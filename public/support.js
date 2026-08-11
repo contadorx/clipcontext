@@ -14,7 +14,7 @@ const SUPPORT = {
   github:  '',
   bmc:     '',
   pix:     'leandro@contadorx.com.br',
-  pixNome: ''
+  pixNome: 'Leandro Batista de Oliveira'
 };
 
 const SUPPORT_TXT = {

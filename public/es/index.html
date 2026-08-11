@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ClipContext — convierte tu vídeo en contexto para la IA</title>
+<meta name="description" content="ChatGPT y Claude no ven vídeo. ClipContext convierte cualquier grabación en un PDF con los fotogramas que importan y la transcripción sincronizada, listo para pegar en la conversación. Gratis, sin registro, y el vídeo no sale de tu ordenador.">
+<link rel="canonical" href="https://clipcontext.vercel.app/es">
+<link rel="alternate" hreflang="pt-BR" href="https://clipcontext.vercel.app/">
+<link rel="alternate" hreflang="en" href="https://clipcontext.vercel.app/en">
+<link rel="alternate" hreflang="es" href="https://clipcontext.vercel.app/es">
+<link rel="alternate" hreflang="x-default" href="https://clipcontext.vercel.app/en">
+<meta property="og:type" content="website">
+<meta property="og:title" content="ClipContext — convierte tu vídeo en contexto para la IA">
+<meta property="og:description" content="Fotogramas por cambio de escena + transcripción sincronizada, en un solo PDF. Nada se envía a ningún servidor.">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/site.css">
+
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <a class="brand" href="/es"><img src="/logo.svg" alt=""><span>Clip<b>Context</b></span></a>
+    <nav>
+      <a href="#como" class="hide-sm">Cómo funciona</a>
+      <a href="/precos">Precios</a>
+      <a href="/app?lang=es">Abrir la herramienta</a>
+      <span style="display:inline-flex;gap:9px;border-left:1px solid var(--line);padding-left:16px"><a href="/?lang=pt">PT</a><a href="/en">EN</a><a href="/es" style="color:var(--ink);font-weight:600">ES</a></span>
+    </nav>
+  </div>
+</header>
+
+<section style="padding-top:78px">
+  <div class="wrap">
+    <p class="eyebrow">Vídeo → PDF → IA</p>
+    <h1>Tu vídeo, en el formato<br>que la IA sí puede leer</h1>
+    <p class="lead">ChatGPT y Claude no ven vídeo. ClipContext convierte cualquier grabación en un PDF con los fotogramas que importan y la transcripción sincronizada — listo para adjuntar a la conversación.</p>
+    <p><a class="btn" href="/app?lang=es">Abrir la herramienta — es gratis</a></p>
+    <p class="small muted" style="margin-top:16px">Sin registro, sin instalación, sin límite de tamaño. El vídeo se procesa dentro de tu navegador y nunca se sube a ningún servidor.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Por qué adjuntar el vídeo no funciona</h2>
+    <p class="lead" style="margin-bottom:0">Los modelos de lenguaje leen texto e imágenes, no vídeo. O rechazan el archivo, o su tamaño hace inviable subirlo. Y cuando haces capturas a mano, acabas enviando diez pantallas casi idénticas y ninguna del momento que importaba, sin nada que enlace lo que aparece con lo que se estaba diciendo.</p>
+  </div>
+</section>
+
+<section id="como">
+  <div class="wrap">
+    <p class="eyebrow">Cómo funciona</p>
+    <h2>Tres pasos, sin cuenta</h2>
+    <ol class="steps">
+      <li><h3>Elige el vídeo</h3><p>Arrastra el archivo a la página. Se lee directamente de tu disco — 300 MB o 3 GB da igual, porque no se sube nada a ninguna parte.</p></li>
+      <li><h3>Trae la transcripción</h3><p>Transcríbelo ahí mismo, con Whisper ejecutándose en tu propia máquina, o arrastra un archivo de subtítulos .vtt / .srt que ya tengas.</p></li>
+      <li><h3>Genera el PDF y copia el prompt</h3><p>Revisa los fotogramas, descarta los malos y descarga el documento. Junto a él viene el texto que le explica al modelo cómo leer ese PDF — eso es lo que cambia la calidad de la respuesta.</p></li>
+    </ol>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Qué hace distinto</h2>
+    <div class="cards" style="margin-top:26px">
+      <div class="card"><h3>Captura cuando la imagen cambia</h3><p>En vez de tomar un fotograma cada diez segundos, recorre el vídeo y guarda los momentos en que la pantalla realmente cambia. En una presentación, eso se convierte en un fotograma por diapositiva en lugar de cuarenta repetidos.</p></div>
+      <div class="card"><h3>Empareja imagen y habla</h3><p>En el PDF, cada fotograma aparece junto a lo que se dice en ese punto, con el instante marcado. El modelo puede relacionar lo que había en pantalla con lo que se estaba diciendo.</p></div>
+      <div class="card"><h3>Nada sale de tu ordenador</h3><p>No existe servidor. El vídeo, el audio y la transcripción se procesan en tu navegador — incluidas grabaciones confidenciales de reuniones.</p></div>
+      <div class="card"><h3>Te entrega también el prompt</h3><p>El texto ya preparado le indica al modelo que cite los instantes, separe lo que vio de lo que oyó, y admita cuando la información no está en el documento en lugar de inventarla.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="privacidade">
+  <div class="wrap">
+    <p class="eyebrow">Privacidad</p>
+    <h2>No tenemos tus archivos porque no tenemos servidor</h2>
+    <p class="lead">La mayoría de las herramientas de vídeo en línea exigen subir el archivo: va a la máquina de alguien, se procesa allí y queda almacenado durante un tiempo que tú no controlas. ClipContext no hace nada de eso — la página es un archivo estático y todo el procesamiento ocurre en tu navegador.</p>
+    <p class="small muted">No hay cuenta, no hay base de datos, no hay rastreo. La única conexión externa es la descarga del modelo de transcripción, y solo si usas la transcripción automática. <a href="/privacidade" style="color:var(--accent)">Lee la política completa</a>.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Preguntas frecuentes</h2>
+    <div class="faq">
+      <details open><summary>¿Necesito instalar algo?</summary><p>No. Se abre en el navegador y funciona. Un Chrome o Edge actualizado da la mejor experiencia, porque la transcripción automática usa la tarjeta gráfica mediante WebGPU.</p></details>
+      <details><summary>¿Cuál es el tamaño máximo de vídeo?</summary><p>No hay límite impuesto por nosotros, precisamente porque no hay subida. El límite práctico es la memoria de tu ordenador. Los vídeos largos tardan más en recorrerse, y puedes detener el barrido cuando quieras.</p></details>
+      <details><summary>¿Qué formatos funcionan?</summary><p>MP4 (H.264), WebM y MOV en la mayoría de los casos. Los formatos que el navegador no sabe decodificar — HEVC y algunos MKV — no se abren; en esos casos hay que convertirlos a MP4 antes.</p></details>
+      <details><summary>¿La transcripción es buena?</summary><p>Usa Whisper ejecutándose localmente. El modelo rápido es razonable y el preciso es bastante mejor, a costa de una descarga mayor. Si ya tienes subtítulos de otro servicio, arrastra el archivo y sáltate este paso.</p></details>
+      <details><summary>¿Es realmente gratis?</summary><p>La herramienta tal como está hoy es gratuita y el código es abierto bajo licencia MIT. Como no hay coste de servidor, no hay motivo para cobrar por ella.</p></details>
+      <details><summary>¿Con qué IA debo usar el PDF?</summary><p>Cualquier modelo que acepte adjuntos y lea imágenes — Claude, ChatGPT y Gemini funcionan. Adjunta el PDF y pega el prompt que la herramienta genera junto a él.</p></details>
+    </div>
+  </div>
+</section>
+
+<section id="support"></section>
+
+<section style="text-align:center">
+  <div class="wrap">
+    <h2>Pruébalo con un vídeo tuyo</h2>
+    <p class="lead" style="margin:0 auto 26px">Lleva menos tiempo que leer esta página.</p>
+    <a class="btn" href="/app?lang=es">Abrir la herramienta</a>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div>
+      <a href="/app?lang=es">Abrir la herramienta</a>
+      <a href="/precos">Precios</a>
+      <a href="/privacidade">Privacidad</a>
+      <a href="/termos">Términos</a>
+    </div>
+    <div>ClipContext — código abierto bajo licencia MIT</div>
+  </div>
+</footer>
+
+<script src="/support.js"></script>
+</body>
+</html>

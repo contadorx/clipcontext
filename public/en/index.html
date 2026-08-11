@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ClipContext — turn video into context an AI can read</title>
+<meta name="description" content="ChatGPT and Claude do not watch video. ClipContext turns any recording into a PDF with the frames that matter and a synced transcript, ready to paste into the conversation. Free, no sign-up, and the video never leaves your computer.">
+<link rel="canonical" href="https://clipcontext.vercel.app/en">
+<link rel="alternate" hreflang="pt-BR" href="https://clipcontext.vercel.app/">
+<link rel="alternate" hreflang="en" href="https://clipcontext.vercel.app/en">
+<link rel="alternate" hreflang="es" href="https://clipcontext.vercel.app/es">
+<link rel="alternate" hreflang="x-default" href="https://clipcontext.vercel.app/en">
+<meta property="og:type" content="website">
+<meta property="og:title" content="ClipContext — turn video into context an AI can read">
+<meta property="og:description" content="Scene-change frames + synced transcript, in a single PDF. Nothing is uploaded to any server.">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/site.css">
+
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <a class="brand" href="/en"><img src="/logo.svg" alt=""><span>Clip<b>Context</b></span></a>
+    <nav>
+      <a href="#como" class="hide-sm">How it works</a>
+      <a href="/precos">Pricing</a>
+      <a href="/app?lang=en">Open the tool</a>
+      <span style="display:inline-flex;gap:9px;border-left:1px solid var(--line);padding-left:16px"><a href="/?lang=pt">PT</a><a href="/en" style="color:var(--ink);font-weight:600">EN</a><a href="/es">ES</a></span>
+    </nav>
+  </div>
+</header>
+
+<section style="padding-top:78px">
+  <div class="wrap">
+    <p class="eyebrow">Video → PDF → AI</p>
+    <h1>Your video, in the format<br>an AI can actually read</h1>
+    <p class="lead">ChatGPT and Claude do not watch video. ClipContext turns any recording into a PDF with the frames that matter and a synced transcript — ready to attach to the conversation.</p>
+    <p><a class="btn" href="/app?lang=en">Open the tool — it's free</a></p>
+    <p class="small muted" style="margin-top:16px">No sign-up, no install, no size limit. The video is processed inside your browser and is never uploaded to any server.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Why attaching the video does not work</h2>
+    <p class="lead" style="margin-bottom:0">Language models read text and images — not video. Either they reject the file, or its size makes uploading impractical. And when you take screenshots by hand, you end up sending ten near-identical screens and none of the moment that mattered, with nothing linking what is shown to what was being said.</p>
+  </div>
+</section>
+
+<section id="como">
+  <div class="wrap">
+    <p class="eyebrow">How it works</p>
+    <h2>Three steps, no account</h2>
+    <ol class="steps">
+      <li><h3>Pick the video</h3><p>Drag the file onto the page. It is read straight from your disk — 300 MB or 3 GB makes no difference, because nothing is uploaded anywhere.</p></li>
+      <li><h3>Bring the transcript</h3><p>Transcribe it right there, with Whisper running on your own machine, or drag in a .vtt / .srt caption file you already have.</p></li>
+      <li><h3>Generate the PDF and copy the prompt</h3><p>Review the frames, discard the bad ones and download the document. Along with it comes the text that tells the model how to read that PDF — that is what changes the quality of the answer.</p></li>
+    </ol>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>What it does differently</h2>
+    <div class="cards" style="margin-top:26px">
+      <div class="card"><h3>Captures when the image changes</h3><p>Instead of grabbing a frame every ten seconds, it scans the video and keeps the moments where the screen actually changes. In a presentation, that becomes one frame per slide instead of forty repeats.</p></div>
+      <div class="card"><h3>Pairs image with speech</h3><p>In the PDF, each frame appears next to what is said at that point, with the timestamp marked. The model can connect what was on screen with what was being said.</p></div>
+      <div class="card"><h3>Nothing leaves your computer</h3><p>There is no server. The video, the audio and the transcript are processed in your browser — including confidential meeting recordings.</p></div>
+      <div class="card"><h3>Hands you the prompt too</h3><p>The ready-made text tells the model to cite timestamps, separate what it saw from what it heard, and admit when the information is not in the document instead of inventing it.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="privacidade">
+  <div class="wrap">
+    <p class="eyebrow">Privacy</p>
+    <h2>We do not have your files because we have no server</h2>
+    <p class="lead">Most online video tools require an upload: your file goes to someone's machine, is processed there and stays stored for a period you do not control. ClipContext does none of that — the page is a static file, and all processing happens in your browser.</p>
+    <p class="small muted">There is no account, no database, no tracking. The only external connection is downloading the transcription model, and only if you use automatic transcription. <a href="/privacidade" style="color:var(--accent)">Read the full policy</a>.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Frequently asked questions</h2>
+    <div class="faq">
+      <details open><summary>Do I need to install anything?</summary><p>No. It opens in the browser and works. An up-to-date Chrome or Edge gives the best experience, because automatic transcription uses the graphics card through WebGPU.</p></details>
+      <details><summary>What is the maximum video size?</summary><p>There is no limit imposed by us, precisely because there is no upload. The practical limit is your computer's memory. Long videos take longer to scan, and you can stop the scan whenever you want.</p></details>
+      <details><summary>Which formats work?</summary><p>MP4 (H.264), WebM and MOV in most cases. Formats the browser cannot decode — HEVC and some MKV files — will not open; those need converting to MP4 first.</p></details>
+      <details><summary>Is the transcription any good?</summary><p>It uses Whisper running locally. The fast model is reasonable and the accurate one is considerably better, at the cost of a larger download. If you already have captions from another service, drag the file in and skip this step.</p></details>
+      <details><summary>Is it really free?</summary><p>The tool as it stands today is free and the code is open under the MIT licence. Since there is no server cost, there is no reason to charge for it.</p></details>
+      <details><summary>Which AI should I use the PDF with?</summary><p>Any model that accepts attachments and reads images — Claude, ChatGPT and Gemini all work. Attach the PDF and paste the prompt the tool generates alongside it.</p></details>
+    </div>
+  </div>
+</section>
+
+<section id="support"></section>
+
+<section style="text-align:center">
+  <div class="wrap">
+    <h2>Try it with one of your videos</h2>
+    <p class="lead" style="margin:0 auto 26px">It takes less time than reading this page.</p>
+    <a class="btn" href="/app?lang=en">Open the tool</a>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div>
+      <a href="/app?lang=en">Open the tool</a>
+      <a href="/precos">Pricing</a>
+      <a href="/privacidade">Privacy</a>
+      <a href="/termos">Terms</a>
+    </div>
+    <div>ClipContext — open source under the MIT licence</div>
+  </div>
+</footer>
+
+<script src="/support.js"></script>
+</body>
+</html>

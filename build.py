@@ -9,6 +9,7 @@ Edite sempre src/template.html. Os arquivos gerados são descartáveis.
 """
 
 import pathlib
+import re
 import sys
 
 ROOT = pathlib.Path(__file__).parent
@@ -23,6 +24,80 @@ META = """<title>ClipContext — transforme vídeo em contexto para IA</title>
 <meta name="twitter:card" content="summary_large_image">"""
 
 PLAIN_TITLE = "<title>Vídeo → PDF (frames + transcrição)</title>"
+
+
+# ---------------------------------------------------------------------------
+# Páginas do site em pt / en / es, geradas do dicionário src/i18n-site.json.
+# Arquivos separados por idioma (e não tradução no navegador) porque só assim
+# o buscador indexa cada versão.
+# ---------------------------------------------------------------------------
+
+IDIOMAS = ["pt", "en", "es"]
+NOMES = {"pt": "Português", "en": "English", "es": "Español"}
+
+REDIRECT = """<script>
+/* Detecção automática de idioma, só na home em português e só quando não há
+   escolha explícita (?lang=). O seletor no topo sempre permite trocar. */
+(function(){
+  try{
+    if (new URLSearchParams(location.search).has('lang')) return;
+    var n = (navigator.language || '').slice(0,2).toLowerCase();
+    if (n === 'en') location.replace('/en');
+    else if (n === 'es') location.replace('/es');
+  }catch(e){}
+})();
+</script>"""
+
+
+def _switcher(lang, paginas_por_idioma, pagina):
+    """Seletor de idioma: links diretos para a mesma página nos outros idiomas."""
+    itens = []
+    for L in IDIOMAS:
+        destino = paginas_por_idioma[L][pagina]
+        if L == "pt":
+            destino += "?lang=pt"          # evita que a detecção redirecione de novo
+        atual = ' style="color:var(--ink);font-weight:600"' if L == lang else ""
+        itens.append(f'<a href="{destino}"{atual}>{L.upper()}</a>')
+    return ('<span style="display:inline-flex;gap:9px;border-left:1px solid var(--line);padding-left:16px">'
+            + "".join(itens) + "</span>")
+
+
+def build_site(root: pathlib.Path) -> None:
+    import json
+    dic = json.loads((root / "src" / "i18n-site.json").read_text(encoding="utf-8"))
+    modelo = (root / "src" / "site" / "home.html").read_text(encoding="utf-8")
+
+    caminhos = {
+        "pt": {"home": "/", "app": "/app", "precos": "/precos",
+               "privacidade": "/privacidade", "termos": "/termos", "root": "/"},
+        "en": {"home": "/en", "app": "/app?lang=en", "precos": "/precos",
+               "privacidade": "/privacidade", "termos": "/termos", "root": "/"},
+        "es": {"home": "/es", "app": "/app?lang=es", "precos": "/precos",
+               "privacidade": "/privacidade", "termos": "/termos", "root": "/"},
+    }
+    paginas = {L: {"home": caminhos[L]["home"]} for L in IDIOMAS}
+
+    for lang in IDIOMAS:
+        t = dict(dic[lang])
+        t.update(caminhos[lang])
+        t["selfPath"] = caminhos[lang]["home"]
+        t["switcher"] = _switcher(lang, paginas, "home")
+        t["redirect"] = REDIRECT if lang == "pt" else ""
+
+        html = modelo
+        for k, v in t.items():
+            html = html.replace("{{" + k + "}}", str(v))
+
+        faltando = set(re.findall(r"\{\{(\w+)\}\}", html))
+        if faltando:
+            print(f"AVISO: chaves sem tradução em {lang}: {sorted(faltando)}", file=sys.stderr)
+            return 1
+
+        destino = root / "public" / ("index.html" if lang == "pt" else f"{lang}/index.html")
+        destino.parent.mkdir(parents=True, exist_ok=True)
+        destino.write_text(html, encoding="utf-8")
+        print(f"{destino.relative_to(root)}  {len(html)/1024:.1f} KB")
+    return 0
 
 
 def main() -> int:
@@ -56,6 +131,8 @@ def main() -> int:
 
     for path in (out_web, out_off):
         print(f"{path.relative_to(ROOT)}  {len(path.read_text(encoding='utf-8')) / 1024:.1f} KB")
+
+    build_site(ROOT)
     return 0
 
 

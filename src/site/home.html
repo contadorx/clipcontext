@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="{{htmlLang}}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{title}}</title>
+<meta name="description" content="{{desc}}">
+<link rel="canonical" href="https://clipcontext.vercel.app{{selfPath}}">
+<link rel="alternate" hreflang="pt-BR" href="https://clipcontext.vercel.app/">
+<link rel="alternate" hreflang="en" href="https://clipcontext.vercel.app/en">
+<link rel="alternate" hreflang="es" href="https://clipcontext.vercel.app/es">
+<link rel="alternate" hreflang="x-default" href="https://clipcontext.vercel.app/en">
+<meta property="og:type" content="website">
+<meta property="og:title" content="{{title}}">
+<meta property="og:description" content="{{ogDesc}}">
+<link rel="icon" href="{{root}}favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="{{root}}site.css">
+{{redirect}}
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <a class="brand" href="{{home}}"><img src="{{root}}logo.svg" alt=""><span>Clip<b>Context</b></span></a>
+    <nav>
+      <a href="#como" class="hide-sm">{{navHow}}</a>
+      <a href="{{precos}}">{{navPrice}}</a>
+      <a href="{{app}}">{{navApp}}</a>
+      {{switcher}}
+    </nav>
+  </div>
+</header>
+
+<section style="padding-top:78px">
+  <div class="wrap">
+    <p class="eyebrow">{{eyebrow}}</p>
+    <h1>{{h1}}</h1>
+    <p class="lead">{{lead}}</p>
+    <p><a class="btn" href="{{app}}">{{cta}}</a></p>
+    <p class="small muted" style="margin-top:16px">{{ctaSub}}</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>{{whyH}}</h2>
+    <p class="lead" style="margin-bottom:0">{{whyP}}</p>
+  </div>
+</section>
+
+<section id="como">
+  <div class="wrap">
+    <p class="eyebrow">{{howEyebrow}}</p>
+    <h2>{{howH}}</h2>
+    <ol class="steps">
+      <li><h3>{{step1H}}</h3><p>{{step1P}}</p></li>
+      <li><h3>{{step2H}}</h3><p>{{step2P}}</p></li>
+      <li><h3>{{step3H}}</h3><p>{{step3P}}</p></li>
+    </ol>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>{{diffH}}</h2>
+    <div class="cards" style="margin-top:26px">
+      <div class="card"><h3>{{d1H}}</h3><p>{{d1P}}</p></div>
+      <div class="card"><h3>{{d2H}}</h3><p>{{d2P}}</p></div>
+      <div class="card"><h3>{{d3H}}</h3><p>{{d3P}}</p></div>
+      <div class="card"><h3>{{d4H}}</h3><p>{{d4P}}</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="privacidade">
+  <div class="wrap">
+    <p class="eyebrow">{{privEyebrow}}</p>
+    <h2>{{privH}}</h2>
+    <p class="lead">{{privP}}</p>
+    <p class="small muted">{{privP2}} <a href="{{privacidade}}" style="color:var(--accent)">{{privLink}}</a>.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>{{faqH}}</h2>
+    <div class="faq">
+      <details open><summary>{{q1}}</summary><p>{{a1}}</p></details>
+      <details><summary>{{q2}}</summary><p>{{a2}}</p></details>
+      <details><summary>{{q3}}</summary><p>{{a3}}</p></details>
+      <details><summary>{{q4}}</summary><p>{{a4}}</p></details>
+      <details><summary>{{q5}}</summary><p>{{a5}}</p></details>
+      <details><summary>{{q6}}</summary><p>{{a6}}</p></details>
+    </div>
+  </div>
+</section>
+
+<section id="support"></section>
+
+<section style="text-align:center">
+  <div class="wrap">
+    <h2>{{endH}}</h2>
+    <p class="lead" style="margin:0 auto 26px">{{endP}}</p>
+    <a class="btn" href="{{app}}">{{endCta}}</a>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div>
+      <a href="{{app}}">{{navApp}}</a>
+      <a href="{{precos}}">{{navPrice}}</a>
+      <a href="{{privacidade}}">{{fPriv}}</a>
+      <a href="{{termos}}">{{fTerms}}</a>
+    </div>
+    <div>{{fLicense}}</div>
+  </div>
+</footer>
+
+<script src="{{root}}support.js"></script>
+</body>
+</html>

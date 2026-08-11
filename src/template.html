@@ -270,10 +270,13 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       demoBtn:'Usar vídeo de exemplo', demoHint:'50 segundos, cinco telas — para experimentar sem arquivo próprio',
       demoLoading:'Baixando o exemplo…', demoReady:'Exemplo carregado com a transcrição. É só extrair os frames.',
       demoErr:'Não consegui baixar o exemplo. Escolha um vídeo do seu computador.',
+      demoNoAudio:'O vídeo de exemplo não tem faixa de áudio — por isso a transcrição já veio preenchida. Escolha um vídeo seu para testar a transcrição automática.',
       mark:'Marcar este momento',
       marked:'{0} momento(s) marcado(s) — entram sempre, mesmo que a imagem não mude.',
       mDur:'duração', mRes:'resolução', mFile:'arquivo',
       videoErr:'O navegador não conseguiu abrir este vídeo. Converta para MP4 (H.264) e tente de novo.',
+      reportar:'Me avise qual formato falhou',
+      reportarDica:' — é o que vai definir se vale a pena construir a conversão automática.',
       s2:'Transcrição (opcional)', autoBtn:'Transcrever automaticamente',
       mBase:'Modelo base — rápido', mSmall:'Modelo small — mais preciso',
       autoDetect:'Detectar sozinho', diagBtn:'Diagnóstico',
@@ -281,7 +284,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       trPh:'Cole aqui a transcrição, ou arraste um arquivo .srt / .vtt.\n\nReconheço automaticamente:\n  00:00:12,400 --> 00:00:15,900   (SRT / VTT)\n  0:12  texto falado             (colado de um painel de legendas)\n  texto solto sem marcação de tempo\n\nCom marcação de tempo, cada frame sai no PDF junto do que é dito naquele trecho.',
       trCues:'{0} trechos com marcação de tempo', trCues2:' — cada frame sai junto da fala correspondente.',
       trPlain:'Texto sem marcação de tempo — vai entrar no PDF como um bloco no final.',
-      audioExtract:'Extraindo o áudio do vídeo…', audioFail:'não consegui extrair o áudio (o vídeo tem faixa de som? o formato é suportado?)',
+      audioExtract:'Extraindo o áudio do vídeo…', audioFail:'este vídeo parece não ter faixa de áudio, ou o formato do áudio não é suportado pelo navegador',
       noAudio:'este vídeo não tem áudio', modelLoad:'Carregando o modelo…',
       modelDl:'Baixando o modelo (só na primeira vez)…', noGpu:'WebGPU indisponível — usando o processador, vai demorar mais.',
       transcribing:'Transcrevendo… bloco {0} de {1}', trDone:'Transcrição pronta — {0} trechos.',
@@ -353,10 +356,13 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       demoBtn:'Use the example video', demoHint:'50 seconds, five screens — try it without your own file',
       demoLoading:'Downloading the example…', demoReady:'Example loaded with its transcript. Just extract the frames.',
       demoErr:'Could not download the example. Please pick a video from your computer.',
+      demoNoAudio:'The example video has no audio track — that is why the transcript comes pre-filled. Pick one of your own videos to try automatic transcription.',
       mark:'Mark this moment',
       marked:'{0} moment(s) marked — always included, even if the image does not change.',
       mDur:'duration', mRes:'resolution', mFile:'file',
       videoErr:'The browser could not open this video. Convert it to MP4 (H.264) and try again.',
+      reportar:'Tell me which format failed',
+      reportarDica:' — that is what will decide whether automatic conversion is worth building.',
       s2:'Transcript (optional)', autoBtn:'Transcribe automatically',
       mBase:'Base model — fast', mSmall:'Small model — more accurate',
       autoDetect:'Detect automatically', diagBtn:'Diagnostics',
@@ -364,7 +370,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       trPh:'Paste the transcript here, or drag in a .srt / .vtt file.\n\nRecognised automatically:\n  00:00:12,400 --> 00:00:15,900   (SRT / VTT)\n  0:12  spoken text              (pasted from a caption panel)\n  plain text with no timestamps\n\nWith timestamps, each frame appears in the PDF next to what is said at that point.',
       trCues:'{0} timestamped segments', trCues2:' — each frame will appear next to its matching speech.',
       trPlain:'Text without timestamps — it will go into the PDF as a block at the end.',
-      audioExtract:'Extracting the audio…', audioFail:'could not extract the audio (does the video have a sound track? is the format supported?)',
+      audioExtract:'Extracting the audio…', audioFail:'this video appears to have no audio track, or the audio format is not supported by the browser',
       noAudio:'this video has no audio', modelLoad:'Loading the model…',
       modelDl:'Downloading the model (first time only)…', noGpu:'WebGPU unavailable — using the CPU, this will be slower.',
       transcribing:'Transcribing… chunk {0} of {1}', trDone:'Transcript ready — {0} segments.',
@@ -436,10 +442,13 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       demoBtn:'Usar el vídeo de ejemplo', demoHint:'50 segundos, cinco pantallas — pruébalo sin archivo propio',
       demoLoading:'Descargando el ejemplo…', demoReady:'Ejemplo cargado con su transcripción. Solo falta extraer los fotogramas.',
       demoErr:'No pude descargar el ejemplo. Elige un vídeo de tu ordenador.',
+      demoNoAudio:'El vídeo de ejemplo no tiene pista de audio — por eso la transcripción ya viene rellenada. Elige un vídeo tuyo para probar la transcripción automática.',
       mark:'Marcar este momento',
       marked:'{0} momento(s) marcado(s) — se incluyen siempre, aunque la imagen no cambie.',
       mDur:'duración', mRes:'resolución', mFile:'archivo',
       videoErr:'El navegador no pudo abrir este vídeo. Conviértelo a MP4 (H.264) e inténtalo de nuevo.',
+      reportar:'Dime qué formato falló',
+      reportarDica:' — eso decidirá si vale la pena construir la conversión automática.',
       s2:'Transcripción (opcional)', autoBtn:'Transcribir automáticamente',
       mBase:'Modelo base — rápido', mSmall:'Modelo small — más preciso',
       autoDetect:'Detectar automáticamente', diagBtn:'Diagnóstico',
@@ -447,7 +456,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       trPh:'Pega aquí la transcripción, o arrastra un archivo .srt / .vtt.\n\nReconozco automáticamente:\n  00:00:12,400 --> 00:00:15,900   (SRT / VTT)\n  0:12  texto hablado            (copiado de un panel de subtítulos)\n  texto suelto sin marcas de tiempo\n\nCon marcas de tiempo, cada fotograma aparece en el PDF junto a lo que se dice en ese tramo.',
       trCues:'{0} tramos con marca de tiempo', trCues2:' — cada fotograma saldrá junto al habla correspondiente.',
       trPlain:'Texto sin marcas de tiempo — irá al PDF como un bloque al final.',
-      audioExtract:'Extrayendo el audio…', audioFail:'no pude extraer el audio (¿el vídeo tiene pista de sonido? ¿el formato es compatible?)',
+      audioExtract:'Extrayendo el audio…', audioFail:'este vídeo parece no tener pista de audio, o el formato del audio no es compatible con el navegador',
       noAudio:'este vídeo no tiene audio', modelLoad:'Cargando el modelo…',
       modelDl:'Descargando el modelo (solo la primera vez)…', noGpu:'WebGPU no disponible — usando el procesador, será más lento.',
       transcribing:'Transcribiendo… bloque {0} de {1}', trDone:'Transcripción lista — {0} tramos.',
@@ -510,6 +519,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     }
   };
 
+  /* Endereço do repositório. Se ficar vazio, o convite a reportar não aparece
+     e o usuário vê apenas a mensagem de erro. */
+  const REPO = 'https://github.com/leandropucsp/clipcontext';
+
   const LANGS = ['pt','en','es'];
   const qLang = new URLSearchParams(location.search).get('lang');
   let LANG = LANGS.includes(qLang) ? qLang
@@ -566,12 +579,26 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     video.onloadedmetadata = () => {
       $('playerBox').classList.remove('hide');
       $('auto').disabled = false;
+      st('');
       $('extract').disabled = false;
       showMeta();
       $('count').value = Math.min(80, Math.max(12, Math.round(video.duration/15)));
     };
-    video.onerror = () => { $('status').innerHTML =
-      `<span class="err">${t('videoErr')}</span>`; };
+    video.onerror = () => {
+      let extra = '';
+      if (REPO) {
+        const ext = (fileName.match(/\.([^.]+)$/) || ['', '?'])[1].toLowerCase();
+        const titulo = encodeURIComponent('Formato nao suportado: .' + ext);
+        const corpo = encodeURIComponent(
+          'Extensao: .' + ext + '\nTamanho: ' + (fileSize/1048576).toFixed(1) + ' MB' +
+          '\nNavegador: ' + navigator.userAgent +
+          '\n\n(Nada foi enviado automaticamente — este texto foi montado no seu navegador ' +
+          'e so vai para o GitHub se voce enviar.)');
+        extra = ` <a href="${REPO}/issues/new?title=${titulo}&body=${corpo}" target="_blank" ` +
+                `rel="noopener" style="color:var(--accent)">${t('reportar')}</a>${t('reportarDica')}`;
+      }
+      $('status').innerHTML = `<span class="err">${t('videoErr')}</span>${extra}`;
+    };
   }
 
   function showMeta(){
@@ -655,6 +682,9 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       } catch (e) {}
 
       $('demoMsg').innerHTML = `<span class="ok">${t('demoReady')}</span>`;
+      // o exemplo é montado a partir de imagens e não tem áudio
+      $('auto').disabled = true;
+      st(t('demoNoAudio'));
     } catch (e) {
       $('demoMsg').innerHTML = `<span class="err">${t('demoErr')} [${(e && e.message) || e}]</span>`;
     } finally { $('demo').disabled = false; }

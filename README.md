@@ -22,7 +22,11 @@ Modelos de texto não assistem vídeo. O que eles leem bem é: imagens dos momen
 ## Estrutura
 
 ```
-public/index.html        landing page (escrita à mão, não é gerada)
+public/index.html        landing em português   — GERADA, não edite
+public/en/index.html     landing em inglês      — GERADA, não edite
+public/es/index.html     landing em espanhol    — GERADA, não edite
+src/site/home.html       modelo da landing, com marcadores {{chave}}
+src/i18n-site.json       os textos da landing nos três idiomas
 public/precos.html       planos e preços
 public/privacidade.html  política de privacidade
 public/termos.html       termos de uso
@@ -32,6 +36,7 @@ offline/*.html           build autocontido: um arquivo só, funciona sem interne
 src/template.html        fonte da ferramenta; contém o marcador /*__JSPDF__*/
 vendor/jspdf.umd.min.js  cópia da biblioteca usada no build offline
 brand/                   logotipos, favicon e paleta
+media/                   GIF e MP4 de demonstração, para divulgação
 build.py                 gera public/app.html e o build offline
 public/support.js        bloco de apoio voluntário (preencha os identificadores no topo)
 LANCAMENTO.md            textos de divulgação, palavras-chave e posicionamento
@@ -45,7 +50,15 @@ você usa (GitHub Sponsors, Buy Me a Coffee, chave Pix) e ele aparece sozinho na
 preços, nos três idiomas. Se todos ficarem vazios, o bloco não é renderizado e nenhuma página fica com
 buraco. Nada nele destrava funcionalidade — é voluntário de verdade.
 
-As páginas institucionais são estáticas e podem ser editadas direto. Só `public/app.html` é gerado.
+Para mudar um texto da landing, edite `src/i18n-site.json` e rode o build — as três versões saem
+sincronizadas. `public/app.html` e as três `index.html` são geradas; nunca edite direto.
+
+As páginas de preços, privacidade e termos ainda são só em português e ficam em `public/`, escritas à mão.
+
+**Detecção de idioma:** só a home em português carrega o script de detecção, e só age quando não há
+`?lang=` na URL. Quem chega de navegador em inglês vai para `/en`, em espanhol para `/es`, e qualquer
+outro idioma fica no português. O seletor PT/EN/ES no topo sempre permite trocar, e o link para a
+versão em português leva `?lang=pt` justamente para não ser redirecionado de volta.
 
 Edite sempre `src/template.html` e rode o build. Não edite os arquivos gerados.
 
@@ -84,6 +97,7 @@ Um detalhe que só apareceu por causa desse teste: comparar os frames em tons de
 1. Traduzir também a landing e as páginas institucionais (hoje só a ferramenta é multilíngue)
 2. Salvar o estado — hoje atualizar a página perde tudo
 3. Cancelamento também na transcrição automática
+4. Traduzir preços, privacidade e termos (a home já está em pt/en/es)
 4. Camada paga no servidor: formatos exóticos, vídeos longos, transcrição de qualidade superior, lote
 5. API / MCP para agentes consumirem vídeo já mastigado
 
