@@ -67,15 +67,16 @@ def build_site(root: pathlib.Path) -> None:
     dic = json.loads((root / "src" / "i18n-site.json").read_text(encoding="utf-8"))
     modelo = (root / "src" / "site" / "home.html").read_text(encoding="utf-8")
 
+    pre = {"pt": "", "en": "/en", "es": "/es"}
     caminhos = {
-        "pt": {"home": "/", "app": "/app", "precos": "/precos",
-               "privacidade": "/privacidade", "termos": "/termos", "root": "/"},
-        "en": {"home": "/en", "app": "/app?lang=en", "precos": "/precos",
-               "privacidade": "/privacidade", "termos": "/termos", "root": "/"},
-        "es": {"home": "/es", "app": "/app?lang=es", "precos": "/precos",
-               "privacidade": "/privacidade", "termos": "/termos", "root": "/"},
+        L: {"home": pre[L] or "/", "app": "/app" + ("" if L == "pt" else "?lang=" + L),
+            "precos": pre[L] + "/precos", "privacidade": pre[L] + "/privacidade",
+            "termos": pre[L] + "/termos", "root": "/"}
+        for L in IDIOMAS
     }
-    paginas = {L: {"home": caminhos[L]["home"]} for L in IDIOMAS}
+    paginas = {L: {"home": caminhos[L]["home"], "precos": caminhos[L]["precos"],
+                   "privacidade": caminhos[L]["privacidade"], "termos": caminhos[L]["termos"]}
+               for L in IDIOMAS}
 
     for lang in IDIOMAS:
         t = dict(dic[lang])
@@ -97,6 +98,47 @@ def build_site(root: pathlib.Path) -> None:
         destino.parent.mkdir(parents=True, exist_ok=True)
         destino.write_text(html, encoding="utf-8")
         print(f"{destino.relative_to(root)}  {len(html)/1024:.1f} KB")
+
+    # páginas internas: mesmo cabeçalho e rodapé, corpo escrito por idioma
+    doc = (root / "src" / "site" / "doc.html").read_text(encoding="utf-8")
+    METAS = {
+        "precos": {"pt": ("Preços — ClipContext", "A ferramenta no navegador é gratuita e sempre será: não há custo de servidor."),
+                   "en": ("Pricing — ClipContext", "The browser tool is free and always will be: there is no server cost."),
+                   "es": ("Precios — ClipContext", "La herramienta del navegador es gratuita y siempre lo será: no hay coste de servidor.")},
+        "privacidade": {"pt": ("Política de Privacidade — ClipContext", "O ClipContext não coleta dados pessoais e não recebe seus vídeos."),
+                        "en": ("Privacy Policy — ClipContext", "ClipContext collects no personal data and never receives your videos."),
+                        "es": ("Política de Privacidad — ClipContext", "ClipContext no recoge datos personales y no recibe tus vídeos.")},
+        "termos": {"pt": ("Termos de Uso — ClipContext", "Condições de uso do ClipContext, ferramenta gratuita e de código aberto."),
+                   "en": ("Terms of Use — ClipContext", "Terms for ClipContext, a free and open-source tool."),
+                   "es": ("Términos de Uso — ClipContext", "Condiciones de uso de ClipContext, herramienta gratuita y de código abierto.")},
+    }
+    for pagina, metas in METAS.items():
+        for lang in IDIOMAS:
+            corpo_arq = root / "src" / "site" / "bodies" / f"{pagina}.{lang}.html"
+            if not corpo_arq.exists():
+                print(f"AVISO: falta {corpo_arq.relative_to(root)}", file=sys.stderr)
+                continue
+            t = dict(dic[lang]); t.update(caminhos[lang])
+            t["docTitle"], t["docDesc"] = metas[lang]
+            t["selfPath"] = caminhos[lang][pagina]
+            t["ptPath"] = paginas["pt"][pagina]
+            t["enPath"] = paginas["en"][pagina]
+            t["esPath"] = paginas["es"][pagina]
+            t["switcher"] = _switcher(lang, paginas, pagina)
+            corpo = corpo_arq.read_text(encoding="utf-8")
+            for k, v in t.items():
+                corpo = corpo.replace("{{" + k + "}}", str(v))
+            t["body"] = corpo
+            html = doc
+            for k, v in t.items():
+                html = html.replace("{{" + k + "}}", str(v))
+            sobrando = set(re.findall(r"\{\{(\w+)\}\}", html))
+            if sobrando:
+                print(f"AVISO: chaves sem valor em {pagina}.{lang}: {sorted(sobrando)}", file=sys.stderr)
+            saida = root / "public" / (f"{pagina}.html" if lang == "pt" else f"{lang}/{pagina}.html")
+            saida.parent.mkdir(parents=True, exist_ok=True)
+            saida.write_text(html, encoding="utf-8")
+            print(f"{saida.relative_to(root)}  {len(html)/1024:.1f} KB")
     return 0
 
 

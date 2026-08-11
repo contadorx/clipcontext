@@ -137,6 +137,7 @@
       <pre id="diagOut" class="hide"></pre>
       <div class="bar hide" id="abarWrap"><i id="abar"></i></div>
       <div class="status" id="astatus"></div>
+      <p class="note hide" id="keepOpen" data-i18n="keepOpen"></p>
     </div>
 
     <div class="row" style="margin-bottom:9px">
@@ -286,7 +287,11 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       trPlain:'Texto sem marcação de tempo — vai entrar no PDF como um bloco no final.',
       audioExtract:'Extraindo o áudio do vídeo…', audioFail:'este vídeo parece não ter faixa de áudio, ou o formato do áudio não é suportado pelo navegador',
       noAudio:'este vídeo não tem áudio', modelLoad:'Carregando o modelo…',
-      modelDl:'Baixando o modelo (só na primeira vez)…', noGpu:'WebGPU indisponível — usando o processador, vai demorar mais.',
+      modelDl:'Etapa 1 de 2 — baixando o modelo: {0}% (só na primeira vez)',
+      transcribing2:'Etapa 2 de 2 — transcrevendo: {0}% (bloco {1} de {2}){3}',
+      etaTr:' — faltam ~{0}',
+      keepOpen:'Mantenha esta aba aberta e visível. O processamento acontece no seu navegador, e fica muito mais lento se a aba ficar em segundo plano.',
+      leaveWarn:'O processamento ainda está em andamento. Se sair agora, perde o que já foi feito.', noGpu:'WebGPU indisponível — usando o processador, vai demorar mais.',
       transcribing:'Transcrevendo… bloco {0} de {1}', trDone:'Transcrição pronta — {0} trechos.',
       trErr:'Não consegui transcrever aqui: {0} — clique em Diagnóstico para ver em qual etapa trava.',
       diagDone:'Diagnóstico pronto. Selecione o bloco acima, copie e envie.',
@@ -372,7 +377,11 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       trPlain:'Text without timestamps — it will go into the PDF as a block at the end.',
       audioExtract:'Extracting the audio…', audioFail:'this video appears to have no audio track, or the audio format is not supported by the browser',
       noAudio:'this video has no audio', modelLoad:'Loading the model…',
-      modelDl:'Downloading the model (first time only)…', noGpu:'WebGPU unavailable — using the CPU, this will be slower.',
+      modelDl:'Step 1 of 2 — downloading the model: {0}% (first time only)',
+      transcribing2:'Step 2 of 2 — transcribing: {0}% (chunk {1} of {2}){3}',
+      etaTr:' — about {0} left',
+      keepOpen:'Keep this tab open and visible. Processing happens in your browser, and gets much slower if the tab goes to the background.',
+      leaveWarn:'Processing is still running. If you leave now, you lose what has been done.', noGpu:'WebGPU unavailable — using the CPU, this will be slower.',
       transcribing:'Transcribing… chunk {0} of {1}', trDone:'Transcript ready — {0} segments.',
       trErr:'Could not transcribe here: {0} — click Diagnostics to see which step fails.',
       diagDone:'Diagnostics ready. Select the block above, copy it and send it over.',
@@ -458,7 +467,11 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       trPlain:'Texto sin marcas de tiempo — irá al PDF como un bloque al final.',
       audioExtract:'Extrayendo el audio…', audioFail:'este vídeo parece no tener pista de audio, o el formato del audio no es compatible con el navegador',
       noAudio:'este vídeo no tiene audio', modelLoad:'Cargando el modelo…',
-      modelDl:'Descargando el modelo (solo la primera vez)…', noGpu:'WebGPU no disponible — usando el procesador, será más lento.',
+      modelDl:'Paso 1 de 2 — descargando el modelo: {0}% (solo la primera vez)',
+      transcribing2:'Paso 2 de 2 — transcribiendo: {0}% (bloque {1} de {2}){3}',
+      etaTr:' — faltan ~{0}',
+      keepOpen:'Mantén esta pestaña abierta y visible. El procesamiento ocurre en tu navegador y se vuelve mucho más lento si la pestaña queda en segundo plano.',
+      leaveWarn:'El procesamiento sigue en curso. Si sales ahora, pierdes lo que ya se hizo.', noGpu:'WebGPU no disponible — usando el procesador, será más lento.',
       transcribing:'Transcribiendo… bloque {0} de {1}', trDone:'Transcripción lista — {0} tramos.',
       trErr:'No pude transcribir aquí: {0} — pulsa Diagnóstico para ver en qué paso falla.',
       diagDone:'Diagnóstico listo. Selecciona el bloque de arriba, cópialo y envíalo.',
@@ -521,7 +534,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
 
   /* Endereço do repositório. Se ficar vazio, o convite a reportar não aparece
      e o usuário vê apenas a mensagem de erro. */
-  const REPO = 'https://github.com/leandropucsp/clipcontext';
+  const REPO = 'https://github.com/contadorx/clipcontext';
 
   const LANGS = ['pt','en','es'];
   const qLang = new URLSearchParams(location.search).get('lang');
@@ -537,6 +550,24 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   }
 
   const tr = t;   // alias: no laço de varredura a variável de tempo sombreia t()
+
+  /* Enquanto algo longo está rodando, avisa antes de fechar a aba: como tudo
+     acontece no navegador, sair significa perder o trabalho. */
+  let ocupado = false;
+  function trabalhando(v){
+    ocupado = v;
+    $('keepOpen').classList.toggle('hide', !v);
+  }
+  window.addEventListener('beforeunload', e => {
+    if (!ocupado) return;
+    e.preventDefault();
+    e.returnValue = t('leaveWarn');
+    return e.returnValue;
+  });
+
+  function duracao(seg){
+    return seg < 90 ? t('etaS', Math.ceil(seg)) : t('etaM', Math.ceil(seg/60));
+  }
 
   function applyLang(){
     document.documentElement.lang = LANG;
@@ -814,8 +845,9 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       if (p.status === 'progress' && p.file) {
         seen[p.file] = p.progress || 0;
         const v = Object.values(seen);
-        prog(v.reduce((x,y) => x+y, 0) / v.length);
-        st(t('modelDl'));
+        const pct = v.reduce((x,y) => x+y, 0) / v.length;
+        prog(pct);
+        st(t('modelDl', pct.toFixed(0)));
       }
     };
     try {
@@ -832,6 +864,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     if (!currentFile) return;
     const modelId = $('model').value, lang = $('lang').value;
     $('auto').disabled = true;
+    trabalhando(true);
     try {
       st(t('audioExtract')); prog(null);
       let data;
@@ -842,6 +875,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       if (pipeId !== modelId) { st(t('modelLoad')); prog(0); pipe = await buildPipe(modelId); pipeId = modelId; }
 
       const SR = 16000, WIN = 30 * SR, total = Math.ceil(data.length / WIN), out = [];
+      const inicio = performance.now();
       for (let i = 0; i < total; i++) {
         const off = i * WIN, seg = data.slice(off, Math.min(off + WIN, data.length)), base = off / SR;
         const opts = { return_timestamps: true, task: 'transcribe' };
@@ -855,8 +889,12 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
           const b = base + (c.timestamp[1] ?? (c.timestamp[0] ?? 0) + 2);
           out.push(`${vttTime(a)} --> ${vttTime(Math.max(b, a + 0.4))}\n${t}`);
         });
-        prog((i + 1) / total * 100);
-        st(t('transcribing', i + 1, total));
+        const feitos = i + 1, pct = feitos / total * 100;
+        prog(pct);
+        // previsão a partir do ritmo medido, não de estimativa fixa
+        const resta = (performance.now() - inicio) / feitos * (total - feitos) / 1000;
+        const falta = (feitos >= 2 && resta > 3) ? t('etaTr', duracao(resta)) : '';
+        st(t('transcribing2', pct.toFixed(0), feitos, total, falta));
       }
       $('tr').value = 'WEBVTT\n\n' + out.join('\n\n');
       refreshTr(); prog(100);
@@ -864,7 +902,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     } catch (e) {
       prog(null);
       st(t('trErr', (e && e.message ? e.message : e)), 'err');
-    } finally { $('auto').disabled = false; }
+    } finally { $('auto').disabled = false; trabalhando(false); }
   };
 
   $('diag').onclick = async () => {
@@ -966,6 +1004,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
 
     $('extract').disabled = true; $('go').disabled = true;
     $('cancel').classList.remove('hide');
+    trabalhando(true);
     $('barWrap').classList.remove('hide');
     frames = [];
     let limited = '';
@@ -1035,6 +1074,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       parou + (limited ? `<span class="err">${limited}</span>` : '');
     $('extract').disabled = false; $('go').disabled = false;
     $('cancel').classList.add('hide');
+    trabalhando(false);
     stop = false;
     $('prevCard').classList.remove('hide');
     render();

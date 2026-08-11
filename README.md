@@ -53,7 +53,9 @@ buraco. Nada nele destrava funcionalidade — é voluntário de verdade.
 Para mudar um texto da landing, edite `src/i18n-site.json` e rode o build — as três versões saem
 sincronizadas. `public/app.html` e as três `index.html` são geradas; nunca edite direto.
 
-As páginas de preços, privacidade e termos ainda são só em português e ficam em `public/`, escritas à mão.
+Preços, privacidade e termos também saem do build, nos três idiomas: o cabeçalho e o rodapé vêm de
+`src/site/doc.html` e o texto de cada página fica em `src/site/bodies/<pagina>.<idioma>.html`. São doze
+páginas geradas ao todo — nunca edite nada dentro de `public/`.
 
 **Detecção de idioma:** só a home em português carrega o script de detecção, e só age quando não há
 `?lang=` na URL. Quem chega de navegador em inglês vai para `/en`, em espanhol para `/es`, e qualquer
@@ -97,7 +99,7 @@ Um detalhe que só apareceu por causa desse teste: comparar os frames em tons de
 1. Traduzir também a landing e as páginas institucionais (hoje só a ferramenta é multilíngue)
 2. Salvar o estado — hoje atualizar a página perde tudo
 3. Cancelamento também na transcrição automática
-4. Traduzir preços, privacidade e termos (a home já está em pt/en/es)
+4. Acelerar a varredura (hoje ~75 ms por salto)
 4. Camada paga no servidor: formatos exóticos, vídeos longos, transcrição de qualidade superior, lote
 5. API / MCP para agentes consumirem vídeo já mastigado
 

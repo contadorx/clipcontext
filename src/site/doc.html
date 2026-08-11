@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="{{htmlLang}}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{docTitle}}</title>
+<meta name="description" content="{{docDesc}}">
+<link rel="canonical" href="https://clipcontext.vercel.app{{selfPath}}">
+<link rel="alternate" hreflang="pt-BR" href="https://clipcontext.vercel.app{{ptPath}}">
+<link rel="alternate" hreflang="en" href="https://clipcontext.vercel.app{{enPath}}">
+<link rel="alternate" hreflang="es" href="https://clipcontext.vercel.app{{esPath}}">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/site.css">
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <a class="brand" href="{{home}}"><img src="/logo.svg" alt=""><span>Clip<b>Context</b></span></a>
+    <nav>
+      <a href="{{precos}}">{{navPrice}}</a>
+      <a href="{{app}}">{{navApp}}</a>
+      {{switcher}}
+    </nav>
+  </div>
+</header>
+
+{{body}}
+
+<footer>
+  <div class="wrap">
+    <div>
+      <a href="{{app}}">{{navApp}}</a>
+      <a href="{{precos}}">{{navPrice}}</a>
+      <a href="{{privacidade}}">{{fPriv}}</a>
+      <a href="{{termos}}">{{fTerms}}</a>
+    </div>
+    <div>{{fLicense}}</div>
+  </div>
+</footer>
+
+<script src="/support.js"></script>
+</body>
+</html>
