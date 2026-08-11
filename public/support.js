@@ -13,7 +13,7 @@
 const SUPPORT = {
   github:  '',
   bmc:     '',
-  pix:     '',
+  pix:     'leandro@contadorx.com.br',
   pixNome: ''
 };
 
