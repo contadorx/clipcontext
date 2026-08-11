@@ -83,6 +83,7 @@ def build_site(root: pathlib.Path) -> None:
         t.update(caminhos[lang])
         t["selfPath"] = caminhos[lang]["home"]
         t["switcher"] = _switcher(lang, paginas, "home")
+        t["lang"] = lang
         t["redirect"] = REDIRECT if lang == "pt" else ""
 
         html = modelo
