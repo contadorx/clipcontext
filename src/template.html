@@ -605,7 +605,25 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     applyLang();
   };
 
-  /* vídeo de demonstração: baixa o arquivo e a legenda do próprio site */
+  /* Vídeo de demonstração.
+     Caminho relativo é frágil: dependendo de como o servidor trata a barra final,
+     'demo/x' a partir de /app pode virar /app/demo/x e dar 404. Tentamos os
+     caminhos possíveis, incluindo o absoluto do site, que também faz o exemplo
+     funcionar a partir do arquivo offline quando há internet. */
+  const DEMO_BASES = ['/demo/', 'demo/', 'https://clipcontext.vercel.app/demo/'];
+
+  async function acharDemo(arq){
+    const erros = [];
+    for (const base of DEMO_BASES) {
+      try {
+        const r = await fetch(base + arq);
+        if (r.ok) return { base, r };
+        erros.push(base + ' -> HTTP ' + r.status);
+      } catch (e) { erros.push(base + ' -> ' + (e && e.message)); }
+    }
+    throw new Error(erros.join(' | '));
+  }
+
   $('demo').onclick = async () => {
     $('demo').disabled = true;
     $('demoMsg').textContent = t('demoLoading');
@@ -614,17 +632,31 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       const h264 = !!document.createElement('video').canPlayType('video/mp4; codecs="avc1.42E01E"');
       const arq = h264 ? 'exemplo.mp4' : 'exemplo.webm';
       const tipo = h264 ? 'video/mp4' : 'video/webm';
-      const [vr, sr] = await Promise.all([
-        fetch('demo/' + arq),
-        fetch('demo/exemplo.' + LANG + '.vtt')
-      ]);
-      if (!vr.ok) throw new Error('HTTP ' + vr.status);
+
+      const { base, r: vr } = await acharDemo(arq);
       const blob = await vr.blob();
+      if (!blob.size) throw new Error('arquivo vazio (0 bytes)');
+
+      // espera o vídeo realmente abrir, para não dizer "pronto" se o codec falhar
+      const ok = new Promise((res, rej) => {
+        const limpa = () => { video.removeEventListener('loadedmetadata', s1); video.removeEventListener('error', s2); };
+        const s1 = () => { limpa(); res(); };
+        const s2 = () => { limpa(); rej(new Error('o navegador não decodificou o arquivo (' + tipo + ')')); };
+        video.addEventListener('loadedmetadata', s1);
+        video.addEventListener('error', s2);
+        setTimeout(() => { limpa(); rej(new Error('tempo esgotado ao abrir o vídeo')); }, 20000);
+      });
       load(new File([blob], 'clipcontext-' + arq, { type: tipo }));
-      if (sr.ok) { $('tr').value = await sr.text(); refreshTr(); }
+      await ok;
+
+      try {
+        const sr = await fetch(base + 'exemplo.' + LANG + '.vtt');
+        if (sr.ok) { $('tr').value = await sr.text(); refreshTr(); }
+      } catch (e) {}
+
       $('demoMsg').innerHTML = `<span class="ok">${t('demoReady')}</span>`;
     } catch (e) {
-      $('demoMsg').innerHTML = `<span class="err">${t('demoErr')}</span>`;
+      $('demoMsg').innerHTML = `<span class="err">${t('demoErr')} [${(e && e.message) || e}]</span>`;
     } finally { $('demo').disabled = false; }
   };
 
@@ -842,6 +874,17 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     }
     const b = await findWasmBase();
     say('wasm em uso   : ' + (b || 'nenhum respondeu — usando o padrão da biblioteca'));
+
+    say('');
+    say('vídeo de exemplo:');
+    say('  H.264 no navegador: ' + (document.createElement('video').canPlayType('video/mp4; codecs="avc1.42E01E"') || 'NAO suportado'));
+    for (const base of DEMO_BASES) {
+      for (const arq of ['exemplo.mp4', 'exemplo.webm', 'exemplo.' + LANG + '.vtt']) {
+        try { const r = await fetch(base + arq, { method:'HEAD' });
+              say('  ' + (base + arq).padEnd(46) + ' HTTP ' + r.status); }
+        catch (e) { say('  ' + (base + arq).padEnd(46) + ' FALHOU -> ' + (e && e.message)); }
+      }
+    }
     say('--- fim ---');
     st(t('diagDone'), 'ok');
   };
