@@ -54,9 +54,10 @@
     "endCta": "Abrir a ferramenta",
     "fPriv": "Privacidade",
     "fTerms": "Termos",
-    "fLicense": "ClipContext — código aberto sob licença MIT"
+    "fLicense": "ClipContext — código aberto sob licença MIT",
+    "tourAlt": "Demonstração do ClipContext em funcionamento",
+    "tourCap": "O fluxo completo em 19 segundos: exemplo carregado, frames encontrados por mudança de cena, PDF gerado e prompt pronto."
   },
-
   "en": {
     "htmlLang": "en",
     "title": "ClipContext — turn video into context an AI can read",
@@ -112,9 +113,10 @@
     "endCta": "Open the tool",
     "fPriv": "Privacy",
     "fTerms": "Terms",
-    "fLicense": "ClipContext — open source under the MIT licence"
+    "fLicense": "ClipContext — open source under the MIT licence",
+    "tourAlt": "ClipContext in action",
+    "tourCap": "The whole flow in 19 seconds: example loaded, frames found by scene change, PDF generated and prompt ready."
   },
-
   "es": {
     "htmlLang": "es",
     "title": "ClipContext — convierte tu vídeo en contexto para la IA",
@@ -170,6 +172,8 @@
     "endCta": "Abrir la herramienta",
     "fPriv": "Privacidad",
     "fTerms": "Términos",
-    "fLicense": "ClipContext — código abierto bajo licencia MIT"
+    "fLicense": "ClipContext — código abierto bajo licencia MIT",
+    "tourAlt": "ClipContext en funcionamiento",
+    "tourCap": "El flujo completo en 19 segundos: ejemplo cargado, fotogramas hallados por cambio de escena, PDF generado y prompt listo."
   }
 }
