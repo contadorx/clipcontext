@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Preços — ClipContext</title>
+<meta name="description" content="A ferramenta no navegador é gratuita e sempre será: não há custo de servidor. Os planos pagos cobrem o que o navegador não consegue fazer sozinho.">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="site.css">
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <a class="brand" href="/"><img src="logo.svg" alt=""><span>Clip<b>Context</b></span></a>
+    <nav>
+      <a href="/#como" class="hide-sm">Como funciona</a>
+      <a href="/privacidade" class="hide-sm">Privacidade</a>
+      <a href="/precos">Preços</a>
+      <a href="/app">Abrir a ferramenta</a>
+    </nav>
+  </div>
+</header>
+
+<section style="padding-top:66px">
+  <div class="wrap">
+    <h1 style="font-size:34px">Preços</h1>
+    <p class="lead">A ferramenta que roda no seu navegador é gratuita e vai continuar sendo. Ela não nos custa
+    nada: não há servidor processando seus vídeos. O que é pago é o que o navegador simplesmente não consegue fazer.</p>
+
+    <div class="plans">
+
+      <div class="plan hi">
+        <span class="badge">disponível agora</span>
+        <h3 style="margin-top:14px">Grátis</h3>
+        <div class="price">R$ 0<span> / para sempre</span></div>
+        <p class="small muted" style="margin:0">Sem cadastro, sem cartão.</p>
+        <ul>
+          <li>Vídeos de qualquer tamanho</li>
+          <li>Frames por mudança de cena</li>
+          <li>Transcrição local com Whisper</li>
+          <li>Importar legenda .vtt / .srt</li>
+          <li>PDF com imagem e fala pareadas</li>
+          <li>Gerador de prompt</li>
+          <li>Código aberto, licença MIT</li>
+        </ul>
+        <a class="btn" href="/app" style="width:100%;text-align:center">Abrir a ferramenta</a>
+      </div>
+
+      <div class="plan">
+        <span class="badge">em desenvolvimento</span>
+        <h3 style="margin-top:14px">Pro</h3>
+        <div class="price">a definir<span> / mensal</span></div>
+        <p class="small muted" style="margin:0">Para quem processa vídeo com frequência.</p>
+        <ul>
+          <li>Formatos que o navegador recusa: HEVC, MKV, ProRes</li>
+          <li>Transcrição de alta precisão no servidor</li>
+          <li>Vídeos longos sem travar a máquina</li>
+          <li>Processamento em lote</li>
+          <li>Histórico dos vídeos processados</li>
+          <li>Tudo do plano grátis</li>
+        </ul>
+        <a class="btn ghost" href="#lista" style="width:100%;text-align:center">Avisar quando sair</a>
+      </div>
+
+      <div class="plan">
+        <span class="badge">em desenvolvimento</span>
+        <h3 style="margin-top:14px">API</h3>
+        <div class="price">por uso<span> / crédito</span></div>
+        <p class="small muted" style="margin:0">Para produtos e agentes.</p>
+        <ul>
+          <li>Endpoint que recebe vídeo e devolve frames e transcrição</li>
+          <li>Servidor MCP, para agentes consumirem direto</li>
+          <li>Saída em JSON, além do PDF</li>
+          <li>Webhook de conclusão</li>
+        </ul>
+        <a class="btn ghost" href="#lista" style="width:100%;text-align:center">Falar sobre a API</a>
+      </div>
+
+    </div>
+
+    <p class="small muted" style="margin-top:28px">Os planos pagos ainda não existem — estão listados para
+    deixar claro o que será cobrado e o que nunca será. Nada aqui está à venda hoje, e o plano gratuito não
+    vai perder recursos quando os pagos chegarem.</p>
+  </div>
+</section>
+
+<section id="lista">
+  <div class="wrap">
+    <h2>Quer ser avisado?</h2>
+    <p class="lead">Ainda não há lista de espera automatizada — seria incoerente montar um formulário que
+    coleta e-mails numa ferramenta que se orgulha de não coletar nada. Por enquanto, acompanhe o repositório
+    no GitHub: cada novidade sai por lá primeiro.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Por que o gratuito não tem pegadinha</h2>
+    <p class="lead" style="margin-bottom:0">A pergunta é justa: ferramenta gratuita geralmente cobra em outro
+    lugar — dados, anúncios, ou um limite que aparece na hora errada. Aqui o motivo é mais simples: seu vídeo
+    é processado pelo seu computador, então o custo de te atender é praticamente zero. Não há o que subsidiar,
+    e por isso não há o que recuperar depois.</p>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div>
+      <a href="/app">Ferramenta</a>
+      <a href="/precos">Preços</a>
+      <a href="/privacidade">Privacidade</a>
+      <a href="/termos">Termos</a>
+    </div>
+    <div>ClipContext — código aberto sob licença MIT</div>
+  </div>
+</footer>
+
+</body>
+</html>

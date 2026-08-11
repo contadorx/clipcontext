@@ -3,7 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Vídeo → PDF (frames + transcrição)</title>
+<title>ClipContext — transforme vídeo em contexto para IA</title>
+<meta name="description" content="Transforme qualquer vídeo em um PDF com os frames que importam e a transcrição sincronizada, pronto para colar em uma IA. Roda no seu navegador: o vídeo não sai do seu computador.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="ClipContext — transforme vídeo em contexto para IA">
+<meta property="og:description" content="Frames por mudança de cena + transcrição sincronizada, em um PDF único. Nada é enviado para servidor nenhum.">
+<meta name="twitter:card" content="summary_large_image">
 <style>
   :root{
     --bg:#faf9f7; --panel:#fff; --ink:#1f1e1c; --muted:#6b6862;
@@ -232,7 +237,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
 
 </div>
 
-<script>/*__JSPDF__*/</script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
 <script>
 (function(){
   const $ = id => document.getElementById(id);

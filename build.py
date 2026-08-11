@@ -2,7 +2,7 @@
 """
 Gera os dois builds do ClipContext a partir de src/template.html.
 
-  public/index.html                 -> jsPDF vindo do CDN (é o que a Vercel publica)
+  public/app.html                   -> a ferramenta, com jsPDF vindo do CDN
   offline/clipcontext-offline.html  -> jsPDF embutido, arquivo único, funciona sem internet
 
 Edite sempre src/template.html. Os arquivos gerados são descartáveis.
@@ -43,7 +43,7 @@ def main() -> int:
     web = src.replace(MARKER, f'<script src="{CDN}"></script>')
     if PLAIN_TITLE in web:
         web = web.replace(PLAIN_TITLE, META)
-    out_web = ROOT / "public" / "index.html"
+    out_web = ROOT / "public" / "app.html"
     out_web.parent.mkdir(exist_ok=True)
     out_web.write_text(web, encoding="utf-8")
 

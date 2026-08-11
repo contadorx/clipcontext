@@ -67,6 +67,9 @@
   .err{color:var(--err);font-weight:550}
   .autobox{border:1px solid var(--line);border-radius:8px;padding:14px;margin-bottom:14px;
            background:color-mix(in srgb,var(--accent) 4%,transparent)}
+  #promptOut{background:var(--bg);border:1px solid var(--line);border-radius:7px;padding:14px;
+           font:13px/1.6 ui-monospace,Menlo,Consolas,monospace;white-space:pre-wrap;margin:14px 0 0;
+           user-select:all;color:var(--ink);max-height:340px;overflow:auto}
   #diagOut{background:var(--bg);border:1px solid var(--line);border-radius:7px;padding:11px;
            font:12px/1.6 ui-monospace,Menlo,Consolas,monospace;white-space:pre-wrap;margin:12px 0 0;
            user-select:all;color:var(--ink)}
@@ -78,6 +81,8 @@
 <body>
 <div class="wrap">
 
+  <p style="margin:0 0 10px"><a href="https://clipcontext.vercel.app/"
+     style="color:var(--muted);text-decoration:none;font-size:13.5px">&larr; clipcontext.vercel.app</a></p>
   <h1>ClipContext</h1>
   <p class="sub">Transforme um vídeo em um PDF com os frames que importam e a transcrição sincronizada — pronto para entregar a uma IA. Tudo roda no seu navegador: o vídeo não sai do seu computador.</p>
 
@@ -174,6 +179,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     </div>
     <div class="row" style="margin-top:20px">
       <button id="extract" disabled>Extrair frames</button>
+      <button class="ghost hide" id="cancel">Parar</button>
       <button class="ghost" id="reset">Recomeçar</button>
     </div>
     <div class="bar hide" id="barWrap"><i id="bar"></i></div>
@@ -201,6 +207,27 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       </select>
       <span class="status" id="pdfStatus"></span>
     </div>
+  </div>
+
+  <div class="card hide" id="promptCard">
+    <h2><span class="step">5</span>Prompt para a IA</h2>
+    <div class="row">
+      <select id="goal" style="max-width:340px">
+        <option value="resumo">Resumir o conteúdo</option>
+        <option value="passos">Transformar em passo a passo</option>
+        <option value="ata">Produzir uma ata de reunião</option>
+        <option value="revisao">Apontar erros e inconsistências</option>
+        <option value="livre">Escrever meu próprio pedido</option>
+      </select>
+      <button class="ghost sm" id="copyPrompt">Copiar prompt</button>
+      <span class="status" id="copyMsg"></span>
+    </div>
+    <input type="text" id="goalFree" class="hide" placeholder="O que você quer que a IA faça com este vídeo?"
+           style="width:100%;margin-top:10px;padding:9px 11px;border:1px solid var(--line);border-radius:7px;
+                  background:var(--bg);color:var(--ink);font:inherit;font-size:14px">
+    <pre id="promptOut"></pre>
+    <p class="note">Anexe o PDF na conversa e cole este texto junto. Ele explica ao modelo como o documento
+    está organizado — sem isso, ele costuma ignorar os instantes e misturar o que viu com o que foi falado.</p>
   </div>
 
 </div>
@@ -608,7 +635,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
 (function(){
   const $ = id => document.getElementById(id);
   const video = $('v');
-  let manual = [], fileName = '', fileSize = 0, currentFile = null, frames = [];
+  let manual = [], fileName = '', fileSize = 0, currentFile = null, frames = [], stop = false;
 
   const pad2 = n => String(n).padStart(2,'0');
   function fmt(t){
@@ -926,9 +953,18 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     const px = 900;
 
     $('extract').disabled = true; $('go').disabled = true;
+    $('cancel').classList.remove('hide');
     $('barWrap').classList.remove('hide');
     frames = [];
     let limited = '';
+    stop = false;
+    const t0 = performance.now();
+    // previsão de término a partir do ritmo medido nos primeiros passos
+    const eta = (done, total) => {
+      if (done < 3) return '';
+      const left = (performance.now() - t0) / done * (total - done) / 1000;
+      return left < 5 ? '' : ` — faltam ~${left < 90 ? Math.ceil(left) + 's' : Math.ceil(left/60) + ' min'}`;
+    };
     video.pause();
 
     if (mode === 'scene') {
@@ -937,7 +973,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       const stepS = Math.max(0.5, dur / 700);
       let prev = null, kept = 0;
       const total = Math.ceil(dur / stepS);
-      for (let i = 0; i < total && kept < maxf; i++) {
+      for (let i = 0; i < total && kept < maxf && !stop; i++) {
         const t = i * stepS;
         await seek(t);
         await new Promise(r => requestAnimationFrame(r));
@@ -948,7 +984,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
           prev = sig; kept++;
         }
         $('bar').style.width = ((i+1)/total*100) + '%';
-        $('status').textContent = `Procurando mudanças de imagem… ${fmt(t)} de ${fmt(dur)} — ${kept} frame(s) guardado(s)`;
+        $('status').textContent = `Procurando mudanças de imagem… ${fmt(t)} de ${fmt(dur)} — ` +
+          `${kept} frame(s) guardado(s)${eta(i+1, total)}`;
         if (kept >= maxf && t < dur - stepS)
           limited = ` A varredura parou em ${fmt(t)} por atingir o limite de ${maxf} frames — o fim do vídeo não foi coberto.`;
       }
@@ -961,12 +998,12 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
         const step = Math.max(0.5, +$('interval').value || 10);
         for (let t = 0; t < dur && times.length < maxf; t += step) times.push(t);
       }
-      for (let i = 0; i < times.length; i++) {
+      for (let i = 0; i < times.length && !stop; i++) {
         await seek(times[i]);
         await new Promise(r => requestAnimationFrame(r));
         frames.push({ t: video.currentTime, img: snap(px, q), keep: true, sig: signature() });
         $('bar').style.width = ((i+1)/times.length*100) + '%';
-        $('status').textContent = `Extraindo… ${i+1} de ${times.length}`;
+        $('status').textContent = `Extraindo… ${i+1} de ${times.length}${eta(i+1, times.length)}`;
       }
       if (mode === 'interval' && times.length >= maxf && times[times.length-1] < dur - 1)
         limited = ` Parou em ${fmt(times[times.length-1])} por atingir o limite de ${maxf} frames.`;
@@ -980,11 +1017,20 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     }
 
     frames.sort((a,b) => a.t - b.t);
+    const parou = stop ? ' <span class="err">Interrompido por você — só o trecho já varrido está aqui.</span>' : '';
     $('status').innerHTML = `<span class="ok">${frames.length} frames extraídos.</span> Revise abaixo antes de gerar o PDF.` +
-      (limited ? `<span class="err">${limited}</span>` : '');
+      parou + (limited ? `<span class="err">${limited}</span>` : '');
     $('extract').disabled = false; $('go').disabled = false;
+    $('cancel').classList.add('hide');
+    stop = false;
     $('prevCard').classList.remove('hide');
+    $('promptCard').classList.remove('hide');
     render();
+  };
+
+  $('cancel').onclick = () => {
+    stop = true;
+    $('status').textContent = 'Parando…';
   };
 
   /* ================= revisão ================= */
@@ -1007,6 +1053,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     const bytes = keep.reduce((s,f) => s + f.img.url.length * 0.75, 0) + 40000;
     $('size').textContent = (bytes/1048576).toFixed(1);
     $('go').disabled = !keep.length;
+    if (frames.length) buildPrompt();
   }
 
   $('allOn').onclick = () => { frames.forEach(f => f.keep = true); render(); };
@@ -1020,6 +1067,65 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     render();
     $('status').textContent = n ? `${n} frame(s) quase idênticos foram descartados.`
                                 : 'Nenhum frame repetido encontrado — todos mostram algo diferente.';
+  };
+
+  /* ================= prompt para a IA ================= */
+  const GOALS = {
+    resumo: 'Resuma o conteúdo em ordem cronológica, destacando os pontos principais e o que muda na tela ao longo do vídeo.',
+    passos: 'Transforme o conteúdo em um passo a passo numerado. Para cada passo, informe o instante correspondente e descreva o que aparece na tela naquele momento.',
+    ata: 'Produza uma ata: assuntos tratados, decisões tomadas, pendências com o respectivo responsável quando mencionado, e próximos passos. Marque o instante de cada decisão.',
+    revisao: 'Aponte inconsistências entre o que é dito e o que aparece na tela, erros visíveis, e informações que ficaram faltando ou ambíguas.'
+  };
+
+  function buildPrompt(){
+    const keep = frames.filter(f => f.keep);
+    const { cues } = parseTranscript($('tr').value);
+    const g = $('goal').value;
+    const tarefa = g === 'livre'
+      ? ($('goalFree').value.trim() || '(descreva aqui o que você quer)')
+      : GOALS[g];
+
+    const linhas = [
+      `O PDF em anexo foi gerado a partir do vídeo "${fileName || 'sem nome'}"` +
+        (video.duration ? `, com duração de ${fmt(video.duration)}.` : '.'),
+      '',
+      `Ele contém ${keep.length} imagens capturadas do vídeo, cada uma identificada pelo instante exato em que ` +
+      `foi capturada (no formato mm:ss, contado a partir do início).` +
+      (cues.length
+        ? ' Logo abaixo de cada imagem está o que é falado naquele trecho, e a transcrição completa com marcações de tempo está nas últimas páginas.'
+        : ' Este documento não tem transcrição: baseie-se apenas no que é visível nas imagens.'),
+      '',
+      'Ao responder:',
+      '- cite sempre o instante (por exemplo, 12:34) ao mencionar algo que aparece ou é dito;',
+      cues.length
+        ? '- deixe claro o que você está afirmando com base na imagem e o que vem da fala;'
+        : '- descreva apenas o que é visível, sem inferir o que teria sido dito;',
+      '- as imagens são amostras, não o vídeo inteiro: se algo aconteceu entre duas capturas, você não tem como saber;',
+      '- quando a informação não estiver no documento, diga que não é possível saber em vez de supor.',
+      '',
+      'Tarefa: ' + tarefa
+    ];
+    $('promptOut').textContent = linhas.join('\n');
+  }
+
+  $('goal').onchange = () => {
+    $('goalFree').classList.toggle('hide', $('goal').value !== 'livre');
+    buildPrompt();
+  };
+  $('goalFree').oninput = buildPrompt;
+
+  $('copyPrompt').onclick = async () => {
+    const txt = $('promptOut').textContent;
+    try {
+      await navigator.clipboard.writeText(txt);
+      $('copyMsg').innerHTML = '<span class="ok">copiado</span>';
+    } catch (e) {
+      const r = document.createRange();
+      r.selectNodeContents($('promptOut'));
+      const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r);
+      $('copyMsg').textContent = 'selecionado — use Ctrl+C';
+    }
+    setTimeout(() => { $('copyMsg').textContent = ''; }, 2500);
   };
 
   /* ================= PDF ================= */
