@@ -76,49 +76,63 @@
   .tag{display:inline-block;background:var(--bg);border:1px solid var(--line);border-radius:99px;
        padding:3px 10px;font-size:12px;color:var(--muted);margin-right:6px}
   .tag b{color:var(--ink);font-weight:600}
+  .topbar{display:flex;justify-content:space-between;align-items:center;gap:14px;margin:0 0 12px}
+  .topbar .back{color:var(--muted);text-decoration:none;font-size:13.5px}
+  .topbar select{width:auto;padding:5px 9px;font-size:13px}
 </style>
 </head>
 <body>
 <div class="wrap">
 
-  <p style="margin:0 0 10px"><a href="https://clipcontext.vercel.app/"
-     style="color:var(--muted);text-decoration:none;font-size:13.5px">&larr; clipcontext.vercel.app</a></p>
+  <div class="topbar">
+    <a href="https://clipcontext.vercel.app/" class="back">&larr; clipcontext.vercel.app</a>
+    <select id="uiLang" aria-label="Language">
+      <option value="pt">Português</option>
+      <option value="en">English</option>
+      <option value="es">Español</option>
+    </select>
+  </div>
   <h1>ClipContext</h1>
-  <p class="sub">Transforme um vídeo em um PDF com os frames que importam e a transcrição sincronizada — pronto para entregar a uma IA. Tudo roda no seu navegador: o vídeo não sai do seu computador.</p>
+  <p class="sub" data-i18n="sub"></p>
 
   <div class="card">
-    <h2><span class="step">1</span>Vídeo</h2>
+    <h2><span class="step">1</span><span data-i18n="s1"></span></h2>
     <div class="drop" id="drop">
-      <strong>Escolher ou arrastar o vídeo aqui</strong>
-      <span>MP4 / MOV / WebM — o tamanho do arquivo não importa</span>
+      <strong data-i18n="drop1"></strong>
+      <span data-i18n="drop2"></span>
     </div>
     <input type="file" id="file" accept="video/*">
+    <div class="row" style="margin-top:12px">
+      <button class="ghost sm" id="demo" data-i18n="demoBtn"></button>
+      <span class="status" id="demoMsg" data-i18n="demoHint"></span>
+    </div>
     <div id="playerBox" class="hide" style="margin-top:16px">
       <video id="v" controls preload="auto" muted playsinline></video>
       <div class="meta" id="meta"></div>
       <div class="row" style="margin-top:12px">
-        <button class="ghost sm" id="grab">Marcar este momento</button>
+        <button class="ghost sm" id="grab" data-i18n="mark"></button>
         <span class="status" id="grabbed"></span>
       </div>
     </div>
   </div>
 
   <div class="card">
-    <h2><span class="step">2</span>Transcrição <span style="text-transform:none;letter-spacing:0">(opcional)</span></h2>
+    <h2><span class="step">2</span><span data-i18n="s2"></span></h2>
 
     <div class="autobox">
       <div class="row">
-        <button id="auto" disabled>Transcrever automaticamente</button>
+        <button id="auto" disabled data-i18n="autoBtn"></button>
         <select id="model" style="width:auto">
-          <option value="onnx-community/whisper-base">Modelo base — rápido</option>
-          <option value="onnx-community/whisper-small">Modelo small — mais preciso</option>
+          <option value="onnx-community/whisper-base" data-i18n="mBase"></option>
+          <option value="onnx-community/whisper-small" data-i18n="mSmall"></option>
         </select>
         <select id="lang" style="width:auto">
           <option value="pt">Português</option>
-          <option value="en">Inglês</option>
-          <option value="">Detectar sozinho</option>
+          <option value="en">English</option>
+          <option value="es">Español</option>
+          <option value="" data-i18n="autoDetect"></option>
         </select>
-        <button class="ghost sm" id="diag">Diagnóstico</button>
+        <button class="ghost sm" id="diag" data-i18n="diagBtn"></button>
       </div>
       <pre id="diagOut" class="hide"></pre>
       <div class="bar hide" id="abarWrap"><i id="abar"></i></div>
@@ -126,8 +140,8 @@
     </div>
 
     <div class="row" style="margin-bottom:9px">
-      <button class="ghost sm" id="pickVtt">Abrir arquivo .vtt / .srt</button>
-      <span class="status">ou arraste o arquivo sobre o campo abaixo, ou cole o texto</span>
+      <button class="ghost sm" id="pickVtt" data-i18n="openSub"></button>
+      <span class="status" data-i18n="orDrag"></span>
     </div>
     <input type="file" id="vttFile" accept=".vtt,.srt,.txt,text/plain">
     <textarea id="tr" placeholder="Cole aqui a transcrição do Google Drive, ou arraste um arquivo .srt / .vtt.
@@ -142,93 +156,98 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   </div>
 
   <div class="card">
-    <h2><span class="step">3</span>Escolha dos frames</h2>
+    <h2><span class="step">3</span><span data-i18n="s3"></span></h2>
     <div class="grid">
       <div>
-        <label class="f" for="mode">Critério</label>
+        <label class="f" for="mode" data-i18n="lCrit"></label>
         <select id="mode">
-          <option value="scene">Quando a imagem muda (recomendado)</option>
-          <option value="count">Quantidade fixa, espalhados</option>
-          <option value="interval">A cada N segundos</option>
+          <option value="scene" data-i18n="mScene"></option>
+          <option value="count" data-i18n="mCount"></option>
+          <option value="interval" data-i18n="mInt"></option>
         </select>
       </div>
       <div id="sceneBox">
-        <label class="f" for="sens">Sensibilidade — <span id="sensV">média</span></label>
+        <label class="f" for="sens"><span data-i18n="lSens"></span> — <span id="sensV"></span></label>
         <input type="range" id="sens" min="1" max="9" value="5">
       </div>
       <div id="countBox" class="hide">
-        <label class="f" for="count">Quantos frames</label>
+        <label class="f" for="count" data-i18n="lCount"></label>
         <input type="number" id="count" value="36" min="1" max="400">
       </div>
       <div id="intBox" class="hide">
-        <label class="f" for="interval">Intervalo (segundos)</label>
+        <label class="f" for="interval" data-i18n="lInt"></label>
         <input type="number" id="interval" value="10" min="0.5" step="0.5">
       </div>
       <div>
-        <label class="f" for="maxf">Limite de frames</label>
+        <label class="f" for="maxf" data-i18n="lMax"></label>
         <input type="number" id="maxf" value="60" min="1" max="400">
       </div>
       <div>
-        <label class="f" for="quality">Qualidade da imagem</label>
+        <label class="f" for="quality" data-i18n="lQual"></label>
         <select id="quality">
-          <option value="0.72">Leve</option>
-          <option value="0.85" selected>Equilibrada</option>
-          <option value="0.94">Alta</option>
+          <option value="0.72" data-i18n="qLow"></option>
+          <option value="0.85" selected data-i18n="qMid"></option>
+          <option value="0.94" data-i18n="qHigh"></option>
         </select>
       </div>
     </div>
     <div class="row" style="margin-top:20px">
-      <button id="extract" disabled>Extrair frames</button>
-      <button class="ghost hide" id="cancel">Parar</button>
-      <button class="ghost" id="reset">Recomeçar</button>
+      <button id="extract" disabled data-i18n="extractBtn"></button>
+      <button class="ghost hide" id="cancel" data-i18n="stopBtn"></button>
+      <button class="ghost" id="reset" data-i18n="resetBtn"></button>
     </div>
     <div class="bar hide" id="barWrap"><i id="bar"></i></div>
     <div class="status" id="status"></div>
-    <p class="note"><b>Se o vídeo não abrir:</b> o navegador não decodifica alguns formatos (HEVC, certos MKV). Nesse caso, converta para MP4 / H.264.</p>
+    <p class="note"><b data-i18n="noteB"></b> <span data-i18n="noteT"></span></p>
   </div>
 
   <div class="card hide" id="prevCard">
-    <h2><span class="step">4</span>Revisão</h2>
+    <h2><span class="step">4</span><span data-i18n="s4"></span></h2>
     <div class="row">
-      <span class="tag">mantidos <b id="nKeep">0</b></span>
-      <span class="tag">descartados <b id="nOff">0</b></span>
+      <span class="tag"><span data-i18n="tKeep"></span> <b id="nKeep">0</b></span>
+      <span class="tag"><span data-i18n="tOff"></span> <b id="nOff">0</b></span>
       <span class="tag">PDF ~<b id="size">0</b> MB</span>
-      <button class="ghost sm" id="allOn">Manter todos</button>
-      <button class="ghost sm" id="dedup">Descartar repetidos</button>
+      <button class="ghost sm" id="allOn" data-i18n="keepAll"></button>
+      <button class="ghost sm" id="dedup" data-i18n="dropDup"></button>
     </div>
-    <p class="status" style="margin:10px 0 0">Clique em qualquer frame para descartar ou trazer de volta.</p>
+    <p class="status" style="margin:10px 0 0" data-i18n="clickHint"></p>
     <div class="thumbs" id="thumbs"></div>
     <div class="row" style="margin-top:18px">
-      <button id="go">Gerar PDF</button>
+      <button id="go" data-i18n="pdfBtn"></button>
       <select id="layout" style="width:auto">
-        <option value="auto">Layout automático</option>
-        <option value="full">Sequência, cada frame com a fala do trecho</option>
-        <option value="grid">Grade compacta, 6 por página</option>
+        <option value="auto" data-i18n="layAuto"></option>
+        <option value="full" data-i18n="layFull"></option>
+        <option value="grid" data-i18n="layGrid"></option>
       </select>
       <span class="status" id="pdfStatus"></span>
     </div>
   </div>
 
-  <div class="card hide" id="promptCard">
-    <h2><span class="step">5</span>Prompt para a IA</h2>
+  <div class="card" id="promptCard">
+    <h2><span class="step">5</span><span data-i18n="s5"></span></h2>
+    <p class="status" style="margin:-6px 0 14px" data-i18n="s5sub"></p>
     <div class="row">
       <select id="goal" style="max-width:340px">
-        <option value="resumo">Resumir o conteúdo</option>
-        <option value="passos">Transformar em passo a passo</option>
-        <option value="ata">Produzir uma ata de reunião</option>
-        <option value="revisao">Apontar erros e inconsistências</option>
-        <option value="livre">Escrever meu próprio pedido</option>
+        <option value="resumo" data-i18n="gSum"></option>
+        <option value="passos" data-i18n="gSteps"></option>
+        <option value="ata" data-i18n="gMinutes"></option>
+        <option value="revisao" data-i18n="gReview"></option>
+        <option value="livre" data-i18n="gFree"></option>
       </select>
-      <button class="ghost sm" id="copyPrompt">Copiar prompt</button>
+      <button class="ghost sm" id="copyPrompt" data-i18n="copyBtn"></button>
       <span class="status" id="copyMsg"></span>
     </div>
     <input type="text" id="goalFree" class="hide" placeholder="O que você quer que a IA faça com este vídeo?"
            style="width:100%;margin-top:10px;padding:9px 11px;border:1px solid var(--line);border-radius:7px;
                   background:var(--bg);color:var(--ink);font:inherit;font-size:14px">
     <pre id="promptOut"></pre>
-    <p class="note">Anexe o PDF na conversa e cole este texto junto. Ele explica ao modelo como o documento
-    está organizado — sem isso, ele costuma ignorar os instantes e misturar o que viu com o que foi falado.</p>
+    <p class="note" data-i18n="s5note"></p>
   </div>
+
+  <p class="status" style="text-align:center;margin-top:26px">
+    <span data-i18n="supportLine"></span>
+    <a href="https://clipcontext.vercel.app/#support" style="color:var(--accent)" data-i18n="supportLink"></a>
+  </p>
 
 </div>
 
@@ -238,6 +257,290 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   const $ = id => document.getElementById(id);
   const video = $('v');
   let manual = [], fileName = '', fileSize = 0, currentFile = null, frames = [], stop = false;
+
+  /* ================= idiomas ================= */
+  const I18N = {
+    pt: {
+      docTitle:'ClipContext — transforme vídeo em contexto para IA',
+      supportLine:'Ferramenta gratuita, sem anúncio e sem cadastro. ',
+      supportLink:'Apoiar o projeto',
+      sub:'Transforme um vídeo em um PDF com os frames que importam e a transcrição sincronizada — pronto para entregar a uma IA. Tudo roda no seu navegador: o vídeo não sai do seu computador.',
+      s1:'Vídeo', drop1:'Escolher ou arrastar o vídeo aqui',
+      drop2:'MP4 / MOV / WebM — o tamanho do arquivo não importa',
+      demoBtn:'Usar vídeo de exemplo', demoHint:'50 segundos, cinco telas — para experimentar sem arquivo próprio',
+      demoLoading:'Baixando o exemplo…', demoReady:'Exemplo carregado com a transcrição. É só extrair os frames.',
+      demoErr:'Não consegui baixar o exemplo. Escolha um vídeo do seu computador.',
+      mark:'Marcar este momento',
+      marked:'{0} momento(s) marcado(s) — entram sempre, mesmo que a imagem não mude.',
+      mDur:'duração', mRes:'resolução', mFile:'arquivo',
+      videoErr:'O navegador não conseguiu abrir este vídeo. Converta para MP4 (H.264) e tente de novo.',
+      s2:'Transcrição (opcional)', autoBtn:'Transcrever automaticamente',
+      mBase:'Modelo base — rápido', mSmall:'Modelo small — mais preciso',
+      autoDetect:'Detectar sozinho', diagBtn:'Diagnóstico',
+      openSub:'Abrir arquivo .vtt / .srt', orDrag:'ou arraste o arquivo sobre o campo abaixo, ou cole o texto',
+      trPh:'Cole aqui a transcrição, ou arraste um arquivo .srt / .vtt.\n\nReconheço automaticamente:\n  00:00:12,400 --> 00:00:15,900   (SRT / VTT)\n  0:12  texto falado             (colado de um painel de legendas)\n  texto solto sem marcação de tempo\n\nCom marcação de tempo, cada frame sai no PDF junto do que é dito naquele trecho.',
+      trCues:'{0} trechos com marcação de tempo', trCues2:' — cada frame sai junto da fala correspondente.',
+      trPlain:'Texto sem marcação de tempo — vai entrar no PDF como um bloco no final.',
+      audioExtract:'Extraindo o áudio do vídeo…', audioFail:'não consegui extrair o áudio (o vídeo tem faixa de som? o formato é suportado?)',
+      noAudio:'este vídeo não tem áudio', modelLoad:'Carregando o modelo…',
+      modelDl:'Baixando o modelo (só na primeira vez)…', noGpu:'WebGPU indisponível — usando o processador, vai demorar mais.',
+      transcribing:'Transcrevendo… bloco {0} de {1}', trDone:'Transcrição pronta — {0} trechos.',
+      trErr:'Não consegui transcrever aqui: {0} — clique em Diagnóstico para ver em qual etapa trava.',
+      diagDone:'Diagnóstico pronto. Selecione o bloco acima, copie e envie.',
+      s3:'Escolha dos frames', lCrit:'Critério', mScene:'Quando a imagem muda (recomendado)',
+      mCount:'Quantidade fixa, espalhados', mInt:'A cada N segundos',
+      lSens:'Sensibilidade', lCount:'Quantos frames', lInt:'Intervalo (segundos)',
+      lMax:'Limite de frames', lQual:'Qualidade da imagem',
+      qLow:'Leve', qMid:'Equilibrada', qHigh:'Alta',
+      sens:['','muito baixa','baixa','baixa+','média-','média','média+','alta','alta+','muito alta'],
+      extractBtn:'Extrair frames', stopBtn:'Parar', resetBtn:'Recomeçar',
+      noteB:'Se o vídeo não abrir:', noteT:'o navegador não decodifica alguns formatos (HEVC, certos MKV). Nesse caso, converta para MP4 / H.264.',
+      noDur:'Duração do vídeo indisponível.',
+      scanning:'Procurando mudanças de imagem… {0} de {1} — {2} frame(s) guardado(s)',
+      eta:' — faltam ~{0}', etaS:'{0}s', etaM:'{0} min',
+      extracting:'Extraindo… {0} de {1}',
+      limitScene:' A varredura parou em {0} por atingir o limite de {1} frames — o fim do vídeo não foi coberto.',
+      limitInt:' Parou em {0} por atingir o limite de {1} frames.',
+      stopping:'Parando…', stopped:' Interrompido por você — só o trecho já varrido está aqui.',
+      extracted:'{0} frames extraídos.', reviewNext:' Revise abaixo antes de gerar o PDF.',
+      s4:'Revisão', tKeep:'mantidos', tOff:'descartados', keepAll:'Manter todos', dropDup:'Descartar repetidos',
+      clickHint:'Clique em qualquer frame para descartar ou trazer de volta.',
+      dedupN:'{0} frame(s) quase idênticos foram descartados.',
+      dedup0:'Nenhum frame repetido encontrado — todos mostram algo diferente.',
+      pdfBtn:'Gerar PDF', layAuto:'Layout automático',
+      layFull:'Sequência, cada frame com a fala do trecho', layGrid:'Grade compacta, 6 por página',
+      pdfBuilding:'Montando o PDF…', pdfDone:'PDF gerado', pdfDone2:' — {0} frames, {1} páginas.',
+      pTitle:'Análise de vídeo', pDur:'Duração', pRes:'Resolução', pSize:'Tamanho',
+      pFrames:'Frames neste PDF', pTr:'Transcrição', pTrCues:'{0} trechos com tempo',
+      pTrPlain:'texto sem marcação de tempo', pTrNone:'não fornecida',
+      pNote:'Cada imagem traz o instante exato em que foi capturada. Os tempos referem-se ao início do vídeo.',
+      pFrameOf:'frame {0} de {1}', pNoSpeech:'(sem fala neste trecho)',
+      pFramesH:'Frames', pFullTr:'Transcrição completa',
+      s5:'Prompt para a IA',
+      s5sub:'Não basta anexar o PDF: o modelo precisa saber como ele está organizado. Este texto faz isso — e é gerado sozinho, ajustado ao seu vídeo.',
+      s5note:'Anexe o PDF na conversa e cole este texto junto. Ele explica ao modelo como o documento está organizado — sem isso, ele costuma ignorar os instantes e misturar o que viu com o que foi falado.',
+      promptPh:'Escolha um vídeo e extraia os frames — o prompt aparece aqui pronto,\njá com o nome do arquivo, a duração, a quantidade de imagens e\na informação de haver ou não transcrição.',
+      gSum:'Resumir o conteúdo', gSteps:'Transformar em passo a passo', gMinutes:'Produzir uma ata de reunião',
+      gReview:'Apontar erros e inconsistências', gFree:'Escrever meu próprio pedido',
+      freePh:'O que você quer que a IA faça com este vídeo?',
+      copyBtn:'Copiar prompt', copied:'copiado', selected:'selecionado — use Ctrl+C',
+      goals:{
+        resumo:'Resuma o conteúdo em ordem cronológica, destacando os pontos principais e o que muda na tela ao longo do vídeo.',
+        passos:'Transforme o conteúdo em um passo a passo numerado. Para cada passo, informe o instante correspondente e descreva o que aparece na tela naquele momento.',
+        ata:'Produza uma ata: assuntos tratados, decisões tomadas, pendências com o respectivo responsável quando mencionado, e próximos passos. Marque o instante de cada decisão.',
+        revisao:'Aponte inconsistências entre o que é dito e o que aparece na tela, erros visíveis, e informações que ficaram faltando ou ambíguas.'
+      },
+      pr1:'O PDF em anexo foi gerado a partir do vídeo "{0}"', pr1b:', com duração de {0}.',
+      pr2:'Ele contém {0} imagens capturadas do vídeo, cada uma identificada pelo instante exato em que foi capturada (no formato mm:ss, contado a partir do início).',
+      pr2cues:' Logo abaixo de cada imagem está o que é falado naquele trecho, e a transcrição completa com marcações de tempo está nas últimas páginas.',
+      pr2no:' Este documento não tem transcrição: baseie-se apenas no que é visível nas imagens.',
+      pr3:'Ao responder:',
+      pr4:'- cite sempre o instante (por exemplo, 12:34) ao mencionar algo que aparece ou é dito;',
+      pr5cues:'- deixe claro o que você está afirmando com base na imagem e o que vem da fala;',
+      pr5no:'- descreva apenas o que é visível, sem inferir o que teria sido dito;',
+      pr6:'- as imagens são amostras, não o vídeo inteiro: se algo aconteceu entre duas capturas, você não tem como saber;',
+      pr7:'- quando a informação não estiver no documento, diga que não é possível saber em vez de supor.',
+      pr8:'Tarefa: ', prFree:'(descreva aqui o que você quer)', prNoName:'sem nome'
+    },
+
+    en: {
+      docTitle:'ClipContext — turn video into context an AI can read',
+      supportLine:'Free tool, no ads, no sign-up. ',
+      supportLink:'Support the project',
+      sub:'Turn a video into a PDF with the frames that matter and a synced transcript — ready to hand to an AI. It all runs in your browser: the video never leaves your computer.',
+      s1:'Video', drop1:'Choose or drag your video here',
+      drop2:'MP4 / MOV / WebM — file size does not matter',
+      demoBtn:'Use the example video', demoHint:'50 seconds, five screens — try it without your own file',
+      demoLoading:'Downloading the example…', demoReady:'Example loaded with its transcript. Just extract the frames.',
+      demoErr:'Could not download the example. Please pick a video from your computer.',
+      mark:'Mark this moment',
+      marked:'{0} moment(s) marked — always included, even if the image does not change.',
+      mDur:'duration', mRes:'resolution', mFile:'file',
+      videoErr:'The browser could not open this video. Convert it to MP4 (H.264) and try again.',
+      s2:'Transcript (optional)', autoBtn:'Transcribe automatically',
+      mBase:'Base model — fast', mSmall:'Small model — more accurate',
+      autoDetect:'Detect automatically', diagBtn:'Diagnostics',
+      openSub:'Open .vtt / .srt file', orDrag:'or drag the file onto the box below, or paste the text',
+      trPh:'Paste the transcript here, or drag in a .srt / .vtt file.\n\nRecognised automatically:\n  00:00:12,400 --> 00:00:15,900   (SRT / VTT)\n  0:12  spoken text              (pasted from a caption panel)\n  plain text with no timestamps\n\nWith timestamps, each frame appears in the PDF next to what is said at that point.',
+      trCues:'{0} timestamped segments', trCues2:' — each frame will appear next to its matching speech.',
+      trPlain:'Text without timestamps — it will go into the PDF as a block at the end.',
+      audioExtract:'Extracting the audio…', audioFail:'could not extract the audio (does the video have a sound track? is the format supported?)',
+      noAudio:'this video has no audio', modelLoad:'Loading the model…',
+      modelDl:'Downloading the model (first time only)…', noGpu:'WebGPU unavailable — using the CPU, this will be slower.',
+      transcribing:'Transcribing… chunk {0} of {1}', trDone:'Transcript ready — {0} segments.',
+      trErr:'Could not transcribe here: {0} — click Diagnostics to see which step fails.',
+      diagDone:'Diagnostics ready. Select the block above, copy it and send it over.',
+      s3:'Frame selection', lCrit:'Method', mScene:'When the image changes (recommended)',
+      mCount:'Fixed count, evenly spread', mInt:'Every N seconds',
+      lSens:'Sensitivity', lCount:'How many frames', lInt:'Interval (seconds)',
+      lMax:'Frame limit', lQual:'Image quality',
+      qLow:'Light', qMid:'Balanced', qHigh:'High',
+      sens:['','very low','low','low+','medium-','medium','medium+','high','high+','very high'],
+      extractBtn:'Extract frames', stopBtn:'Stop', resetBtn:'Start over',
+      noteB:'If the video will not open:', noteT:'browsers cannot decode some formats (HEVC, certain MKV files). Convert to MP4 / H.264 in that case.',
+      noDur:'Video duration unavailable.',
+      scanning:'Looking for image changes… {0} of {1} — {2} frame(s) kept',
+      eta:' — about {0} left', etaS:'{0}s', etaM:'{0} min',
+      extracting:'Extracting… {0} of {1}',
+      limitScene:' The scan stopped at {0} after reaching the {1}-frame limit — the end of the video was not covered.',
+      limitInt:' Stopped at {0} after reaching the {1}-frame limit.',
+      stopping:'Stopping…', stopped:' Stopped by you — only the part scanned so far is here.',
+      extracted:'{0} frames extracted.', reviewNext:' Review them below before generating the PDF.',
+      s4:'Review', tKeep:'kept', tOff:'discarded', keepAll:'Keep all', dropDup:'Discard duplicates',
+      clickHint:'Click any frame to discard it or bring it back.',
+      dedupN:'{0} near-identical frame(s) were discarded.',
+      dedup0:'No repeated frames found — every one shows something different.',
+      pdfBtn:'Generate PDF', layAuto:'Automatic layout',
+      layFull:'Sequence, each frame with its speech', layGrid:'Compact grid, 6 per page',
+      pdfBuilding:'Building the PDF…', pdfDone:'PDF generated', pdfDone2:' — {0} frames, {1} pages.',
+      pTitle:'Video analysis', pDur:'Duration', pRes:'Resolution', pSize:'Size',
+      pFrames:'Frames in this PDF', pTr:'Transcript', pTrCues:'{0} timestamped segments',
+      pTrPlain:'text without timestamps', pTrNone:'not provided',
+      pNote:'Each image carries the exact moment it was captured. Times are counted from the start of the video.',
+      pFrameOf:'frame {0} of {1}', pNoSpeech:'(no speech in this interval)',
+      pFramesH:'Frames', pFullTr:'Full transcript',
+      s5:'Prompt for the AI',
+      s5sub:'Attaching the PDF is not enough: the model needs to know how it is organised. This text does that — generated automatically, tailored to your video.',
+      s5note:'Attach the PDF to the conversation and paste this text along with it. It explains how the document is structured — without it, models tend to ignore the timestamps and blur what they saw with what was said.',
+      promptPh:'Pick a video and extract the frames — the prompt shows up here,\nalready filled in with the file name, duration, number of images\nand whether a transcript is included.',
+      gSum:'Summarise the content', gSteps:'Turn it into step-by-step instructions', gMinutes:'Write meeting minutes',
+      gReview:'Point out errors and inconsistencies', gFree:'Write my own request',
+      freePh:'What do you want the AI to do with this video?',
+      copyBtn:'Copy prompt', copied:'copied', selected:'selected — press Ctrl+C',
+      goals:{
+        resumo:'Summarise the content in chronological order, highlighting the main points and what changes on screen over the course of the video.',
+        passos:'Turn the content into numbered step-by-step instructions. For each step, give the corresponding timestamp and describe what is on screen at that moment.',
+        ata:'Write meeting minutes: topics covered, decisions made, open items with their owner when mentioned, and next steps. Mark the timestamp of each decision.',
+        revisao:'Point out inconsistencies between what is said and what is shown, visible errors, and information that is missing or ambiguous.'
+      },
+      pr1:'The attached PDF was generated from the video "{0}"', pr1b:', which is {0} long.',
+      pr2:'It contains {0} images captured from the video, each labelled with the exact moment it was captured (in mm:ss, counted from the start).',
+      pr2cues:' Directly below each image is what is said at that point, and the full timestamped transcript is on the last pages.',
+      pr2no:' This document has no transcript: rely only on what is visible in the images.',
+      pr3:'When you answer:',
+      pr4:'- always cite the timestamp (for example, 12:34) when referring to something shown or said;',
+      pr5cues:'- make clear what you are asserting from the image and what comes from the speech;',
+      pr5no:'- describe only what is visible, without inferring what may have been said;',
+      pr6:'- the images are samples, not the whole video: if something happened between two captures, you cannot know it;',
+      pr7:'- when the information is not in the document, say that it cannot be determined rather than guessing.',
+      pr8:'Task: ', prFree:'(describe what you want here)', prNoName:'untitled'
+    },
+
+    es: {
+      docTitle:'ClipContext — convierte tu vídeo en contexto para la IA',
+      supportLine:'Herramienta gratuita, sin anuncios ni registro. ',
+      supportLink:'Apoyar el proyecto',
+      sub:'Convierte un vídeo en un PDF con los fotogramas que importan y la transcripción sincronizada, listo para entregar a una IA. Todo se ejecuta en tu navegador: el vídeo no sale de tu ordenador.',
+      s1:'Vídeo', drop1:'Elige o arrastra tu vídeo aquí',
+      drop2:'MP4 / MOV / WebM — el tamaño del archivo no importa',
+      demoBtn:'Usar el vídeo de ejemplo', demoHint:'50 segundos, cinco pantallas — pruébalo sin archivo propio',
+      demoLoading:'Descargando el ejemplo…', demoReady:'Ejemplo cargado con su transcripción. Solo falta extraer los fotogramas.',
+      demoErr:'No pude descargar el ejemplo. Elige un vídeo de tu ordenador.',
+      mark:'Marcar este momento',
+      marked:'{0} momento(s) marcado(s) — se incluyen siempre, aunque la imagen no cambie.',
+      mDur:'duración', mRes:'resolución', mFile:'archivo',
+      videoErr:'El navegador no pudo abrir este vídeo. Conviértelo a MP4 (H.264) e inténtalo de nuevo.',
+      s2:'Transcripción (opcional)', autoBtn:'Transcribir automáticamente',
+      mBase:'Modelo base — rápido', mSmall:'Modelo small — más preciso',
+      autoDetect:'Detectar automáticamente', diagBtn:'Diagnóstico',
+      openSub:'Abrir archivo .vtt / .srt', orDrag:'o arrastra el archivo sobre el campo de abajo, o pega el texto',
+      trPh:'Pega aquí la transcripción, o arrastra un archivo .srt / .vtt.\n\nReconozco automáticamente:\n  00:00:12,400 --> 00:00:15,900   (SRT / VTT)\n  0:12  texto hablado            (copiado de un panel de subtítulos)\n  texto suelto sin marcas de tiempo\n\nCon marcas de tiempo, cada fotograma aparece en el PDF junto a lo que se dice en ese tramo.',
+      trCues:'{0} tramos con marca de tiempo', trCues2:' — cada fotograma saldrá junto al habla correspondiente.',
+      trPlain:'Texto sin marcas de tiempo — irá al PDF como un bloque al final.',
+      audioExtract:'Extrayendo el audio…', audioFail:'no pude extraer el audio (¿el vídeo tiene pista de sonido? ¿el formato es compatible?)',
+      noAudio:'este vídeo no tiene audio', modelLoad:'Cargando el modelo…',
+      modelDl:'Descargando el modelo (solo la primera vez)…', noGpu:'WebGPU no disponible — usando el procesador, será más lento.',
+      transcribing:'Transcribiendo… bloque {0} de {1}', trDone:'Transcripción lista — {0} tramos.',
+      trErr:'No pude transcribir aquí: {0} — pulsa Diagnóstico para ver en qué paso falla.',
+      diagDone:'Diagnóstico listo. Selecciona el bloque de arriba, cópialo y envíalo.',
+      s3:'Elección de fotogramas', lCrit:'Criterio', mScene:'Cuando la imagen cambia (recomendado)',
+      mCount:'Cantidad fija, repartidos', mInt:'Cada N segundos',
+      lSens:'Sensibilidad', lCount:'Cuántos fotogramas', lInt:'Intervalo (segundos)',
+      lMax:'Límite de fotogramas', lQual:'Calidad de imagen',
+      qLow:'Ligera', qMid:'Equilibrada', qHigh:'Alta',
+      sens:['','muy baja','baja','baja+','media-','media','media+','alta','alta+','muy alta'],
+      extractBtn:'Extraer fotogramas', stopBtn:'Parar', resetBtn:'Empezar de nuevo',
+      noteB:'Si el vídeo no se abre:', noteT:'el navegador no decodifica algunos formatos (HEVC, ciertos MKV). En ese caso, conviértelo a MP4 / H.264.',
+      noDur:'Duración del vídeo no disponible.',
+      scanning:'Buscando cambios de imagen… {0} de {1} — {2} fotograma(s) guardado(s)',
+      eta:' — faltan ~{0}', etaS:'{0}s', etaM:'{0} min',
+      extracting:'Extrayendo… {0} de {1}',
+      limitScene:' El barrido se detuvo en {0} al alcanzar el límite de {1} fotogramas — no se cubrió el final del vídeo.',
+      limitInt:' Se detuvo en {0} al alcanzar el límite de {1} fotogramas.',
+      stopping:'Parando…', stopped:' Interrumpido por ti — solo está aquí el tramo ya recorrido.',
+      extracted:'{0} fotogramas extraídos.', reviewNext:' Revísalos abajo antes de generar el PDF.',
+      s4:'Revisión', tKeep:'conservados', tOff:'descartados', keepAll:'Conservar todos', dropDup:'Descartar repetidos',
+      clickHint:'Haz clic en cualquier fotograma para descartarlo o recuperarlo.',
+      dedupN:'{0} fotograma(s) casi idénticos fueron descartados.',
+      dedup0:'No se encontraron fotogramas repetidos — todos muestran algo distinto.',
+      pdfBtn:'Generar PDF', layAuto:'Diseño automático',
+      layFull:'Secuencia, cada fotograma con su habla', layGrid:'Cuadrícula compacta, 6 por página',
+      pdfBuilding:'Montando el PDF…', pdfDone:'PDF generado', pdfDone2:' — {0} fotogramas, {1} páginas.',
+      pTitle:'Análisis de vídeo', pDur:'Duración', pRes:'Resolución', pSize:'Tamaño',
+      pFrames:'Fotogramas en este PDF', pTr:'Transcripción', pTrCues:'{0} tramos con tiempo',
+      pTrPlain:'texto sin marcas de tiempo', pTrNone:'no proporcionada',
+      pNote:'Cada imagen indica el instante exacto en que fue capturada. Los tiempos se cuentan desde el inicio del vídeo.',
+      pFrameOf:'fotograma {0} de {1}', pNoSpeech:'(sin habla en este tramo)',
+      pFramesH:'Fotogramas', pFullTr:'Transcripción completa',
+      s5:'Prompt para la IA',
+      s5sub:'No basta con adjuntar el PDF: el modelo necesita saber cómo está organizado. Este texto hace eso — se genera solo, ajustado a tu vídeo.',
+      s5note:'Adjunta el PDF en la conversación y pega este texto junto a él. Explica al modelo cómo está estructurado el documento — sin eso, suele ignorar los instantes y mezclar lo que vio con lo que se dijo.',
+      promptPh:'Elige un vídeo y extrae los fotogramas — el prompt aparece aquí,\nya con el nombre del archivo, la duración, la cantidad de imágenes\ny si hay transcripción o no.',
+      gSum:'Resumir el contenido', gSteps:'Convertir en paso a paso', gMinutes:'Redactar un acta de reunión',
+      gReview:'Señalar errores e inconsistencias', gFree:'Escribir mi propia petición',
+      freePh:'¿Qué quieres que la IA haga con este vídeo?',
+      copyBtn:'Copiar prompt', copied:'copiado', selected:'seleccionado — pulsa Ctrl+C',
+      goals:{
+        resumo:'Resume el contenido en orden cronológico, destacando los puntos principales y lo que cambia en pantalla a lo largo del vídeo.',
+        passos:'Convierte el contenido en instrucciones numeradas paso a paso. Para cada paso, indica el instante correspondiente y describe lo que aparece en pantalla en ese momento.',
+        ata:'Redacta un acta: temas tratados, decisiones tomadas, pendientes con su responsable cuando se mencione, y próximos pasos. Marca el instante de cada decisión.',
+        revisao:'Señala inconsistencias entre lo que se dice y lo que se muestra, errores visibles, e información que falte o resulte ambigua.'
+      },
+      pr1:'El PDF adjunto se generó a partir del vídeo "{0}"', pr1b:', con una duración de {0}.',
+      pr2:'Contiene {0} imágenes capturadas del vídeo, cada una identificada con el instante exacto en que fue capturada (en formato mm:ss, contado desde el inicio).',
+      pr2cues:' Justo debajo de cada imagen está lo que se dice en ese tramo, y la transcripción completa con marcas de tiempo está en las últimas páginas.',
+      pr2no:' Este documento no tiene transcripción: básate solo en lo que es visible en las imágenes.',
+      pr3:'Al responder:',
+      pr4:'- cita siempre el instante (por ejemplo, 12:34) al mencionar algo que aparece o se dice;',
+      pr5cues:'- deja claro qué afirmas a partir de la imagen y qué proviene del habla;',
+      pr5no:'- describe solo lo que es visible, sin inferir lo que se habría dicho;',
+      pr6:'- las imágenes son muestras, no el vídeo entero: si algo ocurrió entre dos capturas, no puedes saberlo;',
+      pr7:'- cuando la información no esté en el documento, di que no es posible saberlo en vez de suponerlo.',
+      pr8:'Tarea: ', prFree:'(describe aquí lo que quieres)', prNoName:'sin nombre'
+    }
+  };
+
+  const LANGS = ['pt','en','es'];
+  const qLang = new URLSearchParams(location.search).get('lang');
+  let LANG = LANGS.includes(qLang) ? qLang
+           : LANGS.includes((navigator.language || 'pt').slice(0,2).toLowerCase())
+             ? (navigator.language).slice(0,2).toLowerCase() : 'en';
+
+  function t(k, ...a){
+    let v = I18N[LANG][k];
+    if (v === undefined) v = I18N.pt[k];
+    if (typeof v !== 'string') return v;
+    return v.replace(/\{(\d)\}/g, (_, i) => a[i] !== undefined ? a[i] : '');
+  }
+
+  const tr = t;   // alias: no laço de varredura a variável de tempo sombreia t()
+
+  function applyLang(){
+    document.documentElement.lang = LANG;
+    document.title = t('docTitle');
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      el.textContent = t(el.getAttribute('data-i18n'));
+    });
+    $('tr').placeholder = t('trPh');
+    $('goalFree').placeholder = t('freePh');
+    $('sensV').textContent = t('sens')[+$('sens').value];
+    if (!frames.length) $('promptOut').textContent = t('promptPh');
+    else buildPrompt();
+    if (currentFile) showMeta();
+    $('uiLang').value = LANG;
+    $('lang').value = LANG;   // idioma da transcrição acompanha o da interface
+  }
+
 
   const pad2 = n => String(n).padStart(2,'0');
   function fmt(t){
@@ -264,20 +567,25 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       $('playerBox').classList.remove('hide');
       $('auto').disabled = false;
       $('extract').disabled = false;
-      $('meta').innerHTML =
-        `<span>duração <b>${fmt(video.duration)}</b></span>` +
-        `<span>resolução <b>${video.videoWidth}×${video.videoHeight}</b></span>` +
-        `<span>arquivo <b>${(fileSize/1048576).toFixed(0)} MB</b></span>`;
+      showMeta();
       $('count').value = Math.min(80, Math.max(12, Math.round(video.duration/15)));
     };
     video.onerror = () => { $('status').innerHTML =
-      '<span class="err">O navegador não conseguiu abrir este vídeo. Converta para MP4 (H.264) e tente de novo.</span>'; };
+      `<span class="err">${t('videoErr')}</span>`; };
+  }
+
+  function showMeta(){
+    if (!video.videoWidth) return;
+    $('meta').innerHTML =
+      `<span>${t('mDur')} <b>${fmt(video.duration)}</b></span>` +
+      `<span>${t('mRes')} <b>${video.videoWidth}×${video.videoHeight}</b></span>` +
+      `<span>${t('mFile')} <b>${(fileSize/1048576).toFixed(0)} MB</b></span>`;
   }
 
   $('grab').onclick = () => {
     if (!video.videoWidth) return;
     manual.push(video.currentTime);
-    $('grabbed').textContent = manual.length + ' momento(s) marcado(s) — entram sempre, mesmo que a imagem não mude.';
+    $('grabbed').textContent = t('marked', manual.length);
   };
 
   $('mode').onchange = () => {
@@ -286,9 +594,39 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     $('countBox').classList.toggle('hide', m !== 'count');
     $('intBox').classList.toggle('hide', m !== 'interval');
   };
-  const SENS = ['','muito baixa','baixa','baixa+','média-','média','média+','alta','alta+','muito alta'];
-  $('sens').oninput = () => { $('sensV').textContent = SENS[+$('sens').value]; };
+  $('sens').oninput = () => { $('sensV').textContent = t('sens')[+$('sens').value]; };
   $('reset').onclick = () => location.reload();
+
+  $('uiLang').onchange = () => {
+    LANG = $('uiLang').value;
+    const u = new URL(location);
+    u.searchParams.set('lang', LANG);
+    history.replaceState(null, '', u);
+    applyLang();
+  };
+
+  /* vídeo de demonstração: baixa o arquivo e a legenda do próprio site */
+  $('demo').onclick = async () => {
+    $('demo').disabled = true;
+    $('demoMsg').textContent = t('demoLoading');
+    try {
+      // alguns navegadores (Firefox em certos sistemas) não decodificam H.264
+      const h264 = !!document.createElement('video').canPlayType('video/mp4; codecs="avc1.42E01E"');
+      const arq = h264 ? 'exemplo.mp4' : 'exemplo.webm';
+      const tipo = h264 ? 'video/mp4' : 'video/webm';
+      const [vr, sr] = await Promise.all([
+        fetch('demo/' + arq),
+        fetch('demo/exemplo.' + LANG + '.vtt')
+      ]);
+      if (!vr.ok) throw new Error('HTTP ' + vr.status);
+      const blob = await vr.blob();
+      load(new File([blob], 'clipcontext-' + arq, { type: tipo }));
+      if (sr.ok) { $('tr').value = await sr.text(); refreshTr(); }
+      $('demoMsg').innerHTML = `<span class="ok">${t('demoReady')}</span>`;
+    } catch (e) {
+      $('demoMsg').innerHTML = `<span class="err">${t('demoErr')}</span>`;
+    } finally { $('demo').disabled = false; }
+  };
 
   /* ================= transcrição: texto e arquivo ================= */
   function toSec(s){
@@ -329,8 +667,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     const { cues } = parseTranscript($('tr').value);
     const n = $('tr').value.trim().length;
     $('trInfo').innerHTML = !n ? '' : cues.length
-      ? `<span class="ok">${cues.length} trechos com marcação de tempo</span> — cada frame sai junto da fala correspondente.`
-      : 'Texto sem marcação de tempo — vai entrar no PDF como um bloco no final.';
+      ? `<span class="ok">${t('trCues', cues.length)}</span>${t('trCues2')}`
+      : t('trPlain');
   }
   $('tr').oninput = refreshTr;
 
@@ -415,14 +753,14 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
         seen[p.file] = p.progress || 0;
         const v = Object.values(seen);
         prog(v.reduce((x,y) => x+y, 0) / v.length);
-        st('Baixando o modelo (só na primeira vez)…');
+        st(t('modelDl'));
       }
     };
     try {
       return await mod.pipeline('automatic-speech-recognition', modelId,
         { device:'webgpu', dtype:{ encoder_model:'fp32', decoder_model_merged:'q4' }, progress_callback });
     } catch (e) {
-      st('WebGPU indisponível — usando o processador, vai demorar mais.');
+      st(t('noGpu'));
       return await mod.pipeline('automatic-speech-recognition', modelId, { dtype:'q8', progress_callback });
     }
   }
@@ -433,13 +771,13 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     const modelId = $('model').value, lang = $('lang').value;
     $('auto').disabled = true;
     try {
-      st('Extraindo o áudio do vídeo…'); prog(null);
+      st(t('audioExtract')); prog(null);
       let data;
       try { data = await decodeTo16k(currentFile); }
-      catch (e) { throw new Error('não consegui extrair o áudio (o vídeo tem faixa de som? o formato é suportado?)'); }
-      if (!data.length) throw new Error('este vídeo não tem áudio');
+      catch (e) { throw new Error(t('audioFail')); }
+      if (!data.length) throw new Error(t('noAudio'));
 
-      if (pipeId !== modelId) { st('Carregando o modelo…'); prog(0); pipe = await buildPipe(modelId); pipeId = modelId; }
+      if (pipeId !== modelId) { st(t('modelLoad')); prog(0); pipe = await buildPipe(modelId); pipeId = modelId; }
 
       const SR = 16000, WIN = 30 * SR, total = Math.ceil(data.length / WIN), out = [];
       for (let i = 0; i < total; i++) {
@@ -456,15 +794,14 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
           out.push(`${vttTime(a)} --> ${vttTime(Math.max(b, a + 0.4))}\n${t}`);
         });
         prog((i + 1) / total * 100);
-        st(`Transcrevendo… bloco ${i + 1} de ${total}`);
+        st(t('transcribing', i + 1, total));
       }
       $('tr').value = 'WEBVTT\n\n' + out.join('\n\n');
       refreshTr(); prog(100);
-      st(`Transcrição pronta — ${out.length} trechos.`, 'ok');
+      st(t('trDone', out.length), 'ok');
     } catch (e) {
       prog(null);
-      st('Não consegui transcrever aqui: ' + (e && e.message ? e.message : e) +
-         ' — clique em Diagnóstico para ver em qual etapa trava, ou use o Google Drive.', 'err');
+      st(t('trErr', (e && e.message ? e.message : e)), 'err');
     } finally { $('auto').disabled = false; }
   };
 
@@ -506,7 +843,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     const b = await findWasmBase();
     say('wasm em uso   : ' + (b || 'nenhum respondeu — usando o padrão da biblioteca'));
     say('--- fim ---');
-    st('Diagnóstico pronto. Selecione o bloco acima, copie e me envie.', 'ok');
+    st(t('diagDone'), 'ok');
   };
 
   /* ================= extração de frames ================= */
@@ -549,7 +886,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
 
   $('extract').onclick = async () => {
     const dur = video.duration;
-    if (!dur || !isFinite(dur)) { $('status').innerHTML = '<span class="err">Duração do vídeo indisponível.</span>'; return; }
+    if (!dur || !isFinite(dur)) { $('status').innerHTML = `<span class="err">${t('noDur')}</span>`; return; }
     const q = parseFloat($('quality').value), mode = $('mode').value;
     const maxf = Math.max(1, +$('maxf').value || 60);
     const px = 900;
@@ -565,19 +902,21 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     const eta = (done, total) => {
       if (done < 3) return '';
       const left = (performance.now() - t0) / done * (total - done) / 1000;
-      return left < 5 ? '' : ` — faltam ~${left < 90 ? Math.ceil(left) + 's' : Math.ceil(left/60) + ' min'}`;
+      return left < 5 ? '' : t('eta', left < 90 ? t('etaS', Math.ceil(left)) : t('etaM', Math.ceil(left/60)));
     };
     video.pause();
 
     if (mode === 'scene') {
       // varre em passos curtos e só guarda quando a imagem muda o bastante
-      const thr = [0,26,20,15,11,8,6,4.5,3,2][+$('sens').value];
+      // Calibrado com um vídeo de slides real: trocas de tela em documentos de fundo
+      // claro dão diferença em torno de 7,6 — o padrão anterior (8) as perdia por pouco.
+      const thr = [0,26,19,13,9,5.5,4,2.8,1.8,1][+$('sens').value];
       const stepS = Math.max(0.5, dur / 700);
       let prev = null, kept = 0;
       const total = Math.ceil(dur / stepS);
       for (let i = 0; i < total && kept < maxf && !stop; i++) {
-        const t = i * stepS;
-        await seek(t);
+        const tt = i * stepS;
+        await seek(tt);
         await new Promise(r => requestAnimationFrame(r));
         const sig = signature();
         const d = diff(prev, sig);
@@ -586,10 +925,9 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
           prev = sig; kept++;
         }
         $('bar').style.width = ((i+1)/total*100) + '%';
-        $('status').textContent = `Procurando mudanças de imagem… ${fmt(t)} de ${fmt(dur)} — ` +
-          `${kept} frame(s) guardado(s)${eta(i+1, total)}`;
-        if (kept >= maxf && t < dur - stepS)
-          limited = ` A varredura parou em ${fmt(t)} por atingir o limite de ${maxf} frames — o fim do vídeo não foi coberto.`;
+        $('status').textContent = tr('scanning', fmt(tt), fmt(dur), kept) + eta(i+1, total);
+        if (kept >= maxf && tt < dur - stepS)
+          limited = tr('limitScene', fmt(tt), maxf);
       }
     } else {
       let times = [];
@@ -605,34 +943,33 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
         await new Promise(r => requestAnimationFrame(r));
         frames.push({ t: video.currentTime, img: snap(px, q), keep: true, sig: signature() });
         $('bar').style.width = ((i+1)/times.length*100) + '%';
-        $('status').textContent = `Extraindo… ${i+1} de ${times.length}${eta(i+1, times.length)}`;
+        $('status').textContent = tr('extracting', i+1, times.length) + eta(i+1, times.length);
       }
       if (mode === 'interval' && times.length >= maxf && times[times.length-1] < dur - 1)
-        limited = ` Parou em ${fmt(times[times.length-1])} por atingir o limite de ${maxf} frames.`;
+        limited = tr('limitInt', fmt(times[times.length-1]), maxf);
     }
 
     // momentos marcados à mão entram sempre
-    for (const t of manual) {
-      await seek(t);
+    for (const mt of manual) {
+      await seek(mt);
       await new Promise(r => requestAnimationFrame(r));
       frames.push({ t: video.currentTime, img: snap(px, q), keep: true, manual: true });
     }
 
     frames.sort((a,b) => a.t - b.t);
-    const parou = stop ? ' <span class="err">Interrompido por você — só o trecho já varrido está aqui.</span>' : '';
-    $('status').innerHTML = `<span class="ok">${frames.length} frames extraídos.</span> Revise abaixo antes de gerar o PDF.` +
+    const parou = stop ? ` <span class="err">${tr('stopped')}</span>` : '';
+    $('status').innerHTML = `<span class="ok">${tr('extracted', frames.length)}</span>${tr('reviewNext')}` +
       parou + (limited ? `<span class="err">${limited}</span>` : '');
     $('extract').disabled = false; $('go').disabled = false;
     $('cancel').classList.add('hide');
     stop = false;
     $('prevCard').classList.remove('hide');
-    $('promptCard').classList.remove('hide');
     render();
   };
 
   $('cancel').onclick = () => {
     stop = true;
-    $('status').textContent = 'Parando…';
+    $('status').textContent = tr('stopping');
   };
 
   /* ================= revisão ================= */
@@ -667,48 +1004,37 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       else prev = f.sig;
     });
     render();
-    $('status').textContent = n ? `${n} frame(s) quase idênticos foram descartados.`
-                                : 'Nenhum frame repetido encontrado — todos mostram algo diferente.';
+    $('status').textContent = n ? tr('dedupN', n) : tr('dedup0');
   };
 
   /* ================= prompt para a IA ================= */
-  const GOALS = {
-    resumo: 'Resuma o conteúdo em ordem cronológica, destacando os pontos principais e o que muda na tela ao longo do vídeo.',
-    passos: 'Transforme o conteúdo em um passo a passo numerado. Para cada passo, informe o instante correspondente e descreva o que aparece na tela naquele momento.',
-    ata: 'Produza uma ata: assuntos tratados, decisões tomadas, pendências com o respectivo responsável quando mencionado, e próximos passos. Marque o instante de cada decisão.',
-    revisao: 'Aponte inconsistências entre o que é dito e o que aparece na tela, erros visíveis, e informações que ficaram faltando ou ambíguas.'
-  };
-
   function buildPrompt(){
     const keep = frames.filter(f => f.keep);
     const { cues } = parseTranscript($('tr').value);
     const g = $('goal').value;
     const tarefa = g === 'livre'
-      ? ($('goalFree').value.trim() || '(descreva aqui o que você quer)')
-      : GOALS[g];
+      ? ($('goalFree').value.trim() || t('prFree'))
+      : t('goals')[g];
 
     const linhas = [
-      `O PDF em anexo foi gerado a partir do vídeo "${fileName || 'sem nome'}"` +
-        (video.duration ? `, com duração de ${fmt(video.duration)}.` : '.'),
+      t('pr1', fileName || t('prNoName')) + (video.duration ? t('pr1b', fmt(video.duration)) : '.'),
       '',
-      `Ele contém ${keep.length} imagens capturadas do vídeo, cada uma identificada pelo instante exato em que ` +
-      `foi capturada (no formato mm:ss, contado a partir do início).` +
-      (cues.length
-        ? ' Logo abaixo de cada imagem está o que é falado naquele trecho, e a transcrição completa com marcações de tempo está nas últimas páginas.'
-        : ' Este documento não tem transcrição: baseie-se apenas no que é visível nas imagens.'),
+      t('pr2', keep.length) + (cues.length ? t('pr2cues') : t('pr2no')),
       '',
-      'Ao responder:',
-      '- cite sempre o instante (por exemplo, 12:34) ao mencionar algo que aparece ou é dito;',
-      cues.length
-        ? '- deixe claro o que você está afirmando com base na imagem e o que vem da fala;'
-        : '- descreva apenas o que é visível, sem inferir o que teria sido dito;',
-      '- as imagens são amostras, não o vídeo inteiro: se algo aconteceu entre duas capturas, você não tem como saber;',
-      '- quando a informação não estiver no documento, diga que não é possível saber em vez de supor.',
+      t('pr3'),
+      t('pr4'),
+      cues.length ? t('pr5cues') : t('pr5no'),
+      t('pr6'),
+      t('pr7'),
       '',
-      'Tarefa: ' + tarefa
+      t('pr8') + tarefa
     ];
     $('promptOut').textContent = linhas.join('\n');
+    $('copyPrompt').disabled = false;
   }
+
+  $('copyPrompt').disabled = true;
+  applyLang();
 
   $('goal').onchange = () => {
     $('goalFree').classList.toggle('hide', $('goal').value !== 'livre');
@@ -720,12 +1046,12 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     const txt = $('promptOut').textContent;
     try {
       await navigator.clipboard.writeText(txt);
-      $('copyMsg').innerHTML = '<span class="ok">copiado</span>';
+      $('copyMsg').innerHTML = `<span class="ok">${t('copied')}</span>`;
     } catch (e) {
       const r = document.createRange();
       r.selectNodeContents($('promptOut'));
       const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r);
-      $('copyMsg').textContent = 'selecionado — use Ctrl+C';
+      $('copyMsg').textContent = t('selected');
     }
     setTimeout(() => { $('copyMsg').textContent = ''; }, 2500);
   };
@@ -740,7 +1066,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     if (layout === 'auto') layout = cues.length ? 'full' : 'grid';
 
     $('go').disabled = true;
-    $('pdfStatus').textContent = 'Montando o PDF…';
+    $('pdfStatus').textContent = t('pdfBuilding');
     await new Promise(r => setTimeout(r, 40));
 
     const { jsPDF } = window.jspdf;
@@ -756,17 +1082,17 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       doc.setTextColor(30);
     };
 
-    doc.setFont('helvetica','bold').setFontSize(20).text('Análise de vídeo', M, 32);
+    doc.setFont('helvetica','bold').setFontSize(20).text(t('pTitle'), M, 32);
     doc.setFont('helvetica','normal').setFontSize(11).setTextColor(90);
     doc.text(doc.splitTextToSize(fileName, CW), M, 42);
     doc.setDrawColor(215).line(M, 52, PW - M, 52);
     const info = [
-      ['Duração', fmt(dur)],
-      ['Resolução', video.videoWidth + ' x ' + video.videoHeight],
-      ['Tamanho', (fileSize/1048576).toFixed(1) + ' MB'],
-      ['Frames neste PDF', String(kept.length)],
-      ['Transcrição', cues.length ? cues.length + ' trechos com tempo'
-                     : (plain ? 'texto sem marcação de tempo' : 'não fornecida')]
+      [t('pDur'), fmt(dur)],
+      [t('pRes'), video.videoWidth + ' x ' + video.videoHeight],
+      [t('pSize'), (fileSize/1048576).toFixed(1) + ' MB'],
+      [t('pFrames'), String(kept.length)],
+      [t('pTr'), cues.length ? t('pTrCues', cues.length)
+                 : (plain ? t('pTrPlain') : t('pTrNone'))]
     ];
     let y = 62;
     info.forEach(([k,v]) => {
@@ -775,8 +1101,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       doc.setFont('helvetica','normal'); y += 8;
     });
     doc.setTextColor(150).setFontSize(8.5);
-    doc.text(doc.splitTextToSize(
-      'Cada imagem traz o instante exato em que foi capturada. Os tempos referem-se ao início do vídeo.', CW), M, y + 8);
+    doc.text(doc.splitTextToSize(t('pNote'), CW), M, y + 8);
     doc.setTextColor(30);
     foot();
 
@@ -796,14 +1121,14 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
           doc.setFont('helvetica','normal').setFontSize(9.3);
           const said = cues.filter(c => c.b > f.t && c.a < nextT)
             .map(c => (c.a < f.t - 0.2 ? '... ' : '') + c.t).join(' ');
-          lines = doc.splitTextToSize(said || '(sem fala neste trecho)', CW);
+          lines = doc.splitTextToSize(said || t('pNoSpeech'), CW);
           if (lines.length > MAXL) lines = lines.slice(0, MAXL).concat('[...]');
         }
         const blockH = 6 + ih0 + (cues.length ? 6 + lines.length * LH : 0) + 9;
         if (yy + blockH > PH - 16) newPage();
         doc.setFont('helvetica','bold').setFontSize(11).setTextColor(25).text(fmt(f.t), M, yy + 3);
         doc.setFont('helvetica','normal').setFontSize(8).setTextColor(150)
-           .text(`frame ${i+1} de ${kept.length}`, PW - M, yy + 3, { align:'right' });
+           .text(t('pFrameOf', i+1, kept.length), PW - M, yy + 3, { align:'right' });
         yy += 6;
         doc.addImage(f.img.url, 'JPEG', ix, yy, iw, ih0);
         yy += ih0;
@@ -822,7 +1147,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       const ihG = Math.min(cellW * arG, 74), iwG = ihG / arG;
       let col = 0, top = M + 6, rowH = 0;
       doc.addPage();
-      doc.setFont('helvetica','bold').setFontSize(12).text('Frames', M, M);
+      doc.setFont('helvetica','bold').setFontSize(12).text(t('pFramesH'), M, M);
       kept.forEach(f => {
         const blockH = ihG + 7;
         if (col === 0 && top + blockH > PH - 18) { foot(); doc.addPage(); top = M; }
@@ -838,7 +1163,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
 
     if (plain) {
       doc.addPage();
-      doc.setFont('helvetica','bold').setFontSize(13).text('Transcrição completa', M, M + 4);
+      doc.setFont('helvetica','bold').setFontSize(13).text(t('pFullTr'), M, M + 4);
       let ty = M + 14;
       doc.setFont('helvetica','normal').setFontSize(9.5);
       const items = cues.length
@@ -852,7 +1177,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     }
 
     doc.save(`analise-${base}.pdf`);
-    $('pdfStatus').innerHTML = `<span class="ok">PDF gerado</span> — ${kept.length} frames, ${page} páginas.`;
+    $('pdfStatus').innerHTML = `<span class="ok">${t('pdfDone')}</span>${t('pdfDone2', kept.length, page)}`;
     $('go').disabled = false;
   };
 })();

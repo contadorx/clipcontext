@@ -16,6 +16,8 @@ Modelos de texto não assistem vídeo. O que eles leem bem é: imagens dos momen
 - **Deixa revisar antes de gerar.** Grade de miniaturas, clique para descartar, botão para remover quase-duplicados, e estimativa do tamanho do PDF em tempo real.
 - **Monta o prompt.** No fim do fluxo, gera o texto que explica ao modelo como o PDF está organizado — instantes, o que é imagem e o que é fala, e o aviso de que os frames são amostras. Com quatro objetivos prontos ou pedido livre.
 - **Dá para interromper.** A varredura mostra previsão de término e pode ser parada a qualquer momento, aproveitando o que já foi extraído.
+- **Três idiomas.** Português, inglês e espanhol, incluindo o texto do prompt e do PDF. O idioma vem de `?lang=pt|en|es` ou do navegador.
+- **Vídeo de exemplo** em `public/demo/`, com legenda nos três idiomas, para experimentar sem arquivo próprio.
 
 ## Estrutura
 
@@ -31,8 +33,17 @@ src/template.html        fonte da ferramenta; contém o marcador /*__JSPDF__*/
 vendor/jspdf.umd.min.js  cópia da biblioteca usada no build offline
 brand/                   logotipos, favicon e paleta
 build.py                 gera public/app.html e o build offline
+public/support.js        bloco de apoio voluntário (preencha os identificadores no topo)
 LANCAMENTO.md            textos de divulgação, palavras-chave e posicionamento
+ARQUITETURA-PAGO.md      o que é preciso para cobrar: custos, preços e ordem de construção
 ```
+
+## Apoio voluntário
+
+O bloco de apoio nasce **desligado**. Abra `public/support.js`, preencha só os identificadores que
+você usa (GitHub Sponsors, Buy Me a Coffee, chave Pix) e ele aparece sozinho na landing e na página de
+preços, nos três idiomas. Se todos ficarem vazios, o bloco não é renderizado e nenhuma página fica com
+buraco. Nada nele destrava funcionalidade — é voluntário de verdade.
 
 As páginas institucionais são estáticas e podem ser editadas direto. Só `public/app.html` é gerado.
 
@@ -64,12 +75,13 @@ Um detalhe que só apareceu por causa desse teste: comparar os frames em tons de
 - **A transcrição automática não pode ser interrompida** depois de iniciada (a varredura de frames pode).
 - **Formatos que o navegador não decodifica** (HEVC, alguns MKV) simplesmente não abrem. Resolver isso exige conversão no servidor.
 - **Estado não é salvo**: atualizar a página perde tudo.
-- **Interface só em português** e não adaptada para celular.
+- **A landing e as páginas institucionais ainda são só em português** — a ferramenta já é multilíngue.
+- **Não adaptada para celular.**
 - O modelo `base` do Whisper é modesto em português; o `small` é bem melhor e bem mais pesado.
 
 ## Roadmap
 
-1. Internacionalização (inglês primeiro)
+1. Traduzir também a landing e as páginas institucionais (hoje só a ferramenta é multilíngue)
 2. Salvar o estado — hoje atualizar a página perde tudo
 3. Cancelamento também na transcrição automática
 4. Camada paga no servidor: formatos exóticos, vídeos longos, transcrição de qualidade superior, lote
