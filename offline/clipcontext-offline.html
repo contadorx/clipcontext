@@ -233,6 +233,9 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       <span class="tag">PDF ~<b id="size">0</b> MB</span>
       <button class="ghost sm" id="allOn" data-i18n="keepAll"></button>
       <button class="ghost sm" id="dedup" data-i18n="dropDup"></button>
+      <button class="ghost sm" id="mute" data-i18n="dropQuiet"></button>
+      <button class="ghost sm" id="ocr" data-i18n="ocrBtn"></button>
+      <button class="ghost sm hide" id="ocrStop" data-i18n="stopBtn"></button>
     </div>
     <p class="status" style="margin:10px 0 0" data-i18n="clickHint"></p>
     <div class="thumbs" id="thumbs"></div>
@@ -243,6 +246,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
         <option value="full" data-i18n="layFull"></option>
         <option value="grid" data-i18n="layGrid"></option>
       </select>
+      <button class="ghost" id="json" data-i18n="jsonBtn"></button>
       <span class="status" id="pdfStatus"></span>
     </div>
   </div>
@@ -750,7 +754,22 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       limitInt:' Parou em {0} por atingir o limite de {1} frames.',
       stopping:'Parando…', stopped:' Interrompido por você — só o trecho já varrido está aqui.',
       extracted:'{0} frames extraídos.', reviewNext:' Revise abaixo antes de gerar o PDF.',
-      s4:'Revisão', tKeep:'mantidos', tOff:'descartados', keepAll:'Manter todos', dropDup:'Descartar repetidos',
+      s4:'Revisão',
+      dropQuiet:'Descartar sem fala',
+      ocrBtn:'Ler o texto da tela',
+      ocrLoad:'Carregando o leitor de texto (só na primeira vez)…',
+      ocrRun:'Lendo o texto das imagens: {0}% ({1} de {2}){3}',
+      ocrDone:'Texto lido em {0} de {1} frames. Vai junto no PDF e no JSON.',
+      ocrNone:'Nenhum texto legível foi encontrado nas imagens.',
+      ocrErr:'Não consegui carregar o leitor de texto: {0}',
+      ocrStopped:' Interrompido — só o que já foi lido entra no PDF.',
+      pOcr:'TEXTO NA TELA',
+      jsonBtn:'Baixar JSON',
+      quietN:'{0} frame(s) sem fala foram descartados.',
+      quiet0:'Todos os frames têm fala no trecho correspondente.',
+      quietAudio:'Analisando o áudio para achar os trechos sem fala…',
+      quietNone:'Não há transcrição nem áudio utilizável para identificar silêncio.',
+      pIndex:'Índice do vídeo', pIndexSub:'Cada linha é um instante em que a imagem mudou.', tKeep:'mantidos', tOff:'descartados', keepAll:'Manter todos', dropDup:'Descartar repetidos',
       clickHint:'Clique em qualquer frame para descartar ou trazer de volta.',
       dedupN:'{0} frame(s) quase idênticos foram descartados.',
       dedup0:'Nenhum frame repetido encontrado — todos mostram algo diferente.',
@@ -781,6 +800,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       pr2:'Ele contém {0} imagens capturadas do vídeo, cada uma identificada pelo instante exato em que foi capturada (no formato mm:ss, contado a partir do início).',
       pr2cues:' Logo abaixo de cada imagem está o que é falado naquele trecho, e a transcrição completa com marcações de tempo está nas últimas páginas.',
       pr2no:' Este documento não tem transcrição: baseie-se apenas no que é visível nas imagens.',
+      pr2ocr:'Sob a marcação TEXTO NA TELA está o que foi lido automaticamente da imagem, que pode conter erros de leitura.',
       pr3:'Ao responder:',
       pr4:'- cite sempre o instante (por exemplo, 12:34) ao mencionar algo que aparece ou é dito;',
       pr5cues:'- deixe claro o que você está afirmando com base na imagem e o que vem da fala;',
@@ -851,7 +871,22 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       limitInt:' Stopped at {0} after reaching the {1}-frame limit.',
       stopping:'Stopping…', stopped:' Stopped by you — only the part scanned so far is here.',
       extracted:'{0} frames extracted.', reviewNext:' Review them below before generating the PDF.',
-      s4:'Review', tKeep:'kept', tOff:'discarded', keepAll:'Keep all', dropDup:'Discard duplicates',
+      s4:'Review',
+      dropQuiet:'Discard silent ones',
+      ocrBtn:'Read the on-screen text',
+      ocrLoad:'Loading the text reader (first time only)…',
+      ocrRun:'Reading text from the images: {0}% ({1} of {2}){3}',
+      ocrDone:'Text read from {0} of {1} frames. It goes into the PDF and the JSON.',
+      ocrNone:'No readable text was found in the images.',
+      ocrErr:'Could not load the text reader: {0}',
+      ocrStopped:' Stopped — only what was already read goes into the PDF.',
+      pOcr:'TEXT ON SCREEN',
+      jsonBtn:'Download JSON',
+      quietN:'{0} frame(s) with no speech were discarded.',
+      quiet0:'Every frame has speech in its interval.',
+      quietAudio:'Analysing the audio to find the silent stretches…',
+      quietNone:'There is no transcript and no usable audio to detect silence.',
+      pIndex:'Video index', pIndexSub:'Each line is a moment where the image changed.', tKeep:'kept', tOff:'discarded', keepAll:'Keep all', dropDup:'Discard duplicates',
       clickHint:'Click any frame to discard it or bring it back.',
       dedupN:'{0} near-identical frame(s) were discarded.',
       dedup0:'No repeated frames found — every one shows something different.',
@@ -882,6 +917,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       pr2:'It contains {0} images captured from the video, each labelled with the exact moment it was captured (in mm:ss, counted from the start).',
       pr2cues:' Directly below each image is what is said at that point, and the full timestamped transcript is on the last pages.',
       pr2no:' This document has no transcript: rely only on what is visible in the images.',
+      pr2ocr:'Under the TEXT ON SCREEN marker is what was read automatically from the image, which may contain reading errors.',
       pr3:'When you answer:',
       pr4:'- always cite the timestamp (for example, 12:34) when referring to something shown or said;',
       pr5cues:'- make clear what you are asserting from the image and what comes from the speech;',
@@ -945,7 +981,22 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       limitInt:' Se detuvo en {0} al alcanzar el límite de {1} fotogramas.',
       stopping:'Parando…', stopped:' Interrumpido por ti — solo está aquí el tramo ya recorrido.',
       extracted:'{0} fotogramas extraídos.', reviewNext:' Revísalos abajo antes de generar el PDF.',
-      s4:'Revisión', tKeep:'conservados', tOff:'descartados', keepAll:'Conservar todos', dropDup:'Descartar repetidos',
+      s4:'Revisión',
+      dropQuiet:'Descartar sin habla',
+      ocrBtn:'Leer el texto de la pantalla',
+      ocrLoad:'Cargando el lector de texto (solo la primera vez)…',
+      ocrRun:'Leyendo el texto de las imágenes: {0}% ({1} de {2}){3}',
+      ocrDone:'Texto leído en {0} de {1} fotogramas. Va en el PDF y en el JSON.',
+      ocrNone:'No se encontró texto legible en las imágenes.',
+      ocrErr:'No pude cargar el lector de texto: {0}',
+      ocrStopped:' Interrumpido — solo lo ya leído entra en el PDF.',
+      pOcr:'TEXTO EN PANTALLA',
+      jsonBtn:'Descargar JSON',
+      quietN:'{0} fotograma(s) sin habla fueron descartados.',
+      quiet0:'Todos los fotogramas tienen habla en su tramo.',
+      quietAudio:'Analizando el audio para encontrar los tramos en silencio…',
+      quietNone:'No hay transcripción ni audio utilizable para detectar el silencio.',
+      pIndex:'Índice del vídeo', pIndexSub:'Cada línea es un instante en que la imagen cambió.', tKeep:'conservados', tOff:'descartados', keepAll:'Conservar todos', dropDup:'Descartar repetidos',
       clickHint:'Haz clic en cualquier fotograma para descartarlo o recuperarlo.',
       dedupN:'{0} fotograma(s) casi idénticos fueron descartados.',
       dedup0:'No se encontraron fotogramas repetidos — todos muestran algo distinto.',
@@ -976,6 +1027,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       pr2:'Contiene {0} imágenes capturadas del vídeo, cada una identificada con el instante exacto en que fue capturada (en formato mm:ss, contado desde el inicio).',
       pr2cues:' Justo debajo de cada imagen está lo que se dice en ese tramo, y la transcripción completa con marcas de tiempo está en las últimas páginas.',
       pr2no:' Este documento no tiene transcripción: básate solo en lo que es visible en las imágenes.',
+      pr2ocr:'Bajo la marca TEXTO EN PANTALLA está lo que se leyó automáticamente de la imagen, que puede contener errores de lectura.',
       pr3:'Al responder:',
       pr4:'- cita siempre el instante (por ejemplo, 12:34) al mencionar algo que aparece o se dice;',
       pr5cues:'- deja claro qué afirmas a partir de la imagen y qué proviene del habla;',
@@ -1707,6 +1759,163 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     $('status').textContent = n ? tr('dedupN', n) : tr('dedup0');
   };
 
+  /* Descarta os frames cujo trecho não tem fala.
+     Com transcrição, é instantâneo: basta olhar se algum trecho cobre a janela.
+     Sem ela, decodifica o áudio e mede a energia — silêncio é energia baixa. */
+  $('mute').onclick = async () => {
+    if (!frames.length) return;
+    const { cues } = parseTranscript($('tr').value);
+    const dur = video.duration;
+    const janelas = frames.map((f, i) => [f.t, i + 1 < frames.length ? frames[i+1].t : dur + 0.001]);
+    let temFala;
+
+    if (cues.length) {
+      temFala = janelas.map(([a, b]) => cues.some(c => c.b > a && c.a < b));
+    } else if (currentFile) {
+      $('mute').disabled = true;
+      $('status').textContent = t('quietAudio');
+      try {
+        const dados = await decodeTo16k(currentFile);
+        const SR = 16000;
+        // energia média de cada janela, comparada ao nível geral do áudio
+        const rms = ([a, b]) => {
+          const i0 = Math.max(0, Math.floor(a*SR)), i1 = Math.min(dados.length, Math.floor(b*SR));
+          if (i1 <= i0) return 0;
+          let soma = 0;
+          const passo = Math.max(1, Math.floor((i1-i0)/4000));   // amostra, não precisa ser exato
+          let n = 0;
+          for (let i = i0; i < i1; i += passo) { soma += dados[i]*dados[i]; n++; }
+          return Math.sqrt(soma / Math.max(1, n));
+        };
+        const vals = janelas.map(rms);
+        const pico = Math.max(...vals);
+        temFala = vals.map(v => v > pico * 0.12);              // 12% do pico: fala fica bem acima
+      } catch (e) {
+        $('status').innerHTML = `<span class="err">${t('quietNone')}</span>`;
+        $('mute').disabled = false;
+        return;
+      }
+      $('mute').disabled = false;
+    } else {
+      $('status').innerHTML = `<span class="err">${t('quietNone')}</span>`;
+      return;
+    }
+
+    let n = 0;
+    frames.forEach((f, i) => { if (!temFala[i] && f.keep) { f.keep = false; n++; } });
+    render();
+    $('status').textContent = n ? t('quietN', n) : t('quiet0');
+  };
+
+  /* ================= ler o texto da tela (OCR) =================
+     Tudo do jsdelivr, que é a única rede que já provamos alcançar. Se algum
+     endereço falhar, a mensagem diz qual — como no caso do runtime da transcrição. */
+  const TESS = 'https://cdn.jsdelivr.net/npm/tesseract.js@6.1.2/dist/';
+  const TESS_CORE = 'https://cdn.jsdelivr.net/npm/tesseract.js-core@6.1.2';
+  const TESS_LANG = 'https://cdn.jsdelivr.net/gh/naptha/tessdata@main/4.0.0';
+  const OCR_LANG = { pt: 'por', en: 'eng', es: 'spa' };
+  let ocrParar = false;
+
+  function carregarScript(src){
+    return new Promise((ok, erro) => {
+      const el = document.createElement('script');
+      el.src = src;
+      el.onload = ok;
+      el.onerror = () => erro(new Error('não carregou ' + src));
+      document.head.appendChild(el);
+    });
+  }
+
+  $('ocrStop').onclick = () => { ocrParar = true; };
+
+  $('ocr').onclick = async () => {
+    const kept = frames.filter(f => f.keep);
+    if (!kept.length) return;
+    $('ocr').disabled = true;
+    ocrParar = false;
+    trabalhando(true);
+    let worker = null;
+    try {
+      if (!window.Tesseract) {
+        $('status').textContent = t('ocrLoad');
+        await carregarScript(TESS + 'tesseract.min.js');
+      }
+      if (!window.Tesseract) throw new Error('biblioteca não ficou disponível');
+
+      $('status').textContent = t('ocrLoad');
+      worker = await window.Tesseract.createWorker(OCR_LANG[LANG] || 'eng', 1, {
+        workerPath: TESS + 'worker.min.js',
+        corePath: TESS_CORE,
+        langPath: TESS_LANG
+      });
+
+      $('ocrStop').classList.remove('hide');
+      const inicio = performance.now();
+      let comTexto = 0, feitos = 0;
+
+      for (const f of kept) {
+        if (ocrParar) break;
+        const r = await worker.recognize(f.img.url);
+        const txt = ((r && r.data && r.data.text) || '').replace(/\s+/g, ' ').trim();
+        f.ocr = txt.length > 3 ? txt : '';
+        if (f.ocr) comTexto++;
+        feitos++;
+        const pct = feitos / kept.length * 100;
+        prog(pct);
+        const resta = (performance.now() - inicio) / feitos * (kept.length - feitos) / 1000;
+        const falta = (feitos >= 2 && resta > 3) ? t('etaTr', duracao(resta)) : '';
+        $('status').textContent = t('ocrRun', pct.toFixed(0), feitos, kept.length, falta);
+      }
+
+      $('status').innerHTML = comTexto
+        ? `<span class="ok">${t('ocrDone', comTexto, feitos)}</span>` + (ocrParar ? t('ocrStopped') : '')
+        : t('ocrNone');
+      buildPrompt();
+    } catch (e) {
+      $('status').innerHTML = `<span class="err">${t('ocrErr', (e && e.message) || e)}</span>`;
+    } finally {
+      if (worker) { try { await worker.terminate(); } catch (e) {} }
+      $('ocr').disabled = false;
+      $('ocrStop').classList.add('hide');
+      prog(null);
+      trabalhando(false);
+    }
+  };
+
+  /* ================= exportar JSON =================
+     Formato pensado para outro programa consumir: instantes, transcrição e as
+     imagens embutidas em base64. É o mesmo conteúdo do PDF, legível por máquina. */
+  $('json').onclick = () => {
+    const kept = frames.filter(f => f.keep);
+    if (!kept.length) return;
+    const { cues, plain } = parseTranscript($('tr').value);
+    const dados = {
+      gerador: 'ClipContext',
+      video: {
+        arquivo: fileName,
+        duracaoSegundos: +video.duration.toFixed(2),
+        largura: video.videoWidth,
+        altura: video.videoHeight,
+        tamanhoBytes: fileSize
+      },
+      frames: kept.map((f, i) => ({
+        indice: i + 1,
+        segundos: +f.t.toFixed(2),
+        tempo: fmt(f.t),
+        largura: f.img.w,
+        altura: f.img.h,
+        textoNaTela: f.ocr || '',
+        imagemBase64: f.img.url
+      })),
+      transcricao: cues.length
+        ? cues.map(c => ({ inicio: +c.a.toFixed(2), fim: +c.b.toFixed(2),
+                           tempo: fmt(c.a), texto: c.t }))
+        : (plain ? [{ inicio: null, fim: null, tempo: null, texto: plain }] : []),
+      observacao: 'Os frames sao amostras do video: momentos entre duas capturas nao estao aqui.'
+    };
+    baixar(JSON.stringify(dados, null, 2), 'json');
+  };
+
   /* ================= prompt para a IA ================= */
   function buildPrompt(){
     const keep = frames.filter(f => f.keep);
@@ -1719,7 +1928,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     const linhas = [
       t('pr1', fileName || t('prNoName')) + (video.duration ? t('pr1b', fmt(video.duration)) : '.'),
       '',
-      t('pr2', keep.length) + (cues.length ? t('pr2cues') : t('pr2no')),
+      t('pr2', keep.length) + (cues.length ? t('pr2cues') : t('pr2no')) +
+        (keep.some(f => f.ocr) ? ' ' + t('pr2ocr') : ''),
       '',
       t('pr3'),
       t('pr4'),
@@ -1805,6 +2015,29 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     doc.setTextColor(30);
     foot();
 
+    // índice: mapa do vídeo antes das imagens, para o modelo se situar
+    if (kept.length > 2) {
+      doc.addPage();
+      doc.setFont('helvetica','bold').setFontSize(13).setTextColor(25).text(t('pIndex'), M, M + 4);
+      doc.setFont('helvetica','normal').setFontSize(8.5).setTextColor(150);
+      doc.text(doc.splitTextToSize(t('pIndexSub'), CW), M, M + 11);
+      let iy = M + 20;
+      doc.setFontSize(9.5);
+      kept.forEach((f, i) => {
+        if (iy > PH - 20) { foot(); doc.addPage(); iy = M + 4; }
+        const nextT = i+1 < kept.length ? kept[i+1].t : dur + 0.001;
+        let resumo = '';
+        if (cues.length) {
+          const fala = cues.filter(c => c.b > f.t && c.a < nextT).map(c => c.t).join(' ');
+          resumo = fala.length > 88 ? fala.slice(0, 88).replace(/\s\S*$/, '') + '…' : fala;
+        }
+        doc.setTextColor(120).text(fmt(f.t), M, iy);
+        doc.setTextColor(45).text(resumo || '—', M + 18, iy);
+        iy += 5.6;
+      });
+      foot();
+    }
+
     if (layout === 'full') {
       const LH = 4.6, MAXL = 9, MAXIH = 110;
       const ar = kept[0].img.h / kept[0].img.w;
@@ -1824,7 +2057,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
           lines = doc.splitTextToSize(said || t('pNoSpeech'), CW);
           if (lines.length > MAXL) lines = lines.slice(0, MAXL).concat('[...]');
         }
-        const blockH = 6 + ih0 + (cues.length ? 6 + lines.length * LH : 0) + 9;
+        const ocrH = f.ocr ? 9 + Math.min(6, doc.splitTextToSize(f.ocr, CW).length) * 3.9 : 0;
+        const blockH = 6 + ih0 + (cues.length ? 6 + lines.length * LH : 0) + ocrH + 9;
         if (yy + blockH > PH - 16) newPage();
         doc.setFont('helvetica','bold').setFontSize(11).setTextColor(25).text(fmt(f.t), M, yy + 3);
         doc.setFont('helvetica','normal').setFontSize(8).setTextColor(150)
@@ -1837,6 +2071,16 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
           doc.setFontSize(9.3).setTextColor(55);
           doc.text(lines, M, yy, { lineHeightFactor: 1.32 });
           yy += lines.length * LH;
+        }
+        if (f.ocr) {
+          yy += 5;
+          doc.setFont('helvetica','normal').setFontSize(7.6).setTextColor(140);
+          doc.text(t('pOcr'), M, yy);
+          yy += 4;
+          doc.setFontSize(8.4).setTextColor(95);
+          const oc = doc.splitTextToSize(f.ocr, CW).slice(0, 6);
+          doc.text(oc, M, yy, { lineHeightFactor: 1.3 });
+          yy += oc.length * 3.9;
         }
         yy += 9; doc.setTextColor(30);
       }

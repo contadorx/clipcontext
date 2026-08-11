@@ -21,7 +21,12 @@ Modelos de texto não assistem vídeo. O que eles leem bem é: imagens dos momen
   detecção de cena quanto a transcrição sem arquivo próprio.
 - **Grava a tela** pelo próprio navegador (captura nativa + MediaRecorder) e analisa a gravação em seguida.
 - **Recorta o trecho a analisar**: em vez de varrer uma hora inteira, aponte `10:00` a `25:00`.
-- **Exporta a transcrição** em `.vtt`, `.srt` ou `.txt`.
+- **Exporta a transcrição** em `.vtt`, `.srt` ou `.txt`, e o resultado inteiro em **JSON** (instantes,
+  transcrição, texto lido da tela e as imagens em base64) para outro programa consumir.
+- **Lê o texto que aparece na tela** (OCR local) e inclui no PDF, no JSON e no aviso ao modelo.
+- **Descarta frames sem fala**, pela transcrição quando existe, ou medindo a energia do áudio quando não.
+- **Índice no PDF**: a primeira página lista cada instante com o começo da fala, dando ao modelo um mapa
+  do vídeo antes das imagens.
 
 ## Estrutura
 
@@ -100,10 +105,9 @@ Um detalhe que só apareceu por causa desse teste: comparar os frames em tons de
 
 ## Roadmap
 
-1. Reconhecer texto na tela (OCR) e incluir no PDF
+1. Acelerar a varredura (hoje ~75 ms por salto)
 2. Salvar o estado — hoje atualizar a página perde tudo
 3. Cancelamento também na transcrição automática
-4. Acelerar a varredura (hoje ~75 ms por salto)
 4. Camada paga no servidor: formatos exóticos, vídeos longos, transcrição de qualidade superior, lote
 5. API / MCP para agentes consumirem vídeo já mastigado
 
