@@ -17,7 +17,11 @@ Modelos de texto não assistem vídeo. O que eles leem bem é: imagens dos momen
 - **Monta o prompt.** No fim do fluxo, gera o texto que explica ao modelo como o PDF está organizado — instantes, o que é imagem e o que é fala, e o aviso de que os frames são amostras. Com quatro objetivos prontos ou pedido livre.
 - **Dá para interromper.** A varredura mostra previsão de término e pode ser parada a qualquer momento, aproveitando o que já foi extraído.
 - **Três idiomas.** Português, inglês e espanhol, incluindo o texto do prompt e do PDF. O idioma vem de `?lang=pt|en|es` ou do navegador.
-- **Vídeo de exemplo** em `public/demo/`, com legenda nos três idiomas, para experimentar sem arquivo próprio.
+- **Vídeo de exemplo narrado** em `public/demo/`, um por idioma, com legenda — dá para testar tanto a
+  detecção de cena quanto a transcrição sem arquivo próprio.
+- **Grava a tela** pelo próprio navegador (captura nativa + MediaRecorder) e analisa a gravação em seguida.
+- **Recorta o trecho a analisar**: em vez de varrer uma hora inteira, aponte `10:00` a `25:00`.
+- **Exporta a transcrição** em `.vtt`, `.srt` ou `.txt`.
 
 ## Estrutura
 
@@ -96,7 +100,7 @@ Um detalhe que só apareceu por causa desse teste: comparar os frames em tons de
 
 ## Roadmap
 
-1. Traduzir também a landing e as páginas institucionais (hoje só a ferramenta é multilíngue)
+1. Reconhecer texto na tela (OCR) e incluir no PDF
 2. Salvar o estado — hoje atualizar a página perde tudo
 3. Cancelamento também na transcrição automática
 4. Acelerar a varredura (hoje ~75 ms por salto)

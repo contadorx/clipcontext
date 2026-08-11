@@ -106,6 +106,11 @@
       <button class="ghost sm" id="demo" data-i18n="demoBtn"></button>
       <span class="status" id="demoMsg" data-i18n="demoHint"></span>
     </div>
+    <div class="row hide" id="recRow" style="margin-top:10px">
+      <button class="ghost sm" id="rec" data-i18n="recBtn"></button>
+      <button class="sm hide" id="recStop" data-i18n="recStopBtn"></button>
+      <span class="status" id="recMsg" data-i18n="recHint"></span>
+    </div>
     <div id="playerBox" class="hide" style="margin-top:16px">
       <video id="v" controls preload="auto" muted playsinline></video>
       <div class="meta" id="meta"></div>
@@ -154,6 +159,12 @@ Reconheço automaticamente:
 
 Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trecho."></textarea>
     <div class="status" id="trInfo" style="margin-top:8px"></div>
+    <div class="row hide" id="expRow" style="margin-top:10px">
+      <span class="status" data-i18n="expLabel"></span>
+      <button class="ghost sm" id="expVtt">.vtt</button>
+      <button class="ghost sm" id="expSrt">.srt</button>
+      <button class="ghost sm" id="expTxt">.txt</button>
+    </div>
   </div>
 
   <div class="card">
@@ -182,6 +193,18 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       <div>
         <label class="f" for="maxf" data-i18n="lMax"></label>
         <input type="number" id="maxf" value="60" min="1" max="400">
+      </div>
+      <div>
+        <label class="f" for="tIni" data-i18n="lFrom"></label>
+        <input type="text" id="tIni" placeholder="00:00" style="width:100%;padding:8px 10px;
+               border:1px solid var(--line);border-radius:7px;background:var(--bg);color:var(--ink);
+               font:inherit;font-size:14px">
+      </div>
+      <div>
+        <label class="f" for="tFim" data-i18n="lTo"></label>
+        <input type="text" id="tFim" placeholder="—" style="width:100%;padding:8px 10px;
+               border:1px solid var(--line);border-radius:7px;background:var(--bg);color:var(--ink);
+               font:inherit;font-size:14px">
       </div>
       <div>
         <label class="f" for="quality" data-i18n="lQual"></label>
@@ -273,6 +296,20 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       demoErr:'Não consegui baixar o exemplo. Escolha um vídeo do seu computador.',
       demoHasAudio:'O exemplo tem narração: a transcrição já veio preenchida, mas você pode apagá-la e clicar em "Transcrever automaticamente" para ver o reconhecimento de voz funcionando.',
       mark:'Marcar este momento',
+      recBtn:'Grabar la pantalla', recStopBtn:'Detener grabación',
+      recHint:'graba una presentación o reunión y analízala justo después, sin salir del navegador',
+      recRun:'Grabando… {0} — pulsa Detener cuando termines.',
+      recDone:'Grabación de {0} lista y cargada. Ya puedes extraer los fotogramas.',
+      recDeny:'Cancelaste, o el navegador no dio permiso para capturar la pantalla.',
+      recNo:'Este navegador no permite grabar la pantalla. Usa Chrome o Edge en un ordenador.',
+      recEmpty:'La grabación salió vacía. Inténtalo de nuevo eligiendo una ventana o la pantalla completa.',
+      recBtn:'Gravar a tela', recStopBtn:'Parar gravação',
+      recHint:'grave uma apresentação ou reunião e analise em seguida, sem sair do navegador',
+      recRun:'Gravando… {0} — clique em Parar quando terminar.',
+      recDone:'Gravação de {0} pronta e carregada. Pode extrair os frames.',
+      recDeny:'Você cancelou, ou o navegador não deu permissão para capturar a tela.',
+      recNo:'Este navegador não permite gravar a tela. Use Chrome ou Edge no computador.',
+      recEmpty:'A gravação saiu vazia. Tente de novo escolhendo uma janela ou a tela inteira.',
       marked:'{0} momento(s) marcado(s) — entram sempre, mesmo que a imagem não mude.',
       mDur:'duração', mRes:'resolução', mFile:'arquivo',
       videoErr:'O navegador não conseguiu abrir este vídeo. Converta para MP4 (H.264) e tente de novo.',
@@ -299,6 +336,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       mCount:'Quantidade fixa, espalhados', mInt:'A cada N segundos',
       lSens:'Sensibilidade', lCount:'Quantos frames', lInt:'Intervalo (segundos)',
       lMax:'Limite de frames', lQual:'Qualidade da imagem',
+      expLabel:'Baixar a transcrição:',
+      lFrom:'Analisar a partir de', lTo:'Analisar até',
+      faixaMa:'O início precisa ser menor que o fim. Ignorei o recorte.',
+      faixa:'Trecho analisado: {0} a {1}.',
       qLow:'Leve', qMid:'Equilibrada', qHigh:'Alta',
       sens:['','muito baixa','baixa','baixa+','média-','média','média+','alta','alta+','muito alta'],
       extractBtn:'Extrair frames', stopBtn:'Parar', resetBtn:'Recomeçar',
@@ -363,6 +404,13 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       demoErr:'Could not download the example. Please pick a video from your computer.',
       demoHasAudio:'The example is narrated: the transcript comes pre-filled, but you can clear it and click "Transcribe automatically" to watch speech recognition work.',
       mark:'Mark this moment',
+      recBtn:'Record the screen', recStopBtn:'Stop recording',
+      recHint:'record a presentation or meeting and analyse it right after, without leaving the browser',
+      recRun:'Recording… {0} — click Stop when you are done.',
+      recDone:'{0} recording ready and loaded. You can extract the frames.',
+      recDeny:'You cancelled, or the browser did not grant screen capture permission.',
+      recNo:'This browser cannot record the screen. Use Chrome or Edge on a computer.',
+      recEmpty:'The recording came out empty. Try again, picking a window or the whole screen.',
       marked:'{0} moment(s) marked — always included, even if the image does not change.',
       mDur:'duration', mRes:'resolution', mFile:'file',
       videoErr:'The browser could not open this video. Convert it to MP4 (H.264) and try again.',
@@ -389,6 +437,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       mCount:'Fixed count, evenly spread', mInt:'Every N seconds',
       lSens:'Sensitivity', lCount:'How many frames', lInt:'Interval (seconds)',
       lMax:'Frame limit', lQual:'Image quality',
+      expLabel:'Download the transcript:',
+      lFrom:'Analyse from', lTo:'Analyse until',
+      faixaMa:'The start must come before the end. The range was ignored.',
+      faixa:'Range analysed: {0} to {1}.',
       qLow:'Light', qMid:'Balanced', qHigh:'High',
       sens:['','very low','low','low+','medium-','medium','medium+','high','high+','very high'],
       extractBtn:'Extract frames', stopBtn:'Stop', resetBtn:'Start over',
@@ -479,6 +531,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       mCount:'Cantidad fija, repartidos', mInt:'Cada N segundos',
       lSens:'Sensibilidad', lCount:'Cuántos fotogramas', lInt:'Intervalo (segundos)',
       lMax:'Límite de fotogramas', lQual:'Calidad de imagen',
+      expLabel:'Descargar la transcripción:',
+      lFrom:'Analizar desde', lTo:'Analizar hasta',
+      faixaMa:'El inicio debe ser anterior al final. Se ignoró el recorte.',
+      faixa:'Tramo analizado: {0} a {1}.',
       qLow:'Ligera', qMid:'Equilibrada', qHigh:'Alta',
       sens:['','muy baja','baja','baja+','media-','media','media+','alta','alta+','muy alta'],
       extractBtn:'Extraer fotogramas', stopBtn:'Parar', resetBtn:'Empezar de nuevo',
@@ -607,7 +663,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   function load(f){
     fileName = f.name; fileSize = f.size; currentFile = f;
     video.src = URL.createObjectURL(f);
-    video.onloadedmetadata = () => {
+    video.onloadedmetadata = async () => {
+      await corrigirDuracao();
       $('playerBox').classList.remove('hide');
       $('auto').disabled = false;
       st('');
@@ -630,6 +687,27 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       }
       $('status').innerHTML = `<span class="err">${t('videoErr')}</span>${extra}`;
     };
+  }
+
+  /* Arquivos gravados pelo próprio navegador (MediaRecorder) saem sem a duração
+     no cabeçalho: o vídeo reporta Infinity. Buscar um instante muito à frente
+     obriga o navegador a percorrer o arquivo e calcular a duração real. */
+  function corrigirDuracao(){
+    if (isFinite(video.duration) && video.duration > 0) return Promise.resolve();
+    return new Promise(res => {
+      let pronto = false;
+      const fim = () => {
+        if (pronto) return;
+        pronto = true;
+        video.removeEventListener('timeupdate', ao);
+        video.currentTime = 0;
+        res();
+      };
+      const ao = () => { if (video.currentTime > 0) fim(); };
+      video.addEventListener('timeupdate', ao);
+      video.currentTime = 1e6;
+      setTimeout(fim, 6000);
+    });
   }
 
   function showMeta(){
@@ -760,8 +838,102 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     $('trInfo').innerHTML = !n ? '' : cues.length
       ? `<span class="ok">${t('trCues', cues.length)}</span>${t('trCues2')}`
       : t('trPlain');
+    $('expRow').classList.toggle('hide', !n);
   }
   $('tr').oninput = refreshTr;
+
+  /* ================= gravação de tela =================
+     Usa apenas recursos nativos do navegador: a captura e a gravação acontecem
+     na máquina do usuário e o resultado vira um arquivo local, como qualquer outro. */
+  const podeGravar = !!(navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia &&
+                        window.MediaRecorder);
+  if (podeGravar) $('recRow').classList.remove('hide');
+
+  let gravador = null, pedacos = [], tGrav = 0, relogio = null;
+
+  function melhorFormato(){
+    for (const m of ['video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus',
+                     'video/webm', 'video/mp4'])
+      if (MediaRecorder.isTypeSupported(m)) return m;
+    return '';
+  }
+
+  $('rec').onclick = async () => {
+    if (!podeGravar) { $('recMsg').innerHTML = `<span class="err">${t('recNo')}</span>`; return; }
+    let fluxo;
+    try {
+      fluxo = await navigator.mediaDevices.getDisplayMedia({
+        video: { frameRate: 12 },        // 12 q/s bastam: o que interessa é a troca de tela
+        audio: true
+      });
+    } catch (e) {
+      $('recMsg').innerHTML = `<span class="err">${t('recDeny')}</span>`;
+      return;
+    }
+
+    pedacos = [];
+    const tipo = melhorFormato();
+    gravador = new MediaRecorder(fluxo, tipo ? { mimeType: tipo } : undefined);
+    gravador.ondataavailable = ev => { if (ev.data && ev.data.size) pedacos.push(ev.data); };
+
+    gravador.onstop = () => {
+      clearInterval(relogio);
+      fluxo.getTracks().forEach(t => t.stop());
+      $('rec').classList.remove('hide'); $('recStop').classList.add('hide');
+      trabalhando(false);
+      const blob = new Blob(pedacos, { type: pedacos[0] ? pedacos[0].type : 'video/webm' });
+      if (!blob.size) { $('recMsg').innerHTML = `<span class="err">${t('recEmpty')}</span>`; return; }
+      const ext = (blob.type.indexOf('mp4') >= 0) ? 'mp4' : 'webm';
+      load(new File([blob], 'gravacao-' + fmt(tGrav).replace(/:/g,'-') + '.' + ext, { type: blob.type }));
+      $('recMsg').innerHTML = `<span class="ok">${t('recDone', fmt(tGrav))}</span>`;
+    };
+
+    // se a pessoa parar o compartilhamento pela barra do navegador, encerramos junto
+    fluxo.getVideoTracks()[0].addEventListener('ended', () => {
+      if (gravador && gravador.state !== 'inactive') gravador.stop();
+    });
+
+    gravador.start(1000);
+    tGrav = 0;
+    trabalhando(true);
+    $('rec').classList.add('hide'); $('recStop').classList.remove('hide');
+    $('recMsg').textContent = t('recRun', fmt(0));
+    relogio = setInterval(() => { tGrav++; $('recMsg').textContent = t('recRun', fmt(tGrav)); }, 1000);
+  };
+
+  $('recStop').onclick = () => { if (gravador && gravador.state !== 'inactive') gravador.stop(); };
+
+  /* ---- exportar a transcrição em .vtt / .srt / .txt ---- */
+  function tempoLegenda(seg, virgula){
+    const h = Math.floor(seg/3600), m = Math.floor(seg%3600/60), sc = seg%60;
+    const ms = sc.toFixed(3).padStart(6,'0');
+    return `${pad2(h)}:${pad2(m)}:${virgula ? ms.replace('.', ',') : ms}`;
+  }
+
+  function montarLegenda(formato){
+    const { cues, plain } = parseTranscript($('tr').value);
+    if (!cues.length) return plain;                    // sem tempos: exporta o texto puro
+    if (formato === 'txt')
+      return cues.map(c => `[${fmt(c.a)}] ${c.t}`).join('\n');
+    if (formato === 'srt')
+      return cues.map((c,i) =>
+        `${i+1}\n${tempoLegenda(c.a,true)} --> ${tempoLegenda(c.b,true)}\n${c.t}`).join('\n\n') + '\n';
+    return 'WEBVTT\n\n' + cues.map(c =>
+        `${tempoLegenda(c.a,false)} --> ${tempoLegenda(c.b,false)}\n${c.t}`).join('\n\n') + '\n';
+  }
+
+  function baixar(texto, ext){
+    const nome = (fileName || 'transcricao').replace(/\.[^.]+$/, '');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([texto], { type: 'text/plain;charset=utf-8' }));
+    a.download = `${nome}.${ext}`;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  }
+
+  $('expVtt').onclick = () => baixar(montarLegenda('vtt'), 'vtt');
+  $('expSrt').onclick = () => baixar(montarLegenda('srt'), 'srt');
+  $('expTxt').onclick = () => baixar(montarLegenda('txt'), 'txt');
 
   function readSub(f){
     const r = new FileReader();
@@ -993,9 +1165,28 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     return sum / a.length;
   }
 
+  /* aceita "90", "1:30" ou "01:02:03" */
+  function lerTempo(v, padrao){
+    v = (v || '').trim();
+    if (!v) return padrao;
+    const p = v.split(':').map(Number);
+    if (p.some(isNaN)) return padrao;
+    const seg = p.length === 3 ? p[0]*3600 + p[1]*60 + p[2]
+              : p.length === 2 ? p[0]*60 + p[1] : p[0];
+    return isFinite(seg) ? seg : padrao;
+  }
+
   $('extract').onclick = async () => {
     const dur = video.duration;
     if (!dur || !isFinite(dur)) { $('status').innerHTML = `<span class="err">${t('noDur')}</span>`; return; }
+
+    // trecho a analisar; vazio = vídeo inteiro
+    let ini = Math.max(0, Math.min(lerTempo($('tIni').value, 0), dur));
+    let fim = Math.max(0, Math.min(lerTempo($('tFim').value, dur), dur));
+    let avisoFaixa = '';
+    if (fim <= ini) { ini = 0; fim = dur; avisoFaixa = ' ' + t('faixaMa'); }
+    else if (ini > 0 || fim < dur - 0.05) avisoFaixa = ' ' + t('faixa', fmt(ini), fmt(fim));
+    const janela = fim - ini;
     const q = parseFloat($('quality').value), mode = $('mode').value;
     const maxf = Math.max(1, +$('maxf').value || 60);
     const px = 900;
@@ -1021,11 +1212,11 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       // Calibrado com um vídeo de slides real: trocas de tela em documentos de fundo
       // claro dão diferença em torno de 7,6 — o padrão anterior (8) as perdia por pouco.
       const thr = [0,26,19,13,9,5.5,4,2.8,1.8,1][+$('sens').value];
-      const stepS = Math.max(0.5, dur / 700);
+      const stepS = Math.max(0.5, janela / 700);
       let prev = null, kept = 0;
-      const total = Math.ceil(dur / stepS);
+      const total = Math.ceil(janela / stepS);
       for (let i = 0; i < total && kept < maxf && !stop; i++) {
-        const tt = i * stepS;
+        const tt = ini + i * stepS;
         await seek(tt);
         await new Promise(r => requestAnimationFrame(r));
         const sig = signature();
@@ -1035,18 +1226,18 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
           prev = sig; kept++;
         }
         $('bar').style.width = ((i+1)/total*100) + '%';
-        $('status').textContent = tr('scanning', fmt(tt), fmt(dur), kept) + eta(i+1, total);
-        if (kept >= maxf && tt < dur - stepS)
+        $('status').textContent = tr('scanning', fmt(tt), fmt(fim), kept) + eta(i+1, total);
+        if (kept >= maxf && tt < fim - stepS)
           limited = tr('limitScene', fmt(tt), maxf);
       }
     } else {
       let times = [];
       if (mode === 'count') {
         const n = Math.min(maxf, Math.max(1, +$('count').value || 24));
-        for (let i = 0; i < n; i++) times.push(dur * (i + 0.5) / n);
+        for (let i = 0; i < n; i++) times.push(ini + janela * (i + 0.5) / n);
       } else {
         const step = Math.max(0.5, +$('interval').value || 10);
-        for (let t = 0; t < dur && times.length < maxf; t += step) times.push(t);
+        for (let t = ini; t < fim && times.length < maxf; t += step) times.push(t);
       }
       for (let i = 0; i < times.length && !stop; i++) {
         await seek(times[i]);
@@ -1069,7 +1260,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     frames.sort((a,b) => a.t - b.t);
     const parou = stop ? ` <span class="err">${tr('stopped')}</span>` : '';
     $('status').innerHTML = `<span class="ok">${tr('extracted', frames.length)}</span>${tr('reviewNext')}` +
-      parou + (limited ? `<span class="err">${limited}</span>` : '');
+      avisoFaixa + parou + (limited ? `<span class="err">${limited}</span>` : '');
     $('extract').disabled = false; $('go').disabled = false;
     $('cancel').classList.add('hide');
     trabalhando(false);
