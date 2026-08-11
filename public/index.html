@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ClipContext — transforme vídeo em contexto para IA</title>
+<meta name="description" content="Transforme qualquer vídeo em um PDF com os frames que importam e a transcrição sincronizada, pronto para colar em uma IA. Roda no seu navegador: o vídeo não sai do seu computador.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="ClipContext — transforme vídeo em contexto para IA">
+<meta property="og:description" content="Frames por mudança de cena + transcrição sincronizada, em um PDF único. Nada é enviado para servidor nenhum.">
+<meta name="twitter:card" content="summary_large_image">
+<style>
+  :root{
+    --bg:#faf9f7; --panel:#fff; --ink:#1f1e1c; --muted:#6b6862;
+    --line:#e5e2dc; --accent:#c2603a; --accent-ink:#fff; --warn:#8a6d1f; --err:#b3402a;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{--bg:#1a1917;--panel:#232220;--ink:#f0eee9;--muted:#a09c94;
+          --line:#35332f;--accent:#d97757;--accent-ink:#1a1917;--warn:#d4b25f;--err:#e8846b}
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+       font:15px/1.55 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+  .wrap{max-width:1000px;margin:0 auto;padding:32px 20px 90px}
+  h1{font-size:22px;margin:0 0 4px;letter-spacing:-.01em}
+  h2{font-size:14px;margin:0 0 14px;letter-spacing:.03em;text-transform:uppercase;color:var(--muted)}
+  .sub{color:var(--muted);margin:0 0 26px;font-size:14px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:20px;margin-bottom:18px}
+  .step{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;
+        background:var(--accent);color:var(--accent-ink);font-size:12px;font-weight:600;
+        margin-right:8px;vertical-align:2px}
+  .drop{border:2px dashed var(--line);border-radius:10px;padding:36px 20px;text-align:center;cursor:pointer;transition:.15s}
+  .drop:hover,.drop.over{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 6%,transparent)}
+  .drop strong{display:block;font-size:16px;margin-bottom:4px}
+  .drop span{color:var(--muted);font-size:13px}
+  input[type=file]{display:none}
+  textarea{width:100%;min-height:130px;padding:11px;border:1px solid var(--line);border-radius:8px;
+           background:var(--bg);color:var(--ink);font:13px/1.5 ui-monospace,Menlo,Consolas,monospace;resize:vertical;
+           transition:.15s}
+  textarea.over{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 7%,var(--bg))}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:14px}
+  label.f{display:block;font-size:12px;color:var(--muted);margin-bottom:5px;font-weight:500}
+  input[type=number],select{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:7px;
+        background:var(--bg);color:var(--ink);font:inherit;font-size:14px}
+  input[type=range]{width:100%;accent-color:var(--accent)}
+  button{font:inherit;font-weight:550;border:0;border-radius:8px;padding:11px 20px;cursor:pointer;
+         background:var(--accent);color:var(--accent-ink);transition:.15s}
+  button:hover{filter:brightness(1.07)}
+  button:disabled{opacity:.42;cursor:not-allowed}
+  button.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+  button.sm{padding:7px 13px;font-size:13px}
+  .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  video{width:100%;max-height:300px;background:#000;border-radius:8px;display:block}
+  .meta{font-size:13px;color:var(--muted);margin-top:10px;display:flex;gap:18px;flex-wrap:wrap}
+  .meta b{color:var(--ink);font-weight:550}
+  .bar{height:6px;background:var(--line);border-radius:99px;overflow:hidden;margin:16px 0 8px}
+  .bar>i{display:block;height:100%;width:0;background:var(--accent);transition:width .15s}
+  .status{font-size:13px;color:var(--muted);min-height:19px}
+  .thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(135px,1fr));gap:9px;margin-top:16px}
+  .thumbs figure{margin:0;cursor:pointer;position:relative;border-radius:6px;overflow:hidden;
+                 border:2px solid transparent;transition:.12s}
+  .thumbs figure:hover{border-color:var(--accent)}
+  .thumbs figure.off{opacity:.32}
+  .thumbs figure.off::after{content:'descartado';position:absolute;inset:auto 0 0 0;background:var(--err);
+        color:#fff;font-size:10px;text-align:center;padding:2px;font-weight:600}
+  .thumbs img{width:100%;display:block}
+  .thumbs figcaption{font:11px ui-monospace,Menlo,monospace;color:var(--muted);padding:3px 0 5px;text-align:center}
+  .hide{display:none}
+  .note{font-size:13px;color:var(--muted);border-left:3px solid var(--line);padding:2px 0 2px 12px;margin-top:14px}
+  .note b{color:var(--warn)}
+  .ok{color:var(--accent);font-weight:550}
+  .err{color:var(--err);font-weight:550}
+  .autobox{border:1px solid var(--line);border-radius:8px;padding:14px;margin-bottom:14px;
+           background:color-mix(in srgb,var(--accent) 4%,transparent)}
+  #diagOut{background:var(--bg);border:1px solid var(--line);border-radius:7px;padding:11px;
+           font:12px/1.6 ui-monospace,Menlo,Consolas,monospace;white-space:pre-wrap;margin:12px 0 0;
+           user-select:all;color:var(--ink)}
+  .tag{display:inline-block;background:var(--bg);border:1px solid var(--line);border-radius:99px;
+       padding:3px 10px;font-size:12px;color:var(--muted);margin-right:6px}
+  .tag b{color:var(--ink);font-weight:600}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>ClipContext</h1>
+  <p class="sub">Transforme um vídeo em um PDF com os frames que importam e a transcrição sincronizada — pronto para entregar a uma IA. Tudo roda no seu navegador: o vídeo não sai do seu computador.</p>
+
+  <div class="card">
+    <h2><span class="step">1</span>Vídeo</h2>
+    <div class="drop" id="drop">
+      <strong>Escolher ou arrastar o vídeo aqui</strong>
+      <span>MP4 / MOV / WebM — o tamanho do arquivo não importa</span>
+    </div>
+    <input type="file" id="file" accept="video/*">
+    <div id="playerBox" class="hide" style="margin-top:16px">
+      <video id="v" controls preload="auto" muted playsinline></video>
+      <div class="meta" id="meta"></div>
+      <div class="row" style="margin-top:12px">
+        <button class="ghost sm" id="grab">Marcar este momento</button>
+        <span class="status" id="grabbed"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2><span class="step">2</span>Transcrição <span style="text-transform:none;letter-spacing:0">(opcional)</span></h2>
+
+    <div class="autobox">
+      <div class="row">
+        <button id="auto" disabled>Transcrever automaticamente</button>
+        <select id="model" style="width:auto">
+          <option value="onnx-community/whisper-base">Modelo base — rápido</option>
+          <option value="onnx-community/whisper-small">Modelo small — mais preciso</option>
+        </select>
+        <select id="lang" style="width:auto">
+          <option value="pt">Português</option>
+          <option value="en">Inglês</option>
+          <option value="">Detectar sozinho</option>
+        </select>
+        <button class="ghost sm" id="diag">Diagnóstico</button>
+      </div>
+      <pre id="diagOut" class="hide"></pre>
+      <div class="bar hide" id="abarWrap"><i id="abar"></i></div>
+      <div class="status" id="astatus"></div>
+    </div>
+
+    <div class="row" style="margin-bottom:9px">
+      <button class="ghost sm" id="pickVtt">Abrir arquivo .vtt / .srt</button>
+      <span class="status">ou arraste o arquivo sobre o campo abaixo, ou cole o texto</span>
+    </div>
+    <input type="file" id="vttFile" accept=".vtt,.srt,.txt,text/plain">
+    <textarea id="tr" placeholder="Cole aqui a transcrição do Google Drive, ou arraste um arquivo .srt / .vtt.
+
+Reconheço automaticamente:
+  00:00:12,400 --> 00:00:15,900   (SRT / VTT)
+  0:12  texto falado             (colado do painel do Drive)
+  texto solto sem marcação de tempo
+
+Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trecho."></textarea>
+    <div class="status" id="trInfo" style="margin-top:8px"></div>
+  </div>
+
+  <div class="card">
+    <h2><span class="step">3</span>Escolha dos frames</h2>
+    <div class="grid">
+      <div>
+        <label class="f" for="mode">Critério</label>
+        <select id="mode">
+          <option value="scene">Quando a imagem muda (recomendado)</option>
+          <option value="count">Quantidade fixa, espalhados</option>
+          <option value="interval">A cada N segundos</option>
+        </select>
+      </div>
+      <div id="sceneBox">
+        <label class="f" for="sens">Sensibilidade — <span id="sensV">média</span></label>
+        <input type="range" id="sens" min="1" max="9" value="5">
+      </div>
+      <div id="countBox" class="hide">
+        <label class="f" for="count">Quantos frames</label>
+        <input type="number" id="count" value="36" min="1" max="400">
+      </div>
+      <div id="intBox" class="hide">
+        <label class="f" for="interval">Intervalo (segundos)</label>
+        <input type="number" id="interval" value="10" min="0.5" step="0.5">
+      </div>
+      <div>
+        <label class="f" for="maxf">Limite de frames</label>
+        <input type="number" id="maxf" value="60" min="1" max="400">
+      </div>
+      <div>
+        <label class="f" for="quality">Qualidade da imagem</label>
+        <select id="quality">
+          <option value="0.72">Leve</option>
+          <option value="0.85" selected>Equilibrada</option>
+          <option value="0.94">Alta</option>
+        </select>
+      </div>
+    </div>
+    <div class="row" style="margin-top:20px">
+      <button id="extract" disabled>Extrair frames</button>
+      <button class="ghost" id="reset">Recomeçar</button>
+    </div>
+    <div class="bar hide" id="barWrap"><i id="bar"></i></div>
+    <div class="status" id="status"></div>
+    <p class="note"><b>Se o vídeo não abrir:</b> o navegador não decodifica alguns formatos (HEVC, certos MKV). Nesse caso, converta para MP4 / H.264.</p>
+  </div>
+
+  <div class="card hide" id="prevCard">
+    <h2><span class="step">4</span>Revisão</h2>
+    <div class="row">
+      <span class="tag">mantidos <b id="nKeep">0</b></span>
+      <span class="tag">descartados <b id="nOff">0</b></span>
+      <span class="tag">PDF ~<b id="size">0</b> MB</span>
+      <button class="ghost sm" id="allOn">Manter todos</button>
+      <button class="ghost sm" id="dedup">Descartar repetidos</button>
+    </div>
+    <p class="status" style="margin:10px 0 0">Clique em qualquer frame para descartar ou trazer de volta.</p>
+    <div class="thumbs" id="thumbs"></div>
+    <div class="row" style="margin-top:18px">
+      <button id="go">Gerar PDF</button>
+      <select id="layout" style="width:auto">
+        <option value="auto">Layout automático</option>
+        <option value="full">Sequência, cada frame com a fala do trecho</option>
+        <option value="grid">Grade compacta, 6 por página</option>
+      </select>
+      <span class="status" id="pdfStatus"></span>
+    </div>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
+<script>
+(function(){
+  const $ = id => document.getElementById(id);
+  const video = $('v');
+  let manual = [], fileName = '', fileSize = 0, currentFile = null, frames = [];
+
+  const pad2 = n => String(n).padStart(2,'0');
+  function fmt(t){
+    t = Math.max(0, t|0);
+    const h = (t/3600)|0, m = ((t%3600)/60)|0, s = t%60;
+    return (h ? h+':' : '') + pad2(m) + ':' + pad2(s);
+  }
+
+  /* ================= vídeo ================= */
+  $('drop').onclick = () => $('file').click();
+  ['dragenter','dragover'].forEach(e => $('drop').addEventListener(e, ev => {
+    ev.preventDefault(); $('drop').classList.add('over');
+  }));
+  ['dragleave','drop'].forEach(e => $('drop').addEventListener(e, ev => {
+    ev.preventDefault(); $('drop').classList.remove('over');
+  }));
+  $('drop').addEventListener('drop', ev => { const f = ev.dataTransfer.files[0]; if (f) load(f); });
+  $('file').onchange = e => { const f = e.target.files[0]; if (f) load(f); };
+
+  function load(f){
+    fileName = f.name; fileSize = f.size; currentFile = f;
+    video.src = URL.createObjectURL(f);
+    video.onloadedmetadata = () => {
+      $('playerBox').classList.remove('hide');
+      $('auto').disabled = false;
+      $('extract').disabled = false;
+      $('meta').innerHTML =
+        `<span>duração <b>${fmt(video.duration)}</b></span>` +
+        `<span>resolução <b>${video.videoWidth}×${video.videoHeight}</b></span>` +
+        `<span>arquivo <b>${(fileSize/1048576).toFixed(0)} MB</b></span>`;
+      $('count').value = Math.min(80, Math.max(12, Math.round(video.duration/15)));
+    };
+    video.onerror = () => { $('status').innerHTML =
+      '<span class="err">O navegador não conseguiu abrir este vídeo. Converta para MP4 (H.264) e tente de novo.</span>'; };
+  }
+
+  $('grab').onclick = () => {
+    if (!video.videoWidth) return;
+    manual.push(video.currentTime);
+    $('grabbed').textContent = manual.length + ' momento(s) marcado(s) — entram sempre, mesmo que a imagem não mude.';
+  };
+
+  $('mode').onchange = () => {
+    const m = $('mode').value;
+    $('sceneBox').classList.toggle('hide', m !== 'scene');
+    $('countBox').classList.toggle('hide', m !== 'count');
+    $('intBox').classList.toggle('hide', m !== 'interval');
+  };
+  const SENS = ['','muito baixa','baixa','baixa+','média-','média','média+','alta','alta+','muito alta'];
+  $('sens').oninput = () => { $('sensV').textContent = SENS[+$('sens').value]; };
+  $('reset').onclick = () => location.reload();
+
+  /* ================= transcrição: texto e arquivo ================= */
+  function toSec(s){
+    const p = s.trim().replace(',', '.').split(':').map(parseFloat);
+    return p.length === 3 ? p[0]*3600 + p[1]*60 + p[2]
+         : p.length === 2 ? p[0]*60 + p[1] : p[0];
+  }
+
+  function parseTranscript(raw){
+    const txt = (raw || '').trim();
+    if (!txt) return { cues: [], plain: '' };
+    const cues = [];
+    const TS = /((?:\d{1,3}:)?\d{1,2}:\d{2}(?:[.,]\d{1,3})?)\s*-->\s*((?:\d{1,3}:)?\d{1,2}:\d{2}(?:[.,]\d{1,3})?)/;
+
+    if (TS.test(txt)) {
+      txt.split(/\n\s*\n/).forEach(block => {
+        const lines = block.split('\n');
+        const i = lines.findIndex(l => TS.test(l));
+        if (i < 0) return;
+        const m = lines[i].match(TS);
+        const body = lines.slice(i+1).join(' ').replace(/<[^>]*>/g,'').replace(/\s+/g,' ').trim();
+        if (body) cues.push({ a: toSec(m[1]), b: toSec(m[2]), t: body });
+      });
+    }
+    if (!cues.length) {
+      txt.split('\n').forEach(line => {
+        const m = line.match(/^\s*((?:\d{1,3}:)?\d{1,2}:\d{2})\s+(.+)$/);
+        if (m && m[2].trim()) cues.push({ a: toSec(m[1]), b: null, t: m[2].trim() });
+      });
+      for (let i = 0; i < cues.length; i++)
+        cues[i].b = i+1 < cues.length ? cues[i+1].a : cues[i].a + 10;
+    }
+    cues.sort((x,y) => x.a - y.a);
+    return { cues, plain: cues.length ? cues.map(c => c.t).join(' ') : txt };
+  }
+
+  function refreshTr(){
+    const { cues } = parseTranscript($('tr').value);
+    const n = $('tr').value.trim().length;
+    $('trInfo').innerHTML = !n ? '' : cues.length
+      ? `<span class="ok">${cues.length} trechos com marcação de tempo</span> — cada frame sai junto da fala correspondente.`
+      : 'Texto sem marcação de tempo — vai entrar no PDF como um bloco no final.';
+  }
+  $('tr').oninput = refreshTr;
+
+  function readSub(f){
+    const r = new FileReader();
+    r.onload = () => { $('tr').value = r.result; refreshTr(); };
+    r.readAsText(f, 'utf-8');
+  }
+  $('pickVtt').onclick = () => $('vttFile').click();
+  $('vttFile').onchange = e => { const f = e.target.files[0]; if (f) readSub(f); };
+  ['dragenter','dragover'].forEach(e => $('tr').addEventListener(e, ev => {
+    ev.preventDefault(); $('tr').classList.add('over');
+  }));
+  ['dragleave','drop'].forEach(e => $('tr').addEventListener(e, ev => {
+    ev.preventDefault(); $('tr').classList.remove('over');
+  }));
+  $('tr').addEventListener('drop', ev => { const f = ev.dataTransfer.files[0]; if (f) readSub(f); });
+
+  /* ================= transcrição automática ================= */
+  const st = (m, c) => { $('astatus').innerHTML = c ? `<span class="${c}">${m}</span>` : m; };
+  const prog = p => { $('abarWrap').classList.toggle('hide', p == null); if (p != null) $('abar').style.width = p + '%'; };
+  const TJS = 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.2.0';
+
+  function vttTime(s){
+    const h = Math.floor(s/3600), m = Math.floor(s%3600/60), sec = s%60;
+    return `${pad2(h)}:${pad2(m)}:${sec.toFixed(3).padStart(6,'0')}`;
+  }
+
+  async function decodeTo16k(file){
+    const buf = await file.arrayBuffer();
+    const AC = window.AudioContext || window.webkitAudioContext;
+    const ctx = new AC({ sampleRate: 16000 });
+    const dec = await ctx.decodeAudioData(buf);
+    ctx.close();
+    if (dec.numberOfChannels === 1) return dec.getChannelData(0);
+    const a = dec.getChannelData(0), b = dec.getChannelData(1);
+    const out = new Float32Array(a.length);
+    for (let i = 0; i < a.length; i++) out[i] = (a[i] + b[i]) / 2;
+    return out;
+  }
+
+  // O .wasm do runtime NÃO fica no pacote do transformers.js — ele vive no pacote
+  // onnxruntime-web. Apontar para a pasta errada dá 404 e o erro chega como
+  // "Failed to fetch". Testamos os endereços possíveis e usamos o primeiro que responder.
+  const WASM_BASES = [
+    'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.26.0-dev.20260416-b7804b056c/dist/',
+    'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.23.0/dist/',
+    'https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/'
+  ];
+  const WASM_PROBE = 'ort-wasm-simd-threaded.jsep.wasm';
+  let wasmBase;
+
+  async function findWasmBase(){
+    if (wasmBase !== undefined) return wasmBase;
+    for (const b of WASM_BASES) {
+      try {
+        const r = await fetch(b + WASM_PROBE, { headers:{ Range:'bytes=0-16' } });
+        if (r.ok || r.status === 206) { wasmBase = b; return b; }
+      } catch (e) {}
+    }
+    wasmBase = null;              // nenhum respondeu: deixa o padrão da biblioteca
+    return null;
+  }
+
+  async function loadLib(){
+    const mod = await import(TJS);
+    mod.env.allowLocalModels = false;
+    mod.env.allowRemoteModels = true;
+    const base = await findWasmBase();
+    try {
+      const w = mod.env.backends && mod.env.backends.onnx && mod.env.backends.onnx.wasm;
+      if (w) { w.numThreads = 1; if (base) w.wasmPaths = base; }
+    } catch (e) {}
+    return mod;
+  }
+
+  async function buildPipe(modelId){
+    const mod = await loadLib();
+    const seen = {};
+    const progress_callback = p => {
+      if (p.status === 'progress' && p.file) {
+        seen[p.file] = p.progress || 0;
+        const v = Object.values(seen);
+        prog(v.reduce((x,y) => x+y, 0) / v.length);
+        st('Baixando o modelo (só na primeira vez)…');
+      }
+    };
+    try {
+      return await mod.pipeline('automatic-speech-recognition', modelId,
+        { device:'webgpu', dtype:{ encoder_model:'fp32', decoder_model_merged:'q4' }, progress_callback });
+    } catch (e) {
+      st('WebGPU indisponível — usando o processador, vai demorar mais.');
+      return await mod.pipeline('automatic-speech-recognition', modelId, { dtype:'q8', progress_callback });
+    }
+  }
+
+  let pipe = null, pipeId = null;
+  $('auto').onclick = async () => {
+    if (!currentFile) return;
+    const modelId = $('model').value, lang = $('lang').value;
+    $('auto').disabled = true;
+    try {
+      st('Extraindo o áudio do vídeo…'); prog(null);
+      let data;
+      try { data = await decodeTo16k(currentFile); }
+      catch (e) { throw new Error('não consegui extrair o áudio (o vídeo tem faixa de som? o formato é suportado?)'); }
+      if (!data.length) throw new Error('este vídeo não tem áudio');
+
+      if (pipeId !== modelId) { st('Carregando o modelo…'); prog(0); pipe = await buildPipe(modelId); pipeId = modelId; }
+
+      const SR = 16000, WIN = 30 * SR, total = Math.ceil(data.length / WIN), out = [];
+      for (let i = 0; i < total; i++) {
+        const off = i * WIN, seg = data.slice(off, Math.min(off + WIN, data.length)), base = off / SR;
+        const opts = { return_timestamps: true, task: 'transcribe' };
+        if (lang) opts.language = lang;
+        const r = await pipe(seg, opts);
+        const chunks = (r && r.chunks && r.chunks.length) ? r.chunks
+          : [{ timestamp: [0, seg.length / SR], text: (r && r.text) || '' }];
+        chunks.forEach(c => {
+          const t = (c.text || '').trim(); if (!t) return;
+          const a = base + (c.timestamp[0] ?? 0);
+          const b = base + (c.timestamp[1] ?? (c.timestamp[0] ?? 0) + 2);
+          out.push(`${vttTime(a)} --> ${vttTime(Math.max(b, a + 0.4))}\n${t}`);
+        });
+        prog((i + 1) / total * 100);
+        st(`Transcrevendo… bloco ${i + 1} de ${total}`);
+      }
+      $('tr').value = 'WEBVTT\n\n' + out.join('\n\n');
+      refreshTr(); prog(100);
+      st(`Transcrição pronta — ${out.length} trechos.`, 'ok');
+    } catch (e) {
+      prog(null);
+      st('Não consegui transcrever aqui: ' + (e && e.message ? e.message : e) +
+         ' — clique em Diagnóstico para ver em qual etapa trava, ou use o Google Drive.', 'err');
+    } finally { $('auto').disabled = false; }
+  };
+
+  $('diag').onclick = async () => {
+    const out = $('diagOut'); out.classList.remove('hide');
+    const L = []; const say = s => { L.push(s); out.textContent = L.join('\n'); };
+    say('--- diagnóstico ---');
+    say('endereço      : ' + location.protocol);
+    say('navegador     : ' + navigator.userAgent.slice(0, 110));
+    say('WebGPU        : ' + (navigator.gpu ? 'disponível' : 'ausente'));
+    say('cache/isolam. : caches=' + (typeof caches !== 'undefined') +
+        ' crossOriginIsolated=' + (window.crossOriginIsolated === true));
+    try { await loadLib(); say('biblioteca    : OK (jsdelivr respondeu)'); }
+    catch (e) { say('biblioteca    : FALHOU -> ' + (e && e.message)); }
+    const W = 'https://huggingface.co/onnx-community/whisper-base/resolve/main/onnx/encoder_model.onnx';
+    try { const r = await fetch('https://huggingface.co/onnx-community/whisper-base/resolve/main/config.json');
+          say('config modelo : HTTP ' + r.status + (r.ok ? ' OK' : ' <-- problema')); }
+    catch (e) { say('config modelo : FALHOU -> ' + (e && e.message)); }
+
+    // O peso é grande e o Hugging Face redireciona para outro servidor.
+    // Testamos das três formas: o cabeçalho Range pode quebrar o link assinado
+    // sem que o download real (que não usa Range) tenha problema algum.
+    try { const r = await fetch(W, { headers:{ Range:'bytes=0-64' } });
+          say('peso c/ Range : HTTP ' + r.status + (r.ok || r.status === 206 ? ' OK' : ' <-- problema')); }
+    catch (e) { say('peso c/ Range : FALHOU -> ' + (e && e.message)); }
+    try { const c = new AbortController();
+          const r = await fetch(W, { signal: c.signal });   // GET normal, igual ao do download real
+          const len = r.headers.get('content-length');
+          c.abort();
+          say('peso GET puro : HTTP ' + r.status + (r.ok ? ' OK' : ' <-- problema') +
+              (len ? ' (' + (len/1048576).toFixed(1) + ' MB)' : '')); }
+    catch (e) { say('peso GET puro : FALHOU -> ' + (e && e.message)); }
+    for (let i = 0; i < WASM_BASES.length; i++) {
+      const u = WASM_BASES[i] + WASM_PROBE;
+      try { const r = await fetch(u, { headers:{ Range:'bytes=0-16' } });
+            say('wasm opção ' + (i+1) + '  : HTTP ' + r.status + (r.ok || r.status === 206 ? ' OK' : ' <-- 404')); }
+      catch (e) { say('wasm opção ' + (i+1) + '  : FALHOU -> ' + (e && e.message)); }
+    }
+    const b = await findWasmBase();
+    say('wasm em uso   : ' + (b || 'nenhum respondeu — usando o padrão da biblioteca'));
+    say('--- fim ---');
+    st('Diagnóstico pronto. Selecione o bloco acima, copie e me envie.', 'ok');
+  };
+
+  /* ================= extração de frames ================= */
+  function seek(t){
+    return new Promise(res => {
+      let done = false;
+      const ok = () => { if (done) return; done = true; video.removeEventListener('seeked', ok); res(); };
+      video.addEventListener('seeked', ok);
+      setTimeout(ok, 8000);
+      video.currentTime = Math.min(t, Math.max(0, video.duration - 0.05));
+    });
+  }
+
+  function snap(w, q){
+    const c = document.createElement('canvas');
+    c.width = w; c.height = Math.round(w * video.videoHeight / video.videoWidth);
+    c.getContext('2d').drawImage(video, 0, 0, c.width, c.height);
+    return { url: c.toDataURL('image/jpeg', q), w: c.width, h: c.height };
+  }
+
+  // Assinatura 32x18 guardando R, G e B separados.
+  // Em cinza puro isto falharia: vermelho (254,0,0) e verde (0,128,0) têm quase
+  // o mesmo brilho, e uma troca de cena entre os dois passaria despercebida.
+  const sigC = document.createElement('canvas'); sigC.width = 32; sigC.height = 18;
+  const sigX = sigC.getContext('2d', { willReadFrequently: true });
+  function signature(){
+    sigX.drawImage(video, 0, 0, 32, 18);
+    const d = sigX.getImageData(0, 0, 32, 18).data, s = new Uint8Array(32*18*3);
+    for (let i = 0, j = 0; i < d.length; i += 4) {
+      s[j++] = d[i]; s[j++] = d[i+1]; s[j++] = d[i+2];
+    }
+    return s;
+  }
+  function diff(a, b){
+    if (!a || !b) return 255;
+    let sum = 0;
+    for (let i = 0; i < a.length; i++) sum += Math.abs(a[i] - b[i]);
+    return sum / a.length;
+  }
+
+  $('extract').onclick = async () => {
+    const dur = video.duration;
+    if (!dur || !isFinite(dur)) { $('status').innerHTML = '<span class="err">Duração do vídeo indisponível.</span>'; return; }
+    const q = parseFloat($('quality').value), mode = $('mode').value;
+    const maxf = Math.max(1, +$('maxf').value || 60);
+    const px = 900;
+
+    $('extract').disabled = true; $('go').disabled = true;
+    $('barWrap').classList.remove('hide');
+    frames = [];
+    let limited = '';
+    video.pause();
+
+    if (mode === 'scene') {
+      // varre em passos curtos e só guarda quando a imagem muda o bastante
+      const thr = [0,26,20,15,11,8,6,4.5,3,2][+$('sens').value];
+      const stepS = Math.max(0.5, dur / 700);
+      let prev = null, kept = 0;
+      const total = Math.ceil(dur / stepS);
+      for (let i = 0; i < total && kept < maxf; i++) {
+        const t = i * stepS;
+        await seek(t);
+        await new Promise(r => requestAnimationFrame(r));
+        const sig = signature();
+        const d = diff(prev, sig);
+        if (prev === null || d >= thr) {
+          frames.push({ t: video.currentTime, img: snap(px, q), keep: true, sig });
+          prev = sig; kept++;
+        }
+        $('bar').style.width = ((i+1)/total*100) + '%';
+        $('status').textContent = `Procurando mudanças de imagem… ${fmt(t)} de ${fmt(dur)} — ${kept} frame(s) guardado(s)`;
+        if (kept >= maxf && t < dur - stepS)
+          limited = ` A varredura parou em ${fmt(t)} por atingir o limite de ${maxf} frames — o fim do vídeo não foi coberto.`;
+      }
+    } else {
+      let times = [];
+      if (mode === 'count') {
+        const n = Math.min(maxf, Math.max(1, +$('count').value || 24));
+        for (let i = 0; i < n; i++) times.push(dur * (i + 0.5) / n);
+      } else {
+        const step = Math.max(0.5, +$('interval').value || 10);
+        for (let t = 0; t < dur && times.length < maxf; t += step) times.push(t);
+      }
+      for (let i = 0; i < times.length; i++) {
+        await seek(times[i]);
+        await new Promise(r => requestAnimationFrame(r));
+        frames.push({ t: video.currentTime, img: snap(px, q), keep: true, sig: signature() });
+        $('bar').style.width = ((i+1)/times.length*100) + '%';
+        $('status').textContent = `Extraindo… ${i+1} de ${times.length}`;
+      }
+      if (mode === 'interval' && times.length >= maxf && times[times.length-1] < dur - 1)
+        limited = ` Parou em ${fmt(times[times.length-1])} por atingir o limite de ${maxf} frames.`;
+    }
+
+    // momentos marcados à mão entram sempre
+    for (const t of manual) {
+      await seek(t);
+      await new Promise(r => requestAnimationFrame(r));
+      frames.push({ t: video.currentTime, img: snap(px, q), keep: true, manual: true });
+    }
+
+    frames.sort((a,b) => a.t - b.t);
+    $('status').innerHTML = `<span class="ok">${frames.length} frames extraídos.</span> Revise abaixo antes de gerar o PDF.` +
+      (limited ? `<span class="err">${limited}</span>` : '');
+    $('extract').disabled = false; $('go').disabled = false;
+    $('prevCard').classList.remove('hide');
+    render();
+  };
+
+  /* ================= revisão ================= */
+  function render(){
+    const box = $('thumbs'); box.innerHTML = '';
+    frames.forEach((f, i) => {
+      const fig = document.createElement('figure');
+      if (!f.keep) fig.className = 'off';
+      fig.innerHTML = `<img src="${f.img.url}"><figcaption>${fmt(f.t)}${f.manual ? ' *' : ''}</figcaption>`;
+      fig.onclick = () => { frames[i].keep = !frames[i].keep; fig.classList.toggle('off', !frames[i].keep); counts(); };
+      box.appendChild(fig);
+    });
+    counts();
+  }
+
+  function counts(){
+    const keep = frames.filter(f => f.keep);
+    $('nKeep').textContent = keep.length;
+    $('nOff').textContent = frames.length - keep.length;
+    const bytes = keep.reduce((s,f) => s + f.img.url.length * 0.75, 0) + 40000;
+    $('size').textContent = (bytes/1048576).toFixed(1);
+    $('go').disabled = !keep.length;
+  }
+
+  $('allOn').onclick = () => { frames.forEach(f => f.keep = true); render(); };
+  $('dedup').onclick = () => {
+    let prev = null, n = 0;
+    frames.forEach(f => {
+      if (!f.sig) return;
+      if (prev && diff(prev, f.sig) < 4) { f.keep = false; n++; }
+      else prev = f.sig;
+    });
+    render();
+    $('status').textContent = n ? `${n} frame(s) quase idênticos foram descartados.`
+                                : 'Nenhum frame repetido encontrado — todos mostram algo diferente.';
+  };
+
+  /* ================= PDF ================= */
+  $('go').onclick = async () => {
+    const kept = frames.filter(f => f.keep);
+    if (!kept.length) return;
+    const dur = video.duration;
+    const { cues, plain } = parseTranscript($('tr').value);
+    let layout = $('layout').value;
+    if (layout === 'auto') layout = cues.length ? 'full' : 'grid';
+
+    $('go').disabled = true;
+    $('pdfStatus').textContent = 'Montando o PDF…';
+    await new Promise(r => setTimeout(r, 40));
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ unit:'mm', format:'a4', compress:true });
+    const PW = 210, PH = 297, M = 15, CW = PW - M*2;
+    const base = fileName.replace(/\.[^.]+$/, '');
+    let page = 0;
+    const foot = () => {
+      page++;
+      doc.setFont('helvetica','normal').setFontSize(7.5).setTextColor(150);
+      doc.text(base, M, PH - 8);
+      doc.text(String(page), PW - M, PH - 8, { align:'right' });
+      doc.setTextColor(30);
+    };
+
+    doc.setFont('helvetica','bold').setFontSize(20).text('Análise de vídeo', M, 32);
+    doc.setFont('helvetica','normal').setFontSize(11).setTextColor(90);
+    doc.text(doc.splitTextToSize(fileName, CW), M, 42);
+    doc.setDrawColor(215).line(M, 52, PW - M, 52);
+    const info = [
+      ['Duração', fmt(dur)],
+      ['Resolução', video.videoWidth + ' x ' + video.videoHeight],
+      ['Tamanho', (fileSize/1048576).toFixed(1) + ' MB'],
+      ['Frames neste PDF', String(kept.length)],
+      ['Transcrição', cues.length ? cues.length + ' trechos com tempo'
+                     : (plain ? 'texto sem marcação de tempo' : 'não fornecida')]
+    ];
+    let y = 62;
+    info.forEach(([k,v]) => {
+      doc.setTextColor(130).setFontSize(10).text(k, M, y);
+      doc.setTextColor(30).setFont('helvetica','bold').text(v, M + 45, y);
+      doc.setFont('helvetica','normal'); y += 8;
+    });
+    doc.setTextColor(150).setFontSize(8.5);
+    doc.text(doc.splitTextToSize(
+      'Cada imagem traz o instante exato em que foi capturada. Os tempos referem-se ao início do vídeo.', CW), M, y + 8);
+    doc.setTextColor(30);
+    foot();
+
+    if (layout === 'full') {
+      const LH = 4.6, MAXL = 9, MAXIH = 110;
+      const ar = kept[0].img.h / kept[0].img.w;
+      const ih0 = Math.min(CW * ar, MAXIH);
+      const iw = ih0 / ar, ix = M + (CW - iw) / 2;
+      let yy = 0, open = false;
+      const newPage = () => { if (open) foot(); doc.addPage(); yy = M; open = true; };
+      newPage();
+      for (let i = 0; i < kept.length; i++) {
+        const f = kept[i];
+        const nextT = i+1 < kept.length ? kept[i+1].t : dur + 0.001;
+        let lines = [];
+        if (cues.length) {
+          doc.setFont('helvetica','normal').setFontSize(9.3);
+          const said = cues.filter(c => c.b > f.t && c.a < nextT)
+            .map(c => (c.a < f.t - 0.2 ? '... ' : '') + c.t).join(' ');
+          lines = doc.splitTextToSize(said || '(sem fala neste trecho)', CW);
+          if (lines.length > MAXL) lines = lines.slice(0, MAXL).concat('[...]');
+        }
+        const blockH = 6 + ih0 + (cues.length ? 6 + lines.length * LH : 0) + 9;
+        if (yy + blockH > PH - 16) newPage();
+        doc.setFont('helvetica','bold').setFontSize(11).setTextColor(25).text(fmt(f.t), M, yy + 3);
+        doc.setFont('helvetica','normal').setFontSize(8).setTextColor(150)
+           .text(`frame ${i+1} de ${kept.length}`, PW - M, yy + 3, { align:'right' });
+        yy += 6;
+        doc.addImage(f.img.url, 'JPEG', ix, yy, iw, ih0);
+        yy += ih0;
+        if (cues.length) {
+          yy += 6;
+          doc.setFontSize(9.3).setTextColor(55);
+          doc.text(lines, M, yy, { lineHeightFactor: 1.32 });
+          yy += lines.length * LH;
+        }
+        yy += 9; doc.setTextColor(30);
+      }
+      foot();
+    } else {
+      const cols = 2, gap = 8, cellW = (CW - gap) / cols;
+      const arG = kept[0].img.h / kept[0].img.w;
+      const ihG = Math.min(cellW * arG, 74), iwG = ihG / arG;
+      let col = 0, top = M + 6, rowH = 0;
+      doc.addPage();
+      doc.setFont('helvetica','bold').setFontSize(12).text('Frames', M, M);
+      kept.forEach(f => {
+        const blockH = ihG + 7;
+        if (col === 0 && top + blockH > PH - 18) { foot(); doc.addPage(); top = M; }
+        const x = M + col * (cellW + gap) + (cellW - iwG) / 2;
+        doc.addImage(f.img.url, 'JPEG', x, top, iwG, ihG);
+        doc.setFont('helvetica','bold').setFontSize(8.5).setTextColor(60).text(fmt(f.t), x, top + ihG + 4.5);
+        doc.setTextColor(30);
+        rowH = Math.max(rowH, blockH); col++;
+        if (col === cols) { col = 0; top += rowH + 4; rowH = 0; }
+      });
+      foot();
+    }
+
+    if (plain) {
+      doc.addPage();
+      doc.setFont('helvetica','bold').setFontSize(13).text('Transcrição completa', M, M + 4);
+      let ty = M + 14;
+      doc.setFont('helvetica','normal').setFontSize(9.5);
+      const items = cues.length
+        ? cues.map(c => '[' + fmt(c.a) + ']  ' + c.t).flatMap(l => doc.splitTextToSize(l, CW))
+        : doc.splitTextToSize(plain, CW);
+      items.forEach(line => {
+        if (ty > PH - 20) { foot(); doc.addPage(); ty = M + 4; }
+        doc.text(line, M, ty); ty += 5;
+      });
+      foot();
+    }
+
+    doc.save(`analise-${base}.pdf`);
+    $('pdfStatus').innerHTML = `<span class="ok">PDF gerado</span> — ${kept.length} frames, ${page} páginas.`;
+    $('go').disabled = false;
+  };
+})();
+</script>
+</body>
+</html>
