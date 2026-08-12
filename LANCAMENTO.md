@@ -43,7 +43,7 @@ qualidade da resposta da IA é grande.
 
 É gratuito e o código é aberto. Se for útil para você, é só abrir e usar.
 
-🔗 clipcontext.vercel.app
+🔗 clipcontext.app
 
 ---
 

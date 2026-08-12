@@ -167,8 +167,64 @@ consumirem direto. Maior margem, e o público que você já alcança.
 
 ---
 
+## 8. YouTube e Google Drive como entrada
+
+Duas fontes de vídeo pedidas com frequência, e que caem em lados opostos da linha do servidor.
+
+### Google Drive — feito, e sem custo
+
+Está implementado e desligado por padrão (`GOOGLE-DRIVE.md`). O arquivo vai do Google direto para o
+navegador; não há servidor no caminho e não há custo marginal. **Não serve como recurso pago**, e nem
+deveria: o valor dele é reduzir atrito de quem já tem o vídeo na nuvem. É funil, não receita.
+
+### YouTube — o que as ferramentas do gênero realmente fazem
+
+Serviços como o Tactiq não transcrevem nada. Eles leem a legenda que o YouTube já tem: o servidor busca
+o HTML da página do vídeo, extrai o JSON `ytInitialPlayerResponse`, pega a `baseUrl` de
+`captions.playerCaptionsTracklistRenderer.captionTracks[]` e busca `youtube.com/api/timedtext`, que
+devolve as falas já com marcação de tempo. O vídeo nunca é baixado.
+
+As limitações que eles publicam confirmam o método — só inglês, sem Shorts, *"o transcript pode não
+estar disponível para todo vídeo"*. Quem roda ASR de verdade não falha em vídeo sem legenda.
+
+**Três consequências para nós:**
+
+1. **Não dá para fazer no navegador.** `youtube.com` não libera CORS. Exige uma função no servidor —
+   pequena, sem ffmpeg, sem fila, mas servidor.
+2. **IP de datacenter é bloqueado.** O YouTube bloqueia faixas de AWS, GCP, Azure e DigitalOcean por
+   ASN, e desde 2025 exige PO token em boa parte das chamadas. Vercel é datacenter: uma function ali
+   funciona no teste e falha em produção, ou pior, funciona de forma intermitente. Operar isso de
+   verdade custa proxy residencial — custo recorrente, e portanto uma justificativa legítima para o
+   recurso ser pago.
+3. **É zona cinza.** Buscar legenda não é baixar vídeo, mas o endpoint não é documentado e o ToS do
+   YouTube proíbe acessar conteúdo fora dos recursos do próprio serviço. Muita gente opera
+   comercialmente ali. É risco de negócio a assumir conscientemente, não ilegalidade decidida — e é o
+   tipo de decisão que merece um advogado antes de virar linha de receita.
+
+### O desenho escolhido
+
+Transcrição de YouTube isolada é **commodity**: existem dezenas de ferramentas grátis fazendo
+exatamente isso. Entregar só texto seria o ClipContext competindo mal num mercado saturado, e pior do
+que ele mesmo — porque o valor daqui é frame e fala pareados no PDF, e legenda sozinha não gera frame.
+
+O encaixe que preserva a diferenciação é usar a legenda como **atalho**, não como produto:
+
+1. A pessoa cola o link. A transcrição chega pronta em segundos, sem Whisper, sem WebGPU, sem espera.
+2. Os frames vêm da gravação da aba, que a ferramenta já sabe fazer.
+3. O resultado é o PDF completo — que nenhuma ferramenta de transcrição entrega.
+
+Ordem sugerida: isso entra **depois** da Fase 1, não antes. A conversão de formato é o menor produto
+vendável e não depende de zona cinza nenhuma. O YouTube é o segundo passo, quando já houver alguém
+pagando e o custo do proxy tiver a quem ser cobrado.
+
+---
+
 ## Fontes dos números
 
 - Preços de transcrição: [TokenMix — Whisper API pricing 2026](https://tokenmix.ai/blog/whisper-api-pricing)
 - Preços de servidor: [Better Stack — Hetzner Cloud Review 2026](https://betterstack.com/community/guides/web-servers/hetzner-cloud-review/)
 - Taxas de pagamento: [Stripe — Preços e tarifas](https://stripe.com/br/pricing)
+- Escopos do Drive: [Google — Choose Drive API scopes](https://developers.google.com/workspace/drive/api/guides/api-specific-auth)
+- Público e verificação do OAuth: [Google — Manage App Audience](https://support.google.com/cloud/answer/15549945)
+- Termos do YouTube: [YouTube — Terms of Service](https://www.youtube.com/static?template=terms)
+- Bloqueio do endpoint de legenda: [SkipTheWatch — YouTube Transcript API not working](https://skipthewatch.com/blog/youtube-transcript-api-not-working)

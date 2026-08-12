@@ -16,6 +16,10 @@ ROOT = pathlib.Path(__file__).parent
 MARKER = "<script>/*__JSPDF__*/</script>"
 CDN = "https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"
 
+# Endereço público do site, sem barra no fim. Sai daqui para o canonical, para os
+# hreflang e para o link do topo da ferramenta — trocar de domínio é mudar esta linha.
+SITE = "https://clipcontext.app"
+
 META = """<title>ClipContext — transforme vídeo em contexto para IA</title>
 <meta name="description" content="Transforme qualquer vídeo em um PDF com os frames que importam e a transcrição sincronizada, pronto para colar em uma IA. Roda no seu navegador: o vídeo não sai do seu computador.">
 <meta property="og:type" content="website">
@@ -81,6 +85,7 @@ def build_site(root: pathlib.Path) -> None:
     for lang in IDIOMAS:
         t = dict(dic[lang])
         t.update(caminhos[lang])
+        t["site"] = SITE
         t["selfPath"] = caminhos[lang]["home"]
         t["switcher"] = _switcher(lang, paginas, "home")
         t["lang"] = lang
@@ -120,6 +125,7 @@ def build_site(root: pathlib.Path) -> None:
                 print(f"AVISO: falta {corpo_arq.relative_to(root)}", file=sys.stderr)
                 continue
             t = dict(dic[lang]); t.update(caminhos[lang])
+            t["site"] = SITE
             t["docTitle"], t["docDesc"] = metas[lang]
             t["selfPath"] = caminhos[lang][pagina]
             t["ptPath"] = paginas["pt"][pagina]
@@ -153,6 +159,8 @@ def main() -> int:
             return 1
 
     src = template.read_text(encoding="utf-8")
+    src = src.replace("__SITE__", SITE)                      # domínio público, definido no topo
+    src = src.replace("__SITEDOM__", SITE.split("//")[-1])  # o mesmo, sem o esquema, para exibir
     if MARKER not in src:
         print(f"marcador {MARKER} não encontrado em src/template.html", file=sys.stderr)
         return 1

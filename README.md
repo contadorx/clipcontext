@@ -19,7 +19,12 @@ Modelos de texto não assistem vídeo. O que eles leem bem é: imagens dos momen
 - **Três idiomas.** Português, inglês e espanhol, incluindo o texto do prompt e do PDF. O idioma vem de `?lang=pt|en|es` ou do navegador.
 - **Vídeo de exemplo narrado** em `public/demo/`, um por idioma, com legenda — dá para testar tanto a
   detecção de cena quanto a transcrição sem arquivo próprio.
-- **Grava a tela** pelo próprio navegador (captura nativa + MediaRecorder) e analisa a gravação em seguida.
+- **Abre vídeo do Google Drive** sem sair do navegador: o arquivo vai do Google direto para a máquina da
+  pessoa, sem passar por servidor nosso. Nasce desligado — veja `GOOGLE-DRIVE.md`.
+- **Captura a tela ao vivo, sem guardar vídeo.** Durante o compartilhamento, extrai os frames quando a
+  imagem muda e transcreve **dois canais de áudio em separado** — o microfone e o som do computador —,
+  rotulando cada fala com sua origem. Uma reunião de uma hora que ocuparia perto de um giga em disco
+  termina como algumas dezenas de imagens e um texto. Nada de vídeo é escrito em lugar nenhum.
 - **Recorta o trecho a analisar**: em vez de varrer uma hora inteira, aponte `10:00` a `25:00`.
 - **Exporta a transcrição** em `.vtt`, `.srt` ou `.txt`, e o resultado inteiro em **JSON** (instantes,
   transcrição, texto lido da tela e as imagens em base64) para outro programa consumir.
@@ -44,13 +49,47 @@ public/app.html          A FERRAMENTA — gerada pelo build, não edite
 offline/*.html           build autocontido: um arquivo só, funciona sem internet
 src/template.html        fonte da ferramenta; contém o marcador /*__JSPDF__*/
 vendor/jspdf.umd.min.js  cópia da biblioteca usada no build offline
-brand/                   logotipos, favicon e paleta
+brand/                   logotipos, favicon (.svg e .ico) e paleta
+public/favicon.ico       ícone multi-tamanho, referenciado por todas as páginas
 media/                   GIF e MP4 de demonstração, para divulgação
 build.py                 gera public/app.html e o build offline
 public/support.js        bloco de apoio voluntário (preencha os identificadores no topo)
 LANCAMENTO.md            textos de divulgação, palavras-chave e posicionamento
 ARQUITETURA-PAGO.md      o que é preciso para cobrar: custos, preços e ordem de construção
+GOOGLE-DRIVE.md          como ligar o botão do Drive: escopo, chaves e configuração no Google Cloud
 ```
+
+## Captura ao vivo
+
+O botão de gravar a tela não grava um arquivo. Enquanto a tela está compartilhada, três coisas acontecem
+ao mesmo tempo, todas na máquina de quem usa:
+
+1. a imagem é comparada a cada 700 ms e um frame é guardado quando a tela muda de verdade;
+2. o microfone e o som do computador entram por **canais separados**, em 16 kHz, por `AudioWorklet` — na
+   thread de áudio, e não na principal, justamente porque o Whisper ocupa a principal em rajadas;
+3. cada canal é transcrito em janelas de 20 segundos, durante a gravação, e cada fala sai marcada com o
+   canal de onde veio.
+
+A separação dos canais é o que torna a transcrição de reunião utilizável: em vez de um bloco único de
+texto, sai `Microfone:` para quem está no computador e `Computador:` para as outras pessoas. O prompt
+gerado no fim explica ao modelo o que cada rótulo significa.
+
+Janelas silenciosas não vão para a GPU. O corte olha blocos de um segundo, e não a média da janela —
+com a média, meio segundo de fala diluído em vinte segundos de silêncio ficaria abaixo do limiar e a
+frase seria descartada sem nunca chegar ao modelo.
+
+O modelo é carregado **antes** de a gravação começar, porque baixá-lo no meio travaria a captura. Se ele
+não carregar, a gravação continua e guarda os frames sem transcrever.
+
+## Google Drive
+
+O botão "Abrir do Google Drive" nasce **desligado**, como o bloco de apoio. Preencha as três constantes
+`GOOGLE_*` no topo do script de `src/template.html` e ele aparece; vazias, a linha não é renderizada e
+nenhum endereço do Google é requisitado. Os SDKs do Google só são carregados quando alguém clica no
+botão — quem não usa o Drive continua com uma página que não fala com terceiro nenhum.
+
+O escopo é `drive.file`, o mais restrito possível: dá acesso só aos arquivos escolhidos no seletor,
+nunca ao Drive inteiro. Passo a passo da configuração em `GOOGLE-DRIVE.md`.
 
 ## Apoio voluntário
 
@@ -77,6 +116,17 @@ Edite sempre `src/template.html` e rode o build. Não edite os arquivos gerados.
 python3 build.py
 ```
 
+## Domínio e ícone
+
+O endereço público sai de uma linha só: `SITE` no topo de `build.py`. Dele saem o `canonical`, os
+`hreflang`, o link do topo da ferramenta e a base do vídeo de exemplo — o template usa os marcadores
+`__SITE__` e `__SITEDOM__`, substituídos no build. Trocar de domínio é mudar essa linha e rodar o build.
+
+O ícone existe em três formas: `favicon.ico` multi-tamanho (16 a 256 px), `favicon.svg` e
+`apple-touch-icon.png`. Todas as páginas os declaram. A ferramenta traz **o SVG embutido como data URI**,
+além do `.ico`: assim o arquivo de `offline/` mostra o ícone sem depender de rede nem de um arquivo ao
+lado. A logo no topo do app também é SVG inline, pelo mesmo motivo.
+
 ## Publicar
 
 O projeto é estático. Na Vercel, aponte o *output directory* para `public/`, não configure comando de build e mantenha
@@ -96,20 +146,27 @@ Um detalhe que só apareceu por causa desse teste: comparar os frames em tons de
 
 ## Limitações conhecidas
 
-- **A transcrição automática não pode ser interrompida** depois de iniciada (a varredura de frames pode).
+- **A transcrição de arquivo não pode ser interrompida** depois de iniciada (a varredura de frames pode,
+  e a captura ao vivo permite não esperar a fila).
+- **A captura ao vivo disputa a máquina**: a transcrição roda junto com o compartilhamento de tela, e em
+  computador modesto a detecção de cena pode perder alguma troca. É o preço de ver o texto aparecendo.
 - **Formatos que o navegador não decodifica** (HEVC, alguns MKV) simplesmente não abrem. Resolver isso exige conversão no servidor.
 - **Estado não é salvo**: atualizar a página perde tudo.
-- **A landing e as páginas institucionais ainda são só em português** — a ferramenta já é multilíngue.
 - **Não adaptada para celular.**
+- **Vídeo do Drive vira um `Blob` na memória**: acima de ~1,5 GB a interface avisa, e arquivos muito
+  maiores podem derrubar a aba. Baixar e arrastar continua sendo o caminho seguro nesses casos.
 - O modelo `base` do Whisper é modesto em português; o `small` é bem melhor e bem mais pesado.
 
 ## Roadmap
 
 1. Acelerar a varredura (hoje ~75 ms por salto)
 2. Salvar o estado — hoje atualizar a página perde tudo
-3. Cancelamento também na transcrição automática
-4. Camada paga no servidor: formatos exóticos, vídeos longos, transcrição de qualidade superior, lote
-5. API / MCP para agentes consumirem vídeo já mastigado
+3. Cancelamento também na transcrição de arquivo (a captura ao vivo já permite abreviar)
+4. YouTube: colar o link e receber a legenda pronta, com os frames vindo da gravação da aba.
+   Exige um proxy no servidor — `youtube.com` não libera CORS — e o endereço de legenda não é
+   documentado. Veja `ARQUITETURA-PAGO.md`, seção 8.
+5. Camada paga no servidor: formatos exóticos, vídeos longos, transcrição de qualidade superior, lote
+6. API / MCP para agentes consumirem vídeo já mastigado
 
 ## Licença
 
