@@ -4,6 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Vídeo → PDF (frames + transcrição)</title>
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'> <rect width='64' height='64' rx='14' fill='%23C2603A'/> <rect x='12' y='13' width='40' height='22' rx='3' fill='%23fff'/> <rect x='12' y='41' width='40' height='5' rx='2.5' fill='%23fff'/> <rect x='12' y='50' width='26' height='5' rx='2.5' fill='%23fff' opacity='.62'/> </svg>" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <style>
   :root{
     --bg:#faf9f7; --panel:#fff; --ink:#1f1e1c; --muted:#6b6862;
@@ -79,13 +82,39 @@
   .topbar{display:flex;justify-content:space-between;align-items:center;gap:14px;margin:0 0 12px}
   .topbar .back{color:var(--muted);text-decoration:none;font-size:13.5px}
   .topbar select{width:auto;padding:5px 9px;font-size:13px}
+  /* A marca vai inline, e não como <img src>: assim o arquivo offline mostra a
+     logo sem depender de rede nem de um arquivo ao lado. */
+  .brand{display:inline-flex;align-items:center;gap:9px;text-decoration:none;color:var(--ink);
+         font-weight:600;font-size:15px;letter-spacing:-.2px}
+  .brand svg{width:26px;height:26px;display:block;flex:none}
+  .brand b{font-weight:700;color:var(--accent)}
+  .brand .dom{color:var(--muted);font-weight:400;font-size:12.5px;margin-left:2px}
+  @media (max-width:560px){ .brand .dom{display:none} }
+  .chk{display:inline-flex;align-items:center;gap:7px;font-size:13.5px;color:var(--ink);cursor:pointer}
+  .chk input{width:auto;margin:0;cursor:pointer}
+  /* últimas falas transcritas durante a gravação */
+  .live{margin-top:8px;max-height:160px;overflow:auto;border:1px solid var(--line);border-radius:8px;
+        padding:8px 10px;font-size:13px;line-height:1.5;background:var(--bg)}
+  .live:empty{display:none}
+  .live p{margin:0 0 4px}
+  .live .who{font-weight:600;color:var(--accent)}
+  .live .who.sys{color:var(--warn)}
+  .live .tm{font:11px ui-monospace,Menlo,monospace;color:var(--muted);margin-right:6px}
 </style>
 </head>
 <body>
 <div class="wrap">
 
   <div class="topbar">
-    <a href="https://clipcontext.vercel.app/" class="back">&larr; clipcontext.vercel.app</a>
+    <a href="https://clipcontext.app/" class="brand">
+      <svg viewBox="0 0 64 64" role="img" aria-label="ClipContext">
+        <rect width="64" height="64" rx="15" fill="#C2603A"/>
+        <rect x="14" y="14" width="36" height="20" rx="3" fill="#fff"/>
+        <rect x="14" y="40" width="36" height="4.5" rx="2.25" fill="#fff"/>
+        <rect x="14" y="48" width="23" height="4.5" rx="2.25" fill="#fff" opacity=".62"/>
+      </svg>
+      <span>Clip<b>Context</b></span><span class="dom">clipcontext.app</span>
+    </a>
     <select id="uiLang" aria-label="Language">
       <option value="pt">Português</option>
       <option value="en">English</option>
@@ -106,10 +135,23 @@
       <button class="ghost sm" id="demo" data-i18n="demoBtn"></button>
       <span class="status" id="demoMsg" data-i18n="demoHint"></span>
     </div>
+    <div class="row hide" id="driveRow" style="margin-top:10px">
+      <button class="ghost sm" id="drive" data-i18n="driveBtn"></button>
+      <button class="ghost sm hide" id="driveStop" data-i18n="stopBtn"></button>
+      <span class="status" id="driveMsg" data-i18n="driveHint"></span>
+    </div>
     <div class="row hide" id="recRow" style="margin-top:10px">
       <button class="ghost sm" id="rec" data-i18n="recBtn"></button>
       <button class="sm hide" id="recStop" data-i18n="recStopBtn"></button>
       <span class="status" id="recMsg" data-i18n="recHint"></span>
+    </div>
+    <div class="hide" id="recOpts" style="margin-top:8px">
+      <label class="chk"><input type="checkbox" id="recMic" checked><span data-i18n="recMicLbl"></span></label>
+      <p class="note" data-i18n="recWarn" style="margin:6px 0 0"></p>
+    </div>
+    <div class="hide" id="liveBox" style="margin-top:12px">
+      <div class="status" id="liveStat"></div>
+      <div class="live" id="liveTail"></div>
     </div>
     <div id="playerBox" class="hide" style="margin-top:16px">
       <video id="v" controls preload="auto" muted playsinline></video>
@@ -274,7 +316,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
 
   <p class="status" style="text-align:center;margin-top:26px">
     <span data-i18n="supportLine"></span>
-    <a href="https://clipcontext.vercel.app/#support" style="color:var(--accent)" data-i18n="supportLink"></a>
+    <a href="https://clipcontext.app/#support" style="color:var(--accent)" data-i18n="supportLink"></a>
   </p>
 
 </div>
@@ -696,22 +738,50 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       demoBtn:'Usar vídeo de exemplo', demoHint:'50 segundos, cinco telas e narração — para experimentar sem arquivo próprio',
       demoLoading:'Baixando o exemplo…', demoReady:'Exemplo carregado com a transcrição. É só extrair os frames.',
       demoErr:'Não consegui baixar o exemplo. Escolha um vídeo do seu computador.',
+      driveBtn:'Abrir do Google Drive',
+      driveHint:'O arquivo vai do Drive direto para o seu navegador — não passa por servidor nosso',
+      driveAuth:'Esperando a autorização do Google…',
+      driveOpening:'Abrindo o seletor do Drive…',
+      driveDown:'Baixando do Drive… {0}',
+      driveDownPct:'Baixando do Drive… {0}% de {1}',
+      driveReady:'Carregado do Drive: {0} ({1})',
+      driveExpired:'A sessão do Google expirou. Clique de novo para reautorizar.',
+      drivePicker:'O seletor do Google não abriu. Confira se este endereço está nas origens autorizadas do projeto e se o navegador não está bloqueando cookies de terceiros.',
+      driveDenied:'Autorização cancelada. Nada foi acessado no seu Drive.',
+      driveCancelled:'Download cancelado.',
+      driveBig:'São {0}. Arquivos muito grandes podem esgotar a memória do navegador — se travar, baixe o arquivo no computador e arraste aqui.',
+      driveErr:'Não consegui trazer o arquivo do Drive.',
+      driveNoScope:'O Google recusou o acesso a este arquivo. Escolha o arquivo pelo seletor, e não por um atalho.',
+      driveBlocked:'O navegador bloqueou a janela do Google. Libere os pop-ups para este site e tente de novo.',
       demoHasAudio:'O exemplo tem narração: a transcrição já veio preenchida, mas você pode apagá-la e clicar em "Transcrever automaticamente" para ver o reconhecimento de voz funcionando.',
       mark:'Marcar este momento',
-      recBtn:'Grabar la pantalla', recStopBtn:'Detener grabación',
-      recHint:'graba una presentación o reunión y analízala justo después, sin salir del navegador',
-      recRun:'Grabando… {0} — pulsa Detener cuando termines.',
-      recDone:'Grabación de {0} lista y cargada. Ya puedes extraer los fotogramas.',
-      recDeny:'Cancelaste, o el navegador no dio permiso para capturar la pantalla.',
-      recNo:'Este navegador no permite grabar la pantalla. Usa Chrome o Edge en un ordenador.',
-      recEmpty:'La grabación salió vacía. Inténtalo de nuevo eligiendo una ventana o la pantalla completa.',
       recBtn:'Gravar a tela', recStopBtn:'Parar gravação',
-      recHint:'grave uma apresentação ou reunião e analise em seguida, sem sair do navegador',
+      recHint:'grave uma reunião e receba os frames e a transcrição dos dois canais, sem guardar o vídeo',
       recRun:'Gravando… {0} — clique em Parar quando terminar.',
       recDone:'Gravação de {0} pronta e carregada. Pode extrair os frames.',
       recDeny:'Você cancelou, ou o navegador não deu permissão para capturar a tela.',
       recNo:'Este navegador não permite gravar a tela. Use Chrome ou Edge no computador.',
       recEmpty:'A gravação saiu vazia. Tente de novo escolhendo uma janela ou a tela inteira.',
+      recMicLbl:'Incluir meu microfone',
+      recWarn:'Nada de vídeo é guardado: durante a gravação a ferramenta separa os frames que importam e transcreve os dois canais de áudio — o seu microfone e o som do computador — em separado. A transcrição divide a máquina com a captura; em computador modesto a tela pode perder alguma troca.',
+      recPrep:'Preparando o modelo de transcrição…',
+      recNoModel:'Não consegui carregar o modelo: vou guardar os frames sem transcrever.',
+      recMicNo:'Sem microfone: só o som do computador será transcrito.',
+      recSysNo:'Você não marcou “compartilhar áudio”: só o microfone será transcrito.',
+      recNoAudio:'Não consegui abrir os canais de áudio; a gravação segue só com os frames.',
+      recStat:'{0} frames guardados · {1}',
+      recQueue:'transcrevendo ({0} na fila)',
+      recIdle:'transcrição em dia',
+      recTail:'Terminando de transcrever o que faltou…',
+      recDone2:'Pronto: {0} de captura, {1} frames e {2} falas. Nenhum vídeo foi guardado no seu computador.',
+      spkMic:'Microfone', spkSys:'Computador',
+      recFile:'captura de tela', pNoFile:'nenhum arquivo guardado',
+      recAudioNo:'Sem áudio nenhum: nada será transcrito, só os frames serão guardados.',
+      recEnded:'O compartilhamento foi encerrado antes de a gravação começar.',
+      recBusy:'Termine a captura antes de carregar outro vídeo.',
+      recSkip:'Não esperar',
+      recTailN:'Faltam {0} trechos para transcrever. Dá para não esperar.',
+      prSpk:'A transcrição vem de dois canais separados: “Microfone” é quem está no computador, e “Computador” é o som que saiu dos alto-falantes — em uma reunião, as outras pessoas.',
       marked:'{0} momento(s) marcado(s) — entram sempre, mesmo que a imagem não mude.',
       mDur:'duração', mRes:'resolução', mFile:'arquivo',
       videoErr:'O navegador não conseguiu abrir este vídeo. Converta para MP4 (H.264) e tente de novo.',
@@ -820,15 +890,50 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       demoBtn:'Use the example video', demoHint:'50 seconds, five screens, with narration — try it without your own file',
       demoLoading:'Downloading the example…', demoReady:'Example loaded with its transcript. Just extract the frames.',
       demoErr:'Could not download the example. Please pick a video from your computer.',
+      driveBtn:'Open from Google Drive',
+      driveHint:'The file goes from Drive straight to your browser — it never touches a server of ours',
+      driveAuth:'Waiting for Google to authorise…',
+      driveOpening:'Opening the Drive picker…',
+      driveDown:'Downloading from Drive… {0}',
+      driveDownPct:'Downloading from Drive… {0}% of {1}',
+      driveReady:'Loaded from Drive: {0} ({1})',
+      driveExpired:'Your Google session expired. Click again to re-authorise.',
+      drivePicker:'The Google picker did not open. Check that this address is listed in the project authorised origins and that the browser is not blocking third-party cookies.',
+      driveDenied:'Authorisation cancelled. Nothing in your Drive was accessed.',
+      driveCancelled:'Download cancelled.',
+      driveBig:'This is {0}. Very large files can exhaust the browser memory — if it stalls, download the file and drag it here instead.',
+      driveErr:'Could not fetch the file from Drive.',
+      driveNoScope:'Google refused access to this file. Pick the file through the picker rather than through a shortcut.',
+      driveBlocked:'Your browser blocked the Google window. Allow pop-ups for this site and try again.',
       demoHasAudio:'The example is narrated: the transcript comes pre-filled, but you can clear it and click "Transcribe automatically" to watch speech recognition work.',
       mark:'Mark this moment',
       recBtn:'Record the screen', recStopBtn:'Stop recording',
-      recHint:'record a presentation or meeting and analyse it right after, without leaving the browser',
+      recHint:'record a meeting and get the frames and both audio channels transcribed, with no video kept',
       recRun:'Recording… {0} — click Stop when you are done.',
       recDone:'{0} recording ready and loaded. You can extract the frames.',
       recDeny:'You cancelled, or the browser did not grant screen capture permission.',
       recNo:'This browser cannot record the screen. Use Chrome or Edge on a computer.',
       recEmpty:'The recording came out empty. Try again, picking a window or the whole screen.',
+      recMicLbl:'Include my microphone',
+      recWarn:'No video is kept: while recording, the tool pulls out the frames that matter and transcribes the two audio channels separately — your microphone and the computer sound. Transcription shares the machine with the capture; on a modest computer the screen may miss a change.',
+      recPrep:'Preparing the transcription model…',
+      recNoModel:'Could not load the model: I will keep the frames without transcribing.',
+      recMicNo:'No microphone: only the computer sound will be transcribed.',
+      recSysNo:'You did not tick “share audio”: only the microphone will be transcribed.',
+      recNoAudio:'Could not open the audio channels; recording continues with frames only.',
+      recStat:'{0} frames kept · {1}',
+      recQueue:'transcribing ({0} queued)',
+      recIdle:'transcription up to date',
+      recTail:'Finishing the last of the transcription…',
+      recDone2:'Done: {0} captured, {1} frames and {2} lines of speech. No video was kept on your computer.',
+      spkMic:'Microphone', spkSys:'Computer',
+      recFile:'screen capture', pNoFile:'no file kept',
+      recAudioNo:'No audio at all: nothing will be transcribed, only the frames are kept.',
+      recEnded:'Screen sharing ended before the recording could start.',
+      recBusy:'Finish the capture before loading another video.',
+      recSkip:'Do not wait',
+      recTailN:'{0} segments left to transcribe. You can skip the wait.',
+      prSpk:'The transcript comes from two separate channels: “Microphone” is the person at the computer, and “Computer” is the sound coming out of the speakers — in a meeting, the other participants.',
       marked:'{0} moment(s) marked — always included, even if the image does not change.',
       mDur:'duration', mRes:'resolution', mFile:'file',
       videoErr:'The browser could not open this video. Convert it to MP4 (H.264) and try again.',
@@ -937,6 +1042,48 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       demoBtn:'Usar el vídeo de ejemplo', demoHint:'50 segundos, cinco pantallas y narración — pruébalo sin archivo propio',
       demoLoading:'Descargando el ejemplo…', demoReady:'Ejemplo cargado con su transcripción. Solo falta extraer los fotogramas.',
       demoErr:'No pude descargar el ejemplo. Elige un vídeo de tu ordenador.',
+      driveBtn:'Abrir desde Google Drive',
+      driveHint:'El archivo va de Drive directo a tu navegador — no pasa por ningún servidor nuestro',
+      driveAuth:'Esperando la autorización de Google…',
+      driveOpening:'Abriendo el selector de Drive…',
+      driveDown:'Descargando de Drive… {0}',
+      driveDownPct:'Descargando de Drive… {0}% de {1}',
+      driveReady:'Cargado desde Drive: {0} ({1})',
+      driveExpired:'La sesión de Google caducó. Pulsa de nuevo para volver a autorizar.',
+      drivePicker:'El selector de Google no se abrió. Comprueba que esta dirección esté en los orígenes autorizados del proyecto y que el navegador no bloquee las cookies de terceros.',
+      driveDenied:'Autorización cancelada. No se accedió a nada de tu Drive.',
+      driveCancelled:'Descarga cancelada.',
+      driveBig:'Son {0}. Los archivos muy grandes pueden agotar la memoria del navegador — si se traba, descarga el archivo y arrástralo aquí.',
+      driveErr:'No pude traer el archivo de Drive.',
+      driveNoScope:'Google denegó el acceso a este archivo. Elige el archivo por el selector y no por un acceso directo.',
+      driveBlocked:'El navegador bloqueó la ventana de Google. Permite las ventanas emergentes para este sitio e inténtalo de nuevo.',
+      recBtn:'Grabar la pantalla', recStopBtn:'Detener grabación',
+      recHint:'graba una reunión y recibe los fotogramas y la transcripción de los dos canales, sin guardar el vídeo',
+      recRun:'Grabando… {0} — pulsa Detener cuando termines.',
+      recDone:'Grabación de {0} lista y cargada. Ya puedes extraer los fotogramas.',
+      recDeny:'Cancelaste, o el navegador no dio permiso para capturar la pantalla.',
+      recNo:'Este navegador no permite grabar la pantalla. Usa Chrome o Edge en un ordenador.',
+      recEmpty:'La grabación salió vacía. Inténtalo de nuevo eligiendo una ventana o la pantalla completa.',
+      recMicLbl:'Incluir mi micrófono',
+      recWarn:'No se guarda vídeo: durante la grabación la herramienta separa los fotogramas que importan y transcribe los dos canales de audio por separado — tu micrófono y el sonido del ordenador. La transcripción comparte la máquina con la captura; en un ordenador modesto la pantalla puede perder algún cambio.',
+      recPrep:'Preparando el modelo de transcripción…',
+      recNoModel:'No pude cargar el modelo: guardaré los fotogramas sin transcribir.',
+      recMicNo:'Sin micrófono: solo se transcribirá el sonido del ordenador.',
+      recSysNo:'No marcaste “compartir audio”: solo se transcribirá el micrófono.',
+      recNoAudio:'No pude abrir los canales de audio; la grabación sigue solo con los fotogramas.',
+      recStat:'{0} fotogramas guardados · {1}',
+      recQueue:'transcribiendo ({0} en cola)',
+      recIdle:'transcripción al día',
+      recTail:'Terminando de transcribir lo que faltaba…',
+      recDone2:'Listo: {0} de captura, {1} fotogramas y {2} intervenciones. No se guardó ningún vídeo en tu ordenador.',
+      spkMic:'Micrófono', spkSys:'Ordenador',
+      recFile:'captura de pantalla', pNoFile:'ningún archivo guardado',
+      recAudioNo:'Sin audio alguno: no se transcribirá nada, solo se guardarán los fotogramas.',
+      recEnded:'El uso compartido terminó antes de que empezara la grabación.',
+      recBusy:'Termina la captura antes de cargar otro vídeo.',
+      recSkip:'No esperar',
+      recTailN:'Faltan {0} tramos por transcribir. Puedes no esperar.',
+      prSpk:'La transcripción viene de dos canales separados: “Micrófono” es quien está en el ordenador, y “Ordenador” es el sonido que salió de los altavoces — en una reunión, las demás personas.',
       demoHasAudio:'El ejemplo está narrado: la transcripción ya viene rellenada, pero puedes borrarla y pulsar "Transcribir automáticamente" para ver el reconocimiento de voz en acción.',
       mark:'Marcar este momento',
       marked:'{0} momento(s) marcado(s) — se incluyen siempre, aunque la imagen no cambie.',
@@ -1042,6 +1189,22 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
      e o usuário vê apenas a mensagem de erro. */
   const REPO = 'https://github.com/contadorx/clipcontext';
 
+  /* ---------------- Google Drive ----------------
+     Nasce DESLIGADO, como o bloco de apoio: enquanto estes três campos
+     estiverem vazios o botão não é renderizado e nada do Google é carregado.
+     Preencha com os dados do seu projeto no Google Cloud (veja GOOGLE-DRIVE.md).
+
+     Os três valores são públicos por natureza — quem protege a chave é a lista
+     de origens autorizadas no console, não o segredo do arquivo.
+
+     O escopo usado é drive.file, o mais restrito que existe: o app enxerga
+     unicamente os arquivos que a pessoa escolher no seletor, nunca o Drive
+     inteiro. É também o que dispensa a auditoria de segurança que o Google
+     exige dos escopos amplos. */
+  const GOOGLE_CLIENT_ID = '';   // ...apps.googleusercontent.com
+  const GOOGLE_API_KEY   = '';   // chave de API restrita ao seu domínio
+  const GOOGLE_APP_ID    = '';   // número do projeto (só dígitos)
+
   const LANGS = ['pt','en','es'];
   const qLang = new URLSearchParams(location.search).get('lang');
   let LANG = LANGS.includes(qLang) ? qLang
@@ -1100,17 +1263,21 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
   }
 
   /* ================= vídeo ================= */
-  $('drop').onclick = () => $('file').click();
+  $('drop').onclick = () => { if (!capturando()) $('file').click(); };
   ['dragenter','dragover'].forEach(e => $('drop').addEventListener(e, ev => {
     ev.preventDefault(); $('drop').classList.add('over');
   }));
   ['dragleave','drop'].forEach(e => $('drop').addEventListener(e, ev => {
     ev.preventDefault(); $('drop').classList.remove('over');
   }));
-  $('drop').addEventListener('drop', ev => { const f = ev.dataTransfer.files[0]; if (f) load(f); });
-  $('file').onchange = e => { const f = e.target.files[0]; if (f) load(f); };
+  $('drop').addEventListener('drop', ev => { const f = ev.dataTransfer.files[0]; if (f && !capturando()) load(f); });
+  $('file').onchange = e => { const f = e.target.files[0]; if (f && !capturando()) load(f); };
 
   function load(f){
+    /* Sem isto, a duração e os rótulos de uma captura anterior contaminariam o
+       arquivo novo: o PDF diria 30 s para um vídeo de 10 min, e o prompt
+       explicaria canais de áudio que não existem neste material. */
+    limparLive();
     fileName = f.name; fileSize = f.size; currentFile = f;
     video.src = URL.createObjectURL(f);
     video.onloadedmetadata = async () => {
@@ -1120,6 +1287,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       st('');
       $('extract').disabled = false;
       showMeta();
+      buildPrompt();          // o texto anterior falava de outro vídeo
       $('count').value = Math.min(80, Math.max(12, Math.round(video.duration/15)));
     };
     video.onerror = () => {
@@ -1161,15 +1329,25 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
   }
 
   function showMeta(){
-    if (!video.videoWidth) return;
+    if (!video.videoWidth && !liveRes) return;
     $('meta').innerHTML =
-      `<span>${t('mDur')} <b>${fmt(video.duration)}</b></span>` +
-      `<span>${t('mRes')} <b>${video.videoWidth}×${video.videoHeight}</b></span>` +
-      `<span>${t('mFile')} <b>${(fileSize/1048576).toFixed(0)} MB</b></span>`;
+      `<span>${t('mDur')} <b>${fmt(duracaoTotal())}</b></span>` +
+      `<span>${t('mRes')} <b>${resolucao()}</b></span>` +
+      `<span>${t('mFile')} <b>${fileSize ? (fileSize/1048576).toFixed(0) + ' MB' : t('pNoFile')}</b></span>`;
   }
 
   $('grab').onclick = () => {
     if (!video.videoWidth) return;
+    /* Numa captura ao vivo não há a que voltar depois: o instante é guardado
+       na hora, como frame. Num arquivo, só anotamos o momento e a varredura
+       busca depois. */
+    if (liveOn) {
+      frames.push({ t: liveAgora(), img: snap(900, parseFloat($('quality').value)),
+                    keep: true, manual: true });
+      $('grabbed').textContent = t('marked', frames.filter(f => f.manual).length);
+      atualizarLive();
+      return;
+    }
     manual.push(video.currentTime);
     $('grabbed').textContent = t('marked', manual.length);
   };
@@ -1196,7 +1374,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
      'demo/x' a partir de /app pode virar /app/demo/x e dar 404. Tentamos os
      caminhos possíveis, incluindo o absoluto do site, que também faz o exemplo
      funcionar a partir do arquivo offline quando há internet. */
-  const DEMO_BASES = ['/demo/', 'demo/', 'https://clipcontext.vercel.app/demo/'];
+  const DEMO_BASES = ['/demo/', 'demo/', 'https://clipcontext.app/demo/'];
 
   async function acharDemo(arq){
     const erros = [];
@@ -1211,6 +1389,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
   }
 
   $('demo').onclick = async () => {
+    if (capturando()) return;
     $('demo').disabled = true;
     $('demoMsg').textContent = t('demoLoading');
     try {
@@ -1245,6 +1424,198 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     } catch (e) {
       $('demoMsg').innerHTML = `<span class="err">${t('demoErr')} [${(e && e.message) || e}]</span>`;
     } finally { $('demo').disabled = false; }
+  };
+
+  /* ================= Google Drive =================
+     O arquivo trafega do Google para o navegador e para por aí: nenhum byte
+     passa por servidor nosso, então a promessa da página continua valendo.
+
+     Nada do Google é carregado até alguém clicar no botão. Enquanto isso a
+     página segue sem nenhuma requisição a terceiros — que é justamente o que
+     se promete na landing. */
+  /* Os três campos são obrigatórios: sem o App ID o seletor abre normalmente e
+     todo download morre em 404, porque é ele que faz o Google conceder a
+     permissão por arquivo escolhido. Melhor não mostrar o botão. */
+  const DRIVE_ON = !!(GOOGLE_CLIENT_ID && GOOGLE_API_KEY && GOOGLE_APP_ID)
+                   && /^https?:/.test(location.protocol);
+  if (DRIVE_ON) $('driveRow').classList.remove('hide');
+
+  function tamanho(b){
+    b = Number(b) || 0;
+    return b >= 1073741824 ? (b/1073741824).toFixed(2) + ' GB'
+         : b >= 1048576    ? (b/1048576).toFixed(1) + ' MB'
+         : Math.max(1, Math.round(b/1024)) + ' KB';
+  }
+
+  /* O aviso de arquivo grande precisa sobreviver ao progresso do download, que
+     repinta a mesma linha várias vezes por segundo. Fica preso aqui e é
+     reimpresso junto de cada mensagem. */
+  let driveAviso = '';
+  function dMsg(txt, cls){
+    const corpo = cls ? `<span class="${cls}">${txt}</span>` : txt;
+    $('driveMsg').innerHTML = driveAviso
+      ? corpo + `<br><span class="err">${driveAviso}</span>` : corpo;
+  }
+
+  /* Carrega um script de terceiro sob demanda, uma única vez por endereço.
+     Usada tanto aqui quanto pelo OCR mais abaixo. Se algum endereço falhar, a
+     mensagem diz qual — vale para o Google e para o CDN do Tesseract. */
+  const carregados = {};
+  function carregarScript(src){
+    if (carregados[src]) return carregados[src];
+    return carregados[src] = new Promise((ok, erro) => {
+      const el = document.createElement('script');
+      el.src = src; el.async = true;
+      el.onload = ok;
+      el.onerror = () => { delete carregados[src]; erro(new Error('não carregou ' + src)); };
+      document.head.appendChild(el);
+    });
+  }
+
+  let driveToken = null, driveAbort = null;
+
+  /* Pede o token ao Google. drive.file só dá acesso ao que for escolhido no
+     seletor — o resto do Drive continua invisível para esta página. */
+  function pedirToken(forcar){
+    return new Promise((res, rej) => {
+      const cli = google.accounts.oauth2.initTokenClient({
+        client_id: GOOGLE_CLIENT_ID,
+        scope: 'https://www.googleapis.com/auth/drive.file',
+        callback: r => r && r.access_token ? res(r.access_token)
+                                           : rej(new Error(t('driveDenied'))),
+        error_callback: e => rej(new Error(
+          e && e.type === 'popup_failed_to_open' ? t('driveBlocked') : t('driveDenied')))
+      });
+      cli.requestAccessToken({ prompt: forcar ? 'consent' : '' });
+    });
+  }
+
+  /* Se o domínio não estiver autorizado no console, ou se cookies de terceiros
+     estiverem bloqueados, o seletor nunca devolve PICKED nem CANCEL — a
+     promessa ficaria pendente para sempre e o botão travaria até recarregar a
+     página. Daí o prazo. */
+  function abrirSeletor(token){
+    return new Promise((res, rej) => {
+      let respondeu = false;
+      const limite = setTimeout(() => { if (!respondeu) rej(new Error(t('drivePicker'))); }, 90000);
+      const terminar = v => { respondeu = true; clearTimeout(limite); res(v); };
+      const view = new google.picker.DocsView(google.picker.ViewId.DOCS_VIDEOS)
+        .setIncludeFolders(true)
+        .setSelectFolderEnabled(false);
+      const b = new google.picker.PickerBuilder()
+        .setAppId(GOOGLE_APP_ID)
+        .setOAuthToken(token)
+        .setDeveloperKey(GOOGLE_API_KEY)
+        .setOrigin(location.protocol + '//' + location.host)
+        .addView(view);
+      /* Drives compartilhados: o nome da constante já mudou uma vez, então
+         só liga se ela existir nesta versão do SDK. */
+      if (google.picker.Feature && google.picker.Feature.SUPPORT_DRIVES)
+        b.enableFeature(google.picker.Feature.SUPPORT_DRIVES);
+      b.setCallback(d => {
+          const acao = d[google.picker.Response.ACTION];
+          if (acao === google.picker.Action.PICKED) terminar(d[google.picker.Response.DOCUMENTS][0]);
+          else if (acao === google.picker.Action.CANCEL) terminar(null);
+      });
+      b.build().setVisible(true);
+    });
+  }
+
+  /* Baixa em pedaços para poder mostrar progresso e permitir cancelar: um
+     vídeo de 1 GB numa chamada única deixa a interface muda por minutos. */
+  async function baixarDoDrive(doc, token){
+    driveAbort = new AbortController();
+    const url = 'https://www.googleapis.com/drive/v3/files/' +
+                encodeURIComponent(doc.id) + '?alt=media&supportsAllDrives=true';
+    const r = await fetch(url, {
+      headers: { Authorization: 'Bearer ' + token },
+      signal: driveAbort.signal
+    });
+    /* O token do Google vive cerca de uma hora. Não dá para renovar aqui: pedir
+       token abre um pop-up, e o navegador só permite pop-up logo depois de um
+       clique. No meio de um download essa permissão já expirou e a janela
+       seria bloqueada. Então descartamos o token e pedimos outro clique. */
+    if (r.status === 401) { driveToken = null; throw new Error(t('driveExpired')); }
+    /* Sob drive.file, arquivo fora da permissão responde 404, não 403 — é o
+       caso do atalho do Drive e o do App ID errado. */
+    if (r.status === 403 || r.status === 404) throw new Error(t('driveNoScope'));
+    if (!r.ok) throw new Error(t('driveErr') + ' (HTTP ' + r.status + ')');
+
+    const total = Number(r.headers.get('content-length')) || Number(doc.sizeBytes) || 0;
+    if (!r.body) return await r.blob();          // navegador sem streams: espera tudo
+
+    const leitor = r.body.getReader();
+    const partes = [];
+    let lido = 0, ultimo = 0;
+    for (;;) {
+      const { done, value } = await leitor.read();
+      if (done) break;
+      partes.push(value);
+      lido += value.length;
+      const agora = performance.now();
+      if (agora - ultimo > 120) {                // não repintar a cada chunk
+        ultimo = agora;
+        dMsg(total ? t('driveDownPct', Math.min(99, Math.round(lido/total*100)), tamanho(total))
+                   : t('driveDown', tamanho(lido)));
+      }
+    }
+    return new Blob(partes, { type: doc.mimeType || 'video/mp4' });
+  }
+
+  $('driveStop').onclick = () => { if (driveAbort) driveAbort.abort(); };
+
+  $('drive').onclick = async () => {
+    if (capturando()) return;
+    $('drive').disabled = true;
+    driveAviso = '';
+    let travei = false;          // só devolve o aviso de "não feche a aba" se fui eu que liguei
+    try {
+      dMsg(t('driveAuth'));
+      await Promise.all([
+        carregarScript('https://accounts.google.com/gsi/client'),
+        carregarScript('https://apis.google.com/js/api.js')
+      ]);
+      if (!driveToken) driveToken = await pedirToken(false);
+
+      dMsg(t('driveOpening'));
+      await new Promise((res, rej) => gapi.load('picker', { callback: res, onerror: rej }));
+      const doc = await abrirSeletor(driveToken);
+      if (!doc) { dMsg(t('driveHint')); return; }
+
+      if (Number(doc.sizeBytes) > 1610612736) driveAviso = t('driveBig', tamanho(doc.sizeBytes));
+      $('driveStop').classList.remove('hide');
+      trabalhando(true); travei = true;
+
+      const blob = await baixarDoDrive(doc, driveToken);
+      if (!blob.size) throw new Error(t('driveErr') + ' (0 bytes)');
+
+      /* Como no vídeo de exemplo: só dizer "pronto" depois que o navegador
+         realmente decodificar. O Drive entrega HEVC e ProRes sem avisar, e
+         anunciar sucesso em verde ao lado de um erro vermelho é pior que
+         nada. */
+      const abriu = new Promise((res, rej) => {
+        const limpa = () => { video.removeEventListener('loadedmetadata', s1); video.removeEventListener('error', s2); };
+        const s1 = () => { limpa(); res(); };
+        const s2 = () => { limpa(); rej(new Error(t('videoErr'))); };
+        video.addEventListener('loadedmetadata', s1);
+        video.addEventListener('error', s2);
+        setTimeout(() => { limpa(); rej(new Error(t('videoErr'))); }, 30000);
+      });
+      load(new File([blob], doc.name || 'video', { type: doc.mimeType || 'video/mp4' }));
+      await abriu;
+
+      driveAviso = '';
+      dMsg(t('driveReady', doc.name || '', tamanho(blob.size)), 'ok');
+    } catch (e) {
+      const cancelou = e && e.name === 'AbortError';
+      dMsg(cancelou ? t('driveCancelled') : ((e && e.message) || t('driveErr')),
+           cancelou ? '' : 'err');
+    } finally {
+      $('drive').disabled = false;
+      $('driveStop').classList.add('hide');
+      driveAbort = null;
+      if (travei) trabalhando(false);
+    }
   };
 
   /* ================= transcrição: texto e arquivo ================= */
@@ -1292,66 +1663,459 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
   }
   $('tr').oninput = refreshTr;
 
-  /* ================= gravação de tela =================
-     Usa apenas recursos nativos do navegador: a captura e a gravação acontecem
-     na máquina do usuário e o resultado vira um arquivo local, como qualquer outro. */
-  const podeGravar = !!(navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia &&
-                        window.MediaRecorder);
-  if (podeGravar) $('recRow').classList.remove('hide');
+  /* ================= captura ao vivo da tela =================
+     A gravação não guarda vídeo. Enquanto a tela é compartilhada, a ferramenta
+     faz três coisas ao mesmo tempo, todas na máquina do usuário:
 
-  let gravador = null, pedacos = [], tGrav = 0, relogio = null;
+       1. observa a imagem e guarda um frame sempre que a tela muda de verdade;
+       2. captura dois canais de áudio separados — o microfone e o som do
+          computador — em 16 kHz, que é o que o Whisper consome;
+       3. transcreve os dois canais em janelas, durante a gravação, marcando
+          cada fala com o canal de onde veio.
 
-  function melhorFormato(){
-    for (const m of ['video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus',
-                     'video/webm', 'video/mp4'])
-      if (MediaRecorder.isTypeSupported(m)) return m;
-    return '';
+     O vídeo em si é descartado. Uma reunião de uma hora que ocuparia perto de
+     um giga em disco termina como algumas dezenas de imagens e um texto. */
+
+  const podeGravar = !!(navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia);
+  if (podeGravar) { $('recRow').classList.remove('hide'); $('recOpts').classList.remove('hide'); }
+
+  const SR_ASR = 16000;              // taxa que o Whisper espera
+  const JANELA_S = 20;               // segundos por janela de transcrição
+  const PASSO_FRAME_MS = 700;        // com que frequência a tela é comparada
+  const RMS_MUDO = 0.004;            // abaixo disso a janela é silêncio e não vai para a GPU
+
+  let liveOn = false, liveDur = 0, liveCues = [], liveCanais = null, liveRes = '';
+  let abrindoCaptura = false, emCauda = false, pularCauda = false;
+  let liveAgora = () => 0;
+
+  /* Zera o que uma captura deixou para trás. Chamado ao carregar qualquer
+     arquivo e ao começar uma captura nova. */
+  function limparLive(){
+    /* Os frames de uma captura não têm vídeo por trás: se ficassem na tela ao
+       carregar outro arquivo, o PDF sairia com as imagens da gravação antiga e
+       o nome do vídeo novo. Frames vindos de arquivo não são tocados — ali a
+       varredura já os substitui sozinha. */
+    if (liveDur > 0) {
+      frames = [];
+      $('prevCard').classList.add('hide');
+      $('thumbs').innerHTML = '';
+      $('grabbed').textContent = '';
+      $('liveBox').classList.add('hide');
+      $('liveTail').innerHTML = '';
+      $('liveStat').textContent = '';
+    }
+    liveDur = 0; liveRes = ''; liveCues = []; liveCanais = null;
   }
+
+  /* Todos os caminhos que trocam o vídeo passam por aqui antes de agir: durante
+     a captura, carregar um arquivo apagaria a gravação em curso pela metade. */
+  /* O relógio da gravação reescreve $('recMsg') a cada segundo. Um aviso posto
+     ali direto sumiria antes de ser lido, então ele fica guardado com prazo e o
+     relógio o repete enquanto vale. */
+  let avisoCurto = '', avisoAte = 0;
+  function avisar(msg, seg){
+    avisoCurto = msg; avisoAte = performance.now() + (seg || 4) * 1000;
+    pintarRecMsg();
+  }
+  let pintarRecMsg = () => {
+    $('recMsg').innerHTML = (performance.now() < avisoAte && avisoCurto)
+      ? `<span class="err">${avisoCurto}</span>` : t('recHint');
+  };
+
+  function capturando(){
+    if (!liveOn && !emCauda) return false;
+    avisar(t('recBusy'), 5);
+    return true;
+  }
+
+  /* Um vídeo carregado de arquivo tem duração no cabeçalho; uma captura ao vivo
+     não tem — o elemento reporta Infinity. Tudo que precisa da duração passa
+     por aqui. */
+  function duracaoTotal(){
+    if (liveDur > 0) return liveDur;
+    return (isFinite(video.duration) && video.duration > 0) ? video.duration : 0;
+  }
+
+  /* Depois de uma captura ao vivo o srcObject é solto e o elemento passa a
+     reportar 0x0. A resolução real fica guardada durante a gravação. */
+  function resolucao(){
+    if (video.videoWidth) return video.videoWidth + ' x ' + video.videoHeight;
+    return liveRes || '—';
+  }
+
+  /* O processador roda na thread de áudio, não na principal. Isso importa
+     porque o Whisper ocupa a thread principal em rajadas: com ScriptProcessor
+     o áudio sairia picotado exatamente enquanto a transcrição trabalha. */
+  const WORKLET_SRC = `
+    class Cap extends AudioWorkletProcessor {
+      constructor(){ super(); this.acc = []; this.n = 0; }
+      process(inputs){
+        const ch = inputs[0] && inputs[0][0];
+        if (ch && ch.length) {
+          this.acc.push(new Float32Array(ch));
+          this.n += ch.length;
+          if (this.n >= 4096) {
+            const out = new Float32Array(this.n);
+            let o = 0;
+            for (const a of this.acc) { out.set(a, o); o += a.length; }
+            this.acc = []; this.n = 0;
+            this.port.postMessage(out, [out.buffer]);
+          }
+        }
+        return true;
+      }
+    }
+    registerProcessor('cc-cap', Cap);
+  `;
+  let workletUrl = null;
+
+  /* Liga um MediaStream a um acumulador de amostras. Devolve um objeto que sabe
+     quantos segundos já tem e entrega a próxima janela quando ela completa. */
+  async function abrirCanal(ctx, stream, rotulo, classe){
+    const src = ctx.createMediaStreamSource(stream);
+    const pend = [];              // Float32Array ainda não consumidos
+    let disponivel = 0, consumidos = 0;
+
+    const receber = amostras => { pend.push(amostras); disponivel += amostras.length; };
+
+    let no;
+    if (ctx.audioWorklet) {
+      if (!workletUrl) workletUrl = URL.createObjectURL(new Blob([WORKLET_SRC], { type: 'text/javascript' }));
+      await ctx.audioWorklet.addModule(workletUrl);
+      no = new AudioWorkletNode(ctx, 'cc-cap');
+      no.port.onmessage = ev => receber(ev.data);
+    } else {
+      // navegador antigo: ScriptProcessor ainda funciona, só é mais sujeito a engasgo
+      no = ctx.createScriptProcessor(4096, 1, 1);
+      no.onaudioprocess = ev => receber(new Float32Array(ev.inputBuffer.getChannelData(0)));
+    }
+    src.connect(no);
+    // um ganho zerado como destino: sem isso alguns navegadores não rodam o nó,
+    // e com ganho real o áudio do computador voltaria pelos alto-falantes em eco
+    const mudo = ctx.createGain(); mudo.gain.value = 0;
+    no.connect(mudo); mudo.connect(ctx.destination);
+
+    return {
+      rotulo, classe,
+      segundos: () => disponivel / SR_ASR,
+      /* Retira n segundos do começo da fila. Devolve null se não houver. */
+      tirar(seg){
+        const querAmostras = Math.floor(seg * SR_ASR);
+        if (disponivel < querAmostras || querAmostras <= 0) return null;
+        const out = new Float32Array(querAmostras);
+        let escrito = 0;
+        while (escrito < querAmostras) {
+          const bloco = pend[0];
+          const cabe = Math.min(bloco.length, querAmostras - escrito);
+          out.set(bloco.subarray(0, cabe), escrito);
+          escrito += cabe;
+          if (cabe === bloco.length) pend.shift(); else pend[0] = bloco.subarray(cabe);
+        }
+        disponivel -= querAmostras;
+        const t0 = consumidos / SR_ASR;
+        consumidos += querAmostras;
+        return { dados: out, t0 };
+      },
+      /* No fim da gravação, o resto que não completou uma janela. */
+      resto(){
+        if (disponivel <= 0) return null;
+        return this.tirar(disponivel / SR_ASR);
+      },
+      fechar(){ try { no.disconnect(); src.disconnect(); mudo.disconnect(); } catch (e) {} }
+    };
+  }
+
+  /* Procura sinal em blocos de um segundo, e não na média da janela inteira.
+     Com a média, meio segundo de fala diluído em vinte segundos de silêncio
+     fica abaixo do corte e a frase seria jogada fora sem nunca chegar ao
+     modelo — exatamente o caso de quem fala pouco no próprio microfone. */
+  function temSinal(a){
+    const bloco = SR_ASR;
+    for (let i = 0; i < a.length; i += bloco) {
+      const fim = Math.min(a.length, i + bloco);
+      const passo = Math.max(1, Math.floor((fim - i) / 800));
+      let soma = 0, n = 0;
+      for (let k = i; k < fim; k += passo) { soma += a[k]*a[k]; n++; }
+      if (Math.sqrt(soma / Math.max(1, n)) >= RMS_MUDO) return true;
+    }
+    return false;
+  }
+
+  /* Fila serializada: as janelas dos dois canais entram aqui e são transcritas
+     uma de cada vez. Rodar as duas em paralelo só faria elas disputarem a mesma
+     GPU e chegarem juntas mais tarde. */
+  const filaAsr = [];
+  let asrRodando = false, asrPendentes = 0;
+
+  function enfileirar(canal, janela){
+    if (!janela) return;
+    if (!temSinal(janela.dados)) return;           // silêncio não vai para a GPU
+    filaAsr.push({ canal, ...janela });
+    asrPendentes++;
+    atualizarLive();
+    bombearAsr();
+  }
+
+  async function bombearAsr(){
+    if (asrRodando || !pipe) return;
+    asrRodando = true;
+    while (filaAsr.length) {
+      if (pularCauda) { filaAsr.length = 0; asrPendentes = 0; atualizarLive(); break; }
+      const j = filaAsr.shift();
+      try {
+        const opts = { return_timestamps: true, task: 'transcribe' };
+        const lang = $('lang').value;
+        if (lang) opts.language = lang;
+        const r = await pipe(j.dados, opts);
+        const chunks = (r && r.chunks && r.chunks.length) ? r.chunks
+          : [{ timestamp: [0, j.dados.length / SR_ASR], text: (r && r.text) || '' }];
+        chunks.forEach(c => {
+          const txt = (c.text || '').trim();
+          if (!txt) return;
+          const a = j.t0 + (c.timestamp[0] ?? 0);
+          const b = j.t0 + (c.timestamp[1] ?? (c.timestamp[0] ?? 0) + 2);
+          liveCues.push({ a, b: Math.max(b, a + 0.4), t: txt, rot: j.canal.rotulo, cls: j.canal.classe });
+        });
+        escreverTranscricao();
+      } catch (e) {
+        // uma janela que falha não pode derrubar a gravação inteira
+      }
+      asrPendentes--;
+      atualizarLive();
+    }
+    asrRodando = false;
+  }
+
+  function escreverTranscricao(){
+    const cs = liveCues.slice().sort((x, y) => x.a - y.a);
+    $('tr').value = 'WEBVTT\n\n' + cs.map(c =>
+      `${vttTime(c.a)} --> ${vttTime(c.b)}\n${c.rot}: ${c.t}`).join('\n\n');
+    refreshTr();
+    // as últimas falas, para a pessoa ver que está funcionando
+    $('liveTail').innerHTML = cs.slice(-6).map(c =>
+      `<p><span class="tm">${fmt(c.a)}</span>` +
+      `<span class="who${c.cls === 'sys' ? ' sys' : ''}">${c.rot}:</span> ${c.t}</p>`).join('');
+    $('liveTail').scrollTop = $('liveTail').scrollHeight;
+  }
+
+  function atualizarLive(){
+    if (emCauda) {
+      $('liveStat').textContent = t('recTailN', asrPendentes);
+      return;
+    }
+    if (!liveOn) return;
+    $('liveStat').textContent = t('recStat', frames.length,
+      asrPendentes ? t('recQueue', asrPendentes) : t('recIdle'));
+  }
+
+  let pararLive = null;
 
   $('rec').onclick = async () => {
     if (!podeGravar) { $('recMsg').innerHTML = `<span class="err">${t('recNo')}</span>`; return; }
-    let fluxo;
+    /* A trava fecha antes do primeiro await. `liveOn` só liga bem mais adiante,
+       depois de permissões e do modelo; sem esta linha, dois cliques rápidos
+       abrem duas capturas paralelas e a primeira fica órfã, com os relógios
+       rodando e a tela compartilhada para sempre. */
+    if (liveOn || abrindoCaptura) return;
+    abrindoCaptura = true;
+
+    const querMic = $('recMic').checked;
+    let telaStream = null, micStream = null, ctx = null;
+    const canais = [];
+    let relogio = null, relFrames = null;
+
+    // ---- permissões, antes de qualquer preparo caro ----
     try {
-      fluxo = await navigator.mediaDevices.getDisplayMedia({
-        video: { frameRate: 12 },        // 12 q/s bastam: o que interessa é a troca de tela
+      telaStream = await navigator.mediaDevices.getDisplayMedia({
+        video: { frameRate: 12 },     // 12 q/s bastam: o que interessa é a troca de tela
         audio: true
       });
     } catch (e) {
       $('recMsg').innerHTML = `<span class="err">${t('recDeny')}</span>`;
       return;
     }
+    if (querMic) {
+      try {
+        micStream = await navigator.mediaDevices.getUserMedia({
+          audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }
+        });
+      } catch (e) { micStream = null; }
+    }
 
-    pedacos = [];
-    const tipo = melhorFormato();
-    gravador = new MediaRecorder(fluxo, tipo ? { mimeType: tipo } : undefined);
-    gravador.ondataavailable = ev => { if (ev.data && ev.data.size) pedacos.push(ev.data); };
+    const temSom = telaStream.getAudioTracks().length > 0;
+    const temMic = !!micStream;
+    const avisos = [];
+    if (!temSom && !temMic) avisos.push(t('recAudioNo'));
+    else if (querMic && !temMic) avisos.push(t('recMicNo'));
+    else if (!temSom && temMic) avisos.push(t('recSysNo'));
 
-    gravador.onstop = () => {
-      clearInterval(relogio);
-      fluxo.getTracks().forEach(t => t.stop());
-      $('rec').classList.remove('hide'); $('recStop').classList.add('hide');
-      trabalhando(false);
-      const blob = new Blob(pedacos, { type: pedacos[0] ? pedacos[0].type : 'video/webm' });
-      if (!blob.size) { $('recMsg').innerHTML = `<span class="err">${t('recEmpty')}</span>`; return; }
-      const ext = (blob.type.indexOf('mp4') >= 0) ? 'mp4' : 'webm';
-      load(new File([blob], 'gravacao-' + fmt(tGrav).replace(/:/g,'-') + '.' + ext, { type: blob.type }));
-      $('recMsg').innerHTML = `<span class="ok">${t('recDone', fmt(tGrav))}</span>`;
+    const trilhaTela = telaStream.getVideoTracks()[0];
+    const morreu = () => !trilhaTela || trilhaTela.readyState === 'ended';
+    const desistir = msg => {
+      telaStream.getTracks().forEach(x => x.stop());
+      if (micStream) micStream.getTracks().forEach(x => x.stop());
+      $('recMsg').innerHTML = `<span class="err">${msg}</span>`;
+      $('rec').disabled = false;
+      abrindoCaptura = false;
     };
 
-    // se a pessoa parar o compartilhamento pela barra do navegador, encerramos junto
-    fluxo.getVideoTracks()[0].addEventListener('ended', () => {
-      if (gravador && gravador.state !== 'inactive') gravador.stop();
-    });
+    // ---- o modelo precisa estar pronto antes de começar ----
+    $('rec').disabled = true;
+    let podeTranscrever = false;
+    if (temSom || micStream) {
+      try {
+        $('recMsg').textContent = t('recPrep');
+        const modelId = $('model').value;
+        if (pipeId !== modelId) { pipe = await buildPipe(modelId); pipeId = modelId; }
+        podeTranscrever = true;
+        prog(null); st('');
+      } catch (e) {
+        avisos.push(t('recNoModel'));
+        prog(null); st('');
+      }
+    }
+    $('rec').disabled = false;
+    /* Baixar o modelo leva dezenas de segundos. Nesse intervalo a pessoa pode
+       encerrar o compartilhamento pela barra do navegador; seguir em frente
+       gravaria uma tela morta, sem imagem e sem som. */
+    if (morreu()) return desistir(t('recEnded'));
 
-    gravador.start(1000);
-    tGrav = 0;
+    // ---- estado inicial da captura ----
+    frames = []; manual = []; limparLive();
+    $('grabbed').textContent = '';
+    filaAsr.length = 0; asrPendentes = 0;
+    $('tr').value = ''; refreshTr();
+    $('liveTail').innerHTML = '';
+    $('liveBox').classList.remove('hide');
+    $('prevCard').classList.add('hide');
+
+    video.srcObject = telaStream;
+    video.muted = true;
+    try { await video.play(); } catch (e) {}
+    $('playerBox').classList.remove('hide');
+
+    fileName = t('recFile');
+    fileSize = 0;
+    currentFile = null;
+
+    const thr = [0,26,19,13,9,5.5,4,2.8,1.8,1][+$('sens').value];
+    const maxf = Math.max(1, +$('maxf').value || 60);
+    const q = parseFloat($('quality').value);
+
+    /* Os canais de áudio abrem por último, imediatamente antes do relógio.
+       O áudio começa a acumular assim que o nó é conectado, então abri-los
+       antes do `await video.play()` faria a transcrição nascer adiantada em
+       relação aos frames — som e imagem sairiam fora de sincronia no PDF. */
+    if (podeTranscrever) {
+      try {
+        const AC = window.AudioContext || window.webkitAudioContext;
+        ctx = new AC({ sampleRate: SR_ASR });
+        if (ctx.state === 'suspended') await ctx.resume();
+        if (temSom)    canais.push(await abrirCanal(ctx, telaStream, t('spkSys'), 'sys'));
+        if (micStream) canais.push(await abrirCanal(ctx, micStream,  t('spkMic'), 'mic'));
+      } catch (e) {
+        avisos.push(t('recNoAudio'));
+        canais.length = 0;
+      }
+    }
+    liveCanais = canais.map(c => c.rotulo);
+
+    const t0 = performance.now();
+    liveAgora = () => (performance.now() - t0) / 1000;
+    const agora = liveAgora;
+
+    liveOn = true;
+    abrindoCaptura = false;
     trabalhando(true);
     $('rec').classList.add('hide'); $('recStop').classList.remove('hide');
-    $('recMsg').textContent = t('recRun', fmt(0));
-    relogio = setInterval(() => { tGrav++; $('recMsg').textContent = t('recRun', fmt(tGrav)); }, 1000);
+    pintarRecMsg = () => {
+      const extra = (performance.now() < avisoAte && avisoCurto) ? avisoCurto : '';
+      const alerta = [...avisos, extra].filter(Boolean).join(' ');
+      $('recMsg').innerHTML = t('recRun', fmt(Math.floor(agora()))) +
+        (alerta ? ` <span class="err">${alerta}</span>` : '');
+    };
+    pintarRecMsg();
+
+    // ---- laço dos frames: guarda só quando a tela muda ----
+    let prevSig = null;
+    relFrames = setInterval(() => {
+      if (!liveOn || !video.videoWidth) return;
+      if (frames.length >= maxf) return;
+      let sig;
+      try { sig = signature(); } catch (e) { return; }
+      if (!liveRes) { liveRes = video.videoWidth + ' x ' + video.videoHeight; showMeta(); }
+      if (prevSig === null || diff(prevSig, sig) >= thr) {
+        frames.push({ t: agora(), img: snap(900, q), keep: true, sig });
+        prevSig = sig;
+        atualizarLive();
+      }
+    }, PASSO_FRAME_MS);
+
+    // ---- relógio e janelas de transcrição ----
+    relogio = setInterval(() => {
+      pintarRecMsg();
+      canais.forEach(c => { while (c.segundos() >= JANELA_S) enfileirar(c, c.tirar(JANELA_S)); });
+    }, 1000);
+
+    atualizarLive();
+
+    // se a pessoa encerrar o compartilhamento pela barra do navegador
+    telaStream.getVideoTracks()[0].addEventListener('ended', () => { if (liveOn) pararLive(); });
+
+    pararLive = async () => {
+      if (!liveOn) return;
+      liveOn = false;
+      clearInterval(relogio); clearInterval(relFrames);
+      pintarRecMsg = () => {};
+      liveDur = agora();
+      emCauda = true; pularCauda = false;
+      $('recStop').textContent = t('recSkip');
+      $('recMsg').textContent = t('recTail');
+      atualizarLive();
+
+      // o resto do áudio que não completou uma janela ainda vale transcrever
+      canais.forEach(c => enfileirar(c, c.resto()));
+      canais.forEach(c => c.fechar());
+      telaStream.getTracks().forEach(x => x.stop());
+      if (micStream) micStream.getTracks().forEach(x => x.stop());
+
+      await bombearAsr();
+      while (asrRodando) await new Promise(r => setTimeout(r, 150));
+      emCauda = false; pularCauda = false;
+      $('recStop').textContent = t('recStopBtn');
+
+      if (ctx) { try { await ctx.close(); } catch (e) {} }
+      video.pause();
+      video.srcObject = null;
+      video.removeAttribute('src');
+      video.load();
+      $('playerBox').classList.add('hide');
+
+      frames.sort((a, b) => a.t - b.t);
+      $('rec').classList.remove('hide');
+      $('recStop').classList.add('hide'); $('recStop').disabled = false;
+      trabalhando(false);
+      abrindoCaptura = false;
+
+      if (!frames.length && !liveCues.length) {
+        $('recMsg').innerHTML = `<span class="err">${t('recEmpty')}</span>`;
+        $('liveBox').classList.add('hide');
+        return;
+      }
+      $('liveStat').textContent = '';
+      showMeta();
+      $('recMsg').innerHTML = `<span class="ok">${t('recDone2', fmt(liveDur), frames.length, liveCues.length)}</span>`;
+      $('prevCard').classList.remove('hide');
+      $('extract').disabled = true;      // não há vídeo para varrer de novo
+      $('auto').disabled = true;
+      render();
+    };
   };
 
-  $('recStop').onclick = () => { if (gravador && gravador.state !== 'inactive') gravador.stop(); };
+  $('recStop').onclick = () => {
+    if (emCauda) { pularCauda = true; return; }   // não esperar o resto da transcrição
+    if (pararLive) pararLive();
+  };
 
   /* ---- exportar a transcrição em .vtt / .srt / .txt ---- */
   function tempoLegenda(seg, virgula){
@@ -1373,7 +2137,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
   }
 
   function baixar(texto, ext){
-    const nome = (fileName || 'transcricao').replace(/\.[^.]+$/, '');
+    const nome = (fileName || 'transcricao').replace(/\.[^.]+$/, '').replace(/\s+/g, '-');
     const a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob([texto], { type: 'text/plain;charset=utf-8' }));
     a.download = `${nome}.${ext}`;
@@ -1765,7 +2529,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
   $('mute').onclick = async () => {
     if (!frames.length) return;
     const { cues } = parseTranscript($('tr').value);
-    const dur = video.duration;
+    const dur = duracaoTotal();
     const janelas = frames.map((f, i) => [f.t, i + 1 < frames.length ? frames[i+1].t : dur + 0.001]);
     let temFala;
 
@@ -1816,15 +2580,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
   const OCR_LANG = { pt: 'por', en: 'eng', es: 'spa' };
   let ocrParar = false;
 
-  function carregarScript(src){
-    return new Promise((ok, erro) => {
-      const el = document.createElement('script');
-      el.src = src;
-      el.onload = ok;
-      el.onerror = () => erro(new Error('não carregou ' + src));
-      document.head.appendChild(el);
-    });
-  }
+  /* carregarScript() é declarada uma única vez, junto do bloco do Google Drive. */
 
   $('ocrStop').onclick = () => { ocrParar = true; };
 
@@ -1893,7 +2649,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       gerador: 'ClipContext',
       video: {
         arquivo: fileName,
-        duracaoSegundos: +video.duration.toFixed(2),
+        duracaoSegundos: +duracaoTotal().toFixed(2),
         largura: video.videoWidth,
         altura: video.videoHeight,
         tamanhoBytes: fileSize
@@ -1926,11 +2682,13 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       : t('goals')[g];
 
     const linhas = [
-      t('pr1', fileName || t('prNoName')) + (video.duration ? t('pr1b', fmt(video.duration)) : '.'),
+      t('pr1', fileName || t('prNoName')) + (duracaoTotal() ? t('pr1b', fmt(duracaoTotal())) : '.'),
       '',
       t('pr2', keep.length) + (cues.length ? t('pr2cues') : t('pr2no')) +
         (keep.some(f => f.ocr) ? ' ' + t('pr2ocr') : ''),
       '',
+      // captura ao vivo: sem esta linha o modelo não sabe o que os rótulos significam
+      ...(liveCanais && liveCanais.length > 1 && cues.length ? [t('prSpk'), ''] : []),
       t('pr3'),
       t('pr4'),
       cues.length ? t('pr5cues') : t('pr5no'),
@@ -1970,7 +2728,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
   $('go').onclick = async () => {
     const kept = frames.filter(f => f.keep);
     if (!kept.length) return;
-    const dur = video.duration;
+    const dur = duracaoTotal();
     const { cues, plain } = parseTranscript($('tr').value);
     let layout = $('layout').value;
     if (layout === 'auto') layout = cues.length ? 'full' : 'grid';
@@ -1982,7 +2740,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({ unit:'mm', format:'a4', compress:true });
     const PW = 210, PH = 297, M = 15, CW = PW - M*2;
-    const base = fileName.replace(/\.[^.]+$/, '');
+    const base = fileName.replace(/\.[^.]+$/, '').replace(/\s+/g, '-');
     let page = 0;
     const foot = () => {
       page++;
@@ -1998,8 +2756,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     doc.setDrawColor(215).line(M, 52, PW - M, 52);
     const info = [
       [t('pDur'), fmt(dur)],
-      [t('pRes'), video.videoWidth + ' x ' + video.videoHeight],
-      [t('pSize'), (fileSize/1048576).toFixed(1) + ' MB'],
+      [t('pRes'), resolucao()],
+      [t('pSize'), fileSize ? (fileSize/1048576).toFixed(1) + ' MB' : t('pNoFile')],
       [t('pFrames'), String(kept.length)],
       [t('pTr'), cues.length ? t('pTrCues', cues.length)
                  : (plain ? t('pTrPlain') : t('pTrNone'))]
