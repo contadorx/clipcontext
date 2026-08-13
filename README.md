@@ -26,12 +26,15 @@ Modelos de texto não assistem vídeo. O que eles leem bem é: imagens dos momen
   rotulando cada fala com sua origem. Uma reunião de uma hora que ocuparia perto de um giga em disco
   termina como algumas dezenas de imagens e um texto. Nada de vídeo é escrito em lugar nenhum.
 - **Recorta o trecho a analisar**: em vez de varrer uma hora inteira, aponte `10:00` a `25:00`.
-- **Exporta a transcrição** em `.vtt`, `.srt` ou `.txt`, e o resultado inteiro em **JSON** (instantes,
-  transcrição, texto lido da tela e as imagens em base64) para outro programa consumir.
+- **Quatro saídas do mesmo material**: o **PDF**, um **.docx** editável, um **.zip só com as figuras**
+  e o **JSON** completo (instantes, transcrição, texto lido da tela e imagens em base64). O `.docx` e o
+  `.zip` são montados por um escritor de ZIP escrito à mão — um `.docx` é um zip de XML, então o mesmo
+  código serve aos dois e o projeto não ganha dependência nenhuma.
+- **Exporta a transcrição** em `.vtt`, `.srt` ou `.txt`.
 - **Lê o texto que aparece na tela** (OCR local) e inclui no PDF, no JSON e no aviso ao modelo.
 - **Descarta frames sem fala**, pela transcrição quando existe, ou medindo a energia do áudio quando não.
-- **Índice no PDF**: a primeira página lista cada instante com o começo da fala, dando ao modelo um mapa
-  do vídeo antes das imagens.
+- **Índice no PDF e no Word**: a primeira página lista cada instante com o começo da fala, dando ao
+  modelo um mapa do vídeo antes das imagens.
 
 ## Estrutura
 
@@ -80,6 +83,26 @@ frase seria descartada sem nunca chegar ao modelo.
 
 O modelo é carregado **antes** de a gravação começar, porque baixá-lo no meio travaria a captura. Se ele
 não carregar, a gravação continua e guarda os frames sem transcrever.
+
+## As saídas
+
+| Saída | Para quê |
+|---|---|
+| **PDF** | entregar a um modelo de linguagem — é o formato que eles leem melhor |
+| **Word (.docx)** | relatório editável: capa, índice dos instantes, cada frame com a fala daquele trecho, e a transcrição completa no fim |
+| **Zip das figuras** | só os JPEGs, nomeados `0001-00-01-45.jpg` — ordem primeiro para o gerenciador de arquivos ordenar certo, instante depois para saber de onde a imagem veio |
+| **JSON** | para outro programa consumir |
+
+O `.docx` sai pronto do navegador, sem servidor e sem biblioteca: um `.docx` é um zip com XML dentro, e
+o escritor de ZIP (método armazenado, com CRC-32 próprio) já existia para o zip das figuras. Guardar sem
+compressão é deliberado — as imagens já são JPEG, e deflate sobre elas economizaria quase nada em troca
+de segundos de espera.
+
+Dois detalhes que só aparecem quando dá errado: a ordem dos elementos dentro de `w:rPr` **não é
+estética** — o schema do OOXML é uma *sequence*, e com `w:color` depois de `w:sz` o LibreOffice tolera
+mas o Word recusa o arquivo inteiro. E a imagem tem teto de altura: sem ele, um vídeo em retrato gera
+uma figura de quase 11 polegadas, que estoura a área útil da página e empurra a legenda para longe do
+frame.
 
 ## Google Drive
 

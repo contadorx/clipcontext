@@ -293,6 +293,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
         <option value="full" data-i18n="layFull"></option>
         <option value="grid" data-i18n="layGrid"></option>
       </select>
+      <button class="ghost" id="docx" data-i18n="docxBtn"></button>
+      <button class="ghost" id="zip" data-i18n="zipBtn"></button>
       <button class="ghost" id="json" data-i18n="jsonBtn"></button>
       <span class="status" id="pdfStatus"></span>
     </div>
@@ -383,6 +385,11 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recDone2:'Pronto: {0} de captura, {1} frames e {2} falas. Nenhum vídeo foi guardado no seu computador.',
       spkMic:'Microfone', spkSys:'Computador',
       recFile:'captura de tela', pNoFile:'nenhum arquivo guardado',
+      docxBtn:'Word (.docx)', zipBtn:'Zip das figuras', wFrames:'Frames neste documento',
+      pkgBuilding:'Montando o arquivo…',
+      docxDone:'Documento do Word com {0} frames — pronto para editar.',
+      zipDone:'{0} imagens no zip, sem mais nada junto.',
+      pkgErr:'Não consegui montar o arquivo. [{0}]',
       recAudioNo:'Sem áudio nenhum: nada será transcrito, só os frames serão guardados.',
       recEnded:'O compartilhamento foi encerrado antes de a gravação começar.',
       recBusy:'Termine a captura antes de carregar outro vídeo.',
@@ -535,6 +542,11 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recDone2:'Done: {0} captured, {1} frames and {2} lines of speech. No video was kept on your computer.',
       spkMic:'Microphone', spkSys:'Computer',
       recFile:'screen capture', pNoFile:'no file kept',
+      docxBtn:'Word (.docx)', zipBtn:'Zip of the images', wFrames:'Frames in this document',
+      pkgBuilding:'Building the file…',
+      docxDone:'Word document with {0} frames — ready to edit.',
+      zipDone:'{0} images in the zip, nothing else alongside.',
+      pkgErr:'Could not build the file. [{0}]',
       recAudioNo:'No audio at all: nothing will be transcribed, only the frames are kept.',
       recEnded:'Screen sharing ended before the recording could start.',
       recBusy:'Finish the capture before loading another video.',
@@ -685,6 +697,11 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recDone2:'Listo: {0} de captura, {1} fotogramas y {2} intervenciones. No se guardó ningún vídeo en tu ordenador.',
       spkMic:'Micrófono', spkSys:'Ordenador',
       recFile:'captura de pantalla', pNoFile:'ningún archivo guardado',
+      docxBtn:'Word (.docx)', zipBtn:'Zip de las imágenes', wFrames:'Fotogramas en este documento',
+      pkgBuilding:'Montando el archivo…',
+      docxDone:'Documento de Word con {0} fotogramas — listo para editar.',
+      zipDone:'{0} imágenes en el zip, sin nada más.',
+      pkgErr:'No pude montar el archivo. [{0}]',
       recAudioNo:'Sin audio alguno: no se transcribirá nada, solo se guardarán los fotogramas.',
       recEnded:'El uso compartido terminó antes de que empezara la grabación.',
       recBusy:'Termina la captura antes de cargar otro vídeo.',
@@ -936,7 +953,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   }
 
   function showMeta(){
-    if (!video.videoWidth && !liveRes) return;
+    if (!video.videoWidth && !liveW) return;
     $('meta').innerHTML =
       `<span>${t('mDur')} <b>${fmt(duracaoTotal())}</b></span>` +
       `<span>${t('mRes')} <b>${resolucao()}</b></span>` +
@@ -1291,7 +1308,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   const PASSO_FRAME_MS = 700;        // com que frequência a tela é comparada
   const RMS_MUDO = 0.004;            // abaixo disso a janela é silêncio e não vai para a GPU
 
-  let liveOn = false, liveDur = 0, liveCues = [], liveCanais = null, liveRes = '';
+  let liveOn = false, liveDur = 0, liveCues = [], liveCanais = null, liveW = 0, liveH = 0;
   let abrindoCaptura = false, emCauda = false, pularCauda = false;
   let liveAgora = () => 0;
 
@@ -1311,7 +1328,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       $('liveTail').innerHTML = '';
       $('liveStat').textContent = '';
     }
-    liveDur = 0; liveRes = ''; liveCues = []; liveCanais = null;
+    liveDur = 0; liveW = 0; liveH = 0; liveCues = []; liveCanais = null;
   }
 
   /* Todos os caminhos que trocam o vídeo passam por aqui antes de agir: durante
@@ -1346,8 +1363,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   /* Depois de uma captura ao vivo o srcObject é solto e o elemento passa a
      reportar 0x0. A resolução real fica guardada durante a gravação. */
   function resolucao(){
-    if (video.videoWidth) return video.videoWidth + ' x ' + video.videoHeight;
-    return liveRes || '—';
+    const w = video.videoWidth || liveW, h = video.videoHeight || liveH;
+    return w ? w + ' x ' + h : '—';
   }
 
   /* O processador roda na thread de áudio, não na principal. Isso importa
@@ -1650,7 +1667,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       if (frames.length >= maxf) return;
       let sig;
       try { sig = signature(); } catch (e) { return; }
-      if (!liveRes) { liveRes = video.videoWidth + ' x ' + video.videoHeight; showMeta(); }
+      if (!liveW) { liveW = video.videoWidth; liveH = video.videoHeight; showMeta(); }
       if (prevSig === null || diff(prevSig, sig) >= thr) {
         frames.push({ t: agora(), img: snap(900, q), keep: true, sig });
         prevSig = sig;
@@ -2012,7 +2029,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     const maxf = Math.max(1, +$('maxf').value || 60);
     const px = 900;
 
-    $('extract').disabled = true; $('go').disabled = true;
+    $('extract').disabled = true;
+    $('go').disabled = $('docx').disabled = $('zip').disabled = true;
     $('cancel').classList.remove('hide');
     trabalhando(true);
     $('barWrap').classList.remove('hide');
@@ -2082,7 +2100,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     const parou = stop ? ` <span class="err">${tr('stopped')}</span>` : '';
     $('status').innerHTML = `<span class="ok">${tr('extracted', frames.length)}</span>${tr('reviewNext')}` +
       avisoFaixa + parou + (limited ? `<span class="err">${limited}</span>` : '');
-    $('extract').disabled = false; $('go').disabled = false;
+    $('extract').disabled = false;
+    $('go').disabled = $('docx').disabled = $('zip').disabled = false;
     $('cancel').classList.add('hide');
     trabalhando(false);
     stop = false;
@@ -2114,7 +2133,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     $('nOff').textContent = frames.length - keep.length;
     const bytes = keep.reduce((s,f) => s + f.img.url.length * 0.75, 0) + 40000;
     $('size').textContent = (bytes/1048576).toFixed(1);
-    $('go').disabled = !keep.length;
+    $('go').disabled = $('docx').disabled = $('zip').disabled = !keep.length;
     if (frames.length) buildPrompt();
   }
 
@@ -2257,8 +2276,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       video: {
         arquivo: fileName,
         duracaoSegundos: +duracaoTotal().toFixed(2),
-        largura: video.videoWidth,
-        altura: video.videoHeight,
+        largura: video.videoWidth || liveW,
+        altura: video.videoHeight || liveH,
         tamanhoBytes: fileSize
       },
       frames: kept.map((f, i) => ({
@@ -2332,6 +2351,308 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   };
 
   /* ================= PDF ================= */
+  /* ================= empacotamento: .zip e .docx =================
+     Um .docx é um zip com XML dentro, então o mesmo escritor atende às duas
+     saídas — e o projeto não ganha dependência nenhuma, o que importa porque
+     o build offline precisa continuar sendo um arquivo só.
+
+     Tudo é guardado sem compressão (método 0). As imagens já são JPEG: deflate
+     sobre elas economiza quase nada e custaria segundos de espera. */
+
+  const CRC_TAB = (() => {
+    const t = new Uint32Array(256);
+    for (let n = 0; n < 256; n++) {
+      let c = n;
+      for (let k = 0; k < 8; k++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+      t[n] = c >>> 0;
+    }
+    return t;
+  })();
+
+  function crc32(u8){
+    let c = 0xFFFFFFFF;
+    for (let i = 0; i < u8.length; i++) c = CRC_TAB[(c ^ u8[i]) & 0xFF] ^ (c >>> 8);
+    return (c ^ 0xFFFFFFFF) >>> 0;
+  }
+
+  const bytesDe = s => new TextEncoder().encode(s);
+
+  /* data:image/jpeg;base64,... -> bytes */
+  function bytesDaImagem(dataUrl){
+    const bin = atob(dataUrl.slice(dataUrl.indexOf(',') + 1));
+    const u8 = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
+    return u8;
+  }
+
+  /* entradas: [{ nome, dados }], onde `dados` é um Uint8Array ou uma função que
+     o produz. A forma de função existe por memória: com 400 frames as imagens
+     somam mais de 100 MB, e decodificar todas antes de começar derruba a aba em
+     navegador de celular. Assim cada imagem é decodificada, copiada para um
+     Blob (que o navegador pode mandar para o disco) e liberada em seguida. */
+  function zipar(entradas, tipo){
+    const partes = [], central = [];
+    let desloc = 0;
+    for (const e of entradas) {
+      const dados = typeof e.dados === 'function' ? e.dados() : e.dados;
+      const nome = bytesDe(e.nome), crc = crc32(dados), n = dados.length;
+
+      const local = new Uint8Array(30 + nome.length);
+      const lv = new DataView(local.buffer);
+      lv.setUint32(0, 0x04034b50, true);
+      lv.setUint16(4, 20, true);          // versão mínima para extrair
+      lv.setUint16(6, 0x0800, true);      // nomes em UTF-8
+      lv.setUint16(8, 0, true);           // método 0: armazenado
+      lv.setUint16(10, 0, true);          // hora
+      lv.setUint16(12, 0x21, true);       // data: 1º/1/1980, fixa e reprodutível
+      lv.setUint32(14, crc, true);
+      lv.setUint32(18, n, true);
+      lv.setUint32(22, n, true);
+      lv.setUint16(26, nome.length, true);
+      lv.setUint16(28, 0, true);
+      local.set(nome, 30);
+      // vira Blob já: o Uint8Array pode ser coletado antes da próxima volta
+      partes.push(new Blob([local, dados]));
+
+      const c = new Uint8Array(46 + nome.length);
+      const cv = new DataView(c.buffer);
+      cv.setUint32(0, 0x02014b50, true);
+      cv.setUint16(4, 20, true);
+      cv.setUint16(6, 20, true);
+      cv.setUint16(8, 0x0800, true);
+      cv.setUint16(10, 0, true);
+      cv.setUint16(12, 0, true);
+      cv.setUint16(14, 0x21, true);
+      cv.setUint32(16, crc, true);
+      cv.setUint32(20, n, true);
+      cv.setUint32(24, n, true);
+      cv.setUint16(28, nome.length, true);
+      cv.setUint32(42, desloc, true);
+      c.set(nome, 46);
+      central.push(c);
+
+      desloc += local.length + n;
+    }
+    const tamCentral = central.reduce((s, c) => s + c.length, 0);
+    const fim = new Uint8Array(22);
+    const fv = new DataView(fim.buffer);
+    fv.setUint32(0, 0x06054b50, true);
+    fv.setUint16(8, entradas.length, true);
+    fv.setUint16(10, entradas.length, true);
+    fv.setUint32(12, tamCentral, true);
+    fv.setUint32(16, desloc, true);
+    return new Blob([...partes, ...central, fim], { type: tipo || 'application/zip' });
+  }
+
+  function baixarBlob(blob, nome){
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = nome;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 6000);
+  }
+
+  const nomeBase = () => (fileName || 'clipcontext').replace(/\.[^.]+$/, '').replace(/\s+/g, '-');
+
+  /* ---- pareamento imagem/fala, o mesmo critério usado no PDF ---- */
+  function falaDoFrame(kept, i, cues, dur, semPrefixo){
+    const f = kept[i];
+    const nextT = i + 1 < kept.length ? kept[i+1].t : dur + 0.001;
+    return cues.filter(c => c.b > f.t && c.a < nextT)
+               .map(c => (!semPrefixo && c.a < f.t - 0.2 ? '... ' : '') + c.t)
+               .join(' ');
+  }
+
+  /* ================= zip só com as figuras ================= */
+  $('zip').onclick = async () => {
+    const kept = frames.filter(f => f.keep);
+    if (!kept.length) return;
+    $('zip').disabled = true;
+    $('pdfStatus').textContent = t('pkgBuilding');
+    // sem ceder a vez, o navegador não chega a pintar a mensagem antes de
+    // congelar no trabalho síncrono — que com 400 frames leva segundos
+    await new Promise(r => setTimeout(r, 40));
+    try {
+      const entradas = kept.map((f, i) => ({
+        // ordem primeiro para o gerenciador de arquivos ordenar certo,
+        // instante depois para saber de onde a imagem veio
+        nome: String(i + 1).padStart(4, '0') + '-' + fmt(f.t).replace(/:/g, '-') + '.jpg',
+        dados: () => bytesDaImagem(f.img.url)
+      }));
+      baixarBlob(zipar(entradas), 'frames-' + nomeBase() + '.zip');
+      $('pdfStatus').innerHTML = `<span class="ok">${t('zipDone', kept.length)}</span>`;
+    } catch (e) {
+      $('pdfStatus').innerHTML = `<span class="err">${t('pkgErr', (e && e.message) || e)}</span>`;
+    } finally { $('zip').disabled = false; }
+  };
+
+  /* ================= documento do Word ================= */
+  const xmlEsc = s => String(s == null ? '' : s)
+    // além dos controles, U+FFFE e U+FFFF são proibidos em XML: aparecem quando
+    // alguém cola texto de um arquivo UTF-16 lido com o endianness trocado
+    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\uFFFE\uFFFF]/g, '')
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+
+  const EMU_POL = 914400;
+  const LARG_MAX_EMU = Math.round(6.1 * EMU_POL);   // cabe na página A4 com as margens abaixo
+  /* Sem teto de altura, um vídeo em retrato (celular, tela vertical) gera uma
+     imagem de quase 11 polegadas: estoura a área útil de 9,7, empurra a legenda
+     para outra página e corta a figura na margem. O PDF já limitava; aqui
+     também. */
+  const ALT_MAX_EMU = Math.round(7.2 * EMU_POL);
+
+  function medidaImagem(img){
+    let cx = LARG_MAX_EMU, cy = Math.round(cx * (img.h / img.w));
+    if (cy > ALT_MAX_EMU) { cy = ALT_MAX_EMU; cx = Math.round(cy * (img.w / img.h)); }
+    return { cx, cy };
+  }
+
+  /* Um parágrafo de texto. `op` aceita negrito, tamanho em meios-pontos,
+     cor, espaço antes/depois e alinhamento. */
+  function par(texto, op){
+    op = op || {};
+    /* A ordem aqui não é estética: EG_RPrBase do ECMA-376 é uma sequence, e
+       w:color vem ANTES de w:sz. Fora de ordem, o LibreOffice tolera mas o
+       Word recusa o arquivo inteiro com "problemas com o conteúdo". */
+    const rpr = '<w:rPr>' +
+      (op.b ? '<w:b/>' : '') +
+      (op.i ? '<w:i/>' : '') +
+      (op.cor ? `<w:color w:val="${op.cor}"/>` : '') +
+      (op.sz ? `<w:sz w:val="${op.sz}"/><w:szCs w:val="${op.sz}"/>` : '') +
+      '</w:rPr>';
+    const ppr = '<w:pPr>' +
+      `<w:spacing w:before="${op.antes || 0}" w:after="${op.depois == null ? 120 : op.depois}"/>` +
+      (op.ind ? `<w:ind w:left="${op.ind}"/>` : '') +
+      rpr + '</w:pPr>';
+    const txt = xmlEsc(texto);
+    return `<w:p>${ppr}<w:r>${rpr}<w:t xml:space="preserve">${txt}</w:t></w:r></w:p>`;
+  }
+
+  function parImagem(rid, cx, cy, n){
+    return '<w:p><w:pPr><w:spacing w:before="60" w:after="60"/></w:pPr><w:r><w:drawing>' +
+      `<wp:inline distT="0" distB="0" distL="0" distR="0">` +
+      `<wp:extent cx="${cx}" cy="${cy}"/><wp:effectExtent l="0" t="0" r="0" b="0"/>` +
+      `<wp:docPr id="${n}" name="frame ${n}"/>` +
+      '<wp:cNvGraphicFramePr><a:graphicFrameLocks xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" noChangeAspect="1"/></wp:cNvGraphicFramePr>' +
+      '<a:graphic xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main">' +
+      '<a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture">' +
+      '<pic:pic xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture">' +
+      `<pic:nvPicPr><pic:cNvPr id="${n}" name="frame ${n}"/><pic:cNvPicPr/></pic:nvPicPr>` +
+      `<pic:blipFill><a:blip r:embed="${rid}"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill>` +
+      `<pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="${cx}" cy="${cy}"/></a:xfrm>` +
+      '<a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr>' +
+      '</pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing></w:r></w:p>';
+  }
+
+  function montarDocx(){
+    const kept = frames.filter(f => f.keep);
+    const dur = duracaoTotal();
+    const { cues, plain } = parseTranscript($('tr').value);
+
+    const corpo = [];
+    corpo.push(par(t('pTitle'), { b: true, sz: 40, depois: 80 }));
+    corpo.push(par(fileName || t('prNoName'), { sz: 22, cor: '5A5A5A', depois: 240 }));
+
+    [[t('pDur'), fmt(dur)],
+     [t('pRes'), resolucao()],
+     [t('pSize'), fileSize ? (fileSize/1048576).toFixed(1) + ' MB' : t('pNoFile')],
+     [t('wFrames'), String(kept.length)],
+     [t('pTr'), cues.length ? t('pTrCues', cues.length) : (plain ? t('pTrPlain') : t('pTrNone'))]
+    ].forEach(([k, v]) => corpo.push(par(k + ': ' + v, { sz: 20, depois: 40 })));
+
+    corpo.push(par(t('pNote'), { sz: 17, cor: '8A8A8A', antes: 180, depois: 240 }));
+
+    // índice: o mesmo mapa que abre o PDF
+    if (kept.length > 2) {
+      corpo.push(par(t('pIndex'), { b: true, sz: 26, antes: 240, depois: 40 }));
+      corpo.push(par(t('pIndexSub'), { sz: 17, cor: '8A8A8A', depois: 120 }));
+      kept.forEach((f, i) => {
+        const fala = cues.length ? falaDoFrame(kept, i, cues, dur, true) : '';
+        const resumo = fala.length > 96 ? fala.slice(0, 96).replace(/\s\S*$/, '') + '…' : fala;
+        corpo.push(par(fmt(f.t) + '   ' + (resumo || '—'), { sz: 18, depois: 20 }));
+      });
+    }
+
+    const midias = [], rels = [];
+    corpo.push(par(t('pFramesH'), { b: true, sz: 26, antes: 320, depois: 120 }));
+
+    kept.forEach((f, i) => {
+      const rid = 'rIdImg' + (i + 1);
+      const nome = 'frame' + String(i + 1).padStart(4, '0') + '.jpg';
+      midias.push({ nome: 'word/media/' + nome, dados: () => bytesDaImagem(f.img.url) });
+      rels.push(`<Relationship Id="${rid}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/${nome}"/>`);
+
+      const { cx, cy } = medidaImagem(f.img);
+      corpo.push(par(fmt(f.t) + '   ·   ' + t('pFrameOf', i + 1, kept.length),
+                     { b: true, sz: 22, antes: 240, depois: 40 }));
+      corpo.push(parImagem(rid, cx, cy, i + 1));
+      if (cues.length) {
+        const fala = falaDoFrame(kept, i, cues, dur);
+        corpo.push(par(fala || t('pNoSpeech'), { sz: 20, cor: fala ? '333333' : '9A9A9A', depois: 80 }));
+      }
+      if (f.ocr) {
+        corpo.push(par(t('pOcr'), { sz: 16, cor: '8A8A8A', depois: 20 }));
+        corpo.push(par(f.ocr, { sz: 17, cor: '6A6A6A', ind: 220, depois: 80 }));
+      }
+    });
+
+    if (cues.length || plain) {
+      corpo.push(par(t('pFullTr'), { b: true, sz: 26, antes: 320, depois: 120 }));
+      if (cues.length) cues.forEach(c => corpo.push(par(fmt(c.a) + '   ' + c.t, { sz: 19, depois: 40 })));
+      else corpo.push(par(plain, { sz: 19 }));
+    }
+
+    // A4 com margens de uma polegada (1440 twips)
+    const sect = '<w:sectPr><w:pgSz w:w="11906" w:h="16838"/>' +
+      '<w:pgMar w:top="1440" w:right="1440" w:bottom="1440" w:left="1440" w:header="708" w:footer="708" w:gutter="0"/></w:sectPr>';
+
+    const doc = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+      '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" ' +
+      'xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" ' +
+      'xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing">' +
+      '<w:body>' + corpo.join('') + sect + '</w:body></w:document>';
+
+    const tipos = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+      '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">' +
+      '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>' +
+      '<Default Extension="xml" ContentType="application/xml"/>' +
+      '<Default Extension="jpg" ContentType="image/jpeg"/>' +
+      '<Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>' +
+      '</Types>';
+
+    const relsRaiz = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+      '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+      '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>' +
+      '</Relationships>';
+
+    const relsDoc = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+      '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+      rels.join('') + '</Relationships>';
+
+    return zipar([
+      { nome: '[Content_Types].xml', dados: bytesDe(tipos) },
+      { nome: '_rels/.rels', dados: bytesDe(relsRaiz) },
+      { nome: 'word/document.xml', dados: bytesDe(doc) },
+      { nome: 'word/_rels/document.xml.rels', dados: bytesDe(relsDoc) },
+      ...midias
+    ], 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+  }
+
+  $('docx').onclick = async () => {
+    const kept = frames.filter(f => f.keep);
+    if (!kept.length) return;
+    $('docx').disabled = true;
+    $('pdfStatus').textContent = t('pkgBuilding');
+    await new Promise(r => setTimeout(r, 40));    // deixa a mensagem aparecer
+    try {
+      baixarBlob(montarDocx(), 'analise-' + nomeBase() + '.docx');
+      $('pdfStatus').innerHTML = `<span class="ok">${t('docxDone', kept.length)}</span>`;
+    } catch (e) {
+      $('pdfStatus').innerHTML = `<span class="err">${t('pkgErr', (e && e.message) || e)}</span>`;
+    } finally { $('docx').disabled = false; }
+  };
+
   $('go').onclick = async () => {
     const kept = frames.filter(f => f.keep);
     if (!kept.length) return;
