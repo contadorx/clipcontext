@@ -5,16 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Vídeo → PDF (frames + transcrição)</title>
 <link rel="icon" href="/favicon.ico" sizes="any">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'> <rect width='64' height='64' rx='14' fill='%23C2603A'/> <rect x='12' y='13' width='40' height='22' rx='3' fill='%23fff'/> <rect x='12' y='41' width='40' height='5' rx='2.5' fill='%23fff'/> <rect x='12' y='50' width='26' height='5' rx='2.5' fill='%23fff' opacity='.62'/> </svg>" type="image/svg+xml">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'> <rect width='64' height='64' rx='14' fill='%233A3F9E'/> <rect x='12' y='13' width='40' height='22' rx='3' fill='%23fff'/> <rect x='12' y='41' width='40' height='5' rx='2.5' fill='%23fff'/> <rect x='12' y='50' width='26' height='5' rx='2.5' fill='%23fff' opacity='.62'/> </svg>" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <style>
   :root{
-    --bg:#faf9f7; --panel:#fff; --ink:#1f1e1c; --muted:#6b6862;
-    --line:#e5e2dc; --accent:#c2603a; --accent-ink:#fff; --warn:#8a6d1f; --err:#b3402a;
+    --bg:#f7f8fa; --panel:#ffffff; --ink:#15171c; --muted:#5c6473;
+    --line:#e0e3ea; --accent:#3a3f9e; --accent-ink:#ffffff; --warn:#8a6a12; --err:#b32a3a;
   }
   @media (prefers-color-scheme:dark){
-    :root{--bg:#1a1917;--panel:#232220;--ink:#f0eee9;--muted:#a09c94;
-          --line:#35332f;--accent:#d97757;--accent-ink:#1a1917;--warn:#d4b25f;--err:#e8846b}
+    :root{--bg:#121419;--panel:#1a1d24;--ink:#e9ebf1;--muted:#949bab;
+          --line:#282c36;--accent:#737cf0;--accent-ink:#121419;--warn:#d8bd63;--err:#ef8484}
   }
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--ink);
@@ -108,7 +108,7 @@
   <div class="topbar">
     <a href="https://clipcontext.app/" class="brand">
       <svg viewBox="0 0 64 64" role="img" aria-label="ClipContext">
-        <rect width="64" height="64" rx="15" fill="#C2603A"/>
+        <rect width="64" height="64" rx="15" fill="#3A3F9E"/>
         <rect x="14" y="14" width="36" height="20" rx="3" fill="#fff"/>
         <rect x="14" y="40" width="36" height="4.5" rx="2.25" fill="#fff"/>
         <rect x="14" y="48" width="23" height="4.5" rx="2.25" fill="#fff" opacity=".62"/>
@@ -2894,7 +2894,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
      A logo do rodapé do Word vai embutida como PNG de 48 px (1,4 KB). No PDF
      ela é desenhada com primitivas, sem imagem nenhuma: o mesmo traço, com
      custo zero de arquivo. */
-  const MARCA_PNG = 'iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAIAAADYYG7QAAAFOElEQVR42u2ZTWxUVRTHzzn3vvfmK9NpaUsdaKkQA2VhmjRKwJAGET8xKkbihsSYyApXsDDRuDBR2SEmLhRXkrjSuBrTxASwIESCJUILQgUKteIM9INpaed93HNcjMVE+mbKzLSy4OTtXvLu793z8T/nXhQRKJoIgACS8Qrjfb1jvxyZvDpYGMuxCaCWRtGGpkTbqvrOjQ1d3VaiDgBEGJGKr3EWSAAQAHLHMtd7vnaz1wjQZw5YoNamCC0iBKD6xpbN29PPvA4AIAxIs0AigGjcmcEvP3LP9hYCdo0AACCg1B5IEEEAAGyCuK3Vw4+u2vm+k2osMqEwA4Dx3PP798iV/gnPCAMCw8KbACKppAXQ1NqxZ7+dbBAQEhFAvPDFB3ClfyIAYF4cGgBAEODglg9yY/j8p++IMAgQEuWO9wTnfhr3BAIfFt2Qg7wv6vrgcOYgEhH77tC3B2YCKfru/zHhvMd/ZA56EzdptK8X8zk3WDxPzbFJIizssJ89mtG5Ez8gEpGRMB5EJKrNyiwSsowwBgS5k4f07WuDxhgWwDlhiIznsjsDtUh/sh0ViYbEBnsB+H9e1t6tG8IyNw1SMDMdS7c3r3sKLbvKMBHmsdPH8r+f1bFEWLwKs5awWozIvhtLr+h873M71VgTj7W+sOPM3l35i7+SE4UQ3+nQQCMKCtNLn3jOTjWy76FSVXpN2Cgnmn5y20T/SRWJhUmALlO6kEAESSGp6utgUaMAsVSczeNDWLv8Lv8pgvvMHgA9AHoAdB8ALUBbXcJ0GRREQBQ2UHV1FGOQFBKV/kMKlx4hJzJ66jB7BbLsonpU85BlA0D2eA9qC8J1EXvf2FBKX6en6jq6WjZuJW1VpSEiwubmqcM3Tx3R0YSEdoMlXSbMOpbIXzg90f8zzA5TVSgroNKlacqqPQizisRUNFGjZl6ETRVBDQCIwiymNuMRKgJUUPkOIbLvISkrmZqd/SufUgEhmJ5ir0C2UyLRdKm9CQIntaRj18fx5StBqmyMBADc0ey5z96dHhki2w5j0qVT7KFXd9at7hRjUFXbMQqbeNsjK156c2DfHuVERMw9VmoR1NbU0AUAqJ4GAIpNcP7SAFKpOClVhwCR3ULTus2JFatFBOfnMhFBQMH/aI4AUiE7nD36PeqKgf4ZzabYcwERyhYiKY65SoRxjhQQIKVjiSrSHpGNr6Jxp6EZpGyaCSBy4JvCDFn23PQC1dQhFGN0NJHe8pqzpFmMmVfei2SPZvKXBkrkURkgCREFJDSFQqqrO7lyrTc5TtqeDw05kab1Wyav/lZx06KdugYzORbIXceJIqi0O/oX+56KxnF+4UyWU8iNiDFoqYqYSMeWrXQHb7Exd/EI2c7klXPXMgejzcvEBOVdRshuYeJ8H9K90yBZCvWStG58bNPIxT7muVYTQWVPXhrIXzwzf91QdqSC8yREsRHru7p10+Obh747YN/O+yxzyZ6Q7eC9iEYlR4OICFgQaul+kXQs0fb8jrhFgBTeM/D8n0pUBVXSVks3vRJtXk7CvOzp7dzakbRASMPiG1FciZ9qad+2E0SoGBxrd30ITa1JDUBaanjcUfYwhHRMISTq17y9V0WiAEKIBCBWsmHN7k90+9qUjRoACRd0ZBNAJESQOhut5rY1u/fF0u3CxauFYn4KAxIbM5L5KnvoG5yeDFg8s1AHxZYii5C107Rx6/KX39LRmDAXc/PObdC/d0TuaPbGiZ7xvh+nhi8HJqjxoIiolE60tKU6NzSufzaWbr+zHcX3fwPia7XEC/YkTAAAAABJRU5ErkJggg==';
+  const MARCA_PNG = 'iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAIAAADYYG7QAAAFSklEQVR42u2ZS2xUVRjHv++cc+/cOzPQxxREaGlpEaREUVyJYGOLD5QERW2ICTFBZeXCBYkaEo0vfESjblyoMUYEN7gEKoRHy8NEI8S2VGihFIpIW4ZHO8zMnXvO+VzcsRLs3JnOTIsLTu5qcmbO737zPf7fd5CIAAAAiICAGGLSkW0H+ve3ne3piQ4OxaRUULzFGE6rCNXVRpYtrWpYVlVSYgGA1sQYehvQAyICRACA7TtPbv3hj7PnhhFRa0lUTJr0kcgZEwBQUWE1Pz1/TfNCANBEDDEN5NEkEu6mDw+3HRrUyiFy01YjnAAgAvB+Vghh331XyRsbH6iIBD07odYEQI6jNry+p7MzptSIZ0OY+IVInHOAYFWV9fkny8vLLCJgRISIb29q7eyMAY1oTZNDAwBEKKUGutbfn3ht4x6tPSdj2LLr1KGfLxHFXDlJKNcvqYgo3nMquXlrO2PIHEd99fVvpB2tbgKNt7TWWiY2b+m4eDHO2g6eGYy6WruabhoQEWqSriu27zwpdu/pZciUn+vhaJIo+OCMDoqIAHLvvl7R0x1VygUYDcUb85jjqETCLQpQICBsW4zJpDUBuL19V8VQNE4EmWjicbempnR54xzT4ICF2Aa0ooOHz3Z0DobDZiY7aa1xScM3GWwIqZSurJz65RdPVESCRbFQIiFffmXH7+0Dtm1kYhKZiw6Lx50Vj9ZVRIKplOK8UDdSimxbrH5ywS+/ng8GjUzbhG8mBcaQiDhHzlkxfBoQEdHv3bIf4//9cdaKHOQA/M/WLaBbQLeAbj7QJKsS4Y/i5VWlCKBQLqU059xL/flYiIgsW+zb35dMStPknGOBj2lyAGjZddIwmA9SxmrvyY9YLHXf4ttXPj7PMNJtU95VTCna19q3v7XPR35kAUpLooSbSimEwisaCcFCIdO/qxHZ5DcFbSMcMoslYVW2VkJkLfVak+sWp6FmjHGO+VsIET1pVlpqZxLduVsHAGOxVDIpAwHhE2jCR7tIqSIR+/13Gmtry4AAC9PUADAweG3jm3v7+q6YZkYmPwkbiyXXv7j4nkUzlNKFK0al6I65gXXP37vh1d2WJZQafx4yDH6iOwoAxdCv4KnyY11DQviZ2i/sETGZlE2Nc+bPi5AmzKVdJCAgBLyh5BABQ+w/N7yjpUcIlifQaG50Ugpzqx2IwBlqGsP/CYAzDIfN/MMeEVxXh0LG9OkhoiwxRun9KpGQpskzuGwBecirqeGw8ezq+um3hZSkXKKMiLbv7DnWNeQTR1mAEMee2yFi0pEND1bX10+7fDlp2phLbFsB/nBT3fETUcpXtYjyUvvSFRdA3oBFBILjhQuxVEqFQkaOySZg8j/PDytFnLM8mBhDUVtXfvVoVGn1X+MHArzr+MXNW9pnzZwiVfbxJzJMJuWRo39xjuOlYQwRxcyZQfFQQ82Ro5cyvbFpsGNdQ+0dA7nXDcviecyTiAhRNCytxpERZ83abcPDmkiOWfayNeNjTnrG3WIjcs7x+29XsXDYXPvcIsYsluFYb+yV+5NPEmfIefCpVfMqZ01lWlPzMwsXLLCBBQUv/pg8F+8hsGbMYOtfWEz0Ty17763GqkoLMCg4Ik5Sn4EIQiBioKxcfPBuo20bBMS8NqC8zP7s46b6O6cgCwNwbzI0kSiECESIGJ49O/zpR0011aVaE0NMx6d396GU/m5Lx7Yfu0dikkhp7U7Y3yQQRcCClSvmvrRuUTBojl4I/ZswRj8aGIy1/HS69cCZ3tNXpHSL2ygighBidlXJkvsrH3ukrqa6BK67CgKAvwGTT81xF+3kAwAAAABJRU5ErkJggg==';
   const SITE_DOM = 'clipcontext.app';
 
   const EMU_POL = 914400;
@@ -3024,16 +3024,16 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       '<w:p><w:pPr>' +
         '<w:tabs><w:tab w:val="right" w:pos="9026"/></w:tabs>' +   // 11906 - 2x1440
         '<w:spacing w:before="0" w:after="0"/>' +
-        '<w:rPr><w:color w:val="6E6E6E"/><w:sz w:val="17"/><w:szCs w:val="17"/></w:rPr>' +
+        '<w:rPr><w:color w:val="5C6473"/><w:sz w:val="17"/><w:szCs w:val="17"/></w:rPr>' +
       '</w:pPr>' +
       parImagemBruta('rIdMarca', mcx, mcy, 9001, 'ClipContext') +
-      '<w:r><w:rPr><w:color w:val="6E6E6E"/><w:sz w:val="17"/><w:szCs w:val="17"/></w:rPr>' +
+      '<w:r><w:rPr><w:color w:val="5C6473"/><w:sz w:val="17"/><w:szCs w:val="17"/></w:rPr>' +
         `<w:t xml:space="preserve">  ${xmlEsc(t('ftPromo'))}  ·  </w:t></w:r>` +
-      '<w:r><w:rPr><w:b/><w:color w:val="B25632"/><w:sz w:val="17"/><w:szCs w:val="17"/></w:rPr>' +
+      '<w:r><w:rPr><w:b/><w:color w:val="3A3F9E"/><w:sz w:val="17"/><w:szCs w:val="17"/></w:rPr>' +
         `<w:t>${xmlEsc(SITE_DOM)}</w:t></w:r>` +
-      '<w:r><w:rPr><w:color w:val="6E6E6E"/><w:sz w:val="17"/><w:szCs w:val="17"/></w:rPr><w:tab/></w:r>' +
+      '<w:r><w:rPr><w:color w:val="5C6473"/><w:sz w:val="17"/><w:szCs w:val="17"/></w:rPr><w:tab/></w:r>' +
       '<w:fldSimple w:instr=" PAGE ">' +
-        '<w:r><w:rPr><w:color w:val="6E6E6E"/><w:sz w:val="17"/><w:szCs w:val="17"/></w:rPr>' +
+        '<w:r><w:rPr><w:color w:val="5C6473"/><w:sz w:val="17"/><w:szCs w:val="17"/></w:rPr>' +
         '<w:t>1</w:t></w:r></w:fldSimple>' +
       '</w:p></w:ftr>';
 
@@ -3123,12 +3123,12 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
        são o logotipo de 64 px reduzido para 4,2 mm. */
     const marca = (x, y) => {
       const k = 4.9 / 64;
-      doc.setFillColor(194, 96, 58);
+      doc.setFillColor(58, 63, 158);
       doc.roundedRect(x, y, 4.9, 4.9, 15*k, 15*k, 'F');
       doc.setFillColor(255, 255, 255);
       doc.roundedRect(x + 14*k, y + 14*k, 36*k, 20*k, 3*k, 3*k, 'F');
       doc.roundedRect(x + 14*k, y + 40*k, 36*k, 4.5*k, 2*k, 2*k, 'F');
-      doc.setFillColor(233, 199, 184);            // a terceira barra é mais clara
+      doc.setFillColor(180, 182, 218);            // a terceira barra é mais clara
       doc.roundedRect(x + 14*k, y + 48*k, 23*k, 4.5*k, 2*k, 2*k, 'F');
     };
 
@@ -3157,7 +3157,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       doc.setTextColor(110);
       doc.text(promo, FT_X, FT_Y);
       const wp = doc.getTextWidth(promo);
-      doc.setFont('helvetica','bold').setTextColor(178, 86, 50);
+      doc.setFont('helvetica','bold').setTextColor(58, 63, 158);
       doc.text(SITE_DOM, FT_X + wp, FT_Y);
       doc.setFont('helvetica','normal').setFontSize(8.4).setTextColor(110);
       doc.text(String(page), PW - M, FT_Y, { align:'right' });

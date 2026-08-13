@@ -1,10 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 64" width="260" height="64" role="img" aria-label="ClipContext">
-  <rect width="64" height="64" rx="15" fill="#C2603A"/>
+  <rect width="64" height="64" rx="15" fill="#3A3F9E"/>
   <rect x="14" y="14" width="36" height="20" rx="3" fill="#fff"/>
   <rect x="14" y="40" width="36" height="4.5" rx="2.25" fill="#fff"/>
   <rect x="14" y="48" width="23" height="4.5" rx="2.25" fill="#fff" opacity=".62"/>
   <text x="80" y="41.5" font-family="Inter,'Segoe UI',system-ui,-apple-system,Helvetica,Arial,sans-serif"
         font-size="26" letter-spacing="-0.6">
-    <tspan fill="#1F1E1C" font-weight="450">Clip</tspan><tspan fill="#C2603A" font-weight="650">Context</tspan>
+    <tspan fill="#15171C" font-weight="450">Clip</tspan><tspan fill="#3A3F9E" font-weight="650">Context</tspan>
   </text>
 </svg>

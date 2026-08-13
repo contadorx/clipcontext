@@ -53,6 +53,7 @@ offline/*.html           build autocontido: um arquivo só, funciona sem interne
 src/template.html        fonte da ferramenta; contém o marcador /*__JSPDF__*/
 vendor/jspdf.umd.min.js  cópia da biblioteca usada no build offline
 brand/                   logotipos, favicon (.svg e .ico), marca do rodapé e paleta
+brand/paletas.py         validador de contraste WCAG da paleta — rode antes de mexer em cor
 public/favicon.ico       ícone multi-tamanho, referenciado por todas as páginas
 media/                   GIF e MP4 de demonstração, para divulgação
 build.py                 gera public/app.html e o build offline
@@ -107,9 +108,9 @@ Três medidas que não são gosto pessoal:
 
 - **Uma linha, não duas.** Em duas linhas o bloco lê como aviso legal, que é o que as pessoas aprendem a
   ignorar; em uma linha lê como assinatura de autoria.
-- **Contraste acima de 4,5:1.** O cinza `#6E6E6E` dá 5,10:1 e o laranja `#B25632` dá 4,92:1, o mínimo da
-  WCAG para texto pequeno. A versão anterior, em 7,2pt e `#919191`, ficava em 3,15:1 — ilegível para
-  quem imprime em modo econômico.
+- **Contraste acima de 4,5:1.** O cinza `#5C6473` e o índigo `#3A3F9E` passam
+  folgadamente do mínimo da WCAG para texto pequeno. A versão anterior, em 7,2pt e `#919191`, ficava em
+  3,15:1 — ilegível para quem imprime em modo econômico.
 - **Corpo que se ajusta ao idioma.** A frase em espanhol é sensivelmente mais longa que a em inglês; o
   rodapé mede a largura e reduz o corpo em passos de 0,2pt, até 6,6pt, se houver risco de encostar no
   número da página. Hoje nenhum dos três idiomas aciona isso — é rede de proteção para textos futuros.
@@ -126,6 +127,38 @@ estética** — o schema do OOXML é uma *sequence*, e com `w:color` depois de `
 mas o Word recusa o arquivo inteiro. E a imagem tem teto de altura: sem ele, um vídeo em retrato gera
 uma figura de quase 11 polegadas, que estoura a área útil da página e empurra a legenda para longe do
 frame.
+
+## Paleta
+
+Uma fonte de verdade por meio: as variáveis CSS em `src/template.html` e `public/site.css`, e os SVGs
+de `brand/`. Os ícones (`favicon.ico`, `apple-touch-icon.png`, a marca do rodapé do Word) são
+**gerados a partir de `public/favicon.svg`**, lendo a cor de dentro do próprio SVG — assim não há como
+ficarem fora de sincronia com o resto.
+
+| | claro | escuro |
+|---|---|---|
+| fundo | `#F7F8FA` | `#121419` |
+| painel | `#FFFFFF` | `#1A1D24` |
+| texto | `#15171C` | `#E9EBF1` |
+| secundário | `#5C6473` | `#949BAB` |
+| linha | `#E0E3EA` | `#282C36` |
+| acento | `#3A3F9E` | `#737CF0` |
+| texto do botão | `#FFFFFF` | `#121419` |
+| aviso | `#8A6A12` | `#D8BD63` |
+| erro | `#B32A3A` | `#EF8484` |
+
+Índigo profundo sobre neutros frios. A escolha não foi só estética: a paleta anterior — terracota sobre
+papel quente — era a assinatura visual da Anthropic, e **não bastava trocar o laranja**, porque o fundo
+quente e os cinzas amarelados respondiam por metade da associação. Por isso os neutros foram para o
+frio junto com o acento.
+
+De quebra, a troca corrigiu uma falha real: a paleta antiga **reprovava em contraste no modo claro**,
+com o acento como link em 3,97:1 contra o mínimo 4,5:1 da WCAG. Todos os pares da paleta atual passam
+nos dois modos — o verificador está em `/tmp/paletas.py` no histórico, e os números estão na tabela
+acima.
+
+O acento também vale para os arquivos gerados: a marca vetorial do rodapé do PDF e o domínio em negrito
+saem no `#3A3F9E`, que dá 8.8:1 sobre papel branco.
 
 ## Google Drive
 
