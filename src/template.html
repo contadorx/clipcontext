@@ -381,6 +381,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       spkMic:'Microfone', spkSys:'Computador',
       recFile:'captura de tela', pNoFile:'nenhum arquivo guardado',
       docxBtn:'Word (.docx)', zipBtn:'Zip das figuras', wFrames:'Frames neste documento',
+      ftPromo:'Frames e transcrição sincronizada, gerados no navegador com ClipContext',
       pkgBuilding:'Montando o arquivo…',
       docxDone:'Documento do Word com {0} frames — pronto para editar.',
       zipDone:'{0} imagens no zip, sem mais nada junto.',
@@ -538,6 +539,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       spkMic:'Microphone', spkSys:'Computer',
       recFile:'screen capture', pNoFile:'no file kept',
       docxBtn:'Word (.docx)', zipBtn:'Zip of the images', wFrames:'Frames in this document',
+      ftPromo:'Frames and synced transcript, generated in the browser with ClipContext',
       pkgBuilding:'Building the file…',
       docxDone:'Word document with {0} frames — ready to edit.',
       zipDone:'{0} images in the zip, nothing else alongside.',
@@ -693,6 +695,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       spkMic:'Micrófono', spkSys:'Ordenador',
       recFile:'captura de pantalla', pNoFile:'ningún archivo guardado',
       docxBtn:'Word (.docx)', zipBtn:'Zip de las imágenes', wFrames:'Fotogramas en este documento',
+      ftPromo:'Fotogramas y transcripción sincronizada, generados en el navegador con ClipContext',
       pkgBuilding:'Montando el archivo…',
       docxDone:'Documento de Word con {0} fotogramas — listo para editar.',
       zipDone:'{0} imágenes en el zip, sin nada más.',
@@ -2489,6 +2492,13 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
 
+  /* ---- marca no rodapé ----
+     A logo do rodapé do Word vai embutida como PNG de 48 px (1,4 KB). No PDF
+     ela é desenhada com primitivas, sem imagem nenhuma: o mesmo traço, com
+     custo zero de arquivo. */
+  const MARCA_PNG = 'iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAIAAADYYG7QAAAFOElEQVR42u2ZTWxUVRTHzzn3vvfmK9NpaUsdaKkQA2VhmjRKwJAGET8xKkbihsSYyApXsDDRuDBR2SEmLhRXkrjSuBrTxASwIESCJUILQgUKteIM9INpaed93HNcjMVE+mbKzLSy4OTtXvLu793z8T/nXhQRKJoIgACS8Qrjfb1jvxyZvDpYGMuxCaCWRtGGpkTbqvrOjQ1d3VaiDgBEGJGKr3EWSAAQAHLHMtd7vnaz1wjQZw5YoNamCC0iBKD6xpbN29PPvA4AIAxIs0AigGjcmcEvP3LP9hYCdo0AACCg1B5IEEEAAGyCuK3Vw4+u2vm+k2osMqEwA4Dx3PP798iV/gnPCAMCw8KbACKppAXQ1NqxZ7+dbBAQEhFAvPDFB3ClfyIAYF4cGgBAEODglg9yY/j8p++IMAgQEuWO9wTnfhr3BAIfFt2Qg7wv6vrgcOYgEhH77tC3B2YCKfru/zHhvMd/ZA56EzdptK8X8zk3WDxPzbFJIizssJ89mtG5Ez8gEpGRMB5EJKrNyiwSsowwBgS5k4f07WuDxhgWwDlhiIznsjsDtUh/sh0ViYbEBnsB+H9e1t6tG8IyNw1SMDMdS7c3r3sKLbvKMBHmsdPH8r+f1bFEWLwKs5awWozIvhtLr+h873M71VgTj7W+sOPM3l35i7+SE4UQ3+nQQCMKCtNLn3jOTjWy76FSVXpN2Cgnmn5y20T/SRWJhUmALlO6kEAESSGp6utgUaMAsVSczeNDWLv8Lv8pgvvMHgA9AHoAdB8ALUBbXcJ0GRREQBQ2UHV1FGOQFBKV/kMKlx4hJzJ66jB7BbLsonpU85BlA0D2eA9qC8J1EXvf2FBKX6en6jq6WjZuJW1VpSEiwubmqcM3Tx3R0YSEdoMlXSbMOpbIXzg90f8zzA5TVSgroNKlacqqPQizisRUNFGjZl6ETRVBDQCIwiymNuMRKgJUUPkOIbLvISkrmZqd/SufUgEhmJ5ir0C2UyLRdKm9CQIntaRj18fx5StBqmyMBADc0ey5z96dHhki2w5j0qVT7KFXd9at7hRjUFXbMQqbeNsjK156c2DfHuVERMw9VmoR1NbU0AUAqJ4GAIpNcP7SAFKpOClVhwCR3ULTus2JFatFBOfnMhFBQMH/aI4AUiE7nD36PeqKgf4ZzabYcwERyhYiKY65SoRxjhQQIKVjiSrSHpGNr6Jxp6EZpGyaCSBy4JvCDFn23PQC1dQhFGN0NJHe8pqzpFmMmVfei2SPZvKXBkrkURkgCREFJDSFQqqrO7lyrTc5TtqeDw05kab1Wyav/lZx06KdugYzORbIXceJIqi0O/oX+56KxnF+4UyWU8iNiDFoqYqYSMeWrXQHb7Exd/EI2c7klXPXMgejzcvEBOVdRshuYeJ8H9K90yBZCvWStG58bNPIxT7muVYTQWVPXhrIXzwzf91QdqSC8yREsRHru7p10+Obh747YN/O+yxzyZ6Q7eC9iEYlR4OICFgQaul+kXQs0fb8jrhFgBTeM/D8n0pUBVXSVks3vRJtXk7CvOzp7dzakbRASMPiG1FciZ9qad+2E0SoGBxrd30ITa1JDUBaanjcUfYwhHRMISTq17y9V0WiAEKIBCBWsmHN7k90+9qUjRoACRd0ZBNAJESQOhut5rY1u/fF0u3CxauFYn4KAxIbM5L5KnvoG5yeDFg8s1AHxZYii5C107Rx6/KX39LRmDAXc/PObdC/d0TuaPbGiZ7xvh+nhi8HJqjxoIiolE60tKU6NzSufzaWbr+zHcX3fwPia7XEC/YkTAAAAABJRU5ErkJggg==';
+  const SITE_DOM = '__SITEDOM__';
+
   const EMU_POL = 914400;
   const LARG_MAX_EMU = Math.round(6.1 * EMU_POL);   // cabe na página A4 com as margens abaixo
   /* Sem teto de altura, um vídeo em retrato (celular, tela vertical) gera uma
@@ -2525,19 +2535,26 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   }
 
   function parImagem(rid, cx, cy, n){
-    return '<w:p><w:pPr><w:spacing w:before="60" w:after="60"/></w:pPr><w:r><w:drawing>' +
+    return '<w:p><w:pPr><w:spacing w:before="60" w:after="60"/></w:pPr>' +
+           parImagemBruta(rid, cx, cy, n, 'frame ' + n) + '</w:p>';
+  }
+
+  /* Só a run com a imagem, sem parágrafo em volta: o rodapé precisa dela no
+     meio de uma linha com texto e tabulação. */
+  function parImagemBruta(rid, cx, cy, n, nome){
+    return '<w:r><w:drawing>' +
       `<wp:inline distT="0" distB="0" distL="0" distR="0">` +
       `<wp:extent cx="${cx}" cy="${cy}"/><wp:effectExtent l="0" t="0" r="0" b="0"/>` +
-      `<wp:docPr id="${n}" name="frame ${n}"/>` +
+      `<wp:docPr id="${n}" name="${xmlEsc(nome)}"/>` +
       '<wp:cNvGraphicFramePr><a:graphicFrameLocks xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" noChangeAspect="1"/></wp:cNvGraphicFramePr>' +
       '<a:graphic xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main">' +
       '<a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture">' +
       '<pic:pic xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture">' +
-      `<pic:nvPicPr><pic:cNvPr id="${n}" name="frame ${n}"/><pic:cNvPicPr/></pic:nvPicPr>` +
+      `<pic:nvPicPr><pic:cNvPr id="${n}" name="${xmlEsc(nome)}"/><pic:cNvPicPr/></pic:nvPicPr>` +
       `<pic:blipFill><a:blip r:embed="${rid}"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill>` +
       `<pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="${cx}" cy="${cy}"/></a:xfrm>` +
       '<a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr>' +
-      '</pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing></w:r></w:p>';
+      '</pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing></w:r>';
   }
 
   function montarDocx(){
@@ -2598,9 +2615,34 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       else corpo.push(par(plain, { sz: 19 }));
     }
 
+    /* Rodapé: parte separada do pacote, apontada pelo sectPr. A referência
+       precisa vir ANTES de w:pgSz — CT_SectPr também é uma sequence. */
+    const { cx: mcx, cy: mcy } = { cx: 137160, cy: 137160 };   // 0,15 pol, quadrada
+    const rodape =
+      '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+      '<w:ftr xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" ' +
+      'xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" ' +
+      'xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing">' +
+      '<w:p><w:pPr>' +
+        '<w:tabs><w:tab w:val="right" w:pos="9026"/></w:tabs>' +   // 11906 - 2x1440
+        '<w:spacing w:before="0" w:after="0"/>' +
+        '<w:rPr><w:color w:val="6E6E6E"/><w:sz w:val="17"/><w:szCs w:val="17"/></w:rPr>' +
+      '</w:pPr>' +
+      parImagemBruta('rIdMarca', mcx, mcy, 9001, 'ClipContext') +
+      '<w:r><w:rPr><w:color w:val="6E6E6E"/><w:sz w:val="17"/><w:szCs w:val="17"/></w:rPr>' +
+        `<w:t xml:space="preserve">  ${xmlEsc(t('ftPromo'))}  ·  </w:t></w:r>` +
+      '<w:r><w:rPr><w:b/><w:color w:val="B25632"/><w:sz w:val="17"/><w:szCs w:val="17"/></w:rPr>' +
+        `<w:t>${xmlEsc(SITE_DOM)}</w:t></w:r>` +
+      '<w:r><w:rPr><w:color w:val="6E6E6E"/><w:sz w:val="17"/><w:szCs w:val="17"/></w:rPr><w:tab/></w:r>' +
+      '<w:fldSimple w:instr=" PAGE ">' +
+        '<w:r><w:rPr><w:color w:val="6E6E6E"/><w:sz w:val="17"/><w:szCs w:val="17"/></w:rPr>' +
+        '<w:t>1</w:t></w:r></w:fldSimple>' +
+      '</w:p></w:ftr>';
+
     // A4 com margens de uma polegada (1440 twips)
-    const sect = '<w:sectPr><w:pgSz w:w="11906" w:h="16838"/>' +
-      '<w:pgMar w:top="1440" w:right="1440" w:bottom="1440" w:left="1440" w:header="708" w:footer="708" w:gutter="0"/></w:sectPr>';
+    const sect = '<w:sectPr><w:footerReference w:type="default" r:id="rIdFtr"/>' +
+      '<w:pgSz w:w="11906" w:h="16838"/>' +
+      '<w:pgMar w:top="1440" w:right="1440" w:bottom="1440" w:left="1440" w:header="708" w:footer="566" w:gutter="0"/></w:sectPr>';
 
     const doc = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
       '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" ' +
@@ -2613,7 +2655,9 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>' +
       '<Default Extension="xml" ContentType="application/xml"/>' +
       '<Default Extension="jpg" ContentType="image/jpeg"/>' +
+      '<Default Extension="png" ContentType="image/png"/>' +
       '<Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>' +
+      '<Override PartName="/word/footer1.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.footer+xml"/>' +
       '</Types>';
 
     const relsRaiz = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
@@ -2623,13 +2667,23 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
 
     const relsDoc = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
       '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
-      rels.join('') + '</Relationships>';
+      rels.join('') +
+      '<Relationship Id="rIdFtr" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/footer" Target="footer1.xml"/>' +
+      '</Relationships>';
+
+    const relsRodape = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+      '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+      '<Relationship Id="rIdMarca" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/marca.png"/>' +
+      '</Relationships>';
 
     return zipar([
       { nome: '[Content_Types].xml', dados: bytesDe(tipos) },
       { nome: '_rels/.rels', dados: bytesDe(relsRaiz) },
       { nome: 'word/document.xml', dados: bytesDe(doc) },
       { nome: 'word/_rels/document.xml.rels', dados: bytesDe(relsDoc) },
+      { nome: 'word/footer1.xml', dados: bytesDe(rodape) },
+      { nome: 'word/_rels/footer1.xml.rels', dados: bytesDe(relsRodape) },
+      { nome: 'word/media/marca.png', dados: () => bytesDaImagem('data:image/png;base64,' + MARCA_PNG) },
       ...midias
     ], 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
   }
@@ -2663,13 +2717,52 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({ unit:'mm', format:'a4', compress:true });
     const PW = 210, PH = 297, M = 15, CW = PW - M*2;
-    const base = fileName.replace(/\.[^.]+$/, '').replace(/\s+/g, '-');
+    const base = nomeBase();      // usado no nome do arquivo baixado
     let page = 0;
+
+    /* A marca desenhada com primitivas, e não como imagem: são quatro
+       retângulos, saem vetoriais e não somam um byte ao arquivo. As medidas
+       são o logotipo de 64 px reduzido para 4,2 mm. */
+    const marca = (x, y) => {
+      const k = 4.9 / 64;
+      doc.setFillColor(194, 96, 58);
+      doc.roundedRect(x, y, 4.9, 4.9, 15*k, 15*k, 'F');
+      doc.setFillColor(255, 255, 255);
+      doc.roundedRect(x + 14*k, y + 14*k, 36*k, 20*k, 3*k, 3*k, 'F');
+      doc.roundedRect(x + 14*k, y + 40*k, 36*k, 4.5*k, 2*k, 2*k, 'F');
+      doc.setFillColor(233, 199, 184);            // a terceira barra é mais clara
+      doc.roundedRect(x + 14*k, y + 48*k, 23*k, 4.5*k, 2*k, 2*k, 'F');
+    };
+
+    /* Uma linha só, e o mais legível que cabe. Duas linhas leem como aviso
+       legal, que é justamente o que as pessoas aprendem a ignorar; uma linha
+       lê como assinatura de autoria. As cores passam de 4,5:1 de contraste
+       sobre branco — abaixo disso, quem imprime em modo econômico não lê. */
+    const FT_X = M + 7, FT_Y = PH - 8.6;
     const foot = () => {
       page++;
-      doc.setFont('helvetica','normal').setFontSize(7.5).setTextColor(150);
-      doc.text(base, M, PH - 8);
-      doc.text(String(page), PW - M, PH - 8, { align:'right' });
+      marca(M, PH - 12);
+
+      // o texto muda de tamanho conforme o idioma: em espanhol ele é bem mais
+      // longo, e sem isso encostaria no número da página
+      const promo = t('ftPromo') + '  ·  ';
+      const limite = PW - M - FT_X - 9;
+      let corpo = 8.4;
+      doc.setFont('helvetica','normal').setFontSize(corpo);
+      let larg = doc.getTextWidth(promo) + doc.getTextWidth(SITE_DOM) * 1.06;
+      while (larg > limite && corpo > 6.6) {
+        corpo -= 0.2;
+        doc.setFontSize(corpo);
+        larg = doc.getTextWidth(promo) + doc.getTextWidth(SITE_DOM) * 1.06;
+      }
+
+      doc.setTextColor(110);
+      doc.text(promo, FT_X, FT_Y);
+      const wp = doc.getTextWidth(promo);
+      doc.setFont('helvetica','bold').setTextColor(178, 86, 50);
+      doc.text(SITE_DOM, FT_X + wp, FT_Y);
+      doc.setFont('helvetica','normal').setFontSize(8.4).setTextColor(110);
+      doc.text(String(page), PW - M, FT_Y, { align:'right' });
       doc.setTextColor(30);
     };
 

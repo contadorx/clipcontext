@@ -52,7 +52,7 @@ public/app.html          A FERRAMENTA — gerada pelo build, não edite
 offline/*.html           build autocontido: um arquivo só, funciona sem internet
 src/template.html        fonte da ferramenta; contém o marcador /*__JSPDF__*/
 vendor/jspdf.umd.min.js  cópia da biblioteca usada no build offline
-brand/                   logotipos, favicon (.svg e .ico) e paleta
+brand/                   logotipos, favicon (.svg e .ico), marca do rodapé e paleta
 public/favicon.ico       ícone multi-tamanho, referenciado por todas as páginas
 media/                   GIF e MP4 de demonstração, para divulgação
 build.py                 gera public/app.html e o build offline
@@ -90,8 +90,31 @@ não carregar, a gravação continua e guarda os frames sem transcrever.
 |---|---|
 | **PDF** | entregar a um modelo de linguagem — é o formato que eles leem melhor |
 | **Word (.docx)** | relatório editável: capa, índice dos instantes, cada frame com a fala daquele trecho, e a transcrição completa no fim |
-| **Zip das figuras** | só os JPEGs, nomeados `0001-00-01-45.jpg` — ordem primeiro para o gerenciador de arquivos ordenar certo, instante depois para saber de onde a imagem veio |
+| **Zip das figuras** | só os JPEGs, nomeados `0001-00-01-45.jpg` — ordem primeiro para o gerenciador de arquivos ordenar certo, instante depois para saber de onde a imagem veio (sem rodapé: são imagens cruas, como pedido) |
 | **JSON** | para outro programa consumir |
+
+O PDF e o Word saem com um **rodapé de marca em todas as páginas**: a logo, a frase que explica o que a
+ferramenta faz, o endereço do site e o número da página, tudo em uma linha só. No PDF a marca é
+desenhada com primitivas (quatro retângulos arredondados) — sai vetorial e não soma um byte ao arquivo.
+No Word ela é um PNG de 48 px embutido no template, com parte de rodapé própria (`word/footer1.xml`) e
+relacionamento separado. O nome do arquivo, que antes ocupava o rodapé do PDF, ficou só na capa.
+
+**O rodapé segue o idioma da interface**, pela mesma chave (`ftPromo`) e pelo mesmo `t()` que já regem o
+título, o índice e os rótulos do documento. Não existe regra separada para ele de propósito: um rodapé
+em inglês embaixo de um relatório em português leria como defeito, não como alcance internacional.
+
+Três medidas que não são gosto pessoal:
+
+- **Uma linha, não duas.** Em duas linhas o bloco lê como aviso legal, que é o que as pessoas aprendem a
+  ignorar; em uma linha lê como assinatura de autoria.
+- **Contraste acima de 4,5:1.** O cinza `#6E6E6E` dá 5,10:1 e o laranja `#B25632` dá 4,92:1, o mínimo da
+  WCAG para texto pequeno. A versão anterior, em 7,2pt e `#919191`, ficava em 3,15:1 — ilegível para
+  quem imprime em modo econômico.
+- **Corpo que se ajusta ao idioma.** A frase em espanhol é sensivelmente mais longa que a em inglês; o
+  rodapé mede a largura e reduz o corpo em passos de 0,2pt, até 6,6pt, se houver risco de encostar no
+  número da página. Hoje nenhum dos três idiomas aciona isso — é rede de proteção para textos futuros.
+
+O rodapé custa **938 bytes por página** no PDF (1,3% do arquivo) e **3,7 KB** no `.docx` (3,4%).
 
 O `.docx` sai pronto do navegador, sem servidor e sem biblioteca: um `.docx` é um zip com XML dentro, e
 o escritor de ZIP (método armazenado, com CRC-32 próprio) já existia para o zip das figuras. Guardar sem
