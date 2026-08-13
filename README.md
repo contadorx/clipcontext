@@ -54,6 +54,7 @@ src/template.html        fonte da ferramenta; contém o marcador /*__JSPDF__*/
 vendor/jspdf.umd.min.js  cópia da biblioteca usada no build offline
 brand/                   logotipos, favicon (.svg e .ico), marca do rodapé e paleta
 brand/paletas.py         validador de contraste WCAG da paleta — rode antes de mexer em cor
+brand/gerar/             scripts que regeram os vídeos: exemplo, tour e GIF
 public/favicon.ico       ícone multi-tamanho, referenciado por todas as páginas
 media/                   GIF e MP4 de demonstração, para divulgação
 build.py                 gera public/app.html e o build offline
@@ -159,6 +160,25 @@ acima.
 
 O acento também vale para os arquivos gerados: a marca vetorial do rodapé do PDF e o domínio em negrito
 saem no `#3A3F9E`, que dá 8.8:1 sobre papel branco.
+
+## Vídeos
+
+Os três vídeos do projeto — o exemplo narrado, o tour da landing e o GIF de
+divulgação — **são gerados por script**, não gravados à mão. Isso existe por um
+motivo concreto: numa troca de paleta eles precisam ser refeitos, e sem script
+isso vira um dia de trabalho manual. O passo a passo está em `brand/gerar/`.
+
+O tour percorre o app de verdade num roteiro do Playwright, com cursor sintético,
+e o trecho da varredura é acelerado 3,2x na montagem — a barra de progresso diz o
+que precisa em quatro segundos, e em tempo real leva onze. O corte usa os tempos
+que o próprio roteiro anota, não um palpite.
+
+Uma armadilha que vale saber: **o vídeo de exemplo é a vitrine da detecção de
+cena.** Se duas telas seguidas ficarem parecidas demais, a varredura perde a
+transição e o exemplo subestima a própria ferramenta. Na primeira versão em
+índigo isso aconteceu — as telas 4 e 5 tinham a mesma estrutura e a diferença
+ficou em 4,01, abaixo do limiar de 5,5. A tela 5 ganhou cartões com fundo tingido
+e todas as transições passaram para acima de 8. Meça antes de publicar.
 
 ## Google Drive
 
