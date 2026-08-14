@@ -64,9 +64,13 @@
 <section id="lista">
   <div class="wrap">
     <h2>Quer ser avisado?</h2>
-    <p class="lead">Ainda não há lista de espera automatizada — seria incoerente montar um formulário que
-    coleta e-mails numa ferramenta que se orgulha de não coletar nada. Por enquanto, acompanhe o repositório
-    no GitHub: cada novidade sai por lá primeiro.</p>
+    <p class="lead">Deixe um e-mail e eu aviso quando o plano pago sair. Uma mensagem, não uma newsletter.</p>
+    <form class="lista" id="listaForm" data-url="{{supaUrl}}" data-key="{{supaKey}}" novalidate>
+      <input type="email" id="listaEmail" autocomplete="email" placeholder="seu@email.com" aria-label="Seu e-mail">
+      <button class="btn" type="submit" id="listaBtn">Quero ser avisado</button>
+    </form>
+    <p class="small muted listaMsg" id="listaMsg" role="status"></p>
+    <p class="small muted" style="max-width:640px">A promessa desta ferramenta é que <b>seu vídeo não sai da sua máquina</b>, e ela continua de pé: este campo não tem relação nenhuma com o que você processa aqui — o navegador não manda vídeo, áudio nem transcrição para lugar algum. O e-mail fica num banco meu, não é vendido, não vai para lista de terceiro e some no dia em que você pedir. Prefere não deixar? <a href="https://github.com/contadorx/clipcontext" rel="noopener" target="_blank">Acompanhe o repositório</a> — cada novidade sai por lá primeiro.</p>
   </div>
 </section>
 

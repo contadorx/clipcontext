@@ -9,10 +9,11 @@
 <link rel="alternate" hreflang="pt-BR" href="https://clipcontext.app/precos">
 <link rel="alternate" hreflang="en" href="https://clipcontext.app/en/precos">
 <link rel="alternate" hreflang="es" href="https://clipcontext.app/es/precos">
-<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" href="/favicon.ico?v=2" sizes="any">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png?v=2">
 <link rel="stylesheet" href="/site.css">
+<script>window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments)};</script><script defer src="/_vercel/insights/script.js"></script>
 </head>
 <body>
 
@@ -20,7 +21,7 @@
   <div class="wrap">
     <a class="brand" href="/en"><img src="/logo.svg" alt=""><span>Clip<b>Context</b></span></a>
     <nav>
-      <a href="/en/precos">Pricing</a>
+      <a href="/en/precos" class="hide-xs">Pricing</a>
       <a href="/app?lang=en">Open the tool</a>
       <span style="display:inline-flex;gap:9px;border-left:1px solid var(--line);padding-left:16px"><a href="/precos?lang=pt">PT</a><a href="/en/precos" style="color:var(--ink);font-weight:600">EN</a><a href="/es/precos">ES</a></span>
     </nav>
@@ -93,9 +94,13 @@
 <section id="lista">
   <div class="wrap">
     <h2>Want to be notified?</h2>
-    <p class="lead">There is no automated waiting list — it would be incoherent to build an email capture form
-    into a tool that takes pride in collecting nothing. For now, follow the repository on GitHub: every update
-    lands there first.</p>
+    <p class="lead">Leave an e-mail and I will tell you when the paid plan ships. One message, not a newsletter.</p>
+    <form class="lista" id="listaForm" data-url="https://zyqncemxjobkvdveordz.supabase.co" data-key="sb_publishable_HQDSfL4rTtPx2wwbgh_huw_llog8ZJk" novalidate>
+      <input type="email" id="listaEmail" autocomplete="email" placeholder="you@example.com" aria-label="Your e-mail">
+      <button class="btn" type="submit" id="listaBtn">Notify me</button>
+    </form>
+    <p class="small muted listaMsg" id="listaMsg" role="status"></p>
+    <p class="small muted" style="max-width:640px">The promise of this tool is that <b>your video never leaves your machine</b>, and that still holds: this field has nothing to do with what you process here — the browser sends no video, no audio and no transcript anywhere. The e-mail sits in a database of mine, is never sold, never goes to a third-party list, and disappears the day you ask. Rather not leave it? <a href="https://github.com/contadorx/clipcontext" rel="noopener" target="_blank">Follow the repository</a> — every update lands there first.</p>
   </div>
 </section>
 

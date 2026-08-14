@@ -13,10 +13,11 @@
 <meta property="og:type" content="website">
 <meta property="og:title" content="{{title}}">
 <meta property="og:description" content="{{ogDesc}}">
-<link rel="icon" href="{{root}}favicon.ico" sizes="any">
+<link rel="icon" href="{{root}}favicon.ico?v={{ICONV}}" sizes="any">
 <link rel="icon" href="{{root}}favicon.svg" type="image/svg+xml">
-<link rel="apple-touch-icon" href="{{root}}apple-touch-icon.png">
+<link rel="apple-touch-icon" href="{{root}}apple-touch-icon.png?v={{ICONV}}">
 <link rel="stylesheet" href="{{root}}site.css">
+{{analytics}}
 {{redirect}}
 </head>
 <body>
@@ -26,7 +27,7 @@
     <a class="brand" href="{{home}}"><img src="{{root}}logo.svg" alt=""><span>Clip<b>Context</b></span></a>
     <nav>
       <a href="#como" class="hide-sm">{{navHow}}</a>
-      <a href="{{precos}}">{{navPrice}}</a>
+      <a href="{{precos}}" class="hide-xs">{{navPrice}}</a>
       <a href="{{app}}">{{navApp}}</a>
       {{switcher}}
     </nav>
@@ -103,6 +104,7 @@
       <details><summary>{{q4}}</summary><p>{{a4}}</p></details>
       <details><summary>{{q5}}</summary><p>{{a5}}</p></details>
       <details><summary>{{q6}}</summary><p>{{a6}}</p></details>
+      <details><summary>{{q7}}</summary><p>{{a7}}</p></details>
     </div>
   </div>
 </section>

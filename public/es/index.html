@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ClipContext — convierte tu vídeo en contexto para la IA</title>
-<meta name="description" content="ChatGPT y Claude no ven vídeo. ClipContext convierte cualquier grabación en un PDF con los fotogramas que importan y la transcripción sincronizada, listo para pegar en la conversación. Gratis, sin registro, y el vídeo no sale de tu ordenador.">
+<meta name="description" content="Una hora de vídeo se convierte en ~60 pantallas — solo las que cambian — cada una junto a lo que se dijo, en un PDF que ChatGPT, Claude y Gemini leen entero. Funciona en tu navegador: el vídeo no sale de tu ordenador.">
 <link rel="canonical" href="https://clipcontext.app/es">
 <link rel="alternate" hreflang="pt-BR" href="https://clipcontext.app/">
 <link rel="alternate" hreflang="en" href="https://clipcontext.app/en">
@@ -12,11 +12,12 @@
 <link rel="alternate" hreflang="x-default" href="https://clipcontext.app/en">
 <meta property="og:type" content="website">
 <meta property="og:title" content="ClipContext — convierte tu vídeo en contexto para la IA">
-<meta property="og:description" content="Fotogramas por cambio de escena + transcripción sincronizada, en un solo PDF. Nada se envía a ningún servidor.">
-<link rel="icon" href="/favicon.ico" sizes="any">
+<meta property="og:description" content="Solo los momentos en que la pantalla cambia, junto al habla, en un único PDF. Nada se envía a ningún servidor.">
+<link rel="icon" href="/favicon.ico?v=2" sizes="any">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png?v=2">
 <link rel="stylesheet" href="/site.css">
+<script>window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments)};</script><script defer src="/_vercel/insights/script.js"></script>
 
 </head>
 <body>
@@ -26,7 +27,7 @@
     <a class="brand" href="/es"><img src="/logo.svg" alt=""><span>Clip<b>Context</b></span></a>
     <nav>
       <a href="#como" class="hide-sm">Cómo funciona</a>
-      <a href="/es/precos">Precios</a>
+      <a href="/es/precos" class="hide-xs">Precios</a>
       <a href="/app?lang=es">Abrir la herramienta</a>
       <span style="display:inline-flex;gap:9px;border-left:1px solid var(--line);padding-left:16px"><a href="/?lang=pt">PT</a><a href="/en">EN</a><a href="/es" style="color:var(--ink);font-weight:600">ES</a></span>
     </nav>
@@ -36,8 +37,8 @@
 <section style="padding-top:78px">
   <div class="wrap">
     <p class="eyebrow">Vídeo → PDF → IA</p>
-    <h1>Tu vídeo, en el formato<br>que la IA sí puede leer</h1>
-    <p class="lead">ChatGPT y Claude no ven vídeo. ClipContext convierte cualquier grabación en un PDF con los fotogramas que importan y la transcripción sincronizada — listo para adjuntar a la conversación.</p>
+    <h1>Una hora de vídeo<br>en 60 pantallas que importan</h1>
+    <p class="lead">Un modelo que ve vídeo muestrea un fotograma por segundo: 3.600 imágenes casi idénticas, y el contexto se agota antes que la respuesta. ClipContext guarda solo los instantes en que la pantalla cambia, cada uno junto a lo que se estaba diciendo — en un PDF que ChatGPT, Claude y Gemini leen entero.</p>
     <p><a class="btn" href="/app?lang=es">Abrir la herramienta — es gratis</a></p>
     <p class="small muted" style="margin-top:16px">Sin registro, sin instalación, sin límite de tamaño. El vídeo se procesa dentro de tu navegador y nunca se sube a ningún servidor.</p>
 
@@ -55,8 +56,8 @@
 
 <section>
   <div class="wrap">
-    <h2>Por qué adjuntar el vídeo no funciona</h2>
-    <p class="lead" style="margin-bottom:0">Los modelos de lenguaje leen texto e imágenes, no vídeo. O rechazan el archivo, o su tamaño hace inviable subirlo. Y cuando haces capturas a mano, acabas enviando diez pantallas casi idénticas y ninguna del momento que importaba, sin nada que enlace lo que aparece con lo que se estaba diciendo.</p>
+    <h2>Por qué el vídeo en crudo es la peor forma de preguntar</h2>
+    <p class="lead" style="margin-bottom:0">Claude y ChatGPT rechazan los archivos de vídeo. Gemini los acepta — y ahí aparece el otro problema: muestrea un fotograma por segundo a ciegas, así que una clase de una hora se convierte en 3.600 imágenes y cerca de un millón de tokens, casi todo repetición de la diapositiva anterior. Y lo vuelves a pagar en cada pregunta. Hacer capturas a mano tiene el defecto opuesto: diez pantallas parecidas, ninguna del momento que importaba, y nada que una lo que se ve con lo que se decía.</p>
   </div>
 </section>
 
@@ -76,7 +77,7 @@
   <div class="wrap">
     <h2>Qué hace distinto</h2>
     <div class="cards" style="margin-top:26px">
-      <div class="card"><h3>Captura cuando la imagen cambia</h3><p>En vez de tomar un fotograma cada diez segundos, recorre el vídeo y guarda los momentos en que la pantalla realmente cambia. En una presentación, eso se convierte en un fotograma por diapositiva en lugar de cuarenta repetidos.</p></div>
+      <div class="card"><h3>Guarda el cambio, no el intervalo</h3><p>En lugar de fotografiar cada diez segundos, recorre el vídeo y se detiene en los instantes en que la pantalla cambia de verdad, con precisión de medio segundo. En una presentación eso es un fotograma por diapositiva en vez de cuarenta repetidos.</p></div>
       <div class="card"><h3>Empareja imagen y habla</h3><p>En el PDF, cada fotograma aparece junto a lo que se dice en ese punto, con el instante marcado. El modelo puede relacionar lo que había en pantalla con lo que se estaba diciendo.</p></div>
       <div class="card"><h3>Nada sale de tu ordenador</h3><p>No existe servidor. El vídeo, el audio y la transcripción se procesan en tu navegador — incluidas grabaciones confidenciales de reuniones.</p></div>
       <div class="card"><h3>Te entrega también el prompt</h3><p>El texto ya preparado le indica al modelo que cite los instantes, separe lo que vio de lo que oyó, y admita cuando la información no está en el documento en lugar de inventarla.</p></div>
@@ -103,6 +104,7 @@
       <details><summary>¿La transcripción es buena?</summary><p>Usa Whisper ejecutándose localmente. El modelo rápido es razonable y el preciso es bastante mejor, a costa de una descarga mayor. Si ya tienes subtítulos de otro servicio, arrastra el archivo y sáltate este paso.</p></details>
       <details><summary>¿Es realmente gratis?</summary><p>La herramienta tal como está hoy es gratuita y el código es abierto bajo licencia MIT. Como no hay coste de servidor, no hay motivo para cobrar por ella.</p></details>
       <details><summary>¿Con qué IA debo usar el PDF?</summary><p>Cualquier modelo que acepte adjuntos y lea imágenes — Claude, ChatGPT y Gemini funcionan. Adjunta el PDF y pega el prompt que la herramienta genera junto a él.</p></details>
+      <details><summary>Gemini ya ve vídeo. ¿Por qué usaría esto?</summary><p>Porque ver y entender cuestan distinto. Gemini muestrea un fotograma por segundo sin mirar el contenido: una hora de vídeo son 3.600 imágenes y cerca de un millón de tokens — suficiente para llenar la ventana entera y no dejar sitio a la conversación. El mismo material sale de aquí en unas 60 pantallas y 60.000 tokens, porque las otras 3.540 eran repetición. Y Claude y ChatGPT siguen sin aceptar vídeo.</p></details>
     </div>
   </div>
 </section>

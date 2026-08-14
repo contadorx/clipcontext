@@ -20,6 +20,49 @@ CDN = "https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"
 # hreflang e para o link do topo da ferramenta — trocar de domínio é mudar esta linha.
 SITE = "https://clipcontext.app"
 
+# Versão dos ícones. O navegador guarda favicon com unhas e dentes: sem um
+# parâmetro que mude, quem já visitou o site continua vendo o ícone antigo
+# mesmo depois do deploy. Suba este número sempre que a marca mudar.
+ICON_V = "2"
+
+# ---------------------------------------------------------------------------
+# Medição. São duas coisas separadas, de propósito:
+#
+#   Vercel Web Analytics  -> quantas pessoas chegaram e de onde. Só visitas de
+#                            página, sem cookie e sem identificador persistente.
+#                            Eventos personalizados são recurso de plano pago,
+#                            então o funil NÃO passa por aqui.
+#   Supabase              -> os três marcos do funil e a lista de aviso. Chama
+#                            duas funções que só sabem inserir; as tabelas ficam
+#                            num schema fora da API e ninguém as lê pelo cliente.
+#
+# Nada disso entra no build offline: os tokens abaixo viram string vazia lá, e o
+# código sai junto. O arquivo único continua sendo um arquivo que não fala com
+# ninguém — e isso é verificável abrindo ele e procurando por "supabase".
+# ---------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
+# Identificação legal. Sai daqui para os Termos e para a Política de Privacidade
+# nos três idiomas — a LGPD exige que o controlador esteja identificado, e um
+# CNPJ digitado em nove lugares vira nove chances de digitar errado.
+#
+# ATENÇÃO: o endereço abaixo precisa RECEBER e-mail de verdade. Publicar canal de
+# titular que não responde é pior que não publicar — o prazo do art. 19 corre do
+# mesmo jeito. Se preferir usar outro, é esta linha.
+# ---------------------------------------------------------------------------
+EMPRESA = "Produtize Produtos e Serviços Inteligentes Ltda."
+CNPJ    = "48.417.292/0001-99"
+CONTATO = "privacidade@clipcontext.app"
+
+SUPA_URL = "https://zyqncemxjobkvdveordz.supabase.co"
+SUPA_KEY = "sb_publishable_HQDSfL4rTtPx2wwbgh_huw_llog8ZJk"
+
+# Snippet oficial do Vercel para site em HTML puro. O `window.va` enfileira
+# chamadas feitas antes do script chegar; o script cuida do resto.
+ANALYTICS = (
+    '<script>window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments)};</script>'
+    '<script defer src="/_vercel/insights/script.js"></script>'
+)
+
 META = """<title>ClipContext — transforme vídeo em contexto para IA</title>
 <meta name="description" content="Transforme qualquer vídeo em um PDF com os frames que importam e a transcrição sincronizada, pronto para colar em uma IA. Roda no seu navegador: o vídeo não sai do seu computador.">
 <meta property="og:type" content="website">
@@ -86,6 +129,13 @@ def build_site(root: pathlib.Path) -> None:
         t = dict(dic[lang])
         t.update(caminhos[lang])
         t["site"] = SITE
+        t["ICONV"] = ICON_V
+        t["analytics"] = ANALYTICS
+        t["supaUrl"] = SUPA_URL
+        t["supaKey"] = SUPA_KEY
+        t["empresa"] = EMPRESA
+        t["cnpj"] = CNPJ
+        t["contato"] = CONTATO
         t["selfPath"] = caminhos[lang]["home"]
         t["switcher"] = _switcher(lang, paginas, "home")
         t["lang"] = lang
@@ -126,6 +176,14 @@ def build_site(root: pathlib.Path) -> None:
                 continue
             t = dict(dic[lang]); t.update(caminhos[lang])
             t["site"] = SITE
+            t["ICONV"] = ICON_V
+            t["analytics"] = ANALYTICS
+            t["supaUrl"] = SUPA_URL
+            t["supaKey"] = SUPA_KEY
+            t["empresa"] = EMPRESA
+            t["cnpj"] = CNPJ
+            t["contato"] = CONTATO
+            t["lang"] = lang
             t["docTitle"], t["docDesc"] = metas[lang]
             t["selfPath"] = caminhos[lang][pagina]
             t["ptPath"] = paginas["pt"][pagina]
@@ -161,24 +219,38 @@ def main() -> int:
     src = template.read_text(encoding="utf-8")
     src = src.replace("__SITE__", SITE)                      # domínio público, definido no topo
     src = src.replace("__SITEDOM__", SITE.split("//")[-1])  # o mesmo, sem o esquema, para exibir
+    src = src.replace("__ICONV__", ICON_V)
     if MARKER not in src:
         print(f"marcador {MARKER} não encontrado em src/template.html", file=sys.stderr)
         return 1
 
-    # build web: metadados de SEO + jsPDF do CDN
+    # build web: metadados de SEO + jsPDF do CDN + medição
     web = src.replace(MARKER, f'<script src="{CDN}"></script>')
     if PLAIN_TITLE in web:
         web = web.replace(PLAIN_TITLE, META)
+    web = web.replace("__SUPAURL__", SUPA_URL).replace("__SUPAKEY__", SUPA_KEY)
+    web = web.replace("<!--__ANALYTICS__-->", ANALYTICS)
     out_web = ROOT / "public" / "app.html"
     out_web.parent.mkdir(exist_ok=True)
     out_web.write_text(web, encoding="utf-8")
 
-    # build offline: biblioteca embutida, sem nenhuma dependência de rede para o PDF
+    # build offline: biblioteca embutida, sem nenhuma dependência de rede para o
+    # PDF — e sem endereço de medição nenhum. As strings vazias fazem o `medir()`
+    # sair pelo primeiro `if` e o snippet do Vercel simplesmente não existir.
     lib = vendor.read_text(encoding="utf-8")
     offline = src.replace(MARKER, f"<script>{lib}</script>")
+    offline = offline.replace("__SUPAURL__", "").replace("__SUPAKEY__", "")
+    offline = offline.replace("<!--__ANALYTICS__-->", "")
     out_off = ROOT / "offline" / "clipcontext-offline.html"
     out_off.parent.mkdir(exist_ok=True)
     out_off.write_text(offline, encoding="utf-8")
+
+    # Trava, não conferência: se um dia alguém colar um endereço direto no
+    # template, o build quebra em vez de publicar um "offline" que telefona.
+    for proibido in ("supabase.co", "_vercel/insights"):
+        if proibido in offline:
+            print(f"o build offline contém {proibido!r} — ele tem que ser mudo", file=sys.stderr)
+            return 1
 
     for path in (out_web, out_off):
         print(f"{path.relative_to(ROOT)}  {len(path.read_text(encoding='utf-8')) / 1024:.1f} KB")

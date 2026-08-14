@@ -9,10 +9,11 @@
 <link rel="alternate" hreflang="pt-BR" href="{{site}}{{ptPath}}">
 <link rel="alternate" hreflang="en" href="{{site}}{{enPath}}">
 <link rel="alternate" hreflang="es" href="{{site}}{{esPath}}">
-<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" href="/favicon.ico?v={{ICONV}}" sizes="any">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png?v={{ICONV}}">
 <link rel="stylesheet" href="/site.css">
+{{analytics}}
 </head>
 <body>
 
@@ -20,7 +21,7 @@
   <div class="wrap">
     <a class="brand" href="{{home}}"><img src="/logo.svg" alt=""><span>Clip<b>Context</b></span></a>
     <nav>
-      <a href="{{precos}}">{{navPrice}}</a>
+      <a href="{{precos}}" class="hide-xs">{{navPrice}}</a>
       <a href="{{app}}">{{navApp}}</a>
       {{switcher}}
     </nav>

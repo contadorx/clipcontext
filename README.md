@@ -11,7 +11,12 @@ Modelos de texto não assistem vídeo. O que eles leem bem é: imagens dos momen
 ## O que faz
 
 - **Escolhe frames por mudança de cena.** Varre o vídeo e só guarda quando a imagem realmente muda. Num vídeo de slides, troca dezenas de capturas repetidas por uma de cada tela. Também há os modos de quantidade fixa e intervalo fixo.
-- **Transcreve localmente** com Whisper via WebGPU (`@huggingface/transformers`), ou aceita `.vtt` / `.srt` / texto colado do painel do Google Drive.
+- **Transcreve localmente** com Whisper (`@huggingface/transformers`), no processador por padrão e na
+  placa de vídeo como opção — o tamanho do download aparece antes da escolha, e muda com ela. Também
+  aceita `.vtt` / `.srt` / texto colado do painel do Google Drive.
+- **Pula o silêncio.** Janela de 30 s sem voz não vai ao modelo: o Whisper processa sempre 30 segundos,
+  então uma janela muda custa o mesmo que uma cheia — e ainda convida o modelo a inventar texto.
+- **Conta em qual motor rodou e quão rápido**, em quantas linhas, e quantas vezes o tempo real.
 - **Pareia imagem e fala.** No PDF, cada frame aparece com o que é dito naquele trecho. Falas que começaram antes do frame vêm marcadas com `...`.
 - **Deixa revisar antes de gerar.** Grade de miniaturas, clique para descartar, botão para remover quase-duplicados, e estimativa do tamanho do PDF em tempo real.
 - **Monta o prompt.** No fim do fluxo, gera o texto que explica ao modelo como o PDF está organizado — instantes, o que é imagem e o que é fala, e o aviso de que os frames são amostras. Com quatro objetivos prontos ou pedido livre.
@@ -62,6 +67,8 @@ public/support.js        bloco de apoio voluntário (preencha os identificadores
 LANCAMENTO.md            textos de divulgação, palavras-chave e posicionamento
 ARQUITETURA-PAGO.md      o que é preciso para cobrar: custos, preços e ordem de construção
 GOOGLE-DRIVE.md          como ligar o botão do Drive: escopo, chaves e configuração no Google Cloud
+DESEMPENHO.md            o que vale otimizar, com o que foi medido e o que é estimativa
+PARA-O-SALAVOX.md        o que este projeto tem a devolver ao projeto irmão
 ```
 
 ## Captura ao vivo

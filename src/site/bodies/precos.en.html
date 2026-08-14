@@ -64,9 +64,13 @@
 <section id="lista">
   <div class="wrap">
     <h2>Want to be notified?</h2>
-    <p class="lead">There is no automated waiting list — it would be incoherent to build an email capture form
-    into a tool that takes pride in collecting nothing. For now, follow the repository on GitHub: every update
-    lands there first.</p>
+    <p class="lead">Leave an e-mail and I will tell you when the paid plan ships. One message, not a newsletter.</p>
+    <form class="lista" id="listaForm" data-url="{{supaUrl}}" data-key="{{supaKey}}" novalidate>
+      <input type="email" id="listaEmail" autocomplete="email" placeholder="you@example.com" aria-label="Your e-mail">
+      <button class="btn" type="submit" id="listaBtn">Notify me</button>
+    </form>
+    <p class="small muted listaMsg" id="listaMsg" role="status"></p>
+    <p class="small muted" style="max-width:640px">The promise of this tool is that <b>your video never leaves your machine</b>, and that still holds: this field has nothing to do with what you process here — the browser sends no video, no audio and no transcript anywhere. The e-mail sits in a database of mine, is never sold, never goes to a third-party list, and disappears the day you ask. Rather not leave it? <a href="https://github.com/contadorx/clipcontext" rel="noopener" target="_blank">Follow the repository</a> — every update lands there first.</p>
   </div>
 </section>
 

@@ -65,9 +65,13 @@
 <section id="lista">
   <div class="wrap">
     <h2>¿Quieres que te avisemos?</h2>
-    <p class="lead">No hay lista de espera automatizada — sería incoherente montar un formulario que recoge
-    correos en una herramienta que se enorgullece de no recoger nada. Por ahora, sigue el repositorio en
-    GitHub: cada novedad aparece allí primero.</p>
+    <p class="lead">Deja un correo y te aviso cuando salga el plan de pago. Un mensaje, no un boletín.</p>
+    <form class="lista" id="listaForm" data-url="{{supaUrl}}" data-key="{{supaKey}}" novalidate>
+      <input type="email" id="listaEmail" autocomplete="email" placeholder="tu@ejemplo.com" aria-label="Tu correo">
+      <button class="btn" type="submit" id="listaBtn">Avísame</button>
+    </form>
+    <p class="small muted listaMsg" id="listaMsg" role="status"></p>
+    <p class="small muted" style="max-width:640px">La promesa de esta herramienta es que <b>tu vídeo no sale de tu ordenador</b>, y sigue en pie: este campo no tiene ninguna relación con lo que procesas aquí — el navegador no envía vídeo, audio ni transcripción a ningún sitio. El correo queda en una base de datos mía, no se vende, no va a listas de terceros y desaparece el día que lo pidas. ¿Prefieres no dejarlo? <a href="https://github.com/contadorx/clipcontext" rel="noopener" target="_blank">Sigue el repositorio</a>: cada novedad aparece allí primero.</p>
   </div>
 </section>
 

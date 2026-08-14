@@ -4,9 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Vídeo → PDF (frames + transcrição)</title>
-<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" href="/favicon.ico?v=2" sizes="any">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'> <rect width='64' height='64' rx='14' fill='%233A3F9E'/> <rect x='12' y='13' width='40' height='22' rx='3' fill='%23fff'/> <rect x='12' y='41' width='40' height='5' rx='2.5' fill='%23fff'/> <rect x='12' y='50' width='26' height='5' rx='2.5' fill='%23fff' opacity='.62'/> </svg>" type="image/svg+xml">
-<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png?v=2">
+
 <style>
   :root{
     --bg:#f7f8fa; --panel:#ffffff; --ink:#15171c; --muted:#5c6473;
@@ -84,12 +85,12 @@
   .topbar select{width:auto;padding:5px 9px;font-size:13px}
   /* A marca vai inline, e não como <img src>: assim o arquivo offline mostra a
      logo sem depender de rede nem de um arquivo ao lado. */
-  .brand{display:inline-flex;align-items:center;gap:9px;text-decoration:none;color:var(--ink);
-         font-weight:600;font-size:15px;letter-spacing:-.2px}
-  .brand svg{width:26px;height:26px;display:block;flex:none}
+  .brand{display:inline-flex;align-items:center;gap:10px;text-decoration:none;color:var(--ink);
+         font-weight:600;font-size:16.5px;letter-spacing:-.2px}
+  .brand svg{width:34px;height:34px;display:block;flex:none}
   .brand b{font-weight:700;color:var(--accent)}
   .brand .dom{color:var(--muted);font-weight:400;font-size:12.5px;margin-left:2px}
-  @media (max-width:560px){ .brand .dom{display:none} }
+  @media (max-width:560px){ .brand .dom{display:none} .brand svg{width:29px;height:29px} }
   .chk{display:inline-flex;align-items:center;gap:7px;font-size:13.5px;color:var(--ink);cursor:pointer}
   .chk input{width:auto;margin:0;cursor:pointer}
   /* últimas falas transcritas durante a gravação */
@@ -173,12 +174,14 @@
           <option value="onnx-community/whisper-base" data-i18n="mBase"></option>
           <option value="onnx-community/whisper-small" data-i18n="mSmall"></option>
         </select>
+        <span class="status" id="modelSize"></span>
         <select id="lang" style="width:auto">
           <option value="pt">Português</option>
           <option value="en">English</option>
           <option value="es">Español</option>
           <option value="" data-i18n="autoDetect"></option>
         </select>
+        <label class="chk"><input type="checkbox" id="gpu"><span data-i18n="gpuLbl"></span></label>
         <button class="ghost sm" id="diag" data-i18n="diagBtn"></button>
       </div>
       <pre id="diagOut" class="hide"></pre>
@@ -778,6 +781,13 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       recDone2:'Pronto: {0} de captura, {1} frames e {2} falas. Nenhum vídeo foi guardado no seu computador.',
       spkMic:'Microfone', spkSys:'Computador',
       recFile:'captura de tela', pNoFile:'nenhum arquivo guardado',
+      gpuLbl:'usar a placa de vídeo', dlSize:'baixa ~{0} MB na primeira vez',
+      motorCaiu:'O modelo não abriu na {0}. Tentando no processador…',
+      motorQuebrou:'O modelo abriu na placa de vídeo mas quebrou ao transcrever. Refazendo no processador…',
+      trPulou:'{0} trechos sem fala foram pulados.',
+      perf:'Transcrito no {0}{1}: {2} s de áudio em {3} s — {4}× o tempo real.',
+      perfLinhas:' em {0} linhas',
+      perfLento:'Mais lento que o próprio vídeo — vale escolher o modelo rápido.',
       docxBtn:'Word (.docx)', zipBtn:'Zip das figuras', wFrames:'Frames neste documento',
       ftPromo:'Frames e transcrição sincronizada, gerados no navegador com ClipContext',
       pkgBuilding:'Montando o arquivo…',
@@ -936,6 +946,13 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       recDone2:'Done: {0} captured, {1} frames and {2} lines of speech. No video was kept on your computer.',
       spkMic:'Microphone', spkSys:'Computer',
       recFile:'screen capture', pNoFile:'no file kept',
+      gpuLbl:'use the graphics card', dlSize:'downloads ~{0} MB the first time',
+      motorCaiu:'The model would not open on the {0}. Trying the CPU…',
+      motorQuebrou:'The model opened on the graphics card but broke while transcribing. Redoing it on the CPU…',
+      trPulou:'{0} stretches with no speech were skipped.',
+      perf:'Transcribed on the {0}{1}: {2} s of audio in {3} s — {4}× real time.',
+      perfLinhas:' on {0} threads',
+      perfLento:'Slower than the video itself — the fast model is worth a try.',
       docxBtn:'Word (.docx)', zipBtn:'Zip of the images', wFrames:'Frames in this document',
       ftPromo:'Frames and synced transcript, generated in the browser with ClipContext',
       pkgBuilding:'Building the file…',
@@ -1092,6 +1109,13 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       recDone2:'Listo: {0} de captura, {1} fotogramas y {2} intervenciones. No se guardó ningún vídeo en tu ordenador.',
       spkMic:'Micrófono', spkSys:'Ordenador',
       recFile:'captura de pantalla', pNoFile:'ningún archivo guardado',
+      gpuLbl:'usar la tarjeta gráfica', dlSize:'descarga ~{0} MB la primera vez',
+      motorCaiu:'El modelo no abrió en la {0}. Probando en el procesador…',
+      motorQuebrou:'El modelo abrió en la tarjeta gráfica pero se rompió al transcribir. Rehaciéndolo en el procesador…',
+      trPulou:'{0} tramos sin habla fueron omitidos.',
+      perf:'Transcrito en el {0}{1}: {2} s de audio en {3} s — {4}× el tiempo real.',
+      perfLinhas:' en {0} líneas',
+      perfLento:'Más lento que el propio vídeo — vale la pena elegir el modelo rápido.',
       docxBtn:'Word (.docx)', zipBtn:'Zip de las imágenes', wFrames:'Fotogramas en este documento',
       ftPromo:'Fotogramas y transcripción sincronizada, generados en el navegador con ClipContext',
       pkgBuilding:'Montando el archivo…',
@@ -1240,6 +1264,39 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
 
   const tr = t;   // alias: no laço de varredura a variável de tempo sombreia t()
 
+  /* ================= medição =================
+     Três marcos: abriu, carregou vídeo, baixou saída. Nada além disso sai daqui.
+
+     O que NÃO é enviado, e é o que importa: nome de arquivo, tamanho, duração,
+     transcrição, frame, endereço de e-mail, identificador de sessão. A função do
+     lado do servidor só aceita palavras de um vocabulário fechado — qualquer
+     coisa fora dele é descartada lá, não aqui.
+
+     No build offline as duas constantes abaixo saem vazias (o build.py troca os
+     tokens por nada e quebra se sobrar algum endereço), então o `if` já barra na
+     primeira linha e o arquivo único continua mudo.
+
+     `keepalive` porque baixar um arquivo não navega, mas fechar a aba logo em
+     seguida é comum: sem isso o pedido morre com a página. */
+  const MEDIR_URL = '';
+  const MEDIR_KEY = '';
+  const naoQuerMedir = () =>
+    navigator.globalPrivacyControl === true ||
+    navigator.doNotTrack === '1' || window.doNotTrack === '1';
+
+  function medir(nome, extra){
+    if (!MEDIR_URL || !MEDIR_KEY || naoQuerMedir()) return;
+    try {
+      fetch(MEDIR_URL + '/rest/v1/rpc/clipcontext_evento', {
+        method: 'POST',
+        keepalive: true,
+        headers: { 'Content-Type': 'application/json',
+                   apikey: MEDIR_KEY, Authorization: 'Bearer ' + MEDIR_KEY },
+        body: JSON.stringify(Object.assign({ p_nome: nome, p_idioma: LANG }, extra || {}))
+      }).catch(() => {});          // medição que falha não pode atrapalhar o uso
+    } catch (e) {}
+  }
+
   /* Enquanto algo longo está rodando, avisa antes de fechar a aba: como tudo
      acontece no navegador, sair significa perder o trabalho. */
   let ocupado = false;
@@ -1293,7 +1350,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
   $('drop').addEventListener('drop', ev => { const f = ev.dataTransfer.files[0]; if (f && !capturando()) load(f); });
   $('file').onchange = e => { const f = e.target.files[0]; if (f && !capturando()) load(f); };
 
-  function load(f){
+  function load(f, origem){
     /* Sem isto, a duração e os rótulos de uma captura anterior contaminariam o
        arquivo novo: o PDF diria 30 s para um vídeo de 10 min, e o prompt
        explicaria canais de áudio que não existem neste material. */
@@ -1309,6 +1366,10 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       showMeta();
       buildPrompt();          // o texto anterior falava de outro vídeo
       $('count').value = Math.min(80, Math.max(12, Math.round(video.duration/15)));
+      /* Aqui e não no começo da função: só conta o vídeo que o navegador
+         realmente conseguiu abrir. O que cai no onerror é outro número, e
+         misturar os dois esconderia justamente a dor dos formatos recusados. */
+      medir('carregou_video', { p_origem: origem || 'arquivo' });
     };
     video.onerror = () => {
       let extra = '';
@@ -1431,7 +1492,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
         video.addEventListener('error', s2);
         setTimeout(() => { limpa(); rej(new Error('tempo esgotado ao abrir o vídeo')); }, 20000);
       });
-      load(new File([blob], 'clipcontext-' + arq, { type: tipo }));
+      load(new File([blob], 'clipcontext-' + arq, { type: tipo }), 'exemplo');
       await ok;
 
       try {
@@ -1621,7 +1682,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
         video.addEventListener('error', s2);
         setTimeout(() => { limpa(); rej(new Error(t('videoErr'))); }, 30000);
       });
-      load(new File([blob], doc.name || 'video', { type: doc.mimeType || 'video/mp4' }));
+      load(new File([blob], doc.name || 'video', { type: doc.mimeType || 'video/mp4' }), 'drive');
       await abriu;
 
       driveAviso = '';
@@ -1845,6 +1906,43 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     };
   }
 
+  /* Nível de referência do áudio: percentil 99,9 dos quadros, não o pico nem a
+     média. O pico é um clique de teclado; a média afunda com o silêncio. */
+  function nivelAlto(quadros){
+    if (!quadros.length) return 0;
+    const ord = Float32Array.from(quadros).sort();
+    return ord[Math.min(ord.length - 1, Math.floor(ord.length * 0.999))];
+  }
+
+  /* Energia por quadro de 20 ms, a unidade das duas peneiras. */
+  function quadrosDe(dados){
+    const Q = 320, n = Math.floor(dados.length / Q), out = new Float32Array(n);
+    for (let i = 0; i < n; i++) {
+      let soma = 0;
+      for (let k = 0; k < Q; k++) { const v = dados[i*Q + k]; soma += v*v; }
+      out[i] = Math.sqrt(soma / Q);
+    }
+    return out;
+  }
+
+  /* Limiar relativo ao próprio áudio, com piso absoluto. Fixo erra nos dois
+     sentidos: gravação baixa some inteira, gravação alta deixa passar ruído.
+     Os 6% saem de um teste que passou raspando com 12% — a fala mais baixa de
+     um arquivo real ficava exatamente 18 dB abaixo da mais alta. Verificação
+     que passa por um fio é aviso, não aprovação. */
+  const PISO_VOZ = 0.006;
+  const limiarDe = alto => Math.max(PISO_VOZ, alto * 0.06);
+
+  /* Dez quadros acima do limiar — 200 ms de voz — para a janela valer a viagem
+     ao modelo. Contar quadros, e não olhar o pico, é o que impede um clique de
+     teclado arrastar trinta segundos de silêncio para dentro do modelo, que é
+     como nascem as alucinações repetidas. */
+  function janelaTemVoz(quadros, limiar){
+    let n = 0;
+    for (let i = 0; i < quadros.length; i++) if (quadros[i] >= limiar && ++n >= 10) return true;
+    return false;
+  }
+
   /* Procura sinal em blocos de um segundo, e não na média da janela inteira.
      Com a média, meio segundo de fala diluído em vinte segundos de silêncio
      fica abaixo do corte e a frase seria jogada fora sem nunca chegar ao
@@ -1886,7 +1984,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
         const opts = { return_timestamps: true, task: 'transcribe' };
         const lang = $('lang').value;
         if (lang) opts.language = lang;
-        const r = await pipe(j.dados, opts);
+        const r = await transcrever(j.dados, opts);
         const chunks = (r && r.chunks && r.chunks.length) ? r.chunks
           : [{ timestamp: [0, j.dados.length / SR_ASR], text: (r && r.text) || '' }];
         chunks.forEach(c => {
@@ -2124,11 +2222,13 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       }
       $('liveStat').textContent = '';
       showMeta();
-      $('recMsg').innerHTML = `<span class="ok">${t('recDone2', fmt(liveDur), frames.length, liveCues.length)}</span>`;
+      $('recMsg').innerHTML = `<span class="ok">${t('recDone2', fmt(liveDur), frames.length, liveCues.length)}` +
+        contarDesempenho() + `</span>`;
       $('prevCard').classList.remove('hide');
       $('extract').disabled = true;      // não há vídeo para varrer de novo
       $('auto').disabled = true;
       render();
+      medir('carregou_video', { p_origem: 'gravacao' });
     };
   };
 
@@ -2163,6 +2263,9 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     a.download = `${nome}.${ext}`;
     a.click();
     setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+    /* srt e txt entram como 'vtt' de propósito: o vocabulário da função no
+       servidor é fechado, e o que interessa aqui é "saiu legenda", não qual. */
+    medir('baixou_saida', { p_formato: ext === 'json' ? 'json' : 'vtt' });
   }
 
   $('expVtt').onclick = () => baixar(montarLegenda('vtt'), 'vtt');
@@ -2230,6 +2333,24 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     return null;
   }
 
+  /* Quantas linhas o runtime pode usar no processador.
+
+     Mais de uma exige SharedArrayBuffer, que o navegador só entrega a páginas
+     isoladas entre origens — e isolamento se pede por cabeçalho de resposta,
+     no vercel.json, não por código. Onde os cabeçalhos não chegarem
+     (Safari hoje ignora `credentialless`), `crossOriginIsolated` é falso e
+     isto devolve 1: não há como quebrar, só como não melhorar.
+
+     O teto de quatro não é timidez. O ganho achata depois disso, e aqui a
+     transcrição pode estar dividindo a máquina com uma captura de tela
+     acontecendo — tomar todos os núcleos faria a captura engasgar. */
+  function quantasLinhas(nucleos, isolado){
+    if (!isolado) return 1;
+    return Math.max(1, Math.min(4, (nucleos || 2) - 1));
+  }
+  const linhasDoWasm = () =>
+    quantasLinhas(navigator.hardwareConcurrency, !!self.crossOriginIsolated);
+
   async function loadLib(){
     const mod = await import(TJS);
     mod.env.allowLocalModels = false;
@@ -2237,13 +2358,57 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     const base = await findWasmBase();
     try {
       const w = mod.env.backends && mod.env.backends.onnx && mod.env.backends.onnx.wasm;
-      if (w) { w.numThreads = 1; if (base) w.wasmPaths = base; }
+      if (w) { w.numThreads = linhasDoWasm(); if (base) w.wasmPaths = base; }
     } catch (e) {}
     return mod;
   }
 
+  /* Tamanho real do download, conferido arquivo por arquivo no repositório de
+     cada modelo. O caminho da placa de vídeo baixa o codificador SEM compressão
+     (fp32), porque as versões comprimidas produzem texto quebrado em parte das
+     máquinas — por isso ele é 2,4x maior. A tela mostrava «~50 MB» e «~200 MB»
+     para os dois, o que era mentira nos dois casos. */
+  const TAMANHOS = {
+    'onnx-community/whisper-base':  { cpu: 77,  gpu: 206 },
+    'onnx-community/whisper-small': { cpu: 249, gpu: 586 }
+  };
+  const usaPlaca = () => !!($('gpu') && $('gpu').checked);
+
+  function mostrarTamanho(){
+    const t2 = TAMANHOS[$('model').value];
+    if (!t2) { $('modelSize').textContent = ''; return; }
+    $('modelSize').textContent = t('dlSize', usaPlaca() ? t2.gpu : t2.cpu);
+  }
+
+  /* Relógio do modelo: segundos de áudio que entraram, contra tempo de parede
+     gasto. O download não entra na conta — é outra medida, e misturar as duas
+     esconderia justamente o que se quer ver. */
+  const relogio = { audio: 0, ms: 0 };
+  let motorEmUso = null;
+
+  function desempenho(){
+    return { motor: motorEmUso, linhas: linhasDoWasm(),
+             isolado: !!self.crossOriginIsolated,
+             audio: relogio.audio, segundos: relogio.ms / 1000,
+             vezes: relogio.ms > 0 ? relogio.audio / (relogio.ms / 1000) : null };
+  }
+
+  /* A frase que aparece junto do resultado. As linhas entram no texto de
+     propósito: quando a hospedagem deixa de mandar os cabeçalhos de isolamento
+     o número cai para 1 sem nenhum erro na tela, e sem dizer aqui a
+     configuração perdida ficaria invisível — voltaria como "está lento". */
+  function contarDesempenho(){
+    const d = desempenho();
+    if (!d.vezes || d.audio < 5) return '';
+    const n = x => x < 10 ? x.toFixed(1) : x.toFixed(0);
+    const linhas = (d.motor === 'processador' && d.linhas > 1) ? t('perfLinhas', d.linhas) : '';
+    return ' ' + t('perf', d.motor || '?', linhas, n(d.audio), n(d.segundos), n(d.vezes)) +
+           (d.vezes < 1 ? ` <span class="err">${t('perfLento')}</span>` : '');
+  }
+
   async function buildPipe(modelId){
     const mod = await loadLib();
+    libMod = mod;                 // guardado: o degrau precisa remontar sem a placa
     const seen = {};
     const progress_callback = p => {
       if (p.status === 'progress' && p.file) {
@@ -2254,21 +2419,71 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
         st(t('modelDl', pct.toFixed(0)));
       }
     };
-    try {
-      return await mod.pipeline('automatic-speech-recognition', modelId,
-        { device:'webgpu', dtype:{ encoder_model:'fp32', decoder_model_merged:'q4' }, progress_callback });
-    } catch (e) {
-      st(t('noGpu'));
-      return await mod.pipeline('automatic-speech-recognition', modelId, { dtype:'q8', progress_callback });
+
+    /* Sem isto o navegador trata o modelo baixado como cache descartável e o
+       apaga quando o disco aperta — e o próximo vídeo baixa tudo de novo. Uma
+       linha, e o pedido pode ser negado sem piorar nada. */
+    try { if (navigator.storage && navigator.storage.persist) await navigator.storage.persist(); }
+    catch (e) {}
+
+    /* Fila de tentativas, e não uma tentativa só. O caminho da placa pede o
+       decodificador de 4 bits, que em algumas máquinas abre e quebra depois —
+       ver o degrau em transcrever(). */
+    const tentativas = [];
+    if (usaPlaca()) tentativas.push({ motor: 'placa de vídeo',
+      opcoes: { device:'webgpu', dtype:{ encoder_model:'fp32', decoder_model_merged:'q4' } } });
+    tentativas.push({ motor: 'processador', opcoes: { dtype:'q8' } });
+
+    let ultimo = null;
+    for (let i = 0; i < tentativas.length; i++) {
+      const tent = tentativas[i];
+      try {
+        const pp = await mod.pipeline('automatic-speech-recognition', modelId,
+          Object.assign({ progress_callback }, tent.opcoes));
+        motorEmUso = tent.motor;
+        return pp;
+      } catch (e) {
+        ultimo = (e && e.message) || String(e);
+        if (tentativas[i+1]) st(t('motorCaiu', tent.motor));
+      }
     }
+    throw new Error(ultimo || 'não consegui montar o modelo');
   }
 
-  let pipe = null, pipeId = null;
+  let pipe = null, pipeId = null, libMod = null;
+
+  /* O erro que o arquivo de 4 bits produz quando a máquina não consegue abri-lo.
+     Ele NÃO acontece ao montar o pipeline: acontece na primeira inferência,
+     depois de o catch de buildPipe já ter passado. Sem este degrau a
+     transcrição inteira morre e o usuário fica com uma linha de C++. */
+  const ERRO_SESSAO = /session|Missing required scale|MatMulNBits|DequantizeLinear|ERROR_CODE/i;
+
+  async function transcrever(dados, opts){
+    const seg = dados.length / 16000;
+    const t0 = performance.now();
+    try {
+      const r = await pipe(dados, opts);
+      relogio.audio += seg; relogio.ms += performance.now() - t0;
+      return r;
+    } catch (e) {
+      const msg = (e && e.message) || String(e);
+      if (!(motorEmUso === 'placa de vídeo' && ERRO_SESSAO.test(msg) && libMod)) throw e;
+      st(t('motorQuebrou'));
+      pipe = await libMod.pipeline('automatic-speech-recognition', pipeId, { dtype:'q8' });
+      motorEmUso = 'processador';
+      if ($('gpu')) $('gpu').checked = false;      // não tentar de novo nesta sessão
+      const t1 = performance.now();
+      const r = await pipe(dados, opts);           // o MESMO pedido, uma vez só
+      relogio.audio += seg; relogio.ms += performance.now() - t1;
+      return r;
+    }
+  }
   $('auto').onclick = async () => {
     if (!currentFile) return;
     const modelId = $('model').value, lang = $('lang').value;
     $('auto').disabled = true;
     trabalhando(true);
+    relogio.audio = 0; relogio.ms = 0;
     try {
       st(t('audioExtract')); prog(null);
       let data;
@@ -2280,11 +2495,26 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
 
       const SR = 16000, WIN = 30 * SR, total = Math.ceil(data.length / WIN), out = [];
       const inicio = performance.now();
+
+      /* Peneira de silêncio: o Whisper processa SEMPRE 30 segundos, com ou sem
+         fala dentro. Uma janela muda custa o mesmo que uma cheia — e ainda
+         convida o modelo a inventar texto sobre nada. */
+      const quadros = quadrosDe(data);
+      const limiar = limiarDe(nivelAlto(quadros));
+      const QJ = Math.floor(WIN / 320);
+      let pulados = 0;
+
       for (let i = 0; i < total; i++) {
         const off = i * WIN, seg = data.slice(off, Math.min(off + WIN, data.length)), base = off / SR;
+        if (!janelaTemVoz(quadros.subarray(i*QJ, (i+1)*QJ), limiar)) {
+          pulados++;
+          const pc = (i+1) / total * 100;
+          prog(pc); st(t('transcribing2', pc.toFixed(0), i+1, total, ''));
+          continue;
+        }
         const opts = { return_timestamps: true, task: 'transcribe' };
         if (lang) opts.language = lang;
-        const r = await pipe(seg, opts);
+        const r = await transcrever(seg, opts);
         const chunks = (r && r.chunks && r.chunks.length) ? r.chunks
           : [{ timestamp: [0, seg.length / SR], text: (r && r.text) || '' }];
         chunks.forEach(c => {
@@ -2302,12 +2532,17 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       }
       $('tr').value = 'WEBVTT\n\n' + out.join('\n\n');
       refreshTr(); prog(100);
-      st(t('trDone', out.length), 'ok');
+      st(t('trDone', out.length) + (pulados ? ' ' + t('trPulou', pulados) : '') +
+         contarDesempenho(), 'ok');
     } catch (e) {
       prog(null);
       st(t('trErr', (e && e.message ? e.message : e)), 'err');
     } finally { $('auto').disabled = false; trabalhando(false); }
   };
+
+  if ($('gpu')) $('gpu').onchange = mostrarTamanho;
+  $('model').onchange = mostrarTamanho;
+  mostrarTamanho();
 
   $('diag').onclick = async () => {
     const out = $('diagOut'); out.classList.remove('hide');
@@ -2443,28 +2678,64 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     video.pause();
 
     if (mode === 'scene') {
-      // varre em passos curtos e só guarda quando a imagem muda o bastante
-      // Calibrado com um vídeo de slides real: trocas de tela em documentos de fundo
-      // claro dão diferença em torno de 7,6 — o padrão anterior (8) as perdia por pouco.
+      /* Passada grossa, e depois bisseção só onde a imagem mudou.
+
+         O custo aqui é o salto no vídeo — medido em 79 ms de mediana, contra
+         6,5 ms para capturar o frame. A varredura antiga dava 700 saltos de
+         passo fixo: numa hora de vídeo, 55 segundos, e num vídeo de slides com
+         vinte trocas de tela ela gastava 680 deles confirmando que nada mudou.
+
+         Sondar grosso e bisecar só os intervalos que mudaram encontra as mesmas
+         trocas com muito menos saltos, e de brinde localiza a transição com
+         precisão melhor que o passo fixo — o frame guardado passa a ser o
+         primeiro depois da troca, não o próximo múltiplo do passo.
+
+         Calibrado com um vídeo de slides real: trocas de tela em documentos de
+         fundo claro dão diferença em torno de 7,6 — o padrão anterior (8) as
+         perdia por pouco. */
       const thr = [0,26,19,13,9,5.5,4,2.8,1.8,1][+$('sens').value];
-      const stepS = Math.max(0.5, janela / 700);
-      let prev = null, kept = 0;
-      const total = Math.ceil(janela / stepS);
-      for (let i = 0; i < total && kept < maxf && !stop; i++) {
-        const tt = ini + i * stepS;
+      const PASSO_MIN = 0.5;                      // abaixo disso não vale bisecar
+      const grosso = Math.max(PASSO_MIN, janela / 120);
+      const sondas = Math.max(1, Math.ceil(janela / grosso));
+      let saltos = 0, kept = 0;
+      const previsto = sondas + 24;               // só para a barra ter escala
+
+      const olhar = async tt => {
         await seek(tt);
         await new Promise(r => requestAnimationFrame(r));
-        const sig = signature();
-        const d = diff(prev, sig);
-        if (prev === null || d >= thr) {
-          frames.push({ t: video.currentTime, img: snap(px, q), keep: true, sig });
-          prev = sig; kept++;
+        saltos++;
+        $('bar').style.width = Math.min(99, saltos / previsto * 100) + '%';
+        $('status').textContent = tr('scanning', fmt(tt), fmt(fim), kept) + eta(saltos, previsto);
+        return { t: video.currentTime, sig: signature() };
+      };
+      const guardar = a => {
+        frames.push({ t: a.t, img: snap(px, q), keep: true, sig: a.sig });
+        kept++;
+      };
+
+      let ant = await olhar(ini);
+      guardar(ant);                                // a primeira tela entra sempre
+
+      for (let i = 1; i <= sondas && kept < maxf && !stop; i++) {
+        const tt = Math.min(fim, ini + i * grosso);
+        const atual = await olhar(tt);
+        if (diff(ant.sig, atual.sig) < thr) { ant = atual; continue; }
+
+        /* Mudou em algum ponto entre `ant` e `atual`. Bisseção até o intervalo
+           ficar menor que o passo mínimo — aí `dir` é o primeiro instante já
+           depois da troca, que é o frame que interessa guardar. */
+        let esq = ant, dir = atual;
+        while (dir.t - esq.t > PASSO_MIN && !stop) {
+          const meio = await olhar((esq.t + dir.t) / 2);
+          if (diff(esq.sig, meio.sig) >= thr) dir = meio; else esq = meio;
         }
-        $('bar').style.width = ((i+1)/total*100) + '%';
-        $('status').textContent = tr('scanning', fmt(tt), fmt(fim), kept) + eta(i+1, total);
-        if (kept >= maxf && tt < fim - stepS)
+        guardar(dir);
+        ant = atual;                               // segue da sonda grossa, não do meio
+
+        if (kept >= maxf && tt < fim - grosso)
           limited = tr('limitScene', fmt(tt), maxf);
       }
+      $('bar').style.width = '100%';
     } else {
       let times = [];
       if (mode === 'count') {
@@ -2725,6 +2996,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
 
   $('copyPrompt').disabled = true;
   applyLang();
+  medir('abriu_ferramenta');
 
   $('goal').onchange = () => {
     $('goalFree').classList.toggle('hide', $('goal').value !== 'livre');
@@ -2876,6 +3148,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
         dados: () => bytesDaImagem(f.img.url)
       }));
       baixarBlob(zipar(entradas), 'frames-' + nomeBase() + '.zip');
+      medir('baixou_saida', { p_formato: 'zip' });
       $('pdfStatus').innerHTML = `<span class="ok">${t('zipDone', kept.length)}</span>`;
     } catch (e) {
       $('pdfStatus').innerHTML = `<span class="err">${t('pkgErr', (e && e.message) || e)}</span>`;
@@ -3094,6 +3367,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     await new Promise(r => setTimeout(r, 40));    // deixa a mensagem aparecer
     try {
       baixarBlob(montarDocx(), 'analise-' + nomeBase() + '.docx');
+      medir('baixou_saida', { p_formato: 'docx' });
       $('pdfStatus').innerHTML = `<span class="ok">${t('docxDone', kept.length)}</span>`;
     } catch (e) {
       $('pdfStatus').innerHTML = `<span class="err">${t('pkgErr', (e && e.message) || e)}</span>`;
@@ -3293,6 +3567,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     }
 
     doc.save(`analise-${base}.pdf`);
+    medir('baixou_saida', { p_formato: 'pdf' });
     $('pdfStatus').innerHTML = `<span class="ok">${t('pdfDone')}</span>${t('pdfDone2', kept.length, page)}`;
     $('go').disabled = false;
   };

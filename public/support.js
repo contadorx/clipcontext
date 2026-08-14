@@ -94,3 +94,79 @@ const SUPPORT_TXT = {
     setTimeout(() => { document.getElementById('pixMsg').textContent = ''; }, 4000);
   };
 })();
+
+/* ============================================================
+   Lista de aviso do plano pago.
+
+   O endereço e a chave vêm em data- no próprio formulário, postos
+   pelo build — assim este arquivo continua estático e não precisa
+   ser gerado. A chave é publicável de propósito: do lado do banco
+   ela só alcança uma função que insere, nunca lê.
+
+   O e-mail não é cruzado com nada. A medição de uso é outra coisa,
+   separada, e não sabe quem é você.
+   ============================================================ */
+const LISTA_TXT = {
+  pt: { vazio:  'Faltou o e-mail.',
+        ruim:   'Esse endereço não parece um e-mail.',
+        indo:   'enviando...',
+        ok:     'Pronto. Aviso você quando sair — uma mensagem, não uma newsletter.',
+        falhou: 'Não consegui enviar agora. Tente de novo daqui a pouco.' },
+  en: { vazio:  'The e-mail is missing.',
+        ruim:   'That address does not look like an e-mail.',
+        indo:   'sending...',
+        ok:     'Done. I will let you know when it ships — one message, not a newsletter.',
+        falhou: 'Could not send it right now. Please try again in a moment.' },
+  es: { vazio:  'Falta el correo.',
+        ruim:   'Esa dirección no parece un correo.',
+        indo:   'enviando...',
+        ok:     'Listo. Te aviso cuando salga — un mensaje, no un boletín.',
+        falhou: 'No pude enviarlo ahora. Inténtalo de nuevo en un momento.' }
+};
+
+(function () {
+  const form = document.getElementById('listaForm');
+  if (!form) return;
+
+  const url = form.dataset.url, key = form.dataset.key;
+  const campo = document.getElementById('listaEmail');
+  const botao = document.getElementById('listaBtn');
+  const msg   = document.getElementById('listaMsg');
+
+  const q = new URLSearchParams(location.search).get('lang');
+  const nav = (navigator.language || 'pt').slice(0, 2).toLowerCase();
+  const L = ['pt', 'en', 'es'].includes(q) ? q : (['pt', 'en', 'es'].includes(nav) ? nav : 'en');
+  const T = LISTA_TXT[L];
+
+  /* Sem endereço configurado o formulário some em vez de ficar ali fingindo
+     que funciona — é o mesmo critério do bloco de apoio acima. */
+  if (!url || !key) { form.style.display = 'none'; return; }
+
+  const diz = (texto, classe) => { msg.textContent = texto; msg.className = 'small listaMsg ' + (classe || 'muted'); };
+
+  form.addEventListener('submit', async ev => {
+    ev.preventDefault();
+    const email = (campo.value || '').trim();
+    if (!email)                     return diz(T.vazio, 'err');
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return diz(T.ruim, 'err');
+
+    botao.disabled = true; diz(T.indo);
+    try {
+      const r = await fetch(url + '/rest/v1/rpc/clipcontext_interesse', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', apikey: key, Authorization: 'Bearer ' + key },
+        body: JSON.stringify({ p_email: email, p_idioma: L })
+      });
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      /* O banco responde 'invalido' quando o endereço não passa na checagem de
+         lá — que é mais rigorosa que a daqui. Repetido responde 'ok': para quem
+         enviou, deu certo das duas vezes. */
+      if ((await r.json()) === 'invalido') { botao.disabled = false; return diz(T.ruim, 'err'); }
+      form.style.display = 'none';
+      diz(T.ok, 'ok');
+    } catch (e) {
+      botao.disabled = false;
+      diz(T.falhou, 'err');
+    }
+  });
+})();

@@ -9,10 +9,11 @@
 <link rel="alternate" hreflang="pt-BR" href="https://clipcontext.app/precos">
 <link rel="alternate" hreflang="en" href="https://clipcontext.app/en/precos">
 <link rel="alternate" hreflang="es" href="https://clipcontext.app/es/precos">
-<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" href="/favicon.ico?v=2" sizes="any">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png?v=2">
 <link rel="stylesheet" href="/site.css">
+<script>window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments)};</script><script defer src="/_vercel/insights/script.js"></script>
 </head>
 <body>
 
@@ -20,7 +21,7 @@
   <div class="wrap">
     <a class="brand" href="/es"><img src="/logo.svg" alt=""><span>Clip<b>Context</b></span></a>
     <nav>
-      <a href="/es/precos">Precios</a>
+      <a href="/es/precos" class="hide-xs">Precios</a>
       <a href="/app?lang=es">Abrir la herramienta</a>
       <span style="display:inline-flex;gap:9px;border-left:1px solid var(--line);padding-left:16px"><a href="/precos?lang=pt">PT</a><a href="/en/precos">EN</a><a href="/es/precos" style="color:var(--ink);font-weight:600">ES</a></span>
     </nav>
@@ -94,9 +95,13 @@
 <section id="lista">
   <div class="wrap">
     <h2>¿Quieres que te avisemos?</h2>
-    <p class="lead">No hay lista de espera automatizada — sería incoherente montar un formulario que recoge
-    correos en una herramienta que se enorgullece de no recoger nada. Por ahora, sigue el repositorio en
-    GitHub: cada novedad aparece allí primero.</p>
+    <p class="lead">Deja un correo y te aviso cuando salga el plan de pago. Un mensaje, no un boletín.</p>
+    <form class="lista" id="listaForm" data-url="https://zyqncemxjobkvdveordz.supabase.co" data-key="sb_publishable_HQDSfL4rTtPx2wwbgh_huw_llog8ZJk" novalidate>
+      <input type="email" id="listaEmail" autocomplete="email" placeholder="tu@ejemplo.com" aria-label="Tu correo">
+      <button class="btn" type="submit" id="listaBtn">Avísame</button>
+    </form>
+    <p class="small muted listaMsg" id="listaMsg" role="status"></p>
+    <p class="small muted" style="max-width:640px">La promesa de esta herramienta es que <b>tu vídeo no sale de tu ordenador</b>, y sigue en pie: este campo no tiene ninguna relación con lo que procesas aquí — el navegador no envía vídeo, audio ni transcripción a ningún sitio. El correo queda en una base de datos mía, no se vende, no va a listas de terceros y desaparece el día que lo pidas. ¿Prefieres no dejarlo? <a href="https://github.com/contadorx/clipcontext" rel="noopener" target="_blank">Sigue el repositorio</a>: cada novedad aparece allí primero.</p>
   </div>
 </section>
 

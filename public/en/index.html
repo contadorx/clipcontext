@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ClipContext — turn video into context an AI can read</title>
-<meta name="description" content="ChatGPT and Claude do not watch video. ClipContext turns any recording into a PDF with the frames that matter and a synced transcript, ready to paste into the conversation. Free, no sign-up, and the video never leaves your computer.">
+<meta name="description" content="An hour of video becomes ~60 screens — only the ones that change — each paired with what was said, in one PDF that ChatGPT, Claude and Gemini read in full. Runs in your browser: the video never leaves your computer.">
 <link rel="canonical" href="https://clipcontext.app/en">
 <link rel="alternate" hreflang="pt-BR" href="https://clipcontext.app/">
 <link rel="alternate" hreflang="en" href="https://clipcontext.app/en">
@@ -12,11 +12,12 @@
 <link rel="alternate" hreflang="x-default" href="https://clipcontext.app/en">
 <meta property="og:type" content="website">
 <meta property="og:title" content="ClipContext — turn video into context an AI can read">
-<meta property="og:description" content="Scene-change frames + synced transcript, in a single PDF. Nothing is uploaded to any server.">
-<link rel="icon" href="/favicon.ico" sizes="any">
+<meta property="og:description" content="Only the moments the screen changes, paired with the speech, in a single PDF. Nothing is sent to any server.">
+<link rel="icon" href="/favicon.ico?v=2" sizes="any">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png?v=2">
 <link rel="stylesheet" href="/site.css">
+<script>window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments)};</script><script defer src="/_vercel/insights/script.js"></script>
 
 </head>
 <body>
@@ -26,7 +27,7 @@
     <a class="brand" href="/en"><img src="/logo.svg" alt=""><span>Clip<b>Context</b></span></a>
     <nav>
       <a href="#como" class="hide-sm">How it works</a>
-      <a href="/en/precos">Pricing</a>
+      <a href="/en/precos" class="hide-xs">Pricing</a>
       <a href="/app?lang=en">Open the tool</a>
       <span style="display:inline-flex;gap:9px;border-left:1px solid var(--line);padding-left:16px"><a href="/?lang=pt">PT</a><a href="/en" style="color:var(--ink);font-weight:600">EN</a><a href="/es">ES</a></span>
     </nav>
@@ -36,8 +37,8 @@
 <section style="padding-top:78px">
   <div class="wrap">
     <p class="eyebrow">Video → PDF → AI</p>
-    <h1>Your video, in the format<br>an AI can actually read</h1>
-    <p class="lead">ChatGPT and Claude do not watch video. ClipContext turns any recording into a PDF with the frames that matter and a synced transcript — ready to attach to the conversation.</p>
+    <h1>An hour of video<br>in 60 screens that matter</h1>
+    <p class="lead">A model that watches video samples one frame per second: 3,600 near-identical images, and the context runs out before the answer does. ClipContext keeps only the moments the screen changes, each one next to what was being said — in a PDF that ChatGPT, Claude and Gemini read in full.</p>
     <p><a class="btn" href="/app?lang=en">Open the tool — it's free</a></p>
     <p class="small muted" style="margin-top:16px">No sign-up, no install, no size limit. The video is processed inside your browser and is never uploaded to any server.</p>
 
@@ -55,8 +56,8 @@
 
 <section>
   <div class="wrap">
-    <h2>Why attaching the video does not work</h2>
-    <p class="lead" style="margin-bottom:0">Language models read text and images — not video. Either they reject the file, or its size makes uploading impractical. And when you take screenshots by hand, you end up sending ten near-identical screens and none of the moment that mattered, with nothing linking what is shown to what was being said.</p>
+    <h2>Why raw video is the worst way to ask</h2>
+    <p class="lead" style="margin-bottom:0">Claude and ChatGPT refuse video files outright. Gemini accepts them — and that is where the other problem shows up: it samples one frame per second, blind to the content, so an hour-long class becomes 3,600 images and roughly a million tokens, almost all of it the previous slide again. You pay for that on every follow-up question. Taking screenshots by hand has the opposite flaw: ten near-identical screens, none of the moment that mattered, and nothing tying what is on screen to what was being said.</p>
   </div>
 </section>
 
@@ -76,7 +77,7 @@
   <div class="wrap">
     <h2>What it does differently</h2>
     <div class="cards" style="margin-top:26px">
-      <div class="card"><h3>Captures when the image changes</h3><p>Instead of grabbing a frame every ten seconds, it scans the video and keeps the moments where the screen actually changes. In a presentation, that becomes one frame per slide instead of forty repeats.</p></div>
+      <div class="card"><h3>Keeps the change, not the interval</h3><p>Instead of grabbing a frame every ten seconds, it scans the video and stops at the moments the screen actually changes, to within half a second. In a slide deck that means one frame per slide instead of forty of the same one.</p></div>
       <div class="card"><h3>Pairs image with speech</h3><p>In the PDF, each frame appears next to what is said at that point, with the timestamp marked. The model can connect what was on screen with what was being said.</p></div>
       <div class="card"><h3>Nothing leaves your computer</h3><p>There is no server. The video, the audio and the transcript are processed in your browser — including confidential meeting recordings.</p></div>
       <div class="card"><h3>Hands you the prompt too</h3><p>The ready-made text tells the model to cite timestamps, separate what it saw from what it heard, and admit when the information is not in the document instead of inventing it.</p></div>
@@ -103,6 +104,7 @@
       <details><summary>Is the transcription any good?</summary><p>It uses Whisper running locally. The fast model is reasonable and the accurate one is considerably better, at the cost of a larger download. If you already have captions from another service, drag the file in and skip this step.</p></details>
       <details><summary>Is it really free?</summary><p>The tool as it stands today is free and the code is open under the MIT licence. Since there is no server cost, there is no reason to charge for it.</p></details>
       <details><summary>Which AI should I use the PDF with?</summary><p>Any model that accepts attachments and reads images — Claude, ChatGPT and Gemini all work. Attach the PDF and paste the prompt the tool generates alongside it.</p></details>
+      <details><summary>Gemini already watches video. Why would I use this?</summary><p>Because watching and understanding cost different amounts. Gemini samples one frame per second without looking at the content: an hour of video is 3,600 images and close to a million tokens — enough to fill the entire window with no room left for the conversation. The same material comes out of here as roughly 60 screens and 60,000 tokens, because the other 3,540 were repeats. And Claude and ChatGPT still take no video at all.</p></details>
     </div>
   </div>
 </section>

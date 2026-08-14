@@ -1,13 +1,23 @@
 <section style="padding-top:60px">
   <div class="wrap doc">
     <h1 style="font-size:32px">Privacy Policy</h1>
-    <p class="updated">Last updated: 11 August 2026.<br>
+    <p class="updated">Last updated: 14 August 2026.<br>
     This policy describes how ClipContext works today: with no processing server and no user accounts.</p>
 
+    <h2>Who is responsible</h2>
+    <p>ClipContext is offered by <b>{{empresa}}</b>, a company registered in Brazil under CNPJ
+    <b>{{cnpj}}</b>, acting as the <b>controller</b> of the small amount of personal data described in this
+    policy, under Brazilian Law 13,709/2018 (LGPD).</p>
+    <p>Data subject requests, questions and privacy complaints:
+    <a href="mailto:{{contato}}" style="color:var(--accent)">{{contato}}</a>. This is also the channel for
+    the data protection officer (LGPD art. 41).</p>
+
     <h2>Summary</h2>
-    <p>We do not collect personal data. We do not receive your videos, your audio or your transcripts. We use
-    no cookies, there is no login and there is no audience analytics tool. The rest of this document explains
-    why that is possible and what the exceptions are.</p>
+    <p>We do not receive your videos, your audio or your transcripts — that has not changed and will not
+    change on the free plan. We use no cookies and there is no login. Since 14 August 2026 there are two
+    things that <b>are</b> recorded, both described in detail below: a page-view count with no cookie and no
+    identifier, and a count of three usage milestones, also anonymous. If you leave your e-mail on the pricing
+    page, that is personal data — and it is the only piece of it here.</p>
 
     <h2>How the service works</h2>
     <p>ClipContext is a static page. When you choose a video, it is read directly from your device by the
@@ -19,9 +29,37 @@
     <h2>Data we do not collect</h2>
     <ul>
       <li>Videos, audio, extracted images, transcripts and generated PDFs</li>
-      <li>Name, email, phone number or any personal identifier</li>
-      <li>Usage history, processed files or chosen settings</li>
+      <li>File name, size, duration or any characteristic of what you process</li>
+      <li>Name, phone number or personal identifier — and your e-mail only if you type one, by your choice</li>
       <li>Tracking identifiers, behavioural profiles or advertising data</li>
+      <li>Cookies, of any kind</li>
+    </ul>
+
+    <h2>What is measured, and why</h2>
+    <p>A tool nobody knows is being used cannot be improved in the right place. So there are two measurements,
+    and both were designed not to know who you are:</p>
+    <ul>
+      <li><strong>Page views</strong>, through Vercel Web Analytics. No cookie and no identifier that persists
+      between visits. It tells us how many people arrived and by which route.</li>
+      <li><strong>Three usage milestones</strong>, inside the tool: that it was opened, that a video was opened
+      successfully, and that an output file was downloaded. Alongside goes the page language, where the video
+      came from (file, Drive, recording or sample) and the format downloaded. <strong>Nothing else.</strong>
+      No file name, size, duration, content or session identifier — there is no way to tie two milestones to
+      the same person, or this visit to the next.</li>
+    </ul>
+    <p>If your browser sends <em>Do Not Track</em> or <em>Global Privacy Control</em>, the three milestones are
+    not sent. And the <strong>offline version</strong> — the single file you download — is built with no
+    measurement address inside it at all: it talks to nobody, and you can check that by searching the file for
+    &ldquo;supabase&rdquo;.</p>
+
+    <h2>The paid-plan notification list</h2>
+    <p>The pricing page has an optional e-mail field. If you fill it in, the address and the page language are
+    stored in a database of ours, with the date. It is the only personal data here, and it:</p>
+    <ul>
+      <li>is never cross-referenced with the measurements above — they have nothing to cross-reference with;</li>
+      <li>is never sold, shared or added to a third-party list;</li>
+      <li>serves one purpose only: telling you when the paid plan exists;</li>
+      <li>is deleted as soon as you ask, through the contact at the end of this page.</li>
     </ul>
 
     <h2>External connections</h2>
@@ -32,7 +70,9 @@
       transcription libraries. It only receives the request for the library file.</li>
       <li><strong>Hugging Face</strong> — where the transcription model is downloaded from, and only if you
       trigger automatic transcription. It receives the request for the model, never your audio.</li>
-      <li><strong>Vercel</strong> — the page's hosting. Like any web server, it technically logs requests to
+      <li><strong>Supabase</strong> — the database that receives the three usage milestones and, if you fill
+      it in, the notification-list e-mail. It never receives video, audio or transcripts.</li>
+      <li><strong>Vercel</strong> — the page's hosting and the page-view count. Like any web server, it technically logs requests to
       the site.</li>
     </ul>
     <p>These third parties have their own policies and may record technical connection data, such as your IP
@@ -58,23 +98,73 @@
     browsing data. We have no access to it.</p>
 
     <h2>Cookies</h2>
-    <p>We use no first-party or third-party cookies for tracking, advertising or analytics.</p>
+    <p>We use no first-party or third-party cookies — not for tracking, not for advertising, not for
+    measurement. The page-view count and the three milestones described above work <b>without cookies and
+    without any identifier that persists between visits</b>, which is precisely why there is no cookie
+    banner on this site: there would be nothing to consent to.</p>
 
     <h2>Children</h2>
-    <p>The service is not directed at children under 13. Since we collect no data, we hold no information
-    about minors.</p>
+    <p>The service is not directed at children under 13, and the notification list should not be filled in
+    by them. We have no way to verify age — there are no accounts. If you know a minor left their e-mail,
+    write to <a href="mailto:{{contato}}" style="color:var(--accent)">{{contato}}</a> and it will be
+    removed. Beyond that we hold no data about minors, because we hold no data about anyone: the video
+    never leaves the device.</p>
+
+    <h2>Legal bases, purposes and retention</h2>
+    <p>What is processed, why, on what basis and for how long:</p>
+    <table class="legal">
+      <tr><th>Data</th><th>Purpose</th><th>Legal basis</th><th>Retention</th></tr>
+      <tr><td>Notification-list e-mail</td><td>Telling you when the paid plan exists</td>
+          <td>Consent (LGPD art. 7 I / GDPR art. 6(1)(a))</td><td>Until you withdraw it, or 24 months unused</td></tr>
+      <tr><td>The three usage milestones</td><td>Knowing where the tool fails, and improving it</td>
+          <td>Anonymised data (LGPD art. 12); if in doubt, legitimate interest</td><td>18 months</td></tr>
+      <tr><td>Page views</td><td>Knowing how many people arrive, and from where</td>
+          <td>Anonymised data (LGPD art. 12); if in doubt, legitimate interest</td>
+          <td>As per Vercel's policy</td></tr>
+      <tr><td>Web server access logs</td><td>Security and legal obligation</td>
+          <td>Legal obligation — Brazilian Internet Civil Framework, art. 15</td><td>6 months</td></tr>
+    </table>
+    <p class="small muted">The milestones and page views were designed not to identify anyone; should an
+    authority nonetheless treat them as personal data, the basis is our legitimate interest in maintaining and
+    improving the service, and you may object through the contact above.</p>
+
+    <h2>Where the data lives</h2>
+    <p>The notification-list e-mail and the usage milestones sit in a database hosted by <b>Supabase in the
+    São Paulo region</b> — that is, <b>on Brazilian soil</b>. The site itself is hosted by <b>Vercel</b>, whose
+    network is global: technical access logs and the page-view count may be processed outside Brazil, which
+    constitutes an international transfer under LGPD art. 33, covered by the provider's own contractual
+    clauses.</p>
+    <p><b>Your videos are in none of those places</b>, because they never leave your device.</p>
 
     <h2>Your rights</h2>
-    <p>Data protection laws — including the Brazilian LGPD (Law 13,709/2018) and the European GDPR — give you
-    rights such as access to, correction of and erasure of your personal data. Since we process no personal
-    data, there is no information of yours to access, correct or erase. Should we begin offering services that
-    require an account, this policy will be updated beforehand and the new processing will be clearly stated.</p>
+    <p>The LGPD (Law 13,709/2018) grants you, at any time and free of charge:</p>
+    <ul>
+      <li>confirmation that processing exists, and access to the data;</li>
+      <li>correction of incomplete, inaccurate or out-of-date data;</li>
+      <li>anonymisation, blocking or erasure of unnecessary or non-compliant data;</li>
+      <li>portability to another provider;</li>
+      <li>erasure of data processed on the basis of your consent;</li>
+      <li>information about who we share it with;</li>
+      <li>information about your option not to consent, and what that entails;</li>
+      <li>withdrawal of consent, at any time.</li>
+    </ul>
+    <p>In practice, here that almost always means one thing: <b>taking your e-mail off the list</b>. Write to
+    <a href="mailto:{{contato}}" style="color:var(--accent)">{{contato}}</a> — we reply within 15 days, and
+    for that request the removal is immediate. We ask for no document and no justification: the address
+    writing to us is itself the proof that it is yours.</p>
+    <p>You may also complain to the Brazilian data protection authority (<b>ANPD</b>), or to your local
+    supervisory authority, if you believe your rights were not respected.</p>
 
     <h2>Changes</h2>
     <p>If this policy changes, the date at the top will be updated. Material changes — especially any move to
     start collecting data — will be announced in the project's public repository.</p>
 
     <h2>Contact</h2>
-    <p>Questions about this policy can be sent through the project's repository on GitHub.</p>
+    <p>{{empresa}} — Brazilian company registry (CNPJ) {{cnpj}}.<br>
+    Privacy and data subject requests:
+    <a href="mailto:{{contato}}" style="color:var(--accent)">{{contato}}</a>.<br>
+    Technical questions and bug reports are better served by the
+    <a href="https://github.com/contadorx/clipcontext" rel="noopener" target="_blank"
+       style="color:var(--accent)">project repository</a>.</p>
   </div>
 </section>
