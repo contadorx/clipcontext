@@ -5,11 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Walkstamp — your screen recording becomes a document</title>
 <meta name="description" content="Record the screen and get a document with only the moments the screen changes, each with the exact time and the speech from that stretch. Works as test evidence and as context for an AI. Runs in the browser: nothing leaves your computer.">
-<link rel="canonical" href="https://walkstamp.app/en">
-<link rel="alternate" hreflang="pt-BR" href="https://walkstamp.app/">
-<link rel="alternate" hreflang="en" href="https://walkstamp.app/en">
-<link rel="alternate" hreflang="es" href="https://walkstamp.app/es">
-<link rel="alternate" hreflang="x-default" href="https://walkstamp.app/en">
+<link rel="canonical" href="https://walkstamp.com/en">
+<link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/">
+<link rel="alternate" hreflang="en" href="https://walkstamp.com/en">
+<link rel="alternate" hreflang="es" href="https://walkstamp.com/es">
+<link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Walkstamp — your screen recording becomes a document">
 <meta property="og:description" content="One screenshot per step, with the time and the speech beside it. Test evidence and AI context, with nothing leaving your machine.">
@@ -125,9 +125,9 @@
       <details><summary>What is the maximum video size?</summary><p>There is no limit imposed by us, precisely because there is no upload. The practical limit is your computer's memory. Long videos take longer to scan, and you can stop the scan whenever you want.</p></details>
       <details><summary>Which formats work?</summary><p>MP4 (H.264), WebM and MOV in most cases. Formats the browser cannot decode — HEVC and some MKV files — will not open; those need converting to MP4 first.</p></details>
       <details><summary>Is the transcription any good?</summary><p>It uses Whisper running locally. The fast model is reasonable and the accurate one is considerably better, at the cost of a larger download. If you already have captions from another service, drag the file in and skip this step.</p></details>
-      <details><summary>Is it really free?</summary><p>The tool as it stands today is free and the code is open under the MIT licence. Since there is no server cost, there is no reason to charge for it.</p></details>
+      <details><summary>Is it really free?</summary><p>It is free, and the reason is structural: your computer does the work, so serving you costs me nothing. No ads, no sign-up, no data of yours being sold — not out of generosity, but because there is no server to store anything on.</p></details>
       <details><summary>Which AI should I use the PDF with?</summary><p>Any model that accepts attachments and reads images — Claude, ChatGPT and Gemini all work. Attach the PDF and paste the prompt the tool generates alongside it.</p></details>
-      <details><summary>Gemini already watches video. Why would I use this?</summary><p>Because watching and understanding cost different amounts. Gemini samples one frame per second without looking at the content: an hour of video is 3,600 images and close to a million tokens — enough to fill the entire window with no room left for the conversation. The same material comes out of here as roughly 60 screens and 60,000 tokens, because the other 3,540 were repeats. And Claude and ChatGPT still take no video at all.</p></details>
+      <details><summary>How do I check that nothing is really uploaded?</summary><p>Three ways, each a minute long, none of them requiring you to trust me. Open the developer panel (F12), go to the network tab and process a video: you see every request the page makes — and none of them carries your file. Second: the code is a single page; right-click, view source, and it is all there to read. Third, the most direct: download the offline version, turn off the internet and use it. If it works with no network, it is not sending anything anywhere.</p></details>
     </div>
   </div>
 </section>
@@ -150,7 +150,7 @@
       <a href="/en/privacidade">Privacy</a>
       <a href="/en/termos">Terms</a>
     </div>
-    <div>Walkstamp — open source under the MIT licence</div>
+    <div>Walkstamp — free tool, no ads, no sign-up</div>
   </div>
 </footer>
 

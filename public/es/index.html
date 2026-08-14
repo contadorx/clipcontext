@@ -5,11 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Walkstamp — tu grabación de pantalla se vuelve documento</title>
 <meta name="description" content="Graba la pantalla y recibe un documento con solo los instantes en que la pantalla cambia, cada uno con la hora exacta y el habla de ese tramo. Sirve como evidencia de prueba y como contexto para una IA. Funciona en el navegador: nada sale de tu ordenador.">
-<link rel="canonical" href="https://walkstamp.app/es">
-<link rel="alternate" hreflang="pt-BR" href="https://walkstamp.app/">
-<link rel="alternate" hreflang="en" href="https://walkstamp.app/en">
-<link rel="alternate" hreflang="es" href="https://walkstamp.app/es">
-<link rel="alternate" hreflang="x-default" href="https://walkstamp.app/en">
+<link rel="canonical" href="https://walkstamp.com/es">
+<link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/">
+<link rel="alternate" hreflang="en" href="https://walkstamp.com/en">
+<link rel="alternate" hreflang="es" href="https://walkstamp.com/es">
+<link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Walkstamp — tu grabación de pantalla se vuelve documento">
 <meta property="og:description" content="Una captura por paso, con la hora y el habla al lado. Evidencia de prueba y contexto para IA, sin que nada salga de tu máquina.">
@@ -125,9 +125,9 @@
       <details><summary>¿Cuál es el tamaño máximo de vídeo?</summary><p>No hay límite impuesto por nosotros, precisamente porque no hay subida. El límite práctico es la memoria de tu ordenador. Los vídeos largos tardan más en recorrerse, y puedes detener el barrido cuando quieras.</p></details>
       <details><summary>¿Qué formatos funcionan?</summary><p>MP4 (H.264), WebM y MOV en la mayoría de los casos. Los formatos que el navegador no sabe decodificar — HEVC y algunos MKV — no se abren; en esos casos hay que convertirlos a MP4 antes.</p></details>
       <details><summary>¿La transcripción es buena?</summary><p>Usa Whisper ejecutándose localmente. El modelo rápido es razonable y el preciso es bastante mejor, a costa de una descarga mayor. Si ya tienes subtítulos de otro servicio, arrastra el archivo y sáltate este paso.</p></details>
-      <details><summary>¿Es realmente gratis?</summary><p>La herramienta tal como está hoy es gratuita y el código es abierto bajo licencia MIT. Como no hay coste de servidor, no hay motivo para cobrar por ella.</p></details>
+      <details><summary>¿Es realmente gratis?</summary><p>Es gratuita, y el motivo es estructural: tu ordenador hace el trabajo, así que atenderte no me cuesta nada. Sin anuncios, sin registro y sin vender tus datos — no por generosidad, sino porque no hay servidor donde almacenar nada.</p></details>
       <details><summary>¿Con qué IA debo usar el PDF?</summary><p>Cualquier modelo que acepte adjuntos y lea imágenes — Claude, ChatGPT y Gemini funcionan. Adjunta el PDF y pega el prompt que la herramienta genera junto a él.</p></details>
-      <details><summary>Gemini ya ve vídeo. ¿Por qué usaría esto?</summary><p>Porque ver y entender cuestan distinto. Gemini muestrea un fotograma por segundo sin mirar el contenido: una hora de vídeo son 3.600 imágenes y cerca de un millón de tokens — suficiente para llenar la ventana entera y no dejar sitio a la conversación. El mismo material sale de aquí en unas 60 pantallas y 60.000 tokens, porque las otras 3.540 eran repetición. Y Claude y ChatGPT siguen sin aceptar vídeo.</p></details>
+      <details><summary>¿Cómo compruebo que de verdad no se envía nada?</summary><p>De tres formas, cada una de un minuto, y ninguna exige confiar en mí. Abre el panel de desarrollador (F12), ve a la pestaña de red y procesa un vídeo: ves cada petición que hace la página — y ninguna lleva tu archivo. Segunda: el código es una sola página; clic derecho, ver código fuente, y está todo ahí. Tercera, la más directa: descarga la versión offline, apaga internet y úsala. Si funciona sin red, no está mandando nada a ningún sitio.</p></details>
     </div>
   </div>
 </section>
@@ -150,7 +150,7 @@
       <a href="/es/privacidade">Privacidad</a>
       <a href="/es/termos">Términos</a>
     </div>
-    <div>Walkstamp — código abierto bajo licencia MIT</div>
+    <div>Walkstamp — herramienta gratuita, sin anuncios y sin registro</div>
   </div>
 </footer>
 

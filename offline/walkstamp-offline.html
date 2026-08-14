@@ -140,14 +140,14 @@
 <div class="wrap">
 
   <div class="topbar">
-    <a href="https://walkstamp.app/" class="brand">
+    <a href="https://walkstamp.com/" class="brand">
       <svg viewBox="0 0 64 64" role="img" aria-label="Walkstamp">
         <rect width="64" height="64" rx="15" fill="#3A3F9E"/>
         <rect x="14" y="14" width="36" height="20" rx="3" fill="#fff"/>
         <rect x="14" y="40" width="36" height="4.5" rx="2.25" fill="#fff"/>
         <rect x="14" y="48" width="23" height="4.5" rx="2.25" fill="#fff" opacity=".62"/>
       </svg>
-      <span>Clip<b>Context</b></span><span class="dom">walkstamp.app</span>
+      <span>Walk<b>stamp</b></span><span class="dom">walkstamp.com</span>
     </a>
     <select id="uiLang" aria-label="Language">
       <option value="pt">Português</option>
@@ -384,7 +384,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
 
   <p class="status" style="text-align:center;margin-top:26px">
     <span data-i18n="supportLine"></span>
-    <a href="https://walkstamp.app/#support" style="color:var(--accent)" data-i18n="supportLink"></a>
+    <a href="https://walkstamp.com/#support" style="color:var(--accent)" data-i18n="supportLink"></a>
   </p>
 
 </div>
@@ -1393,7 +1393,10 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
 
   /* Endereço do repositório. Se ficar vazio, o convite a reportar não aparece
      e o usuário vê apenas a mensagem de erro. */
-  const REPO = 'https://github.com/contadorx/clipcontext';
+  /* O endereço de contato entra pelo build, junto com o domínio. Antes aqui
+     havia um repositório: relatar defeito abrindo issue no GitHub funciona
+     para quem é programador e exclui todo o resto do público. */
+  const CONTATO = 'privacidade@walkstamp.com';
 
   /* ---------------- Google Drive ----------------
      Nasce DESLIGADO, como o bloco de apoio: enquanto estes três campos
@@ -1469,7 +1472,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
   function medir(nome, extra){
     if (!MEDIR_URL || !MEDIR_KEY || naoQuerMedir()) return;
     try {
-      fetch(MEDIR_URL + '/rest/v1/rpc/clipcontext_evento', {
+      fetch(MEDIR_URL + '/rest/v1/rpc/walkstamp_evento', {
         method: 'POST',
         keepalive: true,
         headers: { 'Content-Type': 'application/json',
@@ -1686,16 +1689,16 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     };
     video.onerror = () => {
       let extra = '';
-      if (REPO) {
+      if (CONTATO) {
         const ext = (fileName.match(/\.([^.]+)$/) || ['', '?'])[1].toLowerCase();
-        const titulo = encodeURIComponent('Formato nao suportado: .' + ext);
+        const assunto = encodeURIComponent('Formato nao suportado: .' + ext);
         const corpo = encodeURIComponent(
           'Extensao: .' + ext + '\nTamanho: ' + (fileSize/1048576).toFixed(1) + ' MB' +
           '\nNavegador: ' + navigator.userAgent +
           '\n\n(Nada foi enviado automaticamente — este texto foi montado no seu navegador ' +
-          'e so vai para o GitHub se voce enviar.)');
-        extra = ` <a href="${REPO}/issues/new?title=${titulo}&body=${corpo}" target="_blank" ` +
-                `rel="noopener" style="color:var(--accent)">${t('reportar')}</a>${t('reportarDica')}`;
+          'e so sai daqui se voce enviar o e-mail.)');
+        extra = ` <a href="mailto:${CONTATO}?subject=${assunto}&body=${corpo}" ` +
+                `style="color:var(--accent)">${t('reportar')}</a>${t('reportarDica')}`;
       }
       $('status').innerHTML = `<span class="err">${t('videoErr')}</span>${extra}`;
     };
@@ -1769,7 +1772,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
      'demo/x' a partir de /app pode virar /app/demo/x e dar 404. Tentamos os
      caminhos possíveis, incluindo o absoluto do site, que também faz o exemplo
      funcionar a partir do arquivo offline quando há internet. */
-  const DEMO_BASES = ['/demo/', 'demo/', 'https://walkstamp.app/demo/'];
+  const DEMO_BASES = ['/demo/', 'demo/', 'https://walkstamp.com/demo/'];
 
   async function acharDemo(arq){
     const erros = [];
@@ -1806,7 +1809,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
         video.addEventListener('error', s2);
         setTimeout(() => { limpa(); rej(new Error('tempo esgotado ao abrir o vídeo')); }, 20000);
       });
-      load(new File([blob], 'clipcontext-' + arq, { type: tipo }), 'exemplo');
+      load(new File([blob], 'walkstamp-' + arq, { type: tipo }), 'exemplo');
       await ok;
 
       try {
@@ -3867,7 +3870,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     setTimeout(() => URL.revokeObjectURL(a.href), 6000);
   }
 
-  const nomeBase = () => (fileName || 'clipcontext').replace(/\.[^.]+$/, '').replace(/\s+/g, '-');
+  const nomeBase = () => (fileName || 'walkstamp').replace(/\.[^.]+$/, '').replace(/\s+/g, '-');
 
   /* ---- pareamento imagem/fala, o mesmo critério usado no PDF ---- */
   function falaDoFrame(kept, i, cues, dur, semPrefixo){
@@ -3915,7 +3918,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
      ela é desenhada com primitivas, sem imagem nenhuma: o mesmo traço, com
      custo zero de arquivo. */
   const MARCA_PNG = 'iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAIAAADYYG7QAAAFSklEQVR42u2ZS2xUVRjHv++cc+/cOzPQxxREaGlpEaREUVyJYGOLD5QERW2ICTFBZeXCBYkaEo0vfESjblyoMUYEN7gEKoRHy8NEI8S2VGihFIpIW4ZHO8zMnXvO+VzcsRLs3JnOTIsLTu5qcmbO737zPf7fd5CIAAAAiICAGGLSkW0H+ve3ne3piQ4OxaRUULzFGE6rCNXVRpYtrWpYVlVSYgGA1sQYehvQAyICRACA7TtPbv3hj7PnhhFRa0lUTJr0kcgZEwBQUWE1Pz1/TfNCANBEDDEN5NEkEu6mDw+3HRrUyiFy01YjnAAgAvB+Vghh331XyRsbH6iIBD07odYEQI6jNry+p7MzptSIZ0OY+IVInHOAYFWV9fkny8vLLCJgRISIb29q7eyMAY1oTZNDAwBEKKUGutbfn3ht4x6tPSdj2LLr1KGfLxHFXDlJKNcvqYgo3nMquXlrO2PIHEd99fVvpB2tbgKNt7TWWiY2b+m4eDHO2g6eGYy6WruabhoQEWqSriu27zwpdu/pZciUn+vhaJIo+OCMDoqIAHLvvl7R0x1VygUYDcUb85jjqETCLQpQICBsW4zJpDUBuL19V8VQNE4EmWjicbempnR54xzT4ICF2Aa0ooOHz3Z0DobDZiY7aa1xScM3GWwIqZSurJz65RdPVESCRbFQIiFffmXH7+0Dtm1kYhKZiw6Lx50Vj9ZVRIKplOK8UDdSimxbrH5ywS+/ng8GjUzbhG8mBcaQiDhHzlkxfBoQEdHv3bIf4//9cdaKHOQA/M/WLaBbQLeAbj7QJKsS4Y/i5VWlCKBQLqU059xL/flYiIgsW+zb35dMStPknGOBj2lyAGjZddIwmA9SxmrvyY9YLHXf4ttXPj7PMNJtU95VTCna19q3v7XPR35kAUpLooSbSimEwisaCcFCIdO/qxHZ5DcFbSMcMoslYVW2VkJkLfVak+sWp6FmjHGO+VsIET1pVlpqZxLduVsHAGOxVDIpAwHhE2jCR7tIqSIR+/13Gmtry4AAC9PUADAweG3jm3v7+q6YZkYmPwkbiyXXv7j4nkUzlNKFK0al6I65gXXP37vh1d2WJZQafx4yDH6iOwoAxdCv4KnyY11DQviZ2i/sETGZlE2Nc+bPi5AmzKVdJCAgBLyh5BABQ+w/N7yjpUcIlifQaG50Ugpzqx2IwBlqGsP/CYAzDIfN/MMeEVxXh0LG9OkhoiwxRun9KpGQpskzuGwBecirqeGw8ezq+um3hZSkXKKMiLbv7DnWNeQTR1mAEMee2yFi0pEND1bX10+7fDlp2phLbFsB/nBT3fETUcpXtYjyUvvSFRdA3oBFBILjhQuxVEqFQkaOySZg8j/PDytFnLM8mBhDUVtXfvVoVGn1X+MHArzr+MXNW9pnzZwiVfbxJzJMJuWRo39xjuOlYQwRxcyZQfFQQ82Ro5cyvbFpsGNdQ+0dA7nXDcviecyTiAhRNCytxpERZ83abcPDmkiOWfayNeNjTnrG3WIjcs7x+29XsXDYXPvcIsYsluFYb+yV+5NPEmfIefCpVfMqZ01lWlPzMwsXLLCBBQUv/pg8F+8hsGbMYOtfWEz0Ty17763GqkoLMCg4Ik5Sn4EIQiBioKxcfPBuo20bBMS8NqC8zP7s46b6O6cgCwNwbzI0kSiECESIGJ49O/zpR0011aVaE0NMx6d396GU/m5Lx7Yfu0dikkhp7U7Y3yQQRcCClSvmvrRuUTBojl4I/ZswRj8aGIy1/HS69cCZ3tNXpHSL2ygighBidlXJkvsrH3ukrqa6BK67CgKAvwGTT81xF+3kAwAAAABJRU5ErkJggg==';
-  const SITE_DOM = 'walkstamp.app';
+  const SITE_DOM = 'walkstamp.com';
 
   const EMU_POL = 914400;
   const LARG_MAX_EMU = Math.round(6.1 * EMU_POL);   // cabe na página A4 com as margens abaixo

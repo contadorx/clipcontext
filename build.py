@@ -25,7 +25,7 @@ MARCA_A, MARCA_B = "Walk", "stamp"
 
 # Endereço público do site, sem barra no fim. Sai daqui para o canonical, para os
 # hreflang e para o link do topo da ferramenta — trocar de domínio é mudar esta linha.
-SITE = "https://walkstamp.app"
+SITE = "https://walkstamp.com"
 
 # Versão dos ícones. O navegador guarda favicon com unhas e dentes: sem um
 # parâmetro que mude, quem já visitou o site continua vendo o ícone antigo
@@ -58,7 +58,7 @@ ICON_V = "3"
 # ---------------------------------------------------------------------------
 EMPRESA = "Produtize Produtos e Serviços Inteligentes Ltda."
 CNPJ    = "48.417.292/0001-99"
-CONTATO = "privacidade@walkstamp.app"
+CONTATO = "privacidade@walkstamp.com"
 
 SUPA_URL = "https://zyqncemxjobkvdveordz.supabase.co"
 SUPA_KEY = "sb_publishable_HQDSfL4rTtPx2wwbgh_huw_llog8ZJk"
@@ -229,6 +229,8 @@ def main() -> int:
 
     src = template.read_text(encoding="utf-8")
     src = src.replace("__MARCA__", MARCA)
+    src = src.replace("__CONTATO__", CONTATO)
+    src = src.replace("__MARCAA__", MARCA_A).replace("__MARCAB__", MARCA_B)
     src = src.replace("__SITE__", SITE)                      # domínio público, definido no topo
     src = src.replace("__SITEDOM__", SITE.split("//")[-1])  # o mesmo, sem o esquema, para exibir
     src = src.replace("__ICONV__", ICON_V)

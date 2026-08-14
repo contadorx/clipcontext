@@ -152,7 +152,7 @@ const LISTA_TXT = {
 
     botao.disabled = true; diz(T.indo);
     try {
-      const r = await fetch(url + '/rest/v1/rpc/clipcontext_interesse', {
+      const r = await fetch(url + '/rest/v1/rpc/walkstamp_interesse', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', apikey: key, Authorization: 'Bearer ' + key },
         body: JSON.stringify({ p_email: email, p_idioma: L })

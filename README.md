@@ -1,4 +1,4 @@
-# ClipContext
+# Walkstamp
 
 Transforma um vídeo em um **PDF único** com os frames que importam e a transcrição sincronizada — pronto para entregar a um modelo de linguagem.
 
@@ -276,7 +276,11 @@ Um detalhe que só apareceu por causa desse teste: comparar os frames em tons de
 
 ## Licença
 
-MIT — veja `LICENSE`.
+Proprietário. O código roda no navegador de quem usa e pode ser lido ali, mas não é
+distribuído sob licença livre.
+
+Versões publicadas até 14/08/2026 sob o nome Walkstamp saíram com licença MIT; quem
+as obteve mantém os direitos daquela licença sobre aquelas versões.
 
 Dependências de terceiros: [jsPDF](https://github.com/parallax/jsPDF) (MIT) e
 [transformers.js](https://github.com/huggingface/transformers.js) (Apache-2.0), que baixa modelos Whisper sob demanda.

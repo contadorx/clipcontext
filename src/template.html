@@ -147,7 +147,7 @@
         <rect x="14" y="40" width="36" height="4.5" rx="2.25" fill="#fff"/>
         <rect x="14" y="48" width="23" height="4.5" rx="2.25" fill="#fff" opacity=".62"/>
       </svg>
-      <span>Clip<b>Context</b></span><span class="dom">__SITEDOM__</span>
+      <span>__MARCAA__<b>__MARCAB__</b></span><span class="dom">__SITEDOM__</span>
     </a>
     <select id="uiLang" aria-label="Language">
       <option value="pt">Português</option>
@@ -995,7 +995,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
 
   /* Endereço do repositório. Se ficar vazio, o convite a reportar não aparece
      e o usuário vê apenas a mensagem de erro. */
-  const REPO = 'https://github.com/contadorx/clipcontext';
+  /* O endereço de contato entra pelo build, junto com o domínio. Antes aqui
+     havia um repositório: relatar defeito abrindo issue no GitHub funciona
+     para quem é programador e exclui todo o resto do público. */
+  const CONTATO = '__CONTATO__';
 
   /* ---------------- Google Drive ----------------
      Nasce DESLIGADO, como o bloco de apoio: enquanto estes três campos
@@ -1071,7 +1074,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   function medir(nome, extra){
     if (!MEDIR_URL || !MEDIR_KEY || naoQuerMedir()) return;
     try {
-      fetch(MEDIR_URL + '/rest/v1/rpc/clipcontext_evento', {
+      fetch(MEDIR_URL + '/rest/v1/rpc/walkstamp_evento', {
         method: 'POST',
         keepalive: true,
         headers: { 'Content-Type': 'application/json',
@@ -1288,16 +1291,16 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     };
     video.onerror = () => {
       let extra = '';
-      if (REPO) {
+      if (CONTATO) {
         const ext = (fileName.match(/\.([^.]+)$/) || ['', '?'])[1].toLowerCase();
-        const titulo = encodeURIComponent('Formato nao suportado: .' + ext);
+        const assunto = encodeURIComponent('Formato nao suportado: .' + ext);
         const corpo = encodeURIComponent(
           'Extensao: .' + ext + '\nTamanho: ' + (fileSize/1048576).toFixed(1) + ' MB' +
           '\nNavegador: ' + navigator.userAgent +
           '\n\n(Nada foi enviado automaticamente — este texto foi montado no seu navegador ' +
-          'e so vai para o GitHub se voce enviar.)');
-        extra = ` <a href="${REPO}/issues/new?title=${titulo}&body=${corpo}" target="_blank" ` +
-                `rel="noopener" style="color:var(--accent)">${t('reportar')}</a>${t('reportarDica')}`;
+          'e so sai daqui se voce enviar o e-mail.)');
+        extra = ` <a href="mailto:${CONTATO}?subject=${assunto}&body=${corpo}" ` +
+                `style="color:var(--accent)">${t('reportar')}</a>${t('reportarDica')}`;
       }
       $('status').innerHTML = `<span class="err">${t('videoErr')}</span>${extra}`;
     };
@@ -1408,7 +1411,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
         video.addEventListener('error', s2);
         setTimeout(() => { limpa(); rej(new Error('tempo esgotado ao abrir o vídeo')); }, 20000);
       });
-      load(new File([blob], 'clipcontext-' + arq, { type: tipo }), 'exemplo');
+      load(new File([blob], 'walkstamp-' + arq, { type: tipo }), 'exemplo');
       await ok;
 
       try {
@@ -3469,7 +3472,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     setTimeout(() => URL.revokeObjectURL(a.href), 6000);
   }
 
-  const nomeBase = () => (fileName || 'clipcontext').replace(/\.[^.]+$/, '').replace(/\s+/g, '-');
+  const nomeBase = () => (fileName || 'walkstamp').replace(/\.[^.]+$/, '').replace(/\s+/g, '-');
 
   /* ---- pareamento imagem/fala, o mesmo critério usado no PDF ---- */
   function falaDoFrame(kept, i, cues, dur, semPrefixo){
