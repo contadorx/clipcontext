@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-Gera os dois builds do ClipContext a partir de src/template.html.
+Gera os dois builds a partir de src/template.html.
 
   public/app.html                   -> a ferramenta, com jsPDF vindo do CDN
-  offline/clipcontext-offline.html  -> jsPDF embutido, arquivo único, funciona sem internet
+  offline/walkstamp-offline.html  -> jsPDF embutido, arquivo único, funciona sem internet
 
 Edite sempre src/template.html. Os arquivos gerados são descartáveis.
 """
@@ -16,14 +16,21 @@ ROOT = pathlib.Path(__file__).parent
 MARKER = "<script>/*__JSPDF__*/</script>"
 CDN = "https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"
 
+# Nome de exibição da marca. Trocar de nome é trocar ESTA linha e o SITE abaixo.
+# Antes disto ele estava escrito à mão em 46 lugares, em três idiomas — o tipo de
+# coisa que faz uma decisão de dez minutos virar uma tarde de caça.
+MARCA = "Walkstamp"
+# O logotipo escreve a marca em duas metades, a segunda em destaque.
+MARCA_A, MARCA_B = "Walk", "stamp"
+
 # Endereço público do site, sem barra no fim. Sai daqui para o canonical, para os
 # hreflang e para o link do topo da ferramenta — trocar de domínio é mudar esta linha.
-SITE = "https://clipcontext.app"
+SITE = "https://walkstamp.app"
 
 # Versão dos ícones. O navegador guarda favicon com unhas e dentes: sem um
 # parâmetro que mude, quem já visitou o site continua vendo o ícone antigo
 # mesmo depois do deploy. Suba este número sempre que a marca mudar.
-ICON_V = "2"
+ICON_V = "3"
 
 # ---------------------------------------------------------------------------
 # Medição. São duas coisas separadas, de propósito:
@@ -51,7 +58,7 @@ ICON_V = "2"
 # ---------------------------------------------------------------------------
 EMPRESA = "Produtize Produtos e Serviços Inteligentes Ltda."
 CNPJ    = "48.417.292/0001-99"
-CONTATO = "privacidade@clipcontext.app"
+CONTATO = "privacidade@walkstamp.app"
 
 SUPA_URL = "https://zyqncemxjobkvdveordz.supabase.co"
 SUPA_KEY = "sb_publishable_HQDSfL4rTtPx2wwbgh_huw_llog8ZJk"
@@ -63,10 +70,10 @@ ANALYTICS = (
     '<script defer src="/_vercel/insights/script.js"></script>'
 )
 
-META = """<title>ClipContext — transforme vídeo em contexto para IA</title>
+META = f"""<title>{MARCA} — transforme vídeo em contexto para IA</title>
 <meta name="description" content="Transforme qualquer vídeo em um PDF com os frames que importam e a transcrição sincronizada, pronto para colar em uma IA. Roda no seu navegador: o vídeo não sai do seu computador.">
 <meta property="og:type" content="website">
-<meta property="og:title" content="ClipContext — transforme vídeo em contexto para IA">
+<meta property="og:title" content="{MARCA} — transforme vídeo em contexto para IA">
 <meta property="og:description" content="Frames por mudança de cena + transcrição sincronizada, em um PDF único. Nada é enviado para servidor nenhum.">
 <meta name="twitter:card" content="summary_large_image">"""
 
@@ -129,6 +136,8 @@ def build_site(root: pathlib.Path) -> None:
         t = dict(dic[lang])
         t.update(caminhos[lang])
         t["site"] = SITE
+        t["marca"] = MARCA
+        t["marcaA"], t["marcaB"] = MARCA_A, MARCA_B
         t["ICONV"] = ICON_V
         t["analytics"] = ANALYTICS
         t["supaUrl"] = SUPA_URL
@@ -158,15 +167,15 @@ def build_site(root: pathlib.Path) -> None:
     # páginas internas: mesmo cabeçalho e rodapé, corpo escrito por idioma
     doc = (root / "src" / "site" / "doc.html").read_text(encoding="utf-8")
     METAS = {
-        "precos": {"pt": ("Preços — ClipContext", "A ferramenta no navegador é gratuita e sempre será: não há custo de servidor."),
-                   "en": ("Pricing — ClipContext", "The browser tool is free and always will be: there is no server cost."),
-                   "es": ("Precios — ClipContext", "La herramienta del navegador es gratuita y siempre lo será: no hay coste de servidor.")},
-        "privacidade": {"pt": ("Política de Privacidade — ClipContext", "O ClipContext não coleta dados pessoais e não recebe seus vídeos."),
-                        "en": ("Privacy Policy — ClipContext", "ClipContext collects no personal data and never receives your videos."),
-                        "es": ("Política de Privacidad — ClipContext", "ClipContext no recoge datos personales y no recibe tus vídeos.")},
-        "termos": {"pt": ("Termos de Uso — ClipContext", "Condições de uso do ClipContext, ferramenta gratuita e de código aberto."),
-                   "en": ("Terms of Use — ClipContext", "Terms for ClipContext, a free and open-source tool."),
-                   "es": ("Términos de Uso — ClipContext", "Condiciones de uso de ClipContext, herramienta gratuita y de código abierto.")},
+        "precos": {"pt": (f"Preços — {MARCA}", "A ferramenta no navegador é gratuita e sempre será: não há custo de servidor."),
+                   "en": (f"Pricing — {MARCA}", "The browser tool is free and always will be: there is no server cost."),
+                   "es": (f"Precios — {MARCA}", "La herramienta del navegador es gratuita y siempre lo será: no hay coste de servidor.")},
+        "privacidade": {"pt": (f"Política de Privacidade — {MARCA}", f"O {MARCA} não coleta dados pessoais e não recebe seus vídeos."),
+                        "en": (f"Privacy Policy — {MARCA}", f"{MARCA} collects no personal data and never receives your videos."),
+                        "es": (f"Política de Privacidad — {MARCA}", f"{MARCA} no recoge datos personales y no recibe tus vídeos.")},
+        "termos": {"pt": (f"Termos de Uso — {MARCA}", f"Condições de uso do {MARCA}, ferramenta gratuita e de código aberto."),
+                   "en": (f"Terms of Use — {MARCA}", f"Terms for {MARCA}, a free and open-source tool."),
+                   "es": (f"Términos de Uso — {MARCA}", f"Condiciones de uso de {MARCA}, herramienta gratuita y de código abierto.")},
     }
     for pagina, metas in METAS.items():
         for lang in IDIOMAS:
@@ -176,6 +185,8 @@ def build_site(root: pathlib.Path) -> None:
                 continue
             t = dict(dic[lang]); t.update(caminhos[lang])
             t["site"] = SITE
+            t["marca"] = MARCA
+            t["marcaA"], t["marcaB"] = MARCA_A, MARCA_B
             t["ICONV"] = ICON_V
             t["analytics"] = ANALYTICS
             t["supaUrl"] = SUPA_URL
@@ -217,6 +228,7 @@ def main() -> int:
             return 1
 
     src = template.read_text(encoding="utf-8")
+    src = src.replace("__MARCA__", MARCA)
     src = src.replace("__SITE__", SITE)                      # domínio público, definido no topo
     src = src.replace("__SITEDOM__", SITE.split("//")[-1])  # o mesmo, sem o esquema, para exibir
     src = src.replace("__ICONV__", ICON_V)
@@ -241,7 +253,7 @@ def main() -> int:
     offline = src.replace(MARKER, f"<script>{lib}</script>")
     offline = offline.replace("__SUPAURL__", "").replace("__SUPAKEY__", "")
     offline = offline.replace("<!--__ANALYTICS__-->", "")
-    out_off = ROOT / "offline" / "clipcontext-offline.html"
+    out_off = ROOT / "offline" / "walkstamp-offline.html"
     out_off.parent.mkdir(exist_ok=True)
     out_off.write_text(offline, encoding="utf-8")
 

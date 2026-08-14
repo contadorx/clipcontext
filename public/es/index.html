@@ -3,19 +3,19 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ClipContext — convierte tu vídeo en contexto para la IA</title>
-<meta name="description" content="Una hora de vídeo se convierte en ~60 pantallas — solo las que cambian — cada una junto a lo que se dijo, en un PDF que ChatGPT, Claude y Gemini leen entero. Funciona en tu navegador: el vídeo no sale de tu ordenador.">
-<link rel="canonical" href="https://clipcontext.app/es">
-<link rel="alternate" hreflang="pt-BR" href="https://clipcontext.app/">
-<link rel="alternate" hreflang="en" href="https://clipcontext.app/en">
-<link rel="alternate" hreflang="es" href="https://clipcontext.app/es">
-<link rel="alternate" hreflang="x-default" href="https://clipcontext.app/en">
+<title>Walkstamp — tu grabación de pantalla se vuelve documento</title>
+<meta name="description" content="Graba la pantalla y recibe un documento con solo los instantes en que la pantalla cambia, cada uno con la hora exacta y el habla de ese tramo. Sirve como evidencia de prueba y como contexto para una IA. Funciona en el navegador: nada sale de tu ordenador.">
+<link rel="canonical" href="https://walkstamp.app/es">
+<link rel="alternate" hreflang="pt-BR" href="https://walkstamp.app/">
+<link rel="alternate" hreflang="en" href="https://walkstamp.app/en">
+<link rel="alternate" hreflang="es" href="https://walkstamp.app/es">
+<link rel="alternate" hreflang="x-default" href="https://walkstamp.app/en">
 <meta property="og:type" content="website">
-<meta property="og:title" content="ClipContext — convierte tu vídeo en contexto para la IA">
-<meta property="og:description" content="Solo los momentos en que la pantalla cambia, junto al habla, en un único PDF. Nada se envía a ningún servidor.">
-<link rel="icon" href="/favicon.ico?v=2" sizes="any">
+<meta property="og:title" content="Walkstamp — tu grabación de pantalla se vuelve documento">
+<meta property="og:description" content="Una captura por paso, con la hora y el habla al lado. Evidencia de prueba y contexto para IA, sin que nada salga de tu máquina.">
+<link rel="icon" href="/favicon.ico?v=3" sizes="any">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<link rel="apple-touch-icon" href="/apple-touch-icon.png?v=2">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png?v=3">
 <link rel="stylesheet" href="/site.css">
 <script>window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments)};</script><script defer src="/_vercel/insights/script.js"></script>
 
@@ -24,7 +24,7 @@
 
 <header>
   <div class="wrap">
-    <a class="brand" href="/es"><img src="/logo.svg" alt=""><span>Clip<b>Context</b></span></a>
+    <a class="brand" href="/es"><img src="/logo.svg" alt=""><span>Walk<b>stamp</b></span></a>
     <nav>
       <a href="#como" class="hide-sm">Cómo funciona</a>
       <a href="/es/precos" class="hide-xs">Precios</a>
@@ -36,18 +36,18 @@
 
 <section style="padding-top:78px">
   <div class="wrap">
-    <p class="eyebrow">Vídeo → PDF → IA</p>
-    <h1>Una hora de vídeo<br>en 60 pantallas que importan</h1>
-    <p class="lead">Un modelo que ve vídeo muestrea un fotograma por segundo: 3.600 imágenes casi idénticas, y el contexto se agota antes que la respuesta. ClipContext guarda solo los instantes en que la pantalla cambia, cada uno junto a lo que se estaba diciendo — en un PDF que ChatGPT, Claude y Gemini leen entero.</p>
+    <p class="eyebrow">Grabación → documento</p>
+    <h1>Tú recorres la pantalla.<br>Él sella cada paso.</h1>
+    <p class="lead">Una grabación de pantalla se vuelve documento: <b>solo los instantes en que la pantalla cambia</b>, cada uno con la <b>hora exacta</b> y con lo que se estaba diciendo. Sirve para probar que la prueba se hizo y sirve para entregar a una IA. Funciona entero en tu navegador — nada sale de tu ordenador.</p>
     <p><a class="btn" href="/app?lang=es">Abrir la herramienta — es gratis</a></p>
     <p class="small muted" style="margin-top:16px">Sin registro, sin instalación, sin límite de tamaño. El vídeo se procesa dentro de tu navegador y nunca se sube a ningún servidor.</p>
 
     <figure class="tour">
       <video poster="/demo/tour.es.jpg" autoplay muted loop playsinline preload="metadata"
-             aria-label="ClipContext en funcionamiento">
+             aria-label="Walkstamp en funcionamiento">
         <source src="/demo/tour.es.webm" type="video/webm">
         <source src="/demo/tour.es.mp4" type="video/mp4">
-        <img src="/demo/tour.es.jpg" alt="ClipContext en funcionamiento" style="width:100%">
+        <img src="/demo/tour.es.jpg" alt="Walkstamp en funcionamiento" style="width:100%">
       </video>
       <figcaption>El flujo completo en 19 segundos: ejemplo cargado, fotogramas hallados por cambio de escena, PDF generado y prompt listo.</figcaption>
     </figure>
@@ -56,8 +56,31 @@
 
 <section>
   <div class="wrap">
-    <h2>Por qué el vídeo en crudo es la peor forma de preguntar</h2>
-    <p class="lead" style="margin-bottom:0">Claude y ChatGPT rechazan los archivos de vídeo. Gemini los acepta — y ahí aparece el otro problema: muestrea un fotograma por segundo a ciegas, así que una clase de una hora se convierte en 3.600 imágenes y cerca de un millón de tokens, casi todo repetición de la diapositiva anterior. Y lo vuelves a pagar en cada pregunta. Hacer capturas a mano tiene el defecto opuesto: diez pantallas parecidas, ninguna del momento que importaba, y nada que una lo que se ve con lo que se decía.</p>
+    <h2>Por qué la grabación en crudo no resuelve</h2>
+    <p class="lead" style="margin-bottom:0">Un vídeo de una hora no se adjunta en ningún sitio: no cabe en un ticket, no cabe en un acta, y nadie lo va a ver. Claude y ChatGPT rechazan los archivos de vídeo; Gemini los acepta y muestrea un fotograma por segundo a ciegas — 3.600 imágenes y más de un millón de tokens, casi todo repetición de la pantalla anterior. Hacer capturas a mano tiene el defecto opuesto: da trabajo, y se pierde la hora de cada una.</p>
+  </div>
+</section>
+
+<section id="usos">
+  <div class="wrap">
+    <p class="eyebrow">El mismo trabajo, dos destinos</p>
+    <h2>Una grabación. Dos cosas que nadie disfruta haciendo a mano.</h2>
+    <p class="lead">Capturar cada paso y escribir el pie debajo. O explicarle a un modelo qué pasó en un vídeo de una hora. Mismo problema — convertir tiempo en documento — y por eso una sola herramienta resuelve los dos.</p>
+    <div class="duo">
+      <div class="via um">
+        <span class="vtag">Evidencia de prueba</span>
+        <h3>Lo ejecutaste. Ahora tienes que probarlo.</h3>
+        <p>Una prueba sin evidencia no sobrevive a una auditoría. Hoy eso es Imprimir Pantalla → pegar en Word → escribir el pie, cuarenta veces. Graba una vez y recibe el documento hecho.</p>
+        <ul><li>Una captura por paso, sin repeticiones de pantalla quieta</li><li>La hora de cada una, y tu narración transcrita al lado</li><li>Salida en Word, lista para adjuntar al ticket</li><li>El dato de prueba suele ser copia de producción — y aquí no sube</li></ul>
+      </div>
+      <div class="via">
+        <span class="vtag">Contexto para IA</span>
+        <h3>El modelo lee el documento entero.</h3>
+        <p>Un modelo que ve vídeo muestrea un fotograma por segundo, a ciegas. Una hora se vuelve 3.600 imágenes y más de un millón de tokens — y lo pagas otra vez en cada pregunta.</p>
+        <ul><li>~60 pantallas en vez de 3.600, porque las demás eran repetición</li><li>Cada imagen junto al habla de ese tramo</li><li>Cabe en cualquier modelo, incluidos los que rechazan vídeo</li><li>El texto de instrucción va junto, listo para pegar</li></ul>
+      </div>
+    </div>
+    <p class="ponte">El puente entre los dos: lo que se quiere es lo mismo — qué pasó en la pantalla, en orden, con la hora, y con lo que se dijo. Solo cambia quién lo lee al final: un auditor o un modelo.</p>
   </div>
 </section>
 
@@ -78,7 +101,7 @@
     <h2>Qué hace distinto</h2>
     <div class="cards" style="margin-top:26px">
       <div class="card"><h3>Guarda el cambio, no el intervalo</h3><p>En lugar de fotografiar cada diez segundos, recorre el vídeo y se detiene en los instantes en que la pantalla cambia de verdad, con precisión de medio segundo. En una presentación eso es un fotograma por diapositiva en vez de cuarenta repetidos.</p></div>
-      <div class="card"><h3>Empareja imagen y habla</h3><p>En el PDF, cada fotograma aparece junto a lo que se dice en ese punto, con el instante marcado. El modelo puede relacionar lo que había en pantalla con lo que se estaba diciendo.</p></div>
+      <div class="card"><h3>Sella la hora</h3><p>Cada pantalla lleva el instante en que ocurrió. Es lo que separa un montón de capturas de un documento que sirve como evidencia — y lo que permite a la IA citar el momento correcto.</p></div>
       <div class="card"><h3>Nada sale de tu ordenador</h3><p>No existe servidor. El vídeo, el audio y la transcripción se procesan en tu navegador — incluidas grabaciones confidenciales de reuniones.</p></div>
       <div class="card"><h3>Te entrega también el prompt</h3><p>El texto ya preparado le indica al modelo que cite los instantes, separe lo que vio de lo que oyó, y admita cuando la información no está en el documento en lugar de inventarla.</p></div>
     </div>
@@ -89,7 +112,7 @@
   <div class="wrap">
     <p class="eyebrow">Privacidad</p>
     <h2>No tenemos tus archivos porque no tenemos servidor</h2>
-    <p class="lead">La mayoría de las herramientas de vídeo en línea exigen subir el archivo: va a la máquina de alguien, se procesa allí y queda almacenado durante un tiempo que tú no controlas. ClipContext no hace nada de eso — la página es un archivo estático y todo el procesamiento ocurre en tu navegador.</p>
+    <p class="lead">La mayoría de las herramientas de vídeo en línea exigen subir el archivo: va a la máquina de alguien, se procesa allí y queda almacenado durante un tiempo que tú no controlas. Walkstamp no hace nada de eso — la página es un archivo estático y todo el procesamiento ocurre en tu navegador.</p>
     <p class="small muted">No hay cuenta, no hay base de datos, no hay rastreo. La única conexión externa es la descarga del modelo de transcripción, y solo si usas la transcripción automática. <a href="/es/privacidade" style="color:var(--accent)">Lee la política completa</a>.</p>
   </div>
 </section>
@@ -113,7 +136,7 @@
 
 <section style="text-align:center">
   <div class="wrap">
-    <h2>Pruébalo con un vídeo tuyo</h2>
+    <h2>Graba dos minutos y mira el documento</h2>
     <p class="lead" style="margin:0 auto 26px">Lleva menos tiempo que leer esta página.</p>
     <a class="btn" href="/app?lang=es">Abrir la herramienta</a>
   </div>
@@ -127,7 +150,7 @@
       <a href="/es/privacidade">Privacidad</a>
       <a href="/es/termos">Términos</a>
     </div>
-    <div>ClipContext — código abierto bajo licencia MIT</div>
+    <div>Walkstamp — código abierto bajo licencia MIT</div>
   </div>
 </footer>
 
