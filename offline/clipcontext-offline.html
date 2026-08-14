@@ -327,8 +327,9 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     </div></div><!-- /dobra -->
   </div>
 
-  <div class="card hide" id="prevCard">
+  <div class="card" id="prevCard">
     <h2><span class="step">4</span><span data-i18n="s4"></span></h2>
+    <p class="lockHint hide" id="hintPrev"></p>
     <div class="dobra"><div>
     <div class="row">
       <span class="tag"><span data-i18n="tKeep"></span> <b id="nKeep">0</b></span>
@@ -839,13 +840,16 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       pipTela:'escolha a tela', pipStop:'Parar', pipFrames:'{0} frames',
       pipNoVideo:'nenhum vídeo é guardado',
       lockHint:'Escolha um vídeo no passo 1 para continuar.',
+      lockPrev:'Os frames aparecem aqui depois do passo 3 — é onde você descarta os que não servem.',
       lockPrompt:'O texto para a IA é montado depois que os frames existirem.',
       lockRec:'Gravando. Os frames e a transcrição estão saindo sozinhos — clique em Parar quando terminar.',
       lockTrRec:'A transcrição está sendo feita ao vivo, enquanto você grava.',
       lockTrNone:'Esta gravação foi só de frames. Se você tiver a transcrição da reunião, cole ou arraste aqui embaixo — ela entra no PDF pareada com as telas.',
       lockTrDone:'Feita ao vivo durante a gravação. Não há áudio guardado para transcrever de novo — mas o texto abaixo é seu: dá para corrigir e exportar.',
       lockDone:'A gravação já trouxe os frames. Como nenhum vídeo é guardado, não há o que varrer de novo — para começar outra, use o passo 1.',
-      recNoSpeech:' Não saiu nenhuma fala porque não havia áudio nesta captura.',
+      recNoSpeech:'Não saiu nenhuma fala porque não havia áudio nenhum nesta captura.',
+      recSoSilencio:'Havia áudio, mas nada de fala foi reconhecido — verifique se o som estava mesmo tocando e se o microfone não estava fechado.',
+      recJanela:'Você compartilhou uma JANELA, e o navegador só entrega o som do computador quando se compartilha uma ABA ou a TELA INTEIRA. Grave de novo escolhendo a aba da reunião, ou marque a caixa de compartilhar áudio na tela inteira.',
       recHint:'grave uma reunião e receba os frames e a transcrição dos dois canais, sem guardar o vídeo',
       recRun:'Gravando… {0} — clique em Parar quando terminar.',
       recDone:'Gravação de {0} pronta e carregada. Pode extrair os frames.',
@@ -1031,13 +1035,16 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       pipTela:'pick the screen', pipStop:'Stop', pipFrames:'{0} frames',
       pipNoVideo:'no video is kept',
       lockHint:'Choose a video in step 1 to continue.',
+      lockPrev:'The frames show up here after step 3 — this is where you discard the ones you do not want.',
       lockPrompt:'The text for the AI is written once the frames exist.',
       lockRec:'Recording. The frames and the transcript are coming out on their own — click Stop when you are done.',
       lockTrRec:'The transcript is being made live, while you record.',
       lockTrNone:'This recording was frames only. If you have the meeting transcript, paste or drop it below — it goes into the PDF paired with the screens.',
       lockTrDone:'Made live during the recording. There is no audio kept to transcribe again — but the text below is yours: you can fix it and export it.',
       lockDone:'The recording already produced the frames. Since no video is kept, there is nothing to scan again — to start another one, use step 1.',
-      recNoSpeech:' No speech came out because there was no audio in this capture.',
+      recNoSpeech:'No speech came out because there was no audio at all in this capture.',
+      recSoSilencio:'There was audio, but no speech was recognised — check that the sound was actually playing and that the microphone was not closed.',
+      recJanela:'You shared a WINDOW, and the browser only delivers computer audio when you share a TAB or the WHOLE SCREEN. Record again picking the meeting tab, or tick the share-audio box on the whole screen.',
       recHint:'record a meeting and get the frames and both audio channels transcribed, with no video kept',
       recRun:'Recording… {0} — click Stop when you are done.',
       recDone:'{0} recording ready and loaded. You can extract the frames.',
@@ -1221,13 +1228,16 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       pipTela:'elige la pantalla', pipStop:'Detener', pipFrames:'{0} fotogramas',
       pipNoVideo:'no se guarda ningún vídeo',
       lockHint:'Elige un vídeo en el paso 1 para continuar.',
+      lockPrev:'Los fotogramas aparecen aquí después del paso 3 — es donde descartas los que no sirven.',
       lockPrompt:'El texto para la IA se arma cuando existan los fotogramas.',
       lockRec:'Grabando. Los fotogramas y la transcripción salen solos — pulsa Detener cuando termines.',
       lockTrRec:'La transcripción se está haciendo en vivo, mientras grabas.',
       lockTrNone:'Esta grabación fue solo de fotogramas. Si tienes la transcripción de la reunión, pégala o arrástrala aquí abajo — entra en el PDF junto a las pantallas.',
       lockTrDone:'Hecha en vivo durante la grabación. No hay audio guardado para transcribir de nuevo — pero el texto de abajo es tuyo: puedes corregirlo y exportarlo.',
       lockDone:'La grabación ya trajo los fotogramas. Como no se guarda ningún vídeo, no hay nada que recorrer de nuevo — para empezar otra, usa el paso 1.',
-      recNoSpeech:' No salió ninguna intervención porque no había audio en esta captura.',
+      recNoSpeech:'No salió ninguna intervención porque no había audio alguno en esta captura.',
+      recSoSilencio:'Había audio, pero no se reconoció ninguna intervención — comprueba que el sonido estaba sonando y que el micrófono no estaba cerrado.',
+      recJanela:'Compartiste una VENTANA, y el navegador solo entrega el sonido del ordenador cuando compartes una PESTAÑA o la PANTALLA COMPLETA. Graba de nuevo eligiendo la pestaña de la reunión, o marca la casilla de compartir audio en la pantalla completa.',
       recHint:'graba una reunión y recibe los fotogramas y la transcripción de los dos canales, sin guardar el vídeo',
       recRun:'Grabando… {0} — pulsa Detener cuando termines.',
       recDone:'Grabación de {0} lista y cargada. Ya puedes extraer los fotogramas.',
@@ -1564,11 +1574,17 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       dica('hintTr', 'lockHint'); dica('hintFrames', 'lockHint');
       dobrar('cardTr', false); dobrar('cardFrames', false);
     }
+    /* O passo 4 não some mais. Escondê-lo deixava a numeração visível em
+       1, 2, 3, 5 — um buraco que a pessoa lê como defeito, e que ficou gritante
+       depois que os outros passaram a aparecer colapsados. Agora ele existe
+       sempre, fechado e com a explicação, como os irmãos. */
     const temFrames = frames.length > 0;
+    trancar('prevCard',   temFrames);
+    dobrar('prevCard',    temFrames);
+    dica('hintPrev',      temFrames ? null : 'lockPrev');
     trancar('promptCard', temFrames);
-    dobrar('promptCard', temFrames);
-    dica('hintPrompt', temFrames ? null : 'lockPrompt');
-    dobrar('prevCard', temFrames);
+    dobrar('promptCard',  temFrames);
+    dica('hintPrompt',    temFrames ? null : 'lockPrompt');
   }
 
   /* Rolagem suave até o próximo passo. Respeita quem pediu menos movimento no
@@ -2152,7 +2168,6 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
        varredura já os substitui sozinha. */
     if (liveDur > 0) {
       frames = [];
-      $('prevCard').classList.add('hide');
       $('thumbs').innerHTML = '';
       $('grabbed').textContent = '';
       $('liveBox').classList.add('hide');
@@ -2160,6 +2175,9 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       $('liveStat').textContent = '';
     }
     liveDur = 0; liveW = 0; liveH = 0; liveCues = []; liveCanais = null;
+    /* Sem isto o passo 4 ficaria aberto e vazio: quem zerava os frames também
+       precisa mandar os passos se recalcularem. */
+    if (typeof passos === 'function') passos();
   }
 
   /* Todos os caminhos que trocam o vídeo passam por aqui antes de agir: durante
@@ -2531,9 +2549,29 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
 
     const temSom = telaStream.getAudioTracks().length > 0;
     const temMic = !!micStream;
+
+    /* Por que não veio som do computador, dito com precisão.
+
+       O Chrome NÃO entrega áudio quando se compartilha uma JANELA — só aba ou
+       tela inteira. Compartilhar a janela do Teams ou do Meet é o gesto mais
+       natural do mundo e é justamente o único que não traz som. Dizer
+       "não havia áudio" nesse caso é verdadeiro e inútil; dizer qual gesto
+       resolve é o que faz a pessoa acertar na segunda tentativa. */
+    let superficie = '';
+    try { superficie = (telaStream.getVideoTracks()[0].getSettings() || {}).displaySurface || ''; }
+    catch (e) {}
+    const somDeJanela = !temSom && superficie === 'window';
+
     if (querTranscrever) {
       if (querMic && !temMic && micErro) avisos.push(micErro);
-      if (!temSom && !temMic) avisos.push(t('recAudioNo'));
+      if (somDeJanela) {
+        avisos.push(t('recJanela'));
+        /* Também no fim, e mesmo que o microfone tenha salvo alguma coisa: sem
+           o som do computador falta metade da conversa, e quem só lê a
+           transcrição depois não tem como saber que faltou. */
+        avisosFim.push(t('recJanela'));
+      }
+      else if (!temSom && !temMic) avisos.push(t('recAudioNo'));
       else if (!temSom && temMic) avisos.push(t('recSysNo'));
     }
 
@@ -2548,7 +2586,6 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     $('tr').value = ''; refreshTr();
     $('liveTail').innerHTML = '';
     $('liveBox').classList.remove('hide');
-    $('prevCard').classList.add('hide');
 
     video.srcObject = telaStream;
     video.muted = true;
@@ -2567,6 +2604,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
        O áudio começa a acumular assim que o nó é conectado, então abri-los
        antes do `await video.play()` faria a transcrição nascer adiantada em
        relação aos frames — som e imagem sairiam fora de sincronia no PDF. */
+    let motivoSemFala = '';        // por que não houve transcrição, quando não houve
     if (podeTranscrever) {
       try {
         const AC = window.AudioContext || window.webkitAudioContext;
@@ -2576,10 +2614,31 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
         if (micStream) canais.push(await abrirCanal(ctx, micStream,  t('spkMic'), 'mic'));
       } catch (e) {
         avisos.push(t('recNoAudio'));
+        motivoSemFala = t('recNoAudio');
         canais.length = 0;
       }
+    } else if (querTranscrever) {
+      /* Pediu transcrição e ela não aconteceu: o modelo não carregou. Isso
+         precisa sobreviver até a mensagem final — antes sumia junto com o
+         relógio, e o fim dizia "não havia áudio", que era mentira. */
+      motivoSemFala = t('recNoModel');
     }
     liveCanais = canais.map(c => c.rotulo);
+
+    /* ---- contexto só para os medidores ----
+       Os medidores NÃO podem depender da transcrição. Eram pendurados nos canais
+       de transcrição, então quando o modelo falhava as duas barras ficavam
+       mortas — justamente no caso em que a pessoa mais precisa saber se o som
+       está chegando. Aqui eles têm contexto próprio, na taxa nativa, e existem
+       sempre que houver trilha de áudio. */
+    let ctxVu = null;
+    if (!ctx && (temSom || micStream)) {
+      try {
+        const AC = window.AudioContext || window.webkitAudioContext;
+        ctxVu = new AC();
+        if (ctxVu.state === 'suspended') await ctxVu.resume();
+      } catch (e) { ctxVu = null; }
+    }
 
     /* ---- medidores e o botão de fechar o microfone ----
        Os dois vêm do SalaVox. O medidor responde "está captando?" enquanto dá
@@ -2587,11 +2646,16 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
        o microfone na reunião não fecha o microfone que o navegador entregou a
        esta página. Silenciar-se no Teams não impede a captura aqui. */
     let medeMic = null, medeSys = null, anima = 0;
-    if (ctx) {
-      const doMic = canais.find(c => c.classe === 'mic');
-      const doSys = canais.find(c => c.classe === 'sys');
-      if (doMic) medeMic = medidor(ctx, doMic.src, $('vuMic'));
-      if (doSys) medeSys = medidor(ctx, doSys.src, $('vuSys'));
+    const ctxM = ctx || ctxVu;
+    if (ctxM) {
+      const fonte = (stream, classe) => {
+        const c = canais.find(x => x.classe === classe);
+        if (c) return c.src;                               // reaproveita o nó da transcrição
+        try { return ctxM.createMediaStreamSource(stream); } catch (e) { return null; }
+      };
+      if (micStream) { const n = fonte(micStream, 'mic'); if (n) medeMic = medidor(ctxM, n, $('vuMic')); }
+      if (temSom)    { const n = fonte(new MediaStream(telaStream.getAudioTracks()), 'sys');
+                       if (n) medeSys = medidor(ctxM, n, $('vuSys')); }
     }
     $('vuBox').classList.toggle('hide', !medeMic && !medeSys);
     $('vuMic').parentElement.parentElement.classList.toggle('off', !medeMic);
@@ -2732,6 +2796,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       $('recStop').textContent = t('recStopBtn');
 
       if (ctx) { try { await ctx.close(); } catch (e) {} }
+      if (ctxVu) { try { await ctxVu.close(); } catch (e) {} }
       video.pause();
       video.srcObject = null;
       video.removeAttribute('src');
@@ -2762,11 +2827,19 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
          havia áudio aparecia durante a gravação e sumia justamente no fim. */
       /* Só é surpresa quem pediu transcrição. Quem marcou "só os frames" no
          passo 1 já sabe por que não há fala. */
-      const semFala = (querTranscrever && liveCues.length === 0) ? t('recNoSpeech') : '';
+      /* A frase antiga era sempre "não havia áudio nesta captura" — e mentia
+         quando o problema era o modelo, os canais, ou a janela compartilhada.
+         Agora o motivo é escolhido pelo que de fato aconteceu. */
+      let semFala = '';
+      if (querTranscrever && liveCues.length === 0) {
+        semFala = ' ' + (motivoSemFala
+                      || (somDeJanela ? t('recJanela')
+                      : (!temSom && !temMic) ? t('recNoSpeech')
+                      : t('recSoSilencio')));
+      }
       const alerta = avisosFim.length ? ` <span class="err">${avisosFim.join(' ')}</span>` : '';
       $('recMsg').innerHTML = `<span class="ok">${t('recDone2', fmt(liveDur), frames.length, liveCues.length)}` +
         semFala + contarDesempenho() + `</span>` + alerta;
-      $('prevCard').classList.remove('hide');
       $('extract').disabled = true;      // não há vídeo para varrer de novo
       $('auto').disabled = true;
       render();
@@ -3330,7 +3403,6 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     $('cancel').classList.add('hide');
     trabalhando(false);
     stop = false;
-    $('prevCard').classList.remove('hide');
     render();
     passos();
     irPara('prevCard', true);      // os frames saíram: agora é revisar
