@@ -101,9 +101,14 @@
     downloaded again. That file stays on your device, under your control, and is removed when you clear your
     browsing data. We have no access to it.</p>
     <p>The evidence identification fields the tool offers — test case, system, who ran it, ticket, result —
-    and the per-step notes exist <b>only in the tab's memory</b> while it is open: they are not written to
-    browser storage, do not survive closing the tab, and are not sent anywhere. They appear only in the
-    documents you generate and download yourself.</p>
+    and the per-step notes are <b>never sent anywhere</b>. They appear only in the documents you generate and
+    download yourself.</p>
+    <p>Two of them, <b>system</b> and <b>executed by</b>, are kept in <code>sessionStorage</code> while the
+    tab stays open, so you do not retype them for every test case. <code>sessionStorage</code> is cleared by
+    the browser itself when the tab closes: <b>it does not survive between visits</b>, it is not a cookie, it
+    is not read by us, and it never leaves your device. There is a &ldquo;Forget&rdquo; button next to the
+    fields that clears it immediately. The remaining fields and the notes are not stored even while the tab
+    lives — they are gone on reload.</p>
 
     <h2>Cookies</h2>
     <p>We use no first-party or third-party cookies — not for tracking, not for advertising, not for

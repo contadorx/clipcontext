@@ -101,9 +101,11 @@
     The PDF library is served from our own domain, not from a CDN.</p>
 
     <h2>What stays in your browser</h2>
-    <p>None of your content is kept between visits. The evidence identification fields — test case, who ran
-    it, system — live only in the tab's memory and disappear when you close it; that was a deliberate
-    decision, and it is why you retype them when you come back.</p>
+    <p>None of your content is kept between visits. Of the evidence identification fields, only
+    <b>system</b> and <b>executed by</b> are held in <code>sessionStorage</code> — which the browser clears
+    when the tab closes — so they are not retyped for every case; a button clears them immediately. Test
+    case, ticket, result and the notes are not stored even while the tab lives. None of this is a cookie,
+    none of it is read by us, and none of it leaves your device.</p>
     <p>The only thing that persists is the <b>transcription model</b>, cached by the browser itself so it is
     not downloaded again. It sits on your device, under your control, and is removed when you clear browsing
     data. We use no <i>cookies</i> — neither our own nor third-party ones.</p>

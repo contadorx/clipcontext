@@ -70,9 +70,11 @@
     La biblioteca de PDF se sirve desde nuestro propio dominio, no desde un CDN.</p>
 
     <h2>Qué queda en tu navegador</h2>
-    <p>Nada de tu contenido se guarda entre visitas. Los datos de identificación de la evidencia — caso de
-    prueba, quién la ejecutó, sistema — viven solo en la memoria de la pestaña y desaparecen al cerrarla; fue
-    una decisión deliberada, y por eso los vuelves a escribir cuando regresas.</p>
+    <p>Nada de tu contenido se guarda entre visitas. De los datos de identificación de la evidencia, solo
+    <b>sistema</b> y <b>ejecutado por</b> quedan en <code>sessionStorage</code> — que el navegador borra al
+    cerrar la pestaña — para no reescribirlos en cada caso; hay un botón que los borra al instante. Caso de
+    prueba, ticket, resultado y las anotaciones no se guardan ni mientras vive la pestaña. Nada de esto es
+    una cookie, nada de esto lo leemos nosotros, y nada de esto sale de tu dispositivo.</p>
     <p>Lo único que persiste es el <b>modelo de transcripción</b>, que el propio navegador guarda en caché
     para no descargarlo otra vez. Está en tu dispositivo, bajo tu control, y desaparece al borrar los datos
     de navegación. No usamos <i>cookies</i> — ni propias ni de terceros.</p>

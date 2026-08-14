@@ -102,9 +102,14 @@
     baixá-lo de novo. Esse arquivo fica no seu dispositivo, sob seu controle, e é removido ao limpar os dados
     de navegação. Nós não temos acesso a ele.</p>
     <p>Os campos de identificação de evidência que a ferramenta oferece — caso de teste, sistema, quem
-    executou, chamado, resultado — e as anotações por passo existem <b>apenas na memória da aba</b> enquanto
-    ela está aberta: não são gravados no navegador, não sobrevivem ao fechamento da aba e não são enviados a
-    lugar nenhum. Eles só aparecem nos documentos que você mesmo gera e baixa.</p>
+    executou, chamado, resultado — e as anotações por passo <b>nunca são enviados a lugar nenhum</b>. Eles só
+    aparecem nos documentos que você mesmo gera e baixa.</p>
+    <p>Dois deles, <b>sistema</b> e <b>executado por</b>, ficam guardados em <code>sessionStorage</code>
+    enquanto a aba estiver aberta, para você não redigitar a cada caso de teste. O
+    <code>sessionStorage</code> é apagado pelo próprio navegador ao fechar a aba: <b>ele não sobrevive entre
+    visitas</b>, não é um cookie, não é lido por nós e não sai do seu dispositivo. Há um botão
+    &ldquo;Esquecer&rdquo; ao lado dos campos que apaga na hora. Os demais campos e as anotações não são
+    guardados nem enquanto a aba vive — some ao recarregar a página.</p>
 
     <h2>Cookies</h2>
     <p>Não utilizamos cookies próprios nem de terceiros — nem para rastreamento, nem para publicidade,

@@ -102,6 +102,30 @@
   .thumbs .nota::placeholder{color:var(--muted);opacity:.8}
   .thumbs .nota:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
   .thumbs figure.off .nota{pointer-events:none}
+  /* Ampliar: 158 px é bom para escolher, péssimo para conferir. O botão fica
+     escondido até o mouse ou o foco chegarem na miniatura, para não competir
+     com a imagem — mas existe sempre no DOM, para o teclado alcançar. */
+  .thumbs .lupa{position:absolute;top:5px;right:5px;z-index:2;border:0;cursor:pointer;
+      width:26px;height:26px;border-radius:6px;padding:0;line-height:1;font-size:14px;
+      background:color-mix(in srgb,var(--panel) 86%,transparent);color:var(--ink);
+      opacity:0;transition:opacity .12s}
+  .thumbs figure:hover .lupa,.thumbs .lupa:focus-visible{opacity:1}
+  .thumbs figure.off .lupa{display:none}
+  /* A lente: o passo em tamanho de conferir, com o que se corrige nele. */
+  .lente{position:fixed;inset:0;z-index:50;background:rgba(11,13,20,.72);
+      display:flex;align-items:center;justify-content:center;padding:20px}
+  .lenteCx{background:var(--panel);border:1px solid var(--line);border-radius:12px;
+      max-width:980px;width:100%;max-height:100%;overflow:auto;padding:18px}
+  .lenteTopo{display:flex;justify-content:space-between;align-items:center;gap:14px;margin-bottom:12px}
+  .lenteTopo b{font-size:15.5px}
+  .lente img{width:100%;display:block;border-radius:8px;background:#000}
+  .lenteCampos{display:grid;gap:12px;margin-top:14px}
+  .lenteCampos label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px;font-weight:500}
+  .lenteCampos input{width:100%;box-sizing:border-box;padding:9px 11px;border:1px solid var(--line);
+      border-radius:7px;background:var(--bg);color:var(--ink);font:inherit;font-size:14px}
+  .lenteFala{display:flex;gap:9px;align-items:center;margin-bottom:8px}
+  .lenteFala span{font:12px ui-monospace,Menlo,monospace;color:var(--muted);flex:none;width:52px}
+  .lenteNav{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:16px}
   /* O modelo de saída fica no topo do cartão 4 e com cara de decisão, não de
      ajuste fino: é ele que define o documento inteiro. */
   .modelo{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin:-4px 0 16px}
@@ -214,6 +238,8 @@
     <div class="row hide" id="recRow" style="margin-top:10px">
       <button class="ghost sm" id="rec" data-i18n="recBtn"></button>
       <button class="sm hide" id="recStop" data-i18n="recStopBtn"></button>
+      <button class="ghost sm hide" id="recPause" data-i18n="recPauseBtn"></button>
+      <button class="ghost sm hide" id="recMark" data-i18n="recMarkBtn"></button>
       <span class="status" id="recMsg" data-i18n="recHint"></span>
     </div>
     <div class="hide" id="recOpts" style="margin-top:8px">
@@ -424,6 +450,9 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       </div>
       <p class="evPe hide" id="evEst" data-i18n="evEstimado"></p>
       <p class="evPe"><label><input type="checkbox" id="evHash"><span data-i18n="evHash"></span></label></p>
+      <p class="evPe"><span data-i18n="evPerfil"></span>
+         <button class="ghost sm hide" id="evLimpar" data-i18n="evLimpar"
+                 style="margin-left:8px;padding:4px 10px;font-size:12px"></button></p>
       <p class="evPe" data-i18n="evNota"></p>
     </details>
 
@@ -440,6 +469,31 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       <span class="status" id="pdfStatus"></span>
     </div>
     </div></div><!-- /dobra -->
+  </div>
+
+  <!-- A lente de um passo: fora do #thumbs de propósito, porque render()
+       reconstrói aquele bloco inteiro e levaria o diálogo junto. -->
+  <div class="lente hide" id="lente" role="dialog" aria-modal="true" aria-labelledby="lenteTit">
+    <div class="lenteCx">
+      <div class="lenteTopo">
+        <b id="lenteTit"></b>
+        <button class="ghost sm" id="lenteFechar" data-i18n="fecharBtn"></button>
+      </div>
+      <img id="lenteImg" alt="">
+      <div class="lenteCampos">
+        <div><label for="lenteNota" data-i18n="notaPh"></label>
+             <input type="text" id="lenteNota" maxlength="180" autocomplete="off"></div>
+        <div id="lenteHoraCx"><label for="lenteHora" data-i18n="lenteHora"></label>
+             <input type="datetime-local" step="1" id="lenteHora">
+             <p class="evPe" style="padding:6px 0 0" data-i18n="lenteHoraNota"></p></div>
+        <div id="lenteFalaCx"><label data-i18n="lenteFala"></label><div id="lenteFalas"></div></div>
+      </div>
+      <div class="lenteNav">
+        <button class="ghost sm" id="lentePrev" data-i18n="lenteAnt"></button>
+        <span class="status" id="lentePos"></span>
+        <button class="ghost sm" id="lenteProx" data-i18n="lenteProx"></button>
+      </div>
+    </div>
   </div>
 
   <div class="card" id="promptCard">
@@ -511,6 +565,9 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       demoHasAudio:'O exemplo tem narração: a transcrição já veio preenchida, mas você pode apagá-la e clicar em "Transcrever automaticamente" para ver o reconhecimento de voz funcionando.',
       mark:'Marcar este momento',
       recBtn:'Gravar a tela', recStopBtn:'Parar gravação',
+      recPauseBtn:'Pausar', recResumeBtn:'Retomar', recMarkBtn:'Marcar este passo',
+      recPausado:'PAUSADO —', recMarcado:'passo marcado.',
+      pipPausado:'Pausado: nada sendo guardado.',
       micNegado:'O navegador bloqueou o microfone para este site. Clique no cadeado ao lado do endereço, permita o microfone e grave de novo.',
       micSemAparelho:'Não encontrei microfone nenhum ligado neste computador.',
       micOcupado:'O microfone está ocupado por outro programa — feche a reunião ou o gravador que está usando ele.',
@@ -649,7 +706,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       evR0:'— não informado', evR1:'Passou', evR2:'Falhou', evR3:'Bloqueado',
       evEstimado:'A hora de início foi estimada pela data do arquivo de vídeo — confira antes de usar como evidência.',
       evHash:'Incluir a impressão digital SHA-256 de cada imagem',
-      evNota:'Tudo aqui é opcional e fica só na memória desta aba: nada é guardado entre visitas nem enviado a lugar nenhum. Vira a primeira página do documento e o nome do arquivo. As horas saem no formato AAAA-MM-DD hh:mm:ss, para não restar dúvida entre dia e mês.',
+      evNota:'Tudo aqui é opcional e nada é enviado a lugar nenhum: vira a primeira página do documento e o nome do arquivo, e mais nada. Nada sobrevive ao fechar a aba. As horas saem no formato AAAA-MM-DD hh:mm:ss com o fuso ao lado, para não restar dúvida entre dia e mês nem entre países.',
       pEvid:'Identificação', pStart:'Início da gravação', pHash:'SHA-256 da imagem',
       pWhen:'Hora', pStep:'Passo {0} de {1}',
       pHashH:'Impressões digitais das imagens',
@@ -663,6 +720,13 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       mTutH:'Um passo por bloco, com a sua anotação como título e a fala como descrição. Sem hora de relógio.',
       mAtaH:'Grade compacta de telas e a transcrição completa no fim — o formato de quem vai ler o que foi dito.',
       falaNota:'Usar a fala como anotação',
+      evPerfil:'O sistema e quem executou ficam guardados enquanto esta aba estiver aberta, para você não redigitar a cada caso. Fechou a aba, some.',
+      evLimpar:'Esquecer',
+      ampliar:'Ampliar este passo', fecharBtn:'Fechar',
+      lenteHora:'Hora deste passo',
+      lenteHoraNota:'Corrigir aqui reancora a gravação inteira: o início passa a ser esta hora menos o tempo decorrido até este passo.',
+      lenteFala:'O que foi dito neste trecho',
+      lenteAnt:'← Anterior', lenteProx:'Próximo →', lentePos:'Quadro {0} de {1}',
       falaNotaN:'{0} anotação(ões) preenchidas com o que foi falado. Corrija o que não estiver certo.',
       falaNota0:'Nada a preencher: ou não há transcrição com tempo, ou as anotações já estão escritas.',
       prEv:'Este documento é a evidência de um teste. Identificação declarada: {0}.',
@@ -737,6 +801,9 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       demoHasAudio:'The example is narrated: the transcript comes pre-filled, but you can clear it and click "Transcribe automatically" to watch speech recognition work.',
       mark:'Mark this moment',
       recBtn:'Record the screen', recStopBtn:'Stop recording',
+      recPauseBtn:'Pause', recResumeBtn:'Resume', recMarkBtn:'Mark this step',
+      recPausado:'PAUSED —', recMarcado:'step marked.',
+      pipPausado:'Paused: nothing being kept.',
       micNegado:'The browser blocked the microphone for this site. Click the padlock next to the address, allow the microphone and record again.',
       micSemAparelho:'I could not find any microphone connected to this computer.',
       micOcupado:'The microphone is busy in another program — close the meeting or recorder that is using it.',
@@ -875,7 +942,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       evR0:'— not stated', evR1:'Passed', evR2:'Failed', evR3:'Blocked',
       evEstimado:'The start time was estimated from the video file date — check it before using this as evidence.',
       evHash:'Include the SHA-256 fingerprint of each image',
-      evNota:'Everything here is optional and lives only in this tab’s memory: nothing is stored between visits or sent anywhere. It becomes the first page of the document and the file name. Times are written as YYYY-MM-DD hh:mm:ss, so day and month are never ambiguous.',
+      evNota:'Everything here is optional and nothing is sent anywhere: it becomes the first page of the document and the file name, and nothing else. Nothing survives closing the tab. Times are written as YYYY-MM-DD hh:mm:ss with the offset beside them, so neither day-and-month nor time zone is ever ambiguous.',
       pEvid:'Identification', pStart:'Recording started at', pHash:'Image SHA-256',
       pWhen:'Time', pStep:'Step {0} of {1}',
       pHashH:'Image fingerprints',
@@ -889,6 +956,13 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       mTutH:'One step per block, with your note as the heading and the speech as the description. No clock times.',
       mAtaH:'A compact grid of screens plus the full transcript at the end — the format for someone who will read what was said.',
       falaNota:'Use the speech as the note',
+      evPerfil:'The system and who ran it are kept while this tab stays open, so you do not retype them for every case. Close the tab and they are gone.',
+      evLimpar:'Forget',
+      ampliar:'Enlarge this step', fecharBtn:'Close',
+      lenteHora:'Time of this step',
+      lenteHoraNota:'Correcting this re-anchors the whole recording: the start becomes this time minus the elapsed time up to this step.',
+      lenteFala:'What was said in this interval',
+      lenteAnt:'← Previous', lenteProx:'Next →', lentePos:'Frame {0} of {1}',
       falaNotaN:'{0} note(s) filled in from what was said. Correct anything that is off.',
       falaNota0:'Nothing to fill: either there is no timestamped transcript, or the notes are already written.',
       prEv:'This document is the evidence for a test. Stated identification: {0}.',
@@ -961,6 +1035,9 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       driveNoScope:'Google denegó el acceso a este archivo. Elige el archivo por el selector y no por un acceso directo.',
       driveBlocked:'El navegador bloqueó la ventana de Google. Permite las ventanas emergentes para este sitio e inténtalo de nuevo.',
       recBtn:'Grabar la pantalla', recStopBtn:'Detener grabación',
+      recPauseBtn:'Pausar', recResumeBtn:'Reanudar', recMarkBtn:'Marcar este paso',
+      recPausado:'EN PAUSA —', recMarcado:'paso marcado.',
+      pipPausado:'En pausa: no se guarda nada.',
       micNegado:'El navegador bloqueó el micrófono para este sitio. Pulsa el candado junto a la dirección, permite el micrófono y graba de nuevo.',
       micSemAparelho:'No encontré ningún micrófono conectado a este ordenador.',
       micOcupado:'El micrófono está ocupado por otro programa — cierra la reunión o la grabadora que lo está usando.',
@@ -1101,7 +1178,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       evR0:'— sin indicar', evR1:'Aprobado', evR2:'Fallido', evR3:'Bloqueado',
       evEstimado:'La hora de inicio se estimó por la fecha del archivo de vídeo — compruébala antes de usarla como evidencia.',
       evHash:'Incluir la huella SHA-256 de cada imagen',
-      evNota:'Todo esto es opcional y vive solo en la memoria de esta pestaña: nada se guarda entre visitas ni se envía a ningún sitio. Se convierte en la primera página del documento y en el nombre del archivo. Las horas salen como AAAA-MM-DD hh:mm:ss, para que no haya duda entre día y mes.',
+      evNota:'Todo esto es opcional y nada se envía a ningún sitio: se convierte en la primera página del documento y en el nombre del archivo, y nada más. Nada sobrevive al cierre de la pestaña. Las horas salen como AAAA-MM-DD hh:mm:ss con el huso al lado, para que no haya duda ni entre día y mes ni entre países.',
       pEvid:'Identificación', pStart:'Inicio de la grabación', pHash:'SHA-256 de la imagen',
       pWhen:'Hora', pStep:'Paso {0} de {1}',
       pHashH:'Huellas digitales de las imágenes',
@@ -1115,6 +1192,13 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       mTutH:'Un paso por bloque, con tu anotación como título y el habla como descripción. Sin hora de reloj.',
       mAtaH:'Rejilla compacta de pantallas y la transcripción completa al final — el formato para quien va a leer lo que se dijo.',
       falaNota:'Usar el habla como anotación',
+      evPerfil:'El sistema y quién lo ejecutó se guardan mientras esta pestaña siga abierta, para no reescribirlos en cada caso. Cierras la pestaña y desaparecen.',
+      evLimpar:'Olvidar',
+      ampliar:'Ampliar este paso', fecharBtn:'Cerrar',
+      lenteHora:'Hora de este paso',
+      lenteHoraNota:'Corregirla aquí reancla la grabación entera: el inicio pasa a ser esta hora menos el tiempo transcurrido hasta este paso.',
+      lenteFala:'Lo que se dijo en este tramo',
+      lenteAnt:'← Anterior', lenteProx:'Siguiente →', lentePos:'Fotograma {0} de {1}',
       falaNotaN:'{0} anotación(es) rellenadas con lo que se dijo. Corrige lo que no encaje.',
       falaNota0:'Nada que rellenar: o no hay transcripción con tiempos, o las anotaciones ya están escritas.',
       prEv:'Este documento es la evidencia de una prueba. Identificación declarada: {0}.',
@@ -1453,11 +1537,25 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     return d.getFullYear() + '-' + pad2(d.getMonth()+1) + '-' + pad2(d.getDate()) + ' ' +
            pad2(d.getHours()) + ':' + pad2(d.getMinutes()) + ':' + pad2(d.getSeconds());
   };
+  /* O deslocamento do fuso, escrito como o resto do mundo escreve: UTC-03:00.
+     Sem ele, "12:58:45" num documento que atravessa times em países diferentes é
+     ambíguo — e evidência ambígua vira pergunta na auditoria. Calculado sobre a
+     data da gravação, e não sobre hoje, porque horário de verão muda o valor. */
+  function fuso(ms){
+    const off = -new Date(ms == null ? Date.now() : ms).getTimezoneOffset();
+    const a = Math.abs(off);
+    return 'UTC' + (off < 0 ? '-' : '+') + pad2((a / 60) | 0) + ':' + pad2(a % 60);
+  }
   /* Data e hora do frame; string vazia quando não se sabe o início — ou quando o
      modelo de saída não pede hora, como no passo a passo. */
+  /* Arredondar para o segundo, e não truncar: o instante de um frame tem casas
+     decimais, e `dataHora` corta os milissegundos. Sem o arredondamento, corrigir
+     a hora de um passo para 15:00:00 devolvia 14:59:59 na tela — um segundo de
+     erro que, numa evidência, é exatamente o tipo de coisa que gera pergunta. */
+  const msDoFrame = (base, tSeg) => base + Math.round(tSeg) * 1000;
   function horaDe(tSeg){
     const base = origemReal();
-    return (base == null || !querHora()) ? '' : dataHora(base + tSeg * 1000);
+    return (base == null || !querHora()) ? '' : dataHora(msDoFrame(base, tSeg));
   }
   /* Só a hora, para a legenda da miniatura, onde a data não cabe. */
   function horaCurta(tSeg){
@@ -1925,7 +2023,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
 
      Onde a API não existe (Firefox, Safari) tudo segue igual, sem a janelinha. */
   let pipWin = null, pipTexto = null, pipRelogio = null, pipFrames = null;
-  let pipVm = null, pipVs = null, pipCalar = null;
+  let pipVm = null, pipVs = null, pipCalar = null, pipMarcar = null, pipPausa = null;
+  /* Pausa e marcação vivem fora do bloco da gravação porque a janelinha e o
+     cartão precisam alcançá-las, e as duas são recriadas a cada captura. */
+  let pausado = false, alternarPausa = null, marcarAgora = null;
 
   const PIP_CSS = `
     *{box-sizing:border-box;margin:0}
@@ -1964,6 +2065,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       '<div class="top"><span class="dot"></span><span class="rel" id="rel">0:00</span></div>' +
       '<div class="txt" id="txt"></div>' +
       '<div class="vus"><div class="vb"><i id="vm"></i></div><div class="vb"><i id="vs"></i></div></div>' +
+      '<button id="marcar" class="sec" disabled></button>' +
+      '<button id="pausa" class="sec" disabled></button>' +
       '<button id="calar" class="sec hide"></button>' +
       '<button id="stop" disabled></button>' +
       '<div class="pe">' + t('pipNoVideo') + '</div>';
@@ -1974,8 +2077,15 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     pipVm      = d.getElementById('vm');
     pipVs      = d.getElementById('vs');
     pipCalar   = d.getElementById('calar');
+    pipMarcar  = d.getElementById('marcar');
+    pipPausa   = d.getElementById('pausa');
     pipFrames.textContent = t('pipStop');
     pipFrames.onclick = () => { if (pararLive) pararLive(); };
+    /* Marcar e pausar moram aqui porque é aqui que a pessoa está: durante a
+       gravação a aba do produto está atrás da tela compartilhada. Os dois
+       chamam a mesma função do cartão — nenhuma lógica duplicada. */
+    pipMarcar.onclick = () => { if (marcarAgora) marcarAgora(); };
+    pipPausa.onclick  = () => { if (alternarPausa) alternarPausa(); };
     /* O botão da janelinha não duplica lógica: chama o mesmo `alternarMic` da
        aba, e o rótulo dos dois é repintado pela mesma função. */
     pipCalar.onclick = () => { if (alternarMic) alternarMic(); };
@@ -1985,6 +2095,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
        destruir uma reunião de uma hora. O botão da aba continua valendo. */
     pipWin.addEventListener('pagehide', () => {
       pipWin = null; pipRelogio = pipTexto = pipFrames = pipVm = pipVs = pipCalar = null;
+      pipMarcar = pipPausa = null;
     });
   }
 
@@ -1994,7 +2105,16 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       if (pipFrames) pipFrames.disabled = false;
       controleMic();
       if (pipRelogio) pipRelogio.textContent = fmt(Math.floor(dados.seg));
-      if (pipTexto) pipTexto.textContent = t('pipFrames', dados.frames);
+      if (pipTexto) pipTexto.textContent = pausado ? t('pipPausado') : t('pipFrames', dados.frames);
+      if (pipMarcar) { pipMarcar.disabled = pausado; pipMarcar.textContent = t('recMarkBtn'); }
+      if (pipPausa)  {
+        pipPausa.disabled = false;
+        pipPausa.textContent = pausado ? t('recResumeBtn') : t('recPauseBtn');
+        pipPausa.classList.toggle('off', pausado);
+      }
+      // o ponto vermelho para de pulsar na pausa: é o sinal que se lê sem ler
+      if (pipWin) { const dot = pipWin.document.querySelector('.dot');
+                    if (dot) dot.style.animationPlayState = pausado ? 'paused' : 'running'; }
       return;
     }
     const rotulos = { prep: 'pipPrep', mic: 'pipMic', modelo: 'pipModelo', tela: 'pipTela' };
@@ -2322,6 +2442,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       $('recMsg').innerHTML = classe ? `<span class="${classe}">${msg}</span>` : msg;
       $('rec').disabled = false;
       abrindoCaptura = false;
+      $('recPause').classList.add('hide'); $('recMark').classList.add('hide');
+      pausado = false; alternarPausa = null; marcarAgora = null;
     };
 
     /* ================= a ordem daqui para baixo é o conserto =================
@@ -2609,7 +2731,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     pintarRecMsg = () => {
       const extra = (performance.now() < avisoAte && avisoCurto) ? avisoCurto : '';
       const alerta = [...avisos, extra].filter(Boolean).join(' ');
-      $('recMsg').innerHTML = t('recRun', fmt(Math.floor(agora()))) +
+      $('recMsg').innerHTML = (pausado ? `<span class="err">${t('recPausado')}</span> ` : '') +
+        t('recRun', fmt(Math.floor(agora()))) +
         (alerta ? ` <span class="err">${alerta}</span>` : '');
     };
     pintarRecMsg();
@@ -2622,18 +2745,56 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
        fechamento, no parar. */
     let prevSig = null;
 
-    const capturar = (forcar) => {
+    const capturar = (forcar, marcado) => {
       if (!video.videoWidth) return false;
       if (frames.length >= maxf) return false;
+      // pausado, o laço automático não guarda nada; marcar à mão continua valendo
+      if (pausado && !forcar) return false;
       let sig;
       try { sig = signature(); } catch (e) { return false; }
       if (!liveW) { liveW = video.videoWidth; liveH = video.videoHeight; showMeta(); }
       if (!forcar && prevSig !== null && diff(prevSig, sig) < thr) return false;
-      frames.push({ t: agora(), img: snap(900, q), keep: true, sig });
+      frames.push({ t: agora(), img: snap(900, q), keep: true, sig, manual: !!marcado });
       prevSig = sig;
       atualizarLive();
       return true;
     };
+
+    /* ---- pausar e marcar ----
+       A pausa NÃO para o relógio, de propósito. O tempo decorrido continua
+       correndo porque a hora de parede tem que continuar verdadeira: se o teste
+       esperou trinta minutos por um job, a evidência precisa mostrar trinta
+       minutos. O que a pausa faz é não guardar tela e não transcrever a espera —
+       que é o que enche o documento de quadros iguais e de conversa paralela.
+
+       Ao retomar, uma captura forçada: depois de uma espera a tela mudou, e é
+       exatamente esse estado que a pessoa esperava documentar. */
+    pausado = false;
+    marcarAgora = () => {
+      if (!liveOn) return;
+      if (capturar(true, true)) {
+        avisoCurto = t('recMarcado');
+        avisoAte = performance.now() + 2600;
+        pintarRecMsg();
+      }
+    };
+    alternarPausa = () => {
+      if (!liveOn) return;
+      pausado = !pausado;
+      if (!pausado) capturar(true, false);
+      $('recPause').textContent = t(pausado ? 'recResumeBtn' : 'recPauseBtn');
+      $('recPause').classList.toggle('ghost', !pausado);
+      $('recMark').disabled = pausado;
+      controle('gravando', { seg: agora(), frames: frames.length });
+      pintarRecMsg();
+      atualizarLive();
+    };
+    $('recPause').onclick = alternarPausa;
+    $('recMark').onclick  = marcarAgora;
+    $('recPause').classList.remove('hide'); $('recPause').classList.add('ghost');
+    $('recMark').classList.remove('hide');
+    $('recPause').textContent = t('recPauseBtn');
+    $('recMark').disabled = false;
 
     /* O `videoWidth` não fica pronto no mesmo instante do play(). Em vez de
        chutar um atraso, tenta por até dois segundos e desiste em silêncio. */
@@ -2653,7 +2814,13 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     relogio = setInterval(() => {
       pintarRecMsg();
       controle('gravando', { seg: agora(), frames: frames.length });
-      canais.forEach(c => { while (c.segundos() >= JANELA_S) enfileirar(c, c.tirar(JANELA_S)); });
+      /* Pausado, o áudio acumulado é jogado fora em vez de entrar na fila: a
+         conversa da espera não pode aparecer na transcrição de um passo, e a
+         janela precisa continuar alinhada com o relógio quando voltar. */
+      canais.forEach(c => {
+        if (pausado) { if (c.segundos() > 0) c.tirar(c.segundos()); return; }
+        while (c.segundos() >= JANELA_S) enfileirar(c, c.tirar(JANELA_S));
+      });
     }, 1000);
 
     atualizarLive();
@@ -2707,6 +2874,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       frames.sort((a, b) => a.t - b.t);
       $('rec').classList.remove('hide');
       $('recStop').classList.add('hide'); $('recStop').disabled = false;
+      // os controles da gravação somem junto com ela, e a pausa não pode
+      // sobreviver para envenenar a próxima captura
+      $('recPause').classList.add('hide'); $('recMark').classList.add('hide');
+      pausado = false; alternarPausa = null; marcarAgora = null;
       trabalhando(false);
       abrindoCaptura = false;
 
@@ -3410,7 +3581,19 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       };
       toque.onclick = alterna;
 
+      /* Ampliar. Fica fora do <button> que descarta: dois botões irmãos, cada um
+         com um trabalho, em vez de um clique que precisa adivinhar a intenção. */
+      const lupa = document.createElement('button');
+      lupa.type = 'button';
+      lupa.className = 'lupa';
+      lupa.dataset.i = i;
+      lupa.textContent = '⤢';
+      lupa.title = t('ampliar');
+      lupa.setAttribute('aria-label', t('ampliar') + ' — ' + (n ? t('stepN', n) : fmt(f.t)));
+      lupa.onclick = e => { e.stopPropagation(); abrirLente(i); };
+
       fig.appendChild(toque);
+      fig.appendChild(lupa);
       fig.appendChild(cap);
       fig.appendChild(campo);
       box.appendChild(fig);
@@ -3471,10 +3654,49 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   };
 
   /* ================= dados da evidência =================
-     Tudo opcional, tudo em memória. Nada daqui vai para localStorage: a política
-     de privacidade promete que não existe identificador que sobreviva à visita,
-     e "Executado por: Fulano" guardado no navegador seria exatamente isso. */
+     Tudo opcional. Nada daqui vai para `localStorage`: a política promete que não
+     existe identificador que sobreviva à VISITA, e "Executado por: Fulano"
+     guardado lá seria exatamente isso.
+
+     `sessionStorage` é outra coisa, e por isso é usado: ele morre junto com a
+     aba. Quem faz cinco casos numa tarde não redigita o próprio nome cinco
+     vezes, e a promessa continua verdadeira ao pé da letra — fechou a aba,
+     acabou. Só o que descreve a PESSOA é guardado; caso de teste, chamado e
+     resultado descrevem o CASO, e um chamado velho reaparecendo no caso
+     seguinte seria um defeito de evidência, não uma comodidade. */
   const evCampos = ['evCaso','evSis','evQuem','evChamado','evRes','evInicio'];
+  const PERFIL_CHAVE = '__MARCA__.perfil';
+  const PERFIL_CAMPOS = ['evSis','evQuem'];
+
+  function pintarPerfil(){
+    const tem = PERFIL_CAMPOS.some(id => ($(id).value || '').trim());
+    $('evLimpar').classList.toggle('hide', !tem);
+  }
+  function gravarPerfil(){
+    try {
+      const p = {};
+      PERFIL_CAMPOS.forEach(id => { const v = ($(id).value || '').trim(); if (v) p[id] = v; });
+      if (Object.keys(p).length) sessionStorage.setItem(PERFIL_CHAVE, JSON.stringify(p));
+      else sessionStorage.removeItem(PERFIL_CHAVE);
+    } catch (e) {}     // aba anônima com armazenamento bloqueado: segue sem perfil
+    pintarPerfil();
+  }
+  function lerPerfil(){
+    try {
+      const cru = sessionStorage.getItem(PERFIL_CHAVE);
+      if (cru) {
+        const p = JSON.parse(cru);
+        PERFIL_CAMPOS.forEach(id => { if (p[id]) $(id).value = p[id]; });
+      }
+    } catch (e) {}
+    pintarPerfil();
+  }
+  $('evLimpar').onclick = () => {
+    PERFIL_CAMPOS.forEach(id => { $(id).value = ''; });
+    try { sessionStorage.removeItem(PERFIL_CHAVE); } catch (e) {}
+    pintarPerfil();
+    if (frames.length) buildPrompt();
+  };
   function evDados(){
     const v = id => ($(id).value || '').trim();
     const res = $('evRes').value;
@@ -3487,7 +3709,9 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       [t('evRes'),     res ? t({ ok:'evR1', nok:'evR2', blq:'evR3' }[res]) : ''],
       // a hora só entra na identificação se o modelo pedir hora: num passo a
       // passo, "Início da gravação" é dado que ninguém foi buscar
-      [t('pStart'),    (origemReal() == null || !querHora()) ? '' : dataHora(origemReal())]
+      // a hora vem com o fuso colado: é uma coluna a menos para o auditor perguntar
+      [t('pStart'),    (origemReal() == null || !querHora())
+                         ? '' : dataHora(origemReal()) + '  (' + fuso(origemReal()) + ')']
     ].filter(([, val]) => val);
     return {
       caso: v('evCaso'), sistema: v('evSis'), quem: v('evQuem'),
@@ -3503,7 +3727,9 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   evCampos.forEach(id => $(id).addEventListener('input', () => {
     if (id === 'evInicio') { $('evEst').classList.add('hide'); render(); }
     else if (frames.length) buildPrompt();
+    if (PERFIL_CAMPOS.includes(id)) gravarPerfil();
   }));
+  lerPerfil();
 
   /* ---- impressão digital das imagens ----
      SHA-256 do JPEG exatamente como ele sai no documento. Prova que o arquivo
@@ -3519,6 +3745,133 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       } catch (e) { f.hash = ''; }
     }
   }
+
+  /* ================= a lente de um passo =================
+     A miniatura de 158 px serve para escolher, não para conferir. Aqui o passo
+     abre grande e ganha as três correções que antes obrigavam a sair do cartão:
+     a anotação, a hora, e o que o reconhecimento de voz entendeu errado. */
+  let lenteI = -1, lenteVoltar = null;
+
+  /* As falas que caem na janela deste passo, com o índice que elas ocupam na
+     transcrição — é por ele que a correção volta para o texto de origem. */
+  function cuesDoFrame(i){
+    const { cues } = parseTranscript($('tr').value);
+    if (!cues.length || !frames[i]) return [];
+    const kept = frames.filter(f => f.keep);
+    const k = kept.indexOf(frames[i]);
+    const dur = duracaoTotal();
+    const a = frames[i].t;
+    // frame descartado não tem "próximo mantido": a janela vai até o frame
+    // seguinte da lista, para a lente ainda mostrar alguma coisa
+    const b = k >= 0
+      ? (k + 1 < kept.length ? kept[k+1].t : dur + 0.001)
+      : (i + 1 < frames.length ? frames[i+1].t : dur + 0.001);
+    return cues.map((c, idx) => ({ ...c, idx })).filter(c => c.b > a && c.a < b);
+  }
+
+  /* Corrigir uma fala reescreve a transcrição de origem, e não uma cópia: se o
+     documento dissesse ME21N e a transcrição completa continuasse dizendo
+     "emê vinte e um ene", a evidência se contradiria dentro do próprio PDF. */
+  function trocarFala(idx, texto){
+    const { cues } = parseTranscript($('tr').value);
+    if (!cues[idx]) return;
+    cues[idx].t = texto.replace(/\s+/g, ' ').trim();
+    $('tr').value = 'WEBVTT\n\n' + cues.filter(c => c.t).map(c =>
+        `${tempoLegenda(c.a,false)} --> ${tempoLegenda(c.b,false)}\n${c.t}`).join('\n\n') + '\n';
+    refreshTr();
+    counts();
+  }
+
+  function pintarLente(){
+    const f = frames[lenteI]; if (!f) return;
+    const kept = frames.filter(x => x.keep);
+    const k = kept.indexOf(f);
+    const n = k >= 0 ? k + 1 : 0;
+    $('lenteImg').src = f.img.url;
+    $('lenteTit').textContent = (n ? t('stepN', n) : t('offTag')) + '  ·  ' + fmt(f.t) +
+                                (horaDe(f.t) ? '  ·  ' + horaDe(f.t) : '');
+    $('lentePos').textContent = t('lentePos', lenteI + 1, frames.length);
+    $('lenteNota').value = f.nota || '';
+
+    // a hora só aparece quando o modelo pede hora e o início é conhecido
+    const temHora = querHora() && origemReal() != null;
+    $('lenteHoraCx').classList.toggle('hide', !temHora);
+    if (temHora) {
+      const d = new Date(msDoFrame(origemReal(), f.t));
+      $('lenteHora').value = d.getFullYear() + '-' + pad2(d.getMonth()+1) + '-' + pad2(d.getDate()) +
+        'T' + pad2(d.getHours()) + ':' + pad2(d.getMinutes()) + ':' + pad2(d.getSeconds());
+    }
+
+    const falas = cuesDoFrame(lenteI);
+    $('lenteFalaCx').classList.toggle('hide', !falas.length);
+    const cx = $('lenteFalas'); cx.innerHTML = '';
+    falas.forEach(c => {
+      const linha = document.createElement('div');
+      linha.className = 'lenteFala';
+      const hora = document.createElement('span');
+      hora.textContent = fmt(c.a);
+      const campo = document.createElement('input');
+      campo.type = 'text';
+      campo.value = c.t;
+      campo.dataset.idx = c.idx;
+      campo.setAttribute('aria-label', t('lenteFala') + ' ' + fmt(c.a));
+      // no change, e não no input: reescrever a transcrição a cada tecla
+      // reconstruiria a lista embaixo do cursor
+      campo.onchange = () => { trocarFala(c.idx, campo.value); pintarLente(); };
+      linha.appendChild(hora); linha.appendChild(campo);
+      cx.appendChild(linha);
+    });
+
+    $('lentePrev').disabled = lenteI <= 0;
+    $('lenteProx').disabled = lenteI >= frames.length - 1;
+  }
+
+  function abrirLente(i){
+    if (!frames[i]) return;
+    lenteI = i;
+    lenteVoltar = document.activeElement;
+    $('lente').classList.remove('hide');
+    pintarLente();
+    $('lenteFechar').focus();
+  }
+  function fecharLente(){
+    $('lente').classList.add('hide');
+    lenteI = -1;
+    // o foco volta para a miniatura de onde saiu; sem isso o teclado recomeça no topo
+    if (lenteVoltar && document.contains(lenteVoltar)) lenteVoltar.focus();
+    else { const b = $('thumbs').querySelector('.lupa'); if (b) b.focus(); }
+    lenteVoltar = null;
+  }
+  $('lenteFechar').onclick = fecharLente;
+  $('lente').onclick = e => { if (e.target === $('lente')) fecharLente(); };
+  $('lentePrev').onclick = () => { if (lenteI > 0) { lenteI--; pintarLente(); } };
+  $('lenteProx').onclick = () => { if (lenteI < frames.length - 1) { lenteI++; pintarLente(); } };
+  $('lenteNota').oninput = () => {
+    if (frames[lenteI]) { frames[lenteI].nota = $('lenteNota').value; }
+  };
+  /* Corrigir a hora de UM passo reancora a gravação inteira: o instante zero
+     passa a ser essa hora menos o tempo decorrido até aqui. É o que a pessoa
+     quer — ela sabe quando o passo 3 aconteceu, não quando apertou gravar — e
+     mantém uma fonte de verdade só, em vez de horas soltas por frame. */
+  $('lenteHora').onchange = () => {
+    const v = $('lenteHora').value;
+    if (!v || !frames[lenteI]) return;
+    const ms = new Date(v).getTime();
+    if (isNaN(ms)) return;
+    porOrigem(ms - Math.round(frames[lenteI].t) * 1000, false);
+    const i = lenteI;
+    render();
+    lenteI = i;
+    pintarLente();
+  };
+  document.addEventListener('keydown', e => {
+    if ($('lente').classList.contains('hide')) return;
+    if (e.key === 'Escape') { e.preventDefault(); fecharLente(); }
+    // setas só quando o foco não está num campo de texto
+    if (e.target.tagName === 'INPUT') return;
+    if (e.key === 'ArrowLeft')  { e.preventDefault(); $('lentePrev').click(); }
+    if (e.key === 'ArrowRight') { e.preventDefault(); $('lenteProx').click(); }
+  });
 
   /* ---- a fala vira o rascunho da anotação ----
      É a jogada que nenhum concorrente pode copiar sem trocar de arquitetura:
@@ -3705,7 +4058,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
         passo: i + 1,
         segundos: +f.t.toFixed(2),
         tempo: fmt(f.t),
-        horaDeRelogio: ev.inicio == null ? null : new Date(ev.inicio + f.t * 1000).toISOString(),
+        horaDeRelogio: ev.inicio == null ? null : new Date(msDoFrame(ev.inicio, f.t)).toISOString(),
         anotacao: f.nota || '',
         largura: f.img.w,
         altura: f.img.h,

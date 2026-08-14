@@ -99,9 +99,11 @@
     A biblioteca de PDF é servida do nosso próprio domínio, e não de CDN.</p>
 
     <h2>O que fica no seu navegador</h2>
-    <p>Nada do seu conteúdo é guardado entre visitas. Os dados de identificação da evidência — caso de teste,
-    quem executou, sistema — ficam só na memória da aba e somem quando você a fecha; foi uma decisão
-    deliberada, e é por isso que você redigita ao voltar.</p>
+    <p>Nada do seu conteúdo é guardado entre visitas. Dos dados de identificação da evidência, só
+    <b>sistema</b> e <b>executado por</b> ficam em <code>sessionStorage</code> — que o navegador apaga ao
+    fechar a aba — para não redigitar a cada caso; há um botão que apaga na hora. Caso de teste, chamado,
+    resultado e as anotações não são guardados nem enquanto a aba vive. Nada disso é um cookie, nada disso é
+    lido por nós, e nada disso sai do seu dispositivo.</p>
     <p>A única coisa que persiste é o <b>modelo de transcrição</b>, guardado pelo próprio navegador em cache
     para não ser baixado de novo. Fica no seu dispositivo, sob seu controle, e some ao limpar os dados de
     navegação. Não usamos <i>cookies</i> — nem próprios, nem de terceiros.</p>

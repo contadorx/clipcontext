@@ -133,9 +133,14 @@
     descargarlo de nuevo. Ese archivo queda en tu dispositivo, bajo tu control, y se elimina al borrar los
     datos de navegación. Nosotros no tenemos acceso a él.</p>
     <p>Los campos de identificación de evidencia que ofrece la herramienta — caso de prueba, sistema, quién
-    la ejecutó, ticket, resultado — y las anotaciones por paso existen <b>solo en la memoria de la pestaña</b>
-    mientras está abierta: no se graban en el navegador, no sobreviven al cierre de la pestaña y no se envían
-    a ningún sitio. Solo aparecen en los documentos que tú mismo generas y descargas.</p>
+    la ejecutó, ticket, resultado — y las anotaciones por paso <b>nunca se envían a ningún sitio</b>. Solo
+    aparecen en los documentos que tú mismo generas y descargas.</p>
+    <p>Dos de ellos, <b>sistema</b> y <b>ejecutado por</b>, se guardan en <code>sessionStorage</code>
+    mientras la pestaña siga abierta, para que no los reescribas en cada caso de prueba. El
+    <code>sessionStorage</code> lo borra el propio navegador al cerrar la pestaña: <b>no sobrevive entre
+    visitas</b>, no es una cookie, nosotros no lo leemos y no sale de tu dispositivo. Hay un botón
+    &ldquo;Olvidar&rdquo; junto a los campos que lo borra al instante. Los demás campos y las anotaciones no
+    se guardan ni mientras vive la pestaña — desaparecen al recargar.</p>
 
     <h2>Cookies</h2>
     <p>No utilizamos cookies propias ni de terceros — ni para rastreo, ni para publicidad, ni para
