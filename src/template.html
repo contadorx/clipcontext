@@ -79,15 +79,52 @@
   .bar{height:6px;background:var(--line);border-radius:99px;overflow:hidden;margin:16px 0 8px}
   .bar>i{display:block;height:100%;width:0;background:var(--accent);transition:width .15s}
   .status{font-size:13px;color:var(--muted);min-height:19px}
-  .thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(135px,1fr));gap:9px;margin-top:16px}
-  .thumbs figure{margin:0;cursor:pointer;position:relative;border-radius:6px;overflow:hidden;
-                 border:2px solid transparent;transition:.12s}
+  .thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:9px;margin-top:16px}
+  .thumbs figure{margin:0;position:relative;border-radius:6px;overflow:hidden;
+                 border:2px solid transparent;transition:.12s;background:var(--bg)}
   .thumbs figure:hover{border-color:var(--accent)}
   .thumbs figure.off{opacity:.32}
   .thumbs figure.off::after{content:attr(data-off);position:absolute;inset:auto 0 0 0;background:var(--err);
-        color:#fff;font-size:10px;text-align:center;padding:2px;font-weight:600}
+        color:#fff;font-size:10px;text-align:center;padding:2px;font-weight:600;pointer-events:none}
+  /* A miniatura virou duas coisas: um botão (descartar) e um campo de texto (a
+     anotação do passo). Um <input> dentro de algo com role=button seria
+     controle interativo dentro de controle interativo — o leitor de tela
+     anuncia um e engole o outro. Então o botão é botão de verdade e o campo é
+     irmão dele. `all:unset` desfaz o estilo global de button sem cascata. */
+  .thumbs .toque{all:unset;display:block;width:100%;cursor:pointer}
+  .thumbs .toque:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
   .thumbs img{width:100%;display:block}
-  .thumbs figcaption{font:11px ui-monospace,Menlo,monospace;color:var(--muted);padding:3px 0 5px;text-align:center}
+  .thumbs figcaption{font:11px ui-monospace,Menlo,monospace;color:var(--muted);padding:4px 0 5px;text-align:center}
+  .thumbs figcaption .passo{display:block;color:var(--ink);font-weight:700;font-size:11.5px}
+  .thumbs figcaption .rel{display:block;font-size:10px;margin-top:1px}
+  .thumbs .nota{display:block;width:100%;box-sizing:border-box;border:0;border-top:1px solid var(--line);
+        background:var(--panel);color:var(--ink);font:12px/1.35 inherit;padding:6px 7px;cursor:text}
+  .thumbs .nota::placeholder{color:var(--muted);opacity:.8}
+  .thumbs .nota:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+  .thumbs figure.off .nota{pointer-events:none}
+  /* O modelo de saída fica no topo do cartão 4 e com cara de decisão, não de
+     ajuste fino: é ele que define o documento inteiro. */
+  .modelo{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin:-4px 0 16px}
+  .modelo label{font-size:13.5px;font-weight:600;color:var(--ink)}
+  .modelo select{width:auto;min-width:220px;padding:8px 10px;border:1px solid var(--line);
+        border-radius:7px;background:var(--bg);color:var(--ink);font:inherit;font-size:14px}
+  .modelo .status{flex-basis:100%;margin:0}
+  /* Bloco da evidência: fechado por padrão, porque metade das pessoas não está
+     documentando teste — mas o resumo diz o que tem dentro, senão ninguém abre. */
+  .ev{border:1px solid var(--line);border-radius:8px;margin:16px 0 0;background:var(--bg)}
+  .ev>summary{cursor:pointer;padding:11px 14px;font-size:13.5px;font-weight:600;list-style:none}
+  .ev>summary::-webkit-details-marker{display:none}
+  .ev>summary::before{content:'▸';margin-right:8px;color:var(--muted)}
+  .ev[open]>summary::before{content:'▾'}
+  .ev>summary .sub{font-weight:400;color:var(--muted)}
+  .evGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(205px,1fr));gap:12px;padding:2px 14px 12px}
+  .evGrid label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px;font-weight:500}
+  .evGrid input,.evGrid select{width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid var(--line);
+        border-radius:7px;background:var(--panel);color:var(--ink);font:inherit;font-size:13.5px}
+  .evPe{padding:0 14px 12px;margin:0;font-size:12px;color:var(--muted);line-height:1.5}
+  .evPe+.evPe{padding-top:0}
+  .evPe label{cursor:pointer;color:var(--ink)}
+  .evPe input[type=checkbox]{accent-color:var(--accent);margin-right:7px;vertical-align:-1px}
   .hide{display:none}
   .note{font-size:13px;color:var(--muted);border-left:3px solid var(--line);padding:2px 0 2px 12px;margin-top:14px}
   .note b{color:var(--warn)}
@@ -331,6 +368,22 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     <h2><span class="step">4</span><span data-i18n="s4"></span></h2>
     <p class="lockHint hide" id="hintPrev"></p>
     <div class="dobra"><div>
+
+    <!-- O modelo de saída: uma escolha só, logo no começo, que acerta o layout
+         do documento, o pedido para a IA, o nome do arquivo e se os dados da
+         evidência aparecem. Sem ele a pessoa tinha que achar quatro controles
+         espalhados e adivinhar a combinação certa. -->
+    <div class="modelo">
+      <label for="modelo" data-i18n="modelH"></label>
+      <select id="modelo">
+        <option value="ia" data-i18n="mIa"></option>
+        <option value="evidencia" data-i18n="mEv"></option>
+        <option value="tutorial" data-i18n="mTut"></option>
+        <option value="ata" data-i18n="mAta"></option>
+      </select>
+      <p class="status" id="modeloDica"></p>
+    </div>
+
     <div class="row">
       <span class="tag"><span data-i18n="tKeep"></span> <b id="nKeep">0</b></span>
       <span class="tag"><span data-i18n="tOff"></span> <b id="nOff">0</b></span>
@@ -340,9 +393,40 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       <button class="ghost sm" id="mute" data-i18n="dropQuiet"></button>
       <button class="ghost sm" id="ocr" data-i18n="ocrBtn"></button>
       <button class="ghost sm hide" id="ocrStop" data-i18n="stopBtn"></button>
+      <button class="ghost sm" id="falaNota" data-i18n="falaNota"></button>
     </div>
     <p class="status" style="margin:10px 0 0" data-i18n="clickHint"></p>
     <div class="thumbs" id="thumbs"></div>
+
+    <!-- Identificação da evidência. Tudo opcional e tudo em memória: nada
+         daqui é guardado no navegador nem sai do computador — só entra no
+         documento que você mesmo baixa. -->
+    <details class="ev" id="evBox">
+      <summary><span data-i18n="evH"></span> <span class="sub" data-i18n="evHsub"></span></summary>
+      <div class="evGrid">
+        <div><label for="evCaso" data-i18n="evCaso"></label>
+             <input id="evCaso" type="text" autocomplete="off" maxlength="120"></div>
+        <div><label for="evSis" data-i18n="evSis"></label>
+             <input id="evSis" type="text" autocomplete="off" maxlength="80"></div>
+        <div><label for="evQuem" data-i18n="evQuem"></label>
+             <input id="evQuem" type="text" autocomplete="off" maxlength="80"></div>
+        <div><label for="evChamado" data-i18n="evChamado"></label>
+             <input id="evChamado" type="text" autocomplete="off" maxlength="60"></div>
+        <div><label for="evRes" data-i18n="evRes"></label>
+             <select id="evRes">
+               <option value="" data-i18n="evR0"></option>
+               <option value="ok" data-i18n="evR1"></option>
+               <option value="nok" data-i18n="evR2"></option>
+               <option value="blq" data-i18n="evR3"></option>
+             </select></div>
+        <div><label for="evInicio" data-i18n="evIni"></label>
+             <input id="evInicio" type="datetime-local" step="1"></div>
+      </div>
+      <p class="evPe hide" id="evEst" data-i18n="evEstimado"></p>
+      <p class="evPe"><label><input type="checkbox" id="evHash"><span data-i18n="evHash"></span></label></p>
+      <p class="evPe" data-i18n="evNota"></p>
+    </details>
+
     <div class="row" style="margin-top:18px">
       <button id="go" data-i18n="pdfBtn"></button>
       <select id="layout" style="width:auto">
@@ -368,6 +452,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
         <option value="resumo" data-i18n="gSum"></option>
         <option value="passos" data-i18n="gSteps"></option>
         <option value="ata" data-i18n="gMinutes"></option>
+        <option value="evidencia" data-i18n="gEvid"></option>
         <option value="revisao" data-i18n="gReview"></option>
         <option value="livre" data-i18n="gFree"></option>
       </select>
@@ -556,7 +641,34 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       quietAudio:'Analisando o áudio para achar os trechos sem fala…',
       quietNone:'Não há transcrição nem áudio utilizável para identificar silêncio.',
       pIndex:'Índice do vídeo', pIndexSub:'Cada linha é um instante em que a imagem mudou.', tKeep:'mantidos', tOff:'descartados', offTag:'descartado', keepAll:'Manter todos', dropDup:'Descartar repetidos',
-      clickHint:'Clique em qualquer frame para descartar ou trazer de volta.',
+      clickHint:'Clique na imagem para descartar ou trazer de volta. O campo abaixo dela é a sua anotação daquele passo.',
+      stepN:'Passo {0}', notaPh:'anotação do passo',
+      evH:'Dados da evidência', evHsub:'— opcional: caso de teste, sistema, quem executou, hora de início',
+      evCaso:'Caso de teste', evSis:'Sistema / mandante', evQuem:'Executado por',
+      evChamado:'Chamado / mudança', evRes:'Resultado', evIni:'Início da gravação',
+      evR0:'— não informado', evR1:'Passou', evR2:'Falhou', evR3:'Bloqueado',
+      evEstimado:'A hora de início foi estimada pela data do arquivo de vídeo — confira antes de usar como evidência.',
+      evHash:'Incluir a impressão digital SHA-256 de cada imagem',
+      evNota:'Tudo aqui é opcional e fica só na memória desta aba: nada é guardado entre visitas nem enviado a lugar nenhum. Vira a primeira página do documento e o nome do arquivo. As horas saem no formato AAAA-MM-DD hh:mm:ss, para não restar dúvida entre dia e mês.',
+      pEvid:'Identificação', pStart:'Início da gravação', pHash:'SHA-256 da imagem',
+      pWhen:'Hora', pStep:'Passo {0} de {1}',
+      pHashH:'Impressões digitais das imagens',
+      pHashSub:'SHA-256 de cada imagem como ela está neste documento. Serve para conferir depois que a imagem não foi trocada; não é assinatura eletrônica e não atesta conformidade com norma nenhuma.',
+      pNoteRel:'A hora de relógio de cada imagem é o início informado da gravação somado ao tempo decorrido. O documento registra o que foi capturado; a trilha de aprovação continua no seu sistema de mudanças.',
+      gEvid:'Montar a ata de evidência de teste',
+      modelH:'Modelo de saída',
+      mIa:'Contexto para IA', mEv:'Evidência de teste', mTut:'Passo a passo', mAta:'Ata de reunião',
+      mIaH:'Sequência com a fala de cada trecho, para o modelo entender o vídeo inteiro. É o documento genérico.',
+      mEvH:'Um passo por bloco, com a hora de relógio e a sua anotação acima da imagem. Preencha os dados da evidência mais abaixo.',
+      mTutH:'Um passo por bloco, com a sua anotação como título e a fala como descrição. Sem hora de relógio.',
+      mAtaH:'Grade compacta de telas e a transcrição completa no fim — o formato de quem vai ler o que foi dito.',
+      falaNota:'Usar a fala como anotação',
+      falaNotaN:'{0} anotação(ões) preenchidas com o que foi falado. Corrija o que não estiver certo.',
+      falaNota0:'Nada a preencher: ou não há transcrição com tempo, ou as anotações já estão escritas.',
+      prEv:'Este documento é a evidência de um teste. Identificação declarada: {0}.',
+      prStep:'Cada imagem é um passo numerado, na ordem em que aconteceu.',
+      prClock:'Junto do número do passo está a hora de relógio em que a tela foi capturada, no formato AAAA-MM-DD hh:mm:ss.',
+      prNota:'A linha imediatamente acima de uma imagem, quando existe, foi escrita à mão por quem executou o teste: é a expectativa ou a observação daquele passo, e não uma descrição do que a imagem mostra.',
       dedupN:'{0} frame(s) quase idênticos foram descartados.',
       dedup0:'Nenhum frame repetido encontrado — todos mostram algo diferente.',
       pdfBtn:'Gerar PDF', layAuto:'Layout automático',
@@ -580,7 +692,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
         resumo:'Resuma o conteúdo em ordem cronológica, destacando os pontos principais e o que muda na tela ao longo do vídeo.',
         passos:'Transforme o conteúdo em um passo a passo numerado. Para cada passo, informe o instante correspondente e descreva o que aparece na tela naquele momento.',
         ata:'Produza uma ata: assuntos tratados, decisões tomadas, pendências com o respectivo responsável quando mencionado, e próximos passos. Marque o instante de cada decisão.',
-        revisao:'Aponte inconsistências entre o que é dito e o que aparece na tela, erros visíveis, e informações que ficaram faltando ou ambíguas.'
+        revisao:'Aponte inconsistências entre o que é dito e o que aparece na tela, erros visíveis, e informações que ficaram faltando ou ambíguas.',
+        evidencia:'Redija a ata de evidência deste teste. Para cada passo, escreva em uma linha o que foi feito, e em outra o resultado observado na tela, sempre citando o número do passo e a hora de relógio. Use a anotação do passo como a expectativa quando ela existir e diga se o observado bate com ela. Termine com um parecer curto: passou, falhou ou bloqueado, e por quê. Não invente aprovador, número de chamado nem nada que não esteja no documento.'
       },
       pr1:'O PDF em anexo foi gerado a partir do vídeo "{0}"', pr1b:', com duração de {0}.',
       pr2:'Ele contém {0} imagens capturadas do vídeo, cada uma identificada pelo instante exato em que foi capturada (no formato mm:ss, contado a partir do início).',
@@ -754,7 +867,34 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       quietAudio:'Analysing the audio to find the silent stretches…',
       quietNone:'There is no transcript and no usable audio to detect silence.',
       pIndex:'Video index', pIndexSub:'Each line is a moment where the image changed.', tKeep:'kept', tOff:'discarded', offTag:'discarded', keepAll:'Keep all', dropDup:'Discard duplicates',
-      clickHint:'Click any frame to discard it or bring it back.',
+      clickHint:'Click the image to discard it or bring it back. The field below it is your note for that step.',
+      stepN:'Step {0}', notaPh:'note for this step',
+      evH:'Evidence details', evHsub:'— optional: test case, system, who ran it, start time',
+      evCaso:'Test case', evSis:'System / client', evQuem:'Executed by',
+      evChamado:'Ticket / change', evRes:'Result', evIni:'Recording started at',
+      evR0:'— not stated', evR1:'Passed', evR2:'Failed', evR3:'Blocked',
+      evEstimado:'The start time was estimated from the video file date — check it before using this as evidence.',
+      evHash:'Include the SHA-256 fingerprint of each image',
+      evNota:'Everything here is optional and lives only in this tab’s memory: nothing is stored between visits or sent anywhere. It becomes the first page of the document and the file name. Times are written as YYYY-MM-DD hh:mm:ss, so day and month are never ambiguous.',
+      pEvid:'Identification', pStart:'Recording started at', pHash:'Image SHA-256',
+      pWhen:'Time', pStep:'Step {0} of {1}',
+      pHashH:'Image fingerprints',
+      pHashSub:'SHA-256 of each image exactly as it appears in this document. It lets you check later that an image was not swapped; it is not an electronic signature and does not certify compliance with any standard.',
+      pNoteRel:'The clock time of each image is the stated recording start plus the elapsed time. This document records what was captured; the approval trail stays in your change management system.',
+      gEvid:'Write the test evidence record',
+      modelH:'Output model',
+      mIa:'Context for AI', mEv:'Test evidence', mTut:'Step-by-step guide', mAta:'Meeting minutes',
+      mIaH:'A sequence with the speech for each interval, so the model understands the whole video. This is the general-purpose document.',
+      mEvH:'One step per block, with the clock time and your note above the image. Fill in the evidence details further down.',
+      mTutH:'One step per block, with your note as the heading and the speech as the description. No clock times.',
+      mAtaH:'A compact grid of screens plus the full transcript at the end — the format for someone who will read what was said.',
+      falaNota:'Use the speech as the note',
+      falaNotaN:'{0} note(s) filled in from what was said. Correct anything that is off.',
+      falaNota0:'Nothing to fill: either there is no timestamped transcript, or the notes are already written.',
+      prEv:'This document is the evidence for a test. Stated identification: {0}.',
+      prStep:'Each image is a numbered step, in the order it happened.',
+      prClock:'Next to the step number is the clock time at which the screen was captured, as YYYY-MM-DD hh:mm:ss.',
+      prNota:'The line immediately above an image, where present, was written by hand by whoever ran the test: it is the expected result or the observation for that step, not a description of what the image shows.',
       dedupN:'{0} near-identical frame(s) were discarded.',
       dedup0:'No repeated frames found — every one shows something different.',
       pdfBtn:'Generate PDF', layAuto:'Automatic layout',
@@ -778,7 +918,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
         resumo:'Summarise the content in chronological order, highlighting the main points and what changes on screen over the course of the video.',
         passos:'Turn the content into numbered step-by-step instructions. For each step, give the corresponding timestamp and describe what is on screen at that moment.',
         ata:'Write meeting minutes: topics covered, decisions made, open items with their owner when mentioned, and next steps. Mark the timestamp of each decision.',
-        revisao:'Point out inconsistencies between what is said and what is shown, visible errors, and information that is missing or ambiguous.'
+        revisao:'Point out inconsistencies between what is said and what is shown, visible errors, and information that is missing or ambiguous.',
+        evidencia:'Write the evidence record for this test. For each step, write one line for what was done and one for the result observed on screen, always citing the step number and the clock time. Where a step note exists, treat it as the expected result and say whether what was observed matches it. Close with a short verdict — passed, failed or blocked — and why. Do not invent an approver, a ticket number, or anything that is not in the document.'
       },
       pr1:'The attached PDF was generated from the video "{0}"', pr1b:', which is {0} long.',
       pr2:'It contains {0} images captured from the video, each labelled with the exact moment it was captured (in mm:ss, counted from the start).',
@@ -952,7 +1093,34 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       quietAudio:'Analizando el audio para encontrar los tramos en silencio…',
       quietNone:'No hay transcripción ni audio utilizable para detectar el silencio.',
       pIndex:'Índice del vídeo', pIndexSub:'Cada línea es un instante en que la imagen cambió.', tKeep:'conservados', tOff:'descartados', offTag:'descartado', keepAll:'Conservar todos', dropDup:'Descartar repetidos',
-      clickHint:'Haz clic en cualquier fotograma para descartarlo o recuperarlo.',
+      clickHint:'Haz clic en la imagen para descartarla o recuperarla. El campo de abajo es tu anotación de ese paso.',
+      stepN:'Paso {0}', notaPh:'anotación del paso',
+      evH:'Datos de la evidencia', evHsub:'— opcional: caso de prueba, sistema, quién lo ejecutó, hora de inicio',
+      evCaso:'Caso de prueba', evSis:'Sistema / mandante', evQuem:'Ejecutado por',
+      evChamado:'Ticket / cambio', evRes:'Resultado', evIni:'Inicio de la grabación',
+      evR0:'— sin indicar', evR1:'Aprobado', evR2:'Fallido', evR3:'Bloqueado',
+      evEstimado:'La hora de inicio se estimó por la fecha del archivo de vídeo — compruébala antes de usarla como evidencia.',
+      evHash:'Incluir la huella SHA-256 de cada imagen',
+      evNota:'Todo esto es opcional y vive solo en la memoria de esta pestaña: nada se guarda entre visitas ni se envía a ningún sitio. Se convierte en la primera página del documento y en el nombre del archivo. Las horas salen como AAAA-MM-DD hh:mm:ss, para que no haya duda entre día y mes.',
+      pEvid:'Identificación', pStart:'Inicio de la grabación', pHash:'SHA-256 de la imagen',
+      pWhen:'Hora', pStep:'Paso {0} de {1}',
+      pHashH:'Huellas digitales de las imágenes',
+      pHashSub:'SHA-256 de cada imagen tal como aparece en este documento. Sirve para comprobar después que la imagen no fue sustituida; no es firma electrónica ni certifica conformidad con ninguna norma.',
+      pNoteRel:'La hora de reloj de cada imagen es el inicio indicado de la grabación más el tiempo transcurrido. El documento registra lo que se capturó; la traza de aprobación sigue en tu sistema de cambios.',
+      gEvid:'Redactar el acta de evidencia de prueba',
+      modelH:'Modelo de salida',
+      mIa:'Contexto para IA', mEv:'Evidencia de prueba', mTut:'Paso a paso', mAta:'Acta de reunión',
+      mIaH:'Secuencia con el habla de cada tramo, para que el modelo entienda el vídeo entero. Es el documento genérico.',
+      mEvH:'Un paso por bloque, con la hora de reloj y tu anotación encima de la imagen. Rellena los datos de la evidencia más abajo.',
+      mTutH:'Un paso por bloque, con tu anotación como título y el habla como descripción. Sin hora de reloj.',
+      mAtaH:'Rejilla compacta de pantallas y la transcripción completa al final — el formato para quien va a leer lo que se dijo.',
+      falaNota:'Usar el habla como anotación',
+      falaNotaN:'{0} anotación(es) rellenadas con lo que se dijo. Corrige lo que no encaje.',
+      falaNota0:'Nada que rellenar: o no hay transcripción con tiempos, o las anotaciones ya están escritas.',
+      prEv:'Este documento es la evidencia de una prueba. Identificación declarada: {0}.',
+      prStep:'Cada imagen es un paso numerado, en el orden en que ocurrió.',
+      prClock:'Junto al número de paso está la hora de reloj en que se capturó la pantalla, con el formato AAAA-MM-DD hh:mm:ss.',
+      prNota:'La línea inmediatamente encima de una imagen, cuando existe, la escribió a mano quien ejecutó la prueba: es la expectativa o la observación de ese paso, no una descripción de lo que muestra la imagen.',
       dedupN:'{0} fotograma(s) casi idénticos fueron descartados.',
       dedup0:'No se encontraron fotogramas repetidos — todos muestran algo distinto.',
       pdfBtn:'Generar PDF', layAuto:'Diseño automático',
@@ -976,7 +1144,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
         resumo:'Resume el contenido en orden cronológico, destacando los puntos principales y lo que cambia en pantalla a lo largo del vídeo.',
         passos:'Convierte el contenido en instrucciones numeradas paso a paso. Para cada paso, indica el instante correspondiente y describe lo que aparece en pantalla en ese momento.',
         ata:'Redacta un acta: temas tratados, decisiones tomadas, pendientes con su responsable cuando se mencione, y próximos pasos. Marca el instante de cada decisión.',
-        revisao:'Señala inconsistencias entre lo que se dice y lo que se muestra, errores visibles, e información que falte o resulte ambigua.'
+        revisao:'Señala inconsistencias entre lo que se dice y lo que se muestra, errores visibles, e información que falte o resulte ambigua.',
+        evidencia:'Redacta el acta de evidencia de esta prueba. Para cada paso, escribe una línea con lo que se hizo y otra con el resultado observado en pantalla, citando siempre el número de paso y la hora de reloj. Cuando exista anotación del paso, trátala como el resultado esperado y di si lo observado coincide. Cierra con un veredicto corto — aprobado, fallido o bloqueado — y por qué. No inventes aprobador, número de ticket ni nada que no esté en el documento.'
       },
       pr1:'El PDF adjunto se generó a partir del vídeo "{0}"', pr1b:', con una duración de {0}.',
       pr2:'Contiene {0} imágenes capturadas del vídeo, cada una identificada con el instante exacto en que fue capturada (en formato mm:ss, contado desde el inicio).',
@@ -1111,8 +1280,11 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     $('tr').placeholder = t('trPh');
     $('goalFree').placeholder = t('freePh');
     $('sensV').textContent = t('sens')[+$('sens').value];
+    dicaModelo();
     if (!frames.length) $('promptOut').textContent = t('promptPh');
-    else buildPrompt();
+    // render() e não só buildPrompt(): "Passo 3" e o texto de apoio da anotação
+    // ficariam no idioma anterior dentro de cada miniatura
+    else render();
     if (currentFile) showMeta();
     $('uiLang').value = LANG;
     $('lang').value = LANG;   // idioma da transcrição acompanha o da interface
@@ -1248,6 +1420,51 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     return (h ? h+':' : '') + pad2(m) + ':' + pad2(s);
   }
 
+  /* ================= hora de relógio =================
+     `00:14` é tempo decorrido, e auditoria não aceita tempo decorrido: uma
+     evidência precisa dizer o dia e a hora. O instante zero é anotado quando a
+     gravação começa; para um arquivo que já existia ele é estimado pela data do
+     arquivo e a pessoa corrige à mão. O campo é a fonte da verdade justamente
+     para que a correção valha — e quando ele está vazio nada de hora aparece,
+     porque inventar um horário numa evidência é pior do que não ter nenhum.
+
+     Formato ISO (AAAA-MM-DD hh:mm:ss) nos três idiomas de propósito: um
+     documento que circula entre times não pode deixar dúvida se 08/09 é agosto
+     ou setembro. */
+  function origemReal(){
+    const v = $('evInicio') && $('evInicio').value;
+    if (!v) return null;
+    const ms = new Date(v).getTime();
+    return isNaN(ms) ? null : ms;
+  }
+  function porOrigem(ms, estimada){
+    const campo = $('evInicio');
+    if (!campo) return;
+    if (ms == null || isNaN(ms)) { campo.value = ''; }
+    else {
+      const d = new Date(ms);
+      campo.value = d.getFullYear() + '-' + pad2(d.getMonth()+1) + '-' + pad2(d.getDate()) +
+                    'T' + pad2(d.getHours()) + ':' + pad2(d.getMinutes()) + ':' + pad2(d.getSeconds());
+    }
+    $('evEst').classList.toggle('hide', !(estimada && campo.value));
+  }
+  const dataHora = ms => {
+    const d = new Date(ms);
+    return d.getFullYear() + '-' + pad2(d.getMonth()+1) + '-' + pad2(d.getDate()) + ' ' +
+           pad2(d.getHours()) + ':' + pad2(d.getMinutes()) + ':' + pad2(d.getSeconds());
+  };
+  /* Data e hora do frame; string vazia quando não se sabe o início — ou quando o
+     modelo de saída não pede hora, como no passo a passo. */
+  function horaDe(tSeg){
+    const base = origemReal();
+    return (base == null || !querHora()) ? '' : dataHora(base + tSeg * 1000);
+  }
+  /* Só a hora, para a legenda da miniatura, onde a data não cabe. */
+  function horaCurta(tSeg){
+    const c = horaDe(tSeg);
+    return c ? c.slice(11) : '';
+  }
+
   /* ================= vídeo ================= */
   $('drop').onclick = () => { if (!capturando()) $('file').click(); };
   /* O <input type=file> está escondido por CSS e a zona de arraste era uma div:
@@ -1275,6 +1492,12 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     video.src = URL.createObjectURL(f);
     video.onloadedmetadata = async () => {
       await corrigirDuracao();
+      /* Estimativa do relógio de parede: a data de modificação do arquivo é o
+         momento em que a gravação terminou de ser escrita, então o começo é ela
+         menos a duração. É um palpite bom o bastante para poupar digitação e
+         ruim o bastante para ser anunciado como palpite — daí o aviso ao lado. */
+      porOrigem(f.lastModified && isFinite(video.duration)
+                  ? f.lastModified - video.duration * 1000 : null, true);
       $('playerBox').classList.remove('hide');
       $('auto').disabled = false;
       st('');
@@ -2373,6 +2596,9 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     const t0 = performance.now();
     liveAgora = () => (performance.now() - t0) / 1000;
     const agora = liveAgora;
+    /* O relógio de parede do instante zero. É a única hora que o produto pode
+       afirmar sem estimar nada, e é ela que transforma a saída em evidência. */
+    porOrigem(Date.now(), false);
 
     liveOn = true;
     abrindoCaptura = false;
@@ -3114,31 +3340,89 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
 
   /* ================= revisão ================= */
   function render(){
-    const box = $('thumbs'); box.innerHTML = '';
+    const box = $('thumbs');
+    /* render() agora se chama a si mesmo ao descartar um quadro; sem guardar o
+       foco, o teclado voltaria para o começo da página a cada clique. E isto
+       tem que vir ANTES de esvaziar o box: depois do innerHTML='' o elemento
+       focado já saiu do documento e o activeElement virou o <body>. */
+    const foco = document.activeElement;
+    const eraNota = !!(foco && foco.classList && foco.classList.contains('nota'));
+    const eraToque = !!(foco && foco.classList && foco.classList.contains('toque'));
+    const focado = (eraNota || eraToque) ? +foco.dataset.i : -1;
+
+    box.innerHTML = '';
+    /* A numeração é sobre os frames MANTIDOS, não sobre a lista: quem descarta
+       o terceiro quadro espera que o quarto vire o passo 3. O documento e a
+       miniatura precisam contar a mesma história, senão a evidência mente. */
+    let passo = 0;
+
     frames.forEach((f, i) => {
       const fig = document.createElement('figure');
       if (!f.keep) fig.className = 'off';
       /* A etiqueta vem daqui, e não do CSS: escrita como content:'descartado'
          ela escapava do i18n e aparecia em português para quem usa em inglês. */
       fig.dataset.off = t('offTag');
-      fig.innerHTML = `<img src="${f.img.url}"><figcaption>${fmt(f.t)}${f.manual ? ' *' : ''}</figcaption>`;
-      /* Descartar frame era exclusivo de mouse. <figure> não é focável por
-         natureza, então o papel e a ordem de foco vão à mão. */
-      fig.setAttribute('role', 'button');
-      fig.setAttribute('tabindex', '0');
+
+      /* Descartar frame era exclusivo de mouse. Agora é um <button> de verdade
+         — e precisa ser, porque o campo de anotação mora ao lado dele: um
+         input dentro de role=button é controle dentro de controle. */
+      const toque = document.createElement('button');
+      toque.type = 'button';
+      toque.className = 'toque';
+      toque.dataset.i = i;
+      toque.innerHTML = `<img src="${f.img.url}" alt="">`;
+      toque.setAttribute('aria-pressed', String(!f.keep));
+
+      const n = f.keep ? ++passo : 0;
+      const hora = horaCurta(f.t);
+      // <figcaption> tem que ser filho direto de <figure>: dentro do botão o
+      // documento fica inválido e o leitor de tela lê a legenda como rótulo
+      const cap = document.createElement('figcaption');
+      // o descartado mantém a linha, com um traço no lugar do número: sem ela a
+      // miniatura encolhe e a fileira desalinha a cada descarte
+      cap.innerHTML =
+        `<span class="passo">${n ? t('stepN', n) : '—'}</span>` +
+        `<span class="rel">${fmt(f.t)}${f.manual ? ' *' : ''}` +
+        (hora ? ' · ' + hora : '') + `</span>`;
+      toque.setAttribute('aria-label',
+        (n ? t('stepN', n) + ' · ' : '') + fmt(f.t) + ' — ' + t('offTag'));
+
+      /* A anotação do passo: é ela que separa evidência de pilha de telas.
+         Fica na miniatura porque é aqui que a pessoa já está olhando quadro a
+         quadro — pedir isso numa tela à parte seria pedir duas vezes. */
+      const campo = document.createElement('input');
+      campo.type = 'text';
+      campo.className = 'nota';
+      campo.autocomplete = 'off';
+      campo.maxLength = 180;
+      campo.dataset.i = i;
+      campo.placeholder = t('notaPh');
+      campo.value = f.nota || '';
+      campo.setAttribute('aria-label', t('notaPh') + ' ' + (n ? t('stepN', n) : fmt(f.t)));
+      campo.oninput = () => { frames[i].nota = campo.value; };
+      // sem isto, digitar espaço na anotação descartaria o frame
+      campo.onclick = e => e.stopPropagation();
+      campo.onkeydown = e => e.stopPropagation();
+
       const alterna = () => {
         frames[i].keep = !frames[i].keep;
-        fig.classList.toggle('off', !frames[i].keep);
-        fig.setAttribute('aria-pressed', String(!frames[i].keep));
-        counts();
+        render();          // renumera todo mundo: o passo 3 tem que virar o 2
       };
-      fig.setAttribute('aria-pressed', String(!f.keep));
-      fig.onclick = alterna;
-      fig.onkeydown = e => {
-        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); alterna(); }
-      };
+      toque.onclick = alterna;
+
+      fig.appendChild(toque);
+      fig.appendChild(cap);
+      fig.appendChild(campo);
       box.appendChild(fig);
     });
+
+    if (focado >= 0) {
+      const volta = box.querySelector((eraNota ? '.nota' : '.toque') + `[data-i="${focado}"]`);
+      if (volta) {
+        volta.focus();
+        if (eraNota) volta.setSelectionRange(volta.value.length, volta.value.length);
+      }
+    }
     counts();
   }
 
@@ -3150,8 +3434,117 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     const bytes = keep.reduce((s,f) => s + f.img.url.length * 0.75, 0) + 40000;
     $('size').textContent = (bytes/1048576).toFixed(1);
     $('go').disabled = $('docx').disabled = $('zip').disabled = !keep.length;
+    // o botão da fala só faz sentido com transcrição marcada no tempo
+    $('falaNota').disabled = !keep.length || !parseTranscript($('tr').value).cues.length;
     if (frames.length) buildPrompt();
   }
+
+  /* ================= modelo de saída =================
+     O produto tem mais de um caso de uso, e cada um quer um documento diferente.
+     Antes isso estava espalhado: o layout num seletor, o objetivo do prompt em
+     outro, os dados da evidência num terceiro — e a pessoa tinha que adivinhar a
+     combinação. Agora é uma escolha só, no começo do cartão, e ela acerta os
+     quatro, inclusive o prefixo do nome do arquivo, que é a primeira coisa que
+     alguém vê quando aquilo chega anexado num chamado. */
+  const MODELOS = {
+    ia:        { layout:'auto', ev:false, goal:'resumo',    prefixo:'analise',       dica:'mIaH'  },
+    evidencia: { layout:'full', ev:true,  goal:'evidencia', prefixo:'evidencia',     dica:'mEvH'  },
+    tutorial:  { layout:'full', ev:false, goal:'passos',    prefixo:'passo-a-passo', dica:'mTutH' },
+    ata:       { layout:'grid', ev:false, goal:'ata',       prefixo:'ata',           dica:'mAtaH' }
+  };
+  const modeloAtual = () => MODELOS[$('modelo').value] || MODELOS.ia;
+  /* Um tutorial não quer saber que dia era: hora de relógio é dado de evidência,
+     e no passo a passo ela só suja o título. */
+  const querHora = () => $('modelo').value !== 'tutorial';
+  const ehTutorial = () => $('modelo').value === 'tutorial';
+  const dicaModelo = () => { $('modeloDica').textContent = t(modeloAtual().dica); };
+
+  $('modelo').onchange = () => {
+    const m = modeloAtual();
+    $('layout').value = m.layout;
+    $('goal').value   = m.goal;
+    $('goalFree').classList.add('hide');   // o modelo já escolheu o objetivo
+    $('evBox').open   = m.ev;
+    dicaModelo();
+    if (frames.length) render();           // a legenda da miniatura muda com o modelo
+    else buildPrompt();
+  };
+
+  /* ================= dados da evidência =================
+     Tudo opcional, tudo em memória. Nada daqui vai para localStorage: a política
+     de privacidade promete que não existe identificador que sobreviva à visita,
+     e "Executado por: Fulano" guardado no navegador seria exatamente isso. */
+  const evCampos = ['evCaso','evSis','evQuem','evChamado','evRes','evInicio'];
+  function evDados(){
+    const v = id => ($(id).value || '').trim();
+    const res = $('evRes').value;
+    /* O caso de teste não entra nesta lista: ele vira o título do documento, e
+       repeti-lo na primeira linha é ruído logo no que alguém lê primeiro. */
+    const linhas = [
+      [t('evSis'),     v('evSis')],
+      [t('evQuem'),    v('evQuem')],
+      [t('evChamado'), v('evChamado')],
+      [t('evRes'),     res ? t({ ok:'evR1', nok:'evR2', blq:'evR3' }[res]) : ''],
+      // a hora só entra na identificação se o modelo pedir hora: num passo a
+      // passo, "Início da gravação" é dado que ninguém foi buscar
+      [t('pStart'),    (origemReal() == null || !querHora()) ? '' : dataHora(origemReal())]
+    ].filter(([, val]) => val);
+    return {
+      caso: v('evCaso'), sistema: v('evSis'), quem: v('evQuem'),
+      chamado: v('evChamado'), resultado: res, inicio: origemReal(),
+      horaVisivel: origemReal() != null && querHora(),
+      hash: $('evHash').checked,
+      linhas,                       // o que entra na primeira página do documento
+      // o zip não tem título onde pendurar o caso de teste, então lá ele volta
+      linhasCompletas: (v('evCaso') ? [[t('evCaso'), v('evCaso')]] : []).concat(linhas),
+      algum: linhas.length > 0 || !!v('evCaso')
+    };
+  }
+  evCampos.forEach(id => $(id).addEventListener('input', () => {
+    if (id === 'evInicio') { $('evEst').classList.add('hide'); render(); }
+    else if (frames.length) buildPrompt();
+  }));
+
+  /* ---- impressão digital das imagens ----
+     SHA-256 do JPEG exatamente como ele sai no documento. Prova que o arquivo
+     não foi editado depois; NÃO prova conformidade com 21 CFR Part 11, SOX ou
+     CSV, e o produto não diz em lugar nenhum que prova. */
+  async function calcularHashes(kept){
+    if (!$('evHash').checked || !(crypto.subtle && crypto.subtle.digest)) return;
+    for (const f of kept) {
+      if (f.hash) continue;
+      try {
+        const d = await crypto.subtle.digest('SHA-256', bytesDaImagem(f.img.url));
+        f.hash = [...new Uint8Array(d)].map(b => pad2(b.toString(16))).join('');
+      } catch (e) { f.hash = ''; }
+    }
+  }
+
+  /* ---- a fala vira o rascunho da anotação ----
+     É a jogada que nenhum concorrente pode copiar sem trocar de arquitetura:
+     eles não escutam. A pessoa narra o teste em voz alta uma vez e o que ela
+     disse já chega escrito no campo que o auditor lê — em vez de sair só como
+     legenda embaixo da imagem, que é onde a fala morria antes.
+
+     Só preenche o que está vazio: sobrescrever o que alguém digitou seria
+     apagar trabalho, e um botão que apaga trabalho não se usa duas vezes. */
+  $('falaNota').onclick = () => {
+    const { cues } = parseTranscript($('tr').value);
+    const kept = frames.filter(f => f.keep);
+    const dur = duracaoTotal();
+    let n = 0;
+    kept.forEach((f, i) => {
+      if (f.nota) return;
+      const fala = falaDoFrame(kept, i, cues, dur, true).trim();
+      if (!fala) return;
+      f.nota = fala.length > 180
+        ? fala.slice(0, 179).replace(/\s\S*$/, '') + '…'
+        : fala;
+      n++;
+    });
+    render();
+    $('pdfStatus').textContent = n ? t('falaNotaN', n) : t('falaNota0');
+  };
 
   $('allOn').onclick = () => { frames.forEach(f => f.keep = true); render(); };
   $('dedup').onclick = () => {
@@ -3283,12 +3676,23 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   /* ================= exportar JSON =================
      Formato pensado para outro programa consumir: instantes, transcrição e as
      imagens embutidas em base64. É o mesmo conteúdo do PDF, legível por máquina. */
-  $('json').onclick = () => {
+  $('json').onclick = async () => {
     const kept = frames.filter(f => f.keep);
     if (!kept.length) return;
+    await calcularHashes(kept);
     const { cues, plain } = parseTranscript($('tr').value);
+    const ev = evDados();
     const dados = {
       gerador: '__MARCA__',
+      evidencia: ev.algum ? {
+        casoDeTeste: ev.caso || null,
+        sistema: ev.sistema || null,
+        executadoPor: ev.quem || null,
+        chamado: ev.chamado || null,
+        resultado: ev.resultado || null,
+        // ISO com fuso: quem consome o arquivo não precisa adivinhar o horário local
+        inicioDaGravacao: ev.inicio == null ? null : new Date(ev.inicio).toISOString()
+      } : null,
       video: {
         arquivo: fileName,
         duracaoSegundos: +duracaoTotal().toFixed(2),
@@ -3298,10 +3702,14 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       },
       frames: kept.map((f, i) => ({
         indice: i + 1,
+        passo: i + 1,
         segundos: +f.t.toFixed(2),
         tempo: fmt(f.t),
+        horaDeRelogio: ev.inicio == null ? null : new Date(ev.inicio + f.t * 1000).toISOString(),
+        anotacao: f.nota || '',
         largura: f.img.w,
         altura: f.img.h,
+        sha256: f.hash || null,
         textoNaTela: f.ocr || '',
         imagemBase64: f.img.url
       })),
@@ -3323,12 +3731,26 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       ? ($('goalFree').value.trim() || t('prFree'))
       : t('goals')[g];
 
+    /* O documento ganhou passo, hora de relógio e anotação. Se o prompt não
+       contar isso, o modelo trata a anotação como legenda e a hora como enfeite
+       — que é o mesmo erro que ele cometia com os instantes antes do pr4. */
+    const ev = evDados();
+    const temNota = keep.some(f => f.nota);
+    const extras = [];
+    if (ev.algum) extras.push(t('prEv', ev.linhas.map(([k, v]) => k + ': ' + v).join('; ')), '');
+    if (origemReal() != null || temNota) {
+      extras.push(t('prStep') +
+        (origemReal() != null ? ' ' + t('prClock') : '') +
+        (temNota ? ' ' + t('prNota') : ''), '');
+    }
+
     const linhas = [
       t('pr1', fileName || t('prNoName')) + (duracaoTotal() ? t('pr1b', fmt(duracaoTotal())) : '.'),
       '',
       t('pr2', keep.length) + (cues.length ? t('pr2cues') : t('pr2no')) +
         (keep.some(f => f.ocr) ? ' ' + t('pr2ocr') : ''),
       '',
+      ...extras,
       // captura ao vivo: sem esta linha o modelo não sabe o que os rótulos significam
       ...(liveCanais && liveCanais.length > 1 && cues.length ? [t('prSpk'), ''] : []),
       t('pr3'),
@@ -3472,7 +3894,21 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     setTimeout(() => URL.revokeObjectURL(a.href), 6000);
   }
 
-  const nomeBase = () => (fileName || 'walkstamp').replace(/\.[^.]+$/, '').replace(/\s+/g, '-');
+  /* O nome do arquivo é a primeira coisa que alguém vê ao anexar num chamado, e
+     "captura de tela.docx" é a pior forma possível de entregar uma evidência.
+     Quando há caso de teste, é ele que nomeia — com o chamado junto, se houver. */
+  const nomeBase = () => {
+    const ev = evDados();
+    const padrao = '__MARCA__'.toLowerCase();
+    const cru = [ev.caso, ev.chamado].filter(Boolean).join(' ') ||
+                (fileName || padrao).replace(/\.[^.]+$/, '');
+    return cru.normalize('NFD').replace(/[\u0300-\u036f]/g, '')  // acento trava anexo em sistema antigo
+              .replace(/[^\w .-]+/g, ' ').trim().replace(/\s+/g, '-').slice(0, 80) || padrao;
+  };
+  /* O prefixo vem do modelo de saída: `evidencia-UAT-4711.pdf` diz o que o
+     arquivo é antes de alguém abrir, e `analise-` num anexo de chamado não diz
+     nada. */
+  const nomeArquivo = () => modeloAtual().prefixo + '-' + nomeBase();
 
   /* ---- pareamento imagem/fala, o mesmo critério usado no PDF ---- */
   function falaDoFrame(kept, i, cues, dur, semPrefixo){
@@ -3493,12 +3929,28 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     // congelar no trabalho síncrono — que com 400 frames leva segundos
     await new Promise(r => setTimeout(r, 40));
     try {
+      await calcularHashes(kept);
+      const ev = evDados();
       const entradas = kept.map((f, i) => ({
         // ordem primeiro para o gerenciador de arquivos ordenar certo,
         // instante depois para saber de onde a imagem veio
         nome: String(i + 1).padStart(4, '0') + '-' + fmt(f.t).replace(/:/g, '-') + '.jpg',
         dados: () => bytesDaImagem(f.img.url)
       }));
+      /* Um índice de texto junto das imagens: sem ele, um zip de evidência é
+         uma pasta de JPEGs sem passo, sem hora e sem a anotação — exatamente o
+         que a pessoa estava tentando não entregar. Só entra quando há o que
+         contar, para não encher o pacote de quem só queria as figuras. */
+      if (ev.algum || kept.some(f => f.nota || f.hash)) {
+        const linhas = ev.linhasCompletas.map(([k, v]) => k + ': ' + v).concat(ev.algum ? [''] : []);
+        kept.forEach((f, i) => {
+          const hora = horaDe(f.t);
+          linhas.push([String(i + 1).padStart(4, '0') + '-' + fmt(f.t).replace(/:/g, '-') + '.jpg',
+                       t('stepN', i + 1), fmt(f.t), hora, f.nota || ''].filter(Boolean).join('\t'));
+          if (f.hash) linhas.push('\t' + t('pHash') + ': ' + f.hash);
+        });
+        entradas.unshift({ nome: 'indice.txt', dados: bytesDe(linhas.join('\r\n') + '\r\n') });
+      }
       baixarBlob(zipar(entradas), 'frames-' + nomeBase() + '.zip');
       medir('baixou_saida', { p_formato: 'zip' });
       $('pdfStatus').innerHTML = `<span class="ok">${t('zipDone', kept.length)}</span>`;
@@ -3585,9 +4037,20 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     const dur = duracaoTotal();
     const { cues, plain } = parseTranscript($('tr').value);
 
+    const ev = evDados();
+    const tut = ehTutorial();
+
     const corpo = [];
-    corpo.push(par(t('pTitle'), { b: true, sz: 40, depois: 80 }));
-    corpo.push(par(fileName || t('prNoName'), { sz: 22, cor: '5A5A5A', depois: 240 }));
+    corpo.push(par(ev.caso || t('pTitle'), { b: true, sz: 40, depois: 80 }));
+    corpo.push(par(fileName || t('prNoName'), { sz: 22, cor: '5A5A5A', depois: ev.algum ? 200 : 240 }));
+
+    /* A identificação vem antes dos dados técnicos: quem abre a evidência quer
+       saber de que teste ela é, não qual a resolução do vídeo. */
+    if (ev.algum) {
+      corpo.push(par(t('pEvid'), { b: true, sz: 24, antes: 60, depois: 60 }));
+      ev.linhas.forEach(([k, v]) => corpo.push(par(k + ': ' + v, { sz: 21, depois: 40 })));
+      corpo.push(par('', { sz: 10, depois: 120 }));
+    }
 
     [[t('pDur'), fmt(dur)],
      [t('pRes'), resolucao()],
@@ -3596,7 +4059,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      [t('pTr'), cues.length ? t('pTrCues', cues.length) : (plain ? t('pTrPlain') : t('pTrNone'))]
     ].forEach(([k, v]) => corpo.push(par(k + ': ' + v, { sz: 20, depois: 40 })));
 
-    corpo.push(par(t('pNote'), { sz: 17, cor: '8A8A8A', antes: 180, depois: 240 }));
+    corpo.push(par(t('pNote'), { sz: 17, cor: '8A8A8A', antes: 180, depois: ev.horaVisivel ? 40 : 240 }));
+    if (ev.horaVisivel) corpo.push(par(t('pNoteRel'), { sz: 17, cor: '8A8A8A', depois: 240 }));
 
     // índice: o mesmo mapa que abre o PDF
     if (kept.length > 2) {
@@ -3604,8 +4068,12 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       corpo.push(par(t('pIndexSub'), { sz: 17, cor: '8A8A8A', depois: 120 }));
       kept.forEach((f, i) => {
         const fala = cues.length ? falaDoFrame(kept, i, cues, dur, true) : '';
-        const resumo = fala.length > 96 ? fala.slice(0, 96).replace(/\s\S*$/, '') + '…' : fala;
-        corpo.push(par(fmt(f.t) + '   ' + (resumo || '—'), { sz: 18, depois: 20 }));
+        // a anotação do passo manda no índice: quem escreveu a expectativa quer
+        // ver a expectativa no sumário, não o começo da narração
+        const linha = f.nota ||
+          (fala.length > 96 ? fala.slice(0, 96).replace(/\s\S*$/, '') + '…' : fala);
+        corpo.push(par(t('stepN', i + 1) + '   ' + fmt(f.t) + '   ' + (linha || '—'),
+                       { sz: 18, depois: 20 }));
       });
     }
 
@@ -3619,9 +4087,17 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       rels.push(`<Relationship Id="${rid}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/${nome}"/>`);
 
       const { cx, cy } = medidaImagem(f.img);
-      corpo.push(par(fmt(f.t) + '   ·   ' + t('pFrameOf', i + 1, kept.length),
-                     { b: true, sz: 22, antes: 240, depois: 40 }));
+      const hora = horaDe(f.t);
+      /* No passo a passo a anotação é o título do passo; na evidência ela é a
+         expectativa e vem numa linha própria acima da imagem. Ver o comentário
+         equivalente no PDF. */
+      corpo.push(par(tut
+          ? t('stepN', i + 1) + (f.nota ? '  —  ' + f.nota : '')
+          : t('pStep', i + 1, kept.length) + '   ·   ' + fmt(f.t) + (hora ? '   ·   ' + hora : ''),
+        { b: true, sz: 22, antes: 240, depois: 40 }));
+      if (!tut && f.nota) corpo.push(par(f.nota, { sz: 21, cor: '1F2430', depois: 60 }));
       corpo.push(parImagem(rid, cx, cy, i + 1));
+      if (f.hash) corpo.push(par(t('pHash') + ': ' + f.hash, { sz: 13, cor: '9A9A9A', depois: 40 }));
       if (cues.length) {
         const fala = falaDoFrame(kept, i, cues, dur);
         corpo.push(par(fala || t('pNoSpeech'), { sz: 20, cor: fala ? '333333' : '9A9A9A', depois: 80 }));
@@ -3718,7 +4194,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     $('pdfStatus').textContent = t('pkgBuilding');
     await new Promise(r => setTimeout(r, 40));    // deixa a mensagem aparecer
     try {
-      baixarBlob(montarDocx(), 'analise-' + nomeBase() + '.docx');
+      await calcularHashes(kept);
+      baixarBlob(montarDocx(), nomeArquivo() + '.docx');
       medir('baixou_saida', { p_formato: 'docx' });
       $('pdfStatus').innerHTML = `<span class="ok">${t('docxDone', kept.length)}</span>`;
     } catch (e) {
@@ -3731,17 +4208,19 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     if (!kept.length) return;
     const dur = duracaoTotal();
     const { cues, plain } = parseTranscript($('tr').value);
+    const ev = evDados();
     let layout = $('layout').value;
     if (layout === 'auto') layout = cues.length ? 'full' : 'grid';
 
     $('go').disabled = true;
     $('pdfStatus').textContent = t('pdfBuilding');
     await new Promise(r => setTimeout(r, 40));
+    await calcularHashes(kept);
 
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({ unit:'mm', format:'a4', compress:true });
     const PW = 210, PH = 297, M = 15, CW = PW - M*2;
-    const base = nomeBase();      // usado no nome do arquivo baixado
+    const base = nomeArquivo();   // usado no nome do arquivo baixado
     let page = 0;
 
     /* A marca desenhada com primitivas, e não como imagem: são quatro
@@ -3797,26 +4276,38 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       doc.setTextColor(30);
     };
 
-    doc.setFont('helvetica','bold').setFontSize(20).text(t('pTitle'), M, 32);
+    /* O título passa a ser o caso de teste quando ele existe: é assim que a
+       evidência é procurada depois, e não por "Análise de vídeo". */
+    const titulo = doc.splitTextToSize(ev.caso || t('pTitle'), CW);
+    doc.setFont('helvetica','bold').setFontSize(20).text(titulo, M, 32);
+    let y = 32 + titulo.length * 8 + 2;
     doc.setFont('helvetica','normal').setFontSize(11).setTextColor(90);
-    doc.text(doc.splitTextToSize(fileName, CW), M, 42);
-    doc.setDrawColor(215).line(M, 52, PW - M, 52);
-    const info = [
+    doc.text(doc.splitTextToSize(fileName, CW), M, y);
+    y += 10;
+    doc.setDrawColor(215).line(M, y, PW - M, y);
+    y += 10;
+
+    // identificação primeiro, dados técnicos depois: quem abre a evidência
+    // quer saber de que teste ela é, não qual a resolução do vídeo
+    const info = ev.linhas.concat([
       [t('pDur'), fmt(dur)],
       [t('pRes'), resolucao()],
       [t('pSize'), fileSize ? (fileSize/1048576).toFixed(1) + ' MB' : t('pNoFile')],
       [t('pFrames'), String(kept.length)],
       [t('pTr'), cues.length ? t('pTrCues', cues.length)
                  : (plain ? t('pTrPlain') : t('pTrNone'))]
-    ];
-    let y = 62;
+    ]);
     info.forEach(([k,v]) => {
-      doc.setTextColor(130).setFontSize(10).text(k, M, y);
-      doc.setTextColor(30).setFont('helvetica','bold').text(v, M + 45, y);
-      doc.setFont('helvetica','normal'); y += 8;
+      doc.setTextColor(130).setFontSize(10).setFont('helvetica','normal').text(k, M, y);
+      doc.setTextColor(30).setFont('helvetica','bold');
+      const val = doc.splitTextToSize(String(v), CW - 45);
+      doc.text(val, M + 45, y);
+      doc.setFont('helvetica','normal'); y += 8 + (val.length - 1) * 5;
     });
     doc.setTextColor(150).setFontSize(8.5);
-    doc.text(doc.splitTextToSize(t('pNote'), CW), M, y + 8);
+    const rodapeNota = doc.splitTextToSize(
+      t('pNote') + (ev.horaVisivel ? ' ' + t('pNoteRel') : ''), CW);
+    doc.text(rodapeNota, M, y + 8);
     doc.setTextColor(30);
     foot();
 
@@ -3836,14 +4327,18 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
           const fala = cues.filter(c => c.b > f.t && c.a < nextT).map(c => c.t).join(' ');
           resumo = fala.length > 88 ? fala.slice(0, 88).replace(/\s\S*$/, '') + '…' : fala;
         }
-        doc.setTextColor(120).text(fmt(f.t), M, iy);
-        doc.setTextColor(45).text(resumo || '—', M + 18, iy);
+        // a anotação manda no índice: quem escreveu a expectativa quer vê-la aqui
+        if (f.nota) resumo = f.nota;
+        doc.setTextColor(120).text(t('stepN', i + 1), M, iy);
+        doc.setTextColor(120).text(fmt(f.t), M + 20, iy);
+        doc.setTextColor(45).text(doc.splitTextToSize(resumo || '—', CW - 38)[0], M + 38, iy);
         iy += 5.6;
       });
       foot();
     }
 
     if (layout === 'full') {
+      const tut = ehTutorial();
       const LH = 4.6, MAXL = 9, MAXIH = 110;
       const ar = kept[0].img.h / kept[0].img.w;
       const ih0 = Math.min(CW * ar, MAXIH);
@@ -3862,13 +4357,37 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
           lines = doc.splitTextToSize(said || t('pNoSpeech'), CW);
           if (lines.length > MAXL) lines = lines.slice(0, MAXL).concat('[...]');
         }
+        /* Onde a anotação entra muda com o modelo. Na evidência ela é a
+           expectativa e vem ACIMA da imagem, porque expectativa se lê antes do
+           resultado. No passo a passo ela é o título do passo, e um título não
+           mora embaixo do próprio conteúdo. */
+        const hora = horaDe(f.t);
+        const cabTxt = tut
+          ? t('stepN', i+1) + (f.nota ? '  —  ' + f.nota : '')
+          : t('stepN', i+1) + '   ·   ' + fmt(f.t) + (hora ? '   ·   ' + hora : '');
+        doc.setFont('helvetica','bold').setFontSize(tut ? 11.5 : 11);
+        const cabL = doc.splitTextToSize(cabTxt, CW - 24);   // 24 mm do "frame i de n"
+        doc.setFont('helvetica','normal').setFontSize(9.6);
+        const notaL = (!tut && f.nota) ? doc.splitTextToSize(f.nota, CW) : [];
         const ocrH = f.ocr ? 9 + Math.min(6, doc.splitTextToSize(f.ocr, CW).length) * 3.9 : 0;
-        const blockH = 6 + ih0 + (cues.length ? 6 + lines.length * LH : 0) + ocrH + 9;
+        /* A folga do fim encolhe quando há anotação. Sem isso o bloco passava de
+           281 mm por menos de um milímetro e cada passo virava uma página
+           inteira — um documento de 40 passos com 40 páginas quase vazias. */
+        const gapFim = (notaL.length || cabL.length > 1) ? 6.5 : 9;
+        const cabH = 6 + (cabL.length - 1) * 5;
+        const blockH = cabH + notaL.length * 4.8 + (notaL.length ? 1.5 : 0) + ih0 +
+                       (cues.length ? 6 + lines.length * LH : 0) + ocrH + gapFim;
         if (yy + blockH > PH - 16) newPage();
-        doc.setFont('helvetica','bold').setFontSize(11).setTextColor(25).text(fmt(f.t), M, yy + 3);
+        doc.setFont('helvetica','bold').setFontSize(tut ? 11.5 : 11).setTextColor(25)
+           .text(cabL, M, yy + 3, { lineHeightFactor: 1.28 });
         doc.setFont('helvetica','normal').setFontSize(8).setTextColor(150)
            .text(t('pFrameOf', i+1, kept.length), PW - M, yy + 3, { align:'right' });
-        yy += 6;
+        yy += cabH;
+        if (notaL.length) {
+          doc.setFont('helvetica','normal').setFontSize(9.6).setTextColor(35);
+          doc.text(notaL, M, yy + 3, { lineHeightFactor: 1.3 });
+          yy += notaL.length * 4.8 + 1.5;
+        }
         doc.addImage(f.img.url, 'JPEG', ix, yy, iw, ih0);
         yy += ih0;
         if (cues.length) {
@@ -3887,7 +4406,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
           doc.text(oc, M, yy, { lineHeightFactor: 1.3 });
           yy += oc.length * 3.9;
         }
-        yy += 9; doc.setTextColor(30);
+        yy += gapFim; doc.setTextColor(30);
       }
       foot();
     } else {
@@ -3897,16 +4416,57 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       let col = 0, top = M + 6, rowH = 0;
       doc.addPage();
       doc.setFont('helvetica','bold').setFontSize(12).text(t('pFramesH'), M, M);
-      kept.forEach(f => {
-        const blockH = ihG + 7;
+      kept.forEach((f, i) => {
+        // a célula cresce conforme o que existe: hora de relógio e anotação
+        // não podem se sobrepor à imagem da linha de baixo
+        doc.setFont('helvetica','normal').setFontSize(7.4);
+        const hora = horaDe(f.t);
+        const notaG = f.nota ? doc.splitTextToSize(f.nota, cellW).slice(0, 3) : [];
+        const blockH = ihG + 7 + (hora ? 3.6 : 0) + notaG.length * 3.4;
         if (col === 0 && top + blockH > PH - 18) { foot(); doc.addPage(); top = M; }
         const x = M + col * (cellW + gap) + (cellW - iwG) / 2;
         doc.addImage(f.img.url, 'JPEG', x, top, iwG, ihG);
-        doc.setFont('helvetica','bold').setFontSize(8.5).setTextColor(60).text(fmt(f.t), x, top + ihG + 4.5);
+        let cy2 = top + ihG + 4.5;
+        doc.setFont('helvetica','bold').setFontSize(8.5).setTextColor(60)
+           .text(t('stepN', i + 1) + '  ·  ' + fmt(f.t), x, cy2);
+        if (hora) {
+          cy2 += 3.6;
+          doc.setFont('helvetica','normal').setFontSize(7).setTextColor(130).text(hora, x, cy2);
+        }
+        if (notaG.length) {
+          cy2 += 3.4;
+          doc.setFont('helvetica','normal').setFontSize(7.4).setTextColor(60);
+          doc.text(notaG, x, cy2, { lineHeightFactor: 1.25 });
+        }
         doc.setTextColor(30);
         rowH = Math.max(rowH, blockH); col++;
         if (col === cols) { col = 0; top += rowH + 4; rowH = 0; }
       });
+      foot();
+    }
+
+    /* As impressões digitais vão num anexo, e não sob cada imagem: 64 caracteres
+       hexadecimais embaixo de uma figura são ruído, e na grade de 6 por página
+       simplesmente não cabem. Em anexo elas ficam conferíveis em lista, que é
+       como alguém realmente verifica hash. */
+    if (kept.some(f => f.hash)) {
+      doc.addPage();
+      doc.setFont('helvetica','bold').setFontSize(13).setTextColor(25).text(t('pHashH'), M, M + 4);
+      doc.setFont('helvetica','normal').setFontSize(8.5).setTextColor(150);
+      const sub = doc.splitTextToSize(t('pHashSub'), CW);
+      doc.text(sub, M, M + 11);
+      let hy = M + 13 + sub.length * 4;
+      kept.forEach((f, i) => {
+        if (!f.hash) return;
+        if (hy > PH - 22) { foot(); doc.addPage(); hy = M + 4; }
+        doc.setFont('helvetica','bold').setFontSize(8.6).setTextColor(60)
+           .text(t('stepN', i + 1) + '  ·  ' + fmt(f.t), M, hy);
+        hy += 4.2;
+        doc.setFont('courier','normal').setFontSize(7.6).setTextColor(95);
+        doc.text(doc.splitTextToSize(f.hash, CW), M, hy);
+        hy += 7.4;
+      });
+      doc.setTextColor(30);
       foot();
     }
 
@@ -3925,7 +4485,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       foot();
     }
 
-    doc.save(`analise-${base}.pdf`);
+    doc.save(base + '.pdf');
     medir('baixou_saida', { p_formato: 'pdf' });
     $('pdfStatus').innerHTML = `<span class="ok">${t('pdfDone')}</span>${t('pdfDone2', kept.length, page)}`;
     $('go').disabled = false;

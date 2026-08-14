@@ -107,6 +107,14 @@ p{margin:0 0 16px}
 .doc ul{padding-left:20px;color:var(--muted)}
 .doc li{margin-bottom:8px}
 .doc .updated{font-size:14px;color:var(--muted);border-left:3px solid var(--accent);padding-left:14px;margin-bottom:34px}
+.doc h3{margin-top:28px;font-size:17px}
+.doc ol{padding-left:22px;color:var(--muted)}
+.doc ol li{margin-bottom:8px}
+.doc code{font:13px ui-monospace,Menlo,Consolas,monospace;background:var(--panel);
+      border:1px solid var(--line);border-radius:5px;padding:1px 5px;color:var(--ink)}
+/* na tabela de comparação, o que a ferramenta faz e o que ela não faz */
+.doc table.legal td.sim{color:var(--accent);font-weight:600}
+.doc table.legal td.nao{color:var(--err)}
 
 footer{padding:40px 0 60px;color:var(--muted);font-size:14px}
 footer .wrap{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}

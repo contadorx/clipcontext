@@ -103,6 +103,22 @@ REDIRECT = """<script>
 </script>"""
 
 
+# O endereço de cada página interna, por idioma. Só as páginas de conteúdo têm
+# endereço traduzido: é nelas que o buscador procura pelas palavras que a pessoa
+# digita, e "/en/substituto-do-steps-recorder" não seria encontrado por ninguém.
+# As páginas legais mantêm o mesmo caminho nos três idiomas, porque quem chega
+# nelas chega por link, não por busca.
+SLUGS = {
+    "precos":      {"pt": "precos",      "en": "precos",      "es": "precos"},
+    "privacidade": {"pt": "privacidade", "en": "privacidade", "es": "privacidade"},
+    "termos":      {"pt": "termos",      "en": "termos",      "es": "termos"},
+    "seguranca":   {"pt": "seguranca",   "en": "security",    "es": "seguridad"},
+    "steps":       {"pt": "substituto-do-steps-recorder",
+                    "en": "steps-recorder-replacement",
+                    "es": "alternativa-al-steps-recorder"},
+}
+
+
 def _switcher(lang, paginas_por_idioma, pagina):
     """Seletor de idioma: links diretos para a mesma página nos outros idiomas."""
     itens = []
@@ -123,13 +139,13 @@ def build_site(root: pathlib.Path) -> None:
 
     pre = {"pt": "", "en": "/en", "es": "/es"}
     caminhos = {
-        L: {"home": pre[L] or "/", "app": "/app" + ("" if L == "pt" else "?lang=" + L),
-            "precos": pre[L] + "/precos", "privacidade": pre[L] + "/privacidade",
-            "termos": pre[L] + "/termos", "root": "/"}
+        L: dict({"home": pre[L] or "/", "app": "/app" + ("" if L == "pt" else "?lang=" + L),
+                 "root": "/"},
+                **{pg: pre[L] + "/" + sl[L] for pg, sl in SLUGS.items()})
         for L in IDIOMAS
     }
-    paginas = {L: {"home": caminhos[L]["home"], "precos": caminhos[L]["precos"],
-                   "privacidade": caminhos[L]["privacidade"], "termos": caminhos[L]["termos"]}
+    paginas = {L: dict({"home": caminhos[L]["home"]},
+                       **{pg: caminhos[L][pg] for pg in SLUGS})
                for L in IDIOMAS}
 
     for lang in IDIOMAS:
@@ -176,6 +192,18 @@ def build_site(root: pathlib.Path) -> None:
         "termos": {"pt": (f"Termos de Uso — {MARCA}", f"Condições de uso do {MARCA}, ferramenta gratuita e de código aberto."),
                    "en": (f"Terms of Use — {MARCA}", f"Terms for {MARCA}, a free and open-source tool."),
                    "es": (f"Términos de Uso — {MARCA}", f"Condiciones de uso de {MARCA}, herramienta gratuita y de código abierto.")},
+        "seguranca": {"pt": (f"Segurança da informação — {MARCA}",
+                             "Como funciona sem servidor, o que sai da sua máquina, e a lista honesta das certificações que não temos."),
+                      "en": (f"Information security — {MARCA}",
+                             "How it works with no server, what leaves your machine, and the honest list of certifications we do not hold."),
+                      "es": (f"Seguridad de la información — {MARCA}",
+                             "Cómo funciona sin servidor, qué sale de tu equipo y la lista honesta de las certificaciones que no tenemos.")},
+        "steps": {"pt": (f"O Steps Recorder acabou — o que usar no lugar | {MARCA}",
+                         "O Gravador de Etapas do Windows foi descontinuado e nada que a Microsoft indica gera documento de passos. O que fazer."),
+                  "en": (f"Steps Recorder is gone — what to use instead | {MARCA}",
+                         "Windows Steps Recorder was deprecated and none of Microsoft's suggested replacements produce a step document. What to do."),
+                  "es": (f"Steps Recorder se acabó — qué usar en su lugar | {MARCA}",
+                         "La Grabadora de Acciones de Windows fue descontinuada y nada de lo que Microsoft sugiere genera un documento de pasos. Qué hacer.")},
     }
     for pagina, metas in METAS.items():
         for lang in IDIOMAS:
@@ -211,10 +239,35 @@ def build_site(root: pathlib.Path) -> None:
             sobrando = set(re.findall(r"\{\{(\w+)\}\}", html))
             if sobrando:
                 print(f"AVISO: chaves sem valor em {pagina}.{lang}: {sorted(sobrando)}", file=sys.stderr)
-            saida = root / "public" / (f"{pagina}.html" if lang == "pt" else f"{lang}/{pagina}.html")
+            arq = SLUGS[pagina][lang] + ".html"
+            saida = root / "public" / (arq if lang == "pt" else f"{lang}/{arq}")
             saida.parent.mkdir(parents=True, exist_ok=True)
             saida.write_text(html, encoding="utf-8")
             print(f"{saida.relative_to(root)}  {len(html)/1024:.1f} KB")
+
+    # sitemap e robots: a página do Steps Recorder só serve se for encontrada,
+    # e um site sem mapa deixa o buscador adivinhar. As alternativas de idioma
+    # vão declaradas em cada URL, senão as três versões competem entre si.
+    urls = []
+    for pagina in ["home"] + list(SLUGS):
+        for lang in IDIOMAS:
+            alt = "".join(
+                f'\n    <xhtml:link rel="alternate" hreflang="{L if L != "pt" else "pt-BR"}" '
+                f'href="{SITE}{paginas[L][pagina]}"/>'
+                for L in IDIOMAS)
+            urls.append(f'  <url>\n    <loc>{SITE}{paginas[lang][pagina]}</loc>{alt}\n'
+                        f'    <xhtml:link rel="alternate" hreflang="x-default" href="{SITE}{paginas["en"][pagina]}"/>\n'
+                        f'  </url>')
+    sitemap = ('<?xml version="1.0" encoding="UTF-8"?>\n'
+               '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" '
+               'xmlns:xhtml="http://www.w3.org/1999/xhtml">\n'
+               + "\n".join(urls) + "\n</urlset>\n")
+    (root / "public" / "sitemap.xml").write_text(sitemap, encoding="utf-8")
+    print(f"public/sitemap.xml  {len(sitemap)/1024:.1f} KB")
+
+    robots = f"User-agent: *\nAllow: /\n\nSitemap: {SITE}/sitemap.xml\n"
+    (root / "public" / "robots.txt").write_text(robots, encoding="utf-8")
+    print("public/robots.txt")
     return 0
 
 

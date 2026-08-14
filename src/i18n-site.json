@@ -76,7 +76,9 @@
     "viaB2": "Imagem pareada com a fala daquele trecho",
     "viaB3": "Cabe em qualquer modelo, inclusive nos que recusam vídeo",
     "viaB4": "O texto de instrução vai junto, pronto para colar",
-    "duoPonte": "A ponte entre os dois: o que se quer é o mesmo — o que aconteceu na tela, em ordem, com hora, e com o que foi dito. Muda só quem lê no fim: um auditor ou um modelo."
+    "duoPonte": "A ponte entre os dois: o que se quer é o mesmo — o que aconteceu na tela, em ordem, com hora, e com o que foi dito. Muda só quem lê no fim: um auditor ou um modelo.",
+    "fSec": "Segurança",
+    "fPsr": "Substituto do Steps Recorder"
   },
   "en": {
     "htmlLang": "en",
@@ -155,7 +157,9 @@
     "viaB2": "Each image paired with the speech from that stretch",
     "viaB3": "Fits in any model, including the ones that refuse video",
     "viaB4": "The instruction text comes along, ready to paste",
-    "duoPonte": "The bridge between the two: what you want is the same — what happened on screen, in order, with the time, and with what was said. Only the reader changes at the end: an auditor or a model."
+    "duoPonte": "The bridge between the two: what you want is the same — what happened on screen, in order, with the time, and with what was said. Only the reader changes at the end: an auditor or a model.",
+    "fSec": "Security",
+    "fPsr": "Steps Recorder replacement"
   },
   "es": {
     "htmlLang": "es",
@@ -234,6 +238,8 @@
     "viaB2": "Cada imagen junto al habla de ese tramo",
     "viaB3": "Cabe en cualquier modelo, incluidos los que rechazan vídeo",
     "viaB4": "El texto de instrucción va junto, listo para pegar",
-    "duoPonte": "El puente entre los dos: lo que se quiere es lo mismo — qué pasó en la pantalla, en orden, con la hora, y con lo que se dijo. Solo cambia quién lo lee al final: un auditor o un modelo."
+    "duoPonte": "El puente entre los dos: lo que se quiere es lo mismo — qué pasó en la pantalla, en orden, con la hora, y con lo que se dijo. Solo cambia quién lo lee al final: un auditor o un modelo.",
+    "fSec": "Seguridad",
+    "fPsr": "Alternativa al Steps Recorder"
   }
 }

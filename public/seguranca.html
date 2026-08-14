@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Segurança da informação — Walkstamp</title>
+<meta name="description" content="Como funciona sem servidor, o que sai da sua máquina, e a lista honesta das certificações que não temos.">
+<link rel="canonical" href="https://walkstamp.com/seguranca">
+<link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/seguranca">
+<link rel="alternate" hreflang="en" href="https://walkstamp.com/en/security">
+<link rel="alternate" hreflang="es" href="https://walkstamp.com/es/seguridad">
+<link rel="icon" href="/favicon.ico?v=3" sizes="any">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png?v=3">
+<link rel="stylesheet" href="/site.css">
+<script>window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments)};</script><script defer src="/_vercel/insights/script.js"></script>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <a class="brand" href="/"><img src="/logo.svg" alt=""><span>Walk<b>stamp</b></span></a>
+    <nav>
+      <a href="/precos" class="hide-xs">Preços</a>
+      <a href="/app">Abrir a ferramenta</a>
+      <span style="display:inline-flex;gap:9px;border-left:1px solid var(--line);padding-left:16px"><a href="/seguranca?lang=pt" style="color:var(--ink);font-weight:600">PT</a><a href="/en/security">EN</a><a href="/es/seguridad">ES</a></span>
+    </nav>
+  </div>
+</header>
+
+<section style="padding-top:60px">
+  <div class="wrap doc">
+    <h1 style="font-size:32px">Segurança da informação</h1>
+    <p class="updated">Última atualização: 14 de agosto de 2026.<br>
+    Esta página é para quem precisa aprovar o uso do Walkstamp dentro de uma empresa: como ele funciona,
+    o que sai da sua máquina, e o que nós <b>não</b> temos.</p>
+
+    <p class="lockHint" style="border-left:3px solid var(--accent);padding-left:12px;margin:0 0 26px">
+    <b>Em uma linha:</b> não recebemos seus arquivos, não há servidor de processamento e não há conta.
+    E você não precisa acreditar nisso — dá para conferir em trinta segundos, com o navegador que você
+    já tem aberto.</p>
+
+    <h2>Por que a pergunta muda de forma aqui</h2>
+    <p>A avaliação de um fornecedor de software costuma seguir uma lista: onde ficam os dados, quem tem
+    acesso, qual a certificação, qual o contrato de tratamento. Essa lista pressupõe que o fornecedor
+    <b>recebe</b> alguma coisa.</p>
+    <p>No Walkstamp o processamento inteiro acontece na aba do seu navegador. O vídeo é lido do seu disco
+    pelo próprio navegador, as imagens são extraídas ali, o áudio é transcrito ali, e o PDF, o Word, o ZIP e
+    o JSON são montados na memória da aba e salvos pelo navegador. <b>Não existe upload em nenhum passo.</b>
+    Não há cópia temporária do lado de cá, porque não há um lado de cá envolvido no processamento.</p>
+    <p>Isso não torna o Walkstamp automaticamente aprovável — torna a conversa diferente. Em vez de
+    &ldquo;confie no controle de acesso deles&rdquo;, a pergunta vira &ldquo;isto realmente não envia nada?&rdquo;,
+    que é uma pergunta que <b>você pode responder sozinho</b>.</p>
+
+    <h2>Como conferir, sem precisar confiar em nós</h2>
+    <p>É a parte mais importante desta página. Leva menos tempo do que lê-la:</p>
+    <ol class="passos">
+      <li>Abra a ferramenta e pressione <code>F12</code> para abrir as ferramentas do desenvolvedor.</li>
+      <li>Vá até a aba <b>Rede</b> (<i>Network</i>) e deixe-a gravando.</li>
+      <li>Carregue um vídeo grande — de propósito, um de vários gigabytes — e gere o PDF.</li>
+      <li>Olhe a coluna do que foi <b>enviado</b>. Ela continua em zero. Nenhuma requisição carrega o vídeo,
+      as imagens ou o texto.</li>
+    </ol>
+    <p>Um teste que a própria equipe de segurança executa vale mais do que qualquer declaração nossa, e é por
+    isso que ele está aqui em vez de um selo.</p>
+
+    <h2>A versão offline, para quando nem isso basta</h2>
+    <p>Existe um <b>arquivo único de HTML</b> com a ferramenta inteira dentro. Você baixa, desconecta a rede,
+    abre o arquivo e ele funciona. Nada nele fala com servidor nenhum.</p>
+    <p>E isso não é uma promessa de texto: o processo que gera esse arquivo <b>falha</b> se sobrar qualquer
+    endereço de medição dentro dele. É uma trava no build, não uma intenção. Dá para conferir procurando por
+    &ldquo;supabase&rdquo; ou &ldquo;insights&rdquo; no arquivo baixado — não há ocorrência.</p>
+    <p>Na versão offline você perde a transcrição automática (o modelo de voz é baixado sob demanda), a
+    leitura de texto da imagem e o botão do Google Drive. O resto funciona igual. Ela também pode ser
+    guardada num repositório interno, escaneada pela sua equipe e distribuída sem depender de nós.</p>
+
+    <h2>O que sai da sua máquina, e quando</h2>
+    <table class="legal">
+      <tr><th>Conexão</th><th>Quando acontece</th><th>O que vai</th><th>O que nunca vai</th></tr>
+      <tr><td>Vercel (hospedagem)</td><td>Sempre, ao abrir a página</td>
+          <td>O pedido do arquivo da página, com IP e navegador — como em qualquer site</td>
+          <td>Seu conteúdo</td></tr>
+      <tr><td>Vercel Web Analytics</td><td>Sempre; não envia se o navegador manda <i>Do&nbsp;Not&nbsp;Track</i> ou <i>Global Privacy Control</i></td>
+          <td>Qual página foi vista, sem cookie e sem identificador que persista</td>
+          <td>Identificador de pessoa ou de sessão</td></tr>
+      <tr><td>Supabase (marcos de uso)</td><td>Em três momentos: abriu a ferramenta, abriu um vídeo, baixou um arquivo. Respeita DNT e GPC</td>
+          <td>O nome do marco, o idioma da página, a origem do vídeo e o formato baixado</td>
+          <td>Nome de arquivo, tamanho, duração, conteúdo, identificador de sessão</td></tr>
+      <tr><td>jsDelivr (CDN público)</td><td>Só ao usar transcrição automática ou leitura de texto da imagem</td>
+          <td>O pedido da biblioteca</td><td>Seu áudio, sua imagem, seu texto</td></tr>
+      <tr><td>Hugging Face</td><td>Só ao acionar a transcrição automática, e uma vez por navegador</td>
+          <td>O pedido do modelo de voz</td><td>Seu áudio</td></tr>
+      <tr><td>Google</td><td>Só se você clicar em abrir um vídeo do Drive</td>
+          <td>Autenticação e o pedido do arquivo que você escolher, com o escopo mais restrito que existe (<code>drive.file</code>)</td>
+          <td>O restante do seu Drive; e o arquivo vai do Google direto para o seu navegador, sem passar por nós</td></tr>
+    </table>
+    <p><b>Nenhuma dessas conexões carrega vídeo, áudio, imagem, transcrição ou documento gerado.</b>
+    A biblioteca de PDF é servida do nosso próprio domínio, e não de CDN.</p>
+
+    <h2>O que fica no seu navegador</h2>
+    <p>Nada do seu conteúdo é guardado entre visitas. Os dados de identificação da evidência — caso de teste,
+    quem executou, sistema — ficam só na memória da aba e somem quando você a fecha; foi uma decisão
+    deliberada, e é por isso que você redigita ao voltar.</p>
+    <p>A única coisa que persiste é o <b>modelo de transcrição</b>, guardado pelo próprio navegador em cache
+    para não ser baixado de novo. Fica no seu dispositivo, sob seu controle, e some ao limpar os dados de
+    navegação. Não usamos <i>cookies</i> — nem próprios, nem de terceiros.</p>
+
+    <h2>O que nós não temos</h2>
+    <p>Esta é a parte que quase nenhum fornecedor escreve, e é justamente a que a sua equipe precisa.
+    <b>Não possuímos nenhuma certificação de segurança, e não estamos em processo de obter nenhuma.</b>
+    Abaixo, o que cada uma significa e por que ela se aplica — ou não — a uma ferramenta que não recebe dados.</p>
+    <table class="legal">
+      <tr><th>Norma ou certificação</th><th>Temos?</th><th>O que isso quer dizer aqui</th></tr>
+      <tr><td>ISO/IEC 27001</td><td>Não</td>
+          <td>Certifica o sistema de gestão de segurança de uma organização que <b>guarda</b> dados. Não guardamos os seus. Se a sua política exige ISO&nbsp;27001 de todo fornecedor que recebe dados, vale registrar que aqui não há recebimento — mas quem decide se a exceção cabe é o seu time, não nós.</td></tr>
+      <tr><td>SOC 2 (Tipo I ou II)</td><td>Não</td>
+          <td>Audita os controles de uma prestadora de serviço que <b>processa</b> dados do cliente. Não há serviço processando nada: o processamento é no seu computador.</td></tr>
+      <tr><td>21 CFR Part 11 (FDA)</td><td>Não</td>
+          <td>Exige sistema fechado e validado, trilha de auditoria e assinatura eletrônica. Um gerador de documento no navegador <b>não atende e não pode atender sozinho</b>. Em ambiente regulado por Part&nbsp;11, o Walkstamp pode produzir a imagem, mas o registro controlado tem que viver no seu sistema validado.</td></tr>
+      <tr><td>CSV / GAMP 5</td><td>Não</td>
+          <td>Validação de sistema computadorizado acontece no <b>seu</b> ambiente, sobre o seu uso. Não é algo que um fornecedor entregue pronto.</td></tr>
+      <tr><td>SOX / ITGC</td><td>Não se aplica como certificação</td>
+          <td>O Walkstamp não é um controle de TI. Ele <b>produz a evidência</b> que entra no seu controle. Quem responde pelo controle continua sendo você.</td></tr>
+      <tr><td>HIPAA — acordo de <i>business associate</i></td><td>Não assinamos</td>
+          <td>Não recebemos dados, então não existe a relação que o acordo formalizaria. Se a sua política exige acordo com qualquer ferramenta que <b>toque</b> dado de saúde, mesmo localmente, converse com o seu time de conformidade — não vamos dizer que está tudo bem numa decisão que não é nossa.</td></tr>
+      <tr><td>LGPD / GDPR</td><td>Não é certificação</td>
+          <td>Não existe &ldquo;certificado de LGPD&rdquo;. A nossa posição, as bases legais e os prazos estão descritos na <a href="/privacidade" style="color:var(--accent)">Política de Privacidade</a>.</td></tr>
+      <tr><td>Relatório de teste de intrusão</td><td>Não temos</td>
+          <td>Não há infraestrutura a testar além de hospedagem de arquivos estáticos. O que existe é o código que roda na sua máquina — e ele é legível.</td></tr>
+      <tr><td>Seguro de responsabilidade cibernética</td><td>Não</td>
+          <td>Somos uma empresa pequena e não seria honesto sugerir cobertura que não existe.</td></tr>
+    </table>
+
+    <h3>O que existe no lugar</h3>
+    <ul>
+      <li>O código que roda no seu navegador <b>pode ser lido</b>: é uma página, e <code>Ctrl+U</code> mostra tudo. Não há código do lado do servidor porque não há servidor.</li>
+      <li>A <b>versão offline</b> pode ser baixada, escaneada, versionada e distribuída pela sua equipe.</li>
+      <li>A verificação de que nada sai leva trinta segundos e não depende de acreditar em nós.</li>
+    </ul>
+
+    <h2>O que continua sendo responsabilidade sua</h2>
+    <ul>
+      <li>O documento gerado contém o que estava na sua tela. Se você gravou dado de produção, <b>o arquivo que saiu tem dado de produção</b> — e para onde ele vai depois é decisão sua.</li>
+      <li>Compartilhar a tela captura tudo o que está nela, inclusive a janela que ficou aberta atrás. Prefira compartilhar uma janela específica quando o conteúdo for sensível.</li>
+      <li>A transcrição automática baixa um modelo de voz de um CDN público na primeira vez. Se a sua política proíbe CDN externo, use a versão offline e escreva as anotações à mão.</li>
+      <li>O Walkstamp produz a evidência visual. A trilha de aprovação continua no seu sistema de mudanças.</li>
+    </ul>
+
+    <h2>Quem responde</h2>
+    <p>O Walkstamp é oferecido por <b>Produtize Produtos e Serviços Inteligentes Ltda.</b>, CNPJ <b>48.417.292/0001-99</b>.</p>
+    <p>Para relatar um problema de segurança, pedir esclarecimento para uma avaliação de fornecedor, ou
+    solicitar a versão offline: <a href="mailto:privacidade@walkstamp.com" style="color:var(--accent)">privacidade@walkstamp.com</a>.
+    Não há programa de recompensa por vulnerabilidade, mas respondemos.</p>
+    <p class="small muted">Esta página descreve o funcionamento na data acima. Se algo mudar de forma que
+    afete o que está escrito aqui, esta página muda junto — e a data no topo é como você verifica isso.</p>
+  </div>
+</section>
+
+
+<footer>
+  <div class="wrap">
+    <div>
+      <a href="/app">Abrir a ferramenta</a>
+      <a href="/precos">Preços</a>
+      <a href="/seguranca">Segurança</a>
+      <a href="/privacidade">Privacidade</a>
+      <a href="/termos">Termos</a>
+      <a href="/substituto-do-steps-recorder">Substituto do Steps Recorder</a>
+    </div>
+    <div>Walkstamp — ferramenta gratuita, sem anúncio e sem cadastro</div>
+  </div>
+</footer>
+
+<script src="/support.js"></script>
+</body>
+</html>
