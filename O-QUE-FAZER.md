@@ -131,15 +131,51 @@ canal.
 | | o quê | esforço | por quê agora | estado |
 |---|---|---|---|---|
 | 1 | Fala → anotação do passo | pequeno | é o que ninguém pode copiar | **feito** |
-| 2 | Página do substituto do Steps Recorder (+ ângulo SolMan 2027) | médio | demanda existente, sem resposta | pendente |
+| 2 | Página do substituto do Steps Recorder (+ ângulo SolMan 2027) | médio | demanda existente, sem resposta | **feito**, com a página de segurança junto |
 | 3 | Layout "evidência", um passo por bloco | pequeno | custo de troca zero | **feito**, dentro do modelo de saída |
 | 4 | Guardar o perfil da evidência na aba | pequeno | tira o atrito que o concorrente não tem | pendente |
 | 5 | Verificador de integridade | médio | credibilidade, depois do uso | pendente |
 
-O item 2 é o único que traz gente.
+Sobrou o item 4 (guardar o perfil da evidência na aba) e o 5 (verificador de integridade).
 
-E antes de qualquer um deles: **publicar o que já está pronto.** As features de evidência e o
-modelo de saída estão construídos e testados, e não estão no ar.
+E antes dos dois: **publicar o que já está pronto.** As features de evidência, o modelo de saída
+e as duas páginas novas estão construídos e testados, e não estão no ar.
+
+---
+
+## A página de segurança — a ideia que faltava (14/08/2026)
+
+A sugestão de *"uma página para falar da segurança da informação e das certificações que
+faltam"* fechou um buraco que nem o `CONCORRENTES.md` tinha visto.
+
+A avaliação de fornecedor numa empresa segue uma lista que **pressupõe que o fornecedor recebe
+alguma coisa**: onde ficam os dados, quem tem acesso, qual a certificação, qual o contrato de
+tratamento. O Walkstamp não recebe nada — mas quem faz a avaliação não tem como saber disso sem
+uma página que explique, e sem essa página a resposta padrão para "não tem ISO 27001?" é não.
+
+A página faz três coisas, e a terceira é a que quase ninguém faz:
+
+**Explica por que a pergunta muda de forma.** Não há dado nosso para proteger, porque o
+processamento inteiro é na aba do navegador.
+
+**Ensina a conferir sem confiar em nós.** `F12` → aba Rede → carregue um vídeo de vários
+gigabytes → os bytes enviados continuam em zero. Um teste que a equipe de segurança do cliente
+executa vale mais que qualquer selo, e leva menos tempo que ler a página. Junto vem a versão
+offline, cujo build **falha** se sobrar endereço de medição dentro — trava de processo, não
+promessa.
+
+**Lista o que não temos, com o porquê de cada uma.** ISO 27001, SOC 2, 21 CFR Part 11, CSV/GAMP
+5, SOX/ITGC, acordo HIPAA, relatório de pentest, seguro cibernético — todos "não", cada um com a
+explicação de por que se aplica ou não a uma ferramenta que não recebe dados. E onde a decisão é
+do cliente, a página diz que é do cliente, em vez de tranquilizar.
+
+Essa lista parece um tiro no pé e é o contrário: quem avalia fornecedor está acostumado a
+perguntar três vezes para descobrir o que falta. Uma página que já entrega a resposta muda o
+tom da conversa inteira — e é coerente com o resto do produto, que também não promete
+conformidade.
+
+Junto saíram um `sitemap.xml` e um `robots.txt` com hreflang por idioma: a página do Steps
+Recorder só serve se for encontrada.
 
 ---
 

@@ -37,7 +37,7 @@ lugar onde essas coisas existem.
 | `src/` | a fonte de tudo: `template.html` é a ferramenta inteira, `site/` são as páginas |
 | `vendor/` | a biblioteca de PDF, servida do próprio domínio em vez de CDN |
 | `brand/` | logotipos, favicons e o gerador deles; a página da proposta de marca |
-| `media/` | os vídeos de exemplo e do tour, na origem |
+| `media/` | mídia de origem; `antigo/` guarda as peças da época do ClipContext |
 
 ## Os documentos
 

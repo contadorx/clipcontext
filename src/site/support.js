@@ -20,7 +20,7 @@ const SUPPORT = {
 const SUPPORT_TXT = {
   pt: {
     eyebrow: 'Apoio',
-    title:   'O Walkstamp é gratuito e vai continuar',
+    title:   'O {{marca}} é gratuito e vai continuar',
     lead:    'Não há anúncio, não há cadastro e não há dado seu sendo vendido — porque não há servidor. ' +
              'Se a ferramenta te poupou trabalho e você quiser retribuir, isso ajuda a manter o desenvolvimento. ' +
              'É voluntário: nada aqui destrava funcionalidade nenhuma.',
@@ -32,7 +32,7 @@ const SUPPORT_TXT = {
   },
   en: {
     eyebrow: 'Support',
-    title:   'Walkstamp is free and will stay that way',
+    title:   '{{marca}} is free and will stay that way',
     lead:    'No ads, no sign-up, no data being sold — because there is no server. ' +
              'If the tool saved you work and you would like to give something back, it helps keep development going. ' +
              'It is voluntary: nothing here unlocks any feature.',
@@ -44,7 +44,7 @@ const SUPPORT_TXT = {
   },
   es: {
     eyebrow: 'Apoyo',
-    title:   'Walkstamp es gratuito y seguirá siéndolo',
+    title:   '{{marca}} es gratuito y seguirá siéndolo',
     lead:    'Sin anuncios, sin registro y sin vender tus datos — porque no hay servidor. ' +
              'Si la herramienta te ahorró trabajo y quieres devolver algo, ayuda a mantener el desarrollo. ' +
              'Es voluntario: nada de esto desbloquea ninguna función.',

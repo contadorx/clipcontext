@@ -113,6 +113,7 @@ SLUGS = {
     "privacidade": {"pt": "privacidade", "en": "privacidade", "es": "privacidade"},
     "termos":      {"pt": "termos",      "en": "termos",      "es": "termos"},
     "seguranca":   {"pt": "seguranca",   "en": "security",    "es": "seguridad"},
+    "comparativo": {"pt": "comparativo",  "en": "compare",     "es": "comparativa"},
     "steps":       {"pt": "substituto-do-steps-recorder",
                     "en": "steps-recorder-replacement",
                     "es": "alternativa-al-steps-recorder"},
@@ -139,7 +140,10 @@ def build_site(root: pathlib.Path) -> None:
 
     pre = {"pt": "", "en": "/en", "es": "/es"}
     caminhos = {
-        L: dict({"home": pre[L] or "/", "app": "/app" + ("" if L == "pt" else "?lang=" + L),
+        # o ?lang vai nos três: quem escolheu o idioma do site escolheu o do app.
+        # Sem ele, um navegador em inglês abria o app em inglês mesmo vindo da
+        # página em português — e a pessoa achava que era defeito.
+        L: dict({"home": pre[L] or "/", "app": "/app?lang=" + L,
                  "root": "/"},
                 **{pg: pre[L] + "/" + sl[L] for pg, sl in SLUGS.items()})
         for L in IDIOMAS
@@ -163,6 +167,10 @@ def build_site(root: pathlib.Path) -> None:
         t["contato"] = CONTATO
         t["selfPath"] = caminhos[lang]["home"]
         t["switcher"] = _switcher(lang, paginas, "home")
+        # o link do comparativo vai montado aqui: colocar <a> dentro do JSON de
+        # tradução quebraria o dia em que alguém trocar o caminho da página
+        t["duoCompLinked"] = t["duoComp"].replace(
+            "{0}", f'<a href="{caminhos[lang]["comparativo"]}" style="color:var(--accent)">').replace("{1}", "</a>")
         t["lang"] = lang
         t["redirect"] = REDIRECT if lang == "pt" else ""
 
@@ -189,15 +197,21 @@ def build_site(root: pathlib.Path) -> None:
         "privacidade": {"pt": (f"Política de Privacidade — {MARCA}", f"O {MARCA} não coleta dados pessoais e não recebe seus vídeos."),
                         "en": (f"Privacy Policy — {MARCA}", f"{MARCA} collects no personal data and never receives your videos."),
                         "es": (f"Política de Privacidad — {MARCA}", f"{MARCA} no recoge datos personales y no recibe tus vídeos.")},
-        "termos": {"pt": (f"Termos de Uso — {MARCA}", f"Condições de uso do {MARCA}, ferramenta gratuita e de código aberto."),
-                   "en": (f"Terms of Use — {MARCA}", f"Terms for {MARCA}, a free and open-source tool."),
-                   "es": (f"Términos de Uso — {MARCA}", f"Condiciones de uso de {MARCA}, herramienta gratuita y de código abierto.")},
+        "termos": {"pt": (f"Termos de Uso — {MARCA}", f"Condições de uso do {MARCA}, ferramenta gratuita que roda inteira no seu navegador."),
+                   "en": (f"Terms of Use — {MARCA}", f"Terms for {MARCA}, a free tool that runs entirely in your browser."),
+                   "es": (f"Términos de Uso — {MARCA}", f"Condiciones de uso de {MARCA}, herramienta gratuita que funciona entera en tu navegador.")},
         "seguranca": {"pt": (f"Segurança da informação — {MARCA}",
                              "Como funciona sem servidor, o que sai da sua máquina, e a lista honesta das certificações que não temos."),
                       "en": (f"Information security — {MARCA}",
                              "How it works with no server, what leaves your machine, and the honest list of certifications we do not hold."),
                       "es": (f"Seguridad de la información — {MARCA}",
                              "Cómo funciona sin servidor, qué sale de tu equipo y la lista honesta de las certificaciones que no tenemos.")},
+        "comparativo": {"pt": (f"Comparativo — {MARCA} e as alternativas",
+                               "FlowShare, Scribe, Tosca, Steps Recorder: o que cada um faz, o preço de tabela e onde cada um ganha — inclusive da gente."),
+                        "en": (f"Compare — {MARCA} and the alternatives",
+                               "FlowShare, Scribe, Tosca, Steps Recorder: what each does, list prices, and where each one wins — including against us."),
+                        "es": (f"Comparativa — {MARCA} y las alternativas",
+                               "FlowShare, Scribe, Tosca, Steps Recorder: qué hace cada uno, el precio de tarifa y dónde gana cada uno — incluso a nosotros.")},
         "steps": {"pt": (f"O Steps Recorder acabou — o que usar no lugar | {MARCA}",
                          "O Gravador de Etapas do Windows foi descontinuado e nada que a Microsoft indica gera documento de passos. O que fazer."),
                   "en": (f"Steps Recorder is gone — what to use instead | {MARCA}",
@@ -268,6 +282,27 @@ def build_site(root: pathlib.Path) -> None:
     robots = f"User-agent: *\nAllow: /\n\nSitemap: {SITE}/sitemap.xml\n"
     (root / "public" / "robots.txt").write_text(robots, encoding="utf-8")
     print("public/robots.txt")
+
+    # support.js: o único texto do site que não vinha de template — e foi
+    # exatamente onde o nome antigo sobreviveu à troca. Agora ele mora em src
+    # com o token {{marca}} e é estampado aqui, como todo o resto.
+    sup = (root / "src" / "site" / "support.js").read_text(encoding="utf-8")
+    sup = sup.replace("{{marca}}", MARCA)
+    (root / "public" / "support.js").write_text(sup, encoding="utf-8")
+    print(f"public/support.js  {len(sup)/1024:.1f} KB")
+
+    # A trava da troca de nome: nome antigo em qualquer página que não seja o
+    # aviso histórico (termos e privacidade citam o ClipContext de propósito,
+    # explicando a mudança) derruba o build em vez de ir parar no ar.
+    permitidos = {"termos.html", "privacidade.html"}
+    for arq in sorted((root / "public").rglob("*")):
+        if arq.suffix not in (".html", ".js", ".xml", ".txt", ".css"):
+            continue
+        if arq.name in permitidos:
+            continue
+        if "clipcontext" in arq.read_text(encoding="utf-8", errors="ignore").lower():
+            print(f"o nome antigo sobrou em {arq.relative_to(root)} — corrija a fonte", file=sys.stderr)
+            return 1
     return 0
 
 

@@ -28,6 +28,12 @@ header .wrap{display:flex;align-items:center;justify-content:space-between;heigh
 nav{display:flex;gap:20px;align-items:center}
 nav a{color:var(--muted);text-decoration:none;font-size:14.5px}
 nav a:hover{color:var(--ink)}
+/* A ação principal do cabeçalho vira botão: no meio de três links cinzas,
+   "Abrir a ferramenta" era o único que importava e o que menos aparecia. */
+nav a.btnTop{background:var(--accent);color:var(--accent-ink);font-weight:600;
+    padding:9px 16px;border-radius:8px;transition:.15s}
+nav a.btnTop:hover{color:var(--accent-ink);filter:brightness(1.08)}
+@media (max-width:560px){ nav a.btnTop{padding:7px 12px;font-size:13px} }
 @media (max-width:620px){ nav a.hide-sm{display:none} }
 /* Abaixo de 560 o cabeçalho não cabia e a página inteira ganhava rolagem
    horizontal — defeito antigo, achado ao aumentar a marca. Aqui o menu encolhe

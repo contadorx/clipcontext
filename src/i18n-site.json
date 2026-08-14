@@ -66,9 +66,9 @@
     "viaAh": "Você executou. Agora precisa provar.",
     "viaAp": "Teste sem evidência não passa em auditoria. Hoje isso é Print Screen → colar no Word → escrever a legenda, quarenta vezes. Grave uma vez e receba o documento pronto.",
     "viaA1": "Um print por passo, sem repetição de tela parada",
-    "viaA2": "A hora de cada um, e a sua narração transcrita junto",
-    "viaA3": "Saída em Word, para anexar ao chamado",
-    "viaA4": "Dado de teste costuma ser cópia de produção — e aqui ele não sobe",
+    "viaA2": "A hora de relógio de cada passo — e a sua narração vira a anotação escrita dele",
+    "viaA3": "Cabeçalho com caso, sistema, chamado e resultado: vira a primeira página e o nome do arquivo",
+    "viaA4": "Dado de teste costuma ser cópia de produção — e aqui ele não sobe: não há servidor",
     "viaBtag": "Contexto para IA",
     "viaBh": "O modelo lê o documento inteiro.",
     "viaBp": "Modelo que assiste vídeo amostra um quadro por segundo, às cegas. Uma hora vira 3.600 imagens e mais de um milhão de tokens — e você repaga a cada pergunta.",
@@ -78,7 +78,10 @@
     "viaB4": "O texto de instrução vai junto, pronto para colar",
     "duoPonte": "A ponte entre os dois: o que se quer é o mesmo — o que aconteceu na tela, em ordem, com hora, e com o que foi dito. Muda só quem lê no fim: um auditor ou um modelo.",
     "fSec": "Segurança",
-    "fPsr": "Substituto do Steps Recorder"
+    "fPsr": "Substituto do Steps Recorder",
+    "navComp": "Comparativo",
+    "fComp": "Comparativo",
+    "duoComp": "Quem mais faz isso, quanto custa, e onde cada um ganha — inclusive da gente: veja o {0}comparativo{1}."
   },
   "en": {
     "htmlLang": "en",
@@ -147,9 +150,9 @@
     "viaAh": "You ran it. Now you have to prove it.",
     "viaAp": "A test with no evidence does not survive an audit. Today that means Print Screen → paste into Word → write the caption, forty times. Record once and get the document ready.",
     "viaA1": "One screenshot per step, no repeats of a still screen",
-    "viaA2": "The time of each one, and your narration transcribed beside it",
-    "viaA3": "Word output, ready to attach to the ticket",
-    "viaA4": "Test data is usually a copy of production — and here it never uploads",
+    "viaA2": "The clock time of every step — and your narration becomes its written note",
+    "viaA3": "A header with case, system, ticket and result: it becomes the first page and the file name",
+    "viaA4": "Test data is usually a copy of production — and here it never uploads: there is no server",
     "viaBtag": "Context for AI",
     "viaBh": "The model reads the whole document.",
     "viaBp": "A model that watches video samples one frame per second, blind. An hour becomes 3,600 images and over a million tokens — and you pay again on every question.",
@@ -159,7 +162,10 @@
     "viaB4": "The instruction text comes along, ready to paste",
     "duoPonte": "The bridge between the two: what you want is the same — what happened on screen, in order, with the time, and with what was said. Only the reader changes at the end: an auditor or a model.",
     "fSec": "Security",
-    "fPsr": "Steps Recorder replacement"
+    "fPsr": "Steps Recorder replacement",
+    "navComp": "Compare",
+    "fComp": "Compare",
+    "duoComp": "Who else does this, what it costs, and where each one wins — including against us: see the {0}comparison{1}."
   },
   "es": {
     "htmlLang": "es",
@@ -228,9 +234,9 @@
     "viaAh": "Lo ejecutaste. Ahora tienes que probarlo.",
     "viaAp": "Una prueba sin evidencia no sobrevive a una auditoría. Hoy eso es Imprimir Pantalla → pegar en Word → escribir el pie, cuarenta veces. Graba una vez y recibe el documento hecho.",
     "viaA1": "Una captura por paso, sin repeticiones de pantalla quieta",
-    "viaA2": "La hora de cada una, y tu narración transcrita al lado",
-    "viaA3": "Salida en Word, lista para adjuntar al ticket",
-    "viaA4": "El dato de prueba suele ser copia de producción — y aquí no sube",
+    "viaA2": "La hora de reloj de cada paso — y tu narración se convierte en su anotación escrita",
+    "viaA3": "Cabecera con caso, sistema, ticket y resultado: se vuelve la primera página y el nombre del archivo",
+    "viaA4": "El dato de prueba suele ser copia de producción — y aquí no sube: no hay servidor",
     "viaBtag": "Contexto para IA",
     "viaBh": "El modelo lee el documento entero.",
     "viaBp": "Un modelo que ve vídeo muestrea un fotograma por segundo, a ciegas. Una hora se vuelve 3.600 imágenes y más de un millón de tokens — y lo pagas otra vez en cada pregunta.",
@@ -240,6 +246,9 @@
     "viaB4": "El texto de instrucción va junto, listo para pegar",
     "duoPonte": "El puente entre los dos: lo que se quiere es lo mismo — qué pasó en la pantalla, en orden, con la hora, y con lo que se dijo. Solo cambia quién lo lee al final: un auditor o un modelo.",
     "fSec": "Seguridad",
-    "fPsr": "Alternativa al Steps Recorder"
+    "fPsr": "Alternativa al Steps Recorder",
+    "navComp": "Comparativa",
+    "fComp": "Comparativa",
+    "duoComp": "Quién más hace esto, cuánto cuesta y dónde gana cada uno — incluso a nosotros: mira la {0}comparativa{1}."
   }
 }
