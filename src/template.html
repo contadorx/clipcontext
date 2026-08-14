@@ -466,6 +466,9 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recWarn:'Nada de vídeo é guardado: durante a gravação a ferramenta separa os frames que importam e transcreve os dois canais de áudio — o seu microfone e o som do computador — em separado. A transcrição divide a máquina com a captura; em computador modesto a tela pode perder alguma troca.',
       recPrep:'Preparando o modelo de transcrição…',
       recNoModel:'Não consegui carregar o modelo: vou guardar os frames sem transcrever.',
+      linhasCairam:'O runtime não pôde usar várias linhas neste navegador — tentando de novo com uma só.',
+      recNoModelStop:'Não consegui carregar o modelo de transcrição, então parei antes de pedir a sua tela — melhor agora do que no fim de uma reunião inteira. Rode o diagnóstico para ver onde trava, ou grave só os frames.',
+      recSoFramesBtn:'Gravar só os frames',
       recMicNo:'Sem microfone: só o som do computador será transcrito.',
       recSysNo:'Você não marcou “compartilhar áudio”: só o microfone será transcrito.',
       recNoAudio:'Não consegui abrir os canais de áudio; a gravação segue só com os frames.',
@@ -661,6 +664,9 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recWarn:'No video is kept: while recording, the tool pulls out the frames that matter and transcribes the two audio channels separately — your microphone and the computer sound. Transcription shares the machine with the capture; on a modest computer the screen may miss a change.',
       recPrep:'Preparing the transcription model…',
       recNoModel:'Could not load the model: I will keep the frames without transcribing.',
+      linhasCairam:'The runtime could not use multiple threads in this browser — trying again with a single one.',
+      recNoModelStop:'I could not load the transcription model, so I stopped before asking for your screen — better now than at the end of a whole meeting. Run the diagnostics to see where it gets stuck, or record frames only.',
+      recSoFramesBtn:'Record frames only',
       recMicNo:'No microphone: only the computer sound will be transcribed.',
       recSysNo:'You did not tick “share audio”: only the microphone will be transcribed.',
       recNoAudio:'Could not open the audio channels; recording continues with frames only.',
@@ -854,6 +860,9 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recWarn:'No se guarda vídeo: durante la grabación la herramienta separa los fotogramas que importan y transcribe los dos canales de audio por separado — tu micrófono y el sonido del ordenador. La transcripción comparte la máquina con la captura; en un ordenador modesto la pantalla puede perder algún cambio.',
       recPrep:'Preparando el modelo de transcripción…',
       recNoModel:'No pude cargar el modelo: guardaré los fotogramas sin transcribir.',
+      linhasCairam:'El runtime no pudo usar varios hilos en este navegador — probando de nuevo con uno solo.',
+      recNoModelStop:'No pude cargar el modelo de transcripción, así que paré antes de pedir tu pantalla — mejor ahora que al final de una reunión entera. Ejecuta el diagnóstico para ver dónde se atasca, o graba solo los fotogramas.',
+      recSoFramesBtn:'Grabar solo los fotogramas',
       recMicNo:'Sin micrófono: solo se transcribirá el sonido del ordenador.',
       recSysNo:'No marcaste “compartir audio”: solo se transcribirá el micrófono.',
       recNoAudio:'No pude abrir los canales de audio; la grabación sigue solo con los fotogramas.',
@@ -1133,6 +1142,30 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     return 'nada';
   };
 
+  /* Cartão fechado precisa de um jeito de abrir. Sem isto, escolher o modelo ou
+     ligar a placa de vídeo ANTES de gravar era impossível: esses controles
+     moram no passo 2, e o passo 2 só destravava com um vídeo carregado — que
+     na gravação nunca existe antes. Um clique no cabeçalho resolve, e vale para
+     qualquer passo. */
+  const abertoNaMao = new Set();
+
+  function ligarCabecalhos(){
+    ['cardTr','cardFrames','prevCard','promptCard'].forEach(id => {
+      const el = $(id); if (!el) return;
+      const h = el.querySelector('h2'); if (!h || h.dataset.clicavel) return;
+      h.dataset.clicavel = '1';
+      h.style.cursor = 'pointer';
+      h.setAttribute('role', 'button');
+      h.setAttribute('tabindex', '0');
+      const alterna = () => {
+        if (abertoNaMao.has(id)) abertoNaMao.delete(id); else abertoNaMao.add(id);
+        passos();
+      };
+      h.onclick = alterna;
+      h.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); alterna(); } };
+    });
+  }
+
   function passos(){
     const modo = modoAtual();
     const trancar = (id, aberto) => {
@@ -1149,7 +1182,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
        decisão. Travado é sobre poder — `inert`, que tira da ordem de foco. */
     const dobrar = (id, aberto) => {
       const el = $(id); if (!el) return;
-      el.classList.toggle('fechado', !aberto);
+      el.classList.toggle('fechado', !(aberto || abertoNaMao.has(id)));
     };
 
     if (modo === 'arquivo') {
@@ -1172,7 +1205,11 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
          gravação acabou de produzir. Fechá-lo esconderia o resultado. */
       dobrar('cardTr', true); dobrar('cardFrames', false);
     } else {
-      trancar('trAuto', false); trancar('trManual', false); trancar('framesCorpo', false);
+      /* Fechado, mas alcançável: o que está aqui são AJUSTES (modelo, placa de
+         vídeo, idioma), e eles precisam poder ser mexidos antes de gravar — a
+         gravação nunca tem "vídeo carregado" antes de começar. A ação em si
+         (`#auto`) continua desabilitada, que é a trava que faz sentido. */
+      trancar('trAuto', true); trancar('trManual', true); trancar('framesCorpo', false);
       dica('hintTr', 'lockHint'); dica('hintFrames', 'lockHint');
       dobrar('cardTr', false); dobrar('cardFrames', false);
     }
@@ -2118,8 +2155,34 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
         podeTranscrever = true;
         prog(null); st('');
       } catch (e) {
-        avisos.push(t('recNoModel'));
         prog(null); st('');
+        /* PARA AQUI, e não no fim.
+
+           Antes o modelo falhava e a gravação seguia assim mesmo: a pessoa
+           gravava a reunião inteira e só descobria no fim que não havia
+           transcrição — e a reunião não se repete. Se a transcrição foi pedida
+           e não vai acontecer, a decisão é dela, tomada agora.
+
+           E o erro de verdade vai junto: engolir a mensagem do navegador me
+           deixou cego por três rodadas de depuração. */
+        const detalhe = (e && (e.message || String(e)) || '').slice(0, 200);
+        $('rec').disabled = false;
+        fecharControle();
+        if (micStream) micStream.getTracks().forEach(x => x.stop());
+        $('recMsg').innerHTML =
+          `<span class="err">${t('recNoModelStop')}</span>` +
+          (detalhe ? ` <span class="status">(${detalhe.replace(/</g,'&lt;')})</span>` : '') +
+          ` <button class="ghost sm" id="recDiag">${t('diagBtn')}</button>` +
+          ` <button class="ghost sm" id="recSoFrames">${t('recSoFramesBtn')}</button>`;
+        const bd = $('recDiag');
+        if (bd) bd.onclick = () => { $('diag').click(); irPara('cardTr', true); };
+        const bf = $('recSoFrames');
+        /* O atalho não é cortesia: quem chegou até aqui já tinha uma reunião
+           para gravar, e obrigá-la a caçar a caixa de seleção no passo 1 é
+           perder a reunião por burocracia. */
+        if (bf) bf.onclick = () => { $('recTr').checked = false; notaTr(); $('rec').click(); };
+        abrindoCaptura = false;
+        return;
       }
     }
     $('rec').disabled = false;
@@ -2259,9 +2322,16 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       if (temSom)    { const n = fonte(new MediaStream(telaStream.getAudioTracks()), 'sys');
                        if (n) medeSys = medidor(ctxM, n, $('vuSys')); }
     }
-    $('vuBox').classList.toggle('hide', !medeMic && !medeSys);
-    $('vuMic').parentElement.parentElement.classList.toggle('off', !medeMic);
-    $('vuSys').parentElement.parentElement.classList.toggle('off', !medeSys);
+    /* Barra vermelha significa "isto deveria estar captando e não está". Quando
+       a pessoa escolheu gravar só os frames, o microfone nem foi pedido — não é
+       defeito, é a escolha dela, e a barra some em vez de acusar. */
+    const caixaMic = $('vuMic').parentElement.parentElement;
+    const caixaSys = $('vuSys').parentElement.parentElement;
+    caixaMic.classList.toggle('hide', !querMic && !medeMic);
+    caixaSys.classList.toggle('hide', !querTranscrever && !medeSys);
+    caixaMic.classList.toggle('off', querMic && !medeMic);
+    caixaSys.classList.toggle('off', querTranscrever && !medeSys);
+    $('vuBox').classList.toggle('hide', !medeMic && !medeSys && !querMic);
     $('calarMsg').textContent = '';
 
     if (micStream) {
@@ -2667,18 +2737,42 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       opcoes: { device:'webgpu', dtype:{ encoder_model:'fp32', decoder_model_merged:'q4' } } });
     tentativas.push({ motor: 'processador', opcoes: { dtype:'q8' } });
 
+    /* Degrau de linhas, dentro de cada tentativa.
+
+       Isolamento entre origens libera SharedArrayBuffer, o runtime passa a
+       querer o wasm com linhas, e para isso ele precisa criar um Worker a
+       partir de um endereço de OUTRA origem — o CDN. Sob COEP isso é
+       justamente o que o navegador barra. O resultado é cruel: ligar o
+       isolamento para ficar mais rápido é o que faz o modelo não carregar, e só
+       no caminho do processador (a placa de vídeo não depende dessas linhas).
+       Foi o que aconteceu em produção.
+
+       Em vez de escolher entre velocidade e funcionar, tenta com linhas e, se
+       falhar, refaz a MESMA tentativa com uma linha só. Perde-se desempenho no
+       navegador que barra, e nada mais. */
+    const wasm = (mod.env.backends && mod.env.backends.onnx && mod.env.backends.onnx.wasm) || null;
     let ultimo = null;
+
     for (let i = 0; i < tentativas.length; i++) {
       const tent = tentativas[i];
-      try {
-        const pp = await mod.pipeline('automatic-speech-recognition', modelId,
-          Object.assign({ progress_callback }, tent.opcoes));
-        motorEmUso = tent.motor;
-        return pp;
-      } catch (e) {
-        ultimo = (e && e.message) || String(e);
-        if (tentativas[i+1]) st(t('motorCaiu', tent.motor));
+      for (let passe = 0; passe < 2; passe++) {
+        try {
+          const pp = await mod.pipeline('automatic-speech-recognition', modelId,
+            Object.assign({ progress_callback }, tent.opcoes));
+          motorEmUso = tent.motor;
+          return pp;
+        } catch (e) {
+          ultimo = (e && e.message) || String(e);
+          const podeBaixarLinhas = passe === 0 && wasm && wasm.numThreads > 1;
+          if (podeBaixarLinhas) {
+            wasm.numThreads = 1;
+            st(t('linhasCairam'));
+            continue;             // mesma tentativa, agora com uma linha
+          }
+          break;                  // esgotou este motor: vai para o próximo
+        }
       }
+      if (tentativas[i+1]) st(t('motorCaiu', tent.motor));
     }
     throw new Error(ultimo || 'não consegui montar o modelo');
   }
@@ -3249,6 +3343,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   $('copyPrompt').disabled = true;
   applyLang();
   notaTr();
+  ligarCabecalhos();
   passos();
   medir('abriu_ferramenta');
 
