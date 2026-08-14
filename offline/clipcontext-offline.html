@@ -37,9 +37,9 @@
      vez de ficar ali cheio de controles ativos que não levam a lugar nenhum.
      `inert` tira o bloco da ordem de foco e da árvore de acessibilidade — bem
      melhor que pointer-events, que só engana o mouse. */
-  .card[inert]{opacity:.45;filter:saturate(.4)}
-  .card[inert] .lockHint{display:block}
-  .lockHint{margin:-6px 0 14px;font-size:13px;color:var(--muted)}
+  [inert]{opacity:.45;filter:saturate(.4)}
+  .lockHint{margin:-6px 0 14px;font-size:13px;color:var(--muted);
+            border-left:3px solid var(--line);padding-left:11px}
   /* Sem isto, os dois elementos que acabaram de virar focáveis — a zona de
      arraste e cada miniatura — recebem foco sem nenhum sinal na tela. */
   /* transition:none porque .drop, button e textarea animam `all` em 150 ms:
@@ -160,7 +160,11 @@
       <span class="status" id="recMsg" data-i18n="recHint"></span>
     </div>
     <div class="hide" id="recOpts" style="margin-top:8px">
-      <label class="chk"><input type="checkbox" id="recMic" checked><span data-i18n="recMicLbl"></span></label>
+      <div class="row" style="gap:18px">
+        <label class="chk"><input type="checkbox" id="recTr" checked><span data-i18n="recTrLbl"></span></label>
+        <label class="chk"><input type="checkbox" id="recMic" checked><span data-i18n="recMicLbl"></span></label>
+      </div>
+      <p class="note" id="recTrNote" style="margin:6px 0 0"></p>
       <p class="note" data-i18n="recWarn" style="margin:6px 0 0"></p>
     </div>
     <div class="hide" id="liveBox" style="margin-top:12px">
@@ -179,8 +183,9 @@
 
   <div class="card" id="cardTr">
     <h2><span class="step">2</span><span data-i18n="s2"></span></h2>
-    <p class="lockHint hide" data-i18n="lockHint"></p>
+    <p class="lockHint hide" id="hintTr"></p>
 
+    <div id="trAuto">
     <div class="autobox">
       <div class="row">
         <button id="auto" disabled data-i18n="autoBtn"></button>
@@ -203,7 +208,9 @@
       <div class="status" id="astatus"></div>
       <p class="note hide" id="keepOpen" data-i18n="keepOpen"></p>
     </div>
+    </div><!-- /trAuto -->
 
+    <div id="trManual">
     <div class="row" style="margin-bottom:9px">
       <button class="ghost sm" id="pickVtt" data-i18n="openSub"></button>
       <span class="status" data-i18n="orDrag"></span>
@@ -224,11 +231,13 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       <button class="ghost sm" id="expSrt">.srt</button>
       <button class="ghost sm" id="expTxt">.txt</button>
     </div>
+    </div><!-- /trManual -->
   </div>
 
   <div class="card" id="cardFrames">
     <h2><span class="step">3</span><span data-i18n="s3"></span></h2>
-    <p class="lockHint hide" data-i18n="lockHint"></p>
+    <p class="lockHint hide" id="hintFrames"></p>
+    <div id="framesCorpo">
     <div class="grid">
       <div>
         <label class="f" for="mode" data-i18n="lCrit"></label>
@@ -278,11 +287,14 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     <div class="row" style="margin-top:20px">
       <button id="extract" disabled data-i18n="extractBtn"></button>
       <button class="ghost hide" id="cancel" data-i18n="stopBtn"></button>
-      <button class="ghost" id="reset" data-i18n="resetBtn"></button>
     </div>
     <div class="bar hide" id="barWrap"><i id="bar"></i></div>
     <div class="status" id="status"></div>
     <p class="note"><b data-i18n="noteB"></b> <span data-i18n="noteT"></span></p>
+    </div><!-- /framesCorpo -->
+    <div class="row" style="margin-top:14px">
+      <button class="ghost" id="reset" data-i18n="resetBtn"></button>
+    </div>
   </div>
 
   <div class="card hide" id="prevCard">
@@ -784,6 +796,12 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       pipTela:'escolha a tela', pipStop:'Parar', pipFrames:'{0} frames',
       pipNoVideo:'nenhum vídeo é guardado',
       lockHint:'Escolha um vídeo no passo 1 para continuar.',
+      lockRec:'Gravando. Os frames e a transcrição estão saindo sozinhos — clique em Parar quando terminar.',
+      lockTrRec:'A transcrição está sendo feita ao vivo, enquanto você grava.',
+      lockTrNone:'Esta gravação foi só de frames. Se você tiver a transcrição da reunião, cole ou arraste aqui embaixo — ela entra no PDF pareada com as telas.',
+      lockTrDone:'Feita ao vivo durante a gravação. Não há áudio guardado para transcrever de novo — mas o texto abaixo é seu: dá para corrigir e exportar.',
+      lockDone:'A gravação já trouxe os frames. Como nenhum vídeo é guardado, não há o que varrer de novo — para começar outra, use o passo 1.',
+      recNoSpeech:' Não saiu nenhuma fala porque não havia áudio nesta captura.',
       recHint:'grave uma reunião e receba os frames e a transcrição dos dois canais, sem guardar o vídeo',
       recRun:'Gravando… {0} — clique em Parar quando terminar.',
       recDone:'Gravação de {0} pronta e carregada. Pode extrair os frames.',
@@ -791,6 +809,9 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       recNo:'Este navegador não permite gravar a tela. Use Chrome ou Edge no computador.',
       recEmpty:'A gravação saiu vazia. Tente de novo escolhendo uma janela ou a tela inteira.',
       recMicLbl:'Incluir meu microfone',
+      recTrLbl:'Transcrever enquanto gravo',
+      recTrOn:'A transcrição sai pronta no fim, junto com os frames. Exige baixar o modelo de ~{0} MB antes de começar — uma vez só, e depois fica guardado no navegador.',
+      recTrOff:'Só os frames. Nada é baixado e a gravação começa na hora. Depois dá para colar uma transcrição pronta no passo 2.',
       recWarn:'Nada de vídeo é guardado: durante a gravação a ferramenta separa os frames que importam e transcreve os dois canais de áudio — o seu microfone e o som do computador — em separado. A transcrição divide a máquina com a captura; em computador modesto a tela pode perder alguma troca.',
       recPrep:'Preparando o modelo de transcrição…',
       recNoModel:'Não consegui carregar o modelo: vou guardar os frames sem transcrever.',
@@ -956,6 +977,12 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       pipTela:'pick the screen', pipStop:'Stop', pipFrames:'{0} frames',
       pipNoVideo:'no video is kept',
       lockHint:'Choose a video in step 1 to continue.',
+      lockRec:'Recording. The frames and the transcript are coming out on their own — click Stop when you are done.',
+      lockTrRec:'The transcript is being made live, while you record.',
+      lockTrNone:'This recording was frames only. If you have the meeting transcript, paste or drop it below — it goes into the PDF paired with the screens.',
+      lockTrDone:'Made live during the recording. There is no audio kept to transcribe again — but the text below is yours: you can fix it and export it.',
+      lockDone:'The recording already produced the frames. Since no video is kept, there is nothing to scan again — to start another one, use step 1.',
+      recNoSpeech:' No speech came out because there was no audio in this capture.',
       recHint:'record a meeting and get the frames and both audio channels transcribed, with no video kept',
       recRun:'Recording… {0} — click Stop when you are done.',
       recDone:'{0} recording ready and loaded. You can extract the frames.',
@@ -963,6 +990,9 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       recNo:'This browser cannot record the screen. Use Chrome or Edge on a computer.',
       recEmpty:'The recording came out empty. Try again, picking a window or the whole screen.',
       recMicLbl:'Include my microphone',
+      recTrLbl:'Transcribe while I record',
+      recTrOn:'The transcript is ready at the end, alongside the frames. It needs the ~{0} MB model downloaded first — once only, and then it stays in your browser.',
+      recTrOff:'Frames only. Nothing is downloaded and recording starts right away. You can paste a ready transcript in step 2 afterwards.',
       recWarn:'No video is kept: while recording, the tool pulls out the frames that matter and transcribes the two audio channels separately — your microphone and the computer sound. Transcription shares the machine with the capture; on a modest computer the screen may miss a change.',
       recPrep:'Preparing the transcription model…',
       recNoModel:'Could not load the model: I will keep the frames without transcribing.',
@@ -1126,6 +1156,12 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       pipTela:'elige la pantalla', pipStop:'Detener', pipFrames:'{0} fotogramas',
       pipNoVideo:'no se guarda ningún vídeo',
       lockHint:'Elige un vídeo en el paso 1 para continuar.',
+      lockRec:'Grabando. Los fotogramas y la transcripción salen solos — pulsa Detener cuando termines.',
+      lockTrRec:'La transcripción se está haciendo en vivo, mientras grabas.',
+      lockTrNone:'Esta grabación fue solo de fotogramas. Si tienes la transcripción de la reunión, pégala o arrástrala aquí abajo — entra en el PDF junto a las pantallas.',
+      lockTrDone:'Hecha en vivo durante la grabación. No hay audio guardado para transcribir de nuevo — pero el texto de abajo es tuyo: puedes corregirlo y exportarlo.',
+      lockDone:'La grabación ya trajo los fotogramas. Como no se guarda ningún vídeo, no hay nada que recorrer de nuevo — para empezar otra, usa el paso 1.',
+      recNoSpeech:' No salió ninguna intervención porque no había audio en esta captura.',
       recHint:'graba una reunión y recibe los fotogramas y la transcripción de los dos canales, sin guardar el vídeo',
       recRun:'Grabando… {0} — pulsa Detener cuando termines.',
       recDone:'Grabación de {0} lista y cargada. Ya puedes extraer los fotogramas.',
@@ -1133,6 +1169,9 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       recNo:'Este navegador no permite grabar la pantalla. Usa Chrome o Edge en un ordenador.',
       recEmpty:'La grabación salió vacía. Inténtalo de nuevo eligiendo una ventana o la pantalla completa.',
       recMicLbl:'Incluir mi micrófono',
+      recTrLbl:'Transcribir mientras grabo',
+      recTrOn:'La transcripción sale lista al final, junto con los fotogramas. Requiere descargar el modelo de ~{0} MB antes de empezar — una sola vez, y luego queda guardado en el navegador.',
+      recTrOff:'Solo los fotogramas. No se descarga nada y la grabación empieza al instante. Después puedes pegar una transcripción ya hecha en el paso 2.',
       recWarn:'No se guarda vídeo: durante la grabación la herramienta separa los fotogramas que importan y transcribe los dos canales de audio por separado — tu micrófono y el sonido del ordenador. La transcripción comparte la máquina con la captura; en un ordenador modesto la pantalla puede perder algún cambio.',
       recPrep:'Preparando el modelo de transcripción…',
       recNoModel:'No pude cargar el modelo: guardaré los fotogramas sin transcribir.',
@@ -1366,6 +1405,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     if (currentFile) showMeta();
     $('uiLang').value = LANG;
     $('lang').value = LANG;   // idioma da transcrição acompanha o da interface
+    notaTr();
+    passos();                 // as dicas dos passos não têm data-i18n: são escritas aqui
   }
 
 
@@ -1377,15 +1418,52 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
 
      `temMaterial` e não `currentFile`: a gravação de tela não produz arquivo
      nenhum, e mesmo assim libera a revisão. */
+  /* O erro da primeira versão: destravar os cartões 2 e 3 depois de uma gravação.
+     Eles ficavam coloridos e convidativos com TODOS os botões mortos por dentro
+     — "Transcrever automaticamente" desabilitado, "Extrair frames" desabilitado
+     — e nada na tela explicava por quê. Era o pior dos dois mundos.
+
+     A causa de fundo é que a ferramenta faz dois trabalhos com os mesmos cinco
+     cartões. Com arquivo, os passos 2 e 3 são o trabalho. Com gravação, os dois
+     já aconteceram sozinhos enquanto a pessoa gravava, e não há vídeo guardado
+     para refazer. Então o estado não é "aberto ou travado": é o modo. */
+  const modoAtual = () => {
+    if (liveOn) return 'gravando';
+    if (gravou)  return 'gravado';
+    if (currentFile || (video && video.videoWidth)) return 'arquivo';
+    return 'nada';
+  };
+
   function passos(){
-    const temVideo    = !!(currentFile || (video && video.videoWidth) || liveOn);
-    const temMaterial = temVideo || frames.length > 0;
+    const modo = modoAtual();
     const trancar = (id, aberto) => {
       const el = $(id); if (!el) return;
       if (aberto) el.removeAttribute('inert'); else el.setAttribute('inert', '');
     };
-    trancar('cardTr',     temMaterial);
-    trancar('cardFrames', temMaterial);
+    const dica = (id, chave) => {
+      const el = $(id); if (!el) return;
+      el.textContent = chave ? t(chave) : '';
+      el.classList.toggle('hide', !chave);
+    };
+
+    if (modo === 'arquivo') {
+      trancar('trAuto', true); trancar('trManual', true); trancar('framesCorpo', true);
+      dica('hintTr', null); dica('hintFrames', null);
+    } else if (modo === 'gravando') {
+      trancar('trAuto', false); trancar('trManual', false); trancar('framesCorpo', false);
+      dica('hintTr', 'lockTrRec'); dica('hintFrames', 'lockRec');
+    } else if (modo === 'gravado') {
+      /* O bloco automático fica travado — não há áudio guardado. O texto, não:
+         é o resultado da gravação, e a pessoa pode corrigir e exportar. */
+      trancar('trAuto', false); trancar('trManual', true); trancar('framesCorpo', false);
+      /* Gravação só de frames é outra história: não houve transcrição para
+         explicar, e o que a pessoa precisa saber é que ainda dá para colar uma. */
+      dica('hintTr', liveCues.length ? 'lockTrDone' : 'lockTrNone');
+      dica('hintFrames', 'lockDone');
+    } else {
+      trancar('trAuto', false); trancar('trManual', false); trancar('framesCorpo', false);
+      dica('hintTr', 'lockHint'); dica('hintFrames', 'lockHint');
+    }
     trancar('promptCard', frames.length > 0);
   }
 
@@ -1430,6 +1508,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
        arquivo novo: o PDF diria 30 s para um vídeo de 10 min, e o prompt
        explicaria canais de áudio que não existem neste material. */
     limparLive();
+    gravou = false;          // um arquivo entrou: os passos 2 e 3 voltam a valer
     fileName = f.name; fileSize = f.size; currentFile = f;
     video.src = URL.createObjectURL(f);
     video.onloadedmetadata = async () => {
@@ -1518,6 +1597,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
   };
   $('sens').oninput = () => { $('sensV').textContent = t('sens')[+$('sens').value]; };
   $('reset').onclick = () => location.reload();   // o recarregamento devolve os passos ao início
+  if ($('recTr')) $('recTr').onchange = notaTr;
 
   $('uiLang').onchange = () => {
     LANG = $('uiLang').value;
@@ -1844,6 +1924,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
 
   let liveOn = false, liveDur = 0, liveCues = [], liveCanais = null, liveW = 0, liveH = 0;
   let abrindoCaptura = false, emCauda = false, pularCauda = false;
+  let gravou = false;   // já houve uma captura ao vivo nesta página
 
   /* ---- janelinha de controle, flutuando sobre a tela compartilhada ----
      Gravando, esta aba fica ATRÁS do que está sendo compartilhado: a pessoa não
@@ -2189,7 +2270,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     if (liveOn || abrindoCaptura) return;
     abrindoCaptura = true;
 
-    const querMic = $('recMic').checked;
+    const querTranscrever = !$('recTr') || $('recTr').checked;
+    const querMic = querTranscrever && $('recMic').checked;
     let telaStream = null, micStream = null, ctx = null;
     const canais = [];
     let relogio = null, relFrames = null;
@@ -2241,19 +2323,24 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       } catch (e) { micStream = null; }
     }
 
-    // ---- 2. o modelo, também antes de compartilhar a tela ----
+    /* ---- 2. o modelo, também antes de compartilhar a tela ----
+       Só baixa se a pessoa pediu transcrição no passo 1. Sem isso, gravar custava
+       obrigatoriamente 77 a 586 MB de espera antes do primeiro frame — mesmo para
+       quem só queria as telas. */
     $('rec').disabled = true;
     let podeTranscrever = false;
-    try {
-      $('recMsg').textContent = t('recPrep');
-      controle('modelo');
-      const modelId = $('model').value;
-      if (pipeId !== modelId) { pipe = await buildPipe(modelId); pipeId = modelId; }
-      podeTranscrever = true;
-      prog(null); st('');
-    } catch (e) {
-      avisos.push(t('recNoModel'));
-      prog(null); st('');
+    if (querTranscrever) {
+      try {
+        $('recMsg').textContent = t('recPrep');
+        controle('modelo');
+        const modelId = $('model').value;
+        if (pipeId !== modelId) { pipe = await buildPipe(modelId); pipeId = modelId; }
+        podeTranscrever = true;
+        prog(null); st('');
+      } catch (e) {
+        avisos.push(t('recNoModel'));
+        prog(null); st('');
+      }
     }
     $('rec').disabled = false;
 
@@ -2271,9 +2358,11 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
 
     const temSom = telaStream.getAudioTracks().length > 0;
     const temMic = !!micStream;
-    if (!temSom && !temMic) avisos.push(t('recAudioNo'));
-    else if (querMic && !temMic) avisos.push(t('recMicNo'));
-    else if (!temSom && temMic) avisos.push(t('recSysNo'));
+    if (querTranscrever) {
+      if (!temSom && !temMic) avisos.push(t('recAudioNo'));
+      else if (querMic && !temMic) avisos.push(t('recMicNo'));
+      else if (!temSom && temMic) avisos.push(t('recSysNo'));
+    }
 
     const trilhaTela = telaStream.getVideoTracks()[0];
     const morreu = () => !trilhaTela || trilhaTela.readyState === 'ended';
@@ -2407,11 +2496,17 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       }
       $('liveStat').textContent = '';
       showMeta();
+      /* "0 falas" sem explicação vira suspeita de defeito. O aviso de que não
+         havia áudio aparecia durante a gravação e sumia justamente no fim. */
+      /* Só é surpresa quem pediu transcrição. Quem marcou "só os frames" no
+         passo 1 já sabe por que não há fala. */
+      const semFala = (querTranscrever && liveCues.length === 0) ? t('recNoSpeech') : '';
       $('recMsg').innerHTML = `<span class="ok">${t('recDone2', fmt(liveDur), frames.length, liveCues.length)}` +
-        contarDesempenho() + `</span>`;
+        semFala + contarDesempenho() + `</span>`;
       $('prevCard').classList.remove('hide');
       $('extract').disabled = true;      // não há vídeo para varrer de novo
       $('auto').disabled = true;
+      gravou = true;
       render();
       passos();
       irPara('prevCard', true);
@@ -2561,10 +2656,24 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
   };
   const usaPlaca = () => !!($('gpu') && $('gpu').checked);
 
+  /* A pergunta "quer transcrição?" agora é respondida no passo 1, antes de
+     qualquer download — e é isso que permite gravar sem baixar nada. */
+  function notaTr(){
+    const el = $('recTrNote'); if (!el) return;
+    const querTr = $('recTr') && $('recTr').checked;
+    el.textContent = querTr ? t('recTrOn', tamanhoModelo()) : t('recTrOff');
+  }
+
+  const tamanhoModelo = () => {
+    const t2 = TAMANHOS[$('model').value];
+    return t2 ? (usaPlaca() ? t2.gpu : t2.cpu) : '?';
+  };
+
   function mostrarTamanho(){
     const t2 = TAMANHOS[$('model').value];
     if (!t2) { $('modelSize').textContent = ''; return; }
     $('modelSize').textContent = t('dlSize', usaPlaca() ? t2.gpu : t2.cpu);
+    notaTr();                 // o tamanho anunciado no passo 1 acompanha o modelo escolhido
   }
 
   /* Relógio do modelo: segundos de áudio que entraram, contra tempo de parede
@@ -3203,6 +3312,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
 
   $('copyPrompt').disabled = true;
   applyLang();
+  notaTr();
   passos();
   medir('abriu_ferramenta');
 
