@@ -37,6 +37,17 @@
      vez de ficar ali cheio de controles ativos que não levam a lugar nenhum.
      `inert` tira o bloco da ordem de foco e da árvore de acessibilidade — bem
      melhor que pointer-events, que só engana o mouse. */
+  /* Colapso: o passo que ainda não chegou mostra só o cabeçalho e a dica. Sem
+     isso a página abre com cinco cartões e uns vinte controles antes de a
+     pessoa decidir qualquer coisa — e o passo 1, que é o único que importa
+     naquele momento, some no meio.
+
+     grid-template-rows 0fr → 1fr anima altura sem precisar medir nada em JS. */
+  .dobra{display:grid;grid-template-rows:1fr;transition:grid-template-rows .28s ease}
+  .dobra > div{overflow:hidden;min-height:0}
+  .card.fechado .dobra{grid-template-rows:0fr}
+  .card.fechado{padding-bottom:20px}
+  @media (prefers-reduced-motion:reduce){ .dobra{transition:none} }
   [inert]{opacity:.45;filter:saturate(.4)}
   .lockHint{margin:-6px 0 14px;font-size:13px;color:var(--muted);
             border-left:3px solid var(--line);padding-left:11px}
@@ -111,6 +122,15 @@
         padding:8px 10px;font-size:13px;line-height:1.5;background:var(--bg)}
   .live:empty{display:none}
   .live p{margin:0 0 4px}
+  /* Medidores: a pessoa precisa VER que está captando. Sem isso, "não saiu som"
+     só se descobre no fim, quando não dá mais para refazer a reunião. */
+  .vus{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:10px}
+  .vu{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted)}
+  .vuBar{width:104px;height:7px;border-radius:4px;background:var(--line);overflow:hidden}
+  .vuBar i{display:block;height:100%;width:0;background:var(--accent);transition:width .08s linear}
+  .vu.off .vuBar i{background:var(--err)}
+  button.ghost.rec{border-color:var(--err);color:var(--err)}
+  .vu.off span{color:var(--err)}
   .live .who{font-weight:600;color:var(--accent)}
   .live .who.sys{color:var(--warn)}
   .live .tm{font:11px ui-monospace,Menlo,monospace;color:var(--muted);margin-right:6px}
@@ -168,6 +188,12 @@
       <p class="note" data-i18n="recWarn" style="margin:6px 0 0"></p>
     </div>
     <div class="hide" id="liveBox" style="margin-top:12px">
+      <div class="vus" id="vuBox">
+        <div class="vu"><span data-i18n="vuMic"></span><div class="vuBar"><i id="vuMic"></i></div></div>
+        <div class="vu"><span data-i18n="vuSys"></span><div class="vuBar"><i id="vuSys"></i></div></div>
+        <button class="ghost sm hide" id="calar"></button>
+      </div>
+      <div class="status" id="calarMsg"></div>
       <div class="status" id="liveStat"></div>
       <div class="live" id="liveTail"></div>
     </div>
@@ -184,6 +210,7 @@
   <div class="card" id="cardTr">
     <h2><span class="step">2</span><span data-i18n="s2"></span></h2>
     <p class="lockHint hide" id="hintTr"></p>
+    <div class="dobra"><div>
 
     <div id="trAuto">
     <div class="autobox">
@@ -232,11 +259,13 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       <button class="ghost sm" id="expTxt">.txt</button>
     </div>
     </div><!-- /trManual -->
+    </div></div><!-- /dobra -->
   </div>
 
   <div class="card" id="cardFrames">
     <h2><span class="step">3</span><span data-i18n="s3"></span></h2>
     <p class="lockHint hide" id="hintFrames"></p>
+    <div class="dobra"><div>
     <div id="framesCorpo">
     <div class="grid">
       <div>
@@ -295,10 +324,12 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     <div class="row" style="margin-top:14px">
       <button class="ghost" id="reset" data-i18n="resetBtn"></button>
     </div>
+    </div></div><!-- /dobra -->
   </div>
 
   <div class="card hide" id="prevCard">
     <h2><span class="step">4</span><span data-i18n="s4"></span></h2>
+    <div class="dobra"><div>
     <div class="row">
       <span class="tag"><span data-i18n="tKeep"></span> <b id="nKeep">0</b></span>
       <span class="tag"><span data-i18n="tOff"></span> <b id="nOff">0</b></span>
@@ -323,11 +354,13 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       <button class="ghost" id="json" data-i18n="jsonBtn"></button>
       <span class="status" id="pdfStatus"></span>
     </div>
+    </div></div><!-- /dobra -->
   </div>
 
   <div class="card" id="promptCard">
-    <p class="lockHint hide" data-i18n="lockHint"></p>
     <h2><span class="step">5</span><span data-i18n="s5"></span></h2>
+    <p class="lockHint hide" id="hintPrompt"></p>
+    <div class="dobra"><div>
     <p class="status" style="margin:-6px 0 14px" data-i18n="s5sub"></p>
     <div class="row">
       <select id="goal" style="max-width:340px">
@@ -345,6 +378,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
                   background:var(--bg);color:var(--ink);font:inherit;font-size:14px">
     <pre id="promptOut"></pre>
     <p class="note" data-i18n="s5note"></p>
+    </div></div><!-- /dobra -->
   </div>
 
   <p class="status" style="text-align:center;margin-top:26px">
@@ -789,6 +823,15 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       demoHasAudio:'O exemplo tem narração: a transcrição já veio preenchida, mas você pode apagá-la e clicar em "Transcrever automaticamente" para ver o reconhecimento de voz funcionando.',
       mark:'Marcar este momento',
       recBtn:'Gravar a tela', recStopBtn:'Parar gravação',
+      micNegado:'O navegador bloqueou o microfone para este site. Clique no cadeado ao lado do endereço, permita o microfone e grave de novo.',
+      micSemAparelho:'Não encontrei microfone nenhum ligado neste computador.',
+      micOcupado:'O microfone está ocupado por outro programa — feche a reunião ou o gravador que está usando ele.',
+      micFalhou:'Não consegui abrir o microfone. A gravação segue com o som do computador.',
+      micMudo:'Fechar meu microfone', micVolta:'Reabrir meu microfone',
+      micFechado:'microfone fechado — nada seu está sendo captado a partir de agora',
+      micAberto:'microfone reaberto — sua voz volta a entrar na transcrição',
+      vuMic:'você (microfone)', vuSys:'computador',
+      recParado:'Atenção: {0} não se mexeu em nenhum momento — a transcrição desse lado saiu vazia.',
       recAskMic:'Permita o microfone nesta aba — a tela só será pedida depois.',
       recAskTela:'Agora escolha a tela ou a janela para compartilhar.',
       pipTit:'ClipContext — gravando',
@@ -796,6 +839,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       pipTela:'escolha a tela', pipStop:'Parar', pipFrames:'{0} frames',
       pipNoVideo:'nenhum vídeo é guardado',
       lockHint:'Escolha um vídeo no passo 1 para continuar.',
+      lockPrompt:'O texto para a IA é montado depois que os frames existirem.',
       lockRec:'Gravando. Os frames e a transcrição estão saindo sozinhos — clique em Parar quando terminar.',
       lockTrRec:'A transcrição está sendo feita ao vivo, enquanto você grava.',
       lockTrNone:'Esta gravação foi só de frames. Se você tiver a transcrição da reunião, cole ou arraste aqui embaixo — ela entra no PDF pareada com as telas.',
@@ -807,6 +851,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       recDone:'Gravação de {0} pronta e carregada. Pode extrair os frames.',
       recDeny:'Você cancelou, ou o navegador não deu permissão para capturar a tela.',
       recNo:'Este navegador não permite gravar a tela. Use Chrome ou Edge no computador.',
+      recCurta:'A gravação durou menos de dois segundos e não deu tempo de capturar nada. Clique em Gravar a tela de novo e deixe rodar até aparecer o que você quer registrar.',
       recEmpty:'A gravação saiu vazia. Tente de novo escolhendo uma janela ou a tela inteira.',
       recMicLbl:'Incluir meu microfone',
       recTrLbl:'Transcrever enquanto gravo',
@@ -970,6 +1015,15 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       demoHasAudio:'The example is narrated: the transcript comes pre-filled, but you can clear it and click "Transcribe automatically" to watch speech recognition work.',
       mark:'Mark this moment',
       recBtn:'Record the screen', recStopBtn:'Stop recording',
+      micNegado:'The browser blocked the microphone for this site. Click the padlock next to the address, allow the microphone and record again.',
+      micSemAparelho:'I could not find any microphone connected to this computer.',
+      micOcupado:'The microphone is busy in another program — close the meeting or recorder that is using it.',
+      micFalhou:'I could not open the microphone. Recording continues with the computer audio.',
+      micMudo:'Close my microphone', micVolta:'Reopen my microphone',
+      micFechado:'microphone closed — nothing of yours is being captured from now on',
+      micAberto:'microphone reopened — your voice goes back into the transcript',
+      vuMic:'you (microphone)', vuSys:'computer',
+      recParado:'Heads up: {0} never moved — the transcript on that side came out empty.',
       recAskMic:'Allow the microphone on this tab — the screen is only asked for afterwards.',
       recAskTela:'Now pick the screen or window to share.',
       pipTit:'ClipContext — recording',
@@ -977,6 +1031,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       pipTela:'pick the screen', pipStop:'Stop', pipFrames:'{0} frames',
       pipNoVideo:'no video is kept',
       lockHint:'Choose a video in step 1 to continue.',
+      lockPrompt:'The text for the AI is written once the frames exist.',
       lockRec:'Recording. The frames and the transcript are coming out on their own — click Stop when you are done.',
       lockTrRec:'The transcript is being made live, while you record.',
       lockTrNone:'This recording was frames only. If you have the meeting transcript, paste or drop it below — it goes into the PDF paired with the screens.',
@@ -988,6 +1043,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       recDone:'{0} recording ready and loaded. You can extract the frames.',
       recDeny:'You cancelled, or the browser did not grant screen capture permission.',
       recNo:'This browser cannot record the screen. Use Chrome or Edge on a computer.',
+      recCurta:'The recording lasted less than two seconds, too short to capture anything. Click Record the screen again and let it run until what you want to keep is on screen.',
       recEmpty:'The recording came out empty. Try again, picking a window or the whole screen.',
       recMicLbl:'Include my microphone',
       recTrLbl:'Transcribe while I record',
@@ -1149,6 +1205,15 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       driveNoScope:'Google denegó el acceso a este archivo. Elige el archivo por el selector y no por un acceso directo.',
       driveBlocked:'El navegador bloqueó la ventana de Google. Permite las ventanas emergentes para este sitio e inténtalo de nuevo.',
       recBtn:'Grabar la pantalla', recStopBtn:'Detener grabación',
+      micNegado:'El navegador bloqueó el micrófono para este sitio. Pulsa el candado junto a la dirección, permite el micrófono y graba de nuevo.',
+      micSemAparelho:'No encontré ningún micrófono conectado a este ordenador.',
+      micOcupado:'El micrófono está ocupado por otro programa — cierra la reunión o la grabadora que lo está usando.',
+      micFalhou:'No pude abrir el micrófono. La grabación sigue con el sonido del ordenador.',
+      micMudo:'Cerrar mi micrófono', micVolta:'Reabrir mi micrófono',
+      micFechado:'micrófono cerrado — nada tuyo se está captando a partir de ahora',
+      micAberto:'micrófono reabierto — tu voz vuelve a entrar en la transcripción',
+      vuMic:'tú (micrófono)', vuSys:'ordenador',
+      recParado:'Atención: {0} no se movió en ningún momento — la transcripción de ese lado salió vacía.',
       recAskMic:'Permite el micrófono en esta pestaña — la pantalla se pide después.',
       recAskTela:'Ahora elige la pantalla o la ventana que vas a compartir.',
       pipTit:'ClipContext — grabando',
@@ -1156,6 +1221,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       pipTela:'elige la pantalla', pipStop:'Detener', pipFrames:'{0} fotogramas',
       pipNoVideo:'no se guarda ningún vídeo',
       lockHint:'Elige un vídeo en el paso 1 para continuar.',
+      lockPrompt:'El texto para la IA se arma cuando existan los fotogramas.',
       lockRec:'Grabando. Los fotogramas y la transcripción salen solos — pulsa Detener cuando termines.',
       lockTrRec:'La transcripción se está haciendo en vivo, mientras grabas.',
       lockTrNone:'Esta grabación fue solo de fotogramas. Si tienes la transcripción de la reunión, pégala o arrástrala aquí abajo — entra en el PDF junto a las pantallas.',
@@ -1167,6 +1233,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       recDone:'Grabación de {0} lista y cargada. Ya puedes extraer los fotogramas.',
       recDeny:'Cancelaste, o el navegador no dio permiso para capturar la pantalla.',
       recNo:'Este navegador no permite grabar la pantalla. Usa Chrome o Edge en un ordenador.',
+      recCurta:'La grabación duró menos de dos segundos y no dio tiempo de capturar nada. Pulsa Grabar la pantalla otra vez y déjala correr hasta que aparezca lo que quieres registrar.',
       recEmpty:'La grabación salió vacía. Inténtalo de nuevo eligiendo una ventana o la pantalla completa.',
       recMicLbl:'Incluir mi micrófono',
       recTrLbl:'Transcribir mientras grabo',
@@ -1340,6 +1407,26 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
 
   const tr = t;   // alias: no laço de varredura a variável de tempo sombreia t()
 
+  /* Medidor de nível: pico, não média — média esconde a fala. Guarda também o
+     maior valor que já viu, e é isso que permite avisar no fim que um dos lados
+     nunca se mexeu, em vez de deixar a pessoa descobrir lendo a transcrição. */
+  function medidor(ctx, node, alvo){
+    const an = ctx.createAnalyser();
+    an.fftSize = 512;
+    node.connect(an);
+    const buf = new Uint8Array(an.frequencyBinCount);
+    const f = () => {
+      an.getByteTimeDomainData(buf);
+      let pico = 0;
+      for (let i = 0; i < buf.length; i++) pico = Math.max(pico, Math.abs(buf[i] - 128));
+      if (pico > f.maior) f.maior = pico;
+      f.agora = pico;
+      if (alvo) alvo.style.width = Math.min(100, pico / 60 * 100) + '%';
+    };
+    f.maior = 0; f.agora = 0;
+    return f;
+  }
+
   /* ================= medição =================
      Três marcos: abriu, carregou vídeo, baixou saída. Nada além disso sai daqui.
 
@@ -1445,13 +1532,22 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       el.textContent = chave ? t(chave) : '';
       el.classList.toggle('hide', !chave);
     };
+    /* Fechado ≠ travado. Fechado é sobre atenção — mostra só o cabeçalho e a
+       dica, para a página não abrir com vinte controles antes da primeira
+       decisão. Travado é sobre poder — `inert`, que tira da ordem de foco. */
+    const dobrar = (id, aberto) => {
+      const el = $(id); if (!el) return;
+      el.classList.toggle('fechado', !aberto);
+    };
 
     if (modo === 'arquivo') {
       trancar('trAuto', true); trancar('trManual', true); trancar('framesCorpo', true);
       dica('hintTr', null); dica('hintFrames', null);
+      dobrar('cardTr', true); dobrar('cardFrames', true);
     } else if (modo === 'gravando') {
       trancar('trAuto', false); trancar('trManual', false); trancar('framesCorpo', false);
       dica('hintTr', 'lockTrRec'); dica('hintFrames', 'lockRec');
+      dobrar('cardTr', false); dobrar('cardFrames', false);
     } else if (modo === 'gravado') {
       /* O bloco automático fica travado — não há áudio guardado. O texto, não:
          é o resultado da gravação, e a pessoa pode corrigir e exportar. */
@@ -1460,11 +1556,19 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
          explicar, e o que a pessoa precisa saber é que ainda dá para colar uma. */
       dica('hintTr', liveCues.length ? 'lockTrDone' : 'lockTrNone');
       dica('hintFrames', 'lockDone');
+      /* O passo 2 continua ABERTO aqui de propósito: é onde está o texto que a
+         gravação acabou de produzir. Fechá-lo esconderia o resultado. */
+      dobrar('cardTr', true); dobrar('cardFrames', false);
     } else {
       trancar('trAuto', false); trancar('trManual', false); trancar('framesCorpo', false);
       dica('hintTr', 'lockHint'); dica('hintFrames', 'lockHint');
+      dobrar('cardTr', false); dobrar('cardFrames', false);
     }
-    trancar('promptCard', frames.length > 0);
+    const temFrames = frames.length > 0;
+    trancar('promptCard', temFrames);
+    dobrar('promptCard', temFrames);
+    dica('hintPrompt', temFrames ? null : 'lockPrompt');
+    dobrar('prevCard', temFrames);
   }
 
   /* Rolagem suave até o próximo passo. Respeita quem pediu menos movimento no
@@ -1925,6 +2029,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
   let liveOn = false, liveDur = 0, liveCues = [], liveCanais = null, liveW = 0, liveH = 0;
   let abrindoCaptura = false, emCauda = false, pularCauda = false;
   let gravou = false;   // já houve uma captura ao vivo nesta página
+  let micErro = '';     // por que o microfone não abriu, quando não abriu
+  let alternarMic = null, micAberto = () => false;
 
   /* ---- janelinha de controle, flutuando sobre a tela compartilhada ----
      Gravando, esta aba fica ATRÁS do que está sendo compartilhado: a pessoa não
@@ -1938,6 +2044,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
 
      Onde a API não existe (Firefox, Safari) tudo segue igual, sem a janelinha. */
   let pipWin = null, pipTexto = null, pipRelogio = null, pipFrames = null;
+  let pipVm = null, pipVs = null, pipCalar = null;
 
   const PIP_CSS = `
     *{box-sizing:border-box;margin:0}
@@ -1954,13 +2061,19 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
            color:#121419;font:600 15px system-ui,sans-serif;cursor:pointer}
     button:hover{filter:brightness(1.08)}
     button:disabled{opacity:.5;cursor:default}
+    button.sec{background:transparent;color:#e9ebf1;border:1px solid #282c36;
+               font-size:13px;padding:8px}
+    button.sec.off{border-color:#ef8484;color:#ef8484}
+    .vus{display:flex;gap:6px}
+    .vb{flex:1;height:6px;border-radius:3px;background:#282c36;overflow:hidden}
+    .vb i{display:block;height:100%;width:0;background:#737cf0}
     .pe{font-size:11.5px;color:#737cf0}
   `;
 
   async function abrirControle(){
     if (!('documentPictureInPicture' in window)) return;
     try {
-      pipWin = await documentPictureInPicture.requestWindow({ width: 250, height: 172 });
+      pipWin = await documentPictureInPicture.requestWindow({ width: 258, height: 236 });
     } catch (e) { pipWin = null; return; }
 
     const d = pipWin.document;
@@ -1969,25 +2082,36 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     d.body.innerHTML =
       '<div class="top"><span class="dot"></span><span class="rel" id="rel">0:00</span></div>' +
       '<div class="txt" id="txt"></div>' +
+      '<div class="vus"><div class="vb"><i id="vm"></i></div><div class="vb"><i id="vs"></i></div></div>' +
+      '<button id="calar" class="sec hide"></button>' +
       '<button id="stop" disabled></button>' +
       '<div class="pe">' + t('pipNoVideo') + '</div>';
 
     pipRelogio = d.getElementById('rel');
     pipTexto   = d.getElementById('txt');
     pipFrames  = d.getElementById('stop');
+    pipVm      = d.getElementById('vm');
+    pipVs      = d.getElementById('vs');
+    pipCalar   = d.getElementById('calar');
     pipFrames.textContent = t('pipStop');
     pipFrames.onclick = () => { if (pararLive) pararLive(); };
+    /* O botão da janelinha não duplica lógica: chama o mesmo `alternarMic` da
+       aba, e o rótulo dos dois é repintado pela mesma função. */
+    pipCalar.onclick = () => { if (alternarMic) alternarMic(); };
     controle('prep');
 
     /* Fechar a janelinha NÃO para a gravação: fechar sem querer não pode
        destruir uma reunião de uma hora. O botão da aba continua valendo. */
-    pipWin.addEventListener('pagehide', () => { pipWin = null; pipRelogio = pipTexto = pipFrames = null; });
+    pipWin.addEventListener('pagehide', () => {
+      pipWin = null; pipRelogio = pipTexto = pipFrames = pipVm = pipVs = pipCalar = null;
+    });
   }
 
   function controle(etapa, dados){
     if (!pipWin) return;
     if (etapa === 'gravando') {
       if (pipFrames) pipFrames.disabled = false;
+      controleMic();
       if (pipRelogio) pipRelogio.textContent = fmt(Math.floor(dados.seg));
       if (pipTexto) pipTexto.textContent = t('pipFrames', dados.frames);
       return;
@@ -1996,9 +2120,26 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     if (pipTexto) pipTexto.textContent = t(rotulos[etapa] || 'pipPrep');
   }
 
+  /* Espelhos da janelinha. Copiam largura e rótulo — não há segundo medidor
+     nem segunda fonte de verdade. */
+  function controleVu(mic, sys){
+    if (!pipWin) return;
+    if (pipVm) pipVm.style.width = mic < 0 ? '0' : Math.min(100, mic / 60 * 100) + '%';
+    if (pipVs) pipVs.style.width = sys < 0 ? '0' : Math.min(100, sys / 60 * 100) + '%';
+  }
+
+  function controleMic(){
+    if (!pipWin || !pipCalar) return;
+    if (!alternarMic) { pipCalar.classList.add('hide'); return; }
+    const on = micAberto();
+    pipCalar.classList.remove('hide');
+    pipCalar.textContent = on ? t('micMudo') : t('micVolta');
+    pipCalar.classList.toggle('off', !on);
+  }
+
   function fecharControle(){
     if (pipWin) { try { pipWin.close(); } catch (e) {} }
-    pipWin = null; pipRelogio = pipTexto = pipFrames = null;
+    pipWin = null; pipRelogio = pipTexto = pipFrames = pipVm = pipVs = pipCalar = null;
   }
   let liveAgora = () => 0;
 
@@ -2110,7 +2251,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     no.connect(mudo); mudo.connect(ctx.destination);
 
     return {
-      rotulo, classe,
+      rotulo, classe, src,
       segundos: () => disponivel / SR_ASR,
       /* Retira n segundos do começo da fila. Devolve null se não houver. */
       tirar(seg){
@@ -2270,12 +2411,17 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     if (liveOn || abrindoCaptura) return;
     abrindoCaptura = true;
 
+    /* Zera o fechamento da captura anterior: um clique em Parar no primeiro
+       instante desta não pode acionar o `pararLive` da gravação passada. */
+    pararLive = null;
+    micErro = '';
     const querTranscrever = !$('recTr') || $('recTr').checked;
     const querMic = querTranscrever && $('recMic').checked;
     let telaStream = null, micStream = null, ctx = null;
     const canais = [];
     let relogio = null, relFrames = null;
-    const avisos = [];
+    const avisos = [];      // pintados enquanto grava
+    const avisosFim = [];   // só fazem sentido depois de parar
 
     /* A janelinha flutuante nasce aqui, antes do primeiro `await`: pedir uma
        janela de picture-in-picture exige gesto do usuário, e o gesto não
@@ -2317,10 +2463,24 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       controle('mic');
       $('recMsg').textContent = t('recAskMic');
       try {
+        /* echoCancellation porque o som do computador sai pelo alto-falante e
+           volta pelo microfone: sem isso os dois canais se contaminam e a
+           separação "microfone × computador" perde o sentido. */
         micStream = await navigator.mediaDevices.getUserMedia({
           audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }
         });
-      } catch (e) { micStream = null; }
+      } catch (e) {
+        micStream = null;
+        /* Antes este catch era mudo: o microfone falhava, a gravação seguia, e a
+           pessoa só descobria no fim que não havia fala nenhuma. Cada motivo tem
+           uma saída diferente, e dizer qual é a diferença entre resolver em dez
+           segundos e desistir. */
+        const nome = (e && e.name) || '';
+        micErro = nome === 'NotAllowedError'  ? t('micNegado')
+                : nome === 'NotFoundError'    ? t('micSemAparelho')
+                : nome === 'NotReadableError' ? t('micOcupado')
+                : t('micFalhou');
+      }
     }
 
     /* ---- 2. o modelo, também antes de compartilhar a tela ----
@@ -2348,9 +2508,22 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     controle('tela');
     $('recMsg').textContent = t('recAskTela');
     try {
+      /* As três chaves depois de `audio` vieram do SalaVox, e cada uma resolve
+         um erro que a pessoa comete no seletor do navegador:
+
+         systemAudio:'include'        -> a caixa "compartilhar áudio" já aparece
+                                         MARCADA. Esquecer de marcar era a causa
+                                         mais comum de gravação sem som.
+         selfBrowserSurface:'exclude' -> tira esta própria aba da lista, que não
+                                         é o que ninguém quer compartilhar.
+         surfaceSwitching:'include'   -> permite trocar de janela no meio sem
+                                         encerrar a captura. */
       telaStream = await navigator.mediaDevices.getDisplayMedia({
         video: { frameRate: 12 },     // 12 q/s bastam: o que interessa é a troca de tela
-        audio: true
+        audio: true,
+        systemAudio: 'include',
+        selfBrowserSurface: 'exclude',
+        surfaceSwitching: 'include'
       });
     } catch (e) {
       return desistir(t('recDeny'), 'err');
@@ -2359,8 +2532,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     const temSom = telaStream.getAudioTracks().length > 0;
     const temMic = !!micStream;
     if (querTranscrever) {
+      if (querMic && !temMic && micErro) avisos.push(micErro);
       if (!temSom && !temMic) avisos.push(t('recAudioNo'));
-      else if (querMic && !temMic) avisos.push(t('recMicNo'));
       else if (!temSom && temMic) avisos.push(t('recSysNo'));
     }
 
@@ -2408,6 +2581,56 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     }
     liveCanais = canais.map(c => c.rotulo);
 
+    /* ---- medidores e o botão de fechar o microfone ----
+       Os dois vêm do SalaVox. O medidor responde "está captando?" enquanto dá
+       tempo de consertar; o botão responde a um pedido de reunião real: fechar
+       o microfone na reunião não fecha o microfone que o navegador entregou a
+       esta página. Silenciar-se no Teams não impede a captura aqui. */
+    let medeMic = null, medeSys = null, anima = 0;
+    if (ctx) {
+      const doMic = canais.find(c => c.classe === 'mic');
+      const doSys = canais.find(c => c.classe === 'sys');
+      if (doMic) medeMic = medidor(ctx, doMic.src, $('vuMic'));
+      if (doSys) medeSys = medidor(ctx, doSys.src, $('vuSys'));
+    }
+    $('vuBox').classList.toggle('hide', !medeMic && !medeSys);
+    $('vuMic').parentElement.parentElement.classList.toggle('off', !medeMic);
+    $('vuSys').parentElement.parentElement.classList.toggle('off', !medeSys);
+    $('calarMsg').textContent = '';
+
+    if (micStream) {
+      const trilhaMic = micStream.getAudioTracks()[0];
+      $('calar').classList.remove('hide');
+      $('calar').textContent = t('micMudo');
+      micAberto = () => !trilhaMic || trilhaMic.enabled;
+      alternarMic = () => {
+        if (!trilhaMic) return;
+        /* `enabled = false` e não um ganho zerado: a trilha desligada entrega
+           silêncio digital sem interromper o fluxo, então os dois canais não
+           saem de sincronia. */
+        trilhaMic.enabled = !trilhaMic.enabled;
+        const on = trilhaMic.enabled;
+        $('calar').textContent = on ? t('micMudo') : t('micVolta');
+        $('calar').classList.toggle('rec', !on);
+        $('calarMsg').innerHTML = on
+          ? `<span class="ok">${t('micAberto')}</span>`
+          : `<span class="err">${t('micFechado')}</span>`;
+        controleMic();
+      };
+      $('calar').onclick = alternarMic;
+    } else {
+      $('calar').classList.add('hide');
+      alternarMic = null; micAberto = () => false;
+    }
+
+    const desenhar = () => {
+      if (medeMic) medeMic();
+      if (medeSys) medeSys();
+      controleVu(medeMic ? medeMic.agora : -1, medeSys ? medeSys.agora : -1);
+      anima = requestAnimationFrame(desenhar);
+    };
+    if (medeMic || medeSys) desenhar();
+
     const t0 = performance.now();
     liveAgora = () => (performance.now() - t0) / 1000;
     const agora = liveAgora;
@@ -2426,19 +2649,39 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     };
     pintarRecMsg();
 
-    // ---- laço dos frames: guarda só quando a tela muda ----
+    /* ---- laço dos frames: guarda só quando a tela muda ----
+       O primeiro `setInterval` só dispara 700 ms depois. Quem começava e parava
+       logo em seguida terminava com ZERO frames — a tela sumia e não sobrava
+       nada, que era exatamente a aparência de um defeito. Agora existe uma
+       captura de abertura, que tenta assim que o vídeo ganha dimensão, e uma de
+       fechamento, no parar. */
     let prevSig = null;
-    relFrames = setInterval(() => {
-      if (!liveOn || !video.videoWidth) return;
-      if (frames.length >= maxf) return;
+
+    const capturar = (forcar) => {
+      if (!video.videoWidth) return false;
+      if (frames.length >= maxf) return false;
       let sig;
-      try { sig = signature(); } catch (e) { return; }
+      try { sig = signature(); } catch (e) { return false; }
       if (!liveW) { liveW = video.videoWidth; liveH = video.videoHeight; showMeta(); }
-      if (prevSig === null || diff(prevSig, sig) >= thr) {
-        frames.push({ t: agora(), img: snap(900, q), keep: true, sig });
-        prevSig = sig;
-        atualizarLive();
+      if (!forcar && prevSig !== null && diff(prevSig, sig) < thr) return false;
+      frames.push({ t: agora(), img: snap(900, q), keep: true, sig });
+      prevSig = sig;
+      atualizarLive();
+      return true;
+    };
+
+    /* O `videoWidth` não fica pronto no mesmo instante do play(). Em vez de
+       chutar um atraso, tenta por até dois segundos e desiste em silêncio. */
+    (async () => {
+      for (let i = 0; i < 20 && liveOn && !frames.length; i++) {
+        if (capturar(true)) return;
+        await new Promise(r => setTimeout(r, 100));
       }
+    })();
+
+    relFrames = setInterval(() => {
+      if (!liveOn) return;
+      capturar(false);
     }, PASSO_FRAME_MS);
 
     // ---- relógio e janelas de transcrição ----
@@ -2455,7 +2698,19 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
 
     pararLive = async () => {
       if (!liveOn) return;
+      /* Uma última foto antes de derrubar tudo: a tela do momento em que a
+         pessoa clicou em Parar costuma ser a que ela queria guardar, e entre
+         dois tiques de 700 ms ela se perderia. */
+      try { capturar(!frames.length); } catch (e) {}
       liveOn = false;
+      if (anima) cancelAnimationFrame(anima);
+      /* Pico máximo de toda a gravação abaixo de 3 significa linha reta: aquele
+         lado nunca produziu som. Melhor dizer agora do que deixar a pessoa
+         descobrir lendo uma transcrição pela metade. */
+      const parados = [];
+      if (medeMic && medeMic.maior < 3) parados.push(t('vuMic'));
+      if (medeSys && medeSys.maior < 3) parados.push(t('vuSys'));
+      if (parados.length) avisosFim.push(t('recParado', parados.join(' e ')));
       fecharControle();
       clearInterval(relogio); clearInterval(relFrames);
       pintarRecMsg = () => {};
@@ -2489,9 +2744,16 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       trabalhando(false);
       abrindoCaptura = false;
 
+      /* Toda saída daqui tem que deixar a tela num estado utilizável. A versão
+         anterior escapava por este `return` sem marcar `gravou` nem chamar
+         `passos()`: a pessoa ficava com os cartões travados, uma dica velha
+         dizendo "a transcrição está sendo feita ao vivo", e nenhuma explicação. */
+      gravou = true;
       if (!frames.length && !liveCues.length) {
-        $('recMsg').innerHTML = `<span class="err">${t('recEmpty')}</span>`;
+        $('recMsg').innerHTML = `<span class="err">${t(liveDur < 2 ? 'recCurta' : 'recEmpty')}` +
+          (avisosFim.length ? ' ' + avisosFim.join(' ') : '') + `</span>`;
         $('liveBox').classList.add('hide');
+        passos();
         return;
       }
       $('liveStat').textContent = '';
@@ -2501,12 +2763,12 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       /* Só é surpresa quem pediu transcrição. Quem marcou "só os frames" no
          passo 1 já sabe por que não há fala. */
       const semFala = (querTranscrever && liveCues.length === 0) ? t('recNoSpeech') : '';
+      const alerta = avisosFim.length ? ` <span class="err">${avisosFim.join(' ')}</span>` : '';
       $('recMsg').innerHTML = `<span class="ok">${t('recDone2', fmt(liveDur), frames.length, liveCues.length)}` +
-        semFala + contarDesempenho() + `</span>`;
+        semFala + contarDesempenho() + `</span>` + alerta;
       $('prevCard').classList.remove('hide');
       $('extract').disabled = true;      // não há vídeo para varrer de novo
       $('auto').disabled = true;
-      gravou = true;
       render();
       passos();
       irPara('prevCard', true);
