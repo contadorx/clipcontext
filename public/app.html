@@ -33,6 +33,21 @@
   .step{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;
         background:var(--accent);color:var(--accent-ink);font-size:12px;font-weight:600;
         margin-right:8px;vertical-align:2px}
+  /* Os dois caminhos do passo 1. O de gravar tem borda de destaque porque é o
+     que a maioria vem fazer; o de arquivo continua inteiro ao lado, e não
+     escondido atrás de um "ou". */
+  .caminhos{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+  .caminhos .via{border:1px solid var(--line);border-radius:10px;padding:16px;background:var(--bg)}
+  .caminhos #viaRec{border:2px solid var(--accent);
+      background:color-mix(in srgb,var(--accent) 5%,transparent)}
+  .caminhos .via h3{margin:8px 0 4px;font-size:16.5px}
+  .caminhos .via > p{margin:0 0 14px;color:var(--muted);font-size:13.5px;line-height:1.5}
+  .caminhos .vtag{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.06em;
+      text-transform:uppercase;color:var(--accent);
+      background:color-mix(in srgb,var(--accent) 14%,transparent);
+      border-radius:99px;padding:3px 9px}
+  .caminhos .vtag.alt{color:var(--muted);background:var(--panel);border:1px solid var(--line)}
+  .caminhos .drop{padding:22px 16px}
   .drop{border:2px dashed var(--line);border-radius:10px;padding:36px 20px;text-align:center;cursor:pointer;transition:.15s}
   .drop:hover,.drop.over{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 6%,transparent)}
   .drop strong{display:block;font-size:16px;margin-bottom:4px}
@@ -67,6 +82,10 @@
            transition:.15s}
   textarea.over{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 7%,var(--bg))}
   .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:14px}
+  /* O critério é o único campo com texto longo dentro: "Quando a imagem muda
+     (recomendado)" não cabe em 165 px e o rótulo saía cortado. */
+  .grid .largo{grid-column:span 2}
+  @media (max-width:560px){ .grid .largo{grid-column:auto} }
   label.f{display:block;font-size:12px;color:var(--muted);margin-bottom:5px;font-weight:500}
   input[type=number],select{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:7px;
         background:var(--bg);color:var(--ink);font:inherit;font-size:14px}
@@ -123,7 +142,15 @@
       max-width:980px;width:100%;max-height:100%;overflow:auto;padding:18px}
   .lenteTopo{display:flex;justify-content:space-between;align-items:center;gap:14px;margin-bottom:12px}
   .lenteTopo b{font-size:15.5px}
-  .lente img{width:100%;display:block;border-radius:8px;background:#000}
+  .lenteImgCx{position:relative;line-height:0;border-radius:8px;overflow:hidden}
+  .lenteImgCx.tarjando{cursor:crosshair;box-shadow:0 0 0 2px var(--err)}
+  .lente img{width:100%;display:block;background:#000}
+  .tarjas{position:absolute;inset:0;pointer-events:none}
+  /* A tarja é preta e opaca já na tela: o que se vê aqui é exatamente o que sai
+     no arquivo, e não uma marcação que "depois vira" preto. */
+  .tarjas i{position:absolute;background:#000;display:block}
+  .lenteImgCx.tarjando .tarjas i{pointer-events:auto;cursor:not-allowed;outline:1px solid rgba(255,255,255,.55)}
+  .tarjas i.nova{background:rgba(0,0,0,.6);outline:2px dashed #fff}
   .lenteCampos{display:grid;gap:12px;margin-top:14px}
   .lenteCampos label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px;font-weight:500}
   .lenteCampos input{width:100%;box-sizing:border-box;padding:9px 11px;border:1px solid var(--line);
@@ -133,7 +160,10 @@
   .lenteNav{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:16px}
   /* O modelo de saída fica no topo do cartão 4 e com cara de decisão, não de
      ajuste fino: é ele que define o documento inteiro. */
-  .modelo{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin:-4px 0 16px}
+  /* margin-top ZERO, e não -4px: este bloco é o primeiro filho de um contêiner
+     com overflow:hidden (o colapso do cartão), e a margem negativa empurrava o
+     topo da caixa para fora — a borda de cima sumia. */
+  .modelo{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin:0 0 16px}
   .modelo label{font-size:13.5px;font-weight:600;color:var(--ink)}
   .modelo select{width:auto;min-width:220px;padding:8px 10px;border:1px solid var(--line);
         border-radius:7px;background:var(--bg);color:var(--ink);font:inherit;font-size:14px}
@@ -226,34 +256,50 @@
 
   <div class="card">
     <h2><span class="step">1</span><span data-i18n="s1"></span></h2>
-    <div class="drop" id="drop" role="button" tabindex="0">
-      <strong data-i18n="drop1"></strong>
-      <span data-i18n="drop2"></span>
-    </div>
-    <input type="file" id="file" accept="video/*">
-    <div class="row" style="margin-top:12px">
-      <button class="ghost sm" id="demo" data-i18n="demoBtn"></button>
-      <span class="status" id="demoMsg" data-i18n="demoHint"></span>
-    </div>
-    <div class="row hide" id="driveRow" style="margin-top:10px">
-      <button class="ghost sm" id="drive" data-i18n="driveBtn"></button>
-      <button class="ghost sm hide" id="driveStop" data-i18n="stopBtn"></button>
-      <span class="status" id="driveMsg" data-i18n="driveHint"></span>
-    </div>
-    <div class="row hide" id="recRow" style="margin-top:10px">
-      <button class="ghost sm" id="rec" data-i18n="recBtn"></button>
-      <button class="sm hide" id="recStop" data-i18n="recStopBtn"></button>
-      <button class="ghost sm hide" id="recPause" data-i18n="recPauseBtn"></button>
-      <button class="ghost sm hide" id="recMark" data-i18n="recMarkBtn"></button>
-      <span class="status" id="recMsg" data-i18n="recHint"></span>
-    </div>
-    <div class="hide" id="recOpts" style="margin-top:8px">
-      <div class="row" style="gap:18px">
-        <label class="chk"><input type="checkbox" id="recTr" checked><span data-i18n="recTrLbl"></span></label>
-        <label class="chk"><input type="checkbox" id="recMic" checked><span data-i18n="recMicLbl"></span></label>
+    <!-- Dois caminhos, e não uma lista de botões: gravar a tela agora é o que a
+         maior parte das pessoas vem fazer, e estava em terceiro lugar, cinza,
+         embaixo de uma zona de arraste que só serve para quem já tem arquivo. -->
+    <div class="caminhos">
+      <div class="via hide" id="viaRec">
+        <span class="vtag" data-i18n="viaRecTag"></span>
+        <h3 data-i18n="viaRecH"></h3>
+        <p data-i18n="viaRecP"></p>
+        <div class="row">
+          <button id="rec" data-i18n="recBtn"></button>
+          <button class="sm hide" id="recStop" data-i18n="recStopBtn"></button>
+          <button class="ghost sm hide" id="recPause" data-i18n="recPauseBtn"></button>
+          <button class="ghost sm hide" id="recMark" data-i18n="recMarkBtn"></button>
+        </div>
+        <span class="status" id="recMsg" data-i18n="recHint"></span>
+        <div class="hide" id="recOpts" style="margin-top:10px">
+          <div class="row" style="gap:18px">
+            <label class="chk"><input type="checkbox" id="recTr" checked><span data-i18n="recTrLbl"></span></label>
+            <label class="chk"><input type="checkbox" id="recMic" checked><span data-i18n="recMicLbl"></span></label>
+          </div>
+          <p class="note" id="recTrNote" style="margin:6px 0 0"></p>
+          <p class="note" data-i18n="recWarn" style="margin:6px 0 0"></p>
+        </div>
       </div>
-      <p class="note" id="recTrNote" style="margin:6px 0 0"></p>
-      <p class="note" data-i18n="recWarn" style="margin:6px 0 0"></p>
+
+      <div class="via">
+        <span class="vtag alt" data-i18n="viaArqTag"></span>
+        <h3 data-i18n="viaArqH"></h3>
+        <p data-i18n="viaArqP"></p>
+        <div class="drop" id="drop" role="button" tabindex="0">
+          <strong data-i18n="drop1"></strong>
+          <span data-i18n="drop2"></span>
+        </div>
+        <input type="file" id="file" accept="video/*">
+        <div class="row" style="margin-top:12px">
+          <button class="ghost sm" id="demo" data-i18n="demoBtn"></button>
+        </div>
+        <span class="status" id="demoMsg" data-i18n="demoHint"></span>
+        <div class="row hide" id="driveRow" style="margin-top:10px">
+          <button class="ghost sm" id="drive" data-i18n="driveBtn"></button>
+          <button class="ghost sm hide" id="driveStop" data-i18n="stopBtn"></button>
+        </div>
+        <span class="status hide" id="driveMsg" data-i18n="driveHint"></span>
+      </div>
     </div>
     <div class="hide" id="liveBox" style="margin-top:12px">
       <div class="vus" id="vuBox">
@@ -295,12 +341,14 @@
           <option value="es">Español</option>
           <option value="" data-i18n="autoDetect"></option>
         </select>
+        <label class="chk"><input type="checkbox" id="trEn"><span data-i18n="trEnLbl"></span></label>
         <label class="chk"><input type="checkbox" id="gpu"><span data-i18n="gpuLbl"></span></label>
         <button class="ghost sm" id="diag" data-i18n="diagBtn"></button>
       </div>
       <pre id="diagOut" class="hide"></pre>
       <div class="bar hide" id="abarWrap"><i id="abar"></i></div>
       <div class="status" id="astatus"></div>
+      <div class="status" id="autoDica"></div>
       <p class="note hide" id="keepOpen" data-i18n="keepOpen"></p>
     </div>
     </div><!-- /trAuto -->
@@ -326,6 +374,20 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       <button class="ghost sm" id="expSrt">.srt</button>
       <button class="ghost sm" id="expTxt">.txt</button>
     </div>
+    <!-- Tradução no aparelho. Só aparece onde o navegador tem o tradutor
+         embutido; onde não tem, a linha explica o caminho que existe. -->
+    <div class="row hide" id="tradRow" style="margin-top:10px">
+      <span class="status" data-i18n="tradLbl"></span>
+      <select id="tradPara" style="width:auto">
+        <option value="en">English</option>
+        <option value="pt">Português</option>
+        <option value="es">Español</option>
+        <option value="de">Deutsch</option>
+        <option value="fr">Français</option>
+      </select>
+      <button class="ghost sm" id="trad" data-i18n="tradBtn"></button>
+    </div>
+    <div class="status" id="tradMsg" style="margin-top:6px"></div>
     </div><!-- /trManual -->
     </div></div><!-- /dobra -->
   </div>
@@ -336,7 +398,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     <div class="dobra"><div>
     <div id="framesCorpo">
     <div class="grid">
-      <div>
+      <div class="largo">
         <label class="f" for="mode" data-i18n="lCrit"></label>
         <select id="mode">
           <option value="scene" data-i18n="mScene"></option>
@@ -427,34 +489,38 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       <button class="ghost sm" id="falaNota" data-i18n="falaNota"></button>
     </div>
     <p class="status" style="margin:10px 0 0" data-i18n="clickHint"></p>
+    <p class="note hide" id="sensAviso" style="margin-top:12px"></p>
     <div class="thumbs" id="thumbs"></div>
 
     <!-- Identificação da evidência. Tudo opcional e tudo em memória: nada
          daqui é guardado no navegador nem sai do computador — só entra no
          documento que você mesmo baixa. -->
-    <details class="ev" id="evBox">
-      <summary><span data-i18n="evH"></span> <span class="sub" data-i18n="evHsub"></span></summary>
+    <!-- O mesmo bloco serve aos três modelos que precisam de identificação; o
+         que muda são os rótulos, escritos por pintarBloco(). Um bloco por
+         modelo seria três vezes o mesmo encanamento até o documento. -->
+    <details class="ev hide" id="evBox">
+      <summary><span id="evBoxH"></span> <span class="sub" id="evBoxSub"></span></summary>
       <div class="evGrid">
-        <div><label for="evCaso" data-i18n="evCaso"></label>
+        <div><label for="evCaso" id="lblCaso"></label>
              <input id="evCaso" type="text" autocomplete="off" maxlength="120"></div>
-        <div><label for="evSis" data-i18n="evSis"></label>
+        <div><label for="evSis" id="lblSis"></label>
              <input id="evSis" type="text" autocomplete="off" maxlength="80"></div>
-        <div><label for="evQuem" data-i18n="evQuem"></label>
+        <div><label for="evQuem" id="lblQuem"></label>
              <input id="evQuem" type="text" autocomplete="off" maxlength="80"></div>
-        <div><label for="evChamado" data-i18n="evChamado"></label>
+        <div><label for="evChamado" id="lblChamado"></label>
              <input id="evChamado" type="text" autocomplete="off" maxlength="60"></div>
-        <div><label for="evRes" data-i18n="evRes"></label>
+        <div id="cxRes"><label for="evRes" data-i18n="evRes"></label>
              <select id="evRes">
                <option value="" data-i18n="evR0"></option>
                <option value="ok" data-i18n="evR1"></option>
                <option value="nok" data-i18n="evR2"></option>
                <option value="blq" data-i18n="evR3"></option>
              </select></div>
-        <div><label for="evInicio" data-i18n="evIni"></label>
+        <div id="cxIni"><label for="evInicio" id="lblIni"></label>
              <input id="evInicio" type="datetime-local" step="1"></div>
       </div>
       <p class="evPe hide" id="evEst" data-i18n="evEstimado"></p>
-      <p class="evPe"><label><input type="checkbox" id="evHash"><span data-i18n="evHash"></span></label></p>
+      <p class="evPe" id="cxHash"><label><input type="checkbox" id="evHash"><span data-i18n="evHash"></span></label></p>
       <p class="evPe"><span data-i18n="evPerfil"></span>
          <button class="ghost sm hide" id="evLimpar" data-i18n="evLimpar"
                  style="margin-left:8px;padding:4px 10px;font-size:12px"></button></p>
@@ -484,7 +550,17 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
         <b id="lenteTit"></b>
         <button class="ghost sm" id="lenteFechar" data-i18n="fecharBtn"></button>
       </div>
-      <img id="lenteImg" alt="">
+      <div class="lenteImgCx" id="lenteImgCx">
+        <img id="lenteImg" alt="">
+        <div class="tarjas" id="lenteTarjas"></div>
+      </div>
+      <div class="row" style="margin-top:12px">
+        <button class="ghost sm" id="tarjaModo" data-i18n="tarjaBtn"></button>
+        <button class="ghost sm hide" id="tarjaLimpar" data-i18n="tarjaLimpar"></button>
+        <button class="ghost sm" id="cropModo" data-i18n="cropBtn"></button>
+        <button class="ghost sm hide" id="cropTirar" data-i18n="cropTirar"></button>
+        <span class="status" id="tarjaMsg"></span>
+      </div>
       <div class="lenteCampos">
         <div><label for="lenteNota" data-i18n="notaPh"></label>
              <input type="text" id="lenteNota" maxlength="180" autocomplete="off"></div>
@@ -505,7 +581,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     <h2><span class="step">5</span><span data-i18n="s5"></span></h2>
     <p class="lockHint hide" id="hintPrompt"></p>
     <div class="dobra"><div>
-    <p class="status" style="margin:-6px 0 14px" data-i18n="s5sub"></p>
+    <p class="status" style="margin:0 0 14px" data-i18n="s5sub"></p>
     <div class="row">
       <select id="goal" style="max-width:340px">
         <option value="resumo" data-i18n="gSum"></option>
@@ -528,7 +604,9 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
 
   <p class="status" style="text-align:center;margin-top:26px">
     <span data-i18n="supportLine"></span>
-    <a href="https://walkstamp.com/#support" style="color:var(--accent)" data-i18n="supportLink"></a>
+    <a href="https://walkstamp.com/seguranca" style="color:var(--accent)" data-i18n="pesSeg"></a> ·
+    <a href="https://walkstamp.com/comparativo" style="color:var(--accent)" data-i18n="pesComp"></a> ·
+    <a href="https://walkstamp.com/precos" style="color:var(--accent)" data-i18n="pesPrecos"></a>
   </p>
 
 </div>
@@ -544,9 +622,13 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   const I18N = {
     pt: {
       docTitle:'Walkstamp — transforme vídeo em contexto para IA',
-      supportLine:'Ferramenta gratuita, sem anúncio e sem cadastro. ',
-      supportLink:'Apoiar o projeto',
+      supportLine:'Gratuita, sem anúncio e sem cadastro — nada do que você processa sai deste computador. ',
+      pesSeg:'Segurança da informação', pesComp:'Comparativo', pesPrecos:'Preços',
       sub:'Transforme um vídeo em um PDF com os frames que importam e a transcrição sincronizada — pronto para entregar a uma IA. Tudo roda no seu navegador: o vídeo não sai do seu computador.',
+      viaRecTag:'Comece por aqui', viaRecH:'Gravar a tela agora',
+      viaRecP:'Você faz o percurso na tela e fala o que está fazendo. Nada de vídeo é guardado: saem só as telas que mudaram e a sua narração transcrita.',
+      viaArqTag:'Já tenho o vídeo', viaArqH:'Usar um arquivo',
+      viaArqP:'Uma gravação que você já fez, de reunião ou de tela. O arquivo é lido pelo navegador e não sai do seu computador.',
       s1:'Vídeo', drop1:'Escolher ou arrastar o vídeo aqui',
       drop2:'MP4 / MOV / WebM — o tamanho do arquivo não importa',
       demoBtn:'Usar vídeo de exemplo', demoHint:'50 segundos, cinco telas e narração — para experimentar sem arquivo próprio',
@@ -599,7 +681,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recNoSpeech:'Não saiu nenhuma fala porque não havia áudio nenhum nesta captura.',
       recSoSilencio:'Havia áudio, mas nada de fala foi reconhecido — verifique se o som estava mesmo tocando e se o microfone não estava fechado.',
       recJanela:'Você compartilhou uma JANELA, e o navegador só entrega o som do computador quando se compartilha uma ABA ou a TELA INTEIRA. Grave de novo escolhendo a aba da reunião, ou marque a caixa de compartilhar áudio na tela inteira.',
-      recHint:'grave uma reunião e receba os frames e a transcrição dos dois canais, sem guardar o vídeo',
+      recHint:'o navegador vai perguntar qual tela ou janela compartilhar',
       recRun:'Gravando… {0} — clique em Parar quando terminar.',
       recDone:'Gravação de {0} pronta e carregada. Pode extrair os frames.',
       recDeny:'Você cancelou, ou o navegador não deu permissão para capturar a tela.',
@@ -634,7 +716,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       perfLinhas:' em {0} linhas',
       perfLento:'Mais lento que o próprio vídeo — vale escolher o modelo rápido.',
       docxBtn:'Word (.docx)', zipBtn:'Zip das figuras', wFrames:'Frames neste documento',
-      ftPromo:'Frames e transcrição sincronizada, gerados no navegador com Walkstamp',
+      ftPromo:'Passo a passo com hora, gerado no navegador — nenhum vídeo saiu do computador ·  Walkstamp',
       pkgBuilding:'Montando o arquivo…',
       docxDone:'Documento do Word com {0} frames — pronto para editar.',
       zipDone:'{0} imagens no zip, sem mais nada junto.',
@@ -650,7 +732,19 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       videoErr:'O navegador não conseguiu abrir este vídeo. Converta para MP4 (H.264) e tente de novo.',
       reportar:'Me avise qual formato falhou',
       reportarDica:' — é o que vai definir se vale a pena construir a conversão automática.',
-      s2:'Transcrição (opcional)', autoBtn:'Transcrever automaticamente',
+      s2:'Transcrição (opcional)', autoBtn:'Transcrever',
+      trEnLbl:'traduzir para inglês',
+      tradLbl:'Traduzir a transcrição e as anotações para', tradBtn:'Traduzir',
+      tradPrep:'Preparando o tradutor do navegador…',
+      tradBaixando:'Baixando o par de idiomas: {0}% (uma vez só, e fica no navegador)',
+      tradIndo:'Traduzindo {0} de {1}…',
+      tradFeito:'{0} trechos traduzidos para {1}. A transcrição original foi substituída — desfaça recarregando a página se não era o que queria.',
+      tradMesmo:'O idioma de origem e o de destino são o mesmo.',
+      tradNada:'Não há transcrição nem anotações para traduzir.',
+      tradSemPar:'Este navegador não tem o par {0} → {1}.',
+      tradErro:'Não consegui traduzir.',
+      tradSemApi:'Tradução no aparelho: por enquanto só no Chrome e no Edge para computador. Aqui você pode marcar “traduzir para inglês” acima, e o próprio modelo de voz traduz enquanto ouve.',
+      autoIndo:'Transcrevendo…', autoEspere:'Pode deixar em segundo plano — mas não feche a aba: o trabalho é feito aqui dentro.',
       mBase:'Modelo base — rápido', mSmall:'Modelo small — mais preciso',
       autoDetect:'Detectar sozinho', diagBtn:'Diagnóstico',
       openSub:'Abrir arquivo .vtt / .srt', orDrag:'ou arraste o arquivo sobre o campo abaixo, ou cole o texto',
@@ -660,6 +754,9 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       audioExtract:'Extraindo o áudio do vídeo…', audioFail:'este vídeo parece não ter faixa de áudio, ou o formato do áudio não é suportado pelo navegador',
       noAudio:'este vídeo não tem áudio', modelLoad:'Carregando o modelo…',
       modelDl:'Etapa 1 de 2 — baixando o modelo: {0}% (só na primeira vez)',
+      modelDl2:'Baixando o modelo de voz: {0}% — {1} de {2} MB. É uma vez só: depois ele fica guardado no seu navegador e a próxima transcrição começa na hora.',
+      modelCache:'O modelo já está guardado neste navegador. Abrindo — não há download.',
+      erroSessao:'O arquivo comprimido do modelo não abre neste computador. Já tentei as versões alternativas, e nenhuma subiu. Rode o diagnóstico, ou grave só os frames e escreva as anotações à mão.',
       transcribing2:'Etapa 2 de 2 — transcrevendo: {0}% (bloco {1} de {2}){3}',
       etaTr:' — faltam ~{0}',
       keepOpen:'Mantenha esta aba aberta e visível. O processamento acontece no seu navegador, e fica muito mais lento se a aba ficar em segundo plano.',
@@ -706,6 +803,11 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       clickHint:'Clique na imagem para descartar ou trazer de volta. O campo abaixo dela é a sua anotação daquele passo.',
       stepN:'Passo {0}', notaPh:'anotação do passo',
       evH:'Dados da evidência', evHsub:'— opcional: caso de teste, sistema, quem executou, hora de início',
+      guiaH:'Dados do guia', guiaHsub:'— opcional: título, sistema, autor, versão',
+      guiaTit:'Título do guia', guiaSis:'Sistema / produto', guiaAutor:'Escrito por', guiaVer:'Versão',
+      ataH:'Dados da reunião', ataHsub:'— opcional: assunto, local, quem conduziu, participantes',
+      ataAssunto:'Assunto', ataLocal:'Local / plataforma', ataOrg:'Conduzida por',
+      ataPart:'Participantes', ataIni:'Início da reunião',
       evCaso:'Caso de teste', evSis:'Sistema / mandante', evQuem:'Executado por',
       evChamado:'Chamado / mudança', evRes:'Resultado', evIni:'Início da gravação',
       evR0:'— não informado', evR1:'Passou', evR2:'Falhou', evR3:'Bloqueado',
@@ -728,6 +830,20 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       evPerfil:'O sistema e quem executou ficam guardados enquanto esta aba estiver aberta, para você não redigitar a cada caso. Fechou a aba, some.',
       evLimpar:'Esquecer',
       ampliar:'Ampliar este passo', fecharBtn:'Fechar',
+      tarjaBtn:'Tarjar', tarjaFim:'Terminar de tarjar', tarjaLimpar:'Tirar todas',
+      tarjaComo:'Arraste sobre a imagem para cobrir. Clique numa tarja para tirá-la.',
+      tarjaN:'{0} tarja(s) neste passo — elas são queimadas na imagem que sai no documento.',
+      tarjaTirar:'clique para tirar esta tarja',
+      cropBtn:'Recortar', cropFim:'Cancelar recorte', cropTirar:'Tirar o recorte',
+      cropComo:'Arraste a área que interessa. O mesmo recorte vale para todos os quadros.',
+      cropIndo:'Recortando os quadros…',
+      cropFeito:'{0} quadros recortados. As tarjas foram desfeitas — refaça-as sobre a imagem nova.',
+      cropSaiu:'Recorte desfeito: os quadros voltaram ao tamanho original.',
+      sensH:'Dado pessoal visível.',
+      sensP:'A leitura da tela encontrou {0}. Confira e, se for o caso, cubra com o botão Tarjar dentro de cada passo — nada disso é enviado a lugar nenhum, mas o documento que você baixar vai com o que está na imagem.',
+      sensPassos:'passos {0}',
+      sens_cpf:'CPF', sens_cnpj:'CNPJ', sens_email:'endereço de e-mail',
+      sens_cartao:'sequência com cara de cartão', sens_telefone:'telefone',
       lenteHora:'Hora deste passo',
       lenteHoraNota:'Corrigir aqui reancora a gravação inteira: o início passa a ser esta hora menos o tempo decorrido até este passo.',
       lenteFala:'O que foi dito neste trecho',
@@ -780,9 +896,13 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
 
     en: {
       docTitle:'Walkstamp — turn video into context an AI can read',
-      supportLine:'Free tool, no ads, no sign-up. ',
-      supportLink:'Support the project',
+      supportLine:'Free, no ads, no sign-up — nothing you process leaves this computer. ',
+      pesSeg:'Information security', pesComp:'Compare', pesPrecos:'Pricing',
       sub:'Turn a video into a PDF with the frames that matter and a synced transcript — ready to hand to an AI. It all runs in your browser: the video never leaves your computer.',
+      viaRecTag:'Start here', viaRecH:'Record the screen now',
+      viaRecP:'You walk through the screen and say what you are doing. No video is kept: what comes out are the screens that changed and your narration, transcribed.',
+      viaArqTag:'I already have the video', viaArqH:'Use a file',
+      viaArqP:'A recording you already made, of a meeting or of a screen. The file is read by the browser and never leaves your computer.',
       s1:'Video', drop1:'Choose or drag your video here',
       drop2:'MP4 / MOV / WebM — file size does not matter',
       demoBtn:'Use the example video', demoHint:'50 seconds, five screens, with narration — try it without your own file',
@@ -835,7 +955,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recNoSpeech:'No speech came out because there was no audio at all in this capture.',
       recSoSilencio:'There was audio, but no speech was recognised — check that the sound was actually playing and that the microphone was not closed.',
       recJanela:'You shared a WINDOW, and the browser only delivers computer audio when you share a TAB or the WHOLE SCREEN. Record again picking the meeting tab, or tick the share-audio box on the whole screen.',
-      recHint:'record a meeting and get the frames and both audio channels transcribed, with no video kept',
+      recHint:'the browser will ask which screen or window to share',
       recRun:'Recording… {0} — click Stop when you are done.',
       recDone:'{0} recording ready and loaded. You can extract the frames.',
       recDeny:'You cancelled, or the browser did not grant screen capture permission.',
@@ -870,7 +990,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       perfLinhas:' on {0} threads',
       perfLento:'Slower than the video itself — the fast model is worth a try.',
       docxBtn:'Word (.docx)', zipBtn:'Zip of the images', wFrames:'Frames in this document',
-      ftPromo:'Frames and synced transcript, generated in the browser with Walkstamp',
+      ftPromo:'Time-stamped walkthrough, generated in the browser — no video left the computer ·  Walkstamp',
       pkgBuilding:'Building the file…',
       docxDone:'Word document with {0} frames — ready to edit.',
       zipDone:'{0} images in the zip, nothing else alongside.',
@@ -886,7 +1006,19 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       videoErr:'The browser could not open this video. Convert it to MP4 (H.264) and try again.',
       reportar:'Tell me which format failed',
       reportarDica:' — that is what will decide whether automatic conversion is worth building.',
-      s2:'Transcript (optional)', autoBtn:'Transcribe automatically',
+      s2:'Transcript (optional)', autoBtn:'Transcribe',
+      trEnLbl:'translate to English',
+      tradLbl:'Translate the transcript and the notes into', tradBtn:'Translate',
+      tradPrep:'Preparing the browser translator…',
+      tradBaixando:'Downloading the language pair: {0}% (once only, then it stays in the browser)',
+      tradIndo:'Translating {0} of {1}…',
+      tradFeito:'{0} passages translated into {1}. The original transcript was replaced — reload the page to undo it if that is not what you wanted.',
+      tradMesmo:'Source and target languages are the same.',
+      tradNada:'There is no transcript or notes to translate.',
+      tradSemPar:'This browser does not have the {0} → {1} pair.',
+      tradErro:'I could not translate.',
+      tradSemApi:'On-device translation: for now only in Chrome and Edge on desktop. Here you can tick “translate to English” above, and the speech model itself translates as it listens.',
+      autoIndo:'Transcribing…', autoEspere:'You can leave it in the background — but do not close the tab: the work happens in here.',
       mBase:'Base model — fast', mSmall:'Small model — more accurate',
       autoDetect:'Detect automatically', diagBtn:'Diagnostics',
       openSub:'Open .vtt / .srt file', orDrag:'or drag the file onto the box below, or paste the text',
@@ -896,6 +1028,9 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       audioExtract:'Extracting the audio…', audioFail:'this video appears to have no audio track, or the audio format is not supported by the browser',
       noAudio:'this video has no audio', modelLoad:'Loading the model…',
       modelDl:'Step 1 of 2 — downloading the model: {0}% (first time only)',
+      modelDl2:'Downloading the speech model: {0}% — {1} of {2} MB. Once only: after this it stays in your browser and the next transcription starts right away.',
+      modelCache:'The model is already stored in this browser. Opening it — nothing to download.',
+      erroSessao:'The compressed model file will not open on this computer. I already tried the alternative builds and none came up. Run the diagnostics, or record the frames only and write the notes by hand.',
       transcribing2:'Step 2 of 2 — transcribing: {0}% (chunk {1} of {2}){3}',
       etaTr:' — about {0} left',
       keepOpen:'Keep this tab open and visible. Processing happens in your browser, and gets much slower if the tab goes to the background.',
@@ -942,6 +1077,11 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       clickHint:'Click the image to discard it or bring it back. The field below it is your note for that step.',
       stepN:'Step {0}', notaPh:'note for this step',
       evH:'Evidence details', evHsub:'— optional: test case, system, who ran it, start time',
+      guiaH:'Guide details', guiaHsub:'— optional: title, system, author, version',
+      guiaTit:'Guide title', guiaSis:'System / product', guiaAutor:'Written by', guiaVer:'Version',
+      ataH:'Meeting details', ataHsub:'— optional: subject, place, who chaired it, attendees',
+      ataAssunto:'Subject', ataLocal:'Place / platform', ataOrg:'Chaired by',
+      ataPart:'Attendees', ataIni:'Meeting started at',
       evCaso:'Test case', evSis:'System / client', evQuem:'Executed by',
       evChamado:'Ticket / change', evRes:'Result', evIni:'Recording started at',
       evR0:'— not stated', evR1:'Passed', evR2:'Failed', evR3:'Blocked',
@@ -964,6 +1104,20 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       evPerfil:'The system and who ran it are kept while this tab stays open, so you do not retype them for every case. Close the tab and they are gone.',
       evLimpar:'Forget',
       ampliar:'Enlarge this step', fecharBtn:'Close',
+      tarjaBtn:'Redact', tarjaFim:'Done redacting', tarjaLimpar:'Remove all',
+      tarjaComo:'Drag over the image to cover it. Click a box to remove it.',
+      tarjaN:'{0} redaction(s) on this step — they are burned into the image that goes in the document.',
+      tarjaTirar:'click to remove this redaction',
+      cropBtn:'Crop', cropFim:'Cancel crop', cropTirar:'Remove the crop',
+      cropComo:'Drag the area that matters. The same crop applies to every frame.',
+      cropIndo:'Cropping the frames…',
+      cropFeito:'{0} frames cropped. Redactions were undone — redraw them on the new image.',
+      cropSaiu:'Crop undone: the frames are back to their original size.',
+      sensH:'Personal data on screen.',
+      sensP:'Reading the screens found {0}. Check them and, if needed, cover them with the Redact button inside each step — none of this is sent anywhere, but the document you download carries whatever is in the image.',
+      sensPassos:'steps {0}',
+      sens_cpf:'a Brazilian tax ID (CPF)', sens_cnpj:'a company tax ID (CNPJ)', sens_email:'an e-mail address',
+      sens_cartao:'a card-like number', sens_telefone:'a phone number',
       lenteHora:'Time of this step',
       lenteHoraNota:'Correcting this re-anchors the whole recording: the start becomes this time minus the elapsed time up to this step.',
       lenteFala:'What was said in this interval',
@@ -1016,9 +1170,13 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
 
     es: {
       docTitle:'Walkstamp — convierte tu vídeo en contexto para la IA',
-      supportLine:'Herramienta gratuita, sin anuncios ni registro. ',
-      supportLink:'Apoyar el proyecto',
+      supportLine:'Gratuita, sin anuncios ni registro — nada de lo que procesas sale de este equipo. ',
+      pesSeg:'Seguridad de la información', pesComp:'Comparativa', pesPrecos:'Precios',
       sub:'Convierte un vídeo en un PDF con los fotogramas que importan y la transcripción sincronizada, listo para entregar a una IA. Todo se ejecuta en tu navegador: el vídeo no sale de tu ordenador.',
+      viaRecTag:'Empieza por aquí', viaRecH:'Grabar la pantalla ahora',
+      viaRecP:'Haces el recorrido en la pantalla y dices lo que estás haciendo. No se guarda vídeo: salen solo las pantallas que cambiaron y tu narración transcrita.',
+      viaArqTag:'Ya tengo el vídeo', viaArqH:'Usar un archivo',
+      viaArqP:'Una grabación que ya hiciste, de una reunión o de pantalla. El archivo lo lee el navegador y no sale de tu equipo.',
       s1:'Vídeo', drop1:'Elige o arrastra tu vídeo aquí',
       drop2:'MP4 / MOV / WebM — el tamaño del archivo no importa',
       demoBtn:'Usar el vídeo de ejemplo', demoHint:'50 segundos, cinco pantallas y narración — pruébalo sin archivo propio',
@@ -1069,7 +1227,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recNoSpeech:'No salió ninguna intervención porque no había audio alguno en esta captura.',
       recSoSilencio:'Había audio, pero no se reconoció ninguna intervención — comprueba que el sonido estaba sonando y que el micrófono no estaba cerrado.',
       recJanela:'Compartiste una VENTANA, y el navegador solo entrega el sonido del ordenador cuando compartes una PESTAÑA o la PANTALLA COMPLETA. Graba de nuevo eligiendo la pestaña de la reunión, o marca la casilla de compartir audio en la pantalla completa.',
-      recHint:'graba una reunión y recibe los fotogramas y la transcripción de los dos canales, sin guardar el vídeo',
+      recHint:'el navegador te preguntará qué pantalla o ventana compartir',
       recRun:'Grabando… {0} — pulsa Detener cuando termines.',
       recDone:'Grabación de {0} lista y cargada. Ya puedes extraer los fotogramas.',
       recDeny:'Cancelaste, o el navegador no dio permiso para capturar la pantalla.',
@@ -1104,7 +1262,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       perfLinhas:' en {0} líneas',
       perfLento:'Más lento que el propio vídeo — vale la pena elegir el modelo rápido.',
       docxBtn:'Word (.docx)', zipBtn:'Zip de las imágenes', wFrames:'Fotogramas en este documento',
-      ftPromo:'Fotogramas y transcripción sincronizada, generados en el navegador con Walkstamp',
+      ftPromo:'Paso a paso con hora, generado en el navegador — ningún vídeo salió del equipo ·  Walkstamp',
       pkgBuilding:'Montando el archivo…',
       docxDone:'Documento de Word con {0} fotogramas — listo para editar.',
       zipDone:'{0} imágenes en el zip, sin nada más.',
@@ -1122,7 +1280,19 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       videoErr:'El navegador no pudo abrir este vídeo. Conviértelo a MP4 (H.264) e inténtalo de nuevo.',
       reportar:'Dime qué formato falló',
       reportarDica:' — eso decidirá si vale la pena construir la conversión automática.',
-      s2:'Transcripción (opcional)', autoBtn:'Transcribir automáticamente',
+      s2:'Transcripción (opcional)', autoBtn:'Transcribir',
+      trEnLbl:'traducir al inglés',
+      tradLbl:'Traducir la transcripción y las anotaciones a', tradBtn:'Traducir',
+      tradPrep:'Preparando el traductor del navegador…',
+      tradBaixando:'Descargando el par de idiomas: {0}% (una sola vez, y queda en el navegador)',
+      tradIndo:'Traduciendo {0} de {1}…',
+      tradFeito:'{0} pasajes traducidos a {1}. La transcripción original fue sustituida — recarga la página para deshacerlo si no era lo que querías.',
+      tradMesmo:'El idioma de origen y el de destino son el mismo.',
+      tradNada:'No hay transcripción ni anotaciones que traducir.',
+      tradSemPar:'Este navegador no tiene el par {0} → {1}.',
+      tradErro:'No pude traducir.',
+      tradSemApi:'Traducción en el dispositivo: por ahora solo en Chrome y Edge de escritorio. Aquí puedes marcar “traducir al inglés” arriba, y el propio modelo de voz traduce mientras escucha.',
+      autoIndo:'Transcribiendo…', autoEspere:'Puedes dejarlo en segundo plano — pero no cierres la pestaña: el trabajo se hace aquí dentro.',
       mBase:'Modelo base — rápido', mSmall:'Modelo small — más preciso',
       autoDetect:'Detectar automáticamente', diagBtn:'Diagnóstico',
       openSub:'Abrir archivo .vtt / .srt', orDrag:'o arrastra el archivo sobre el campo de abajo, o pega el texto',
@@ -1132,6 +1302,9 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       audioExtract:'Extrayendo el audio…', audioFail:'este vídeo parece no tener pista de audio, o el formato del audio no es compatible con el navegador',
       noAudio:'este vídeo no tiene audio', modelLoad:'Cargando el modelo…',
       modelDl:'Paso 1 de 2 — descargando el modelo: {0}% (solo la primera vez)',
+      modelDl2:'Descargando el modelo de voz: {0}% — {1} de {2} MB. Es una sola vez: después queda guardado en tu navegador y la próxima transcripción empieza al instante.',
+      modelCache:'El modelo ya está guardado en este navegador. Abriéndolo — no hay descarga.',
+      erroSessao:'El archivo comprimido del modelo no abre en este equipo. Ya probé las versiones alternativas y ninguna arrancó. Ejecuta el diagnóstico, o graba solo los fotogramas y escribe las anotaciones a mano.',
       transcribing2:'Paso 2 de 2 — transcribiendo: {0}% (bloque {1} de {2}){3}',
       etaTr:' — faltan ~{0}',
       keepOpen:'Mantén esta pestaña abierta y visible. El procesamiento ocurre en tu navegador y se vuelve mucho más lento si la pestaña queda en segundo plano.',
@@ -1178,6 +1351,11 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       clickHint:'Haz clic en la imagen para descartarla o recuperarla. El campo de abajo es tu anotación de ese paso.',
       stepN:'Paso {0}', notaPh:'anotación del paso',
       evH:'Datos de la evidencia', evHsub:'— opcional: caso de prueba, sistema, quién lo ejecutó, hora de inicio',
+      guiaH:'Datos de la guía', guiaHsub:'— opcional: título, sistema, autor, versión',
+      guiaTit:'Título de la guía', guiaSis:'Sistema / producto', guiaAutor:'Escrito por', guiaVer:'Versión',
+      ataH:'Datos de la reunión', ataHsub:'— opcional: asunto, lugar, quién la condujo, participantes',
+      ataAssunto:'Asunto', ataLocal:'Lugar / plataforma', ataOrg:'Conducida por',
+      ataPart:'Participantes', ataIni:'Inicio de la reunión',
       evCaso:'Caso de prueba', evSis:'Sistema / mandante', evQuem:'Ejecutado por',
       evChamado:'Ticket / cambio', evRes:'Resultado', evIni:'Inicio de la grabación',
       evR0:'— sin indicar', evR1:'Aprobado', evR2:'Fallido', evR3:'Bloqueado',
@@ -1200,6 +1378,20 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       evPerfil:'El sistema y quién lo ejecutó se guardan mientras esta pestaña siga abierta, para no reescribirlos en cada caso. Cierras la pestaña y desaparecen.',
       evLimpar:'Olvidar',
       ampliar:'Ampliar este paso', fecharBtn:'Cerrar',
+      tarjaBtn:'Tachar', tarjaFim:'Terminar de tachar', tarjaLimpar:'Quitar todas',
+      tarjaComo:'Arrastra sobre la imagen para cubrir. Haz clic en una zona para quitarla.',
+      tarjaN:'{0} zona(s) tachada(s) en este paso — se queman en la imagen que sale en el documento.',
+      tarjaTirar:'haz clic para quitar esta zona',
+      cropBtn:'Recortar', cropFim:'Cancelar recorte', cropTirar:'Quitar el recorte',
+      cropComo:'Arrastra el área que importa. El mismo recorte vale para todos los fotogramas.',
+      cropIndo:'Recortando los fotogramas…',
+      cropFeito:'{0} fotogramas recortados. Las zonas tachadas se deshicieron — vuelve a marcarlas sobre la imagen nueva.',
+      cropSaiu:'Recorte deshecho: los fotogramas volvieron a su tamaño original.',
+      sensH:'Dato personal visible.',
+      sensP:'La lectura de las pantallas encontró {0}. Compruébalo y, si procede, cúbrelo con el botón Tachar dentro de cada paso — nada de esto se envía a ningún sitio, pero el documento que descargues lleva lo que esté en la imagen.',
+      sensPassos:'pasos {0}',
+      sens_cpf:'CPF (identificación fiscal)', sens_cnpj:'CNPJ (identificación de empresa)', sens_email:'dirección de correo',
+      sens_cartao:'secuencia con aspecto de tarjeta', sens_telefone:'teléfono',
       lenteHora:'Hora de este paso',
       lenteHoraNota:'Corregirla aquí reancla la grabación entera: el inicio pasa a ser esta hora menos el tiempo transcurrido hasta este paso.',
       lenteFala:'Lo que se dijo en este tramo',
@@ -1369,7 +1561,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     $('tr').placeholder = t('trPh');
     $('goalFree').placeholder = t('freePh');
     $('sensV').textContent = t('sens')[+$('sens').value];
-    dicaModelo();
+    dicaModelo(); pintarBloco(); pintarObjetivos();
     if (!frames.length) $('promptOut').textContent = t('promptPh');
     // render() e não só buildPrompt(): "Passo 3" e o texto de apoio da anotação
     // ficariam no idioma anterior dentro de cada miniatura
@@ -1986,8 +2178,78 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       ? `<span class="ok">${t('trCues', cues.length)}</span>${t('trCues2')}`
       : t('trPlain');
     $('expRow').classList.toggle('hide', !n);
+    $('tradRow').classList.toggle('hide', !n || !TEM_TRADUTOR);
+    if (n && !TEM_TRADUTOR && !$('tradMsg').textContent) $('tradMsg').textContent = t('tradSemApi');
   }
   $('tr').oninput = refreshTr;
+
+  /* ================= tradução no aparelho =================
+     A pergunta era "dá para usar o Google Tradutor?". A API paga do Google
+     Cloud não serve aqui por duas razões: a chave ficaria no código, à vista de
+     qualquer um, e a transcrição sairia do computador — que é exatamente o que
+     este produto promete que não acontece.
+
+     O que serve é o tradutor que o Chrome passou a embutir: é o modelo do
+     Google, mas rodando NO APARELHO, sem chave e sem enviar nada. Ele baixa o
+     par de idiomas na primeira vez e depois fica no navegador.
+
+     Onde ele não existe (Firefox, Safari, celular), a linha some e sobra o
+     caminho do Whisper — que traduz para inglês enquanto ouve, sem download
+     extra. Nenhum dos dois manda texto para servidor nenhum. */
+  const TEM_TRADUTOR = typeof self !== 'undefined' && 'Translator' in self;
+
+  function origemTrad(){
+    // o idioma da transcrição é a melhor pista; no automático, cai no da página
+    const l = $('lang') && $('lang').value;
+    return l || LANG || 'pt';
+  }
+
+  async function traduzirTudo(){
+    const alvo = $('tradPara').value;
+    const de = origemTrad();
+    if (de === alvo) { $('tradMsg').innerHTML = `<span class="err">${t('tradMesmo')}</span>`; return; }
+    const { cues } = parseTranscript($('tr').value);
+    const notas = frames.filter(f => f.nota);
+    if (!cues.length && !notas.length) { $('tradMsg').textContent = t('tradNada'); return; }
+
+    $('trad').disabled = true;
+    $('tradMsg').textContent = t('tradPrep');
+    try {
+      const pode = await Translator.availability({ sourceLanguage: de, targetLanguage: alvo });
+      if (pode === 'unavailable') throw new Error(t('tradSemPar', de, alvo));
+
+      const tr = await Translator.create({
+        sourceLanguage: de, targetLanguage: alvo,
+        monitor(m){
+          m.addEventListener('downloadprogress', e => {
+            $('tradMsg').textContent = t('tradBaixando', ((e.loaded || 0) * 100).toFixed(0));
+          });
+        }
+      });
+
+      const total = cues.length + notas.length;
+      let feitos = 0;
+      const andar = () => { feitos++; $('tradMsg').textContent = t('tradIndo', feitos, total); };
+
+      for (const c of cues) { c.t = await tr.translate(c.t); andar(); }
+      // as anotações também: elas viram o texto do passo no documento, e um PDF
+      // metade em inglês e metade em português não serve para entregar a ninguém
+      for (const f of notas) { f.nota = await tr.translate(f.nota); andar(); }
+
+      if (cues.length) {
+        $('tr').value = 'WEBVTT\n\n' + cues.map(c =>
+          `${tempoLegenda(c.a,false)} --> ${tempoLegenda(c.b,false)}\n${c.t}`).join('\n\n') + '\n';
+        refreshTr();
+      }
+      if (frames.length) render();
+      if (tr.destroy) tr.destroy();
+      $('tradMsg').innerHTML = `<span class="ok">${t('tradFeito', total, alvo.toUpperCase())}</span>`;
+    } catch (e) {
+      $('tradMsg').innerHTML = `<span class="err">${(e && e.message) || t('tradErro')}</span>`;
+    } finally { $('trad').disabled = false; }
+  }
+
+  if (TEM_TRADUTOR) $('trad').onclick = traduzirTudo;
 
   /* ================= captura ao vivo da tela =================
      A gravação não guarda vídeo. Enquanto a tela é compartilhada, a ferramenta
@@ -2003,7 +2265,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      um giga em disco termina como algumas dezenas de imagens e um texto. */
 
   const podeGravar = !!(navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia);
-  if (podeGravar) { $('recRow').classList.remove('hide'); $('recOpts').classList.remove('hide'); }
+  if (podeGravar) { $('viaRec').classList.remove('hide'); $('recOpts').classList.remove('hide'); }
 
   const SR_ASR = 16000;              // taxa que o Whisper espera
   const JANELA_S = 20;               // segundos por janela de transcrição
@@ -2363,7 +2625,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       if (pularCauda) { filaAsr.length = 0; asrPendentes = 0; atualizarLive(); break; }
       const j = filaAsr.shift();
       try {
-        const opts = { return_timestamps: true, task: 'transcribe' };
+        const opts = { return_timestamps: true, task: tarefaAsr() };
         const lang = $('lang').value;
         if (lang) opts.language = lang;
         const r = await transcrever(j.dados, opts);
@@ -3088,6 +3350,12 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     notaTr();                 // o tamanho anunciado no passo 1 acompanha o modelo escolhido
   }
 
+  /* O Whisper faz duas tarefas com o MESMO arquivo já baixado: transcrever no
+     idioma falado, ou traduzir para inglês enquanto ouve. A segunda não custa um
+     byte a mais de download — é só outra instrução para o mesmo modelo. Só vai
+     para inglês: é a única direção que ele conhece. */
+  const tarefaAsr = () => ($('trEn') && $('trEn').checked) ? 'translate' : 'transcribe';
+
   /* Relógio do modelo: segundos de áudio que entraram, contra tempo de parede
      gasto. O download não entra na conta — é outra medida, e misturar as duas
      esconderia justamente o que se quer ver. */
@@ -3114,19 +3382,54 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
            (d.vezes < 1 ? ` <span class="err">${t('perfLento')}</span>` : '');
   }
 
+  /* O modelo já está guardado neste navegador? O transformers.js usa a Cache
+     Storage, que dá para perguntar antes de começar. Serve para não escrever
+     "baixando" quando não há download nenhum — a queixa era justamente essa. */
+  async function modeloEmCache(modelId){
+    try {
+      if (!self.caches) return false;
+      const nomes = await caches.keys();
+      for (const n of nomes) {
+        if (!/transformers/i.test(n)) continue;
+        const c = await caches.open(n);
+        const chaves = await c.keys();
+        if (chaves.some(r => r.url.includes(modelId))) return true;
+      }
+    } catch (e) {}
+    return false;
+  }
+
+  /* Máquinas que não abrem o arquivo de 4 bits são uma classe conhecida, e o
+     erro só aparece DEPOIS de baixar o arquivo grande. Guardar a falha na aba
+     evita repetir esse download a cada transcrição — que foi a queixa de
+     "mesmo depois de baixar, ele baixa de novo". */
+  const MOTOR_CHAVE = 'Walkstamp.semQ4';
+  const semQ4 = () => { try { return sessionStorage.getItem(MOTOR_CHAVE) === '1'; } catch (e) { return false; } };
+  const marcarSemQ4 = () => { try { sessionStorage.setItem(MOTOR_CHAVE, '1'); } catch (e) {} };
+
   async function buildPipe(modelId){
     const mod = await loadLib();
     libMod = mod;                 // guardado: o degrau precisa remontar sem a placa
-    const seen = {};
+    const arquivos = {};
+    let baixouAlgo = false;
+    const mb = b => (b / 1048576).toFixed(0);
+    /* Percentual por BYTES, e não a média das porcentagens de cada arquivo: a
+       média fazia o número saltar para 50% assim que o menor arquivo terminava,
+       e depois travar. E com os megabytes na tela dá para decidir se dá tempo. */
     const progress_callback = p => {
-      if (p.status === 'progress' && p.file) {
-        seen[p.file] = p.progress || 0;
-        const v = Object.values(seen);
-        const pct = v.reduce((x,y) => x+y, 0) / v.length;
+      if (!p.file) return;
+      if (p.status === 'progress' || p.status === 'download') {
+        baixouAlgo = true;
+        arquivos[p.file] = { loaded: p.loaded || 0, total: p.total || 0 };
+        let l = 0, tt = 0;
+        for (const k in arquivos) { l += arquivos[k].loaded; tt += arquivos[k].total; }
+        const pct = tt ? Math.min(100, l / tt * 100) : 0;
         prog(pct);
-        st(t('modelDl', pct.toFixed(0)));
+        st(t('modelDl2', pct.toFixed(0), mb(l), mb(tt)));
       }
     };
+
+    if (await modeloEmCache(modelId)) { prog(null); st(t('modelCache')); }
 
     /* Sem isto o navegador trata o modelo baixado como cache descartável e o
        apaga quando o disco aperta — e o próximo vídeo baixa tudo de novo. Uma
@@ -3134,13 +3437,30 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     try { if (navigator.storage && navigator.storage.persist) await navigator.storage.persist(); }
     catch (e) {}
 
-    /* Fila de tentativas, e não uma tentativa só. O caminho da placa pede o
-       decodificador de 4 bits, que em algumas máquinas abre e quebra depois —
-       ver o degrau em transcrever(). */
+    /* Fila de tentativas, e não uma tentativa só. Quatro degraus, do mais rápido
+       ao que não pode falhar:
+
+       1. placa de vídeo com o decodificador de 4 bits — o mais rápido, e o que
+          quebra em parte das máquinas com "Missing required scale / MatMulNBits":
+          o arquivo comprimido em 4 bits vem sem as escalas que aquele runtime
+          exige, e a sessão nem chega a abrir;
+       2. a mesma placa, sem compressão no decodificador — não usa MatMulNBits,
+          então o defeito acima não existe;
+       3. processador com 8 bits;
+       4. processador sem compressão — grande e lento, mas é o único que não
+          depende de nenhuma operação quantizada. É o degrau que garante que a
+          transcrição não fica indisponível numa máquina.
+
+       Antes havia só o 1 e o 3, e quem caía no defeito do 4 bits recebia a linha
+       de C++ do runtime como se fosse resposta. */
     const tentativas = [];
+    if (usaPlaca() && !semQ4()) tentativas.push({ motor: 'placa de vídeo',
+      opcoes: { device:'webgpu', dtype:{ encoder_model:'fp32', decoder_model_merged:'q4' } },
+      q4: true });
     if (usaPlaca()) tentativas.push({ motor: 'placa de vídeo',
-      opcoes: { device:'webgpu', dtype:{ encoder_model:'fp32', decoder_model_merged:'q4' } } });
+      opcoes: { device:'webgpu', dtype:{ encoder_model:'fp32', decoder_model_merged:'fp32' } } });
     tentativas.push({ motor: 'processador', opcoes: { dtype:'q8' } });
+    tentativas.push({ motor: 'processador', opcoes: { dtype:'fp32' } });
 
     /* Degrau de linhas, dentro de cada tentativa.
 
@@ -3168,6 +3488,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
           return pp;
         } catch (e) {
           ultimo = (e && e.message) || String(e);
+          // o defeito do arquivo de 4 bits não se repete: fica anotado na aba
+          if (tent.q4 && ERRO_SESSAO.test(ultimo)) marcarSemQ4();
           const podeBaixarLinhas = passe === 0 && wasm && wasm.numThreads > 1;
           if (podeBaixarLinhas) {
             wasm.numThreads = 1;
@@ -3179,6 +3501,11 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       }
       if (tentativas[i+1]) st(t('motorCaiu', tent.motor));
     }
+    /* Traduzir o erro do runtime antes de entregá-lo. "TransposeDQWeightsFor
+       MatMulNBits Missing required scale" é uma linha de C++ que não diz a
+       ninguém o que fazer; o que interessa é que o arquivo comprimido não abre
+       nesta máquina e que as alternativas já foram tentadas. */
+    if (ERRO_SESSAO.test(ultimo || '')) throw new Error(t('erroSessao'));
     throw new Error(ultimo || 'não consegui montar o modelo');
   }
 
@@ -3213,7 +3540,12 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   $('auto').onclick = async () => {
     if (!currentFile) return;
     const modelId = $('model').value, lang = $('lang').value;
+    /* O botão desabilitado e mudo deixava a pessoa sem saber se algo estava
+       acontecendo — e a transcrição de um vídeo longo leva minutos. Agora ele
+       diz o que está fazendo, e a linha ao lado diz o que ela pode fazer. */
     $('auto').disabled = true;
+    $('auto').textContent = t('autoIndo');
+    $('autoDica').textContent = t('autoEspere');
     trabalhando(true);
     relogio.audio = 0; relogio.ms = 0;
     try {
@@ -3223,7 +3555,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       catch (e) { throw new Error(t('audioFail')); }
       if (!data.length) throw new Error(t('noAudio'));
 
-      if (pipeId !== modelId) { st(t('modelLoad')); prog(0); pipe = await buildPipe(modelId); pipeId = modelId; }
+      if (pipeId !== modelId) {
+        st(await modeloEmCache(modelId) ? t('modelCache') : t('modelLoad'));
+        prog(0); pipe = await buildPipe(modelId); pipeId = modelId;
+      }
 
       const SR = 16000, WIN = 30 * SR, total = Math.ceil(data.length / WIN), out = [];
       const inicio = performance.now();
@@ -3244,7 +3579,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
           prog(pc); st(t('transcribing2', pc.toFixed(0), i+1, total, ''));
           continue;
         }
-        const opts = { return_timestamps: true, task: 'transcribe' };
+        const opts = { return_timestamps: true, task: tarefaAsr() };
         if (lang) opts.language = lang;
         const r = await transcrever(seg, opts);
         const chunks = (r && r.chunks && r.chunks.length) ? r.chunks
@@ -3269,7 +3604,12 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     } catch (e) {
       prog(null);
       st(t('trErr', (e && e.message ? e.message : e)), 'err');
-    } finally { $('auto').disabled = false; trabalhando(false); }
+    } finally {
+      $('auto').disabled = false;
+      $('auto').textContent = t('autoBtn');
+      $('autoDica').textContent = '';
+      trabalhando(false);
+    }
   };
 
   if ($('gpu')) $('gpu').onchange = mostrarTamanho;
@@ -3546,7 +3886,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       toque.type = 'button';
       toque.className = 'toque';
       toque.dataset.i = i;
-      toque.innerHTML = `<img src="${f.img.url}" alt="">`;
+      toque.innerHTML = `<img src="${imgFinal(f)}" alt="">`;
       toque.setAttribute('aria-pressed', String(!f.keep));
 
       const n = f.keep ? ++passo : 0;
@@ -3641,6 +3981,68 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     ata:       { layout:'grid', ev:false, goal:'ata',       prefixo:'ata',           dica:'mAtaH' }
   };
   const modeloAtual = () => MODELOS[$('modelo').value] || MODELOS.ia;
+
+  /* Cada modelo pede uma identificação diferente — e o "Contexto para IA" não
+     pede nenhuma: o leitor é uma máquina, e caso de teste, chamado e resultado
+     não significam nada para ela. Os campos são os mesmos; o que muda são os
+     rótulos e quais aparecem. */
+  const BLOCOS = {
+    evidencia: { h:'evH',   sub:'evHsub',   caso:'evCaso',    sis:'evSis',   quem:'evQuem',
+                 chamado:'evChamado', ini:'evIni',  res:true,  hash:true,  temIni:true },
+    tutorial:  { h:'guiaH', sub:'guiaHsub', caso:'guiaTit',   sis:'guiaSis', quem:'guiaAutor',
+                 chamado:'guiaVer',   ini:'evIni',  res:false, hash:false, temIni:false },
+    ata:       { h:'ataH',  sub:'ataHsub',  caso:'ataAssunto',sis:'ataLocal',quem:'ataOrg',
+                 chamado:'ataPart',   ini:'ataIni', res:false, hash:false, temIni:true },
+    ia:        null
+  };
+  const blocoAtual = () => BLOCOS[$('modelo').value] || null;
+
+  function pintarBloco(){
+    const b = blocoAtual();
+    $('evBox').classList.toggle('hide', !b);
+    if (!b) return;
+    $('evBoxH').textContent   = t(b.h);
+    $('evBoxSub').textContent = t(b.sub);
+    $('lblCaso').textContent    = t(b.caso);
+    $('lblSis').textContent     = t(b.sis);
+    $('lblQuem').textContent    = t(b.quem);
+    $('lblChamado').textContent = t(b.chamado);
+    $('lblIni').textContent     = t(b.ini);
+    $('cxRes').classList.toggle('hide', !b.res);
+    $('cxIni').classList.toggle('hide', !b.temIni);
+    $('cxHash').classList.toggle('hide', !b.hash);
+    // o resultado e o hash só existem na evidência: se ficassem preenchidos ao
+    // trocar de modelo, apareceriam num guia sem que ninguém os tivesse pedido
+    if (!b.res)  $('evRes').value = '';
+    if (!b.hash) $('evHash').checked = false;
+  }
+
+  /* O passo 5 oferecia os seis objetivos em qualquer modelo. Agora oferece os
+     que fazem sentido para a saída escolhida — "produzir uma ata" num passo a
+     passo era uma opção que só podia dar errado. */
+  const OBJETIVOS = {
+    ia:        ['resumo','revisao','passos','livre'],
+    evidencia: ['evidencia','revisao','livre'],
+    tutorial:  ['passos','resumo','livre'],
+    ata:       ['ata','resumo','revisao','livre']
+  };
+  const ROTULO_OBJ = { resumo:'gSum', passos:'gSteps', ata:'gMinutes',
+                       evidencia:'gEvid', revisao:'gReview', livre:'gFree' };
+
+  function pintarObjetivos(){
+    const lista = OBJETIVOS[$('modelo').value] || OBJETIVOS.ia;
+    const atual = $('goal').value;
+    const sel = $('goal');
+    sel.innerHTML = '';
+    lista.forEach(v => {
+      const o = document.createElement('option');
+      o.value = v; o.textContent = t(ROTULO_OBJ[v]);
+      sel.appendChild(o);
+    });
+    // mantém a escolha se ela ainda existe; senão cai no padrão do modelo
+    sel.value = lista.includes(atual) ? atual : (modeloAtual().goal || lista[0]);
+    $('goalFree').classList.toggle('hide', sel.value !== 'livre');
+  }
   /* Um tutorial não quer saber que dia era: hora de relógio é dado de evidência,
      e no passo a passo ela só suja o título. */
   const querHora = () => $('modelo').value !== 'tutorial';
@@ -3650,7 +4052,9 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   $('modelo').onchange = () => {
     const m = modeloAtual();
     $('layout').value = m.layout;
+    pintarBloco();
     $('goal').value   = m.goal;
+    pintarObjetivos();
     $('goalFree').classList.add('hide');   // o modelo já escolheu o objetivo
     $('evBox').open   = m.ev;
     dicaModelo();
@@ -3703,29 +4107,35 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     if (frames.length) buildPrompt();
   };
   function evDados(){
+    const b = blocoAtual();
+    const vazio = { caso:'', sistema:'', quem:'', chamado:'', resultado:'', inicio:null,
+                    horaVisivel:false, hash:false, linhas:[], linhasCompletas:[], algum:false };
+    // "Contexto para IA" não tem identificação: o que estiver digitado fica
+    // guardado no campo, mas não entra no documento sem alguém pedir
+    if (!b) return vazio;
     const v = id => ($(id).value || '').trim();
-    const res = $('evRes').value;
+    const res = b.res ? $('evRes').value : '';
     /* O caso de teste não entra nesta lista: ele vira o título do documento, e
        repeti-lo na primeira linha é ruído logo no que alguém lê primeiro. */
     const linhas = [
-      [t('evSis'),     v('evSis')],
-      [t('evQuem'),    v('evQuem')],
-      [t('evChamado'), v('evChamado')],
-      [t('evRes'),     res ? t({ ok:'evR1', nok:'evR2', blq:'evR3' }[res]) : ''],
+      [t(b.sis),     v('evSis')],
+      [t(b.quem),    v('evQuem')],
+      [t(b.chamado), v('evChamado')],
+      [t('evRes'),   res ? t({ ok:'evR1', nok:'evR2', blq:'evR3' }[res]) : ''],
       // a hora só entra na identificação se o modelo pedir hora: num passo a
       // passo, "Início da gravação" é dado que ninguém foi buscar
       // a hora vem com o fuso colado: é uma coluna a menos para o auditor perguntar
-      [t('pStart'),    (origemReal() == null || !querHora())
-                         ? '' : dataHora(origemReal()) + '  (' + fuso(origemReal()) + ')']
+      [t(b.ini),     (origemReal() == null || !querHora() || !b.temIni)
+                       ? '' : dataHora(origemReal()) + '  (' + fuso(origemReal()) + ')']
     ].filter(([, val]) => val);
     return {
       caso: v('evCaso'), sistema: v('evSis'), quem: v('evQuem'),
       chamado: v('evChamado'), resultado: res, inicio: origemReal(),
       horaVisivel: origemReal() != null && querHora(),
-      hash: $('evHash').checked,
+      hash: b.hash && $('evHash').checked,
       linhas,                       // o que entra na primeira página do documento
       // o zip não tem título onde pendurar o caso de teste, então lá ele volta
-      linhasCompletas: (v('evCaso') ? [[t('evCaso'), v('evCaso')]] : []).concat(linhas),
+      linhasCompletas: (v('evCaso') ? [[t(b.caso), v('evCaso')]] : []).concat(linhas),
       algum: linhas.length > 0 || !!v('evCaso')
     };
   }
@@ -3741,13 +4151,137 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      não foi editado depois; NÃO prova conformidade com 21 CFR Part 11, SOX ou
      CSV, e o produto não diz em lugar nenhum que prova. */
   async function calcularHashes(kept){
-    if (!$('evHash').checked || !(crypto.subtle && crypto.subtle.digest)) return;
+    if (!evDados().hash || !(crypto.subtle && crypto.subtle.digest)) return;
     for (const f of kept) {
       if (f.hash) continue;
       try {
-        const d = await crypto.subtle.digest('SHA-256', bytesDaImagem(f.img.url));
+        const d = await crypto.subtle.digest('SHA-256', bytesDaImagem(imgFinal(f)));
         f.hash = [...new Uint8Array(d)].map(b => pad2(b.toString(16))).join('');
       } catch (e) { f.hash = ''; }
+    }
+  }
+
+  /* ================= aviso de dado sensível =================
+     O OCR já lê a tela para pôr o texto no documento. Usar essa mesma leitura
+     para procurar padrões de dado pessoal custa quase nada e resolve o pior
+     jeito de descobrir o problema: pelo destinatário do PDF.
+
+     A varredura é local, como todo o resto, e ela NÃO tarja sozinha — só diz
+     onde olhar. Tarjar sem perguntar apagaria justamente o número que às vezes
+     é a prova (um pedido, uma nota). Quem decide é quem executou o teste.
+
+     Os padrões são deliberadamente conservadores: preferem deixar passar a
+     gritar em cima de qualquer sequência de números. Um aviso que erra sempre
+     vira um aviso que ninguém lê. */
+  const PADROES = [
+    { k:'cpf',      re:/\b\d{3}\.?\d{3}\.?\d{3}-?\d{2}\b/g },
+    { k:'cnpj',     re:/\b\d{2}\.?\d{3}\.?\d{3}\/?\d{4}-?\d{2}\b/g },
+    { k:'email',    re:/\b[\w.+-]+@[\w-]+\.[\w.-]{2,}\b/g },
+    { k:'cartao',   re:/\b(?:\d[ -]?){13,16}\b/g },
+    { k:'telefone', re:/\(?\b\d{2}\)?[ -]?9?\d{4}[ -]?\d{4}\b/g }
+  ];
+
+  function varrerSensivel(){
+    const kept = frames.filter(f => f.keep);
+    const achados = {};        // tipo -> lista de números de passo
+    kept.forEach((f, i) => {
+      if (!f.ocr) return;
+      PADROES.forEach(p => {
+        p.re.lastIndex = 0;
+        if (p.re.test(f.ocr)) (achados[p.k] = achados[p.k] || []).push(i + 1);
+      });
+    });
+    const tipos = Object.keys(achados);
+    const cx = $('sensAviso');
+    if (!tipos.length) { cx.classList.add('hide'); cx.innerHTML = ''; return; }
+    const partes = tipos.map(k => t('sens_' + k) + ' (' + t('sensPassos', achados[k].join(', ')) + ')');
+    cx.classList.remove('hide');
+    cx.innerHTML = `<b>${t('sensH')}</b> ${t('sensP', partes.join('; '))}`;
+  }
+
+  /* ================= tarjar =================
+     O caso de evidência esbarra sempre no mesmo muro: a tela tem dado de
+     produção. Até aqui a única saída era descartar o quadro inteiro — e com ele
+     a prova. Agora dá para cobrir a área e seguir.
+
+     Três decisões que fazem isso ser tarja de verdade, e não desenho por cima:
+
+     1. As coordenadas são normalizadas (0 a 1). A miniatura tem 158 px, a lente
+        tem 900 e o PDF tem outra escala; guardar pixels amarraria a tarja a uma
+        das três.
+     2. A tarja é QUEIMADA numa imagem nova, e é essa que vai para o PDF, o
+        Word, o ZIP e o JSON. O original fica só na memória desta aba e nunca é
+        exportado — não existe "camada" para alguém remover depois.
+     3. A impressão digital é calculada sobre a imagem JÁ tarjada, senão o hash
+        provaria um arquivo que ninguém recebeu. */
+  const imgFinal = f => f.tarjado || f.img.url;
+
+  async function queimarTarjas(f){
+    if (!f.tarjas || !f.tarjas.length) { f.tarjado = null; f.hash = null; return; }
+    const im = await new Promise((ok, err) => {
+      const i = new Image();
+      i.onload = () => ok(i);
+      i.onerror = () => err(new Error('imagem'));
+      i.src = f.img.url;
+    });
+    const c = document.createElement('canvas');
+    c.width = f.img.w; c.height = f.img.h;
+    const x = c.getContext('2d');
+    x.drawImage(im, 0, 0, c.width, c.height);
+    x.fillStyle = '#000';
+    f.tarjas.forEach(t => x.fillRect(
+      Math.round(t.x * c.width), Math.round(t.y * c.height),
+      Math.max(1, Math.round(t.w * c.width)), Math.max(1, Math.round(t.h * c.height))));
+    f.tarjado = c.toDataURL('image/jpeg', parseFloat($('quality').value) || 0.8);
+    f.hash = null;                 // a imagem mudou: o hash antigo não vale mais
+    /* E o texto lido antes da tarja some junto. Ele foi lido da imagem inteira e
+       pode conter exatamente o que acabou de ser coberto — mantê-lo publicaria o
+       dado no documento com a tarja aplicada ao lado. Basta reler. */
+    f.ocr = '';
+  }
+
+  /* Antes de qualquer exportação: garante que toda tarja desenhada virou pixel
+     preto. É barato quando não há tarja nenhuma — sai na primeira linha. */
+  async function aplicarTarjas(lista){
+    for (const f of lista) {
+      if (f.tarjas && f.tarjas.length && !f.tarjado) await queimarTarjas(f);
+    }
+  }
+
+  const temTarja = () => frames.some(f => f.tarjas && f.tarjas.length);
+
+  /* ================= recortar =================
+     Gravação de tela inteira traz barra de tarefas, notificação e a janela que
+     ficou aberta atrás. O recorte é UM só, aplicado a todos os quadros: numa
+     mesma gravação a área que interessa é sempre a mesma, e recortar quadro a
+     quadro seria trabalho repetido para o mesmo resultado.
+
+     Ele é destrutivo como a tarja — o que sai no documento é a imagem recortada
+     — mas guarda o original em memória, então "tirar o recorte" devolve tudo
+     sem precisar extrair de novo. */
+  let recorte = null;         // {x,y,w,h} normalizado, ou null
+
+  async function aplicarRecorte(){
+    for (const f of frames) {
+      if (!f.orig) f.orig = f.img;                  // guarda uma vez só
+      const base = f.orig;
+      if (!recorte) { f.img = base; f.tarjado = null; f.hash = null; continue; }
+      const im = await new Promise((ok, err) => {
+        const i = new Image(); i.onload = () => ok(i); i.onerror = () => err(new Error('imagem'));
+        i.src = base.url;
+      });
+      const sx = Math.round(recorte.x * base.w), sy = Math.round(recorte.y * base.h);
+      const sw = Math.max(8, Math.round(recorte.w * base.w));
+      const sh = Math.max(8, Math.round(recorte.h * base.h));
+      const c = document.createElement('canvas');
+      c.width = sw; c.height = sh;
+      c.getContext('2d').drawImage(im, sx, sy, sw, sh, 0, 0, sw, sh);
+      f.img = { url: c.toDataURL('image/jpeg', parseFloat($('quality').value) || 0.8), w: sw, h: sh };
+      /* Tarja e recorte não se compõem bem: as coordenadas da tarja eram
+         relativas à imagem inteira e deixariam de apontar o mesmo lugar. Em vez
+         de recalcular e errar por um pixel numa evidência, as tarjas do quadro
+         são desfeitas e a pessoa refaz sobre a imagem nova. */
+      f.tarjas = []; f.tarjado = null; f.hash = null; f.ocr = '';
     }
   }
 
@@ -3787,12 +4321,119 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     counts();
   }
 
+  /* ---- desenhar e apagar tarjas dentro da lente ---- */
+  let tarjando = false, cortando = false, arrasto = null;
+
+  function pintarTarjas(){
+    const f = frames[lenteI];
+    const cx = $('lenteTarjas'); cx.innerHTML = '';
+    if (!f) return;
+    /* `caixa` e não `t`: o nome curto sombreava a função de tradução, e a
+       primeira linha que chamasse t('...') dentro do laço quebraria. */
+    (f.tarjas || []).forEach((caixa, i) => {
+      const el = document.createElement('i');
+      el.style.cssText = `left:${caixa.x*100}%;top:${caixa.y*100}%;` +
+                         `width:${caixa.w*100}%;height:${caixa.h*100}%`;
+      el.title = t('tarjaTirar');
+      el.onclick = () => {
+        if (!tarjando) return;
+        f.tarjas.splice(i, 1);
+        queimarTarjas(f).then(() => { pintarLente(); render(); });
+      };
+      cx.appendChild(el);
+    });
+    $('tarjaLimpar').classList.toggle('hide', !(f.tarjas && f.tarjas.length));
+    $('tarjaMsg').textContent = (f.tarjas && f.tarjas.length)
+      ? t('tarjaN', f.tarjas.length)
+      : (tarjando ? t('tarjaComo') : '');
+  }
+
+  function modoTarja(on){
+    tarjando = on;
+    $('lenteImgCx').classList.toggle('tarjando', on);
+    $('tarjaModo').textContent = t(on ? 'tarjaFim' : 'tarjaBtn');
+    $('tarjaModo').classList.toggle('ghost', !on);
+    pintarTarjas();
+  }
+
+  $('tarjaModo').onclick = () => { if (cortando) modoCrop(false); modoTarja(!tarjando); };
+
+  function modoCrop(on){
+    cortando = on;
+    $('lenteImgCx').classList.toggle('tarjando', on || tarjando);
+    $('cropModo').textContent = t(on ? 'cropFim' : 'cropBtn');
+    $('cropModo').classList.toggle('ghost', !on);
+    if (on) $('tarjaMsg').textContent = t('cropComo');
+    else pintarTarjas();
+  }
+  $('cropModo').onclick = () => { if (tarjando) modoTarja(false); modoCrop(!cortando); };
+  $('cropTirar').onclick = async () => {
+    recorte = null;
+    $('tarjaMsg').textContent = t('cropIndo');
+    await aplicarRecorte();
+    $('cropTirar').classList.add('hide');
+    pintarLente(); render();
+    $('tarjaMsg').textContent = t('cropSaiu');
+  };
+  $('tarjaLimpar').onclick = () => {
+    const f = frames[lenteI]; if (!f) return;
+    f.tarjas = [];
+    queimarTarjas(f).then(() => { pintarLente(); render(); });
+  };
+
+  const normal = e => {
+    const r = $('lenteImg').getBoundingClientRect();
+    return { x: Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)),
+             y: Math.min(1, Math.max(0, (e.clientY - r.top) / r.height)) };
+  };
+  $('lenteImgCx').addEventListener('pointerdown', e => {
+    if ((!tarjando && !cortando) || (tarjando && e.target.tagName === 'I')) return;
+    e.preventDefault();
+    $('lenteImgCx').setPointerCapture(e.pointerId);
+    arrasto = { de: normal(e), el: document.createElement('i') };
+    arrasto.el.className = 'nova';
+    $('lenteTarjas').appendChild(arrasto.el);
+  });
+  $('lenteImgCx').addEventListener('pointermove', e => {
+    if (!arrasto) return;
+    const a = arrasto.de, b = normal(e);
+    arrasto.caixa = { x: Math.min(a.x,b.x), y: Math.min(a.y,b.y),
+                      w: Math.abs(b.x-a.x), h: Math.abs(b.y-a.y) };
+    const c = arrasto.caixa;
+    arrasto.el.style.cssText = `left:${c.x*100}%;top:${c.y*100}%;width:${c.w*100}%;height:${c.h*100}%`;
+  });
+  $('lenteImgCx').addEventListener('pointerup', async () => {
+    if (!arrasto) return;
+    const c = arrasto.caixa;
+    const f = frames[lenteI];
+    arrasto = null;
+    // um clique sem arrastar não vira tarja nem recorte de um pixel
+    if (!c || c.w < 0.012 || c.h < 0.012 || !f) { pintarTarjas(); return; }
+
+    if (cortando) {
+      recorte = c;
+      $('tarjaMsg').textContent = t('cropIndo');
+      await aplicarRecorte();
+      modoCrop(false);
+      $('cropTirar').classList.remove('hide');
+      pintarLente(); render();
+      $('tarjaMsg').textContent = t('cropFeito', frames.length);
+      return;
+    }
+    f.tarjas = (f.tarjas || []).concat(c);
+    await queimarTarjas(f);
+    pintarLente();
+    render();
+  });
+
   function pintarLente(){
     const f = frames[lenteI]; if (!f) return;
     const kept = frames.filter(x => x.keep);
     const k = kept.indexOf(f);
     const n = k >= 0 ? k + 1 : 0;
-    $('lenteImg').src = f.img.url;
+    $('lenteImg').src = imgFinal(f);
+    $('cropTirar').classList.toggle('hide', !recorte);
+    pintarTarjas();
     $('lenteTit').textContent = (n ? t('stepN', n) : t('offTag')) + '  ·  ' + fmt(f.t) +
                                 (horaDe(f.t) ? '  ·  ' + horaDe(f.t) : '');
     $('lentePos').textContent = t('lentePos', lenteI + 1, frames.length);
@@ -3840,6 +4481,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     $('lenteFechar').focus();
   }
   function fecharLente(){
+    if (tarjando) modoTarja(false);
+    if (cortando) modoCrop(false);
     $('lente').classList.add('hide');
     lenteI = -1;
     // o foco volta para a miniatura de onde saiu; sem isso o teclado recomeça no topo
@@ -3978,6 +4621,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   $('ocrStop').onclick = () => { ocrParar = true; };
 
   $('ocr').onclick = async () => {
+    await aplicarTarjas(frames.filter(f => f.keep));
     const kept = frames.filter(f => f.keep);
     if (!kept.length) return;
     $('ocr').disabled = true;
@@ -4004,7 +4648,9 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
 
       for (const f of kept) {
         if (ocrParar) break;
-        const r = await worker.recognize(f.img.url);
+        /* A imagem final, e não a original: o OCR do quadro tarjado não pode
+           devolver ao documento justamente o texto que a tarja cobriu. */
+        const r = await worker.recognize(imgFinal(f));
         const txt = ((r && r.data && r.data.text) || '').replace(/\s+/g, ' ').trim();
         f.ocr = txt.length > 3 ? txt : '';
         if (f.ocr) comTexto++;
@@ -4019,6 +4665,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       $('status').innerHTML = comTexto
         ? `<span class="ok">${t('ocrDone', comTexto, feitos)}</span>` + (ocrParar ? t('ocrStopped') : '')
         : t('ocrNone');
+      varrerSensivel();
       buildPrompt();
     } catch (e) {
       $('status').innerHTML = `<span class="err">${t('ocrErr', (e && e.message) || e)}</span>`;
@@ -4037,7 +4684,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   $('json').onclick = async () => {
     const kept = frames.filter(f => f.keep);
     if (!kept.length) return;
-    await calcularHashes(kept);
+    await aplicarTarjas(kept); await calcularHashes(kept);
     const { cues, plain } = parseTranscript($('tr').value);
     const ev = evDados();
     const dados = {
@@ -4069,7 +4716,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
         altura: f.img.h,
         sha256: f.hash || null,
         textoNaTela: f.ocr || '',
-        imagemBase64: f.img.url
+        imagemBase64: imgFinal(f),
+        tarjas: (f.tarjas || []).length
       })),
       transcricao: cues.length
         ? cues.map(c => ({ inicio: +c.a.toFixed(2), fim: +c.b.toFixed(2),
@@ -4287,13 +4935,13 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     // congelar no trabalho síncrono — que com 400 frames leva segundos
     await new Promise(r => setTimeout(r, 40));
     try {
-      await calcularHashes(kept);
+      await aplicarTarjas(kept); await calcularHashes(kept);
       const ev = evDados();
       const entradas = kept.map((f, i) => ({
         // ordem primeiro para o gerenciador de arquivos ordenar certo,
         // instante depois para saber de onde a imagem veio
         nome: String(i + 1).padStart(4, '0') + '-' + fmt(f.t).replace(/:/g, '-') + '.jpg',
-        dados: () => bytesDaImagem(f.img.url)
+        dados: () => bytesDaImagem(imgFinal(f))
       }));
       /* Um índice de texto junto das imagens: sem ele, um zip de evidência é
          uma pasta de JPEGs sem passo, sem hora e sem a anotação — exatamente o
@@ -4441,7 +5089,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     kept.forEach((f, i) => {
       const rid = 'rIdImg' + (i + 1);
       const nome = 'frame' + String(i + 1).padStart(4, '0') + '.jpg';
-      midias.push({ nome: 'word/media/' + nome, dados: () => bytesDaImagem(f.img.url) });
+      midias.push({ nome: 'word/media/' + nome, dados: () => bytesDaImagem(imgFinal(f)) });
       rels.push(`<Relationship Id="${rid}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/${nome}"/>`);
 
       const { cx, cy } = medidaImagem(f.img);
@@ -4552,7 +5200,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     $('pdfStatus').textContent = t('pkgBuilding');
     await new Promise(r => setTimeout(r, 40));    // deixa a mensagem aparecer
     try {
-      await calcularHashes(kept);
+      await aplicarTarjas(kept); await calcularHashes(kept);
       baixarBlob(montarDocx(), nomeArquivo() + '.docx');
       medir('baixou_saida', { p_formato: 'docx' });
       $('pdfStatus').innerHTML = `<span class="ok">${t('docxDone', kept.length)}</span>`;
@@ -4573,7 +5221,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     $('go').disabled = true;
     $('pdfStatus').textContent = t('pdfBuilding');
     await new Promise(r => setTimeout(r, 40));
-    await calcularHashes(kept);
+    await aplicarTarjas(kept); await calcularHashes(kept);
 
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({ unit:'mm', format:'a4', compress:true });
@@ -4746,7 +5394,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
           doc.text(notaL, M, yy + 3, { lineHeightFactor: 1.3 });
           yy += notaL.length * 4.8 + 1.5;
         }
-        doc.addImage(f.img.url, 'JPEG', ix, yy, iw, ih0);
+        doc.addImage(imgFinal(f), 'JPEG', ix, yy, iw, ih0);
         yy += ih0;
         if (cues.length) {
           yy += 6;
@@ -4783,7 +5431,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
         const blockH = ihG + 7 + (hora ? 3.6 : 0) + notaG.length * 3.4;
         if (col === 0 && top + blockH > PH - 18) { foot(); doc.addPage(); top = M; }
         const x = M + col * (cellW + gap) + (cellW - iwG) / 2;
-        doc.addImage(f.img.url, 'JPEG', x, top, iwG, ihG);
+        doc.addImage(imgFinal(f), 'JPEG', x, top, iwG, ihG);
         let cy2 = top + ihG + 4.5;
         doc.setFont('helvetica','bold').setFontSize(8.5).setTextColor(60)
            .text(t('stepN', i + 1) + '  ·  ' + fmt(f.t), x, cy2);

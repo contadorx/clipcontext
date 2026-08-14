@@ -68,6 +68,11 @@
     </table>
     <p><b>None of these connections carries video, audio, images, transcripts or generated documents.</b>
     The PDF library is served from our own domain, not from a CDN.</p>
+    <p>One case tends to surprise people: <b>translation</b> of the transcript does not leave here either.
+    It uses the translator the browser itself embeds, running on your device — not the Google Cloud API,
+    which would require a key of ours in the code and would send your text to a server. Where that
+    translator does not exist, what the tool offers is the speech model translating as it listens, also on
+    your computer. <b>In neither path is the text transmitted.</b></p>
 
     <h2>What stays in your browser</h2>
     <p>None of your content is kept between visits. Of the evidence identification fields, only
