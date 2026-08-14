@@ -38,6 +38,19 @@
   .drop strong{display:block;font-size:16px;margin-bottom:4px}
   .drop span{color:var(--muted);font-size:13px}
   input[type=file]{display:none}
+  /* Passo a passo: o cartão que ainda não pode ser usado fica cinza e inerte, em
+     vez de ficar ali cheio de controles ativos que não levam a lugar nenhum.
+     `inert` tira o bloco da ordem de foco e da árvore de acessibilidade — bem
+     melhor que pointer-events, que só engana o mouse. */
+  .card[inert]{opacity:.45;filter:saturate(.4)}
+  .card[inert] .lockHint{display:block}
+  .lockHint{margin:-6px 0 14px;font-size:13px;color:var(--muted)}
+  /* Sem isto, os dois elementos que acabaram de virar focáveis — a zona de
+     arraste e cada miniatura — recebem foco sem nenhum sinal na tela. */
+  /* transition:none porque .drop, button e textarea animam `all` em 150 ms:
+     sem isto o anel de foco aparece desbotando, que é o oposto do que um
+     anel de foco serve para fazer. */
+  :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px;transition:none}
   textarea{width:100%;min-height:130px;padding:11px;border:1px solid var(--line);border-radius:8px;
            background:var(--bg);color:var(--ink);font:13px/1.5 ui-monospace,Menlo,Consolas,monospace;resize:vertical;
            transition:.15s}
@@ -50,7 +63,7 @@
   button{font:inherit;font-weight:550;border:0;border-radius:8px;padding:11px 20px;cursor:pointer;
          background:var(--accent);color:var(--accent-ink);transition:.15s}
   button:hover{filter:brightness(1.07)}
-  button:disabled{opacity:.42;cursor:not-allowed}
+  button:disabled{opacity:.62;cursor:not-allowed}
   button.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
   button.sm{padding:7px 13px;font-size:13px}
   .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
@@ -65,7 +78,7 @@
                  border:2px solid transparent;transition:.12s}
   .thumbs figure:hover{border-color:var(--accent)}
   .thumbs figure.off{opacity:.32}
-  .thumbs figure.off::after{content:'descartado';position:absolute;inset:auto 0 0 0;background:var(--err);
+  .thumbs figure.off::after{content:attr(data-off);position:absolute;inset:auto 0 0 0;background:var(--err);
         color:#fff;font-size:10px;text-align:center;padding:2px;font-weight:600}
   .thumbs img{width:100%;display:block}
   .thumbs figcaption{font:11px ui-monospace,Menlo,monospace;color:var(--muted);padding:3px 0 5px;text-align:center}
@@ -132,7 +145,7 @@
 
   <div class="card">
     <h2><span class="step">1</span><span data-i18n="s1"></span></h2>
-    <div class="drop" id="drop">
+    <div class="drop" id="drop" role="button" tabindex="0">
       <strong data-i18n="drop1"></strong>
       <span data-i18n="drop2"></span>
     </div>
@@ -169,8 +182,9 @@
     </div>
   </div>
 
-  <div class="card">
+  <div class="card" id="cardTr">
     <h2><span class="step">2</span><span data-i18n="s2"></span></h2>
+    <p class="lockHint hide" data-i18n="lockHint"></p>
 
     <div class="autobox">
       <div class="row">
@@ -217,8 +231,9 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     </div>
   </div>
 
-  <div class="card">
+  <div class="card" id="cardFrames">
     <h2><span class="step">3</span><span data-i18n="s3"></span></h2>
+    <p class="lockHint hide" data-i18n="lockHint"></p>
     <div class="grid">
       <div>
         <label class="f" for="mode" data-i18n="lCrit"></label>
@@ -304,6 +319,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   </div>
 
   <div class="card" id="promptCard">
+    <p class="lockHint hide" data-i18n="lockHint"></p>
     <h2><span class="step">5</span><span data-i18n="s5"></span></h2>
     <p class="status" style="margin:-6px 0 14px" data-i18n="s5sub"></p>
     <div class="row">
@@ -368,6 +384,13 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       demoHasAudio:'O exemplo tem narração: a transcrição já veio preenchida, mas você pode apagá-la e clicar em "Transcrever automaticamente" para ver o reconhecimento de voz funcionando.',
       mark:'Marcar este momento',
       recBtn:'Gravar a tela', recStopBtn:'Parar gravação',
+      recAskMic:'Permita o microfone nesta aba — a tela só será pedida depois.',
+      recAskTela:'Agora escolha a tela ou a janela para compartilhar.',
+      pipTit:'ClipContext — gravando',
+      pipPrep:'preparando…', pipMic:'liberando o microfone', pipModelo:'baixando o modelo',
+      pipTela:'escolha a tela', pipStop:'Parar', pipFrames:'{0} frames',
+      pipNoVideo:'nenhum vídeo é guardado',
+      lockHint:'Escolha um vídeo no passo 1 para continuar.',
       recHint:'grave uma reunião e receba os frames e a transcrição dos dois canais, sem guardar o vídeo',
       recRun:'Gravando… {0} — clique em Parar quando terminar.',
       recDone:'Gravação de {0} pronta e carregada. Pode extrair os frames.',
@@ -464,7 +487,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       quiet0:'Todos os frames têm fala no trecho correspondente.',
       quietAudio:'Analisando o áudio para achar os trechos sem fala…',
       quietNone:'Não há transcrição nem áudio utilizável para identificar silêncio.',
-      pIndex:'Índice do vídeo', pIndexSub:'Cada linha é um instante em que a imagem mudou.', tKeep:'mantidos', tOff:'descartados', keepAll:'Manter todos', dropDup:'Descartar repetidos',
+      pIndex:'Índice do vídeo', pIndexSub:'Cada linha é um instante em que a imagem mudou.', tKeep:'mantidos', tOff:'descartados', offTag:'descartado', keepAll:'Manter todos', dropDup:'Descartar repetidos',
       clickHint:'Clique em qualquer frame para descartar ou trazer de volta.',
       dedupN:'{0} frame(s) quase idênticos foram descartados.',
       dedup0:'Nenhum frame repetido encontrado — todos mostram algo diferente.',
@@ -533,6 +556,13 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       demoHasAudio:'The example is narrated: the transcript comes pre-filled, but you can clear it and click "Transcribe automatically" to watch speech recognition work.',
       mark:'Mark this moment',
       recBtn:'Record the screen', recStopBtn:'Stop recording',
+      recAskMic:'Allow the microphone on this tab — the screen is only asked for afterwards.',
+      recAskTela:'Now pick the screen or window to share.',
+      pipTit:'ClipContext — recording',
+      pipPrep:'getting ready…', pipMic:'allowing the microphone', pipModelo:'downloading the model',
+      pipTela:'pick the screen', pipStop:'Stop', pipFrames:'{0} frames',
+      pipNoVideo:'no video is kept',
+      lockHint:'Choose a video in step 1 to continue.',
       recHint:'record a meeting and get the frames and both audio channels transcribed, with no video kept',
       recRun:'Recording… {0} — click Stop when you are done.',
       recDone:'{0} recording ready and loaded. You can extract the frames.',
@@ -629,7 +659,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       quiet0:'Every frame has speech in its interval.',
       quietAudio:'Analysing the audio to find the silent stretches…',
       quietNone:'There is no transcript and no usable audio to detect silence.',
-      pIndex:'Video index', pIndexSub:'Each line is a moment where the image changed.', tKeep:'kept', tOff:'discarded', keepAll:'Keep all', dropDup:'Discard duplicates',
+      pIndex:'Video index', pIndexSub:'Each line is a moment where the image changed.', tKeep:'kept', tOff:'discarded', offTag:'discarded', keepAll:'Keep all', dropDup:'Discard duplicates',
       clickHint:'Click any frame to discard it or bring it back.',
       dedupN:'{0} near-identical frame(s) were discarded.',
       dedup0:'No repeated frames found — every one shows something different.',
@@ -696,6 +726,13 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       driveNoScope:'Google denegó el acceso a este archivo. Elige el archivo por el selector y no por un acceso directo.',
       driveBlocked:'El navegador bloqueó la ventana de Google. Permite las ventanas emergentes para este sitio e inténtalo de nuevo.',
       recBtn:'Grabar la pantalla', recStopBtn:'Detener grabación',
+      recAskMic:'Permite el micrófono en esta pestaña — la pantalla se pide después.',
+      recAskTela:'Ahora elige la pantalla o la ventana que vas a compartir.',
+      pipTit:'ClipContext — grabando',
+      pipPrep:'preparando…', pipMic:'permitiendo el micrófono', pipModelo:'descargando el modelo',
+      pipTela:'elige la pantalla', pipStop:'Detener', pipFrames:'{0} fotogramas',
+      pipNoVideo:'no se guarda ningún vídeo',
+      lockHint:'Elige un vídeo en el paso 1 para continuar.',
       recHint:'graba una reunión y recibe los fotogramas y la transcripción de los dos canales, sin guardar el vídeo',
       recRun:'Grabando… {0} — pulsa Detener cuando termines.',
       recDone:'Grabación de {0} lista y cargada. Ya puedes extraer los fotogramas.',
@@ -794,7 +831,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       quiet0:'Todos los fotogramas tienen habla en su tramo.',
       quietAudio:'Analizando el audio para encontrar los tramos en silencio…',
       quietNone:'No hay transcripción ni audio utilizable para detectar el silencio.',
-      pIndex:'Índice del vídeo', pIndexSub:'Cada línea es un instante en que la imagen cambió.', tKeep:'conservados', tOff:'descartados', keepAll:'Conservar todos', dropDup:'Descartar repetidos',
+      pIndex:'Índice del vídeo', pIndexSub:'Cada línea es un instante en que la imagen cambió.', tKeep:'conservados', tOff:'descartados', offTag:'descartado', keepAll:'Conservar todos', dropDup:'Descartar repetidos',
       clickHint:'Haz clic en cualquier fotograma para descartarlo o recuperarlo.',
       dedupN:'{0} fotograma(s) casi idénticos fueron descartados.',
       dedup0:'No se encontraron fotogramas repetidos — todos muestran algo distinto.',
@@ -939,6 +976,38 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   }
 
 
+  /* ================= passo a passo =================
+     A queixa era justa: cinco cartões abertos ao mesmo tempo, todos com
+     controles ativos, e nenhuma indicação de por onde começar. Agora o que
+     ainda não pode ser usado fica cinza e inerte, e a página leva a pessoa ao
+     próximo passo assim que ele destrava.
+
+     `temMaterial` e não `currentFile`: a gravação de tela não produz arquivo
+     nenhum, e mesmo assim libera a revisão. */
+  function passos(){
+    const temVideo    = !!(currentFile || (video && video.videoWidth) || liveOn);
+    const temMaterial = temVideo || frames.length > 0;
+    const trancar = (id, aberto) => {
+      const el = $(id); if (!el) return;
+      if (aberto) el.removeAttribute('inert'); else el.setAttribute('inert', '');
+    };
+    trancar('cardTr',     temMaterial);
+    trancar('cardFrames', temMaterial);
+    trancar('promptCard', frames.length > 0);
+  }
+
+  /* Rolagem suave até o próximo passo. Respeita quem pediu menos movimento no
+     sistema — para essas pessoas o salto é seco, e não uma animação. */
+  let ultimoAlvo = '';
+  function irPara(id, forcar){
+    const el = $(id); if (!el) return;
+    if (!forcar && ultimoAlvo === id) return;
+    ultimoAlvo = id;
+    const seco = window.matchMedia &&
+                 window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    el.scrollIntoView({ behavior: seco ? 'auto' : 'smooth', block: 'start' });
+  }
+
   const pad2 = n => String(n).padStart(2,'0');
   function fmt(t){
     t = Math.max(0, t|0);
@@ -948,6 +1017,12 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
 
   /* ================= vídeo ================= */
   $('drop').onclick = () => { if (!capturando()) $('file').click(); };
+  /* O <input type=file> está escondido por CSS e a zona de arraste era uma div:
+     sem mouse, não havia como escolher um vídeo. Isto invalidava o produto
+     inteiro no teclado. */
+  $('drop').onkeydown = e => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); $('drop').click(); }
+  };
   ['dragenter','dragover'].forEach(e => $('drop').addEventListener(e, ev => {
     ev.preventDefault(); $('drop').classList.add('over');
   }));
@@ -977,6 +1052,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
          realmente conseguiu abrir. O que cai no onerror é outro número, e
          misturar os dois esconderia justamente a dor dos formatos recusados. */
       medir('carregou_video', { p_origem: origem || 'arquivo' });
+      passos();
+      irPara('cardFrames');      // o vídeo abriu: o próximo passo é escolher os frames
     };
     video.onerror = () => {
       let extra = '';
@@ -1047,7 +1124,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     $('intBox').classList.toggle('hide', m !== 'interval');
   };
   $('sens').oninput = () => { $('sensV').textContent = t('sens')[+$('sens').value]; };
-  $('reset').onclick = () => location.reload();
+  $('reset').onclick = () => location.reload();   // o recarregamento devolve os passos ao início
 
   $('uiLang').onchange = () => {
     LANG = $('uiLang').value;
@@ -1374,6 +1451,81 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
 
   let liveOn = false, liveDur = 0, liveCues = [], liveCanais = null, liveW = 0, liveH = 0;
   let abrindoCaptura = false, emCauda = false, pularCauda = false;
+
+  /* ---- janelinha de controle, flutuando sobre a tela compartilhada ----
+     Gravando, esta aba fica ATRÁS do que está sendo compartilhado: a pessoa não
+     vê o relógio e não alcança o botão Parar. A janela de picture-in-picture de
+     documento fica por cima de tudo e resolve isso.
+
+     Ela é aberta no primeiro instante do clique, antes de qualquer `await`:
+     `requestWindow` exige gesto do usuário, e gesto não sobrevive a um download
+     de modelo de 200 MB. Por isso ela nasce mostrando "preparando…" e vai sendo
+     atualizada conforme as etapas passam.
+
+     Onde a API não existe (Firefox, Safari) tudo segue igual, sem a janelinha. */
+  let pipWin = null, pipTexto = null, pipRelogio = null, pipFrames = null;
+
+  const PIP_CSS = `
+    *{box-sizing:border-box;margin:0}
+    body{font:14px/1.4 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+         background:#121419;color:#e9ebf1;padding:14px;display:flex;
+         flex-direction:column;gap:10px;justify-content:center;height:100vh}
+    .top{display:flex;align-items:center;gap:8px}
+    .dot{width:10px;height:10px;border-radius:50%;background:#ef8484;flex:none;
+         animation:pulsa 1.4s ease-in-out infinite}
+    @keyframes pulsa{0%,100%{opacity:1}50%{opacity:.25}}
+    .rel{font:600 22px/1 ui-monospace,Menlo,Consolas,monospace;letter-spacing:.5px}
+    .txt{color:#949bab;font-size:12.5px}
+    button{width:100%;padding:11px;border:0;border-radius:9px;background:#737cf0;
+           color:#121419;font:600 15px system-ui,sans-serif;cursor:pointer}
+    button:hover{filter:brightness(1.08)}
+    button:disabled{opacity:.5;cursor:default}
+    .pe{font-size:11.5px;color:#737cf0}
+  `;
+
+  async function abrirControle(){
+    if (!('documentPictureInPicture' in window)) return;
+    try {
+      pipWin = await documentPictureInPicture.requestWindow({ width: 250, height: 172 });
+    } catch (e) { pipWin = null; return; }
+
+    const d = pipWin.document;
+    d.title = t('pipTit');
+    const st = d.createElement('style'); st.textContent = PIP_CSS; d.head.appendChild(st);
+    d.body.innerHTML =
+      '<div class="top"><span class="dot"></span><span class="rel" id="rel">0:00</span></div>' +
+      '<div class="txt" id="txt"></div>' +
+      '<button id="stop" disabled></button>' +
+      '<div class="pe">' + t('pipNoVideo') + '</div>';
+
+    pipRelogio = d.getElementById('rel');
+    pipTexto   = d.getElementById('txt');
+    pipFrames  = d.getElementById('stop');
+    pipFrames.textContent = t('pipStop');
+    pipFrames.onclick = () => { if (pararLive) pararLive(); };
+    controle('prep');
+
+    /* Fechar a janelinha NÃO para a gravação: fechar sem querer não pode
+       destruir uma reunião de uma hora. O botão da aba continua valendo. */
+    pipWin.addEventListener('pagehide', () => { pipWin = null; pipRelogio = pipTexto = pipFrames = null; });
+  }
+
+  function controle(etapa, dados){
+    if (!pipWin) return;
+    if (etapa === 'gravando') {
+      if (pipFrames) pipFrames.disabled = false;
+      if (pipRelogio) pipRelogio.textContent = fmt(Math.floor(dados.seg));
+      if (pipTexto) pipTexto.textContent = t('pipFrames', dados.frames);
+      return;
+    }
+    const rotulos = { prep: 'pipPrep', mic: 'pipMic', modelo: 'pipModelo', tela: 'pipTela' };
+    if (pipTexto) pipTexto.textContent = t(rotulos[etapa] || 'pipPrep');
+  }
+
+  function fecharControle(){
+    if (pipWin) { try { pipWin.close(); } catch (e) {} }
+    pipWin = null; pipRelogio = pipTexto = pipFrames = null;
+  }
   let liveAgora = () => 0;
 
   /* Zera o que uma captura deixou para trás. Chamado ao carregar qualquer
@@ -1648,18 +1800,47 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     let telaStream = null, micStream = null, ctx = null;
     const canais = [];
     let relogio = null, relFrames = null;
+    const avisos = [];
 
-    // ---- permissões, antes de qualquer preparo caro ----
-    try {
-      telaStream = await navigator.mediaDevices.getDisplayMedia({
-        video: { frameRate: 12 },     // 12 q/s bastam: o que interessa é a troca de tela
-        audio: true
-      });
-    } catch (e) {
-      $('recMsg').innerHTML = `<span class="err">${t('recDeny')}</span>`;
-      return;
-    }
+    /* A janelinha flutuante nasce aqui, antes do primeiro `await`: pedir uma
+       janela de picture-in-picture exige gesto do usuário, e o gesto não
+       sobrevive a um download de modelo. */
+    await abrirControle();
+
+    /* Desistir tem que devolver TUDO. A versão anterior devolvia o botão em
+       alguns caminhos e em outros não: cancelar o seletor de tela uma vez
+       deixava `abrindoCaptura` preso em true e o botão Gravar não voltava a
+       funcionar até recarregar a página. */
+    const desistir = (msg, classe) => {
+      if (telaStream) telaStream.getTracks().forEach(x => x.stop());
+      if (micStream)  micStream.getTracks().forEach(x => x.stop());
+      fecharControle();
+      $('recMsg').innerHTML = classe ? `<span class="${classe}">${msg}</span>` : msg;
+      $('rec').disabled = false;
+      abrindoCaptura = false;
+    };
+
+    /* ================= a ordem daqui para baixo é o conserto =================
+       Antes: tela → microfone → modelo. Duas coisas davam errado, e as duas
+       custavam a gravação inteira.
+
+       1. A caixa de permissão do microfone aparecia DEPOIS de a tela já estar
+          sendo compartilhada. A pessoa já tinha ido para a janela compartilhada
+          e só descobria a permissão pendente ao voltar — quando já era tarde.
+
+       2. Pior: o modelo de 77 a 586 MB baixava com a tela JÁ compartilhada.
+          Dezenas de segundos "compartilhando" sem gravar nada, e qualquer
+          interrupção (encerrar pela barra do navegador, trocar de janela)
+          matava tudo com "o compartilhamento foi encerrado antes de começar".
+
+       Agora: microfone → modelo → tela. Tudo o que é lento e tudo o que precisa
+       de atenção acontece com a pessoa ainda olhando para esta aba. Da escolha
+       da tela ao primeiro frame não há mais espera nenhuma. */
+
+    // ---- 1. microfone, ainda com a pessoa olhando para esta aba ----
     if (querMic) {
+      controle('mic');
+      $('recMsg').textContent = t('recAskMic');
       try {
         micStream = await navigator.mediaDevices.getUserMedia({
           audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }
@@ -1667,43 +1848,43 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       } catch (e) { micStream = null; }
     }
 
+    // ---- 2. o modelo, também antes de compartilhar a tela ----
+    $('rec').disabled = true;
+    let podeTranscrever = false;
+    try {
+      $('recMsg').textContent = t('recPrep');
+      controle('modelo');
+      const modelId = $('model').value;
+      if (pipeId !== modelId) { pipe = await buildPipe(modelId); pipeId = modelId; }
+      podeTranscrever = true;
+      prog(null); st('');
+    } catch (e) {
+      avisos.push(t('recNoModel'));
+      prog(null); st('');
+    }
+    $('rec').disabled = false;
+
+    // ---- 3. a tela, por último ----
+    controle('tela');
+    $('recMsg').textContent = t('recAskTela');
+    try {
+      telaStream = await navigator.mediaDevices.getDisplayMedia({
+        video: { frameRate: 12 },     // 12 q/s bastam: o que interessa é a troca de tela
+        audio: true
+      });
+    } catch (e) {
+      return desistir(t('recDeny'), 'err');
+    }
+
     const temSom = telaStream.getAudioTracks().length > 0;
     const temMic = !!micStream;
-    const avisos = [];
     if (!temSom && !temMic) avisos.push(t('recAudioNo'));
     else if (querMic && !temMic) avisos.push(t('recMicNo'));
     else if (!temSom && temMic) avisos.push(t('recSysNo'));
 
     const trilhaTela = telaStream.getVideoTracks()[0];
     const morreu = () => !trilhaTela || trilhaTela.readyState === 'ended';
-    const desistir = msg => {
-      telaStream.getTracks().forEach(x => x.stop());
-      if (micStream) micStream.getTracks().forEach(x => x.stop());
-      $('recMsg').innerHTML = `<span class="err">${msg}</span>`;
-      $('rec').disabled = false;
-      abrindoCaptura = false;
-    };
-
-    // ---- o modelo precisa estar pronto antes de começar ----
-    $('rec').disabled = true;
-    let podeTranscrever = false;
-    if (temSom || micStream) {
-      try {
-        $('recMsg').textContent = t('recPrep');
-        const modelId = $('model').value;
-        if (pipeId !== modelId) { pipe = await buildPipe(modelId); pipeId = modelId; }
-        podeTranscrever = true;
-        prog(null); st('');
-      } catch (e) {
-        avisos.push(t('recNoModel'));
-        prog(null); st('');
-      }
-    }
-    $('rec').disabled = false;
-    /* Baixar o modelo leva dezenas de segundos. Nesse intervalo a pessoa pode
-       encerrar o compartilhamento pela barra do navegador; seguir em frente
-       gravaria uma tela morta, sem imagem e sem som. */
-    if (morreu()) return desistir(t('recEnded'));
+    if (morreu()) return desistir(t('recEnded'), 'err');
 
     // ---- estado inicial da captura ----
     frames = []; manual = []; limparLive();
@@ -1751,6 +1932,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
 
     liveOn = true;
     abrindoCaptura = false;
+    controle('gravando', { seg: 0, frames: 0 });
+    passos();
     trabalhando(true);
     $('rec').classList.add('hide'); $('recStop').classList.remove('hide');
     pintarRecMsg = () => {
@@ -1779,6 +1962,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     // ---- relógio e janelas de transcrição ----
     relogio = setInterval(() => {
       pintarRecMsg();
+      controle('gravando', { seg: agora(), frames: frames.length });
       canais.forEach(c => { while (c.segundos() >= JANELA_S) enfileirar(c, c.tirar(JANELA_S)); });
     }, 1000);
 
@@ -1790,6 +1974,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     pararLive = async () => {
       if (!liveOn) return;
       liveOn = false;
+      fecharControle();
       clearInterval(relogio); clearInterval(relFrames);
       pintarRecMsg = () => {};
       liveDur = agora();
@@ -1835,6 +2020,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       $('extract').disabled = true;      // não há vídeo para varrer de novo
       $('auto').disabled = true;
       render();
+      passos();
+      irPara('prevCard', true);
       medir('carregou_video', { p_origem: 'gravacao' });
     };
   };
@@ -2381,6 +2568,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     stop = false;
     $('prevCard').classList.remove('hide');
     render();
+    passos();
+    irPara('prevCard', true);      // os frames saíram: agora é revisar
   };
 
   $('cancel').onclick = () => {
@@ -2394,14 +2583,32 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     frames.forEach((f, i) => {
       const fig = document.createElement('figure');
       if (!f.keep) fig.className = 'off';
+      /* A etiqueta vem daqui, e não do CSS: escrita como content:'descartado'
+         ela escapava do i18n e aparecia em português para quem usa em inglês. */
+      fig.dataset.off = t('offTag');
       fig.innerHTML = `<img src="${f.img.url}"><figcaption>${fmt(f.t)}${f.manual ? ' *' : ''}</figcaption>`;
-      fig.onclick = () => { frames[i].keep = !frames[i].keep; fig.classList.toggle('off', !frames[i].keep); counts(); };
+      /* Descartar frame era exclusivo de mouse. <figure> não é focável por
+         natureza, então o papel e a ordem de foco vão à mão. */
+      fig.setAttribute('role', 'button');
+      fig.setAttribute('tabindex', '0');
+      const alterna = () => {
+        frames[i].keep = !frames[i].keep;
+        fig.classList.toggle('off', !frames[i].keep);
+        fig.setAttribute('aria-pressed', String(!frames[i].keep));
+        counts();
+      };
+      fig.setAttribute('aria-pressed', String(!f.keep));
+      fig.onclick = alterna;
+      fig.onkeydown = e => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); alterna(); }
+      };
       box.appendChild(fig);
     });
     counts();
   }
 
   function counts(){
+    passos();
     const keep = frames.filter(f => f.keep);
     $('nKeep').textContent = keep.length;
     $('nOff').textContent = frames.length - keep.length;
@@ -2603,6 +2810,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
 
   $('copyPrompt').disabled = true;
   applyLang();
+  passos();
   medir('abriu_ferramenta');
 
   $('goal').onchange = () => {
