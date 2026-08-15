@@ -718,6 +718,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recNo:'Este navegador não permite gravar a tela. Use Chrome ou Edge no computador.',
       recCurta:'A gravação durou menos de dois segundos e não deu tempo de capturar nada. Clique em Gravar a tela de novo e deixe rodar até aparecer o que você quer registrar.',
       recEmpty:'A gravação saiu vazia. Tente de novo escolhendo uma janela ou a tela inteira.',
+      recSemFramesN:'sem imagem do vídeo: {0} · falha ao ler a tela: {1} · mudança abaixo do limiar: {2} · maior mudança vista: {3}% · limiar: {4}%',
+      recSemFrames:'Nenhuma tela foi guardada: a imagem não mudou o suficiente durante a captura. A gravação só guarda a tela quando ela muda — se você ficou numa tela só, ou se compartilhou uma janela que o navegador entrega em preto, não há o que guardar. Grave de novo percorrendo as telas que quer documentar.',
       recMicLbl:'Incluir meu microfone',
       recTrLbl:'Transcrever enquanto gravo',
       recTrOn:'A transcrição sai pronta no fim, junto com os frames. Exige baixar o modelo de ~{0} MB antes de começar — uma vez só, e depois fica guardado no navegador.',
@@ -1016,6 +1018,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recNo:'This browser cannot record the screen. Use Chrome or Edge on a computer.',
       recCurta:'The recording lasted less than two seconds, too short to capture anything. Click Record the screen again and let it run until what you want to keep is on screen.',
       recEmpty:'The recording came out empty. Try again, picking a window or the whole screen.',
+      recSemFramesN:'no video image: {0} · could not read the screen: {1} · change below threshold: {2} · largest change seen: {3}% · threshold: {4}%',
+      recSemFrames:'No screen was kept: the image did not change enough during the capture. Recording only keeps the screen when it changes — if you stayed on a single screen, or shared a window the browser hands over as black, there is nothing to keep. Record again, walking through the screens you want to document.',
       recMicLbl:'Include my microphone',
       recTrLbl:'Transcribe while I record',
       recTrOn:'The transcript is ready at the end, alongside the frames. It needs the ~{0} MB model downloaded first — once only, and then it stays in your browser.',
@@ -1312,6 +1316,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recNo:'Este navegador no permite grabar la pantalla. Usa Chrome o Edge en un ordenador.',
       recCurta:'La grabación duró menos de dos segundos y no dio tiempo de capturar nada. Pulsa Grabar la pantalla otra vez y déjala correr hasta que aparezca lo que quieres registrar.',
       recEmpty:'La grabación salió vacía. Inténtalo de nuevo eligiendo una ventana o la pantalla completa.',
+      recSemFramesN:'sin imagen de vídeo: {0} · fallo al leer la pantalla: {1} · cambio por debajo del umbral: {2} · mayor cambio visto: {3}% · umbral: {4}%',
+      recSemFrames:'No se guardó ninguna pantalla: la imagen no cambió lo suficiente durante la captura. La grabación solo guarda la pantalla cuando cambia — si te quedaste en una sola, o compartiste una ventana que el navegador entrega en negro, no hay nada que guardar. Graba de nuevo recorriendo las pantallas que quieres documentar.',
       recMicLbl:'Incluir mi micrófono',
       recTrLbl:'Transcribir mientras grabo',
       recTrOn:'La transcripción sale lista al final, junto con los fotogramas. Requiere descargar el modelo de ~{0} MB antes de empezar — una sola vez, y luego queda guardado en el navegador.',
@@ -2647,10 +2653,30 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      quantos segundos já tem e entrega a próxima janela quando ela completa. */
   async function abrirCanal(ctx, stream, rotulo, classe){
     const src = ctx.createMediaStreamSource(stream);
-    const pend = [];              // Float32Array ainda não consumidos
-    let disponivel = 0, consumidos = 0;
+    /* Cada bloco carrega o INSTANTE DE PAREDE em que foi capturado, e não só as
+       amostras.
 
-    const receber = amostras => { pend.push(amostras); disponivel += amostras.length; };
+       Antes, o instante de uma janela de transcrição era `consumidos/16000` —
+       quantas amostras já tinham saído da fila. Isso só coincide com o relógio
+       da gravação enquanto nenhuma amostra se perde. Duas coisas fazem perder:
+       a PAUSA, que joga o áudio da espera fora de propósito, e qualquer engasgo
+       de CPU que atrase o worklet.
+
+       O efeito é cruel porque é silencioso e cumulativo: depois de uma pausa de
+       trinta minutos, o frame guardado aos 31:00 fica pareado com a fala de
+       01:00. Nenhum erro na tela, e uma evidência que afirma que a pessoa disse
+       aquilo naquela hora. Era o "a minutagem não bate com a fala".
+
+       Com o instante de parede no bloco, a janela sabe onde ela começou no
+       relógio da gravação — o MESMO relógio que carimba os frames. */
+    const pend = [];              // { d: Float32Array, t: segundos de gravação }
+    let disponivel = 0;
+
+    const receber = amostras => {
+      const fim = (typeof liveAgora === 'function') ? liveAgora() : 0;
+      pend.push({ d: amostras, t: Math.max(0, fim - amostras.length / SR_ASR) });
+      disponivel += amostras.length;
+    };
 
     let no;
     if (ctx.audioWorklet) {
@@ -2676,18 +2702,18 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       tirar(seg){
         const querAmostras = Math.floor(seg * SR_ASR);
         if (disponivel < querAmostras || querAmostras <= 0) return null;
+        const t0 = pend.length ? pend[0].t : 0;    // onde esta janela começa no relógio
         const out = new Float32Array(querAmostras);
         let escrito = 0;
         while (escrito < querAmostras) {
           const bloco = pend[0];
-          const cabe = Math.min(bloco.length, querAmostras - escrito);
-          out.set(bloco.subarray(0, cabe), escrito);
+          const cabe = Math.min(bloco.d.length, querAmostras - escrito);
+          out.set(bloco.d.subarray(0, cabe), escrito);
           escrito += cabe;
-          if (cabe === bloco.length) pend.shift(); else pend[0] = bloco.subarray(cabe);
+          if (cabe === bloco.d.length) pend.shift();
+          else pend[0] = { d: bloco.d.subarray(cabe), t: bloco.t + cabe / SR_ASR };
         }
         disponivel -= querAmostras;
-        const t0 = consumidos / SR_ASR;
-        consumidos += querAmostras;
         return { dados: out, t0 };
       },
       /* No fim da gravação, o resto que não completou uma janela. */
@@ -2767,6 +2793,20 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     bombearAsr();
   }
 
+  /* Duas falas são "a mesma" quando sobra o mesmo texto depois de tirar
+     pontuação, acento de caixa e espaço repetido. Comparar as strings cruas
+     deixaria passar "Vamos para a linguagem." e "vamos para a linguagem". */
+  const chaveFala = txt => txt.toLowerCase()
+    .replace(/[^\p{L}\p{N}\s]+/gu, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  function ultimaFalaDo(rot){
+    for (let i = liveCues.length - 1; i >= 0; i--)
+      if (liveCues[i].rot === rot) return liveCues[i];
+    return null;
+  }
+
   async function bombearAsr(){
     if (asrRodando || !pipe) return;
     asrRodando = true;
@@ -2785,7 +2825,22 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
           if (!txt) return;
           const a = j.t0 + (c.timestamp[0] ?? 0);
           const b = j.t0 + (c.timestamp[1] ?? (c.timestamp[0] ?? 0) + 2);
-          liveCues.push({ a, b: Math.max(b, a + 0.4), t: txt, rot: j.canal.rotulo, cls: j.canal.classe });
+          /* O Whisper repete. Numa janela quase muda, ou quando a frase
+             atravessa o corte de 30 segundos, ele devolve a MESMA sentença de
+             novo — e o que chega na tela são cinco linhas idênticas em cinco
+             instantes diferentes. Numa evidência de teste isso é pior que não
+             ter transcrição: são horas de relógio afirmando que a pessoa disse
+             a mesma coisa cinco vezes.
+
+             A regra é conservadora de propósito: só descarta se for o MESMO
+             canal, a MESMA frase palavra por palavra e dentro de meio minuto.
+             Quem repete de verdade ("não, não é da jade dela, não é da jade
+             dela") repete dentro da mesma janela, num trecho só, e passa. */
+          const ch = chaveFala(txt);
+          const ant = ultimaFalaDo(j.canal.rotulo);
+          if (ant && ant.ch === ch && a - ant.a < 30) return;
+          liveCues.push({ a, b: Math.max(b, a + 0.4), t: txt, ch,
+                          rot: j.canal.rotulo, cls: j.canal.classe });
         });
         escreverTranscricao();
       } catch (e) {
@@ -3163,16 +3218,26 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
        captura de abertura, que tenta assim que o vídeo ganha dimensão, e uma de
        fechamento, no parar. */
     let prevSig = null;
+    /* Por que um quadro NÃO foi guardado. Zero frames no fim de uma gravação em
+       que a tela mudou é indistinguível de defeito enquanto o motivo não
+       aparece — e "sem frames, ainda com problemas" foi como chegou. Estes
+       contadores custam nada e transformam a queixa em diagnóstico. */
+    motivosFrame = { semVideo: 0, semAssinatura: 0, poucaMudanca: 0, limite: 0,
+                     maiorDiff: 0, limiar: thr };
 
     const capturar = (forcar, marcado) => {
-      if (!video.videoWidth) return false;
-      if (frames.length >= maxf) return false;
+      if (!video.videoWidth) { motivosFrame.semVideo++; return false; }
+      if (frames.length >= maxf) { motivosFrame.limite++; return false; }
       // pausado, o laço automático não guarda nada; marcar à mão continua valendo
       if (pausado && !forcar) return false;
       let sig;
-      try { sig = signature(); } catch (e) { return false; }
+      try { sig = signature(); } catch (e) { motivosFrame.semAssinatura++; return false; }
       if (!liveW) { liveW = video.videoWidth; liveH = video.videoHeight; showMeta(); }
-      if (!forcar && prevSig !== null && diff(prevSig, sig) < thr) return false;
+      if (!forcar && prevSig !== null) {
+        const d = diff(prevSig, sig);
+        if (d > motivosFrame.maiorDiff) motivosFrame.maiorDiff = d;
+        if (d < thr) { motivosFrame.poucaMudanca++; return false; }
+      }
       frames.push({ t: agora(), img: snap(900, q), keep: true, sig, manual: !!marcado });
       prevSig = sig;
       atualizarLive();
@@ -3338,9 +3403,25 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
                       : (!temSom && !temMic) ? t('recNoSpeech')
                       : t('recSoSilencio')));
       }
+      /* "0 frames" sem explicação é indistinguível de defeito — e chegou como
+         "sem frames, ainda com problemas". A captura ao vivo só guarda a tela
+         QUANDO ELA MUDA; uma tela parada, ou uma janela que o navegador entrega
+         como quadro preto, produz zero frames legitimamente. Dizer isso, com o
+         que fazer a seguir, é a diferença entre um limite e um erro. */
+      /* Quando dá zero, o motivo vai junto em números. "A tela não mudou o
+         suficiente" é uma hipótese; `maior mudança 3% contra limiar de 8%` é um
+         fato — e se a maior mudança for grande e ainda assim ninguém entrou, o
+         defeito é meu e o relatório diz isso. */
+      const m = motivosFrame || {};
+      const detalheFrames = (frames.length === 0 && liveDur >= 2)
+        ? ' <span class="status">(' + t('recSemFramesN',
+            m.semVideo || 0, m.semAssinatura || 0, m.poucaMudanca || 0,
+            ((m.maiorDiff || 0) * 100).toFixed(1), ((m.limiar || 0) * 100).toFixed(1)) + ')</span>'
+        : '';
+      const semFrames = (frames.length === 0 && liveDur >= 2) ? ' ' + t('recSemFrames') : '';
       const alerta = avisosFim.length ? ` <span class="err">${avisosFim.join(' ')}</span>` : '';
       $('recMsg').innerHTML = `<span class="ok">${t('recDone2', fmt(liveDur), frames.length, liveCues.length)}` +
-        semFala + contarDesempenho() + `</span>` + alerta;
+        semFala + semFrames + contarDesempenho() + `</span>` + detalheFrames + alerta;
       $('extract').disabled = true;      // não há vídeo para varrer de novo
       $('auto').disabled = true;
       render();
@@ -3413,9 +3494,14 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      depois de um erro de digitação) faz TODOS os degraus da fila falharem
      identicamente, com a rede aparentando estar perfeita no diagnóstico. Foi
      por isso que este ponto passou a ser testado e relatado, e não só usado. */
+  /* A ordem aqui é resultado de medição, não de preferência pelo novo. Numa
+     máquina Windows/Chrome 151 real, a 4.2.0 falhava em TODA configuração com
+     `MatMulNBits Missing required scale`, e a 3.x montou de primeira com o
+     mesmo arquivo. Enquanto não houver caso contrário, o padrão é a que
+     funciona; a 4.2.0 continua na fila, logo atrás. */
   const TJS_BASES = [
-    'https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.2.0',
     'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3',
+    'https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.2.0',
     'https://cdn.jsdelivr.net/npm/@huggingface/transformers'
   ];
   let tjsEmUso = null, tjsMod = null, tjsErros = [];
@@ -3701,6 +3787,9 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      diagnóstico imprime — antes ele só dizia que a rede estava boa, o que numa
      máquina onde a rede ESTÁ boa e o modelo não abre não ajuda ninguém. */
   let degraus = [], ultimoErroModelo = '';
+  /* Ver o comentário em `capturar`. Fica no escopo do módulo porque o
+     diagnóstico e a mensagem de fim o leem depois que a gravação acabou. */
+  let motivosFrame = null;
 
   /* Um MÓDULO novo a cada chamada, e é isso que faz esta função existir.
 
@@ -3726,11 +3815,24 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   /* A versão do onnxruntime que o módulo carregou. É o dado que faltava para
      parar de discutir versão por dedução. */
   function versaoOrt(mod){
+    const partes = [];
     try {
-      const v = mod.env && mod.env.versions;
-      if (!v) return '?';
-      return Object.keys(v).map(k => k + '=' + v[k]).join(' ');
-    } catch (e) { return '?'; }
+      const e = mod.env || {};
+      /* Cada versão da biblioteca guarda isto num lugar. A 3.x expõe
+         `env.version`; a 4.x, `env.versions`; e o onnxruntime carrega a sua
+         própria em `backends.onnx.versions`. Procurar nos três é mais barato
+         que descobrir de novo em cada rodada. */
+      if (e.version) partes.push('transformers=' + e.version);
+      const v = e.versions;
+      if (v && typeof v === 'object') for (const k in v) partes.push(k + '=' + v[k]);
+      const ort = e.backends && e.backends.onnx;
+      if (ort) {
+        if (ort.version) partes.push('ort=' + ort.version);
+        if (ort.versions && typeof ort.versions === 'object')
+          for (const k in ort.versions) partes.push('ort.' + k + '=' + ort.versions[k]);
+      }
+    } catch (e) {}
+    return partes.length ? partes.join(' ') : '?';
   }
 
   /* Os ambientes de execução, do mais provável ao mais improvável. Cada um é
@@ -3740,9 +3842,11 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      `dtype` e duas placas produziram um erro idêntico byte a byte, o que só
      acontece quando o que executa é sempre o mesmo. */
   function ambientes(){
-    const lista = [{ lib: TJS_BASES[0], runtime: 'de fábrica' }];
+    const lista = TJS_BASES.map(lib => ({ lib, runtime: 'de fábrica' }));
+    /* O runtime sondado por último: ele resolve o caso em que o endereço de
+       fábrica saiu do ar, e causa o caso em que a versão não bate com a da
+       biblioteca. */
     lista.push({ lib: TJS_BASES[0], runtime: 'sondado' });
-    for (let i = 1; i < TJS_BASES.length; i++) lista.push({ lib: TJS_BASES[i], runtime: 'de fábrica' });
     return lista;
   }
 
@@ -3997,6 +4101,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       const limiar = limiarDe(nivelAlto(quadros));
       const QJ = Math.floor(WIN / 320);
       let pulados = 0;
+      let ultimaChave = null;
 
       for (let i = 0; i < total; i++) {
         const off = i * WIN, seg = data.slice(off, Math.min(off + WIN, data.length)), base = off / SR;
@@ -4015,6 +4120,11 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
           const t = (c.text || '').trim(); if (!t) return;
           const a = base + (c.timestamp[0] ?? 0);
           const b = base + (c.timestamp[1] ?? (c.timestamp[0] ?? 0) + 2);
+          /* Mesma repetição do caminho ao vivo, mesma regra. Ver o comentário
+             em `bombearAsr`. */
+          const ch = chaveFala(t);
+          if (ultimaChave && ultimaChave.ch === ch && a - ultimaChave.a < 30) return;
+          ultimaChave = { ch, a };
           out.push(`${vttTime(a)} --> ${vttTime(Math.max(b, a + 0.4))}\n${t}`);
         });
         const feitos = i + 1, pct = feitos / total * 100;

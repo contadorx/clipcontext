@@ -498,3 +498,91 @@ O caso "modelo indisponível" esperava que a gravação seguisse mesmo assim. O 
 contrário, de propósito: **para antes de pedir a tela** e oferece dois botões — diagnóstico e
 "gravar só os frames". Uma reunião não se repete; descobrir no fim que não houve transcrição é o
 pior momento possível para descobrir. O teste passou a verificar o comportamento certo.
+
+---
+
+## 15/08/2026, quinta rodada — a resposta: a biblioteca era a 3.x
+
+O diagnóstico fechou a questão em duas linhas:
+
+```
+1. combinação lembrada  -> OK  [linhas=4]
+   ambiente: @huggingface/transformers@3 · runtime de fábrica
+```
+
+Montou de primeira, com **zero download** (tudo do cache), pela combinação guardada. E a combinação
+guardada é a **3.x**. A hipótese "versão da biblioteca", que eu tinha dado por descartada na
+terceira rodada por causa de um degrau que não trocava nada, era a certa desde o começo — só nunca
+tinha sido executada de verdade.
+
+Consequência direta: a **3.x virou a primeira da fila**, para todo mundo. Não faz sentido cada
+navegador novo subir a escada inteira — e pagar os 353 MB — para chegar onde já sabemos que dá
+certo. A 4.2.0 continua logo atrás, para o dia em que a 3.x sair do ar ou parar de servir.
+
+O cache do navegador guarda a marca do preço dessa descoberta: `decoder_model_merged.onnx` com
+**198,9 MB** ao lado dos `_quantized` de 51 MB, e as duas cópias do repositório `Xenova`.
+
+### `versões : ?`
+
+O diagnóstico não achava a versão porque procurava só em `env.versions`. A 3.x expõe
+`env.version`, e o onnxruntime guarda a sua em `backends.onnx`. Passou a procurar nos três.
+
+### A repetição do Whisper — o "tempos errados"
+
+A captura da rodada anterior mostrava isto no painel ao vivo:
+
+```
+00:15  Microfone: Vamos para a linguagem que está gravando.
+00:17  Microfone: Vamos para a linguagem que está gravando.
+00:18  Microfone: Vamos para a linguagem que está gravando.
+00:19  Microfone: Vamos para a linguagem que está gravando.
+```
+
+É artefato conhecido do Whisper: numa janela quase muda, ou quando a frase atravessa o corte de 30
+segundos, ele devolve a mesma sentença de novo. Numa evidência de teste isso é pior que não ter
+transcrição — são horas de relógio afirmando que a pessoa disse a mesma coisa quatro vezes.
+
+O filtro é conservador de propósito: descarta só quando é o **mesmo canal**, a **mesma frase**
+(ignorando pontuação e caixa) e dentro de **30 segundos**. Microfone e computador dizendo a mesma
+coisa continuam sendo duas falas — juntá-las apagaria informação. E repetição de verdade dentro de
+um mesmo trecho ("não, não é da jade dela, não é da jade dela") vem numa linha só e passa inteira.
+Vale para a transcrição ao vivo e para a de arquivo.
+
+### "Sem frames" deixou de ser indistinguível de defeito
+
+Zero frames com a gravação rodando não tinha explicação na tela. Agora tem: a captura só guarda a
+tela **quando ela muda**, e uma tela parada — ou uma janela que o navegador entrega como quadro
+preto — produz zero legitimamente. A mensagem diz isso e diz o que fazer. Um limite explicado é um
+limite; um limite mudo é um defeito.
+
+### Ainda na quinta rodada: a minutagem que não batia
+
+Duas âncoras de tempo diferentes governavam a mesma gravação.
+
+Os **frames** eram carimbados por `liveAgora()` — relógio de parede desde o instante zero da
+captura. As **janelas de transcrição** eram carimbadas por `consumidos / 16000` — quantas amostras
+de áudio já tinham saído da fila. As duas só coincidem enquanto **nenhuma amostra se perde**, e
+perder amostra é o normal: o worklet engasga quando a máquina está dividida entre a captura da tela
+e o Whisper rodando a 1,9× o tempo real, e o grafo de áudio começa a acumular num instante que não
+é exatamente o zero da gravação.
+
+O erro é cumulativo e silencioso. Nada aparece na tela; o que aparece é um passo às 00:13 pareado
+com a fala de outro momento — numa evidência de teste, uma hora de relógio afirmando algo que não
+aconteceu ali.
+
+Agora cada bloco de áudio carrega o instante de parede em que foi capturado, e a janela herda o
+instante do seu primeiro bloco. **Uma âncora só, a mesma dos frames**, por construção e não por
+coincidência. O teste novo (`alinhado.mjs`) grava 12 s, pausa 15 s — a pausa descarta o áudio da
+espera de propósito — e grava mais 35 s: a última fala tem que cair perto do fim do relógio, e os
+frames têm que mostrar o buraco da pausa. Mostram.
+
+### E o "sem frames" com a tela mudando
+
+Aqui eu não tenho a resposta, e chutar de novo custaria mais uma rodada. O que a gravação passou a
+fazer é contar **por que** cada quadro foi recusado — sem imagem do vídeo, falha ao ler a tela,
+mudança abaixo do limiar — e imprimir os números junto da mensagem de fim, com a **maior mudança
+vista** contra o **limiar em vigor**.
+
+É a diferença entre uma hipótese e um fato. Se a maior mudança for 3% contra um limiar de 8%, o
+limiar está alto para aquela tela. Se ela for 40% e mesmo assim ninguém entrou, o defeito é meu e o
+relatório diz isso na cara.
