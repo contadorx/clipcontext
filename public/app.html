@@ -746,6 +746,9 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       gpuLbl:'usar a placa de vídeo', dlSize:'baixa ~{0} MB na primeira vez',
       modelLimpando:'Apagando o modelo guardado e baixando de novo…',
       trocandoMotor:'Trocando a versão do motor e tentando de novo…',
+      trAoVivoFim:'Transcrição feita ao vivo: {0} trechos. O texto está aqui embaixo e pode ser corrigido.',
+      motorGuardado:'Este navegador já sabe qual combinação funciona aqui — indo direto nela.',
+      tentandoCaro:'As opções leves não subiram. Tentando uma que baixa ~{0} MB — é a partir daqui que fica grande.',
       limparBtn:'apagar o modelo guardado',
       limparFeito:'Apaguei {0} arquivo(s) do modelo guardado. A próxima transcrição baixa de novo.',
       limparVazio:'Não havia nada guardado.',
@@ -1041,6 +1044,9 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       gpuLbl:'use the graphics card', dlSize:'downloads ~{0} MB the first time',
       modelLimpando:'Clearing the stored model and downloading it again…',
       trocandoMotor:'Switching the engine version and trying again…',
+      trAoVivoFim:'Transcribed live: {0} segments. The text is below and can be corrected.',
+      motorGuardado:'This browser already knows which combination works here — going straight to it.',
+      tentandoCaro:'The light options did not come up. Trying one that downloads ~{0} MB — this is where it gets big.',
       limparBtn:'delete the stored model',
       limparFeito:'Deleted {0} stored model file(s). The next transcription downloads again.',
       limparVazio:'There was nothing stored.',
@@ -1334,6 +1340,9 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       gpuLbl:'usar la tarjeta gráfica', dlSize:'descarga ~{0} MB la primera vez',
       modelLimpando:'Borrando el modelo guardado y descargándolo de nuevo…',
       trocandoMotor:'Cambiando la versión del motor y probando de nuevo…',
+      trAoVivoFim:'Transcripción hecha en vivo: {0} fragmentos. El texto está abajo y se puede corregir.',
+      motorGuardado:'Este navegador ya sabe qué combinación funciona aquí — voy directo a ella.',
+      tentandoCaro:'Las opciones ligeras no arrancaron. Probando una que descarga ~{0} MB — a partir de aquí se pone grande.',
       limparBtn:'borrar el modelo guardado',
       limparFeito:'Borré {0} archivo(s) del modelo guardado. La próxima transcripción vuelve a descargar.',
       limparVazio:'No había nada guardado.',
@@ -3296,6 +3305,16 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       trabalhando(false);
       abrindoCaptura = false;
 
+      /* A barra e a linha de status do cartão 2 são da transcrição AO VIVO, que
+         acabou de terminar aqui. Sem limpar, elas ficam na tela para sempre
+         dizendo "Baixando o modelo de voz: 100% — 353 de 353 MB", e o cartão
+         inteiro passa a parecer travado: o botão Transcrever está desabilitado
+         de propósito (não há áudio guardado para transcrever de novo), e ao
+         lado dele uma barra de progresso parada. Foi assim que uma gravação que
+         DEU CERTO chegou como "deu erro e não me deixou abrir o diagnóstico". */
+      prog(null);
+      st(liveCues.length ? t('trAoVivoFim', liveCues.length) : '', liveCues.length ? 'ok' : '');
+
       /* Toda saída daqui tem que deixar a tela num estado utilizável. A versão
          anterior escapava por este `return` sem marcar `gravou` nem chamar
          `passos()`: a pessoa ficava com os cartões travados, uma dica velha
@@ -3656,6 +3675,29 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
            (tent.modelo  ? ' · ' + tent.modelo : '');
   }
 
+  /* A combinação que funcionou nesta máquina, guardada para a próxima vez.
+
+     Sem isto, a fila inteira é refeita a cada visita: numa máquina onde os
+     primeiros degraus falham, isso significou **353 MB** de variantes baixadas
+     antes de uma subir. Os arquivos ficam no cache, mas as sessões que falham
+     são refeitas do zero toda vez, e a primeira transcrição de cada visita
+     volta a demorar minutos.
+
+     O que fica guardado é uma configuração — nomes de biblioteca, de runtime e
+     de arquivo. Nada do vídeo, do áudio ou do texto, que continuam sem tocar em
+     disco. Está descrito na política de privacidade junto do idioma. */
+  const MOTOR_OK = 'Walkstamp.motorOk';
+  function lembrarMotor(obj){
+    try { localStorage.setItem(MOTOR_OK, JSON.stringify(obj)); } catch (e) {}
+  }
+  function motorLembrado(modelId){
+    try {
+      const j = JSON.parse(localStorage.getItem(MOTOR_OK) || 'null');
+      return (j && j.modelId === modelId) ? j : null;
+    } catch (e) { return null; }
+  }
+  const esquecerMotor = () => { try { localStorage.removeItem(MOTOR_OK); } catch (e) {} };
+
   const MOTOR_CHAVE = 'Walkstamp.semQ4';
   const semQ4 = () => { try { return sessionStorage.getItem(MOTOR_CHAVE) === '1'; } catch (e) { return false; } };
   const marcarSemQ4 = () => { try { sessionStorage.setItem(MOTOR_CHAVE, '1'); } catch (e) {} };
@@ -3744,6 +3786,39 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     catch (e) {}
 
     let ultimo = null;
+
+    /* O atalho. Se esta máquina já montou o modelo alguma vez, a combinação que
+       funcionou vem na frente de tudo — sem refazer a escada de sessões que
+       falham. Se ela não funcionar mais (biblioteca atualizada, cache limpo),
+       é esquecida e a escada normal corre em seguida. */
+    const lembrado = motorLembrado(modelId);
+    if (lembrado) {
+      st(t('motorGuardado'));
+      try {
+        const mod0 = await importarFresco(lembrado.lib);
+        const w0 = (mod0.env.backends && mod0.env.backends.onnx && mod0.env.backends.onnx.wasm) || null;
+        if (w0) {
+          w0.numThreads = linhasDoWasm();
+          if (lembrado.runtime === 'sondado') { const b0 = await findWasmBase(); if (b0) w0.wasmPaths = b0; }
+        }
+        pedidos = new Set();
+        const pp = await mod0.pipeline('automatic-speech-recognition', lembrado.alvo,
+          Object.assign({ progress_callback }, lembrado.opcoes));
+        libMod = mod0; tjsEmUso = lembrado.lib;
+        motorEmUso = lembrado.motor; modeloEmUso = lembrado.alvo;
+        degraus.push({ rotulo: 'combinação lembrada', ok: true, alvo: lembrado.alvo,
+                       amb: curto(lembrado.lib) + ' · runtime ' + lembrado.runtime,
+                       ort: versaoOrt(mod0), linhas: linhasDoWasm(), arqs: [...pedidos] });
+        return pp;
+      } catch (e) {
+        degraus.push({ rotulo: 'combinação lembrada', ok: false, alvo: lembrado.alvo,
+                       amb: curto(lembrado.lib) + ' · runtime ' + lembrado.runtime,
+                       linhas: linhasDoWasm(), erro: (e && e.message) || String(e),
+                       arqs: [...pedidos] });
+        esquecerMotor();
+      }
+    }
+
     const ambs = ambientes();
 
     for (let a = 0; a < ambs.length; a++) {
@@ -3787,32 +3862,41 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       /* `device:'wasm'` explícito: sem isso a biblioteca pode escolher a placa
          de vídeo sozinha quando ela existe, e os degraus "de processador"
          correm pelo mesmo caminho que acabou de falhar. */
+      /* A ordem daqui para baixo é por CUSTO DE DOWNLOAD, e não por elegância.
+         Uma máquina real gastou 353 MB antes de uma sessão subir, porque o
+         degrau `fp32` (~200 MB) vinha antes das alternativas de 8 bits (~73 MB
+         cada). Tudo que não baixa nada vem primeiro; o caro fica no fim. */
       tentativas.push({ motor: 'processador', opcoes: { device:'wasm', dtype:'q8' } });
       if (a === 0) {
-        /* Sem otimização de grafo: `TransposeDQWeightsForMatMulNBits` mora em
-           `qdq_actions.cc`, que é otimizador. Não resolveu nesta máquina, mas
-           resolve numa classe de casos e custa um degrau. */
+        /* Custo zero: mesmo arquivo, outra configuração de sessão. */
         tentativas.push({ motor: 'processador', semOtim: true,
           opcoes: { device:'wasm', dtype:'q8',
                     session_options:{ graphOptimizationLevel:'disabled' } } });
       }
-      tentativas.push({ motor: 'processador', opcoes: { device:'wasm', dtype:'fp32' } });
+      /* ~73 MB: outro repositório do mesmo modelo, em 8 bits. */
+      if (MODELO_RESERVA[modelId]) tentativas.push({ motor: 'processador', caro: 73,
+        modelo: MODELO_RESERVA[modelId], opcoes: { device:'wasm', dtype:'q8' } });
       if (a === 0) {
-        if (!usaPlaca() && navigator.gpu) tentativas.push({ motor: 'placa de vídeo',
-          opcoes: { device:'webgpu', dtype:{ encoder_model:'fp32', decoder_model_merged:'fp32' } } });
-        /* Apagar o guardado e baixar de novo, para o caso de arquivo truncado.
-           Custa um download, e por isso vem depois de tudo que não custa. */
-        tentativas.push({ motor: 'processador', limpar: true,
+        /* ~73 MB de novo: apagar o guardado e rebaixar, para o caso de arquivo
+           truncado no cache. */
+        tentativas.push({ motor: 'processador', limpar: true, caro: 73,
           opcoes: { device:'wasm', dtype:'q8' } });
       }
-      /* Outro repositório do mesmo modelo, em todos os ambientes: a combinação
-         (biblioteca velha × arquivo velho) é uma das que nunca foi testada. */
-      if (MODELO_RESERVA[modelId]) tentativas.push({ motor: 'processador',
-        modelo: MODELO_RESERVA[modelId], opcoes: { device:'wasm', dtype:'q8' } });
+      /* ~200 MB: sem compressão nenhuma. É o degrau que não depende de operação
+         quantizada, e o mais caro do caminho do processador. */
+      tentativas.push({ motor: 'processador', caro: 200, opcoes: { device:'wasm', dtype:'fp32' } });
+      /* ~206 MB: resgate pela placa de vídeo, se a máquina tiver e a pessoa não
+         tiver marcado. Último de todos: só entra quando a alternativa é ficar
+         sem transcrição. */
+      if (a === 0 && !usaPlaca() && navigator.gpu) tentativas.push({ motor: 'placa de vídeo', caro: 206,
+        opcoes: { device:'webgpu', dtype:{ encoder_model:'fp32', decoder_model_merged:'fp32' } } });
 
       for (let i = 0; i < tentativas.length; i++) {
         const tent = tentativas[i];
         if (tent.limpar) { st(t('modelLimpando')); await limparCacheModelo(); }
+        /* Dizer antes, e não durante. Ver a barra reiniciar num número maior
+           sem explicação é o que faz a pessoa achar que travou. */
+        if (tent.caro) st(t('tentandoCaro', tent.caro));
         const alvo = tent.modelo || modelId;
         /* Degrau de linhas, dentro de cada tentativa. Isolamento entre origens
            libera SharedArrayBuffer, o runtime passa a querer o wasm com linhas,
@@ -3826,6 +3910,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
               Object.assign({ progress_callback }, tent.opcoes));
             motorEmUso = tent.motor;
             modeloEmUso = alvo;
+            lembrarMotor({ modelId, lib: amb.lib, runtime: amb.runtime, alvo,
+                           opcoes: tent.opcoes, motor: tent.motor });
             degraus.push({ rotulo: rotuloTentativa(tent), ok: true, amb: ambRot,
                            ort: versaoOrt(mod), linhas: passe ? 1 : linhasDoWasm(),
                            alvo, arqs: [...pedidos] });
@@ -3979,6 +4065,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     $('limparModelo').disabled = true;
     try {
       const n = await limparCacheModelo();
+      esquecerMotor();                 // a combinação lembrada apontava para o que acabou de sumir
       pipe = null; pipeId = null;      // a próxima transcrição remonta do zero
       st(n ? t('limparFeito', n) : t('limparVazio'), n ? 'ok' : '');
     } finally { $('limparModelo').disabled = false; }

@@ -440,3 +440,61 @@ de ser necessário.
 As três rodadas anteriores foram hipótese → correção → publicar → falhar. Esta foi medição →
 hipótese. A diferença de custo é o tempo do Leandro, e ela deveria ter vindo primeiro: o
 `progress_callback` já entregava o nome de cada arquivo desde sempre — eu é que não estava olhando.
+
+---
+
+## 15/08/2026, quarta rodada — montou; e o que custou
+
+A escada de ambientes funcionou: a gravação seguinte transcreveu **11 falas ao vivo, a 1,9× o
+tempo real**, no processador com 4 linhas. Depois de quatro rodadas, o modelo abre nessa máquina.
+
+O relatório trouxe junto o preço: **353 MB baixados** antes de uma sessão subir, e um cartão que
+parecia travado no fim. Três correções.
+
+### O custo: 353 MB
+
+A fila tentava `fp32` (~200 MB) **antes** das alternativas de 8 bits (~73 MB cada). A ordem passou
+a ser por custo de download, e não por elegância:
+
+| ordem | degrau | baixa |
+|---|---|---|
+| 1 | `q8` | ~73 MB (uma vez) |
+| 2 | `q8` sem otimização de grafo | nada — mesmo arquivo |
+| 3 | `q8` no repositório de reserva | ~73 MB |
+| 4 | `q8` com o cache apagado | ~73 MB |
+| 5 | `fp32` | ~200 MB |
+| 6 | placa de vídeo | ~206 MB |
+
+E antes de qualquer degrau caro a tela **avisa**: *"as opções leves não subiram, tentando uma que
+baixa ~200 MB — é a partir daqui que fica grande"*. Ver a barra reiniciar num número maior sem
+explicação é o que faz alguém achar que travou.
+
+### A combinação que funciona fica lembrada
+
+A escada era refeita a cada visita. Agora a combinação vencedora — biblioteca, runtime, arquivo —
+fica em `localStorage` e vem na frente de tudo na próxima vez. Se ela deixar de funcionar
+(biblioteca atualizada, cache limpo), é esquecida e a escada normal corre em seguida.
+
+É **configuração**, não conteúdo: nomes de versão e de arquivo. Está descrito na política de
+privacidade e na página de segurança, ao lado do idioma, e o botão *apagar o modelo guardado*
+apaga a anotação junto.
+
+### O cartão que parecia travado
+
+Este é o defeito de verdade, e é de interface. A barra de progresso e a linha *"Baixando o modelo
+de voz: 100% — 353 de 353 MB"* pertencem à transcrição ao vivo — que termina junto com a gravação.
+Ninguém as limpava. O resultado: uma gravação que **deu certo** terminava com uma barra parada na
+tela e o botão *Transcrever* desabilitado (corretamente — não há áudio guardado para transcrever de
+novo). Lido de fora, isso é "deu erro e não me deixou abrir o diagnóstico".
+
+Agora o fim da gravação limpa a barra e troca a linha por *"Transcrição feita ao vivo: N trechos. O
+texto está aqui embaixo e pode ser corrigido."* — em todas as saídas, inclusive na que não gerou
+frame nenhum. O teste de gravação passou a verificar as quatro coisas: barra escondida, nenhuma
+linha de download sobrando, diagnóstico clicável, apagar-modelo clicável.
+
+### Um teste que estava errado, e a decisão que ele testava
+
+O caso "modelo indisponível" esperava que a gravação seguisse mesmo assim. O produto faz o
+contrário, de propósito: **para antes de pedir a tela** e oferece dois botões — diagnóstico e
+"gravar só os frames". Uma reunião não se repete; descobrir no fim que não houve transcrição é o
+pior momento possível para descobrir. O teste passou a verificar o comportamento certo.
