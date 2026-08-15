@@ -137,11 +137,30 @@
       opacity:0;transition:opacity .12s}
   .thumbs figure:hover .lupa,.thumbs .lupa:focus-visible{opacity:1}
   .thumbs figure.off .lupa{display:none}
+  /* As setas de mover. Mesmo desenho da lupa, nas laterais, e aparecem só no
+     foco ou no passar do mouse — a miniatura é para olhar a tela, não a
+     ferramenta. */
+  .thumbs .mover{position:absolute;top:50%;transform:translateY(-50%);z-index:2;border:0;
+      cursor:pointer;width:24px;height:34px;border-radius:6px;padding:0;line-height:1;
+      font-size:19px;background:color-mix(in srgb,var(--panel) 88%,transparent);
+      color:var(--ink);opacity:0;transition:opacity .12s}
+  .thumbs .mover.esq{left:4px}
+  .thumbs .mover.dir{right:4px}
+  .thumbs figure:hover .mover,.thumbs .mover:focus-visible{opacity:1}
+  .thumbs .mover:disabled{opacity:0 !important;pointer-events:none}
+  /* A tela anexada à mão fica reconhecível na fileira: ela não tem instante no
+     vídeo, e quem revisa precisa saber disso antes de abrir. */
+  .thumbs figure.colada{outline:2px dashed color-mix(in srgb,var(--accent) 55%,transparent);
+      outline-offset:-2px}
+  /* O filtro em vigor. Borda e peso, não fundo cheio: estes botões convivem com
+     o "Gerar PDF", que é o primário da tela, e dois cheios brigam. */
+  button.ghost.ativo{border-color:var(--accent);color:var(--accent);font-weight:640;
+      background:color-mix(in srgb,var(--accent) 8%,transparent)}
   /* A lente: o passo em tamanho de conferir, com o que se corrige nele. */
   .lente{position:fixed;inset:0;z-index:50;background:rgba(11,13,20,.72);
       display:flex;align-items:center;justify-content:center;padding:20px}
   .lenteCx{background:var(--panel);border:1px solid var(--line);border-radius:12px;
-      max-width:980px;width:100%;max-height:100%;overflow:auto;padding:18px}
+      max-width:var(--lenteW,980px);width:100%;max-height:100%;overflow:auto;padding:18px}
   .lenteTopo{display:flex;justify-content:space-between;align-items:center;gap:14px;margin-bottom:12px}
   .lenteTopo b{font-size:15.5px}
   .lenteImgCx{position:relative;line-height:0;border-radius:8px;overflow:hidden}
@@ -385,7 +404,6 @@
     <div id="trAuto">
     <div class="autobox">
       <div class="row">
-        <button id="auto" disabled data-i18n="autoBtn"></button>
         <select id="model" style="width:auto">
           <option value="onnx-community/whisper-base" data-i18n="mBase"></option>
           <option value="onnx-community/whisper-small" data-i18n="mSmall"></option>
@@ -397,16 +415,143 @@
           <option value="es">Español</option>
           <option value="" data-i18n="autoDetect"></option>
         </select>
-        <label class="chk"><input type="checkbox" id="trEn"><span data-i18n="trEnLbl"></span></label>
         <label class="chk"><input type="checkbox" id="gpu"><span data-i18n="gpuLbl"></span></label>
       </div>
-      <div class="bar hide" id="abarWrap"><i id="abar"></i></div>
-      <div class="status" id="astatus"></div>
-      <div class="status" id="autoDica"></div>
-      <p class="note hide" id="keepOpen" data-i18n="keepOpen"></p>
     </div>
     </div><!-- /trAuto -->
 
+    <div id="framesCorpo">
+    <div class="grid">
+      <div class="largo">
+        <label class="f" for="mode" data-i18n="lCrit"></label>
+        <select id="mode">
+          <option value="scene" data-i18n="mScene"></option>
+          <option value="count" data-i18n="mCount"></option>
+          <option value="interval" data-i18n="mInt"></option>
+        </select>
+      </div>
+      <div id="sceneBox">
+        <label class="f" for="sens"><span data-i18n="lSens"></span> — <span id="sensV"></span></label>
+        <input type="range" id="sens" min="1" max="9" value="5">
+      </div>
+      <div id="countBox" class="hide">
+        <label class="f" for="count" data-i18n="lCount"></label>
+        <input type="number" id="count" value="36" min="1" max="400">
+      </div>
+      <div id="intBox" class="hide">
+        <label class="f" for="interval" data-i18n="lInt"></label>
+        <input type="number" id="interval" value="10" min="0.5" step="0.5">
+      </div>
+      <div>
+        <label class="f" for="maxf" data-i18n="lMax"></label>
+        <input type="number" id="maxf" value="60" min="1" max="400">
+      </div>
+      <div>
+        <label class="f" for="tIni" data-i18n="lFrom"></label>
+        <input type="text" id="tIni" placeholder="00:00" style="width:100%;padding:8px 10px;
+               border:1px solid var(--line);border-radius:7px;background:var(--bg);color:var(--ink);
+               font:inherit;font-size:14px">
+      </div>
+      <div>
+        <label class="f" for="tFim" data-i18n="lTo"></label>
+        <input type="text" id="tFim" placeholder="—" style="width:100%;padding:8px 10px;
+               border:1px solid var(--line);border-radius:7px;background:var(--bg);color:var(--ink);
+               font:inherit;font-size:14px">
+      </div>
+      <div>
+        <label class="f" for="quality" data-i18n="lQual"></label>
+        <select id="quality">
+          <option value="0.72" data-i18n="qLow"></option>
+          <option value="0.85" selected data-i18n="qMid"></option>
+          <option value="0.94" data-i18n="qHigh"></option>
+        </select>
+      </div>
+    </div>
+    </div><!-- /framesCorpo -->
+
+    <!-- Uma decisão, três botões, e não dois cartões em fila.
+
+         Os passos 2 e 3 eram um engano de desenho: numeravam como sequência
+         obrigatória duas coisas que são opcionais, independentes e quase sempre
+         pedidas juntas. Quem grava a tela já escolheu lá no passo 1 se quer
+         transcrição — chegar aqui e ter que apertar mais dois botões em ordem
+         era trabalho inventado.
+
+         "Ambos" é o botão cheio porque é o caminho de quase todo mundo. Os
+         outros dois continuam existindo para quem só quer um dos lados. -->
+    <div class="row acoes" style="margin-top:20px">
+      <button id="ambos" disabled data-i18n="acAmbos"></button>
+      <button class="ghost" id="auto" disabled data-i18n="autoBtn"></button>
+      <button class="ghost" id="extract" disabled data-i18n="extractBtn"></button>
+      <button class="ghost hide" id="cancel" data-i18n="stopBtn"></button>
+    </div>
+    <div class="bar hide" id="abarWrap"><i id="abar"></i></div>
+    <div class="status" id="astatus"></div>
+    <div class="status" id="autoDica"></div>
+    <p class="note hide" id="keepOpen" data-i18n="keepOpen"></p>
+    <div class="bar hide" id="barWrap"><i id="bar"></i></div>
+    <div class="status" id="status"></div>
+    <p class="note"><b data-i18n="noteB"></b> <span data-i18n="noteT"></span></p>
+    <div class="row" style="margin-top:14px">
+      <button class="ghost" id="reset" data-i18n="resetBtn"></button>
+    </div>
+
+
+    </div></div><!-- /dobra -->
+  </div>
+
+  <div class="card" id="prevCard">
+    <h2><span class="step">3</span><span data-i18n="s4"></span></h2>
+    <p class="lockHint hide" id="hintPrev"></p>
+    <div class="dobra"><div>
+
+    <!-- O modelo de saída: uma escolha só, logo no começo, que acerta o layout
+         do documento, o pedido para a IA, o nome do arquivo e se os dados da
+         evidência aparecem. Sem ele a pessoa tinha que achar quatro controles
+         espalhados e adivinhar a combinação certa. -->
+    <div class="modelo">
+      <label for="modelo" data-i18n="modelH"></label>
+      <select id="modelo">
+        <option value="ia" data-i18n="mIa"></option>
+        <option value="evidencia" data-i18n="mEv"></option>
+        <option value="tutorial" data-i18n="mTut"></option>
+        <option value="ata" data-i18n="mAta"></option>
+      </select>
+      <label for="unNome" data-i18n="unLbl" style="margin-left:14px"></label>
+      <input type="text" id="unNome" maxlength="24" style="width:auto;max-width:150px">
+      <p class="status" id="modeloDica"></p>
+    </div>
+
+    <div class="row">
+      <span class="tag"><span data-i18n="tKeep"></span> <b id="nKeep">0</b></span>
+      <span class="tag"><span data-i18n="tOff"></span> <b id="nOff">0</b></span>
+      <span class="tag">PDF ~<b id="size">0</b> MB</span>
+      <button class="ghost sm" id="allOn" data-i18n="keepAll"></button>
+      <button class="ghost sm hide" id="soMarcados" data-i18n="keepMarked"></button>
+      <button class="ghost sm" id="addTela" data-i18n="addTelaBtn"></button>
+      <input type="file" id="addArq" accept="image/*" class="hide">
+      <button class="ghost sm" id="dedup" data-i18n="dropDup"></button>
+      <button class="ghost sm" id="mute" data-i18n="dropQuiet"></button>
+      <button class="ghost sm" id="ocr" data-i18n="ocrBtn"></button>
+      <button class="ghost sm hide" id="ocrStop" data-i18n="stopBtn"></button>
+      <button class="ghost sm" id="falaNota" data-i18n="falaNota"></button>
+    </div>
+    <p class="status" style="margin:10px 0 0" data-i18n="clickHint"></p>
+    <p class="note hide" id="sensAviso" style="margin-top:12px"></p>
+    <div class="thumbs" id="thumbs"></div>
+
+    <!-- O texto da fala mora na revisão, e não num passo antes.
+
+         Ele é RESULTADO: só existe depois de transcrever, e o que se faz com
+         ele — corrigir uma sigla, aplicar o vocabulário, traduzir — é trabalho
+         de revisão, feito olhando as telas ao lado. Num passo anterior, era uma
+         caixa de texto vazia pedindo que a pessoa digitasse algo que a
+         ferramenta ainda ia produzir sozinha.
+
+         A tradução também é posterior por natureza: traduzir antes de ler é
+         escolher no escuro. -->
+    <details class="ev" id="trBox" open>
+      <summary><span data-i18n="trBoxH"></span> <span class="sub" id="trBoxSub"></span></summary>
     <div id="trManual">
     <div class="row" style="margin-bottom:9px">
       <button class="ghost sm" id="pickVtt" data-i18n="openSub"></button>
@@ -458,111 +603,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     </div>
     <div class="status" id="tradMsg" style="margin-top:6px"></div>
     </div><!-- /trManual -->
-    </div></div><!-- /dobra -->
-  </div>
-
-  <div class="card" id="cardFrames">
-    <h2><span class="step">3</span><span data-i18n="s3"></span></h2>
-    <p class="lockHint hide" id="hintFrames"></p>
-    <div class="dobra"><div>
-    <div id="framesCorpo">
-    <div class="grid">
-      <div class="largo">
-        <label class="f" for="mode" data-i18n="lCrit"></label>
-        <select id="mode">
-          <option value="scene" data-i18n="mScene"></option>
-          <option value="count" data-i18n="mCount"></option>
-          <option value="interval" data-i18n="mInt"></option>
-        </select>
-      </div>
-      <div id="sceneBox">
-        <label class="f" for="sens"><span data-i18n="lSens"></span> — <span id="sensV"></span></label>
-        <input type="range" id="sens" min="1" max="9" value="5">
-      </div>
-      <div id="countBox" class="hide">
-        <label class="f" for="count" data-i18n="lCount"></label>
-        <input type="number" id="count" value="36" min="1" max="400">
-      </div>
-      <div id="intBox" class="hide">
-        <label class="f" for="interval" data-i18n="lInt"></label>
-        <input type="number" id="interval" value="10" min="0.5" step="0.5">
-      </div>
-      <div>
-        <label class="f" for="maxf" data-i18n="lMax"></label>
-        <input type="number" id="maxf" value="60" min="1" max="400">
-      </div>
-      <div>
-        <label class="f" for="tIni" data-i18n="lFrom"></label>
-        <input type="text" id="tIni" placeholder="00:00" style="width:100%;padding:8px 10px;
-               border:1px solid var(--line);border-radius:7px;background:var(--bg);color:var(--ink);
-               font:inherit;font-size:14px">
-      </div>
-      <div>
-        <label class="f" for="tFim" data-i18n="lTo"></label>
-        <input type="text" id="tFim" placeholder="—" style="width:100%;padding:8px 10px;
-               border:1px solid var(--line);border-radius:7px;background:var(--bg);color:var(--ink);
-               font:inherit;font-size:14px">
-      </div>
-      <div>
-        <label class="f" for="quality" data-i18n="lQual"></label>
-        <select id="quality">
-          <option value="0.72" data-i18n="qLow"></option>
-          <option value="0.85" selected data-i18n="qMid"></option>
-          <option value="0.94" data-i18n="qHigh"></option>
-        </select>
-      </div>
-    </div>
-    <div class="row" style="margin-top:20px">
-      <button id="extract" disabled data-i18n="extractBtn"></button>
-      <button class="ghost hide" id="cancel" data-i18n="stopBtn"></button>
-    </div>
-    <div class="bar hide" id="barWrap"><i id="bar"></i></div>
-    <div class="status" id="status"></div>
-    <p class="note"><b data-i18n="noteB"></b> <span data-i18n="noteT"></span></p>
-    </div><!-- /framesCorpo -->
-    <div class="row" style="margin-top:14px">
-      <button class="ghost" id="reset" data-i18n="resetBtn"></button>
-    </div>
-    </div></div><!-- /dobra -->
-  </div>
-
-  <div class="card" id="prevCard">
-    <h2><span class="step">4</span><span data-i18n="s4"></span></h2>
-    <p class="lockHint hide" id="hintPrev"></p>
-    <div class="dobra"><div>
-
-    <!-- O modelo de saída: uma escolha só, logo no começo, que acerta o layout
-         do documento, o pedido para a IA, o nome do arquivo e se os dados da
-         evidência aparecem. Sem ele a pessoa tinha que achar quatro controles
-         espalhados e adivinhar a combinação certa. -->
-    <div class="modelo">
-      <label for="modelo" data-i18n="modelH"></label>
-      <select id="modelo">
-        <option value="ia" data-i18n="mIa"></option>
-        <option value="evidencia" data-i18n="mEv"></option>
-        <option value="tutorial" data-i18n="mTut"></option>
-        <option value="ata" data-i18n="mAta"></option>
-      </select>
-      <p class="status" id="modeloDica"></p>
-    </div>
-
-    <div class="row">
-      <span class="tag"><span data-i18n="tKeep"></span> <b id="nKeep">0</b></span>
-      <span class="tag"><span data-i18n="tOff"></span> <b id="nOff">0</b></span>
-      <span class="tag">PDF ~<b id="size">0</b> MB</span>
-      <button class="ghost sm" id="allOn" data-i18n="keepAll"></button>
-      <button class="ghost sm hide" id="soMarcados" data-i18n="keepMarked"></button>
-      <button class="ghost sm" id="addTela" data-i18n="addTelaBtn"></button>
-      <input type="file" id="addArq" accept="image/*" class="hide">
-      <button class="ghost sm" id="dedup" data-i18n="dropDup"></button>
-      <button class="ghost sm" id="mute" data-i18n="dropQuiet"></button>
-      <button class="ghost sm" id="ocr" data-i18n="ocrBtn"></button>
-      <button class="ghost sm hide" id="ocrStop" data-i18n="stopBtn"></button>
-      <button class="ghost sm" id="falaNota" data-i18n="falaNota"></button>
-    </div>
-    <p class="status" style="margin:10px 0 0" data-i18n="clickHint"></p>
-    <p class="note hide" id="sensAviso" style="margin-top:12px"></p>
-    <div class="thumbs" id="thumbs"></div>
+    </details>
 
     <!-- Identificação da evidência. Tudo opcional e tudo em memória: nada
          daqui é guardado no navegador nem sai do computador — só entra no
@@ -648,7 +689,20 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     <div class="lenteCx">
       <div class="lenteTopo">
         <b id="lenteTit"></b>
-        <button class="ghost sm" id="lenteFechar" data-i18n="fecharBtn"></button>
+        <span class="row" style="gap:7px;align-items:center">
+          <!-- O tamanho da lente. Ela ocupava a tela inteira e não havia como
+               reduzir — numa tela pequena isso engole o resto, e quem só quer
+               conferir um detalhe não precisa de 1200 px. A escolha fica na
+               própria lente, que é onde o incômodo aparece, e é lembrada. -->
+          <label class="status" for="lenteTam" data-i18n="lenteTam"></label>
+          <select id="lenteTam" style="width:auto">
+            <option value="720">S</option>
+            <option value="980" selected>M</option>
+            <option value="1280">L</option>
+            <option value="1700">XL</option>
+          </select>
+          <button class="ghost sm" id="lenteFechar" data-i18n="fecharBtn"></button>
+        </span>
       </div>
       <div class="lenteImgCx" id="lenteImgCx">
         <img id="lenteImg" alt="">
@@ -691,7 +745,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   </div>
 
   <div class="card" id="promptCard">
-    <h2><span class="step">5</span><span data-i18n="s5"></span></h2>
+    <h2><span class="step">4</span><span data-i18n="s5"></span></h2>
     <p class="lockHint hide" id="hintPrompt"></p>
     <div class="dobra"><div>
     <p class="status" style="margin:0 0 14px" data-i18n="s5sub"></p>
@@ -1185,7 +1239,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       pipMarcado:'✓ tela marcada ({0})', pipMarcados:'{0} marcadas',
       pipNoVideo:'nenhum vídeo é guardado',
       lockHint:'Escolha um vídeo no passo 1 para continuar.',
-      lockPrev:'Os frames aparecem aqui depois do passo 3 — é onde você descarta os que não servem.',
+      lockPrevTr:'A transcrição está aqui embaixo, em Transcrição — dá para corrigir e exportar.',
+      lockPrev:'Os frames aparecem aqui depois do passo 2 — é onde você descarta os que não servem, corrige a transcrição e gera o documento.',
       lockPrompt:'O texto para a IA é montado depois que os frames existirem.',
       lockRec:'Gravando. Os frames e a transcrição estão saindo sozinhos — clique em Parar quando terminar.',
       lockTrRec:'A transcrição está sendo feita ao vivo, enquanto você grava.',
@@ -1305,8 +1360,10 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       videoErr:'O navegador não conseguiu abrir este vídeo. Converta para MP4 (H.264) e tente de novo.',
       reportar:'Me avise qual formato falhou',
       reportarDica:' — é o que vai definir se vale a pena construir a conversão automática.',
-      s2:'Transcrição (opcional)', autoBtn:'Transcrever',
-      trEnLbl:'traduzir para inglês',
+      s2:'Transcrição e frames (opcional)', autoBtn:'Só transcrever',
+      acAmbos:'Transcrever e extrair frames',
+      trBoxH:'Transcrição', trBoxSub:'corrigir, aplicar vocabulário, traduzir',
+      trBoxVazio:'ainda vazia', trBoxCheia:'{0} linhas',
       tradLbl:'Traduzir a transcrição e as anotações para', tradBtn:'Traduzir',
       tradPrep:'Preparando o tradutor do navegador…',
       tradBaixando:'Baixando o par de idiomas: {0}% (uma vez só, e fica no navegador)',
@@ -1316,7 +1373,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       tradNada:'Não há transcrição nem anotações para traduzir.',
       tradSemPar:'Este navegador não tem o par {0} → {1}.',
       tradErro:'Não consegui traduzir.',
-      tradSemApi:'Tradução no aparelho: por enquanto só no Chrome e no Edge para computador. Aqui você pode marcar “traduzir para inglês” acima, e o próprio modelo de voz traduz enquanto ouve.',
+      tradSemApi:'Tradução no aparelho: por enquanto só no Chrome e no Edge para computador. Em outros navegadores a transcrição sai no idioma falado, e a tradução fica para depois — o texto é seu, dá para exportar e traduzir onde quiser.',
       autoIndo:'Transcrevendo…', autoEspere:'Pode deixar em segundo plano — mas não feche a aba: o trabalho é feito aqui dentro.',
       mBase:'Modelo base — rápido', mSmall:'Modelo small — mais preciso',
       autoDetect:'Detectar sozinho', diagBtn:'Diagnóstico',
@@ -1348,7 +1405,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       faixa:'Trecho analisado: {0} a {1}.',
       qLow:'Leve', qMid:'Equilibrada', qHigh:'Alta',
       sens:['','muito baixa','baixa','baixa+','média-','média','média+','alta','alta+','muito alta'],
-      extractBtn:'Extrair frames', stopBtn:'Parar', resetBtn:'Recomeçar',
+      extractBtn:'Só extrair frames', stopBtn:'Parar', resetBtn:'Recomeçar',
       noteB:'Se o vídeo não abrir:', noteT:'o navegador não decodifica alguns formatos (HEVC, certos MKV). Nesse caso, converta para MP4 / H.264.',
       noDur:'Duração do vídeo indisponível.',
       scanning:'Procurando mudanças de imagem… {0} de {1} — {2} frame(s) guardado(s)',
@@ -1376,6 +1433,11 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       pIndex:'Índice do vídeo', pIndexSub:'Cada linha é um instante em que a imagem mudou.', tKeep:'mantidos', tOff:'descartados', offTag:'descartado', keepAll:'Manter todos', dropDup:'Descartar repetidos',
       clickHint:'Clique na imagem para descartar ou trazer de volta. O campo abaixo dela é a sua anotação daquele passo.',
       stepN:'Passo {0}', notaPh:'anotação do passo',
+      dropDupN:'Descartar repetidos ({0})',
+      dropQuietN:'Descartar sem fala ({0})',
+      lenteTam:'tamanho',
+      unLbl:'Chamar cada quadro de',
+      unPasso:'Passo', unMomento:'Momento', unIa:'Trecho',
       evH:'Dados da evidência', evHsub:'— opcional: caso de teste, sistema, quem executou, hora de início',
       guiaH:'Dados do guia', guiaHsub:'— opcional: título, sistema, autor, versão',
       guiaTit:'Título do guia', guiaSis:'Sistema / produto', guiaAutor:'Escrito por', guiaVer:'Versão',
@@ -1389,7 +1451,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       evHash:'Incluir a impressão digital SHA-256 de cada imagem',
       evNota:'Tudo aqui é opcional e nada é enviado a lugar nenhum: vira a primeira página do documento e o nome do arquivo, e mais nada. Nada sobrevive ao fechar a aba. As horas saem no formato AAAA-MM-DD hh:mm:ss com o fuso ao lado, para não restar dúvida entre dia e mês nem entre países.',
       pEvid:'Identificação', pStart:'Início da gravação', pHash:'SHA-256 da imagem',
-      pWhen:'Tempo decorrido', pRelogio:'Hora de relógio', pStep:'Passo {0} de {1}',
+      pWhen:'Tempo decorrido', pRelogio:'Hora de relógio', pStep:'{0} de {1}',
       pHashH:'Impressões digitais das imagens',
       pHashSub:'SHA-256 de cada imagem como ela está neste documento. Serve para conferir depois que a imagem não foi trocada; não é assinatura eletrônica e não atesta conformidade com norma nenhuma.',
       pNoteRel:'A hora de relógio de cada imagem é o início informado da gravação somado ao tempo decorrido. O documento registra o que foi capturado; a trilha de aprovação continua no seu sistema de mudanças.',
@@ -1534,7 +1596,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       pipMarcado:'✓ screen marked ({0})', pipMarcados:'{0} marked',
       pipNoVideo:'no video is kept',
       lockHint:'Choose a video in step 1 to continue.',
-      lockPrev:'The frames show up here after step 3 — this is where you discard the ones you do not want.',
+      lockPrevTr:'The transcript is below, under Transcript — you can fix it and export it.',
+      lockPrev:'The frames show up here after step 2 — this is where you discard the ones you do not want, fix the transcript and build the document.',
       lockPrompt:'The text for the AI is written once the frames exist.',
       lockRec:'Recording. The frames and the transcript are coming out on their own — click Stop when you are done.',
       lockTrRec:'The transcript is being made live, while you record.',
@@ -1654,8 +1717,10 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       videoErr:'The browser could not open this video. Convert it to MP4 (H.264) and try again.',
       reportar:'Tell me which format failed',
       reportarDica:' — that is what will decide whether automatic conversion is worth building.',
-      s2:'Transcript (optional)', autoBtn:'Transcribe',
-      trEnLbl:'translate to English',
+      s2:'Transcript and frames (optional)', autoBtn:'Transcript only',
+      acAmbos:'Transcribe and extract frames',
+      trBoxH:'Transcript', trBoxSub:'fix, apply vocabulary, translate',
+      trBoxVazio:'still empty', trBoxCheia:'{0} lines',
       tradLbl:'Translate the transcript and the notes into', tradBtn:'Translate',
       tradPrep:'Preparing the browser translator…',
       tradBaixando:'Downloading the language pair: {0}% (once only, then it stays in the browser)',
@@ -1665,7 +1730,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       tradNada:'There is no transcript or notes to translate.',
       tradSemPar:'This browser does not have the {0} → {1} pair.',
       tradErro:'I could not translate.',
-      tradSemApi:'On-device translation: for now only in Chrome and Edge on desktop. Here you can tick “translate to English” above, and the speech model itself translates as it listens.',
+      tradSemApi:'On-device translation: for now only in Chrome and Edge on desktop. In other browsers the transcript comes out in the spoken language and translation waits — the text is yours, you can export it and translate it wherever you like.',
       autoIndo:'Transcribing…', autoEspere:'You can leave it in the background — but do not close the tab: the work happens in here.',
       mBase:'Base model — fast', mSmall:'Small model — more accurate',
       autoDetect:'Detect automatically', diagBtn:'Diagnostics',
@@ -1697,7 +1762,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       faixa:'Range analysed: {0} to {1}.',
       qLow:'Light', qMid:'Balanced', qHigh:'High',
       sens:['','very low','low','low+','medium-','medium','medium+','high','high+','very high'],
-      extractBtn:'Extract frames', stopBtn:'Stop', resetBtn:'Start over',
+      extractBtn:'Frames only', stopBtn:'Stop', resetBtn:'Start over',
       noteB:'If the video will not open:', noteT:'browsers cannot decode some formats (HEVC, certain MKV files). Convert to MP4 / H.264 in that case.',
       noDur:'Video duration unavailable.',
       scanning:'Looking for image changes… {0} of {1} — {2} frame(s) kept',
@@ -1725,6 +1790,11 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       pIndex:'Video index', pIndexSub:'Each line is a moment where the image changed.', tKeep:'kept', tOff:'discarded', offTag:'discarded', keepAll:'Keep all', dropDup:'Discard duplicates',
       clickHint:'Click the image to discard it or bring it back. The field below it is your note for that step.',
       stepN:'Step {0}', notaPh:'note for this step',
+      dropDupN:'Discard duplicates ({0})',
+      dropQuietN:'Discard the silent ones ({0})',
+      lenteTam:'size',
+      unLbl:'Call each frame a',
+      unPasso:'Step', unMomento:'Moment', unIa:'Segment',
       evH:'Evidence details', evHsub:'— optional: test case, system, who ran it, start time',
       guiaH:'Guide details', guiaHsub:'— optional: title, system, author, version',
       guiaTit:'Guide title', guiaSis:'System / product', guiaAutor:'Written by', guiaVer:'Version',
@@ -1738,7 +1808,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       evHash:'Include the SHA-256 fingerprint of each image',
       evNota:'Everything here is optional and nothing is sent anywhere: it becomes the first page of the document and the file name, and nothing else. Nothing survives closing the tab. Times are written as YYYY-MM-DD hh:mm:ss with the offset beside them, so neither day-and-month nor time zone is ever ambiguous.',
       pEvid:'Identification', pStart:'Recording started at', pHash:'Image SHA-256',
-      pWhen:'Elapsed', pRelogio:'Clock time', pStep:'Step {0} of {1}',
+      pWhen:'Elapsed', pRelogio:'Clock time', pStep:'{0} of {1}',
       pHashH:'Image fingerprints',
       pHashSub:'SHA-256 of each image exactly as it appears in this document. It lets you check later that an image was not swapped; it is not an electronic signature and does not certify compliance with any standard.',
       pNoteRel:'The clock time of each image is the stated recording start plus the elapsed time. This document records what was captured; the approval trail stays in your change management system.',
@@ -1881,7 +1951,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       pipMarcado:'✓ pantalla marcada ({0})', pipMarcados:'{0} marcadas',
       pipNoVideo:'no se guarda ningún vídeo',
       lockHint:'Elige un vídeo en el paso 1 para continuar.',
-      lockPrev:'Los fotogramas aparecen aquí después del paso 3 — es donde descartas los que no sirven.',
+      lockPrevTr:'La transcripción está aquí abajo, en Transcripción — puedes corregirla y exportarla.',
+      lockPrev:'Los fotogramas aparecen aquí después del paso 2 — es donde descartas los que no sirven, corriges la transcripción y generas el documento.',
       lockPrompt:'El texto para la IA se arma cuando existan los fotogramas.',
       lockRec:'Grabando. Los fotogramas y la transcripción salen solos — pulsa Detener cuando termines.',
       lockTrRec:'La transcripción se está haciendo en vivo, mientras grabas.',
@@ -2003,8 +2074,10 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       videoErr:'El navegador no pudo abrir este vídeo. Conviértelo a MP4 (H.264) e inténtalo de nuevo.',
       reportar:'Dime qué formato falló',
       reportarDica:' — eso decidirá si vale la pena construir la conversión automática.',
-      s2:'Transcripción (opcional)', autoBtn:'Transcribir',
-      trEnLbl:'traducir al inglés',
+      s2:'Transcripción y fotogramas (opcional)', autoBtn:'Solo transcribir',
+      acAmbos:'Transcribir y extraer fotogramas',
+      trBoxH:'Transcripción', trBoxSub:'corregir, aplicar vocabulario, traducir',
+      trBoxVazio:'aún vacía', trBoxCheia:'{0} líneas',
       tradLbl:'Traducir la transcripción y las anotaciones a', tradBtn:'Traducir',
       tradPrep:'Preparando el traductor del navegador…',
       tradBaixando:'Descargando el par de idiomas: {0}% (una sola vez, y queda en el navegador)',
@@ -2014,7 +2087,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       tradNada:'No hay transcripción ni anotaciones que traducir.',
       tradSemPar:'Este navegador no tiene el par {0} → {1}.',
       tradErro:'No pude traducir.',
-      tradSemApi:'Traducción en el dispositivo: por ahora solo en Chrome y Edge de escritorio. Aquí puedes marcar “traducir al inglés” arriba, y el propio modelo de voz traduce mientras escucha.',
+      tradSemApi:'Traducción en el dispositivo: por ahora solo en Chrome y Edge de escritorio. En otros navegadores la transcripción sale en el idioma hablado y la traducción queda para después — el texto es tuyo, puedes exportarlo y traducirlo donde quieras.',
       autoIndo:'Transcribiendo…', autoEspere:'Puedes dejarlo en segundo plano — pero no cierres la pestaña: el trabajo se hace aquí dentro.',
       mBase:'Modelo base — rápido', mSmall:'Modelo small — más preciso',
       autoDetect:'Detectar automáticamente', diagBtn:'Diagnóstico',
@@ -2046,7 +2119,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       faixa:'Tramo analizado: {0} a {1}.',
       qLow:'Ligera', qMid:'Equilibrada', qHigh:'Alta',
       sens:['','muy baja','baja','baja+','media-','media','media+','alta','alta+','muy alta'],
-      extractBtn:'Extraer fotogramas', stopBtn:'Parar', resetBtn:'Empezar de nuevo',
+      extractBtn:'Solo fotogramas', stopBtn:'Parar', resetBtn:'Empezar de nuevo',
       noteB:'Si el vídeo no se abre:', noteT:'el navegador no decodifica algunos formatos (HEVC, ciertos MKV). En ese caso, conviértelo a MP4 / H.264.',
       noDur:'Duración del vídeo no disponible.',
       scanning:'Buscando cambios de imagen… {0} de {1} — {2} fotograma(s) guardado(s)',
@@ -2074,6 +2147,11 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       pIndex:'Índice del vídeo', pIndexSub:'Cada línea es un instante en que la imagen cambió.', tKeep:'conservados', tOff:'descartados', offTag:'descartado', keepAll:'Conservar todos', dropDup:'Descartar repetidos',
       clickHint:'Haz clic en la imagen para descartarla o recuperarla. El campo de abajo es tu anotación de ese paso.',
       stepN:'Paso {0}', notaPh:'anotación del paso',
+      dropDupN:'Descartar repetidos ({0})',
+      dropQuietN:'Descartar sin habla ({0})',
+      lenteTam:'tamaño',
+      unLbl:'Llamar a cada cuadro de',
+      unPasso:'Paso', unMomento:'Momento', unIa:'Fragmento',
       evH:'Datos de la evidencia', evHsub:'— opcional: caso de prueba, sistema, quién lo ejecutó, hora de inicio',
       guiaH:'Datos de la guía', guiaHsub:'— opcional: título, sistema, autor, versión',
       guiaTit:'Título de la guía', guiaSis:'Sistema / producto', guiaAutor:'Escrito por', guiaVer:'Versión',
@@ -2087,7 +2165,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       evHash:'Incluir la huella SHA-256 de cada imagen',
       evNota:'Todo esto es opcional y nada se envía a ningún sitio: se convierte en la primera página del documento y en el nombre del archivo, y nada más. Nada sobrevive al cierre de la pestaña. Las horas salen como AAAA-MM-DD hh:mm:ss con el huso al lado, para que no haya duda ni entre día y mes ni entre países.',
       pEvid:'Identificación', pStart:'Inicio de la grabación', pHash:'SHA-256 de la imagen',
-      pWhen:'Tiempo transcurrido', pRelogio:'Hora de reloj', pStep:'Paso {0} de {1}',
+      pWhen:'Tiempo transcurrido', pRelogio:'Hora de reloj', pStep:'{0} de {1}',
       pHashH:'Huellas digitales de las imágenes',
       pHashSub:'SHA-256 de cada imagen tal como aparece en este documento. Sirve para comprobar después que la imagen no fue sustituida; no es firma electrónica ni certifica conformidad con ninguna norma.',
       pNoteRel:'La hora de reloj de cada imagen es el inicio indicado de la grabación más el tiempo transcurrido. El documento registra lo que se capturó; la traza de aprobación sigue en tu sistema de cambios.',
@@ -2315,7 +2393,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     $('tr').placeholder = t('trPh');
     $('goalFree').placeholder = t('freePh');
     $('sensV').textContent = t('sens')[+$('sens').value];
-    dicaModelo(); pintarBloco(); pintarObjetivos();
+    dicaModelo(); pintarBloco(); pintarObjetivos(); pintarRotulo();
     if (!frames.length) $('promptOut').textContent = t('promptPh');
     // render() e não só buildPrompt(): "Passo 3" e o texto de apoio da anotação
     // ficariam no idioma anterior dentro de cada miniatura
@@ -2398,12 +2476,12 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
 
     if (modo === 'arquivo') {
       trancar('trAuto', true); trancar('trManual', true); trancar('framesCorpo', true);
-      dica('hintTr', null); dica('hintFrames', null);
-      dobrar('cardTr', true); dobrar('cardFrames', true);
+      dica('hintTr', null);
+      dobrar('cardTr', true);
     } else if (modo === 'gravando') {
       trancar('trAuto', false); trancar('trManual', false); trancar('framesCorpo', false);
-      dica('hintTr', 'lockTrRec'); dica('hintFrames', 'lockRec');
-      dobrar('cardTr', false); dobrar('cardFrames', false);
+      dica('hintTr', 'lockRec');
+      dobrar('cardTr', false);
     } else if (modo === 'gravado') {
       /* O bloco automático fica travado — não há áudio guardado. O texto, não:
          é o resultado da gravação, e a pessoa pode corrigir e exportar. */
@@ -2411,30 +2489,55 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       /* Gravação só de frames é outra história: não houve transcrição para
          explicar, e o que a pessoa precisa saber é que ainda dá para colar uma. */
       dica('hintTr', liveCues.length ? 'lockTrDone' : 'lockTrNone');
-      dica('hintFrames', 'lockDone');
-      /* O passo 2 continua ABERTO aqui de propósito: é onde está o texto que a
-         gravação acabou de produzir. Fechá-lo esconderia o resultado. */
-      dobrar('cardTr', true); dobrar('cardFrames', false);
+      /* Fechado: com a gravação pronta não há mais nada a ajustar aqui, e o
+         que interessa é a revisão logo abaixo. */
+      dobrar('cardTr', false);
     } else {
       /* Fechado, mas alcançável: o que está aqui são AJUSTES (modelo, placa de
          vídeo, idioma), e eles precisam poder ser mexidos antes de gravar — a
          gravação nunca tem "vídeo carregado" antes de começar. A ação em si
          (`#auto`) continua desabilitada, que é a trava que faz sentido. */
-      trancar('trAuto', true); trancar('trManual', true); trancar('framesCorpo', false);
-      dica('hintTr', 'lockHint'); dica('hintFrames', 'lockHint');
-      dobrar('cardTr', false); dobrar('cardFrames', false);
+      /* Ajustes, e não ações: modelo, placa, sensibilidade e limites precisam
+         estar ao alcance ANTES de gravar — a sensibilidade vale para a captura
+         ao vivo também. O que fica travado é o botão, que é onde a trava faz
+         sentido. */
+      trancar('trAuto', true); trancar('trManual', true); trancar('framesCorpo', true);
+      dica('hintTr', 'lockHint');
+      dobrar('cardTr', false);
     }
     /* O passo 4 não some mais. Escondê-lo deixava a numeração visível em
        1, 2, 3, 5 — um buraco que a pessoa lê como defeito, e que ficou gritante
        depois que os outros passaram a aparecer colapsados. Agora ele existe
        sempre, fechado e com a explicação, como os irmãos. */
+    /* Frames OU texto. Depois que a transcrição desceu para cá, uma gravação
+       só de som deixava a revisão trancada com o resultado dentro dela — a
+       pessoa via o texto pela fresta e não podia tocar nele. */
     const temFrames = frames.length > 0;
-    trancar('prevCard',   temFrames);
-    dobrar('prevCard',    temFrames);
-    dica('hintPrev',      temFrames ? null : 'lockPrev');
-    trancar('promptCard', temFrames);
-    dobrar('promptCard',  temFrames);
-    dica('hintPrompt',    temFrames ? null : 'lockPrompt');
+    const temTexto  = !!($('tr') && $('tr').value.trim());
+    const temAlgo   = temFrames || temTexto;
+    /* Inerte é diferente de fechado, e aqui a diferença passou a doer: a caixa
+       de texto da transcrição mora dentro deste cartão. Travá-lo enquanto não
+       houver frames impediria justamente quem quer COLAR uma transcrição de
+       chegar ao campo. Então basta haver material — vídeo ou gravação — para
+       ele poder ser tocado; ele só não abre sozinho antes da hora. */
+    trancar('prevCard',   temAlgo || modo !== 'nada');
+    /* Aberto assim que existe material, mesmo sem quadro nenhum: é aqui que se
+       cola uma transcrição pronta, e um cartão fechado é um campo que não
+       existe para quem não sabe que o cabeçalho abre. */
+    dobrar('prevCard',    temAlgo || modo === 'arquivo' || modo === 'gravado');
+    dica('hintPrev',      temAlgo ? null : 'lockPrev');
+    trancar('promptCard', temAlgo);
+    dobrar('promptCard',  temAlgo);
+    dica('hintPrompt',    temAlgo ? null : 'lockPrompt');
+    sincAmbos();
+  }
+
+  /* "Ambos" não tem estado próprio: ele vale exatamente quando os dois lados
+     valem. Calcular aqui, e não guardar em outro lugar, evita o terceiro botão
+     ficar aceso depois que os outros dois apagaram. */
+  function sincAmbos(){
+    const b = $('ambos'); if (!b) return;
+    b.disabled = $('auto').disabled || $('extract').disabled;
   }
 
   /* Rolagem suave até o próximo passo. Respeita quem pediu menos movimento no
@@ -2552,6 +2655,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       $('auto').disabled = false;
       st('');
       $('extract').disabled = false;
+      sincAmbos();
       showMeta();
       buildPrompt();          // o texto anterior falava de outro vídeo
       $('count').value = Math.min(80, Math.max(12, Math.round(video.duration/15)));
@@ -2560,7 +2664,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
          misturar os dois esconderia justamente a dor dos formatos recusados. */
       medir('carregou_video', { p_origem: origem || 'arquivo' });
       passos();
-      irPara('cardFrames');      // o vídeo abriu: o próximo passo é escolher os frames
+      irPara('cardTr');          // o vídeo abriu: o próximo passo são os ajustes
     };
     video.onerror = () => {
       let extra = '';
@@ -2974,6 +3078,10 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
   }
 
   function refreshTr(){
+    /* Os filtros contam quadros sem fala, e isso muda quando a transcrição
+       muda. Sem esta linha o botão dizia "Descartar sem fala" sem número até
+       alguém mexer nos quadros. */
+    if (typeof pintarFiltros === 'function' && frames.length) pintarFiltros();
     const { cues } = parseTranscript($('tr').value);
     const n = $('tr').value.trim().length;
     $('trInfo').innerHTML = !n ? '' : cues.length
@@ -2982,8 +3090,18 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     $('expRow').classList.toggle('hide', !n);
     $('tradRow').classList.toggle('hide', !n || !TEM_TRADUTOR);
     if (n && !TEM_TRADUTOR && !$('tradMsg').textContent) $('tradMsg').textContent = t('tradSemApi');
+    /* O resumo na aba fechada. Sem ele a pessoa não tem como saber se há texto
+       lá dentro sem abrir — e abre por desconfiança, toda vez. */
+    const cx = $('trBox');
+    if (cx) {
+      const linhas = $('tr').value.trim().split(/\n+/).filter(Boolean).length;
+      $('trBoxSub').textContent = n ? t('trBoxCheia', linhas) : t('trBoxVazio');
+      if (n && !cx.dataset.mexido) cx.open = true;
+    }
+    if (typeof passos === 'function') passos();
   }
   $('tr').oninput = refreshTr;
+  if ($('trBox')) $('trBox').addEventListener('toggle', () => { $('trBox').dataset.mexido = '1'; });
 
   /* ================= tradução no aparelho =================
      A pergunta era "dá para usar o Google Tradutor?". A API paga do Google
@@ -3746,10 +3864,16 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
          surfaceSwitching:'include'   -> permite trocar de janela no meio sem
                                          encerrar a captura. */
       telaStream = await navigator.mediaDevices.getDisplayMedia({
-        video: { frameRate: 12 },     // 12 q/s bastam: o que interessa é a troca de tela
+        /* `displaySurface:'monitor'` é uma DICA, não uma ordem: o navegador abre
+           o seletor já na aba da tela inteira, e quem quiser uma janela troca.
+           Vale porque compartilhar janela tem duas armadilhas — o som do
+           computador não vem junto, e o que acontece fora dela some da evidência.
+           A escolha continua sendo de quem grava; só o padrão mudou. */
+        video: { frameRate: 12, displaySurface: 'monitor' },     // 12 q/s bastam: o que interessa é a troca de tela
         audio: true,
         systemAudio: 'include',
         selfBrowserSurface: 'exclude',
+        monitorTypeSurfaces: 'include',
         surfaceSwitching: 'include'
       });
     } catch (e) {
@@ -4415,11 +4539,12 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     notaTr();                 // o tamanho anunciado no passo 1 acompanha o modelo escolhido
   }
 
-  /* O Whisper faz duas tarefas com o MESMO arquivo já baixado: transcrever no
-     idioma falado, ou traduzir para inglês enquanto ouve. A segunda não custa um
-     byte a mais de download — é só outra instrução para o mesmo modelo. Só vai
-     para inglês: é a única direção que ele conhece. */
-  const tarefaAsr = () => ($('trEn') && $('trEn').checked) ? 'translate' : 'transcribe';
+  /* Sempre transcrever, nunca traduzir na origem. O Whisper sabe traduzir para
+     inglês enquanto ouve, e havia uma caixa para isso ao lado do botão — mas
+     era uma decisão pedida ANTES de qualquer texto existir, e traduzir antes de
+     ler é escolher no escuro. A tradução ficou onde pertence: na revisão, sobre
+     o texto pronto, e para o idioma que a pessoa quiser. */
+  const tarefaAsr = () => 'transcribe';
 
   /* Relógio do modelo: segundos de áudio que entraram, contra tempo de parede
      gasto. O download não entra na conta — é outra medida, e misturar as duas
@@ -4930,8 +5055,18 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       return r;
     }
   }
+  /* Ligado só pelo botão "Ambos". Sem ele, "Só transcrever" varria os frames
+     por conta própria e a escolha da pessoa virava enfeite. */
+  let juntarFrames = false;
+
+  $('ambos').onclick = () => {
+    juntarFrames = true;
+    $('auto').click();
+  };
+
   $('auto').onclick = async () => {
     if (!currentFile) return;
+    const juntar = juntarFrames; juntarFrames = false;
     const modelId = $('model').value, lang = $('lang').value;
 
     /* Varrer os frames JUNTO, e não depois.
@@ -4949,7 +5084,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
        que a pessoa já fez, nem apaga escolhas dela) e só se a varredura não
        estiver em curso. Se falhar, falha sozinha — a transcrição não pode cair
        por causa de uma varredura em segundo plano. */
-    if (!frames.length && !$('extract').disabled && !liveDur) {
+    if (juntar && !frames.length && !$('extract').disabled && !liveDur) {
       $('status').textContent = t('extraJunto');
       Promise.resolve().then(() => $('extract').click()).catch(() => {});
     }
@@ -4957,6 +5092,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
        acontecendo — e a transcrição de um vídeo longo leva minutos. Agora ele
        diz o que está fazendo, e a linha ao lado diz o que ela pode fazer. */
     $('auto').disabled = true;
+    $('ambos').disabled = true;
     $('auto').textContent = t('autoIndo');
     $('autoDica').textContent = t('autoEspere');
     trabalhando(true);
@@ -5027,6 +5163,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       $('auto').disabled = false;
       $('auto').textContent = t('autoBtn');
       $('autoDica').textContent = '';
+      sincAmbos();
       trabalhando(false);
     }
   };
@@ -5378,6 +5515,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     const px = 900;
 
     $('extract').disabled = true;
+    sincAmbos();
     $('go').disabled = $('docx').disabled = $('zip').disabled = true;
     $('cancel').classList.remove('hide');
     trabalhando(true);
@@ -5487,6 +5625,9 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     $('extract').disabled = false;
     $('go').disabled = $('docx').disabled = $('zip').disabled = false;
     $('cancel').classList.add('hide');
+    /* A barra cheia ficava no lugar depois de terminar — uma faixa azul de
+       100% que não quer dizer mais nada, logo abaixo dos botões. */
+    $('barWrap').classList.add('hide');
     trabalhando(false);
     stop = false;
     render();
@@ -5546,11 +5687,11 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       /* Uma tela colada não tem instante no vídeo, e inventar um seria mentir
          num documento de evidência. Ela mostra a etiqueta no lugar do relógio. */
       cap.innerHTML =
-        `<span class="passo">${n ? t('stepN', n) : '—'}</span>` +
+        `<span class="passo">${n ? passoN(n) : '—'}</span>` +
         `<span class="rel">${f.colado ? t('coladoTag') : fmt(f.t) + (f.manual ? ' *' : '')}` +
         (hora && !f.colado ? ' · ' + hora : '') + `</span>`;
       toque.setAttribute('aria-label',
-        (n ? t('stepN', n) + ' · ' : '') + fmt(f.t) + ' — ' + t('offTag'));
+        (n ? passoN(n) + ' · ' : '') + fmt(f.t) + ' — ' + t('offTag'));
 
       /* A anotação do passo: é ela que separa evidência de pilha de telas.
          Fica na miniatura porque é aqui que a pessoa já está olhando quadro a
@@ -5563,7 +5704,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       campo.dataset.i = i;
       campo.placeholder = t('notaPh');
       campo.value = f.nota || '';
-      campo.setAttribute('aria-label', t('notaPh') + ' ' + (n ? t('stepN', n) : fmt(f.t)));
+      campo.setAttribute('aria-label', t('notaPh') + ' ' + (n ? passoN(n) : fmt(f.t)));
       campo.oninput = () => { frames[i].nota = campo.value; };
       // sem isto, digitar espaço na anotação descartaria o frame
       campo.onclick = e => e.stopPropagation();
@@ -5583,7 +5724,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       lupa.dataset.i = i;
       lupa.textContent = '⤢';
       lupa.title = t('ampliar');
-      lupa.setAttribute('aria-label', t('ampliar') + ' — ' + (n ? t('stepN', n) : fmt(f.t)));
+      lupa.setAttribute('aria-label', t('ampliar') + ' — ' + (n ? passoN(n) : fmt(f.t)));
       lupa.onclick = e => { e.stopPropagation(); abrirLente(i); };
 
       /* Mover o passo de lugar.
@@ -5602,7 +5743,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
         b2.className = 'mover ' + (dir < 0 ? 'esq' : 'dir');
         b2.textContent = dir < 0 ? '‹' : '›';
         b2.title = t(rotulo);
-        b2.setAttribute('aria-label', t(rotulo) + ' — ' + (n ? t('stepN', n) : fmt(f.t)));
+        b2.setAttribute('aria-label', t(rotulo) + ' — ' + (n ? passoN(n) : fmt(f.t)));
         b2.disabled = dir < 0 ? i === 0 : i === frames.length - 1;
         b2.onclick = e => {
           e.stopPropagation();
@@ -5663,6 +5804,36 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     ata:       { layout:'grid', ev:false, goal:'ata',       prefixo:'ata',           dica:'mAtaH' }
   };
   const modeloAtual = () => MODELOS[$('modelo').value] || MODELOS.ia;
+
+  /* ---- como se chama uma unidade do documento ----
+
+     "Passo" cabe numa evidência de teste e num passo a passo. Numa ata de
+     reunião não: ali o que existe é um MOMENTO, e chamar de passo faz o
+     documento parecer outra coisa. No contexto para IA é um TRECHO.
+
+     O rótulo segue o modelo de saída por padrão, e a pessoa pode trocar — há
+     empresa que chama de "evidência", de "etapa" ou de "print", e brigar com o
+     vocabulário de quem usa é uma briga que não se ganha. O campo fica ao lado
+     do modelo, e trocar repinta as miniaturas e todos os documentos.
+
+     Trocado à mão, o valor não é mais reescrito ao trocar de modelo — senão a
+     escolha de alguém seria apagada pela primeira mexida num select. */
+  const ROTULO_PADRAO = { ia:'unIa', evidencia:'unPasso', tutorial:'unPasso', ata:'unMomento' };
+  let rotuloManual = null;
+
+  function rotuloUnidade(){
+    if (rotuloManual) return rotuloManual;
+    return t(ROTULO_PADRAO[$('modelo').value] || 'unPasso');
+  }
+  /* Substitui o "Passo" de stepN pelo rótulo em vigor. Uma função só, para os
+     dezoito lugares que numeram um quadro contarem a mesma história. */
+  const passoN = n => rotuloUnidade() + ' ' + n;
+
+  function pintarRotulo(){
+    const el = $('unNome'); if (!el) return;
+    if (document.activeElement !== el) el.value = rotuloUnidade();
+    el.placeholder = t(ROTULO_PADRAO[$('modelo').value] || 'unPasso');
+  }
 
   /* Cada modelo pede uma identificação diferente — e o "Contexto para IA" não
      pede nenhuma: o leitor é uma máquina, e caso de teste, chamado e resultado
@@ -5740,9 +5911,20 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     $('goalFree').classList.add('hide');   // o modelo já escolheu o objetivo
     $('evBox').open   = m.ev;
     dicaModelo();
+    pintarRotulo();                        // "Passo" vira "Momento" numa ata
     if (frames.length) render();           // a legenda da miniatura muda com o modelo
     else buildPrompt();
   };
+
+  /* Trocar à mão trava o rótulo: a partir daí ele não é mais reescrito pelo
+     modelo de saída. Apagar o campo devolve o padrão. */
+  $('unNome').oninput = () => {
+    const v = ($('unNome').value || '').trim();
+    rotuloManual = v || null;
+    if (frames.length) render(); else buildPrompt();
+  };
+  $('unNome').onblur = pintarRotulo;
+  pintarRotulo();
 
   /* ================= dados da evidência =================
      Tudo opcional. Nada daqui vai para `localStorage`: a política promete que não
@@ -6610,6 +6792,23 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     render();
   });
 
+  /* O tamanho escolhido vale para a próxima vez: quem achou a lente grande vai
+     achar de novo. Fica no localStorage porque é preferência de tela, não
+     conteúdo — está descrito na política junto do idioma. */
+  const LENTE_TAM = 'Walkstamp.lenteTam';
+  function aplicarTamLente(){
+    const v = $('lenteTam').value || '980';
+    document.documentElement.style.setProperty('--lenteW', v + 'px');
+    try { localStorage.setItem(LENTE_TAM, v); } catch (e) {}
+  }
+  (() => {
+    let v = null;
+    try { v = localStorage.getItem(LENTE_TAM); } catch (e) {}
+    if (v && [...$('lenteTam').options].some(o => o.value === v)) $('lenteTam').value = v;
+    aplicarTamLente();
+  })();
+  $('lenteTam').onchange = aplicarTamLente;
+
   function pintarLente(){
     const f = frames[lenteI]; if (!f) return;
     const kept = frames.filter(x => x.keep);
@@ -6619,7 +6818,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     $('cropTirar').classList.toggle('hide', !recorte);
     pintarTarjas();
     pintarMarcas();
-    $('lenteTit').textContent = (n ? t('stepN', n) : t('offTag')) + '  ·  ' + fmt(f.t) +
+    $('lenteTit').textContent = (n ? passoN(n) : t('offTag')) + '  ·  ' + fmt(f.t) +
                                 (horaDe(f.t) ? '  ·  ' + horaDe(f.t) : '');
     $('lentePos').textContent = t('lentePos', lenteI + 1, frames.length);
     $('lenteNota').value = f.nota || '';
@@ -6798,22 +6997,66 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     }
   });
 
-  $('allOn').onclick = () => { frames.forEach(f => f.keep = true); render(); };
+  $('allOn').onclick = () => { frames.forEach(f => f.keep = true); filtroAtivo = 'todos'; render(); };
 
   /* "Manter só as marcadas". Quem apertou "marcar" durante a gravação já disse
      quais telas importam — e depois tinha que descartar as outras uma a uma. O
      botão só aparece quando existe alguma marcada, porque um botão que não faz
      nada é pior que um botão a menos. */
-  function pintarSoMarcados(){
-    const b = $('soMarcados'); if (!b) return;
-    const n = frames.filter(f => f.manual).length;
-    b.classList.toggle('hide', n === 0);
-    b.textContent = t('keepMarked', n);
+  /* Quantos quadros cada filtro pegaria, sem aplicá-lo.
+
+     Um botão que diz "Descartar repetidos" e não diz quantos não dá para
+     decidir: a pessoa clica para descobrir e desfaz. Com o número na cara ela
+     decide antes — e o botão some quando não há nada a fazer, porque botão que
+     não faz nada é pior que botão a menos. */
+  function contarRepetidos(){
+    let prev = null, n = 0;
+    frames.forEach(f => {
+      if (!f.sig || !f.keep) return;
+      if (prev && diff(prev, f.sig) < 4) n++;
+      else prev = f.sig;
+    });
+    return n;
   }
+  function contarSemFala(){
+    const { cues } = parseTranscript($('tr').value);
+    if (!cues.length) return null;              // sem transcrição não há como saber
+    const dur = duracaoTotal();
+    let n = 0;
+    frames.forEach((f, i) => {
+      if (!f.keep) return;
+      const b2 = i + 1 < frames.length ? frames[i+1].t : dur + 0.001;
+      if (!cues.some(c => c.b > f.t && c.a < b2)) n++;
+    });
+    return n;
+  }
+
+  /* O filtro em vigor fica marcado. Sem isso a tela não guarda memória do que já
+     foi feito, e "descartar repetidos" clicado duas vezes parece não ter
+     funcionado nenhuma das duas. */
+  let filtroAtivo = null;
+  function pintarFiltros(){
+    const b = $('soMarcados');
+    if (b) {
+      const n = frames.filter(f => f.manual).length;
+      b.classList.toggle('hide', n === 0);
+      b.textContent = t('keepMarked', n);
+    }
+    const rep = contarRepetidos();
+    $('dedup').textContent = rep ? t('dropDupN', rep) : t('dropDup');
+    const mudo = contarSemFala();
+    $('mute').textContent = (mudo != null && mudo) ? t('dropQuietN', mudo) : t('dropQuiet');
+    [['allOn','todos'], ['soMarcados','marcados'], ['dedup','repetidos'], ['mute','semfala']]
+      .forEach(([id, k]) => {
+        const el = $(id); if (el) el.classList.toggle('ativo', filtroAtivo === k);
+      });
+  }
+  const pintarSoMarcados = pintarFiltros;
   $('soMarcados').onclick = () => {
     const n = frames.filter(f => f.manual).length;
     if (!n) return;
     frames.forEach(f => { f.keep = !!f.manual; });
+    filtroAtivo = 'marcados';
     render();
     $('status').textContent = t('keepMarkedN', n, frames.length - n);
   };
@@ -6824,6 +7067,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       if (prev && diff(prev, f.sig) < 4) { f.keep = false; n++; }
       else prev = f.sig;
     });
+    filtroAtivo = 'repetidos';
     render();
     $('status').textContent = n ? tr('dedupN', n) : tr('dedup0');
   };
@@ -6872,6 +7116,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
 
     let n = 0;
     frames.forEach((f, i) => { if (!temFala[i] && f.keep) { f.keep = false; n++; } });
+    filtroAtivo = 'semfala';
     render();
     $('status').textContent = n ? t('quietN', n) : t('quiet0');
   };
@@ -7262,7 +7507,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
         kept.forEach((f, i) => {
           const hora = horaDe(f.t);
           linhas.push([String(i + 1).padStart(4, '0') + '-' + fmt(f.t).replace(/:/g, '-') + '.jpg',
-                       t('stepN', i + 1), fmt(f.t), hora, f.nota || ''].filter(Boolean).join('\t'));
+                       passoN(i + 1), fmt(f.t), hora, f.nota || ''].filter(Boolean).join('\t'));
           if (f.hash) linhas.push('\t' + t('pHash') + ': ' + f.hash);
         });
         entradas.unshift({ nome: 'indice.txt', dados: bytesDe(linhas.join('\r\n') + '\r\n') });
@@ -7317,11 +7562,11 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       `<tr><th>${esc(k)}</th><td>${esc(v)}</td></tr>`).join('');
     const blocos = linhas.map(l => `
   <section class="passo">
-    <h2>${esc(tut && l.nota ? t('stepN', l.passo) + '  —  ' + l.nota
-                            : t('pStep', l.passo, linhas.length) + '   ·   ' + l.tempo +
+    <h2>${esc(tut && l.nota ? passoN(l.passo) + '  —  ' + l.nota
+                            : t('pStep', passoN(l.passo), linhas.length) + '   ·   ' + l.tempo +
                               (l.hora ? '   ·   ' + l.hora : ''))}</h2>
     ${(!tut && l.nota) ? `<p class="nota">${esc(l.nota)}</p>` : ''}
-    <img src="${l.img}" alt="${esc(t('stepN', l.passo))}">
+    <img src="${l.img}" alt="${esc(passoN(l.passo))}">
     ${l.fala ? `<p class="fala">${esc(l.fala)}</p>` : ''}
     ${l.ocr ? `<p class="ocr"><b>${esc(t('pOcr'))}</b> ${esc(l.ocr)}</p>` : ''}
     ${l.hash ? `<p class="hash">${esc(t('pHash'))}: ${esc(l.hash)}</p>` : ''}
@@ -7386,13 +7631,13 @@ ${blocos}
     if (ev.linhasCompletas.length) out.push('');
     linhas.forEach(l => {
       out.push('## ' + (tut && l.nota
-        ? t('stepN', l.passo) + ' — ' + l.nota
-        : t('pStep', l.passo, linhas.length) + ' · ' + l.tempo + (l.hora ? ' · ' + l.hora : '')));
+        ? passoN(l.passo) + ' — ' + l.nota
+        : t('pStep', passoN(l.passo), linhas.length) + ' · ' + l.tempo + (l.hora ? ' · ' + l.hora : '')));
       out.push('');
       if (!tut && l.nota) { out.push(l.nota); out.push(''); }
       /* A imagem vai embutida em base64 no próprio Markdown: um arquivo só, que
          é o ponto de colar numa wiki sem ter que subir anexo separado. */
-      out.push('![' + t('stepN', l.passo) + '](' + l.img + ')');
+      out.push('![' + passoN(l.passo) + '](' + l.img + ')');
       out.push('');
       if (l.fala) { out.push('> ' + l.fala); out.push(''); }
       if (l.ocr)  { out.push('`' + t('pOcr') + '` ' + l.ocr); out.push(''); }
@@ -7592,7 +7837,7 @@ ${blocos}
         // ver a expectativa no sumário, não o começo da narração
         const linha = f.nota ||
           (fala.length > 96 ? fala.slice(0, 96).replace(/\s\S*$/, '') + '…' : fala);
-        corpo.push(par(t('stepN', i + 1) + '   ' + fmt(f.t) + '   ' + (linha || '—'),
+        corpo.push(par(passoN(i + 1) + '   ' + fmt(f.t) + '   ' + (linha || '—'),
                        { sz: 18, depois: 20 }));
       });
     }
@@ -7612,8 +7857,8 @@ ${blocos}
          expectativa e vem numa linha própria acima da imagem. Ver o comentário
          equivalente no PDF. */
       corpo.push(par(tut
-          ? t('stepN', i + 1) + (f.nota ? '  —  ' + f.nota : '')
-          : t('pStep', i + 1, kept.length) + '   ·   ' +
+          ? passoN(i + 1) + (f.nota ? '  —  ' + f.nota : '')
+          : t('pStep', passoN(i + 1), kept.length) + '   ·   ' +
             (f.colado ? t('coladoTag') : fmt(f.t) + (hora ? '   ·   ' + hora : '')),
         { b: true, sz: 22, antes: 240, depois: 40 }));
       if (!tut && f.nota) corpo.push(par(f.nota, { sz: 21, cor: '1F2430', depois: 60 }));
@@ -8096,7 +8341,7 @@ ${blocos}
         }
         // a anotação manda no índice: quem escreveu a expectativa quer vê-la aqui
         if (f.nota) resumo = f.nota;
-        doc.setTextColor(120).text(t('stepN', i + 1), M, iy);
+        doc.setTextColor(120).text(passoN(i + 1), M, iy);
         doc.setTextColor(120).text(quando(f), M + 20, iy);
         doc.setTextColor(45).text(doc.splitTextToSize(resumo || '—', CW - 38)[0], M + 38, iy);
         iy += 5.6;
@@ -8130,8 +8375,8 @@ ${blocos}
            mora embaixo do próprio conteúdo. */
         const hora = horaDe(f.t);
         const cabTxt = tut
-          ? t('stepN', i+1) + (f.nota ? '  —  ' + f.nota : '')
-          : t('stepN', i+1) + '   ·   ' + quando(f) + (hora && !f.colado ? '   ·   ' + hora : '');
+          ? passoN(i+1) + (f.nota ? '  —  ' + f.nota : '')
+          : passoN(i+1) + '   ·   ' + quando(f) + (hora && !f.colado ? '   ·   ' + hora : '');
         doc.setFont('helvetica','bold').setFontSize(tut ? 11.5 : 11);
         const cabL = doc.splitTextToSize(cabTxt, CW - 24);   // 24 mm do "frame i de n"
         doc.setFont('helvetica','normal').setFontSize(9.6);
@@ -8195,7 +8440,7 @@ ${blocos}
         doc.addImage(imgFinal(f), 'JPEG', x, top, iwG, ihG);
         let cy2 = top + ihG + 4.5;
         doc.setFont('helvetica','bold').setFontSize(8.5).setTextColor(60)
-           .text(t('stepN', i + 1) + '  ·  ' + quando(f), x, cy2);
+           .text(passoN(i + 1) + '  ·  ' + quando(f), x, cy2);
         if (hora) {
           cy2 += 3.6;
           doc.setFont('helvetica','normal').setFontSize(7).setTextColor(130).text(hora, x, cy2);
@@ -8227,7 +8472,7 @@ ${blocos}
         if (!f.hash) return;
         if (hy > PH - 22) { foot(); doc.addPage(); hy = M + 4; }
         doc.setFont('helvetica','bold').setFontSize(8.6).setTextColor(60)
-           .text(t('stepN', i + 1) + '  ·  ' + quando(f), M, hy);
+           .text(passoN(i + 1) + '  ·  ' + quando(f), M, hy);
         hy += 4.2;
         doc.setFont('courier','normal').setFontSize(7.6).setTextColor(95);
         doc.text(doc.splitTextToSize(f.hash, CW), M, hy);

@@ -143,7 +143,7 @@ uma demo perdida.
 | aconteceu | o que dizer, e o que fazer |
 |---|---|
 | o modelo não carrega | *"transcrição é opcional"* — desmarque, grave só os frames, e rode o Diagnóstico depois |
-| a tela não gerou frames | aumente a sensibilidade no passo 3 e use o **marcar tela** à mão |
+| a tela não gerou frames | aumente a sensibilidade no passo 2 e use o **marcar tela** à mão |
 | o navegador reclama que a página não responde | *"é a transcrição usando o processador"* — clique em **Aguarde**; e me mande o Diagnóstico |
 | bloqueio de proxy corporativo | use a **versão offline** — arquivo único, sem rede, funciona igual menos a transcrição automática |
 
