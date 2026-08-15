@@ -25,7 +25,7 @@
       <a href="/en/compare" class="hide-sm">Compare</a>
       <a href="/en/precos" class="hide-xs">Pricing</a>
       <a class="btnTop" href="/app?lang=en">Open the tool</a>
-      <span style="display:inline-flex;gap:9px;border-left:1px solid var(--line);padding-left:16px"><a href="/seguranca?lang=pt">PT</a><a href="/en/security" style="color:var(--ink);font-weight:600">EN</a><a href="/es/seguridad">ES</a></span>
+      <span style="display:inline-flex;gap:9px;border-left:1px solid var(--line);padding-left:16px"><a href="/seguranca?lang=pt">PT</a><a href="/en/security?lang=en" style="color:var(--ink);font-weight:600">EN</a><a href="/es/seguridad?lang=es">ES</a></span>
     </nav>
   </div>
 </header>
@@ -33,7 +33,7 @@
 <section style="padding-top:60px">
   <div class="wrap doc">
     <h1 style="font-size:32px">Information security</h1>
-    <p class="updated">Last updated: 14 August 2026.<br>
+    <p class="updated">Last updated: 15 August 2026.<br>
     This page is for whoever has to approve Walkstamp inside a company: how it works, what leaves your
     machine, and what we do <b>not</b> have.</p>
 
@@ -97,9 +97,18 @@
       <tr><td>Google</td><td>Only if you click to open a video from Drive</td>
           <td>Authentication and the request for the file you pick, with the narrowest scope available (<code>drive.file</code>)</td>
           <td>The rest of your Drive; and the file goes from Google straight to your browser, never through us</td></tr>
+      <tr><td>Google Docs (upload)</td><td>Only if you click <b>Send to Google Docs</b>, and only after confirming the warning that appears</td>
+          <td>The Word document assembled in your browser — text and images — for Google to convert into a Drive document</td>
+          <td>Anything beyond the document you sent; it goes from your browser straight to Google, never through us</td></tr>
     </table>
-    <p><b>None of these connections carries video, audio, images, transcripts or generated documents.</b>
+    <p><b>None of these connections carries video, audio, images or transcripts.</b>
     The PDF library is served from our own domain, not from a CDN.</p>
+    <p>There is one exception, and it is in the table rather than hidden: the <b>Send to Google Docs</b>
+    button is the only function where the <b>generated document leaves the computer</b>. It exists because
+    many teams review evidence in Drive, and it asks for explicit confirmation before sending — if you do
+    not want it, you do not click it, and nothing changes. If your policy forbids taking the content to
+    Google, note that the button only appears when Drive credentials are configured, and the offline
+    version does not have it.</p>
     <p>One case tends to surprise people: <b>translation</b> of the transcript does not leave here either.
     It uses the translator the browser itself embeds, running on your device — not the Google Cloud API,
     which would require a key of ours in the code and would send your text to a server. Where that
@@ -176,6 +185,7 @@
       <a href="/en/precos">Pricing</a>
       <a href="/en/compare">Compare</a>
       <a href="/en/security">Security</a>
+      <a href="/en/verify">Check evidence</a>
       <a href="/en/privacidade">Privacy</a>
       <a href="/en/termos">Terms</a>
       <a href="/en/steps-recorder-replacement">Steps Recorder replacement</a>

@@ -90,14 +90,38 @@ IDIOMAS = ["pt", "en", "es"]
 NOMES = {"pt": "Português", "en": "English", "es": "Español"}
 
 REDIRECT = """<script>
-/* Detecção automática de idioma, só na home em português e só quando não há
-   escolha explícita (?lang=). O seletor no topo sempre permite trocar. */
+/* Detecção de idioma na home. Três regras, e a ordem importa:
+
+   1. `?lang=` na URL manda em tudo — quem clicou numa sigla escolheu, e a
+      escolha fica registrada para as próximas visitas;
+   2. uma escolha anterior (guardada no `localStorage`, e é a ÚNICA coisa que
+      esta página guarda) vale mais que o idioma do sistema: quem já disse que
+      lê em português num computador em inglês não quer ser mandado de volta
+      para /en toda vez;
+   3. só então o idioma do navegador decide.
+
+   `navigator.languages` e não `navigator.language`: quem tem "pt-BR, en-US"
+   configurado prefere português, e olhar só o primeiro item já erraria menos,
+   mas a lista inteira erra menos ainda quando o primeiro é um idioma que não
+   temos. */
 (function(){
   try{
-    if (new URLSearchParams(location.search).has('lang')) return;
-    var n = (navigator.language || '').slice(0,2).toLowerCase();
-    if (n === 'en') location.replace('/en');
-    else if (n === 'es') location.replace('/es');
+    var q = new URLSearchParams(location.search).get('lang');
+    var temos = ['pt','en','es'];
+    if (q && temos.indexOf(q) >= 0) { try{ localStorage.setItem('walkstamp.lang', q); }catch(e){} return; }
+    var salvo = null;
+    try{ salvo = localStorage.getItem('walkstamp.lang'); }catch(e){}
+    var escolhido = (temos.indexOf(salvo) >= 0) ? salvo : null;
+    if (!escolhido) {
+      var lista = navigator.languages && navigator.languages.length
+        ? navigator.languages : [navigator.language || ''];
+      for (var i = 0; i < lista.length && !escolhido; i++) {
+        var n = String(lista[i]).slice(0,2).toLowerCase();
+        if (temos.indexOf(n) >= 0) escolhido = n;
+      }
+    }
+    if (escolhido === 'en') location.replace('/en');
+    else if (escolhido === 'es') location.replace('/es');
   }catch(e){}
 })();
 </script>"""
@@ -113,6 +137,7 @@ SLUGS = {
     "privacidade": {"pt": "privacidade", "en": "privacidade", "es": "privacidade"},
     "termos":      {"pt": "termos",      "en": "termos",      "es": "termos"},
     "seguranca":   {"pt": "seguranca",   "en": "security",    "es": "seguridad"},
+    "verificar":   {"pt": "verificar",   "en": "verify",      "es": "verificar"},
     "comparativo": {"pt": "comparativo",  "en": "compare",     "es": "comparativa"},
     "steps":       {"pt": "substituto-do-steps-recorder",
                     "en": "steps-recorder-replacement",
@@ -120,13 +145,26 @@ SLUGS = {
 }
 
 
+LEMBRAR = """<script>
+/* Só registra a escolha; quem está em /en ou /es chegou por link ou por
+   redirecionamento, e nos dois casos a detecção já fez o trabalho dela. */
+(function(){
+  try{
+    var q = new URLSearchParams(location.search).get('lang');
+    if (['pt','en','es'].indexOf(q) >= 0) localStorage.setItem('walkstamp.lang', q);
+  }catch(e){}
+})();
+</script>"""
+
+
 def _switcher(lang, paginas_por_idioma, pagina):
     """Seletor de idioma: links diretos para a mesma página nos outros idiomas."""
     itens = []
     for L in IDIOMAS:
         destino = paginas_por_idioma[L][pagina]
-        if L == "pt":
-            destino += "?lang=pt"          # evita que a detecção redirecione de novo
+        # `?lang=` em TODOS: é o sinal explícito que a home registra para não
+        # mandar a pessoa de volta pelo idioma do sistema na próxima visita
+        destino += ("&" if "?" in destino else "?") + "lang=" + L
         atual = ' style="color:var(--ink);font-weight:600"' if L == lang else ""
         itens.append(f'<a href="{destino}"{atual}>{L.upper()}</a>')
     return ('<span style="display:inline-flex;gap:9px;border-left:1px solid var(--line);padding-left:16px">'
@@ -172,7 +210,7 @@ def build_site(root: pathlib.Path) -> None:
         t["duoCompLinked"] = t["duoComp"].replace(
             "{0}", f'<a href="{caminhos[lang]["comparativo"]}" style="color:var(--accent)">').replace("{1}", "</a>")
         t["lang"] = lang
-        t["redirect"] = REDIRECT if lang == "pt" else ""
+        t["redirect"] = REDIRECT if lang == "pt" else LEMBRAR
 
         html = modelo
         for k, v in t.items():
@@ -212,6 +250,12 @@ def build_site(root: pathlib.Path) -> None:
                                "FlowShare, Scribe, Tosca, Steps Recorder: what each does, list prices, and where each one wins — including against us."),
                         "es": (f"Comparativa — {MARCA} y las alternativas",
                                "FlowShare, Scribe, Tosca, Steps Recorder: qué hace cada uno, el precio de tarifa y dónde gana cada uno — incluso a nosotros.")},
+        "verificar": {"pt": (f"Conferir uma evidência — {MARCA}",
+                             "Arraste o zip ou o json e confira, no seu próprio navegador, se as imagens continuam as mesmas."),
+                      "en": (f"Check a piece of evidence — {MARCA}",
+                             "Drop the zip or the json and check, in your own browser, whether the images are still the same."),
+                      "es": (f"Comprobar una evidencia — {MARCA}",
+                             "Arrastra el zip o el json y comprueba, en tu propio navegador, si las imágenes siguen siendo las mismas.")},
         "steps": {"pt": (f"O Steps Recorder acabou — o que usar no lugar | {MARCA}",
                          "O Gravador de Etapas do Windows foi descontinuado e nada que a Microsoft indica gera documento de passos. O que fazer."),
                   "en": (f"Steps Recorder is gone — what to use instead | {MARCA}",
@@ -279,6 +323,63 @@ def build_site(root: pathlib.Path) -> None:
     (root / "public" / "sitemap.xml").write_text(sitemap, encoding="utf-8")
     print(f"public/sitemap.xml  {len(sitemap)/1024:.1f} KB")
 
+    # ---- PWA ----
+    # "Instalar sem instalar": o atalho vai para a área de trabalho sem que a TI
+    # precise aprovar um executável, e o cache resolve rede instável no meio de
+    # uma gravação. O service worker é REDE-PRIMEIRO para as páginas: um app que
+    # serve HTML velho de cache é pior que um app que não instala.
+    manifest = {
+        "name": MARCA, "short_name": MARCA,
+        "description": {"pt": "Grave a tela e receba um documento com hora por passo.",
+                        "en": "Record the screen and get a document with a time on every step.",
+                        "es": "Graba la pantalla y recibe un documento con hora en cada paso."}["pt"],
+        "start_url": "/app?lang=pt", "scope": "/", "display": "standalone",
+        "background_color": "#f7f8fb", "theme_color": "#3A3F9E", "lang": "pt-BR",
+        "icons": [
+            {"src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any"},
+            {"src": f"/apple-touch-icon.png?v={ICON_V}", "sizes": "180x180", "type": "image/png"}
+        ]
+    }
+    (root / "public" / "manifest.webmanifest").write_text(
+        json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    print("public/manifest.webmanifest")
+
+    sw = """/* Service worker do %s.
+   Rede primeiro para documentos: uma ferramenta que abre a versão de ontem
+   depois de um deploy é pior do que uma que não instala. O cache existe para o
+   caso de a rede cair no meio do trabalho, e para os arquivos estáticos.
+   Ele NÃO guarda vídeo, áudio, transcrição nem documento gerado: nada disso
+   passa por aqui, porque nada disso é uma requisição de rede. */
+const CACHE = 'walkstamp-v%s';
+const ESSENCIAIS = ['/app', '/site.css', '/favicon.svg', '/logo.svg'];
+
+self.addEventListener('install', e => {
+  self.skipWaiting();
+  e.waitUntil(caches.open(CACHE).then(c => c.addAll(ESSENCIAIS)).catch(() => {}));
+});
+
+self.addEventListener('activate', e => {
+  e.waitUntil(caches.keys().then(ns =>
+    Promise.all(ns.filter(n => n !== CACHE).map(n => caches.delete(n)))).then(() => self.clients.claim()));
+});
+
+self.addEventListener('fetch', e => {
+  const req = e.request;
+  if (req.method !== 'GET') return;
+  const url = new URL(req.url);
+  if (url.origin !== self.location.origin) return;   // CDN e modelo não passam por aqui
+  e.respondWith(
+    fetch(req).then(r => {
+      const copia = r.clone();
+      caches.open(CACHE).then(c => c.put(req, copia)).catch(() => {});
+      return r;
+    }).catch(() => caches.match(req).then(r => r || caches.match('/app')))
+  );
+});
+""" % (MARCA, ICON_V)
+    (root / "public" / "sw.js").write_text(sw, encoding="utf-8")
+    print("public/sw.js")
+
     robots = f"User-agent: *\nAllow: /\n\nSitemap: {SITE}/sitemap.xml\n"
     (root / "public" / "robots.txt").write_text(robots, encoding="utf-8")
     print("public/robots.txt")
@@ -343,6 +444,10 @@ def main() -> int:
     offline = src.replace(MARKER, f"<script>{lib}</script>")
     offline = offline.replace("__SUPAURL__", "").replace("__SUPAKEY__", "")
     offline = offline.replace("<!--__ANALYTICS__-->", "")
+    # o arquivo único é aberto de file://: manifesto e service worker não têm
+    # origem para existir ali, e um <link> apontando para /manifest.webmanifest
+    # só produziria um 404 no console de quem o abrir
+    offline = offline.replace('<link rel="manifest" href="/manifest.webmanifest">\n', "")
     out_off = ROOT / "offline" / "walkstamp-offline.html"
     out_off.parent.mkdir(exist_ok=True)
     out_off.write_text(offline, encoding="utf-8")

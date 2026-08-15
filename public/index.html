@@ -19,14 +19,38 @@
 <link rel="stylesheet" href="/site.css">
 <script>window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments)};</script><script defer src="/_vercel/insights/script.js"></script>
 <script>
-/* Detecção automática de idioma, só na home em português e só quando não há
-   escolha explícita (?lang=). O seletor no topo sempre permite trocar. */
+/* Detecção de idioma na home. Três regras, e a ordem importa:
+
+   1. `?lang=` na URL manda em tudo — quem clicou numa sigla escolheu, e a
+      escolha fica registrada para as próximas visitas;
+   2. uma escolha anterior (guardada no `localStorage`, e é a ÚNICA coisa que
+      esta página guarda) vale mais que o idioma do sistema: quem já disse que
+      lê em português num computador em inglês não quer ser mandado de volta
+      para /en toda vez;
+   3. só então o idioma do navegador decide.
+
+   `navigator.languages` e não `navigator.language`: quem tem "pt-BR, en-US"
+   configurado prefere português, e olhar só o primeiro item já erraria menos,
+   mas a lista inteira erra menos ainda quando o primeiro é um idioma que não
+   temos. */
 (function(){
   try{
-    if (new URLSearchParams(location.search).has('lang')) return;
-    var n = (navigator.language || '').slice(0,2).toLowerCase();
-    if (n === 'en') location.replace('/en');
-    else if (n === 'es') location.replace('/es');
+    var q = new URLSearchParams(location.search).get('lang');
+    var temos = ['pt','en','es'];
+    if (q && temos.indexOf(q) >= 0) { try{ localStorage.setItem('walkstamp.lang', q); }catch(e){} return; }
+    var salvo = null;
+    try{ salvo = localStorage.getItem('walkstamp.lang'); }catch(e){}
+    var escolhido = (temos.indexOf(salvo) >= 0) ? salvo : null;
+    if (!escolhido) {
+      var lista = navigator.languages && navigator.languages.length
+        ? navigator.languages : [navigator.language || ''];
+      for (var i = 0; i < lista.length && !escolhido; i++) {
+        var n = String(lista[i]).slice(0,2).toLowerCase();
+        if (temos.indexOf(n) >= 0) escolhido = n;
+      }
+    }
+    if (escolhido === 'en') location.replace('/en');
+    else if (escolhido === 'es') location.replace('/es');
   }catch(e){}
 })();
 </script>
@@ -41,7 +65,7 @@
       <a href="/comparativo" class="hide-sm">Comparativo</a>
       <a href="/precos" class="hide-xs">Preços</a>
       <a class="btnTop" href="/app?lang=pt">Abrir a ferramenta</a>
-      <span style="display:inline-flex;gap:9px;border-left:1px solid var(--line);padding-left:16px"><a href="/?lang=pt" style="color:var(--ink);font-weight:600">PT</a><a href="/en">EN</a><a href="/es">ES</a></span>
+      <span style="display:inline-flex;gap:9px;border-left:1px solid var(--line);padding-left:16px"><a href="/?lang=pt" style="color:var(--ink);font-weight:600">PT</a><a href="/en?lang=en">EN</a><a href="/es?lang=es">ES</a></span>
     </nav>
   </div>
 </header>
@@ -160,6 +184,7 @@
       <a href="/precos">Preços</a>
       <a href="/comparativo">Comparativo</a>
       <a href="/seguranca">Segurança</a>
+      <a href="/verificar">Conferir evidência</a>
       <a href="/privacidade">Privacidade</a>
       <a href="/termos">Termos</a>
       <a href="/substituto-do-steps-recorder">Substituto do Steps Recorder</a>

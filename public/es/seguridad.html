@@ -25,7 +25,7 @@
       <a href="/es/comparativa" class="hide-sm">Comparativa</a>
       <a href="/es/precos" class="hide-xs">Precios</a>
       <a class="btnTop" href="/app?lang=es">Abrir la herramienta</a>
-      <span style="display:inline-flex;gap:9px;border-left:1px solid var(--line);padding-left:16px"><a href="/seguranca?lang=pt">PT</a><a href="/en/security">EN</a><a href="/es/seguridad" style="color:var(--ink);font-weight:600">ES</a></span>
+      <span style="display:inline-flex;gap:9px;border-left:1px solid var(--line);padding-left:16px"><a href="/seguranca?lang=pt">PT</a><a href="/en/security?lang=en">EN</a><a href="/es/seguridad?lang=es" style="color:var(--ink);font-weight:600">ES</a></span>
     </nav>
   </div>
 </header>
@@ -33,7 +33,7 @@
 <section style="padding-top:60px">
   <div class="wrap doc">
     <h1 style="font-size:32px">Seguridad de la información</h1>
-    <p class="updated">Última actualización: 14 de agosto de 2026.<br>
+    <p class="updated">Última actualización: 15 de agosto de 2026.<br>
     Esta página es para quien tiene que aprobar el uso de Walkstamp dentro de una empresa: cómo funciona,
     qué sale de tu equipo y qué <b>no</b> tenemos.</p>
 
@@ -97,9 +97,18 @@
       <tr><td>Google</td><td>Solo si haces clic en abrir un vídeo de Drive</td>
           <td>Autenticación y la petición del archivo que elijas, con el permiso más restringido que existe (<code>drive.file</code>)</td>
           <td>El resto de tu Drive; y el archivo va de Google directo a tu navegador, sin pasar por nosotros</td></tr>
+      <tr><td>Google Docs (envío)</td><td>Solo si pulsas <b>Enviar a Google Docs</b>, y solo tras confirmar el aviso que aparece</td>
+          <td>El documento de Word montado en tu navegador — texto e imágenes — para que Google lo convierta en documento de Drive</td>
+          <td>Nada más allá del documento que enviaste; va de tu navegador directo a Google, sin pasar por nosotros</td></tr>
     </table>
-    <p><b>Ninguna de estas conexiones lleva vídeo, audio, imagen, transcripción ni documento generado.</b>
+    <p><b>Ninguna de estas conexiones lleva vídeo, audio, imagen ni transcripción.</b>
     La biblioteca de PDF se sirve desde nuestro propio dominio, no desde un CDN.</p>
+    <p>Hay una excepción, y está en la tabla en lugar de escondida: el botón <b>Enviar a Google Docs</b> es
+    la única función en la que el <b>documento generado sale del ordenador</b>. Existe porque muchos equipos
+    revisan la evidencia en Drive, y pide confirmación explícita antes de enviar — quien no lo quiera, no
+    pulsa, y nada cambia. Si tu política prohíbe llevar el contenido a Google, ten en cuenta que el botón
+    solo aparece cuando las credenciales de Drive están configuradas, y que la versión offline no lo
+    tiene.</p>
     <p>Un caso que suele sorprender: la <b>traducción</b> de la transcripción tampoco sale de aquí. Usa el
     traductor que el propio navegador incorpora y que funciona en tu dispositivo — no la API de Google
     Cloud, que exigiría una clave nuestra en el código y enviaría tu texto a un servidor. Donde ese
@@ -176,6 +185,7 @@
       <a href="/es/precos">Precios</a>
       <a href="/es/comparativa">Comparativa</a>
       <a href="/es/seguridad">Seguridad</a>
+      <a href="/es/verificar">Comprobar evidencia</a>
       <a href="/es/privacidade">Privacidad</a>
       <a href="/es/termos">Términos</a>
       <a href="/es/alternativa-al-steps-recorder">Alternativa al Steps Recorder</a>

@@ -149,7 +149,7 @@ que houver o que ler.
    vazio.
 2. **Conferir o CORS em produção.** O ambiente onde isto foi construído não tem saída de rede para o
    `supabase.co`, então o caminho servidor foi testado direto no banco e o navegador foi testado contra
-   um endpoint simulado. O que falta é uma passada real. Abra `clipcontext.app/app` e, no console:
+   um endpoint simulado. O que falta é uma passada real. Abra `walkstamp.com/app` e, no console:
 
    ```js
    fetch('https://zyqncemxjobkvdveordz.supabase.co/rest/v1/rpc/clipcontext_evento', {

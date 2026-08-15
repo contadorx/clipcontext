@@ -7,6 +7,8 @@
 <link rel="icon" href="/favicon.ico?v=__ICONV__" sizes="any">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'> <rect width='64' height='64' rx='14' fill='%233A3F9E'/> <rect x='12' y='13' width='40' height='22' rx='3' fill='%23fff'/> <rect x='12' y='41' width='40' height='5' rx='2.5' fill='%23fff'/> <rect x='12' y='50' width='26' height='5' rx='2.5' fill='%23fff' opacity='.62'/> </svg>" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=__ICONV__">
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#3A3F9E">
 <!--__ANALYTICS__-->
 <style>
   :root{
@@ -204,8 +206,14 @@
          font-weight:600;font-size:16.5px;letter-spacing:-.2px}
   .brand svg{width:34px;height:34px;display:block;flex:none}
   .brand b{font-weight:700;color:var(--accent)}
-  .brand .dom{color:var(--muted);font-weight:400;font-size:12.5px;margin-left:2px}
-  @media (max-width:560px){ .brand .dom{display:none} .brand svg{width:29px;height:29px} }
+  @media (max-width:560px){ .brand svg{width:29px;height:29px} }
+  /* Siglas em vez de caixa de seleção, como na home: três letras ocupam menos
+     que um <select> de "Português" e ficam iguais nos dois lugares. */
+  .idiomas{display:inline-flex;gap:9px;align-items:center;
+      border-left:1px solid var(--line);padding-left:16px}
+  .idiomas a{color:var(--muted);text-decoration:none;font-size:14px;cursor:pointer}
+  .idiomas a:hover{color:var(--ink)}
+  .idiomas a.atual{color:var(--ink);font-weight:600}
   .chk{display:inline-flex;align-items:center;gap:7px;font-size:13.5px;color:var(--ink);cursor:pointer}
   .chk input{width:auto;margin:0;cursor:pointer}
   /* últimas falas transcritas durante a gravação */
@@ -221,6 +229,12 @@
   .vuBar i{display:block;height:100%;width:0;background:var(--accent);transition:width .08s linear}
   .vu.off .vuBar i{background:var(--err)}
   button.ghost.rec{border-color:var(--err);color:var(--err)}
+  /* O único botão que manda alguma coisa para fora: borda tracejada e uma seta
+     apontando para cima e para a direita. Não é enfeite — é para a pessoa
+     distinguir, antes de clicar, o botão que sai do computador dos que não
+     saem. */
+  button.ghost#gdocs{border-style:dashed}
+  button.ghost#gdocs::before{content:'\2197\00a0'}
   .vu.off span{color:var(--err)}
   .live .who{font-weight:600;color:var(--accent)}
   .live .who.sys{color:var(--warn)}
@@ -238,13 +252,13 @@
         <rect x="14" y="40" width="36" height="4.5" rx="2.25" fill="#fff"/>
         <rect x="14" y="48" width="23" height="4.5" rx="2.25" fill="#fff" opacity=".62"/>
       </svg>
-      <span>__MARCAA__<b>__MARCAB__</b></span><span class="dom">__SITEDOM__</span>
+      <span>__MARCAA__<b>__MARCAB__</b></span>
     </a>
-    <select id="uiLang" aria-label="Language">
-      <option value="pt">Português</option>
-      <option value="en">English</option>
-      <option value="es">Español</option>
-    </select>
+    <nav class="idiomas" id="idiomas" aria-label="Language">
+      <a href="?lang=pt" data-l="pt">PT</a>
+      <a href="?lang=en" data-l="en">EN</a>
+      <a href="?lang=es" data-l="es">ES</a>
+    </nav>
   </div>
   <h1>__MARCA__</h1>
   <p class="sub" data-i18n="sub"></p>
@@ -518,7 +532,12 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       <p class="evPe" id="cxHash"><label><input type="checkbox" id="evHash"><span data-i18n="evHash"></span></label></p>
       <p class="evPe"><span data-i18n="evPerfil"></span>
          <button class="ghost sm hide" id="evLimpar" data-i18n="evLimpar"
-                 style="margin-left:8px;padding:4px 10px;font-size:12px"></button></p>
+                 style="margin-left:8px;padding:4px 10px;font-size:12px"></button>
+         <button class="ghost sm" id="evSalvar" data-i18n="evSalvar"
+                 style="margin-left:6px;padding:4px 10px;font-size:12px"></button>
+         <button class="ghost sm" id="evAbrir" data-i18n="evAbrir"
+                 style="margin-left:6px;padding:4px 10px;font-size:12px"></button>
+         <input type="file" id="evArq" accept=".json,application/json"></p>
       <p class="evPe" data-i18n="evNota"></p>
     </details>
 
@@ -529,9 +548,17 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
         <option value="full" data-i18n="layFull"></option>
         <option value="grid" data-i18n="layGrid"></option>
       </select>
+      <select id="papel" style="width:auto">
+        <option value="a4">A4</option>
+        <option value="letter" data-i18n="papelCarta"></option>
+      </select>
       <button class="ghost" id="docx" data-i18n="docxBtn"></button>
+      <button class="ghost" id="html" data-i18n="htmlBtn"></button>
+      <button class="ghost" id="md" data-i18n="mdBtn"></button>
+      <button class="ghost" id="csv" data-i18n="csvBtn"></button>
       <button class="ghost" id="zip" data-i18n="zipBtn"></button>
       <button class="ghost" id="json" data-i18n="jsonBtn"></button>
+      <button class="ghost hide" id="gdocs" data-i18n="gdBtn"></button>
       <span class="status" id="pdfStatus"></span>
     </div>
     </div></div><!-- /dobra -->
@@ -647,6 +674,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       demoHasAudio:'O exemplo tem narração: a transcrição já veio preenchida, mas você pode apagá-la e clicar em "Transcrever automaticamente" para ver o reconhecimento de voz funcionando.',
       mark:'Marcar este momento',
       recBtn:'Gravar a tela', recStopBtn:'Parar gravação',
+      recAdiantando:'Baixando o modelo de voz agora, para não atrasar a gravação. Pode escolher a tela quando quiser.',
+      recPronto:'Modelo pronto. A gravação começa na hora.',
       recPauseBtn:'Pausar', recResumeBtn:'Retomar', recMarkBtn:'Marcar este passo',
       recPausado:'PAUSADO —', recMarcado:'passo marcado.',
       pipPausado:'Pausado: nada sendo guardado.',
@@ -711,7 +740,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       perfLinhas:' em {0} linhas',
       perfLento:'Mais lento que o próprio vídeo — vale escolher o modelo rápido.',
       docxBtn:'Word (.docx)', zipBtn:'Zip das figuras', wFrames:'Frames neste documento',
-      ftPromo:'Passo a passo com hora, gerado no navegador — nenhum vídeo saiu do computador ·  __MARCA__',
+      ftPromo:'Passo a passo com hora, gerado no navegador — nenhum vídeo saiu do computador',
+      ftCapa:'Documento gerado inteiramente no navegador de quem executou. O vídeo, o áudio e as imagens não passaram por servidor nenhum — nem nosso, nem de terceiros. Ferramenta gratuita, sem cadastro.',
       pkgBuilding:'Montando o arquivo…',
       docxDone:'Documento do Word com {0} frames — pronto para editar.',
       zipDone:'{0} imagens no zip, sem mais nada junto.',
@@ -751,6 +781,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       modelDl:'Etapa 1 de 2 — baixando o modelo: {0}% (só na primeira vez)',
       modelDl2:'Baixando o modelo de voz: {0}% — {1} de {2} MB. É uma vez só: depois ele fica guardado no seu navegador e a próxima transcrição começa na hora.',
       modelCache:'O modelo já está guardado neste navegador. Abrindo — não há download.',
+      ocrSemCdn:'Não consegui alcançar a biblioteca de leitura de texto em nenhum dos endereços. Se a rede da empresa bloqueia CDN público, este recurso não vai funcionar aqui — o resto da ferramenta funciona igual.',
       erroSessao:'O arquivo comprimido do modelo não abre neste computador. Já tentei as versões alternativas, e nenhuma subiu. Rode o diagnóstico, ou grave só os frames e escreva as anotações à mão.',
       transcribing2:'Etapa 2 de 2 — transcrevendo: {0}% (bloco {1} de {2}){3}',
       etaTr:' — faltam ~{0}',
@@ -823,12 +854,24 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       mAtaH:'Grade compacta de telas e a transcrição completa no fim — o formato de quem vai ler o que foi dito.',
       falaNota:'Usar a fala como anotação',
       evPerfil:'O sistema e quem executou ficam guardados enquanto esta aba estiver aberta, para você não redigitar a cada caso. Fechou a aba, some.',
-      evLimpar:'Esquecer',
+      evLimpar:'Esquecer', evSalvar:'Salvar perfil', evAbrir:'Abrir perfil',
       ampliar:'Ampliar este passo', fecharBtn:'Fechar',
       tarjaBtn:'Tarjar', tarjaFim:'Terminar de tarjar', tarjaLimpar:'Tirar todas',
       tarjaComo:'Arraste sobre a imagem para cobrir. Clique numa tarja para tirá-la.',
       tarjaN:'{0} tarja(s) neste passo — elas são queimadas na imagem que sai no documento.',
       tarjaTirar:'clique para tirar esta tarja',
+      htmlBtn:'Página (.html)', mdBtn:'Markdown', csvBtn:'Planilha (.csv)',
+      papelCarta:'Carta', csvPasso:'Passo',
+      gdBtn:'Enviar para o Google Docs',
+      gdAviso:'Atenção: este é o único botão da ferramenta que faz o seu documento SAIR do computador.\n\nO arquivo do Word é enviado ao Google, que o converte em um documento do Google Docs dentro do seu Drive. Ele sai daqui direto para o Google — não passa por nenhum servidor nosso —, mas passa a estar no Google, sujeito às políticas de lá.\n\nSe a evidência tiver dado sensível, prefira baixar o arquivo.\n\nEnviar mesmo assim?',
+      gdAuth:'Esperando a autorização do Google…',
+      gdMontando:'Montando o documento…',
+      gdEnviando:'Enviando ao Google… {0}',
+      gdOk:'Documento criado no seu Google Drive.',
+      gdAbrir:'Abrir no Google Docs',
+      gdErr:'Não consegui criar o documento no Google.',
+      gdGrande:'O documento tem {0}. O envio pode demorar.',
+      saiuArq:'{0} gerado com {1} passos.',
       cropBtn:'Recortar', cropFim:'Cancelar recorte', cropTirar:'Tirar o recorte',
       cropComo:'Arraste a área que interessa. O mesmo recorte vale para todos os quadros.',
       cropIndo:'Recortando os quadros…',
@@ -921,6 +964,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       demoHasAudio:'The example is narrated: the transcript comes pre-filled, but you can clear it and click "Transcribe automatically" to watch speech recognition work.',
       mark:'Mark this moment',
       recBtn:'Record the screen', recStopBtn:'Stop recording',
+      recAdiantando:'Downloading the speech model now, so it does not delay the recording. Pick your screen whenever you like.',
+      recPronto:'Model ready. Recording starts immediately.',
       recPauseBtn:'Pause', recResumeBtn:'Resume', recMarkBtn:'Mark this step',
       recPausado:'PAUSED —', recMarcado:'step marked.',
       pipPausado:'Paused: nothing being kept.',
@@ -985,7 +1030,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       perfLinhas:' on {0} threads',
       perfLento:'Slower than the video itself — the fast model is worth a try.',
       docxBtn:'Word (.docx)', zipBtn:'Zip of the images', wFrames:'Frames in this document',
-      ftPromo:'Time-stamped walkthrough, generated in the browser — no video left the computer ·  __MARCA__',
+      ftPromo:'Time-stamped walkthrough, generated in the browser — no video left the computer',
+      ftCapa:'This document was generated entirely in the browser of the person who ran it. The video, the audio and the images went through no server — neither ours nor anyone else’s. Free tool, no sign-up.',
       pkgBuilding:'Building the file…',
       docxDone:'Word document with {0} frames — ready to edit.',
       zipDone:'{0} images in the zip, nothing else alongside.',
@@ -1025,6 +1071,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       modelDl:'Step 1 of 2 — downloading the model: {0}% (first time only)',
       modelDl2:'Downloading the speech model: {0}% — {1} of {2} MB. Once only: after this it stays in your browser and the next transcription starts right away.',
       modelCache:'The model is already stored in this browser. Opening it — nothing to download.',
+      ocrSemCdn:'I could not reach the text-reading library at any of the addresses. If your company network blocks public CDNs, this feature will not work here — the rest of the tool works the same.',
       erroSessao:'The compressed model file will not open on this computer. I already tried the alternative builds and none came up. Run the diagnostics, or record the frames only and write the notes by hand.',
       transcribing2:'Step 2 of 2 — transcribing: {0}% (chunk {1} of {2}){3}',
       etaTr:' — about {0} left',
@@ -1097,12 +1144,24 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       mAtaH:'A compact grid of screens plus the full transcript at the end — the format for someone who will read what was said.',
       falaNota:'Use the speech as the note',
       evPerfil:'The system and who ran it are kept while this tab stays open, so you do not retype them for every case. Close the tab and they are gone.',
-      evLimpar:'Forget',
+      evLimpar:'Forget', evSalvar:'Save profile', evAbrir:'Open profile',
       ampliar:'Enlarge this step', fecharBtn:'Close',
       tarjaBtn:'Redact', tarjaFim:'Done redacting', tarjaLimpar:'Remove all',
       tarjaComo:'Drag over the image to cover it. Click a box to remove it.',
       tarjaN:'{0} redaction(s) on this step — they are burned into the image that goes in the document.',
       tarjaTirar:'click to remove this redaction',
+      htmlBtn:'Page (.html)', mdBtn:'Markdown', csvBtn:'Spreadsheet (.csv)',
+      papelCarta:'Letter', csvPasso:'Step',
+      gdBtn:'Send to Google Docs',
+      gdAviso:'Heads up: this is the only button in the tool that makes your document LEAVE your computer.\n\nThe Word file is sent to Google, which converts it into a Google Docs document inside your Drive. It goes straight from here to Google — it never touches a server of ours — but from then on it lives at Google, under their policies.\n\nIf the evidence contains sensitive data, download the file instead.\n\nSend anyway?',
+      gdAuth:'Waiting for Google to authorise…',
+      gdMontando:'Building the document…',
+      gdEnviando:'Sending to Google… {0}',
+      gdOk:'Document created in your Google Drive.',
+      gdAbrir:'Open in Google Docs',
+      gdErr:'Could not create the document at Google.',
+      gdGrande:'The document is {0}. Sending may take a while.',
+      saiuArq:'{0} generated with {1} steps.',
       cropBtn:'Crop', cropFim:'Cancel crop', cropTirar:'Remove the crop',
       cropComo:'Drag the area that matters. The same crop applies to every frame.',
       cropIndo:'Cropping the frames…',
@@ -1193,6 +1252,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       driveNoScope:'Google denegó el acceso a este archivo. Elige el archivo por el selector y no por un acceso directo.',
       driveBlocked:'El navegador bloqueó la ventana de Google. Permite las ventanas emergentes para este sitio e inténtalo de nuevo.',
       recBtn:'Grabar la pantalla', recStopBtn:'Detener grabación',
+      recAdiantando:'Descargando el modelo de voz ahora, para no retrasar la grabación. Elige la pantalla cuando quieras.',
+      recPronto:'Modelo listo. La grabación empieza al instante.',
       recPauseBtn:'Pausar', recResumeBtn:'Reanudar', recMarkBtn:'Marcar este paso',
       recPausado:'EN PAUSA —', recMarcado:'paso marcado.',
       pipPausado:'En pausa: no se guarda nada.',
@@ -1257,7 +1318,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       perfLinhas:' en {0} líneas',
       perfLento:'Más lento que el propio vídeo — vale la pena elegir el modelo rápido.',
       docxBtn:'Word (.docx)', zipBtn:'Zip de las imágenes', wFrames:'Fotogramas en este documento',
-      ftPromo:'Paso a paso con hora, generado en el navegador — ningún vídeo salió del equipo ·  __MARCA__',
+      ftPromo:'Paso a paso con hora, generado en el navegador — ningún vídeo salió del equipo',
+      ftCapa:'Documento generado enteramente en el navegador de quien lo ejecutó. El vídeo, el audio y las imágenes no pasaron por ningún servidor — ni nuestro ni de terceros. Herramienta gratuita, sin registro.',
       pkgBuilding:'Montando el archivo…',
       docxDone:'Documento de Word con {0} fotogramas — listo para editar.',
       zipDone:'{0} imágenes en el zip, sin nada más.',
@@ -1299,6 +1361,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       modelDl:'Paso 1 de 2 — descargando el modelo: {0}% (solo la primera vez)',
       modelDl2:'Descargando el modelo de voz: {0}% — {1} de {2} MB. Es una sola vez: después queda guardado en tu navegador y la próxima transcripción empieza al instante.',
       modelCache:'El modelo ya está guardado en este navegador. Abriéndolo — no hay descarga.',
+      ocrSemCdn:'No pude alcanzar la biblioteca de lectura de texto en ninguna de las direcciones. Si la red de la empresa bloquea los CDN públicos, esta función no va a funcionar aquí — el resto de la herramienta funciona igual.',
       erroSessao:'El archivo comprimido del modelo no abre en este equipo. Ya probé las versiones alternativas y ninguna arrancó. Ejecuta el diagnóstico, o graba solo los fotogramas y escribe las anotaciones a mano.',
       transcribing2:'Paso 2 de 2 — transcribiendo: {0}% (bloque {1} de {2}){3}',
       etaTr:' — faltan ~{0}',
@@ -1371,12 +1434,24 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       mAtaH:'Rejilla compacta de pantallas y la transcripción completa al final — el formato para quien va a leer lo que se dijo.',
       falaNota:'Usar el habla como anotación',
       evPerfil:'El sistema y quién lo ejecutó se guardan mientras esta pestaña siga abierta, para no reescribirlos en cada caso. Cierras la pestaña y desaparecen.',
-      evLimpar:'Olvidar',
+      evLimpar:'Olvidar', evSalvar:'Guardar perfil', evAbrir:'Abrir perfil',
       ampliar:'Ampliar este paso', fecharBtn:'Cerrar',
       tarjaBtn:'Tachar', tarjaFim:'Terminar de tachar', tarjaLimpar:'Quitar todas',
       tarjaComo:'Arrastra sobre la imagen para cubrir. Haz clic en una zona para quitarla.',
       tarjaN:'{0} zona(s) tachada(s) en este paso — se queman en la imagen que sale en el documento.',
       tarjaTirar:'haz clic para quitar esta zona',
+      htmlBtn:'Página (.html)', mdBtn:'Markdown', csvBtn:'Hoja de cálculo (.csv)',
+      papelCarta:'Carta', csvPasso:'Paso',
+      gdBtn:'Enviar a Google Docs',
+      gdAviso:'Atención: este es el único botón de la herramienta que hace que tu documento SALGA del ordenador.\n\nEl archivo de Word se envía a Google, que lo convierte en un documento de Google Docs dentro de tu Drive. Va de aquí directo a Google — no pasa por ningún servidor nuestro —, pero a partir de ahí queda en Google, sujeto a sus políticas.\n\nSi la evidencia tiene datos sensibles, descarga el archivo.\n\n¿Enviar de todos modos?',
+      gdAuth:'Esperando la autorización de Google…',
+      gdMontando:'Montando el documento…',
+      gdEnviando:'Enviando a Google… {0}',
+      gdOk:'Documento creado en tu Google Drive.',
+      gdAbrir:'Abrir en Google Docs',
+      gdErr:'No pude crear el documento en Google.',
+      gdGrande:'El documento pesa {0}. El envío puede tardar.',
+      saiuArq:'{0} generado con {1} pasos.',
       cropBtn:'Recortar', cropFim:'Cancelar recorte', cropTirar:'Quitar el recorte',
       cropComo:'Arrastra el área que importa. El mismo recorte vale para todos los fotogramas.',
       cropIndo:'Recortando los fotogramas…',
@@ -1562,7 +1637,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     // ficariam no idioma anterior dentro de cada miniatura
     else render();
     if (currentFile) showMeta();
-    $('uiLang').value = LANG;
+    $('idiomas').querySelectorAll('a[data-l]').forEach(a =>
+      a.classList.toggle('atual', a.dataset.l === LANG));
     $('lang').value = LANG;   // idioma da transcrição acompanha o da interface
     notaTr();
     passos();                 // as dicas dos passos não têm data-i18n: são escritas aqui
@@ -1872,15 +1948,57 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   };
   $('sens').oninput = () => { $('sensV').textContent = t('sens')[+$('sens').value]; };
   $('reset').onclick = () => location.reload();   // o recarregamento devolve os passos ao início
-  if ($('recTr')) $('recTr').onchange = notaTr;
+  /* ---- adiantar o modelo ----
+     A queixa foi justa: marcar "transcrever enquanto gravo" e só descobrir o
+     download de 77 MB ao clicar em Gravar transforma "vou gravar agora" em
+     "espera aí". Marcar a caixa passa a começar o download NAQUELE momento, em
+     segundo plano, enquanto a pessoa ainda está escolhendo a tela e ajeitando
+     a janela. Quando ela clicar em Gravar, ou já acabou, ou está bem adiantado.
 
-  $('uiLang').onchange = () => {
-    LANG = $('uiLang').value;
+     Em segundo plano de verdade: o botão continua clicável, e a promessa de
+     "paro antes de pedir a sua tela se o modelo falhar" continua valendo,
+     porque o clique espera esta mesma promessa terminar. */
+  let adiantando = null;
+
+  function adiantarModelo(){
+    if (!$('recTr') || !$('recTr').checked) return;
+    const modelId = $('model').value;
+    if (pipeId === modelId || adiantando) return;
+    adiantando = (async () => {
+      try {
+        $('recMsg').textContent = t('recAdiantando');
+        pipe = await buildPipe(modelId);
+        pipeId = modelId;
+        prog(null); st('');
+        $('recMsg').textContent = t('recPronto');
+      } catch (e) {
+        /* Silêncio aqui de propósito: o erro pertence ao clique em Gravar, que
+           é onde a pessoa decide o que fazer com ele. Adiantar não pode virar
+           uma caixa vermelha para quem nem começou. */
+        prog(null); st('');
+        $('recMsg').textContent = t('recHint');
+      } finally { adiantando = null; }
+    })();
+  }
+
+  if ($('recTr')) $('recTr').onchange = () => { notaTr(); adiantarModelo(); };
+  if ($('model')) $('model').addEventListener('change', () => {
+    // trocar de modelo com a caixa marcada recomeça o adiantamento
+    if ($('recTr') && $('recTr').checked) adiantarModelo();
+  });
+
+  /* Troca de idioma pelas siglas. Continua sem recarregar: a página inteira é
+     repintada por applyLang(), e um vídeo já carregado não se perde. */
+  $('idiomas').addEventListener('click', e => {
+    const a = e.target.closest('a[data-l]');
+    if (!a) return;
+    e.preventDefault();
+    LANG = a.dataset.l;
     const u = new URL(location);
     u.searchParams.set('lang', LANG);
     history.replaceState(null, '', u);
     applyLang();
-  };
+  });
 
   /* Vídeo de demonstração.
      Caminho relativo é frágil: dependendo de como o servidor trata a barra final,
@@ -1952,6 +2070,11 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   const DRIVE_ON = !!(GOOGLE_CLIENT_ID && GOOGLE_API_KEY && GOOGLE_APP_ID)
                    && /^https?:/.test(location.protocol);
   if (DRIVE_ON) $('driveRow').classList.remove('hide');
+  /* O envio para o Google Docs só precisa do client_id: quem abre o seletor
+     de arquivos é a chave de API e o App ID, e criar um arquivo novo não passa
+     pelo seletor. Então o botão de enviar pode existir mesmo sem eles. */
+  const DOCS_ON = !!GOOGLE_CLIENT_ID && /^https?:/.test(location.protocol);
+  if (DOCS_ON) $('gdocs').classList.remove('hide');
 
   function tamanho(b){
     b = Number(b) || 0;
@@ -2761,6 +2884,9 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
         $('recMsg').textContent = t('recPrep');
         controle('modelo');
         const modelId = $('model').value;
+        // se o adiantamento já está em curso, espera ELE em vez de começar
+        // outro download igual em paralelo
+        if (adiantando) await adiantando;
         if (pipeId !== modelId) { pipe = await buildPipe(modelId); pipeId = modelId; }
         podeTranscrever = true;
         prog(null); st('');
@@ -3398,11 +3524,25 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      erro só aparece DEPOIS de baixar o arquivo grande. Guardar a falha na aba
      evita repetir esse download a cada transcrição — que foi a queixa de
      "mesmo depois de baixar, ele baixa de novo". */
+  /* "placa de vídeo · decodificador q4" — o rótulo que aparece no diagnóstico.
+     Sem ele, quatro linhas dizendo só "processador" seriam indistinguíveis. */
+  function rotuloTentativa(tent){
+    const d = tent.opcoes.dtype;
+    const tipo = typeof d === 'string' ? d : (d && d.decoder_model_merged) || '?';
+    return (tent.opcoes.device || 'automático') + ' · decodificador ' + tipo;
+  }
+
   const MOTOR_CHAVE = '__MARCA__.semQ4';
   const semQ4 = () => { try { return sessionStorage.getItem(MOTOR_CHAVE) === '1'; } catch (e) { return false; } };
   const marcarSemQ4 = () => { try { sessionStorage.setItem(MOTOR_CHAVE, '1'); } catch (e) {} };
 
+  /* O que aconteceu em cada degrau da última montagem. É isto que o
+     diagnóstico imprime — antes ele só dizia que a rede estava boa, o que numa
+     máquina onde a rede ESTÁ boa e o modelo não abre não ajuda ninguém. */
+  let degraus = [], ultimoErroModelo = '';
+
   async function buildPipe(modelId){
+    degraus = [];
     const mod = await loadLib();
     libMod = mod;                 // guardado: o degrau precisa remontar sem a placa
     const arquivos = {};
@@ -3454,8 +3594,13 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       q4: true });
     if (usaPlaca()) tentativas.push({ motor: 'placa de vídeo',
       opcoes: { device:'webgpu', dtype:{ encoder_model:'fp32', decoder_model_merged:'fp32' } } });
-    tentativas.push({ motor: 'processador', opcoes: { dtype:'q8' } });
-    tentativas.push({ motor: 'processador', opcoes: { dtype:'fp32' } });
+    /* `device:'wasm'` explícito: sem isso a biblioteca pode escolher a placa de
+       vídeo sozinha quando ela está disponível, e os degraus "de processador"
+       correm pelo MESMO caminho que acabou de falhar — quatro tentativas com
+       um resultado só. Foi o que aconteceu na máquina que reportou
+       "já tentei as alternativas e nenhuma subiu". */
+    tentativas.push({ motor: 'processador', opcoes: { device:'wasm', dtype:'q8' } });
+    tentativas.push({ motor: 'processador', opcoes: { device:'wasm', dtype:'fp32' } });
 
     /* Degrau de linhas, dentro de cada tentativa.
 
@@ -3480,9 +3625,12 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
           const pp = await mod.pipeline('automatic-speech-recognition', modelId,
             Object.assign({ progress_callback }, tent.opcoes));
           motorEmUso = tent.motor;
+          degraus.push({ rotulo: rotuloTentativa(tent), ok: true, linhas: passe ? 1 : linhasDoWasm() });
           return pp;
         } catch (e) {
           ultimo = (e && e.message) || String(e);
+          degraus.push({ rotulo: rotuloTentativa(tent), ok: false,
+                         linhas: passe ? 1 : linhasDoWasm(), erro: ultimo });
           // o defeito do arquivo de 4 bits não se repete: fica anotado na aba
           if (tent.q4 && ERRO_SESSAO.test(ultimo)) marcarSemQ4();
           const podeBaixarLinhas = passe === 0 && wasm && wasm.numThreads > 1;
@@ -3500,8 +3648,12 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
        MatMulNBits Missing required scale" é uma linha de C++ que não diz a
        ninguém o que fazer; o que interessa é que o arquivo comprimido não abre
        nesta máquina e que as alternativas já foram tentadas. */
-    if (ERRO_SESSAO.test(ultimo || '')) throw new Error(t('erroSessao'));
-    throw new Error(ultimo || 'não consegui montar o modelo');
+    /* A mensagem amigável NUNCA substitui a técnica: ela vem na frente, e o
+       texto do runtime vai junto entre parênteses. Trocar uma pela outra fez o
+       diagnóstico perder a única pista que existia. */
+    ultimoErroModelo = ultimo || 'não consegui montar o modelo';
+    if (ERRO_SESSAO.test(ultimo || '')) throw new Error(t('erroSessao') + ' (' + ultimo + ')');
+    throw new Error(ultimoErroModelo);
   }
 
   let pipe = null, pipeId = null, libMod = null;
@@ -3659,6 +3811,25 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
         catch (e) { say('  ' + (base + arq).padEnd(46) + ' FALHOU -> ' + (e && e.message)); }
       }
     }
+    /* A parte que faltava. O diagnóstico dizia que a rede estava boa e parava
+       aí — numa máquina onde a rede ESTÁ boa e o modelo não abre, isso não
+       ajuda ninguém. Agora ele TENTA montar o modelo de verdade e imprime o
+       que aconteceu em cada degrau, com o erro do runtime em cada um. */
+    say('');
+    say('montagem do modelo:');
+    try {
+      await buildPipe($('model').value);
+      say('  montou em: ' + motorEmUso);
+    } catch (e) {
+      say('  NÃO montou.');
+    }
+    if (!degraus.length) say('  (nenhum degrau chegou a ser tentado)');
+    degraus.forEach((d, i) => {
+      say('  ' + (i+1) + '. ' + d.rotulo.padEnd(34) +
+          (d.ok ? 'OK' : 'falhou') + '  [linhas=' + d.linhas + ']');
+      if (d.erro) say('     -> ' + String(d.erro).slice(0, 220));
+    });
+
     say('--- fim ---');
     st(t('diagDone'), 'ok');
   };
@@ -4095,6 +4266,37 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     } catch (e) {}
     pintarPerfil();
   }
+  /* ---- levar o perfil embora ----
+     Quem quer persistência de verdade — entre visitas, entre máquinas, entre a
+     equipe — leva um arquivo. É a única forma de oferecer isso sem que a gente
+     guarde nada: o arquivo é dele, fica onde ele quiser, e não existe conta
+     nossa para vazar. */
+  $('evSalvar').onclick = () => {
+    const p = {};
+    ['evSis','evQuem'].forEach(id => { const v = ($(id).value || '').trim(); if (v) p[id] = v; });
+    p.gerador = '__MARCA__';
+    baixarBlob(new Blob([JSON.stringify(p, null, 2)], { type:'application/json' }),
+               'perfil-__MARCA__.json'.toLowerCase());
+  };
+  $('evAbrir').onclick = () => $('evArq').click();
+  $('evArq').onchange = e => {
+    const f = e.target.files && e.target.files[0];
+    if (!f) return;
+    const r = new FileReader();
+    r.onload = () => {
+      try {
+        const p = JSON.parse(r.result);
+        ['evSis','evQuem'].forEach(id => { if (typeof p[id] === 'string') $(id).value = p[id]; });
+        gravarPerfil();
+        if (frames.length) buildPrompt();
+        $('evArq').value = '';
+      } catch (err) {
+        $('evArq').value = '';
+      }
+    };
+    r.readAsText(f);
+  };
+
   $('evLimpar').onclick = () => {
     PERFIL_CAMPOS.forEach(id => { $(id).value = ''; });
     try { sessionStorage.removeItem(PERFIL_CHAVE); } catch (e) {}
@@ -4605,9 +4807,34 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   /* ================= ler o texto da tela (OCR) =================
      Tudo do jsdelivr, que é a única rede que já provamos alcançar. Se algum
      endereço falhar, a mensagem diz qual — como no caso do runtime da transcrição. */
-  const TESS = 'https://cdn.jsdelivr.net/npm/tesseract.js@6.1.2/dist/';
-  const TESS_CORE = 'https://cdn.jsdelivr.net/npm/tesseract.js-core@6.1.2';
+  /* O leitor de texto vinha preso a uma versão exata. Quando aquele endereço
+     não responde — versão retirada do CDN, bloqueio de rede, o que for — o
+     recurso inteiro morria com "não carregou". Agora são três endereços na
+     ordem do mais específico para o mais tolerante, testados como já é feito
+     com o wasm: o primeiro que responder é o que vale. */
+  const TESS_BASES = [
+    'https://cdn.jsdelivr.net/npm/tesseract.js@6/dist/',
+    'https://cdn.jsdelivr.net/npm/tesseract.js@6.1.2/dist/',
+    'https://cdn.jsdelivr.net/npm/tesseract.js/dist/'
+  ];
+  const TESS_CORES = [
+    'https://cdn.jsdelivr.net/npm/tesseract.js-core@6',
+    'https://cdn.jsdelivr.net/npm/tesseract.js-core@6.1.2',
+    'https://cdn.jsdelivr.net/npm/tesseract.js-core'
+  ];
   const TESS_LANG = 'https://cdn.jsdelivr.net/gh/naptha/tessdata@main/4.0.0';
+  let tessBase = null, tessCore = null;
+
+  async function acharTess(){
+    if (tessBase) return tessBase;
+    for (let i = 0; i < TESS_BASES.length; i++) {
+      try {
+        const r = await fetch(TESS_BASES[i] + 'tesseract.min.js', { headers:{ Range:'bytes=0-16' } });
+        if (r.ok || r.status === 206) { tessBase = TESS_BASES[i]; tessCore = TESS_CORES[i]; return tessBase; }
+      } catch (e) {}
+    }
+    return null;
+  }
   const OCR_LANG = { pt: 'por', en: 'eng', es: 'spa' };
   let ocrParar = false;
 
@@ -4626,14 +4853,16 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     try {
       if (!window.Tesseract) {
         $('status').textContent = t('ocrLoad');
-        await carregarScript(TESS + 'tesseract.min.js');
+        const base = await acharTess();
+        if (!base) throw new Error(t('ocrSemCdn'));
+        await carregarScript(base + 'tesseract.min.js');
       }
-      if (!window.Tesseract) throw new Error('biblioteca não ficou disponível');
+      if (!window.Tesseract) throw new Error(t('ocrSemCdn'));
 
       $('status').textContent = t('ocrLoad');
       worker = await window.Tesseract.createWorker(OCR_LANG[LANG] || 'eng', 1, {
-        workerPath: TESS + 'worker.min.js',
-        corePath: TESS_CORE,
+        workerPath: (tessBase || TESS_BASES[0]) + 'worker.min.js',
+        corePath: tessCore || TESS_CORES[0],
         langPath: TESS_LANG
       });
 
@@ -4772,6 +5001,16 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   ligarCabecalhos();
   passos();
   medir('abriu_ferramenta');
+
+  /* Instalar sem instalar. O registro é silencioso e opcional: se falhar, ou se
+     a página estiver rodando do disco (o arquivo offline), a ferramenta funciona
+     igual — o service worker só adianta o carregamento e segura uma queda de
+     rede no meio do trabalho. */
+  if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js').catch(() => {});
+    });
+  }
 
   $('goal').onchange = () => {
     $('goalFree').classList.toggle('hide', $('goal').value !== 'livre');
@@ -4960,6 +5199,157 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     } finally { $('zip').disabled = false; }
   };
 
+  /* ================= HTML, Markdown e CSV =================
+     Três saídas que o PDF não substitui. O HTML autocontido é o melhor formato
+     para mandar por chat interno: um arquivo, abre em qualquer coisa, imprime
+     bem e não depende de leitor nenhum. O Markdown existe porque documentação
+     de processo termina numa wiki, não num PDF. O CSV, porque quem controla
+     teste em planilha anexa o CSV nela.
+
+     As três respeitam as mesmas regras dos modelos de saída: numeração de
+     passo, hora de relógio quando há, anotação, fala do trecho — e a imagem
+     JÁ TARJADA, porque `imgFinal` é a única porta por onde imagem sai daqui. */
+  const esc = t => String(t == null ? '' : t)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+  function linhasDoDoc(){
+    const kept = frames.filter(f => f.keep);
+    const { cues } = parseTranscript($('tr').value);
+    const dur = duracaoTotal();
+    return kept.map((f, i) => ({
+      passo: i + 1,
+      tempo: fmt(f.t),
+      hora: horaDe(f.t),
+      nota: f.nota || '',
+      fala: cues.length ? falaDoFrame(kept, i, cues, dur, true) : '',
+      ocr: f.ocr || '',
+      hash: f.hash || '',
+      img: imgFinal(f)
+    }));
+  }
+
+  function montarHtml(){
+    const ev = evDados();
+    const tut = ehTutorial();
+    const linhas = linhasDoDoc();
+    const titulo = ev.caso || t('pTitle');
+    const cab = ev.linhasCompletas.map(([k, v]) =>
+      `<tr><th>${esc(k)}</th><td>${esc(v)}</td></tr>`).join('');
+    const blocos = linhas.map(l => `
+  <section class="passo">
+    <h2>${esc(tut && l.nota ? t('stepN', l.passo) + '  —  ' + l.nota
+                            : t('pStep', l.passo, linhas.length) + '   ·   ' + l.tempo +
+                              (l.hora ? '   ·   ' + l.hora : ''))}</h2>
+    ${(!tut && l.nota) ? `<p class="nota">${esc(l.nota)}</p>` : ''}
+    <img src="${l.img}" alt="${esc(t('stepN', l.passo))}">
+    ${l.fala ? `<p class="fala">${esc(l.fala)}</p>` : ''}
+    ${l.ocr ? `<p class="ocr"><b>${esc(t('pOcr'))}</b> ${esc(l.ocr)}</p>` : ''}
+    ${l.hash ? `<p class="hash">${esc(t('pHash'))}: ${esc(l.hash)}</p>` : ''}
+  </section>`).join('');
+
+    return `<!DOCTYPE html>
+<html lang="${LANG}"><head><meta charset="utf-8">
+<title>${esc(titulo)}</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+ body{max-width:820px;margin:0 auto;padding:32px 20px 60px;
+      font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:#1f2430}
+ h1{font-size:27px;margin:0 0 6px} .arq{color:#666;margin:0 0 22px}
+ table.id{border-collapse:collapse;margin:0 0 26px;font-size:14.5px}
+ table.id th{text-align:left;padding:5px 16px 5px 0;color:#666;font-weight:500;vertical-align:top}
+ table.id td{padding:5px 0;font-weight:600}
+ .passo{margin:0 0 34px;padding-top:18px;border-top:1px solid #e6e8ee}
+ .passo h2{font-size:16px;margin:0 0 8px}
+ .passo img{width:100%;display:block;border-radius:6px;border:1px solid #e6e8ee}
+ .nota{margin:0 0 10px;font-size:15.5px}
+ .fala{color:#444;font-size:15px;margin:10px 0 0}
+ .ocr{color:#777;font-size:13.5px;margin:8px 0 0}
+ .hash{color:#999;font:11px ui-monospace,Menlo,monospace;margin:6px 0 0;word-break:break-all}
+ .pe{border-top:1px solid #e6e8ee;padding-top:16px;margin-top:38px;display:flex;gap:12px;align-items:flex-start}
+ .pe .marca{margin:0 0 3px;font-size:15px;color:#1f2430}
+ .pe .marca b{color:#3A3F9E}
+ .pe .marca a{color:#3A3F9E;text-decoration:none}
+ .pe .frase{margin:0;color:#777;font-size:12.5px;line-height:1.5}
+ @media print{ body{max-width:none} .passo{break-inside:avoid} }
+</style></head><body>
+<h1>${esc(titulo)}</h1>
+<p class="arq">${esc(fileName || t('prNoName'))}</p>
+${cab ? `<table class="id">${cab}</table>` : ''}
+<p class="arq">${esc(t('pNote'))}${ev.horaVisivel ? ' ' + esc(t('pNoteRel')) : ''}</p>
+${blocos}
+<footer class="pe">
+<svg viewBox="0 0 64 64" width="34" height="34" aria-hidden="true">
+<rect width="64" height="64" rx="15" fill="#3A3F9E"/><rect x="13" y="12" width="38" height="21" rx="3" fill="#fff"/>
+<rect x="13" y="39" width="38" height="4.5" rx="2.25" fill="#fff"/><rect x="13" y="47" width="22" height="4.5" rx="2.25" fill="#fff" opacity=".62"/>
+<circle cx="48" cy="48" r="9.5" fill="#fff"/><circle cx="48" cy="48" r="7.6" fill="#3A3F9E"/>
+<path d="M48 43.6V48l3 2" stroke="#fff" stroke-width="1.9" stroke-linecap="round" fill="none"/></svg>
+<div><p class="marca"><b>__MARCAA__</b>__MARCAB__ &middot; <a href="__SITE__">__SITEDOM__</a></p>
+<p class="frase">${esc(t('ftPromo'))}</p>
+<p class="frase">${esc(t('ftCapa'))}</p></div>
+</footer>
+</body></html>`;
+  }
+
+  function montarMd(){
+    const ev = evDados();
+    const tut = ehTutorial();
+    const linhas = linhasDoDoc();
+    const out = ['# ' + (ev.caso || t('pTitle')), '', '_' + (fileName || t('prNoName')) + '_', ''];
+    ev.linhasCompletas.forEach(([k, v]) => out.push('- **' + k + ':** ' + v));
+    if (ev.linhasCompletas.length) out.push('');
+    linhas.forEach(l => {
+      out.push('## ' + (tut && l.nota
+        ? t('stepN', l.passo) + ' — ' + l.nota
+        : t('pStep', l.passo, linhas.length) + ' · ' + l.tempo + (l.hora ? ' · ' + l.hora : '')));
+      out.push('');
+      if (!tut && l.nota) { out.push(l.nota); out.push(''); }
+      /* A imagem vai embutida em base64 no próprio Markdown: um arquivo só, que
+         é o ponto de colar numa wiki sem ter que subir anexo separado. */
+      out.push('![' + t('stepN', l.passo) + '](' + l.img + ')');
+      out.push('');
+      if (l.fala) { out.push('> ' + l.fala); out.push(''); }
+      if (l.ocr)  { out.push('`' + t('pOcr') + '` ' + l.ocr); out.push(''); }
+      if (l.hash) { out.push('`' + t('pHash') + ': ' + l.hash + '`'); out.push(''); }
+    });
+    out.push('---', '',
+             '**__MARCA__** — <__SITE__>', '',
+             t('ftPromo'), '', t('ftCapa'));
+    return out.join('\n');
+  }
+
+  /* CSV com ponto e vírgula e BOM: é o que o Excel em português abre em colunas
+     sem passar pelo assistente de importação. */
+  function montarCsv(){
+    const cabec = [t('csvPasso'), t('pWhen'), t('pStart'),
+                   t('notaPh'), t('lenteFala'), t('pOcr'), t('pHash')];
+    const campos = ['passo','tempo','hora','nota','fala','ocr','hash'];
+    const cel = v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
+    const linhas = [cabec.map(cel).join(';')];
+    linhasDoDoc().forEach(l => linhas.push(campos.map(c => cel(l[c])).join(';')));
+    return '\ufeff' + linhas.join('\r\n') + '\r\n';
+  }
+
+  async function baixarTexto(gerar, ext, tipo){
+    const kept = frames.filter(f => f.keep);
+    if (!kept.length) return;
+    $('pdfStatus').textContent = t('pkgBuilding');
+    await new Promise(r => setTimeout(r, 40));
+    try {
+      await aplicarTarjas(kept);
+      await calcularHashes(kept);
+      const txt = gerar();
+      baixarBlob(new Blob([txt], { type: tipo + ';charset=utf-8' }), nomeArquivo() + '.' + ext);
+      medir('baixou_saida', { p_formato: ext });
+      $('pdfStatus').innerHTML = `<span class="ok">${t('saiuArq', ext.toUpperCase(), kept.length)}</span>`;
+    } catch (e) {
+      $('pdfStatus').innerHTML = `<span class="err">${t('pkgErr', (e && e.message) || e)}</span>`;
+    }
+  }
+
+  $('html').onclick = () => baixarTexto(montarHtml, 'html', 'text/html');
+  $('md').onclick   = () => baixarTexto(montarMd,   'md',   'text/markdown');
+  $('csv').onclick  = () => baixarTexto(montarCsv,  'csv',  'text/csv');
+
   /* ================= documento do Word ================= */
   const xmlEsc = s => String(s == null ? '' : s)
     // além dos controles, U+FFFE e U+FFFF são proibidos em XML: aparecem quando
@@ -5063,6 +5453,26 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     corpo.push(par(t('pNote'), { sz: 17, cor: '8A8A8A', antes: 180, depois: ev.horaVisivel ? 40 : 240 }));
     if (ev.horaVisivel) corpo.push(par(t('pNoteRel'), { sz: 17, cor: '8A8A8A', depois: 240 }));
 
+    /* Bloco de autoria, o equivalente da capa do PDF: marca grande, nome,
+       endereço e a frase que explica o que este documento é. É aqui que a
+       plataforma aparece de verdade — o rodapé de cada página fica discreto de
+       propósito, porque propaganda em toda folha tira a seriedade de uma
+       evidência de auditoria. Quem recebe o arquivo lê a abertura; o resto ele
+       folheia. */
+    const rprA = '<w:rPr><w:b/><w:color w:val="3A3F9E"/><w:sz w:val="30"/><w:szCs w:val="30"/></w:rPr>';
+    const rprB = '<w:rPr><w:b/><w:color w:val="1F2430"/><w:sz w:val="30"/><w:szCs w:val="30"/></w:rPr>';
+    corpo.push(
+      '<w:p><w:pPr>' +
+        '<w:pBdr><w:top w:val="single" w:sz="6" w:space="10" w:color="E0E0E0"/></w:pBdr>' +
+        '<w:spacing w:before="400" w:after="0"/>' +
+      '</w:pPr>' +
+      parImagemBruta('rIdMarcaD', 365760, 365760, 9002, '__MARCA__') +
+      `<w:r>${rprA}<w:t xml:space="preserve">  __MARCAA__</w:t></w:r>` +
+      `<w:r>${rprB}<w:t>__MARCAB__</w:t></w:r>` +
+      '</w:p>');
+    corpo.push(par(SITE_DOM, { sz: 19, cor: '5C6473', depois: 60 }));
+    corpo.push(par(t('ftCapa'), { sz: 17, cor: '8A8A8A', depois: 320 }));
+
     // índice: o mesmo mapa que abre o PDF
     if (kept.length > 2) {
       corpo.push(par(t('pIndex'), { b: true, sz: 26, antes: 240, depois: 40 }));
@@ -5117,31 +5527,35 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
 
     /* Rodapé: parte separada do pacote, apontada pelo sectPr. A referência
        precisa vir ANTES de w:pgSz — CT_SectPr também é uma sequence. */
-    const { cx: mcx, cy: mcy } = { cx: 137160, cy: 137160 };   // 0,15 pol, quadrada
+    /* 0,26 pol em vez de 0,15: a marca de 0,15 sumia no papel impresso — era
+       menor que a altura da própria linha de texto ao lado dela. */
+    const { cx: mcx, cy: mcy } = { cx: 237744, cy: 237744 };
     const rodape =
       '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
       '<w:ftr xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" ' +
       'xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" ' +
       'xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing">' +
       '<w:p><w:pPr>' +
-        '<w:tabs><w:tab w:val="right" w:pos="9026"/></w:tabs>' +   // 11906 - 2x1440
+        `<w:tabs><w:tab w:val="right" w:pos="${($('papel').value === 'letter' ? 12240 : 11906) - 2880}"/></w:tabs>` +
         '<w:spacing w:before="0" w:after="0"/>' +
-        '<w:rPr><w:color w:val="5C6473"/><w:sz w:val="17"/><w:szCs w:val="17"/></w:rPr>' +
+        '<w:rPr><w:color w:val="5C6473"/><w:sz w:val="18"/><w:szCs w:val="18"/></w:rPr>' +
       '</w:pPr>' +
       parImagemBruta('rIdMarca', mcx, mcy, 9001, '__MARCA__') +
-      '<w:r><w:rPr><w:color w:val="5C6473"/><w:sz w:val="17"/><w:szCs w:val="17"/></w:rPr>' +
+      '<w:r><w:rPr><w:color w:val="5C6473"/><w:sz w:val="18"/><w:szCs w:val="18"/></w:rPr>' +
         `<w:t xml:space="preserve">  ${xmlEsc(t('ftPromo'))}  ·  </w:t></w:r>` +
-      '<w:r><w:rPr><w:b/><w:color w:val="3A3F9E"/><w:sz w:val="17"/><w:szCs w:val="17"/></w:rPr>' +
+      '<w:r><w:rPr><w:b/><w:color w:val="3A3F9E"/><w:sz w:val="18"/><w:szCs w:val="18"/></w:rPr>' +
         `<w:t>${xmlEsc(SITE_DOM)}</w:t></w:r>` +
-      '<w:r><w:rPr><w:color w:val="5C6473"/><w:sz w:val="17"/><w:szCs w:val="17"/></w:rPr><w:tab/></w:r>' +
+      '<w:r><w:rPr><w:color w:val="5C6473"/><w:sz w:val="18"/><w:szCs w:val="18"/></w:rPr><w:tab/></w:r>' +
       '<w:fldSimple w:instr=" PAGE ">' +
-        '<w:r><w:rPr><w:color w:val="5C6473"/><w:sz w:val="17"/><w:szCs w:val="17"/></w:rPr>' +
+        '<w:r><w:rPr><w:color w:val="5C6473"/><w:sz w:val="18"/><w:szCs w:val="18"/></w:rPr>' +
         '<w:t>1</w:t></w:r></w:fldSimple>' +
       '</w:p></w:ftr>';
 
     // A4 com margens de uma polegada (1440 twips)
+    // 12240 x 15840 twips = Carta; 11906 x 16838 = A4
+    const carta = $('papel').value === 'letter';
     const sect = '<w:sectPr><w:footerReference w:type="default" r:id="rIdFtr"/>' +
-      '<w:pgSz w:w="11906" w:h="16838"/>' +
+      (carta ? '<w:pgSz w:w="12240" w:h="15840"/>' : '<w:pgSz w:w="11906" w:h="16838"/>') +
       '<w:pgMar w:top="1440" w:right="1440" w:bottom="1440" w:left="1440" w:header="708" w:footer="566" w:gutter="0"/></w:sectPr>';
 
     const doc = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
@@ -5168,6 +5582,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     const relsDoc = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
       '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
       rels.join('') +
+      '<Relationship Id="rIdMarcaD" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/marca.png"/>' +
       '<Relationship Id="rIdFtr" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/footer" Target="footer1.xml"/>' +
       '</Relationships>';
 
@@ -5204,6 +5619,70 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     } finally { $('docx').disabled = false; }
   };
 
+  /* --------- Enviar para o Google Docs ---------
+     O único caminho da ferramenta em que o documento sai do computador, e por
+     isso o único com confirmação explícita. O que sai é o .docx montado aqui,
+     enviado direto ao Google, que o converte em documento nativo do Drive.
+     Nenhum servidor nosso entra no caminho — mas a partir daí o arquivo está
+     no Google, e dizer isso em voz alta vale mais do que o botão.
+
+     O .docx é o formato certo para a conversão: o conversor de HTML do Drive
+     descarta imagem em base64, e o documento é feito de imagens. */
+  async function enviarAoDocs(blob, nome){
+    const lim = '----walkstamp' + Math.random().toString(36).slice(2);
+    const corpo = new Blob([
+      '--' + lim + '\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n',
+      JSON.stringify({ name: nome, mimeType: 'application/vnd.google-apps.document' }),
+      '\r\n--' + lim +
+        '\r\nContent-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document\r\n\r\n',
+      blob,
+      '\r\n--' + lim + '--\r\n'
+    ]);
+    const r = await fetch('https://www.googleapis.com/upload/drive/v3/files' +
+      '?uploadType=multipart&supportsAllDrives=true&fields=id,webViewLink', {
+      method: 'POST',
+      headers: { Authorization: 'Bearer ' + driveToken,
+                 'Content-Type': 'multipart/related; boundary=' + lim },
+      body: corpo
+    });
+    /* Mesmo raciocínio do download: o token expira em cerca de uma hora e
+       renovar exige pop-up, que só é permitido logo depois de um clique. */
+    if (r.status === 401) { driveToken = null; throw new Error(t('driveExpired')); }
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return await r.json();
+  }
+
+  $('gdocs').onclick = async () => {
+    const kept = frames.filter(f => f.keep);
+    if (!kept.length) return;
+    if (!confirm(t('gdAviso'))) return;
+    $('gdocs').disabled = true;
+    try {
+      $('pdfStatus').textContent = t('gdAuth');
+      await carregarScript('https://accounts.google.com/gsi/client');
+      if (!driveToken) driveToken = await pedirToken(false);
+
+      $('pdfStatus').textContent = t('gdMontando');
+      await new Promise(r => setTimeout(r, 40));
+      await aplicarTarjas(kept); await calcularHashes(kept);
+      const blob = montarDocx();
+
+      $('pdfStatus').textContent = t('gdEnviando', tamanho(blob.size)) +
+        (blob.size > 26214400 ? '  ' + t('gdGrande', tamanho(blob.size)) : '');
+      const j = await enviarAoDocs(blob, nomeArquivo());
+      medir('baixou_saida', { p_formato: 'gdocs' });
+
+      /* Sem window.open: depois de um upload longo o navegador já não conta
+         mais como gesto do usuário e a janela seria bloqueada. O link fica
+         ali, e quem clica abre. */
+      const url = j.webViewLink || ('https://docs.google.com/document/d/' + j.id + '/edit');
+      $('pdfStatus').innerHTML = `<span class="ok">${t('gdOk')}</span> ` +
+        `<a href="${url}" target="_blank" rel="noopener" style="color:var(--accent)">${t('gdAbrir')}</a>`;
+    } catch (e) {
+      $('pdfStatus').innerHTML = `<span class="err">${t('gdErr')} ${(e && e.message) || e}</span>`;
+    } finally { $('gdocs').disabled = false; }
+  };
+
   $('go').onclick = async () => {
     const kept = frames.filter(f => f.keep);
     if (!kept.length) return;
@@ -5219,18 +5698,24 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     await aplicarTarjas(kept); await calcularHashes(kept);
 
     const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({ unit:'mm', format:'a4', compress:true });
-    const PW = 210, PH = 297, M = 15, CW = PW - M*2;
+    /* Carta para quem entrega a empresa americana. As medidas do PDF inteiro
+       saem daqui, e não de constantes: o rodapé, a tabulação do número da
+       página e a quebra dos blocos já eram calculados a partir de PW e PH. */
+    const papel = $('papel').value === 'letter' ? 'letter' : 'a4';
+    const doc = new jsPDF({ unit:'mm', format:papel, compress:true });
+    const PW = papel === 'letter' ? 215.9 : 210;
+    const PH = papel === 'letter' ? 279.4 : 297;
+    const M = 15, CW = PW - M*2;
     const base = nomeArquivo();   // usado no nome do arquivo baixado
     let page = 0;
 
     /* A marca desenhada com primitivas, e não como imagem: são quatro
        retângulos, saem vetoriais e não somam um byte ao arquivo. As medidas
        são o logotipo de 64 px reduzido para 4,2 mm. */
-    const marca = (x, y) => {
-      const k = 4.9 / 64;
+    const marca = (x, y, tam) => {
+      const s = tam || 4.9, k = s / 64;
       doc.setFillColor(58, 63, 158);
-      doc.roundedRect(x, y, 4.9, 4.9, 15*k, 15*k, 'F');
+      doc.roundedRect(x, y, s, s, 15*k, 15*k, 'F');
       doc.setFillColor(255, 255, 255);
       doc.roundedRect(x + 13*k, y + 12*k, 38*k, 21*k, 3*k, 3*k, 'F');
       doc.roundedRect(x + 13*k, y + 39*k, 38*k, 4.5*k, 2*k, 2*k, 'F');
@@ -5243,22 +5728,35 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       doc.circle(x + 48*k, y + 48*k, 9.5*k, 'F');
       doc.setFillColor(58, 63, 158);
       doc.circle(x + 48*k, y + 48*k, 7.6*k, 'F');
+      /* A partir de uns 9 mm o ponteiro já se lê, e é ele que faz o disco virar
+         relógio em vez de bolinha. Abaixo disso vira borrão e fica pior. */
+      if (s >= 9) {
+        doc.setDrawColor(255, 255, 255).setLineWidth(1.4*k).setLineCap('round');
+        doc.line(x + 48*k, y + 48*k, x + 48*k, y + 43*k);
+        doc.line(x + 48*k, y + 48*k, x + 52*k, y + 48*k);
+        doc.setLineWidth(0.2);
+      }
     };
 
     /* Uma linha só, e o mais legível que cabe. Duas linhas leem como aviso
        legal, que é justamente o que as pessoas aprendem a ignorar; uma linha
        lê como assinatura de autoria. As cores passam de 4,5:1 de contraste
        sobre branco — abaixo disso, quem imprime em modo econômico não lê. */
-    const FT_X = M + 7, FT_Y = PH - 8.6;
+    /* A marca do rodapé cresceu de 4,9 para 6,4 mm e o texto de 8,4 para 9 pt.
+       Continua discreta de propósito — numa evidência de auditoria, propaganda
+       em toda página tira a seriedade do documento —, mas agora se lê sem
+       aproximar o papel do rosto. A presença de verdade fica na primeira
+       página, onde há espaço e onde a autoria pertence. */
+    const FT_X = M + 8.6, FT_Y = PH - 8.4;
     const foot = () => {
       page++;
-      marca(M, PH - 12);
+      marca(M, PH - 12.9, 6.4);
 
       // o texto muda de tamanho conforme o idioma: em espanhol ele é bem mais
       // longo, e sem isso encostaria no número da página
       const promo = t('ftPromo') + '  ·  ';
       const limite = PW - M - FT_X - 9;
-      let corpo = 8.4;
+      let corpo = 9;
       doc.setFont('helvetica','normal').setFontSize(corpo);
       let larg = doc.getTextWidth(promo) + doc.getTextWidth(SITE_DOM) * 1.06;
       while (larg > limite && corpo > 6.6) {
@@ -5272,7 +5770,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       const wp = doc.getTextWidth(promo);
       doc.setFont('helvetica','bold').setTextColor(58, 63, 158);
       doc.text(SITE_DOM, FT_X + wp, FT_Y);
-      doc.setFont('helvetica','normal').setFontSize(8.4).setTextColor(110);
+      doc.setFont('helvetica','normal').setFontSize(9).setTextColor(110);
       doc.text(String(page), PW - M, FT_Y, { align:'right' });
       doc.setTextColor(30);
     };
@@ -5309,6 +5807,24 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     const rodapeNota = doc.splitTextToSize(
       t('pNote') + (ev.horaVisivel ? ' ' + t('pNoteRel') : ''), CW);
     doc.text(rodapeNota, M, y + 8);
+    doc.setTextColor(30);
+
+    /* Bloco de autoria, só na primeira página. É onde a plataforma aparece de
+       verdade: marca grande, nome, endereço e a frase que explica o que este
+       documento é. Quem recebe a evidência lê a capa; as páginas seguintes ele
+       folheia. */
+    const cy = y + 8 + rodapeNota.length * 4.2 + 16;
+    doc.setDrawColor(224).line(M, cy, PW - M, cy);
+    marca(M, cy + 7, 13);
+    doc.setFont('helvetica','bold').setFontSize(15).setTextColor(58, 63, 158);
+    doc.text('__MARCAA__', M + 17, cy + 13.4);
+    const wA = doc.getTextWidth('__MARCAA__');
+    doc.setTextColor(30);
+    doc.text('__MARCAB__', M + 17 + wA, cy + 13.4);
+    doc.setFont('helvetica','normal').setFontSize(9.4).setTextColor(110);
+    doc.text(SITE_DOM, M + 17, cy + 18.6);
+    doc.setFontSize(8.6).setTextColor(140);
+    doc.text(doc.splitTextToSize(t('ftCapa'), CW - 17), M + 17, cy + 24.6);
     doc.setTextColor(30);
     foot();
 

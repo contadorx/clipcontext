@@ -106,6 +106,27 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/security"/>
   </url>
   <url>
+    <loc>https://walkstamp.com/verificar</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/verificar"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/verify"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/verificar"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/verify"/>
+  </url>
+  <url>
+    <loc>https://walkstamp.com/en/verify</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/verificar"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/verify"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/verificar"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/verify"/>
+  </url>
+  <url>
+    <loc>https://walkstamp.com/es/verificar</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/verificar"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/verify"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/verificar"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/verify"/>
+  </url>
+  <url>
     <loc>https://walkstamp.com/comparativo</loc>
     <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/comparativo"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/compare"/>

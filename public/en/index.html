@@ -18,7 +18,16 @@
 <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=3">
 <link rel="stylesheet" href="/site.css">
 <script>window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments)};</script><script defer src="/_vercel/insights/script.js"></script>
-
+<script>
+/* Só registra a escolha; quem está em /en ou /es chegou por link ou por
+   redirecionamento, e nos dois casos a detecção já fez o trabalho dela. */
+(function(){
+  try{
+    var q = new URLSearchParams(location.search).get('lang');
+    if (['pt','en','es'].indexOf(q) >= 0) localStorage.setItem('walkstamp.lang', q);
+  }catch(e){}
+})();
+</script>
 </head>
 <body>
 
@@ -30,7 +39,7 @@
       <a href="/en/compare" class="hide-sm">Compare</a>
       <a href="/en/precos" class="hide-xs">Pricing</a>
       <a class="btnTop" href="/app?lang=en">Open the tool</a>
-      <span style="display:inline-flex;gap:9px;border-left:1px solid var(--line);padding-left:16px"><a href="/?lang=pt">PT</a><a href="/en" style="color:var(--ink);font-weight:600">EN</a><a href="/es">ES</a></span>
+      <span style="display:inline-flex;gap:9px;border-left:1px solid var(--line);padding-left:16px"><a href="/?lang=pt">PT</a><a href="/en?lang=en" style="color:var(--ink);font-weight:600">EN</a><a href="/es?lang=es">ES</a></span>
     </nav>
   </div>
 </header>
@@ -149,6 +158,7 @@
       <a href="/en/precos">Pricing</a>
       <a href="/en/compare">Compare</a>
       <a href="/en/security">Security</a>
+      <a href="/en/verify">Check evidence</a>
       <a href="/en/privacidade">Privacy</a>
       <a href="/en/termos">Terms</a>
       <a href="/en/steps-recorder-replacement">Steps Recorder replacement</a>

@@ -1,7 +1,7 @@
 <section style="padding-top:60px">
   <div class="wrap doc">
     <h1 style="font-size:32px">Política de Privacidad</h1>
-    <p class="updated">Última actualización: 14 de agosto de 2026 (cambio de nombre).<br>
+    <p class="updated">Última actualización: 15 de agosto de 2026.<br>
     Esta política describe cómo funciona {{marca}} hoy: sin servidor de procesamiento y sin cuentas de
     usuario.</p>
 
@@ -96,8 +96,25 @@
     que existe (<code>drive.file</code>), que da acceso solo a los archivos que selecciones en la ventana de
     Google, nunca al resto de tu Drive. Mientras no pulses ese botón, no se hace ninguna conexión con
     Google.</p>
+    <p>También existe un botón <b>Enviar a Google Docs</b>. Es la única función de la herramienta en la que
+    <strong>el documento generado sale de tu ordenador</strong>: el archivo de Word montado en el navegador
+    se envía a Google, que lo convierte en un documento de Google Docs dentro de tu Drive. Va
+    <strong>de aquí directo a Google</strong>, sin pasar por ningún servidor nuestro, pero a partir de ese
+    momento el contenido está en Google, sujeto a sus políticas y no a las nuestras. Por eso el botón pide
+    confirmación explícita antes de enviar, y por eso dice lo que está haciendo. Si la evidencia tiene datos
+    sensibles, descarga el archivo en lugar de enviarlo.</p>
 
     <h2>Almacenamiento en tu navegador</h2>
+    <p>La página de inicio guarda <b>una sola cosa</b>: el código del idioma que elegiste en el selector de
+    arriba (<code>pt</code>, <code>en</code> o <code>es</code>). Existe para no devolverte al idioma del
+    sistema en la próxima visita. Son dos letras, no identifican a nadie, no se envían a ningún sitio y
+    desaparecen al borrar los datos de navegación.</p>
+    <p>Si instalas la herramienta como aplicación (el acceso directo que ofrece el navegador), un
+    <i>service worker</i> guarda una copia de las <b>páginas y las hojas de estilo</b> para que abra sin red.
+    Solo guarda lo que el navegador descargaría de nuestra dirección de todos modos — <b>nunca vídeo, audio,
+    transcripción ni documento generado</b>, porque nada de eso es una petición de red: son cosas que viven y
+    mueren dentro de la pestaña. Desinstalar la aplicación, o borrar los datos de navegación, elimina esa
+    copia.</p>
     <p>Si usas la transcripción automática, el navegador guarda en caché el modelo descargado para no tener que
     descargarlo de nuevo. Ese archivo queda en tu dispositivo, bajo tu control, y se elimina al borrar los
     datos de navegación. Nosotros no tenemos acceso a él.</p>

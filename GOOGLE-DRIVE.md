@@ -71,7 +71,8 @@ e logotipo próprios na tela de consentimento.
 **Origens JavaScript autorizadas**, liste os endereços de onde a página é servida:
 
 ```
-https://clipcontext.app
+https://walkstamp.com
+https://www.walkstamp.com
 http://localhost:8000
 ```
 
@@ -119,3 +120,28 @@ existe para funcionar sem internet, e o Drive precisa de internet.
 - **Vídeos de Drives compartilhados** funcionam — `supportsAllDrives=true` está ligado —, mas dependem
   da permissão de download concedida pelo administrador.
 - **O download pode ser cancelado**, a transcrição automática ainda não.
+
+---
+
+## Enviar o documento para o Google Docs
+
+Construído em 15/08/2026. Usa o **mesmo escopo `drive.file`** e o mesmo client ID — não há
+credencial nova a criar. O que ele faz: sobe o `.docx` montado no navegador para
+`upload/drive/v3/files` em `multipart`, com `mimeType: application/vnd.google-apps.document` nos
+metadados, e o Google devolve um documento nativo do Drive já convertido.
+
+Três decisões que valem registro:
+
+**O botão aparece só com o `GOOGLE_CLIENT_ID`.** A chave de API e o App ID são o que abre o
+*seletor* de arquivos; criar um arquivo novo não passa pelo seletor. Então o envio funciona mesmo
+numa configuração parcial, enquanto o botão de abrir vídeo continua exigindo os três.
+
+**O formato enviado é `.docx`, não HTML.** O conversor de HTML do Drive descarta imagem em
+`data:`, e o documento é feito de imagens. Com `.docx` as imagens são partes do pacote e
+atravessam a conversão intactas.
+
+**Este é o único ponto da ferramenta em que o conteúdo sai da máquina.** Por isso ele pede
+confirmação explícita, tem borda tracejada e seta ↗, está na tabela da página de segurança com
+linha própria e tem parágrafo próprio na política de privacidade. O caminho continua sendo
+navegador → Google, sem servidor nosso — mas a partir dali o arquivo está no Google, e o texto diz
+isso com essas palavras. Na versão offline o botão não existe (ele exige `http(s)`).

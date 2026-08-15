@@ -81,7 +81,8 @@
     "fPsr": "Substituto do Steps Recorder",
     "navComp": "Comparativo",
     "fComp": "Comparativo",
-    "duoComp": "Quem mais faz isso, quanto custa, e onde cada um ganha — inclusive da gente: veja o {0}comparativo{1}."
+    "duoComp": "Quem mais faz isso, quanto custa, e onde cada um ganha — inclusive da gente: veja o {0}comparativo{1}.",
+    "fVerif": "Conferir evidência"
   },
   "en": {
     "htmlLang": "en",
@@ -165,7 +166,8 @@
     "fPsr": "Steps Recorder replacement",
     "navComp": "Compare",
     "fComp": "Compare",
-    "duoComp": "Who else does this, what it costs, and where each one wins — including against us: see the {0}comparison{1}."
+    "duoComp": "Who else does this, what it costs, and where each one wins — including against us: see the {0}comparison{1}.",
+    "fVerif": "Check evidence"
   },
   "es": {
     "htmlLang": "es",
@@ -249,6 +251,7 @@
     "fPsr": "Alternativa al Steps Recorder",
     "navComp": "Comparativa",
     "fComp": "Comparativa",
-    "duoComp": "Quién más hace esto, cuánto cuesta y dónde gana cada uno — incluso a nosotros: mira la {0}comparativa{1}."
+    "duoComp": "Quién más hace esto, cuánto cuesta y dónde gana cada uno — incluso a nosotros: mira la {0}comparativa{1}.",
+    "fVerif": "Comprobar evidencia"
   }
 }
