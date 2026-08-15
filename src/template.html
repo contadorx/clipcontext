@@ -110,6 +110,15 @@
   .meta b{color:var(--ink);font-weight:550}
   .bar{height:6px;background:var(--line);border-radius:99px;overflow:hidden;margin:16px 0 8px}
   .bar>i{display:block;height:100%;width:0;background:var(--accent);transition:width .15s}
+  /* Barra sem número: listras andando. Diz "trabalhando" sem mentir um
+     progresso que ainda não se conhece. Quem pediu menos movimento no sistema
+     recebe a barra parada, cheia e mais clara — nunca uma tela imóvel sem
+     explicação, porque a frase ao lado continua contando os segundos. */
+  .bar.indef>i{width:100% !important;opacity:.55;
+    background:repeating-linear-gradient(115deg,var(--accent) 0 12px,transparent 12px 24px);
+    background-size:200% 100%;animation:corre 1.1s linear infinite;transition:none}
+  @keyframes corre{from{background-position:0 0}to{background-position:-48px 0}}
+  @media (prefers-reduced-motion: reduce){ .bar.indef>i{animation:none} }
   .status{font-size:13px;color:var(--muted);min-height:19px}
   .thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:9px;margin-top:16px}
   .thumbs figure{margin:0;position:relative;border-radius:6px;overflow:hidden;
@@ -147,13 +156,36 @@
      foco ou no passar do mouse — a miniatura é para olhar a tela, não a
      ferramenta. */
   .thumbs .mover{position:absolute;top:50%;transform:translateY(-50%);z-index:2;border:0;
-      cursor:pointer;width:24px;height:34px;border-radius:6px;padding:0;line-height:1;
-      font-size:19px;background:color-mix(in srgb,var(--panel) 88%,transparent);
+      cursor:pointer;width:19px;height:26px;border-radius:5px;padding:0;line-height:1;
+      font-size:13px;background:color-mix(in srgb,var(--panel) 88%,transparent);
       color:var(--ink);opacity:0;transition:opacity .12s}
-  .thumbs .mover.esq{left:4px}
-  .thumbs .mover.dir{right:4px}
+  .thumbs .mover.esq{left:3px}
+  .thumbs .mover.dir{right:3px}
   .thumbs figure:hover .mover,.thumbs .mover:focus-visible{opacity:1}
   .thumbs .mover:disabled{opacity:0 !important;pointer-events:none}
+  /* O quadro que acabou de mudar de lugar.
+
+     Numa gravação de sistema as telas são quase idênticas — mesma janela,
+     mesmo menu, um campo diferente. Trocar duas de posição não muda NADA do
+     que se vê, e a pessoa fica sem saber se o clique funcionou. Cor de botão
+     não resolve isso: a cor está no botão, e o que mudou foi o quadro.
+
+     Então o quadro que se moveu pisca por um instante e a frase abaixo da
+     fileira diz, em palavras, o que aconteceu com a numeração. Movimento e
+     texto — duas linguagens diferentes, porque uma delas some para quem não
+     enxerga cor e a outra some para quem não lê a tela inteira. */
+  .thumbs figure.moveu{outline:3px solid var(--accent);outline-offset:-3px;
+      animation:pisca 1.5s ease-out 1}
+  .thumbs figure.moveu figcaption{background:color-mix(in srgb,var(--accent) 22%,transparent)}
+  @keyframes pisca{
+    0%{outline-color:var(--accent);transform:scale(1.035)}
+    35%{outline-color:transparent}
+    60%{outline-color:var(--accent)}
+    100%{outline-color:var(--accent);transform:scale(1)}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .thumbs figure.moveu{animation:none}
+  }
   /* A tela anexada à mão fica reconhecível na fileira: ela não tem instante no
      vídeo, e quem revisa precisa saber disso antes de abrir. */
   .thumbs figure.colada{outline:2px dashed color-mix(in srgb,var(--accent) 55%,transparent);
@@ -198,6 +230,15 @@
   /* margin-top ZERO, e não -4px: este bloco é o primeiro filho de um contêiner
      com overflow:hidden (o colapso do cartão), e a margem negativa empurrava o
      topo da caixa para fora — a borda de cima sumia. */
+  /* O cenário, no topo do passo 1. Maior que um seletor comum de propósito:
+     é a decisão que governa todas as outras, e precisa parecer isso. */
+  .cenario{display:flex;flex-wrap:wrap;align-items:center;gap:9px 12px;margin:0 0 20px;
+        padding:14px 16px;border:1px solid var(--line);border-radius:10px;background:var(--bg)}
+  .cenario label{font-size:14px;font-weight:650;color:var(--ink)}
+  .cenario select{width:auto;min-width:250px;padding:10px 12px;border:1px solid var(--line);
+        border-radius:8px;background:var(--panel);color:var(--ink);font:inherit;font-size:15px;
+        font-weight:550}
+  .cenario .status{flex-basis:100%;margin:0}
   .modelo{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin:0 0 16px}
   .modelo label{font-size:13.5px;font-weight:600;color:var(--ink)}
   .modelo select{width:auto;min-width:220px;padding:8px 10px;border:1px solid var(--line);
@@ -309,8 +350,33 @@
   <h1>__MARCA__</h1>
   <p class="sub" data-i18n="sub"></p>
 
-  <div class="card">
+  <div class="card" id="cardVideo">
     <h2><span class="step">1</span><span data-i18n="s1"></span></h2>
+
+    <!-- O cenário vem PRIMEIRO, antes de gravar ou de escolher arquivo.
+
+         A ferramenta faz cinco documentos diferentes com a mesma máquina, e a
+         escolha entre eles muda o layout, os campos de identificação, o pedido
+         para a IA, o nome do arquivo, a hora de relógio e até como se chama um
+         quadro. Ela estava no passo da revisão — depois de gravar, depois de
+         extrair —, o que fazia a pessoa montar o documento errado e descobrir
+         no fim. Perguntar antes custa um clique e acerta tudo o que vem depois.
+
+         Um <select>, e não cinco cartões clicáveis: cinco cartões empurram o
+         botão de gravar para baixo da dobra num notebook, e a primeira coisa
+         que a pessoa precisa ver continua sendo o botão de gravar. -->
+    <div class="cenario">
+      <label for="modelo" data-i18n="cenLbl"></label>
+      <select id="modelo">
+        <option value="evidencia" data-i18n="mEv"></option>
+        <option value="tutorial" data-i18n="mTut"></option>
+        <option value="ata" data-i18n="mAta"></option>
+        <option value="usabilidade" data-i18n="mUx"></option>
+        <option value="ia" selected data-i18n="mIa"></option>
+      </select>
+      <p class="status" id="cenDica"></p>
+    </div>
+
     <!-- Dois caminhos, e não uma lista de botões: gravar a tela agora é o que a
          maior parte das pessoas vem fazer, e estava em terceiro lugar, cinza,
          embaixo de uma zona de arraste que só serve para quem já tem arquivo. -->
@@ -426,8 +492,9 @@
     <div class="autobox">
       <div class="row">
         <select id="model" style="width:auto">
+          <option value="onnx-community/whisper-small" selected data-i18n="mSmall"></option>
           <option value="onnx-community/whisper-base" data-i18n="mBase"></option>
-          <option value="onnx-community/whisper-small" data-i18n="mSmall"></option>
+          <option value="onnx-community/whisper-large-v3-turbo" data-i18n="mTurbo"></option>
         </select>
         <span class="status" id="modelSize"></span>
         <select id="lang" style="width:auto">
@@ -530,17 +597,14 @@
          do documento, o pedido para a IA, o nome do arquivo e se os dados da
          evidência aparecem. Sem ele a pessoa tinha que achar quatro controles
          espalhados e adivinhar a combinação certa. -->
+    <!-- O cenário subiu para o passo 1: ele decide o documento inteiro e não é
+         uma decisão de revisão. O que sobra aqui é o vocabulário — como este
+         documento chama cada quadro —, que é decisão de quem escreve, na hora
+         de escrever. -->
     <div class="modelo">
-      <label for="modelo" data-i18n="modelH"></label>
-      <select id="modelo">
-        <option value="ia" data-i18n="mIa"></option>
-        <option value="evidencia" data-i18n="mEv"></option>
-        <option value="tutorial" data-i18n="mTut"></option>
-        <option value="ata" data-i18n="mAta"></option>
-      </select>
-      <label for="unNome" data-i18n="unLbl" style="margin-left:14px"></label>
+      <label for="unNome" data-i18n="unLbl"></label>
       <input type="text" id="unNome" maxlength="24" style="width:auto;max-width:150px">
-      <p class="status" id="modeloDica"></p>
+      <span class="status" id="modeloDica" style="flex-basis:100%;margin:0"></span>
     </div>
 
     <div class="row">
@@ -558,6 +622,9 @@
       <button class="ghost sm" id="falaNota" data-i18n="falaNota"></button>
     </div>
     <p class="status" style="margin:10px 0 0" data-i18n="clickHint"></p>
+    <!-- O que acabou de acontecer com a ordem, em palavras. role=status para o
+         leitor de tela anunciar sem roubar o foco de quem está no botão. -->
+    <p class="status ok" id="movMsg" role="status" style="margin:4px 0 0"></p>
     <p class="note hide" id="sensAviso" style="margin-top:12px"></p>
     <div class="thumbs" id="thumbs"></div>
 
@@ -898,9 +965,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recStat:'{0} frames guardados · {1}',
       recQueue:'transcrevendo ({0} na fila)',
       recIdle:'transcrição em dia',
-      recTail:'Terminando de transcrever o que faltou…',
+      recTail:'Terminando de transcrever o que faltou…', recTailSeg:'há {0}',
       recDone2:'Pronto: {0} de captura, {1} frames e {2} falas. Nenhum vídeo foi guardado no seu computador.',
       spkMic:'Microfone', spkSys:'Computador',
+      spkModer:'Moderador', spkPart:'Participante',
       recFile:'captura de tela', pNoFile:'nenhum arquivo guardado',
       gpuLbl:'usar a placa de vídeo', dlSize:'baixa ~{0} MB na primeira vez',
       modelLimpando:'Apagando o modelo guardado e baixando de novo…',
@@ -913,6 +981,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       addTelaErro:'Não consegui ler essa imagem. Tente um PNG ou um JPG.',
       coladoTag:'tela anexada',
       moverEsq:'mover para trás', moverDir:'mover para frente',
+      movFeito:'Pronto: o {0} {1} agora é o {0} {2}.',
+      movFeitoSem:'Quadro movido de lugar.',
       vocBtn:'Termos do seu sistema',
       vocComo:'Um termo por linha. O reconhecimento de voz não conhece o seu sistema e devolve "ME21N" como "eme vinte e um ene" — liste os códigos e os nomes próprios que aparecem no seu dia, e eu procuro a forma falada de cada um na transcrição e nas anotações.',
       vocPh:'ME21N\nKI235\nS/4HANA\nFiori',
@@ -1004,7 +1074,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       tradErro:'Não consegui traduzir.',
       tradSemApi:'Tradução no aparelho: por enquanto só no Chrome e no Edge para computador. Em outros navegadores a transcrição sai no idioma falado, e a tradução fica para depois — o texto é seu, dá para exportar e traduzir onde quiser.',
       autoIndo:'Transcrevendo…', autoEspere:'Pode deixar em segundo plano — mas não feche a aba: o trabalho é feito aqui dentro.',
-      mBase:'Modelo base — rápido', mSmall:'Modelo small — mais preciso',
+      mBase:'Rápido — menos preciso', mSmall:'Recomendado — equilibrado',
+      mTurbo:'Máxima precisão — download grande',
       autoDetect:'Detectar sozinho', diagBtn:'Diagnóstico',
       openSub:'Abrir arquivo .vtt / .srt', orDrag:'ou arraste o arquivo sobre o campo abaixo, ou cole o texto',
       trPh:'Cole aqui a transcrição, ou arraste um arquivo .srt / .vtt.\n\nReconheço automaticamente:\n  00:00:12,400 --> 00:00:15,900   (SRT / VTT)\n  0:12  texto falado             (colado de um painel de legendas)\n  texto solto sem marcação de tempo\n\nCom marcação de tempo, cada frame sai no PDF junto do que é dito naquele trecho.',
@@ -1067,6 +1138,14 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       lenteTam:'tamanho',
       unLbl:'Chamar cada quadro de',
       unPasso:'Passo', unMomento:'Momento', unIa:'Trecho',
+      cenLbl:'Cenário de uso',
+      mUx:'Teste de usabilidade',
+      mUxH:'Sessão com participante: cada momento marcado vira um bloco, com a fala do moderador e a do participante separadas. O código do participante entra no lugar do nome.',
+      uxH:'Dados da sessão', uxHsub:'— opcional: estudo, código do participante, tarefa, moderador',
+      uxEstudo:'Estudo / pesquisa', uxTarefa:'Tarefa / cenário', uxModer:'Moderado por',
+      uxPart:'Código do participante', uxIni:'Início da sessão',
+      gSessao:'Montar o relatório da sessão',
+      cenTroca:'Cenário: {0}.',
       evH:'Dados da evidência', evHsub:'— opcional: caso de teste, sistema, quem executou, hora de início',
       guiaH:'Dados do guia', guiaHsub:'— opcional: título, sistema, autor, versão',
       guiaTit:'Título do guia', guiaSis:'Sistema / produto', guiaAutor:'Escrito por', guiaVer:'Versão',
@@ -1155,7 +1234,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
         passos:'Transforme o conteúdo em um passo a passo numerado. Para cada passo, informe o instante correspondente e descreva o que aparece na tela naquele momento.',
         ata:'Produza uma ata: assuntos tratados, decisões tomadas, pendências com o respectivo responsável quando mencionado, e próximos passos. Marque o instante de cada decisão.',
         revisao:'Aponte inconsistências entre o que é dito e o que aparece na tela, erros visíveis, e informações que ficaram faltando ou ambíguas.',
-        evidencia:'Redija a ata de evidência deste teste. Para cada passo, escreva em uma linha o que foi feito, e em outra o resultado observado na tela, sempre citando o número do passo e a hora de relógio. Use a anotação do passo como a expectativa quando ela existir e diga se o observado bate com ela. Termine com um parecer curto: passou, falhou ou bloqueado, e por quê. Não invente aprovador, número de chamado nem nada que não esteja no documento.'
+        evidencia:'Redija a ata de evidência deste teste. Para cada passo, escreva em uma linha o que foi feito, e em outra o resultado observado na tela, sempre citando o número do passo e a hora de relógio. Use a anotação do passo como a expectativa quando ela existir e diga se o observado bate com ela. Termine com um parecer curto: passou, falhou ou bloqueado, e por quê. Não invente aprovador, número de chamado nem nada que não esteja no documento.',
+        sessao:'Monte o relatório desta sessão de teste de usabilidade. Separe o que o moderador pediu do que o participante disse e fez — os rótulos de canal estão na transcrição. Para cada momento, diga qual tarefa estava em curso, o que o participante tentou, onde ele hesitou ou travou, e o que ele falou em voz alta. Marque explicitamente cada ponto de fricção, cada desistência e cada elogio, sempre com o número do momento e o instante. Termine com os achados em ordem de gravidade e o que cada um sugere mudar na interface. Não interprete emoção que não foi dita nem generalize a partir de um participante só; e refira-se à pessoa pelo código do participante, nunca por nome.'
       },
       pr1:'O PDF em anexo foi gerado a partir do vídeo "{0}"', pr1b:', com duração de {0}.',
       pr2:'Ele contém {0} imagens capturadas do vídeo, cada uma identificada pelo instante exato em que foi capturada (no formato mm:ss, contado a partir do início).',
@@ -1261,9 +1341,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recStat:'{0} frames kept · {1}',
       recQueue:'transcribing ({0} queued)',
       recIdle:'transcription up to date',
-      recTail:'Finishing the last of the transcription…',
+      recTail:'Finishing the last of the transcription…', recTailSeg:'for {0}',
       recDone2:'Done: {0} captured, {1} frames and {2} lines of speech. No video was kept on your computer.',
       spkMic:'Microphone', spkSys:'Computer',
+      spkModer:'Moderator', spkPart:'Participant',
       recFile:'screen capture', pNoFile:'no file kept',
       gpuLbl:'use the graphics card', dlSize:'downloads ~{0} MB the first time',
       modelLimpando:'Clearing the stored model and downloading it again…',
@@ -1276,6 +1357,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       addTelaErro:'I could not read that image. Try a PNG or a JPG.',
       coladoTag:'attached screen',
       moverEsq:'move back', moverDir:'move forward',
+      movFeito:'Done: {0} {1} is now {0} {2}.',
+      movFeitoSem:'Frame moved.',
       vocBtn:'Your system terms',
       vocComo:'One term per line. Speech recognition does not know your system and returns "ME21N" as "em twenty one en" — list the codes and proper names that show up in your day, and I look for the spoken form of each one in the transcript and in the notes.',
       vocPh:'ME21N\nKI235\nS/4HANA\nFiori',
@@ -1367,7 +1450,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       tradErro:'I could not translate.',
       tradSemApi:'On-device translation: for now only in Chrome and Edge on desktop. In other browsers the transcript comes out in the spoken language and translation waits — the text is yours, you can export it and translate it wherever you like.',
       autoIndo:'Transcribing…', autoEspere:'You can leave it in the background — but do not close the tab: the work happens in here.',
-      mBase:'Base model — fast', mSmall:'Small model — more accurate',
+      mBase:'Fast — less accurate', mSmall:'Recommended — balanced',
+      mTurbo:'Highest accuracy — large download',
       autoDetect:'Detect automatically', diagBtn:'Diagnostics',
       openSub:'Open .vtt / .srt file', orDrag:'or drag the file onto the box below, or paste the text',
       trPh:'Paste the transcript here, or drag in a .srt / .vtt file.\n\nRecognised automatically:\n  00:00:12,400 --> 00:00:15,900   (SRT / VTT)\n  0:12  spoken text              (pasted from a caption panel)\n  plain text with no timestamps\n\nWith timestamps, each frame appears in the PDF next to what is said at that point.',
@@ -1430,6 +1514,14 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       lenteTam:'size',
       unLbl:'Call each frame a',
       unPasso:'Step', unMomento:'Moment', unIa:'Segment',
+      cenLbl:'Use case',
+      mUx:'Usability test',
+      mUxH:'A session with a participant: each marked moment becomes a block, with the moderator\u2019s speech and the participant\u2019s kept apart. The participant code goes in place of the name.',
+      uxH:'Session details', uxHsub:'— optional: study, participant code, task, moderator',
+      uxEstudo:'Study / research', uxTarefa:'Task / scenario', uxModer:'Moderated by',
+      uxPart:'Participant code', uxIni:'Session start',
+      gSessao:'Write the session report',
+      cenTroca:'Use case: {0}.',
       evH:'Evidence details', evHsub:'— optional: test case, system, who ran it, start time',
       guiaH:'Guide details', guiaHsub:'— optional: title, system, author, version',
       guiaTit:'Guide title', guiaSis:'System / product', guiaAutor:'Written by', guiaVer:'Version',
@@ -1518,7 +1610,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
         passos:'Turn the content into numbered step-by-step instructions. For each step, give the corresponding timestamp and describe what is on screen at that moment.',
         ata:'Write meeting minutes: topics covered, decisions made, open items with their owner when mentioned, and next steps. Mark the timestamp of each decision.',
         revisao:'Point out inconsistencies between what is said and what is shown, visible errors, and information that is missing or ambiguous.',
-        evidencia:'Write the evidence record for this test. For each step, write one line for what was done and one for the result observed on screen, always citing the step number and the clock time. Where a step note exists, treat it as the expected result and say whether what was observed matches it. Close with a short verdict — passed, failed or blocked — and why. Do not invent an approver, a ticket number, or anything that is not in the document.'
+        evidencia:'Write the evidence record for this test. For each step, write one line for what was done and one for the result observed on screen, always citing the step number and the clock time. Where a step note exists, treat it as the expected result and say whether what was observed matches it. Close with a short verdict — passed, failed or blocked — and why. Do not invent an approver, a ticket number, or anything that is not in the document.',
+        sessao:'Write the report for this usability session. Keep what the moderator asked apart from what the participant said and did — the channel labels are in the transcript. For each moment, say which task was under way, what the participant tried, where they hesitated or got stuck, and what they said out loud. Mark every point of friction, every abandonment and every moment of praise explicitly, always with the moment number and the timestamp. Close with the findings in order of severity and what each one suggests changing in the interface. Do not read in emotion that was not stated, do not generalise from a single participant, and refer to the person by participant code, never by name.'
       },
       pr1:'The attached PDF was generated from the video "{0}"', pr1b:', which is {0} long.',
       pr2:'It contains {0} images captured from the video, each labelled with the exact moment it was captured (in mm:ss, counted from the start).',
@@ -1622,9 +1715,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recStat:'{0} fotogramas guardados · {1}',
       recQueue:'transcribiendo ({0} en cola)',
       recIdle:'transcripción al día',
-      recTail:'Terminando de transcribir lo que faltaba…',
+      recTail:'Terminando de transcribir lo que faltaba…', recTailSeg:'desde hace {0}',
       recDone2:'Listo: {0} de captura, {1} fotogramas y {2} intervenciones. No se guardó ningún vídeo en tu ordenador.',
       spkMic:'Micrófono', spkSys:'Ordenador',
+      spkModer:'Moderador', spkPart:'Participante',
       recFile:'captura de pantalla', pNoFile:'ningún archivo guardado',
       gpuLbl:'usar la tarjeta gráfica', dlSize:'descarga ~{0} MB la primera vez',
       modelLimpando:'Borrando el modelo guardado y descargándolo de nuevo…',
@@ -1637,6 +1731,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       addTelaErro:'No pude leer esa imagen. Prueba con un PNG o un JPG.',
       coladoTag:'pantalla adjuntada',
       moverEsq:'mover atrás', moverDir:'mover adelante',
+      movFeito:'Listo: el {0} {1} ahora es el {0} {2}.',
+      movFeitoSem:'Fotograma movido de lugar.',
       vocBtn:'Términos de tu sistema',
       vocComo:'Un término por línea. El reconocimiento de voz no conoce tu sistema y devuelve "ME21N" como "eme veintiuno ene" — lista los códigos y nombres propios que aparecen en tu día, y yo busco la forma hablada de cada uno en la transcripción y en las anotaciones.',
       vocPh:'ME21N\nKI235\nS/4HANA\nFiori',
@@ -1730,7 +1826,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       tradErro:'No pude traducir.',
       tradSemApi:'Traducción en el dispositivo: por ahora solo en Chrome y Edge de escritorio. En otros navegadores la transcripción sale en el idioma hablado y la traducción queda para después — el texto es tuyo, puedes exportarlo y traducirlo donde quieras.',
       autoIndo:'Transcribiendo…', autoEspere:'Puedes dejarlo en segundo plano — pero no cierres la pestaña: el trabajo se hace aquí dentro.',
-      mBase:'Modelo base — rápido', mSmall:'Modelo small — más preciso',
+      mBase:'Rápido — menos preciso', mSmall:'Recomendado — equilibrado',
+      mTurbo:'Máxima precisión — descarga grande',
       autoDetect:'Detectar automáticamente', diagBtn:'Diagnóstico',
       openSub:'Abrir archivo .vtt / .srt', orDrag:'o arrastra el archivo sobre el campo de abajo, o pega el texto',
       trPh:'Pega aquí la transcripción, o arrastra un archivo .srt / .vtt.\n\nReconozco automáticamente:\n  00:00:12,400 --> 00:00:15,900   (SRT / VTT)\n  0:12  texto hablado            (copiado de un panel de subtítulos)\n  texto suelto sin marcas de tiempo\n\nCon marcas de tiempo, cada fotograma aparece en el PDF junto a lo que se dice en ese tramo.',
@@ -1793,6 +1890,14 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       lenteTam:'tamaño',
       unLbl:'Llamar a cada cuadro de',
       unPasso:'Paso', unMomento:'Momento', unIa:'Fragmento',
+      cenLbl:'Escenario de uso',
+      mUx:'Prueba de usabilidad',
+      mUxH:'Sesión con participante: cada momento marcado se vuelve un bloque, con el habla del moderador y la del participante separadas. El código del participante va en lugar del nombre.',
+      uxH:'Datos de la sesión', uxHsub:'— opcional: estudio, código del participante, tarea, moderador',
+      uxEstudo:'Estudio / investigación', uxTarefa:'Tarea / escenario', uxModer:'Moderada por',
+      uxPart:'Código del participante', uxIni:'Inicio de la sesión',
+      gSessao:'Redactar el informe de la sesión',
+      cenTroca:'Escenario: {0}.',
       evH:'Datos de la evidencia', evHsub:'— opcional: caso de prueba, sistema, quién lo ejecutó, hora de inicio',
       guiaH:'Datos de la guía', guiaHsub:'— opcional: título, sistema, autor, versión',
       guiaTit:'Título de la guía', guiaSis:'Sistema / producto', guiaAutor:'Escrito por', guiaVer:'Versión',
@@ -1881,7 +1986,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
         passos:'Convierte el contenido en instrucciones numeradas paso a paso. Para cada paso, indica el instante correspondiente y describe lo que aparece en pantalla en ese momento.',
         ata:'Redacta un acta: temas tratados, decisiones tomadas, pendientes con su responsable cuando se mencione, y próximos pasos. Marca el instante de cada decisión.',
         revisao:'Señala inconsistencias entre lo que se dice y lo que se muestra, errores visibles, e información que falte o resulte ambigua.',
-        evidencia:'Redacta el acta de evidencia de esta prueba. Para cada paso, escribe una línea con lo que se hizo y otra con el resultado observado en pantalla, citando siempre el número de paso y la hora de reloj. Cuando exista anotación del paso, trátala como el resultado esperado y di si lo observado coincide. Cierra con un veredicto corto — aprobado, fallido o bloqueado — y por qué. No inventes aprobador, número de ticket ni nada que no esté en el documento.'
+        evidencia:'Redacta el acta de evidencia de esta prueba. Para cada paso, escribe una línea con lo que se hizo y otra con el resultado observado en pantalla, citando siempre el número de paso y la hora de reloj. Cuando exista anotación del paso, trátala como el resultado esperado y di si lo observado coincide. Cierra con un veredicto corto — aprobado, fallido o bloqueado — y por qué. No inventes aprobador, número de ticket ni nada que no esté en el documento.',
+        sessao:'Redacta el informe de esta sesión de prueba de usabilidad. Separa lo que pidió el moderador de lo que dijo e hizo el participante — las etiquetas de canal están en la transcripción. Para cada momento, di qué tarea estaba en curso, qué intentó el participante, dónde dudó o se atascó, y qué dijo en voz alta. Marca explícitamente cada punto de fricción, cada abandono y cada elogio, siempre con el número del momento y el instante. Cierra con los hallazgos en orden de gravedad y qué sugiere cambiar cada uno en la interfaz. No interpretes emociones que no se dijeron, no generalices a partir de un solo participante, y refiérete a la persona por el código del participante, nunca por su nombre.'
       },
       pr1:'El PDF adjunto se generó a partir del vídeo "{0}"', pr1b:', con una duración de {0}.',
       pr2:'Contiene {0} imágenes capturadas del vídeo, cada una identificada con el instante exacto en que fue capturada (en formato mm:ss, contado desde el inicio).',
@@ -2835,6 +2941,18 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
 
   let liveOn = false, liveDur = 0, liveCues = [], liveCanais = null, liveW = 0, liveH = 0;
   let abrindoCaptura = false, emCauda = false, pularCauda = false;
+  /* Relógio próprio da finalização.
+
+     O que a pessoa relatou: aperta Parar e a tela fica parada, sem dizer se
+     algo está acontecendo. A causa é que a porcentagem da cauda só existe
+     depois que o primeiro bloco de áudio termina — e até lá a barra fica
+     escondida e a frase fica imóvel. Uma tela imóvel é lida como travada, e
+     quem lê isso fecha a aba.
+
+     A resposta é um contador que anda desde o primeiro instante, mesmo sem
+     nenhum número de progresso ainda: segundos correndo dizem "estou
+     trabalhando" melhor do que qualquer barra. */
+  let caudaT0 = 0, caudaTic = null;
   let gravou = false;   // já houve uma captura ao vivo nesta página
   let micErro = '';     // por que o microfone não abriu, quando não abriu
   let alternarMic = null, micAberto = () => false;
@@ -3337,16 +3455,28 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   function atualizarLive(){
     if (emCauda) {
       const { pct, falta } = progressoCauda();
+      const seg = Math.max(0, Math.round((performance.now() - caudaT0) / 1000));
+      const relogioTxt = t('recTailSeg', duracao(seg));
       $('liveStat').textContent = t('recTailN', asrPendentes) + (falta ? ' ' + falta : '');
+      /* A barra aparece SEMPRE, desde o primeiro segundo. Sem porcentagem ainda
+         ela fica listrada e andando — que é a forma honesta de dizer "estou
+         trabalhando e ainda não sei quanto falta". Esconder até ter número é
+         mostrar tela morta justo no minuto em que a pessoa duvida. */
+      $('caudaBar').classList.remove('hide');
+      $('caudaBar').classList.toggle('indef', pct == null);
       if (pct != null) {
-        $('caudaBar').classList.remove('hide');
         $('caudaFill').style.width = pct.toFixed(1) + '%';
         prog(pct);
         st(t('transcribing2', pct.toFixed(0), caudaTotal - asrPendentes, caudaTotal, falta));
         /* Também no #recMsg: é para onde a pessoa está olhando quando acaba de
            apertar Parar, e não para o cartão 2 mais abaixo. */
         $('recMsg').innerHTML = t('recTail') + ' <b>' + pct.toFixed(0) + '%</b>' +
-          (falta ? ' <span class="status">' + falta + '</span>' : '');
+          (falta ? ' <span class="status">' + falta + '</span>' : '') +
+          ' <span class="status">' + relogioTxt + '</span>';
+      } else {
+        $('caudaFill').style.width = '100%';
+        $('recMsg').innerHTML = t('recTail') +
+          ' <span class="status">' + relogioTxt + '</span>';
       }
       return;
     }
@@ -3584,8 +3714,14 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
         const AC = window.AudioContext || window.webkitAudioContext;
         ctx = new AC({ sampleRate: SR_ASR });
         if (ctx.state === 'suspended') await ctx.resume();
-        if (temSom)    canais.push(await abrirCanal(ctx, telaStream, t('spkSys'), 'sys'));
-        if (micStream) canais.push(await abrirCanal(ctx, micStream,  t('spkMic'), 'mic'));
+        /* Numa sessão de pesquisa os dois canais têm outro nome: o microfone é
+           o MODERADOR e o som do computador é o PARTICIPANTE que compartilha a
+           tela. O rótulo entra na transcrição e sai no documento — chamar de
+           "Computador" a fala de quem está sendo observado apaga a única
+           distinção que esse relatório precisa fazer. */
+        const ux = $('modelo') && $('modelo').value === 'usabilidade';
+        if (temSom)    canais.push(await abrirCanal(ctx, telaStream, t(ux ? 'spkPart' : 'spkSys'), 'sys'));
+        if (micStream) canais.push(await abrirCanal(ctx, micStream,  t(ux ? 'spkModer' : 'spkMic'), 'mic'));
       } catch (e) {
         avisos.push(t('recNoAudio'));
         motivoSemFala = t('recNoAudio');
@@ -3851,8 +3987,17 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
         guardarMotivos();
       }
       emCauda = true; pularCauda = false;
+      caudaT0 = performance.now();
+      /* A fila já é conhecida AQUI, e não só quando a bomba der a primeira
+         volta: contar antes é o que permite a barra existir desde o começo. */
+      if (!caudaTotal) caudaTotal = filaAsr.length + asrPendentes;
       $('recStop').textContent = t('recSkip');
       $('recMsg').textContent = t('recTail');
+      /* A pessoa pode ter rolado a página durante a gravação. Trazer a tela de
+         volta para onde a resposta vai aparecer é metade do problema. */
+      irPara('cardVideo', true);
+      if (caudaTic) clearInterval(caudaTic);
+      caudaTic = setInterval(atualizarLive, 1000);
       atualizarLive();
 
       // o resto do áudio que não completou uma janela ainda vale transcrever
@@ -3864,6 +4009,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       await bombearAsr();
       while (asrRodando) await new Promise(r => setTimeout(r, 150));
       emCauda = false; pularCauda = false;
+      if (caudaTic) { clearInterval(caudaTic); caudaTic = null; }
       $('recStop').textContent = t('recStopBtn');
 
       if (ctx) { try { await ctx.close(); } catch (e) {} }
@@ -4145,7 +4291,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      para os dois, o que era mentira nos dois casos. */
   const TAMANHOS = {
     'onnx-community/whisper-base':  { cpu: 77,  gpu: 206 },
-    'onnx-community/whisper-small': { cpu: 249, gpu: 586 }
+    'onnx-community/whisper-small': { cpu: 249, gpu: 586 },
+    'onnx-community/whisper-large-v3-turbo': { cpu: 843, gpu: 1620 }
   };
 
   /* Repositório de reserva do MESMO modelo. As exportações do `onnx-community`
@@ -4156,6 +4303,9 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   const MODELO_RESERVA = {
     'onnx-community/whisper-base':  'Xenova/whisper-base',
     'onnx-community/whisper-small': 'Xenova/whisper-small'
+    /* O turbo não tem reserva: o `Xenova` é anterior a ele. Se falhar na
+       máquina de alguém, o caminho é escolher o small — que está escrito na
+       dica do seletor, e não escondido num degrau da fila de montagem. */
   };
   let modeloEmUso = null;
   const usaPlaca = () => !!($('gpu') && $('gpu').checked);
@@ -5391,7 +5541,17 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     $('status').textContent = tr('stopping');
   };
 
-  /* ================= revisão ================= */
+  /* ================= revisão =================
+
+     Qual quadro acabou de mudar de lugar, e como se chama o número dele.
+     `numeroDe` conta só os mantidos, que é a mesma conta do documento. */
+  let destaqueMov = null;
+  const numeroDe = idx => {
+    let n = 0;
+    for (let k = 0; k <= idx && k < frames.length; k++) if (frames[k].keep) n++;
+    return frames[idx] && frames[idx].keep ? n : 0;
+  };
+
   function render(){
     if (typeof pintarSoMarcados === 'function') pintarSoMarcados();
     const box = $('thumbs');
@@ -5500,8 +5660,16 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
           e.stopPropagation();
           const j = i + dir;
           if (j < 0 || j >= frames.length) return;
+          /* A numeração é contada só entre os quadros MANTIDOS, então de/para
+             tem que ser lido antes e depois da troca — a posição no array não
+             é o número que a pessoa vê. */
+          const de = numeroDe(i);
           [frames[i], frames[j]] = [frames[j], frames[i]];
+          destaqueMov = j;
           render();
+          const para = numeroDe(j);
+          if ($('movMsg')) $('movMsg').textContent =
+            (de && para) ? t('movFeito', rotuloUnidade(), de, para) : t('movFeitoSem');
           const alvo = $('thumbs').querySelector(`.mover.${dir < 0 ? 'esq' : 'dir'}[data-i="${j}"]`);
           if (alvo) alvo.focus();
         };
@@ -5515,8 +5683,23 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       fig.appendChild(mover(1, 'moverDir'));
       fig.appendChild(cap);
       fig.appendChild(campo);
+      if (destaqueMov === i) fig.classList.add('moveu');
       box.appendChild(fig);
     });
+
+    /* Piscar UMA vez. A classe sai depois da animação, senão o próximo render
+       (que acontece a cada tecla digitada numa anotação) repintaria o destaque
+       para sempre. */
+    if (destaqueMov != null) {
+      const alvo = box.children[destaqueMov];
+      destaqueMov = null;
+      if (alvo) {
+        alvo.scrollIntoView({ block: 'nearest', inline: 'nearest',
+          behavior: (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)
+            ? 'auto' : 'smooth' });
+        setTimeout(() => alvo.classList.remove('moveu'), 1600);
+      }
+    }
 
     if (focado >= 0) {
       const volta = box.querySelector((eraNota ? '.nota' : '.toque') + `[data-i="${focado}"]`);
@@ -5552,7 +5735,11 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     ia:        { layout:'auto', ev:false, goal:'resumo',    prefixo:'analise',       dica:'mIaH'  },
     evidencia: { layout:'full', ev:true,  goal:'evidencia', prefixo:'evidencia',     dica:'mEvH'  },
     tutorial:  { layout:'full', ev:false, goal:'passos',    prefixo:'passo-a-passo', dica:'mTutH' },
-    ata:       { layout:'grid', ev:false, goal:'ata',       prefixo:'ata',           dica:'mAtaH' }
+    ata:       { layout:'grid', ev:false, goal:'ata',       prefixo:'ata',           dica:'mAtaH' },
+    /* Sessão de pesquisa: layout cheio (a tela do participante é o dado),
+       identificação própria e um objetivo de prompt que não existe nos outros —
+       relatório de sessão não é ata nem evidência. */
+    usabilidade:{ layout:'full', ev:true,  goal:'sessao',    prefixo:'sessao',        dica:'mUxH' }
   };
   const modeloAtual = () => MODELOS[$('modelo').value] || MODELOS.ia;
 
@@ -5569,7 +5756,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
 
      Trocado à mão, o valor não é mais reescrito ao trocar de modelo — senão a
      escolha de alguém seria apagada pela primeira mexida num select. */
-  const ROTULO_PADRAO = { ia:'unIa', evidencia:'unPasso', tutorial:'unPasso', ata:'unMomento' };
+  const ROTULO_PADRAO = { ia:'unIa', evidencia:'unPasso', tutorial:'unPasso', ata:'unMomento',
+                          usabilidade:'unMomento' };
   let rotuloManual = null;
 
   function rotuloUnidade(){
@@ -5597,6 +5785,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
                  chamado:'guiaVer',   ini:'evIni',  res:false, hash:false, temIni:false },
     ata:       { h:'ataH',  sub:'ataHsub',  caso:'ataAssunto',sis:'ataLocal',quem:'ataOrg',
                  chamado:'ataPart',   ini:'ataIni', res:false, hash:false, temIni:true },
+    usabilidade:{ h:'uxH', sub:'uxHsub', caso:'uxEstudo', sis:'uxTarefa', quem:'uxModer',
+                 chamado:'uxPart',    ini:'uxIni',  res:false, hash:false, temIni:true },
     ia:        null
   };
   const blocoAtual = () => BLOCOS[$('modelo').value] || null;
@@ -5628,10 +5818,12 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     ia:        ['resumo','revisao','passos','livre'],
     evidencia: ['evidencia','revisao','livre'],
     tutorial:  ['passos','resumo','livre'],
-    ata:       ['ata','resumo','revisao','livre']
+    ata:       ['ata','resumo','revisao','livre'],
+    usabilidade:['sessao','resumo','revisao','livre']
   };
   const ROTULO_OBJ = { resumo:'gSum', passos:'gSteps', ata:'gMinutes',
-                       evidencia:'gEvid', revisao:'gReview', livre:'gFree' };
+                       evidencia:'gEvid', revisao:'gReview', livre:'gFree',
+                       sessao:'gSessao' };
 
   function pintarObjetivos(){
     const lista = OBJETIVOS[$('modelo').value] || OBJETIVOS.ia;
@@ -5651,7 +5843,14 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      e no passo a passo ela só suja o título. */
   const querHora = () => $('modelo').value !== 'tutorial';
   const ehTutorial = () => $('modelo').value === 'tutorial';
-  const dicaModelo = () => { $('modeloDica').textContent = t(modeloAtual().dica); };
+  const dicaModelo = () => {
+    /* A explicação do cenário mora no passo 1, ao lado da escolha. A linha da
+       revisão continua existindo para quem chegou lá sem passar pelo topo. */
+    const txt = t(modeloAtual().dica);
+    if ($('cenDica')) $('cenDica').textContent = txt;
+    if ($('modeloDica')) $('modeloDica').textContent =
+      t('cenTroca', $('modelo').selectedOptions[0] ? $('modelo').selectedOptions[0].textContent : '');
+  };
 
   $('modelo').onchange = () => {
     const m = modeloAtual();
@@ -7304,6 +7503,15 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     }));
   }
 
+  /* A marca em SVG, num tamanho pedido. Uma função só porque ela aparece duas
+     vezes no mesmo arquivo — e porque a versão de 34 px que existia no rodapé
+     era pequena demais para ser vista: quem abria o HTML via só texto. */
+  const marcaSvg = px => `<svg viewBox="0 0 64 64" width="${px}" height="${px}" aria-hidden="true">
+<rect width="64" height="64" rx="15" fill="#3A3F9E"/><rect x="13" y="12" width="38" height="21" rx="3" fill="#fff"/>
+<rect x="13" y="39" width="38" height="4.5" rx="2.25" fill="#fff"/><rect x="13" y="47" width="22" height="4.5" rx="2.25" fill="#fff" opacity=".62"/>
+<circle cx="48" cy="48" r="9.5" fill="#fff"/><circle cx="48" cy="48" r="7.6" fill="#3A3F9E"/>
+<path d="M48 43.6V48l3 2" stroke="#fff" stroke-width="1.9" stroke-linecap="round" fill="none"/></svg>`;
+
   function montarHtml(){
     const ev = evDados();
     const tut = ehTutorial();
@@ -7345,10 +7553,19 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
  .fala{color:#444;font-size:15px;margin:10px 0 0}
  .ocr{color:#777;font-size:13.5px;margin:8px 0 0}
  .hash{color:#999;font:11px ui-monospace,Menlo,monospace;margin:6px 0 0;word-break:break-all}
- .pe{border-top:1px solid #e6e8ee;padding-top:16px;margin-top:38px;display:flex;gap:12px;align-items:flex-start}
- .pe .marca{margin:0 0 3px;font-size:15px;color:#1f2430}
+ /* Bloco de autoria da abertura, o equivalente da capa do PDF. O HTML era o
+    único formato em que a plataforma não aparecia com a marca — só texto de
+    rodapé, minúsculo, no fim de um documento que a pessoa nem rola até o fim. */
+ .abre{display:flex;gap:14px;align-items:center;margin:0 0 30px;padding:16px 18px;
+   border:1px solid #e6e8ee;border-radius:10px;background:#f7f8fb}
+ .abre .nome{margin:0 0 2px;font-size:21px;font-weight:700;color:#1f2430;letter-spacing:-.2px}
+ .abre .nome b{color:#3A3F9E}
+ .abre .dom{margin:0;font-size:13.5px;color:#5C6473}
+ .abre .dom a{color:#3A3F9E;text-decoration:none}
+ .pe{border-top:1px solid #e6e8ee;padding-top:18px;margin-top:38px;display:flex;gap:14px;align-items:flex-start}
+ .pe .marca{margin:0 0 4px;font-size:17px;font-weight:650;color:#1f2430}
  .pe .marca b{color:#3A3F9E}
- .pe .marca a{color:#3A3F9E;text-decoration:none}
+ .pe .marca a{color:#3A3F9E;text-decoration:none;font-weight:500}
  .pe .frase{margin:0;color:#777;font-size:12.5px;line-height:1.5}
  @media print{ body{max-width:none} .passo{break-inside:avoid} }
 </style></head><body>
@@ -7359,13 +7576,12 @@ ${temTime() && (marcaCliente.img || marcaCliente.nome) ? `<div class="cliente">`
 <p class="arq">${esc(fileName || t('prNoName'))}</p>
 ${cab ? `<table class="id">${cab}</table>` : ''}
 <p class="arq">${esc(t('pNote'))}${ev.horaVisivel ? ' ' + esc(t('pNoteRel')) : ''}</p>
+<div class="abre">${marcaSvg(46)}
+<div><p class="nome"><b>__MARCAA__</b>__MARCAB__</p>
+<p class="dom"><a href="__SITE__">__SITEDOM__</a> &middot; ${esc(t('ftPromo'))}</p></div></div>
 ${blocos}
 <footer class="pe">
-<svg viewBox="0 0 64 64" width="34" height="34" aria-hidden="true">
-<rect width="64" height="64" rx="15" fill="#3A3F9E"/><rect x="13" y="12" width="38" height="21" rx="3" fill="#fff"/>
-<rect x="13" y="39" width="38" height="4.5" rx="2.25" fill="#fff"/><rect x="13" y="47" width="22" height="4.5" rx="2.25" fill="#fff" opacity=".62"/>
-<circle cx="48" cy="48" r="9.5" fill="#fff"/><circle cx="48" cy="48" r="7.6" fill="#3A3F9E"/>
-<path d="M48 43.6V48l3 2" stroke="#fff" stroke-width="1.9" stroke-linecap="round" fill="none"/></svg>
+${marcaSvg(46)}
 <div><p class="marca"><b>__MARCAA__</b>__MARCAB__ &middot; <a href="__SITE__">__SITEDOM__</a></p>
 <p class="frase">${esc(t('ftPromo'))}</p>
 <p class="frase">${esc(t('ftCapa'))}</p></div>

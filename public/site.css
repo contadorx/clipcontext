@@ -92,7 +92,28 @@ p{margin:0 0 16px}
 
 /* preços */
 .plans{display:grid;grid-template-columns:repeat(auto-fit,minmax(255px,1fr));gap:18px;margin-top:30px;align-items:start}
+/* Três cartões da MESMA altura, com o botão sempre na mesma linha.
+
+   Com altura livre, o cartão do meio ficava um palmo mais alto que os outros só
+   porque tinha uma frase a mais — e o olho lê isso como "este é maior", que é
+   exatamente a informação errada quando o do meio é o mais barato. Grade que
+   estica, coluna flex por dentro, lista que empurra o botão para baixo. */
+.plans.tres{grid-template-columns:repeat(auto-fit,minmax(272px,1fr));align-items:stretch}
+.plans.tres .plan{display:flex;flex-direction:column}
+.plans.tres .plan ul{flex:1 0 auto}
+.plans.tres .plan .btn{width:100%;text-align:center;box-sizing:border-box;margin-top:auto}
 .plan{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:26px}
+/* O mesmo preço nas três moedas, sem conversão ao vivo: quem lê de fora do
+   Brasil não precisa abrir a calculadora, e a página continua sem chamar rede. */
+.plan .moedas{margin:2px 0 10px;font-size:14px;color:var(--muted);font-weight:550}
+/* O que ainda não existe fica dito na própria linha. Listar sem marcar seria
+   vender o que não foi construído; esconder seria esconder o plano. */
+.plan .soon{display:inline-block;font-size:11px;text-transform:uppercase;letter-spacing:.06em;
+      font-weight:650;color:var(--muted);border:1px solid var(--line);border-radius:99px;
+      padding:1px 7px;margin-left:5px;vertical-align:1px;white-space:nowrap}
+.plan .pe{margin:10px 0 0;font-size:13px;color:var(--muted);text-align:center}
+.plan .pe a{color:var(--accent)}
+.plan ul a{color:var(--accent)}
 .plan.hi{border-color:var(--accent);border-width:2px}
 .plan .price{font-size:clamp(25px,2.4vw,33px);font-weight:680;letter-spacing:-.02em;margin:10px 0 2px;white-space:nowrap}
 .plan .price span{font-size:14.5px;font-weight:450;color:var(--muted);letter-spacing:0;white-space:nowrap}
@@ -161,3 +182,16 @@ footer a:hover{color:var(--ink)}
       border-left:2px solid var(--accent);border-bottom:2px solid var(--accent);transform:rotate(-45deg)}
 .ponte{border-left:3px solid var(--accent);padding:2px 0 2px 15px;color:var(--muted);
        font-size:15.5px;margin:26px 0 0;max-width:720px}
+
+
+/* ---- os cinco cenários, na home ----
+   Cartões que são LINK inteiro, e não um título com um "saiba mais" embaixo: o
+   alvo de toque de um cartão inteiro é o cartão inteiro. */
+.casos{display:grid;grid-template-columns:repeat(auto-fit,minmax(258px,1fr));gap:14px;margin-top:26px}
+.caso{display:flex;flex-direction:column;background:var(--panel);border:1px solid var(--line);
+      border-radius:12px;padding:20px 20px 17px;text-decoration:none;color:inherit;
+      transition:border-color .15s,transform .15s}
+.caso:hover{border-color:var(--accent);transform:translateY(-2px)}
+.caso h3{margin:0 0 8px;font-size:17.5px;letter-spacing:-.01em}
+.caso p{margin:0 0 14px;font-size:14.5px;color:var(--muted);line-height:1.55;flex:1}
+.caso span{font-size:13.5px;font-weight:600;color:var(--accent)}

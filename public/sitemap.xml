@@ -190,6 +190,111 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/team"/>
   </url>
   <url>
+    <loc>https://walkstamp.com/evidencia-de-teste</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/evidencia-de-teste"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/test-evidence"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/evidencia-de-prueba"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/test-evidence"/>
+  </url>
+  <url>
+    <loc>https://walkstamp.com/en/test-evidence</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/evidencia-de-teste"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/test-evidence"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/evidencia-de-prueba"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/test-evidence"/>
+  </url>
+  <url>
+    <loc>https://walkstamp.com/es/evidencia-de-prueba</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/evidencia-de-teste"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/test-evidence"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/evidencia-de-prueba"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/test-evidence"/>
+  </url>
+  <url>
+    <loc>https://walkstamp.com/instrucao-de-trabalho</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/instrucao-de-trabalho"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/work-instruction"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/instruccion-de-trabajo"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/work-instruction"/>
+  </url>
+  <url>
+    <loc>https://walkstamp.com/en/work-instruction</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/instrucao-de-trabalho"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/work-instruction"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/instruccion-de-trabajo"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/work-instruction"/>
+  </url>
+  <url>
+    <loc>https://walkstamp.com/es/instruccion-de-trabajo</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/instrucao-de-trabalho"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/work-instruction"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/instruccion-de-trabajo"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/work-instruction"/>
+  </url>
+  <url>
+    <loc>https://walkstamp.com/ata-de-reuniao</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/ata-de-reuniao"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/meeting-minutes"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/acta-de-reunion"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/meeting-minutes"/>
+  </url>
+  <url>
+    <loc>https://walkstamp.com/en/meeting-minutes</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/ata-de-reuniao"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/meeting-minutes"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/acta-de-reunion"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/meeting-minutes"/>
+  </url>
+  <url>
+    <loc>https://walkstamp.com/es/acta-de-reunion</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/ata-de-reuniao"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/meeting-minutes"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/acta-de-reunion"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/meeting-minutes"/>
+  </url>
+  <url>
+    <loc>https://walkstamp.com/contexto-para-ia</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/contexto-para-ia"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/context-for-ai"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/contexto-para-ia"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/context-for-ai"/>
+  </url>
+  <url>
+    <loc>https://walkstamp.com/en/context-for-ai</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/contexto-para-ia"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/context-for-ai"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/contexto-para-ia"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/context-for-ai"/>
+  </url>
+  <url>
+    <loc>https://walkstamp.com/es/contexto-para-ia</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/contexto-para-ia"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/context-for-ai"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/contexto-para-ia"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/context-for-ai"/>
+  </url>
+  <url>
+    <loc>https://walkstamp.com/teste-de-usabilidade</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/teste-de-usabilidade"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/usability-test"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/prueba-de-usabilidad"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/usability-test"/>
+  </url>
+  <url>
+    <loc>https://walkstamp.com/en/usability-test</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/teste-de-usabilidade"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/usability-test"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/prueba-de-usabilidad"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/usability-test"/>
+  </url>
+  <url>
+    <loc>https://walkstamp.com/es/prueba-de-usabilidad</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/teste-de-usabilidade"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/usability-test"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/prueba-de-usabilidad"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/usability-test"/>
+  </url>
+  <url>
     <loc>https://walkstamp.com/substituto-do-steps-recorder</loc>
     <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/substituto-do-steps-recorder"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/steps-recorder-replacement"/>

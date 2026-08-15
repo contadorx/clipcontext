@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Un vídeo que la IA sí puede leer entero — Walkstamp</title>
+<meta name="description" content="~60 pantallas en vez de 3.600, cada una emparejada con el habla de ese tramo, y el prompt listo. Cabe en cualquier modelo, incluidos los que rechazan vídeo.">
+<link rel="canonical" href="https://walkstamp.com/es/contexto-para-ia">
+<link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/contexto-para-ia">
+<link rel="alternate" hreflang="en" href="https://walkstamp.com/en/context-for-ai">
+<link rel="alternate" hreflang="es" href="https://walkstamp.com/es/contexto-para-ia">
+<link rel="icon" href="/favicon.ico?v=3" sizes="any">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png?v=3">
+<link rel="stylesheet" href="/site.css">
+<script>window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments)};</script><script defer src="/_vercel/insights/script.js"></script>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <a class="brand" href="/es"><img src="/logo.svg" alt=""><span>Walk<b>stamp</b></span></a>
+    <nav>
+      <a href="/es#como" class="hide-sm">Cómo funciona</a>
+      <a href="/es/comparativa" class="hide-sm">Comparativa</a>
+      <a href="/es/precos" class="hide-xs">Precios</a>
+      <a class="btnTop" href="/app?lang=es">Abrir la herramienta</a>
+      <span style="display:inline-flex;gap:9px;border-left:1px solid var(--line);padding-left:16px"><a href="/contexto-para-ia?lang=pt">PT</a><a href="/en/context-for-ai?lang=en">EN</a><a href="/es/contexto-para-ia?lang=es" style="color:var(--ink);font-weight:600">ES</a></span>
+    </nav>
+  </div>
+</header>
+
+<section style="padding-top:60px">
+  <div class="wrap doc">
+    <p class="eyebrow">Caso de uso</p>
+    <h1 style="font-size:32px">Un vídeo que la IA sí puede leer entero</h1>
+    <p class="updated">Un modelo que ve vídeo muestrea un fotograma por segundo, a ciegas. Una hora se vuelve 3.600 imágenes, más de un millón de tokens, y la mayoría es la misma pantalla quieta. El documento resuelve eso antes de llegar al modelo.</p>
+
+    <p class="row" style="gap:10px;margin:0 0 8px;flex-wrap:wrap">
+      <a class="btn" href="https://walkstamp.com/app?modelo=ia&amp;lang=es">Preparar un vídeo para la IA</a>
+      <span class="small muted">gratis, y el vídeo no sale de tu ordenador</span>
+    </p>
+
+    <h2>El dolor</h2>
+    <p>Tienes una grabación — una demo, una clase, una sesión de soporte, un incidente — y quieres preguntarle cosas a un modelo. Mandar el archivo choca con tres paredes: el límite de tamaño, el coste de procesar fotogramas repetidos, y el hecho de que <b>la mayoría de los modelos simplemente no acepta vídeo</b>.</p>
+    <p>Y aun donde lo acepta, el modelo pierde lo que se <i>dijo</i> junto a lo que se <i>mostró</i>: el habla llega como un bloque de texto suelto, sin saber a qué pantalla pertenece.</p>
+
+    <h2>Qué sale</h2>
+    <p>Un PDF (o Markdown, HTML, JSON) que cualquier modelo lee, con la información ya organizada:</p>
+    <ul>
+      <li><b>~60 pantallas en vez de 3.600</b>, porque el resto eran repeticiones de la misma imagen</li>
+      <li><b>Cada imagen emparejada con el habla de ese tramo</b>, y no con la transcripción entera tirada al final</li>
+      <li><b>El instante exacto de cada fotograma</b>, para que el modelo pueda citar "en el 04:12" con precisión</li>
+      <li><b>Cabe en cualquier modelo</b>, incluidos los que rechazan vídeo — es un documento, no un archivo de medios</li>
+      <li><b>Prompt listo</b>, escrito para que el modelo entienda qué está leyendo antes de responder</li>
+      <li><b>JSON estructurado</b> cuando el destino no es un chat sino tu propio código o tu agente</li>
+    </ul>
+
+    <h2>Cómo hacerlo</h2>
+    <ol class="passos">
+      <li>Deja el escenario en <b>Contexto para IA</b> — es el predeterminado.</li>
+      <li>Arrastra el vídeo, o graba la pantalla en el momento.</li>
+      <li>Deja que transcriba y extraiga los fotogramas. Descarta en la revisión lo que no interesa: cada pantalla de menos es un token de menos.</li>
+      <li>Genera el PDF, copia el prompt y llévate los dos a la IA que uses.</li>
+    </ol>
+
+    <h2>Lo que no hace — mejor saberlo antes</h2>
+    <p><b>No manda nada a ningún modelo.</b> Monta el material y te lo entrega. Quien elige el modelo, la cuenta y la política de uso eres tú — incluido un modelo que corra dentro de tu propia empresa.</p>
+    <p><b>No sustituye ver el vídeo cuando el movimiento es el dato.</b> Si lo que importa es una animación, una transición o el gesto de alguien, los fotogramas por cambio de escena lo pierden. Para pantalla de sistema, que es el caso común, capturan todo lo que interesa.</p>
+    <p><b>No resume por su cuenta.</b> El resumen es trabajo del modelo; el nuestro es hacer que el modelo lea lo correcto.</p>
+
+    <p class="row" style="gap:10px;margin-top:30px;flex-wrap:wrap">
+      <a class="btn" href="https://walkstamp.com/app?modelo=ia&amp;lang=es">Preparar un vídeo para la IA</a>
+      <a class="btn ghost" href="/es/precos">Ver los planes</a>
+    </p>
+    <p class="small muted" style="margin-top:16px">Es el más genérico de los cinco, y el predeterminado de la herramienta — cuando no sabes qué documento quieres, este es el que sirve.</p>
+  </div>
+</section>
+
+
+<footer>
+  <div class="wrap">
+    <div>
+      <a href="/app?lang=es">Abrir la herramienta</a>
+      <a href="/es/precos">Precios</a>
+      <a href="/es/comparativa">Comparativa</a>
+      <a href="/es/seguridad">Seguridad</a>
+      <a href="/es/verificar">Comprobar evidencia</a>
+      <a href="/es/privacidade">Privacidad</a>
+      <a href="/es/termos">Términos</a>
+      <a href="/es/alternativa-al-steps-recorder">Alternativa al Steps Recorder</a>
+    </div>
+    <div>Walkstamp — herramienta gratuita, sin anuncios y sin registro</div>
+  </div>
+</footer>
+
+<script src="/support.js"></script>
+</body>
+</html>

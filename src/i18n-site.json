@@ -82,7 +82,21 @@
     "navComp": "Comparativo",
     "fComp": "Comparativo",
     "duoComp": "Quem mais faz isso, quanto custa, e onde cada um ganha — inclusive da gente: veja o {0}comparativo{1}.",
-    "fVerif": "Conferir evidência"
+    "fVerif": "Conferir evidência",
+    "casosEyebrow": "Cinco cenários, uma gravação",
+    "casosH": "Escolha o que você precisa entregar. O resto a ferramenta acerta sozinha.",
+    "casosP": "A escolha do cenário é o primeiro passo dentro da ferramenta, e é ela que define o layout do documento, os campos de identificação, se a hora de relógio aparece, como se chama cada quadro e o pedido pronto para a IA.",
+    "casoEvT": "Evidência de teste",
+    "casoEvD": "UAT e auditoria: uma tela por passo, com hora de relógio, cabeçalho de identificação e verificação de integridade.",
+    "casoInT": "Instrução de trabalho",
+    "casoInD": "O passo a passo do key user, em imperativo e sem carimbo de data — entregável de contrato de go-live.",
+    "casoAtaT": "Ata de reunião",
+    "casoAtaD": "As telas do que foi mostrado, a fala pareada e a transcrição completa no fim.",
+    "casoIaT": "Contexto para IA",
+    "casoIaD": "~60 telas em vez de 3.600, com a fala de cada trecho e o prompt pronto.",
+    "casoUxT": "Teste de usabilidade",
+    "casoUxD": "Moderador e participante separados, momentos marcados ao vivo e tarja para anonimizar.",
+    "casosVer": "Ver o caso completo"
   },
   "en": {
     "htmlLang": "en",
@@ -167,7 +181,21 @@
     "navComp": "Compare",
     "fComp": "Compare",
     "duoComp": "Who else does this, what it costs, and where each one wins — including against us: see the {0}comparison{1}.",
-    "fVerif": "Check evidence"
+    "fVerif": "Check evidence",
+    "casosEyebrow": "Five use cases, one recording",
+    "casosH": "Pick what you have to hand over. The tool gets the rest right on its own.",
+    "casosP": "Choosing the use case is the first step inside the tool, and it is what sets the document layout, the identification fields, whether clock time appears, what each frame is called, and the ready-made prompt for the AI.",
+    "casoEvT": "Test evidence",
+    "casoEvD": "UAT and audit: one screen per step, with clock time, identification header and integrity verification.",
+    "casoInT": "Work instruction",
+    "casoInD": "The key user’s step-by-step, in the imperative and with no date stamp — a go-live contractual deliverable.",
+    "casoAtaT": "Meeting minutes",
+    "casoAtaD": "The screens of what was shown, the speech paired to them, and the full transcript at the end.",
+    "casoIaT": "Context for AI",
+    "casoIaD": "~60 screens instead of 3,600, with the speech of each stretch and a ready-made prompt.",
+    "casoUxT": "Usability test",
+    "casoUxD": "Moderator and participant kept apart, moments marked live, and redaction to anonymise.",
+    "casosVer": "Read the full case"
   },
   "es": {
     "htmlLang": "es",
@@ -252,6 +280,20 @@
     "navComp": "Comparativa",
     "fComp": "Comparativa",
     "duoComp": "Quién más hace esto, cuánto cuesta y dónde gana cada uno — incluso a nosotros: mira la {0}comparativa{1}.",
-    "fVerif": "Comprobar evidencia"
+    "fVerif": "Comprobar evidencia",
+    "casosEyebrow": "Cinco escenarios, una grabación",
+    "casosH": "Elige lo que tienes que entregar. El resto lo acierta la herramienta sola.",
+    "casosP": "Elegir el escenario es el primer paso dentro de la herramienta, y es lo que define el layout del documento, los campos de identificación, si aparece la hora de reloj, cómo se llama cada fotograma y el prompt listo para la IA.",
+    "casoEvT": "Evidencia de prueba",
+    "casoEvD": "UAT y auditoría: una pantalla por paso, con hora de reloj, cabecera de identificación y comprobación de integridad.",
+    "casoInT": "Instrucción de trabajo",
+    "casoInD": "El paso a paso del key user, en imperativo y sin sello de fecha — entregable de contrato de go-live.",
+    "casoAtaT": "Acta de reunión",
+    "casoAtaD": "Las pantallas de lo que se mostró, el habla emparejada y la transcripción completa al final.",
+    "casoIaT": "Contexto para IA",
+    "casoIaD": "~60 pantallas en vez de 3.600, con el habla de cada tramo y el prompt listo.",
+    "casoUxT": "Prueba de usabilidad",
+    "casoUxD": "Moderador y participante separados, momentos marcados en vivo y tapado para anonimizar.",
+    "casosVer": "Ver el caso completo"
   }
 }
