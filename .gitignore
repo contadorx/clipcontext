@@ -1,0 +1,70 @@
+# ---------------------------------------------------------------------------
+# O repositório é PÚBLICO. Tudo que entra aqui é lido por qualquer pessoa —
+# e continua legível depois de apagado, porque o histórico do git guarda.
+#
+# Os arquivos abaixo são de estratégia, não de produto. Nenhum deles é segredo
+# técnico: são coisas que, publicadas, ou entregam o jogo ou envelhecem mal.
+# Se um dia quiser publicar algum, tire desta lista com intenção — não por
+# descuido.
+# ---------------------------------------------------------------------------
+
+# Análise competitiva, números de tração e ranking das apostas de monetização
+ONDE-ESTAMOS.md
+
+# Custo por vídeo, preço de fornecedor, margem e quanto cobrar
+ARQUITETURA-PAGO.md
+
+# Auditoria de experiência: lacunas do produto, ainda não corrigidas
+MELHORIAS.md
+
+# Catálogo completo de features possíveis, com prioridade
+FUNCIONALIDADES.md
+
+# Grátis vs. pago e a sequência de entrega, com preço-alvo
+ESTRATEGIA-ENTREGA.md
+
+# Estratégia do caso de uso de evidência de teste
+EVIDENCIA-DE-TESTE.md
+
+# Mapa de concorrentes, com preço de cada um e onde eles perdem
+CONCORRENTES.md
+
+# Plano de resposta aos concorrentes, com preço-alvo e o que não fazer
+O-QUE-FAZER.md
+
+# Plano de canais e calendário de publicação
+brand/onde-publicar.md
+
+# Estudo de nomes, com o que ainda não foi decidido
+brand/nomes.md
+
+# Textos ainda não publicados
+brand/post-linkedin.md
+LANCAMENTO.md
+
+# Defeitos concretos de OUTRO produto seu, por arquivo e linha. Num repositório
+# público, isso é crítica ao SalaVox num lugar que o Google indexa.
+PARA-O-SALAVOX.md
+
+# Notas internas de medição. Publicar uma versão enxuta disto seria COERENTE com
+# o discurso de privacidade — mas esta versão tem observações internas e cita o
+# projeto do SalaVox. Decida de propósito, não por omissão.
+MEDICAO.md
+
+# ---------------------------------------------------------------------------
+# Lixo de máquina e de build
+# ---------------------------------------------------------------------------
+node_modules/
+.vercel/
+.DS_Store
+Thumbs.db
+*.log
+*.swp
+*~
+dist/
+__pycache__/
+*.pyc
+.venv/
+venv/
+.env
+.env.*
