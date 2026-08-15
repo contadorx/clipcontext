@@ -1,11 +1,31 @@
 {
-  "crons": [
-    { "path": "/api/cron/regua-cobranca", "schedule": "0 12 * * *" },
-    { "path": "/api/cron/expurgo-documentos", "schedule": "0 5 * * *" },
-    { "path": "/api/cron/aviso-expiracao", "schedule": "0 13 1 * *" },
-    { "path": "/api/cron/lembretes-boletos", "schedule": "30 12 * * *" },
-    { "path": "/api/cron/recorrencias", "schedule": "0 6 * * *" },
-    { "path": "/api/cron/digest-diario", "schedule": "0 10 * * *" },
-    { "path": "/api/cron/resumo-socio", "schedule": "0 11 * * *" }
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "cleanUrls": true,
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "Cross-Origin-Opener-Policy",
+          "value": "same-origin"
+        },
+        {
+          "key": "Cross-Origin-Embedder-Policy",
+          "value": "credentialless"
+        },
+        {
+          "key": "Cross-Origin-Resource-Policy",
+          "value": "cross-origin"
+        }
+      ]
+    }
   ]
 }
