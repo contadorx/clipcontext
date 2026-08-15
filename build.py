@@ -78,6 +78,17 @@ CONTATO = "privacidade@walkstamp.com"
 # Nada disso entra no build offline: lá os três viram string vazia, como os
 # tokens de medição.
 # ---------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
+# Licença do plano Time. Esta é a chave PÚBLICA — ela só sabe CONFERIR uma
+# assinatura, nunca produzir uma. Pode ir para o HTML e para o repositório
+# público sem risco nenhum; quem assina é a privada, que fica no
+# emitir-licenca.py e nunca entra aqui.
+#
+# Trocar o par derruba todas as licenças já emitidas. Só faça isso se a privada
+# vazar — e aí é justamente o que se quer.
+# ---------------------------------------------------------------------------
+LIC_PUB = "sVXqPeioW7lkGRM2EPNSOadXCQNFGTBXLtzTknMSeYE"
+
 G_CLIENT = ""   # ...apps.googleusercontent.com
 G_KEY    = ""
 G_APP    = ""
@@ -457,6 +468,8 @@ def main() -> int:
     src = src.replace("__SITE__", SITE)                      # domínio público, definido no topo
     src = src.replace("__SITEDOM__", SITE.split("//")[-1])  # o mesmo, sem o esquema, para exibir
     src = src.replace("__ICONV__", ICON_V)
+    # a chave PÚBLICA da licença vale nos dois builds: ela só confere assinatura
+    src = src.replace("__LICPUB__", LIC_PUB)
     if MARKER not in src:
         print(f"marcador {MARKER} não encontrado em src/template.html", file=sys.stderr)
         return 1

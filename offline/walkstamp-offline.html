@@ -146,6 +146,14 @@
   .lenteTopo b{font-size:15.5px}
   .lenteImgCx{position:relative;line-height:0;border-radius:8px;overflow:hidden}
   .lenteImgCx.tarjando{cursor:crosshair;box-shadow:0 0 0 2px var(--err)}
+  /* A camada de destaque fica ACIMA da de tarjas e não recebe clique: quem
+     desenha mira na imagem, e a tarja continua clicável para ser removida. */
+  .marcas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+  .lenteImgCx.marcando{cursor:crosshair;box-shadow:0 0 0 2px var(--accent)}
+  .mkCores{display:inline-flex;gap:5px;align-items:center}
+  .mkCores button{width:22px;height:22px;border-radius:50%;border:2px solid transparent;
+    padding:0;cursor:pointer}
+  .mkCores button.sel{border-color:var(--ink);box-shadow:0 0 0 2px var(--bg)}
   .lente img{width:100%;display:block;background:#000}
   .tarjas{position:absolute;inset:0;pointer-events:none}
   /* A tarja é preta e opaca já na tela: o que se vê aqui é exatamente o que sai
@@ -358,7 +366,18 @@
     <div class="row ferramentas">
       <button class="ghost sm" id="diag" data-i18n="diagBtn"></button>
       <button class="ghost sm" id="limparModelo" data-i18n="limparBtn"></button>
+      <button class="ghost sm" id="licBtn" data-i18n="licBtn"></button>
       <span class="status" id="diagStatus"></span>
+    </div>
+    <div class="hide" id="licBox" style="margin:8px 0 0">
+      <div class="row">
+        <input type="text" id="licChave" placeholder="WS1..." autocomplete="off" spellcheck="false"
+               style="flex:1;min-width:240px;font:12.5px ui-monospace,Menlo,Consolas,monospace">
+        <button class="ghost sm" id="licAtivar" data-i18n="licAtivar"></button>
+        <button class="ghost sm hide" id="licTirar" data-i18n="licTirar"></button>
+      </div>
+      <p class="status" id="licMsg"></p>
+      <p class="status" data-i18n="licNota" style="max-width:640px"></p>
     </div>
     <pre id="diagOut" class="hide"></pre>
     <div class="dobra"><div>
@@ -566,7 +585,21 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
                  style="margin-left:6px;padding:4px 10px;font-size:12px"></button>
          <input type="file" id="evArq" accept=".json,application/json"></p>
       <p class="evPe" data-i18n="evNota"></p>
+      <p class="evPe ok" id="evDica"></p>
     </details>
+
+    <!-- Marca do cliente: a primeira feature do plano Time. Fica escondida sem
+         licença — e o botão que aparece no lugar explica o que é, em vez de
+         deixar um buraco. -->
+    <div class="row hide" id="marcaBox" style="margin-top:16px;align-items:center">
+      <span class="status" data-i18n="mcTitulo"></span>
+      <input type="text" id="mcNome" maxlength="60" data-i18n-ph="mcNomePh"
+             style="width:auto;min-width:190px">
+      <button class="ghost sm" id="mcArq" data-i18n="mcLogo"></button>
+      <input type="file" id="mcFile" accept="image/png,image/jpeg,image/svg+xml" class="hide">
+      <img id="mcPrev" class="hide" alt="" style="height:26px;border-radius:4px">
+      <button class="ghost sm hide" id="mcTirar" data-i18n="mcTirar"></button>
+    </div>
 
     <div class="row" style="margin-top:18px">
       <button id="go" data-i18n="pdfBtn"></button>
@@ -585,6 +618,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       <button class="ghost" id="csv" data-i18n="csvBtn"></button>
       <button class="ghost" id="zip" data-i18n="zipBtn"></button>
       <button class="ghost" id="json" data-i18n="jsonBtn"></button>
+      <button class="ghost" id="jira" data-i18n="jiraBtn"></button>
       <button class="ghost hide" id="gdocs" data-i18n="gdBtn"></button>
       <span class="status" id="pdfStatus"></span>
     </div>
@@ -602,13 +636,26 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       <div class="lenteImgCx" id="lenteImgCx">
         <img id="lenteImg" alt="">
         <div class="tarjas" id="lenteTarjas"></div>
+        <svg class="marcas" id="lenteMarcas" viewBox="0 0 1000 1000" preserveAspectRatio="none"></svg>
       </div>
       <div class="row" style="margin-top:12px">
         <button class="ghost sm" id="tarjaModo" data-i18n="tarjaBtn"></button>
         <button class="ghost sm hide" id="tarjaLimpar" data-i18n="tarjaLimpar"></button>
+        <button class="ghost sm" id="mkModo" data-i18n="mkBtn"></button>
         <button class="ghost sm" id="cropModo" data-i18n="cropBtn"></button>
         <button class="ghost sm hide" id="cropTirar" data-i18n="cropTirar"></button>
         <span class="status" id="tarjaMsg"></span>
+      </div>
+      <!-- As ferramentas de destaque só aparecem quando pedidas: a barra de cima
+           já tem quatro botões, e um quinto grupo permanente afogaria o que a
+           maioria usa. -->
+      <div class="row hide" id="mkBox" style="margin-top:8px;gap:7px">
+        <button class="ghost sm" id="mkRet" data-i18n="mkRet"></button>
+        <button class="ghost sm" id="mkSeta" data-i18n="mkSeta"></button>
+        <button class="ghost sm" id="mkCaneta" data-i18n="mkCaneta"></button>
+        <span class="mkCores" id="mkCores"></span>
+        <button class="ghost sm hide" id="mkDesfazer" data-i18n="mkDesfazer"></button>
+        <button class="ghost sm hide" id="mkLimpar" data-i18n="mkLimpar"></button>
       </div>
       <div class="lenteCampos">
         <div><label for="lenteNota" data-i18n="notaPh"></label>
@@ -1165,6 +1212,32 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       trocandoMotor:'Trocando a versão do motor e tentando de novo…',
       trAoVivoFim:'Transcrição feita ao vivo: {0} trechos. O texto está aqui embaixo e pode ser corrigido.',
       extraJunto:'Varrendo os frames ao mesmo tempo que a transcrição — os dois usam partes diferentes da máquina, então ir junto é mais rápido do que um depois do outro.',
+      urlPreenchido:'{0} campo(s) vieram preenchidos pelo link que você abriu. Confira antes de gerar — dá para corrigir tudo aqui.',
+      jiraBtn:'Resumo para o Jira',
+      jiraCopiado:'Resumo copiado. Cole no comentário do chamado e arraste o PDF junto.',
+      jiraBaixado:'Não consegui usar a área de transferência, então baixei o resumo como .txt.',
+      jiraRodape:'Evidência gerada no Walkstamp e anexada como {0}. As imagens e a hora de cada passo estão no arquivo.',
+      mkBtn:'Destacar', mkRet:'Retângulo', mkSeta:'Seta', mkCaneta:'Caneta',
+      mkCor:'cor do destaque', mkDesfazer:'desfazer', mkLimpar:'limpar os destaques',
+      mkComo:'Arraste sobre a imagem para apontar o que importa. O destaque é queimado na figura, como a tarja — ninguém remove depois.',
+      mkN:'{0} destaque(s) nesta tela.',
+      mcTitulo:'Marca do cliente no documento:',
+      mcNomePh:'nome da empresa',
+      mcLogo:'Escolher logotipo',
+      mcTirar:'tirar o logotipo',
+      mcErro:'Não consegui ler essa imagem. Tente um PNG ou um JPG.',
+      mcFeito:'Documento gerado para {0}',
+      licBtn:'Ativar o plano Time',
+      licAtiva:'Plano Time · {0}',
+      licAtivar:'Ativar',
+      licTirar:'Remover esta licença',
+      licValida:'Licença válida para {0} — {1} pessoa(s), até {2}.',
+      licTirada:'Licença removida deste navegador.',
+      licFormato:'Isso não parece uma chave do Walkstamp. Ela começa com WS1. e vem numa linha só.',
+      licInvalida:'Esta chave não confere. Se você a recebeu por e-mail, copie a linha inteira, sem quebras.',
+      licVencida:'Esta licença venceu em {0}. Fale comigo para renovar — nada do que você já gerou deixa de funcionar.',
+      licSemCripto:'Este navegador não sabe conferir a assinatura da chave. Use o Chrome ou o Edge atualizados.',
+      licNota:'A chave é conferida aqui dentro, sem falar com servidor nenhum — funciona offline, e nós não ficamos sabendo que ela foi usada. Ela fica guardada neste navegador até você removê-la.',
       keepMarked:'Manter só as marcadas ({0})',
       keepMarkedN:'Mantidas as {0} telas que você marcou; {1} descartada(s).',
       autoJaFeito:'já transcrito ao vivo',
@@ -1284,7 +1357,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       evHash:'Incluir a impressão digital SHA-256 de cada imagem',
       evNota:'Tudo aqui é opcional e nada é enviado a lugar nenhum: vira a primeira página do documento e o nome do arquivo, e mais nada. Nada sobrevive ao fechar a aba. As horas saem no formato AAAA-MM-DD hh:mm:ss com o fuso ao lado, para não restar dúvida entre dia e mês nem entre países.',
       pEvid:'Identificação', pStart:'Início da gravação', pHash:'SHA-256 da imagem',
-      pWhen:'Hora', pStep:'Passo {0} de {1}',
+      pWhen:'Tempo decorrido', pRelogio:'Hora de relógio', pStep:'Passo {0} de {1}',
       pHashH:'Impressões digitais das imagens',
       pHashSub:'SHA-256 de cada imagem como ela está neste documento. Serve para conferir depois que a imagem não foi trocada; não é assinatura eletrônica e não atesta conformidade com norma nenhuma.',
       pNoteRel:'A hora de relógio de cada imagem é o início informado da gravação somado ao tempo decorrido. O documento registra o que foi capturado; a trilha de aprovação continua no seu sistema de mudanças.',
@@ -1473,6 +1546,32 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       trocandoMotor:'Switching the engine version and trying again…',
       trAoVivoFim:'Transcribed live: {0} segments. The text is below and can be corrected.',
       extraJunto:'Scanning frames at the same time as the transcription — the two use different parts of the machine, so together is faster than one after the other.',
+      urlPreenchido:'{0} field(s) came pre-filled from the link you opened. Check them before generating — you can correct everything here.',
+      jiraBtn:'Summary for Jira',
+      jiraCopiado:'Summary copied. Paste it into the issue comment and drag the PDF along.',
+      jiraBaixado:'I could not use the clipboard, so I downloaded the summary as .txt.',
+      jiraRodape:'Evidence generated in Walkstamp and attached as {0}. The images and the clock time of each step are in the file.',
+      mkBtn:'Highlight', mkRet:'Rectangle', mkSeta:'Arrow', mkCaneta:'Pen',
+      mkCor:'highlight colour', mkDesfazer:'undo', mkLimpar:'clear the highlights',
+      mkComo:'Drag over the image to point at what matters. The highlight is burned into the picture, like the redaction — nobody removes it afterwards.',
+      mkN:'{0} highlight(s) on this screen.',
+      mcTitulo:'Client brand in the document:',
+      mcNomePh:'company name',
+      mcLogo:'Choose a logo',
+      mcTirar:'remove the logo',
+      mcErro:'I could not read that image. Try a PNG or a JPG.',
+      mcFeito:'Document generated for {0}',
+      licBtn:'Activate the Team plan',
+      licAtiva:'Team plan · {0}',
+      licAtivar:'Activate',
+      licTirar:'Remove this licence',
+      licValida:'Licence valid for {0} — {1} seat(s), until {2}.',
+      licTirada:'Licence removed from this browser.',
+      licFormato:'That does not look like a Walkstamp key. It starts with WS1. and comes on a single line.',
+      licInvalida:'This key does not check out. If you received it by email, copy the whole line, with no breaks.',
+      licVencida:'This licence expired on {0}. Get in touch to renew — nothing you have already generated stops working.',
+      licSemCripto:'This browser cannot verify the key signature. Use an up-to-date Chrome or Edge.',
+      licNota:'The key is checked right here, without talking to any server — it works offline, and we never learn that it was used. It stays in this browser until you remove it.',
       keepMarked:'Keep only the marked ones ({0})',
       keepMarkedN:'Kept the {0} screens you marked; {1} discarded.',
       autoJaFeito:'already transcribed live',
@@ -1592,7 +1691,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       evHash:'Include the SHA-256 fingerprint of each image',
       evNota:'Everything here is optional and nothing is sent anywhere: it becomes the first page of the document and the file name, and nothing else. Nothing survives closing the tab. Times are written as YYYY-MM-DD hh:mm:ss with the offset beside them, so neither day-and-month nor time zone is ever ambiguous.',
       pEvid:'Identification', pStart:'Recording started at', pHash:'Image SHA-256',
-      pWhen:'Time', pStep:'Step {0} of {1}',
+      pWhen:'Elapsed', pRelogio:'Clock time', pStep:'Step {0} of {1}',
       pHashH:'Image fingerprints',
       pHashSub:'SHA-256 of each image exactly as it appears in this document. It lets you check later that an image was not swapped; it is not an electronic signature and does not certify compliance with any standard.',
       pNoteRel:'The clock time of each image is the stated recording start plus the elapsed time. This document records what was captured; the approval trail stays in your change management system.',
@@ -1779,6 +1878,32 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       trocandoMotor:'Cambiando la versión del motor y probando de nuevo…',
       trAoVivoFim:'Transcripción hecha en vivo: {0} fragmentos. El texto está abajo y se puede corregir.',
       extraJunto:'Barriendo los fotogramas a la vez que la transcripción — los dos usan partes distintas de la máquina, así que juntos es más rápido que uno tras otro.',
+      urlPreenchido:'{0} campo(s) vinieron rellenados por el enlace que abriste. Revísalos antes de generar — puedes corregirlo todo aquí.',
+      jiraBtn:'Resumen para Jira',
+      jiraCopiado:'Resumen copiado. Pégalo en el comentario del ticket y arrastra el PDF junto.',
+      jiraBaixado:'No pude usar el portapapeles, así que descargué el resumen como .txt.',
+      jiraRodape:'Evidencia generada en Walkstamp y adjuntada como {0}. Las imágenes y la hora de cada paso están en el archivo.',
+      mkBtn:'Destacar', mkRet:'Rectángulo', mkSeta:'Flecha', mkCaneta:'Lápiz',
+      mkCor:'color del destaque', mkDesfazer:'deshacer', mkLimpar:'limpiar los destaques',
+      mkComo:'Arrastra sobre la imagen para señalar lo que importa. El destaque se quema en la figura, como la tarja — nadie lo quita después.',
+      mkN:'{0} destaque(s) en esta pantalla.',
+      mcTitulo:'Marca del cliente en el documento:',
+      mcNomePh:'nombre de la empresa',
+      mcLogo:'Elegir logotipo',
+      mcTirar:'quitar el logotipo',
+      mcErro:'No pude leer esa imagen. Prueba con un PNG o un JPG.',
+      mcFeito:'Documento generado para {0}',
+      licBtn:'Activar el plan Equipo',
+      licAtiva:'Plan Equipo · {0}',
+      licAtivar:'Activar',
+      licTirar:'Quitar esta licencia',
+      licValida:'Licencia válida para {0} — {1} persona(s), hasta {2}.',
+      licTirada:'Licencia quitada de este navegador.',
+      licFormato:'Eso no parece una clave de Walkstamp. Empieza con WS1. y viene en una sola línea.',
+      licInvalida:'Esta clave no cuadra. Si la recibiste por correo, copia la línea entera, sin saltos.',
+      licVencida:'Esta licencia venció el {0}. Habla conmigo para renovar — nada de lo que ya generaste deja de funcionar.',
+      licSemCripto:'Este navegador no sabe verificar la firma de la clave. Usa Chrome o Edge actualizados.',
+      licNota:'La clave se verifica aquí mismo, sin hablar con ningún servidor — funciona sin conexión, y nosotros nunca nos enteramos de que se usó. Se queda en este navegador hasta que la quites.',
       keepMarked:'Mantener solo las marcadas ({0})',
       keepMarkedN:'Mantenidas las {0} pantallas que marcaste; {1} descartada(s).',
       autoJaFeito:'ya transcrito en vivo',
@@ -1900,7 +2025,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       evHash:'Incluir la huella SHA-256 de cada imagen',
       evNota:'Todo esto es opcional y nada se envía a ningún sitio: se convierte en la primera página del documento y en el nombre del archivo, y nada más. Nada sobrevive al cierre de la pestaña. Las horas salen como AAAA-MM-DD hh:mm:ss con el huso al lado, para que no haya duda ni entre día y mes ni entre países.',
       pEvid:'Identificación', pStart:'Inicio de la grabación', pHash:'SHA-256 de la imagen',
-      pWhen:'Hora', pStep:'Paso {0} de {1}',
+      pWhen:'Tiempo transcurrido', pRelogio:'Hora de reloj', pStep:'Paso {0} de {1}',
       pHashH:'Huellas digitales de las imágenes',
       pHashSub:'SHA-256 de cada imagen tal como aparece en este documento. Sirve para comprobar después que la imagen no fue sustituida; no es firma electrónica ni certifica conformidad con ninguna norma.',
       pNoteRel:'La hora de reloj de cada imagen es el inicio indicado de la grabación más el tiempo transcurrido. El documento registra lo que se capturó; la traza de aprobación sigue en tu sistema de cambios.',
@@ -2119,6 +2244,10 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     document.title = t('docTitle');
     document.querySelectorAll('[data-i18n]').forEach(el => {
       el.textContent = t(el.getAttribute('data-i18n'));
+    });
+    /* Campos de texto não têm textContent para traduzir — têm placeholder. */
+    document.querySelectorAll('[data-i18n-ph]').forEach(el => {
+      el.placeholder = t(el.getAttribute('data-i18n-ph'));
     });
     pintarAuto();
     $('tr').placeholder = t('trPh');
@@ -4341,6 +4470,67 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
      O que fica guardado é uma configuração — nomes de biblioteca, de runtime e
      de arquivo. Nada do vídeo, do áudio ou do texto, que continuam sem tocar em
      disco. Está descrito na política de privacidade junto do idioma. */
+  /* ================= licença do plano Time =================
+
+     Uma chave assinada, conferida AQUI, sem servidor de licença e sem chamada de
+     rede. O desenho é o mesmo do resto do produto: a máquina de quem usa decide,
+     e nós não ficamos sabendo de nada.
+
+     A chave abaixo é a PÚBLICA — ela só sabe conferir uma assinatura, nunca
+     produzir uma. Está no HTML de propósito e não há risco em lê-la. Quem assina
+     é a privada, que vive fora deste repositório.
+
+     Formato:  WS1.<corpo>.<assinatura>
+     O corpo é um JSON { q: para quem, n: assentos, a: válida até, p: plano }.
+
+     Funciona offline por construção — o que é o ponto: quem paga não pode passar
+     a depender da nossa hospedagem para trabalhar. */
+  const LIC_PUB = 'sVXqPeioW7lkGRM2EPNSOadXCQNFGTBXLtzTknMSeYE';
+
+  const b64url = txt => {
+    const s2 = txt.replace(/-/g, '+').replace(/_/g, '/');
+    const bin = atob(s2 + '='.repeat((4 - s2.length % 4) % 4));
+    const u8 = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
+    return u8;
+  };
+
+  /* Devolve os dados da licença, ou um erro com motivo legível. Nunca lança:
+     quem chama precisa poder mostrar o porquê na tela. */
+  async function conferirLicenca(chave){
+    const partes = String(chave || '').trim().split('.');
+    if (partes.length !== 3 || partes[0] !== 'WS1') return { erro: t('licFormato') };
+    let corpo, assinatura, dados;
+    try {
+      corpo = b64url(partes[1]);
+      assinatura = b64url(partes[2]);
+      dados = JSON.parse(new TextDecoder().decode(corpo));
+    } catch (e) { return { erro: t('licFormato') }; }
+    try {
+      const pub = await crypto.subtle.importKey('raw', b64url(LIC_PUB), { name:'Ed25519' }, false, ['verify']);
+      const ok = await crypto.subtle.verify('Ed25519', pub, assinatura, corpo);
+      if (!ok) return { erro: t('licInvalida') };
+    } catch (e) {
+      /* Navegador sem Ed25519 no WebCrypto. Não dá para conferir, e conferir mal
+         seria pior que não conferir: a licença simplesmente não ativa, com o
+         motivo na tela. */
+      return { erro: t('licSemCripto') };
+    }
+    if (dados.p !== 'time') return { erro: t('licInvalida') };
+    /* A data de validade é comparada com o relógio da máquina, que a pessoa
+       controla. Isso é uma escolha, não um descuido: a alternativa é perguntar a
+       hora a um servidor, e um produto que precisa de rede para funcionar deixa
+       de ser este produto. Quem quiser burlar mexendo no relógio consegue — e
+       quem faria isso não ia comprar de qualquer forma. */
+    const hoje = new Date().toISOString().slice(0, 10);
+    if (!dados.a || dados.a < hoje) return { erro: t('licVencida', dados.a || '?') };
+    return { dados };
+  }
+
+  const LIC_CHAVE = 'Walkstamp.licenca';
+  let licenca = null;                     // { q, n, a, p } quando ativa
+  const temTime = () => !!licenca;
+
   const MOTOR_OK = 'Walkstamp.motorOk';
   function lembrarMotor(obj){
     try { localStorage.setItem(MOTOR_OK, JSON.stringify(obj)); } catch (e) {}
@@ -4795,6 +4985,100 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
   }
   $('model').onchange = mostrarTamanho;
   mostrarTamanho();
+
+  /* ---- interface da licença ---- */
+  function pintarLicenca(){
+    const ativo = temTime();
+    $('licBtn').textContent = ativo ? t('licAtiva', licenca.q) : t('licBtn');
+    $('licBtn').classList.toggle('ok', ativo);
+    $('licTirar').classList.toggle('hide', !ativo);
+    $('licChave').classList.toggle('hide', ativo);
+    $('licAtivar').classList.toggle('hide', ativo);
+    if (ativo) $('licMsg').innerHTML =
+      `<span class="ok">${t('licValida', licenca.q, licenca.n, licenca.a)}</span>`;
+    if (typeof pintarMarcaCliente === 'function') pintarMarcaCliente();
+  }
+
+  $('licBtn').onclick = () => $('licBox').classList.toggle('hide');
+
+  /* ---- marca do cliente no documento (plano Time) ----
+
+     Uma consultoria entrega evidência com a marca do cliente final, não com a
+     nossa. É a feature mais visível do pacote pago e a mais barata de fazer —
+     por isso é a primeira.
+
+     O logotipo NÃO sai daqui: é lido pelo navegador, guardado em memória e
+     desenhado dentro do PDF, do Word e do HTML como qualquer frame. A promessa
+     do produto vale igual para quem paga. */
+  let marcaCliente = { nome: '', img: null };
+
+  function pintarMarcaCliente(){
+    const box = $('marcaBox'); if (!box) return;
+    box.classList.toggle('hide', !temTime());
+    $('mcPrev').classList.toggle('hide', !marcaCliente.img);
+    $('mcTirar').classList.toggle('hide', !marcaCliente.img);
+    if (marcaCliente.img) $('mcPrev').src = marcaCliente.img.url;
+  }
+
+  $('mcNome').oninput = () => { marcaCliente.nome = $('mcNome').value.trim(); };
+  $('mcArq').onclick = () => $('mcFile').click();
+  $('mcTirar').onclick = () => { marcaCliente.img = null; $('mcFile').value = ''; pintarMarcaCliente(); };
+
+  $('mcFile').onchange = async e => {
+    const f = e.target.files && e.target.files[0];
+    if (!f) return;
+    try {
+      /* Redesenhado num PNG nosso, e não guardado como veio. Dois motivos: o
+         jsPDF não sabe desenhar SVG, e um arquivo de 8 MB dentro de cada página
+         do documento é um documento que ninguém consegue mandar por e-mail. */
+      const url = URL.createObjectURL(f);
+      const im = await new Promise((ok2, erro) => {
+        const i = new Image(); i.onload = () => ok2(i); i.onerror = erro; i.src = url;
+      });
+      const alvo = 220;                       // altura suficiente para imprimir bem
+      const esc = Math.min(1, alvo / (im.naturalHeight || alvo));
+      const cv = document.createElement('canvas');
+      cv.width = Math.max(1, Math.round((im.naturalWidth || alvo) * esc));
+      cv.height = Math.max(1, Math.round((im.naturalHeight || alvo) * esc));
+      cv.getContext('2d').drawImage(im, 0, 0, cv.width, cv.height);
+      URL.revokeObjectURL(url);
+      marcaCliente.img = { url: cv.toDataURL('image/png'), w: cv.width, h: cv.height };
+      pintarMarcaCliente();
+    } catch (err) {
+      $('licMsg').innerHTML = `<span class="err">${t('mcErro')}</span>`;
+    }
+  };
+
+  $('licAtivar').onclick = async () => {
+    const r = await conferirLicenca($('licChave').value);
+    if (r.erro) { $('licMsg').innerHTML = `<span class="err">${r.erro}</span>`; return; }
+    licenca = r.dados;
+    try { localStorage.setItem(LIC_CHAVE, $('licChave').value.trim()); } catch (e) {}
+    medir('ativou_licenca', {});
+    pintarLicenca();
+  };
+
+  $('licTirar').onclick = () => {
+    licenca = null;
+    try { localStorage.removeItem(LIC_CHAVE); } catch (e) {}
+    $('licChave').value = '';
+    $('licMsg').textContent = t('licTirada');
+    pintarLicenca();
+  };
+
+  /* Ao abrir, reconfere o que está guardado — e não confia nele. Uma chave
+     vencida ontem tem que parar de valer hoje sem ninguém fazer nada, e uma
+     chave adulterada no localStorage não passa pela assinatura. */
+  (async () => {
+    let guardada = null;
+    try { guardada = localStorage.getItem(LIC_CHAVE); } catch (e) {}
+    if (!guardada) { pintarLicenca(); return; }
+    const r = await conferirLicenca(guardada);
+    if (r.dados) licenca = r.dados;
+    else { try { localStorage.removeItem(LIC_CHAVE); } catch (e) {} }
+    pintarLicenca();
+    if (r.erro) $('licMsg').innerHTML = `<span class="err">${r.erro}</span>`;
+  })();
 
   $('limparModelo').onclick = async () => {
     $('limparModelo').disabled = true;
@@ -5398,7 +5682,49 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
         PERFIL_CAMPOS.forEach(id => { if (p[id]) $(id).value = p[id]; });
       }
     } catch (e) {}
+    lerDaUrl();
     pintarPerfil();
+  }
+
+  /* ---- link já preenchido ----
+
+     `?modelo=evidencia&caso=CT-014&chamado=NAT-1234&sistema=S4P/100`
+
+     Quem coordena o teste manda o link pronto — de uma automação do Jira, de uma
+     planilha, do próprio chamado — e quem executa não digita nada. É o que faz um
+     time inteiro produzir evidência no mesmo padrão sem ninguém ser treinado.
+
+     Vem DEPOIS do perfil da aba de propósito: um link explícito é uma instrução
+     de agora, e ganha do que estava guardado de antes.
+
+     Um aviso que o produto precisa dar, e dá na política: o que vai na URL fica
+     no histórico do navegador e nos registros de quem servir a página. Nome de
+     sistema e número de chamado tudo bem; dado pessoal, não. */
+  function lerDaUrl(){
+    let q;
+    try { q = new URLSearchParams(location.search); } catch (e) { return; }
+    const mapa = { caso:'evCaso', chamado:'evChamado', sistema:'evSis',
+                   quem:'evQuem', resultado:'evRes' };
+    let veio = 0;
+    const md = q.get('modelo');
+    if (md && $('modelo') && [...$('modelo').options].some(o => o.value === md)) {
+      $('modelo').value = md;
+      $('modelo').dispatchEvent(new Event('change'));
+      veio++;
+    }
+    for (const k in mapa) {
+      const v = q.get(k); const el = $(mapa[k]);
+      if (!v || !el) continue;
+      if (el.tagName === 'SELECT') {
+        if ([...el.options].some(o => o.value === v)) { el.value = v; veio++; }
+      } else { el.value = v.slice(0, 120); veio++; }
+    }
+    if (veio) {
+      /* Dizer que veio do link, e não deixar a pessoa achar que a ferramenta
+         adivinhou — ou pior, que outra pessoa mexeu na máquina dela. */
+      const el = $('evNota') || $('lblChamado');
+      if ($('evDica')) $('evDica').textContent = t('urlPreenchido', veio);
+    }
   }
   /* ---- levar o perfil embora ----
      Quem quer persistência de verdade — entre visitas, entre máquinas, entre a
@@ -5547,8 +5873,63 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
         provaria um arquivo que ninguém recebeu. */
   const imgFinal = f => f.tarjado || f.img.url;
 
+  /* ================= destaque: retângulo, seta e caneta =================
+
+     A tarja ESCONDE; o destaque APONTA. São a mesma mecânica e propósitos
+     opostos, e por isso convivem no mesmo lugar e na mesma imagem queimada:
+     quem recebe o documento não tem como remover nem um nem outro.
+
+     Numa evidência de teste o destaque é o que transforma "a tela estava assim"
+     em "olhe este campo" — e é metade do valor de um passo a passo. As
+     coordenadas são normalizadas de 0 a 1, como as tarjas, porque a miniatura, a
+     lente e o PDF têm escalas diferentes.
+
+     A espessura sai da MAIOR dimensão da imagem, e não de pixels fixos: um traço
+     de 3 px é grosso num quadro de 640 e invisível num de 3840. */
+  const MK_CORES = ['#e0281e', '#ffcc00', '#1e6ee0'];
+  let mkCor = MK_CORES[0];
+
+  /* 0,6% da maior dimensão. Medido na tela: a 0,38% o traço sumia numa captura
+     de 1920 impressa em A4 — e um destaque que não se vê à primeira vista não é
+     destaque. */
+  function tracoDe(c){ return Math.max(3, Math.round(Math.max(c.width, c.height) * 0.006)); }
+
+  /* Desenha um destaque num contexto de canvas já dimensionado como a imagem. */
+  function desenharMarca(x, c, m){
+    const W = c.width, H = c.height;
+    x.strokeStyle = m.cor || MK_CORES[0];
+    x.fillStyle = m.cor || MK_CORES[0];
+    x.lineWidth = tracoDe(c);
+    x.lineCap = 'round'; x.lineJoin = 'round';
+    if (m.tipo === 'ret') {
+      x.strokeRect(m.x * W, m.y * H, m.w * W, m.h * H);
+      return;
+    }
+    if (m.tipo === 'seta') {
+      const x1 = m.x1 * W, y1 = m.y1 * H, x2 = m.x2 * W, y2 = m.y2 * H;
+      x.beginPath(); x.moveTo(x1, y1); x.lineTo(x2, y2); x.stroke();
+      /* A ponta cresce com o traço, senão uma seta longa numa imagem grande
+         termina num espeto fino que ninguém vê. */
+      const ang = Math.atan2(y2 - y1, x2 - x1), L = x.lineWidth * 4.5, ab = 0.45;
+      x.beginPath();
+      x.moveTo(x2, y2);
+      x.lineTo(x2 - L * Math.cos(ang - ab), y2 - L * Math.sin(ang - ab));
+      x.lineTo(x2 - L * Math.cos(ang + ab), y2 - L * Math.sin(ang + ab));
+      x.closePath(); x.fill();
+      return;
+    }
+    if (m.tipo === 'caneta' && m.pts && m.pts.length > 1) {
+      x.beginPath();
+      x.moveTo(m.pts[0][0] * W, m.pts[0][1] * H);
+      for (let i = 1; i < m.pts.length; i++) x.lineTo(m.pts[i][0] * W, m.pts[i][1] * H);
+      x.stroke();
+    }
+  }
+
+  const temSobreposicao = f => (f.tarjas && f.tarjas.length) || (f.marcas && f.marcas.length);
+
   async function queimarTarjas(f){
-    if (!f.tarjas || !f.tarjas.length) { f.tarjado = null; f.hash = null; return; }
+    if (!temSobreposicao(f)) { f.tarjado = null; f.hash = null; f.ocr = f.ocr || ''; return; }
     const im = await new Promise((ok, err) => {
       const i = new Image();
       i.onload = () => ok(i);
@@ -5559,10 +5940,13 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     c.width = f.img.w; c.height = f.img.h;
     const x = c.getContext('2d');
     x.drawImage(im, 0, 0, c.width, c.height);
+    /* A tarja vem PRIMEIRO e o destaque depois: uma seta apontando para um campo
+       coberto continua fazendo sentido; um preto por cima da seta, não. */
     x.fillStyle = '#000';
-    f.tarjas.forEach(t => x.fillRect(
+    (f.tarjas || []).forEach(t => x.fillRect(
       Math.round(t.x * c.width), Math.round(t.y * c.height),
       Math.max(1, Math.round(t.w * c.width)), Math.max(1, Math.round(t.h * c.height))));
+    (f.marcas || []).forEach(m => desenharMarca(x, c, m));
     f.tarjado = c.toDataURL('image/jpeg', parseFloat($('quality').value) || 0.8);
     f.hash = null;                 // a imagem mudou: o hash antigo não vale mais
     /* E o texto lido antes da tarja some junto. Ele foi lido da imagem inteira e
@@ -5575,7 +5959,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
      preto. É barato quando não há tarja nenhuma — sai na primeira linha. */
   async function aplicarTarjas(lista){
     for (const f of lista) {
-      if (f.tarjas && f.tarjas.length && !f.tarjado) await queimarTarjas(f);
+      if (temSobreposicao(f) && !f.tarjado) await queimarTarjas(f);
     }
   }
 
@@ -5679,8 +6063,99 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       : (tarjando ? t('tarjaComo') : '');
   }
 
+  /* ---- destaque na lente ---- */
+  let mkFerramenta = null;          // null | 'ret' | 'seta' | 'caneta'
+  const marcando = () => !!mkFerramenta;
+
+  function pintarMarcas(){
+    const f = frames[lenteI];
+    const sv = $('lenteMarcas'); if (!sv) return;
+    sv.innerHTML = '';
+    const NS = 'http://www.w3.org/2000/svg';
+    const cria = (tag, attrs) => {
+      const el = document.createElementNS(NS, tag);
+      for (const k in attrs) el.setAttribute(k, attrs[k]);
+      /* Sem isto o preserveAspectRatio="none" esticaria o traço junto com a
+         imagem, e um destaque numa tela 16:9 sairia com a linha vertical fina e
+         a horizontal grossa. */
+      el.setAttribute('vector-effect', 'non-scaling-stroke');
+      return el;
+    };
+    const todas = (f && f.marcas ? f.marcas.slice() : []);
+    if (arrastoMk && arrastoMk.marca) todas.push(arrastoMk.marca);
+    todas.forEach(m => {
+      const cor = m.cor || MK_CORES[0];
+      if (m.tipo === 'ret') {
+        sv.appendChild(cria('rect', { x: m.x*1000, y: m.y*1000, width: m.w*1000, height: m.h*1000,
+          fill: 'none', stroke: cor, 'stroke-width': 4 }));
+      } else if (m.tipo === 'seta') {
+        sv.appendChild(cria('line', { x1: m.x1*1000, y1: m.y1*1000, x2: m.x2*1000, y2: m.y2*1000,
+          stroke: cor, 'stroke-width': 4, 'stroke-linecap': 'round' }));
+        const ang = Math.atan2((m.y2-m.y1), (m.x2-m.x1)), L = 26, ab = 0.45;
+        sv.appendChild(cria('polygon', { points:
+          `${m.x2*1000},${m.y2*1000} ` +
+          `${m.x2*1000 - L*Math.cos(ang-ab)},${m.y2*1000 - L*Math.sin(ang-ab)} ` +
+          `${m.x2*1000 - L*Math.cos(ang+ab)},${m.y2*1000 - L*Math.sin(ang+ab)}`,
+          fill: cor }));
+      } else if (m.tipo === 'caneta' && m.pts && m.pts.length > 1) {
+        sv.appendChild(cria('polyline', {
+          points: m.pts.map(pt => `${pt[0]*1000},${pt[1]*1000}`).join(' '),
+          fill: 'none', stroke: cor, 'stroke-width': 4,
+          'stroke-linecap': 'round', 'stroke-linejoin': 'round' }));
+      }
+    });
+    const n = f && f.marcas ? f.marcas.length : 0;
+    $('mkDesfazer').classList.toggle('hide', !n);
+    $('mkLimpar').classList.toggle('hide', !n);
+  }
+
+  function pintarCores(){
+    const cx = $('mkCores'); cx.innerHTML = '';
+    MK_CORES.forEach(cor => {
+      const b = document.createElement('button');
+      b.style.background = cor;
+      b.className = cor === mkCor ? 'sel' : '';
+      b.title = t('mkCor');
+      b.onclick = () => { mkCor = cor; pintarCores(); };
+      cx.appendChild(b);
+    });
+  }
+
+  function modoMarca(qual){
+    mkFerramenta = qual;
+    if (qual) { modoTarja(false); modoCrop(false); }
+    $('lenteImgCx').classList.toggle('marcando', !!qual);
+    [['mkRet','ret'], ['mkSeta','seta'], ['mkCaneta','caneta']].forEach(([id, k]) => {
+      $(id).classList.toggle('ghost', mkFerramenta !== k);
+    });
+    if (qual) $('tarjaMsg').textContent = t('mkComo');
+    else pintarTarjas();
+    pintarMarcas();
+  }
+
+  $('mkModo').onclick = () => {
+    const abrir = $('mkBox').classList.contains('hide');
+    $('mkBox').classList.toggle('hide', !abrir);
+    if (abrir) { pintarCores(); modoMarca('ret'); }
+    else modoMarca(null);
+  };
+  $('mkRet').onclick    = () => modoMarca(mkFerramenta === 'ret' ? null : 'ret');
+  $('mkSeta').onclick   = () => modoMarca(mkFerramenta === 'seta' ? null : 'seta');
+  $('mkCaneta').onclick = () => modoMarca(mkFerramenta === 'caneta' ? null : 'caneta');
+  $('mkDesfazer').onclick = async () => {
+    const f = frames[lenteI]; if (!f || !f.marcas || !f.marcas.length) return;
+    f.marcas.pop();
+    await queimarTarjas(f); pintarLente(); render();
+  };
+  $('mkLimpar').onclick = async () => {
+    const f = frames[lenteI]; if (!f) return;
+    f.marcas = [];
+    await queimarTarjas(f); pintarLente(); render();
+  };
+
   function modoTarja(on){
     tarjando = on;
+    if (on) modoMarca(null);
     $('lenteImgCx').classList.toggle('tarjando', on);
     $('tarjaModo').textContent = t(on ? 'tarjaFim' : 'tarjaBtn');
     $('tarjaModo').classList.toggle('ghost', !on);
@@ -5717,7 +6192,20 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     return { x: Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)),
              y: Math.min(1, Math.max(0, (e.clientY - r.top) / r.height)) };
   };
+  let arrastoMk = null;
+
   $('lenteImgCx').addEventListener('pointerdown', e => {
+    if (marcando()) {
+      e.preventDefault();
+      $('lenteImgCx').setPointerCapture(e.pointerId);
+      const p0 = normal(e);
+      arrastoMk = { de: p0, marca: mkFerramenta === 'caneta'
+        ? { tipo:'caneta', cor: mkCor, pts: [[p0.x, p0.y]] }
+        : { tipo: mkFerramenta, cor: mkCor,
+            x: p0.x, y: p0.y, w: 0, h: 0, x1: p0.x, y1: p0.y, x2: p0.x, y2: p0.y } };
+      pintarMarcas();
+      return;
+    }
     if ((!tarjando && !cortando) || (tarjando && e.target.tagName === 'I')) return;
     e.preventDefault();
     $('lenteImgCx').setPointerCapture(e.pointerId);
@@ -5726,6 +6214,22 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     $('lenteTarjas').appendChild(arrasto.el);
   });
   $('lenteImgCx').addEventListener('pointermove', e => {
+    if (arrastoMk) {
+      const a2 = arrastoMk.de, b2 = normal(e), m = arrastoMk.marca;
+      if (m.tipo === 'caneta') {
+        /* Um ponto a cada 0,4% da largura: mais que isso vira um polígono
+           gigante dentro do JSON e do documento, sem diferença no traço. */
+        const ult = m.pts[m.pts.length - 1];
+        if (Math.abs(b2.x - ult[0]) + Math.abs(b2.y - ult[1]) > 0.004) m.pts.push([b2.x, b2.y]);
+      } else if (m.tipo === 'seta') {
+        m.x2 = b2.x; m.y2 = b2.y;
+      } else {
+        m.x = Math.min(a2.x, b2.x); m.y = Math.min(a2.y, b2.y);
+        m.w = Math.abs(b2.x - a2.x); m.h = Math.abs(b2.y - a2.y);
+      }
+      pintarMarcas();
+      return;
+    }
     if (!arrasto) return;
     const a = arrasto.de, b = normal(e);
     arrasto.caixa = { x: Math.min(a.x,b.x), y: Math.min(a.y,b.y),
@@ -5734,6 +6238,19 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     arrasto.el.style.cssText = `left:${c.x*100}%;top:${c.y*100}%;width:${c.w*100}%;height:${c.h*100}%`;
   });
   $('lenteImgCx').addEventListener('pointerup', async () => {
+    if (arrastoMk) {
+      const m = arrastoMk.marca, f = frames[lenteI];
+      arrastoMk = null;
+      /* Um clique parado não vira destaque de tamanho zero. */
+      const vale = m.tipo === 'caneta' ? m.pts.length > 2
+        : m.tipo === 'seta' ? (Math.abs(m.x2-m.x1) + Math.abs(m.y2-m.y1)) > 0.02
+        : (m.w > 0.012 && m.h > 0.012);
+      if (!vale || !f) { pintarMarcas(); return; }
+      f.marcas = (f.marcas || []).concat(m);
+      await queimarTarjas(f);
+      pintarLente(); render();
+      return;
+    }
     if (!arrasto) return;
     const c = arrasto.caixa;
     const f = frames[lenteI];
@@ -5765,6 +6282,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     $('lenteImg').src = imgFinal(f);
     $('cropTirar').classList.toggle('hide', !recorte);
     pintarTarjas();
+    pintarMarcas();
     $('lenteTit').textContent = (n ? t('stepN', n) : t('offTag')) + '  ·  ' + fmt(f.t) +
                                 (horaDe(f.t) ? '  ·  ' + horaDe(f.t) : '');
     $('lentePos').textContent = t('lentePos', lenteI + 1, frames.length);
@@ -6093,7 +6611,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
         sha256: f.hash || null,
         textoNaTela: f.ocr || '',
         imagemBase64: imgFinal(f),
-        tarjas: (f.tarjas || []).length
+        tarjas: (f.tarjas || []).length,
+        destaques: (f.marcas || []).length
       })),
       transcricao: cues.length
         ? cues.map(c => ({ inicio: +c.a.toFixed(2), fim: +c.b.toFixed(2),
@@ -6407,6 +6926,10 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
  body{max-width:820px;margin:0 auto;padding:32px 20px 60px;
       font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:#1f2430}
  h1{font-size:27px;margin:0 0 6px} .arq{color:#666;margin:0 0 22px}
+ .cliente{display:flex;align-items:center;gap:11px;padding:0 0 14px;margin:0 0 18px;
+   border-bottom:1px solid #e6e8ee}
+ .cliente img{height:30px}
+ .cliente b{font-size:16px;color:#3c3c3c}
  table.id{border-collapse:collapse;margin:0 0 26px;font-size:14.5px}
  table.id th{text-align:left;padding:5px 16px 5px 0;color:#666;font-weight:500;vertical-align:top}
  table.id td{padding:5px 0;font-weight:600}
@@ -6424,6 +6947,9 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
  .pe .frase{margin:0;color:#777;font-size:12.5px;line-height:1.5}
  @media print{ body{max-width:none} .passo{break-inside:avoid} }
 </style></head><body>
+${temTime() && (marcaCliente.img || marcaCliente.nome) ? `<div class="cliente">` +
+  (marcaCliente.img ? `<img src="${marcaCliente.img.url}" alt="">` : '') +
+  (marcaCliente.nome ? `<b>${esc(marcaCliente.nome)}</b>` : '') + `</div>` : ''}
 <h1>${esc(titulo)}</h1>
 <p class="arq">${esc(fileName || t('prNoName'))}</p>
 ${cab ? `<table class="id">${cab}</table>` : ''}
@@ -6472,7 +6998,7 @@ ${blocos}
   /* CSV com ponto e vírgula e BOM: é o que o Excel em português abre em colunas
      sem passar pelo assistente de importação. */
   function montarCsv(){
-    const cabec = [t('csvPasso'), t('pWhen'), t('pStart'),
+    const cabec = [t('csvPasso'), t('pWhen'), t('pRelogio'),
                    t('notaPh'), t('lenteFala'), t('pOcr'), t('pHash')];
     const campos = ['passo','tempo','hora','nota','fala','ocr','hash'];
     const cel = v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
@@ -6584,6 +7110,28 @@ ${blocos}
     const tut = ehTutorial();
 
     const corpo = [];
+    /* Marca do cliente no topo, como no PDF. A imagem entra como qualquer outra
+       parte do pacote — o mesmo caminho dos frames. */
+    const midiaMarca = [], relsMarca = [];
+    if (temTime() && (marcaCliente.img || marcaCliente.nome)) {
+      if (marcaCliente.img) {
+        const altEmu = Math.round(0.42 * EMU_POL);
+        const largEmu = Math.round(altEmu * (marcaCliente.img.w / marcaCliente.img.h));
+        midiaMarca.push({ nome: 'word/media/cliente.png',
+                          dados: () => bytesDaImagem(marcaCliente.img.url) });
+        relsMarca.push('<Relationship Id="rIdCliente" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/cliente.png"/>');
+        corpo.push('<w:p><w:pPr><w:spacing w:before="0" w:after="60"/></w:pPr>' +
+          parImagemBruta('rIdCliente', largEmu, altEmu, 9003, 'cliente') +
+          (marcaCliente.nome
+            ? `<w:r><w:rPr><w:b/><w:color w:val="3C3C3C"/><w:sz w:val="24"/><w:szCs w:val="24"/></w:rPr>` +
+              `<w:t xml:space="preserve">  ${xmlEsc(marcaCliente.nome)}</w:t></w:r>`
+            : '') + '</w:p>');
+      } else {
+        corpo.push(par(marcaCliente.nome, { b: true, sz: 24, cor: '3C3C3C', depois: 60 }));
+      }
+      corpo.push('<w:p><w:pPr><w:pBdr><w:top w:val="single" w:sz="6" w:space="6" w:color="E0E0E0"/></w:pBdr>' +
+                 '<w:spacing w:before="0" w:after="160"/></w:pPr></w:p>');
+    }
     corpo.push(par(ev.caso || t('pTitle'), { b: true, sz: 40, depois: 80 }));
     corpo.push(par(fileName || t('prNoName'), { sz: 22, cor: '5A5A5A', depois: ev.algum ? 200 : 240 }));
 
@@ -6733,7 +7281,7 @@ ${blocos}
 
     const relsDoc = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
       '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
-      rels.join('') +
+      rels.join('') + relsMarca.join('') +
       '<Relationship Id="rIdMarcaD" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/marca.png"/>' +
       '<Relationship Id="rIdFtr" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/footer" Target="footer1.xml"/>' +
       '</Relationships>';
@@ -6751,6 +7299,7 @@ ${blocos}
       { nome: 'word/footer1.xml', dados: bytesDe(rodape) },
       { nome: 'word/_rels/footer1.xml.rels', dados: bytesDe(relsRodape) },
       { nome: 'word/media/marca.png', dados: () => bytesDaImagem('data:image/png;base64,' + MARCA_PNG) },
+      ...midiaMarca,
       ...midias
     ], 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
   }
@@ -6769,6 +7318,64 @@ ${blocos}
     } catch (e) {
       $('pdfStatus').innerHTML = `<span class="err">${t('pkgErr', (e && e.message) || e)}</span>`;
     } finally { $('docx').disabled = false; }
+  };
+
+  /* --------- Resumo para o Jira ---------
+
+     O plano de teste de muita gente vive no Jira, e a evidência precisa chegar
+     lá. A integração de verdade (anexar no chamado por OAuth) exige uma função
+     do nosso lado; este botão resolve a maior parte da dor sem depender de
+     ninguém: o texto sai na marcação de wiki que o Jira entende, com a tabela
+     de passos e a hora de cada um, e a pessoa cola no comentário e arrasta o
+     PDF ao lado.
+
+     O nome do arquivo já carrega a chave do chamado quando ela está preenchida
+     — `evidencia-UAT-4711-NAT-1234.pdf` se explica sozinho na lista de anexos
+     do Jira, que é onde alguém vai procurá-lo daqui a três meses. */
+  function resumoJira(){
+    const kept = frames.filter(f => f.keep);
+    const ev = evDados();
+    const dur = duracaoTotal();
+    const { cues } = parseTranscript($('tr').value);
+    const L = [];
+    L.push('h3. ' + (ev.caso || t('pTitle')));
+    /* `linhas`, e não `linhasCompletas`: o caso de teste já é o título logo
+       acima, e repeti-lo na primeira linha é ruído no que alguém lê primeiro. */
+    if (ev.linhas.length) {
+      L.push('');
+      ev.linhas.forEach(([k, v]) => L.push('* *' + k + ':* ' + v));
+    }
+    L.push('');
+    L.push('* *' + t('pDur') + ':* ' + fmt(dur));
+    L.push('* *' + t('wFrames') + ':* ' + kept.length);
+    L.push('');
+    L.push('||' + t('csvPasso') + '||' + t('pWhen') + '||' +
+           (ev.horaVisivel ? t('pRelogio') + '||' : '') + t('notaPh') + '||');
+    kept.forEach((f, i) => {
+      const nota = (f.nota || (cues.length ? falaDoFrame(kept, i, cues, dur, true) : '') || '—')
+        .replace(/[|\r\n]+/g, ' ').slice(0, 120);
+      L.push('|' + (i + 1) + '|' + fmt(f.t) + '|' +
+             (ev.horaVisivel ? (horaDe(f.t) || '—') + '|' : '') + nota + '|');
+    });
+    L.push('');
+    L.push('_' + t('jiraRodape', nomeArquivo()) + '_');
+    return L.join('\n');
+  }
+
+  $('jira').onclick = async () => {
+    const kept = frames.filter(f => f.keep);
+    if (!kept.length) return;
+    const txt = resumoJira();
+    try {
+      await navigator.clipboard.writeText(txt);
+      $('pdfStatus').innerHTML = `<span class="ok">${t('jiraCopiado')}</span>`;
+    } catch (e) {
+      /* Sem permissão de área de transferência: baixa como arquivo, que é pior
+         mas não deixa ninguém sem o texto. */
+      baixarBlob(new Blob([txt], { type:'text/plain;charset=utf-8' }), nomeArquivo() + '-jira.txt');
+      $('pdfStatus').innerHTML = `<span class="ok">${t('jiraBaixado')}</span>`;
+    }
+    medir('baixou_saida', { p_formato: 'jira' });
   };
 
   /* --------- Enviar para o Google Docs ---------
@@ -6929,9 +7536,28 @@ ${blocos}
 
     /* O título passa a ser o caso de teste quando ele existe: é assim que a
        evidência é procurada depois, e não por "Análise de vídeo". */
+    /* A marca do cliente vem ANTES do título, no alto da primeira página — é o
+       lugar onde um documento corporativo põe de quem ele é. Logotipo à
+       esquerda, nome ao lado; qualquer um dos dois sozinho também funciona. */
+    let topo = 32;
+    if (temTime() && (marcaCliente.img || marcaCliente.nome)) {
+      let x = M;
+      if (marcaCliente.img) {
+        const alt = 11, larg = alt * (marcaCliente.img.w / marcaCliente.img.h);
+        try { doc.addImage(marcaCliente.img.url, 'PNG', M, 14, larg, alt); x = M + larg + 5; }
+        catch (e) {}
+      }
+      if (marcaCliente.nome) {
+        doc.setFont('helvetica','bold').setFontSize(12).setTextColor(60);
+        doc.text(marcaCliente.nome, x, 21.5);
+      }
+      doc.setDrawColor(225).line(M, 28.5, PW - M, 28.5);
+      topo = 41;
+    }
+
     const titulo = doc.splitTextToSize(ev.caso || t('pTitle'), CW);
-    doc.setFont('helvetica','bold').setFontSize(20).text(titulo, M, 32);
-    let y = 32 + titulo.length * 8 + 2;
+    doc.setFont('helvetica','bold').setFontSize(20).setTextColor(30).text(titulo, M, topo);
+    let y = topo + titulo.length * 8 + 2;
     doc.setFont('helvetica','normal').setFontSize(11).setTextColor(90);
     doc.text(doc.splitTextToSize(fileName, CW), M, y);
     y += 10;

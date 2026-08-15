@@ -68,3 +68,7 @@ __pycache__/
 venv/
 .env
 .env.*
+
+# A chave PRIVADA que assina as licenças do plano Time. Se ela vazar, qualquer
+# pessoa emite licença e o plano pago deixa de existir.
+emitir-licenca.py
