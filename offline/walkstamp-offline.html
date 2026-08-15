@@ -422,6 +422,21 @@ Reconheço automaticamente:
 
 Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trecho."></textarea>
     <div class="status" id="trInfo" style="margin-top:8px"></div>
+    <!-- Vocabulário do domínio. Fica logo abaixo da transcrição porque é ali que
+         o erro aparece, e não num painel de configuração que ninguém abre. -->
+    <div class="row" style="margin-top:10px;align-items:flex-start;gap:8px">
+      <button class="ghost sm" id="vocModo" data-i18n="vocBtn"></button>
+      <span class="status" id="vocMsg"></span>
+    </div>
+    <div class="hide" id="vocBox" style="margin-top:8px">
+      <p class="status" data-i18n="vocComo" style="max-width:660px;margin:0 0 6px"></p>
+      <textarea id="vocLista" rows="3" spellcheck="false"
+        data-i18n-ph="vocPh" style="font:13px ui-monospace,Menlo,Consolas,monospace"></textarea>
+      <div class="row" style="margin-top:8px">
+        <button class="ghost sm" id="vocAplicar" data-i18n="vocAplicar"></button>
+        <button class="ghost sm hide" id="vocDesfazer" data-i18n="vocDesfazer"></button>
+      </div>
+    </div>
     <div class="row hide" id="expRow" style="margin-top:10px">
       <span class="status" data-i18n="expLabel"></span>
       <button class="ghost sm" id="expVtt">.vtt</button>
@@ -537,6 +552,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       <span class="tag">PDF ~<b id="size">0</b> MB</span>
       <button class="ghost sm" id="allOn" data-i18n="keepAll"></button>
       <button class="ghost sm hide" id="soMarcados" data-i18n="keepMarked"></button>
+      <button class="ghost sm" id="addTela" data-i18n="addTelaBtn"></button>
+      <input type="file" id="addArq" accept="image/*" class="hide">
       <button class="ghost sm" id="dedup" data-i18n="dropDup"></button>
       <button class="ghost sm" id="mute" data-i18n="dropQuiet"></button>
       <button class="ghost sm" id="ocr" data-i18n="ocrBtn"></button>
@@ -1213,6 +1230,21 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       trAoVivoFim:'Transcrição feita ao vivo: {0} trechos. O texto está aqui embaixo e pode ser corrigido.',
       extraJunto:'Varrendo os frames ao mesmo tempo que a transcrição — os dois usam partes diferentes da máquina, então ir junto é mais rápido do que um depois do outro.',
       urlPreenchido:'{0} campo(s) vieram preenchidos pelo link que você abriu. Confira antes de gerar — dá para corrigir tudo aqui.',
+      addTelaBtn:'Anexar uma tela',
+      addTelaFeito:'Tela anexada como passo {0}. Use as setas na miniatura para movê-la de lugar.',
+      addTelaErro:'Não consegui ler essa imagem. Tente um PNG ou um JPG.',
+      coladoTag:'tela anexada',
+      moverEsq:'mover para trás', moverDir:'mover para frente',
+      vocBtn:'Termos do seu sistema',
+      vocComo:'Um termo por linha. O reconhecimento de voz não conhece o seu sistema e devolve "ME21N" como "eme vinte e um ene" — liste os códigos e os nomes próprios que aparecem no seu dia, e eu procuro a forma falada de cada um na transcrição e nas anotações.',
+      vocPh:'ME21N\nKI235\nS/4HANA\nFiori',
+      vocAplicar:'Corrigir os termos',
+      vocDesfazer:'desfazer',
+      vocFeito:'{0} correção(ões) feita(s).',
+      vocNada:'Nenhum desses termos apareceu falado por extenso. Nada foi mudado.',
+      vocVazio:'Liste pelo menos um termo antes.',
+      vocSemTexto:'Não há transcrição para corrigir ainda.',
+      vocDesfeito:'Desfeito — a transcrição voltou ao que era.',
       jiraBtn:'Resumo para o Jira',
       jiraCopiado:'Resumo copiado. Cole no comentário do chamado e arraste o PDF junto.',
       jiraBaixado:'Não consegui usar a área de transferência, então baixei o resumo como .txt.',
@@ -1547,6 +1579,21 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       trAoVivoFim:'Transcribed live: {0} segments. The text is below and can be corrected.',
       extraJunto:'Scanning frames at the same time as the transcription — the two use different parts of the machine, so together is faster than one after the other.',
       urlPreenchido:'{0} field(s) came pre-filled from the link you opened. Check them before generating — you can correct everything here.',
+      addTelaBtn:'Attach a screen',
+      addTelaFeito:'Screen attached as step {0}. Use the arrows on the thumbnail to move it.',
+      addTelaErro:'I could not read that image. Try a PNG or a JPG.',
+      coladoTag:'attached screen',
+      moverEsq:'move back', moverDir:'move forward',
+      vocBtn:'Your system terms',
+      vocComo:'One term per line. Speech recognition does not know your system and returns "ME21N" as "em twenty one en" — list the codes and proper names that show up in your day, and I look for the spoken form of each one in the transcript and in the notes.',
+      vocPh:'ME21N\nKI235\nS/4HANA\nFiori',
+      vocAplicar:'Fix the terms',
+      vocDesfazer:'undo',
+      vocFeito:'{0} correction(s) made.',
+      vocNada:'None of those terms showed up spelled out. Nothing was changed.',
+      vocVazio:'List at least one term first.',
+      vocSemTexto:'There is no transcript to fix yet.',
+      vocDesfeito:'Undone — the transcript is back to what it was.',
       jiraBtn:'Summary for Jira',
       jiraCopiado:'Summary copied. Paste it into the issue comment and drag the PDF along.',
       jiraBaixado:'I could not use the clipboard, so I downloaded the summary as .txt.',
@@ -1879,6 +1926,21 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       trAoVivoFim:'Transcripción hecha en vivo: {0} fragmentos. El texto está abajo y se puede corregir.',
       extraJunto:'Barriendo los fotogramas a la vez que la transcripción — los dos usan partes distintas de la máquina, así que juntos es más rápido que uno tras otro.',
       urlPreenchido:'{0} campo(s) vinieron rellenados por el enlace que abriste. Revísalos antes de generar — puedes corregirlo todo aquí.',
+      addTelaBtn:'Adjuntar una pantalla',
+      addTelaFeito:'Pantalla adjuntada como paso {0}. Usa las flechas de la miniatura para moverla.',
+      addTelaErro:'No pude leer esa imagen. Prueba con un PNG o un JPG.',
+      coladoTag:'pantalla adjuntada',
+      moverEsq:'mover atrás', moverDir:'mover adelante',
+      vocBtn:'Términos de tu sistema',
+      vocComo:'Un término por línea. El reconocimiento de voz no conoce tu sistema y devuelve "ME21N" como "eme veintiuno ene" — lista los códigos y nombres propios que aparecen en tu día, y yo busco la forma hablada de cada uno en la transcripción y en las anotaciones.',
+      vocPh:'ME21N\nKI235\nS/4HANA\nFiori',
+      vocAplicar:'Corregir los términos',
+      vocDesfazer:'deshacer',
+      vocFeito:'{0} corrección(es) hecha(s).',
+      vocNada:'Ninguno de esos términos apareció escrito por extenso. No se cambió nada.',
+      vocVazio:'Lista al menos un término antes.',
+      vocSemTexto:'Todavía no hay transcripción que corregir.',
+      vocDesfeito:'Deshecho — la transcripción volvió a como estaba.',
       jiraBtn:'Resumen para Jira',
       jiraCopiado:'Resumen copiado. Pégalo en el comentario del ticket y arrastra el PDF junto.',
       jiraBaixado:'No pude usar el portapapeles, así que descargué el resumen como .txt.',
@@ -5459,6 +5521,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     frames.forEach((f, i) => {
       const fig = document.createElement('figure');
       if (!f.keep) fig.className = 'off';
+      if (f.colado) fig.classList.add('colada');
       /* A etiqueta vem daqui, e não do CSS: escrita como content:'descartado'
          ela escapava do i18n e aparecia em português para quem usa em inglês. */
       fig.dataset.off = t('offTag');
@@ -5480,10 +5543,12 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       const cap = document.createElement('figcaption');
       // o descartado mantém a linha, com um traço no lugar do número: sem ela a
       // miniatura encolhe e a fileira desalinha a cada descarte
+      /* Uma tela colada não tem instante no vídeo, e inventar um seria mentir
+         num documento de evidência. Ela mostra a etiqueta no lugar do relógio. */
       cap.innerHTML =
         `<span class="passo">${n ? t('stepN', n) : '—'}</span>` +
-        `<span class="rel">${fmt(f.t)}${f.manual ? ' *' : ''}` +
-        (hora ? ' · ' + hora : '') + `</span>`;
+        `<span class="rel">${f.colado ? t('coladoTag') : fmt(f.t) + (f.manual ? ' *' : '')}` +
+        (hora && !f.colado ? ' · ' + hora : '') + `</span>`;
       toque.setAttribute('aria-label',
         (n ? t('stepN', n) + ' · ' : '') + fmt(f.t) + ' — ' + t('offTag'));
 
@@ -5521,8 +5586,41 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       lupa.setAttribute('aria-label', t('ampliar') + ' — ' + (n ? t('stepN', n) : fmt(f.t)));
       lupa.onclick = e => { e.stopPropagation(); abrirLente(i); };
 
+      /* Mover o passo de lugar.
+
+         Setas, e não arrastar. Arrastar seria mais bonito e seria pior aqui: a
+         miniatura JÁ é um botão que descarta e tem um campo de texto embaixo, e
+         distinguir arrasto de clique nesse aperto quebra os dois. Setas
+         funcionam com teclado, com toque e com leitor de tela, e ninguém precisa
+         adivinhar o gesto.
+
+         Em teste exploratório a ordem sai errada o tempo todo — a pessoa volta
+         numa tela, confere outra coisa, segue. Sem isto a saída era regravar. */
+      const mover = (dir, rotulo) => {
+        const b2 = document.createElement('button');
+        b2.type = 'button';
+        b2.className = 'mover ' + (dir < 0 ? 'esq' : 'dir');
+        b2.textContent = dir < 0 ? '‹' : '›';
+        b2.title = t(rotulo);
+        b2.setAttribute('aria-label', t(rotulo) + ' — ' + (n ? t('stepN', n) : fmt(f.t)));
+        b2.disabled = dir < 0 ? i === 0 : i === frames.length - 1;
+        b2.onclick = e => {
+          e.stopPropagation();
+          const j = i + dir;
+          if (j < 0 || j >= frames.length) return;
+          [frames[i], frames[j]] = [frames[j], frames[i]];
+          render();
+          const alvo = $('thumbs').querySelector(`.mover.${dir < 0 ? 'esq' : 'dir'}[data-i="${j}"]`);
+          if (alvo) alvo.focus();
+        };
+        b2.dataset.i = i;
+        return b2;
+      };
+
       fig.appendChild(toque);
       fig.appendChild(lupa);
+      fig.appendChild(mover(-1, 'moverEsq'));
+      fig.appendChild(mover(1, 'moverDir'));
       fig.appendChild(cap);
       fig.appendChild(campo);
       box.appendChild(fig);
@@ -5659,6 +5757,244 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
      seguinte seria um defeito de evidência, não uma comodidade. */
   const evCampos = ['evCaso','evSis','evQuem','evChamado','evRes','evInicio'];
   const PERFIL_CHAVE = 'Walkstamp.perfil';
+  /* ================= vocabulário do domínio =================
+
+     O Whisper não conhece SAP. "ME21N" volta como *emê vinte e um ene*, "KI235"
+     como *cá i duzentos e trinta e cinco*, e uma evidência com o código da
+     transação escrito por extenso não é evidência — é um texto que o auditor não
+     reconhece e que a busca do Jira não acha.
+
+     Não dá para ensinar o modelo. Dá para corrigir depois, e a correção é
+     barata: a pessoa lista os termos que existem no sistema dela, e o produto
+     procura a FORMA FALADA de cada um.
+
+     A forma falada é gerada, não digitada. Para ME21N o código monta sozinho
+     "eme e vinte e um ene", "eme vinte e um ene", "m e 21 n", "me21n" — soletrando
+     letra por letra no idioma da transcrição e escrevendo os números por extenso,
+     com o "e" do português opcional no meio ("vinte e um" e "vinte um").
+
+     É uma feature do plano gratuito de propósito: transcrição que erra o código
+     da transação não é um incômodo de equipe, é uma evidência que não serve — e
+     o que faz a evidência de UMA pessoa ser aceita é grátis, por regra. */
+  const LETRAS = {
+    pt: { a:'a', b:'bê', c:'cê', d:'dê', e:'é', f:'éfe', g:'gê', h:'agá', i:'i', j:'jota',
+          k:'ká', l:'éle', m:'eme', n:'ene', o:'ó', p:'pê', q:'quê', r:'erre', s:'ésse',
+          t:'tê', u:'u', v:'vê', w:'dáblio', x:'xis', y:'ípsilon', z:'zê' },
+    en: { a:'ay', b:'bee', c:'see', d:'dee', e:'ee', f:'ef', g:'gee', h:'aitch', i:'eye',
+          j:'jay', k:'kay', l:'el', m:'em', n:'en', o:'oh', p:'pee', q:'cue', r:'ar',
+          s:'ess', t:'tee', u:'you', v:'vee', w:'double u', x:'ex', y:'why', z:'zee' },
+    es: { a:'a', b:'be', c:'ce', d:'de', e:'e', f:'efe', g:'ge', h:'hache', i:'i', j:'jota',
+          k:'ka', l:'ele', m:'eme', n:'ene', o:'o', p:'pe', q:'cu', r:'erre', s:'ese',
+          t:'te', u:'u', v:'uve', w:'doble u', x:'equis', y:'i griega', z:'zeta' }
+  };
+
+  /* Números por extenso. Só até 999: código de transação e de conta não passa
+     disso, e uma tabela maior seria peso sem uso. */
+  const NUMS = {
+    pt: { u:['zero','um','dois','três','quatro','cinco','seis','sete','oito','nove'],
+          d:['dez','onze','doze','treze','quatorze','quinze','dezesseis','dezessete','dezoito','dezenove'],
+          z:['','','vinte','trinta','quarenta','cinquenta','sessenta','setenta','oitenta','noventa'],
+          c:['','cento','duzentos','trezentos','quatrocentos','quinhentos','seiscentos','setecentos','oitocentos','novecentos'],
+          cem:'cem', e:'e' },
+    en: { u:['zero','one','two','three','four','five','six','seven','eight','nine'],
+          d:['ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen'],
+          z:['','','twenty','thirty','forty','fifty','sixty','seventy','eighty','ninety'],
+          c:['','one hundred','two hundred','three hundred','four hundred','five hundred','six hundred','seven hundred','eight hundred','nine hundred'],
+          cem:'one hundred', e:'and' },
+    es: { u:['cero','uno','dos','tres','cuatro','cinco','seis','siete','ocho','nueve'],
+          d:['diez','once','doce','trece','catorce','quince','dieciséis','diecisiete','dieciocho','diecinueve'],
+          z:['','','veinte','treinta','cuarenta','cincuenta','sesenta','setenta','ochenta','noventa'],
+          c:['','ciento','doscientos','trescientos','cuatrocientos','quinientos','seiscientos','setecientos','ochocientos','novecientos'],
+          cem:'cien', e:'y' },
+    };
+
+  /* Todas as maneiras de dizer um número de 0 a 999 naquele idioma. Devolve
+     mais de uma quando a língua permite ("vinte e um" e "vinte um"). */
+  function numPorExtenso(n, L){
+    const T = NUMS[L] || NUMS.pt;
+    if (n < 10) return [T.u[n]];
+    if (n < 20) return [T.d[n - 10]];
+    if (n < 100) {
+      const z = T.z[Math.floor(n / 10)], r = n % 10;
+      if (!r) return [z];
+      return [z + ' ' + T.e + ' ' + T.u[r], z + ' ' + T.u[r], z + '-' + T.u[r]];
+    }
+    const c = Math.floor(n / 100), r = n % 100;
+    const cab = (n === 100) ? T.cem : T.c[c];
+    if (!r) return [cab];
+    return numPorExtenso(r, L).map(x => cab + ' ' + T.e + ' ' + x)
+      .concat(numPorExtenso(r, L).map(x => cab + ' ' + x));
+  }
+
+  const semAcento = txt => txt.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+  /* O caminho inverso: pegar o que foi FALADO e reduzir a uma sigla comparável.
+
+     A primeira versão gerava todas as formas faladas de "ME21N" e procurava por
+     elas. Falhou no primeiro teste com fala de verdade, e o motivo é simples:
+     ninguém soletra igual. "ME21N" sai como *eme vinte e um ene* — o M virou
+     "eme", o E sumiu dentro dele, o N virou "ene". Gerar combinações nunca vai
+     cobrir como cada pessoa lê uma sigla.
+
+     Então o sentido se inverteu. Em vez de adivinhar como o termo é dito, o
+     código normaliza o TEXTO e compara por proximidade:
+
+       1. números por extenso viram dígitos  → "vinte e um" vira "21"
+       2. nome de letra vira a letra         → "eme" vira "m"
+       3. janelas de até cinco palavras são coladas e comparadas com o termo,
+          aceitando pequena distância de edição — é o que absorve o "e" que
+          ninguém pronuncia.
+
+     Exigir dígito na janela quando o termo tem dígito é o que impede o
+     tropeço mais provável: trocar uma palavra comum por um código parecido. */
+  /* Como o reconhecimento de voz REALMENTE escreve o nome de cada letra.
+
+     A tabela de cima é a grafia correta; esta é a que aparece na prática. O caso
+     que derrubou o primeiro teste: em português o K é dito "cá", e o modelo
+     escreve com C — a tabela dizia "ká", tirar o acento dava "ka", e nada casava.
+     Grafia certa não serve para reconhecer fala. */
+  const APELIDOS = {
+    pt: { k:['ca','kappa','cappa'], h:['aga'], w:['dabliu','double u','dabliu'],
+          y:['ipsilon','ypsilon','i grego'], q:['ke','ku'], r:['er'], s:['es'],
+          x:['chis','shis'], z:['zeta'], j:['jotta'], g:['je'], e:['e'] },
+    en: { k:['kei'], w:['double you','doubleu'], y:['wai'], z:['zed'], h:['aich'] },
+    es: { k:['ca','ka'], w:['doble ve','uve doble'], y:['ye','i griega'],
+          z:['ceta'], h:['ache'], j:['jotta'] }
+  };
+
+  const NOME_LETRA = {};
+  for (const L in LETRAS) {
+    NOME_LETRA[L] = {};
+    for (const letra in LETRAS[L]) NOME_LETRA[L][semAcento(LETRAS[L][letra])] = letra;
+    const ap = APELIDOS[L] || {};
+    for (const letra in ap) ap[letra].forEach(w => { NOME_LETRA[L][semAcento(w)] = letra; });
+  }
+
+  /* Palavras de número → valor. Montada da mesma tabela que escreve por extenso,
+     para as duas nunca discordarem. */
+  function tabelaNumeros(L){
+    const T = NUMS[L] || NUMS.pt, m = {};
+    T.u.forEach((w, i) => { if (w) m[semAcento(w)] = i; });
+    T.d.forEach((w, i) => { if (w) m[semAcento(w)] = 10 + i; });
+    T.z.forEach((w, i) => { if (w) m[semAcento(w)] = 10 * i; });
+    T.c.forEach((w, i) => { if (w) m[semAcento(w)] = 100 * i; });
+    m[semAcento(T.cem)] = 100;
+    return { mapa: m, e: semAcento(T.e) };
+  }
+
+  /* Distância de edição, limitada: acima do teto devolve o teto e para. */
+  function distancia(a, b, teto){
+    if (Math.abs(a.length - b.length) > teto) return teto + 1;
+    let linha = Array.from({ length: b.length + 1 }, (_, i) => i);
+    for (let i = 1; i <= a.length; i++) {
+      let ant = linha[0]; linha[0] = i; let melhor = i;
+      for (let j = 1; j <= b.length; j++) {
+        const tmp = linha[j];
+        linha[j] = Math.min(linha[j] + 1, linha[j-1] + 1, ant + (a[i-1] === b[j-1] ? 0 : 1));
+        ant = tmp;
+        if (linha[j] < melhor) melhor = linha[j];
+      }
+      if (melhor > teto) return teto + 1;
+    }
+    return linha[b.length];
+  }
+
+  const compacto = t2 => semAcento(String(t2)).toLowerCase().replace(/[^a-z0-9]/g, '');
+
+  /* Quebra o texto em palavras guardando onde cada uma começa e termina, para
+     poder devolver o texto com a troca no lugar exato. */
+  function palavras(texto){
+    const out = []; const re = /[0-9]+|[A-Za-zÀ-ÿ]+/g; let m;
+    while ((m = re.exec(texto))) out.push({ t: m[0], i: m.index, f: m.index + m[0].length });
+    return out;
+  }
+
+  /* Uma janela de palavras vira uma sigla candidata: número por extenso vira
+     dígito, nome de letra vira letra, o resto entra como está. */
+  function siglaDaJanela(js, L){
+    const { mapa, e } = tabelaNumeros(L);
+    const nomes = NOME_LETRA[L] || NOME_LETRA.pt;
+    let saida = '', acumulado = null, temDigito = false;
+    const fechar = () => { if (acumulado != null) { saida += acumulado; acumulado = null; } };
+    for (const p2 of js) {
+      const w = semAcento(p2.t).toLowerCase();
+      if (w === e) continue;                       // o "e" de "vinte e um"
+      if (/^\d+$/.test(w)) { fechar(); saida += w; temDigito = true; continue; }
+      if (w in mapa) {
+        const v = mapa[w];
+        /* "duzentos e trinta e cinco" soma; "vinte" e "um" também. */
+        if (acumulado == null) acumulado = v;
+        else if (v < 100 && acumulado % 100 === 0) acumulado += v;
+        else if (v < 10 && acumulado % 10 === 0) acumulado += v;
+        else { fechar(); acumulado = v; }
+        temDigito = true;
+        continue;
+      }
+      fechar();
+      saida += (w in nomes) ? nomes[w] : w;
+    }
+    fechar();
+    return { sigla: saida, temDigito };
+  }
+
+  /* Troca as formas faladas dos termos pelo termo escrito. Devolve o texto novo
+     e o número de trocas — sem o número, "apliquei" é indistinguível de "não
+     achei nada". */
+  function aplicarVocabulario(texto, termos, L){
+    if (!LETRAS[L]) L = 'pt';
+    const alvos = termos.map(t2 => ({ termo: t2, comp: compacto(t2) }))
+                        .filter(a => a.comp.length >= 2)
+                        .sort((a, b) => b.comp.length - a.comp.length);
+    if (!alvos.length) return { texto, trocas: 0 };
+
+    const ps = palavras(texto);
+    const usada = new Array(ps.length).fill(false);
+    const trocasList = [];
+
+    const MAXJ = 8;                 // "cá i duzentos e trinta e cinco" tem sete palavras
+
+    /* Duas passadas, e a ordem é o que impede o erro mais bobo.
+
+       A primeira aceita SÓ acerto exato, da janela menor para a maior. Sem ela,
+       "a ME21N" casaria com "ME21N" por distância 1 e o artigo seria engolido —
+       o termo já estava escrito certo e mesmo assim a frase mudava.
+
+       A segunda aceita distância, da janela maior para a menor: "eme vinte e um
+       ene" tem que ganhar de "eme". */
+    const varrer = (larguras, tolerar) => {
+      for (const larg of larguras) {
+        for (let i = 0; i + larg <= ps.length; i++) {
+          if (usada.slice(i, i + larg).some(Boolean)) continue;
+          const js = ps.slice(i, i + larg);
+          const { sigla, temDigito } = siglaDaJanela(js, L);
+          if (sigla.length < 2 || sigla.length > 24) continue;
+          for (const alvo of alvos) {
+            if (/\d/.test(alvo.comp) && !temDigito) continue;
+            /* Teto proporcional: uma letra a mais ou a menos numa sigla curta,
+               duas numa longa. Mais que isso vira chute. */
+            const teto = tolerar ? (alvo.comp.length <= 5 ? 1 : 2) : 0;
+            if (distancia(sigla, alvo.comp, teto) > teto) continue;
+            for (let k = i; k < i + larg; k++) usada[k] = true;
+            /* Já está escrito certo? Marca como usada e não troca. */
+            const cru = texto.slice(js[0].i, js[js.length-1].f);
+            if (cru !== alvo.termo) {
+              trocasList.push({ i: js[0].i, f: js[js.length-1].f, termo: alvo.termo });
+            }
+            break;
+          }
+        }
+      }
+    };
+    const cresc = Array.from({ length: MAXJ }, (_, k) => k + 1);
+    varrer(cresc, false);                       // exato, do menor para o maior
+    varrer(cresc.slice().reverse(), true);      // com tolerância, do maior para o menor
+    if (!trocasList.length) return { texto, trocas: 0 };
+    trocasList.sort((a, b) => b.i - a.i);           // de trás para frente: os índices não se movem
+    let saida = texto;
+    trocasList.forEach(tr => { saida = saida.slice(0, tr.i) + tr.termo + saida.slice(tr.f); });
+    return { texto: saida, trocas: trocasList.length };
+  }
+
   const PERFIL_CAMPOS = ['evSis','evQuem'];
 
   function pintarPerfil(){
@@ -6396,6 +6732,72 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     $('pdfStatus').textContent = n ? t('falaNotaN', n) : t('falaNota0');
   };
 
+  /* ---- inserir uma tela à mão ----
+
+     A tela que faltou — um e-mail de confirmação, um sistema legado que não
+     estava na gravação, um print que alguém mandou no chat. Antes disso a única
+     saída era regravar tudo.
+
+     Ela entra no fim e a pessoa move com as setas. Não tem instante no vídeo, e
+     inventar um seria mentir num documento de evidência: ela aparece com a
+     etiqueta "tela anexada" no lugar do relógio, na miniatura e no documento, e
+     sai marcada no JSON.
+
+     Também aceita Ctrl+V: quem acabou de dar um print quer colar, não procurar
+     um botão. */
+  async function inserirTela(arquivo){
+    if (!arquivo || !/^image\//.test(arquivo.type || '')) return false;
+    try {
+      const url = URL.createObjectURL(arquivo);
+      const im = await new Promise((ok2, erro) => {
+        const i = new Image(); i.onload = () => ok2(i); i.onerror = erro; i.src = url;
+      });
+      /* Redesenhada na mesma largura das outras: um print de 4K ao lado de
+         quadros de 900 px sairia com outra escala no documento. */
+      const larg = Math.min(900, im.naturalWidth || 900);
+      const esc = larg / (im.naturalWidth || larg);
+      const c2 = document.createElement('canvas');
+      c2.width = Math.max(1, Math.round((im.naturalWidth || larg) * esc));
+      c2.height = Math.max(1, Math.round((im.naturalHeight || larg) * esc));
+      c2.getContext('2d').drawImage(im, 0, 0, c2.width, c2.height);
+      URL.revokeObjectURL(url);
+      const q = parseFloat($('quality').value) || 0.8;
+      const ultimo = frames.length ? frames[frames.length - 1].t : 0;
+      frames.push({
+        t: ultimo, img: { url: c2.toDataURL('image/jpeg', q), w: c2.width, h: c2.height },
+        keep: true, colado: true, manual: true, nota: ''
+      });
+      render(); passos();
+      $('status').innerHTML = `<span class="ok">${t('addTelaFeito', frames.length)}</span>`;
+      return true;
+    } catch (e) {
+      $('status').innerHTML = `<span class="err">${t('addTelaErro')}</span>`;
+      return false;
+    }
+  }
+
+  $('addTela').onclick = () => $('addArq').click();
+  $('addArq').onchange = async e => {
+    const f = e.target.files && e.target.files[0];
+    if (f) await inserirTela(f);
+    e.target.value = '';
+  };
+
+  /* Colar. Só quando o cartão de revisão está aberto: um Ctrl+V no passo 1 é
+     alguém colando uma transcrição, não uma tela. */
+  document.addEventListener('paste', async ev => {
+    if ($('prevCard').classList.contains('hide')) return;
+    const alvo = ev.target;
+    if (alvo && /^(INPUT|TEXTAREA)$/.test(alvo.tagName)) return;
+    const itens = (ev.clipboardData && ev.clipboardData.items) || [];
+    for (const it of itens) {
+      if (it.kind !== 'file' || !/^image\//.test(it.type)) continue;
+      const f = it.getAsFile();
+      if (f) { ev.preventDefault(); await inserirTela(f); }
+      return;
+    }
+  });
+
   $('allOn').onclick = () => { frames.forEach(f => f.keep = true); render(); };
 
   /* "Manter só as marcadas". Quem apertou "marcar" durante a gravação já disse
@@ -6612,7 +7014,10 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
         textoNaTela: f.ocr || '',
         imagemBase64: imgFinal(f),
         tarjas: (f.tarjas || []).length,
-        destaques: (f.marcas || []).length
+        destaques: (f.marcas || []).length,
+        /* Anexada à mão: não tem instante no vídeo, e quem lê a evidência
+           precisa saber disso sem depender de reparar na etiqueta. */
+        telaAnexada: !!f.colado
       })),
       transcricao: cues.length
         ? cues.map(c => ({ inicio: +c.a.toFixed(2), fim: +c.b.toFixed(2),
@@ -6889,8 +7294,12 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     const dur = duracaoTotal();
     return kept.map((f, i) => ({
       passo: i + 1,
-      tempo: fmt(f.t),
-      hora: horaDe(f.t),
+      /* A tela anexada não tem instante no vídeo. Mostrar a etiqueta no lugar
+         do relógio vale para o HTML, o Markdown e a planilha, pelo mesmo motivo
+         que vale para o PDF: uma hora inventada numa evidência é pior que a
+         ausência dela. */
+      tempo: f.colado ? t('coladoTag') : fmt(f.t),
+      hora: f.colado ? '' : horaDe(f.t),
       nota: f.nota || '',
       fala: cues.length ? falaDoFrame(kept, i, cues, dur, true) : '',
       ocr: f.ocr || '',
@@ -7204,7 +7613,8 @@ ${blocos}
          equivalente no PDF. */
       corpo.push(par(tut
           ? t('stepN', i + 1) + (f.nota ? '  —  ' + f.nota : '')
-          : t('pStep', i + 1, kept.length) + '   ·   ' + fmt(f.t) + (hora ? '   ·   ' + hora : ''),
+          : t('pStep', i + 1, kept.length) + '   ·   ' +
+            (f.colado ? t('coladoTag') : fmt(f.t) + (hora ? '   ·   ' + hora : '')),
         { b: true, sz: 22, antes: 240, depois: 40 }));
       if (!tut && f.nota) corpo.push(par(f.nota, { sz: 21, cor: '1F2430', depois: 60 }));
       corpo.push(parImagem(rid, cx, cy, i + 1));
@@ -7361,6 +7771,63 @@ ${blocos}
     L.push('_' + t('jiraRodape', nomeArquivo()) + '_');
     return L.join('\n');
   }
+
+  /* ---- interface do vocabulário ---- */
+  const VOC_CHAVE = 'Walkstamp.vocabulario';
+  let vocAntes = null;              // o texto anterior, para desfazer
+
+  function vocTermos(){
+    return ($('vocLista').value || '')
+      .split(/[\n,;]+/).map(x => x.trim()).filter(x => x.length > 1).slice(0, 200);
+  }
+  function guardarVoc(){
+    try {
+      const v = ($('vocLista').value || '').trim();
+      if (v) sessionStorage.setItem(VOC_CHAVE, v);
+      else sessionStorage.removeItem(VOC_CHAVE);
+    } catch (e) {}
+  }
+  try {
+    const v = sessionStorage.getItem(VOC_CHAVE);
+    if (v) $('vocLista').value = v;
+  } catch (e) {}
+
+  $('vocLista').addEventListener('input', guardarVoc);
+  $('vocModo').onclick = () => $('vocBox').classList.toggle('hide');
+
+  $('vocAplicar').onclick = () => {
+    const termos = vocTermos();
+    if (!termos.length) { $('vocMsg').innerHTML = `<span class="err">${t('vocVazio')}</span>`; return; }
+    const antes = $('tr').value;
+    if (!antes.trim()) { $('vocMsg').innerHTML = `<span class="err">${t('vocSemTexto')}</span>`; return; }
+    const L = ($('lang').value || LANG || 'pt').slice(0, 2);
+    const r = aplicarVocabulario(antes, termos, LETRAS[L] ? L : 'pt');
+    if (!r.trocas) { $('vocMsg').textContent = t('vocNada'); return; }
+    vocAntes = antes;
+    $('tr').value = r.texto;
+    refreshTr();
+    /* As anotações dos passos vêm da mesma fala e sofrem do mesmo erro — corrigir
+       só a transcrição deixaria o documento contradizendo a si mesmo. */
+    let extra = 0;
+    frames.forEach(f => {
+      if (!f.nota) return;
+      const rn = aplicarVocabulario(f.nota, termos, LETRAS[L] ? L : 'pt');
+      if (rn.trocas) { f.nota = rn.texto; extra += rn.trocas; }
+    });
+    if (extra) render();
+    $('vocMsg').innerHTML = `<span class="ok">${t('vocFeito', r.trocas + extra)}</span>`;
+    $('vocDesfazer').classList.remove('hide');
+    medir('baixou_saida', { p_formato: 'vocabulario' });
+  };
+
+  $('vocDesfazer').onclick = () => {
+    if (vocAntes == null) return;
+    $('tr').value = vocAntes;
+    vocAntes = null;
+    refreshTr();
+    $('vocDesfazer').classList.add('hide');
+    $('vocMsg').textContent = t('vocDesfeito');
+  };
 
   $('jira').onclick = async () => {
     const kept = frames.filter(f => f.keep);
@@ -7555,6 +8022,11 @@ ${blocos}
       topo = 41;
     }
 
+    /* O instante de um passo, no PDF. Um lugar só, porque ele aparece em quatro
+       — capa em grade, capa cheia, índice e lista de hashes — e uma tela
+       anexada tem que dizer a mesma coisa nos quatro. */
+    const quando = f => f.colado ? t('coladoTag') : fmt(f.t);
+
     const titulo = doc.splitTextToSize(ev.caso || t('pTitle'), CW);
     doc.setFont('helvetica','bold').setFontSize(20).setTextColor(30).text(titulo, M, topo);
     let y = topo + titulo.length * 8 + 2;
@@ -7625,7 +8097,7 @@ ${blocos}
         // a anotação manda no índice: quem escreveu a expectativa quer vê-la aqui
         if (f.nota) resumo = f.nota;
         doc.setTextColor(120).text(t('stepN', i + 1), M, iy);
-        doc.setTextColor(120).text(fmt(f.t), M + 20, iy);
+        doc.setTextColor(120).text(quando(f), M + 20, iy);
         doc.setTextColor(45).text(doc.splitTextToSize(resumo || '—', CW - 38)[0], M + 38, iy);
         iy += 5.6;
       });
@@ -7659,7 +8131,7 @@ ${blocos}
         const hora = horaDe(f.t);
         const cabTxt = tut
           ? t('stepN', i+1) + (f.nota ? '  —  ' + f.nota : '')
-          : t('stepN', i+1) + '   ·   ' + fmt(f.t) + (hora ? '   ·   ' + hora : '');
+          : t('stepN', i+1) + '   ·   ' + quando(f) + (hora && !f.colado ? '   ·   ' + hora : '');
         doc.setFont('helvetica','bold').setFontSize(tut ? 11.5 : 11);
         const cabL = doc.splitTextToSize(cabTxt, CW - 24);   // 24 mm do "frame i de n"
         doc.setFont('helvetica','normal').setFontSize(9.6);
@@ -7723,7 +8195,7 @@ ${blocos}
         doc.addImage(imgFinal(f), 'JPEG', x, top, iwG, ihG);
         let cy2 = top + ihG + 4.5;
         doc.setFont('helvetica','bold').setFontSize(8.5).setTextColor(60)
-           .text(t('stepN', i + 1) + '  ·  ' + fmt(f.t), x, cy2);
+           .text(t('stepN', i + 1) + '  ·  ' + quando(f), x, cy2);
         if (hora) {
           cy2 += 3.6;
           doc.setFont('helvetica','normal').setFontSize(7).setTextColor(130).text(hora, x, cy2);
@@ -7755,7 +8227,7 @@ ${blocos}
         if (!f.hash) return;
         if (hy > PH - 22) { foot(); doc.addPage(); hy = M + 4; }
         doc.setFont('helvetica','bold').setFontSize(8.6).setTextColor(60)
-           .text(t('stepN', i + 1) + '  ·  ' + fmt(f.t), M, hy);
+           .text(t('stepN', i + 1) + '  ·  ' + quando(f), M, hy);
         hy += 4.2;
         doc.setFont('courier','normal').setFontSize(7.6).setTextColor(95);
         doc.text(doc.splitTextToSize(f.hash, CW), M, hy);
