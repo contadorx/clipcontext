@@ -18,12 +18,16 @@ body{margin:0;background:var(--bg);color:var(--ink);
 header{border-bottom:1px solid var(--line);position:sticky;top:0;z-index:9;
        background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(9px)}
 header .wrap{display:flex;align-items:center;justify-content:space-between;height:62px;gap:16px}
-.brand{display:flex;align-items:center;gap:11px;text-decoration:none;color:var(--ink);font-weight:600;
-       letter-spacing:-.01em;font-size:19px}
+/* A palavra pesa mais que o desenho. O símbolo já ficou grande numa rodada
+   anterior; o nome continuou em 19px, e é ele que a pessoa lê, repete e digita
+   depois. Num cabeçalho de 62px cabe bem mais do que isso. */
+.brand{display:flex;align-items:center;gap:11px;text-decoration:none;color:var(--ink);font-weight:700;
+       letter-spacing:-.015em;font-size:24px}
 /* 36 num cabeçalho de 62: sobram 13px de respiro de cada lado, que é o que
    impede a marca de encostar na borda quando o menu quebra no celular. */
 .brand img{width:36px;height:36px;display:block}
-@media (max-width:480px){ .brand img{width:31px;height:31px} .brand{font-size:17px} }
+@media (max-width:560px){ .brand img{width:32px;height:32px} .brand{font-size:21px} }
+@media (max-width:430px){ .brand img{width:29px;height:29px} .brand{font-size:19px} }
 .brand b{font-weight:700;color:var(--accent)}
 nav{display:flex;gap:20px;align-items:center}
 nav a{color:var(--muted);text-decoration:none;font-size:14.5px}

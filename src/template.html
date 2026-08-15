@@ -139,6 +139,35 @@
   .thumbs figcaption .passo{display:block;color:var(--ink);font-weight:700;font-size:11.5px}
   .thumbs figcaption .rel{display:block;font-size:10px;margin-top:1px}
   .thumbs figcaption .selo{color:var(--accent);font-weight:700}
+  /* ---- subpassos da revisão ---- */
+  /* uma opção por linha */
+  label.opt{display:flex;align-items:center;gap:9px;padding:7px 0;font-size:14.5px;cursor:pointer}
+  label.opt input[type=checkbox]{flex:none}
+  .optNota{margin-left:auto;font-weight:400;font-size:12.5px;color:var(--muted)}
+  details.sub{border:1px solid var(--linha,#e6e6ef);border-radius:12px;margin:0 0 10px;background:#fff}
+  details.sub[open]{box-shadow:0 1px 3px rgba(16,20,40,.05)}
+  details.sub>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;
+    padding:13px 15px;font-weight:650;font-size:15px;color:var(--ink)}
+  details.sub>summary::-webkit-details-marker{display:none}
+  /* O <summary> é focável por teclado e nasce sem contorno em vários
+     navegadores. Sem esta regra, tabular pela revisão fica invisível — e a
+     revisão passou a ser feita de quatro summaries. */
+  details.sub>summary:focus-visible,
+  label.opt:focus-within{outline:2px solid var(--accent);outline-offset:2px;border-radius:10px}
+  details.sub>summary:hover{background:#fafaff;border-radius:12px}
+  .sbN{flex:none;width:23px;height:23px;border-radius:50%;background:var(--accent);color:#fff;
+    font:700 12px/23px ui-sans-serif,system-ui;text-align:center;font-style:normal}
+  details.sub.feito .sbN{background:#1f9d55}
+  details.sub.feito .sbN::after{content:"✓"}
+  details.sub.feito .sbN{font-size:0}
+  details.sub.feito .sbN::after{font-size:13px}
+  .sbEst{margin-left:auto;font-weight:400;font-size:13px;color:var(--muted)}
+  .sbCorpo{padding:0 15px 15px}
+  .sbFim{margin-top:14px}
+  @media (prefers-color-scheme:dark){
+    details.sub{background:transparent;border-color:#2a2f45}
+    details.sub>summary:hover{background:#171b2c}
+  }
   .thumbs figcaption .capSelo{display:block;margin-top:3px;font:600 10px/1.3 inherit;
     color:#fff;background:var(--accent);border-radius:999px;padding:2px 7px;
     overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -224,7 +253,11 @@
   /* A lente: o passo em tamanho de conferir, com o que se corrige nele. */
   .lente{position:fixed;inset:0;z-index:50;background:rgba(11,13,20,.72);
       display:flex;align-items:center;justify-content:center;padding:20px}
-  .lenteCx{background:var(--panel);border:1px solid var(--line);border-radius:12px;
+  /* `.modalCx` compartilha o visual da lente e NÃO o nome dela. Enquanto os
+     dois usavam `.lenteCx`, qualquer seletor que quisesse dizer "a lente"
+     passou a casar com dois diálogos — e um teste esperando a lente ficava
+     esperando para sempre. */
+  .lenteCx,.modalCx{background:var(--panel);border:1px solid var(--line);border-radius:12px;
       max-width:var(--lenteW,980px);width:100%;max-height:100%;overflow:auto;padding:18px}
   .lenteTopo{display:flex;justify-content:space-between;align-items:center;gap:14px;margin-bottom:12px}
   .lenteTopo b{font-size:15.5px}
@@ -419,73 +452,70 @@
           <button class="ghost sm hide" id="recMark" data-i18n="recMarkBtn"></button>
         </div>
         <span class="status" id="recMsg" data-i18n="recHint"></span>
-        <p class="note" data-i18n="atalhos" style="margin:6px 0 0"></p>
-        <div class="hide" id="recOpts" style="margin-top:10px">
-          <div class="row" style="gap:18px">
-            <label class="chk"><input type="checkbox" id="recTr" checked><span data-i18n="recTrLbl"></span></label>
-            <label class="chk"><input type="checkbox" id="recMic" checked><span data-i18n="recMicLbl"></span></label>
-            <!-- Três segundos antes de começar. Sem eles, o primeiro quadro da
-                 gravação é quase sempre o seletor de tela do navegador — a
-                 janela que a pessoa acabou de fechar — e ela descobre isso na
-                 revisão, quando já não dá para refazer o começo. -->
-            <label class="chk"><input type="checkbox" id="recCount" checked><span data-i18n="recCountLbl"></span></label>
-            <!-- O clipe do momento marcado. Em pesquisa, a moeda política é
-                 mostrar a pessoa sofrendo: um parágrafo dizendo "o participante
-                 não achou o botão" convence menos do que quinze segundos de
-                 alguém procurando. Só dos momentos MARCADOS — guardar a sessão
-                 inteira transformaria uma hora de gravação em um giga na
-                 memória da aba, que é a maneira mais rápida de derrubar tudo. -->
-            <label class="chk"><input type="checkbox" id="recClipe"><span data-i18n="recClipeLbl"></span></label>
-          </div>
-          <!-- A webcam num canto. O catálogo condicionava este item ao clipe
-               existir — "rosto sem clipe é uma foto de alguém franzindo a
-               testa" — e o clipe existe. Ela nasce DESLIGADA em todo cenário,
-               sem exceção: um rosto é dado pessoal de outra ordem que uma tela,
-               e ligar isso por padrão em qualquer lugar seria decidir pela
-               pessoa filmada. -->
-          <div class="row" style="gap:12px;margin-top:8px;align-items:center;flex-wrap:wrap">
-            <label class="chk"><input type="checkbox" id="recCam"><span data-i18n="recCamLbl"></span></label>
-            <select id="camCanto" style="width:auto">
-              <option value="bd" data-i18n="camBD"></option>
-              <option value="be" data-i18n="camBE"></option>
-              <option value="td" data-i18n="camTD"></option>
-              <option value="te" data-i18n="camTE"></option>
-            </select>
-            <select id="camTam" style="width:auto">
-              <option value="0.14" data-i18n="camP"></option>
-              <option value="0.18" selected data-i18n="camM"></option>
-              <option value="0.24" data-i18n="camG"></option>
-            </select>
-          </div>
-          <p class="note hide" id="recCamNota" data-i18n="recCamNota" style="margin:6px 0 0"></p>
-          <p class="note hide" id="recClipeNota" data-i18n="recClipeNota" style="margin:6px 0 0"></p>
-          <!-- O nome dos dois canais. Ele já muda sozinho com o cenário —
-               Microfone/Computador vira Moderador/Participante numa sessão de
-               pesquisa —, mas nome fixo não serve a quem grava uma entrevista,
-               a quem tem dois moderadores, ou a quem chama de outra coisa. O
-               rótulo entra na transcrição e sai no documento; deixá-lo fixo era
-               obrigar a pessoa a procurar e substituir depois. -->
-          <div class="row" id="spkRow" style="gap:10px;margin-top:8px;align-items:center;flex-wrap:wrap">
-            <label class="chk" for="spkMicNome" data-i18n="spkLblMic"></label>
-            <input type="text" id="spkMicNome" maxlength="28" autocomplete="off"
-                   style="width:148px;padding:5px 8px;font-size:13.5px">
-            <label class="chk" for="spkSysNome" data-i18n="spkLblSys"></label>
-            <input type="text" id="spkSysNome" maxlength="28" autocomplete="off"
-                   style="width:148px;padding:5px 8px;font-size:13.5px">
-          </div>
+        <div class="hide" id="recOpts" style="margin-top:12px">
+          <!-- Uma opção por linha. Elas eram cinco numa fileira que quebrava em
+               duas, e uma fileira quebrada não se lê: lê-se a primeira e
+               ignora-se o resto. -->
+          <label class="opt"><input type="checkbox" id="recTr" checked><span data-i18n="recTrLbl"></span>
+            <b class="optNota" id="optTr"></b></label>
+          <!-- Três segundos antes de começar. Sem eles, o primeiro quadro é
+               quase sempre o seletor de tela do navegador — a janela que a
+               pessoa acabou de fechar — e ela descobre isso na revisão. -->
+          <label class="opt"><input type="checkbox" id="recCount" checked><span data-i18n="recCountLbl"></span></label>
           <!-- "Esqueci gravando" é o acidente mais caro que esta ferramenta
-               pode causar: uma aba consumindo memória a manhã inteira e uma
-               gravação de duas horas que ninguém vai revisar. O limite é
-               generoso e desligável, e ele PARA como se a pessoa tivesse
-               apertado Parar — o documento sai inteiro. -->
-          <div class="row" style="gap:10px;margin-top:8px;align-items:center">
-            <label class="chk"><input type="checkbox" id="recAuto" checked><span data-i18n="recAutoLbl"></span></label>
+               pode causar. O limite é generoso e desligável, e ele PARA como se
+               a pessoa tivesse apertado Parar — o documento sai inteiro. -->
+          <label class="opt"><input type="checkbox" id="recAuto" checked><span data-i18n="recAutoLbl"></span>
             <input type="number" id="recAutoMin" value="45" min="1" max="240"
-                   style="width:74px;padding:5px 8px;font-size:13.5px">
-            <span class="status" data-i18n="recAutoMinLbl"></span>
+                   style="width:66px;padding:4px 7px;font-size:13px;margin-left:8px">
+            <span class="status" data-i18n="recAutoMinLbl"></span></label>
+          <!-- O clipe e a webcam saíram da lista e viraram um botão: são a
+               opção mais rara e a que mais precisa de explicação, e as duas
+               juntas ocupavam metade do cartão para servir a um cenário só. -->
+          <div class="row" style="gap:10px;margin-top:10px;align-items:center;flex-wrap:wrap">
+            <button class="ghost sm" id="clipeAbrir" type="button"></button>
+            <button class="ghost sm" id="recAjuda" type="button" aria-expanded="false"
+                    aria-controls="recAjudaCx" title="" style="padding:4px 10px">?</button>
           </div>
-          <p class="note" id="recTrNote" style="margin:6px 0 0"></p>
-          <p class="note" data-i18n="recWarn" style="margin:6px 0 0"></p>
+          <!-- As duas frases longas viraram AJUDA, e não leitura obrigatória.
+               Elas continuam existindo porque uma delas declara um custo real —
+               os megabytes do modelo — e a outra é a promessa do produto. O que
+               mudou é que ninguém precisa lê-las para gravar. -->
+          <div class="hide" id="recAjudaCx" style="margin-top:8px">
+            <p class="note" id="recTrNote" style="margin:0"></p>
+            <p class="note" data-i18n="recWarn" style="margin:6px 0 0"></p>
+          </div>
+        </div>
+
+        <!-- ---- o modal do clipe ---- -->
+        <div class="lente hide" id="clipeModal" role="dialog" aria-modal="true" aria-labelledby="clipeModalTit">
+          <div class="modalCx" style="max-width:520px">
+            <div class="lenteTopo">
+              <b id="clipeModalTit" data-i18n="clipeModalTit"></b>
+              <span class="row" style="gap:8px">
+                <button class="ghost sm" id="clipeModalFechar" data-i18n="fecharBtn"></button>
+              </span>
+            </div>
+            <div style="padding:4px 2px 2px">
+              <label class="opt"><input type="checkbox" id="recClipe"><span data-i18n="recClipeLbl"></span></label>
+              <p class="note" id="recClipeNota" data-i18n="recClipeNota" style="margin:2px 0 12px"></p>
+              <label class="opt"><input type="checkbox" id="recCam"><span data-i18n="recCamLbl"></span></label>
+              <div class="row hide" id="camOpts" style="gap:10px;margin:6px 0 0 26px;align-items:center;flex-wrap:wrap">
+                <select id="camCanto" style="width:auto">
+                  <option value="bd" data-i18n="camBD"></option>
+                  <option value="be" data-i18n="camBE"></option>
+                  <option value="td" data-i18n="camTD"></option>
+                  <option value="te" data-i18n="camTE"></option>
+                </select>
+                <select id="camTam" style="width:auto">
+                  <option value="0.14" data-i18n="camP"></option>
+                  <option value="0.18" selected data-i18n="camM"></option>
+                  <option value="0.24" data-i18n="camG"></option>
+                </select>
+              </div>
+              <p class="note hide" id="recCamNota" data-i18n="recCamNota" style="margin:8px 0 0"></p>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -521,7 +551,6 @@
            pode estar dobrado. Uma barra escondida é o mesmo que barra nenhuma. -->
       <div class="bar hide" id="caudaBar" style="margin:10px 0 6px"><i id="caudaFill"></i></div>
       <div class="status" id="liveStat"></div>
-      <div class="live" id="liveTail"></div>
     </div>
     <!-- A terceira porta: um documento que já saiu daqui, voltando para ser
          corrigido.
@@ -542,7 +571,6 @@
            sessão vira um capítulo, e a máquina de tempo por tarefa já existe. -->
       <button class="ghost sm" id="juntar" data-i18n="juntarBtn"></button>
       <input type="file" id="juntarArq" multiple accept=".json,.zip,application/json,application/zip" class="hide">
-      <button class="ghost sm hide" id="revisar" data-i18n="revisarBtn"></button>
       <span class="status" id="reabrirMsg" data-i18n="reabrirDica"></span>
     </div>
 
@@ -614,6 +642,24 @@
           <option value="" data-i18n="autoDetect"></option>
         </select>
         <label class="chk"><input type="checkbox" id="gpu"><span data-i18n="gpuLbl"></span></label>
+        <!-- O microfone é uma ENTRADA de transcrição, então mora com as outras.
+             No cartão de gravar ele era a quinta caixa de uma fileira e fazia
+             a pessoa decidir sobre áudio antes de pensar em áudio. O padrão
+             continua ligado, e vale para a gravação ao vivo também. -->
+        <label class="chk"><input type="checkbox" id="recMic" checked><span data-i18n="recMicLbl"></span></label>
+      </div>
+      <!-- O nome dos dois canais. Ele esteve, por uma hora, dentro do modal do
+           clipe — errado: renomear canal é coisa de quem transcreve, não de
+           quem guarda vídeo, e lá dentro sumia para quem nunca liga o clipe.
+           Aqui, ao lado do microfone e do modelo de voz, está entre os seus
+           iguais. O rótulo entra na transcrição e sai no documento. -->
+      <div class="row" id="spkRow" style="gap:10px;margin-top:9px;align-items:center;flex-wrap:wrap">
+        <label class="chk" for="spkMicNome" data-i18n="spkLblMic"></label>
+        <input type="text" id="spkMicNome" maxlength="28" autocomplete="off"
+               style="width:148px;padding:5px 8px;font-size:13.5px">
+        <label class="chk" for="spkSysNome" data-i18n="spkLblSys"></label>
+        <input type="text" id="spkSysNome" maxlength="28" autocomplete="off"
+               style="width:148px;padding:5px 8px;font-size:13.5px">
       </div>
     </div>
     </div><!-- /trAuto -->
@@ -722,6 +768,27 @@
          uma decisão de revisão. O que sobra aqui é o vocabulário — como este
          documento chama cada quadro —, que é decisão de quem escreve, na hora
          de escrever. -->
+    <!-- ---- o passo 3 é um conjunto de subpassos ----
+
+         Eles nascem ABERTOS, e isso é uma decisão, não preguiça. Fechados por
+         padrão, a fileira de saídas — que é o que quase todo mundo veio buscar
+         — some atrás de três cliques, e quem já conhece a ferramenta paga o
+         preço da orientação de quem não conhece. O que o subpasso resolve é
+         outra coisa: dizer onde você está, em que pé cada parte está, e deixar
+         recolher o que já acabou. O botão do fim de cada bloco é que fecha.
+
+
+         Ele acumulou coisa demais: conferir quadros, corrigir fala, preencher
+         identificação e escolher formato viraram uma parede única, e quem abre
+         não sabe por onde começa nem quando acabou. Agora são quatro blocos
+         que abrem um de cada vez, cada um dizendo em que pé está e levando ao
+         seguinte. Quem quiser tudo aberto abre — nenhum deles é obrigatório e
+         nenhum tranca o outro. -->
+
+    <details class="sub" id="sb1" open>
+      <summary><i class="sbN">1</i><span data-i18n="sb1H"></span>
+        <b class="sbEst" id="sbEst1"></b></summary>
+      <div class="sbCorpo">
     <div class="modelo">
       <label for="unNome" data-i18n="unLbl"></label>
       <input type="text" id="unNome" maxlength="24" style="width:auto;max-width:150px">
@@ -742,7 +809,12 @@
       <button class="ghost sm hide" id="ocrStop" data-i18n="stopBtn"></button>
       <button class="ghost sm" id="falaNota" data-i18n="falaNota"></button>
     </div>
-    <p class="status" style="margin:10px 0 0" data-i18n="clickHint"></p>
+    <!-- Revisar passo a passo mora aqui, e não no cartão do vídeo: é o que se
+         faz COM os quadros que já estão na tela, não uma forma de trazê-los. -->
+    <div class="row" style="margin-top:10px">
+      <button class="ghost sm hide" id="revisar" data-i18n="revisarBtn"></button>
+      <span class="status" data-i18n="clickHint"></span>
+    </div>
     <!-- O que acabou de acontecer com a ordem, em palavras. role=status para o
          leitor de tela anunciar sem roubar o foco de quem está no botão. -->
     <p class="status ok" id="movMsg" role="status" style="margin:4px 0 0"></p>
@@ -793,7 +865,14 @@
     </div>
     <p class="note hide" id="sensAviso" style="margin-top:12px"></p>
     <div class="thumbs" id="thumbs"></div>
+      <div class="row sbFim"><button class="ghost sm sbOk" data-sb="1" data-i18n="sbOk1"></button></div>
+      </div>
+    </details>
 
+    <details class="sub" id="sb2" open>
+      <summary><i class="sbN">2</i><span data-i18n="sb2H"></span>
+        <b class="sbEst" id="sbEst2"></b></summary>
+      <div class="sbCorpo">
     <!-- O texto da fala mora na revisão, e não num passo antes.
 
          Ele é RESULTADO: só existe depois de transcrever, e o que se faz com
@@ -883,6 +962,14 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     </div><!-- /trManual -->
     </details>
 
+      <div class="row sbFim"><button class="ghost sm sbOk" data-sb="2" data-i18n="sbOk2"></button></div>
+      </div>
+    </details>
+
+    <details class="sub" id="sb3" open>
+      <summary><i class="sbN">3</i><span data-i18n="sb3H"></span>
+        <b class="sbEst" id="sbEst3"></b></summary>
+      <div class="sbCorpo">
     <!-- Identificação da evidência. Tudo opcional e tudo em memória: nada
          daqui é guardado no navegador nem sai do computador — só entra no
          documento que você mesmo baixa. -->
@@ -960,6 +1047,14 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       <button class="ghost sm hide" id="mcTirar" data-i18n="mcTirar"></button>
     </div>
 
+      <div class="row sbFim"><button class="ghost sm sbOk" data-sb="3" data-i18n="sbOk3"></button></div>
+      </div>
+    </details>
+
+    <details class="sub" id="sb4" open>
+      <summary><i class="sbN">4</i><span data-i18n="sb4H"></span>
+        <b class="sbEst" id="sbEst4"></b></summary>
+      <div class="sbCorpo">
     <div class="row" style="margin-top:18px">
       <button id="go" data-i18n="pdfBtn"></button>
       <select id="layout" style="width:auto">
@@ -984,6 +1079,9 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       <button class="ghost hide" id="gdocs" data-i18n="gdBtn"></button>
       <span class="status" id="pdfStatus"></span>
     </div>
+      </div>
+    </details>
+
     </div></div><!-- /dobra -->
   </div>
 
@@ -1237,7 +1335,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recQueue:'transcrevendo ({0} na fila)',
       recIdle:'transcrição em dia',
       recTail:'Terminando de transcrever o que faltou…', recTailSeg:'há {0}',
-      recDone2:'Pronto: {0} de captura, {1} frames e {2} falas. Nenhum vídeo foi guardado no seu computador.',
+      recDone2:'Pronto: {0} de captura, {1} frames e {2} falas.',
       spkMic:'Microfone', spkSys:'Computador',
       spkModer:'Moderador', spkPart:'Participante',
       spkLblMic:'Chame o microfone de', spkLblSys:'e o som do computador de',
@@ -1443,6 +1541,15 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       juntarSemHora:'A hora de relógio saiu do documento: são sessões diferentes, cada uma com o seu início. O tempo dentro de cada uma continua valendo.',
       juntarOk:'{0} sessões juntadas, {1} quadros no total. Cada sessão virou uma tarefa, com o tempo de cada uma.',
       juntarBtn:'Juntar várias sessões', juntarUm:'Escolha dois ou mais arquivos — para um só, use \u201cReabrir um documento\u201d.',
+      sbE4:'documento gerado', sbE4v:'nenhum documento ainda',
+      sbE3:'{0} campos preenchidos', sbE3v:'opcional, em branco',
+      sbE3u:'1 campo preenchido',
+      sbE2:'{0} trechos com tempo', sbE2t:'texto colado, sem marcação de tempo', sbE2v:'sem transcrição',
+      sbE1:'{0} quadros mantidos', sbE1v:'nenhum quadro ainda',
+      sbOk1:'Pronto — ir para a fala', sbOk2:'Pronto — ir para a identificação', sbOk3:'Pronto — ir para gerar', sbOk4:'Recomeçar',
+      sb1H:'Conferir os quadros', sb2H:'Revisar a fala', sb3H:'Identificar o documento', sb4H:'Gerar',
+      clipeBotaoOn:'Clipe de {0} s ligado', clipeBotaoCam:' · com webcam',
+      clipeModalTit:'Clipe e webcam', clipeBotaoOff:'Clipe do momento: desligado',
       lenteCap:'Começa aqui uma tarefa / um caso',
       lenteCapNota:'Deixe em branco se este passo continua a tarefa anterior. Escrevendo um nome, a gravação passa a ter capítulos: cada documento ganha o título da tarefa, e a planilha ganha o tempo gasto em cada uma.',
       capTempo:'{0} nesta tarefa', capCol:'Tarefa', capTempoCol:'Tempo na tarefa',
@@ -1707,7 +1814,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recQueue:'transcribing ({0} queued)',
       recIdle:'transcription up to date',
       recTail:'Finishing the last of the transcription…', recTailSeg:'for {0}',
-      recDone2:'Done: {0} captured, {1} frames and {2} lines of speech. No video was kept on your computer.',
+      recDone2:'Done: {0} captured, {1} frames and {2} lines of speech.',
       spkMic:'Microphone', spkSys:'Computer',
       spkModer:'Moderator', spkPart:'Participant',
       spkLblMic:'Call the microphone', spkLblSys:'and the computer sound',
@@ -1913,6 +2020,15 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       juntarSemHora:'Wall-clock time was removed from the document: these are different sessions, each with its own start. Time within each one still holds.',
       juntarOk:'{0} sessions merged, {1} frames in total. Each session became a task, with its own duration.',
       juntarBtn:'Merge several sessions', juntarUm:'Pick two or more files — for a single one, use \u201cReopen a document\u201d.',
+      sbE4:'document generated', sbE4v:'no document yet',
+      sbE3:'{0} fields filled', sbE3v:'optional, empty',
+      sbE3u:'1 field filled',
+      sbE2:'{0} time-stamped cues', sbE2t:'pasted text, no timing', sbE2v:'no transcript',
+      sbE1:'{0} frames kept', sbE1v:'no frames yet',
+      sbOk1:'Done — go to the speech', sbOk2:'Done — go to identification', sbOk3:'Done — go to generate', sbOk4:'Start over',
+      sb1H:'Check the frames', sb2H:'Review the speech', sb3H:'Identify the document', sb4H:'Generate',
+      clipeBotaoOn:'{0} s clip on', clipeBotaoCam:' · with webcam',
+      clipeModalTit:'Clip and webcam', clipeBotaoOff:'Moment clip: off',
       lenteCap:'A task / case starts here',
       lenteCapNota:'Leave it blank if this step continues the previous task. Type a name and the recording gains chapters: each document gets the task title, and the spreadsheet gains the time spent on each one.',
       capTempo:'{0} on this task', capCol:'Task', capTempoCol:'Time on task',
@@ -2175,7 +2291,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recQueue:'transcribiendo ({0} en cola)',
       recIdle:'transcripción al día',
       recTail:'Terminando de transcribir lo que faltaba…', recTailSeg:'desde hace {0}',
-      recDone2:'Listo: {0} de captura, {1} fotogramas y {2} intervenciones. No se guardó ningún vídeo en tu ordenador.',
+      recDone2:'Listo: {0} de captura, {1} fotogramas y {2} intervenciones.',
       spkMic:'Micrófono', spkSys:'Ordenador',
       spkModer:'Moderador', spkPart:'Participante',
       spkLblMic:'Llama al micrófono', spkLblSys:'y al sonido del ordenador',
@@ -2383,6 +2499,15 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       juntarSemHora:'La hora de reloj salió del documento: son sesiones distintas, cada una con su inicio. El tiempo dentro de cada una sigue valiendo.',
       juntarOk:'{0} sesiones juntadas, {1} fotogramas en total. Cada sesión pasó a ser una tarea, con su propia duración.',
       juntarBtn:'Juntar varias sesiones', juntarUm:'Elige dos o más archivos — para uno solo, usa \u201cReabrir un documento\u201d.',
+      sbE4:'documento generado', sbE4v:'todavía sin documento',
+      sbE3:'{0} campos rellenados', sbE3v:'opcional, en blanco',
+      sbE3u:'1 campo rellenado',
+      sbE2:'{0} tramos con tiempo', sbE2t:'texto pegado, sin marcas de tiempo', sbE2v:'sin transcripción',
+      sbE1:'{0} fotogramas mantenidos', sbE1v:'todavía sin fotogramas',
+      sbOk1:'Listo — ir al habla', sbOk2:'Listo — ir a la identificación', sbOk3:'Listo — ir a generar', sbOk4:'Empezar de nuevo',
+      sb1H:'Revisar los fotogramas', sb2H:'Revisar el habla', sb3H:'Identificar el documento', sb4H:'Generar',
+      clipeBotaoOn:'Clip de {0} s activado', clipeBotaoCam:' · con webcam',
+      clipeModalTit:'Clip y webcam', clipeBotaoOff:'Clip del momento: apagado',
       lenteCap:'Aquí empieza una tarea / un caso',
       lenteCapNota:'Déjalo en blanco si este paso continúa la tarea anterior. Al escribir un nombre, la grabación pasa a tener capítulos: cada documento recibe el título de la tarea y la hoja de cálculo gana el tiempo dedicado a cada una.',
       capTempo:'{0} en esta tarea', capCol:'Tarea', capTempoCol:'Tiempo en la tarea',
@@ -3380,6 +3505,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   }
 
   function refreshTr(){
+    /* O estado do subpasso da fala muda com o TEXTO, e o texto muda sem passar
+       por render(). Sem esta linha, colar uma transcrição deixava o subpasso 2
+       dizendo "sem transcrição" com a transcrição na tela. */
+    if (typeof pintarSubpassos === 'function') pintarSubpassos();
     /* Os filtros contam quadros sem fala, e isso muda quando a transcrição
        muda. Sem esta linha o botão dizia "Descartar sem fala" sem número até
        alguém mexer nos quadros. */
@@ -4067,7 +4196,6 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       $('thumbs').innerHTML = '';
       $('grabbed').textContent = '';
       $('liveBox').classList.add('hide');
-      $('liveTail').innerHTML = '';
       $('liveStat').textContent = '';
     }
     liveDur = 0; liveW = 0; liveH = 0; liveCues = []; liveCanais = null;
@@ -4374,10 +4502,11 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       `${vttTime(c.a)} --> ${vttTime(c.b)}\n${c.rot}: ${c.t}`).join('\n\n');
     refreshTr();
     // as últimas falas, para a pessoa ver que está funcionando
-    $('liveTail').innerHTML = cs.slice(-6).map(c =>
-      `<p><span class="tm">${fmt(c.a)}</span>` +
-      `<span class="who${c.cls === 'sys' ? ' sys' : ''}">${c.rot}:</span> ${c.t}</p>`).join('');
-    $('liveTail').scrollTop = $('liveTail').scrollHeight;
+    /* A prévia da transcrição saía aqui, no cartão 1, enquanto se gravava.
+       Depois de parar ela virava um bloco de texto solto embaixo do botão de
+       gravar — resultado no lugar de ferramenta. O texto vive no passo 3, que
+       é onde se corrige. Durante a gravação a fileira de quadros já mostra que
+       algo está acontecendo. */
   }
 
   /* Quantos trechos a cauda tinha no começo, para a porcentagem ter denominador. */
@@ -4639,7 +4768,6 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     $('grabbed').textContent = '';
     filaAsr.length = 0; asrPendentes = 0;
     $('tr').value = ''; refreshTr();
-    $('liveTail').innerHTML = '';
     $('liveBox').classList.remove('hide');
 
     video.srcObject = telaStream;
@@ -5102,8 +5230,13 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
          erro, daí procuro e a transcrição foi realizada". Vermelho fica
          reservado para o que de fato falhou. */
       const alerta = avisosFim.length ? ` <span class="nota">${avisosFim.join(' ')}</span>` : '';
+      /* A frase do fim ficou só com o que a pessoa faz alguma coisa com:
+         quanto durou, quantos quadros, quantas falas. O tempo de processamento
+         era a única linha ali que ninguém usava para decidir nada — e a mais
+         longa. Ela continua existindo, no Diagnóstico, que é onde se vai
+         quando a suspeita é de lentidão. */
       $('recMsg').innerHTML = `<span class="ok">${t('recDone2', fmt(liveDur), frames.length, liveCues.length)}` +
-        semFala + semFrames + contarDesempenho() + `</span>` + detalheFrames + alerta;
+        semFala + semFrames + `</span>` + detalheFrames + alerta;
       $('extract').disabled = true;      // não há vídeo para varrer de novo
       /* Um botão cinza e mudo é a pior resposta possível: quem lê "Transcrever"
          desabilitado conclui que a transcrição falhou — e ela acabou de dar
@@ -5325,6 +5458,11 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   /* A pergunta "quer transcrição?" agora é respondida no passo 1, antes de
      qualquer download — e é isso que permite gravar sem baixar nada. */
   function notaTr(){
+    /* O número de megabytes também sai inline, ao lado da caixa. A frase
+       inteira virou ajuda; o CUSTO não pode virar — quem liga a transcrição
+       precisa saber, antes de gravar, que vai baixar um modelo. */
+    const mb = $('optTr');
+    if (mb) mb.textContent = ($('recTr') && $('recTr').checked) ? t('dlSize', tamanhoModelo()) : '';
     const el = $('recTrNote'); if (!el) return;
     const querTr = $('recTr') && $('recTr').checked;
     el.textContent = querTr ? t('recTrOn', tamanhoModelo()) : t('recTrOff');
@@ -6788,6 +6926,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     $('falaNota').disabled = !keep.length || !parseTranscript($('tr').value).cues.length;
     if (typeof pintarRevisar === 'function') pintarRevisar();
     pintarClipeRow();
+    if (typeof pintarSubpassos === 'function') pintarSubpassos();
     pintarCapitulos();
     if (frames.length) buildPrompt();
   }
@@ -6809,6 +6948,41 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     el.innerHTML = t('capResumo', caps.length) + ' ' +
       caps.map(c => `<b>${esc(c.nome)}</b> ${fmt(c.fim - c.ini)}`).join('  ·  ');
   }
+
+  /* ---- os subpassos da revisão ----
+     Cada um diz em que pé está e leva ao seguinte. O estado é CALCULADO, não
+     guardado: um "concluído" que a pessoa marca e que depois deixa de ser
+     verdade — porque ela apagou os quadros — é pior que nenhum. O botão do fim
+     só fecha e abre o próximo, que é o gesto, não a verdade. */
+  function pintarSubpassos(){
+    if (!$('sb1')) return;
+    const keep = frames.filter(f => f.keep);
+    const cues = parseTranscript($('tr').value).cues;
+    const ev = (typeof evDados === 'function') ? evDados() : { algum:false, linhas:[] };
+    const n3 = ev.linhas.length + (ev.caso ? 1 : 0);
+    const est = [
+      keep.length ? t('sbE1', keep.length) : t('sbE1v'),
+      cues.length ? t('sbE2', cues.length) : ($('tr').value.trim() ? t('sbE2t') : t('sbE2v')),
+      ev.algum ? t(n3 === 1 ? 'sbE3u' : 'sbE3', n3) : t('sbE3v'),
+      baixouAlgo ? t('sbE4') : t('sbE4v')
+    ];
+    const feito = [keep.length > 0, cues.length > 0 || !!$('tr').value.trim(), ev.algum, baixouAlgo];
+    est.forEach((txt, i) => {
+      const el = $('sbEst' + (i + 1)); if (el) el.textContent = txt;
+      const d = $('sb' + (i + 1)); if (d) d.classList.toggle('feito', feito[i]);
+    });
+  }
+  let baixouAlgo = false;
+
+  document.querySelectorAll('.sbOk').forEach(b2 => {
+    b2.onclick = () => {
+      const n = +b2.dataset.sb;
+      const eu = $('sb' + n), prox = $('sb' + (n + 1));
+      if (eu) eu.open = false;
+      if (prox) { prox.open = true; irPara('sb' + (n + 1), true); }
+      pintarSubpassos();
+    };
+  });
 
   $('clipeApagar').onclick = () => {
     const n = clipesDescartar();
@@ -6988,8 +7162,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
        repintura desfaria a escolha de quem marcou à mão, que é a maneira mais
        irritante de um padrão existir. */
     if (ux !== cx.dataset.ux) { cx.checked = (ux === 'true'); cx.dataset.ux = ux; }
-    $('recClipeNota').classList.toggle('hide', !cx.checked);
     frasesDoClipe();
+    pintarBotaoClipe();
   }
 
   /* Duas frases do cartão de gravar afirmam "nada de vídeo é guardado" — e com o
@@ -7002,13 +7176,59 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     const w = document.querySelector('[data-i18n="recWarn"]');
     if (p) p.textContent = t(lig ? 'viaRecPclipe' : 'viaRecP');
     if (w) w.textContent = t(lig ? 'recWarnClipe' : 'recWarn');
+    /* A frase do topo é a que fica visível; a de dentro da ajuda muda junto
+       para quem abrir. As duas afirmam a mesma coisa e não podem divergir. */
   }
-  if ($('recCam')) $('recCam').onchange = () =>
+  /* ---- o modal do clipe ----
+     Clipe e webcam saíram da lista de opções e viraram um botão. Os dois
+     servem a um cenário só e são os que mais precisam de explicação; juntos
+     ocupavam metade do cartão de gravar para a maioria que nunca os liga. */
+  const abrirClipeModal = (abrir) => {
+    $('clipeModal').classList.toggle('hide', !abrir);
+    if (abrir) { $('recClipe').focus(); }
+    else { pintarBotaoClipe(); $('clipeAbrir').focus(); }
+  };
+  if ($('clipeAbrir')) {
+    $('clipeAbrir').onclick = () => abrirClipeModal(true);
+    $('clipeModalFechar').onclick = () => abrirClipeModal(false);
+    $('clipeModal').addEventListener('click', e => {
+      if (e.target === $('clipeModal')) abrirClipeModal(false);
+    });
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && !$('clipeModal').classList.contains('hide')) abrirClipeModal(false);
+    });
+  }
+
+  /* O botão diz o estado, e não só o nome: "clipe de 15 s" já responde a
+     pergunta que o rótulo antigo deixava aberta — quanto tempo é o clipe. */
+  function pintarBotaoClipe(){
+    const b2 = $('clipeAbrir'); if (!b2) return;
+    const cl = $('recClipe') && $('recClipe').checked;
+    const cam = $('recCam') && $('recCam').checked;
+    b2.textContent = cl ? t('clipeBotaoOn', CLIPE_JANELA) + (cam ? t('clipeBotaoCam') : '')
+                        : t('clipeBotaoOff');
+    b2.classList.toggle('ghost', !cl);
+  }
+
+  if ($('recCam')) $('recCam').onchange = () => {
     $('recCamNota').classList.toggle('hide', !$('recCam').checked);
+    $('camOpts').classList.toggle('hide', !$('recCam').checked);
+    pintarBotaoClipe();
+  };
+
+  /* A ajuda: as duas frases longas continuam existindo, atrás de um "?".
+     Uma delas declara um custo real — os megabytes do modelo — e a outra é a
+     promessa do produto; nenhuma das duas precisa ser lida para gravar. */
+  if ($('recAjuda')) $('recAjuda').onclick = () => {
+    const cx = $('recAjudaCx');
+    const abre = cx.classList.contains('hide');
+    cx.classList.toggle('hide', !abre);
+    $('recAjuda').setAttribute('aria-expanded', String(abre));
+  };
 
   if ($('recClipe')) $('recClipe').onchange = () => {
-    $('recClipeNota').classList.toggle('hide', !$('recClipe').checked);
     frasesDoClipe();
+    pintarBotaoClipe();
   };
 
   /* ---- o nome dos dois canais ----
@@ -9490,6 +9710,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   }
 
   function baixarBlob(blob, nome){
+    /* Qualquer saída conclui o último subpasso: o passo 3 acaba quando um
+       documento existe, e não quando alguém clica em "pronto". */
+    baixouAlgo = true;
+    if (typeof pintarSubpassos === 'function') setTimeout(pintarSubpassos, 0);
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
     a.download = nome;
