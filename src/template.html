@@ -740,6 +740,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recFile:'captura de tela', pNoFile:'nenhum arquivo guardado',
       gpuLbl:'usar a placa de vídeo', dlSize:'baixa ~{0} MB na primeira vez',
       modelLimpando:'Apagando o modelo guardado e baixando de novo…',
+      trocandoMotor:'Trocando a versão do motor e tentando de novo…',
       limparBtn:'apagar o modelo guardado',
       limparFeito:'Apaguei {0} arquivo(s) do modelo guardado. A próxima transcrição baixa de novo.',
       limparVazio:'Não havia nada guardado.',
@@ -1034,6 +1035,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recFile:'screen capture', pNoFile:'no file kept',
       gpuLbl:'use the graphics card', dlSize:'downloads ~{0} MB the first time',
       modelLimpando:'Clearing the stored model and downloading it again…',
+      trocandoMotor:'Switching the engine version and trying again…',
       limparBtn:'delete the stored model',
       limparFeito:'Deleted {0} stored model file(s). The next transcription downloads again.',
       limparVazio:'There was nothing stored.',
@@ -1326,6 +1328,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recFile:'captura de pantalla', pNoFile:'ningún archivo guardado',
       gpuLbl:'usar la tarjeta gráfica', dlSize:'descarga ~{0} MB la primera vez',
       modelLimpando:'Borrando el modelo guardado y descargándolo de nuevo…',
+      trocandoMotor:'Cambiando la versión del motor y probando de nuevo…',
       limparBtn:'borrar el modelo guardado',
       limparFeito:'Borré {0} archivo(s) del modelo guardado. La próxima transcripción vuelve a descargar.',
       limparVazio:'No había nada guardado.',
@@ -3657,14 +3660,57 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      máquina onde a rede ESTÁ boa e o modelo não abre não ajuda ninguém. */
   let degraus = [], ultimoErroModelo = '';
 
+  /* Um MÓDULO novo a cada chamada, e é isso que faz esta função existir.
+
+     O onnxruntime-web instancia o .wasm uma vez por módulo e guarda a
+     instância. Depois disso, mexer em `wasmPaths` não troca runtime nenhum —
+     o binário já está na memória. Foi exatamente por isso que o degrau
+     "runtime reserva" da rodada anterior não mudou uma vírgula do erro: ele
+     trocava o endereço com o runtime já carregado, e o import seguinte
+     devolvia o mesmo módulo do cache do navegador.
+
+     Um parâmetro diferente na URL do `import()` devolve um módulo NOVO, com um
+     onnxruntime novo, que lê o `wasmPaths` do zero. É a única forma de trocar
+     de runtime dentro da mesma aba. */
+  let contadorModulo = 0;
+  async function importarFresco(url){
+    const sep = url.includes('?') ? '&' : '?';
+    const mod = await import(url + sep + 'ws=' + (++contadorModulo));
+    mod.env.allowLocalModels = false;
+    mod.env.allowRemoteModels = true;
+    return mod;
+  }
+
+  /* A versão do onnxruntime que o módulo carregou. É o dado que faltava para
+     parar de discutir versão por dedução. */
+  function versaoOrt(mod){
+    try {
+      const v = mod.env && mod.env.versions;
+      if (!v) return '?';
+      return Object.keys(v).map(k => k + '=' + v[k]).join(' ');
+    } catch (e) { return '?'; }
+  }
+
+  /* Os ambientes de execução, do mais provável ao mais improvável. Cada um é
+     uma combinação de BIBLIOTECA e RUNTIME, e cada um precisa de um módulo
+     fresco — ver `importarFresco`. Esta é a variável que nunca tinha sido
+     trocada de verdade: oito degraus, dois repositórios de modelo, quatro
+     `dtype` e duas placas produziram um erro idêntico byte a byte, o que só
+     acontece quando o que executa é sempre o mesmo. */
+  function ambientes(){
+    const lista = [{ lib: TJS_BASES[0], runtime: 'de fábrica' }];
+    lista.push({ lib: TJS_BASES[0], runtime: 'sondado' });
+    for (let i = 1; i < TJS_BASES.length; i++) lista.push({ lib: TJS_BASES[i], runtime: 'de fábrica' });
+    return lista;
+  }
+
+  const curto = u => u.replace(/^https?:\/\/cdn\.jsdelivr\.net\/npm\//, '');
+
   async function buildPipe(modelId){
     degraus = [];
-    const mod = await loadLib();
-    libMod = mod;                 // guardado: o degrau precisa remontar sem a placa
     const arquivos = {};
-    /* Quais arquivos o degrau pediu de verdade. Era a pergunta que faltava:
-       sem ela, dizer "o degrau fp32 falhou" não diz se ele chegou a pedir o
-       arquivo fp32. */
+    /* Quais arquivos o degrau pediu de verdade. Sem isto, dizer "o degrau fp32
+       falhou" não diz se ele chegou a pedir o arquivo fp32 — e não chegava. */
     let pedidos = new Set();
     let baixouAlgo = false;
     const mb = b => (b / 1048576).toFixed(0);
@@ -3688,139 +3734,117 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     if (await modeloEmCache(modelId)) { prog(null); st(t('modelCache')); }
 
     /* Sem isto o navegador trata o modelo baixado como cache descartável e o
-       apaga quando o disco aperta — e o próximo vídeo baixa tudo de novo. Uma
-       linha, e o pedido pode ser negado sem piorar nada. */
+       apaga quando o disco aperta — e o próximo vídeo baixa tudo de novo. */
     try { if (navigator.storage && navigator.storage.persist) await navigator.storage.persist(); }
     catch (e) {}
 
-    /* Fila de tentativas, e não uma tentativa só. Quatro degraus, do mais rápido
-       ao que não pode falhar:
-
-       1. placa de vídeo com o decodificador de 4 bits — o mais rápido, e o que
-          quebra em parte das máquinas com "Missing required scale / MatMulNBits":
-          o arquivo comprimido em 4 bits vem sem as escalas que aquele runtime
-          exige, e a sessão nem chega a abrir;
-       2. a mesma placa, sem compressão no decodificador — não usa MatMulNBits,
-          então o defeito acima não existe;
-       3. processador com 8 bits;
-       4. processador sem compressão — grande e lento, mas é o único que não
-          depende de nenhuma operação quantizada. É o degrau que garante que a
-          transcrição não fica indisponível numa máquina.
-
-       Antes havia só o 1 e o 3, e quem caía no defeito do 4 bits recebia a linha
-       de C++ do runtime como se fosse resposta. */
-    const tentativas = [];
-    if (usaPlaca() && !semQ4()) tentativas.push({ motor: 'placa de vídeo',
-      opcoes: { device:'webgpu', dtype:{ encoder_model:'fp32', decoder_model_merged:'q4' } },
-      q4: true });
-    if (usaPlaca()) tentativas.push({ motor: 'placa de vídeo',
-      opcoes: { device:'webgpu', dtype:{ encoder_model:'fp32', decoder_model_merged:'fp32' } } });
-    /* `device:'wasm'` explícito: sem isso a biblioteca pode escolher a placa de
-       vídeo sozinha quando ela está disponível, e os degraus "de processador"
-       correm pelo MESMO caminho que acabou de falhar — quatro tentativas com
-       um resultado só. Foi o que aconteceu na máquina que reportou
-       "já tentei as alternativas e nenhuma subiu". */
-    tentativas.push({ motor: 'processador', opcoes: { device:'wasm', dtype:'q8' } });
-    /* Sem otimização de grafo. `TransposeDQWeightsForMatMulNBits` mora em
-       `qdq_actions.cc`, que é OTIMIZADOR — o erro não vem de ler o arquivo, vem
-       de reescrever o grafo depois de lido. Desligar a otimização pula
-       exatamente a transformação que quebra. Custa alguma velocidade, e
-       velocidade que roda vale mais que velocidade que não sobe. */
-    tentativas.push({ motor: 'processador', semOtim: true,
-      opcoes: { device:'wasm', dtype:'q8',
-                session_options:{ graphOptimizationLevel:'disabled' } } });
-    tentativas.push({ motor: 'processador', opcoes: { device:'wasm', dtype:'fp32' } });
-    /* Último recurso: o runtime sondado no CDN, que era o comportamento padrão
-       até 15/08/2026. Fica por último de propósito — ele resolve o caso em que
-       o endereço de fábrica saiu do ar, e causa o caso em que a versão não bate
-       com a da biblioteca. */
-    tentativas.push({ motor: 'processador', sondar: true,
-      opcoes: { device:'wasm', dtype:'q8' } });
-    /* Resgate pela placa de vídeo. Se todos os degraus de processador caírem e
-       a máquina TIVER WebGPU, vale tentar por lá antes de dizer que não deu —
-       o caminho da placa não passa pelo otimizador de grafo do wasm, que é
-       justamente onde a montagem quebra nessas máquinas. Custa mais download,
-       e é por isso que ele é o último e não o primeiro: só entra quando a
-       alternativa é ficar sem transcrição. */
-    if (!usaPlaca() && navigator.gpu) tentativas.push({ motor: 'placa de vídeo',
-      opcoes: { device:'webgpu', dtype:{ encoder_model:'fp32', decoder_model_merged:'fp32' } } });
-    /* Apagar o guardado e tentar de novo. Um arquivo truncado ou de outra
-       variante fica no cache indefinidamente — o navegador não revalida o que
-       já tem — e o sintoma é exatamente este: o mesmo erro em toda
-       configuração, porque em toda configuração o que abre são os mesmos
-       bytes. Custa um download novo, e por isso vem depois de tudo que não
-       custa. */
-    tentativas.push({ motor: 'processador', limpar: true,
-      opcoes: { device:'wasm', dtype:'q8' } });
-    /* Outro repositório do mesmo modelo. Os arquivos do `onnx-community` são
-       exportações novas, com quantização QDQ de 4 bits; os do `Xenova` são as
-       antigas, sem `MatMulNBits`. Se o defeito estiver no arquivo e não na
-       máquina, é aqui que ele desaparece. */
-    if (MODELO_RESERVA[modelId]) tentativas.push({ motor: 'processador',
-      modelo: MODELO_RESERVA[modelId], opcoes: { device:'wasm', dtype:'q8' } });
-
-    /* Degrau de linhas, dentro de cada tentativa.
-
-       Isolamento entre origens libera SharedArrayBuffer, o runtime passa a
-       querer o wasm com linhas, e para isso ele precisa criar um Worker a
-       partir de um endereço de OUTRA origem — o CDN. Sob COEP isso é
-       justamente o que o navegador barra. O resultado é cruel: ligar o
-       isolamento para ficar mais rápido é o que faz o modelo não carregar, e só
-       no caminho do processador (a placa de vídeo não depende dessas linhas).
-       Foi o que aconteceu em produção.
-
-       Em vez de escolher entre velocidade e funcionar, tenta com linhas e, se
-       falhar, refaz a MESMA tentativa com uma linha só. Perde-se desempenho no
-       navegador que barra, e nada mais. */
-    const wasm = (mod.env.backends && mod.env.backends.onnx && mod.env.backends.onnx.wasm) || null;
     let ultimo = null;
+    const ambs = ambientes();
 
-    for (let i = 0; i < tentativas.length; i++) {
-      const tent = tentativas[i];
-      /* A troca de runtime é por degrau, e não uma decisão global feita antes
-         de saber se ela era necessária. */
+    for (let a = 0; a < ambs.length; a++) {
+      const amb = ambs[a];
+      let mod;
+      try {
+        if (a > 0) st(t('trocandoMotor'));
+        mod = await importarFresco(amb.lib);
+      } catch (e) {
+        degraus.push({ rotulo: 'biblioteca ' + curto(amb.lib), ok: false,
+                       erro: (e && e.message) || String(e), linhas: 0, arqs: [] });
+        continue;
+      }
+      libMod = mod;
+      tjsEmUso = amb.lib;
+
+      const wasm = (mod.env.backends && mod.env.backends.onnx && mod.env.backends.onnx.wasm) || null;
       if (wasm) {
         try {
-          wasm.wasmPaths = tent.sondar ? (await findWasmBase()) || wasmPadrao : wasmPadrao;
+          wasm.numThreads = linhasDoWasm();
+          /* Só ANTES da primeira sessão deste módulo isto tem efeito. */
+          if (amb.runtime === 'sondado') {
+            const b = await findWasmBase();
+            if (b) wasm.wasmPaths = b;
+          }
         } catch (e) {}
       }
-      if (tent.limpar) { st(t('modelLimpando')); await limparCacheModelo(); }
-      const alvo = tent.modelo || modelId;
-      for (let passe = 0; passe < 2; passe++) {
-        pedidos = new Set();
-        try {
-          const pp = await mod.pipeline('automatic-speech-recognition', alvo,
-            Object.assign({ progress_callback }, tent.opcoes));
-          motorEmUso = tent.motor;
-          degraus.push({ rotulo: rotuloTentativa(tent), ok: true, linhas: passe ? 1 : linhasDoWasm(),
-                         alvo, arqs: [...pedidos] });
-          modeloEmUso = alvo;
-          return pp;
-        } catch (e) {
-          ultimo = (e && e.message) || String(e);
-          degraus.push({ rotulo: rotuloTentativa(tent), ok: false,
-                         linhas: passe ? 1 : linhasDoWasm(), erro: ultimo,
-                         alvo, arqs: [...pedidos] });
-          // o defeito do arquivo de 4 bits não se repete: fica anotado na aba
-          if (tent.q4 && ERRO_SESSAO.test(ultimo)) marcarSemQ4();
-          const podeBaixarLinhas = passe === 0 && wasm && wasm.numThreads > 1;
-          if (podeBaixarLinhas) {
-            wasm.numThreads = 1;
-            st(t('linhasCairam'));
-            continue;             // mesma tentativa, agora com uma linha
-          }
-          break;                  // esgotou este motor: vai para o próximo
-        }
+      const ambRot = curto(amb.lib) + ' · runtime ' + amb.runtime;
+
+      /* Os degraus dentro de um ambiente. No PRIMEIRO ambiente vale a fila
+         inteira; nos seguintes, só os dois que importam — se o ambiente for a
+         causa, o primeiro degrau já resolve, e repetir seis variações em cada
+         um só gastaria a paciência de quem espera. */
+      const tentativas = [];
+      if (a === 0) {
+        if (usaPlaca() && !semQ4()) tentativas.push({ motor: 'placa de vídeo', q4: true,
+          opcoes: { device:'webgpu', dtype:{ encoder_model:'fp32', decoder_model_merged:'q4' } } });
+        if (usaPlaca()) tentativas.push({ motor: 'placa de vídeo',
+          opcoes: { device:'webgpu', dtype:{ encoder_model:'fp32', decoder_model_merged:'fp32' } } });
       }
-      if (tentativas[i+1]) st(t('motorCaiu', tent.motor));
+      /* `device:'wasm'` explícito: sem isso a biblioteca pode escolher a placa
+         de vídeo sozinha quando ela existe, e os degraus "de processador"
+         correm pelo mesmo caminho que acabou de falhar. */
+      tentativas.push({ motor: 'processador', opcoes: { device:'wasm', dtype:'q8' } });
+      if (a === 0) {
+        /* Sem otimização de grafo: `TransposeDQWeightsForMatMulNBits` mora em
+           `qdq_actions.cc`, que é otimizador. Não resolveu nesta máquina, mas
+           resolve numa classe de casos e custa um degrau. */
+        tentativas.push({ motor: 'processador', semOtim: true,
+          opcoes: { device:'wasm', dtype:'q8',
+                    session_options:{ graphOptimizationLevel:'disabled' } } });
+      }
+      tentativas.push({ motor: 'processador', opcoes: { device:'wasm', dtype:'fp32' } });
+      if (a === 0) {
+        if (!usaPlaca() && navigator.gpu) tentativas.push({ motor: 'placa de vídeo',
+          opcoes: { device:'webgpu', dtype:{ encoder_model:'fp32', decoder_model_merged:'fp32' } } });
+        /* Apagar o guardado e baixar de novo, para o caso de arquivo truncado.
+           Custa um download, e por isso vem depois de tudo que não custa. */
+        tentativas.push({ motor: 'processador', limpar: true,
+          opcoes: { device:'wasm', dtype:'q8' } });
+      }
+      /* Outro repositório do mesmo modelo, em todos os ambientes: a combinação
+         (biblioteca velha × arquivo velho) é uma das que nunca foi testada. */
+      if (MODELO_RESERVA[modelId]) tentativas.push({ motor: 'processador',
+        modelo: MODELO_RESERVA[modelId], opcoes: { device:'wasm', dtype:'q8' } });
+
+      for (let i = 0; i < tentativas.length; i++) {
+        const tent = tentativas[i];
+        if (tent.limpar) { st(t('modelLimpando')); await limparCacheModelo(); }
+        const alvo = tent.modelo || modelId;
+        /* Degrau de linhas, dentro de cada tentativa. Isolamento entre origens
+           libera SharedArrayBuffer, o runtime passa a querer o wasm com linhas,
+           e para isso precisa criar um Worker de OUTRA origem — o CDN. Sob COEP
+           é justamente o que o navegador barra. Em vez de escolher entre
+           velocidade e funcionar, tenta com linhas e refaz com uma só. */
+        for (let passe = 0; passe < 2; passe++) {
+          pedidos = new Set();
+          try {
+            const pp = await mod.pipeline('automatic-speech-recognition', alvo,
+              Object.assign({ progress_callback }, tent.opcoes));
+            motorEmUso = tent.motor;
+            modeloEmUso = alvo;
+            degraus.push({ rotulo: rotuloTentativa(tent), ok: true, amb: ambRot,
+                           ort: versaoOrt(mod), linhas: passe ? 1 : linhasDoWasm(),
+                           alvo, arqs: [...pedidos] });
+            return pp;
+          } catch (e) {
+            ultimo = (e && e.message) || String(e);
+            degraus.push({ rotulo: rotuloTentativa(tent), ok: false, amb: ambRot,
+                           ort: versaoOrt(mod), linhas: passe ? 1 : linhasDoWasm(),
+                           erro: ultimo, alvo, arqs: [...pedidos] });
+            if (tent.q4 && ERRO_SESSAO.test(ultimo)) marcarSemQ4();
+            if (passe === 0 && wasm && wasm.numThreads > 1) {
+              wasm.numThreads = 1;
+              st(t('linhasCairam'));
+              continue;
+            }
+            break;
+          }
+        }
+        if (tentativas[i+1]) st(t('motorCaiu', tent.motor));
+      }
     }
-    /* Traduzir o erro do runtime antes de entregá-lo. "TransposeDQWeightsFor
-       MatMulNBits Missing required scale" é uma linha de C++ que não diz a
-       ninguém o que fazer; o que interessa é que o arquivo comprimido não abre
-       nesta máquina e que as alternativas já foram tentadas. */
+
     /* A mensagem amigável NUNCA substitui a técnica: ela vem na frente, e o
-       texto do runtime vai junto entre parênteses. Trocar uma pela outra fez o
-       diagnóstico perder a única pista que existia. */
+       texto do runtime vai junto entre parênteses. */
     ultimoErroModelo = ultimo || 'não consegui montar o modelo';
     if (ERRO_SESSAO.test(ultimo || '')) throw new Error(t('erroSessao') + ' (' + ultimo + ')');
     throw new Error(ultimoErroModelo);
@@ -3964,7 +3988,9 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     say('WebGPU        : ' + (navigator.gpu ? 'disponível' : 'ausente'));
     say('cache/isolam. : caches=' + (typeof caches !== 'undefined') +
         ' crossOriginIsolated=' + (window.crossOriginIsolated === true));
-    try { await loadLib(); say('biblioteca    : OK -> ' + tjsEmUso); }
+    try { const m = await loadLib();
+          say('biblioteca    : OK -> ' + tjsEmUso);
+          say('versões       : ' + versaoOrt(m)); }
     catch (e) {
       say('biblioteca    : FALHOU em todos os endereços');
       tjsErros.forEach(x => say('              -> ' + x.slice(0, 200)));
@@ -4034,6 +4060,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
          relatório que é copiado e colado. */
       say('  ' + (i+1) + '. ' + d.rotulo + '  -> ' + (d.ok ? 'OK' : 'falhou') +
           '  [linhas=' + d.linhas + ']');
+      if (d.amb)  say('     ambiente: ' + d.amb + (d.ort ? '  [' + d.ort + ']' : ''));
       if (d.alvo) say('     modelo: ' + d.alvo);
       say('     arquivos pedidos: ' + (d.arqs && d.arqs.length ? d.arqs.join(', ')
                                        : '(nenhum — veio tudo do cache)'));

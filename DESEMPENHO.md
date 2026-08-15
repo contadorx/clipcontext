@@ -376,3 +376,67 @@ passou a ser registrado por degrau e impresso.
 
 Os rótulos dos degraus deixaram de ser alinhados por coluna fixa: com nomes mais longos, o
 `padEnd(34)` colava "sem otimização" em "falhou" no relatório copiado.
+
+---
+
+## 15/08/2026, terceira rodada — a instrumentação apontou o erro que era meu
+
+A medição encerrou as duas hipóteses da rodada anterior, e de quebra mostrou que **um dos degraus
+mentia**.
+
+O que os `arquivos pedidos:` provaram:
+
+- **Não é cache corrompido.** O degrau `cache limpo` apagou tudo, baixou de novo e falhou igual.
+- **Não é o `dtype` sendo ignorado.** O degrau `fp32` pediu `encoder_model.onnx` e
+  `decoder_model_merged.onnx` — os arquivos sem compressão, exatamente como devia.
+- **Não é o repositório.** O degrau `Xenova/whisper-base` baixou os 73 MB do outro repositório e
+  falhou com a mesma linha, byte a byte.
+
+Dois repositórios, quatro `dtype`, com e sem otimização de grafo, wasm e WebGPU: **oito degraus,
+uma mensagem só.** Um erro idêntico em oito configurações diferentes não descreve oito execuções —
+descreve uma. O que executava era sempre o mesmo.
+
+### O degrau "runtime reserva" nunca trocou runtime nenhum
+
+Esse é o erro, e ele é meu. O `onnxruntime-web` **instancia o `.wasm` uma vez por módulo** e guarda
+a instância. Depois da primeira sessão, mexer em `wasmPaths` não troca nada — o binário já está na
+memória. E `import()` do mesmo endereço devolve o módulo do cache, não um módulo novo.
+
+Ou seja: os oito degraus rodaram no mesmo `onnxruntime`, carregado no degrau 1. A hipótese "versão
+do runtime" não foi testada e descartada — ela **nunca chegou a ser testada**. Eu li o degrau 5
+falhando e concluí a coisa errada.
+
+### O que muda: trocar de ambiente, não de configuração
+
+A unidade de tentativa deixou de ser a configuração e passou a ser o **ambiente** — a combinação de
+biblioteca e runtime. Cada ambiente carrega um **módulo novo**, com um `onnxruntime` novo, através
+de um parâmetro diferente na URL do `import()`:
+
+```js
+await import(url + '?ws=' + (++contadorModulo));
+```
+
+Sem esse parâmetro o navegador devolve o módulo já carregado, e a troca vira teatro.
+
+Os ambientes, em ordem:
+
+| # | biblioteca | runtime |
+|---|---|---|
+| 1 | `@huggingface/transformers@4.2.0` | o que a biblioteca traz |
+| 2 | `@huggingface/transformers@4.2.0` | o sondado no CDN (agora aplicado **antes** da 1ª sessão) |
+| 3 | `@huggingface/transformers@3` | o que a biblioteca traz |
+| 4 | `@huggingface/transformers` (último) | o que a biblioteca traz |
+
+No ambiente 1 vale a fila inteira de degraus; nos seguintes, só `q8`, `fp32` e o repositório de
+reserva — se o ambiente for a causa, o primeiro degrau já resolve, e repetir seis variações em cada
+um só gastaria a paciência de quem espera.
+
+E o diagnóstico passou a imprimir **`versões`**, lido de `env.versions`: qual `onnxruntime` cada
+módulo carregou. Discutir versão por dedução, que é o que eu vinha fazendo há três rodadas, deixa
+de ser necessário.
+
+### A lição de método
+
+As três rodadas anteriores foram hipótese → correção → publicar → falhar. Esta foi medição →
+hipótese. A diferença de custo é o tempo do Leandro, e ela deveria ter vindo primeiro: o
+`progress_callback` já entregava o nome de cada arquivo desde sempre — eu é que não estava olhando.
