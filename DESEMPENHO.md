@@ -586,3 +586,48 @@ vista** contra o **limiar em vigor**.
 É a diferença entre uma hipótese e um fato. Se a maior mudança for 3% contra um limiar de 8%, o
 limiar está alto para aquela tela. Se ela for 40% e mesmo assim ninguém entrou, o defeito é meu e o
 relatório diz isso na cara.
+
+---
+
+## 15/08/2026, sexta rodada — o "sem frames", e um erro meu de leitura
+
+O diagnóstico veio limpo: `transformers=3.8.1`, `ort.web=1.22.0-dev`, modelo montado pela
+combinação lembrada, **zero download**. O lado do modelo está resolvido.
+
+Mas ele veio sem os números dos frames — e a culpa é minha. Eu pus os contadores na **mensagem de
+fim da gravação** e pedi "me manda a linha entre parênteses". A pessoa apertou o botão que se chama
+**Diagnóstico**, que é o que qualquer um aperta quando algo dá errado, e mandou aquilo. O
+instrumento estava no lugar errado.
+
+Os contadores passaram para o Diagnóstico, e ficam guardados depois que a gravação termina:
+
+```
+última gravação de tela:
+  frames guardados : 1   de um limite de 60
+  duração          : 6.1 s   laço a cada 700 ms
+  vídeo            : 320×180
+  recusas: sem imagem do vídeo=0  falha ao ler a tela=0  falha ao gravar a imagem=0
+           mudança abaixo do limiar=9  limite atingido=0
+  mudança: maior vista=0.0   limiar em vigor=5.5   (escala 0–255)
+```
+
+(As unidades também estavam erradas na primeira versão: `diff()` devolve média de 0 a 255, e eu
+imprimia como porcentagem.)
+
+### Uma causa encontrada de caminho
+
+A assinatura de 32×18 serve ao **detector de mudança**. Ela estava barrando também as capturas
+**forçadas** — a de abertura, a de fechamento, o botão "marcar" e a retomada da pausa —, que são
+justamente as quatro em que não há nada a detectar porque a decisão de guardar já foi tomada.
+
+Se `signature()` falha nessa máquina (a leitura de pixel pode falhar por mais de um motivo), o
+resultado é uma gravação inteira com vídeo o tempo todo e **zero frames**. Agora a falha da
+assinatura é contada e a captura forçada passa assim mesmo. O teste novo (`semframes.mjs`) quebra a
+leitura de pixel de propósito e exige que a gravação ainda termine com frame.
+
+E o `snap()` — que grava a imagem de verdade — ganhou o mesmo tratamento: se ele estourar dentro do
+`setInterval`, derrubaria o laço inteiro em silêncio. Agora é contado, com a mensagem do erro, e o
+laço continua.
+
+Não afirmo que era isso na máquina do Leandro. Afirmo que era **um** jeito de acontecer, que agora
+não acontece mais, e que se ainda acontecer o relatório dirá qual dos cinco motivos foi.

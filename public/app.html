@@ -723,7 +723,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recNo:'Este navegador não permite gravar a tela. Use Chrome ou Edge no computador.',
       recCurta:'A gravação durou menos de dois segundos e não deu tempo de capturar nada. Clique em Gravar a tela de novo e deixe rodar até aparecer o que você quer registrar.',
       recEmpty:'A gravação saiu vazia. Tente de novo escolhendo uma janela ou a tela inteira.',
-      recSemFramesN:'sem imagem do vídeo: {0} · falha ao ler a tela: {1} · mudança abaixo do limiar: {2} · maior mudança vista: {3}% · limiar: {4}%',
+      recSemFramesN:'sem imagem do vídeo: {0} · falha ao ler a tela: {1} · mudança abaixo do limiar: {2} · maior mudança vista: {3} · limiar: {4} (escala 0–255) — o Diagnóstico, no passo 2, mostra isto e mais um pouco',
       recSemFrames:'Nenhuma tela foi guardada: a imagem não mudou o suficiente durante a captura. A gravação só guarda a tela quando ela muda — se você ficou numa tela só, ou se compartilhou uma janela que o navegador entrega em preto, não há o que guardar. Grave de novo percorrendo as telas que quer documentar.',
       recMicLbl:'Incluir meu microfone',
       recTrLbl:'Transcrever enquanto gravo',
@@ -1023,7 +1023,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recNo:'This browser cannot record the screen. Use Chrome or Edge on a computer.',
       recCurta:'The recording lasted less than two seconds, too short to capture anything. Click Record the screen again and let it run until what you want to keep is on screen.',
       recEmpty:'The recording came out empty. Try again, picking a window or the whole screen.',
-      recSemFramesN:'no video image: {0} · could not read the screen: {1} · change below threshold: {2} · largest change seen: {3}% · threshold: {4}%',
+      recSemFramesN:'no video image: {0} · could not read the screen: {1} · change below threshold: {2} · largest change seen: {3} · threshold: {4} (0–255 scale) — Diagnostics, in step 2, shows this and a bit more',
       recSemFrames:'No screen was kept: the image did not change enough during the capture. Recording only keeps the screen when it changes — if you stayed on a single screen, or shared a window the browser hands over as black, there is nothing to keep. Record again, walking through the screens you want to document.',
       recMicLbl:'Include my microphone',
       recTrLbl:'Transcribe while I record',
@@ -1321,7 +1321,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recNo:'Este navegador no permite grabar la pantalla. Usa Chrome o Edge en un ordenador.',
       recCurta:'La grabación duró menos de dos segundos y no dio tiempo de capturar nada. Pulsa Grabar la pantalla otra vez y déjala correr hasta que aparezca lo que quieres registrar.',
       recEmpty:'La grabación salió vacía. Inténtalo de nuevo eligiendo una ventana o la pantalla completa.',
-      recSemFramesN:'sin imagen de vídeo: {0} · fallo al leer la pantalla: {1} · cambio por debajo del umbral: {2} · mayor cambio visto: {3}% · umbral: {4}%',
+      recSemFramesN:'sin imagen de vídeo: {0} · fallo al leer la pantalla: {1} · cambio por debajo del umbral: {2} · mayor cambio visto: {3} · umbral: {4} (escala 0–255) — el Diagnóstico, en el paso 2, muestra esto y algo más',
       recSemFrames:'No se guardó ninguna pantalla: la imagen no cambió lo suficiente durante la captura. La grabación solo guarda la pantalla cuando cambia — si te quedaste en una sola, o compartiste una ventana que el navegador entrega en negro, no hay nada que guardar. Graba de nuevo recorriendo las pantallas que quieres documentar.',
       recMicLbl:'Incluir mi micrófono',
       recTrLbl:'Transcribir mientras grabo',
@@ -3227,23 +3227,37 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
        que a tela mudou é indistinguível de defeito enquanto o motivo não
        aparece — e "sem frames, ainda com problemas" foi como chegou. Estes
        contadores custam nada e transformam a queixa em diagnóstico. */
-    motivosFrame = { semVideo: 0, semAssinatura: 0, poucaMudanca: 0, limite: 0,
-                     maiorDiff: 0, limiar: thr };
+    motivosFrame = { semVideo: 0, semAssinatura: 0, semImagem: 0, poucaMudanca: 0,
+                     limite: 0, maiorDiff: 0, limiar: thr, erroImagem: '' };
 
     const capturar = (forcar, marcado) => {
       if (!video.videoWidth) { motivosFrame.semVideo++; return false; }
       if (frames.length >= maxf) { motivosFrame.limite++; return false; }
       // pausado, o laço automático não guarda nada; marcar à mão continua valendo
       if (pausado && !forcar) return false;
-      let sig;
-      try { sig = signature(); } catch (e) { motivosFrame.semAssinatura++; return false; }
+      /* A assinatura serve ao DETECTOR de mudança. Numa captura forçada — a de
+         abertura, a de fechamento, o botão "marcar" e a retomada da pausa — não
+         há nada a detectar: a decisão de guardar já foi tomada. Deixar a falha
+         da assinatura barrar essas quatro era o caminho mais curto para uma
+         gravação inteira terminar com zero frames tendo vídeo o tempo todo. */
+      let sig = null;
+      try { sig = signature(); }
+      catch (e) { motivosFrame.semAssinatura++; if (!forcar) return false; }
       if (!liveW) { liveW = video.videoWidth; liveH = video.videoHeight; showMeta(); }
-      if (!forcar && prevSig !== null) {
+      if (!forcar && prevSig !== null && sig) {
         const d = diff(prevSig, sig);
         if (d > motivosFrame.maiorDiff) motivosFrame.maiorDiff = d;
         if (d < thr) { motivosFrame.poucaMudanca++; return false; }
       }
-      frames.push({ t: agora(), img: snap(900, q), keep: true, sig, manual: !!marcado });
+      /* Se a imagem em si não puder ser lida, o motivo é outro do que "não
+         mudou" — e ele precisa aparecer com nome próprio. Um `snap` que estoura
+         dentro do `setInterval` derrubaria o laço inteiro em silêncio, e o que
+         chega é "gravei e não veio frame nenhum". */
+      let img;
+      try { img = snap(900, q); }
+      catch (e) { motivosFrame.semImagem++; motivosFrame.erroImagem =
+                    (e && e.message) || String(e); return false; }
+      frames.push({ t: agora(), img, keep: true, sig, manual: !!marcado });
       prevSig = sig;
       atualizarLive();
       return true;
@@ -3336,6 +3350,16 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       clearInterval(relogio); clearInterval(relFrames);
       pintarRecMsg = () => {};
       liveDur = agora();
+      /* Fica guardado para o diagnóstico. Era o erro da rodada passada: eu pus
+         os números na mensagem de fim, e o botão que a pessoa aperta quando
+         algo dá errado chama-se Diagnóstico. */
+      if (motivosFrame) {
+        motivosFrame.frames = frames.length;
+        motivosFrame.segundos = liveDur;
+        motivosFrame.video = video.videoWidth + '×' + video.videoHeight;
+        motivosFrame.limite_max = maxf;
+        motivosFrame.passo_ms = PASSO_FRAME_MS;
+      }
       emCauda = true; pularCauda = false;
       $('recStop').textContent = t('recSkip');
       $('recMsg').textContent = t('recTail');
@@ -3421,7 +3445,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       const detalheFrames = (frames.length === 0 && liveDur >= 2)
         ? ' <span class="status">(' + t('recSemFramesN',
             m.semVideo || 0, m.semAssinatura || 0, m.poucaMudanca || 0,
-            ((m.maiorDiff || 0) * 100).toFixed(1), ((m.limiar || 0) * 100).toFixed(1)) + ')</span>'
+            (m.maiorDiff || 0).toFixed(1), (m.limiar || 0).toFixed(1)) + ')</span>'
         : '';
       const semFrames = (frames.length === 0 && liveDur >= 2) ? ' ' + t('recSemFrames') : '';
       const alerta = avisosFim.length ? ` <span class="err">${avisosFim.join(' ')}</span>` : '';
@@ -4224,6 +4248,26 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     const b = await findWasmBase();
     say('wasm de fábrica: ' + (wasmPadrao === undefined ? '(a biblioteca resolve sozinha)' : wasmPadrao));
     say('wasm reserva  : ' + (b || 'nenhum respondeu'));
+
+    say('');
+    say('última gravação de tela:');
+    if (!motivosFrame) say('  (nenhuma gravação nesta aba ainda)');
+    else {
+      const m = motivosFrame;
+      say('  frames guardados : ' + (m.frames == null ? '?' : m.frames) +
+          '   de um limite de ' + (m.limite_max || '?'));
+      say('  duração          : ' + (m.segundos == null ? '?' : m.segundos.toFixed(1) + ' s') +
+          '   laço a cada ' + (m.passo_ms || '?') + ' ms');
+      say('  vídeo            : ' + (m.video || '?'));
+      say('  recusas: sem imagem do vídeo=' + (m.semVideo || 0) +
+          '  falha ao ler a tela=' + (m.semAssinatura || 0) +
+          '  falha ao gravar a imagem=' + (m.semImagem || 0) +
+          '  mudança abaixo do limiar=' + (m.poucaMudanca || 0) +
+          '  limite atingido=' + (m.limite || 0));
+      if (m.erroImagem) say('  erro ao gravar a imagem: ' + String(m.erroImagem).slice(0, 200));
+      say('  mudança: maior vista=' + (m.maiorDiff || 0).toFixed(1) +
+          '   limiar em vigor=' + (m.limiar || 0).toFixed(1) + '   (escala 0–255)');
+    }
 
     say('');
     say('modelo guardado neste navegador:');
