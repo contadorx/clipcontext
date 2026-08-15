@@ -1,0 +1,38 @@
+-- Portal do cliente: fecha o caminho direto para os dados.
+--
+-- O portal passou a exigir login por e-mail. Só que exigir login no componente
+-- React não protege nada: `portal_dados` é `security definer` e executável pelo
+-- papel `anon`, e a chave anônima está dentro do pacote JavaScript que todo
+-- visitante baixa. Quem tivesse o link — que circula por WhatsApp — podia
+-- chamar a RPC direto no endpoint REST e receber entradas, saídas, resultado
+-- mês a mês e o texto da análise, sem cookie nenhum.
+--
+--   POST /rest/v1/rpc/portal_dados
+--   apikey: <anon, copiada do bundle>
+--   {"p_token":"<token da URL>","p_ano":2026}
+--
+-- Depois deste arquivo, quem consulta é o servidor do app com a chave de
+-- serviço, e só depois de validar a sessão do portal (ver `lib/portal-sessao.ts`).
+--
+-- ATENÇÃO — duas coisas mudam de requisito com esta rodada:
+--
+--   1. `SUPABASE_SERVICE_ROLE_KEY` passa a ser OBRIGATÓRIA para o portal
+--      funcionar. É ela que lê os dados sem passar pelo `anon` e que confere se
+--      o acesso do usuário continua ativo. Sem a chave, o portal mostra
+--      "temporariamente indisponível" — de propósito, para não mandar o cliente
+--      pedir um link que também não abriria.
+--   2. O cookie de sessão do portal mudou de nome (agora é um por portal). Quem
+--      já estava conectado precisa entrar de novo pelo link do e-mail. Antes de
+--      subir para clientes reais, avise-os ou reenvie os acessos.
+--
+-- Ordem de deploy: rode DEPOIS de subir o app. O app já não usa o caminho
+-- anônimo, então rodar antes também funciona — mas rodar sem o app novo no ar
+-- derrubaria o portal para todo mundo.
+revoke execute on function public.portal_dados(text, integer) from anon;
+
+-- `authenticated` também não precisa: quem está logado no app olha o financeiro
+-- pelas telas normais, com RLS. Se a assinatura da função na sua base for
+-- diferente (outros tipos de parâmetro), ajuste as duas linhas — um `revoke` em
+-- assinatura que não existe falha com "function does not exist", e é assim que
+-- você descobre.
+revoke execute on function public.portal_dados(text, integer) from authenticated;

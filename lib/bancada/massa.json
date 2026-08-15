@@ -1,0 +1,769 @@
+{
+ "_leia": "Massa fixa das bancadas. Espelha de propósito os dados do mockup Fiori (Padaria Aurora), para que a comparação lado a lado seja entre desenhos e não entre conteúdos diferentes. Servida por components/bancada/dados-falsos.tsx no navegador e por scripts/bancada/servir.js nos roteiros. ATENÇÃO ao nome da tabela: a conciliação consulta `transacoes_extrato` — na primeira versão desta massa estava `extrato_transacoes`, invertido, e a tela apareceu vazia numa auditoria inteira sem que ninguém desconfiasse do arreio.",
+ "contas_bancarias": [
+  {
+   "id": "ct-1",
+   "nome": "Itaú",
+   "banco": "Itaú",
+   "agencia": "1234",
+   "conta": "56789-0",
+   "saldo_inicial": 42000,
+   "data_inicio": "2026-01-01",
+   "empresa_id": "emp-1",
+   "ativa": true,
+   "tipo": "corrente"
+  },
+  {
+   "id": "ct-2",
+   "nome": "Bradesco",
+   "banco": "Bradesco",
+   "agencia": "0987",
+   "conta": "12345-6",
+   "saldo_inicial": 18000,
+   "data_inicio": "2026-01-01",
+   "empresa_id": "emp-1",
+   "ativa": true,
+   "tipo": "corrente"
+  },
+  {
+   "id": "ct-3",
+   "nome": "Nubank PJ",
+   "banco": "Nubank",
+   "agencia": "0001",
+   "conta": "77777-7",
+   "saldo_inicial": 9500,
+   "data_inicio": "2026-01-01",
+   "empresa_id": "emp-1",
+   "ativa": true,
+   "tipo": "corrente"
+  }
+ ],
+ "categorias": [
+  {
+   "id": "cat-1",
+   "nome": "Receita de vendas",
+   "tipo": "receber",
+   "empresa_id": "emp-1"
+  },
+  {
+   "id": "cat-2",
+   "nome": "Receita de contratos",
+   "tipo": "receber",
+   "empresa_id": "emp-1"
+  },
+  {
+   "id": "cat-3",
+   "nome": "Receita de serviços",
+   "tipo": "receber",
+   "empresa_id": "emp-1"
+  },
+  {
+   "id": "cat-4",
+   "nome": "Insumos e mercadorias",
+   "tipo": "pagar",
+   "empresa_id": "emp-1"
+  },
+  {
+   "id": "cat-5",
+   "nome": "Ocupação",
+   "tipo": "pagar",
+   "empresa_id": "emp-1"
+  },
+  {
+   "id": "cat-6",
+   "nome": "Pessoal",
+   "tipo": "pagar",
+   "empresa_id": "emp-1"
+  },
+  {
+   "id": "cat-7",
+   "nome": "Impostos e taxas",
+   "tipo": "pagar",
+   "empresa_id": "emp-1"
+  },
+  {
+   "id": "cat-8",
+   "nome": "Utilidades",
+   "tipo": "pagar",
+   "empresa_id": "emp-1"
+  }
+ ],
+ "clientes_fornecedores": [
+  {
+   "id": "pf-1",
+   "nome": "Supermercado Vila Nova",
+   "tipo": "cliente",
+   "cnpj_cpf": "12345678000190",
+   "empresa_id": "emp-1",
+   "email": "compras@vilanova.com.br",
+   "telefone": "1133334444",
+   "cidade": "São Paulo",
+   "uf": "SP"
+  },
+  {
+   "id": "pf-2",
+   "nome": "Moinho Santa Clara",
+   "tipo": "fornecedor",
+   "cnpj_cpf": "98765432000110",
+   "empresa_id": "emp-1",
+   "email": "vendas@santaclara.com.br",
+   "telefone": "1144445555",
+   "cidade": "Campinas",
+   "uf": "SP"
+  },
+  {
+   "id": "pf-3",
+   "nome": "Hotel Bela Vista",
+   "tipo": "cliente",
+   "cnpj_cpf": "11222333000144",
+   "empresa_id": "emp-1",
+   "email": "financeiro@belavista.com.br",
+   "telefone": "1155556666",
+   "cidade": "Santos",
+   "uf": "SP"
+  },
+  {
+   "id": "pf-4",
+   "nome": "Imobiliária Prado",
+   "tipo": "fornecedor",
+   "cnpj_cpf": "55666777000188",
+   "empresa_id": "emp-1",
+   "email": "contato@prado.com.br",
+   "telefone": "1166667777",
+   "cidade": "São Paulo",
+   "uf": "SP"
+  },
+  {
+   "id": "pf-5",
+   "nome": "Enel Distribuição",
+   "tipo": "fornecedor",
+   "cnpj_cpf": "61695227000193",
+   "empresa_id": "emp-1",
+   "email": null,
+   "telefone": null,
+   "cidade": "São Paulo",
+   "uf": "SP"
+  },
+  {
+   "id": "pf-6",
+   "nome": "Construtora Andrade",
+   "tipo": "cliente",
+   "cnpj_cpf": "33444555000166",
+   "empresa_id": "emp-1",
+   "email": "obras@andrade.com.br",
+   "telefone": "1177778888",
+   "cidade": "Guarulhos",
+   "uf": "SP"
+  },
+  {
+   "id": "pf-7",
+   "nome": "Embalar Distribuidora",
+   "tipo": "fornecedor",
+   "cnpj_cpf": "77888999000122",
+   "empresa_id": "emp-1",
+   "email": null,
+   "telefone": null,
+   "cidade": "Osasco",
+   "uf": "SP"
+  },
+  {
+   "id": "pf-8",
+   "nome": "Receita Federal",
+   "tipo": "fornecedor",
+   "cnpj_cpf": "00394460000141",
+   "empresa_id": "emp-1",
+   "email": null,
+   "telefone": null,
+   "cidade": "Brasília",
+   "uf": "DF"
+  }
+ ],
+ "centros_custo": [
+  {
+   "id": "cc-1",
+   "nome": "Matriz",
+   "empresa_id": "emp-1"
+  },
+  {
+   "id": "cc-2",
+   "nome": "Filial Butantã",
+   "empresa_id": "emp-1"
+  },
+  {
+   "id": "cc-3",
+   "nome": "Eventos",
+   "empresa_id": "emp-1"
+  }
+ ],
+ "lancamentos": [
+  {
+   "id": "l-1",
+   "tipo": "entrada",
+   "valor": 18900,
+   "descricao": "Venda a prazo — pedido 8842",
+   "data_competencia": "2026-08-05",
+   "data_vencimento": "2026-08-05",
+   "data_pagamento": null,
+   "data_agendamento": null,
+   "conciliado": false,
+   "transferencia": false,
+   "transferencia_par_id": null,
+   "numero_documento": "8842",
+   "forma_pagamento": "boleto",
+   "pagamento_dados": null,
+   "categoria_id": "cat-1",
+   "conta_id": "ct-1",
+   "centro_custo_id": "cc-1",
+   "cliente_fornecedor_id": "pf-1",
+   "recorrencia_id": null,
+   "exportado_em": null,
+   "empresa_id": "emp-1",
+   "categoria": {
+    "nome": "Receita de vendas"
+   },
+   "conta": {
+    "nome": "Itaú"
+   },
+   "pessoa": {
+    "nome": "Supermercado Vila Nova"
+   }
+  },
+  {
+   "id": "l-2",
+   "tipo": "saida",
+   "valor": 6320.4,
+   "descricao": "Farinha de trigo — lote 22",
+   "data_competencia": "2026-08-08",
+   "data_vencimento": "2026-08-08",
+   "data_pagamento": null,
+   "data_agendamento": null,
+   "conciliado": false,
+   "transferencia": false,
+   "transferencia_par_id": null,
+   "numero_documento": "NF 4471",
+   "forma_pagamento": "boleto",
+   "pagamento_dados": null,
+   "categoria_id": "cat-4",
+   "conta_id": "ct-2",
+   "centro_custo_id": "cc-1",
+   "cliente_fornecedor_id": "pf-2",
+   "recorrencia_id": null,
+   "exportado_em": null,
+   "empresa_id": "emp-1",
+   "categoria": {
+    "nome": "Insumos e mercadorias"
+   },
+   "conta": {
+    "nome": "Bradesco"
+   },
+   "pessoa": {
+    "nome": "Moinho Santa Clara"
+   }
+  },
+  {
+   "id": "l-3",
+   "tipo": "entrada",
+   "valor": 12500,
+   "descricao": "Contrato mensal — agosto",
+   "data_competencia": "2026-08-10",
+   "data_vencimento": "2026-08-10",
+   "data_pagamento": "2026-08-10",
+   "data_agendamento": null,
+   "conciliado": true,
+   "transferencia": false,
+   "transferencia_par_id": null,
+   "numero_documento": null,
+   "forma_pagamento": "pix",
+   "pagamento_dados": null,
+   "categoria_id": "cat-2",
+   "conta_id": "ct-3",
+   "centro_custo_id": "cc-1",
+   "cliente_fornecedor_id": "pf-3",
+   "recorrencia_id": "rec-1",
+   "exportado_em": null,
+   "empresa_id": "emp-1",
+   "categoria": {
+    "nome": "Receita de contratos"
+   },
+   "conta": {
+    "nome": "Nubank PJ"
+   },
+   "pessoa": {
+    "nome": "Hotel Bela Vista"
+   }
+  },
+  {
+   "id": "l-4",
+   "tipo": "saida",
+   "valor": 8400,
+   "descricao": "Aluguel do ponto comercial",
+   "data_competencia": "2026-08-13",
+   "data_vencimento": "2026-08-13",
+   "data_pagamento": null,
+   "data_agendamento": null,
+   "conciliado": false,
+   "transferencia": false,
+   "transferencia_par_id": null,
+   "numero_documento": null,
+   "forma_pagamento": "debito_automatico",
+   "pagamento_dados": null,
+   "categoria_id": "cat-5",
+   "conta_id": "ct-1",
+   "centro_custo_id": null,
+   "cliente_fornecedor_id": "pf-4",
+   "recorrencia_id": "rec-2",
+   "exportado_em": null,
+   "empresa_id": "emp-1",
+   "categoria": {
+    "nome": "Ocupação"
+   },
+   "conta": {
+    "nome": "Itaú"
+   },
+   "pessoa": {
+    "nome": "Imobiliária Prado"
+   }
+  },
+  {
+   "id": "l-5",
+   "tipo": "entrada",
+   "valor": 18900,
+   "descricao": "Venda a prazo — pedido 8901",
+   "data_competencia": "2026-08-14",
+   "data_vencimento": "2026-08-14",
+   "data_pagamento": null,
+   "data_agendamento": null,
+   "conciliado": false,
+   "transferencia": false,
+   "transferencia_par_id": null,
+   "numero_documento": "8901",
+   "forma_pagamento": "boleto",
+   "pagamento_dados": null,
+   "categoria_id": "cat-1",
+   "conta_id": "ct-1",
+   "centro_custo_id": "cc-1",
+   "cliente_fornecedor_id": "pf-1",
+   "recorrencia_id": null,
+   "exportado_em": null,
+   "empresa_id": "emp-1",
+   "categoria": {
+    "nome": "Receita de vendas"
+   },
+   "conta": {
+    "nome": "Itaú"
+   },
+   "pessoa": {
+    "nome": "Supermercado Vila Nova"
+   }
+  },
+  {
+   "id": "l-6",
+   "tipo": "saida",
+   "valor": 22150,
+   "descricao": "Folha de pagamento — agosto",
+   "data_competencia": "2026-08-15",
+   "data_vencimento": "2026-08-15",
+   "data_pagamento": null,
+   "data_agendamento": "2026-08-15",
+   "conciliado": false,
+   "transferencia": false,
+   "transferencia_par_id": null,
+   "numero_documento": null,
+   "forma_pagamento": "ted",
+   "pagamento_dados": {
+    "banco": "237",
+    "agencia": "0987",
+    "conta": "12345-6",
+    "favorecido": "Diversos"
+   },
+   "categoria_id": "cat-6",
+   "conta_id": "ct-2",
+   "centro_custo_id": "cc-1",
+   "cliente_fornecedor_id": null,
+   "recorrencia_id": "rec-3",
+   "exportado_em": null,
+   "empresa_id": "emp-1",
+   "categoria": {
+    "nome": "Pessoal"
+   },
+   "conta": {
+    "nome": "Bradesco"
+   },
+   "pessoa": null
+  },
+  {
+   "id": "l-7",
+   "tipo": "saida",
+   "valor": 6320.4,
+   "descricao": "Farinha de trigo — lote 22",
+   "data_competencia": "2026-08-18",
+   "data_vencimento": "2026-08-18",
+   "data_pagamento": null,
+   "data_agendamento": null,
+   "conciliado": false,
+   "transferencia": false,
+   "transferencia_par_id": null,
+   "numero_documento": "NF 4471",
+   "forma_pagamento": "boleto",
+   "pagamento_dados": null,
+   "categoria_id": "cat-4",
+   "conta_id": "ct-2",
+   "centro_custo_id": "cc-1",
+   "cliente_fornecedor_id": "pf-2",
+   "recorrencia_id": null,
+   "exportado_em": null,
+   "empresa_id": "emp-1",
+   "categoria": {
+    "nome": "Insumos e mercadorias"
+   },
+   "conta": {
+    "nome": "Bradesco"
+   },
+   "pessoa": {
+    "nome": "Moinho Santa Clara"
+   }
+  },
+  {
+   "id": "l-8",
+   "tipo": "saida",
+   "valor": 6410,
+   "descricao": "Simples Nacional — 07/26",
+   "data_competencia": "2026-08-20",
+   "data_vencimento": "2026-08-20",
+   "data_pagamento": null,
+   "data_agendamento": null,
+   "conciliado": false,
+   "transferencia": false,
+   "transferencia_par_id": null,
+   "numero_documento": "DAS 072026",
+   "forma_pagamento": "boleto",
+   "pagamento_dados": null,
+   "categoria_id": "cat-7",
+   "conta_id": "ct-1",
+   "centro_custo_id": null,
+   "cliente_fornecedor_id": "pf-8",
+   "recorrencia_id": null,
+   "exportado_em": null,
+   "empresa_id": "emp-1",
+   "categoria": {
+    "nome": "Impostos e taxas"
+   },
+   "conta": {
+    "nome": "Itaú"
+   },
+   "pessoa": {
+    "nome": "Receita Federal"
+   }
+  },
+  {
+   "id": "l-9",
+   "tipo": "saida",
+   "valor": 3180.6,
+   "descricao": "Energia elétrica — julho",
+   "data_competencia": "2026-08-25",
+   "data_vencimento": "2026-08-25",
+   "data_pagamento": null,
+   "data_agendamento": null,
+   "conciliado": false,
+   "transferencia": false,
+   "transferencia_par_id": null,
+   "numero_documento": null,
+   "forma_pagamento": "debito_automatico",
+   "pagamento_dados": null,
+   "categoria_id": "cat-8",
+   "conta_id": "ct-1",
+   "centro_custo_id": "cc-1",
+   "cliente_fornecedor_id": "pf-5",
+   "recorrencia_id": null,
+   "exportado_em": null,
+   "empresa_id": "emp-1",
+   "categoria": {
+    "nome": "Utilidades"
+   },
+   "conta": {
+    "nome": "Itaú"
+   },
+   "pessoa": {
+    "nome": "Enel Distribuição"
+   }
+  },
+  {
+   "id": "l-10",
+   "tipo": "entrada",
+   "valor": 7850,
+   "descricao": "Buffet corporativo — evento",
+   "data_competencia": "2026-08-22",
+   "data_vencimento": "2026-08-22",
+   "data_pagamento": null,
+   "data_agendamento": null,
+   "conciliado": false,
+   "transferencia": false,
+   "transferencia_par_id": null,
+   "numero_documento": null,
+   "forma_pagamento": "pix",
+   "pagamento_dados": null,
+   "categoria_id": "cat-3",
+   "conta_id": "ct-3",
+   "centro_custo_id": "cc-3",
+   "cliente_fornecedor_id": "pf-6",
+   "recorrencia_id": null,
+   "exportado_em": null,
+   "empresa_id": "emp-1",
+   "categoria": {
+    "nome": "Receita de serviços"
+   },
+   "conta": {
+    "nome": "Nubank PJ"
+   },
+   "pessoa": {
+    "nome": "Construtora Andrade"
+   }
+  },
+  {
+   "id": "l-11",
+   "tipo": "entrada",
+   "valor": 9420.5,
+   "descricao": "Venda balcão — semana 35",
+   "data_competencia": "2026-08-29",
+   "data_vencimento": "2026-08-29",
+   "data_pagamento": null,
+   "data_agendamento": null,
+   "conciliado": false,
+   "transferencia": false,
+   "transferencia_par_id": null,
+   "numero_documento": null,
+   "forma_pagamento": "cartao",
+   "pagamento_dados": null,
+   "categoria_id": "cat-1",
+   "conta_id": "ct-3",
+   "centro_custo_id": "cc-2",
+   "cliente_fornecedor_id": null,
+   "recorrencia_id": null,
+   "exportado_em": null,
+   "empresa_id": "emp-1",
+   "categoria": {
+    "nome": "Receita de vendas"
+   },
+   "conta": {
+    "nome": "Nubank PJ"
+   },
+   "pessoa": null
+  },
+  {
+   "id": "l-12",
+   "tipo": "saida",
+   "valor": 2740.9,
+   "descricao": "Embalagens e descartáveis",
+   "data_competencia": "2026-08-31",
+   "data_vencimento": "2026-08-31",
+   "data_pagamento": null,
+   "data_agendamento": null,
+   "conciliado": false,
+   "transferencia": false,
+   "transferencia_par_id": null,
+   "numero_documento": "Pedido 771",
+   "forma_pagamento": "boleto",
+   "pagamento_dados": null,
+   "categoria_id": "cat-4",
+   "conta_id": "ct-2",
+   "centro_custo_id": "cc-1",
+   "cliente_fornecedor_id": "pf-7",
+   "recorrencia_id": null,
+   "exportado_em": null,
+   "empresa_id": "emp-1",
+   "categoria": {
+    "nome": "Insumos e mercadorias"
+   },
+   "conta": {
+    "nome": "Bradesco"
+   },
+   "pessoa": {
+    "nome": "Embalar Distribuidora"
+   }
+  }
+ ],
+ "escritorios": [
+  {
+   "id": "esc-1",
+   "nome": "ContadorX",
+   "usar_centro_custo": true
+  }
+ ],
+ "grupos_categoria": [
+  {
+   "id": "gr-1",
+   "nome": "Receitas operacionais",
+   "eh_receita": true,
+   "ordem": 1,
+   "empresa_id": "emp-1"
+  },
+  {
+   "id": "gr-2",
+   "nome": "Custos e despesas",
+   "eh_receita": false,
+   "ordem": 2,
+   "empresa_id": "emp-1"
+  }
+ ],
+ "documentos_recebidos": [
+  {
+   "id": "doc-1",
+   "arquivo_nome": "nf-4471-moinho.pdf",
+   "enviado_em": "2026-08-11T09:12:00Z",
+   "tipo": "a_pagar",
+   "lancamento_id": null,
+   "empresa_id": "emp-1",
+   "status": "novo"
+  },
+  {
+   "id": "doc-2",
+   "arquivo_nome": "boleto-energia-julho.pdf",
+   "enviado_em": "2026-08-12T14:03:00Z",
+   "tipo": "a_pagar",
+   "lancamento_id": null,
+   "empresa_id": "emp-1",
+   "status": "novo"
+  },
+  {
+   "id": "doc-3",
+   "arquivo_nome": "extrato-itau-agosto.ofx",
+   "enviado_em": "2026-08-13T07:45:00Z",
+   "tipo": "extrato",
+   "lancamento_id": null,
+   "empresa_id": "emp-1",
+   "status": "novo"
+  }
+ ],
+ "regras_classificacao": [],
+ "lancamento_rateios": [
+  {
+   "id": "rt-1",
+   "lancamento_id": "l-4",
+   "centro_custo_id": "cc-1",
+   "valor": 5040
+  },
+  {
+   "id": "rt-2",
+   "lancamento_id": "l-4",
+   "centro_custo_id": "cc-2",
+   "valor": 3360
+  }
+ ],
+ "servicos": [
+  {
+   "id": "sv-1",
+   "nome": "Assessoria financeira mensal",
+   "preco": 2500,
+   "empresa_id": "emp-1",
+   "ativo": true
+  },
+  {
+   "id": "sv-2",
+   "nome": "Buffet corporativo — por pessoa",
+   "preco": 78.5,
+   "empresa_id": "emp-1",
+   "ativo": true
+  }
+ ],
+ "contratos": [
+  {
+   "id": "co-1",
+   "descricao": "Contrato mensal — Hotel Bela Vista",
+   "cliente_fornecedor_id": "pf-3",
+   "valor": 12500,
+   "dia_vencimento": 10,
+   "ativo": true,
+   "empresa_id": "emp-1"
+  }
+ ],
+ "transacoes_extrato": [
+  {
+   "id": "tx-1",
+   "conta_id": "ct-1",
+   "empresa_id": "emp-1",
+   "data": "2026-08-12",
+   "descricao": "DEB AUT ENEL DISTRIBUICAO SP",
+   "valor": -3180.6,
+   "fitid": "20260812001",
+   "conciliado": false
+  },
+  {
+   "id": "tx-2",
+   "conta_id": "ct-1",
+   "empresa_id": "emp-1",
+   "data": "2026-08-13",
+   "descricao": "PAGTO ALUGUEL IMOBILIARIA PRADO",
+   "valor": -8400.0,
+   "fitid": "20260813002",
+   "conciliado": false
+  },
+  {
+   "id": "tx-3",
+   "conta_id": "ct-1",
+   "empresa_id": "emp-1",
+   "data": "2026-08-11",
+   "descricao": "TARIFA PACOTE SERVICOS",
+   "valor": -79.9,
+   "fitid": "20260811003",
+   "conciliado": false
+  },
+  {
+   "id": "tx-4",
+   "conta_id": "ct-1",
+   "empresa_id": "emp-1",
+   "data": "2026-08-10",
+   "descricao": "TED RECEBIDA SUPERMERCADO VILA NOVA",
+   "valor": 18900.0,
+   "fitid": "20260810004",
+   "conciliado": false
+  },
+  {
+   "id": "tx-5",
+   "conta_id": "ct-1",
+   "empresa_id": "emp-1",
+   "data": "2026-08-09",
+   "descricao": "DEPOSITO DINHEIRO CAIXA LOJA",
+   "valor": 2410.35,
+   "fitid": "20260809005",
+   "conciliado": false
+  },
+  {
+   "id": "tx-6",
+   "conta_id": "ct-1",
+   "empresa_id": "emp-1",
+   "data": "2026-08-08",
+   "descricao": "PIX ENVIADO MOINHO SANTA CLARA",
+   "valor": -6320.4,
+   "fitid": "20260808006",
+   "conciliado": false
+  }
+ ],
+ "conciliacao_links": [],
+ "conciliacao_regras": [
+  {
+   "id": "rg-1",
+   "empresa_id": "emp-1",
+   "padrao": "ENEL",
+   "tipo": "saida",
+   "categoria_id": "cat-8",
+   "cliente_fornecedor_id": "pf-5"
+  },
+  {
+   "id": "rg-2",
+   "empresa_id": "emp-1",
+   "padrao": "TARIFA",
+   "tipo": "saida",
+   "categoria_id": "cat-7",
+   "cliente_fornecedor_id": null
+  }
+ ],
+ "regras_escritorio": [
+  {
+   "id": "re-1",
+   "padrao": "TED RECEBIDA",
+   "tipo": "entrada",
+   "categoria_id": "cat-1",
+   "cliente_fornecedor_id": null
+  }
+ ]
+}
