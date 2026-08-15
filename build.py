@@ -60,6 +60,28 @@ EMPRESA = "Produtize Produtos e Serviços Inteligentes Ltda."
 CNPJ    = "48.417.292/0001-99"
 CONTATO = "privacidade@walkstamp.com"
 
+# ---------------------------------------------------------------------------
+# Google Drive e Google Docs. Os três nascem VAZIOS e é assim que devem ficar
+# em qualquer cópia que não seja a sua: com eles vazios, nenhum botão do Google
+# é renderizado e nenhum endereço do Google é requisitado.
+#
+# São valores PÚBLICOS por natureza — vão para dentro de um HTML estático que
+# qualquer pessoa lê. O que protege a chave não é o segredo, é a lista de
+# origens autorizadas no console do Google. O passo a passo está em
+# GOOGLE-DRIVE.md.
+#
+#   G_CLIENT  -> liga "Enviar para o Google Docs" (só ele já basta)
+#   G_KEY     -> chave de API, restrita a Picker API + seus domínios
+#   G_APP     -> número do projeto, só dígitos
+#              os três juntos ligam "Abrir do Google Drive"
+#
+# Nada disso entra no build offline: lá os três viram string vazia, como os
+# tokens de medição.
+# ---------------------------------------------------------------------------
+G_CLIENT = ""   # ...apps.googleusercontent.com
+G_KEY    = ""
+G_APP    = ""
+
 SUPA_URL = "https://zyqncemxjobkvdveordz.supabase.co"
 SUPA_KEY = "sb_publishable_HQDSfL4rTtPx2wwbgh_huw_llog8ZJk"
 
@@ -404,6 +426,18 @@ self.addEventListener('fetch', e => {
         if "clipcontext" in arq.read_text(encoding="utf-8", errors="ignore").lower():
             print(f"o nome antigo sobrou em {arq.relative_to(root)} — corrija a fonte", file=sys.stderr)
             return 1
+
+    # A trava do token esquecido. Um __TOKEN__ que sobrevive ao build vira texto
+    # literal na tela ou, pior, uma credencial que não existe e um botão que
+    # falha só em produção. Barato de checar, caro de descobrir depois.
+    saidas = [root / "public" / "app.html", root / "offline" / "walkstamp-offline.html"]
+    for arq in saidas:
+        sobrou = sorted(set(re.findall(r"__[A-Z][A-Z0-9_]*__", arq.read_text(encoding="utf-8"))))
+        sobrou = [x for x in sobrou if x != "__JSPDF__"]
+        if sobrou:
+            print(f"token não substituído em {arq.relative_to(root)}: {', '.join(sobrou)}",
+                  file=sys.stderr)
+            return 1
     return 0
 
 
@@ -432,6 +466,9 @@ def main() -> int:
     if PLAIN_TITLE in web:
         web = web.replace(PLAIN_TITLE, META)
     web = web.replace("__SUPAURL__", SUPA_URL).replace("__SUPAKEY__", SUPA_KEY)
+    web = (web.replace("__GCLIENT__", G_CLIENT)
+              .replace("__GKEY__", G_KEY)
+              .replace("__GAPP__", G_APP))
     web = web.replace("<!--__ANALYTICS__-->", ANALYTICS)
     out_web = ROOT / "public" / "app.html"
     out_web.parent.mkdir(exist_ok=True)
@@ -443,6 +480,8 @@ def main() -> int:
     lib = vendor.read_text(encoding="utf-8")
     offline = src.replace(MARKER, f"<script>{lib}</script>")
     offline = offline.replace("__SUPAURL__", "").replace("__SUPAKEY__", "")
+    for tok in ("__GCLIENT__", "__GKEY__", "__GAPP__"):
+        offline = offline.replace(tok, "")
     offline = offline.replace("<!--__ANALYTICS__-->", "")
     # o arquivo único é aberto de file://: manifesto e service worker não têm
     # origem para existir ali, e um <link> apontando para /manifest.webmanifest

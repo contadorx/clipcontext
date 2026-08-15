@@ -8,11 +8,20 @@ O App ID entra nessa exigência de propósito. Sem ele o seletor abre normalment
 em 404**, porque é o App ID que faz o Google conceder a permissão sobre o arquivo escolhido. É um erro
 caro de diagnosticar; melhor não deixar o botão aparecer.
 
-```js
-const GOOGLE_CLIENT_ID = '';   // ...apps.googleusercontent.com
-const GOOGLE_API_KEY   = '';   // chave de API restrita ao seu domínio
-const GOOGLE_APP_ID    = '';   // número do projeto (só dígitos)
+Desde 15/08/2026 os valores **não se digitam no `template.html`**. Eles moram no `build.py`,
+junto da marca, do domínio e dos tokens de medição — um lugar só onde a identidade do projeto
+vive, em vez de um arquivo de 5.600 linhas:
+
+```python
+G_CLIENT = ""   # ...apps.googleusercontent.com
+G_KEY    = ""
+G_APP    = ""
 ```
+
+O `build.py` estampa os três no `public/app.html` e os deixa **vazios no build offline**, do mesmo
+jeito que faz com os endereços de medição. E uma trava nova derruba o build se qualquer
+`__TOKEN__` sobreviver à substituição — credencial que não existe produzindo um botão que só falha
+em produção é exatamente o tipo de erro que não se quer descobrir pelo usuário.
 
 ---
 
@@ -87,7 +96,9 @@ isso agora, não depois:
 **6. App ID.** É o **número do projeto**, só dígitos, no painel inicial do console. Não confunda com o
 ID do projeto, que é textual.
 
-**7. Preencha as constantes** em `src/template.html` e rode `python3 build.py`.
+**7. Preencha as constantes** no topo do `build.py` (`G_CLIENT`, `G_KEY`, `G_APP`) e rode
+`python3 build.py`. Confira em `public/app.html` que os três valores chegaram, e em
+`offline/walkstamp-offline.html` que continuam vazios.
 
 ---
 
@@ -132,7 +143,7 @@ metadados, e o Google devolve um documento nativo do Drive já convertido.
 
 Três decisões que valem registro:
 
-**O botão aparece só com o `GOOGLE_CLIENT_ID`.** A chave de API e o App ID são o que abre o
+**O botão aparece só com o `G_CLIENT`.** A chave de API e o App ID são o que abre o
 *seletor* de arquivos; criar um arquivo novo não passa pelo seletor. Então o envio funciona mesmo
 numa configuração parcial, enquanto o botão de abrir vídeo continua exigindo os três.
 

@@ -1526,9 +1526,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   const CONTATO = 'privacidade@walkstamp.com';
 
   /* ---------------- Google Drive ----------------
-     Nasce DESLIGADO, como o bloco de apoio: enquanto estes três campos
-     estiverem vazios o botão não é renderizado e nada do Google é carregado.
-     Preencha com os dados do seu projeto no Google Cloud (veja GOOGLE-DRIVE.md).
+     Nasce DESLIGADO: enquanto estes três campos estiverem vazios o botão não é
+     renderizado e nada do Google é carregado. Os valores NÃO se digitam aqui —
+     eles vêm do build.py, como a marca e o domínio, para haver um lugar só onde
+     a identidade do projeto mora (veja GOOGLE-DRIVE.md).
 
      Os três valores são públicos por natureza — quem protege a chave é a lista
      de origens autorizadas no console, não o segredo do arquivo.
@@ -1538,8 +1539,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      inteiro. É também o que dispensa a auditoria de segurança que o Google
      exige dos escopos amplos. */
   const GOOGLE_CLIENT_ID = '';   // ...apps.googleusercontent.com
-  const GOOGLE_API_KEY   = '';   // chave de API restrita ao seu domínio
-  const GOOGLE_APP_ID    = '';   // número do projeto (só dígitos)
+  const GOOGLE_API_KEY   = '';      // chave de API restrita ao seu domínio
+  const GOOGLE_APP_ID    = '';      // número do projeto (só dígitos)
 
   const LANGS = ['pt','en','es'];
   const qLang = new URLSearchParams(location.search).get('lang');
@@ -3372,7 +3373,27 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   /* ================= transcrição automática ================= */
   const st = (m, c) => { $('astatus').innerHTML = c ? `<span class="${c}">${m}</span>` : m; };
   const prog = p => { $('abarWrap').classList.toggle('hide', p == null); if (p != null) $('abar').style.width = p + '%'; };
-  const TJS = 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.2.0';
+  /* Endereço da biblioteca, com alternativas — pelo mesmo motivo dos endereços
+     do wasm logo abaixo. Uma versão fixada que sai do ar (ou que nunca existiu,
+     depois de um erro de digitação) faz TODOS os degraus da fila falharem
+     identicamente, com a rede aparentando estar perfeita no diagnóstico. Foi
+     por isso que este ponto passou a ser testado e relatado, e não só usado. */
+  const TJS_BASES = [
+    'https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.2.0',
+    'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3',
+    'https://cdn.jsdelivr.net/npm/@huggingface/transformers'
+  ];
+  let tjsEmUso = null, tjsMod = null, tjsErros = [];
+
+  async function importarTjs(){
+    if (tjsMod) return tjsMod;
+    tjsErros = [];
+    for (const u of TJS_BASES) {
+      try { const m = await import(u); tjsEmUso = u; return (tjsMod = m); }
+      catch (e) { tjsErros.push(u.replace(/^https:\/\//, '') + ' -> ' + ((e && e.message) || e)); }
+    }
+    throw new Error(tjsErros.join('  |  '));
+  }
 
   function vttTime(s){
     const h = Math.floor(s/3600), m = Math.floor(s%3600/60), sec = s%60;
@@ -3434,7 +3455,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     quantasLinhas(navigator.hardwareConcurrency, !!self.crossOriginIsolated);
 
   async function loadLib(){
-    const mod = await import(TJS);
+    const mod = await importarTjs();
     mod.env.allowLocalModels = false;
     mod.env.allowRemoteModels = true;
     const base = await findWasmBase();
@@ -3777,8 +3798,11 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     say('WebGPU        : ' + (navigator.gpu ? 'disponível' : 'ausente'));
     say('cache/isolam. : caches=' + (typeof caches !== 'undefined') +
         ' crossOriginIsolated=' + (window.crossOriginIsolated === true));
-    try { await loadLib(); say('biblioteca    : OK (jsdelivr respondeu)'); }
-    catch (e) { say('biblioteca    : FALHOU -> ' + (e && e.message)); }
+    try { await loadLib(); say('biblioteca    : OK -> ' + tjsEmUso); }
+    catch (e) {
+      say('biblioteca    : FALHOU em todos os endereços');
+      tjsErros.forEach(x => say('              -> ' + x.slice(0, 200)));
+    }
     const W = 'https://huggingface.co/onnx-community/whisper-base/resolve/main/onnx/encoder_model.onnx';
     try { const r = await fetch('https://huggingface.co/onnx-community/whisper-base/resolve/main/config.json');
           say('config modelo : HTTP ' + r.status + (r.ok ? ' OK' : ' <-- problema')); }
