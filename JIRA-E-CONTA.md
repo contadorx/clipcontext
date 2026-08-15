@@ -90,3 +90,64 @@ linha é pior que não ter coluna. Virou "Hora de relógio", e "Hora" virou "Tem
 2. **Portal do cliente** — link mágico, licença, assentos, revogação. Supabase, que já está no ar.
 3. **Descobrir o alvo certo** na segunda: Jira puro, Xray ou Zephyr. Uma pergunta na reunião
    economiza uma semana de código no lugar errado.
+
+---
+
+## 5. É Zephyr — e isso muda a recomendação
+
+Confirmado com o Leandro em 15/08/2026: a Natura usa **Zephyr**. Pesquisado no mesmo dia, e a
+descoberta inverte a ordem que eu tinha proposto.
+
+**O Zephyr Scale Cloud aparentemente não faz CORS.** Há pedido público de clientes na comunidade da
+SmartBear pedindo que `api.zephyrscale.smartbear.com` libere origens de navegador, e ele ficou sem
+resposta oficial. Se o navegador não pode chamar a API direto, a única forma de anexar seria o
+documento **passar pelo nosso servidor**.
+
+Isso não é um detalhe de implementação. É a diferença entre os dois caminhos:
+
+| | quem carrega o documento | a promessa |
+|---|---|---|
+| Jira Cloud | navegador → Atlassian. Nossa função só troca o token do OAuth | **intacta** |
+| Zephyr Scale Cloud | navegador → **nós** → SmartBear | **quebrada** |
+
+**Então não construo o anexo automático no Zephyr.** Um proxy que recebe evidência de teste de
+cliente é exatamente o que a página de segurança promete que não existe, e trocar isso por um botão
+de conveniência seria vender a única vantagem estrutural do produto por um clique.
+
+### O que a restrição empurra para cima
+
+A camada do **link** — que era o degrau 2 da lista — vira o degrau 1, e é o Leandro quem enxergou
+primeiro: *"essa camada de copiar o link público serve para o gratuito e nos demais sistemas de
+teste? isso seria um baita diferencial para o gratuito."* Serve, e é.
+
+Um link não depende de API, de CORS, de permissão nem de projeto aprovado. Funciona no **Zephyr**,
+no **Xray**, no **Jira** puro, no **TestRail**, no **Azure DevOps**, no **qTest** e numa planilha —
+todos ao mesmo tempo, sem construir nada para nenhum. Onde a integração é bloqueada pela TI, ele
+continua funcionando. É a única "integração" que atravessa a política de segurança de qualquer
+empresa, porque não é integração.
+
+**E fica no plano gratuito**, o que contraria o que foi publicado na página de preços na véspera — o
+"link de equipe pré-configurado" estava listado no plano Time. A correção foi feita e o raciocínio
+é de distribuição: o link é o que faz o Walkstamp caber no processo que a equipe já tem, e uma
+ferramenta que só funciona sozinha não serve para equipe nenhuma. Cobrar por ele mataria a cunha
+justamente onde ela entra. O que continua pago é o que um indivíduo não precisa e uma empresa sim:
+marca do cliente no documento, vocabulário compartilhado, pacote offline para a TI, modelo de
+documento próprio.
+
+### O que foi construído
+
+Uma página pública, `/link`, nos três idiomas: o coordenador preenche caso, chamado, sistema, modelo
+de saída e idioma, e leva o endereço pronto para colar no Zephyr. Sem cadastro e sem licença.
+
+A página também explica as duas formas de usar dentro do Zephyr — colado num passo do *test script*,
+ou montado por automação a partir dos campos do próprio caso — e diz o que o link **não** faz: ele
+não anexa nada de volta. O caminho de volta continua sendo arrastar o arquivo, três segundos, e
+funciona em qualquer ferramenta, inclusive nas que a empresa não deixa integrar.
+
+### O que ainda vale perguntar na segunda
+
+- **Zephyr Scale ou Zephyr Squad?** São produtos diferentes, com APIs diferentes.
+- **Cloud ou Data Center?** No Data Center o administrador deles pode liberar CORS, e aí o anexo
+  automático volta a ser possível **sem servidor nosso** — que é o único desenho que eu aceitaria.
+- **Onde a evidência é anexada hoje?** Na execução do Zephyr, ou no chamado do Jira ligado a ela? Se
+  for no chamado, o caminho do Jira Cloud (que tem CORS) resolve, e a Zephyr nem precisa entrar.
