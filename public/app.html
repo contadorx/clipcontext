@@ -143,6 +143,10 @@
   .thumbs figcaption{font:11px ui-monospace,Menlo,monospace;color:var(--muted);padding:4px 0 5px;text-align:center}
   .thumbs figcaption .passo{display:block;color:var(--ink);font-weight:700;font-size:11.5px}
   .thumbs figcaption .rel{display:block;font-size:10px;margin-top:1px}
+  .thumbs figcaption .selo{color:var(--accent);font-weight:700}
+  .thumbs figcaption .capSelo{display:block;margin-top:3px;font:600 10px/1.3 inherit;
+    color:#fff;background:var(--accent);border-radius:999px;padding:2px 7px;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .thumbs .nota{display:block;width:100%;box-sizing:border-box;border:0;border-top:1px solid var(--line);
         background:var(--panel);color:var(--ink);font:12px/1.35 inherit;padding:6px 7px;cursor:text}
   .thumbs .nota::placeholder{color:var(--muted);opacity:.8}
@@ -195,6 +199,29 @@
      vídeo, e quem revisa precisa saber disso antes de abrir. */
   .thumbs figure.colada{outline:2px dashed color-mix(in srgb,var(--accent) 55%,transparent);
       outline-offset:-2px}
+  /* O tipo do momento. Cor E palavra: a cor sozinha some para quem não a
+     distingue, e num relatório de pesquisa a diferença entre "elogiou" e
+     "desistiu" não pode depender de vermelho contra verde. */
+  /* O painel da revisão assistida. Ele ocupa o lugar de honra do cartão de
+     revisão enquanto está aberto: uma revisão guiada que divide a atenção com
+     vinte miniaturas não guia ninguém. */
+  .revBox{border:2px solid var(--accent);border-radius:12px;padding:18px;margin:16px 0;
+      background:color-mix(in srgb,var(--accent) 5%,var(--panel))}
+  .revGrid{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(210px,.9fr);gap:18px;
+      margin-top:12px;align-items:start}
+  .revGrid figure{margin:0}
+  .revGrid figcaption{font-size:12.5px;color:var(--muted);margin-bottom:6px}
+  .revGrid img{width:100%;display:block;border-radius:8px;border:1px solid var(--line)}
+  .revAcoes{display:flex;flex-direction:column;gap:9px}
+  .revAcoes button{width:100%}
+  @media (max-width:720px){ .revGrid{grid-template-columns:1fr} }
+  .thumbs .tipoTag{position:absolute;left:4px;top:4px;z-index:2;font-size:10.5px;font-weight:700;
+      text-transform:uppercase;letter-spacing:.04em;padding:2px 7px;border-radius:99px;
+      background:var(--panel);color:var(--ink);border:1px solid var(--line)}
+  .thumbs .tipoTag.t-friccao {border-color:#e08a1e;color:#a8630c}
+  .thumbs .tipoTag.t-desistiu{border-color:#e0281e;color:#b01d15}
+  .thumbs .tipoTag.t-elogiou {border-color:#1e9e5a;color:#137a43}
+  .thumbs .tipoTag.t-defeito {border-color:#7a3ce0;color:#5b28ab}
   /* O filtro em vigor. Borda e peso, não fundo cheio: estes botões convivem com
      o "Gerar PDF", que é o primário da tela, e dois cheios brigam. */
   button.ghost.ativo{border-color:var(--accent);color:var(--accent);font-weight:640;
@@ -397,10 +424,70 @@
           <button class="ghost sm hide" id="recMark" data-i18n="recMarkBtn"></button>
         </div>
         <span class="status" id="recMsg" data-i18n="recHint"></span>
+        <p class="note" data-i18n="atalhos" style="margin:6px 0 0"></p>
         <div class="hide" id="recOpts" style="margin-top:10px">
           <div class="row" style="gap:18px">
             <label class="chk"><input type="checkbox" id="recTr" checked><span data-i18n="recTrLbl"></span></label>
             <label class="chk"><input type="checkbox" id="recMic" checked><span data-i18n="recMicLbl"></span></label>
+            <!-- Três segundos antes de começar. Sem eles, o primeiro quadro da
+                 gravação é quase sempre o seletor de tela do navegador — a
+                 janela que a pessoa acabou de fechar — e ela descobre isso na
+                 revisão, quando já não dá para refazer o começo. -->
+            <label class="chk"><input type="checkbox" id="recCount" checked><span data-i18n="recCountLbl"></span></label>
+            <!-- O clipe do momento marcado. Em pesquisa, a moeda política é
+                 mostrar a pessoa sofrendo: um parágrafo dizendo "o participante
+                 não achou o botão" convence menos do que quinze segundos de
+                 alguém procurando. Só dos momentos MARCADOS — guardar a sessão
+                 inteira transformaria uma hora de gravação em um giga na
+                 memória da aba, que é a maneira mais rápida de derrubar tudo. -->
+            <label class="chk"><input type="checkbox" id="recClipe"><span data-i18n="recClipeLbl"></span></label>
+          </div>
+          <!-- A webcam num canto. O catálogo condicionava este item ao clipe
+               existir — "rosto sem clipe é uma foto de alguém franzindo a
+               testa" — e o clipe existe. Ela nasce DESLIGADA em todo cenário,
+               sem exceção: um rosto é dado pessoal de outra ordem que uma tela,
+               e ligar isso por padrão em qualquer lugar seria decidir pela
+               pessoa filmada. -->
+          <div class="row" style="gap:12px;margin-top:8px;align-items:center;flex-wrap:wrap">
+            <label class="chk"><input type="checkbox" id="recCam"><span data-i18n="recCamLbl"></span></label>
+            <select id="camCanto" style="width:auto">
+              <option value="bd" data-i18n="camBD"></option>
+              <option value="be" data-i18n="camBE"></option>
+              <option value="td" data-i18n="camTD"></option>
+              <option value="te" data-i18n="camTE"></option>
+            </select>
+            <select id="camTam" style="width:auto">
+              <option value="0.14" data-i18n="camP"></option>
+              <option value="0.18" selected data-i18n="camM"></option>
+              <option value="0.24" data-i18n="camG"></option>
+            </select>
+          </div>
+          <p class="note hide" id="recCamNota" data-i18n="recCamNota" style="margin:6px 0 0"></p>
+          <p class="note hide" id="recClipeNota" data-i18n="recClipeNota" style="margin:6px 0 0"></p>
+          <!-- O nome dos dois canais. Ele já muda sozinho com o cenário —
+               Microfone/Computador vira Moderador/Participante numa sessão de
+               pesquisa —, mas nome fixo não serve a quem grava uma entrevista,
+               a quem tem dois moderadores, ou a quem chama de outra coisa. O
+               rótulo entra na transcrição e sai no documento; deixá-lo fixo era
+               obrigar a pessoa a procurar e substituir depois. -->
+          <div class="row" id="spkRow" style="gap:10px;margin-top:8px;align-items:center;flex-wrap:wrap">
+            <label class="chk" for="spkMicNome" data-i18n="spkLblMic"></label>
+            <input type="text" id="spkMicNome" maxlength="28" autocomplete="off"
+                   style="width:148px;padding:5px 8px;font-size:13.5px">
+            <label class="chk" for="spkSysNome" data-i18n="spkLblSys"></label>
+            <input type="text" id="spkSysNome" maxlength="28" autocomplete="off"
+                   style="width:148px;padding:5px 8px;font-size:13.5px">
+          </div>
+          <!-- "Esqueci gravando" é o acidente mais caro que esta ferramenta
+               pode causar: uma aba consumindo memória a manhã inteira e uma
+               gravação de duas horas que ninguém vai revisar. O limite é
+               generoso e desligável, e ele PARA como se a pessoa tivesse
+               apertado Parar — o documento sai inteiro. -->
+          <div class="row" style="gap:10px;margin-top:8px;align-items:center">
+            <label class="chk"><input type="checkbox" id="recAuto" checked><span data-i18n="recAutoLbl"></span></label>
+            <input type="number" id="recAutoMin" value="45" min="1" max="240"
+                   style="width:74px;padding:5px 8px;font-size:13.5px">
+            <span class="status" data-i18n="recAutoMinLbl"></span>
           </div>
           <p class="note" id="recTrNote" style="margin:6px 0 0"></p>
           <p class="note" data-i18n="recWarn" style="margin:6px 0 0"></p>
@@ -441,6 +528,29 @@
       <div class="status" id="liveStat"></div>
       <div class="live" id="liveTail"></div>
     </div>
+    <!-- A terceira porta: um documento que já saiu daqui, voltando para ser
+         corrigido.
+
+         Sem isto, "gerei o PDF e o passo 12 está errado" se resolvia
+         regravando os quarenta. E a instrução de trabalho — que envelhece por
+         definição, porque a tela muda em seis meses — simplesmente não existia
+         como caso de uso: ninguém mantém documento que precisa ser refeito
+         inteiro.
+
+         Continua sem servidor: o arquivo está na máquina de quem usa, é ela
+         que o escolhe, e é a mesma porta que o /verificar já abre. -->
+    <div class="row reabrirRow" style="margin-top:16px">
+      <button class="ghost sm" id="reabrir" data-i18n="reabrirBtn"></button>
+      <input type="file" id="reabrirArq" accept=".json,.zip,application/json,application/zip" class="hide">
+      <!-- Cinco participantes é o tamanho padrão de um estudo, e até agora eram
+           cinco documentos soltos. Ficou barato depois dos capítulos: cada
+           sessão vira um capítulo, e a máquina de tempo por tarefa já existe. -->
+      <button class="ghost sm" id="juntar" data-i18n="juntarBtn"></button>
+      <input type="file" id="juntarArq" multiple accept=".json,.zip,application/json,application/zip" class="hide">
+      <button class="ghost sm hide" id="revisar" data-i18n="revisarBtn"></button>
+      <span class="status" id="reabrirMsg" data-i18n="reabrirDica"></span>
+    </div>
+
     <div id="playerBox" class="hide" style="margin-top:16px">
       <video id="v" controls preload="auto" muted playsinline></video>
       <div class="meta" id="meta"></div>
@@ -551,6 +661,17 @@
                border:1px solid var(--line);border-radius:7px;background:var(--bg);color:var(--ink);
                font:inherit;font-size:14px">
       </div>
+      <!-- A faixa que a detecção ignora. Fica junto do critério porque só
+           existe para ele: nada aqui muda a imagem exportada. -->
+      <div>
+        <label class="f" for="ignorar" data-i18n="lIgnorar"></label>
+        <select id="ignorar">
+          <option value="nada" data-i18n="ign0"></option>
+          <option value="baixo" selected data-i18n="ign1"></option>
+          <option value="topo" data-i18n="ign2"></option>
+          <option value="ambos" data-i18n="ign3"></option>
+        </select>
+      </div>
       <div>
         <label class="f" for="quality" data-i18n="lQual"></label>
         <select id="quality">
@@ -630,6 +751,51 @@
     <!-- O que acabou de acontecer com a ordem, em palavras. role=status para o
          leitor de tela anunciar sem roubar o foco de quem está no botão. -->
     <p class="status ok" id="movMsg" role="status" style="margin:4px 0 0"></p>
+    <!-- Descartar os vídeos. Só aparece quando há vídeo a descartar, e some
+         depois — um botão de apagar que continua ali depois de apagar convida a
+         segunda dúvida ("será que foi mesmo?"). -->
+    <p class="status hide" id="capMsg" role="status" style="margin:4px 0 0"></p>
+    <div class="row hide" id="clipeRow" style="margin-top:6px">
+      <button class="ghost sm" id="clipeApagar" data-i18n="clipeDescarta"></button>
+      <span class="status" id="clipeMsg"></span>
+    </div>
+
+    <!-- ---- revisão assistida ----
+
+         A resposta honesta ao replay do ClickLearn. Eles reexecutam a gravação
+         contra o sistema e refazem os screenshots sozinhos; nós não podemos —
+         a aba só recebe uma imagem de tela compartilhada, e prometer o
+         contrário seria a primeira mentira do produto.
+
+         O que dá para fazer é o primo humilde e verdadeiro: conduzir a PESSOA
+         passo a passo, perguntando "esta tela ainda está assim?", e recapturar
+         só o que mudou. Ordem, numeração, anotações, tarjas e destaques dos
+         passos que ficaram continuam intactos.
+
+         É talvez 10% do valor por 2% do custo. E a frase que sai daqui é
+         verdadeira: não atualizo sozinho; eu faço a revisão levar dez minutos
+         em vez de uma tarde. -->
+    <div class="hide revBox" id="revBox">
+      <div class="row" style="align-items:flex-start">
+        <b id="revTit"></b>
+        <span class="status" id="revPos"></span>
+      </div>
+      <div class="revGrid">
+        <figure class="revLado">
+          <figcaption data-i18n="revAntes"></figcaption>
+          <img id="revImg" alt="">
+        </figure>
+        <div class="revAcoes">
+          <p class="status" id="revNota"></p>
+          <button id="revIgual" data-i18n="revIgualBtn"></button>
+          <button class="ghost" id="revTrocar" data-i18n="revTrocarBtn"></button>
+          <input type="file" id="revArq" accept="image/*" class="hide">
+          <button class="ghost" id="revFora" data-i18n="revForaBtn"></button>
+          <button class="ghost sm" id="revSair" data-i18n="revSairBtn"></button>
+        </div>
+      </div>
+      <p class="status" id="revResumo"></p>
+    </div>
     <p class="note hide" id="sensAviso" style="margin-top:12px"></p>
     <div class="thumbs" id="thumbs"></div>
 
@@ -673,7 +839,11 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       <div class="row" style="margin-top:8px">
         <button class="ghost sm" id="vocAplicar" data-i18n="vocAplicar"></button>
         <button class="ghost sm hide" id="vocDesfazer" data-i18n="vocDesfazer"></button>
+        <!-- Desligada por padrão, e continua desligada: numa sessão de pesquisa
+             a hesitação É o dado. Quem quiser um passo a passo limpo marca. -->
+        <label class="chk"><input type="checkbox" id="hesitar"><span data-i18n="hesitarLbl"></span></label>
       </div>
+      <p class="note hide" id="hesitarNota" data-i18n="hesitarUx" style="margin:6px 0 0"></p>
     </div>
     <div class="row hide" id="expRow" style="margin-top:10px">
       <span class="status" data-i18n="expLabel"></span>
@@ -693,6 +863,26 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
         <option value="fr">Français</option>
       </select>
       <button class="ghost sm" id="trad" data-i18n="tradBtn"></button>
+      <button class="ghost sm" id="multiModo" data-i18n="multiBtn"></button>
+    </div>
+    <!-- Vários idiomas de uma vez.
+
+         A tradução já existia, um idioma por vez. O delta é pequeno e a frase
+         que sai dele fecha reunião num rollout multinacional: a instrução em
+         português, inglês e espanhol saindo da MESMA gravação, sem que nada
+         suba para lugar nenhum.
+
+         Só HTML e Markdown, e isso é dito na tela: o PDF e o Word carregam as
+         imagens de novo a cada idioma, e cinco idiomas de um documento de
+         quarenta telas derrubariam a aba de quem tem 8 GB. O HTML autocontido
+         imprime bem e é um arquivo só — para distribuir, resolve. -->
+    <div class="hide" id="multiBox" style="margin-top:8px">
+      <p class="status" data-i18n="multiComo" style="max-width:660px;margin:0 0 8px"></p>
+      <div class="row" id="multiLinguas" style="gap:14px"></div>
+      <div class="row" style="margin-top:9px">
+        <button class="ghost sm" id="multiGerar" data-i18n="multiGerar"></button>
+        <span class="status" id="multiMsg"></span>
+      </div>
     </div>
     <div class="status" id="tradMsg" style="margin-top:6px"></div>
     </div><!-- /trManual -->
@@ -724,9 +914,32 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
              </select></div>
         <div id="cxIni"><label for="evInicio" id="lblIni"></label>
              <input id="evInicio" type="datetime-local" step="1"></div>
+        <!-- O ambiente. É um select a mais e é a primeira pergunta do auditor:
+             uma evidência de PRD e uma de QAS provam coisas diferentes, e um
+             documento que não diz qual era não prova nenhuma das duas. -->
+        <!-- Campos do procedimento. Só a instrução de trabalho os pede: numa
+             evidência, "válido a partir de" não significa nada — a evidência
+             vale para o dia em que o teste rodou, e ponto. -->
+        <div id="cxDono"><label for="evDono" data-i18n="guiaDono"></label>
+             <input id="evDono" type="text" autocomplete="off" maxlength="80"></div>
+        <div id="cxValido"><label for="evValido" data-i18n="guiaValido"></label>
+             <input id="evValido" type="date"></div>
+        <div id="cxAmb"><label for="evAmb" data-i18n="evAmb"></label>
+             <select id="evAmb">
+               <option value="" data-i18n="evAmb0"></option>
+               <option value="DEV">DEV</option>
+               <option value="QAS">QAS</option>
+               <option value="PRD">PRD</option>
+               <option value="SBX">SBX</option>
+             </select></div>
       </div>
       <p class="evPe hide" id="evEst" data-i18n="evEstimado"></p>
       <p class="evPe" id="cxHash"><label><input type="checkbox" id="evHash"><span data-i18n="evHash"></span></label></p>
+      <!-- Numeração automática. Não é obrigatória e não inventa nada: é um
+           contador desta aba, para quem grava cinco evidências numa tarde e
+           precisa que os arquivos se ordenem sozinhos na pasta e no anexo. -->
+      <p class="evPe" id="cxNum"><label><input type="checkbox" id="evNum"><span data-i18n="evNumLbl"></span></label>
+         <span class="status" id="evNumAtual"></span></p>
       <p class="evPe"><span data-i18n="evPerfil"></span>
          <button class="ghost sm hide" id="evLimpar" data-i18n="evLimpar"
                  style="margin-left:8px;padding:4px 10px;font-size:12px"></button>
@@ -769,7 +982,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       <button class="ghost" id="csv" data-i18n="csvBtn"></button>
       <button class="ghost" id="zip" data-i18n="zipBtn"></button>
       <button class="ghost" id="json" data-i18n="jsonBtn"></button>
+      <button class="ghost" id="pptx" data-i18n="pptxBtn"></button>
+      <button class="ghost hide" id="capPacote" data-i18n="capPacote"></button>
       <button class="ghost" id="jira" data-i18n="jiraBtn"></button>
+      <button class="ghost hide" id="scorm" data-i18n="scormBtn"></button>
       <button class="ghost hide" id="gdocs" data-i18n="gdBtn"></button>
       <span class="status" id="pdfStatus"></span>
     </div>
@@ -808,6 +1024,21 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
         <button class="ghost sm" id="mkModo" data-i18n="mkBtn"></button>
         <button class="ghost sm" id="cropModo" data-i18n="cropBtn"></button>
         <button class="ghost sm hide" id="cropTirar" data-i18n="cropTirar"></button>
+        <!-- Trocar a imagem deste passo é o gesto mais repetido de quem MANTÉM
+             um documento: a tela mudou, o resto do procedimento não. Fazia-se
+             pelo caminho torto — anexar, mover com as setas até o lugar,
+             descartar a antiga —, que são dez cliques para uma troca. -->
+        <button class="ghost sm" id="trocarImg" data-i18n="trocarBtn"></button>
+        <input type="file" id="trocarArq" accept="image/*" class="hide">
+        <!-- Duplicar: a mesma tela provando duas coisas (antes e depois de uma
+             ação), sem truque de exportar e reanexar. -->
+        <button class="ghost sm" id="duplicar" data-i18n="dupBtn"></button>
+        <!-- "O que mudou entre estes dois?" Numa revisão de instrução reaberta
+             seis meses depois, é a pergunta inteira: a tela parece a mesma e um
+             campo saiu do lugar. Duas imagens lado a lado não respondem — o
+             olho não acha um botão que andou oito pixels. Sobrepostas com o
+             segundo por cima, respondem. -->
+        <button class="ghost sm" id="comparar" data-i18n="cmpBtn"></button>
         <span class="status" id="tarjaMsg"></span>
       </div>
       <!-- As ferramentas de destaque só aparecem quando pedidas: a barra de cima
@@ -821,13 +1052,51 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
         <button class="ghost sm hide" id="mkDesfazer" data-i18n="mkDesfazer"></button>
         <button class="ghost sm hide" id="mkLimpar" data-i18n="mkLimpar"></button>
       </div>
+      <div class="row hide" id="cmpBox" style="margin-top:8px;gap:10px;align-items:center">
+        <label class="chk" for="cmpCom" data-i18n="cmpCom"></label>
+        <select id="cmpCom" style="width:auto"></select>
+        <input type="range" id="cmpMistura" min="0" max="100" value="50" style="width:150px">
+        <span class="status" id="cmpMsg"></span>
+        <button class="ghost sm" id="cmpDiff" data-i18n="cmpDiff"></button>
+      </div>
       <div class="lenteCampos">
         <div><label for="lenteNota" data-i18n="notaPh"></label>
              <input type="text" id="lenteNota" maxlength="180" autocomplete="off"></div>
         <div id="lenteHoraCx"><label for="lenteHora" data-i18n="lenteHora"></label>
              <input type="datetime-local" step="1" id="lenteHora">
              <p class="evPe" style="padding:6px 0 0" data-i18n="lenteHoraNota"></p></div>
+        <!-- O tipo do momento, só na sessão de pesquisa.
+
+             O catálogo pedia isto no botão de marcar, durante a sessão. Ficou
+             na revisão de propósito: quatro botões a mais na janelinha
+             flutuante tiram a atenção de quem está conduzindo, e o pesquisador
+             classifica o momento olhando a tela, não de memória enquanto a
+             pessoa fala. -->
+        <!-- Onde começa uma tarefa nova. Fica na lente e não numa lista à
+             parte porque a fronteira é uma propriedade do QUADRO: assim ela
+             acompanha reordenar, descartar e duplicar sem ninguém sincronizar
+             nada. -->
+        <div id="lenteCapCx"><label for="lenteCap" data-i18n="lenteCap"></label>
+             <input type="text" id="lenteCap" maxlength="80" autocomplete="off">
+             <p class="evPe" style="padding:6px 0 0" data-i18n="lenteCapNota"></p></div>
+        <div id="lenteTipoCx" class="hide"><label for="lenteTipo" data-i18n="uxTipo"></label>
+             <select id="lenteTipo">
+               <option value="" data-i18n="uxT0"></option>
+               <option value="friccao" data-i18n="uxT1"></option>
+               <option value="desistiu" data-i18n="uxT2"></option>
+               <option value="elogiou" data-i18n="uxT3"></option>
+               <option value="defeito" data-i18n="uxT4"></option>
+             </select></div>
         <div id="lenteFalaCx"><label data-i18n="lenteFala"></label><div id="lenteFalas"></div></div>
+        <!-- O clipe do momento. Ele abre já perto da marca: quinze segundos são
+             curtos para o vídeo e longos para quem está revisando quarenta
+             momentos, e começar do zero faria a pessoa arrastar a barrinha toda
+             vez. -->
+        <div id="lenteClipeCx" class="hide"><label data-i18n="lenteClipe"></label>
+             <video id="lenteClipe" controls preload="metadata"
+                    style="width:100%;max-height:300px;border-radius:10px;background:#0b0d12"></video>
+             <p class="evPe" style="padding:6px 0 0" id="lenteClipeNota"></p>
+             <button class="ghost sm" id="clipeBaixar" data-i18n="clipeBaixar"></button></div>
       </div>
       <div class="lenteNav">
         <button class="ghost sm" id="lentePrev" data-i18n="lenteAnt"></button>
@@ -887,6 +1156,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       sub:'Transforme um vídeo em um PDF com os frames que importam e a transcrição sincronizada — pronto para entregar a uma IA. Tudo roda no seu navegador: o vídeo não sai do seu computador.',
       viaRecTag:'Comece por aqui', viaRecH:'Gravar a tela agora',
       viaRecP:'Você faz o percurso na tela e fala o que está fazendo. Nada de vídeo é guardado: saem só as telas que mudaram e a sua narração transcrita.',
+      viaRecPclipe:'Você faz o percurso na tela e fala o que está fazendo. A gravação inteira é descartada: saem as telas que mudaram, a sua narração transcrita, e um clipe curto de cada momento que você marcar.',
+      recWarnClipe:'A gravação inteira é descartada — só ficam os clipes dos momentos que você marcar. Durante a captura a ferramenta separa os frames que importam e transcreve os dois canais de áudio em separado. A transcrição divide a máquina com a captura; em computador modesto a tela pode perder alguma troca.',
       viaArqTag:'Já tenho o vídeo', viaArqH:'Usar um arquivo',
       viaArqP:'Uma gravação que você já fez, de reunião ou de tela. O arquivo é lido pelo navegador e não sai do seu computador.',
       s1:'Vídeo', drop1:'Escolher ou arrastar o vídeo aqui',
@@ -974,6 +1245,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recDone2:'Pronto: {0} de captura, {1} frames e {2} falas. Nenhum vídeo foi guardado no seu computador.',
       spkMic:'Microfone', spkSys:'Computador',
       spkModer:'Moderador', spkPart:'Participante',
+      spkLblMic:'Chame o microfone de', spkLblSys:'e o som do computador de',
       recFile:'captura de tela', pNoFile:'nenhum arquivo guardado',
       gpuLbl:'usar a placa de vídeo', dlSize:'baixa ~{0} MB na primeira vez',
       modelLimpando:'Apagando o modelo guardado e baixando de novo…',
@@ -1069,6 +1341,11 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       trBoxH:'Transcrição', trBoxSub:'corrigir, aplicar vocabulário, traduzir',
       trBoxVazio:'ainda vazia', trBoxCheia:'{0} linhas',
       tradLbl:'Traduzir a transcrição e as anotações para', tradBtn:'Traduzir',
+      multiBtn:'Vários idiomas de uma vez', multiGerar:'Gerar o pacote',
+      multiComo:'Marque os idiomas. Sai um .zip com o mesmo documento em cada um — em HTML e Markdown. O PDF e o Word continuam um idioma por vez: eles carregam as imagens de novo a cada idioma, e cinco versões de um documento grande derrubariam a aba.',
+      multiVazio:'Marque pelo menos um idioma.',
+      multiIndo:'Traduzindo para {0} ({1} de {2})…',
+      multiFeito:'Pacote pronto, com {0} idioma(s). Nada saiu do seu computador: a tradução roda no navegador.',
       tradPrep:'Preparando o tradutor do navegador…',
       tradBaixando:'Baixando o par de idiomas: {0}% (uma vez só, e fica no navegador)',
       tradIndo:'Traduzindo {0} de {1}…',
@@ -1104,6 +1381,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       mCount:'Quantidade fixa, espalhados', mInt:'A cada N segundos',
       lSens:'Sensibilidade', lCount:'Quantos frames', lInt:'Intervalo (segundos)',
       lMax:'Limite de frames', lQual:'Qualidade da imagem',
+      lIgnorar:'Ignorar na detecção', ign0:'nada — a tela inteira conta',
+      ign1:'a barra de baixo (relógio do Windows)', ign2:'a barra de cima (macOS)', ign3:'as duas barras',
       expLabel:'Baixar a transcrição:',
       lFrom:'Analisar a partir de', lTo:'Analisar até',
       faixaMa:'O início precisa ser menor que o fim. Ignorei o recorte.',
@@ -1143,6 +1422,80 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       lenteTam:'tamanho',
       unLbl:'Chamar cada quadro de',
       unPasso:'Passo', unMomento:'Momento', unIa:'Trecho',
+      recCountCancel:'Cancelado antes de começar. Nada foi gravado.',
+      recAutoLbl:'Parar sozinho depois de', recAutoMinLbl:'minutos',
+      recAutoParou:'A gravação parou sozinha no limite de {0} minutos que você definiu. Tudo o que foi capturado até aqui está no documento.',
+      atalhos:'Atalhos, quando o foco não está num campo: G grava e para, M marca a tela, P pausa.',
+      recCountLbl:'Contar 3 antes de começar',
+      recCamNao:'Não consegui abrir a webcam; a gravação continua sem ela.',
+      recCamNota:'O rosto é desenhado por cima da tela, nos quadros e nos clipes. Ele NÃO participa da detecção de mudança — senão cada respiração viraria um passo novo. Como todo o resto, a imagem não sai do seu computador; e como é rosto, peça permissão a quem está sendo filmado.',
+      camTD:'canto de cima, à direita', camTE:'canto de cima, à esquerda', camP:'pequena', camM:'média', camG:'grande',
+      recCamLbl:'Webcam num canto do quadro', camBD:'canto de baixo, à direita', camBE:'canto de baixo, à esquerda',
+      recClipeLbl:'Guardar um clipe dos momentos marcados',
+      recClipeNota:'Só dos momentos que você marcar durante a gravação: cerca de 15 segundos em volta de cada marca, com o som. O resto da gravação continua sendo descartado. Os clipes ficam na memória desta aba e saem no .zip — não sobem para lugar nenhum.',
+      recClipeNao:'Este navegador não grava clipe; o resto da captura funciona normalmente.',
+      lenteClipe:'Clipe deste momento',
+      lenteClipeNota:'A marca está aos {0} deste clipe de {1} segundos.',
+      lenteClipeVolta:'Clipe recuperado do pacote. Onde exatamente estava a marca não vem escrito no arquivo, então ele começa do início.',
+      cmpSo:'Só há um quadro para comparar.',
+      cmpIndo:'Comparando…', cmpErro:'Não consegui comparar estes dois quadros.',
+      cmpDif:'{0}% dos pixels mudaram, em vermelho.', cmpIgual:'Os dois quadros são iguais.',
+      cmpMsg:'{0}% do outro quadro por cima. Arraste para o quadro piscar: o que mudou é a única coisa que se mexe.',
+      cmpBtn:'Comparar', cmpCom:'com', cmpDiff:'Mostrar só a diferença',
+      juntarLinhaV:'{0} sessões diferentes, uma por tarefa. Sem hora de relógio: cada sessão tinha o seu próprio início.',
+      juntarNome:'{0}-sessoes', juntarLinha:'Documento consolidado',
+      juntarPulou:'{0} arquivo(s) não deram para ler e ficaram de fora.',
+      juntarSemHora:'A hora de relógio saiu do documento: são sessões diferentes, cada uma com o seu início. O tempo dentro de cada uma continua valendo.',
+      juntarOk:'{0} sessões juntadas, {1} quadros no total. Cada sessão virou uma tarefa, com o tempo de cada uma.',
+      juntarBtn:'Juntar várias sessões', juntarUm:'Escolha dois ou mais arquivos — para um só, use \u201cReabrir um documento\u201d.',
+      lenteCap:'Começa aqui uma tarefa / um caso',
+      lenteCapNota:'Deixe em branco se este passo continua a tarefa anterior. Escrevendo um nome, a gravação passa a ter capítulos: cada documento ganha o título da tarefa, e a planilha ganha o tempo gasto em cada uma.',
+      capTempo:'{0} nesta tarefa', capCol:'Tarefa', capTempoCol:'Tempo na tarefa',
+      capResumo:'{0} tarefa(s) nesta gravação:',
+      capPacote:'Um documento por tarefa', capPacoteOk:'{0} documentos, um por tarefa, no mesmo .zip.',
+      capPacoteNao:'Marque onde começa cada tarefa (na lupa de um passo) para separar a gravação em documentos.',
+      clipeBaixar:'Baixar o clipe',
+      clipeNome:'momento',
+      clipeSelo:'clipe',
+      clipeDescarta:'Descartar os vídeos',
+      clipeDescartou:'{0} clipe(s) descartado(s). A data do descarte entra no documento.',
+      clipeDescartado:'Vídeos dos momentos descartados em {0}.',
+      recCountN:'Começando em {0}…',
+      hesitarLbl:'tirar hesitações (é…, hã…, tipo…)',
+      hesitarFeito:'{0} hesitações tiradas.',
+      hesitarNada:'Nenhuma hesitação encontrada.',
+      hesitarUx:'Numa sessão de pesquisa a hesitação É o dado — pense duas vezes antes de tirá-la.',
+      uxTipo:'Tipo do momento',
+      uxT0:'— sem tipo —', uxT1:'fricção', uxT2:'desistiu', uxT3:'elogiou', uxT4:'defeito',
+      prTipo:'Alguns momentos foram classificados pelo pesquisador (fricção, desistiu, elogiou, defeito). Use essa classificação e não invente outra.',
+      evAmb:'Ambiente', evAmb0:'— não informar —',
+      scormBtn:'Pacote SCORM',
+      scormOk:'Pacote SCORM 1.2 pronto. Suba no seu LMS como conteúdo — ele é que registra quem concluiu; nós continuamos sem saber.',
+      pptxBtn:'PowerPoint',
+      pptxOk:'Apresentação pronta: {0} slides mais a capa. Abre no PowerPoint, no Keynote e no Google Slides, e cada slide é editável — a imagem, o título e a nota estão soltos, não achatados.',
+      trocarBtn:'Trocar a imagem', dupBtn:'Duplicar',
+      trocarOk:'Imagem trocada. As tarjas e os destaques do quadro antigo saíram junto — eles apontavam para pixels que não existem mais.',
+      trocarErro:'Não consegui ler esta imagem.',
+      dupFeito:'{0} duplicado logo depois deste.',
+      trocadoTag:'imagem trocada',
+      revisarBtn:'Revisar passo a passo',
+      revAntes:'A tela que está no documento hoje',
+      revPos:'{0} de {1}',
+      revSemNota:'Este passo não tem anotação — só a tela.',
+      revIgualBtn:'Continua assim →',
+      revTrocarBtn:'Mudou — trocar a imagem',
+      revForaBtn:'Não existe mais — descartar',
+      revSairBtn:'Parar a revisão',
+      revFim:'Revisão concluída: {0} confirmados, {1} com imagem nova, {2} descartados.',
+      reabrirBtn:'Abrir um documento gerado antes',
+      reabrirDica:'para corrigir um passo sem regravar — aceita o .json e o .zip que saíram daqui',
+      reabrirLendo:'Lendo o arquivo…',
+      reabrirOk:'{0} quadros de volta. Corrija o que precisar e gere de novo.',
+      reabrirTarja:'As tarjas voltam queimadas na imagem: elas nunca foram uma camada por cima, e não há como desfazê-las.',
+      reabrirErro:'Não consegui abrir este arquivo: {0}',
+      reabrirVazio:'este arquivo não tem quadros dentro',
+      reabrirSemImg:'não achei imagem nenhuma aqui dentro',
+      reabertoTag:'reaberto',
       cenLbl:'Cenário de uso',
       mUx:'Teste de usabilidade',
       mUxH:'Sessão com participante: cada momento marcado vira um bloco, com a fala do moderador e a do participante separadas. O código do participante entra no lugar do nome.',
@@ -1153,6 +1506,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       cenTroca:'Cenário: {0}.',
       evH:'Dados da evidência', evHsub:'— opcional: caso de teste, sistema, quem executou, hora de início',
       guiaH:'Dados do guia', guiaHsub:'— opcional: título, sistema, autor, versão',
+      guiaDono:'Área / dono do procedimento', guiaValido:'Válido a partir de',
       guiaTit:'Título do guia', guiaSis:'Sistema / produto', guiaAutor:'Escrito por', guiaVer:'Versão',
       ataH:'Dados da reunião', ataHsub:'— opcional: assunto, local, quem conduziu, participantes',
       ataAssunto:'Assunto', ataLocal:'Local / plataforma', ataOrg:'Conduzida por',
@@ -1161,6 +1515,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       evChamado:'Chamado / mudança', evRes:'Resultado', evIni:'Início da gravação',
       evR0:'— não informado', evR1:'Passou', evR2:'Falhou', evR3:'Bloqueado',
       evEstimado:'A hora de início foi estimada pela data do arquivo de vídeo — confira antes de usar como evidência.',
+      evNumLbl:'numerar automaticamente (EV-001, EV-002…)', evNumProx:'o próximo será {0}',
       evHash:'Incluir a impressão digital SHA-256 de cada imagem',
       evNota:'Tudo aqui é opcional e nada é enviado a lugar nenhum: vira a primeira página do documento e o nome do arquivo, e mais nada. Nada sobrevive ao fechar a aba. As horas saem no formato AAAA-MM-DD hh:mm:ss com o fuso ao lado, para não restar dúvida entre dia e mês nem entre países.',
       pEvid:'Identificação', pStart:'Início da gravação', pHash:'SHA-256 da imagem',
@@ -1200,6 +1555,14 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       cropIndo:'Recortando os quadros…',
       cropFeito:'{0} quadros recortados. As tarjas foram desfeitas — refaça-as sobre a imagem nova.',
       cropSaiu:'Recorte desfeito: os quadros voltaram ao tamanho original.',
+      sensTarjar1:'Tarjar a ocorrência encontrada',
+      sensTarjado1:'1 tarja aplicada. Confira na lente antes de gerar — a tarja é queimada na imagem.',
+      sensTarjar:'Tarjar as {0} ocorrências',
+      sensTarjado:'{0} tarjas aplicadas. Confira na lente antes de gerar — a tarja é queimada na imagem.',
+      sensNaoAchou:'Nada para tarjar automaticamente',
+      sensNaoAchouDica:'O padrão foi encontrado no texto corrido, mas não em cima de nenhuma palavra localizável na imagem. Tarje à mão na lente.',
+      sensSemCaixa:'Tarjar automaticamente não disponível',
+      sensSemCaixaDica:'Esta versão do leitor de texto não devolveu a posição das palavras. Dá para tarjar à mão na lente.',
       sensH:'Dado pessoal visível.',
       sensP:'A leitura da tela encontrou {0}. Confira e, se for o caso, cubra com o botão Tarjar dentro de cada passo — nada disso é enviado a lugar nenhum, mas o documento que você baixar vai com o que está na imagem.',
       sensPassos:'passos {0}',
@@ -1263,6 +1626,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       sub:'Turn a video into a PDF with the frames that matter and a synced transcript — ready to hand to an AI. It all runs in your browser: the video never leaves your computer.',
       viaRecTag:'Start here', viaRecH:'Record the screen now',
       viaRecP:'You walk through the screen and say what you are doing. No video is kept: what comes out are the screens that changed and your narration, transcribed.',
+      viaRecPclipe:'You walk through the screen and say what you are doing. The whole recording is discarded: what comes out are the screens that changed, your narration transcribed, and a short clip of each moment you mark.',
+      recWarnClipe:'The whole recording is discarded — only the clips of the moments you mark are kept. While capturing, the tool pulls out the frames that matter and transcribes the two audio channels separately. Transcription shares the machine with the capture; on a modest computer the screen may miss a change.',
       viaArqTag:'I already have the video', viaArqH:'Use a file',
       viaArqP:'A recording you already made, of a meeting or of a screen. The file is read by the browser and never leaves your computer.',
       s1:'Video', drop1:'Choose or drag your video here',
@@ -1350,6 +1715,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recDone2:'Done: {0} captured, {1} frames and {2} lines of speech. No video was kept on your computer.',
       spkMic:'Microphone', spkSys:'Computer',
       spkModer:'Moderator', spkPart:'Participant',
+      spkLblMic:'Call the microphone', spkLblSys:'and the computer sound',
       recFile:'screen capture', pNoFile:'no file kept',
       gpuLbl:'use the graphics card', dlSize:'downloads ~{0} MB the first time',
       modelLimpando:'Clearing the stored model and downloading it again…',
@@ -1445,6 +1811,11 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       trBoxH:'Transcript', trBoxSub:'fix, apply vocabulary, translate',
       trBoxVazio:'still empty', trBoxCheia:'{0} lines',
       tradLbl:'Translate the transcript and the notes into', tradBtn:'Translate',
+      multiBtn:'Several languages at once', multiGerar:'Build the package',
+      multiComo:'Tick the languages. You get a .zip with the same document in each one — as HTML and Markdown. PDF and Word stay one language at a time: they load the images again for every language, and five versions of a large document would bring the tab down.',
+      multiVazio:'Tick at least one language.',
+      multiIndo:'Translating into {0} ({1} of {2})…',
+      multiFeito:'Package ready, with {0} language(s). Nothing left your computer: the translation runs in the browser.',
       tradPrep:'Preparing the browser translator…',
       tradBaixando:'Downloading the language pair: {0}% (once only, then it stays in the browser)',
       tradIndo:'Translating {0} of {1}…',
@@ -1480,6 +1851,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       mCount:'Fixed count, evenly spread', mInt:'Every N seconds',
       lSens:'Sensitivity', lCount:'How many frames', lInt:'Interval (seconds)',
       lMax:'Frame limit', lQual:'Image quality',
+      lIgnorar:'Ignore in detection', ign0:'nothing — the whole screen counts',
+      ign1:'the bottom bar (Windows clock)', ign2:'the top bar (macOS)', ign3:'both bars',
       expLabel:'Download the transcript:',
       lFrom:'Analyse from', lTo:'Analyse until',
       faixaMa:'The start must come before the end. The range was ignored.',
@@ -1519,6 +1892,80 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       lenteTam:'size',
       unLbl:'Call each frame a',
       unPasso:'Step', unMomento:'Moment', unIa:'Segment',
+      recCountCancel:'Cancelled before it started. Nothing was recorded.',
+      recAutoLbl:'Stop by itself after', recAutoMinLbl:'minutes',
+      recAutoParou:'The recording stopped by itself at the {0}-minute limit you set. Everything captured up to here is in the document.',
+      atalhos:'Shortcuts, when focus is not in a field: G records and stops, M marks the screen, P pauses.',
+      recCountLbl:'Count 3 before starting',
+      recCamNao:'I could not open the webcam; the recording continues without it.',
+      recCamNota:'The face is drawn on top of the screen, in the frames and in the clips. It does NOT take part in change detection — otherwise every breath would become a new step. Like everything else, the image never leaves your computer; and because it is a face, ask permission from whoever is being filmed.',
+      camTD:'top right', camTE:'top left', camP:'small', camM:'medium', camG:'large',
+      recCamLbl:'Webcam in a corner of the frame', camBD:'bottom right', camBE:'bottom left',
+      recClipeLbl:'Keep a clip of the marked moments',
+      recClipeNota:'Only for the moments you mark while recording: about 15 seconds around each mark, with sound. The rest of the recording is still discarded. Clips stay in this tab and go into the .zip — they are not uploaded anywhere.',
+      recClipeNao:'This browser cannot record clips; the rest of the capture works normally.',
+      lenteClipe:'Clip of this moment',
+      lenteClipeNota:'The mark is at {0} of this {1}-second clip.',
+      lenteClipeVolta:'Clip recovered from the package. Where exactly the mark was is not written in the file, so it starts from the beginning.',
+      cmpSo:'There is only one frame to compare.',
+      cmpIndo:'Comparing…', cmpErro:'I could not compare these two frames.',
+      cmpDif:'{0}% of the pixels changed, in red.', cmpIgual:'The two frames are identical.',
+      cmpMsg:'{0}% of the other frame on top. Drag to make the frame blink: what changed is the only thing that moves.',
+      cmpBtn:'Compare', cmpCom:'with', cmpDiff:'Show only the difference',
+      juntarLinhaV:'{0} different sessions, one per task. No wall-clock time: each session had its own start.',
+      juntarNome:'{0}-sessions', juntarLinha:'Consolidated document',
+      juntarPulou:'{0} file(s) could not be read and were left out.',
+      juntarSemHora:'Wall-clock time was removed from the document: these are different sessions, each with its own start. Time within each one still holds.',
+      juntarOk:'{0} sessions merged, {1} frames in total. Each session became a task, with its own duration.',
+      juntarBtn:'Merge several sessions', juntarUm:'Pick two or more files — for a single one, use \u201cReopen a document\u201d.',
+      lenteCap:'A task / case starts here',
+      lenteCapNota:'Leave it blank if this step continues the previous task. Type a name and the recording gains chapters: each document gets the task title, and the spreadsheet gains the time spent on each one.',
+      capTempo:'{0} on this task', capCol:'Task', capTempoCol:'Time on task',
+      capResumo:'{0} task(s) in this recording:',
+      capPacote:'One document per task', capPacoteOk:'{0} documents, one per task, in the same .zip.',
+      capPacoteNao:'Mark where each task starts (in a step\u2019s magnifier) to split the recording into documents.',
+      clipeBaixar:'Download the clip',
+      clipeNome:'moment',
+      clipeSelo:'clip',
+      clipeDescarta:'Discard the videos',
+      clipeDescartou:'{0} clip(s) discarded. The discard date goes into the document.',
+      clipeDescartado:'Moment videos discarded on {0}.',
+      recCountN:'Starting in {0}…',
+      hesitarLbl:'remove hesitations (um…, uh…, like…)',
+      hesitarFeito:'{0} hesitations removed.',
+      hesitarNada:'No hesitations found.',
+      hesitarUx:'In a research session the hesitation IS the data — think twice before removing it.',
+      uxTipo:'Moment type',
+      uxT0:'— no type —', uxT1:'friction', uxT2:'gave up', uxT3:'praised', uxT4:'defect',
+      prTipo:'Some moments were classified by the researcher (friction, gave up, praised, defect). Use that classification and do not invent another.',
+      evAmb:'Environment', evAmb0:'— do not state —',
+      scormBtn:'SCORM package',
+      scormOk:'SCORM 1.2 package ready. Upload it to your LMS as content — the LMS is what records who completed it; we still do not know.',
+      pptxBtn:'PowerPoint',
+      pptxOk:'Deck ready: {0} slides plus the cover. It opens in PowerPoint, Keynote and Google Slides, and every slide is editable — the image, the title and the note are separate objects, not a flattened picture.',
+      trocarBtn:'Replace the image', dupBtn:'Duplicate',
+      trocarOk:'Image replaced. The old frame’s redactions and highlights went with it — they pointed at pixels that no longer exist.',
+      trocarErro:'I could not read this image.',
+      dupFeito:'{0} duplicated right after this one.',
+      trocadoTag:'image replaced',
+      revisarBtn:'Review step by step',
+      revAntes:'The screen that is in the document today',
+      revPos:'{0} of {1}',
+      revSemNota:'This step has no note — just the screen.',
+      revIgualBtn:'Still like this →',
+      revTrocarBtn:'It changed — replace the image',
+      revForaBtn:'It is gone — discard',
+      revSairBtn:'Stop the review',
+      revFim:'Review done: {0} confirmed, {1} with a new image, {2} discarded.',
+      reabrirBtn:'Open a document made earlier',
+      reabrirDica:'to fix one step without re-recording — takes the .json and the .zip that came out of here',
+      reabrirLendo:'Reading the file…',
+      reabrirOk:'{0} frames back. Fix what you need and generate again.',
+      reabrirTarja:'Redactions come back burned into the image: they were never a layer on top, and there is no undoing them.',
+      reabrirErro:'I could not open this file: {0}',
+      reabrirVazio:'this file has no frames inside',
+      reabrirSemImg:'I found no image in here',
+      reabertoTag:'reopened',
       cenLbl:'Use case',
       mUx:'Usability test',
       mUxH:'A session with a participant: each marked moment becomes a block, with the moderator\u2019s speech and the participant\u2019s kept apart. The participant code goes in place of the name.',
@@ -1529,6 +1976,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       cenTroca:'Use case: {0}.',
       evH:'Evidence details', evHsub:'— optional: test case, system, who ran it, start time',
       guiaH:'Guide details', guiaHsub:'— optional: title, system, author, version',
+      guiaDono:'Area / procedure owner', guiaValido:'Valid from',
       guiaTit:'Guide title', guiaSis:'System / product', guiaAutor:'Written by', guiaVer:'Version',
       ataH:'Meeting details', ataHsub:'— optional: subject, place, who chaired it, attendees',
       ataAssunto:'Subject', ataLocal:'Place / platform', ataOrg:'Chaired by',
@@ -1537,6 +1985,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       evChamado:'Ticket / change', evRes:'Result', evIni:'Recording started at',
       evR0:'— not stated', evR1:'Passed', evR2:'Failed', evR3:'Blocked',
       evEstimado:'The start time was estimated from the video file date — check it before using this as evidence.',
+      evNumLbl:'number automatically (EV-001, EV-002…)', evNumProx:'the next one will be {0}',
       evHash:'Include the SHA-256 fingerprint of each image',
       evNota:'Everything here is optional and nothing is sent anywhere: it becomes the first page of the document and the file name, and nothing else. Nothing survives closing the tab. Times are written as YYYY-MM-DD hh:mm:ss with the offset beside them, so neither day-and-month nor time zone is ever ambiguous.',
       pEvid:'Identification', pStart:'Recording started at', pHash:'Image SHA-256',
@@ -1576,6 +2025,14 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       cropIndo:'Cropping the frames…',
       cropFeito:'{0} frames cropped. Redactions were undone — redraw them on the new image.',
       cropSaiu:'Crop undone: the frames are back to their original size.',
+      sensTarjar1:'Redact the one occurrence',
+      sensTarjado1:'1 redaction applied. Check it in the lens before generating — the redaction is burned into the image.',
+      sensTarjar:'Redact the {0} occurrences',
+      sensTarjado:'{0} redactions applied. Check them in the lens before generating — the redaction is burned into the image.',
+      sensNaoAchou:'Nothing to redact automatically',
+      sensNaoAchouDica:'The pattern was found in the running text, but not over any word that can be located on the image. Redact by hand in the lens.',
+      sensSemCaixa:'Automatic redaction unavailable',
+      sensSemCaixaDica:'This version of the text reader did not return word positions. You can still redact by hand in the lens.',
       sensH:'Personal data on screen.',
       sensP:'Reading the screens found {0}. Check them and, if needed, cover them with the Redact button inside each step — none of this is sent anywhere, but the document you download carries whatever is in the image.',
       sensPassos:'steps {0}',
@@ -1639,6 +2096,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       sub:'Convierte un vídeo en un PDF con los fotogramas que importan y la transcripción sincronizada, listo para entregar a una IA. Todo se ejecuta en tu navegador: el vídeo no sale de tu ordenador.',
       viaRecTag:'Empieza por aquí', viaRecH:'Grabar la pantalla ahora',
       viaRecP:'Haces el recorrido en la pantalla y dices lo que estás haciendo. No se guarda vídeo: salen solo las pantallas que cambiaron y tu narración transcrita.',
+      viaRecPclipe:'Haces el recorrido en la pantalla y dices lo que estás haciendo. La grabación entera se descarta: salen las pantallas que cambiaron, tu narración transcrita y un clip corto de cada momento que marques.',
+      recWarnClipe:'La grabación entera se descarta — solo quedan los clips de los momentos que marques. Durante la captura la herramienta separa los fotogramas que importan y transcribe los dos canales de audio por separado. La transcripción comparte la máquina con la captura; en un ordenador modesto la pantalla puede perder algún cambio.',
       viaArqTag:'Ya tengo el vídeo', viaArqH:'Usar un archivo',
       viaArqP:'Una grabación que ya hiciste, de una reunión o de pantalla. El archivo lo lee el navegador y no sale de tu equipo.',
       s1:'Vídeo', drop1:'Elige o arrastra tu vídeo aquí',
@@ -1724,6 +2183,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recDone2:'Listo: {0} de captura, {1} fotogramas y {2} intervenciones. No se guardó ningún vídeo en tu ordenador.',
       spkMic:'Micrófono', spkSys:'Ordenador',
       spkModer:'Moderador', spkPart:'Participante',
+      spkLblMic:'Llama al micrófono', spkLblSys:'y al sonido del ordenador',
       recFile:'captura de pantalla', pNoFile:'ningún archivo guardado',
       gpuLbl:'usar la tarjeta gráfica', dlSize:'descarga ~{0} MB la primera vez',
       modelLimpando:'Borrando el modelo guardado y descargándolo de nuevo…',
@@ -1821,6 +2281,11 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       trBoxH:'Transcripción', trBoxSub:'corregir, aplicar vocabulario, traducir',
       trBoxVazio:'aún vacía', trBoxCheia:'{0} líneas',
       tradLbl:'Traducir la transcripción y las anotaciones a', tradBtn:'Traducir',
+      multiBtn:'Varios idiomas de una vez', multiGerar:'Generar el paquete',
+      multiComo:'Marca los idiomas. Sale un .zip con el mismo documento en cada uno — en HTML y Markdown. El PDF y el Word siguen siendo de un idioma por vez: cargan las imágenes otra vez en cada idioma, y cinco versiones de un documento grande tumbarían la pestaña.',
+      multiVazio:'Marca al menos un idioma.',
+      multiIndo:'Traduciendo a {0} ({1} de {2})…',
+      multiFeito:'Paquete listo, con {0} idioma(s). Nada salió de tu ordenador: la traducción corre en el navegador.',
       tradPrep:'Preparando el traductor del navegador…',
       tradBaixando:'Descargando el par de idiomas: {0}% (una sola vez, y queda en el navegador)',
       tradIndo:'Traduciendo {0} de {1}…',
@@ -1856,6 +2321,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       mCount:'Cantidad fija, repartidos', mInt:'Cada N segundos',
       lSens:'Sensibilidad', lCount:'Cuántos fotogramas', lInt:'Intervalo (segundos)',
       lMax:'Límite de fotogramas', lQual:'Calidad de imagen',
+      lIgnorar:'Ignorar en la detección', ign0:'nada — cuenta la pantalla entera',
+      ign1:'la barra de abajo (reloj de Windows)', ign2:'la barra de arriba (macOS)', ign3:'las dos barras',
       expLabel:'Descargar la transcripción:',
       lFrom:'Analizar desde', lTo:'Analizar hasta',
       faixaMa:'El inicio debe ser anterior al final. Se ignoró el recorte.',
@@ -1895,6 +2362,80 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       lenteTam:'tamaño',
       unLbl:'Llamar a cada cuadro de',
       unPasso:'Paso', unMomento:'Momento', unIa:'Fragmento',
+      recCountCancel:'Cancelado antes de empezar. No se grabó nada.',
+      recAutoLbl:'Parar solo después de', recAutoMinLbl:'minutos',
+      recAutoParou:'La grabación se detuvo sola en el límite de {0} minutos que definiste. Todo lo capturado hasta aquí está en el documento.',
+      atalhos:'Atajos, cuando el foco no está en un campo: G graba y detiene, M marca la pantalla, P pausa.',
+      recCountLbl:'Contar 3 antes de empezar',
+      recCamNao:'No he podido abrir la webcam; la grabación continúa sin ella.',
+      recCamNota:'La cara se dibuja encima de la pantalla, en los fotogramas y en los clips. NO participa en la detección de cambio — si no, cada respiración sería un paso nuevo. Como todo lo demás, la imagen no sale de tu ordenador; y como es una cara, pide permiso a quien está siendo filmado.',
+      camTD:'arriba a la derecha', camTE:'arriba a la izquierda', camP:'pequeña', camM:'mediana', camG:'grande',
+      recCamLbl:'Webcam en una esquina del fotograma', camBD:'abajo a la derecha', camBE:'abajo a la izquierda',
+      recClipeLbl:'Guardar un clip de los momentos marcados',
+      recClipeNota:'Solo de los momentos que marques durante la grabación: unos 15 segundos alrededor de cada marca, con sonido. El resto de la grabación se sigue descartando. Los clips quedan en esta pestaña y salen en el .zip — no se suben a ninguna parte.',
+      recClipeNao:'Este navegador no graba clips; el resto de la captura funciona con normalidad.',
+      lenteClipe:'Clip de este momento',
+      lenteClipeNota:'La marca está a los {0} de este clip de {1} segundos.',
+      lenteClipeVolta:'Clip recuperado del paquete. Dónde estaba exactamente la marca no viene escrito en el archivo, así que empieza desde el principio.',
+      cmpSo:'Solo hay un fotograma para comparar.',
+      cmpIndo:'Comparando…', cmpErro:'No he podido comparar estos dos fotogramas.',
+      cmpDif:'{0}% de los píxeles cambiaron, en rojo.', cmpIgual:'Los dos fotogramas son idénticos.',
+      cmpMsg:'{0}% del otro fotograma encima. Arrastra para que el fotograma parpadee: lo que cambió es lo único que se mueve.',
+      cmpBtn:'Comparar', cmpCom:'con', cmpDiff:'Mostrar solo la diferencia',
+      juntarLinhaV:'{0} sesiones distintas, una por tarea. Sin hora de reloj: cada sesión tenía su propio inicio.',
+      juntarNome:'{0}-sesiones', juntarLinha:'Documento consolidado',
+      juntarPulou:'{0} archivo(s) no se pudieron leer y quedaron fuera.',
+      juntarSemHora:'La hora de reloj salió del documento: son sesiones distintas, cada una con su inicio. El tiempo dentro de cada una sigue valiendo.',
+      juntarOk:'{0} sesiones juntadas, {1} fotogramas en total. Cada sesión pasó a ser una tarea, con su propia duración.',
+      juntarBtn:'Juntar varias sesiones', juntarUm:'Elige dos o más archivos — para uno solo, usa \u201cReabrir un documento\u201d.',
+      lenteCap:'Aquí empieza una tarea / un caso',
+      lenteCapNota:'Déjalo en blanco si este paso continúa la tarea anterior. Al escribir un nombre, la grabación pasa a tener capítulos: cada documento recibe el título de la tarea y la hoja de cálculo gana el tiempo dedicado a cada una.',
+      capTempo:'{0} en esta tarea', capCol:'Tarea', capTempoCol:'Tiempo en la tarea',
+      capResumo:'{0} tarea(s) en esta grabación:',
+      capPacote:'Un documento por tarea', capPacoteOk:'{0} documentos, uno por tarea, en el mismo .zip.',
+      capPacoteNao:'Marca dónde empieza cada tarea (en la lupa de un paso) para separar la grabación en documentos.',
+      clipeBaixar:'Descargar el clip',
+      clipeNome:'momento',
+      clipeSelo:'clip',
+      clipeDescarta:'Descartar los vídeos',
+      clipeDescartou:'{0} clip(s) descartado(s). La fecha del descarte entra en el documento.',
+      clipeDescartado:'Vídeos de los momentos descartados el {0}.',
+      recCountN:'Empezando en {0}…',
+      hesitarLbl:'quitar vacilaciones (eh…, este…, o sea…)',
+      hesitarFeito:'{0} vacilaciones quitadas.',
+      hesitarNada:'No encontré vacilaciones.',
+      hesitarUx:'En una sesión de investigación la vacilación ES el dato — piénsalo dos veces antes de quitarla.',
+      uxTipo:'Tipo del momento',
+      uxT0:'— sin tipo —', uxT1:'fricción', uxT2:'abandonó', uxT3:'elogió', uxT4:'defecto',
+      prTipo:'Algunos momentos fueron clasificados por el investigador (fricción, abandonó, elogió, defecto). Usa esa clasificación y no inventes otra.',
+      evAmb:'Entorno', evAmb0:'— no indicar —',
+      scormBtn:'Paquete SCORM',
+      scormOk:'Paquete SCORM 1.2 listo. Súbelo a tu LMS como contenido — es él quien registra quién lo completó; nosotros seguimos sin saberlo.',
+      pptxBtn:'PowerPoint',
+      pptxOk:'Presentación lista: {0} diapositivas más la portada. Se abre en PowerPoint, Keynote y Google Slides, y cada diapositiva es editable — la imagen, el título y la nota van sueltos, no aplastados.',
+      trocarBtn:'Cambiar la imagen', dupBtn:'Duplicar',
+      trocarOk:'Imagen cambiada. Los tapados y destacados del fotograma antiguo se fueron con ella — apuntaban a píxeles que ya no existen.',
+      trocarErro:'No pude leer esta imagen.',
+      dupFeito:'{0} duplicado justo después de este.',
+      trocadoTag:'imagen cambiada',
+      revisarBtn:'Revisar paso a paso',
+      revAntes:'La pantalla que está hoy en el documento',
+      revPos:'{0} de {1}',
+      revSemNota:'Este paso no tiene anotación — solo la pantalla.',
+      revIgualBtn:'Sigue así →',
+      revTrocarBtn:'Cambió — cambiar la imagen',
+      revForaBtn:'Ya no existe — descartar',
+      revSairBtn:'Parar la revisión',
+      revFim:'Revisión terminada: {0} confirmados, {1} con imagen nueva, {2} descartados.',
+      reabrirBtn:'Abrir un documento hecho antes',
+      reabrirDica:'para corregir un paso sin volver a grabar — acepta el .json y el .zip que salieron de aquí',
+      reabrirLendo:'Leyendo el archivo…',
+      reabrirOk:'{0} fotogramas de vuelta. Corrige lo que haga falta y genera otra vez.',
+      reabrirTarja:'Los tapados vuelven quemados en la imagen: nunca fueron una capa encima, y no hay forma de deshacerlos.',
+      reabrirErro:'No pude abrir este archivo: {0}',
+      reabrirVazio:'este archivo no tiene fotogramas dentro',
+      reabrirSemImg:'no encontré ninguna imagen aquí dentro',
+      reabertoTag:'reabierto',
       cenLbl:'Escenario de uso',
       mUx:'Prueba de usabilidad',
       mUxH:'Sesión con participante: cada momento marcado se vuelve un bloque, con el habla del moderador y la del participante separadas. El código del participante va en lugar del nombre.',
@@ -1905,6 +2446,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       cenTroca:'Escenario: {0}.',
       evH:'Datos de la evidencia', evHsub:'— opcional: caso de prueba, sistema, quién lo ejecutó, hora de inicio',
       guiaH:'Datos de la guía', guiaHsub:'— opcional: título, sistema, autor, versión',
+      guiaDono:'Área / dueño del procedimiento', guiaValido:'Válido desde',
       guiaTit:'Título de la guía', guiaSis:'Sistema / producto', guiaAutor:'Escrito por', guiaVer:'Versión',
       ataH:'Datos de la reunión', ataHsub:'— opcional: asunto, lugar, quién la condujo, participantes',
       ataAssunto:'Asunto', ataLocal:'Lugar / plataforma', ataOrg:'Conducida por',
@@ -1913,6 +2455,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       evChamado:'Ticket / cambio', evRes:'Resultado', evIni:'Inicio de la grabación',
       evR0:'— sin indicar', evR1:'Aprobado', evR2:'Fallido', evR3:'Bloqueado',
       evEstimado:'La hora de inicio se estimó por la fecha del archivo de vídeo — compruébala antes de usarla como evidencia.',
+      evNumLbl:'numerar automáticamente (EV-001, EV-002…)', evNumProx:'el siguiente será {0}',
       evHash:'Incluir la huella SHA-256 de cada imagen',
       evNota:'Todo esto es opcional y nada se envía a ningún sitio: se convierte en la primera página del documento y en el nombre del archivo, y nada más. Nada sobrevive al cierre de la pestaña. Las horas salen como AAAA-MM-DD hh:mm:ss con el huso al lado, para que no haya duda ni entre día y mes ni entre países.',
       pEvid:'Identificación', pStart:'Inicio de la grabación', pHash:'SHA-256 de la imagen',
@@ -1952,6 +2495,14 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       cropIndo:'Recortando los fotogramas…',
       cropFeito:'{0} fotogramas recortados. Las zonas tachadas se deshicieron — vuelve a marcarlas sobre la imagen nueva.',
       cropSaiu:'Recorte deshecho: los fotogramas volvieron a su tamaño original.',
+      sensTarjar1:'Tapar la aparición encontrada',
+      sensTarjado1:'1 tapado aplicado. Compruébalo en la lupa antes de generar — el tapado se quema en la imagen.',
+      sensTarjar:'Tapar las {0} apariciones',
+      sensTarjado:'{0} tapados aplicados. Compruébalos en la lupa antes de generar — el tapado se quema en la imagen.',
+      sensNaoAchou:'Nada que tapar automáticamente',
+      sensNaoAchouDica:'El patrón se encontró en el texto corrido, pero no sobre ninguna palabra localizable en la imagen. Tapa a mano en la lupa.',
+      sensSemCaixa:'Tapado automático no disponible',
+      sensSemCaixaDica:'Esta versión del lector de texto no devolvió la posición de las palabras. Puedes tapar a mano en la lupa.',
       sensH:'Dato personal visible.',
       sensP:'La lectura de las pantallas encontró {0}. Compruébalo y, si procede, cúbrelo con el botón Tachar dentro de cada paso — nada de esto se envía a ningún sitio, pero el documento que descargues lleva lo que esté en la imagen.',
       sensPassos:'pasos {0}',
@@ -2145,7 +2696,11 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     $('tr').placeholder = t('trPh');
     $('goalFree').placeholder = t('freePh');
     $('sensV').textContent = t('sens')[+$('sens').value];
-    dicaModelo(); pintarBloco(); pintarObjetivos(); pintarRotulo();
+    dicaModelo(); pintarBloco(); pintarObjetivos(); pintarRotulo(); pintarScorm();
+    /* Também na troca de idioma: o nome sugerido dos canais é palavra
+       traduzida, e deixá-la em português numa página em inglês é o tipo de
+       resto que faz a pessoa duvidar do resto da tradução. */
+    if (typeof pintarClipe === 'function') { pintarClipe(); pintarCanais(); }
     if (!frames.length) $('promptOut').textContent = t('promptPh');
     // render() e não só buildPrompt(): "Passo 3" e o texto de apoio da anotação
     // ficariam no idioma anterior dentro de cada miniatura
@@ -2923,6 +3478,137 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
 
   if (TEM_TRADUTOR) $('trad').onclick = traduzirTudo;
 
+  /* ---- o mesmo documento em N idiomas, num pacote só ---- */
+  const MULTI = [['pt','Português'], ['en','English'], ['es','Español'],
+                 ['de','Deutsch'], ['fr','Français']];
+
+  function montarMultiCaixas(){
+    const cx = $('multiLinguas'); if (!cx || cx.children.length) return;
+    MULTI.forEach(([cod, nome]) => {
+      const l = document.createElement('label');
+      l.className = 'chk';
+      l.innerHTML = `<input type="checkbox" value="${cod}"><span>${nome}</span>`;
+      cx.appendChild(l);
+    });
+  }
+
+  $('multiModo').onclick = () => {
+    montarMultiCaixas();
+    const cx = $('multiBox');
+    cx.classList.toggle('hide');
+    if (!cx.classList.contains('hide') && !TEM_TRADUTOR)
+      $('multiMsg').innerHTML = `<span class="err">${t('tradSemApi')}</span>`;
+  };
+
+  $('multiGerar').onclick = async () => {
+    const alvos = [...$('multiLinguas').querySelectorAll('input:checked')].map(i => i.value);
+    if (!alvos.length) { $('multiMsg').innerHTML = `<span class="err">${t('multiVazio')}</span>`; return; }
+    const kept = frames.filter(f => f.keep);
+    if (!kept.length) return;
+    if (!TEM_TRADUTOR) { $('multiMsg').innerHTML = `<span class="err">${t('tradSemApi')}</span>`; return; }
+
+    $('multiGerar').disabled = true;
+    await aplicarTarjas(kept);
+    await calcularHashes(kept);
+
+    /* O estado original guardado ANTES de qualquer tradução, e devolvido no
+       fim. A alternativa — traduzir e reverter idioma por idioma — acumula erro:
+       traduzir de volta não devolve o texto de partida, devolve outro texto. */
+    const trOriginal = $('tr').value;
+    const notasOriginais = frames.map(f => f.nota || '');
+    const de = origemTrad();
+    const entradas = [];
+    let feitos = 0;
+    try {
+      for (const alvo of alvos) {
+        $('multiMsg').textContent = t('multiIndo', alvo.toUpperCase(), ++feitos, alvos.length);
+        if (alvo !== de) {
+          const pode = await Translator.availability({ sourceLanguage: de, targetLanguage: alvo });
+          if (pode === 'unavailable') {
+            $('multiMsg').innerHTML = `<span class="err">${t('tradSemPar', de, alvo)}</span>`;
+            continue;
+          }
+          const tr = await Translator.create({ sourceLanguage: de, targetLanguage: alvo });
+          const { cues } = parseTranscript(trOriginal);
+          for (const c of cues) c.t = await tr.translate(c.t);
+          for (let i = 0; i < frames.length; i++)
+            if (notasOriginais[i]) frames[i].nota = await tr.translate(notasOriginais[i]);
+          if (cues.length) {
+            $('tr').value = 'WEBVTT\n\n' + cues.map(c =>
+              `${tempoLegenda(c.a,false)} --> ${tempoLegenda(c.b,false)}\n${c.t}`).join('\n\n') + '\n';
+            refreshTr();
+          }
+          if (tr.destroy) tr.destroy();
+        } else {
+          $('tr').value = trOriginal;
+          frames.forEach((f, i) => { f.nota = notasOriginais[i]; });
+          refreshTr();
+        }
+        const base = nomeBase() + '-' + alvo;
+        entradas.push({ nome: base + '.html', dados: bytesDe(montarHtml()) });
+        entradas.push({ nome: base + '.md',   dados: bytesDe(montarMd()) });
+      }
+    } catch (e) {
+      $('multiMsg').innerHTML = `<span class="err">${(e && e.message) || t('tradErro')}</span>`;
+    } finally {
+      $('tr').value = trOriginal;
+      frames.forEach((f, i) => { f.nota = notasOriginais[i]; });
+      refreshTr(); render();
+      $('multiGerar').disabled = false;
+    }
+    if (!entradas.length) return;
+    baixarBlob(zipar(entradas), 'idiomas-' + nomeBase() + '.zip');
+    medir('baixou_saida', { p_formato: 'zip' });
+    $('multiMsg').innerHTML = `<span class="ok">${t('multiFeito', entradas.length / 2)}</span>`;
+  };
+
+  /* ---- um documento por tarefa ----
+
+     Uma tarde de teste com quatro casos vira quatro documentos, de uma captura
+     só. O truque é o mesmo do pacote de idiomas: esconder os quadros que não
+     são do capítulo, montar o documento, e devolver tudo no `finally`. Sair
+     pelo meio com metade dos quadros descartados seria pior do que não ter o
+     botão. */
+  $('capPacote').onclick = async () => {
+    const caps = capitulos();
+    if (!caps.length) { $('pdfStatus').innerHTML = `<span class="err">${t('capPacoteNao')}</span>`; return; }
+    const kept = frames.filter(f => f.keep);
+    if (!kept.length) return;
+    $('capPacote').disabled = true;
+    $('pdfStatus').textContent = t('pkgBuilding');
+    await new Promise(r => setTimeout(r, 40));
+    await aplicarTarjas(kept);
+    await calcularHashes(kept);
+
+    const guardados = frames.map(f => f.keep);
+    const casoOriginal = $('evCaso').value;
+    const entradas = [];
+    try {
+      for (const c of caps) {
+        const doCap = kept.slice(c.de, c.ate + 1);
+        frames.forEach(f => { f.keep = doCap.includes(f); });
+        /* O nome da tarefa vira o título do documento — é o que a pessoa
+           procura na pasta depois, não "gravação de terça". */
+        $('evCaso').value = c.nome;
+        const base = nomeBase();
+        entradas.push({ nome: base + '.html', dados: bytesDe(montarHtml()) });
+        entradas.push({ nome: base + '.md',   dados: bytesDe(montarMd()) });
+        entradas.push({ nome: base + '.csv',  dados: bytesDe(montarCsv()) });
+      }
+    } catch (e) {
+      $('pdfStatus').innerHTML = `<span class="err">${t('pkgErr', (e && e.message) || e)}</span>`;
+    } finally {
+      frames.forEach((f, i) => { f.keep = guardados[i]; });
+      $('evCaso').value = casoOriginal;
+      render();
+      $('capPacote').disabled = false;
+    }
+    if (!entradas.length) return;
+    baixarBlob(zipar(entradas), 'tarefas-' + nomeBase() + '.zip');
+    medir('baixou_saida', { p_formato: 'zip' });
+    $('pdfStatus').innerHTML = `<span class="ok">${t('capPacoteOk', caps.length)}</span>`;
+  };
+
   /* ================= captura ao vivo da tela =================
      A gravação não guarda vídeo. Enquanto a tela é compartilhada, a ferramenta
      faz três coisas ao mesmo tempo, todas na máquina do usuário:
@@ -2946,6 +3632,262 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
 
   let liveOn = false, liveDur = 0, liveCues = [], liveCanais = null, liveW = 0, liveH = 0;
   let abrindoCaptura = false, emCauda = false, pularCauda = false;
+
+  /* ================= o clipe do momento marcado =================
+
+     O problema, primeiro. Uma marca acontece DEPOIS do que interessa: o
+     pesquisador vê a pessoa travar e só então aperta o botão. O clipe útil é o
+     que vem ANTES da marca, e no instante em que ela é feita esse pedaço já
+     passou. Guardar tudo para poder olhar para trás é o que não cabe: uma hora
+     de tela a 2,5 Mbps é mais de um giga na memória de uma aba.
+
+     A saída não é remendar bytes. Um `MediaRecorder` cortado no meio produz
+     blocos que só decodificam junto com o cabeçalho do começo, e os tempos
+     internos continuam sendo os da sessão inteira — o "clipe" abriria como um
+     vídeo de quarenta minutos com trinta e nove de tela preta. Reescrever esses
+     tempos é cirurgia de EBML à mão, que é exatamente o tipo de código que
+     falha em silêncio num navegador que a gente não testou.
+
+     Então: DOIS gravadores em janelas de 15 s, defasados de 7,5 s. Cada janela
+     é um arquivo inteiro, fechado pelo próprio navegador, que toca em qualquer
+     lugar. Qualquer instante da sessão está sempre dentro das duas janelas, uma
+     delas com pelo menos 7,5 s já corridos — é dela que sai o clipe, porque ela
+     é a que tem o antes. A janela que ninguém marcou é jogada fora ao fechar, e
+     é isso que mantém a memória no tamanho dos momentos marcados e não no
+     tamanho da sessão. */
+  /* ================= a webcam num canto =================
+
+     Ela entra no QUADRO e no CLIPE, e não na assinatura. Isso não é detalhe: a
+     detecção de mudança compara uma miniatura de 32×18 da tela, e um rosto se
+     mexendo dentro dela mudaria a assinatura a cada tique. O documento sairia
+     com um quadro a cada 700 ms, todos da mesma tela, porque alguém respirou.
+     A assinatura continua olhando só a tela; o rosto é desenhado depois. */
+  let camStream = null, camVideo = null, camAviso = '', camTick = null;
+
+  const camLigada = () => !!(camVideo && camVideo.videoWidth);
+
+  async function camAbrir(){
+    camAviso = '';
+    if (!$('recCam') || !$('recCam').checked) return false;
+    if (!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)) {
+      camAviso = t('recCamNao'); return false;
+    }
+    try {
+      camStream = await navigator.mediaDevices.getUserMedia({
+        video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: 'user' },
+        audio: false          // o som já vem do canal do microfone; dois seriam eco
+      });
+    } catch (e) { camAviso = t('recCamNao'); return false; }
+    camVideo = document.createElement('video');
+    camVideo.muted = true; camVideo.playsInline = true; camVideo.srcObject = camStream;
+    try { await camVideo.play(); } catch (e) {}
+    /* Espera o primeiro quadro chegar. Sem isto, os primeiros segundos saem com
+       um retângulo branco vazio no canto, que parece defeito. */
+    for (let i = 0; i < 20 && !camVideo.videoWidth; i++)
+      await new Promise(r => setTimeout(r, 100));
+    return camLigada();
+  }
+
+  function camFechar(){
+    if (camTick) { clearInterval(camTick); camTick = null; }
+    if (camStream) { camStream.getTracks().forEach(x => { try { x.stop(); } catch (e) {} }); camStream = null; }
+    if (camVideo) { camVideo.srcObject = null; camVideo = null; }
+  }
+
+  /* Desenhada por cima, com uma moldura branca fina. Sem a moldura o rosto se
+     funde com a tela atrás e é lido como artefato de compressão. */
+  function camDesenhar(g, W, H){
+    if (!camLigada()) return;
+    const fr = parseFloat(($('camTam') && $('camTam').value) || 0.18);
+    const canto = ($('camCanto') && $('camCanto').value) || 'bd';
+    const lado = Math.round(W * fr);
+    const alt = Math.round(lado * camVideo.videoHeight / camVideo.videoWidth) || Math.round(lado * 0.75);
+    const m = Math.max(6, Math.round(W * 0.015));
+    const x = canto[1] === 'd' ? W - lado - m : m;
+    const y = canto[0] === 'b' ? H - alt - m : m;
+    const b = Math.max(2, Math.round(W * 0.003));
+    try {
+      g.save();
+      g.fillStyle = '#ffffff';
+      g.fillRect(x - b, y - b, lado + b * 2, alt + b * 2);
+      g.drawImage(camVideo, x, y, lado, alt);
+      g.restore();
+    } catch (e) {}
+  }
+
+  const CLIPE_JANELA = 15;                 // segundos de cada janela
+  const CLIPE_ANTES  = 10;                 // o quanto se quer de "antes" na marca
+  let clipeOn = false, clipeStream = null, clipeCtx = null, clipeTipo = 'video/webm';
+  let clipeSlots = {}, clipeParar = null, clipeAviso = '';
+  const clipesVivos = [];                  // para o descarte com um clique
+
+  function clipeSuportado(){
+    return typeof MediaRecorder !== 'undefined' &&
+           typeof MediaRecorder.isTypeSupported === 'function';
+  }
+
+  function clipeTipoBom(){
+    for (const m of ['video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus',
+                     'video/webm', 'video/mp4'])
+      if (MediaRecorder.isTypeSupported(m)) return m;
+    return '';
+  }
+
+  /* O vídeo do clipe é uma CÓPIA reduzida da trilha da tela. Reduzir não é
+     economia de disco — é de processador: a mesma aba está comparando telas a
+     cada 700 ms e, quase sempre, rodando o reconhecimento de fala. Dois
+     gravadores em cima da trilha original disputariam com o que faz o produto
+     funcionar, e o primeiro sintoma seria a transcrição atrasar. */
+  async function clipeAbrir(telaStream, micStream){
+    clipeAviso = '';
+    if (!$('recClipe') || !$('recClipe').checked) return false;
+    if (!clipeSuportado()) { clipeAviso = t('recClipeNao'); return false; }
+    const tipo = clipeTipoBom();
+    if (!tipo) { clipeAviso = t('recClipeNao'); return false; }
+    clipeTipo = tipo;
+    try {
+      let faixas;
+      if (camLigada()) {
+        /* Com webcam, o clipe grava a COMPOSIÇÃO — senão o vídeo do momento
+           sairia sem o rosto, que num estudo é metade do que se quer mostrar.
+           O preço é um laço de desenho a 12 q/s, que só existe quando as duas
+           opções estão ligadas. */
+        const cv = document.createElement('canvas');
+        const prop = (video.videoHeight && video.videoWidth)
+          ? video.videoHeight / video.videoWidth : 9 / 16;
+        cv.width = 960; cv.height = Math.round(960 * prop) || 540;
+        const g = cv.getContext('2d');
+        camTick = setInterval(() => {
+          try { g.drawImage(video, 0, 0, cv.width, cv.height); camDesenhar(g, cv.width, cv.height); }
+          catch (e) {}
+        }, 1000 / 12);
+        faixas = [cv.captureStream(12).getVideoTracks()[0]];
+      } else {
+        const orig = telaStream.getVideoTracks()[0];
+        const trilha = orig.clone();
+        try { await trilha.applyConstraints({ width: { max: 960 }, frameRate: { max: 12 } }); }
+        catch (e) {}                                 // a dica falhou: grava no tamanho que vier
+        faixas = [trilha];
+      }
+
+      /* Os dois canais somados num só. Sem isto o `MediaRecorder` grava apenas
+         a PRIMEIRA trilha de áudio da lista — e num estudo de usabilidade a
+         primeira seria o moderador, deixando de fora justamente a pessoa
+         observada. */
+      const AC = window.AudioContext || window.webkitAudioContext;
+      const fontes = [telaStream, micStream].filter(s => s && s.getAudioTracks().length);
+      if (AC && fontes.length) {
+        try {
+          clipeCtx = new AC();
+          const destino = clipeCtx.createMediaStreamDestination();
+          fontes.forEach(s => clipeCtx.createMediaStreamSource(s).connect(destino));
+          const som = destino.stream.getAudioTracks()[0];
+          if (som) faixas.push(som);
+        } catch (e) { clipeCtx = null; }
+      }
+      clipeStream = new MediaStream(faixas);
+    } catch (e) { clipeAviso = t('recClipeNao'); return false; }
+    return true;
+  }
+
+  function clipeComecar(agora){
+    if (!clipeStream) return;
+    clipeOn = true;
+    clipeSlots = {};
+    const fechados = [];
+
+    const ciclo = (slot) => {
+      if (!clipeOn) return;
+      let rec;
+      try { rec = new MediaRecorder(clipeStream, { mimeType: clipeTipo }); }
+      catch (e) { clipeOn = false; return; }
+      const janela = { rec, ini: agora(), pecas: [], marcas: [], guardar: false };
+      clipeSlots[slot] = janela;
+      rec.ondataavailable = e => { if (e.data && e.data.size) janela.pecas.push(e.data); };
+      rec.onstop = () => {
+        if (janela.guardar) clipeGuardar(janela, agora());
+        janela.pecas = [];             // o que ninguém marcou some aqui, e é o ponto
+        if (janela.resolver) janela.resolver();
+      };
+      try { rec.start(); } catch (e) { clipeOn = false; return; }
+      janela.timer = setTimeout(() => {
+        try { rec.stop(); } catch (e) {}
+        ciclo(slot);
+      }, CLIPE_JANELA * 1000);
+    };
+
+    ciclo('a');
+    setTimeout(() => { if (clipeOn) ciclo('b'); }, (CLIPE_JANELA / 2) * 1000);
+
+    clipeParar = async () => {
+      clipeOn = false;
+      const esperas = [];
+      Object.values(clipeSlots).forEach(j => {
+        if (j.timer) clearTimeout(j.timer);
+        if (j.rec && j.rec.state !== 'inactive') {
+          esperas.push(new Promise(r => { j.resolver = r; setTimeout(r, 1500); }));
+          try { j.rec.stop(); } catch (e) { if (j.resolver) j.resolver(); }
+        }
+      });
+      await Promise.all(esperas);
+      clipeSlots = {};
+      if (clipeStream) { clipeStream.getTracks().forEach(x => { try { x.stop(); } catch (e) {} }); clipeStream = null; }
+      if (clipeCtx) { try { await clipeCtx.close(); } catch (e) {} clipeCtx = null; }
+      clipeParar = null;
+      return fechados;
+    };
+  }
+
+  /* Escolhe a janela que tem mais "antes" perto do ideal. As duas estão sempre
+     defasadas de 7,5 s, então uma delas passou do meio — é a que guarda o que
+     levou ao momento, que é a parte que convence. */
+  function clipeMarcar(frame, agora){
+    if (!clipeOn || !frame) return;
+    const t0 = agora();
+    const cands = Object.values(clipeSlots)
+      .filter(j => j.rec && j.rec.state === 'recording' && t0 > j.ini);
+    if (!cands.length) return;
+    cands.sort((x, y) => Math.abs((t0 - x.ini) - CLIPE_ANTES) - Math.abs((t0 - y.ini) - CLIPE_ANTES));
+    const j = cands[0];
+    j.guardar = true;
+    j.marcas.push({ frame, em: t0 - j.ini });
+  }
+
+  function clipeGuardar(janela, fim){
+    let blob;
+    try { blob = new Blob(janela.pecas, { type: clipeTipo }); } catch (e) { return; }
+    if (!blob.size) return;
+    const url = URL.createObjectURL(blob);
+    clipesVivos.push(url);
+    const seg = Math.max(0, Math.round((fim - janela.ini) * 10) / 10);
+    /* Duas marcas dentro da mesma janela dividem o MESMO arquivo. Guardar duas
+       cópias de quinze segundos de vídeo para dizer a mesma coisa duas vezes
+       seria dobrar a memória sem acrescentar nada. */
+    janela.marcas.forEach((m, k) => {
+      m.frame.clipe = { blob, url, tipo: clipeTipo,
+                        em: Math.round(m.em * 10) / 10, seg, junto: janela.marcas.length > 1, ordem: k };
+    });
+  }
+
+  /* Jogar fora o vídeo é uma operação de privacidade, não de limpeza: gravação
+     de participante é dado pessoal com prazo, e o que o jurídico quer ver é a
+     data em que foi descartado — no documento, escrita. */
+  let clipesDescartadosEm = '';
+
+  function clipesDescartar(){
+    let n = 0;
+    frames.forEach(f => { if (f.clipe) { n++; delete f.clipe; } });
+    clipesVivos.splice(0).forEach(u => { try { URL.revokeObjectURL(u); } catch (e) {} });
+    return n;
+  }
+
+  function pintarClipeRow(){
+    const linha = $('clipeRow'); if (!linha) return;
+    const tem = frames.some(f => f.clipe);
+    linha.classList.toggle('hide', !tem && !clipesDescartadosEm);
+    $('clipeApagar').classList.toggle('hide', !tem);
+  }
+  let contando = false, cancelouContagem = false;
   /* Relógio próprio da finalização.
 
      O que a pessoa relatou: aperta Parar e a tela fica parada, sem dizer se
@@ -3087,6 +4029,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
                     if (dot) dot.style.animationPlayState = pausado ? 'paused' : 'running'; }
       return;
     }
+    if (etapa === 'contando') {
+      if (pipTexto) pipTexto.textContent = t('recCountN', dados.n);
+      return;
+    }
     const rotulos = { prep: 'pipPrep', mic: 'pipMic', modelo: 'pipModelo', tela: 'pipTela' };
     if (pipTexto) pipTexto.textContent = t(rotulos[etapa] || 'pipPrep');
   }
@@ -3164,7 +4110,12 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      por aqui. */
   function duracaoTotal(){
     if (liveDur > 0) return liveDur;
-    return (isFinite(video.duration) && video.duration > 0) ? video.duration : 0;
+    if (isFinite(video.duration) && video.duration > 0) return video.duration;
+    /* Documento REABERTO: não há vídeo nenhum no elemento, e devolver zero
+       fazia duas coisas erradas de uma vez — o último capítulo durava 00:00, e
+       a fala do último quadro sumia, porque a janela dela é (instante, fim].
+       O último quadro mais um segundo é a única duração que o arquivo conhece. */
+    return frames.length ? frames.reduce((m, f) => Math.max(m, f.t), 0) + 1 : 0;
   }
 
   /* Depois de uma captura ao vivo o srcObject é solto e o elemento passa a
@@ -3725,8 +4676,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
            "Computador" a fala de quem está sendo observado apaga a única
            distinção que esse relatório precisa fazer. */
         const ux = $('modelo') && $('modelo').value === 'usabilidade';
-        if (temSom)    canais.push(await abrirCanal(ctx, telaStream, t(ux ? 'spkPart' : 'spkSys'), 'sys'));
-        if (micStream) canais.push(await abrirCanal(ctx, micStream,  t(ux ? 'spkModer' : 'spkMic'), 'mic'));
+        if (temSom)    canais.push(await abrirCanal(ctx, telaStream, nomeDoCanal('sys'), 'sys'));
+        if (micStream) canais.push(await abrirCanal(ctx, micStream,  nomeDoCanal('mic'), 'mic'));
       } catch (e) {
         avisos.push(t('recNoAudio'));
         motivoSemFala = t('recNoAudio');
@@ -3817,12 +4768,52 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     };
     if (medeMic || medeSys) desenhar();
 
+    /* Contagem regressiva: três segundos entre "permiti compartilhar" e "está
+       gravando". Ela acontece DEPOIS de tudo estar montado e ANTES do relógio
+       zero — a hora de relógio da evidência tem que ser a do primeiro quadro
+       real, não a do momento em que a pessoa clicou. */
+    if ($('recCount') && $('recCount').checked) {
+      /* Parar já vale AQUI. Três segundos depois de escolher a tela é
+         exatamente quando a pessoa percebe que compartilhou a janela errada —
+         e um botão que só aparece depois disso chega tarde. */
+      contando = true; cancelouContagem = false;
+      $('rec').classList.add('hide'); $('recStop').classList.remove('hide');
+      for (let c = 3; c >= 1 && !cancelouContagem; c--) {
+        $('recMsg').innerHTML = `<span class="ok">${t('recCountN', c)}</span>`;
+        controle('contando', { n: c });
+        await new Promise(r => setTimeout(r, 1000));
+      }
+      contando = false;
+      if (cancelouContagem) {
+        $('recMsg').textContent = t('recCountCancel');
+        telaStream.getTracks().forEach(x => x.stop());
+        if (micStream) micStream.getTracks().forEach(x => x.stop());
+        canais.forEach(c => { try { c.fechar(); } catch (e) {} });
+        if (ctx) { try { await ctx.close(); } catch (e) {} }
+        fecharControle();
+        $('rec').classList.remove('hide'); $('recStop').classList.add('hide');
+        abrindoCaptura = false;
+        return;
+      }
+      $('recMsg').textContent = '';
+    }
+
     const t0 = performance.now();
     liveAgora = () => (performance.now() - t0) / 1000;
     const agora = liveAgora;
     /* O relógio de parede do instante zero. É a única hora que o produto pode
        afirmar sem estimar nada, e é ela que transforma a saída em evidência. */
     porOrigem(Date.now(), false);
+
+    /* A webcam ANTES do clipe: é ela que decide se o clipe grava a tela ou a
+       composição, e essa decisão precisa estar tomada quando o gravador nasce. */
+    await camAbrir();
+    if (camAviso) avisos.push(camAviso);
+
+    /* Depois do relógio zerar, para a primeira janela nascer junto com o
+       instante zero da evidência e não meio segundo antes. */
+    if (await clipeAbrir(telaStream, micStream)) clipeComecar(agora);
+    else if (clipeAviso) avisos.push(clipeAviso);
 
     liveOn = true;
     abrindoCaptura = false;
@@ -3902,6 +4893,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     marcarAgora = () => {
       if (!liveOn) return;
       if (capturar(true, true)) {
+        clipeMarcar(frames[frames.length - 1], agora);
         avisoCurto = t('recMarcado');
         avisoAte = performance.now() + 2600;
         pintarRecMsg();
@@ -3947,6 +4939,16 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     relogio = setInterval(() => {
       pintarRecMsg();
       controle('gravando', { seg: agora(), frames: frames.length });
+      /* O limite de tempo. Checado aqui, no relógio de um segundo, e não num
+         timer próprio: um timer paralelo continuaria correndo depois do Parar,
+         e derrubaria a gravação seguinte. */
+      if ($('recAuto') && $('recAuto').checked) {
+        const lim = Math.max(1, Math.min(240, +$('recAutoMin').value || 45)) * 60;
+        if (agora() >= lim) {
+          avisosFim.push(t('recAutoParou', Math.round(lim / 60)));
+          if (pararLive) pararLive();
+        }
+      }
       /* Pausado, o áudio acumulado é jogado fora em vez de entrar na fila: a
          conversa da espera não pode aparecer na transcrição de um passo, e a
          janela precisa continuar alinhada com o relógio quando voltar. */
@@ -4004,6 +5006,15 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       if (caudaTic) clearInterval(caudaTic);
       caudaTic = setInterval(atualizarLive, 1000);
       atualizarLive();
+
+      /* Antes de derrubar as trilhas: a janela marcada há dois segundos ainda
+         está aberta, e é o `stop()` do próprio gravador que a fecha em arquivo.
+         Matar a trilha primeiro deixaria o último momento marcado — que é
+         quase sempre o mais importante — sem clipe nenhum. */
+      if (clipeParar) { try { await clipeParar(); } catch (e) {} }
+      /* Depois do clipe: o laço de composição alimenta o gravador, e desligá-lo
+         antes deixaria os últimos segundos do clipe congelados. */
+      camFechar();
 
       // o resto do áudio que não completou uma janela ainda vale transcrever
       canais.forEach(c => enfileirar(c, c.resto()));
@@ -4113,6 +5124,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   };
 
   $('recStop').onclick = () => {
+    if (contando) { cancelouContagem = true; return; }  // desistir antes do relógio zerar
     if (emCauda) { pularCauda = true; return; }   // não esperar o resto da transcrição
     if (pararLive) pararLive();
   };
@@ -5329,7 +6341,11 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   function snap(w, q){
     const c = document.createElement('canvas');
     c.width = w; c.height = Math.round(w * video.videoHeight / video.videoWidth);
-    c.getContext('2d').drawImage(video, 0, 0, c.width, c.height);
+    const g = c.getContext('2d');
+    g.drawImage(video, 0, 0, c.width, c.height);
+    /* Depois da tela, nunca antes: o rosto é sobreposição, e a assinatura que
+       decide o que é passo já foi tirada da tela limpa. */
+    camDesenhar(g, c.width, c.height);
     return { url: c.toDataURL('image/jpeg', q), w: c.width, h: c.height };
   }
 
@@ -5338,12 +6354,47 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   // o mesmo brilho, e uma troca de cena entre os dois passaria despercebida.
   const sigC = document.createElement('canvas'); sigC.width = 32; sigC.height = 18;
   const sigX = sigC.getContext('2d', { willReadFrequently: true });
+
+  /* ---- a faixa que a detecção IGNORA ----
+
+     O relógio da barra de tarefas é a maior fonte de quadro repetido que
+     existe: ele muda a cada minuto, sozinho, e a assinatura não sabe que
+     aquilo não é o sistema mudando de tela. Numa gravação de meia hora são
+     trinta quadros idênticos com um número diferente no canto.
+
+     A resposta é zerar uma faixa da assinatura antes de comparar. Zerar, e não
+     recortar: o quadro exportado continua inteiro — quem revisa uma evidência
+     quer ver a barra de tarefas, só não quer que ela decida o que é passo.
+
+     As faixas são frações da altura, então valem para qualquer resolução. */
+  const IGNORAR = {
+    nada:   null,
+    topo:   { a: 0,     b: 0.055 },   // barra de título / notificação do macOS
+    baixo:  { a: 0.945, b: 1     },   // barra de tarefas do Windows
+    ambos:  null                      // resolvido na hora
+  };
+  function faixasIgnoradas(){
+    const v = $('ignorar') ? $('ignorar').value : 'nada';
+    if (v === 'ambos') return [IGNORAR.topo, IGNORAR.baixo];
+    return IGNORAR[v] ? [IGNORAR[v]] : [];
+  }
+
   function signature(){
     sigX.drawImage(video, 0, 0, 32, 18);
     const d = sigX.getImageData(0, 0, 32, 18).data, s = new Uint8Array(32*18*3);
     for (let i = 0, j = 0; i < d.length; i += 4) {
       s[j++] = d[i]; s[j++] = d[i+1]; s[j++] = d[i+2];
     }
+    /* Zera as linhas ignoradas DEPOIS de montar: assim `diff` compara duas
+       assinaturas com o mesmo buraco e a diferença ali é sempre zero. */
+    faixasIgnoradas().forEach(f => {
+      const l0 = Math.floor(f.a * 18), l1 = Math.ceil(f.b * 18);
+      for (let y = l0; y < l1 && y < 18; y++)
+        for (let x = 0; x < 32; x++) {
+          const j = (y * 32 + x) * 3;
+          s[j] = 0; s[j+1] = 0; s[j+2] = 0;
+        }
+    });
     return s;
   }
   /* Uma célula da assinatura "mudou" quando algum canal se move mais que isto.
@@ -5579,6 +6630,15 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       const fig = document.createElement('figure');
       if (!f.keep) fig.className = 'off';
       if (f.colado) fig.classList.add('colada');
+      /* O tipo do momento na própria miniatura: numa sessão de uma hora, achar
+         as três frustrações é o trabalho, e abrir vinte lentes para procurar
+         não é achar. */
+      if (f.tipo) {
+        const et = document.createElement('span');
+        et.className = 'tipoTag t-' + f.tipo;
+        et.textContent = t({ friccao:'uxT1', desistiu:'uxT2', elogiou:'uxT3', defeito:'uxT4' }[f.tipo] || 'uxT0');
+        fig.appendChild(et);
+      }
       /* A etiqueta vem daqui, e não do CSS: escrita como content:'descartado'
          ela escapava do i18n e aparecia em português para quem usa em inglês. */
       fig.dataset.off = t('offTag');
@@ -5605,7 +6665,12 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       cap.innerHTML =
         `<span class="passo">${n ? passoN(n) : '—'}</span>` +
         `<span class="rel">${f.colado ? t('coladoTag') : fmt(f.t) + (f.manual ? ' *' : '')}` +
-        (hora && !f.colado ? ' · ' + hora : '') + `</span>`;
+        (hora && !f.colado ? ' · ' + hora : '') +
+        /* O selo do clipe. Sem ele o vídeo existiria e ninguém saberia: nada na
+           fileira distingue o momento que tem quinze segundos guardados do que
+           só tem uma foto. */
+        (f.clipe ? ` · <b class="selo">▶ ${t('clipeSelo')}</b>` : '') + `</span>` +
+        ((f.cap || '').trim() ? `<span class="capSelo">${esc(f.cap.trim())}</span>` : '');
       toque.setAttribute('aria-label',
         (n ? passoN(n) + ' · ' : '') + fmt(f.t) + ' — ' + t('offTag'));
 
@@ -5726,8 +6791,38 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     $('go').disabled = $('docx').disabled = $('zip').disabled = !keep.length;
     // o botão da fala só faz sentido com transcrição marcada no tempo
     $('falaNota').disabled = !keep.length || !parseTranscript($('tr').value).cues.length;
+    if (typeof pintarRevisar === 'function') pintarRevisar();
+    pintarClipeRow();
+    pintarCapitulos();
     if (frames.length) buildPrompt();
   }
+
+  /* O resumo das tarefas. Ele existe por um motivo só: o tempo por tarefa é a
+     única métrica que a pesquisa de usabilidade pede e que dá para tirar sem
+     inventar nada — as horas de relógio já estão lá. Vê-lo na tela, antes de
+     exportar, é o que permite perceber que uma fronteira ficou no quadro errado
+     enquanto ainda é barato mover. */
+  function pintarCapitulos(){
+    const el = $('capMsg'); if (!el) return;
+    const caps = capitulos();
+    el.classList.toggle('hide', !caps.length);
+    /* O botão de separar em documentos só existe quando há o que separar. Um
+       botão que responde "marque onde começa cada tarefa" é uma pergunta feita
+       tarde demais — a resposta certa é ele não estar ali. */
+    if ($('capPacote')) $('capPacote').classList.toggle('hide', caps.length < 2);
+    if (!caps.length) return;
+    el.innerHTML = t('capResumo', caps.length) + ' ' +
+      caps.map(c => `<b>${esc(c.nome)}</b> ${fmt(c.fim - c.ini)}`).join('  ·  ');
+  }
+
+  $('clipeApagar').onclick = () => {
+    const n = clipesDescartar();
+    if (!n) return;
+    clipesDescartadosEm = dataHora(Date.now());
+    $('clipeMsg').innerHTML = `<span class="ok">${t('clipeDescartou', n)}</span>`;
+    render();
+    buildPrompt();
+  };
 
   /* ================= modelo de saída =================
      O produto tem mais de um caso de uso, e cada um quer um documento diferente.
@@ -5785,9 +6880,9 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      rótulos e quais aparecem. */
   const BLOCOS = {
     evidencia: { h:'evH',   sub:'evHsub',   caso:'evCaso',    sis:'evSis',   quem:'evQuem',
-                 chamado:'evChamado', ini:'evIni',  res:true,  hash:true,  temIni:true },
+                 chamado:'evChamado', ini:'evIni',  res:true,  hash:true,  temIni:true, amb:true },
     tutorial:  { h:'guiaH', sub:'guiaHsub', caso:'guiaTit',   sis:'guiaSis', quem:'guiaAutor',
-                 chamado:'guiaVer',   ini:'evIni',  res:false, hash:false, temIni:false },
+                 chamado:'guiaVer',   ini:'evIni',  res:false, hash:false, temIni:false, amb:true, proc:true },
     ata:       { h:'ataH',  sub:'ataHsub',  caso:'ataAssunto',sis:'ataLocal',quem:'ataOrg',
                  chamado:'ataPart',   ini:'ataIni', res:false, hash:false, temIni:true },
     usabilidade:{ h:'uxH', sub:'uxHsub', caso:'uxEstudo', sis:'uxTarefa', quem:'uxModer',
@@ -5808,6 +6903,11 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     $('lblChamado').textContent = t(b.chamado);
     $('lblIni').textContent     = t(b.ini);
     $('cxRes').classList.toggle('hide', !b.res);
+    $('cxAmb').classList.toggle('hide', !b.amb);
+    if (!b.amb) $('evAmb').value = '';
+    $('cxDono').classList.toggle('hide', !b.proc);
+    $('cxValido').classList.toggle('hide', !b.proc);
+    if (!b.proc) { $('evDono').value = ''; $('evValido').value = ''; }
     $('cxIni').classList.toggle('hide', !b.temIni);
     $('cxHash').classList.toggle('hide', !b.hash);
     // o resultado e o hash só existem na evidência: se ficassem preenchidos ao
@@ -5846,7 +6946,14 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   }
   /* Um tutorial não quer saber que dia era: hora de relógio é dado de evidência,
      e no passo a passo ela só suja o título. */
-  const querHora = () => $('modelo').value !== 'tutorial';
+  /* Num documento consolidado não existe UMA hora de relógio: são cinco
+     sessões, cada uma com o seu início, e a linha do tempo contínua que o
+     documento mostra é montada por nós. Imprimir "09:412:03" ao lado de um
+     quadro da terceira sessão seria inventar um horário — que é a única coisa
+     que uma evidência não pode fazer. O tempo DENTRO de cada sessão continua
+     verdadeiro, e é ele que vira o tempo por tarefa. */
+  let sessoesJuntadas = 0;
+  const querHora = () => $('modelo').value !== 'tutorial' && !sessoesJuntadas;
   const ehTutorial = () => $('modelo').value === 'tutorial';
   const dicaModelo = () => {
     /* A explicação do cenário mora no passo 1, ao lado da escolha. A linha da
@@ -5867,9 +6974,79 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     $('evBox').open   = m.ev;
     dicaModelo();
     pintarRotulo();                        // "Passo" vira "Momento" numa ata
+    pintarScorm();
+    pintarHesitar();
+    pintarClipe();
+    pintarCanais();
     if (frames.length) render();           // a legenda da miniatura muda com o modelo
     else buildPrompt();
   };
+
+  /* O clipe nasce ligado na sessão de pesquisa e desligado no resto, e isso é
+     uma afirmação sobre para que ele serve. Numa evidência de teste o vídeo do
+     momento não prova nada além do que a tela já prova, e é peso; numa pesquisa
+     ele É o resultado. Quem quiser o contrário desmarca — só o padrão muda. */
+  function pintarClipe(){
+    const cx = $('recClipe'); if (!cx) return;
+    const ux = String($('modelo').value === 'usabilidade');
+    /* Só mexe na caixa quando o CENÁRIO muda. Reafirmar o padrão a cada
+       repintura desfaria a escolha de quem marcou à mão, que é a maneira mais
+       irritante de um padrão existir. */
+    if (ux !== cx.dataset.ux) { cx.checked = (ux === 'true'); cx.dataset.ux = ux; }
+    $('recClipeNota').classList.toggle('hide', !cx.checked);
+    frasesDoClipe();
+  }
+
+  /* Duas frases do cartão de gravar afirmam "nada de vídeo é guardado" — e com o
+     clipe ligado isso deixa de ser verdade. Uma página que se contradiz a três
+     centímetros de distância não perde só a frase: perde a promessa inteira, que
+     é a única coisa que este produto tem de estrutural. */
+  function frasesDoClipe(){
+    const lig = $('recClipe') && $('recClipe').checked;
+    const p = document.querySelector('[data-i18n="viaRecP"]');
+    const w = document.querySelector('[data-i18n="recWarn"]');
+    if (p) p.textContent = t(lig ? 'viaRecPclipe' : 'viaRecP');
+    if (w) w.textContent = t(lig ? 'recWarnClipe' : 'recWarn');
+  }
+  if ($('recCam')) $('recCam').onchange = () =>
+    $('recCamNota').classList.toggle('hide', !$('recCam').checked);
+
+  if ($('recClipe')) $('recClipe').onchange = () => {
+    $('recClipeNota').classList.toggle('hide', !$('recClipe').checked);
+    frasesDoClipe();
+  };
+
+  /* ---- o nome dos dois canais ----
+     O padrão vem do cenário; o que a pessoa escreve ganha. A distinção importa:
+     repintar o padrão em cima de um nome digitado seria apagar trabalho toda
+     vez que alguém trocasse de cenário para conferir uma coisa e voltasse. */
+  const spkPadrao = lado => {
+    const ux = $('modelo').value === 'usabilidade';
+    return t(lado === 'mic' ? (ux ? 'spkModer' : 'spkMic') : (ux ? 'spkPart' : 'spkSys'));
+  };
+  function nomeDoCanal(lado){
+    const el = $(lado === 'mic' ? 'spkMicNome' : 'spkSysNome');
+    return (el && el.value.trim()) || spkPadrao(lado);
+  }
+  function pintarCanais(){
+    [['mic','spkMicNome'],['sys','spkSysNome']].forEach(([lado, id]) => {
+      const el = $(id); if (!el) return;
+      el.placeholder = spkPadrao(lado);
+      // o campo em branco SEGUE o cenário; o campo escrito manda
+      if (!el.dataset.mao) el.value = '';
+      el.oninput = () => { el.dataset.mao = el.value.trim() ? '1' : ''; };
+    });
+  }
+
+  /* O SCORM só aparece onde faz sentido. Um pacote de LMS de uma EVIDÊNCIA de
+     teste não existe — ninguém "conclui" uma evidência —, e um botão que não
+     serve ao cenário escolhido é um botão que a pessoa clica uma vez, não
+     entende, e desconfia do resto. Instrução de trabalho e passo a passo são o
+     conteúdo que termina num LMS; é lá que ele fica. */
+  function pintarScorm(){
+    const b = $('scorm'); if (!b) return;
+    b.classList.toggle('hide', $('modelo').value !== 'tutorial');
+  }
 
   /* Trocar à mão trava o rótulo: a partir daí ele não é mais reescrito pelo
      modelo de saída. Apagar o campo devolve o padrão. */
@@ -6236,6 +7413,17 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     pintarPerfil();
     if (frames.length) buildPrompt();
   };
+  /* "2027-03-01" não é data para ninguém ler num procedimento. O formato sai do
+     idioma da página, que é o mesmo de quem vai executar. */
+  function dataLegivel(iso){
+    try {
+      const [a, m, d] = String(iso).split('-').map(Number);
+      return new Date(a, m - 1, d).toLocaleDateString(
+        { pt:'pt-BR', en:'en-US', es:'es-ES' }[LANG] || 'pt-BR',
+        { year:'numeric', month:'long', day:'numeric' });
+    } catch (e) { return iso; }
+  }
+
   function evDados(){
     const b = blocoAtual();
     const vazio = { caso:'', sistema:'', quem:'', chamado:'', resultado:'', inicio:null,
@@ -6247,8 +7435,12 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     const res = b.res ? $('evRes').value : '';
     /* O caso de teste não entra nesta lista: ele vira o título do documento, e
        repeti-lo na primeira linha é ruído logo no que alguém lê primeiro. */
+    const amb = (b.amb && $('evAmb')) ? $('evAmb').value : '';
     const linhas = [
       [t(b.sis),     v('evSis')],
+      [t('evAmb'),   amb],
+      [t('guiaDono'),   b.proc ? v('evDono') : ''],
+      [t('guiaValido'), b.proc && $('evValido').value ? dataLegivel($('evValido').value) : ''],
       [t(b.quem),    v('evQuem')],
       [t(b.chamado), v('evChamado')],
       [t('evRes'),   res ? t({ ok:'evR1', nok:'evR2', blq:'evR3' }[res]) : ''],
@@ -6256,11 +7448,20 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       // passo, "Início da gravação" é dado que ninguém foi buscar
       // a hora vem com o fuso colado: é uma coluna a menos para o auditor perguntar
       [t(b.ini),     (origemReal() == null || !querHora() || !b.temIni)
-                       ? '' : dataHora(origemReal()) + '  (' + fuso(origemReal()) + ')']
+                       ? '' : dataHora(origemReal()) + '  (' + fuso(origemReal()) + ')'],
+      /* O descarte da gravação é linha de identificação e não rodapé: quem
+         audita um estudo com participante procura essa data na primeira página,
+         e escondê-la no fim do documento é o mesmo que não tê-la. */
+      [t('clipeDescarta'), clipesDescartadosEm || ''],
+      /* Um documento consolidado tem que se declarar consolidado logo na
+         abertura. Quem recebe cinco sessões costuradas num arquivo e não é
+         avisado lê os passos como se fossem de uma pessoa só — que é a
+         conclusão errada mais fácil de tirar de um estudo de usabilidade. */
+      [t('juntarLinha'), sessoesJuntadas ? t('juntarLinhaV', sessoesJuntadas) : '']
     ].filter(([, val]) => val);
     return {
       caso: v('evCaso'), sistema: v('evSis'), quem: v('evQuem'),
-      chamado: v('evChamado'), resultado: res, inicio: origemReal(),
+      chamado: v('evChamado'), resultado: res, ambiente: amb, inicio: origemReal(),
       horaVisivel: origemReal() != null && querHora(),
       hash: b.hash && $('evHash').checked,
       linhas,                       // o que entra na primeira página do documento
@@ -6303,12 +7504,41 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      Os padrões são deliberadamente conservadores: preferem deixar passar a
      gritar em cima de qualquer sequência de números. Um aviso que erra sempre
      vira um aviso que ninguém lê. */
+  /* Extrai [{txt, x, y, w, h}] normalizado de qualquer um dos dois formatos que
+     o Tesseract.js já usou. Sem caixas, devolve lista vazia — e a tarja
+     automática se explica em vez de sumir. */
+  function palavrasDoOcr(r, f){
+    const d = r && r.data; if (!d) return [];
+    let brutas = Array.isArray(d.words) ? d.words : null;
+    if (!brutas && Array.isArray(d.blocks)) {
+      brutas = [];
+      d.blocks.forEach(b => (b.paragraphs || []).forEach(pa => (pa.lines || []).forEach(li =>
+        (li.words || []).forEach(w => brutas.push(w)))));
+    }
+    if (!brutas || !brutas.length) return [];
+    const W = f.img.w, H = f.img.h;
+    return brutas.map(w => {
+      const bb = w.bbox || {};
+      if (bb.x1 == null) return null;
+      return { txt: String(w.text || ''),
+               x: bb.x0 / W, y: bb.y0 / H,
+               w: (bb.x1 - bb.x0) / W, h: (bb.y1 - bb.y0) / H };
+    }).filter(w => w && w.w > 0 && w.h > 0);
+  }
+
   const PADROES = [
     { k:'cpf',      re:/\b\d{3}\.?\d{3}\.?\d{3}-?\d{2}\b/g },
     { k:'cnpj',     re:/\b\d{2}\.?\d{3}\.?\d{3}\/?\d{4}-?\d{2}\b/g },
     { k:'email',    re:/\b[\w.+-]+@[\w-]+\.[\w.-]{2,}\b/g },
     { k:'cartao',   re:/\b(?:\d[ -]?){13,16}\b/g },
-    { k:'telefone', re:/\(?\b\d{2}\)?[ -]?9?\d{4}[ -]?\d{4}\b/g }
+    /* Telefone precisa PARECER telefone.
+       A versão anterior aceitava dez dígitos seguidos sem pontuação nenhuma —
+       e um número de pedido do SAP tem exatamente essa cara (4500001234). O
+       aviso apontava "telefone" num número de documento, e depois que a tarja
+       automática existiu isso deixou de ser barulho e virou risco: cobrir o
+       número do pedido é apagar a prova que a evidência foi produzir.
+       Agora exige pontuação de telefone, ou o 9 do celular com DDD colado. */
+    { k:'telefone', re:/(?:\(\d{2}\)\s?9?\d{4}[- ]?\d{4}|\b\d{2}[ -]9?\d{4}[- ]\d{4}\b|\b\d{2}9\d{8}\b)/g }
   ];
 
   function varrerSensivel(){
@@ -6326,7 +7556,95 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     if (!tipos.length) { cx.classList.add('hide'); cx.innerHTML = ''; return; }
     const partes = tipos.map(k => t('sens_' + k) + ' (' + t('sensPassos', achados[k].join(', ')) + ')');
     cx.classList.remove('hide');
+    /* Quantas dessas ocorrências dá para cobrir com um clique. O número entra no
+       botão porque um botão que diz só "tarjar tudo" não deixa ninguém decidir
+       nada: cobrir 12 é uma coisa, cobrir 2 é outra. */
+    const alvos = alvosSensiveis();
     cx.innerHTML = `<b>${t('sensH')}</b> ${t('sensP', partes.join('; '))}`;
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'ghost sm'; b.id = 'tarjarTudo';
+    b.style.marginTop = '10px';
+    if (alvos.total) {
+      b.textContent = t(alvos.total === 1 ? 'sensTarjar1' : 'sensTarjar', alvos.total);
+      b.onclick = () => tarjarAchados();
+    } else {
+      /* Dois motivos diferentes para não haver o que tarjar, e eles pedem
+         explicações diferentes: ou o leitor não devolveu posição nenhuma, ou
+         devolveu e o padrão não bateu em cima de nenhuma palavra. Dizer
+         "indisponível" no segundo caso manda a pessoa procurar defeito onde não
+         há. */
+      const temCaixas = frames.some(f => f.palavras && f.palavras.length);
+      b.textContent = t(temCaixas ? 'sensNaoAchou' : 'sensSemCaixa');
+      b.disabled = true;
+      b.title = t(temCaixas ? 'sensNaoAchouDica' : 'sensSemCaixaDica');
+    }
+    cx.appendChild(document.createElement('br'));
+    cx.appendChild(b);
+  }
+
+  /* ---- tarjar tudo o que o aviso encontrou ----
+
+     O aviso já sabe QUE existe um CPF na tela; as caixas do OCR sabem ONDE. O
+     que faltava era o clique entre as duas coisas — e ele continua sendo um
+     clique da pessoa, nunca automático: tarjar sozinho apagaria justamente o
+     número que às vezes é a prova. */
+  function alvosSensiveis(){
+    let total = 0;
+    const porFrame = new Map();
+    frames.filter(f => f.keep).forEach(f => {
+      if (!f.palavras || !f.palavras.length) return;
+      /* O padrão quase nunca cabe numa palavra só. "(11) 98888-7777" chega do
+         OCR como dois pedaços, e um CPF costuma vir partido no ponto. Então a
+         busca é por JANELAS de até três palavras vizinhas da mesma linha — e a
+         tarja cobre a união das caixas, que é o retângulo que a pessoa
+         desenharia à mão. */
+        const ps = f.palavras;
+      const usada = new Array(ps.length).fill(false);
+      const lista = [];
+      for (let tam = 3; tam >= 1; tam--) {
+        for (let i = 0; i + tam <= ps.length; i++) {
+          if (usada.slice(i, i + tam).some(Boolean)) continue;
+          const grupo = ps.slice(i, i + tam);
+          // mesma linha: as caixas têm que se sobrepor verticalmente
+          const mesmaLinha = grupo.every(w =>
+            Math.abs((w.y + w.h / 2) - (grupo[0].y + grupo[0].h / 2)) < grupo[0].h * 0.8);
+          if (!mesmaLinha) continue;
+          const txt = grupo.map(w => w.txt).join(' ');
+          const bate = PADROES.some(p => { p.re.lastIndex = 0; return p.re.test(txt); });
+          if (!bate) continue;
+          for (let k = i; k < i + tam; k++) usada[k] = true;
+          const x0 = Math.min(...grupo.map(w => w.x)), y0 = Math.min(...grupo.map(w => w.y));
+          const x1 = Math.max(...grupo.map(w => w.x + w.w)), y1 = Math.max(...grupo.map(w => w.y + w.h));
+          lista.push({ x: x0, y: y0, w: x1 - x0, h: y1 - y0 });
+        }
+      }
+      if (lista.length) { porFrame.set(f, lista); total += lista.length; }
+    });
+    return { total, porFrame };
+  }
+
+  function tarjarAchados(){
+    const { total, porFrame } = alvosSensiveis();
+    if (!total) return;
+    let novas = 0;
+    porFrame.forEach((lista, f) => {
+      f.tarjas = f.tarjas || [];
+      lista.forEach(w => {
+        /* Uma folga de 0,6% em volta: o OCR aperta a caixa nos pixels da letra,
+           e uma tarja rente deixa meia perna do "9" aparecendo na borda. */
+        const m = 0.006;
+        const x = Math.max(0, w.x - m), y = Math.max(0, w.y - m);
+        const cx2 = Math.min(1 - x, w.w + m * 2), cy2 = Math.min(1 - y, w.h + m * 2);
+        const igual = f.tarjas.some(t2 => Math.abs(t2.x - x) < .004 && Math.abs(t2.y - y) < .004);
+        if (!igual) { f.tarjas.push({ x, y, w: cx2, h: cy2 }); novas++; }
+      });
+      f.tarjado = null;   // a imagem queimada precisa ser refeita
+      f.hash = null;      // e o hash descrevia a imagem sem tarja
+    });
+    render();
+    if (lenteI >= 0) pintarLente();
+    const b = $('tarjarTudo');
+    if (b) { b.disabled = true; b.textContent = t('sensTarjado', novas); }
   }
 
   /* ================= tarjar =================
@@ -6777,6 +8095,13 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
                                 (horaDe(f.t) ? '  ·  ' + horaDe(f.t) : '');
     $('lentePos').textContent = t('lentePos', lenteI + 1, frames.length);
     $('lenteNota').value = f.nota || '';
+    const ux = $('modelo').value === 'usabilidade';
+    $('lenteTipoCx').classList.toggle('hide', !ux);
+    if (ux) $('lenteTipo').value = f.tipo || '';
+    $('lenteCap').value = f.cap || '';
+    /* Trocar de quadro refaz a lista e volta para a sobreposição simples: a
+       diferença desenhada era ENTRE dois quadros, e um deles acabou de mudar. */
+    if (comparando) { pintarComparar(); desenharComparacao(); }
 
     // a hora só aparece quando o modelo pede hora e o início é conhecido
     const temHora = querHora() && origemReal() != null;
@@ -6807,8 +8132,43 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       cx.appendChild(linha);
     });
 
+    /* O clipe, quando existe. `src` só é reescrito quando o quadro muda: um
+       `<video>` recebendo o mesmo endereço de novo reinicia do zero, e navegar
+       pela lente com o clipe tocando ficaria impossível. */
+    const cl = f.clipe;
+    $('lenteClipeCx').classList.toggle('hide', !cl);
+    const vd = $('lenteClipe');
+    if (cl) {
+      if (vd.dataset.url !== cl.url) {
+        vd.src = cl.url; vd.dataset.url = cl.url;
+        /* Um pouco antes da marca, não em cima dela: o que se quer ver é o que
+           levou até ali. E só depois que o navegador souber a duração — em
+           arquivo do MediaRecorder ela chega atrasada, e buscar antes disso não
+           faz nada. */
+        const ir = () => { try { vd.currentTime = Math.max(0, cl.em - 3); } catch (e) {} };
+        if (vd.readyState >= 1) ir(); else vd.onloadedmetadata = ir;
+      }
+      $('lenteClipeNota').textContent = cl.reaberto
+        ? t('lenteClipeVolta')
+        : t('lenteClipeNota', fmt(cl.em), String(Math.round(cl.seg)));
+    } else if (vd.dataset.url) { vd.removeAttribute('src'); vd.dataset.url = ''; }
+
     $('lentePrev').disabled = lenteI <= 0;
     $('lenteProx').disabled = lenteI >= frames.length - 1;
+  }
+
+  $('clipeBaixar').onclick = () => {
+    const f = frames[lenteI]; if (!f || !f.clipe) return;
+    baixarBlob(f.clipe.blob, nomeDoClipe(f, frames.filter(x => x.keep).indexOf(f) + 1));
+  };
+
+  /* O nome carrega o passo e o tipo do momento porque é assim que ele chega ao
+     relatório: uma pasta com `momento-0007-friccao.webm` já conta a história
+     antes de alguém abrir o arquivo. */
+  function nomeDoClipe(f, n){
+    const ext = /mp4/.test((f.clipe && f.clipe.tipo) || '') ? '.mp4' : '.webm';
+    return [t('clipeNome'), String(n).padStart(4, '0'), f.tipo || ''].filter(Boolean).join('-')
+           .replace(/[^\w.-]+/g, '-') + ext;
   }
 
   function abrirLente(i){
@@ -6822,6 +8182,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   function fecharLente(){
     if (tarjando) modoTarja(false);
     if (cortando) modoCrop(false);
+    if (typeof fecharComparar === 'function') fecharComparar();
     $('lente').classList.add('hide');
     lenteI = -1;
     // o foco volta para a miniatura de onde saiu; sem isso o teclado recomeça no topo
@@ -6829,10 +8190,78 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     else { const b = $('thumbs').querySelector('.lupa'); if (b) b.focus(); }
     lenteVoltar = null;
   }
+  /* ---- trocar a imagem deste passo ----
+
+     A imagem nova entra no lugar da antiga e leva embora tudo o que era da
+     antiga: tarja, destaque, hash e texto lido da tela. Não é zelo excessivo —
+     as coordenadas da tarja apontavam para pixels que não existem mais, e um
+     hash que descreve a imagem anterior num documento de evidência é pior que
+     hash nenhum: ele afirma uma integridade que não vale. */
+  async function trocarImagemDoPasso(file){
+    const f = frames[lenteI];
+    if (!f || !file) return;
+    const url = URL.createObjectURL(file);
+    try {
+      const im = await new Promise((ok2, erro) => {
+        const x = new Image();
+        x.onload = () => ok2(x); x.onerror = () => erro(new Error('img'));
+        x.src = url;
+      });
+      const w = im.naturalWidth, h = im.naturalHeight;
+      if (!w || !h) throw new Error('img');
+      /* Redesenhada num JPEG nosso, e não guardada como veio: o PNG de 8 MB de
+         um print de tela vira um documento que ninguém consegue mandar por
+         e-mail — e o resto do documento já é JPEG na qualidade escolhida. */
+      const cv = document.createElement('canvas');
+      cv.width = w; cv.height = h;
+      cv.getContext('2d').drawImage(im, 0, 0, w, h);
+      f.img = { url: cv.toDataURL('image/jpeg', +($('quality').value || 0.85)), w, h };
+      f.orig = null; f.tarjado = null; f.tarjas = []; f.marcas = [];
+      f.hash = null; f.ocr = '';
+      f.trocado = true;
+      pintarLente();
+      render();
+      $('tarjaMsg').innerHTML = `<span class="ok">${t('trocarOk')}</span>`;
+    } catch (e) {
+      $('tarjaMsg').innerHTML = `<span class="err">${t('trocarErro')}</span>`;
+    } finally { URL.revokeObjectURL(url); }
+  }
+  $('trocarImg').onclick = () => $('trocarArq').click();
+  $('trocarArq').onchange = e => {
+    const f = e.target.files && e.target.files[0];
+    $('trocarArq').value = '';
+    if (f) trocarImagemDoPasso(f);
+  };
+
+  $('duplicar').onclick = () => {
+    const f = frames[lenteI];
+    if (!f) return;
+    /* Cópia rasa com as listas clonadas: o destino não pode compartilhar o
+       array de tarjas com a origem, senão tarjar um tarja os dois. */
+    const copia = Object.assign({}, f, {
+      tarjas: (f.tarjas || []).map(x => Object.assign({}, x)),
+      marcas: (f.marcas || []).map(x => Object.assign({}, x)),
+      hash: null, duplicado: true
+    });
+    frames.splice(lenteI + 1, 0, copia);
+    destaqueMov = lenteI + 1;
+    render();
+    lenteI = lenteI + 1;
+    pintarLente();
+    if ($('movMsg')) $('movMsg').textContent = t('dupFeito', rotuloUnidade());
+  };
+
   $('lenteFechar').onclick = fecharLente;
   $('lente').onclick = e => { if (e.target === $('lente')) fecharLente(); };
   $('lentePrev').onclick = () => { if (lenteI > 0) { lenteI--; pintarLente(); } };
   $('lenteProx').onclick = () => { if (lenteI < frames.length - 1) { lenteI++; pintarLente(); } };
+  $('lenteTipo').onchange = () => {
+    const f = frames[lenteI]; if (!f) return;
+    f.tipo = $('lenteTipo').value || '';
+    render();
+    buildPrompt();
+  };
+
   $('lenteNota').oninput = () => {
     if (frames[lenteI]) { frames[lenteI].nota = $('lenteNota').value; }
   };
@@ -6840,6 +8269,116 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      passa a ser essa hora menos o tempo decorrido até aqui. É o que a pessoa
      quer — ela sabe quando o passo 3 aconteceu, não quando apertou gravar — e
      mantém uma fonte de verdade só, em vez de horas soltas por frame. */
+  /* ================= comparar dois quadros =================
+
+     A sobreposição é uma camada por cima da imagem da lente, com opacidade
+     controlada por um cursor: arrastar de 0 a 100 faz a tela "piscar" entre os
+     dois estados, e o que mudou é a única coisa que se mexe. É o mesmo truque
+     do blink comparator com que se acharam planetas em placas fotográficas, e
+     funciona pelo mesmo motivo: o olho humano é péssimo em comparar duas coisas
+     lado a lado e ótimo em notar movimento.
+
+     O botão de diferença faz a conta explícita — pinta de vermelho onde os
+     pixels não batem — para quando a piscada não basta. Ele é uma leitura, não
+     uma edição: nada disso entra no documento. */
+  let comparando = false;
+
+  function pintarComparar(){
+    const sel = $('cmpCom');
+    const atual = sel.value;
+    sel.innerHTML = '';
+    frames.forEach((f, i) => {
+      if (i === lenteI) return;
+      const o = document.createElement('option');
+      o.value = String(i);
+      o.textContent = passoN(i + 1) + '  ·  ' + (f.colado ? t('coladoTag') : fmt(f.t));
+      sel.appendChild(o);
+    });
+    if (!sel.options.length) return;
+    /* O anterior por padrão: "o que mudou desde o passo de trás" é a pergunta
+       que se faz nove vezes em dez. */
+    const prefer = String(lenteI > 0 ? lenteI - 1 : lenteI + 1);
+    sel.value = [...sel.options].some(o => o.value === atual) ? atual : prefer;
+  }
+
+  function desenharComparacao(){
+    const outro = frames[+$('cmpCom').value];
+    const cam = $('cmpCamada');
+    if (!outro || !cam) return;
+    cam.style.backgroundImage = 'url(' + imgFinal(outro) + ')';
+    cam.style.opacity = (+$('cmpMistura').value) / 100;
+    $('cmpMsg').textContent = t('cmpMsg', $('cmpMistura').value);
+  }
+
+  function fecharComparar(){
+    comparando = false;
+    $('cmpBox').classList.add('hide');
+    $('comparar').classList.remove('on');
+    const cam = $('cmpCamada'); if (cam) cam.remove();
+  }
+
+  $('comparar').onclick = () => {
+    if (comparando) return fecharComparar();
+    if (frames.length < 2) { $('tarjaMsg').textContent = t('cmpSo'); return; }
+    comparando = true;
+    $('cmpBox').classList.remove('hide');
+    $('comparar').classList.add('on');
+    const cam = document.createElement('div');
+    cam.id = 'cmpCamada';
+    cam.style.cssText = 'position:absolute;inset:0;background-size:100% 100%;' +
+                        'background-repeat:no-repeat;pointer-events:none;border-radius:inherit';
+    $('lenteImgCx').appendChild(cam);
+    pintarComparar();
+    desenharComparacao();
+  };
+  $('cmpCom').onchange   = desenharComparacao;
+  $('cmpMistura').oninput = desenharComparacao;
+
+  /* A diferença calculada: onde os dois quadros discordam, vermelho. Roda num
+     canvas de trabalho e nunca toca a imagem do documento. */
+  $('cmpDiff').onclick = async () => {
+    const f = frames[lenteI], outro = frames[+$('cmpCom').value];
+    if (!f || !outro) return;
+    const cam = $('cmpCamada'); if (!cam) return;
+    $('cmpMsg').textContent = t('cmpIndo');
+    try {
+      const carregar = url => new Promise((res, rej) => {
+        const im = new Image(); im.onload = () => res(im); im.onerror = rej; im.src = url;
+      });
+      const [a, b] = await Promise.all([carregar(imgFinal(f)), carregar(imgFinal(outro))]);
+      /* No menor dos dois: quadros de tamanhos diferentes acontecem quando
+         alguém trocou a imagem de um passo, e é justamente aí que se compara. */
+      const W = Math.min(a.naturalWidth, b.naturalWidth);
+      const H = Math.min(a.naturalHeight, b.naturalHeight);
+      const ca = document.createElement('canvas'); ca.width = W; ca.height = H;
+      const cb = document.createElement('canvas'); cb.width = W; cb.height = H;
+      const ga = ca.getContext('2d'), gb = cb.getContext('2d');
+      ga.drawImage(a, 0, 0, W, H); gb.drawImage(b, 0, 0, W, H);
+      const da = ga.getImageData(0, 0, W, H), db = gb.getImageData(0, 0, W, H);
+      let n = 0;
+      for (let i = 0; i < da.data.length; i += 4) {
+        const d = Math.abs(da.data[i] - db.data[i]) + Math.abs(da.data[i+1] - db.data[i+1]) +
+                  Math.abs(da.data[i+2] - db.data[i+2]);
+        if (d > 60) { da.data[i] = 230; da.data[i+1] = 30; da.data[i+2] = 60; da.data[i+3] = 235; n++; }
+        else da.data[i+3] = 0;                      // igual: transparente
+      }
+      ga.putImageData(da, 0, 0);
+      cam.style.backgroundImage = 'url(' + ca.toDataURL('image/png') + ')';
+      cam.style.opacity = 1;
+      $('cmpMistura').value = 100;
+      const pct = (n / (W * H) * 100).toFixed(1);
+      $('cmpMsg').textContent = n ? t('cmpDif', pct) : t('cmpIgual');
+    } catch (e) { $('cmpMsg').textContent = t('cmpErro'); }
+  };
+
+  $('lenteCap').oninput = () => {
+    const f = frames[lenteI]; if (!f) return;
+    f.cap = $('lenteCap').value;
+    const i = lenteI;
+    render();                 // a fileira ganha o selo e o resumo se refaz
+    lenteI = i;
+  };
+
   $('lenteHora').onchange = () => {
     const v = $('lenteHora').value;
     if (!v || !frames[lenteI]) return;
@@ -7149,6 +8688,14 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
         const r = await worker.recognize(imgFinal(f));
         const txt = ((r && r.data && r.data.text) || '').replace(/\s+/g, ' ').trim();
         f.ocr = txt.length > 3 ? txt : '';
+        /* As CAIXAS das palavras, normalizadas. É o que permite tarjar o padrão
+           encontrado sem pedir para a pessoa desenhar o retângulo — e é de
+           graça: o reconhecimento já as calculou para montar o texto.
+
+           Nem toda versão do Tesseract.js devolve `words` no primeiro nível;
+           algumas só entregam blocos. Ler os dois caminhos custa dez linhas e
+           evita que o recurso simplesmente não exista em metade das máquinas. */
+        f.palavras = palavrasDoOcr(r, f);
         if (f.ocr) comTexto++;
         feitos++;
         const pct = feitos / kept.length * 100;
@@ -7185,12 +8732,20 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     const ev = evDados();
     const dados = {
       gerador: 'Walkstamp',
+      /* Três campos que não são para quem consome o JSON de fora, e sim para a
+         própria ferramenta na hora de REABRIR o documento: sem o cenário, o
+         arquivo volta com o layout errado; sem o rótulo, os quadros voltam
+         chamados de outra coisa. */
+      formato: 1,
+      cenario: $('modelo').value,
+      rotuloDoQuadro: rotuloUnidade(),
       evidencia: ev.algum ? {
         casoDeTeste: ev.caso || null,
         sistema: ev.sistema || null,
         executadoPor: ev.quem || null,
         chamado: ev.chamado || null,
         resultado: ev.resultado || null,
+        ambiente: ev.ambiente || null,
         // ISO com fuso: quem consome o arquivo não precisa adivinhar o horário local
         inicioDaGravacao: ev.inicio == null ? null : new Date(ev.inicio).toISOString()
       } : null,
@@ -7208,10 +8763,19 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
         tempo: fmt(f.t),
         horaDeRelogio: ev.inicio == null ? null : new Date(msDoFrame(ev.inicio, f.t)).toISOString(),
         anotacao: f.nota || '',
+        tipoDoMomento: f.tipo || '',
         largura: f.img.w,
         altura: f.img.h,
         sha256: f.hash || null,
         textoNaTela: f.ocr || '',
+        /* As caixas das palavras, quando o leitor de texto rodou. Elas custam
+           alguns kilobytes ao lado de imagens que pesam megabytes, e sem elas
+           um documento reaberto sabe QUE tem um CPF na tela e não sabe ONDE —
+           que é o mesmo que não saber. */
+        palavrasNaTela: (f.palavras && f.palavras.length)
+          ? f.palavras.map(w => ({ t: w.txt, x: +w.x.toFixed(4), y: +w.y.toFixed(4),
+                                   w: +w.w.toFixed(4), h: +w.h.toFixed(4) }))
+          : undefined,
         imagemBase64: imgFinal(f),
         tarjas: (f.tarjas || []).length,
         destaques: (f.marcas || []).length,
@@ -7226,6 +8790,533 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       observacao: 'Os frames sao amostras do video: momentos entre duas capturas nao estao aqui.'
     };
     baixar(JSON.stringify(dados, null, 2), 'json');
+  };
+
+  /* ================= atalhos de teclado =================
+
+     Quem usa toda semana faz o mesmo caminho quarenta vezes. Três teclas
+     cobrem o que se repete, e nenhuma delas rouba a tecla de ninguém: só valem
+     quando o foco NÃO está num campo de texto — senão escrever "gravar" numa
+     anotação começaria uma gravação. */
+  document.addEventListener('keydown', e => {
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    const alvo = e.target;
+    const digitando = alvo && (alvo.tagName === 'INPUT' || alvo.tagName === 'TEXTAREA' ||
+                               alvo.tagName === 'SELECT' || alvo.isContentEditable);
+    if (digitando) return;
+    if (!$('lente').classList.contains('hide')) return;   // a lente tem os atalhos dela
+    const k = (e.key || '').toLowerCase();
+    if (k === 'g') {
+      const b = liveOn ? $('recStop') : $('rec');
+      if (b && !b.classList.contains('hide') && !b.disabled) { e.preventDefault(); b.click(); }
+    } else if (k === 'm' && liveOn) {
+      const b = $('recMark');
+      if (b && !b.disabled) { e.preventDefault(); b.click(); }
+    } else if (k === 'p' && liveOn) {
+      const b = $('recPause');
+      if (b && !b.disabled) { e.preventDefault(); b.click(); }
+    }
+  });
+
+  /* ================= revisão assistida =================
+
+     Ver o comentário do painel no HTML para o porquê. Aqui só a mecânica:
+     percorre os quadros mantidos, um por vez, e para cada um oferece três
+     saídas — continua igual, mudou (troca a imagem), ou não existe mais
+     (descarta). Nada acontece sem a pessoa dizer.
+
+     Ela roda em cima do documento que está aberto, venha ele de uma gravação
+     de agora ou de um `.zip` de seis meses atrás. É o mesmo conjunto de
+     quadros; o que muda é o modo de olhar para ele. */
+  let revI = -1, revConta = null;
+
+  function revAtivo(){ return revI >= 0; }
+
+  function revAbrir(){
+    const kept = frames.filter(f => f.keep);
+    if (!kept.length) return;
+    revI = 0;
+    revConta = { igual: 0, trocada: 0, fora: 0 };
+    $('revBox').classList.remove('hide');
+    $('revSair').textContent = t('revSairBtn');
+    revPintar();
+    irPara('prevCard', true);
+  }
+
+  function revFechar(fim){
+    revI = -1;
+    $('revBox').classList.add('hide');
+    if (fim && revConta) {
+      $('movMsg').textContent = t('revFim', revConta.igual, revConta.trocada, revConta.fora);
+    }
+    revConta = null;
+    render();
+  }
+
+  function revPintar(){
+    const kept = frames.filter(f => f.keep);
+    if (!kept.length || revI >= kept.length) { revFechar(true); return; }
+    const f = kept[revI];
+    $('revTit').textContent = passoN(revI + 1);
+    $('revPos').textContent = t('revPos', revI + 1, kept.length);
+    $('revImg').src = imgFinal(f);
+    /* A anotação do passo é o que diz o que aquela tela devia provar. Sem ela
+       na frente, "esta tela ainda está assim?" é uma pergunta sobre pixels. */
+    $('revNota').textContent = f.nota ? f.nota : t('revSemNota');
+  }
+
+  function revAvancar(){
+    revI++;
+    const kept = frames.filter(f => f.keep);
+    if (revI >= kept.length) { revFechar(true); return; }
+    revPintar();
+  }
+
+  $('revisar').onclick = revAbrir;
+  $('revSair').onclick = () => revFechar(true);
+
+  $('revIgual').onclick = () => { if (revConta) revConta.igual++; revAvancar(); };
+
+  $('revFora').onclick = () => {
+    const kept = frames.filter(f => f.keep);
+    const f = kept[revI];
+    if (f) { f.keep = false; if (revConta) revConta.fora++; }
+    /* O quadro saiu da lista dos mantidos, então o índice já aponta para o
+       próximo sem incrementar — incrementar aqui pularia um passo, que numa
+       revisão de quarenta é o erro que ninguém percebe. */
+    render();
+    const restantes = frames.filter(x => x.keep);
+    if (revI >= restantes.length) { revFechar(true); return; }
+    revPintar();
+  };
+
+  $('revTrocar').onclick = () => $('revArq').click();
+  $('revArq').onchange = async e => {
+    const arq = e.target.files && e.target.files[0];
+    $('revArq').value = '';
+    if (!arq) return;
+    const kept = frames.filter(f => f.keep);
+    const f = kept[revI];
+    if (!f) return;
+    const url = URL.createObjectURL(arq);
+    try {
+      const im = await new Promise((ok2, erro) => {
+        const x = new Image(); x.onload = () => ok2(x); x.onerror = () => erro(new Error('img'));
+        x.src = url;
+      });
+      const w = im.naturalWidth, h = im.naturalHeight;
+      if (!w || !h) throw new Error('img');
+      const cv = document.createElement('canvas');
+      cv.width = w; cv.height = h;
+      cv.getContext('2d').drawImage(im, 0, 0, w, h);
+      f.img = { url: cv.toDataURL('image/jpeg', +($('quality').value || 0.85)), w, h };
+      /* Mesma regra do trocar da lente: o que descrevia a imagem antiga morre
+         com ela. A anotação e o instante ficam — continuam verdadeiros. */
+      f.orig = null; f.tarjado = null; f.tarjas = []; f.marcas = [];
+      f.hash = null; f.ocr = ''; f.palavras = [];
+      f.trocado = true;
+      if (revConta) revConta.trocada++;
+      render();
+      revAvancar();
+    } catch (err) {
+      $('revNota').innerHTML = `<span class="err">${t('trocarErro')}</span>`;
+    } finally { URL.revokeObjectURL(url); }
+  };
+
+  /* O botão só existe quando há documento para revisar. */
+  function pintarRevisar(){
+    const b = $('revisar'); if (!b) return;
+    b.classList.toggle('hide', frames.filter(f => f.keep).length === 0);
+  }
+
+  /* ================= pacote SCORM =================
+
+     Um SCORM 1.2 é um `.zip` com três coisas: o `imsmanifest.xml`, o conteúdo
+     em HTML e um punhado de JavaScript que avisa o LMS que a pessoa concluiu.
+     O HTML autocontido já existe — só faltava o envelope.
+
+     Por que ele vale mais do que parece: é a porta para o LMS do CLIENTE
+     (SuccessFactors Learning, Cornerstone, Moodle, TalentLMS), e o LMS é onde
+     se responde "quem leu a instrução de trabalho?" — a pergunta que a
+     auditoria de treinamento faz e que nós NOS RECUSAMOS a responder, porque
+     responder exigiria conta, servidor e rastreamento.
+
+     Com SCORM, quem registra é o sistema do cliente. Nós entregamos o pacote e
+     continuamos sem saber quem abriu o quê. É o raro caso em que copiar o
+     concorrente nos deixa MAIS fiéis à promessa, e não menos.
+
+     O JavaScript de dentro é deliberadamente burro: acha a API do LMS subindo
+     a árvore de janelas (é assim que o SCORM 1.2 manda), diz "completed" e sai.
+     Se não achar API nenhuma — alguém abriu o HTML direto —, ele não faz nada e
+     o documento continua legível. Um pacote que quebra fora do LMS é um pacote
+     que ninguém confere antes de subir. */
+  const SCORM_JS = `(function(){
+  function achar(w,n){ while(w && n-- > 0){ if(w.API) return w.API; w = w.parent !== w ? w.parent : null; } return null; }
+  var api = achar(window,7) || (window.opener ? achar(window.opener,7) : null);
+  if(!api) return;                       // fora de um LMS: o documento vale sozinho
+  try{
+    api.LMSInitialize('');
+    api.LMSSetValue('cmi.core.lesson_status','completed');
+    api.LMSCommit('');
+    window.addEventListener('unload', function(){ try{ api.LMSFinish(''); }catch(e){} });
+  }catch(e){}
+})();`;
+
+  /* O mesmo escape do .docx, que já existe mais abaixo com este nome. Aqui vale
+     um nome próprio: declarar `xmlEsc` duas vezes no mesmo escopo derruba o
+     arquivo inteiro na primeira linha, e a página fica em branco. */
+  const scEsc = x => String(x == null ? '' : x)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&apos;');
+
+  function manifestoScorm(titulo, id){
+    return `<?xml version="1.0" encoding="UTF-8"?>
+<manifest identifier="${scEsc(id)}" version="1.2"
+  xmlns="http://www.imsproject.org/xsd/imscp_rootv1p1p2"
+  xmlns:adlcp="http://www.adlnet.org/xsd/adlcp_rootv1p2"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.imsproject.org/xsd/imscp_rootv1p1p2 imscp_rootv1p1p2.xsd
+                      http://www.adlnet.org/xsd/adlcp_rootv1p2 adlcp_rootv1p2.xsd
+                      http://www.imsglobal.org/xsd/imsmd_rootv1p2p1 imsmd_rootv1p2p1.xsd">
+  <metadata>
+    <schema>ADL SCORM</schema>
+    <schemaversion>1.2</schemaversion>
+  </metadata>
+  <organizations default="ORG-1">
+    <organization identifier="ORG-1">
+      <title>${scEsc(titulo)}</title>
+      <item identifier="ITEM-1" identifierref="RES-1" isvisible="true">
+        <title>${scEsc(titulo)}</title>
+        <adlcp:masteryscore>100</adlcp:masteryscore>
+      </item>
+    </organization>
+  </organizations>
+  <resources>
+    <resource identifier="RES-1" type="webcontent" adlcp:scormtype="sco" href="index.html">
+      <file href="index.html"/>
+      <file href="scorm.js"/>
+    </resource>
+  </resources>
+</manifest>
+`;
+  }
+
+  $('scorm').onclick = async () => {
+    const kept = frames.filter(f => f.keep);
+    if (!kept.length) return;
+    $('scorm').disabled = true;
+    $('pdfStatus').textContent = t('pkgBuilding');
+    await new Promise(r => setTimeout(r, 40));
+    try {
+      await aplicarTarjas(kept);
+      const ev = evDados();
+      const titulo = ev.caso || t('pTitle');
+      /* O identificador precisa ser estável e sem espaço: alguns LMS usam o
+         identifier do manifesto como chave e recusam caractere estranho. */
+      const id = 'WS-' + (nomeBase() || 'doc').replace(/[^A-Za-z0-9_-]+/g, '-').slice(0, 48);
+      const corpo = montarHtml().replace('</body>',
+        '<script src="scorm.js"><\/script>\n</body>');
+      const entradas = [
+        { nome: 'imsmanifest.xml', dados: bytesDe(manifestoScorm(titulo, id)) },
+        { nome: 'scorm.js',        dados: bytesDe(SCORM_JS) },
+        { nome: 'index.html',      dados: bytesDe(corpo) }
+      ];
+      baixarBlob(zipar(entradas), 'scorm-' + nomeBase() + '.zip');
+      medir('baixou_saida', { p_formato: 'zip' });
+      $('pdfStatus').innerHTML = `<span class="ok">${t('scormOk')}</span>`;
+    } catch (e) {
+      $('pdfStatus').innerHTML = `<span class="err">${t('pkgErr', (e && e.message) || e)}</span>`;
+    } finally { $('scorm').disabled = false; }
+  };
+
+  /* ================= reabrir um documento =================
+
+     A ferramenta não guarda nada entre visitas — para a evidência isso é a
+     promessa inteira. Para uma instrução de trabalho seria fatal: em seis meses
+     a tela mudou e o passo 7 está errado, e a resposta seria regravar os
+     quarenta.
+
+     A saída é limpa e não fere nada: o arquivo está na máquina de quem usa, e
+     ela o carrega de volta. Continua não existindo servidor no caminho — é a
+     mesma porta que o /verificar já abre.
+
+     Uma coisa que precisa ser dita ao reabrir, e é dita: a TARJA VOLTA
+     QUEIMADA. Ela nunca foi uma camada por cima; foi desenhada dentro da
+     imagem exportada. Reabrir devolve a imagem já tarjada, e não há como
+     desfazer — que é exatamente a garantia que faz a tarja valer alguma coisa. */
+
+  /* Os pacotes desta ferramenta são gravados sem compressão (método 0), então
+     ler as entradas é percorrer os cabeçalhos locais e copiar os bytes. Mesmo
+     código do /verificar, e de propósito: dois leitores diferentes do mesmo
+     formato divergem no dia em que alguém mexer num só. */
+  function lerZip(buf){
+    const b = new Uint8Array(buf), dv = new DataView(buf), saida = {};
+    for (let i = 0; i + 30 < b.length; ) {
+      if (dv.getUint32(i, true) !== 0x04034b50) { i++; continue; }
+      const metodo = dv.getUint16(i + 8, true);
+      const n  = dv.getUint32(i + 18, true);
+      const nl = dv.getUint16(i + 26, true), el = dv.getUint16(i + 28, true);
+      const nome = new TextDecoder().decode(b.subarray(i + 30, i + 30 + nl));
+      const ini = i + 30 + nl + el;
+      if (metodo === 0) saida[nome] = b.subarray(ini, ini + n);
+      i = ini + n;
+    }
+    return saida;
+  }
+
+  const bytesParaDataUrl = (u8, tipo) => new Promise((ok2, erro) => {
+    const fr = new FileReader();
+    fr.onload = () => ok2(fr.result);
+    fr.onerror = erro;
+    fr.readAsDataURL(new Blob([u8], { type: tipo || 'image/jpeg' }));
+  });
+
+  /* Descobre largura e altura de uma imagem já em memória. O documento precisa
+     delas para escolher o layout e para desenhar no PDF sem deformar. */
+  const medirImagem = url => new Promise((ok2, erro) => {
+    const im = new Image();
+    im.onload = () => ok2({ url, w: im.naturalWidth, h: im.naturalHeight });
+    im.onerror = erro;
+    im.src = url;
+  });
+
+  const mmss = txt => {
+    const m = String(txt || '').match(/(\d+)[:\-](\d+)(?:[:\-](\d+))?/);
+    if (!m) return 0;
+    return m[3] ? (+m[1]) * 3600 + (+m[2]) * 60 + (+m[3]) : (+m[1]) * 60 + (+m[2]);
+  };
+
+  /* `soQuadros` existe para o consolidado: ao juntar cinco sessões, os campos
+     de identificação de cada uma NÃO podem sobrescrever a tela — a quinta
+     apagaria as quatro anteriores e o documento sairia com o código do último
+     participante como se fosse o do estudo inteiro. */
+  async function reabrirJson(j, soQuadros){
+    if (!j || !Array.isArray(j.frames) || !j.frames.length) throw new Error(t('reabrirVazio'));
+    const novos = [];
+    for (const f of j.frames) {
+      if (!f.imagemBase64) continue;
+      const img = await medirImagem(f.imagemBase64);
+      novos.push({
+        t: typeof f.segundos === 'number' ? f.segundos : mmss(f.tempo),
+        img, keep: true,
+        nota: f.anotacao || '',
+        ocr: f.textoNaTela || '',
+        palavras: Array.isArray(f.palavrasNaTela)
+          ? f.palavrasNaTela.map(w => ({ txt: w.t, x: w.x, y: w.y, w: w.w, h: w.h }))
+          : [],
+        hash: f.sha256 || null,
+        colado: !!f.telaAnexada,
+        tipo: f.tipoDoMomento || '',
+        /* Reaberto, e não capturado agora. A etiqueta serve para quem revisa
+           saber que aquela imagem veio de um documento anterior — e para nós
+           não fingirmos que houve uma varredura de vídeo que não houve. */
+        reaberto: true
+      });
+    }
+    if (!novos.length) throw new Error(t('reabrirSemImg'));
+
+    if (soQuadros) return novos;
+
+    if (j.cenario && [...$('modelo').options].some(o => o.value === j.cenario)) {
+      $('modelo').value = j.cenario;
+      $('modelo').dispatchEvent(new Event('change'));
+    }
+    const e = j.evidencia || {};
+    const por = { evCaso:'casoDeTeste', evSis:'sistema', evQuem:'executadoPor', evChamado:'chamado' };
+    if (e.ambiente && $('evAmb')) $('evAmb').value = e.ambiente;
+    for (const id in por) if (e[por[id]]) $(id).value = e[por[id]];
+    if (e.resultado && $('evRes')) $('evRes').value = e.resultado;
+    if (e.inicioDaGravacao && $('evInicio')) {
+      const d = new Date(e.inicioDaGravacao);
+      if (!isNaN(d)) {
+        const p2 = n => String(n).padStart(2, '0');
+        $('evInicio').value = `${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())}` +
+          `T${p2(d.getHours())}:${p2(d.getMinutes())}:${p2(d.getSeconds())}`;
+        $('evInicio').dispatchEvent(new Event('input'));
+      }
+    }
+    if (Array.isArray(j.transcricao) && j.transcricao.length) {
+      const temTempo = j.transcricao.some(c => typeof c.inicio === 'number');
+      $('tr').value = temTempo
+        ? 'WEBVTT\n\n' + j.transcricao.map(c =>
+            `${tempoLegenda(c.inicio || 0)} --> ${tempoLegenda(c.fim || (c.inicio || 0) + 3)}\n${c.texto}`).join('\n\n')
+        : j.transcricao.map(c => c.texto).join('\n');
+      $('tr').dispatchEvent(new Event('input'));
+    }
+    if (j.rotuloDoQuadro && $('unNome')) {
+      $('unNome').value = j.rotuloDoQuadro;
+      $('unNome').dispatchEvent(new Event('input'));
+    }
+    if (j.video && j.video.arquivo) fileName = j.video.arquivo;
+    return novos;
+  }
+
+  async function reabrirZip(buf){
+    const itens = lerZip(buf);
+    const nomes = Object.keys(itens).filter(n => /\.(jpe?g|png)$/i.test(n)).sort();
+    if (!nomes.length) throw new Error(t('reabrirSemImg'));
+    /* O índice do zip é um TSV: arquivo, passo, instante, hora, anotação. Ele é
+       opcional no pacote, e por isso é opcional aqui — sem ele voltam as
+       imagens na ordem do nome, que já é a ordem dos passos. */
+    const notas = {};
+    if (itens['indice.txt']) {
+      new TextDecoder().decode(itens['indice.txt']).split(/\r?\n/).forEach(l => {
+        const c = l.split('\t');
+        if (c.length >= 2 && /\.(jpe?g|png)$/i.test(c[0])) notas[c[0]] = c[c.length - 1] || '';
+      });
+    }
+    const novos = [];
+    for (const n of nomes) {
+      const img = await medirImagem(await bytesParaDataUrl(itens[n]));
+      novos.push({ t: mmss(n.replace(/^\d+-/, '')), img, keep: true,
+                   nota: notas[n] || '', reaberto: true });
+    }
+    /* Os clipes voltam junto. Sem isto, reabrir um estudo de pesquisa para
+       corrigir uma anotação apagaria os vídeos — e num relatório de sessão o
+       vídeo é o resultado, não um anexo dele. O número no nome do arquivo é o
+       passo: é a mesma numeração que batiza as imagens.
+
+       O que NÃO volta é a posição da marca dentro do clipe. Ela não está
+       gravada em lugar nenhum que dê para ler de máquina, e escrever "aos
+       00:00" seria a ferramenta afirmando o que não sabe. */
+    Object.keys(itens).filter(n => /\.(webm|mp4)$/i.test(n)).forEach(n => {
+      const m = n.match(/(\d{3,})/);
+      if (!m) return;
+      const alvo = novos[+m[1] - 1];
+      if (!alvo) return;
+      const blob = new Blob([itens[n]], { type: /mp4$/i.test(n) ? 'video/mp4' : 'video/webm' });
+      const url = URL.createObjectURL(blob);
+      clipesVivos.push(url);
+      alvo.clipe = { blob, url, tipo: blob.type, em: 0, seg: 0, reaberto: true };
+    });
+    return novos;
+  }
+
+  $('reabrir').onclick = () => $('reabrirArq').click();
+  $('reabrirArq').onchange = async ev2 => {
+    const file = ev2.target.files && ev2.target.files[0];
+    if (!file) return;
+    $('reabrirArq').value = '';
+    $('reabrirMsg').textContent = t('reabrirLendo');
+    trabalhando(true);
+    try {
+      const novos = /\.zip$/i.test(file.name)
+        ? await reabrirZip(await file.arrayBuffer())
+        : await reabrirJson(JSON.parse(await file.text()));
+      frames = novos;
+      manual = [];
+      if (!fileName) fileName = file.name.replace(/\.(json|zip)$/i, '');
+      render();
+      passos();
+      buildPrompt();
+      /* Um documento reaberto pode trazer o texto lido da tela — e com ele o
+         aviso de dado sensível. Não repetir a varredura seria esconder na
+         segunda visita o que se avisou na primeira. */
+      varrerSensivel();
+      $('reabrirMsg').innerHTML = `<span class="ok">${t('reabrirOk', novos.length)}</span> ` +
+        `<span class="status">${t('reabrirTarja')}</span>`;
+      irPara('prevCard', true);
+      medir('carregou_video', { p_origem: 'arquivo' });
+    } catch (err) {
+      $('reabrirMsg').innerHTML =
+        `<span class="err">${t('reabrirErro', (err && err.message) || err)}</span>`;
+    } finally { trabalhando(false); }
+  };
+
+  /* ---- consolidar N sessões num documento ----
+
+     Cada arquivo vira um CAPÍTULO, e é por isso que este item ficou barato: a
+     máquina de capítulos, os títulos em todos os formatos e o tempo por tarefa
+     já existiam. O que falta aqui é só a costura.
+
+     A costura tem um problema real: cada sessão tem o seu próprio relógio
+     começando do zero. Empilhar sem deslocar faria a segunda sessão começar
+     antes da primeira terminar, e o tempo por tarefa sairia negativo. Deslocar
+     resolve a ordem — e cria uma linha do tempo que nós montamos. Por isso a
+     hora de relógio é DESLIGADA no consolidado e o documento diz que é
+     consolidado: o tempo dentro de cada sessão continua verdadeiro, o horário
+     de parede entre elas não existe. */
+  $('juntar').onclick = () => $('juntarArq').click();
+  $('juntarArq').onchange = async ev3 => {
+    const arqs = [...(ev3.target.files || [])];
+    $('juntarArq').value = '';
+    if (!arqs.length) return;
+    if (arqs.length < 2) { $('reabrirMsg').innerHTML = `<span class="err">${t('juntarUm')}</span>`; return; }
+    $('reabrirMsg').textContent = t('reabrirLendo');
+    trabalhando(true);
+    const juntos = [], cues = [], nomes = [];
+    let desloc = 0, pulados = 0;
+    try {
+      /* Ordem alfabética do nome do arquivo, e não a ordem em que o navegador
+         entregou: quem nomeia P01, P02, P03 espera essa ordem no documento, e a
+         ordem de um `input multiple` não é garantida por nada. */
+      arqs.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
+      for (const file of arqs) {
+        let novos = [], meta = {};
+        try {
+          if (/\.zip$/i.test(file.name)) novos = await reabrirZip(await file.arrayBuffer());
+          else { meta = JSON.parse(await file.text()); novos = await reabrirJson(meta, true); }
+        } catch (e) { pulados++; continue; }
+        if (!novos.length) { pulados++; continue; }
+        const e2 = meta.evidencia || {};
+        /* Do primeiro arquivo vem o que é do ESTUDO e não do participante: o
+           cenário, o nome do estudo e como se chama um quadro. Sem isto o
+           consolidado voltava como "contexto para IA" — cinco sessões de
+           pesquisa reabertas com o layout errado e sem bloco de identificação,
+           que é onde a linha "documento consolidado" precisa aparecer. */
+        if (!juntos.length && meta.cenario) {
+          if ([...$('modelo').options].some(o => o.value === meta.cenario)) {
+            $('modelo').value = meta.cenario;
+            $('modelo').dispatchEvent(new Event('change'));
+          }
+          if (e2.casoDeTeste) $('evCaso').value = e2.casoDeTeste;
+          if (e2.sistema) $('evSis').value = e2.sistema;
+          if (meta.rotuloDoQuadro && $('unNome')) {
+            $('unNome').value = meta.rotuloDoQuadro;
+            $('unNome').dispatchEvent(new Event('input'));
+          }
+          $('evBox').open = true;
+        }
+        /* O código do participante primeiro: num estudo é ele que identifica a
+           sessão, e o padrão do campo já ensina a não usar o nome. */
+        const nome = String(e2.chamado || e2.casoDeTeste ||
+                            file.name.replace(/\.(json|zip)$/i, '')).trim();
+        nomes.push(nome);
+        const dur = novos.reduce((m, f) => Math.max(m, f.t), 0);
+        novos.forEach((f, i) => { f.t = f.t + desloc; if (i === 0) f.cap = nome; });
+        (Array.isArray(meta.transcricao) ? meta.transcricao : []).forEach(c => {
+          if (!c || !c.texto) return;
+          const a2 = (typeof c.inicio === 'number' ? c.inicio : 0) + desloc;
+          cues.push({ a: a2, b: (typeof c.fim === 'number' ? c.fim : (c.inicio || 0) + 3) + desloc, t: c.texto });
+        });
+        juntos.push(...novos);
+        /* Um segundo de folga entre sessões. Sem ele o primeiro quadro da
+           seguinte cai no mesmo instante do último da anterior, e a fronteira
+           do capítulo fica ambígua na ordenação. */
+        desloc += dur + 1;
+      }
+      if (juntos.length < 1) throw new Error(t('reabrirVazio'));
+      frames = juntos;
+      manual = [];
+      sessoesJuntadas = nomes.length;
+      porOrigem(null, false);              // não há UM início: a hora sai do documento
+      if (cues.length) {
+        cues.sort((x, y) => x.a - y.a);
+        $('tr').value = 'WEBVTT\n\n' + cues.map(c =>
+          `${tempoLegenda(c.a, false)} --> ${tempoLegenda(c.b, false)}\n${c.t}`).join('\n\n') + '\n';
+        $('tr').dispatchEvent(new Event('input'));
+      }
+      fileName = t('juntarNome', nomes.length);
+      render(); passos(); buildPrompt(); varrerSensivel();
+      $('reabrirMsg').innerHTML = `<span class="ok">${t('juntarOk', nomes.length, juntos.length)}</span> ` +
+        `<span class="status">${t('juntarSemHora')}</span>` +
+        (pulados ? ` <span class="err">${t('juntarPulou', pulados)}</span>` : '');
+      irPara('prevCard', true);
+      medir('carregou_video', { p_origem: 'arquivo' });
+    } catch (err) {
+      $('reabrirMsg').innerHTML =
+        `<span class="err">${t('reabrirErro', (err && err.message) || err)}</span>`;
+    } finally { trabalhando(false); }
   };
 
   /* ================= prompt para a IA ================= */
@@ -7259,6 +9350,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       ...extras,
       // captura ao vivo: sem esta linha o modelo não sabe o que os rótulos significam
       ...(liveCanais && liveCanais.length > 1 && cues.length ? [t('prSpk'), ''] : []),
+      ...(keep.some(f => f.tipo) ? [t('prTipo'), ''] : []),
       t('pr3'),
       t('pr4'),
       cues.length ? t('pr5cues') : t('pr5no'),
@@ -7413,6 +9505,30 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   /* O nome do arquivo é a primeira coisa que alguém vê ao anexar num chamado, e
      "captura de tela.docx" é a pior forma possível de entregar uma evidência.
      Quando há caso de teste, é ele que nomeia — com o chamado junto, se houver. */
+  /* ---- numeração automática de evidência ----
+     Um contador por ABA. Ele não persiste entre visitas de propósito: um número
+     que continua de ontem, numa ferramenta que promete não guardar nada, seria
+     a primeira contradição da política. E o número só é consumido quando um
+     documento sai de verdade — marcar a caixa e desistir não queima o 001. */
+  const NUM_CHAVE = 'Walkstamp.contador';
+  const contadorAtual = () => {
+    try { return +(sessionStorage.getItem(NUM_CHAVE) || 0); } catch (e) { return 0; }
+  };
+  const prefixoNum = n => 'EV-' + String(n).padStart(3, '0');
+  function pintarNumero(){
+    const el = $('evNumAtual'); if (!el) return;
+    const lig = $('evNum') && $('evNum').checked;
+    el.textContent = lig ? t('evNumProx', prefixoNum(contadorAtual() + 1)) : '';
+  }
+  function consumirNumero(){
+    if (!($('evNum') && $('evNum').checked)) return '';
+    const n = contadorAtual() + 1;
+    try { sessionStorage.setItem(NUM_CHAVE, String(n)); } catch (e) {}
+    pintarNumero();
+    return prefixoNum(n);
+  }
+  if ($('evNum')) $('evNum').onchange = pintarNumero;
+
   const nomeBase = () => {
     const ev = evDados();
     const padrao = 'Walkstamp'.toLowerCase();
@@ -7424,7 +9540,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   /* O prefixo vem do modelo de saída: `evidencia-UAT-4711.pdf` diz o que o
      arquivo é antes de alguém abrir, e `analise-` num anexo de chamado não diz
      nada. */
-  const nomeArquivo = () => modeloAtual().prefixo + '-' + nomeBase();
+  const nomeArquivo = () => {
+    const num = consumirNumero();
+    return (num ? num + '-' : '') + modeloAtual().prefixo + '-' + nomeBase();
+  };
 
   /* ---- pareamento imagem/fala, o mesmo critério usado no PDF ---- */
   function falaDoFrame(kept, i, cues, dur, semPrefixo){
@@ -7464,8 +9583,21 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
           linhas.push([String(i + 1).padStart(4, '0') + '-' + fmt(f.t).replace(/:/g, '-') + '.jpg',
                        passoN(i + 1), fmt(f.t), hora, f.nota || ''].filter(Boolean).join('\t'));
           if (f.hash) linhas.push('\t' + t('pHash') + ': ' + f.hash);
+          if (f.clipe) linhas.push('\t' + t('lenteClipe') + ': ' + nomeDoClipe(f, i + 1) +
+                                   '  (' + t('lenteClipeNota', fmt(f.clipe.em), String(Math.round(f.clipe.seg))) + ')');
         });
         entradas.unshift({ nome: 'indice.txt', dados: bytesDe(linhas.join('\r\n') + '\r\n') });
+      }
+      /* Os clipes viajam junto. Sem isto, o vídeo do momento existiria só
+         enquanto a aba estivesse aberta — e a sessão de pesquisa termina com a
+         aba fechada. Duas marcas na mesma janela compartilham o arquivo, e ele
+         entra uma vez só. */
+      const jaFoi = new Set();
+      for (const [i, f] of kept.entries()) {
+        if (!f.clipe || jaFoi.has(f.clipe.url)) continue;
+        jaFoi.add(f.clipe.url);
+        const buf = new Uint8Array(await f.clipe.blob.arrayBuffer());
+        entradas.push({ nome: nomeDoClipe(f, i + 1), dados: buf });
       }
       baixarBlob(zipar(entradas), 'frames-' + nomeBase() + '.zip');
       medir('baixou_saida', { p_formato: 'zip' });
@@ -7488,12 +9620,55 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   const esc = t => String(t == null ? '' : t)
     .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 
+  /* ================= capítulos: vários casos numa gravação =================
+
+     Quem testa, testa uma tarde inteira; quem pesquisa, dá quatro tarefas ao
+     mesmo participante. Hoje a saída é uma gravação por caso — ou seja, parar,
+     escolher a tela outra vez, e recomeçar, três vezes por tarde. O capítulo é
+     a alternativa: uma captura só, cortada depois.
+
+     O corte mora no QUADRO e não numa lista à parte de propósito. Uma lista com
+     tempos de início seria uma segunda verdade para manter sincronizada com a
+     revisão — descartar um quadro moveria a fronteira sem ninguém mandar. Preso
+     ao quadro, o capítulo acompanha reordenar, descartar e duplicar de graça.
+
+     E o fim de um capítulo é o começo do seguinte, nunca o último quadro dele:
+     o tempo entre o último clique de uma tarefa e o primeiro da próxima é tempo
+     gasto NAQUELA tarefa — é onde a pessoa ficou procurando. */
+  function capitulos(){
+    const kept = frames.filter(f => f.keep);
+    const dur = duracaoTotal();
+    const caps = [];
+    kept.forEach((f, i) => {
+      const nome = (f.cap || '').trim();
+      if (!nome) return;
+      caps.push({ nome, de: i, ini: f.t, ate: kept.length - 1, fim: dur });
+    });
+    caps.forEach((c, k) => {
+      const prox = caps[k + 1];
+      if (prox) { c.ate = prox.de - 1; c.fim = prox.ini; }
+    });
+    return caps;
+  }
+
   function linhasDoDoc(){
     const kept = frames.filter(f => f.keep);
     const { cues } = parseTranscript($('tr').value);
     const dur = duracaoTotal();
+    const caps = capitulos();
+    const doQuadro = i => {
+      for (let k = caps.length - 1; k >= 0; k--) if (i >= caps[k].de) return caps[k];
+      return null;
+    };
     return kept.map((f, i) => ({
       passo: i + 1,
+      /* `capitulo` vai em TODA linha, e não só na primeira do capítulo: numa
+         planilha, o que se faz com essa coluna é agrupar, e agrupar por uma
+         coluna preenchida uma vez a cada dez linhas não funciona. Quem precisa
+         saber onde o capítulo começa olha `capAbre`. */
+      capitulo: (doQuadro(i) || {}).nome || '',
+      capAbre: !!(f.cap || '').trim(),
+      tarefa: doQuadro(i) ? fmt(doQuadro(i).fim - doQuadro(i).ini) : '',
       /* A tela anexada não tem instante no vídeo. Mostrar a etiqueta no lugar
          do relógio vale para o HTML, o Markdown e a planilha, pelo mesmo motivo
          que vale para o PDF: uma hora inventada numa evidência é pior que a
@@ -7501,6 +9676,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       tempo: f.colado ? t('coladoTag') : fmt(f.t),
       hora: f.colado ? '' : horaDe(f.t),
       nota: f.nota || '',
+      tipo: f.tipo ? t({ friccao:'uxT1', desistiu:'uxT2', elogiou:'uxT3', defeito:'uxT4' }[f.tipo]) : '',
       fala: cues.length ? falaDoFrame(kept, i, cues, dur, true) : '',
       ocr: f.ocr || '',
       hash: f.hash || '',
@@ -7525,10 +9701,12 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     const cab = ev.linhasCompletas.map(([k, v]) =>
       `<tr><th>${esc(k)}</th><td>${esc(v)}</td></tr>`).join('');
     const blocos = linhas.map(l => `
+  ${l.capAbre ? `<h2 class="cap">${esc(l.capitulo)}${l.tarefa ? ` <small>· ${esc(t('capTempo', l.tarefa))}</small>` : ''}</h2>` : ''}
   <section class="passo">
     <h2>${esc(tut && l.nota ? passoN(l.passo) + '  —  ' + l.nota
                             : t('pStep', passoN(l.passo), linhas.length) + '   ·   ' + l.tempo +
                               (l.hora ? '   ·   ' + l.hora : ''))}</h2>
+    ${l.tipo ? `<p class="tipo">${esc(l.tipo)}</p>` : ''}
     ${(!tut && l.nota) ? `<p class="nota">${esc(l.nota)}</p>` : ''}
     <img src="${l.img}" alt="${esc(passoN(l.passo))}">
     ${l.fala ? `<p class="fala">${esc(l.fala)}</p>` : ''}
@@ -7555,6 +9733,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
  .passo h2{font-size:16px;margin:0 0 8px}
  .passo img{width:100%;display:block;border-radius:6px;border:1px solid #e6e8ee}
  .nota{margin:0 0 10px;font-size:15.5px}
+ .tipo{margin:0 0 8px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;
+   color:#7a4a00;background:#fff4e0;border-radius:99px;padding:3px 10px;display:inline-block}
  .fala{color:#444;font-size:15px;margin:10px 0 0}
  .ocr{color:#777;font-size:13.5px;margin:8px 0 0}
  .hash{color:#999;font:11px ui-monospace,Menlo,monospace;margin:6px 0 0;word-break:break-all}
@@ -7602,10 +9782,19 @@ ${marcaSvg(46)}
     ev.linhasCompletas.forEach(([k, v]) => out.push('- **' + k + ':** ' + v));
     if (ev.linhasCompletas.length) out.push('');
     linhas.forEach(l => {
-      out.push('## ' + (tut && l.nota
+      /* O capítulo é um nível ACIMA do passo: "## Tarefa 2 — pagar" e os passos
+         abaixo dele. Sair como mais um passo faria a tarefa parecer uma etapa
+         da tarefa anterior, que é exatamente a confusão que o capítulo existe
+         para desfazer. */
+      if (l.capAbre) {
+        out.push('## ' + l.capitulo + (l.tarefa ? '  ·  ' + t('capTempo', l.tarefa) : ''));
+        out.push('');
+      }
+      out.push((l.capAbre || l.capitulo ? '### ' : '## ') + (tut && l.nota
         ? passoN(l.passo) + ' — ' + l.nota
         : t('pStep', passoN(l.passo), linhas.length) + ' · ' + l.tempo + (l.hora ? ' · ' + l.hora : '')));
       out.push('');
+      if (l.tipo) { out.push('**' + l.tipo + '**'); out.push(''); }
       if (!tut && l.nota) { out.push(l.nota); out.push(''); }
       /* A imagem vai embutida em base64 no próprio Markdown: um arquivo só, que
          é o ponto de colar numa wiki sem ter que subir anexo separado. */
@@ -7624,9 +9813,23 @@ ${marcaSvg(46)}
   /* CSV com ponto e vírgula e BOM: é o que o Excel em português abre em colunas
      sem passar pelo assistente de importação. */
   function montarCsv(){
-    const cabec = [t('csvPasso'), t('pWhen'), t('pRelogio'),
-                   t('notaPh'), t('lenteFala'), t('pOcr'), t('pHash')];
-    const campos = ['passo','tempo','hora','nota','fala','ocr','hash'];
+    /* A coluna do tipo só existe onde ela significa alguma coisa: numa planilha
+       de evidência, uma coluna vazia chamada "Tipo do momento" faz o auditor
+       perguntar o que deveria estar ali. */
+    const ux = $('modelo').value === 'usabilidade';
+    /* As duas colunas do capítulo só existem quando há capítulo. Uma planilha
+       de evidência de um caso só não precisa de uma coluna repetindo o mesmo
+       nome em todas as linhas, nem de um "tempo da tarefa" que é a duração da
+       gravação inteira. */
+    const temCap = capitulos().length > 0;
+    const cabec = [t('csvPasso'), t('pWhen'), t('pRelogio')]
+      .concat(temCap ? [t('capCol'), t('capTempoCol')] : [])
+      .concat(ux ? [t('uxTipo')] : [])
+      .concat([t('notaPh'), t('lenteFala'), t('pOcr'), t('pHash')]);
+    const campos = ['passo','tempo','hora']
+      .concat(temCap ? ['capitulo','tarefa'] : [])
+      .concat(ux ? ['tipo'] : [])
+      .concat(['nota','fala','ocr','hash']);
     const cel = v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
     const linhas = [cabec.map(cel).join(';')];
     linhasDoDoc().forEach(l => linhas.push(campos.map(c => cel(l[c])).join(';')));
@@ -7727,9 +9930,252 @@ ${marcaSvg(46)}
       '</pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing></w:r>';
   }
 
+  /* ================= PowerPoint =================
+
+     Paridade, e a palavra é essa: ClickLearn, FlowShare e Folge exportam PPT e
+     nós não. Ninguém troca de ferramenta por causa disto — mas gente deixa de
+     escolher a nossa por falta dele, e treinamento de key user no Brasil é dado
+     a partir de um deck que o instrutor quer editar.
+
+     Montado à mão em OOXML, como o `.docx` já é. Uma biblioteca a mais custaria
+     ~100 KB no primeiro carregamento de todo mundo — inclusive de quem nunca
+     vai gerar um slide — e este arquivo é o produto inteiro.
+
+     O desenho é deliberadamente pobre: um slide de capa e um slide por passo,
+     com a imagem grande e o texto embaixo. Um deck bonito é trabalho do
+     instrutor; o nosso é ele não ter que colar quarenta prints. */
+  const EMU = 9525;                       // 1 px em EMU, a unidade do OOXML
+  const SL_W = 12192000, SL_H = 6858000;  // 16:9 widescreen
+
+  function pptEsc(x){
+    return String(x == null ? '' : x)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  function pptCaixa(id, nome, x, y, cx, cy, linhas, opc){
+    const o = opc || {};
+    const corpo = linhas.map(l => {
+      const txt = typeof l === 'string' ? l : l.t;
+      const est = typeof l === 'string' ? {} : l;
+      return `<a:p><a:pPr algn="${est.algn || 'l'}"/><a:r><a:rPr lang="pt-BR" sz="${est.sz || 1400}"` +
+             `${est.b ? ' b="1"' : ''} dirty="0"><a:solidFill><a:srgbClr val="${est.cor || '1F2430'}"/>` +
+             `</a:solidFill><a:latin typeface="Aptos"/></a:rPr><a:t>${pptEsc(txt)}</a:t></a:r></a:p>`;
+    }).join('');
+    return `<p:sp><p:nvSpPr><p:cNvPr id="${id}" name="${pptEsc(nome)}"/>` +
+      `<p:cNvSpPr txBox="1"/><p:nvPr/></p:nvSpPr>` +
+      `<p:spPr><a:xfrm><a:off x="${x}" y="${y}"/><a:ext cx="${cx}" cy="${cy}"/></a:xfrm>` +
+      `<a:prstGeom prst="rect"><a:avLst/></a:prstGeom></p:spPr>` +
+      `<p:txBody><a:bodyPr wrap="square" anchor="${o.anchor || 't'}"><a:normAutofit/></a:bodyPr>` +
+      `<a:lstStyle/>${corpo}</p:txBody></p:sp>`;
+  }
+
+  function pptImagem(id, rid, x, y, cx, cy){
+    return `<p:pic><p:nvPicPr><p:cNvPr id="${id}" name="img${id}"/>` +
+      `<p:cNvPicPr><a:picLocks noChangeAspect="1"/></p:cNvPicPr><p:nvPr/></p:nvPicPr>` +
+      `<p:blipFill><a:blip r:embed="${rid}"/><a:stretch><a:fillRect/></a:stretch></p:blipFill>` +
+      `<p:spPr><a:xfrm><a:off x="${x}" y="${y}"/><a:ext cx="${cx}" cy="${cy}"/></a:xfrm>` +
+      `<a:prstGeom prst="rect"><a:avLst/></a:prstGeom></p:spPr></p:pic>`;
+  }
+
+  const pptSlide = interno =>
+    `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<p:sld xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"
+ xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"
+ xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main">
+<p:cSld><p:spTree><p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr>
+<p:grpSpPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/><a:chOff x="0" y="0"/><a:chExt cx="0" cy="0"/></a:xfrm></p:grpSpPr>
+${interno}</p:spTree></p:cSld><p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></p:sld>`;
+
+  function montarPptx(){
+    const kept = frames.filter(f => f.keep);
+    const { cues } = parseTranscript($('tr').value);
+    const dur = duracaoTotal();
+    const ev = evDados();
+    const tut = ehTutorial();
+    const titulo = ev.caso || t('pTitle');
+
+    const slides = [], relsSlide = [], midias = [];
+    const M = 640080;   // margem, ~0,7 cm
+
+    // ---- capa
+    const capa = [
+      pptCaixa(2, 'titulo', M, 2000000, SL_W - M * 2, 1200000,
+               [{ t: titulo, sz: 3600, b: true }]),
+      pptCaixa(3, 'sub', M, 3300000, SL_W - M * 2, 1800000,
+        ev.linhas.map(([k, v]) => ({ t: k + ': ' + v, sz: 1400, cor: '5C6473' }))
+          .concat([{ t: 'Walkstamp · walkstamp.com', sz: 1200, cor: '3A3F9E' }]))
+    ].join('');
+    slides.push(pptSlide(capa));
+    relsSlide.push('');
+
+    // ---- um slide por passo
+    kept.forEach((f, i) => {
+      const rid = 'rId9';
+      const nome = 'img' + String(i + 1).padStart(4, '0') + '.jpg';
+      midias.push({ nome: 'ppt/media/' + nome, dados: () => bytesDaImagem(imgFinal(f)) });
+
+      /* A imagem ocupa o alto do slide, com a proporção dela preservada — uma
+         tela esticada num deck é a marca de quem colou print no PowerPoint às
+         pressas, que é exatamente o trabalho que este botão evita. */
+      const areaW = SL_W - M * 2, areaH = 4400000;
+      const prop = (f.img.w && f.img.h) ? f.img.w / f.img.h : 16 / 9;
+      let iw = areaW, ih = Math.round(areaW / prop);
+      if (ih > areaH) { ih = areaH; iw = Math.round(areaH * prop); }
+      const ix = Math.round((SL_W - iw) / 2), iy = 900000;
+
+      const fala = cues.length ? falaDoFrame(kept, i, cues, dur, true) : '';
+      const cabec = tut && f.nota
+        ? passoN(i + 1) + '  —  ' + f.nota
+        : passoN(i + 1) + (querHora() && horaDe(f.t) ? '   ·   ' + horaDe(f.t) : '   ·   ' + fmt(f.t));
+      const rodape = [];
+      if (!tut && f.nota) rodape.push({ t: f.nota, sz: 1400, b: true });
+      if (fala) rodape.push({ t: fala, sz: 1200, cor: '5C6473' });
+
+      slides.push(pptSlide(
+        pptCaixa(2, 'cab', M, 300000, SL_W - M * 2, 500000, [{ t: cabec, sz: 1800, b: true }]) +
+        pptImagem(4, rid, ix, iy, iw, ih) +
+        (rodape.length ? pptCaixa(5, 'pe', M, iy + ih + 120000, SL_W - M * 2,
+                                  SL_H - (iy + ih + 120000) - 200000, rodape) : '')
+      ));
+      relsSlide.push(
+        `<Relationship Id="${rid}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../media/${nome}"/>`);
+    });
+
+    const n = slides.length;
+    const idsSlide = slides.map((_, i) => `<p:sldId id="${256 + i}" r:id="rId${i + 1}"/>`).join('');
+    const relsPres = slides.map((_, i) =>
+      `<Relationship Id="rId${i + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slide" Target="slides/slide${i + 1}.xml"/>`).join('') +
+      `<Relationship Id="rId${n + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slideMaster" Target="slideMasters/slideMaster1.xml"/>`;
+
+    const entradas = [
+      { nome: '[Content_Types].xml', dados: bytesDe(
+        `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+<Default Extension="xml" ContentType="application/xml"/>
+<Default Extension="jpeg" ContentType="image/jpeg"/>
+<Default Extension="jpg" ContentType="image/jpeg"/>
+<Override PartName="/ppt/presentation.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.presentation.main+xml"/>
+<Override PartName="/ppt/slideMasters/slideMaster1.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.slideMaster+xml"/>
+<Override PartName="/ppt/slideLayouts/slideLayout1.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.slideLayout+xml"/>
+<Override PartName="/ppt/theme/theme1.xml" ContentType="application/vnd.openxmlformats-officedocument.theme+xml"/>
+${slides.map((_, i) => `<Override PartName="/ppt/slides/slide${i+1}.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.slide+xml"/>`).join('')}
+</Types>`) },
+      { nome: '_rels/.rels', dados: bytesDe(
+        `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="ppt/presentation.xml"/>
+</Relationships>`) },
+      { nome: 'ppt/presentation.xml', dados: bytesDe(
+        `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<p:presentation xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"
+ xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"
+ xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main">
+<p:sldMasterIdLst><p:sldMasterId id="2147483648" r:id="rId${n + 1}"/></p:sldMasterIdLst>
+<p:sldIdLst>${idsSlide}</p:sldIdLst>
+<p:sldSz cx="${SL_W}" cy="${SL_H}"/><p:notesSz cx="${SL_H}" cy="${SL_W}"/>
+</p:presentation>`) },
+      { nome: 'ppt/_rels/presentation.xml.rels', dados: bytesDe(
+        `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${relsPres}</Relationships>`) },
+      { nome: 'ppt/slideMasters/slideMaster1.xml', dados: bytesDe(
+        `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<p:sldMaster xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"
+ xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"
+ xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main">
+<p:cSld><p:bg><p:bgPr><a:solidFill><a:srgbClr val="FFFFFF"/></a:solidFill><a:effectLst/></p:bgPr></p:bg>
+<p:spTree><p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr>
+<p:grpSpPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/><a:chOff x="0" y="0"/><a:chExt cx="0" cy="0"/></a:xfrm></p:grpSpPr>
+</p:spTree></p:cSld>
+<p:clrMap bg1="lt1" tx1="dk1" bg2="lt2" tx2="dk2" accent1="accent1" accent2="accent2" accent3="accent3" accent4="accent4" accent5="accent5" accent6="accent6" hlink="hlink" folHlink="folHlink"/>
+<p:sldLayoutIdLst><p:sldLayoutId id="2147483649" r:id="rId1"/></p:sldLayoutIdLst>
+</p:sldMaster>`) },
+      { nome: 'ppt/slideMasters/_rels/slideMaster1.xml.rels', dados: bytesDe(
+        `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slideLayout" Target="../slideLayouts/slideLayout1.xml"/>
+<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/theme" Target="../theme/theme1.xml"/>
+</Relationships>`) },
+      { nome: 'ppt/slideLayouts/slideLayout1.xml', dados: bytesDe(
+        `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<p:sldLayout xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"
+ xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"
+ xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main" type="blank" preserve="1">
+<p:cSld name="Em branco"><p:spTree><p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr>
+<p:grpSpPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/><a:chOff x="0" y="0"/><a:chExt cx="0" cy="0"/></a:xfrm></p:grpSpPr>
+</p:spTree></p:cSld><p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></p:sldLayout>`) },
+      { nome: 'ppt/slideLayouts/_rels/slideLayout1.xml.rels', dados: bytesDe(
+        `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slideMaster" Target="../slideMasters/slideMaster1.xml"/>
+</Relationships>`) },
+      { nome: 'ppt/theme/theme1.xml', dados: bytesDe(temaOOXML()) }
+    ];
+
+    slides.forEach((xml, i) => {
+      entradas.push({ nome: `ppt/slides/slide${i + 1}.xml`, dados: bytesDe(xml) });
+      entradas.push({ nome: `ppt/slides/_rels/slide${i + 1}.xml.rels`, dados: bytesDe(
+        `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slideLayout" Target="../slideLayouts/slideLayout1.xml"/>
+${relsSlide[i]}</Relationships>`) });
+    });
+    midias.forEach(m => entradas.push(m));
+    return entradas;
+  }
+
+  /* Um tema mínimo, mas COMPLETO: o PowerPoint recusa o arquivo se faltar
+     qualquer uma das doze cores ou dos dois esquemas de fonte. */
+  function temaOOXML(){
+    const cores = ['dk1','FF000000','lt1','FFFFFFFF','dk2','FF1F2430','lt2','FFF7F8FB',
+                   'accent1','FF3A3F9E','accent2','FF5C6473','accent3','FF1E9E5A',
+                   'accent4','FFE08A1E','accent5','FFE0281E','accent6','FF7A3CE0',
+                   'hlink','FF3A3F9E','folHlink','FF7A3CE0'];
+    let clr = '';
+    for (let i = 0; i < cores.length; i += 2) {
+      const nome = cores[i], val = cores[i+1].slice(2);
+      clr += nome === 'dk1' || nome === 'lt1'
+        ? `<a:${nome}><a:sysClr val="${nome === 'dk1' ? 'windowText' : 'window'}" lastClr="${val}"/></a:${nome}>`
+        : `<a:${nome}><a:srgbClr val="${val}"/></a:${nome}>`;
+    }
+    const fonte = tipo => `<a:${tipo}><a:latin typeface="Aptos"/><a:ea typeface=""/><a:cs typeface=""/></a:${tipo}>`;
+    const preenche = `<a:solidFill><a:schemeClr val="phClr"/></a:solidFill>`;
+    const linha = `<a:ln w="6350"><a:solidFill><a:schemeClr val="phClr"/></a:solidFill><a:prstDash val="solid"/></a:ln>`;
+    return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<a:theme xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" name="Walkstamp">
+<a:themeElements>
+<a:clrScheme name="Walkstamp">${clr}</a:clrScheme>
+<a:fontScheme name="Walkstamp">${fonte('majorFont')}${fonte('minorFont')}</a:fontScheme>
+<a:fmtScheme name="Walkstamp">
+<a:fillStyleLst>${preenche}${preenche}${preenche}</a:fillStyleLst>
+<a:lnStyleLst>${linha}${linha}${linha}</a:lnStyleLst>
+<a:effectStyleLst><a:effectStyle><a:effectLst/></a:effectStyle><a:effectStyle><a:effectLst/></a:effectStyle><a:effectStyle><a:effectLst/></a:effectStyle></a:effectStyleLst>
+<a:bgFillStyleLst>${preenche}${preenche}${preenche}</a:bgFillStyleLst>
+</a:fmtScheme></a:themeElements><a:objectDefaults/><a:extraClrSchemeLst/></a:theme>`;
+  }
+
+  $('pptx').onclick = async () => {
+    const kept = frames.filter(f => f.keep);
+    if (!kept.length) return;
+    $('pptx').disabled = true;
+    $('pdfStatus').textContent = t('pkgBuilding');
+    await new Promise(r => setTimeout(r, 40));
+    try {
+      await aplicarTarjas(kept);
+      baixarBlob(zipar(montarPptx(),
+        'application/vnd.openxmlformats-officedocument.presentationml.presentation'),
+        nomeArquivo() + '.pptx');
+      medir('baixou_saida', { p_formato: 'pptx' });
+      $('pdfStatus').innerHTML = `<span class="ok">${t('pptxOk', kept.length)}</span>`;
+    } catch (e) {
+      $('pdfStatus').innerHTML = `<span class="err">${t('pkgErr', (e && e.message) || e)}</span>`;
+    } finally { $('pptx').disabled = false; }
+  };
+
   function montarDocx(){
     const kept = frames.filter(f => f.keep);
     const dur = duracaoTotal();
+    const linhasDoc = linhasDoDoc();          // é daqui que saem os capítulos
     const { cues, plain } = parseTranscript($('tr').value);
 
     const ev = evDados();
@@ -7825,6 +10271,10 @@ ${marcaSvg(46)}
 
       const { cx, cy } = medidaImagem(f.img);
       const hora = horaDe(f.t);
+      const cap = linhasDoc[i];
+      if (cap && cap.capAbre)
+        corpo.push(par(cap.capitulo + (cap.tarefa ? '   ·   ' + t('capTempo', cap.tarefa) : ''),
+                       { b: true, sz: 28, antes: 420, depois: 100 }));
       /* No passo a passo a anotação é o título do passo; na evidência ela é a
          expectativa e vem numa linha própria acima da imagem. Ver o comentário
          equivalente no PDF. */
@@ -8012,6 +10462,54 @@ ${marcaSvg(46)}
   $('vocLista').addEventListener('input', guardarVoc);
   $('vocModo').onclick = () => $('vocBox').classList.toggle('hide');
 
+  /* ---- tirar hesitações ----
+
+     Uma lista curta e conservadora por idioma. Conservadora de propósito: "é"
+     em português também é verbo, e apagar um verbo de uma evidência é pior do
+     que deixar um "é…". Por isso só sai a hesitação ISOLADA entre pontuação ou
+     seguida de reticências — o padrão em que o Whisper escreve titubeio. */
+  const HESITA = {
+    pt: ['é+','eh+','ééé+','hã+','ãh+','ahn+','hum+','uhm+','tipo assim','tipo,','né,','ahn'],
+    en: ['um+','uh+','erm+','hmm+','you know,','like,','i mean,'],
+    es: ['eh+','este,','o sea,','mmm+','pues,']
+  };
+  function tirarHesitacoes(texto, L){
+    const lista = HESITA[L] || HESITA.pt;
+    let n = 0;
+    const linhas = texto.split(/\n/).map(linha => {
+      /* Linha de tempo do VTT não é fala: mexer nela quebra a legenda. */
+      if (/-->/.test(linha) || /^WEBVTT/.test(linha) || /^\d+$/.test(linha.trim())) return linha;
+      let out = linha;
+      lista.forEach(h => {
+        const base = h.replace(/\+$/, '');
+        const corpo = base.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + (h.endsWith('+') ? '+' : '');
+        /* Isolada: precedida de começo/pontuação/espaço, e levando embora as
+           reticências que o Whisper cola no titubeio — senão sai "é..." e fica
+           "...", que é o mesmo estorvo com menos letras. */
+        const re = new RegExp('(^|[\\s,;:—-])' + corpo + '(?:\\s*(?:…|\\.{2,}))?(?=[\\s,.…]|$)', 'gi');
+        out = out.replace(re, (m, pre) => { n++; return pre; });
+      });
+      /* A limpeza da pontuação que sobra. Tirar "hã" de "eu vou, hã, abrir"
+         deixa "eu vou,, abrir" — e uma vírgula dupla numa evidência parece
+         defeito da ferramenta, que é o oposto do que ela vende. */
+      return out
+        .replace(/\s{2,}/g, ' ')
+        .replace(/\s+([,.;:!?])/g, '$1')
+        .replace(/([,;:])\s*(?=[,;:])/g, '')      // vírgula dupla vira uma só
+        .replace(/([:.])\s*[,;]+/g, '$1')          // "Microfone:, algo" volta a "Microfone: algo"
+        .replace(/^\s*[,.;:]+\s*/, '')
+        .replace(/,\s*\./g, '.')
+        .trimEnd();
+    });
+    return { texto: linhas.join('\n'), trocas: n };
+  }
+
+  function pintarHesitar(){
+    const el = $('hesitarNota'); if (!el) return;
+    el.classList.toggle('hide', $('modelo').value !== 'usabilidade' || !$('hesitar').checked);
+  }
+  $('hesitar').onchange = pintarHesitar;
+
   $('vocAplicar').onclick = () => {
     const termos = vocTermos();
     if (!termos.length) { $('vocMsg').innerHTML = `<span class="err">${t('vocVazio')}</span>`; return; }
@@ -8019,7 +10517,22 @@ ${marcaSvg(46)}
     if (!antes.trim()) { $('vocMsg').innerHTML = `<span class="err">${t('vocSemTexto')}</span>`; return; }
     const L = ($('lang').value || LANG || 'pt').slice(0, 2);
     const r = aplicarVocabulario(antes, termos, LETRAS[L] ? L : 'pt');
-    if (!r.trocas) { $('vocMsg').textContent = t('vocNada'); return; }
+    if (!r.trocas) {
+      /* Termo nenhum bateu — mas a pessoa pode ter marcado só a limpeza de
+         hesitação, e recusar tudo por causa do vocabulário seria engolir o
+         pedido dela. */
+      if ($('hesitar') && $('hesitar').checked) {
+        const rh = tirarHesitacoes(antes, LETRAS[L] ? L : 'pt');
+        if (rh.trocas) {
+          vocAntes = antes; $('tr').value = rh.texto; refreshTr();
+          $('vocDesfazer').classList.remove('hide');
+          $('vocMsg').innerHTML = `<span class="ok">${t('hesitarFeito', rh.trocas)}</span>`;
+          return;
+        }
+        $('vocMsg').textContent = t('hesitarNada'); return;
+      }
+      $('vocMsg').textContent = t('vocNada'); return;
+    }
     vocAntes = antes;
     $('tr').value = r.texto;
     refreshTr();
@@ -8032,7 +10545,13 @@ ${marcaSvg(46)}
       if (rn.trocas) { f.nota = rn.texto; extra += rn.trocas; }
     });
     if (extra) render();
-    $('vocMsg').innerHTML = `<span class="ok">${t('vocFeito', r.trocas + extra)}</span>`;
+    let hes = 0;
+    if ($('hesitar') && $('hesitar').checked) {
+      const rh = tirarHesitacoes($('tr').value, LETRAS[L] ? L : 'pt');
+      if (rh.trocas) { $('tr').value = rh.texto; refreshTr(); hes = rh.trocas; }
+    }
+    $('vocMsg').innerHTML = `<span class="ok">${t('vocFeito', r.trocas + extra)}</span>` +
+      (hes ? ' <span class="status">' + t('hesitarFeito', hes) + '</span>' : '');
     $('vocDesfazer').classList.remove('hide');
     medir('baixou_saida', { p_formato: 'vocabulario' });
   };
@@ -8150,6 +10669,7 @@ ${marcaSvg(46)}
     const PH = papel === 'letter' ? 279.4 : 297;
     const M = 15, CW = PW - M*2;
     const base = nomeArquivo();   // usado no nome do arquivo baixado
+    const linhasPdf = linhasDoDoc();          // é daqui que saem os capítulos
     let page = 0;
 
     /* A marca desenhada com primitivas, e não como imagem: são quatro
@@ -8359,9 +10879,23 @@ ${marcaSvg(46)}
            inteira — um documento de 40 passos com 40 páginas quase vazias. */
         const gapFim = (notaL.length || cabL.length > 1) ? 6.5 : 9;
         const cabH = 6 + (cabL.length - 1) * 5;
-        const blockH = cabH + notaL.length * 4.8 + (notaL.length ? 1.5 : 0) + ih0 +
+        /* O capítulo entra na conta da altura ANTES da quebra de página. Somar
+           depois colocaria o título de uma tarefa no rodapé de uma página e o
+           primeiro passo dela na seguinte, que é o único jeito de um capítulo
+           atrapalhar em vez de ajudar. */
+        const linCap = linhasPdf[i];
+        const capTxt = (linCap && linCap.capAbre)
+          ? linCap.capitulo + (linCap.tarefa ? '   ·   ' + t('capTempo', linCap.tarefa) : '') : '';
+        const capH = capTxt ? 12 : 0;
+        const blockH = capH + cabH + notaL.length * 4.8 + (notaL.length ? 1.5 : 0) + ih0 +
                        (cues.length ? 6 + lines.length * LH : 0) + ocrH + gapFim;
         if (yy + blockH > PH - 16) newPage();
+        if (capTxt) {
+          doc.setFont('helvetica','bold').setFontSize(13).setTextColor(58, 63, 158)
+             .text(capTxt, M, yy + 4);
+          doc.setDrawColor(220).line(M, yy + 6.6, PW - M, yy + 6.6);
+          yy += capH;
+        }
         doc.setFont('helvetica','bold').setFontSize(tut ? 11.5 : 11).setTextColor(25)
            .text(cabL, M, yy + 3, { lineHeightFactor: 1.28 });
         doc.setFont('helvetica','normal').setFontSize(8).setTextColor(150)

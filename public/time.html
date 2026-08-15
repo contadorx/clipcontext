@@ -66,6 +66,33 @@
         qualquer um da empresa abre, num canal público, num documento compartilhado com o cliente. Quem
         tem o link tem o plano — e este aqui está no seu nome.</p>
       </div>
+
+      <!-- O painel do administrador. Ele só existe para quem administra um
+           domínio, e o servidor decide isso pelo e-mail de dentro do token —
+           não por nada que esta página mande. -->
+      <div id="tmPainel" hidden style="margin-top:26px;border-top:1px solid var(--linha,#e6e6ef);padding-top:22px">
+        <h3 style="margin:0 0 6px">Administrar o seu time</h3>
+        <p class="small muted" style="margin:0 0 14px">Você administra <b id="tpDom"></b>. Aqui você vê quem tem acesso, corta quem saiu, e escolhe em quanto tempo um corte passa a valer.</p>
+        <div class="row" style="gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:14px">
+          <label class="small" for="tpDias">A licença vale por</label>
+          <input id="tpDias" type="number" min="1" max="90" style="width:82px;padding:6px 8px">
+          <span class="small muted">dias</span>
+          <label class="small" for="tpAssentos">Assentos contratados</label>
+          <input id="tpAssentos" type="number" min="1" max="500" style="width:82px;padding:6px 8px">
+          <button class="btn ghost" id="tpSalvar">Salvar</button>
+          <span class="small muted" id="tpMsg" role="status"></span>
+        </div>
+        <table class="tp" id="tpTab" style="width:100%;border-collapse:collapse;font-size:14px">
+          <thead><tr>
+            <th style="text-align:left;padding:6px 8px">Pessoa</th>
+            <th style="text-align:left;padding:6px 8px">Pediu</th>
+            <th style="text-align:left;padding:6px 8px">Vence</th>
+            <th style="text-align:right;padding:6px 8px"></th>
+          </tr></thead>
+          <tbody id="tpCorpo"></tbody>
+        </table>
+        <p class="small muted" style="margin:16px 0 0"><b>O que um bloqueio faz, e o que não faz.</b> Ele impede a <b>próxima</b> emissão — a chave que já está no navegador da pessoa continua valendo até vencer. Não existe corte instantâneo, e não vai existir: para isso a ferramenta teria que perguntar a um servidor se pode trabalhar, e aí ela pararia de funcionar na máquina de cliente com a rede trancada, que é onde ela mais precisa funcionar. <b>O prazo acima é o seu controle real:</b> em 7 dias, um corte vale numa semana; em 90, pode levar três meses.</p>
+      </div>
     </div>
 
     <h2>Como funciona por dentro</h2>
@@ -193,6 +220,7 @@
         };
         return diz(motivos[d.erro] || 'Não consegui emitir agora. Fale comigo em privacidade@walkstamp.com.', true);
       }
+      tokenVivo = token;
       $('tmPedir').hidden = true;
       $('tmPronto').hidden = false;
       $('tmUrl').textContent = d.link;
@@ -213,7 +241,82 @@
       diz('Não consegui falar com o emissor. Tente de novo em instantes.', true);
     }
   }
-  daVolta();
+
+  /* ---- o painel do administrador ----
+     Ele aparece depois da chave, e só se o servidor disser que este e-mail
+     administra um domínio. A página não decide isso: ela pergunta. */
+  const FNT = SUPA + '/functions/v1/walkstamp-time';
+  let tokenVivo = null;
+
+  const rotulos = { bloq: 'Bloquear', desbloq: 'Liberar' };
+
+  async function painel(corpo){
+    if (!tokenVivo) return null;
+    const r = await fetch(FNT, {
+      method: 'POST',
+      headers: { apikey: ANON, Authorization: 'Bearer ' + tokenVivo, 'Content-Type': 'application/json' },
+      body: JSON.stringify(corpo || { acao: 'listar' })
+    });
+    const d = await r.json().catch(() => ({}));
+    return (r.ok && d && !d.erro) ? d : null;
+  }
+
+  function pintarPainel(p){
+    if (!p) return;
+    $('tmPainel').hidden = false;
+    $('tpDom').textContent = p.cliente ? (p.cliente + ' (' + p.dominio + ')') : p.dominio;
+    $('tpDias').value = p.dias;
+    $('tpAssentos').value = p.assentos;
+    const corpo = $('tpCorpo');
+    corpo.innerHTML = '';
+    (p.pessoas || []).forEach(pes => {
+      const tr = document.createElement('tr');
+      tr.style.borderTop = '1px solid var(--linha,#e6e6ef)';
+      const td = (txt, dir) => {
+        const c = document.createElement('td');
+        c.style.padding = '7px 8px';
+        if (dir) c.style.textAlign = 'right';
+        c.textContent = txt;
+        return c;
+      };
+      const nome = td(pes.email + (pes.admin ? ' \u2022' : ''));
+      if (!pes.ativo) { nome.style.opacity = '.55'; nome.style.textDecoration = 'line-through'; }
+      tr.appendChild(nome);
+      tr.appendChild(td(pes.ultima_em ? String(pes.ultima_em).slice(0, 10) : '\u2014'));
+      tr.appendChild(td(pes.vence_em || '\u2014'));
+      const acao = document.createElement('td');
+      acao.style.cssText = 'padding:7px 8px;text-align:right';
+      /* O administrador não aparece com botão de bloquear a si mesmo: o
+         servidor recusaria, e um botão que sempre falha é pior que nenhum. */
+      if (!pes.admin || !pes.ativo) {
+        const b = document.createElement('button');
+        b.className = 'btn ghost';
+        b.style.cssText = 'padding:4px 10px;font-size:13px';
+        b.textContent = pes.ativo ? rotulos.bloq : rotulos.desbloq;
+        b.onclick = async () => {
+          b.disabled = true;
+          const novo = await painel({ acao: 'bloquear', email: pes.email, bloquear: pes.ativo });
+          b.disabled = false;
+          if (novo) pintarPainel(novo);
+        };
+        acao.appendChild(b);
+      }
+      tr.appendChild(acao);
+      corpo.appendChild(tr);
+    });
+  }
+
+  if ($('tpSalvar')) $('tpSalvar').onclick = async () => {
+    $('tpSalvar').disabled = true;
+    $('tpMsg').textContent = '\u2026';
+    const novo = await painel({ acao: 'ajustar',
+      dias: +$('tpDias').value || 90, assentos: +$('tpAssentos').value || 25 });
+    $('tpSalvar').disabled = false;
+    if (novo) { pintarPainel(novo); $('tpMsg').textContent = '\u2713'; }
+    else $('tpMsg').textContent = '\u2717';
+  };
+
+  daVolta().then(() => painel().then(pintarPainel));
 })();
 </script>
 
