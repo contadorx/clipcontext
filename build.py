@@ -88,6 +88,13 @@ CONTATO = "privacidade@walkstamp.com"
 # vazar — e aí é justamente o que se quer.
 # ---------------------------------------------------------------------------
 LIC_PUB = "sVXqPeioW7lkGRM2EPNSOadXCQNFGTBXLtzTknMSeYE"
+# A segunda chave pública: a do emissor AUTOMÁTICO (a função da Supabase que
+# manda o link por e-mail). São duas de propósito. A de cima assina qualquer
+# licença e a privada dela nunca sai da máquina do Leandro; a de baixo vive num
+# segredo da Supabase, e o navegador só aceita dela licenças curtas (até 100
+# dias) e pequenas (até 25 assentos). Se o servidor for comprometido, o estrago
+# máximo é um punhado de licenças de teste — nunca uma licença perpétua.
+LIC_PUB_AUTO = "XTO_Xcc5mByFV3tIcijyhjIaJZR-8cyf_HCb1npPtMs"
 
 G_CLIENT = ""   # ...apps.googleusercontent.com
 G_KEY    = ""
@@ -173,6 +180,7 @@ SLUGS = {
     "verificar":   {"pt": "verificar",   "en": "verify",      "es": "verificar"},
     "comparativo": {"pt": "comparativo",  "en": "compare",     "es": "comparativa"},
     "link":        {"pt": "link",        "en": "link",        "es": "link"},
+    "time":        {"pt": "time",        "en": "team",        "es": "equipo"},
     "steps":       {"pt": "substituto-do-steps-recorder",
                     "en": "steps-recorder-replacement",
                     "es": "alternativa-al-steps-recorder"},
@@ -296,6 +304,12 @@ def build_site(root: pathlib.Path) -> None:
                         "Build a link that opens Walkstamp with the case, the ticket and the system already filled in. Paste it into Zephyr, Jira, TestRail or a spreadsheet. Free, no integration, no sign-up."),
                  "es": (f"Un enlace listo para tu sistema de pruebas — {MARCA}",
                         "Arma un enlace que abre Walkstamp con el caso, el ticket y el sistema ya rellenados. Pégalo en Zephyr, Jira, TestRail o una hoja de cálculo. Gratis, sin integración y sin registro.")},
+        "time": {"pt": (f"Plano Time: receba seu link por e-mail — {MARCA}",
+                        "Informe seu e-mail e receba um link que ativa o plano Time no navegador do seu time. Teste de 14 dias, sem cadastro, sem senha e sem cartão."),
+                 "en": (f"Team plan: get your link by email — {MARCA}",
+                        "Enter your email and get a link that switches on the Team plan in your team's browser. 14-day trial, no sign-up, no password, no card."),
+                 "es": (f"Plan Equipo: recibe tu enlace por correo — {MARCA}",
+                        "Escribe tu correo y recibe un enlace que activa el plan Equipo en el navegador de tu equipo. Prueba de 14 días, sin registro, sin contraseña y sin tarjeta.")},
         "steps": {"pt": (f"O Steps Recorder acabou — o que usar no lugar | {MARCA}",
                          "O Gravador de Etapas do Windows foi descontinuado e nada que a Microsoft indica gera documento de passos. O que fazer."),
                   "en": (f"Steps Recorder is gone — what to use instead | {MARCA}",
@@ -477,6 +491,7 @@ def main() -> int:
     src = src.replace("__ICONV__", ICON_V)
     # a chave PÚBLICA da licença vale nos dois builds: ela só confere assinatura
     src = src.replace("__LICPUB__", LIC_PUB)
+    src = src.replace("__LICPUBAUTO__", LIC_PUB_AUTO)
     if MARKER not in src:
         print(f"marcador {MARKER} não encontrado em src/template.html", file=sys.stderr)
         return 1

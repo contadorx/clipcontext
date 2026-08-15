@@ -169,6 +169,27 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/link"/>
   </url>
   <url>
+    <loc>https://walkstamp.com/time</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/time"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/team"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/equipo"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/team"/>
+  </url>
+  <url>
+    <loc>https://walkstamp.com/en/team</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/time"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/team"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/equipo"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/team"/>
+  </url>
+  <url>
+    <loc>https://walkstamp.com/es/equipo</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/time"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/team"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/equipo"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/team"/>
+  </url>
+  <url>
     <loc>https://walkstamp.com/substituto-do-steps-recorder</loc>
     <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/substituto-do-steps-recorder"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/steps-recorder-replacement"/>

@@ -70,5 +70,11 @@ venv/
 .env.*
 
 # A chave PRIVADA que assina as licenças do plano Time. Se ela vazar, qualquer
-# pessoa emite licença e o plano pago deixa de existir.
+# pessoa emite licença e o plano pago deixa de existir. Guarda também o par do
+# emissor automático (o da função da Supabase).
 emitir-licenca.py
+
+# Como o plano Time é administrado: nomes de tabela, SQL de liberação e o
+# segredo que precisa estar na Supabase. Nada aqui é chave, mas é o mapa da
+# fechadura — e num repositório público isso é um convite.
+PLANO-TIME.md

@@ -98,6 +98,11 @@
   button:disabled{opacity:.62;cursor:not-allowed}
   button.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
   button.sm{padding:7px 13px;font-size:13px}
+  /* Um <a> que precisa parecer botão: é link de verdade porque abre outra
+     página, e abrir outra página com JavaScript quebra o clique do meio. */
+  a.btn{font:inherit;font-weight:550;border-radius:8px;padding:7px 13px;font-size:13px;
+        background:var(--accent);color:var(--accent-ink);text-decoration:none;display:inline-block}
+  a.btn:hover{filter:brightness(1.07)}
   .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
   video{width:100%;max-height:300px;background:#000;border-radius:8px;display:block}
   .meta{font-size:13px;color:var(--muted);margin-top:10px;display:flex;gap:18px;flex-wrap:wrap}
@@ -389,11 +394,26 @@
       <span class="status" id="diagStatus"></span>
     </div>
     <div class="hide" id="licBox" style="margin:8px 0 0">
+      <!-- O caminho normal é o LINK, e não uma chave digitada.
+
+           Uma chave de 200 caracteres colada num campo é a pior parte de um
+           produto que não tem cadastro: quem recebe não sabe o que é aquilo, o
+           e-mail quebra a linha no meio e a primeira experiência do plano pago
+           vira suporte. Quem coordena manda um endereço; quem abre já está
+           dentro. O campo continua existindo para quando o link chega mutilado. -->
+      <p class="status" id="licComo" data-i18n="licComo" style="max-width:660px;margin:0 0 8px"></p>
       <div class="row">
-        <input type="text" id="licChave" placeholder="WS1..." autocomplete="off" spellcheck="false"
-               style="flex:1;min-width:240px;font:12.5px ui-monospace,Menlo,Consolas,monospace">
-        <button class="ghost sm" id="licAtivar" data-i18n="licAtivar"></button>
+        <a class="btn sm" id="licPedir" href="https://walkstamp.com/time" target="_blank" rel="noopener"
+           data-i18n="licPedir"></a>
         <button class="ghost sm hide" id="licTirar" data-i18n="licTirar"></button>
+        <button class="ghost sm" id="licManual" data-i18n="licManual"></button>
+      </div>
+      <div class="hide" id="licManualBox" style="margin-top:8px">
+        <div class="row">
+          <input type="text" id="licChave" placeholder="WS1..." autocomplete="off" spellcheck="false"
+                 style="flex:1;min-width:240px;font:12.5px ui-monospace,Menlo,Consolas,monospace">
+          <button class="ghost sm" id="licAtivar" data-i18n="licAtivar"></button>
+        </div>
       </div>
       <p class="status" id="licMsg"></p>
       <p class="status" data-i18n="licNota" style="max-width:640px"></p>
@@ -1325,6 +1345,12 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       licVencida:'Esta licença venceu em {0}. Fale comigo para renovar — nada do que você já gerou deixa de funcionar.',
       licSemCripto:'Este navegador não sabe conferir a assinatura da chave. Use o Chrome ou o Edge atualizados.',
       licNota:'A chave é conferida aqui dentro, sem falar com servidor nenhum — funciona offline, e nós não ficamos sabendo que ela foi usada. Ela fica guardada neste navegador até você removê-la.',
+      licComo:'O jeito normal de entrar no plano Time é abrir o link que você recebeu: ele ativa o plano neste navegador e já traz o nome do cliente e os dados do teste preenchidos. Você monta esse link na página “Link pronto”.',
+      licManual:'tenho uma chave para colar',
+      licPedir:'Receber meu link por e-mail',
+      licPara:'· no nome de {0}',
+      licPorLink:'Plano Time ativado pelo link. A chave foi guardada neste navegador e tirada do endereço.',
+      licLinkRuim:'O link trazia uma chave que não confere: {0}',
       keepMarked:'Manter só as marcadas ({0})',
       keepMarkedN:'Mantidas as {0} telas que você marcou; {1} descartada(s).',
       autoJaFeito:'já transcrito ao vivo',
@@ -1682,6 +1708,12 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       licVencida:'This licence expired on {0}. Get in touch to renew — nothing you have already generated stops working.',
       licSemCripto:'This browser cannot verify the key signature. Use an up-to-date Chrome or Edge.',
       licNota:'The key is checked right here, without talking to any server — it works offline, and we never learn that it was used. It stays in this browser until you remove it.',
+      licComo:'The normal way into the Team plan is to open the link you were sent: it activates the plan in this browser and arrives with the client name and the test details already filled in. You build that link on the “Ready-made link” page.',
+      licManual:'I have a key to paste',
+      licPedir:'Get my link by email',
+      licPara:'· in the name of {0}',
+      licPorLink:'Team plan activated by the link. The key was stored in this browser and removed from the address.',
+      licLinkRuim:'The link carried a key that does not check out: {0}',
       keepMarked:'Keep only the marked ones ({0})',
       keepMarkedN:'Kept the {0} screens you marked; {1} discarded.',
       autoJaFeito:'already transcribed live',
@@ -2037,6 +2069,12 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       licVencida:'Esta licencia venció el {0}. Habla conmigo para renovar — nada de lo que ya generaste deja de funcionar.',
       licSemCripto:'Este navegador no sabe verificar la firma de la clave. Usa Chrome o Edge actualizados.',
       licNota:'La clave se verifica aquí mismo, sin hablar con ningún servidor — funciona sin conexión, y nosotros nunca nos enteramos de que se usó. Se queda en este navegador hasta que la quites.',
+      licComo:'La forma normal de entrar en el plan Equipo es abrir el enlace que te enviaron: activa el plan en este navegador y llega con el nombre del cliente y los datos de la prueba ya rellenados. Ese enlace se monta en la página “Enlace listo”.',
+      licManual:'tengo una clave para pegar',
+      licPedir:'Recibir mi enlace por correo',
+      licPara:'· a nombre de {0}',
+      licPorLink:'Plan Equipo activado por el enlace. La clave se guardó en este navegador y se quitó de la dirección.',
+      licLinkRuim:'El enlace traía una clave que no cuadra: {0}',
       keepMarked:'Mantener solo las marcadas ({0})',
       keepMarkedN:'Mantenidas las {0} pantallas que marcaste; {1} descartada(s).',
       autoJaFeito:'ya transcrito en vivo',
@@ -4673,6 +4711,11 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
      Funciona offline por construção — o que é o ponto: quem paga não pode passar
      a depender da nossa hospedagem para trabalhar. */
   const LIC_PUB = 'sVXqPeioW7lkGRM2EPNSOadXCQNFGTBXLtzTknMSeYE';
+  /* A segunda chave: a do emissor automático, que assina o link mandado por
+     e-mail. Ela existe para que o servidor NÃO precise da chave mestra — e por
+     isso o que ela assina vem com teto. Ver TETO_AUTO abaixo. */
+  const LIC_PUB_AUTO = 'XTO_Xcc5mByFV3tIcijyhjIaJZR-8cyf_HCb1npPtMs';
+  const TETO_AUTO = { dias: 100, assentos: 25 };
 
   const b64url = txt => {
     const s2 = txt.replace(/-/g, '+').replace(/_/g, '/');
@@ -4694,9 +4737,30 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       dados = JSON.parse(new TextDecoder().decode(corpo));
     } catch (e) { return { erro: t('licFormato') }; }
     try {
-      const pub = await crypto.subtle.importKey('raw', b64url(LIC_PUB), { name:'Ed25519' }, false, ['verify']);
-      const ok = await crypto.subtle.verify('Ed25519', pub, assinatura, corpo);
-      if (!ok) return { erro: t('licInvalida') };
+      /* Duas chaves públicas, conferidas na ordem: a mestra primeiro. Uma chave
+         que passa pela mestra não fica sujeita a teto nenhum — é o Leandro
+         emitindo à mão, e ele sabe o que está fazendo. */
+      const conferir = async pub64 => {
+        const pub = await crypto.subtle.importKey('raw', b64url(pub64), { name:'Ed25519' }, false, ['verify']);
+        return crypto.subtle.verify('Ed25519', pub, assinatura, corpo);
+      };
+      let quem = null;
+      if (await conferir(LIC_PUB)) quem = 'mestra';
+      else if (await conferir(LIC_PUB_AUTO)) quem = 'auto';
+      if (!quem) return { erro: t('licInvalida') };
+      /* O teto do emissor automático é conferido AQUI, e não só lá no servidor.
+         Uma regra que só existe do lado de quem assina não é uma regra: é uma
+         intenção. Se aquele projeto vazar, o que se pode fabricar com a chave
+         dele continua limitado ao que esta linha aceita. */
+      if (quem === 'auto') {
+        if (dados.s !== 'auto') return { erro: t('licInvalida') };
+        /* Arredondar para CIMA, e não para o mais próximo: a data de validade é
+           meia-noite, o relógio de agora não é, e com Math.round um prazo de
+           101 dias vira 100 e passa pela trava. Fração conta como dia inteiro. */
+        const dias = Math.ceil((new Date(dados.a + 'T00:00:00Z') - Date.now()) / 86400000);
+        if (dias > TETO_AUTO.dias || (dados.n || 0) > TETO_AUTO.assentos)
+          return { erro: t('licInvalida') };
+      }
     } catch (e) {
       /* Navegador sem Ed25519 no WebCrypto. Não dá para conferir, e conferir mal
          seria pior que não conferir: a licença simplesmente não ativa, com o
@@ -5194,7 +5258,13 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     $('licChave').classList.toggle('hide', ativo);
     $('licAtivar').classList.toggle('hide', ativo);
     if (ativo) $('licMsg').innerHTML =
-      `<span class="ok">${t('licValida', licenca.q, licenca.n, licenca.a)}</span>`;
+      `<span class="ok">${t('licValida', licenca.q, licenca.n, licenca.a)}</span>` +
+      /* A quem esta licença foi dada, escrito onde a pessoa vê. Não impede o
+         repasse — nada impede — mas faz o repasse ter nome, que é o que pesa
+         numa empresa. Fica só na tela: carimbar um e-mail pessoal no rodapé de
+         uma evidência entregue ao cliente é uma decisão de privacidade que não
+         é nossa para tomar. */
+      (licenca.e ? ` <span class="status">${t('licPara', licenca.e)}</span>` : '');
     if (typeof pintarMarcaCliente === 'function') pintarMarcaCliente();
   }
 
@@ -5265,19 +5335,97 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     pintarLicenca();
   };
 
+  $('licManual').onclick = () => {
+    const cx = $('licManualBox');
+    cx.classList.toggle('hide');
+    if (!cx.classList.contains('hide')) $('licChave').focus();
+  };
+
+  /* ---- ativação pelo link ----
+
+     `?lic=WS1.…` liga o plano Time neste navegador. É o mesmo objeto assinado
+     que se cola no campo — só chega por um caminho que a pessoa já sabe usar.
+
+     Duas decisões que parecem detalhe e não são:
+
+     A chave sai do endereço depois de conferida (`replaceState`). Um endereço
+     com a licença dentro é um endereço que vai parar num print de tela, no
+     histórico compartilhado da máquina de teste e no corpo de um chamado —
+     e ninguém decidiu isso. Ela fica guardada onde já ficava.
+
+     Chave ruim não é silêncio. Se o link chegou quebrado, o motivo aparece: a
+     alternativa é a pessoa achar que o plano ativou e descobrir na hora de
+     gerar o documento que não. */
+  async function licencaDaUrl(){
+    let q;
+    try { q = new URLSearchParams(location.search); } catch (e) { return false; }
+    const chave = q.get('lic');
+    if (!chave) return false;
+    const r = await conferirLicenca(chave);
+    if (r.dados) {
+      licenca = r.dados;
+      try { localStorage.setItem(LIC_CHAVE, chave.trim()); } catch (e) {}
+      medir('ativou_licenca', { p_via: 'link' });
+    }
+    /* Tira do endereço em qualquer caso — inclusive quando a chave é ruim.
+       Deixar uma chave inválida na barra não conserta nada e ainda a espalha. */
+    try {
+      q.delete('lic');
+      const busca = q.toString();
+      history.replaceState(null, '', location.pathname + (busca ? '?' + busca : '') + location.hash);
+    } catch (e) {}
+    if (r.erro) {
+      $('licBox').classList.remove('hide');
+      $('licMsg').innerHTML = `<span class="err">${t('licLinkRuim', r.erro)}</span>`;
+      return false;
+    }
+    return true;
+  }
+
   /* Ao abrir, reconfere o que está guardado — e não confia nele. Uma chave
      vencida ontem tem que parar de valer hoje sem ninguém fazer nada, e uma
      chave adulterada no localStorage não passa pela assinatura. */
   (async () => {
+    /* O link vem primeiro: é uma instrução de agora, e ganha do que estava
+       guardado de antes — a mesma regra que vale para os campos do teste. */
+    const veioDoLink = await licencaDaUrl();
+    if (veioDoLink) {
+      pintarLicenca();     // escreve a validade em #licMsg…
+      /* …e o aviso do link vem DEPOIS, senão pintarLicenca o apaga. A pessoa
+         precisa das duas coisas: para quem a licença vale, e que ela entrou
+         por um link e já está guardada aqui. */
+      $('licMsg').innerHTML = `<span class="ok">${t('licPorLink')}</span> ` + $('licMsg').innerHTML;
+      marcaDaUrl();
+      return;
+    }
     let guardada = null;
     try { guardada = localStorage.getItem(LIC_CHAVE); } catch (e) {}
-    if (!guardada) { pintarLicenca(); return; }
+    if (!guardada) { pintarLicenca(); marcaDaUrl(); return; }
     const r = await conferirLicenca(guardada);
     if (r.dados) licenca = r.dados;
     else { try { localStorage.removeItem(LIC_CHAVE); } catch (e) {} }
     pintarLicenca();
+    marcaDaUrl();
     if (r.erro) $('licMsg').innerHTML = `<span class="err">${r.erro}</span>`;
   })();
+
+  /* O nome do cliente também vem no link — e só faz efeito com o plano ativo,
+     porque é ele que desenha a marca no documento.
+
+     O logotipo NÃO vem: um endereço não carrega um arquivo, e apontar para uma
+     imagem na internet faria a ferramenta buscar algo de fora para colocar
+     dentro do documento. A promessa é que nada entra e nada sai; o logotipo
+     continua sendo um arquivo que a pessoa escolhe uma vez. */
+  function marcaDaUrl(){
+    if (!temTime()) return;
+    let q;
+    try { q = new URLSearchParams(location.search); } catch (e) { return; }
+    const nome = q.get('marca');
+    if (!nome) return;
+    marcaCliente.nome = nome.slice(0, 60).trim();
+    if ($('mcNome')) $('mcNome').value = marcaCliente.nome;
+    pintarMarcaCliente();
+  }
 
   $('limparModelo').onclick = async () => {
     $('limparModelo').disabled = true;

@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Team plan: get your link by email — Walkstamp</title>
+<meta name="description" content="Enter your email and get a link that switches on the Team plan in your team's browser. 14-day trial, no sign-up, no password, no card.">
+<link rel="canonical" href="https://walkstamp.com/en/team">
+<link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/time">
+<link rel="alternate" hreflang="en" href="https://walkstamp.com/en/team">
+<link rel="alternate" hreflang="es" href="https://walkstamp.com/es/equipo">
+<link rel="icon" href="/favicon.ico?v=3" sizes="any">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png?v=3">
+<link rel="stylesheet" href="/site.css">
+<script>window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments)};</script><script defer src="/_vercel/insights/script.js"></script>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <a class="brand" href="/en"><img src="/logo.svg" alt=""><span>Walk<b>stamp</b></span></a>
+    <nav>
+      <a href="/en#como" class="hide-sm">How it works</a>
+      <a href="/en/compare" class="hide-sm">Compare</a>
+      <a href="/en/precos" class="hide-xs">Pricing</a>
+      <a class="btnTop" href="/app?lang=en">Open the tool</a>
+      <span style="display:inline-flex;gap:9px;border-left:1px solid var(--line);padding-left:16px"><a href="/time?lang=pt">PT</a><a href="/en/team?lang=en" style="color:var(--ink);font-weight:600">EN</a><a href="/es/equipo?lang=es">ES</a></span>
+    </nav>
+  </div>
+</header>
+
+<section style="padding-top:60px">
+  <div class="wrap doc">
+    <h1 style="font-size:32px">Get your Team plan link</h1>
+    <p class="updated">You type your email, you get a link, you click it. The link switches on the
+    <b>Team plan</b> in the browser — and it is the same link you pass on to the rest of the team.<br>
+    <b>There is no sign-up, no password and no card.</b> The email does one job: prove the mailbox is
+    yours, and give us somewhere to send the renewal. It is the closest thing to a login this product
+    will ever have, and it happens <i>outside</i> the tool — inside it nothing changed: no video, audio
+    or document leaves your computer.</p>
+
+    <div class="linkBox">
+      <div id="tmPedir">
+        <label class="tmL" for="tmEmail">Your work email</label>
+        <div class="row" style="gap:9px;margin-top:6px;flex-wrap:wrap">
+          <input id="tmEmail" type="email" autocomplete="email" placeholder="you@company.com"
+                 style="flex:1;min-width:260px">
+          <button class="btn" id="tmEnviar">Send me the link</button>
+        </div>
+        <p class="small muted" id="tmMsg" role="status" style="margin:12px 0 0"></p>
+        <p class="small muted" style="margin:10px 0 0">If your company already subscribed, the link
+        arrives with the plan you bought and with the client name. If not, it arrives as a <b>14-day
+        trial</b> — once per email.</p>
+      </div>
+
+      <div id="tmPronto" hidden>
+        <p class="small muted" style="margin:0 0 6px"><b>Done.</b> <span id="tmQuem"></span></p>
+        <div class="lkSaida"><code id="tmUrl"></code></div>
+        <p class="row" style="gap:9px;margin-top:12px;flex-wrap:wrap">
+          <a class="btn" id="tmAbrir" href="#">Open Walkstamp with the plan switched on</a>
+          <button class="btn ghost" id="tmCopiar">Copy the link</button>
+          <span class="small muted" id="tmCopiado" role="status"></span>
+        </p>
+        <p class="small muted" style="margin:12px 0 0"><b>Where not to paste this link:</b> in a
+        ticket anyone in the company can open, in a public channel, in a document shared with the client.
+        Whoever holds the link holds the plan — and this one carries your name.</p>
+      </div>
+    </div>
+
+    <h2>How it works underneath</h2>
+    <ol class="passos">
+      <li><b>You ask.</b> Type your email here. Nothing is decided at this moment: a message goes out
+      to your mailbox, that is all.</li>
+      <li><b>You click what arrived.</b> That is what proves the address is yours — and it is the only
+      moment anything resembling a session exists.</li>
+      <li><b>You come back with the link ready.</b> The key is signed on the server, with your email
+      inside it, and handed over already wrapped in a Walkstamp address.</li>
+      <li><b>From then on, no network at all.</b> The key is checked <b>inside the browser</b>, against a
+      public key that sits in the tool's own HTML. It works on a plane, on the client machine with the
+      internet locked down, and on the computer IT will not let talk to our hosting.</li>
+    </ol>
+
+    <h2>Why the validity is short</h2>
+    <p>Each key issued lasts <b>90 days</b> (14 on the trial), and the next one arrives by email
+    before the previous expires. This is not bureaucracy: it is what makes a leaked link <b>die on its
+    own</b>. Since no server checks anything while you work, there is no revoke button — the deadline is
+    the revocation. It is a trade we chose on purpose: we would rather have a leak that expires than a
+    paid product that stops working when the internet drops.</p>
+
+    <h2>What is kept</h2>
+    <p>Your email, the plan it is entitled to, and the date of the last issue. That is all, and only
+    so we can renew and notice odd use. <b>The key itself is not stored</b> — it is signed and handed
+    over. Nothing you record, transcribe or generate passes through here: see the
+    <a href="/en/security" style="color:var(--accent)">security page</a> and the
+    <a href="/en/privacidade" style="color:var(--accent)">privacy policy</a>.</p>
+
+    <h2>Would rather not give the email?</h2>
+    <p>Then stay on the <b>free plan</b>, which does the whole job: record, transcribe, build the PDF,
+    the Word file and the verification package, plus the
+    <a href="https://walkstamp.com/en/link" style="color:var(--accent)">pre-filled link</a> for your test management
+    tool. What Team adds is on the
+    <a href="/en/precos" style="color:var(--accent)">pricing page</a>. And if you already hold a key, it
+    still works: in the tool, under <i>Activate the Team plan</i> → <i>I have a key to paste</i>.</p>
+  </div>
+</section>
+
+<style>
+.linkBox{border:1px solid var(--line);border-radius:12px;padding:22px;margin:26px 0 8px;background:var(--panel)}
+.tmL{font-size:13px;color:var(--muted)}
+#tmEmail{padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--bg);
+  color:var(--ink);font-size:15px;font-family:inherit}
+.lkSaida{border:1px solid var(--line);border-radius:8px;padding:12px 13px;background:var(--bg);overflow-x:auto}
+.lkSaida code{font:12.5px ui-monospace,Menlo,Consolas,monospace;color:var(--ink);white-space:pre-wrap;
+  word-break:break-all}
+</style>
+
+<script>
+(function () {
+  const $ = id => document.getElementById(id);
+  if (!$('tmEnviar')) return;
+
+  const SUPA = 'https://zyqncemxjobkvdveordz.supabase.co', ANON = 'sb_publishable_HQDSfL4rTtPx2wwbgh_huw_llog8ZJk';
+  const FN = SUPA + '/functions/v1/walkstamp-licenca';
+  const VOLTA = location.origin + location.pathname;
+
+  const diz = (txt, erro) => {
+    $('tmMsg').innerHTML = erro ? '<span style="color:#c0392b">' + txt + '</span>' : txt;
+  };
+
+  /* Pedir o link é um POST solto na API de autenticação — sem SDK. Um produto
+     que carrega 40 kB de biblioteca para mandar um e-mail está pagando caro por
+     uma linha de fetch, e cada kilobyte aqui é uma página que demora mais. */
+  $('tmEnviar').onclick = async () => {
+    const email = ($('tmEmail').value || '').trim().toLowerCase();
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+      return diz('That address does not look complete. Check it before sending.', true);
+    }
+    $('tmEnviar').disabled = true;
+    diz('Sending…');
+    try {
+      const r = await fetch(SUPA + '/auth/v1/otp?redirect_to=' + encodeURIComponent(VOLTA), {
+        method: 'POST',
+        headers: { apikey: ANON, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email, create_user: true })
+      });
+      if (r.ok) {
+        diz('<b>Sent.</b> Open the message at <b>' + email + '</b> and click the link inside it. ' +
+            'It arrives within seconds — if it does not, check the spam folder before asking again.');
+      } else {
+        const t = await r.text();
+        diz(/rate|limit/i.test(t)
+          ? 'Too many requests in a row for this address. Wait a few minutes and try again.'
+          : 'I could not send it right now. Try again shortly, or write to me at privacidade@walkstamp.com.', true);
+        $('tmEnviar').disabled = false;
+      }
+    } catch (e) {
+      diz('No connection to the sending service. Try again shortly.', true);
+      $('tmEnviar').disabled = false;
+    }
+  };
+  $('tmEmail').addEventListener('keydown', e => { if (e.key === 'Enter') $('tmEnviar').click(); });
+
+  /* A volta do link mágico traz os tokens no #fragmento — que, por ser
+     fragmento, não chega a servidor nenhum. Lemos, usamos e apagamos da barra. */
+  async function daVolta(){
+    const h = new URLSearchParams(location.hash.replace(/^#/, ''));
+    const token = h.get('access_token');
+    if (!token) {
+      if (h.get('error_description')) {
+        diz('The link from the email did not hold: ' + h.get('error_description') +
+            '. Ask for another one below.', true);
+        history.replaceState(null, '', VOLTA);
+      }
+      return;
+    }
+    history.replaceState(null, '', VOLTA);
+    diz('Checked. Issuing your key…');
+    try {
+      const r = await fetch(FN, {
+        method: 'POST',
+        headers: { apikey: ANON, Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
+        body: '{}'
+      });
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok || !d.link) {
+        const motivos = {
+          teste_usado: 'This email already used the 14-day trial. To go on with the Team plan, write to me at privacidade@walkstamp.com.',
+          suspensa:    'This account is suspended. Write to me at privacidade@walkstamp.com.',
+          sem_sessao:  'The link from the email expired. Ask for another one below.',
+          sem_segredo: 'The issuer is down. Write to me at privacidade@walkstamp.com.'
+        };
+        return diz(motivos[d.erro] || 'I could not issue it right now. Write to me at privacidade@walkstamp.com.', true);
+      }
+      $('tmPedir').hidden = true;
+      $('tmPronto').hidden = false;
+      $('tmUrl').textContent = d.link;
+      $('tmAbrir').href = d.link;
+      $('tmQuem').textContent = 'Licence for ' + d.assentos + ' person(s), issued to ' + d.email +
+                                ', valid until ' + d.vence + '.';
+      $('tmCopiar').onclick = async () => {
+        try {
+          await navigator.clipboard.writeText(d.link);
+          $('tmCopiado').textContent = 'Copied.';
+        } catch (e) {
+          const rg = document.createRange(); rg.selectNodeContents($('tmUrl'));
+          const s = getSelection(); s.removeAllRanges(); s.addRange(rg);
+          $('tmCopiado').textContent = 'I selected the link — copy it with Ctrl+C.';
+        }
+      };
+    } catch (e) {
+      diz('I could not reach the issuer. Try again shortly.', true);
+    }
+  }
+  daVolta();
+})();
+</script>
+
+
+<footer>
+  <div class="wrap">
+    <div>
+      <a href="/app?lang=en">Open the tool</a>
+      <a href="/en/precos">Pricing</a>
+      <a href="/en/compare">Compare</a>
+      <a href="/en/security">Security</a>
+      <a href="/en/verify">Check evidence</a>
+      <a href="/en/privacidade">Privacy</a>
+      <a href="/en/termos">Terms</a>
+      <a href="/en/steps-recorder-replacement">Steps Recorder replacement</a>
+    </div>
+    <div>Walkstamp — free tool, no ads, no sign-up</div>
+  </div>
+</footer>
+
+<script src="/support.js"></script>
+</body>
+</html>
