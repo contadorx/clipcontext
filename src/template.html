@@ -767,6 +767,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       modelLimpando:'Apagando o modelo guardado e baixando de novo…',
       trocandoMotor:'Trocando a versão do motor e tentando de novo…',
       trAoVivoFim:'Transcrição feita ao vivo: {0} trechos. O texto está aqui embaixo e pode ser corrigido.',
+      extraJunto:'Varrendo os frames ao mesmo tempo que a transcrição — os dois usam partes diferentes da máquina, então ir junto é mais rápido do que um depois do outro.',
       keepMarked:'Manter só as marcadas ({0})',
       keepMarkedN:'Mantidas as {0} telas que você marcou; {1} descartada(s).',
       autoJaFeito:'já transcrito ao vivo',
@@ -1074,6 +1075,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       modelLimpando:'Clearing the stored model and downloading it again…',
       trocandoMotor:'Switching the engine version and trying again…',
       trAoVivoFim:'Transcribed live: {0} segments. The text is below and can be corrected.',
+      extraJunto:'Scanning frames at the same time as the transcription — the two use different parts of the machine, so together is faster than one after the other.',
       keepMarked:'Keep only the marked ones ({0})',
       keepMarkedN:'Kept the {0} screens you marked; {1} discarded.',
       autoJaFeito:'already transcribed live',
@@ -1379,6 +1381,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       modelLimpando:'Borrando el modelo guardado y descargándolo de nuevo…',
       trocandoMotor:'Cambiando la versión del motor y probando de nuevo…',
       trAoVivoFim:'Transcripción hecha en vivo: {0} fragmentos. El texto está abajo y se puede corregir.',
+      extraJunto:'Barriendo los fotogramas a la vez que la transcripción — los dos usan partes distintas de la máquina, así que juntos es más rápido que uno tras otro.',
       keepMarked:'Mantener solo las marcadas ({0})',
       keepMarkedN:'Mantenidas las {0} pantallas que marcaste; {1} descartada(s).',
       autoJaFeito:'ya transcrito en vivo',
@@ -4281,6 +4284,26 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   $('auto').onclick = async () => {
     if (!currentFile) return;
     const modelId = $('model').value, lang = $('lang').value;
+
+    /* Varrer os frames JUNTO, e não depois.
+
+       Os dois trabalhos não disputam nada: a transcrição lê o áudio do arquivo
+       pelo AudioContext e, com o proxy ligado, roda num worker do runtime; a
+       varredura busca posições no elemento <video> e desenha num canvas. São
+       decodificadores diferentes e não há trava entre eles — só a numeração dos
+       passos 2 e 3 sugeria uma fila que nunca existiu.
+
+       O ganho é aproximadamente o menor dos dois tempos: num vídeo longo, onde
+       a transcrição domina, a varredura sai de graça.
+
+       Regras de bom senso: só dispara se ainda não houver frames (não refaz o
+       que a pessoa já fez, nem apaga escolhas dela) e só se a varredura não
+       estiver em curso. Se falhar, falha sozinha — a transcrição não pode cair
+       por causa de uma varredura em segundo plano. */
+    if (!frames.length && !$('extract').disabled && !liveDur) {
+      $('status').textContent = t('extraJunto');
+      Promise.resolve().then(() => $('extract').click()).catch(() => {});
+    }
     /* O botão desabilitado e mudo deixava a pessoa sem saber se algo estava
        acontecendo — e a transcrição de um vídeo longo leva minutos. Agora ele
        diz o que está fazendo, e a linha ao lado diz o que ela pode fazer. */

@@ -789,3 +789,43 @@ Agora ela tem porcentagem, contagem de trechos e previsão. Três decisões:
   cartão 2, que naquele momento ainda pode estar dobrado. Barra escondida é o mesmo que barra
   nenhuma.
 - **A porcentagem também vai para a linha de status da gravação**, que é onde os olhos já estão.
+
+### Duas perguntas do Leandro, respondidas com medição
+
+**"Qual a vantagem do worker próprio? Teríamos ganho de performance?"**
+
+Praticamente nenhum. O `proxy` do onnxruntime já tirou a inferência do fio principal, e um worker
+nosso rodaria **os mesmos núcleos wasm nas mesmas linhas** — o cálculo não fica mais rápido por
+mudar de dono. O que sobraria no fio principal é o preparo do áudio (espectrograma e tokenização),
+algo entre 50 e 150 ms por janela. Real, mas pequeno perto dos segundos da inferência.
+
+O que um worker próprio daria de verdade é **controle**: poder matar e recriar uma sessão travada
+sem recarregar a página. O custo seria refazer dentro do worker a escada de ambientes, a combinação
+lembrada e a limpeza de cache — dias de trabalho por um ganho de velocidade que não existe.
+Decisão: não fazer. Se voltar a engasgar, o passo certo é mover **só o preparo do áudio**, que é
+pequeno.
+
+**"Preciso transcrever e depois extrair os frames? Não daria para fazer em paralelo?"**
+
+Daria — e já dava. Os dois trabalhos nunca disputaram nada: a transcrição lê o áudio do arquivo
+pelo `AudioContext` e roda no worker do runtime; a varredura busca posições no `<video>` e desenha
+num canvas. Decodificadores diferentes, nenhuma trava entre eles. **A única coisa que sugeria uma
+fila era a numeração dos passos 2 e 3.**
+
+Medido no teste `paralelo.mjs`: em série 1,1 s, junto 0,8 s — **27% no cenário mínimo**. Num vídeo
+longo, onde a transcrição domina, a varredura sai praticamente de graça: o ganho tende ao menor dos
+dois tempos.
+
+Agora clicar em **Transcrever** dispara a varredura junto, com uma linha explicando. Três regras de
+bom senso: só dispara se ainda não houver frames (não refaz o que a pessoa fez nem apaga escolhas
+dela), só se a varredura não estiver em curso, e se falhar falha sozinha — a transcrição não pode
+cair por causa de uma varredura em segundo plano.
+
+Na gravação de tela isso já acontecia desde sempre: os frames são capturados enquanto o áudio é
+transcrito em janelas. A fila só existia no caminho do arquivo.
+
+Uma nota de método sobre o teste: a primeira versão media também "clicar nos dois à mão", e dava
+**pior**. O motivo era o próprio teste — com o disparo automático em vigor, o segundo clique
+reiniciava a varredura do zero, e o teste media o trabalho duas vezes. Na tela ninguém consegue
+fazer isso, porque o botão fica desabilitado enquanto a varredura corre. Um teste que mede o que o
+produto não permite não mede nada; esse caso saiu.
