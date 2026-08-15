@@ -100,8 +100,18 @@ G_CLIENT = ""   # ...apps.googleusercontent.com
 G_KEY    = ""
 G_APP    = ""
 
-SUPA_URL = "https://zyqncemxjobkvdveordz.supabase.co"
-SUPA_KEY = "sb_publishable_HQDSfL4rTtPx2wwbgh_huw_llog8ZJk"
+# Projeto PRÓPRIO do Walkstamp, na organização Softaria (região sa-east-1).
+# Antes era o projeto do SalaVox, emprestado: dois produtos no mesmo banco, na
+# mesma conta de e-mail e nos mesmos limites. Separado, cada um cresce sem
+# atropelar o outro — e o dia em que um for vendido, migrado ou desligado não
+# arrasta o outro junto.
+#
+# Estas duas linhas são PÚBLICAS por construção: a chave publicável é a chave
+# anônima, e só consegue chamar duas funções que apenas INSEREM (medição e lista
+# de aviso). Ler a lista de e-mails ou a tabela de licenças é privilégio do
+# service_role, que nunca sai do servidor.
+SUPA_URL = "https://kjlnyyblhanficgpends.supabase.co"
+SUPA_KEY = "sb_publishable_J78bnm05t_zuzcLQ65pW-A_9K3HtU81"
 
 # Snippet oficial do Vercel para site em HTML puro. O `window.va` enfileira
 # chamadas feitas antes do script chegar; o script cuida do resto.
