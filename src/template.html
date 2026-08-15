@@ -181,7 +181,12 @@
   .evPe+.evPe{padding-top:0}
   .evPe label{cursor:pointer;color:var(--ink)}
   .evPe input[type=checkbox]{accent-color:var(--accent);margin-right:7px;vertical-align:-1px}
-  .hide{display:none}
+  /* `!important` porque .hide é utilitário: ele precisa ganhar de qualquer
+     regra de mesma especificidade que apareça DEPOIS dele na folha. Sem isso,
+     esconder um `label.chk` não funcionava — `.chk{display:inline-flex}` está
+     mais abaixo e vencia por ordem de origem. O tipo de defeito que não dá
+     erro, não aparece em revisão de código e só se vê na tela. */
+  .hide{display:none !important}
   .note{font-size:13px;color:var(--muted);border-left:3px solid var(--line);padding:2px 0 2px 12px;margin-top:14px}
   .note b{color:var(--warn)}
   .ok{color:var(--accent);font-weight:550}
@@ -3408,9 +3413,11 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     return out;
   }
 
-  // O .wasm do runtime NÃO fica no pacote do transformers.js — ele vive no pacote
-  // onnxruntime-web. Apontar para a pasta errada dá 404 e o erro chega como
-  // "Failed to fetch". Testamos os endereços possíveis e usamos o primeiro que responder.
+  // Endereços alternativos do runtime, para o caso do endereço de fábrica sair
+  // do ar. NÃO são o caminho padrão: a versão que a biblioteca traz é a que
+  // combina com ela, e trocá-la por fora foi o que produziu "Missing required
+  // scale" em todos os degraus de uma máquina com a rede perfeita. Só o último
+  // degrau da fila usa isto.
   const WASM_BASES = [
     'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.26.0-dev.20260416-b7804b056c/dist/',
     'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.23.0/dist/',
@@ -3449,14 +3456,33 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   const linhasDoWasm = () =>
     quantasLinhas(navigator.hardwareConcurrency, !!self.crossOriginIsolated);
 
+  /* O endereço de wasm que a biblioteca traz de fábrica, guardado antes de
+     qualquer troca. Ele é o certo por definição: cada versão do transformers.js
+     é publicada contra uma versão específica do onnxruntime-web, e o pacote já
+     aponta para ela.
+
+     Trocar esse endereço por fora — que era o que esta função fazia sempre —
+     é montar um runtime de uma versão com a cola de outra. O sintoma que isso
+     produziu numa máquina real: os TRÊS degraus falhando com a mesma linha,
+     `TransposeDQWeightsForMatMulNBits Missing required scale`, enquanto o
+     diagnóstico mostrava rede perfeita, WebGPU disponível e os 78,6 MB do peso
+     baixando sem erro. O erro não vinha do arquivo do modelo nem da rede: vinha
+     do otimizador de grafo do runtime trocado.
+
+     A sondagem continua existindo, mas virou plano B: só entra se o endereço
+     de fábrica falhar. */
+  let wasmPadrao;
+
   async function loadLib(){
     const mod = await importarTjs();
     mod.env.allowLocalModels = false;
     mod.env.allowRemoteModels = true;
-    const base = await findWasmBase();
     try {
       const w = mod.env.backends && mod.env.backends.onnx && mod.env.backends.onnx.wasm;
-      if (w) { w.numThreads = linhasDoWasm(); if (base) w.wasmPaths = base; }
+      if (w) {
+        if (wasmPadrao === undefined) wasmPadrao = w.wasmPaths;
+        w.numThreads = linhasDoWasm();
+      }
     } catch (e) {}
     return mod;
   }
@@ -3548,9 +3574,11 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   /* "placa de vídeo · decodificador q4" — o rótulo que aparece no diagnóstico.
      Sem ele, quatro linhas dizendo só "processador" seriam indistinguíveis. */
   function rotuloTentativa(tent){
-    const d = tent.opcoes.dtype;
-    const tipo = typeof d === 'string' ? d : (d && d.decoder_model_merged) || '?';
-    return (tent.opcoes.device || 'automático') + ' · decodificador ' + tipo;
+    const dt = tent.opcoes.dtype;
+    const tipo = typeof dt === 'string' ? dt : (dt && dt.decoder_model_merged) || '?';
+    return (tent.opcoes.device || 'automático') + ' · decodificador ' + tipo +
+           (tent.semOtim ? ' · sem otimização' : '') +
+           (tent.sondar  ? ' · runtime alternativo' : '');
   }
 
   const MOTOR_CHAVE = '__MARCA__.semQ4';
@@ -3621,7 +3649,29 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
        um resultado só. Foi o que aconteceu na máquina que reportou
        "já tentei as alternativas e nenhuma subiu". */
     tentativas.push({ motor: 'processador', opcoes: { device:'wasm', dtype:'q8' } });
+    /* Sem otimização de grafo. `TransposeDQWeightsForMatMulNBits` mora em
+       `qdq_actions.cc`, que é OTIMIZADOR — o erro não vem de ler o arquivo, vem
+       de reescrever o grafo depois de lido. Desligar a otimização pula
+       exatamente a transformação que quebra. Custa alguma velocidade, e
+       velocidade que roda vale mais que velocidade que não sobe. */
+    tentativas.push({ motor: 'processador', semOtim: true,
+      opcoes: { device:'wasm', dtype:'q8',
+                session_options:{ graphOptimizationLevel:'disabled' } } });
     tentativas.push({ motor: 'processador', opcoes: { device:'wasm', dtype:'fp32' } });
+    /* Último recurso: o runtime sondado no CDN, que era o comportamento padrão
+       até 15/08/2026. Fica por último de propósito — ele resolve o caso em que
+       o endereço de fábrica saiu do ar, e causa o caso em que a versão não bate
+       com a da biblioteca. */
+    tentativas.push({ motor: 'processador', sondar: true,
+      opcoes: { device:'wasm', dtype:'q8' } });
+    /* Resgate pela placa de vídeo. Se todos os degraus de processador caírem e
+       a máquina TIVER WebGPU, vale tentar por lá antes de dizer que não deu —
+       o caminho da placa não passa pelo otimizador de grafo do wasm, que é
+       justamente onde a montagem quebra nessas máquinas. Custa mais download,
+       e é por isso que ele é o último e não o primeiro: só entra quando a
+       alternativa é ficar sem transcrição. */
+    if (!usaPlaca() && navigator.gpu) tentativas.push({ motor: 'placa de vídeo',
+      opcoes: { device:'webgpu', dtype:{ encoder_model:'fp32', decoder_model_merged:'fp32' } } });
 
     /* Degrau de linhas, dentro de cada tentativa.
 
@@ -3641,6 +3691,13 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
 
     for (let i = 0; i < tentativas.length; i++) {
       const tent = tentativas[i];
+      /* A troca de runtime é por degrau, e não uma decisão global feita antes
+         de saber se ela era necessária. */
+      if (wasm) {
+        try {
+          wasm.wasmPaths = tent.sondar ? (await findWasmBase()) || wasmPadrao : wasmPadrao;
+        } catch (e) {}
+      }
       for (let passe = 0; passe < 2; passe++) {
         try {
           const pp = await mod.pipeline('automatic-speech-recognition', modelId,
@@ -3780,7 +3837,20 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     }
   };
 
-  if ($('gpu')) $('gpu').onchange = mostrarTamanho;
+  /* A caixa da placa de vídeo some onde não há WebGPU: oferecer um atalho que
+     a máquina não tem é só uma forma de fazer a pessoa tentar e não entender o
+     resultado.
+
+     Ela continua DESMARCADA por padrão, e isso é deliberado: o caminho da placa
+     baixa 206 MB contra 77 MB do processador, e encarecer o primeiro uso de
+     todo mundo para acelerar alguns seria pagar no lugar errado. Quem tem placa
+     e quer velocidade marca. Quem não marca e cai no defeito do wasm é
+     resgatado automaticamente — a fila de montagem tenta a placa por conta
+     própria no fim, antes de desistir. */
+  if ($('gpu')) {
+    $('gpu').closest('label').classList.toggle('hide', !navigator.gpu);
+    $('gpu').onchange = mostrarTamanho;
+  }
   $('model').onchange = mostrarTamanho;
   mostrarTamanho();
 
@@ -3823,7 +3893,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       catch (e) { say('wasm opção ' + (i+1) + '  : FALHOU -> ' + (e && e.message)); }
     }
     const b = await findWasmBase();
-    say('wasm em uso   : ' + (b || 'nenhum respondeu — usando o padrão da biblioteca'));
+    say('wasm de fábrica: ' + (wasmPadrao === undefined ? '(a biblioteca resolve sozinha)' : wasmPadrao));
+    say('wasm reserva  : ' + (b || 'nenhum respondeu'));
 
     say('');
     say('vídeo de exemplo:');

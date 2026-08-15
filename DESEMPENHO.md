@@ -261,3 +261,63 @@ frase, a configuração perdida ficaria invisível e voltaria como "está lento"
 O que continua na fila, e por quê: **compactar a fala** (o maior ganho possível, e o mais perigoso, por
 causa do remapeamento de instantes) e **sobreposição nas emendas de 30 s** (custa velocidade, e a troca
 atual está feita a favor da velocidade sem ninguém ter decidido).
+
+---
+
+## 15/08/2026 — por que o modelo não montava numa máquina com tudo verde
+
+Um relatório de diagnóstico real, de uma máquina Windows com Chrome 151, mostrava **tudo
+funcionando**: WebGPU disponível, `crossOriginIsolated=true`, biblioteca carregada, `config.json`
+do modelo em HTTP 200, os 78,6 MB do peso baixando em GET puro, e os três endereços de wasm
+respondendo 206. E os três degraus de montagem falhando com a mesma linha:
+
+```
+Can't create a session. ERROR_CODE: 1, ERROR_MESSAGE: qdq_actions.cc:137
+TransposeDQWeightsForMatMulNBits Missing required scale:
+model.decoder.embed_tokens.weight_merged_0_scale
+```
+
+Duas pistas dizem onde o defeito está, e nenhuma delas é a rede:
+
+**`qdq_actions.cc` é otimizador de grafo**, não leitor de arquivo. O erro acontece *depois* de ler
+o modelo, quando o runtime reescreve o grafo. Não é download corrompido nem 404.
+
+**O degrau `fp32` falhou com um erro de `MatMulNBits`**, que é uma operação de 4 bits. Um degrau
+sem compressão não deveria nem passar perto dessa operação. Quando três configurações diferentes
+falham identicamente, o que elas têm em comum não são as configurações — é o runtime.
+
+E o runtime era o problema. O `findWasmBase()` sondava três endereços de `onnxruntime-web` e usava
+**o primeiro que respondesse** — que era um build `1.26.0-dev`. Só que cada versão do
+`transformers.js` é publicada contra uma versão específica do `onnxruntime-web`, e o pacote já
+aponta para ela. Trocar esse endereço por fora é montar um motor com a caixa de câmbio de outro
+carro: tudo carrega, nada anda.
+
+### O que mudou
+
+**O endereço de fábrica virou o padrão.** A sondagem continua, mas como plano B — ela existe para o
+caso do endereço padrão sair do ar, não para substituí-lo por rotina.
+
+**A fila de degraus ganhou duas saídas novas**, e agora é, no caminho do processador:
+
+1. `q8` com o runtime de fábrica
+2. `q8` **sem otimização de grafo** (`graphOptimizationLevel: 'disabled'`) — pula exatamente a
+   transformação que quebra, ao custo de alguma velocidade
+3. `fp32` com o runtime de fábrica
+4. `q8` com o runtime sondado — o comportamento antigo, agora por último
+5. **resgate pela placa de vídeo**, se a máquina tiver WebGPU e a pessoa não a tiver marcado: o
+   caminho da placa não passa pelo otimizador do wasm. Custa 206 MB em vez de 77, e é por isso que
+   ele é o último degrau e não o primeiro — só entra quando a alternativa é ficar sem transcrição
+
+Cada degrau ainda repete com uma linha só antes de desistir, pelo motivo de sempre (COEP barrando o
+Worker do CDN).
+
+**A caixa "usar a placa de vídeo" some onde não há WebGPU.** Ela continua desmarcada por padrão:
+encarecer o primeiro download de todo mundo de 77 para 206 MB, para acelerar alguns, seria pagar no
+lugar errado.
+
+### Um defeito de CSS achado no caminho
+
+Esconder essa caixa não funcionava. `.hide{display:none}` estava **acima** de
+`.chk{display:inline-flex}` na folha, e com a mesma especificidade quem vence é a última — então
+`label.chk.hide` continuava visível. `.hide` passou a ser `!important`, que é o que um utilitário
+precisa ser. O defeito não dava erro, não aparecia em revisão e só se via na tela.
