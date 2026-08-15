@@ -69,6 +69,12 @@
   .dobra > div{overflow:hidden;min-height:0}
   .card.fechado .dobra{grid-template-rows:0fr}
   .card.fechado{padding-bottom:20px}
+  /* Discretas de propósito: são ferramentas de exceção, e não o caminho que a
+     pessoa deve seguir. Mas sempre visíveis — ver o comentário no HTML. */
+  .ferramentas{margin:2px 0 0;gap:8px}
+  .ferramentas button{font-size:12px;padding:4px 10px;opacity:.75}
+  .ferramentas button:hover{opacity:1}
+  .card.fechado .ferramentas{margin-top:6px}
   @media (prefers-reduced-motion:reduce){ .dobra{transition:none} }
   [inert]{opacity:.45;filter:saturate(.4)}
   .lockHint{margin:-6px 0 14px;font-size:13px;color:var(--muted);
@@ -343,6 +349,17 @@
   <div class="card" id="cardTr">
     <h2><span class="step">2</span><span data-i18n="s2"></span></h2>
     <p class="lockHint hide" id="hintTr"></p>
+    <!-- Fora da dobra de propósito. Estes dois botões são as ferramentas de
+         quem está com problema — e o cartão 2 fica TRAVADO justamente quando há
+         problema (sem vídeo no passo 1, o cartão colapsa e tudo que está dentro
+         dele é recortado por overflow:hidden). O diagnóstico ficava
+         inalcançável exatamente na hora em que era preciso. -->
+    <div class="row ferramentas">
+      <button class="ghost sm" id="diag" data-i18n="diagBtn"></button>
+      <button class="ghost sm" id="limparModelo" data-i18n="limparBtn"></button>
+      <span class="status" id="diagStatus"></span>
+    </div>
+    <pre id="diagOut" class="hide"></pre>
     <div class="dobra"><div>
 
     <div id="trAuto">
@@ -362,10 +379,7 @@
         </select>
         <label class="chk"><input type="checkbox" id="trEn"><span data-i18n="trEnLbl"></span></label>
         <label class="chk"><input type="checkbox" id="gpu"><span data-i18n="gpuLbl"></span></label>
-        <button class="ghost sm" id="diag" data-i18n="diagBtn"></button>
-        <button class="ghost sm" id="limparModelo" data-i18n="limparBtn"></button>
       </div>
-      <pre id="diagOut" class="hide"></pre>
       <div class="bar hide" id="abarWrap"><i id="abar"></i></div>
       <div class="status" id="astatus"></div>
       <div class="status" id="autoDica"></div>
@@ -3359,6 +3373,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
         motivosFrame.video = video.videoWidth + '×' + video.videoHeight;
         motivosFrame.limite_max = maxf;
         motivosFrame.passo_ms = PASSO_FRAME_MS;
+        guardarMotivos();
       }
       emCauda = true; pularCauda = false;
       $('recStop').textContent = t('recSkip');
@@ -3817,8 +3832,19 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      máquina onde a rede ESTÁ boa e o modelo não abre não ajuda ninguém. */
   let degraus = [], ultimoErroModelo = '';
   /* Ver o comentário em `capturar`. Fica no escopo do módulo porque o
-     diagnóstico e a mensagem de fim o leem depois que a gravação acabou. */
-  let motivosFrame = null;
+     diagnóstico e a mensagem de fim o leem depois que a gravação acabou.
+
+     E vai para o sessionStorage porque quem grava, vê que deu errado e recarrega
+     a página perderia justamente o relatório que veio buscar. Morre com a aba,
+     como o resto: são contadores de tela, não conteúdo. */
+  const FRAMES_CHAVE = 'Walkstamp.ultimaCaptura';
+  let motivosFrame = (() => {
+    try { return JSON.parse(sessionStorage.getItem(FRAMES_CHAVE) || 'null'); }
+    catch (e) { return null; }
+  })();
+  const guardarMotivos = () => {
+    try { sessionStorage.setItem(FRAMES_CHAVE, JSON.stringify(motivosFrame)); } catch (e) {}
+  };
 
   /* Um MÓDULO novo a cada chamada, e é isso que faz esta função existir.
 
@@ -4201,6 +4227,11 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       const n = await limparCacheModelo();
       esquecerMotor();                 // a combinação lembrada apontava para o que acabou de sumir
       pipe = null; pipeId = null;      // a próxima transcrição remonta do zero
+      /* No #diagStatus, e não no #astatus: este último vive dentro da dobra e
+         some junto com ela quando o cartão está travado — que é quando o botão
+         costuma ser usado. */
+      $('diagStatus').innerHTML = n
+        ? `<span class="ok">${t('limparFeito', n)}</span>` : t('limparVazio');
       st(n ? t('limparFeito', n) : t('limparVazio'), n ? 'ok' : '');
     } finally { $('limparModelo').disabled = false; }
   };

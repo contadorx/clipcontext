@@ -162,6 +162,10 @@
     is not read by us, and it never leaves your device. There is a &ldquo;Forget&rdquo; button next to the
     fields that clears it immediately. The remaining fields and the notes are not stored even while the tab
     lives — they are gone on reload.</p>
+    <p>The same <code>sessionStorage</code> holds the <b>summary of the last screen recording</b>: how
+    many frames were kept and why the others were not. These are counters — no image, no text — and
+    they exist so the diagnostics survive a page reload after something goes wrong. They vanish when
+    the tab closes, like everything else.</p>
 
     <h2>Cookies</h2>
     <p>We use no first-party or third-party cookies — not for tracking, not for advertising, not for

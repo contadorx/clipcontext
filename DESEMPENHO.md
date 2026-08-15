@@ -631,3 +631,47 @@ laço continua.
 
 Não afirmo que era isso na máquina do Leandro. Afirmo que era **um** jeito de acontecer, que agora
 não acontece mais, e que se ainda acontecer o relatório dirá qual dos cinco motivos foi.
+
+---
+
+## 15/08/2026, sétima rodada — o botão estava embaixo da dobra
+
+*"Agora o aplicativo não habilitou o diagnóstico."*
+
+O botão nunca esteve desabilitado. Ele estava **inalcançável**, e o motivo é estrutural:
+
+O Diagnóstico morava dentro do cartão 2. O cartão 2 **colapsa** quando não há vídeo no passo 1 —
+`.card.fechado .dobra{grid-template-rows:0fr}` com `overflow:hidden` no filho. Tudo que está lá
+dentro é recortado a zero de altura. Ou seja: **a ferramenta de quem está com problema desaparecia
+exatamente no estado em que há problema.** Na captura que o Leandro mandou, o cartão 2 dizia
+"Escolha um vídeo no passo 1 para continuar" — e o botão estava logo abaixo daquela linha, com zero
+pixel de altura.
+
+O Diagnóstico e o "apagar o modelo guardado" saíram de dentro da dobra e passaram a viver logo
+abaixo do aviso de cartão travado, sempre visíveis. A resposta do "apagar" também mudou de lugar:
+ela ia para o `#astatus`, que fica dentro da dobra e sumia junto — agora vai para um `#diagStatus`
+ao lado dos botões.
+
+### Como isso passou pelos testes
+
+Esta é a parte que me interessa mais. **Dois testes bateram no defeito e eu silenciei os dois.**
+
+O Playwright recusou `locator('#diag').click()` com *"a `<div>` intercepts pointer events"* — que é
+literalmente o relatório do defeito, com o elemento culpado nomeado. Eu troquei por
+`.evaluate(el => el.click())`, que dispara o clique por dentro do DOM e ignora se o elemento está
+alcançável. O teste voltou a passar. O defeito continuou.
+
+Os dois contornos foram removidos, e existe agora um teste (`tapado.mjs`) que faz a pergunta
+diretamente: com o cartão travado, `elementFromPoint` no centro do botão devolve o botão? E o
+clique de verdade — sem `force`, sem `evaluate` — funciona? Ele cobre os três estados: cartão
+travado, durante a gravação e depois de parar.
+
+A regra que fica: **quando o Playwright diz que um elemento não é clicável, ele não está sendo
+chato — ele está sendo o usuário.** Contornar o clique é apagar o relatório.
+
+### E os contadores agora sobrevivem ao F5
+
+O relatório dessa rodada veio com `última gravação de tela: (nenhuma gravação nesta aba ainda)` —
+diagnóstico rodado em aba nova. Quem grava, vê que deu errado e recarrega a página perdia
+justamente o que veio buscar. Os contadores foram para o `sessionStorage`: morrem com a aba, como
+todo o resto, e estão descritos na política.
