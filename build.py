@@ -96,9 +96,9 @@ LIC_PUB = "sVXqPeioW7lkGRM2EPNSOadXCQNFGTBXLtzTknMSeYE"
 # máximo é um punhado de licenças de teste — nunca uma licença perpétua.
 LIC_PUB_AUTO = "XTO_Xcc5mByFV3tIcijyhjIaJZR-8cyf_HCb1npPtMs"
 
-G_CLIENT = ""   # ...apps.googleusercontent.com
-G_KEY    = ""
-G_APP    = ""
+G_CLIENT = "184815388097-6aki8j9sfgat025onau4alnsu6vqje0b.apps.googleusercontent.com"
+G_KEY    = "AIzaSyBsXkxGvHeiSlj4U42wMNDAd-GdlrO18QM"
+G_APP    = "184815388097"
 
 # Projeto PRÓPRIO do Walkstamp, na organização Softaria (região sa-east-1).
 # Antes era o projeto do SalaVox, emprestado: dois produtos no mesmo banco, na

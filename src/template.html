@@ -141,6 +141,10 @@
   .thumbs figcaption .selo{color:var(--accent);font-weight:700}
   /* ---- subpassos da revisão ---- */
   /* uma opção por linha */
+  /* A contagem regressiva, grande. */
+  .contagem{display:block;font-size:34px;font-weight:800;line-height:1.15;margin:6px 0 2px;
+    letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+  @media (max-width:560px){ .contagem{font-size:27px} }
   label.opt{display:flex;align-items:center;gap:9px;padding:7px 0;font-size:14.5px;cursor:pointer}
   label.opt input[type=checkbox]{flex:none}
   .optNota{margin-left:auto;font-weight:400;font-size:12.5px;color:var(--muted)}
@@ -163,7 +167,20 @@
   details.sub.feito .sbN::after{font-size:13px}
   .sbEst{margin-left:auto;font-weight:400;font-size:13px;color:var(--muted)}
   .sbCorpo{padding:0 15px 15px}
+  .rodapeAjuda{max-width:960px;margin:26px auto 40px;padding:0 20px;display:flex;
+    align-items:center;gap:10px;flex-wrap:wrap}
+  .fbTipo.on{border-color:var(--accent) !important;color:var(--accent) !important;font-weight:650}
+  .saidaGrupo{margin-top:16px}
+  .saidaTit{display:block;font:600 12px/1 ui-sans-serif,system-ui;letter-spacing:.06em;
+    text-transform:uppercase;color:var(--muted);margin-bottom:7px}
   .sbFim{margin-top:14px}
+  /* Concluir um subpasso é uma afirmação, e cinza não afirma nada. Verde aqui
+     não é decoração: é o único botão do bloco que fecha alguma coisa. */
+  .sbOk{border-color:#1f9d55 !important;color:#177a42 !important;font-weight:650}
+  .sbOk:hover{background:#f0fbf4 !important}
+  @media (prefers-color-scheme:dark){
+    .sbOk{color:#5fd08a !important} .sbOk:hover{background:#12281c !important}
+  }
   @media (prefers-color-scheme:dark){
     details.sub{background:transparent;border-color:#2a2f45}
     details.sub>summary:hover{background:#171b2c}
@@ -437,6 +454,28 @@
       <p class="status" id="cenDica"></p>
     </div>
 
+    <!-- ---- recuperar um documento anterior ----
+
+         A terceira porta, e ela subiu para junto do cenário porque é uma
+         ESCOLHA de entrada, no mesmo nível de gravar e de enviar vídeo — não um
+         rodapé do cartão. Sem ela, "gerei o PDF e o passo 12 está errado" se
+         resolvia regravando os quarenta.
+
+         Um botão só, que aceita um arquivo ou vários: dois botões obrigavam a
+         pessoa a saber, ANTES de escolher, se ia juntar sessões ou abrir uma —
+         e a diferença é o número de arquivos que ela seleciona, não uma
+         decisão à parte. Com dois ou mais, cada arquivo vira um capítulo.
+
+         Continua sem servidor: o arquivo está na máquina de quem usa. -->
+    <div class="recup" id="recupBloco">
+      <div class="row" style="align-items:center;gap:10px;flex-wrap:wrap">
+        <button class="ghost sm" id="reabrir" data-i18n="reabrirBtn"></button>
+        <input type="file" id="reabrirArq" multiple
+               accept=".json,.zip,application/json,application/zip" class="hide">
+        <span class="status" id="reabrirMsg" data-i18n="reabrirDica"></span>
+      </div>
+    </div>
+
     <!-- Dois caminhos, e não uma lista de botões: gravar a tela agora é o que a
          maior parte das pessoas vem fazer, e estava em terceiro lugar, cinza,
          embaixo de uma zona de arraste que só serve para quem já tem arquivo. -->
@@ -552,28 +591,6 @@
       <div class="bar hide" id="caudaBar" style="margin:10px 0 6px"><i id="caudaFill"></i></div>
       <div class="status" id="liveStat"></div>
     </div>
-    <!-- A terceira porta: um documento que já saiu daqui, voltando para ser
-         corrigido.
-
-         Sem isto, "gerei o PDF e o passo 12 está errado" se resolvia
-         regravando os quarenta. E a instrução de trabalho — que envelhece por
-         definição, porque a tela muda em seis meses — simplesmente não existia
-         como caso de uso: ninguém mantém documento que precisa ser refeito
-         inteiro.
-
-         Continua sem servidor: o arquivo está na máquina de quem usa, é ela
-         que o escolhe, e é a mesma porta que o /verificar já abre. -->
-    <div class="row reabrirRow" style="margin-top:16px">
-      <button class="ghost sm" id="reabrir" data-i18n="reabrirBtn"></button>
-      <input type="file" id="reabrirArq" accept=".json,.zip,application/json,application/zip" class="hide">
-      <!-- Cinco participantes é o tamanho padrão de um estudo, e até agora eram
-           cinco documentos soltos. Ficou barato depois dos capítulos: cada
-           sessão vira um capítulo, e a máquina de tempo por tarefa já existe. -->
-      <button class="ghost sm" id="juntar" data-i18n="juntarBtn"></button>
-      <input type="file" id="juntarArq" multiple accept=".json,.zip,application/json,application/zip" class="hide">
-      <span class="status" id="reabrirMsg" data-i18n="reabrirDica"></span>
-    </div>
-
     <div id="playerBox" class="hide" style="margin-top:16px">
       <video id="v" controls preload="auto" muted playsinline></video>
       <div class="meta" id="meta"></div>
@@ -593,35 +610,8 @@
          dele é recortado por overflow:hidden). O diagnóstico ficava
          inalcançável exatamente na hora em que era preciso. -->
     <div class="row ferramentas">
-      <button class="ghost sm" id="diag" data-i18n="diagBtn"></button>
       <button class="ghost sm" id="limparModelo" data-i18n="limparBtn"></button>
-      <button class="ghost sm" id="licBtn" data-i18n="licBtn"></button>
       <span class="status" id="diagStatus"></span>
-    </div>
-    <div class="hide" id="licBox" style="margin:8px 0 0">
-      <!-- O caminho normal é o LINK, e não uma chave digitada.
-
-           Uma chave de 200 caracteres colada num campo é a pior parte de um
-           produto que não tem cadastro: quem recebe não sabe o que é aquilo, o
-           e-mail quebra a linha no meio e a primeira experiência do plano pago
-           vira suporte. Quem coordena manda um endereço; quem abre já está
-           dentro. O campo continua existindo para quando o link chega mutilado. -->
-      <p class="status" id="licComo" data-i18n="licComo" style="max-width:660px;margin:0 0 8px"></p>
-      <div class="row">
-        <a class="btn sm" id="licPedir" href="__SITE__/time" target="_blank" rel="noopener"
-           data-i18n="licPedir"></a>
-        <button class="ghost sm hide" id="licTirar" data-i18n="licTirar"></button>
-        <button class="ghost sm" id="licManual" data-i18n="licManual"></button>
-      </div>
-      <div class="hide" id="licManualBox" style="margin-top:8px">
-        <div class="row">
-          <input type="text" id="licChave" placeholder="WS1..." autocomplete="off" spellcheck="false"
-                 style="flex:1;min-width:240px;font:12.5px ui-monospace,Menlo,Consolas,monospace">
-          <button class="ghost sm" id="licAtivar" data-i18n="licAtivar"></button>
-        </div>
-      </div>
-      <p class="status" id="licMsg"></p>
-      <p class="status" data-i18n="licNota" style="max-width:640px"></p>
     </div>
     <pre id="diagOut" class="hide"></pre>
     <div class="dobra"><div>
@@ -1055,28 +1045,50 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       <summary><i class="sbN">4</i><span data-i18n="sb4H"></span>
         <b class="sbEst" id="sbEst4"></b></summary>
       <div class="sbCorpo">
-    <div class="row" style="margin-top:18px">
-      <button id="go" data-i18n="pdfBtn"></button>
-      <select id="layout" style="width:auto">
-        <option value="auto" data-i18n="layAuto"></option>
-        <option value="full" data-i18n="layFull"></option>
-        <option value="grid" data-i18n="layGrid"></option>
-      </select>
-      <select id="papel" style="width:auto">
-        <option value="a4">A4</option>
-        <option value="letter" data-i18n="papelCarta"></option>
-      </select>
-      <button class="ghost" id="docx" data-i18n="docxBtn"></button>
-      <button class="ghost" id="html" data-i18n="htmlBtn"></button>
-      <button class="ghost" id="md" data-i18n="mdBtn"></button>
-      <button class="ghost" id="csv" data-i18n="csvBtn"></button>
-      <button class="ghost" id="zip" data-i18n="zipBtn"></button>
-      <button class="ghost" id="json" data-i18n="jsonBtn"></button>
-      <button class="ghost" id="pptx" data-i18n="pptxBtn"></button>
-      <button class="ghost hide" id="capPacote" data-i18n="capPacote"></button>
-      <button class="ghost" id="jira" data-i18n="jiraBtn"></button>
-      <button class="ghost hide" id="scorm" data-i18n="scormBtn"></button>
-      <button class="ghost hide" id="gdocs" data-i18n="gdBtn"></button>
+    <!-- ---- as saídas, agrupadas ----
+
+         Eram onze botões numa fileira que quebrava em três linhas, todos com o
+         mesmo peso visual: o PDF, que é o que quase todo mundo quer, tinha o
+         mesmo tamanho do pacote SCORM, que quase ninguém quer. Agora são três
+         grupos com nome, e o formato do documento vem primeiro. -->
+    <div class="saidaGrupo">
+      <span class="saidaTit" data-i18n="grDoc"></span>
+      <div class="row">
+        <button id="go" data-i18n="pdfBtn"></button>
+        <button class="ghost" id="docx" data-i18n="docxBtn"></button>
+        <button class="ghost" id="html" data-i18n="htmlBtn"></button>
+        <button class="ghost" id="md" data-i18n="mdBtn"></button>
+        <select id="layout" style="width:auto">
+          <option value="auto" data-i18n="layAuto"></option>
+          <option value="full" data-i18n="layFull"></option>
+          <option value="grid" data-i18n="layGrid"></option>
+        </select>
+        <select id="papel" style="width:auto">
+          <option value="a4">A4</option>
+          <option value="letter" data-i18n="papelCarta"></option>
+        </select>
+      </div>
+    </div>
+    <div class="saidaGrupo">
+      <span class="saidaTit" data-i18n="grEntregar"></span>
+      <div class="row">
+        <button class="ghost" id="pptx" data-i18n="pptxBtn"></button>
+        <button class="ghost hide" id="scorm" data-i18n="scormBtn"></button>
+        <button class="ghost hide" id="gdocs" data-i18n="gdBtn"></button>
+        <button class="ghost" id="jira" data-i18n="jiraBtn"></button>
+        <button class="ghost hide" id="capPacote" data-i18n="capPacote"></button>
+      </div>
+    </div>
+    <div class="saidaGrupo">
+      <span class="saidaTit" data-i18n="grDados"></span>
+      <div class="row">
+        <button class="ghost" id="json" data-i18n="jsonBtn"></button>
+        <button class="ghost" id="csv" data-i18n="csvBtn"></button>
+        <button class="ghost" id="zip" data-i18n="zipBtn"></button>
+      </div>
+      <p class="note" data-i18n="grDadosNota" style="margin:6px 0 0"></p>
+    </div>
+    <div class="row" style="margin-top:12px">
       <span class="status" id="pdfStatus"></span>
     </div>
       </div>
@@ -1234,6 +1246,83 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
 </div>
 
 <script>/*__JSPDF__*/</script>
+  <!-- ---- avisar um problema ----
+
+       O Diagnóstico morava no cartão 2, ao lado de "limpar o modelo", e era
+       um botão de desenvolvedor no meio do caminho de quem só queria gravar.
+       Ele não sumiu: virou o ANEXO de um recado. Quem tem um problema quer
+       contar o problema, não ler uma lista de capacidades do navegador — e nós
+       queremos exatamente essa lista junto do recado. -->
+  <div class="rodapeAjuda">
+    <!-- O plano mora aqui, e não no cartão 2. Ele não é um passo do trabalho:
+         é uma propriedade de quem você é, como o idioma. E o caminho normal é
+         entrar pelo link do e-mail — colar chave à mão continua existindo,
+         atrás de um clique, para quem recebeu a chave por outro caminho. -->
+    <button class="ghost sm" id="licBtn" data-i18n="licBtn"></button>
+    <button class="ghost sm" id="avisar" data-i18n="avisarBtn"></button>
+    <span class="status" data-i18n="avisarDica"></span>
+  </div>
+    <div class="hide" id="licBox" style="margin:8px 0 0">
+    <!-- O caminho normal é o LINK, e não uma chave digitada.
+
+         Uma chave de 200 caracteres colada num campo é a pior parte de um
+         produto que não tem cadastro: quem recebe não sabe o que é aquilo, o
+         e-mail quebra a linha no meio e a primeira experiência do plano pago
+         vira suporte. Quem coordena manda um endereço; quem abre já está
+         dentro. O campo continua existindo para quando o link chega mutilado. -->
+    <p class="status" id="licComo" data-i18n="licComo" style="max-width:660px;margin:0 0 8px"></p>
+    <div class="row">
+      <a class="btn sm" id="licPedir" href="__SITE__/time" target="_blank" rel="noopener"
+         data-i18n="licPedir"></a>
+      <button class="ghost sm hide" id="licTirar" data-i18n="licTirar"></button>
+      <button class="ghost sm" id="licManual" data-i18n="licManual"></button>
+    </div>
+    <div class="hide" id="licManualBox" style="margin-top:8px">
+      <div class="row">
+        <input type="text" id="licChave" placeholder="WS1..." autocomplete="off" spellcheck="false"
+               style="flex:1;min-width:240px;font:12.5px ui-monospace,Menlo,Consolas,monospace">
+        <button class="ghost sm" id="licAtivar" data-i18n="licAtivar"></button>
+      </div>
+    </div>
+    <p class="status" id="licMsg"></p>
+    <p class="status" data-i18n="licNota" style="max-width:640px"></p>
+  </div>
+
+
+  <div class="lente hide" id="fbModal" role="dialog" aria-modal="true" aria-labelledby="fbTit">
+    <div class="modalCx" style="max-width:560px">
+      <div class="lenteTopo">
+        <b id="fbTit" data-i18n="fbTit"></b>
+        <span class="row" style="gap:8px">
+          <button class="ghost sm" id="fbFechar" data-i18n="fecharBtn"></button>
+        </span>
+      </div>
+      <div style="padding:4px 2px 2px">
+        <div class="row" id="fbTipos" style="gap:8px;margin-bottom:12px;flex-wrap:wrap">
+          <button class="ghost sm fbTipo" data-tipo="ideia" data-i18n="fbIdeia"></button>
+          <button class="ghost sm fbTipo" data-tipo="elogio" data-i18n="fbElogio"></button>
+          <button class="ghost sm fbTipo" data-tipo="problema" data-i18n="fbProblema"></button>
+        </div>
+        <label class="small" for="fbTexto" data-i18n="fbTextoLbl"></label>
+        <textarea id="fbTexto" rows="5" maxlength="2000"
+                  style="width:100%;margin:4px 0 10px;padding:9px;font:inherit;font-size:14px"></textarea>
+        <label class="small" for="fbEmail" data-i18n="fbEmailLbl"></label>
+        <input id="fbEmail" type="email" autocomplete="email" placeholder="voce@empresa.com"
+               style="width:100%;max-width:340px;margin:4px 0 10px;padding:8px">
+        <label class="opt"><input type="checkbox" id="fbDiag" checked><span data-i18n="fbDiagLbl"></span></label>
+        <details style="margin:4px 0 12px">
+          <summary class="small" data-i18n="fbVerDiag"></summary>
+          <pre id="fbDiagOut" style="max-height:190px;overflow:auto;font-size:11.5px;
+               white-space:pre-wrap;margin:8px 0 0"></pre>
+        </details>
+        <div class="row" style="gap:9px;align-items:center">
+          <button id="fbEnviar" data-i18n="fbEnviar"></button>
+          <span class="status" id="fbMsg" role="status"></span>
+        </div>
+        <p class="note" data-i18n="fbNota" style="margin:10px 0 0"></p>
+      </div>
+    </div>
+
 <script>
 (function(){
   const $ = id => document.getElementById(id);
@@ -1502,7 +1591,16 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       ocrErr:'Não consegui carregar o leitor de texto: {0}',
       ocrStopped:' Interrompido — só o que já foi lido entra no PDF.',
       pOcr:'TEXTO NA TELA',
-      jsonBtn:'Baixar JSON',
+      grDadosNota:'O .json é o que traz este documento de volta ao __MARCA__ depois — guarde-o junto do PDF.',
+      fbNota:'Isto abre o seu programa de e-mail com o texto pronto. Nada é enviado por trás — não temos servidor de recados, pelo mesmo motivo de não termos servidor de vídeo.',
+      fbFeito:'Abri o seu programa de e-mail. Se não abriu, escreva para {0}.',
+      fbEnviar:'Enviar', fbVazio:'Escreva alguma coisa antes de enviar.', fbIndo:'Abrindo o seu e-mail…',
+      fbDiagLbl:'Mandar junto o relatório técnico do navegador', fbVerDiag:'ver o que vai junto',
+      fbTextoLbl:'O que aconteceu, ou o que você queria que existisse', fbEmailLbl:'Seu e-mail, se quiser resposta',
+      fbTit:'Falar com a gente', fbIdeia:'Ideia', fbElogio:'Elogio', fbProblema:'Problema',
+      avisarBtn:'Avisar um problema ou dar uma ideia', avisarDica:'Vai junto um relatório técnico do seu navegador — você vê antes de mandar.',
+      grDoc:'O documento', grEntregar:'Entregar em outro sistema', grDados:'Dados e recuperação',
+      jsonBtn:'Save to reopen later (.json)',
       quietN:'{0} frame(s) sem fala foram descartados.',
       quiet0:'Todos os frames têm fala no trecho correspondente.',
       quietAudio:'Analisando o áudio para achar os trechos sem fala…',
@@ -1981,7 +2079,16 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       ocrErr:'Could not load the text reader: {0}',
       ocrStopped:' Stopped — only what was already read goes into the PDF.',
       pOcr:'TEXT ON SCREEN',
-      jsonBtn:'Download JSON',
+      grDadosNota:'The .json is what brings this document back into __MARCA__ later — keep it next to the PDF.',
+      fbNota:'This opens your e-mail program with the text ready. Nothing is sent behind your back — we have no message server, for the same reason we have no video server.',
+      fbFeito:'I opened your e-mail program. If it did not open, write to {0}.',
+      fbEnviar:'Send', fbVazio:'Write something before sending.', fbIndo:'Opening your e-mail…',
+      fbDiagLbl:'Send the browser technical report along', fbVerDiag:'see what goes along',
+      fbTextoLbl:'What happened, or what you wish existed', fbEmailLbl:'Your e-mail, if you want a reply',
+      fbTit:'Talk to us', fbIdeia:'Idea', fbElogio:'Praise', fbProblema:'Problem',
+      avisarBtn:'Report a problem or share an idea', avisarDica:'A technical report of your browser goes along — you see it before sending.',
+      grDoc:'The document', grEntregar:'Deliver to another system', grDados:'Data and recovery',
+      jsonBtn:'Save to reopen later (.json)',
       quietN:'{0} frame(s) with no speech were discarded.',
       quiet0:'Every frame has speech in its interval.',
       quietAudio:'Analysing the audio to find the silent stretches…',
@@ -2460,7 +2567,16 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       ocrErr:'No pude cargar el lector de texto: {0}',
       ocrStopped:' Interrumpido — solo lo ya leído entra en el PDF.',
       pOcr:'TEXTO EN PANTALLA',
-      jsonBtn:'Descargar JSON',
+      grDadosNota:'El .json es lo que trae este documento de vuelta a __MARCA__ después — guárdalo junto al PDF.',
+      fbNota:'Esto abre tu programa de correo con el texto listo. Nada se envía por detrás — no tenemos servidor de mensajes, por el mismo motivo por el que no tenemos servidor de vídeo.',
+      fbFeito:'Abrí tu programa de correo. Si no se abrió, escribe a {0}.',
+      fbEnviar:'Enviar', fbVazio:'Escribe algo antes de enviar.', fbIndo:'Abriendo tu correo…',
+      fbDiagLbl:'Enviar también el informe técnico del navegador', fbVerDiag:'ver lo que va junto',
+      fbTextoLbl:'Qué pasó, o qué te gustaría que existiera', fbEmailLbl:'Tu correo, si quieres respuesta',
+      fbTit:'Hablar con nosotros', fbIdeia:'Idea', fbElogio:'Elogio', fbProblema:'Problema',
+      avisarBtn:'Avisar de un problema o dar una idea', avisarDica:'Va junto un informe técnico de tu navegador — lo ves antes de enviar.',
+      grDoc:'El documento', grEntregar:'Entregar a otro sistema', grDados:'Datos y recuperación',
+      jsonBtn:'Guardar para recuperar después (.json)',
       quietN:'{0} fotograma(s) sin habla fueron descartados.',
       quiet0:'Todos los fotogramas tienen habla en su tramo.',
       quietAudio:'Analizando el audio para encontrar los tramos en silencio…',
@@ -4688,7 +4804,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
           ` <button class="ghost sm" id="recDiag">${t('diagBtn')}</button>` +
           ` <button class="ghost sm" id="recSoFrames">${t('recSoFramesBtn')}</button>`;
         const bd = $('recDiag');
-        if (bd) bd.onclick = () => { $('diag').click(); irPara('cardTr', true); };
+        if (bd) bd.onclick = () => { coletarDiag($('diagOut')); irPara('cardTr', true); };
         const bf = $('recSoFrames');
         /* O atalho não é cortesia: quem chegou até aqui já tinha uma reunião
            para gravar, e obrigá-la a caçar a caixa de seleção no passo 1 é
@@ -4902,7 +5018,11 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       contando = true; cancelouContagem = false;
       $('rec').classList.add('hide'); $('recStop').classList.remove('hide');
       for (let c = 3; c >= 1 && !cancelouContagem; c--) {
-        $('recMsg').innerHTML = `<span class="ok">${t('recCountN', c)}</span>`;
+        /* Grande de propósito: a contagem é o único momento em que a pessoa
+           precisa OLHAR para a página em vez de para a tela que vai gravar, e
+           num status de 13px ela passava despercebida — quem não a via
+           começava a agir antes do zero. */
+        $('recMsg').innerHTML = `<span class="ok contagem">${t('recCountN', c)}</span>`;
         controle('contando', { n: c });
         await new Promise(r => setTimeout(r, 1000));
       }
@@ -6345,8 +6465,11 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     } finally { $('limparModelo').disabled = false; }
   };
 
-  $('diag').onclick = async () => {
-    const out = $('diagOut'); out.classList.remove('hide');
+  /* O diagnóstico agora tem dois destinos: a tela (quando alguém abre o
+     Diagnóstico pelo aviso de erro) e o corpo de um recado. A função é a
+     mesma; o que muda é para onde o texto vai. */
+  async function coletarDiag(out){
+    out.classList.remove('hide');
     const L = []; const say = s => { L.push(s); out.textContent = L.join('\n'); };
     say('--- diagnóstico ---');
     say('endereço      : ' + location.protocol);
@@ -6458,6 +6581,67 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
 
     say('--- fim ---');
     st(t('diagDone'), 'ok');
+  }
+
+  /* O botão de Diagnóstico não existe mais como botão: ele virou o anexo do
+     recado. O que continua existindo é o coletor, chamado pelo aviso de erro
+     (que abre o painel na tela) e pelo modal do recado. */
+
+  /* ---- o recado: ideia, elogio ou problema ----
+     O diagnóstico vai ANEXADO, e marcado por padrão. Quem tem um problema quer
+     contar o problema; a lista de capacidades do navegador é o que NÓS
+     precisamos, e pedi-la de quem já está irritado é pedir errado. Quem não
+     quiser mandar, desmarca — e ela fica visível antes de sair. */
+  let fbTipo = 'problema';
+  const fbAbrir = async (abrir) => {
+    $('fbModal').classList.toggle('hide', !abrir);
+    if (!abrir) return;
+    pintarFbTipo();
+    $('fbTexto').focus();
+    if (!$('fbDiagOut').textContent) {
+      $('fbDiagOut').textContent = '…';
+      try { $('fbDiagOut').textContent = await diagTexto(); }
+      catch (e) { $('fbDiagOut').textContent = '(não consegui coletar)'; }
+    }
+  };
+  function pintarFbTipo(){
+    document.querySelectorAll('.fbTipo').forEach(b2 =>
+      b2.classList.toggle('on', b2.dataset.tipo === fbTipo));
+  }
+  if ($('avisar')) {
+    $('avisar').onclick = () => fbAbrir(true);
+    $('fbFechar').onclick = () => fbAbrir(false);
+    $('fbModal').addEventListener('click', e => { if (e.target === $('fbModal')) fbAbrir(false); });
+    document.querySelectorAll('.fbTipo').forEach(b2 => {
+      b2.onclick = () => { fbTipo = b2.dataset.tipo; pintarFbTipo(); };
+    });
+    $('fbEnviar').onclick = async () => {
+      const txt = ($('fbTexto').value || '').trim();
+      if (!txt) { $('fbMsg').innerHTML = `<span class="err">${t('fbVazio')}</span>`; return; }
+      $('fbEnviar').disabled = true;
+      $('fbMsg').textContent = t('fbIndo');
+      const corpo = [txt, '', '--- ' + fbTipo + ' ---',
+                     'idioma: ' + LANG, 'cenário: ' + $('modelo').value,
+                     $('fbDiag').checked ? ($('fbDiagOut').textContent || '') : '(sem diagnóstico)'
+                    ].join('\n');
+      /* Sem servidor de recados: o texto vai pelo cliente de e-mail da pessoa.
+         É feio e é honesto — a alternativa seria um endpoint nosso recebendo
+         texto livre, que é exatamente o tipo de coisa que este produto não
+         tem. O corpo é cortado porque `mailto:` tem limite de tamanho. */
+      const assunto = encodeURIComponent('__MARCA__ · ' + fbTipo + (($('fbEmail').value||'').trim() ? ' · ' + $('fbEmail').value.trim() : ''));
+      const url = 'mailto:' + CONTATO + '?subject=' + assunto +
+                  '&body=' + encodeURIComponent(corpo.slice(0, 1600));
+      try { window.location.href = url; } catch (e) {}
+      medir('recado', { p_formato: fbTipo });
+      $('fbEnviar').disabled = false;
+      $('fbMsg').innerHTML = `<span class="ok">${t('fbFeito', CONTATO)}</span>`;
+    };
+  }
+
+  const diagTexto = async () => {
+    const alvo = document.createElement('pre');
+    await coletarDiag(alvo);
+    return alvo.textContent || '';
   };
 
   /* ================= extração de frames ================= */
@@ -9409,9 +9593,14 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
 
   $('reabrir').onclick = () => $('reabrirArq').click();
   $('reabrirArq').onchange = async ev2 => {
-    const file = ev2.target.files && ev2.target.files[0];
-    if (!file) return;
+    const escolhidos = [...(ev2.target.files || [])];
     $('reabrirArq').value = '';
+    if (!escolhidos.length) return;
+    /* Dois ou mais viram capítulos de um documento só. A pessoa não escolhe
+       entre "abrir" e "juntar": ela escolhe arquivos, e o número deles diz o
+       que ela quis. */
+    if (escolhidos.length > 1) return juntarVarios(escolhidos);
+    const file = escolhidos[0];
     $('reabrirMsg').textContent = t('reabrirLendo');
     trabalhando(true);
     try {
@@ -9451,12 +9640,9 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      hora de relógio é DESLIGADA no consolidado e o documento diz que é
      consolidado: o tempo dentro de cada sessão continua verdadeiro, o horário
      de parede entre elas não existe. */
-  $('juntar').onclick = () => $('juntarArq').click();
-  $('juntarArq').onchange = async ev3 => {
-    const arqs = [...(ev3.target.files || [])];
-    $('juntarArq').value = '';
-    if (!arqs.length) return;
-    if (arqs.length < 2) { $('reabrirMsg').innerHTML = `<span class="err">${t('juntarUm')}</span>`; return; }
+  /* Um arquivo abre; dois ou mais juntam. A decisão saiu da tela e virou
+     consequência do que a pessoa selecionou — que é como ela já pensava. */
+  async function juntarVarios(arqs){
     $('reabrirMsg').textContent = t('reabrirLendo');
     trabalhando(true);
     const juntos = [], cues = [], nomes = [];
@@ -11229,5 +11415,6 @@ ${relsSlide[i]}</Relationships>`) });
   };
 })();
 </script>
+  </div>
 </body>
 </html>

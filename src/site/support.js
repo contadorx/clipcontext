@@ -170,3 +170,166 @@ const LISTA_TXT = {
     }
   });
 })();
+
+/* ================= a ficha lateral: recado e NPS =================
+
+   Uma aba fixa na borda do site. Ela existe porque o único canal de retorno que
+   havia era um endereço de e-mail no rodapé — que ninguém rola até o fim para
+   achar, e que exige a pessoa trocar de programa para dizer uma frase.
+
+   E ela carrega o NPS, que não é vaidade: é a única pergunta que dá para fazer
+   sem conta e sem rastrear ninguém, e é ela que decide a quem vale a pena pedir
+   um compartilhamento. Pedir a todo mundo é o que transforma um pedido legítimo
+   em incômodo. */
+const FICHA_TXT = {
+  pt: { abrir:'Dar retorno', titulo:'Como está sendo?', fechar:'fechar',
+        pergunta:'De 0 a 10, quanto você indicaria o {{marca}} a um colega?',
+        nada:'de jeito nenhum', muito:'com certeza',
+        ideia:'Ideia', elogio:'Elogio', problema:'Problema',
+        ph:'Escreva do seu jeito — é uma pessoa que lê.',
+        email:'seu e-mail, se quiser resposta', enviar:'Enviar',
+        vazio:'Escreva alguma coisa antes de enviar.', enviado:'Abri o seu e-mail.',
+        obrigado:'Obrigado. Se ele te poupou trabalho, contar para uma pessoa ajuda mais que qualquer anúncio — e nós não temos anúncio.',
+        compartilhar:'Compartilhar no LinkedIn',
+        compNota:'Abre o compartilhador do LinkedIn com o endereço já preenchido. O texto é seu.' },
+  en: { abrir:'Give feedback', titulo:'How is it going?', fechar:'close',
+        pergunta:'From 0 to 10, how likely are you to recommend {{marca}} to a colleague?',
+        nada:'not at all', muito:'absolutely',
+        ideia:'Idea', elogio:'Praise', problema:'Problem',
+        ph:'In your own words — a person reads this.',
+        email:'your e-mail, if you want a reply', enviar:'Send',
+        vazio:'Write something before sending.', enviado:'I opened your e-mail.',
+        obrigado:'Thank you. If it saved you work, telling one person helps more than any ad — and we have no ads.',
+        compartilhar:'Share on LinkedIn',
+        compNota:'Opens the LinkedIn sharer with the address filled in. The words are yours.' },
+  es: { abrir:'Dar tu opinión', titulo:'¿Qué tal va?', fechar:'cerrar',
+        pergunta:'De 0 a 10, ¿cuánto recomendarías {{marca}} a un colega?',
+        nada:'de ninguna manera', muito:'sin duda',
+        ideia:'Idea', elogio:'Elogio', problema:'Problema',
+        ph:'Escríbelo a tu manera — lo lee una persona.',
+        email:'tu correo, si quieres respuesta', enviar:'Enviar',
+        vazio:'Escribe algo antes de enviar.', enviado:'Abrí tu correo.',
+        obrigado:'Gracias. Si te ahorró trabajo, contárselo a una persona ayuda más que cualquier anuncio — y no tenemos anuncios.',
+        compartilhar:'Compartir en LinkedIn',
+        compNota:'Abre el compartidor de LinkedIn con la dirección ya puesta. El texto es tuyo.' }
+};
+
+(function () {
+  const lang = (document.documentElement.lang || 'pt').slice(0, 2);
+  const T = Object.assign({}, FICHA_TXT[lang] || FICHA_TXT.pt, {
+    marca: '{{marca}}',
+    contato: (document.querySelector('a[href^="mailto:"]') || {}).href
+             ? (document.querySelector('a[href^="mailto:"]').href.replace('mailto:', '')) : '',
+    url: location.origin,
+    /* A medição do site já existe e é a mesma: um evento sem identidade. */
+    evento: (nome, valor) => { try { if (window.wsMedir) window.wsMedir(nome, valor); } catch (e) {} }
+  });
+  if (!T.abrir) return;
+  const $ = id => document.getElementById(id);
+  const LS = 'walkstamp.nps';           // só a marca de "já respondi", nada mais
+
+  const aba = document.createElement('button');
+  aba.id = 'fichaAba'; aba.type = 'button'; aba.textContent = T.abrir;
+  aba.setAttribute('aria-haspopup', 'dialog');
+  document.body.appendChild(aba);
+
+  const cx = document.createElement('div');
+  cx.id = 'fichaCx'; cx.hidden = true;
+  cx.setAttribute('role', 'dialog'); cx.setAttribute('aria-modal', 'true');
+  cx.setAttribute('aria-label', T.abrir);
+  cx.innerHTML =
+    '<div class="fichaBox">' +
+      '<div class="fichaTopo"><b>' + T.titulo + '</b>' +
+        '<button type="button" id="fichaFechar" aria-label="' + T.fechar + '">&times;</button></div>' +
+      '<div id="fichaPasso1">' +
+        '<p class="small muted" style="margin:0 0 8px">' + T.pergunta + '</p>' +
+        '<div id="fichaNotas"></div>' +
+        '<div class="fichaLeg"><span>' + T.nada + '</span><span>' + T.muito + '</span></div>' +
+      '</div>' +
+      '<div id="fichaPasso2" hidden>' +
+        '<div class="row" id="fichaTipos" style="gap:7px;margin:0 0 9px;flex-wrap:wrap">' +
+          '<button type="button" class="btn ghost fichaTipo" data-t="ideia">' + T.ideia + '</button>' +
+          '<button type="button" class="btn ghost fichaTipo" data-t="elogio">' + T.elogio + '</button>' +
+          '<button type="button" class="btn ghost fichaTipo" data-t="problema">' + T.problema + '</button>' +
+        '</div>' +
+        '<textarea id="fichaTexto" rows="4" maxlength="1200" placeholder="' + T.ph + '"></textarea>' +
+        '<input id="fichaEmail" type="email" placeholder="' + T.email + '" autocomplete="email">' +
+        '<div class="row" style="gap:8px;align-items:center;margin-top:8px">' +
+          '<button type="button" class="btn" id="fichaEnviar">' + T.enviar + '</button>' +
+          '<span class="small muted" id="fichaMsg" role="status"></span></div>' +
+      '</div>' +
+      '<div id="fichaPasso3" hidden>' +
+        '<p class="small" style="margin:0 0 10px">' + T.obrigado + '</p>' +
+        '<a class="btn" id="fichaLinkedin" target="_blank" rel="noopener">' + T.compartilhar + '</a>' +
+        '<p class="small muted" style="margin:10px 0 0">' + T.compNota + '</p>' +
+      '</div>' +
+    '</div>';
+  document.body.appendChild(cx);
+
+  const notas = $('fichaNotas');
+  for (let n = 0; n <= 10; n++) {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'fichaNota'; b.textContent = n; b.dataset.n = n;
+    notas.appendChild(b);
+  }
+
+  const abrir = (v) => {
+    cx.hidden = !v;
+    aba.setAttribute('aria-expanded', String(v));
+    if (v) {
+      /* Quem já respondeu a nota não responde de novo: a pergunta vira recado
+         direto. Uma pesquisa que reaparece é a definição de incômodo. */
+      const jaDeu = (() => { try { return localStorage.getItem(LS); } catch (e) { return null; } })();
+      if (jaDeu) { $('fichaPasso1').hidden = true; $('fichaPasso2').hidden = false; }
+      (jaDeu ? $('fichaTexto') : notas.querySelector('button')).focus();
+    }
+  };
+  aba.onclick = () => abrir(cx.hidden);
+  $('fichaFechar').onclick = () => abrir(false);
+  cx.addEventListener('click', e => { if (e.target === cx) abrir(false); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && !cx.hidden) abrir(false); });
+
+  let nota = null, tipo = 'ideia';
+  notas.addEventListener('click', e => {
+    const b = e.target.closest('.fichaNota'); if (!b) return;
+    nota = +b.dataset.n;
+    [...notas.children].forEach(x => x.classList.toggle('on', x === b));
+    try { localStorage.setItem(LS, String(nota)); } catch (e2) {}
+    if (T.evento) T.evento('nps', String(nota));
+    $('fichaPasso1').hidden = true;
+    /* De 7 para cima, o pedido de compartilhar; abaixo disso, a caixa de texto
+       — quem deu nota baixa tem algo a dizer, e pedir divulgação a essa pessoa
+       é não ter escutado. */
+    if (nota >= 7) { $('fichaPasso3').hidden = false; montarLinkedin(); }
+    else { $('fichaPasso2').hidden = false; tipo = 'problema'; pintarTipos(); $('fichaTexto').focus(); }
+  });
+
+  function pintarTipos(){
+    cx.querySelectorAll('.fichaTipo').forEach(b => b.classList.toggle('on', b.dataset.t === tipo));
+  }
+  cx.querySelectorAll('.fichaTipo').forEach(b => {
+    b.onclick = () => { tipo = b.dataset.t; pintarTipos(); };
+  });
+  pintarTipos();
+
+  function montarLinkedin(){
+    /* O compartilhador do LinkedIn aceita só a URL; o texto quem escreve é a
+       pessoa, na caixa dele. Tentar empurrar um texto pronto por parâmetro é
+       um caminho que eles fecharam e que voltaria vazio. */
+    $('fichaLinkedin').href =
+      'https://www.linkedin.com/sharing/share-offsite/?url=' + encodeURIComponent(T.url || location.origin);
+    $('fichaLinkedin').onclick = () => { if (T.evento) T.evento('compartilhou', 'linkedin'); };
+  }
+
+  $('fichaEnviar').onclick = () => {
+    const txt = ($('fichaTexto').value || '').trim();
+    if (!txt) { $('fichaMsg').textContent = T.vazio; return; }
+    const email = ($('fichaEmail').value || '').trim();
+    const assunto = encodeURIComponent(T.marca + ' · ' + tipo + (email ? ' · ' + email : '') +
+                                       (nota != null ? ' · nota ' + nota : ''));
+    const corpo = encodeURIComponent(txt + '\n\n---\n' + location.href + '\n' + navigator.userAgent.slice(0,120));
+    if (T.evento) T.evento('recado', tipo);
+    window.location.href = 'mailto:' + T.contato + '?subject=' + assunto + '&body=' + corpo;
+    $('fichaMsg').textContent = T.enviado;
+  };
+})();

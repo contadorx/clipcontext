@@ -199,3 +199,31 @@ footer a:hover{color:var(--ink)}
 .caso h3{margin:0 0 8px;font-size:17.5px;letter-spacing:-.01em}
 .caso p{margin:0 0 14px;font-size:14.5px;color:var(--muted);line-height:1.55;flex:1}
 .caso span{font-size:13.5px;font-weight:600;color:var(--accent)}
+
+/* ---- a ficha lateral: retorno e NPS ----
+   Uma aba na borda, e não um balão que salta: balão que salta é a coisa que
+   todo mundo fecha sem ler. Ela fica onde o polegar não esbarra e onde o olho
+   acha quando procura. */
+#fichaAba{position:fixed;right:0;top:50%;transform:translateY(-50%) rotate(180deg);
+  writing-mode:vertical-rl;background:var(--accent);color:#fff;border:0;cursor:pointer;
+  padding:15px 8px;border-radius:0 0 8px 8px;font:600 13px/1 inherit;letter-spacing:.02em;
+  z-index:40;box-shadow:0 2px 10px rgba(16,20,40,.18)}
+#fichaAba:hover{filter:brightness(1.08)}
+#fichaCx{position:fixed;inset:0;background:rgba(11,13,20,.55);z-index:60;
+  display:flex;align-items:center;justify-content:center;padding:20px}
+#fichaCx[hidden]{display:none}
+.fichaBox{background:#fff;border-radius:14px;max-width:430px;width:100%;padding:18px 20px 20px;
+  box-shadow:0 20px 60px rgba(16,20,40,.28)}
+.fichaTopo{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.fichaTopo b{font-size:17px}
+.fichaTopo button{background:none;border:0;font-size:24px;line-height:1;cursor:pointer;color:var(--muted)}
+#fichaNotas{display:flex;gap:4px;flex-wrap:wrap}
+.fichaNota{flex:1 1 0;min-width:29px;padding:9px 0;border:1px solid var(--linha,#e6e6ef);
+  background:#fff;border-radius:7px;cursor:pointer;font:600 13px/1 inherit}
+.fichaNota:hover{border-color:var(--accent);color:var(--accent)}
+.fichaNota.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.fichaLeg{display:flex;justify-content:space-between;font-size:11.5px;color:var(--muted);margin-top:6px}
+.fichaTipo.on{border-color:var(--accent);color:var(--accent);font-weight:650}
+#fichaTexto,#fichaEmail{width:100%;padding:9px;font:inherit;font-size:14px;
+  border:1px solid var(--linha,#e6e6ef);border-radius:8px;margin-bottom:8px}
+@media (max-width:560px){ #fichaAba{padding:12px 7px;font-size:12px} }
