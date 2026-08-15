@@ -737,3 +737,55 @@ Sete passos para seis navegações, onde antes seriam zero.
 
 E o diagnóstico passou a imprimir as duas partes separadas. Um número composto sem as parcelas é um
 número que não se pode interpretar — foi o que me custou uma rodada nesta mesma investigação.
+
+---
+
+## 15/08/2026, nona rodada — "Página sem resposta" e a barra que faltava
+
+Duas queixas na mesma frase, e a segunda é a que decide se a primeira importa:
+
+> *"Agora ele está travando… e a barra da transcrição está somente no baixando o modelo até 100% e
+> não mais aparece a da transcrição com percentual e tempo esperado, essa barra é um calcanhar de
+> Aquiles pois é a diferença entre aguardar e fechar a página."*
+
+Ele tem razão nas duas, e a leitura é exata: numa espera cega, **fechar a aba é a decisão
+racional** — e fechar a aba perde a gravação inteira, porque não há nada guardado em lugar nenhum.
+A barra não é enfeite; é o que compra a paciência que o produto precisa.
+
+### A trava
+
+A inferência rodava no **fio principal**. Cada janela de 20 segundos de áudio custa segundos de
+processador (a máquina dele mediu entre 1,9× e 5,7× o tempo real), e enquanto ela corre nada é
+pintado e nenhum clique é atendido. Passado o limite do navegador, aparece a caixa oferecendo
+"sair da página" — no meio de uma gravação que está dando certo.
+
+A correção é uma linha, e ela já existia no runtime: **`env.wasm.proxy = true`**. Com ela o
+onnxruntime cria um worker próprio e o fio principal fica livre.
+
+Não virou padrão cego, virou **degrau**. O worker é criado a partir de um blob e, sob isolamento
+entre origens, alguns navegadores barram — então ele é o primeiro ambiente da escada, e o segundo é
+exatamente o comportamento de antes: mais desconfortável, mas funcionando. A escada que foi
+construída para achar a biblioteca certa serviu, sem mudança, para escolher onde a inferência roda.
+
+Entre uma janela e outra o laço agora **devolve o fio ao navegador** por dois quadros. Não elimina
+o bloqueio (uma janela sozinha já pode passar do limite), mas garante que a barra ande *entre* as
+janelas em vez de saltar de 0 a 100 no fim.
+
+E como a fila de ambientes ganhou um degrau novo e melhor, quem já tinha combinação guardada
+ficaria preso na antiga para sempre. A anotação passou a ter **versão**: subir o número descarta o
+que foi guardado e faz a escada correr uma vez mais.
+
+### A barra
+
+A cauda — o trecho depois de apertar Parar, quando falta transcrever o que ficou na fila — era a
+**única espera longa do produto sem barra nenhuma**. Dizia "Terminando de transcrever o que
+faltou…" e mais nada. Cinco segundos e cinco minutos tinham exatamente a mesma aparência.
+
+Agora ela tem porcentagem, contagem de trechos e previsão. Três decisões:
+
+- **A previsão sai do ritmo medido nesta máquina** (`relogio`), não de uma estimativa fixa: a mesma
+  gravação leva 4 s numa máquina e 40 s em outra.
+- **A barra mora no cartão 1**, junto do botão Parar que a pessoa acabou de apertar — e não no
+  cartão 2, que naquele momento ainda pode estar dobrado. Barra escondida é o mesmo que barra
+  nenhuma.
+- **A porcentagem também vai para a linha de status da gravação**, que é onde os olhos já estão.

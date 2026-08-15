@@ -197,6 +197,9 @@
   .note b{color:var(--warn)}
   .ok{color:var(--accent);font-weight:550}
   .err{color:var(--err);font-weight:550}
+  /* O degrau entre "deu certo" e "deu errado": uma observação. Cor de aviso, sem
+     o peso do vermelho — quem lê entende que é para saber, não para consertar. */
+  .nota{color:var(--warn);font-weight:500}
   .autobox{border:1px solid var(--line);border-radius:8px;padding:14px;margin-bottom:14px;
            background:color-mix(in srgb,var(--accent) 4%,transparent)}
   #promptOut{background:var(--bg);border:1px solid var(--line);border-radius:7px;padding:14px;
@@ -328,6 +331,10 @@
         <button class="ghost sm hide" id="calar"></button>
       </div>
       <div class="status" id="calarMsg"></div>
+      <!-- A barra da cauda mora AQUI, no cartão 1, e não no cartão 2: quando a
+           pessoa aperta Parar é para cá que ela está olhando, e o cartão 2 ainda
+           pode estar dobrado. Uma barra escondida é o mesmo que barra nenhuma. -->
+      <div class="bar hide" id="caudaBar" style="margin:10px 0 6px"><i id="caudaFill"></i></div>
       <div class="status" id="liveStat"></div>
       <div class="live" id="liveTail"></div>
     </div>
@@ -511,6 +518,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       <span class="tag"><span data-i18n="tOff"></span> <b id="nOff">0</b></span>
       <span class="tag">PDF ~<b id="size">0</b> MB</span>
       <button class="ghost sm" id="allOn" data-i18n="keepAll"></button>
+      <button class="ghost sm hide" id="soMarcados" data-i18n="keepMarked"></button>
       <button class="ghost sm" id="dedup" data-i18n="dropDup"></button>
       <button class="ghost sm" id="mute" data-i18n="dropQuiet"></button>
       <button class="ghost sm" id="ocr" data-i18n="ocrBtn"></button>
@@ -707,12 +715,13 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       micFechado:'microfone fechado — nada seu está sendo captado a partir de agora',
       micAberto:'microfone reaberto — sua voz volta a entrar na transcrição',
       vuMic:'você (microfone)', vuSys:'computador',
-      recParado:'Atenção: {0} não se mexeu em nenhum momento — a transcrição desse lado saiu vazia.',
+      recParado:'Só para você saber: {0} não teve som em nenhum momento, então a transcrição desse lado saiu vazia. Se não havia áudio tocando, é o esperado.',
       recAskMic:'Permita o microfone nesta aba — a tela só será pedida depois.',
       recAskTela:'Agora escolha a tela ou a janela para compartilhar.',
       pipTit:'__MARCA__ — gravando',
       pipPrep:'preparando…', pipMic:'liberando o microfone', pipModelo:'baixando o modelo',
       pipTela:'escolha a tela', pipStop:'Parar', pipFrames:'{0} frames',
+      pipMarcado:'✓ tela marcada ({0})', pipMarcados:'{0} marcadas',
       pipNoVideo:'nenhum vídeo é guardado',
       lockHint:'Escolha um vídeo no passo 1 para continuar.',
       lockPrev:'Os frames aparecem aqui depois do passo 3 — é onde você descarta os que não servem.',
@@ -758,6 +767,12 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       modelLimpando:'Apagando o modelo guardado e baixando de novo…',
       trocandoMotor:'Trocando a versão do motor e tentando de novo…',
       trAoVivoFim:'Transcrição feita ao vivo: {0} trechos. O texto está aqui embaixo e pode ser corrigido.',
+      keepMarked:'Manter só as marcadas ({0})',
+      keepMarkedN:'Mantidas as {0} telas que você marcou; {1} descartada(s).',
+      autoJaFeito:'já transcrito ao vivo',
+      autoJaFeitoDica:'A transcrição foi feita durante a gravação. Como nenhum áudio é guardado, não há o que transcrever de novo — mas o texto abaixo é seu e pode ser corrigido.',
+      autoSemAudio:'sem áudio para transcrever',
+      autoSemAudioDica:'Esta captura não guardou áudio, então não há o que transcrever. Você pode colar ou abrir uma transcrição no campo abaixo.',
       motorGuardado:'Este navegador já sabe qual combinação funciona aqui — indo direto nela.',
       tentandoCaro:'As opções leves não subiram. Tentando uma que baixa ~{0} MB — é a partir daqui que fica grande.',
       limparBtn:'apagar o modelo guardado',
@@ -1007,12 +1022,13 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       micFechado:'microphone closed — nothing of yours is being captured from now on',
       micAberto:'microphone reopened — your voice goes back into the transcript',
       vuMic:'you (microphone)', vuSys:'computer',
-      recParado:'Heads up: {0} never moved — the transcript on that side came out empty.',
+      recParado:'Just so you know: {0} had no sound at any point, so the transcript for that side came out empty. If nothing was playing, that is expected.',
       recAskMic:'Allow the microphone on this tab — the screen is only asked for afterwards.',
       recAskTela:'Now pick the screen or window to share.',
       pipTit:'__MARCA__ — recording',
       pipPrep:'getting ready…', pipMic:'allowing the microphone', pipModelo:'downloading the model',
       pipTela:'pick the screen', pipStop:'Stop', pipFrames:'{0} frames',
+      pipMarcado:'✓ screen marked ({0})', pipMarcados:'{0} marked',
       pipNoVideo:'no video is kept',
       lockHint:'Choose a video in step 1 to continue.',
       lockPrev:'The frames show up here after step 3 — this is where you discard the ones you do not want.',
@@ -1058,6 +1074,12 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       modelLimpando:'Clearing the stored model and downloading it again…',
       trocandoMotor:'Switching the engine version and trying again…',
       trAoVivoFim:'Transcribed live: {0} segments. The text is below and can be corrected.',
+      keepMarked:'Keep only the marked ones ({0})',
+      keepMarkedN:'Kept the {0} screens you marked; {1} discarded.',
+      autoJaFeito:'already transcribed live',
+      autoJaFeitoDica:'The transcript was made during the recording. Since no audio is stored, there is nothing to transcribe again — but the text below is yours and can be corrected.',
+      autoSemAudio:'no audio to transcribe',
+      autoSemAudioDica:'This capture stored no audio, so there is nothing to transcribe. You can paste or open a transcript in the field below.',
       motorGuardado:'This browser already knows which combination works here — going straight to it.',
       tentandoCaro:'The light options did not come up. Trying one that downloads ~{0} MB — this is where it gets big.',
       limparBtn:'delete the stored model',
@@ -1305,12 +1327,13 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       micFechado:'micrófono cerrado — nada tuyo se está captando a partir de ahora',
       micAberto:'micrófono reabierto — tu voz vuelve a entrar en la transcripción',
       vuMic:'tú (micrófono)', vuSys:'ordenador',
-      recParado:'Atención: {0} no se movió en ningún momento — la transcripción de ese lado salió vacía.',
+      recParado:'Solo para que lo sepas: {0} no tuvo sonido en ningún momento, así que la transcripción de ese lado salió vacía. Si no había audio sonando, es lo esperado.',
       recAskMic:'Permite el micrófono en esta pestaña — la pantalla se pide después.',
       recAskTela:'Ahora elige la pantalla o la ventana que vas a compartir.',
       pipTit:'__MARCA__ — grabando',
       pipPrep:'preparando…', pipMic:'permitiendo el micrófono', pipModelo:'descargando el modelo',
       pipTela:'elige la pantalla', pipStop:'Detener', pipFrames:'{0} fotogramas',
+      pipMarcado:'✓ pantalla marcada ({0})', pipMarcados:'{0} marcadas',
       pipNoVideo:'no se guarda ningún vídeo',
       lockHint:'Elige un vídeo en el paso 1 para continuar.',
       lockPrev:'Los fotogramas aparecen aquí después del paso 3 — es donde descartas los que no sirven.',
@@ -1356,6 +1379,12 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       modelLimpando:'Borrando el modelo guardado y descargándolo de nuevo…',
       trocandoMotor:'Cambiando la versión del motor y probando de nuevo…',
       trAoVivoFim:'Transcripción hecha en vivo: {0} fragmentos. El texto está abajo y se puede corregir.',
+      keepMarked:'Mantener solo las marcadas ({0})',
+      keepMarkedN:'Mantenidas las {0} pantallas que marcaste; {1} descartada(s).',
+      autoJaFeito:'ya transcrito en vivo',
+      autoJaFeitoDica:'La transcripción se hizo durante la grabación. Como no se guarda audio, no hay nada que transcribir de nuevo — pero el texto de abajo es tuyo y se puede corregir.',
+      autoSemAudio:'sin audio que transcribir',
+      autoSemAudioDica:'Esta captura no guardó audio, así que no hay nada que transcribir. Puedes pegar o abrir una transcripción en el campo de abajo.',
       motorGuardado:'Este navegador ya sabe qué combinación funciona aquí — voy directo a ella.',
       tentandoCaro:'Las opciones ligeras no arrancaron. Probando una que descarga ~{0} MB — a partir de aquí se pone grande.',
       limparBtn:'borrar el modelo guardado',
@@ -1673,12 +1702,25 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     return seg < 90 ? t('etaS', Math.ceil(seg)) : t('etaM', Math.ceil(seg/60));
   }
 
+  /* O botão Transcrever tem dois estados de rótulo: o normal, que vem do
+     data-i18n, e o de "não há o que transcrever", que explica por que ele está
+     cinza. Guardado numa variável porque applyLang() reescreve todo data-i18n
+     ao trocar de idioma e apagaria a explicação. */
+  let autoTravado = null;
+  function pintarAuto(){
+    const b = $('auto'); if (!b) return;
+    if (!autoTravado) { b.title = ''; return; }
+    b.textContent = t(autoTravado);
+    b.title = t(autoTravado + 'Dica');
+  }
+
   function applyLang(){
     document.documentElement.lang = LANG;
     document.title = t('docTitle');
     document.querySelectorAll('[data-i18n]').forEach(el => {
       el.textContent = t(el.getAttribute('data-i18n'));
     });
+    pintarAuto();
     $('tr').placeholder = t('trPh');
     $('goalFree').placeholder = t('freePh');
     $('sensV').textContent = t('sens')[+$('sens').value];
@@ -2458,6 +2500,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      atualizada conforme as etapas passam.
 
      Onde a API não existe (Firefox, Safari) tudo segue igual, sem a janelinha. */
+  let pipAviso = '', pipAvisoAte = 0;
   let pipWin = null, pipTexto = null, pipRelogio = null, pipFrames = null;
   let pipVm = null, pipVs = null, pipCalar = null, pipMarcar = null, pipPausa = null;
   /* Pausa e marcação vivem fora do bloco da gravação porque a janelinha e o
@@ -2482,6 +2525,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     button.sec{background:transparent;color:#e9ebf1;border:1px solid #282c36;
                font-size:13px;padding:8px}
     button.sec.off{border-color:#ef8484;color:#ef8484}
+    /* O flash de "marcou". Numa janelinha de 240 px não cabe uma mensagem de
+       confirmação ao lado do botão — então o próprio botão confirma. */
+    button.sec.piscou{border-color:#737cf0;color:#121419;background:#737cf0}
+    .txt.aviso{color:#a9b2ff;font-weight:600}
     .vus{display:flex;gap:6px}
     .vb{flex:1;height:6px;border-radius:3px;background:#282c36;overflow:hidden}
     .vb i{display:block;height:100%;width:0;background:#737cf0}
@@ -2541,8 +2588,22 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       if (pipFrames) pipFrames.disabled = false;
       controleMic();
       if (pipRelogio) pipRelogio.textContent = fmt(Math.floor(dados.seg));
-      if (pipTexto) pipTexto.textContent = pausado ? t('pipPausado') : t('pipFrames', dados.frames);
-      if (pipMarcar) { pipMarcar.disabled = pausado; pipMarcar.textContent = t('recMarkBtn'); }
+      /* O relógio repinta esta linha todo segundo, então uma confirmação escrita
+         direto aqui sumiria antes de ser lida. Mesma solução do aviso da página:
+         guardada com prazo, repetida enquanto vale. Sem isto, clicar em "marcar"
+         na janelinha não produzia sinal NENHUM — e quem está gravando olha para
+         a janelinha, não para a página atrás dela. */
+      const marcados = frames.filter(f => f.manual).length;
+      const aviso = (performance.now() < pipAvisoAte) ? pipAviso : '';
+      if (pipTexto) pipTexto.classList.toggle('aviso', !!aviso);
+      if (pipTexto) pipTexto.textContent = aviso ? aviso
+        : pausado ? t('pipPausado')
+        : t('pipFrames', dados.frames) + (marcados ? ' · ' + t('pipMarcados', marcados) : '');
+      if (pipMarcar) {
+        pipMarcar.disabled = pausado;
+        pipMarcar.textContent = t('recMarkBtn');
+        pipMarcar.classList.toggle('piscou', !!aviso);
+      }
       if (pipPausa)  {
         pipPausa.disabled = false;
         pipPausa.textContent = pausado ? t('recResumeBtn') : t('recPauseBtn');
@@ -2596,6 +2657,9 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       $('liveStat').textContent = '';
     }
     liveDur = 0; liveW = 0; liveH = 0; liveCues = []; liveCanais = null;
+    /* Voltando a haver vídeo, o botão volta a ser um botão. */
+    autoTravado = null;
+    if ($('auto')) { $('auto').textContent = t('autoBtn'); $('auto').title = ''; }
     /* Sem isto o passo 4 ficaria aberto e vazio: quem zerava os frames também
        precisa mandar os passos se recalcularem. */
     if (typeof passos === 'function') passos();
@@ -2824,6 +2888,9 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   async function bombearAsr(){
     if (asrRodando || !pipe) return;
     asrRodando = true;
+    /* Quantos trechos havia quando a cauda começou. Sem esse denominador não há
+       porcentagem — e a porcentagem é a diferença entre esperar e fechar a aba. */
+    if (emCauda && !caudaTotal) caudaTotal = filaAsr.length;
     while (filaAsr.length) {
       if (pularCauda) { filaAsr.length = 0; asrPendentes = 0; atualizarLive(); break; }
       const j = filaAsr.shift();
@@ -2862,8 +2929,24 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       }
       asrPendentes--;
       atualizarLive();
+      /* Devolver o fio ao navegador entre um trecho e outro.
+
+         A inferência roda no fio principal, e cada janela de 20 segundos custa
+         segundos de processador. Enquanto ela corre, nada é pintado e nenhum
+         clique é atendido — é daí que sai a caixa "Página sem resposta". Este
+         respiro não elimina o problema (uma janela sozinha já pode passar do
+         limite do navegador), mas garante que a barra e a contagem apareçam
+         ENTRE as janelas em vez de todas de uma vez no fim.
+
+         Dois quadros de espera, e não zero: um `setTimeout(0)` volta antes de o
+         navegador desenhar, e a barra continuaria pulando de 0 a 100. */
+      await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
     }
     asrRodando = false;
+    if (emCauda) {
+      caudaTotal = 0; prog(null);
+      $('caudaBar').classList.add('hide');
+    }
   }
 
   function escreverTranscricao(){
@@ -2878,9 +2961,43 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     $('liveTail').scrollTop = $('liveTail').scrollHeight;
   }
 
+  /* Quantos trechos a cauda tinha no começo, para a porcentagem ter denominador. */
+  let caudaTotal = 0;
+
+  /* A barra da cauda.
+
+     Era a única espera longa do produto sem barra nenhuma: a pessoa parava a
+     gravação, via "Terminando de transcrever o que faltou…" e ficava sem saber
+     se aquilo levava cinco segundos ou cinco minutos. Numa espera cega, fechar
+     a aba é a decisão racional — e fechar a aba perde a gravação inteira, porque
+     não há nada guardado em lugar nenhum.
+
+     A previsão sai do ritmo MEDIDO nesta máquina (`relogio`), e não de uma
+     estimativa fixa: a mesma gravação leva 4 s numa máquina e 40 s em outra. */
+  function progressoCauda(){
+    if (!caudaTotal) return { pct: null, falta: '' };
+    const feitos = Math.max(0, caudaTotal - asrPendentes);
+    const pct = Math.min(100, feitos / caudaTotal * 100);
+    const porSegundo = relogio.ms > 0 ? relogio.audio / (relogio.ms / 1000) : 0;
+    const restaAudio = asrPendentes * JANELA_S;
+    const seg = porSegundo > 0 ? restaAudio / porSegundo : 0;
+    return { pct, falta: (seg > 3 ? t('etaTr', duracao(seg)) : '') };
+  }
+
   function atualizarLive(){
     if (emCauda) {
-      $('liveStat').textContent = t('recTailN', asrPendentes);
+      const { pct, falta } = progressoCauda();
+      $('liveStat').textContent = t('recTailN', asrPendentes) + (falta ? ' ' + falta : '');
+      if (pct != null) {
+        $('caudaBar').classList.remove('hide');
+        $('caudaFill').style.width = pct.toFixed(1) + '%';
+        prog(pct);
+        st(t('transcribing2', pct.toFixed(0), caudaTotal - asrPendentes, caudaTotal, falta));
+        /* Também no #recMsg: é para onde a pessoa está olhando quando acaba de
+           apertar Parar, e não para o cartão 2 mais abaixo. */
+        $('recMsg').innerHTML = t('recTail') + ' <b>' + pct.toFixed(0) + '%</b>' +
+          (falta ? ' <span class="status">' + falta + '</span>' : '');
+      }
       return;
     }
     if (!liveOn) return;
@@ -3291,6 +3408,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
         avisoCurto = t('recMarcado');
         avisoAte = performance.now() + 2600;
         pintarRecMsg();
+        /* E na janelinha, que é para onde a pessoa está olhando. */
+        pipAviso = t('pipMarcado', frames.filter(f => f.manual).length);
+        pipAvisoAte = performance.now() + 2200;
+        controle('gravando', { seg: agora(), frames: frames.length });
       }
     };
     alternarPausa = () => {
@@ -3461,11 +3582,22 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
             (m.maiorDiff || 0).toFixed(1), (m.limiar || 0).toFixed(1)) + ')</span>'
         : '';
       const semFrames = (frames.length === 0 && liveDur >= 2) ? ' ' + t('recSemFrames') : '';
-      const alerta = avisosFim.length ? ` <span class="err">${avisosFim.join(' ')}</span>` : '';
+      /* Nota, e não erro. Um canal de áudio mudo é o caso NORMAL de quem grava
+         a própria tela sem som tocando — e pintá-lo de vermelho ao lado de uma
+         gravação bem-sucedida faz a pessoa sair procurando um defeito que não
+         existe. Foi exatamente o que aconteceu: "o erro em vermelho sinaliza um
+         erro, daí procuro e a transcrição foi realizada". Vermelho fica
+         reservado para o que de fato falhou. */
+      const alerta = avisosFim.length ? ` <span class="nota">${avisosFim.join(' ')}</span>` : '';
       $('recMsg').innerHTML = `<span class="ok">${t('recDone2', fmt(liveDur), frames.length, liveCues.length)}` +
         semFala + semFrames + contarDesempenho() + `</span>` + detalheFrames + alerta;
       $('extract').disabled = true;      // não há vídeo para varrer de novo
+      /* Um botão cinza e mudo é a pior resposta possível: quem lê "Transcrever"
+         desabilitado conclui que a transcrição falhou — e ela acabou de dar
+         certo. O rótulo passa a dizer o estado, e o título explica. */
       $('auto').disabled = true;
+      autoTravado = liveCues.length ? 'autoJaFeito' : 'autoSemAudio';
+      pintarAuto();
       render();
       passos();
       irPara('prevCard', true);
@@ -3813,10 +3945,16 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   function lembrarMotor(obj){
     try { localStorage.setItem(MOTOR_OK, JSON.stringify(obj)); } catch (e) {}
   }
+  /* A versão do formato. Quando a fila de ambientes ganha um degrau NOVO e
+     melhor — foi o caso do `proxy`, que tira a inferência do fio principal —,
+     quem já tinha uma combinação guardada ficaria preso na antiga para sempre,
+     sem nunca experimentar a nova. Subir este número descarta o que foi
+     guardado antes e faz a escada correr uma vez mais. */
+  const MOTOR_VER = 2;
   function motorLembrado(modelId){
     try {
       const j = JSON.parse(localStorage.getItem(MOTOR_OK) || 'null');
-      return (j && j.modelId === modelId) ? j : null;
+      return (j && j.v === MOTOR_VER && j.modelId === modelId) ? j : null;
     } catch (e) { return null; }
   }
   const esquecerMotor = () => { try { localStorage.removeItem(MOTOR_OK); } catch (e) {} };
@@ -3895,7 +4033,20 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      `dtype` e duas placas produziram um erro idêntico byte a byte, o que só
      acontece quando o que executa é sempre o mesmo. */
   function ambientes(){
-    const lista = TJS_BASES.map(lib => ({ lib, runtime: 'de fábrica' }));
+    /* `proxy` primeiro, e é o que resolve a caixa "Página sem resposta".
+
+       Sem ele, a inferência roda no FIO PRINCIPAL: cada janela de áudio bloqueia
+       a página por segundos, nada é pintado, nenhum clique é atendido, e o
+       navegador oferece "sair da página" no meio de uma gravação que está dando
+       certo. Com `env.wasm.proxy = true`, o onnxruntime cria um worker próprio e
+       o fio principal fica livre — a barra anda, os botões respondem.
+
+       Ele não é o único degrau porque pode falhar: o worker é criado a partir de
+       um blob e, sob isolamento entre origens, alguns navegadores barram. Se
+       falhar, o degrau seguinte é exatamente o comportamento de antes — mais
+       lento de usar, mas funcionando. */
+    const lista = [{ lib: TJS_BASES[0], runtime: 'de fábrica', proxy: true }];
+    TJS_BASES.forEach(lib => lista.push({ lib, runtime: 'de fábrica' }));
     /* O runtime sondado por último: ele resolve o caso em que o endereço de
        fábrica saiu do ar, e causa o caso em que a versão não bate com a da
        biblioteca. */
@@ -3951,6 +4102,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
         const w0 = (mod0.env.backends && mod0.env.backends.onnx && mod0.env.backends.onnx.wasm) || null;
         if (w0) {
           w0.numThreads = linhasDoWasm();
+          w0.proxy = !!lembrado.proxy;
           if (lembrado.runtime === 'sondado') { const b0 = await findWasmBase(); if (b0) w0.wasmPaths = b0; }
         }
         pedidos = new Set();
@@ -3959,12 +4111,14 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
         libMod = mod0; tjsEmUso = lembrado.lib;
         motorEmUso = lembrado.motor; modeloEmUso = lembrado.alvo;
         degraus.push({ rotulo: 'combinação lembrada', ok: true, alvo: lembrado.alvo,
-                       amb: curto(lembrado.lib) + ' · runtime ' + lembrado.runtime,
+                       amb: curto(lembrado.lib) + ' · runtime ' + lembrado.runtime +
+                            (lembrado.proxy ? ' · fora do fio principal' : ''),
                        ort: versaoOrt(mod0), linhas: linhasDoWasm(), arqs: [...pedidos] });
         return pp;
       } catch (e) {
         degraus.push({ rotulo: 'combinação lembrada', ok: false, alvo: lembrado.alvo,
-                       amb: curto(lembrado.lib) + ' · runtime ' + lembrado.runtime,
+                       amb: curto(lembrado.lib) + ' · runtime ' + lembrado.runtime +
+                            (lembrado.proxy ? ' · fora do fio principal' : ''),
                        linhas: linhasDoWasm(), erro: (e && e.message) || String(e),
                        arqs: [...pedidos] });
         esquecerMotor();
@@ -3991,14 +4145,17 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       if (wasm) {
         try {
           wasm.numThreads = linhasDoWasm();
-          /* Só ANTES da primeira sessão deste módulo isto tem efeito. */
+          /* Como o wasmPaths: só ANTES da primeira sessão deste módulo isto tem
+             efeito — daí cada ambiente precisar de um módulo fresco. */
+          wasm.proxy = !!amb.proxy;
           if (amb.runtime === 'sondado') {
             const b = await findWasmBase();
             if (b) wasm.wasmPaths = b;
           }
         } catch (e) {}
       }
-      const ambRot = curto(amb.lib) + ' · runtime ' + amb.runtime;
+      const ambRot = curto(amb.lib) + ' · runtime ' + amb.runtime +
+                     (amb.proxy ? ' · fora do fio principal' : '');
 
       /* Os degraus dentro de um ambiente. No PRIMEIRO ambiente vale a fila
          inteira; nos seguintes, só os dois que importam — se o ambiente for a
@@ -4062,8 +4219,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
               Object.assign({ progress_callback }, tent.opcoes));
             motorEmUso = tent.motor;
             modeloEmUso = alvo;
-            lembrarMotor({ modelId, lib: amb.lib, runtime: amb.runtime, alvo,
-                           opcoes: tent.opcoes, motor: tent.motor });
+            lembrarMotor({ v: MOTOR_VER, modelId, lib: amb.lib, runtime: amb.runtime, proxy: !!amb.proxy,
+                           alvo, opcoes: tent.opcoes, motor: tent.motor });
             degraus.push({ rotulo: rotuloTentativa(tent), ok: true, amb: ambRot,
                            ort: versaoOrt(mod), linhas: passe ? 1 : linhasDoWasm(),
                            alvo, arqs: [...pedidos] });
@@ -4578,6 +4735,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
 
   /* ================= revisão ================= */
   function render(){
+    if (typeof pintarSoMarcados === 'function') pintarSoMarcados();
     const box = $('thumbs');
     /* render() agora se chama a si mesmo ao descartar um quadro; sem guardar o
        foco, o teclado voltaria para o começo da página a cada clique. E isto
@@ -5301,6 +5459,24 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   };
 
   $('allOn').onclick = () => { frames.forEach(f => f.keep = true); render(); };
+
+  /* "Manter só as marcadas". Quem apertou "marcar" durante a gravação já disse
+     quais telas importam — e depois tinha que descartar as outras uma a uma. O
+     botão só aparece quando existe alguma marcada, porque um botão que não faz
+     nada é pior que um botão a menos. */
+  function pintarSoMarcados(){
+    const b = $('soMarcados'); if (!b) return;
+    const n = frames.filter(f => f.manual).length;
+    b.classList.toggle('hide', n === 0);
+    b.textContent = t('keepMarked', n);
+  }
+  $('soMarcados').onclick = () => {
+    const n = frames.filter(f => f.manual).length;
+    if (!n) return;
+    frames.forEach(f => { f.keep = !!f.manual; });
+    render();
+    $('status').textContent = t('keepMarkedN', n, frames.length - n);
+  };
   $('dedup').onclick = () => {
     let prev = null, n = 0;
     frames.forEach(f => {
