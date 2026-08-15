@@ -357,6 +357,7 @@
         <label class="chk"><input type="checkbox" id="trEn"><span data-i18n="trEnLbl"></span></label>
         <label class="chk"><input type="checkbox" id="gpu"><span data-i18n="gpuLbl"></span></label>
         <button class="ghost sm" id="diag" data-i18n="diagBtn"></button>
+        <button class="ghost sm" id="limparModelo" data-i18n="limparBtn"></button>
       </div>
       <pre id="diagOut" class="hide"></pre>
       <div class="bar hide" id="abarWrap"><i id="abar"></i></div>
@@ -1135,6 +1136,10 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       spkMic:'Microfone', spkSys:'Computador',
       recFile:'captura de tela', pNoFile:'nenhum arquivo guardado',
       gpuLbl:'usar a placa de vídeo', dlSize:'baixa ~{0} MB na primeira vez',
+      modelLimpando:'Apagando o modelo guardado e baixando de novo…',
+      limparBtn:'apagar o modelo guardado',
+      limparFeito:'Apaguei {0} arquivo(s) do modelo guardado. A próxima transcrição baixa de novo.',
+      limparVazio:'Não havia nada guardado.',
       motorCaiu:'O modelo não abriu na {0}. Tentando no processador…',
       motorQuebrou:'O modelo abriu na placa de vídeo mas quebrou ao transcrever. Refazendo no processador…',
       trPulou:'{0} trechos sem fala foram pulados.',
@@ -1425,6 +1430,10 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       spkMic:'Microphone', spkSys:'Computer',
       recFile:'screen capture', pNoFile:'no file kept',
       gpuLbl:'use the graphics card', dlSize:'downloads ~{0} MB the first time',
+      modelLimpando:'Clearing the stored model and downloading it again…',
+      limparBtn:'delete the stored model',
+      limparFeito:'Deleted {0} stored model file(s). The next transcription downloads again.',
+      limparVazio:'There was nothing stored.',
       motorCaiu:'The model would not open on the {0}. Trying the CPU…',
       motorQuebrou:'The model opened on the graphics card but broke while transcribing. Redoing it on the CPU…',
       trPulou:'{0} stretches with no speech were skipped.',
@@ -1713,6 +1722,10 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       spkMic:'Micrófono', spkSys:'Ordenador',
       recFile:'captura de pantalla', pNoFile:'ningún archivo guardado',
       gpuLbl:'usar la tarjeta gráfica', dlSize:'descarga ~{0} MB la primera vez',
+      modelLimpando:'Borrando el modelo guardado y descargándolo de nuevo…',
+      limparBtn:'borrar el modelo guardado',
+      limparFeito:'Borré {0} archivo(s) del modelo guardado. La próxima transcripción vuelve a descargar.',
+      limparVazio:'No había nada guardado.',
       motorCaiu:'El modelo no abrió en la {0}. Probando en el procesador…',
       motorQuebrou:'El modelo abrió en la tarjeta gráfica pero se rompió al transcribir. Rehaciéndolo en el procesador…',
       trPulou:'{0} tramos sin habla fueron omitidos.',
@@ -3893,6 +3906,17 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     'onnx-community/whisper-base':  { cpu: 77,  gpu: 206 },
     'onnx-community/whisper-small': { cpu: 249, gpu: 586 }
   };
+
+  /* Repositório de reserva do MESMO modelo. As exportações do `onnx-community`
+     são novas e usam quantização QDQ de 4 bits (`MatMulNBits`); as do `Xenova`
+     são as antigas, sem essa operação. Numa máquina onde toda configuração
+     falha com a mesma linha de `MatMulNBits`, trocar o arquivo é a única
+     variável que ainda não tinha sido mexida. */
+  const MODELO_RESERVA = {
+    'onnx-community/whisper-base':  'Xenova/whisper-base',
+    'onnx-community/whisper-small': 'Xenova/whisper-small'
+  };
+  let modeloEmUso = null;
   const usaPlaca = () => !!($('gpu') && $('gpu').checked);
 
   /* A pergunta "quer transcrição?" agora é respondida no passo 1, antes de
@@ -3947,6 +3971,47 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
            (d.vezes < 1 ? ` <span class="err">${t('perfLento')}</span>` : '');
   }
 
+  /* O que está guardado na Cache Storage, endereço por endereço. Foi escrito
+     para responder uma pergunta que eu vinha respondendo por teoria: QUAL
+     arquivo o runtime está abrindo? Seis degraus com configurações diferentes
+     falhando com a mesma linha só faz sentido se o arquivo aberto for o mesmo
+     nos seis — e um arquivo guardado errado explica isso melhor que qualquer
+     hipótese sobre versão de runtime. */
+  async function listarCacheModelo(){
+    const achados = [];
+    try {
+      if (!self.caches) return achados;
+      for (const n of await caches.keys()) {
+        if (!/transformers/i.test(n)) continue;
+        const c = await caches.open(n);
+        for (const r of await c.keys()) {
+          let tam = null;
+          try { const resp = await c.match(r); const b2 = await resp.clone().blob(); tam = b2.size; }
+          catch (e) {}
+          achados.push({ cache: n, url: r.url, bytes: tam });
+        }
+      }
+    } catch (e) {}
+    return achados;
+  }
+
+  /* Apagar o que está guardado. Um arquivo truncado ou de outra variante fica
+     no cache para sempre — o navegador não revalida o que já tem —, e o sintoma
+     é justamente um erro que não muda por mais que se mude a configuração. */
+  async function limparCacheModelo(){
+    let n = 0;
+    try {
+      if (!self.caches) return 0;
+      for (const nome of await caches.keys()) {
+        if (!/transformers/i.test(nome)) continue;
+        const c = await caches.open(nome);
+        for (const r of await c.keys()) { await c.delete(r); n++; }
+        await caches.delete(nome);
+      }
+    } catch (e) {}
+    return n;
+  }
+
   /* O modelo já está guardado neste navegador? O transformers.js usa a Cache
      Storage, que dá para perguntar antes de começar. Serve para não escrever
      "baixando" quando não há download nenhum — a queixa era justamente essa. */
@@ -3973,9 +4038,11 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
   function rotuloTentativa(tent){
     const dt = tent.opcoes.dtype;
     const tipo = typeof dt === 'string' ? dt : (dt && dt.decoder_model_merged) || '?';
-    return (tent.opcoes.device || 'automático') + ' · decodificador ' + tipo +
+    return (tent.opcoes.device || 'automático') + ' · decod. ' + tipo +
            (tent.semOtim ? ' · sem otimização' : '') +
-           (tent.sondar  ? ' · runtime alternativo' : '');
+           (tent.sondar  ? ' · runtime reserva' : '') +
+           (tent.limpar  ? ' · cache limpo' : '') +
+           (tent.modelo  ? ' · ' + tent.modelo : '');
   }
 
   const MOTOR_CHAVE = 'Walkstamp.semQ4';
@@ -3992,6 +4059,10 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     const mod = await loadLib();
     libMod = mod;                 // guardado: o degrau precisa remontar sem a placa
     const arquivos = {};
+    /* Quais arquivos o degrau pediu de verdade. Era a pergunta que faltava:
+       sem ela, dizer "o degrau fp32 falhou" não diz se ele chegou a pedir o
+       arquivo fp32. */
+    let pedidos = new Set();
     let baixouAlgo = false;
     const mb = b => (b / 1048576).toFixed(0);
     /* Percentual por BYTES, e não a média das porcentagens de cada arquivo: a
@@ -3999,6 +4070,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
        e depois travar. E com os megabytes na tela dá para decidir se dá tempo. */
     const progress_callback = p => {
       if (!p.file) return;
+      pedidos.add(p.file);
       if (p.status === 'progress' || p.status === 'download') {
         baixouAlgo = true;
         arquivos[p.file] = { loaded: p.loaded || 0, total: p.total || 0 };
@@ -4069,6 +4141,20 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
        alternativa é ficar sem transcrição. */
     if (!usaPlaca() && navigator.gpu) tentativas.push({ motor: 'placa de vídeo',
       opcoes: { device:'webgpu', dtype:{ encoder_model:'fp32', decoder_model_merged:'fp32' } } });
+    /* Apagar o guardado e tentar de novo. Um arquivo truncado ou de outra
+       variante fica no cache indefinidamente — o navegador não revalida o que
+       já tem — e o sintoma é exatamente este: o mesmo erro em toda
+       configuração, porque em toda configuração o que abre são os mesmos
+       bytes. Custa um download novo, e por isso vem depois de tudo que não
+       custa. */
+    tentativas.push({ motor: 'processador', limpar: true,
+      opcoes: { device:'wasm', dtype:'q8' } });
+    /* Outro repositório do mesmo modelo. Os arquivos do `onnx-community` são
+       exportações novas, com quantização QDQ de 4 bits; os do `Xenova` são as
+       antigas, sem `MatMulNBits`. Se o defeito estiver no arquivo e não na
+       máquina, é aqui que ele desaparece. */
+    if (MODELO_RESERVA[modelId]) tentativas.push({ motor: 'processador',
+      modelo: MODELO_RESERVA[modelId], opcoes: { device:'wasm', dtype:'q8' } });
 
     /* Degrau de linhas, dentro de cada tentativa.
 
@@ -4095,17 +4181,23 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
           wasm.wasmPaths = tent.sondar ? (await findWasmBase()) || wasmPadrao : wasmPadrao;
         } catch (e) {}
       }
+      if (tent.limpar) { st(t('modelLimpando')); await limparCacheModelo(); }
+      const alvo = tent.modelo || modelId;
       for (let passe = 0; passe < 2; passe++) {
+        pedidos = new Set();
         try {
-          const pp = await mod.pipeline('automatic-speech-recognition', modelId,
+          const pp = await mod.pipeline('automatic-speech-recognition', alvo,
             Object.assign({ progress_callback }, tent.opcoes));
           motorEmUso = tent.motor;
-          degraus.push({ rotulo: rotuloTentativa(tent), ok: true, linhas: passe ? 1 : linhasDoWasm() });
+          degraus.push({ rotulo: rotuloTentativa(tent), ok: true, linhas: passe ? 1 : linhasDoWasm(),
+                         alvo, arqs: [...pedidos] });
+          modeloEmUso = alvo;
           return pp;
         } catch (e) {
           ultimo = (e && e.message) || String(e);
           degraus.push({ rotulo: rotuloTentativa(tent), ok: false,
-                         linhas: passe ? 1 : linhasDoWasm(), erro: ultimo });
+                         linhas: passe ? 1 : linhasDoWasm(), erro: ultimo,
+                         alvo, arqs: [...pedidos] });
           // o defeito do arquivo de 4 bits não se repete: fica anotado na aba
           if (tent.q4 && ERRO_SESSAO.test(ultimo)) marcarSemQ4();
           const podeBaixarLinhas = passe === 0 && wasm && wasm.numThreads > 1;
@@ -4251,6 +4343,15 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
   $('model').onchange = mostrarTamanho;
   mostrarTamanho();
 
+  $('limparModelo').onclick = async () => {
+    $('limparModelo').disabled = true;
+    try {
+      const n = await limparCacheModelo();
+      pipe = null; pipeId = null;      // a próxima transcrição remonta do zero
+      st(n ? t('limparFeito', n) : t('limparVazio'), n ? 'ok' : '');
+    } finally { $('limparModelo').disabled = false; }
+  };
+
   $('diag').onclick = async () => {
     const out = $('diagOut'); out.classList.remove('hide');
     const L = []; const say = s => { L.push(s); out.textContent = L.join('\n'); };
@@ -4294,6 +4395,14 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     say('wasm reserva  : ' + (b || 'nenhum respondeu'));
 
     say('');
+    say('modelo guardado neste navegador:');
+    const guardado = await listarCacheModelo();
+    if (!guardado.length) say('  (nada guardado — vai baixar)');
+    guardado.slice(0, 20).forEach(g => say('  ' + (g.bytes == null ? '?' :
+      (g.bytes/1048576).toFixed(1) + ' MB').padStart(9) + '  ' + g.url.replace(/^https?:\/\//, '')));
+    if (guardado.length > 20) say('  (+ ' + (guardado.length - 20) + ' arquivo(s))');
+
+    say('');
     say('vídeo de exemplo:');
     say('  H.264 no navegador: ' + (document.createElement('video').canPlayType('video/mp4; codecs="avc1.42E01E"') || 'NAO suportado'));
     for (const base of DEMO_BASES) {
@@ -4317,9 +4426,15 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     }
     if (!degraus.length) say('  (nenhum degrau chegou a ser tentado)');
     degraus.forEach((d, i) => {
-      say('  ' + (i+1) + '. ' + d.rotulo.padEnd(34) +
-          (d.ok ? 'OK' : 'falhou') + '  [linhas=' + d.linhas + ']');
-      if (d.erro) say('     -> ' + String(d.erro).slice(0, 220));
+      /* Sem padEnd: os rótulos passaram a ser longos e a coluna fixa colava
+         "sem otimização" em "falhou". Uma linha por informação lê melhor num
+         relatório que é copiado e colado. */
+      say('  ' + (i+1) + '. ' + d.rotulo + '  -> ' + (d.ok ? 'OK' : 'falhou') +
+          '  [linhas=' + d.linhas + ']');
+      if (d.alvo) say('     modelo: ' + d.alvo);
+      say('     arquivos pedidos: ' + (d.arqs && d.arqs.length ? d.arqs.join(', ')
+                                       : '(nenhum — veio tudo do cache)'));
+      if (d.erro) say('     erro: ' + String(d.erro).slice(0, 260));
     });
 
     say('--- fim ---');

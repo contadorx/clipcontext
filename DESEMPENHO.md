@@ -321,3 +321,58 @@ Esconder essa caixa não funcionava. `.hide{display:none}` estava **acima** de
 `.chk{display:inline-flex}` na folha, e com a mesma especificidade quem vence é a última — então
 `label.chk.hide` continuava visível. `.hide` passou a ser `!important`, que é o que um utilitário
 precisa ser. O defeito não dava erro, não aparecia em revisão e só se via na tela.
+
+---
+
+## 15/08/2026, segunda rodada — a hipótese do runtime caiu
+
+Publicada a correção acima, o mesmo relatório voltou com **seis** degraus, todos com a mesma
+linha — incluindo os três que existiam justamente para escapar dela:
+
+| degrau | resultado |
+|---|---|
+| `wasm · q8` (runtime de fábrica) | `MatMulNBits Missing required scale` |
+| `wasm · q8` com uma linha só | idem |
+| `wasm · q8 · sem otimização de grafo` | idem |
+| `wasm · fp32` | idem |
+| `wasm · q8 · runtime reserva` | idem |
+| **`webgpu · fp32`** | idem |
+
+Isso encerra três hipóteses de uma vez. **Não é a versão do runtime**, porque o degrau de fábrica e
+o sondado falham igual. **Não é o otimizador de grafo**, porque desligá-lo não muda nada. E **não é
+o wasm**, porque a placa de vídeo — que nem passa por esse caminho — falha com a mensagem do wasm.
+
+Quando seis configurações diferentes produzem um erro idêntico, o que elas têm em comum não são as
+configurações: são **os bytes que estão sendo abertos**. E há duas explicações para os bytes serem
+os mesmos em todos os degraus:
+
+1. o `dtype` não está trocando de arquivo — a biblioteca abre o mesmo decodificador sempre;
+2. o arquivo está **guardado no navegador** e nenhum degrau chega a pedir outro.
+
+A segunda tem um agravante que combina com uma queixa antiga desta caixa de entrada — *"mesmo após
+baixar, na próxima transcrição ele continua baixando"*. Cache Storage não revalida o que já tem: um
+arquivo truncado, ou de uma variante que não abre, fica lá indefinidamente.
+
+Uma pista de laboratório reforça o ponto: `wasm de fábrica: [object Object]`. O `wasmPaths` do
+transformers.js 4.x é um **objeto** (um mapa de arquivo → endereço), não uma string. Quer dizer que
+a versão anterior, que o substituía por uma string de CDN, estava de fato quebrando a resolução —
+só que consertar isso não bastou, porque não era a causa raiz.
+
+### O que esta rodada faz — e por que ela é de instrumentação
+
+Eu vinha respondendo por teoria uma pergunta que o código pode responder por medição: **qual
+arquivo cada degrau abre.** O `progress_callback` já recebe o nome de cada arquivo pedido; ele
+passou a ser registrado por degrau e impresso.
+
+- **O diagnóstico lista o que está guardado no navegador**, endereço por endereço e com o tamanho.
+  Um `decoder_model_merged_q4.onnx` guardado enquanto o degrau diz `fp32` fecha o caso na hora.
+- **Cada degrau imprime os arquivos que pediu**, ou `(nenhum — veio tudo do cache)`, que é a
+  resposta mais reveladora possível.
+- **Dois degraus novos**, os dois atacando a causa que sobrou: um que **apaga o guardado e baixa de
+  novo**, e um que troca de **repositório do modelo** (`Xenova/whisper-base` em vez de
+  `onnx-community/whisper-base` — exportações antigas, sem `MatMulNBits`).
+- **Um botão "apagar o modelo guardado"**, ao lado do diagnóstico, para não depender de limpar
+  dados de navegação inteiros.
+
+Os rótulos dos degraus deixaram de ser alinhados por coluna fixa: com nomes mais longos, o
+`padEnd(34)` colava "sem otimização" em "falhou" no relatório copiado.
