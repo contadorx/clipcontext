@@ -675,3 +675,65 @@ O relatório dessa rodada veio com `última gravação de tela: (nenhuma gravaç
 diagnóstico rodado em aba nova. Quem grava, vê que deu errado e recarrega a página perdia
 justamente o que veio buscar. Os contadores foram para o `sessionStorage`: morrem com a aba, como
 todo o resto, e estão descritos na política.
+
+---
+
+## 15/08/2026, oitava rodada — o detector media a coisa errada
+
+O relatório que faltava, enfim:
+
+```
+frames guardados : 5   de um limite de 60
+duração          : 18.7 s   laço a cada 700 ms
+vídeo            : 1920×794
+recusas: ... mudança abaixo do limiar=23
+mudança: maior vista=6.6   limiar em vigor=5.5
+```
+
+Vinte e oito tentativas, cinco guardadas, vinte e três recusadas por "não mudou o suficiente". E a
+**maior** mudança de toda a gravação foi 6,6 numa escala de 0 a 255 — raspando o limiar de 5,5.
+Alguém percorrendo telas de verdade numa janela de 1920 px, e o detector enxergando quase nada.
+
+### Por que
+
+O detector reduzia cada quadro a uma assinatura de 32×18 e comparava pela **média** da diferença
+absoluta. Média funciona em vídeo, onde a cena inteira troca. Em captura de tela ela falha de um
+jeito específico:
+
+Numa janela de 1920×794, navegar de uma transação para outra troca a área de conteúdo e deixa
+**intactos** o menu do topo, a barra lateral, o rodapé e o fundo. Uma troca que salta aos olhos
+ocupa 3% dos pixels. Espalhada pela média de 576 células, vira 2,7 — abaixo de qualquer limiar
+utilizável. Baixar o limiar não resolve: a 1 ou 2, o cursor piscando e o relógio da barra de
+tarefas viram "mudança de tela" e o documento enche de quadros iguais.
+
+O erro não era o limiar. Era a **grandeza medida**.
+
+### O que passou a medir
+
+O sinal agora tem duas partes, e vale a maior:
+
+- a **média** de sempre — boa para vídeo, onde a cena inteira muda;
+- a **fração de células que mudaram de verdade** (algum canal movendo mais de 24 em 255), trazida
+  para a mesma escala de 0 a 255.
+
+Usar o **máximo**, e não a soma, garante que o detector só pode ficar mais sensível: nenhuma
+captura que acontecia antes deixa de acontecer.
+
+A escala casa com os limiares que já existiam, por um acaso feliz: 5,5 passa a significar "2,2% das
+células mudaram" e 26 passa a significar "10,2%". Uma célula solta — o cursor, o relógio — vale 0,4
+e não move ninguém.
+
+O teste (`telalarga.mjs`) reproduz a geometria da máquina real: 1920×794, cromo parado, painel de
+3% trocando a cada 3 s. Ele exige as duas coisas ao mesmo tempo — que a **média sozinha fique
+abaixo do limiar** (senão o cenário é fácil demais e o teste não prova nada) e que a captura
+aconteça assim mesmo:
+
+```
+mudança: maior vista=10.2   limiar em vigor=5.5
+  das duas partes: média=2.7   área=10.2  (4.0% das células)
+```
+
+Sete passos para seis navegações, onde antes seriam zero.
+
+E o diagnóstico passou a imprimir as duas partes separadas. Um número composto sem as parcelas é um
+número que não se pode interpretar — foi o que me custou uma rodada nesta mesma investigação.

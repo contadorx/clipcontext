@@ -3237,7 +3237,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
        aparece — e "sem frames, ainda com problemas" foi como chegou. Estes
        contadores custam nada e transformam a queixa em diagnóstico. */
     motivosFrame = { semVideo: 0, semAssinatura: 0, semImagem: 0, poucaMudanca: 0,
-                     limite: 0, maiorDiff: 0, limiar: thr, erroImagem: '' };
+                     limite: 0, maiorDiff: 0, maiorMedia: 0, maiorArea: 0,
+                     limiar: thr, erroImagem: '' };
 
     const capturar = (forcar, marcado) => {
       if (!video.videoWidth) { motivosFrame.semVideo++; return false; }
@@ -3256,6 +3257,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       if (!forcar && prevSig !== null && sig) {
         const d = diff(prevSig, sig);
         if (d > motivosFrame.maiorDiff) motivosFrame.maiorDiff = d;
+        if (ultimaMedida.media > motivosFrame.maiorMedia) motivosFrame.maiorMedia = ultimaMedida.media;
+        if (ultimaMedida.area  > motivosFrame.maiorArea)  motivosFrame.maiorArea  = ultimaMedida.area;
         if (d < thr) { motivosFrame.poucaMudanca++; return false; }
       }
       /* Se a imagem em si não puder ser lida, o motivo é outro do que "não
@@ -4293,6 +4296,9 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       if (m.erroImagem) say('  erro ao gravar a imagem: ' + String(m.erroImagem).slice(0, 200));
       say('  mudança: maior vista=' + (m.maiorDiff || 0).toFixed(1) +
           '   limiar em vigor=' + (m.limiar || 0).toFixed(1) + '   (escala 0–255)');
+      say('    das duas partes: média=' + (m.maiorMedia || 0).toFixed(1) +
+          '   área=' + (m.maiorArea || 0).toFixed(1) +
+          '  (' + ((m.maiorArea || 0) / 2.55).toFixed(1) + '% das células)');
     }
 
     say('');
@@ -4374,12 +4380,53 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     }
     return s;
   }
+  /* Uma célula da assinatura "mudou" quando algum canal se move mais que isto.
+     24 em 255 é mudança que se vê; abaixo disso é compressão, anti-aliasing e
+     o cintilar do próprio codec de captura. */
+  const CEL_MUDOU = 24;
+
+  /* O quanto duas telas diferem — e o número que sai daqui decide se um quadro
+     vira passo do documento.
+
+     Durante muito tempo isto era só a MÉDIA da diferença absoluta. Média
+     funciona em vídeo, onde a cena inteira troca. Em captura de tela ela falha
+     de um jeito específico e silencioso: numa janela de 1920 px, navegar de uma
+     transação para outra troca a área de conteúdo e deixa intactos o menu, a
+     barra lateral, o rodapé e o fundo. Espalhada por 576 células, uma troca
+     grande vira um número pequeno.
+
+     O número de uma máquina real: 18,7 segundos percorrendo telas de verdade,
+     maior média vista = 6,6 contra um limiar de 5,5. Cinco frames em vinte e
+     sete tentativas, e a impressão de que a ferramenta não guarda nada.
+
+     Agora o sinal tem duas partes e vale a MAIOR: a média de sempre, e a
+     FRAÇÃO DE CÉLULAS que mudaram de verdade, trazida para a mesma escala de
+     0 a 255. A segunda enxerga o que a primeira dilui. Usar o máximo, e não a
+     soma, garante que o detector só pode ficar mais sensível — nenhuma captura
+     que acontecia antes deixa de acontecer.
+
+     A escala casa por acaso feliz com os limiares que já existiam: 5,5 vira
+     "2,2% das células mudaram", e 26 vira "10,2%". Uma célula solta (o cursor,
+     o relógio da barra) vale 0,4 e não move ninguém. */
   function diff(a, b){
     if (!a || !b) return 255;
-    let sum = 0;
-    for (let i = 0; i < a.length; i++) sum += Math.abs(a[i] - b[i]);
-    return sum / a.length;
+    let soma = 0, celulas = 0, mudadas = 0;
+    for (let i = 0; i + 2 < a.length; i += 3) {
+      const dr = Math.abs(a[i] - b[i]),
+            dg = Math.abs(a[i+1] - b[i+1]),
+            db = Math.abs(a[i+2] - b[i+2]);
+      soma += dr + dg + db;
+      celulas++;
+      if (dr > CEL_MUDOU || dg > CEL_MUDOU || db > CEL_MUDOU) mudadas++;
+    }
+    const media = soma / a.length;
+    const area  = celulas ? (mudadas / celulas) * 255 : 0;
+    ultimaMedida = { media, area, mudadas, celulas };
+    return Math.max(media, area);
   }
+  /* Guardado para o diagnóstico poder mostrar as duas partes separadas — sem
+     isso, "maior mudança vista" vira um número sem como ser interpretado. */
+  let ultimaMedida = { media: 0, area: 0, mudadas: 0, celulas: 0 };
 
   /* aceita "90", "1:30" ou "01:02:03" */
   function lerTempo(v, padrao){
