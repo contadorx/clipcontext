@@ -501,7 +501,7 @@
     <div class="recup" id="rotBloco">
       <div class="row" style="align-items:center;gap:10px;flex-wrap:wrap">
         <button class="ghost sm" id="rotAbrir" data-i18n="rotBtn"></button>
-        <input type="file" id="rotArq" accept=".xlsx,.csv,.tsv,.txt" class="hide">
+        <input type="file" id="rotArq" accept=".xlsx,.csv,.tsv,.txt" multiple class="hide">
         <button class="ghost sm" id="rotColar" data-i18n="rotColarBtn"></button>
         <button class="ghost sm hide" id="rotBaixar" data-i18n="rotBaixarBtn"></button>
         <button class="ghost sm hide" id="rotFechar" data-i18n="rotFecharBtn"></button>
@@ -825,6 +825,12 @@
     <div class="row hide" id="modelosCx" style="margin:0 0 10px;align-items:center;gap:9px">
       <label class="chk" for="modeloCliente" data-i18n="mdCliente"></label>
       <select id="modeloCliente" style="width:auto;max-width:230px"></select>
+      <!-- O botão que faltava. O portal cadastrava modelos com o conteúdo
+           VAZIO — nome e escopo, e mais nada —, e a ferramenta sabia aplicar
+           cenário, rótulo, ambiente, sistema, layout e papel. Resultado: quem
+           pagava criava "Evidência Natura", escolhia na lista, e não acontecia
+           nada. O lugar de salvar um modelo é aqui, onde os valores estão. -->
+      <button class="ghost sm hide" id="mdSalvar" data-i18n="mdSalvarBtn"></button>
       <span class="status" id="modelosMsg"></span>
     </div>
 
@@ -1716,6 +1722,12 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       juntarOk:'{0} sessões juntadas, {1} quadros no total. Cada sessão virou uma tarefa, com o tempo de cada uma.',
       juntarBtn:'Juntar várias sessões', juntarUm:'Escolha dois ou mais arquivos — para um só, use \u201cReabrir um documento\u201d.',
       sbE4:'documento gerado', sbE4v:'nenhum documento ainda',
+      mdSalvarBtn:'Salvar como meu modelo',
+      mdSalvarNome:'Nome do modelo (por exemplo: Evidência Natura)',
+      mdSalvando:'Salvando…', mdSalvo:'Modelo "{0}" salvo.',
+      mdSalvoNao:'Não consegui salvar o modelo agora.',
+      rotColQuem:'Quem executou', rotJuntadas:'{0} planilhas juntadas: {1} de {2} casos executados.',
+      rotNaoBate:'Essas planilhas não são do mesmo roteiro — os casos não batem.',
       rotBtn:'Tenho um roteiro de casos', rotColarBtn:'Colar da planilha',
       rotBaixarBtn:'Baixar a planilha preenchida', rotFecharBtn:'Fechar o roteiro',
       rotDica:'Suba a planilha de casos (.xlsx ou .csv) e execute um a um: a identificação vem preenchida, e no fim a planilha volta com o que foi feito.',
@@ -2241,6 +2253,12 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       juntarOk:'{0} sessions merged, {1} frames in total. Each session became a task, with its own duration.',
       juntarBtn:'Merge several sessions', juntarUm:'Pick two or more files — for a single one, use \u201cReopen a document\u201d.',
       sbE4:'document generated', sbE4v:'no document yet',
+      mdSalvarBtn:'Save as my template',
+      mdSalvarNome:'Template name (for example: Natura evidence)',
+      mdSalvando:'Saving…', mdSalvo:'Template "{0}" saved.',
+      mdSalvoNao:'I could not save the template right now.',
+      rotColQuem:'Run by', rotJuntadas:'{0} spreadsheets merged: {1} of {2} cases run.',
+      rotNaoBate:'Those spreadsheets are not from the same case list — the cases do not match.',
       rotBtn:'I have a list of cases', rotColarBtn:'Paste from the spreadsheet',
       rotBaixarBtn:'Download the filled spreadsheet', rotFecharBtn:'Close the list',
       rotDica:'Upload your case spreadsheet (.xlsx or .csv) and run them one by one: the identification comes filled in, and at the end the spreadsheet comes back with what was done.',
@@ -2762,6 +2780,12 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       juntarOk:'{0} sesiones juntadas, {1} fotogramas en total. Cada sesión pasó a ser una tarea, con su propia duración.',
       juntarBtn:'Juntar varias sesiones', juntarUm:'Elige dos o más archivos — para uno solo, usa \u201cReabrir un documento\u201d.',
       sbE4:'documento generado', sbE4v:'todavía sin documento',
+      mdSalvarBtn:'Guardar como plantilla mía',
+      mdSalvarNome:'Nombre de la plantilla (por ejemplo: Evidencia Natura)',
+      mdSalvando:'Guardando…', mdSalvo:'Plantilla "{0}" guardada.',
+      mdSalvoNao:'No pude guardar la plantilla ahora.',
+      rotColQuem:'Ejecutado por', rotJuntadas:'{0} hojas juntadas: {1} de {2} casos ejecutados.',
+      rotNaoBate:'Esas hojas no son de la misma lista de casos — los casos no coinciden.',
       rotBtn:'Tengo una lista de casos', rotColarBtn:'Pegar de la hoja de cálculo',
       rotBaixarBtn:'Descargar la hoja rellenada', rotFecharBtn:'Cerrar la lista',
       rotDica:'Sube tu hoja de casos (.xlsx o .csv) y ejecútalos uno a uno: la identificación viene rellenada, y al final la hoja vuelve con lo que se hizo.',
@@ -6674,11 +6698,61 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
 
   /* Os modelos de documento do cliente. Escolher um preenche o que ele define;
      não escolher nenhum deixa tudo como está. */
+  /** O que está na tela agora, no formato que o modelo guarda. Os seis campos
+   *  são exatamente os que `pintarModelosDoCliente()` sabe aplicar de volta —
+   *  guardar mais seria guardar o que ninguém lê. */
+  function modeloDaTela(){
+    return {
+      cenario:  $('modelo') ? $('modelo').value : '',
+      rotulo:   $('unNome') ? ($('unNome').value || '').trim() : '',
+      ambiente: $('evAmb') ? $('evAmb').value : '',
+      sistema:  $('evSis') ? ($('evSis').value || '').trim() : '',
+      layout:   $('layout') ? $('layout').value : '',
+      papel:    $('papel') ? $('papel').value : '',
+    };
+  }
+
+  async function salvarModeloDoCliente(){
+    if (!sessao || !MEDIR_URL) return;
+    const nome = (prompt(t('mdSalvarNome')) || '').trim();
+    if (!nome) return;
+    $('mdSalvar').disabled = true;
+    $('modelosMsg').textContent = t('mdSalvando');
+    try {
+      const r = await fetch(MEDIR_URL + '/functions/v1/walkstamp-time', {
+        method: 'POST',
+        headers: { apikey: MEDIR_KEY, Authorization: 'Bearer ' + sessao.token,
+                   'Content-Type': 'application/json' },
+        /* `personal` e não `time`: um modelo salvo da ferramenta é de quem
+           salvou. Empurrar o padrão para a equipe inteira é decisão de quem
+           administra, e ela se toma no painel, não sem querer daqui. */
+        body: JSON.stringify({ acao: 'modelo', nome, escopo: 'personal', dados: modeloDaTela() })
+      });
+      const d = await r.json().catch(() => null);
+      if (!r.ok || !d || d.erro) throw new Error((d && d.erro) || 'falha');
+      if (d.modelos) { perfilDoCliente = Object.assign({}, perfilDoCliente, { modelos: d.modelos }); }
+      pintarModelosDoCliente();
+      $('modelosMsg').innerHTML = `<span class="ok">${t('mdSalvo', nome)}</span>`;
+    } catch (e) {
+      $('modelosMsg').innerHTML = `<span class="err">${t('mdSalvoNao')}</span>`;
+    }
+    $('mdSalvar').disabled = false;
+  }
+  if ($('mdSalvar')) $('mdSalvar').onclick = salvarModeloDoCliente;
+
   function pintarModelosDoCliente(){
     const cx = $('modelosCx'); if (!cx) return;
     const lista = (perfilDoCliente && perfilDoCliente.modelos) || [];
-    cx.classList.toggle('hide', !lista.length);
-    if (!lista.length) return;
+    /* Antes o bloco inteiro só aparecia com pelo menos um modelo cadastrado — e
+       como o único jeito de cadastrar passou a ser daqui, quem não tinha nenhum
+       nunca via o botão de criar o primeiro. Agora o bloco aparece com sessão;
+       o SELETOR é que some quando não há o que selecionar. */
+    const dentro = !!(sessao && perfilDoCliente && perfilDoCliente.cliente);
+    cx.classList.toggle('hide', !dentro);
+    if ($('mdSalvar')) $('mdSalvar').classList.toggle('hide', !dentro);
+    $('modeloCliente').classList.toggle('hide', !lista.length);
+    document.querySelector('label[for="modeloCliente"]').classList.toggle('hide', !lista.length);
+    if (!dentro || !lista.length) return;
     const sel = $('modeloCliente');
     sel.innerHTML = `<option value="">${t('mdNenhum')}</option>` +
       lista.map(m => `<option value="${m.id}">${esc(m.nome)}` +
@@ -10631,7 +10705,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   /* As quatro colunas que a ferramenta acrescenta ao devolver a planilha. Os
      nomes saem traduzidos, e são reconhecidos na volta para que reabrir a
      planilha devolvida não crie um segundo conjunto delas. */
-  const COLS_SAIDA = () => [t('rotColSit'), t('rotColQuando'), t('rotColArq'), t('rotColImp')];
+  const COLS_SAIDA = () => [t('rotColSit'), t('rotColQuando'), t('rotColQuem'), t('rotColArq'), t('rotColImp')];
 
   function gravarRoteiro(){
     try {
@@ -10672,8 +10746,9 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       roteiro.linhas.forEach((l, i) => {
         const sit = String(l[roteiro.saida[0]] || '').trim();
         if (sit) roteiro.feitos[i] = { quando: l[roteiro.saida[1]] || '',
-                                       arquivo: l[roteiro.saida[2]] || '',
-                                       impressao: l[roteiro.saida[3]] || '' };
+                                       quem: l[roteiro.saida[2]] || '',
+                                       arquivo: l[roteiro.saida[3]] || '',
+                                       impressao: l[roteiro.saida[4]] || '' };
       });
     }
     gravarRoteiro();
@@ -10727,7 +10802,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
           `<td style="padding:6px 9px;white-space:nowrap"><b>${esc(val(l, 'caso') || ('#' + (i + 1)))}</b></td>` +
           `<td style="padding:6px 9px">${esc(val(l, 'titulo'))}</td>` +
           `<td style="padding:6px 9px;white-space:nowrap;color:${f ? 'var(--ok,#1f9d55)' : 'var(--muted)'}">` +
-            (f ? '✓ ' + esc(f.quando || '') : (atual ? t('rotAgora') : '—')) + '</td>' +
+            (f ? '✓ ' + esc(f.quando || '') + (f.quem ? ' · ' + esc(f.quem) : '')
+               : (atual ? t('rotAgora') : '—')) + '</td>' +
           `<td style="padding:6px 9px;text-align:right;white-space:nowrap">` +
             `<button class="ghost sm rotUsar" data-i="${i}" style="padding:3px 9px;font-size:12.5px">` +
             (atual ? t('rotUsando') : t('rotUsar')) + '</button></td></tr>';
@@ -10779,6 +10855,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       quando: new Date().toISOString().slice(0, 16).replace('T', ' '),
       arquivo: nomeArq || '',
       impressao: await impressaoDoDocumento(),
+      /* Quem executou sai da SESSÃO, quando existe — e fica em branco quando
+         não existe, em vez de perguntar. Sem isso, juntar as planilhas de cinco
+         pessoas devolveria cinco linhas idênticas sem dono. */
+      quem: (sessao && sessao.email) || '',
     };
     /* O caso sai da vez ao ser concluído: deixar "em execução" depois de pronto
        faria a fila parecer travada no mesmo lugar a rodada inteira. */
@@ -10797,12 +10877,63 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       const f = roteiro.feitos[i];
       nova[onde[0]] = f ? t('rotFeito') : '';
       nova[onde[1]] = f ? f.quando : '';
-      nova[onde[2]] = f ? f.arquivo : '';
-      nova[onde[3]] = f ? f.impressao : '';
+      nova[onde[2]] = f ? (f.quem || '') : '';
+      nova[onde[3]] = f ? f.arquivo : '';
+      nova[onde[4]] = f ? f.impressao : '';
       return nova;
     }));
     baixarBlob(montarXlsx(linhas, roteiro.nome), roteiro.nome + '-' +
                new Date().toISOString().slice(0, 10) + '.xlsx');
+  }
+
+  /** Juntar as planilhas que o time devolveu.
+   *
+   *  É a versão de equipe do roteiro, e ela é feita SEM SERVIDOR — pelo mesmo
+   *  motivo que o resto: guardar o roteiro seria a primeira coisa nossa a saber
+   *  o que a empresa está testando. Quem coordena junta os arquivos que cada um
+   *  devolveu, do mesmo jeito que já se juntam cinco sessões de usabilidade num
+   *  documento.
+   *
+   *  A chave é o CÓDIGO DO CASO, não a posição da linha: duas pessoas podem ter
+   *  filtrado ou reordenado a planilha delas, e casar por linha misturaria as
+   *  execuções. Se os casos não baterem, ele recusa em vez de inventar. */
+  function juntarRoteiros(varios){
+    const base = varios[0];
+    const chaveDe = (r2, l) => r2.mapa.caso == null ? '' : String(l[r2.mapa.caso] || '').trim();
+    const porCaso = {};
+    base.linhas.forEach((l, i) => { const k = chaveDe(base, l); if (k) porCaso[k] = i; });
+    if (!Object.keys(porCaso).length) { avisoRoteiro(t('rotNaoBate'), true); return; }
+
+    let casaram = 0;
+    for (const outro of varios.slice(1)) {
+      for (const [j, f] of Object.entries(outro.feitos)) {
+        const k = chaveDe(outro, outro.linhas[j]);
+        const i = porCaso[k];
+        if (i == null) continue;
+        casaram++;
+        /* Quem executou primeiro fica. Duas pessoas executando o mesmo caso é
+           um problema de organização do time, e sobrescrever em silêncio
+           esconderia isso de quem coordena. */
+        if (!base.feitos[i]) base.feitos[i] = f;
+      }
+    }
+    if (!casaram && varios.length > 1) { avisoRoteiro(t('rotNaoBate'), true); return; }
+    roteiro = base;
+    gravarRoteiro(); pintarRoteiro();
+    avisoRoteiro(t('rotJuntadas', varios.length, Object.keys(base.feitos).length, base.linhas.length));
+  }
+
+  /** Lê um arquivo e devolve o roteiro dele, sem mexer no que está na tela. */
+  async function roteiroDeArquivo(file){
+    const linhas = /\.xlsx$/i.test(file.name)
+      ? xlsxParaLinhas(await abrirZip(await file.arrayBuffer()))
+      : textoParaLinhas(await file.text());
+    const antes = roteiro;
+    roteiro = null;
+    abrirRoteiro(linhas, file.name);
+    const novo = roteiro;
+    roteiro = antes;
+    return novo;
   }
 
   async function carregarRoteiro(file){
@@ -10828,7 +10959,20 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       return false;
     };
     $('rotAbrir').onclick = () => { if (podeRoteiro()) $('rotArq').click(); };
-    $('rotArq').onchange = e => { const f = e.target.files[0]; if (f) carregarRoteiro(f); e.target.value = ''; };
+    $('rotArq').onchange = async e => {
+      const fs2 = [...e.target.files]; e.target.value = '';
+      if (!fs2.length) return;
+      /* Um arquivo abre; dois ou mais juntam. A decisão saiu da tela e virou
+         consequência do que a pessoa selecionou — é o mesmo gesto do reabrir. */
+      if (fs2.length === 1) return carregarRoteiro(fs2[0]);
+      try {
+        avisoRoteiro(t('rotLendo'));
+        const todos = [];
+        for (const f of fs2) { const r2 = await roteiroDeArquivo(f); if (r2) todos.push(r2); }
+        if (todos.length < 2) return avisoRoteiro(t('rotNaoBate'), true);
+        juntarRoteiros(todos);
+      } catch (e2) { avisoRoteiro(t('rotErro', (e2 && e2.message) || e2), true); }
+    };
     $('rotColar').onclick = async () => {
       if (!podeRoteiro()) return;
       try {

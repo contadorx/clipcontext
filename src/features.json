@@ -421,10 +421,9 @@
         },
         {
           "planos": "t",
-          "breve": true,
-          "pt": "O mesmo roteiro para o time, e quem executou cada caso",
-          "en": "The same case list across the team, and who ran each case",
-          "es": "La misma lista para el equipo, y quién ejecutó cada caso"
+          "pt": "Juntar as planilhas que o time devolveu, e ver quem executou cada caso",
+          "en": "Merge the spreadsheets the team returned, and see who ran each case",
+          "es": "Juntar las hojas que el equipo devolvió, y ver quién ejecutó cada caso"
         }
       ]
     },
@@ -530,9 +529,9 @@
         },
         {
           "planos": "pt",
-          "pt": "Modelos de documento seus: cenário, rótulo, sistema e papel prontos",
-          "en": "Your own document templates: scenario, label, system and paper preset",
-          "es": "Plantillas de documento tuyas: escenario, etiqueta, sistema y papel listos"
+          "pt": "Salvar o que está na tela como modelo seu, e reaplicar em um clique",
+          "en": "Save what is on screen as your own template, and reapply it in one click",
+          "es": "Guardar lo que está en pantalla como plantilla tuya, y reaplicarla en un clic"
         },
         {
           "planos": "pt",
