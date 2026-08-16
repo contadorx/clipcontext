@@ -14,6 +14,7 @@ import { emailDaSessao } from '@/lib/supabase/servidor';
 import { type Conta, contaDe, temChaveDeServico } from '@/lib/supabase/servico';
 import { PLANOS, temStripe } from '@/lib/stripe';
 import { type Lang, type Textos, ehLang, preencher, textos } from '@/lib/conta/textos';
+import { CAMINHO_ROTEIRO } from '@/lib/conta/roteiro';
 import { ajustar, bloquear, comprar, configurar, convidar, entrar, gerenciar, sair } from '../acoes';
 
 export const dynamic = 'force-dynamic';
@@ -121,6 +122,7 @@ async function Portal({ email, lang, t }: { email: string; lang: Lang; t: Textos
       <div style={{ marginBottom: 30 }}><Sair lang={lang} t={t} /></div>
 
       <Plano conta={conta} lang={lang} t={t} />
+      <RoteiroAtalho conta={conta} lang={lang} t={t} />
       <Faturas conta={conta} lang={lang} t={t} />
       <Chamados conta={conta} lang={lang} t={t} />
       {conta.time && <Time conta={conta} lang={lang} t={t} />}
@@ -182,6 +184,24 @@ function Plano({ conta, lang, t }: { conta: Conta; lang: Lang; t: Textos }) {
       {semVenda && !conta.assinante && (
         <p className="small muted" style={{ marginTop: 10 }}>{t.vendaDesligada}</p>
       )}
+    </div>
+  );
+}
+
+/* O roteiro de casos tem tela própria, e uma tela própria que ninguém acha é
+   uma tela que não existe. Este cartão é o caminho: quem entra na conta vê que
+   ela está aqui, e vê o que ela faz antes de clicar. */
+function RoteiroAtalho({ conta, lang, t }: { conta: Conta; lang: Lang; t: Textos }) {
+  const pago = Boolean(conta.plano) && conta.motivo !== 'suspensa';
+  return (
+    <div className="card" style={{ marginBottom: 24 }}>
+      <h2 style={{ marginTop: 0 }}>{t.rotTitulo}</h2>
+      <p className="small muted" style={{ marginTop: 0 }}>{t.rotImportarTexto}</p>
+      <p style={{ marginBottom: 0 }}>
+        <a className="btn ghost" href={CAMINHO_ROTEIRO[lang]}>
+          {pago ? t.rotTitulo : t.rotVerPlanos}
+        </a>
+      </p>
     </div>
   );
 }

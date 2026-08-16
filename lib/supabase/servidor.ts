@@ -12,11 +12,11 @@
  */
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
-import { marca } from '@/lib/marca';
+import { enderecoDaSessao, marca } from '@/lib/marca';
 
 export async function clienteDoServidor() {
   const caixa = await cookies();
-  return createServerClient(marca.supaUrl, marca.supaKey, {
+  return createServerClient(enderecoDaSessao(), marca.supaKey, {
     cookies: {
       getAll: () => caixa.getAll(),
       setAll: (novos) => {

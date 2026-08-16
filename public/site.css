@@ -175,27 +175,37 @@ footer a:hover{color:var(--ink)}
 .soLeitor{position:absolute;width:1px;height:1px;padding:0;margin:-1px;
       overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
 
-/* A tabela de funcionalidades por plano. Rola na horizontal no celular em vez
-   de espremer sessenta linhas em telas de 360px. */
-.tabRolar{overflow-x:auto;margin:26px 0 8px;border:1px solid var(--line);border-radius:12px}
-.tabPlanos{width:100%;min-width:560px;border-collapse:collapse;font-size:14.4px}
-/* O cabeçalho NÃO gruda. Ele grudava, e isso fazia duas coisas erradas: dentro
-   de uma caixa que rola só na horizontal ele nunca chegava a grudar de verdade
-   (a caixa tem a altura da tabela inteira), e a posição fixa escapava do
-   recorte — a página inteira ganhava 168px de rolagem horizontal no telefone. */
-.tabPlanos thead th{background:var(--panel);color:var(--ink);
-      font-weight:640;font-size:13px;padding:12px 10px;text-align:center;
-      border-bottom:1px solid var(--line)}
-.tabPlanos thead th:first-child{text-align:left;width:58%}
-.tabPlanos tbody th{text-align:left;font-weight:450;color:var(--muted);
-      padding:9px 12px;border-top:1px solid var(--line);line-height:1.45}
-.tabPlanos td{text-align:center;padding:9px 10px;border-top:1px solid var(--line);width:14%}
-.tabPlanos tr.grp th{background:var(--bg);color:var(--ink);font-weight:640;font-size:13px;
-      text-transform:uppercase;letter-spacing:.05em;padding:16px 12px 8px}
-.tabPlanos td.sim{color:var(--accent);font-weight:700;font-size:16px}
-.tabPlanos td.nao{color:var(--muted);opacity:.4;font-weight:400}
-.tabPlanos tbody tr:not(.grp):hover th,.tabPlanos tbody tr:not(.grp):hover td{background:var(--panel)}
-@media (max-width:620px){ .tabPlanos{font-size:13.4px} .tabPlanos thead th:first-child{width:50%} }
+/* A lista de funcionalidades, em grupos que abrem e fecham.
+   Era uma tabela de 87 linhas por 4 colunas — uma parede que ninguém lê numa
+   página de preço. Como 71 das 87 estão no gratuito, a tabela gastava 213
+   vistos para dizer "de graça" e escondia no meio deles as dezesseis linhas
+   que decidem uma compra. Agora o padrão é o silêncio: sem selo = gratuito. */
+.tpRegra{margin:22px 0 14px}
+.listaF{display:grid;gap:10px;margin:0 0 8px}
+.grpF{border:1px solid var(--line);border-radius:12px;background:var(--panel);
+      padding:0 16px}
+.grpF>summary{cursor:pointer;list-style:none;padding:13px 0;font-size:15px;
+      display:flex;align-items:center;gap:10px;color:var(--ink)}
+.grpF>summary::-webkit-details-marker{display:none}
+/* A setinha é desenhada: o marcador nativo é diferente em cada navegador e
+   some no Safari quando `list-style:none` entra. */
+.grpF>summary::before{content:"";width:7px;height:7px;flex:none;
+      border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);
+      transform:rotate(-45deg);transition:transform .15s;margin-right:2px}
+.grpF[open]>summary::before{transform:rotate(45deg)}
+.grpF>summary:hover{color:var(--accent)}
+.grpF .cont{font-size:12.5px;color:var(--muted);font-weight:400}
+.fts{margin:0 0 14px;padding:0 0 0 19px;
+     columns:2;column-gap:34px;font-size:14.2px;color:var(--muted)}
+.fts li{margin:0 0 7px;line-height:1.5;break-inside:avoid}
+/* O selo do plano. Só aparece onde há algo a pagar — é a informação que a
+   pessoa veio buscar, e ela some se estiver ao lado de 71 irmãos iguais. */
+.pl{display:inline-block;font-size:10.5px;text-transform:uppercase;
+    letter-spacing:.06em;font-weight:700;padding:1px 6px;border-radius:5px;
+    vertical-align:1px;white-space:nowrap}
+.pl.p{background:color-mix(in srgb,var(--accent) 14%,transparent);color:var(--accent)}
+.pl.t{background:color-mix(in srgb,var(--ink) 10%,transparent);color:var(--ink)}
+@media (max-width:720px){ .fts{columns:1} }
 
 /* As saídas como fichas, na home. É a coisa que mais gente pergunta e que
    estava escondida numa frase no meio de um parágrafo. */
@@ -216,13 +226,21 @@ footer a:hover{color:var(--ink)}
 .listaMsg.ok{color:var(--accent)}
 .listaMsg.err{color:var(--err)}
 
-/* tabelas dos documentos legais */
-.doc table.legal{width:100%;border-collapse:collapse;margin:16px 0 6px;font-size:14px}
-.doc table.legal th,.doc table.legal td{border:1px solid var(--line);padding:9px 11px;
+/* Tabelas: as dos documentos legais e as da área do cliente.
+   O seletor era `.doc table.legal`, e por isso a área do cliente — que não tem
+   o `.doc` em volta — desenhava faturas, chamados, assentos e roteiro SEM
+   borda, sem espaçamento e sem largura. Não era uma escolha, era um seletor
+   estreito demais que ninguém tinha olhado. */
+table.legal{width:100%;border-collapse:collapse;margin:16px 0 6px;font-size:14px}
+table.legal th,table.legal td{border:1px solid var(--line);padding:9px 11px;
       text-align:left;vertical-align:top;color:var(--muted)}
-.doc table.legal th{background:var(--panel);color:var(--ink);font-weight:600;font-size:13.5px}
-.doc table.legal td:first-child{color:var(--ink);font-weight:550}
-@media (max-width:620px){ .doc table.legal{font-size:13px} .doc table.legal th,.doc table.legal td{padding:7px 8px} }
+table.legal th{background:var(--panel);color:var(--ink);font-weight:600;font-size:13.5px}
+table.legal td:first-child{color:var(--ink);font-weight:550}
+/* …mas o que está marcado como secundário dentro dela continua secundário: o
+   título e o sistema de um caso herdavam o negrito da primeira coluna e a
+   linha inteira virava um bloco só, sem hierarquia nenhuma. */
+table.legal td:first-child .small,table.legal td:first-child .muted{font-weight:400}
+@media (max-width:620px){ table.legal{font-size:13px} table.legal th,table.legal td{padding:7px 8px} }
 
 /* os dois usos, lado a lado */
 .duo{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:18px;margin-top:28px}

@@ -1,9 +1,9 @@
 <section style="padding-top:60px">
   <div class="wrap doc">
     <h1 style="font-size:32px">Política de Privacidade</h1>
-    <p class="updated">Última atualização: 15 de agosto de 2026.<br>
-    Esta política descreve o funcionamento atual do {{marca}}, que não possui servidor de processamento
-    nem cadastro de usuários.</p>
+    <p class="updated">Última atualização: 16 de agosto de 2026.<br>
+    Esta política descreve o funcionamento atual do {{marca}}: a ferramenta não possui servidor de
+    processamento, e existe uma conta opcional — descrita mais abaixo — para quem contrata um plano pago.</p>
 
     <p class="lockHint" style="border-left:3px solid var(--accent);padding-left:12px;margin:0 0 26px">
     Até 14 de agosto de 2026 este serviço se chamava <b>ClipContext</b>. Só o nome mudou — a
@@ -18,11 +18,15 @@
     encarregado pelo tratamento de dados pessoais (art. 41 da LGPD).</p>
 
     <h2>Resumo</h2>
-    <p>Não recebemos seus vídeos, seu áudio ou suas transcrições — isso não mudou e não vai mudar no plano
-    gratuito. Não usamos cookies e não há login. Desde 14 de agosto de 2026 existem duas coisas que
-    <b>são</b> registradas, e elas estão descritas em detalhe mais abaixo: uma contagem de visitas sem cookie
-    e sem identificador, e uma contagem de três marcos de uso, também anônima. Se você deixar o e-mail na
-    página de preços, aí sim há um dado pessoal, e ele é o único.</p>
+    <p><b>Não recebemos seus vídeos, seu áudio, seus quadros, suas transcrições nem os documentos que você
+    gera.</b> Isso não mudou, vale em todos os planos, e é a promessa que sustenta o produto — não é uma
+    configuração que a gente possa afrouxar depois.</p>
+    <p>O que existe é isto, e está detalhado mais abaixo: uma contagem de visitas sem cookie e sem
+    identificador; uma contagem anônima de três marcos de uso; o e-mail, se você deixá-lo na página de
+    preços; e, para quem contrata um plano pago, uma <b>conta</b> — com o e-mail de acesso, as faturas, os
+    chamados de suporte e a <b>lista de casos a executar</b>, quando você usa a tela de roteiro. Usar a
+    ferramenta continua não exigindo conta: sem login, ela grava, transcreve e gera documento exatamente
+    igual.</p>
 
     <h2>Como o serviço funciona</h2>
     <p>O {{marca}} é uma página estática. Quando você escolhe um vídeo, ele é lido diretamente do seu
@@ -66,6 +70,41 @@
       <li>serve para uma finalidade só: avisar quando o plano pago existir;</li>
       <li>é apagado assim que você pedir, pelo contato no fim desta página.</li>
     </ul>
+
+    <h2>A conta do plano pago, e o roteiro de casos</h2>
+    <p>Quem contrata um plano pago passa a ter uma <b>conta</b>. Ela é o único lugar em que guardamos dado
+    seu por escolha sua, e é onde vive a única funcionalidade que grava conteúdo de cliente num servidor
+    nosso: a <b>tela de roteiro de casos</b>. Por isso ela está descrita aqui campo a campo.</p>
+    <p>Na conta ficam guardados:</p>
+    <ul>
+      <li>o <b>e-mail</b> de acesso, que é a identidade da conta e o destino do link de entrada;</li>
+      <li>as <b>faturas</b> e o estado da assinatura, vindos da Stripe;</li>
+      <li>os <b>chamados</b> de suporte que você abrir, com o texto que você escreveu;</li>
+      <li>no plano Time, os <b>assentos</b>: o e-mail de cada pessoa da equipe e o que ela já emitiu;</li>
+      <li>os <b>modelos de documento</b> e a identidade visual que você configurar (nome da empresa,
+      endereço do logotipo, rótulo, ambiente).</li>
+    </ul>
+    <p>E, se você usar o roteiro de casos, ficam guardados <b>os campos da lista de tarefas</b>, e apenas
+    eles: o código do caso, o título, o sistema, o número do chamado, o e-mail do responsável, a data em que
+    o caso foi marcado como feito, quem o marcou, o <b>nome</b> do arquivo gerado, a <b>impressão digital</b>
+    dele e a observação que você digitar.</p>
+    <p><b>O que o roteiro nunca guarda:</b> o vídeo, os quadros, a transcrição e o documento. Eles continuam
+    nascendo e morrendo no seu navegador. A impressão digital é um número curto calculado a partir das telas
+    — ela serve para conferir depois se um documento é aquele mesmo, e <b>não</b> permite reconstruir
+    nenhuma imagem. A planilha que você envia para criar o roteiro é lida, vira essas linhas, e <b>o arquivo
+    é descartado</b>: não guardamos a planilha.</p>
+    <p>Repare no que isso significa na prática: um roteiro é uma <b>lista de trabalho</b>, e um código de
+    caso ou um número de chamado podem dizer o que a sua empresa está testando. Escreva nesses campos o que
+    você escreveria num cartão de quadro de tarefas — nome de sistema e número de chamado, tudo bem; dado
+    pessoal de terceiro, não.</p>
+    <p>Um roteiro marcado como <b>&ldquo;do time&rdquo;</b> é visível para todas as pessoas com assento na
+    mesma conta; um roteiro <b>&ldquo;só meu&rdquo;</b> é visível apenas para quem o criou. Quem criou o
+    roteiro pode apagá-lo a qualquer momento, e apagar leva junto todos os casos dele, na hora e sem cópia.
+    Encerrada a assinatura, a conta inteira — roteiros inclusive — é apagada em até 90 dias, e antes disso
+    a pedido pelo contato no fim desta página.</p>
+    <p>A sessão da conta usa um <b>cookie</b>, e ele é necessário: é o que mantém você logado. Ele não serve
+    para medição, não é lido por script de terceiro e existe apenas nas páginas da conta — a ferramenta
+    continua funcionando sem cookie nenhum.</p>
 
     <h2>Conexões externas</h2>
     <p>A página faz um número reduzido de conexões a serviços de terceiros, e nenhuma delas transporta seu

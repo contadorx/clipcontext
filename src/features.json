@@ -398,32 +398,50 @@
         {
           "planos": "pt",
           "pt": "Subir a planilha de casos (.xlsx, .csv, ou colar do Excel)",
-          "en": "Upload your case spreadsheet (.xlsx, .csv, or paste from Excel)",
+          "en": "Upload the case spreadsheet (.xlsx, .csv, or paste from Excel)",
           "es": "Subir la hoja de casos (.xlsx, .csv, o pegar desde Excel)"
         },
         {
           "planos": "pt",
-          "pt": "Fila de casos: escolher um e a identificação já vem preenchida",
-          "en": "A case queue: pick one and the identification comes filled in",
-          "es": "Cola de casos: eliges uno y la identificación viene rellenada"
+          "pt": "Conferir e corrigir qual coluna é o quê antes de salvar",
+          "en": "Check and fix which column is what before saving",
+          "es": "Comprobar y corregir qué columna es qué antes de guardar"
         },
         {
           "planos": "pt",
-          "pt": "A planilha volta com situação, data, arquivo e impressão das telas",
-          "en": "The spreadsheet comes back with status, date, file and screen fingerprint",
-          "es": "La hoja vuelve con situación, fecha, archivo y huella de las pantallas"
+          "pt": "Cada caso vira um link que abre a ferramenta já preenchida",
+          "en": "Each case becomes a link that opens the tool already filled in",
+          "es": "Cada caso se convierte en un enlace que abre la herramienta ya rellenada"
         },
         {
           "planos": "pt",
-          "pt": "Reabrir a planilha devolvida e continuar de onde parou",
-          "en": "Reopen the returned spreadsheet and carry on where you left off",
-          "es": "Reabrir la hoja devuelta y seguir donde lo dejaste"
+          "pt": "Marcar feito com o arquivo gerado e a impressão das telas junto",
+          "en": "Mark done with the generated file and the screen fingerprint attached",
+          "es": "Marcar hecho con el archivo generado y la huella de las pantallas"
+        },
+        {
+          "planos": "pt",
+          "pt": "A planilha volta com situação, data, quem executou e a impressão",
+          "en": "The spreadsheet comes back with status, date, who ran it and the fingerprint",
+          "es": "La hoja vuelve con situación, fecha, quién lo ejecutó y la huella"
+        },
+        {
+          "planos": "pt",
+          "pt": "Roteiro só seu, que ninguém do time enxerga",
+          "en": "A run that is yours alone, invisible to the team",
+          "es": "Un guion solo tuyo, que nadie del equipo ve"
         },
         {
           "planos": "t",
-          "pt": "Juntar as planilhas que o time devolveu, e ver quem executou cada caso",
-          "en": "Merge the spreadsheets the team returned, and see who ran each case",
-          "es": "Juntar las hojas que el equipo devolvió, y ver quién ejecutó cada caso"
+          "pt": "Roteiro do time: todo mundo com assento enxerga o mesmo",
+          "en": "Team run: everyone with a seat sees the same one",
+          "es": "Guion del equipo: todo el mundo con asiento ve el mismo"
+        },
+        {
+          "planos": "t",
+          "pt": "Atribuir cada caso a uma pessoa, e ver quem fez o quê",
+          "en": "Assign each case to a person, and see who did what",
+          "es": "Asignar cada caso a una persona, y ver quién hizo qué"
         }
       ]
     },

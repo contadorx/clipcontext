@@ -117,45 +117,77 @@ type Grupo = { id: string; titulo: Record<Lang, string>; itens: Feature[] };
 
 const features: { grupos: Grupo[] } = JSON.parse(ler('features.json'));
 
-const PLANOS = [
-  { nome: 'Free', letra: 'f' },
-  { nome: 'Personal', letra: 'p' },
-  { nome: 'Team', letra: 't' },
-] as const;
-
 const escapar = (s: string) =>
   s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
-/** A lista completa do que existe, com um visto por plano.
+/** O selo do plano de um item: nada quando é do Free.
  *
- *  Ela é MONTADA e não escrita à mão porque são ~65 linhas em três idiomas: à
- *  mão, seriam 195 chances de a versão em espanhol prometer uma coisa que a em
+ *  Esta é a decisão que faz a lista caber na cabeça. Das 87 linhas, 71 estão no
+ *  gratuito — a tabela antiga desenhava 213 vistos para dizer isso, e o leitor
+ *  tinha que varrer três colunas de ✓ e — para descobrir as dezesseis linhas
+ *  que importam. Agora o padrão é o silêncio: quem não tem selo é gratuito, e o
+ *  selo aparece só onde há algo a pagar. O parágrafo acima da lista diz a regra
+ *  em uma frase, e quem lê com leitor de tela ouve "só no Personal" junto.
+ */
+function seloDoPlano(planos: string, t: Dicionario): string {
+  if (planos.includes('f')) return '';
+  const nome = planos.includes('p') ? 'Personal' : 'Team';
+  const classe = planos.includes('p') ? 'pl p' : 'pl t';
+  return ` <span class="${classe}"><span class="soLeitor">${escapar(t.tpSoNo)} </span>${nome}</span>`;
+}
+
+/** A lista completa do que existe, em grupos que se abrem e se fecham.
+ *
+ *  Ela é MONTADA e não escrita à mão porque são 87 linhas em três idiomas: à
+ *  mão, seriam 261 chances de a versão em espanhol prometer uma coisa que a em
  *  português não promete. O dado mora em `src/features.json`, e a regra escrita
  *  lá no topo é a que importa — só entra o que existe.
+ *
+ *  Por que deixou de ser tabela: oitenta e sete linhas por quatro colunas é uma
+ *  parede. Ninguém lê uma parede numa página de preço — rola até o fim e
+ *  desiste no meio. Em grupos dobráveis, o que se vê primeiro são doze títulos
+ *  com a contagem de cada um, e a pessoa abre o que é o problema dela. O
+ *  conteúdo é o mesmo, e nada ficou escondido: os grupos nascem abertos.
  */
 export function tabelaDePlanos(lang: Lang, t: Dicionario): string {
-  const linhas: string[] = [];
-  for (const g of features.grupos) {
-    linhas.push(`<tr class="grp"><th colspan="4" scope="colgroup">${escapar(g.titulo[lang])}</th></tr>`);
-    for (const item of g.itens) {
+  const gratis = features.grupos.reduce(
+    (n, g) => n + g.itens.filter((i) => i.planos.includes('f')).length, 0);
+  const pagas = quantasFeatures - gratis;
+
+  const blocos = features.grupos.map((g) => {
+    const pagosNoGrupo = g.itens.filter((i) => !i.planos.includes('f')).length;
+    const itens = g.itens.map((item) => {
       const rotulo = escapar(String(item[lang] ?? ''));
-      const marca_ = item.breve ? `${rotulo} <span class="soon">${escapar(t.tpBreve)}</span>` : rotulo;
-      const celulas = PLANOS.map(({ letra, nome }) => {
-        const tem = item.planos.includes(letra);
-        /* O visto é decoração; o que o leitor de tela lê é a palavra. Uma tabela
-           de 65 linhas cheia de "✓" sem alternativa é ilegível para quem não vê. */
-        return tem
-          ? `<td class="sim"><span aria-hidden="true">✓</span><span class="soLeitor">${escapar(t.tpSim)} ${nome}</span></td>`
-          : `<td class="nao"><span aria-hidden="true">—</span><span class="soLeitor">${escapar(t.tpNao)} ${nome}</span></td>`;
-      }).join('');
-      linhas.push(`<tr><th scope="row">${marca_}</th>${celulas}</tr>`);
-    }
-  }
-  return '<div class="tabRolar">' +
-    `<table class="tabPlanos"><caption class="soLeitor">${escapar(t.tpLegenda)}</caption>` +
-    '<thead><tr><th scope="col"></th>' +
-    PLANOS.map((p) => `<th scope="col">${p.nome}</th>`).join('') +
-    '</tr></thead><tbody>' + linhas.join('') + '</tbody></table></div>';
+      const breve = item.breve ? ` <span class="soon">${escapar(t.tpBreve)}</span>` : '';
+      return `<li>${rotulo}${breve}${seloDoPlano(item.planos, t)}</li>`;
+    }).join('');
+    /* A contagem no título é o que deixa a lista fechada ainda informativa:
+       "O que sai (15)" já responde "vale a pena abrir?" antes do clique. */
+    const conta = `<span class="cont">${g.itens.length}</span>`;
+    /* Quando o grupo inteiro é do MESMO plano pago, o selo sobe para o título:
+       "Quando é uma equipe · Team" responde de fora o que a pessoa iria abrir
+       para descobrir. Ter que ser o mesmo plano não é detalhe: o grupo do
+       roteiro tem seis linhas Personal e duas Team, e um "PERSONAL" no título
+       diria que as duas de Team também são — uma promessa a menos vendida como
+       a mais, que é o jeito de errar que custa caro. */
+    const mesmoPlano = new Set(g.itens.map((i) => i.planos)).size === 1;
+    const sinal = g.itens.length > 0 && pagosNoGrupo === g.itens.length && mesmoPlano
+      ? seloDoPlano(g.itens[0].planos, t) : '';
+    return `<details class="grpF" open><summary><b>${escapar(g.titulo[lang])}</b>${conta}${sinal}</summary>` +
+      `<ul class="fts">${itens}</ul></details>`;
+  }).join('');
+
+  return `<p class="small muted tpRegra">${preencherTexto(t.tpResumo, [quantasFeatures, gratis, pagas])}</p>` +
+    `<div class="listaF" aria-label="${escapar(t.tpLegenda)}">${blocos}</div>`;
+}
+
+/** `{0}`, `{1}`… trocados por números. Existe para o resumo acima da lista sair
+ *  contado e não escrito à mão: um número redondo no texto envelhece na primeira
+ *  vez que alguém mexe na lista e esquece do parágrafo. */
+function preencherTexto(molde: string, vals: Array<string | number>): string {
+  let s = escapar(molde || '');
+  vals.forEach((v, i) => { s = s.split(`{${i}}`).join(`<b>${v}</b>`); });
+  return s;
 }
 
 /** Quantas funcionalidades a lista declara. Sai no texto acima da tabela: um

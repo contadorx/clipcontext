@@ -7,12 +7,12 @@
  */
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
-import { marca } from '@/lib/marca';
+import { enderecoDaSessao, marca } from '@/lib/marca';
 
 export async function middleware(req: NextRequest) {
   let resposta = NextResponse.next({ request: req });
 
-  const supa = createServerClient(marca.supaUrl, marca.supaKey, {
+  const supa = createServerClient(enderecoDaSessao(), marca.supaKey, {
     cookies: {
       getAll: () => req.cookies.getAll(),
       setAll: (novos) => {

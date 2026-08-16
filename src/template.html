@@ -487,29 +487,16 @@
     </div>
 
 
-    <!-- ---- roteiro de casos ----
+    <!-- O roteiro de casos NÃO mora mais aqui.
+         Ele virou tela própria, em /conta/roteiro. O motivo é de ritmo: quem
+         organiza quarenta casos e quem grava um vídeo são momentos diferentes,
+         e quase sempre pessoas diferentes — a fila dentro desta página fazia
+         quem só ia gravar passar por um bloco que não era dele.
+         A ligação entre as duas é o LINK: a tela de controle entrega um
+         endereço com caso, sistema e chamado já dentro (o `lerDaUrl()` abaixo é
+         quem os recebe), e o `?rot=` avisa que há um caso esperando a volta. -->
+    <div class="recup hide" id="rotVindo"></div>
 
-         A quarta porta de entrada, e a única que muda o RITMO do trabalho em vez
-         da fonte do vídeo. Quem executa quarenta casos de teste não tem quarenta
-         vídeos: tem uma planilha, e digita caso, sistema e chamado quarenta
-         vezes à mão, errando em alguns.
-
-         A planilha entra, vira fila, e volta preenchida. Ela é o estado: não
-         guardamos roteiro em servidor nenhum, e quem fechar a aba no meio
-         reabre a planilha que baixou e continua de onde parou — o que já foi
-         feito está escrito nela. -->
-    <div class="recup" id="rotBloco">
-      <div class="row" style="align-items:center;gap:10px;flex-wrap:wrap">
-        <button class="ghost sm" id="rotAbrir" data-i18n="rotBtn"></button>
-        <input type="file" id="rotArq" accept=".xlsx,.csv,.tsv,.txt" multiple class="hide">
-        <button class="ghost sm" id="rotColar" data-i18n="rotColarBtn"></button>
-        <button class="ghost sm hide" id="rotBaixar" data-i18n="rotBaixarBtn"></button>
-        <button class="ghost sm hide" id="rotFechar" data-i18n="rotFecharBtn"></button>
-        <span class="status" id="rotMsg" data-i18n="rotDica"></span>
-      </div>
-      <div class="hide" id="rotMapa" style="margin-top:12px"></div>
-      <div class="hide" id="rotFila" style="margin-top:12px"></div>
-    </div>
 
     <!-- Dois caminhos, e não uma lista de botões: gravar a tela agora é o que a
          maior parte das pessoas vem fazer, e estava em terceiro lugar, cinza,
@@ -1140,6 +1127,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     <div class="row" style="margin-top:12px">
       <span class="status" id="pdfStatus"></span>
     </div>
+    <!-- O caminho de volta para a tela de controle do roteiro. Nasce escondido
+         e só aparece depois que um documento existe: um "marcar como feito" ao
+         lado de um caso não executado é um convite para mentir na planilha. -->
+    <div class="row hide" id="rotVolta" style="margin-top:10px"></div>
       </div>
     </details>
 
@@ -1726,23 +1717,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       mdSalvarNome:'Nome do modelo (por exemplo: Evidência Natura)',
       mdSalvando:'Salvando…', mdSalvo:'Modelo "{0}" salvo.',
       mdSalvoNao:'Não consegui salvar o modelo agora.',
-      rotColQuem:'Quem executou', rotJuntadas:'{0} planilhas juntadas: {1} de {2} casos executados.',
-      rotNaoBate:'Essas planilhas não são do mesmo roteiro — os casos não batem.',
-      rotBtn:'Tenho um roteiro de casos', rotColarBtn:'Colar da planilha',
-      rotBaixarBtn:'Baixar a planilha preenchida', rotFecharBtn:'Fechar o roteiro',
-      rotDica:'Suba a planilha de casos (.xlsx ou .csv) e execute um a um: a identificação vem preenchida, e no fim a planilha volta com o que foi feito.',
-      rotLendo:'Lendo a planilha…', rotErro:'Não consegui ler essa planilha: {0}',
-      rotVazio:'Essa planilha não tem cabeçalho e pelo menos uma linha de caso.',
-      rotColado:'colado', rotColarVazio:'Não havia nada na área de transferência.',
-      rotSemColar:'O navegador não deixou ler a área de transferência. Salve como .csv e use o botão ao lado.',
-      rotMapaTit:'Qual coluna é o quê — eu chutei pelo cabeçalho, corrija se errei:',
-      rotCampoCaso:'Caso', rotCampoTitulo:'Título', rotCampoSistema:'Sistema', rotCampoChamado:'Chamado',
-      rotColuna:'coluna {0}', rotFilaTit:'{0} de {1} casos executados.',
-      rotUsar:'Executar', rotUsando:'Em execução', rotAgora:'em execução',
-      rotAgoraMsg:'Caso <b>{0}</b> preenchido. Grave a tela — ao baixar o documento ele é marcado como feito.',
-      rotFeito:'Executado',
-      rotColSit:'Situação', rotColQuando:'Executado em', rotColArq:'Arquivo', rotColImp:'Impressão das telas',
-      rotSoPago:'O roteiro de casos é do plano Personal.', rotVerPlanos:'ver os planos',
+      /* O que sobrou do roteiro nesta página: um aviso de que a pessoa veio de
+         um caso, e o link que leva a marca de volta para a tela de controle. */
+      rotVindo:'Você veio do caso <b>{0}</b>. Grave a tela e baixe o documento — depois um botão aparece aqui para marcar o caso como feito.',
+      rotVoltaBtn:'Marcar este caso como feito',
       revJaAberta:'A revisão já está aberta aqui embaixo.',
       /* O que aparece onde os botões de saída estão. O primeiro é o motivo de
          eles estarem desligados — e diz onde os quadros nascem, porque botão
@@ -2257,23 +2235,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       mdSalvarNome:'Template name (for example: Natura evidence)',
       mdSalvando:'Saving…', mdSalvo:'Template "{0}" saved.',
       mdSalvoNao:'I could not save the template right now.',
-      rotColQuem:'Run by', rotJuntadas:'{0} spreadsheets merged: {1} of {2} cases run.',
-      rotNaoBate:'Those spreadsheets are not from the same case list — the cases do not match.',
-      rotBtn:'I have a list of cases', rotColarBtn:'Paste from the spreadsheet',
-      rotBaixarBtn:'Download the filled spreadsheet', rotFecharBtn:'Close the list',
-      rotDica:'Upload your case spreadsheet (.xlsx or .csv) and run them one by one: the identification comes filled in, and at the end the spreadsheet comes back with what was done.',
-      rotLendo:'Reading the spreadsheet…', rotErro:'I could not read that spreadsheet: {0}',
-      rotVazio:'That spreadsheet has no header and at least one case row.',
-      rotColado:'pasted', rotColarVazio:'There was nothing on the clipboard.',
-      rotSemColar:'The browser would not let me read the clipboard. Save as .csv and use the button next to it.',
-      rotMapaTit:'Which column is what — I guessed from the header, fix it if I got it wrong:',
-      rotCampoCaso:'Case', rotCampoTitulo:'Title', rotCampoSistema:'System', rotCampoChamado:'Ticket',
-      rotColuna:'column {0}', rotFilaTit:'{0} of {1} cases run.',
-      rotUsar:'Run', rotUsando:'Running', rotAgora:'running',
-      rotAgoraMsg:'Case <b>{0}</b> filled in. Record the screen — downloading the document marks it done.',
-      rotFeito:'Done',
-      rotColSit:'Status', rotColQuando:'Run at', rotColArq:'File', rotColImp:'Screen fingerprint',
-      rotSoPago:'The case list is a Personal plan feature.', rotVerPlanos:'see the plans',
+      rotVindo:'You came from case <b>{0}</b>. Record the screen and download the document — a button then appears here to mark the case as done.',
+      rotVoltaBtn:'Mark this case as done',
       revJaAberta:'The review is already open just below.',
       saidaSemQuadros:'There is no frame to build from yet. Frames come out of step 2 — extract them from the video, or record the screen, which extracts as it goes.',
       saidaPronta:'{0} frames ready. Pick a format — you can download more than one.',
@@ -2784,23 +2747,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       mdSalvarNome:'Nombre de la plantilla (por ejemplo: Evidencia Natura)',
       mdSalvando:'Guardando…', mdSalvo:'Plantilla "{0}" guardada.',
       mdSalvoNao:'No pude guardar la plantilla ahora.',
-      rotColQuem:'Ejecutado por', rotJuntadas:'{0} hojas juntadas: {1} de {2} casos ejecutados.',
-      rotNaoBate:'Esas hojas no son de la misma lista de casos — los casos no coinciden.',
-      rotBtn:'Tengo una lista de casos', rotColarBtn:'Pegar de la hoja de cálculo',
-      rotBaixarBtn:'Descargar la hoja rellenada', rotFecharBtn:'Cerrar la lista',
-      rotDica:'Sube tu hoja de casos (.xlsx o .csv) y ejecútalos uno a uno: la identificación viene rellenada, y al final la hoja vuelve con lo que se hizo.',
-      rotLendo:'Leyendo la hoja…', rotErro:'No pude leer esa hoja: {0}',
-      rotVazio:'Esa hoja no tiene cabecera y al menos una fila de caso.',
-      rotColado:'pegado', rotColarVazio:'No había nada en el portapapeles.',
-      rotSemColar:'El navegador no dejó leer el portapapeles. Guarda como .csv y usa el botón de al lado.',
-      rotMapaTit:'Qué columna es qué — lo adiviné por la cabecera, corrígelo si fallé:',
-      rotCampoCaso:'Caso', rotCampoTitulo:'Título', rotCampoSistema:'Sistema', rotCampoChamado:'Ticket',
-      rotColuna:'columna {0}', rotFilaTit:'{0} de {1} casos ejecutados.',
-      rotUsar:'Ejecutar', rotUsando:'En ejecución', rotAgora:'en ejecución',
-      rotAgoraMsg:'Caso <b>{0}</b> rellenado. Graba la pantalla — al descargar el documento queda marcado como hecho.',
-      rotFeito:'Ejecutado',
-      rotColSit:'Situación', rotColQuando:'Ejecutado el', rotColArq:'Archivo', rotColImp:'Huella de las pantallas',
-      rotSoPago:'La lista de casos es del plan Personal.', rotVerPlanos:'ver los planes',
+      rotVindo:'Vienes del caso <b>{0}</b>. Graba la pantalla y descarga el documento — después aparece aquí un botón para marcar el caso como hecho.',
+      rotVoltaBtn:'Marcar este caso como hecho',
       revJaAberta:'La revisión ya está abierta aquí abajo.',
       saidaSemQuadros:'Todavía no hay ningún fotograma para generar. Los fotogramas salen en el paso 2 — extráelos del vídeo, o graba la pantalla, que ya extrae mientras graba.',
       saidaPronta:'{0} fotogramas listos. Elige un formato — puedes descargar más de uno.',
@@ -10073,162 +10021,12 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      código do /verificar, e de propósito: dois leitores diferentes do mesmo
      formato divergem no dia em que alguém mexer num só. */
 
-  /* ================= planilha: ler e escrever =========================
-
-     Um `.xlsx` é um zip de XML, e a ferramenta já sabe abrir zip e montar zip —
-     foi assim que o `.docx` e o `.pptx` nasceram aqui, sem biblioteca nova. O
-     que faltava era ler zip COMPRIMIDO: o `lerZip()` que existe só entende o
-     método 0 (armazenado), porque foi escrito para os nossos próprios pacotes.
-     Planilha de Excel e de Google Sheets vem sempre em deflate.
-
-     Quem descomprime é o navegador, com `DecompressionStream` — nativo, sem
-     dependência. E a leitura passa pelo DIRETÓRIO CENTRAL do zip em vez de
-     varrer os cabeçalhos locais: quem escreve zip em fluxo deixa o tamanho
-     fora do cabeçalho local, e varrer daria lixo em silêncio. */
-  async function inflar(u8){
-    const fluxo = new Blob([u8]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
-    return new Uint8Array(await new Response(fluxo).arrayBuffer());
-  }
-
-  async function abrirZip(buf){
-    const b = new Uint8Array(buf), dv = new DataView(buf), saida = {};
-    // o fim do diretório central: assinatura procurada de trás para frente
-    let fim = -1;
-    for (let i = b.length - 22; i >= 0 && i > b.length - 66000; i--) {
-      if (dv.getUint32(i, true) === 0x06054b50) { fim = i; break; }
-    }
-    if (fim < 0) throw new Error('zip');
-    const quantos = dv.getUint16(fim + 10, true);
-    let p2 = dv.getUint32(fim + 16, true);
-    for (let k = 0; k < quantos; k++) {
-      if (dv.getUint32(p2, true) !== 0x02014b50) break;
-      const metodo = dv.getUint16(p2 + 10, true);
-      const comp   = dv.getUint32(p2 + 20, true);
-      const nl     = dv.getUint16(p2 + 28, true);
-      const el     = dv.getUint16(p2 + 30, true);
-      const cl     = dv.getUint16(p2 + 32, true);
-      const local  = dv.getUint32(p2 + 42, true);
-      const nome   = new TextDecoder().decode(b.subarray(p2 + 46, p2 + 46 + nl));
-      const lnl = dv.getUint16(local + 26, true), lel = dv.getUint16(local + 28, true);
-      const ini = local + 30 + lnl + lel;
-      const cru = b.subarray(ini, ini + comp);
-      saida[nome] = metodo === 8 ? await inflar(cru) : cru;
-      p2 += 46 + nl + el + cl;
-    }
-    return saida;
-  }
-
-  const desXml = s2 => String(s2 == null ? '' : s2)
-    .replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"')
-    .replace(/&apos;/g, "'").replace(/&#(\d+);/g, (_, n) => String.fromCharCode(+n))
-    .replace(/&amp;/g, '&');
-
-  /** "AB" -> 27. A coluna vem no atributo `r` de cada célula, e é por ela que
-   *  se sabe onde a célula fica: planilha com coluna vazia no meio não escreve
-   *  a célula, e contar na ordem alinharia tudo errado a partir dali. */
-  function colunaDaRef(ref){
-    let n = 0;
-    for (const ch of ref) n = n * 26 + (ch.charCodeAt(0) - 64);
-    return n - 1;
-  }
-
-  function xlsxParaLinhas(itens){
-    const txt = nome => new TextDecoder().decode(itens[nome] || new Uint8Array());
-    const compart = [...txt('xl/sharedStrings.xml').matchAll(/<si>([\s\S]*?)<\/si>/g)]
-      .map(m => [...m[1].matchAll(/<t[^>]*>([\s\S]*?)<\/t>/g)].map(x => desXml(x[1])).join(''));
-    const nomes = Object.keys(itens).filter(n => /^xl\/worksheets\/.*\.xml$/.test(n)).sort();
-    if (!nomes.length) throw new Error('sem aba');
-    const aba = txt(nomes[0]);
-    const linhas = [];
-    for (const lm of aba.matchAll(/<row[^>]*>([\s\S]*?)<\/row>/g)) {
-      const cels = [];
-      for (const cm of lm[1].matchAll(/<c\b([^>]*?)(?:\/>|>([\s\S]*?)<\/c>)/g)) {
-        const attrs = cm[1] || '', corpo = cm[2] || '';
-        const ref = (attrs.match(/r="([A-Z]+)\d+"/) || [])[1];
-        const onde = ref ? colunaDaRef(ref) : cels.length;
-        let v = '';
-        if (/t="s"/.test(attrs)) v = compart[+((corpo.match(/<v>(\d+)<\/v>/) || [])[1])] || '';
-        else if (/t="inlineStr"/.test(attrs))
-          v = [...corpo.matchAll(/<t[^>]*>([\s\S]*?)<\/t>/g)].map(x => desXml(x[1])).join('');
-        else v = desXml((corpo.match(/<v>([\s\S]*?)<\/v>/) || ['', ''])[1]);
-        while (cels.length < onde) cels.push('');
-        cels[onde] = String(v).trim();
-      }
-      linhas.push(cels);
-    }
-    return linhas;
-  }
-
-  /** Texto separado por tabulação (colar do Excel) ou por vírgula/ponto e
-   *  vírgula (CSV). O separador é adivinhado pela primeira linha — quem cola do
-   *  Excel manda tabulação, e ninguém deveria ter que escolher isso num menu. */
-  function textoParaLinhas(txt){
-    const bruto = String(txt || '').replace(/\r\n?/g, '\n').replace(/^﻿/, '');
-    const primeira = bruto.split('\n')[0] || '';
-    const sep = primeira.includes('\t') ? '\t'
-              : (primeira.split(';').length > primeira.split(',').length ? ';' : ',');
-    const linhas = [];
-    for (const l of bruto.split('\n')) {
-      if (!l.trim()) continue;
-      const cels = []; let atual = '', aspas = false;
-      for (let i = 0; i < l.length; i++) {
-        const ch = l[i];
-        if (ch === '"') { if (aspas && l[i + 1] === '"') { atual += '"'; i++; } else aspas = !aspas; }
-        else if (ch === sep && !aspas) { cels.push(atual.trim()); atual = ''; }
-        else atual += ch;
-      }
-      cels.push(atual.trim());
-      linhas.push(cels);
-    }
-    return linhas;
-  }
-
-  /* Escrever `.xlsx` à mão: cinco arquivos, e todo texto vai como `inlineStr`
-     para não precisar da tabela de strings compartilhadas — ela economiza bytes
-     numa planilha de cem mil linhas e custa um índice para manter certo numa de
-     quarenta. */
-  const xEsc = s2 => String(s2 == null ? '' : s2)
-    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, '')
-    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-  const refDaColuna = n => { let s2 = ''; n++; while (n > 0) { const r = (n - 1) % 26; s2 = String.fromCharCode(65 + r) + s2; n = (n - 1 - r) / 26; } return s2; };
-
-  function montarXlsx(linhas, nomeAba){
-    const corpo = linhas.map((cels, i) =>
-      `<row r="${i + 1}">` + cels.map((v, j) =>
-        `<c r="${refDaColuna(j)}${i + 1}" t="inlineStr"><is><t xml:space="preserve">${xEsc(v)}</t></is></c>`
-      ).join('') + '</row>').join('');
-    const arq = {
-      '[Content_Types].xml':
-        '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
-        '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">' +
-        '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>' +
-        '<Default Extension="xml" ContentType="application/xml"/>' +
-        '<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>' +
-        '<Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>' +
-        '</Types>',
-      '_rels/.rels':
-        '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
-        '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
-        '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>' +
-        '</Relationships>',
-      'xl/workbook.xml':
-        '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
-        '<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" ' +
-        'xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">' +
-        `<sheets><sheet name="${xEsc((nomeAba || 'Roteiro').slice(0, 28))}" sheetId="1" r:id="rId1"/></sheets></workbook>`,
-      'xl/_rels/workbook.xml.rels':
-        '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
-        '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
-        '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>' +
-        '</Relationships>',
-      'xl/worksheets/sheet1.xml':
-        '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
-        '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">' +
-        `<sheetData>${corpo}</sheetData></worksheet>`,
-    };
-    return zipar(Object.entries(arq).map(([nome, txt]) => ({ nome, dados: bytesDe(txt) })),
-                 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-  }
+  /* A leitura e a escrita de PLANILHA saíram daqui.
+     Elas existiam para o roteiro de casos, e o roteiro virou tela própria em
+     /conta/roteiro. Quem lê o `.xlsx` agora é o `lib/planilha.ts`, no servidor,
+     que é onde a planilha entra e de onde ela volta preenchida. Tirar deste
+     arquivo não é asseio: é uma tonelada de código de zip e de XML que todo
+     mundo que abre a ferramenta baixava sem nunca usar. */
 
   function lerZip(buf){
     const b = new Uint8Array(buf), dv = new DataView(buf), saida = {};
@@ -10678,159 +10476,29 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   }
 
 
-  /* ================= roteiro de casos ==================================
+  /* ================= a volta do roteiro de casos =======================
 
-     Quem executa quarenta casos tem uma planilha, e hoje digita caso, sistema e
-     chamado quarenta vezes. Aqui a planilha entra, vira fila, e volta
-     preenchida com o que foi feito.
+     O roteiro mora em /conta/roteiro, no servidor, e não aqui. O que sobrou
+     nesta página é o outro lado do link: quando o endereço traz `?rot=<caso>`,
+     a pessoa veio da tela de controle para executar um caso — e, depois de
+     baixar o documento, ganha um link de volta que marca aquele caso como
+     feito, levando junto o nome do arquivo e a impressão das telas.
 
-     A PLANILHA É O ESTADO. Não guardamos roteiro em servidor nenhum — seria a
-     primeira coisa nossa a saber o que a pessoa está testando, e isso é
-     exatamente o que o produto promete não fazer. Quem fecha a aba no meio
-     reabre a planilha que baixou: o que já foi feito está escrito nela, e a
-     fila volta de onde parou. O `sessionStorage` é só conforto dentro da aba.
+     Repare no que NÃO viaja: nada é enviado por esta página. O link é um
+     endereço que a pessoa clica, e quem grava é a conta dela, com a sessão
+     dela, do outro lado. Esta página continua sem falar com servidor nenhum
+     para produzir documento. */
+  const casoDoRoteiro = (new URLSearchParams(location.search).get('rot') || '').replace(/\D/g, '');
 
-     É recurso de plano pago (Personal), e a razão é de fluxo, não de
-     capacidade: ninguém que grava um vídeo precisa disto, e quem roda quarenta
-     casos economiza uma tarde. Nada que já era gratuito foi para trás. */
-  const ROTEIRO_CHAVE = '__MARCA__.roteiro';
-  let roteiro = null;
-
-  const PISTAS = {
-    caso:    /^(caso|id|c[oó]digo|codigo|case|test\s*case|ct|cen[aá]rio)\b/i,
-    titulo:  /(t[ií]tulo|titulo|title|descri|resumo|summary|nome|passo)/i,
-    sistema: /(sistema|system|aplica|app|m[oó]dulo|modulo|produto)/i,
-    chamado: /(chamado|ticket|issue|jira|hist[oó]ria|story|requisito|demanda)/i,
-  };
-  /* As quatro colunas que a ferramenta acrescenta ao devolver a planilha. Os
-     nomes saem traduzidos, e são reconhecidos na volta para que reabrir a
-     planilha devolvida não crie um segundo conjunto delas. */
-  const COLS_SAIDA = () => [t('rotColSit'), t('rotColQuando'), t('rotColQuem'), t('rotColArq'), t('rotColImp')];
-
-  function gravarRoteiro(){
-    try {
-      if (roteiro) sessionStorage.setItem(ROTEIRO_CHAVE, JSON.stringify(roteiro));
-      else sessionStorage.removeItem(ROTEIRO_CHAVE);
-    } catch (e) {}
-  }
-
-  function acharColuna(cab, quais){
-    const i = cab.findIndex(c => quais.test(String(c || '')));
-    return i < 0 ? null : i;
-  }
-
-  /** Entrar com linhas cruas: separa cabeçalho, adivinha o mapa e monta a fila. */
-  function abrirRoteiro(linhas, nome){
-    const uteis = linhas.filter(l => l.some(c => String(c || '').trim()));
-    if (uteis.length < 2) { avisoRoteiro(t('rotVazio'), true); return; }
-    const cab = uteis[0].map(c => String(c || '').trim());
-    const jaTem = COLS_SAIDA().map(c => cab.indexOf(c));
-    roteiro = {
-      nome: (nome || 'roteiro').replace(/\.(xlsx|csv|tsv|txt)$/i, ''),
-      cab, linhas: uteis.slice(1),
-      /* Se a planilha já voltou de uma rodada anterior, as colunas de saída
-         estão nela — e é daí que a fila sabe o que já foi feito. */
-      saida: jaTem.every(i => i >= 0) ? jaTem : null,
-      mapa: {
-        caso:    acharColuna(cab, PISTAS.caso),
-        titulo:  acharColuna(cab, PISTAS.titulo),
-        sistema: acharColuna(cab, PISTAS.sistema),
-        chamado: acharColuna(cab, PISTAS.chamado),
-      },
-      feitos: {},
-      atual: null,
-    };
-    if (roteiro.mapa.caso == null) roteiro.mapa.caso = 0;
-    // o que a planilha devolvida já registrava volta para a memória
-    if (roteiro.saida) {
-      roteiro.linhas.forEach((l, i) => {
-        const sit = String(l[roteiro.saida[0]] || '').trim();
-        if (sit) roteiro.feitos[i] = { quando: l[roteiro.saida[1]] || '',
-                                       quem: l[roteiro.saida[2]] || '',
-                                       arquivo: l[roteiro.saida[3]] || '',
-                                       impressao: l[roteiro.saida[4]] || '' };
-      });
-    }
-    gravarRoteiro();
-    pintarRoteiro();
-  }
-
-  const avisoRoteiro = (txt, ruim) => {
-    const el = $('rotMsg'); if (!el) return;
-    el.innerHTML = ruim ? `<span class="err">${txt}</span>` : txt;
-  };
-
-  function pintarRoteiro(){
-    const mapa = $('rotMapa'), fila = $('rotFila');
-    if (!mapa || !fila) return;
-    $('rotBaixar').classList.toggle('hide', !roteiro);
-    $('rotFechar').classList.toggle('hide', !roteiro);
-    if (!roteiro) {
-      mapa.classList.add('hide'); fila.classList.add('hide');
-      avisoRoteiro(t('rotDica'));
-      return;
-    }
-    mapa.classList.remove('hide'); fila.classList.remove('hide');
-
-    const opcoes = (sel) => '<option value="">—</option>' + roteiro.cab.map((c, i) =>
-      `<option value="${i}"${sel === i ? ' selected' : ''}>${esc(c || t('rotColuna', i + 1))}</option>`).join('');
-    mapa.innerHTML =
-      `<p class="status" style="margin:0 0 6px">${t('rotMapaTit')}</p>` +
-      '<div class="row" style="gap:10px;flex-wrap:wrap;align-items:center">' +
-      [['caso', 'rotCampoCaso'], ['titulo', 'rotCampoTitulo'],
-       ['sistema', 'rotCampoSistema'], ['chamado', 'rotCampoChamado']].map(([k, rot]) =>
-        `<label class="small" for="rotMap_${k}">${t(rot)}</label>` +
-        `<select id="rotMap_${k}" data-campo="${k}" style="padding:5px 7px">${opcoes(roteiro.mapa[k])}</select>`
-      ).join('') + '</div>';
-    mapa.querySelectorAll('select').forEach(sel2 => {
-      sel2.onchange = () => {
-        roteiro.mapa[sel2.dataset.campo] = sel2.value === '' ? null : +sel2.value;
-        gravarRoteiro(); pintarRoteiro();
-      };
-    });
-
-    const val = (l, k) => roteiro.mapa[k] == null ? '' : String(l[roteiro.mapa[k]] || '').trim();
-    const feitos = Object.keys(roteiro.feitos).length;
-    fila.innerHTML =
-      `<p class="status" style="margin:0 0 6px">${t('rotFilaTit', feitos, roteiro.linhas.length)}</p>` +
-      '<div style="max-height:280px;overflow:auto;border:1px solid var(--linha,#e6e6ef);border-radius:8px">' +
-      '<table style="width:100%;border-collapse:collapse;font-size:13.5px">' +
-      roteiro.linhas.map((l, i) => {
-        const f = roteiro.feitos[i];
-        const atual = roteiro.atual === i;
-        return `<tr style="border-top:1px solid var(--linha,#e6e6ef)${atual ? ';background:var(--panel)' : ''}">` +
-          `<td style="padding:6px 9px;white-space:nowrap"><b>${esc(val(l, 'caso') || ('#' + (i + 1)))}</b></td>` +
-          `<td style="padding:6px 9px">${esc(val(l, 'titulo'))}</td>` +
-          `<td style="padding:6px 9px;white-space:nowrap;color:${f ? 'var(--ok,#1f9d55)' : 'var(--muted)'}">` +
-            (f ? '✓ ' + esc(f.quando || '') + (f.quem ? ' · ' + esc(f.quem) : '')
-               : (atual ? t('rotAgora') : '—')) + '</td>' +
-          `<td style="padding:6px 9px;text-align:right;white-space:nowrap">` +
-            `<button class="ghost sm rotUsar" data-i="${i}" style="padding:3px 9px;font-size:12.5px">` +
-            (atual ? t('rotUsando') : t('rotUsar')) + '</button></td></tr>';
-      }).join('') + '</table></div>';
-    fila.querySelectorAll('.rotUsar').forEach(b => { b.onclick = () => usarCaso(+b.dataset.i); });
-  }
-
-  /** Põe o caso na tela: preenche a identificação e leva o olho para gravar. */
-  function usarCaso(i){
-    if (!roteiro) return;
-    const l = roteiro.linhas[i]; if (!l) return;
-    const val = k => roteiro.mapa[k] == null ? '' : String(l[roteiro.mapa[k]] || '').trim();
-    roteiro.atual = i;
-    /* O roteiro é de execução de teste: o cenário vai junto, porque escolher
-       "evidência" quarenta vezes é o mesmo trabalho manual que a fila veio
-       acabar. Se a pessoa trocar depois, a troca dela vale. */
-    if ($('modelo').value === 'ia') { $('modelo').value = 'evidencia'; $('modelo').dispatchEvent(new Event('change')); }
-    const por = { evCaso: val('caso') + (val('titulo') ? ' — ' + val('titulo') : ''),
-                  evSis: val('sistema'), evChamado: val('chamado') };
-    for (const [id, v] of Object.entries(por)) {
-      if (v && $(id)) { $(id).value = v; $(id).dispatchEvent(new Event('input')); }
-    }
-    if ($('evBox')) $('evBox').open = true;
-    gravarRoteiro(); pintarRoteiro();
-    avisoRoteiro(t('rotAgoraMsg', val('caso') || ('#' + (i + 1))));
-    const alvo = $('viaRec') && !$('viaRec').classList.contains('hide') ? $('viaRec') : $('cardVideo');
-    if (alvo) alvo.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  /* O aviso de chegada. Ele é pintado aqui, e não dentro do `lerDaUrl()`, por
+     um motivo bobo e real: `lerDaUrl()` roda no início, antes desta linha
+     existir, e ler uma `const` antes da hora derruba a página inteira. */
+  if (casoDoRoteiro && $('rotVindo')) {
+    const nomeDoCaso = (new URLSearchParams(location.search).get('caso') || '').slice(0, 120)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    $('rotVindo').innerHTML = '<p class="status" style="margin:0">' +
+      t('rotVindo', nomeDoCaso || '—') + '</p>';
+    $('rotVindo').classList.remove('hide');
   }
 
   /** A impressão do documento: o SHA-256 dos hashes das imagens, em ordem.
@@ -10847,148 +10515,21 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     } catch (e) { return ''; }
   }
 
-  /** Chamado de dentro do `baixarBlob`: o caso da vez vira "feito". */
-  async function marcarCasoDoRoteiro(nomeArq){
-    if (!roteiro || roteiro.atual == null) return;
-    const i = roteiro.atual;
-    roteiro.feitos[i] = {
-      quando: new Date().toISOString().slice(0, 16).replace('T', ' '),
-      arquivo: nomeArq || '',
-      impressao: await impressaoDoDocumento(),
-      /* Quem executou sai da SESSÃO, quando existe — e fica em branco quando
-         não existe, em vez de perguntar. Sem isso, juntar as planilhas de cinco
-         pessoas devolveria cinco linhas idênticas sem dono. */
-      quem: (sessao && sessao.email) || '',
-    };
-    /* O caso sai da vez ao ser concluído: deixar "em execução" depois de pronto
-       faria a fila parecer travada no mesmo lugar a rodada inteira. */
-    roteiro.atual = null;
-    gravarRoteiro(); pintarRoteiro();
-  }
-
-  function baixarRoteiro(){
-    if (!roteiro) return;
-    const novasCols = COLS_SAIDA();
-    const base = roteiro.saida ? roteiro.cab.slice() : roteiro.cab.concat(novasCols);
-    const onde = roteiro.saida || novasCols.map((_, k) => roteiro.cab.length + k);
-    const linhas = [base].concat(roteiro.linhas.map((l, i) => {
-      const nova = l.slice();
-      while (nova.length < base.length) nova.push('');
-      const f = roteiro.feitos[i];
-      nova[onde[0]] = f ? t('rotFeito') : '';
-      nova[onde[1]] = f ? f.quando : '';
-      nova[onde[2]] = f ? (f.quem || '') : '';
-      nova[onde[3]] = f ? f.arquivo : '';
-      nova[onde[4]] = f ? f.impressao : '';
-      return nova;
-    }));
-    baixarBlob(montarXlsx(linhas, roteiro.nome), roteiro.nome + '-' +
-               new Date().toISOString().slice(0, 10) + '.xlsx');
-  }
-
-  /** Juntar as planilhas que o time devolveu.
-   *
-   *  É a versão de equipe do roteiro, e ela é feita SEM SERVIDOR — pelo mesmo
-   *  motivo que o resto: guardar o roteiro seria a primeira coisa nossa a saber
-   *  o que a empresa está testando. Quem coordena junta os arquivos que cada um
-   *  devolveu, do mesmo jeito que já se juntam cinco sessões de usabilidade num
-   *  documento.
-   *
-   *  A chave é o CÓDIGO DO CASO, não a posição da linha: duas pessoas podem ter
-   *  filtrado ou reordenado a planilha delas, e casar por linha misturaria as
-   *  execuções. Se os casos não baterem, ele recusa em vez de inventar. */
-  function juntarRoteiros(varios){
-    const base = varios[0];
-    const chaveDe = (r2, l) => r2.mapa.caso == null ? '' : String(l[r2.mapa.caso] || '').trim();
-    const porCaso = {};
-    base.linhas.forEach((l, i) => { const k = chaveDe(base, l); if (k) porCaso[k] = i; });
-    if (!Object.keys(porCaso).length) { avisoRoteiro(t('rotNaoBate'), true); return; }
-
-    let casaram = 0;
-    for (const outro of varios.slice(1)) {
-      for (const [j, f] of Object.entries(outro.feitos)) {
-        const k = chaveDe(outro, outro.linhas[j]);
-        const i = porCaso[k];
-        if (i == null) continue;
-        casaram++;
-        /* Quem executou primeiro fica. Duas pessoas executando o mesmo caso é
-           um problema de organização do time, e sobrescrever em silêncio
-           esconderia isso de quem coordena. */
-        if (!base.feitos[i]) base.feitos[i] = f;
-      }
-    }
-    if (!casaram && varios.length > 1) { avisoRoteiro(t('rotNaoBate'), true); return; }
-    roteiro = base;
-    gravarRoteiro(); pintarRoteiro();
-    avisoRoteiro(t('rotJuntadas', varios.length, Object.keys(base.feitos).length, base.linhas.length));
-  }
-
-  /** Lê um arquivo e devolve o roteiro dele, sem mexer no que está na tela. */
-  async function roteiroDeArquivo(file){
-    const linhas = /\.xlsx$/i.test(file.name)
-      ? xlsxParaLinhas(await abrirZip(await file.arrayBuffer()))
-      : textoParaLinhas(await file.text());
-    const antes = roteiro;
-    roteiro = null;
-    abrirRoteiro(linhas, file.name);
-    const novo = roteiro;
-    roteiro = antes;
-    return novo;
-  }
-
-  async function carregarRoteiro(file){
-    try {
-      avisoRoteiro(t('rotLendo'));
-      if (/\.xlsx$/i.test(file.name)) {
-        abrirRoteiro(xlsxParaLinhas(await abrirZip(await file.arrayBuffer())), file.name);
-      } else {
-        abrirRoteiro(textoParaLinhas(await file.text()), file.name);
-      }
-    } catch (e) { avisoRoteiro(t('rotErro', (e && e.message) || e), true); }
-  }
-
-  if ($('rotAbrir')) {
-    /* A trava do plano é uma PORTA, não um muro: o bloco existe, o botão
-       responde, e o que ele diz é o que a coisa faz e onde ela mora. Botão que
-       não reage é indistinguível de defeito — foi o que a auditoria de fluxo
-       mostrou custar caro. */
-    const podeRoteiro = () => {
-      if (temTime()) return true;
-      avisoRoteiro(t('rotSoPago') + ' <a href="__SITE__/precos" target="_blank" rel="noopener">' +
-                   t('rotVerPlanos') + '</a>', false);
-      return false;
-    };
-    $('rotAbrir').onclick = () => { if (podeRoteiro()) $('rotArq').click(); };
-    $('rotArq').onchange = async e => {
-      const fs2 = [...e.target.files]; e.target.value = '';
-      if (!fs2.length) return;
-      /* Um arquivo abre; dois ou mais juntam. A decisão saiu da tela e virou
-         consequência do que a pessoa selecionou — é o mesmo gesto do reabrir. */
-      if (fs2.length === 1) return carregarRoteiro(fs2[0]);
-      try {
-        avisoRoteiro(t('rotLendo'));
-        const todos = [];
-        for (const f of fs2) { const r2 = await roteiroDeArquivo(f); if (r2) todos.push(r2); }
-        if (todos.length < 2) return avisoRoteiro(t('rotNaoBate'), true);
-        juntarRoteiros(todos);
-      } catch (e2) { avisoRoteiro(t('rotErro', (e2 && e2.message) || e2), true); }
-    };
-    $('rotColar').onclick = async () => {
-      if (!podeRoteiro()) return;
-      try {
-        const txt = await navigator.clipboard.readText();
-        if (!txt.trim()) return avisoRoteiro(t('rotColarVazio'), true);
-        abrirRoteiro(textoParaLinhas(txt), t('rotColado'));
-      } catch (e) { avisoRoteiro(t('rotSemColar'), true); }
-    };
-    $('rotBaixar').onclick = baixarRoteiro;
-    $('rotFechar').onclick = () => {
-      roteiro = null; gravarRoteiro(); pintarRoteiro();
-    };
-    try {
-      const cru = sessionStorage.getItem(ROTEIRO_CHAVE);
-      if (cru) { roteiro = JSON.parse(cru); pintarRoteiro(); }
-    } catch (e) {}
+  /** O link de volta para a tela de controle. Ele aparece SÓ depois que um
+   *  documento existe: antes disso não há o que marcar, e um botão de "feito"
+   *  ao lado de um caso não executado é um convite para mentir na planilha. */
+  async function oferecerVoltaDoRoteiro(nomeArq){
+    if (!casoDoRoteiro) return;
+    const caixa = $('rotVolta'); if (!caixa) return;
+    const p = new URLSearchParams();
+    p.set('marcar', casoDoRoteiro);
+    if (nomeArq) p.set('arq', nomeArq.slice(0, 120));
+    const imp = await impressaoDoDocumento();
+    if (imp) p.set('imp', imp);
+    const base = (typeof CAMINHO_ROTEIRO === 'object' && CAMINHO_ROTEIRO[LANG]) || '/conta/roteiro';
+    caixa.innerHTML = '<a class="btn sm" href="__SITE__' + base + '?' + p.toString() +
+                      '" target="_blank" rel="noopener">' + esc(t('rotVoltaBtn')) + '</a>';
+    caixa.classList.remove('hide');
   }
 
   function baixarBlob(blob, nome){
@@ -10996,10 +10537,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
        documento existe, e não quando alguém clica em "pronto". */
     baixouAlgo = true;
     if (typeof pintarSubpassos === 'function') setTimeout(pintarSubpassos, 0);
-    /* E, se há um roteiro em execução, o caso da vez fica marcado como feito —
-       com a data, o nome do arquivo e a impressão das telas. É isso que faz a
-       planilha voltar preenchida sem ninguém anotar nada à mão. */
-    if (typeof marcarCasoDoRoteiro === 'function' && !/\.xlsx$/i.test(nome)) marcarCasoDoRoteiro(nome);
+    /* E, se a pessoa veio de um caso do roteiro, aparece o link de volta que
+       marca esse caso como feito — com o nome do arquivo e a impressão das
+       telas dentro. Quem grava é a conta dela, do outro lado do link. */
+    if (casoDoRoteiro) oferecerVoltaDoRoteiro(nome);
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
     a.download = nome;
