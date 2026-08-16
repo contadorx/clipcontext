@@ -86,11 +86,32 @@
     <p>And, if you use the test run, it holds <b>the fields of the task list</b>, and nothing else: the case
     code, the title, the system, the ticket number, the owner's e-mail, the date the case was marked done,
     who marked it, the <b>name</b> of the generated file, its <b>fingerprint</b> and any note you type.</p>
-    <p><b>What the test run never holds:</b> the video, the frames, the transcript and the document. Those
-    are still born and die in your browser. The fingerprint is a short number computed from the screens — it
-    lets you check later that a document is the same one, and it does <b>not</b> allow any image to be
-    reconstructed. The spreadsheet you upload to create a run is read, becomes those rows, and <b>the file is
-    discarded</b>: we do not store the spreadsheet.</p>
+    <p>When you mark a case done, a <b>receipt</b> is stored too: the record of what was run (case,
+    scenario, system, ticket, environment, result, date and format) and the <b>fingerprint of every
+    frame</b>, in order. Those are numbers. It travels inside the return link itself, and it is what lets
+    you take a document months later and check that it is the same one.</p>
+    <p><b>What the receipt never contains:</b> images, transcripts or step text. The fingerprint is
+    computed from the screens and does <b>not</b> allow any image to be reconstructed. The spreadsheet you
+    upload to create a run is read, becomes the rows described above, and <b>the file is discarded</b>: we
+    do not store the spreadsheet.</p>
+
+    <h2>The session attachment — the one exception, and it is yours</h2>
+    <p>When you confirm a case as done there is an <b>optional</b> field: attach the complete
+    <code>.json</code> of that session. That file <b>has the frame images inside it</b>, along with the
+    step text and the transcript, if there is one.</p>
+    <p>Attaching it is the <b>only</b> thing in this product that puts content of yours on a server of
+    ours. Because of that, and without exception:</p>
+    <ul>
+      <li>it <b>never goes on its own</b> — the field starts closed and you have to pick the file;</li>
+      <li>what it means is written <b>next to the field</b>, at the moment of the choice, not only here;</li>
+      <li>it lives in <b>private</b> storage with no public address: downloading goes through our server,
+      which checks your session and returns a signed address that <b>expires in two minutes</b>;</li>
+      <li>whoever can see the case can see the attachment — on a team run, that is the whole team;</li>
+      <li>there is a <b>delete attachment</b> button, and it deletes the file, not just the record pointing at it;</li>
+      <li>the limit is 32 MB per case, and only <code>.json</code> files are accepted.</li>
+    </ul>
+    <p><b>Your video and audio still never leave your browser</b>, attachment or no attachment. With no
+    attachment, only the receipt is kept — numbers, no images.</p>
     <p>Note what that means in practice: a run is a <b>work list</b>, and a case code or a ticket number can
     say what your company is testing. Write in those fields what you would write on a task-board card —
     system names and ticket numbers, fine; someone else's personal data, no.</p>

@@ -33,6 +33,13 @@ export type Caso = {
   arquivo: string | null;
   impressao: string | null;
   observacao: string | null;
+  /* A prova do que foi executado, em dois níveis.
+     `recibo` é a ficha com a impressão de cada quadro — sem imagem nenhuma, e
+     por isso ele vem inteiro. `anexo` é o `.json` completo da sessão, que TEM
+     os quadros dentro: aqui ele só é descrito (nome, tamanho, data), porque o
+     conteúdo dele não passa por esta chamada nunca. */
+  recibo: Record<string, unknown> | null;
+  anexo: { nome: string | null; bytes: number | null; em: string | null } | null;
 };
 
 export type Roteiro = {

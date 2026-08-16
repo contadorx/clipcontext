@@ -87,11 +87,32 @@
     código del caso, el título, el sistema, el número del ticket, el correo del responsable, la fecha en que
     el caso se marcó como hecho, quién lo marcó, el <b>nombre</b> del archivo generado, su <b>huella</b> y la
     observación que escribas.</p>
-    <p><b>Lo que el guion nunca guarda:</b> el vídeo, los fotogramas, la transcripción y el documento. Siguen
-    naciendo y muriendo en tu navegador. La huella es un número corto calculado a partir de las pantallas —
-    sirve para comprobar después que un documento es el mismo, y <b>no</b> permite reconstruir ninguna imagen.
-    La hoja que envías para crear el guion se lee, se convierte en esas filas, y <b>el archivo se descarta</b>:
-    no guardamos la hoja.</p>
+    <p>Al marcar un caso como hecho se guarda también un <b>recibo</b>: la ficha de lo que se ejecutó
+    (caso, escenario, sistema, ticket, entorno, resultado, fecha y formato) y la <b>huella de cada
+    fotograma</b>, en orden. Son números. Viaja dentro del propio enlace de vuelta, y es lo que permite
+    coger un documento meses después y comprobar que es el mismo.</p>
+    <p><b>Lo que el recibo nunca contiene:</b> imágenes, transcripción ni el texto de los pasos. La huella
+    se calcula a partir de las pantallas y <b>no</b> permite reconstruir ninguna imagen. La hoja que envías
+    para crear el guion se lee, se convierte en las filas descritas arriba, y <b>el archivo se
+    descarta</b>: no guardamos la hoja.</p>
+
+    <h2>El adjunto de la sesión — la única excepción, y es tuya</h2>
+    <p>Al confirmar un caso como hecho hay un campo <b>opcional</b>: adjuntar el <code>.json</code>
+    completo de esa sesión. Ese archivo <b>lleva las imágenes de los fotogramas dentro</b>, junto con el
+    texto de los pasos y la transcripción, si la hay.</p>
+    <p>Adjuntarlo es lo <b>único</b> de este producto que pone contenido tuyo en un servidor nuestro. Por
+    eso, y sin excepción:</p>
+    <ul>
+      <li><b>nunca va solo</b> — el campo viene cerrado y hay que elegir el archivo;</li>
+      <li>lo que significa está escrito <b>al lado del campo</b>, en el momento de elegir, y no solo aquí;</li>
+      <li>vive en un almacenamiento <b>privado</b>, sin dirección pública: quien descarga pasa por nuestro
+      servidor, que comprueba tu sesión y devuelve una dirección firmada que <b>caduca en dos minutos</b>;</li>
+      <li>quien ve el caso ve el adjunto — en un guion del equipo, eso es el equipo entero;</li>
+      <li>hay un botón <b>borrar adjunto</b>, y borra el archivo, no solo la fila que apunta a él;</li>
+      <li>el límite es de 32 MB por caso, y solo se aceptan archivos <code>.json</code>.</li>
+    </ul>
+    <p><b>Tu vídeo y tu audio siguen sin salir nunca de tu navegador</b>, con adjunto o sin él. Sin
+    adjunto queda solo el recibo — números, sin imágenes.</p>
     <p>Fíjate en lo que eso significa en la práctica: un guion es una <b>lista de trabajo</b>, y un código de
     caso o un número de ticket pueden decir qué está probando tu empresa. Escribe en esos campos lo que
     escribirías en una tarjeta de un tablero de tareas — nombres de sistema y números de ticket, bien; datos

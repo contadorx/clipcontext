@@ -21,7 +21,8 @@ import { emailDaSessao } from '@/lib/supabase/servidor';
 import { type Conta, contaDe, temChaveDeServico } from '@/lib/supabase/servico';
 import { type Lang, type Textos, CAMINHO, ehLang, preencher, textos } from '@/lib/conta/textos';
 import { type Caso, type Resumo, type Roteiro, CAMINHO_ROTEIRO, linkDoCaso, meusRoteiros, verRoteiro } from '@/lib/conta/roteiro';
-import { apagarRoteiro, atribuirCaso, marcarFeito } from '../../roteiro-acoes';
+import { apagarAnexoDoCaso, apagarRoteiro, atribuirCaso, marcarFeito } from '../../roteiro-acoes';
+import { lerRecibo, resumoDoRecibo } from '@/lib/conta/recibo';
 import Importar from './Importar';
 import Copiar from './Copiar';
 
@@ -53,7 +54,7 @@ export default async function Pagina({ params, searchParams }: PageProps<'/conta
             : <Tela email={email} lang={lang} t={t}
                     id={Number(um('id')) || null}
                     marcar={Number(um('marcar')) || null}
-                    arq={um('arq')} imp={um('imp')} />}
+                    arq={um('arq')} imp={um('imp')} rec={um('rec')} />}
       </div>
     </section>
   );
@@ -69,8 +70,9 @@ const NaoEntrou = ({ lang, t }: { lang: Lang; t: Textos }) => (
 /* ------------------------------------------------------------------- tela */
 
 async function Tela(
-  { email, lang, t, id, marcar, arq, imp }:
-  { email: string; lang: Lang; t: Textos; id: number | null; marcar: number | null; arq: string | null; imp: string | null },
+  { email, lang, t, id, marcar, arq, imp, rec }:
+  { email: string; lang: Lang; t: Textos; id: number | null; marcar: number | null;
+    arq: string | null; imp: string | null; rec: string | null },
 ) {
   let conta: Conta;
   try {
@@ -124,7 +126,7 @@ async function Tela(
           link de retorno trouxe o nome do arquivo e a impressão das telas.
           Marcar é um POST, e não o próprio link — endereço que muda dado é
           endereço que o histórico do navegador reexecuta sozinho. */}
-      {marcar && <Voltando lang={lang} t={t} casoId={marcar} arq={arq} imp={imp} />}
+      {marcar && <Voltando lang={lang} t={t} casoId={marcar} arq={arq} imp={imp} rec={rec} />}
 
       <Listas lista={lista} escolhido={escolhido} lang={lang} t={t} />
       {atual && <Detalhe r={atual} email={email} lang={lang} t={t} ehAdmin={ehAdmin} pessoas={pessoas} />}
@@ -135,9 +137,13 @@ async function Tela(
 }
 
 function Voltando(
-  { lang, t, casoId, arq, imp }:
-  { lang: Lang; t: Textos; casoId: number; arq: string | null; imp: string | null },
+  { lang, t, casoId, arq, imp, rec }:
+  { lang: Lang; t: Textos; casoId: number; arq: string | null; imp: string | null; rec: string | null },
 ) {
+  /* O recibo já veio no link. Mostrar o que ele contém ANTES de gravar é o que
+     transforma "clique aqui" numa escolha: a pessoa vê que são números e não
+     imagens, e vê a diferença para o anexo logo abaixo. */
+  const r = resumoDoRecibo(lerRecibo(rec));
   return (
     <div className="card" style={{ marginBottom: 24, borderColor: 'var(--brand, #3b5bdb)' }}>
       <h2 style={{ marginTop: 0 }}>{t.rotVoltandoTitulo}</h2>
@@ -145,14 +151,35 @@ function Voltando(
         {arq ? preencher(t.rotVoltandoArq, { arquivo: arq }) : t.rotVoltandoSemArq}
         {imp ? ` · ${t.rotImpressao} ${imp}` : ''}
       </p>
-      <form action={marcarFeito} style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
+      {r && (
+        <p className="small" style={{ margin: '0 0 12px' }}>
+          <b>{t.rotRecibo}:</b>{' '}
+          {preencher(t.rotReciboDe, { quadros: r.quadros, impressao: r.impressao || '—' })}
+          {r.hashes > 0 && ` · ${preencher(t.rotReciboHashes, { quantos: r.hashes })}`}
+        </p>
+      )}
+      <form action={marcarFeito} encType="multipart/form-data" style={{ display: 'grid', gap: 12 }}>
         <input type="hidden" name="lang" value={lang} />
         <input type="hidden" name="caso_id" value={casoId} />
         <input type="hidden" name="arquivo" value={arq || ''} />
         <input type="hidden" name="impressao" value={imp || ''} />
-        <input name="observacao" placeholder={t.rotObservacaoPlaceholder}
-               aria-label={t.rotObservacao} style={{ minWidth: 240 }} />
-        <button className="btn" type="submit">{t.rotMarcarBotao}</button>
+        <input type="hidden" name="recibo" value={rec || ''} />
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
+          <input name="observacao" placeholder={t.rotObservacaoPlaceholder}
+                 aria-label={t.rotObservacao} style={{ minWidth: 240 }} />
+        </div>
+
+        {/* O anexo é a única coisa deste produto que guarda conteúdo do cliente
+            num servidor nosso. Por isso ele é opcional, vem desmarcado, e o
+            aviso do que ele significa está do lado do campo — e não numa página
+            de termos que ninguém abre no meio de uma rodada de testes. */}
+        <details>
+          <summary className="small" style={{ cursor: 'pointer' }}>{t.rotAnexoCampo}</summary>
+          <p className="small muted" style={{ margin: '8px 0' }}>{t.rotAnexoAviso}</p>
+          <input type="file" name="anexo" accept=".json,application/json" />
+        </details>
+
+        <div><button className="btn" type="submit">{t.rotMarcarBotao}</button></div>
       </form>
     </div>
   );
@@ -230,17 +257,19 @@ function Detalhe(
             sobra do que os botões não usaram, e "Emitir a segunda via da fatura"
             — que é o texto que a pessoa lê para saber o que fazer — quebra em
             três linhas ao lado de espaço vazio. */}
-        <table className="legal" style={{ tableLayout: 'fixed', minWidth: 720 }}>
+        <table className="legal" style={{ tableLayout: 'fixed', minWidth: 860 }}>
           <colgroup>
-            <col style={{ width: r.escopo === 'time' ? '32%' : '46%' }} />
-            {r.escopo === 'time' && <col style={{ width: '22%' }} />}
-            <col style={{ width: r.escopo === 'time' ? '22%' : '30%' }} />
-            <col style={{ width: '24%' }} />
+            <col style={{ width: r.escopo === 'time' ? '26%' : '34%' }} />
+            {r.escopo === 'time' && <col style={{ width: '18%' }} />}
+            <col style={{ width: '18%' }} />
+            <col style={{ width: r.escopo === 'time' ? '20%' : '28%' }} />
+            <col style={{ width: '18%' }} />
           </colgroup>
           <thead><tr>
             <th>{t.rotCampoCaso}</th>
             {r.escopo === 'time' && <th>{t.rotCampoResponsavel}</th>}
             <th>{t.rotColSit}</th>
+            <th>{t.rotProva}</th>
             <th style={{ textAlign: 'right' }}>{t.rotAcoes}</th>
           </tr></thead>
           <tbody>
@@ -274,6 +303,54 @@ function Detalhe(
  * vez de empurrar a coluna, o que sobra VAZA por cima da vizinha. Foi assim que
  * o botão "Atribuir" apareceu escrito em cima da data de execução do caso ao
  * lado. Por isso tudo aqui dentro quebra linha em vez de esticar. */
+function tamanho(bytes: number | null): string {
+  if (!bytes) return '';
+  const mb = bytes / (1024 * 1024);
+  return mb >= 1 ? `${mb.toFixed(1)} MB` : `${Math.max(1, Math.round(bytes / 1024))} KB`;
+}
+
+function Prova({ c, lang, t }: { c: Caso; lang: Lang; t: Textos }) {
+  const r = resumoDoRecibo(c.recibo as Parameters<typeof resumoDoRecibo>[0]);
+  if (!r && !c.anexo) return <span className="muted small">—</span>;
+  return (
+    <div className="small">
+      {r ? (
+        <div style={{ marginBottom: c.anexo ? 8 : 0 }}>
+          <b>{t.rotRecibo}</b>
+          <div className="muted" style={{ wordBreak: 'break-all' }}>
+            {preencher(t.rotReciboDe, { quadros: r.quadros, impressao: r.impressao || '—' })}
+          </div>
+          {r.hashes > 0 && (
+            <div className="muted">{preencher(t.rotReciboHashes, { quantos: r.hashes })}</div>
+          )}
+        </div>
+      ) : (
+        <div className="muted" style={{ marginBottom: c.anexo ? 8 : 0 }}>{t.rotSemRecibo}</div>
+      )}
+
+      {c.anexo && (
+        <div>
+          <b>{t.rotAnexo}</b>
+          <div className="muted" style={{ wordBreak: 'break-all' }}>
+            {c.anexo.nome} · {tamanho(c.anexo.bytes)}
+          </div>
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 4 }}>
+            <a className="btn ghost" style={{ padding: '2px 8px', fontSize: 12 }}
+               href={`/conta/anexo?caso=${c.id}&lang=${lang}`}>{t.rotAnexoBaixar}</a>
+            <form action={apagarAnexoDoCaso}>
+              <input type="hidden" name="lang" value={lang} />
+              <input type="hidden" name="caso_id" value={c.id} />
+              <button className="btn ghost" type="submit" style={{ padding: '2px 8px', fontSize: 12 }}>
+                {t.rotAnexoApagarBtn}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function Linha(
   { c, r, email, lang, t, ehAdmin, pessoas }:
   { c: Caso; r: Roteiro; email: string; lang: Lang; t: Textos; ehAdmin: boolean; pessoas: string[] },
@@ -320,6 +397,13 @@ function Linha(
             {c.impressao && <div className="small muted" style={{ wordBreak: 'break-all' }}>{t.rotImpressao} {c.impressao}</div>}
           </span>
         ) : <span className="muted">—</span>}
+      </td>
+
+      {/* A prova: o recibo (números, sem imagem) e o anexo (o .json completo,
+          com os quadros dentro). Os dois aparecem descritos, e o anexo tem o
+          botão que o apaga de verdade — do balde, não só da linha. */}
+      <td>
+        <Prova c={c} lang={lang} t={t} />
       </td>
 
       <td style={{ textAlign: 'right' }}>

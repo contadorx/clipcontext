@@ -442,6 +442,18 @@
           "pt": "Atribuir cada caso a uma pessoa, e ver quem fez o quê",
           "en": "Assign each case to a person, and see who did what",
           "es": "Asignar cada caso a una persona, y ver quién hizo qué"
+        },
+        {
+          "planos": "pt",
+          "pt": "Recibo do caso: a ficha e a impressão de cada quadro, sem imagem",
+          "en": "Case receipt: the record and the fingerprint of every frame, no images",
+          "es": "Recibo del caso: la ficha y la huella de cada fotograma, sin imágenes"
+        },
+        {
+          "planos": "pt",
+          "pt": "Anexar o .json completo da sessão ao caso, por escolha, e apagar quando quiser",
+          "en": "Attach the complete session .json to a case, by choice, and delete it whenever",
+          "es": "Adjuntar el .json completo de la sesión al caso, por elección, y borrarlo cuando quieras"
         }
       ]
     },

@@ -88,11 +88,32 @@
     eles: o código do caso, o título, o sistema, o número do chamado, o e-mail do responsável, a data em que
     o caso foi marcado como feito, quem o marcou, o <b>nome</b> do arquivo gerado, a <b>impressão digital</b>
     dele e a observação que você digitar.</p>
-    <p><b>O que o roteiro nunca guarda:</b> o vídeo, os quadros, a transcrição e o documento. Eles continuam
-    nascendo e morrendo no seu navegador. A impressão digital é um número curto calculado a partir das telas
-    — ela serve para conferir depois se um documento é aquele mesmo, e <b>não</b> permite reconstruir
-    nenhuma imagem. A planilha que você envia para criar o roteiro é lida, vira essas linhas, e <b>o arquivo
-    é descartado</b>: não guardamos a planilha.</p>
+    <p>Ao marcar um caso como concluído, fica guardado também um <b>recibo</b>: a ficha do que foi
+    executado (caso, cenário, sistema, chamado, ambiente, resultado, data e formato) e a <b>impressão
+    digital de cada quadro</b>, em ordem. São números. Ele viaja dentro do próprio link de retorno, e é o
+    que permite pegar um documento meses depois e conferir se é aquele mesmo.</p>
+    <p><b>O que o recibo nunca contém:</b> imagem, transcrição ou o texto dos passos. A impressão digital
+    é calculada a partir das telas e <b>não</b> permite reconstruir nenhuma imagem. A planilha que você
+    envia para criar o roteiro é lida, vira as linhas descritas acima, e <b>o arquivo é descartado</b>:
+    não guardamos a planilha.</p>
+
+    <h2>O anexo da sessão — a única exceção, e ela é sua</h2>
+    <p>Ao confirmar um caso como concluído existe um campo <b>opcional</b>: anexar o
+    <code>.json</code> completo daquela sessão. Esse arquivo <b>tem as imagens dos quadros dentro</b>,
+    junto com o texto dos passos e a transcrição, se houver.</p>
+    <p>Anexá-lo é a <b>única</b> coisa deste produto que coloca conteúdo seu num servidor nosso. Por
+    isso, e sem exceção:</p>
+    <ul>
+      <li>ele <b>nunca vai sozinho</b> — o campo vem fechado e é preciso escolher o arquivo;</li>
+      <li>o que ele significa está escrito <b>ao lado do campo</b>, no momento da escolha, e não só aqui;</li>
+      <li>ele fica num armazenamento <b>privado</b>, sem endereço público: quem baixa passa pelo nosso
+      servidor, que confere a sua sessão e devolve um endereço assinado que <b>vence em dois minutos</b>;</li>
+      <li>quem enxerga o caso enxerga o anexo — num roteiro do time, isso é o time inteiro;</li>
+      <li>há um botão <b>apagar anexo</b>, e ele apaga o arquivo, não apenas o registro que aponta para ele;</li>
+      <li>o limite é de 32 MB por caso, e só arquivos <code>.json</code> são aceitos.</li>
+    </ul>
+    <p><b>O vídeo e o áudio continuam nunca saindo do seu navegador</b>, com anexo ou sem anexo. Sem
+    anexo, fica só o recibo — números, sem imagem.</p>
     <p>Repare no que isso significa na prática: um roteiro é uma <b>lista de trabalho</b>, e um código de
     caso ou um número de chamado podem dizer o que a sua empresa está testando. Escreva nesses campos o que
     você escreveria num cartão de quadro de tarefas — nome de sistema e número de chamado, tudo bem; dado
