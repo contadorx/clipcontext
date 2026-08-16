@@ -188,7 +188,15 @@ const FICHA_TXT = {
         ideia:'Ideia', elogio:'Elogio', problema:'Problema',
         ph:'Escreva do seu jeito — é uma pessoa que lê.',
         email:'seu e-mail, se quiser resposta', enviar:'Enviar',
-        vazio:'Escreva alguma coisa antes de enviar.', enviado:'Abri o seu e-mail.',
+        vazio:'Escreva alguma coisa antes de enviar.',
+        enviado:'Recebido. O seu chamado é o {0} — anote, é por ele que você acompanha.',
+        semEmail:'Sem e-mail, ele não tem como ser respondido nem consultado.',
+        jaTenho:'Já tenho um chamado e quero consultar', voltar:'Voltar ao recado',
+        consultaTit:'Digite o número do chamado e o e-mail com que ele foi aberto.',
+        consultar:'Consultar', faltaDado:'Preencha o número e o e-mail.',
+        naoAchei:'Não achei esse chamado com esse e-mail.', semResposta:'Ainda sem resposta.',
+        status:{ aberto:'aberto', analise:'em análise', respondido:'respondido', fechado:'fechado' },
+        indo:'Enviando…', erro:'Não consegui enviar agora. Tente de novo em instantes.', muitos:'Muitos recados ao mesmo tempo. Espere um minuto.', semRede:'Sem conexão com o serviço agora.',
         obrigado:'Obrigado. Se ele te poupou trabalho, contar para uma pessoa ajuda mais que qualquer anúncio — e nós não temos anúncio.',
         compartilhar:'Compartilhar no LinkedIn',
         compNota:'Abre o compartilhador do LinkedIn com o endereço já preenchido. O texto é seu.' },
@@ -198,7 +206,15 @@ const FICHA_TXT = {
         ideia:'Idea', elogio:'Praise', problema:'Problem',
         ph:'In your own words — a person reads this.',
         email:'your e-mail, if you want a reply', enviar:'Send',
-        vazio:'Write something before sending.', enviado:'I opened your e-mail.',
+        vazio:'Write something before sending.',
+        enviado:'Got it. Your ticket is {0} — write it down, that is how you follow it.',
+        semEmail:'Without an e-mail, it cannot be answered or looked up.',
+        jaTenho:'I already have a ticket and want to check it', voltar:'Back to the message',
+        consultaTit:'Type the ticket number and the e-mail it was opened with.',
+        consultar:'Check', faltaDado:'Fill in the number and the e-mail.',
+        naoAchei:'I could not find that ticket with that e-mail.', semResposta:'No reply yet.',
+        status:{ aberto:'open', analise:'under review', respondido:'answered', fechado:'closed' },
+        indo:'Sending…', erro:'I could not send it now. Try again in a moment.', muitos:'Too many messages at once. Wait a minute.', semRede:'No connection to the service right now.',
         obrigado:'Thank you. If it saved you work, telling one person helps more than any ad — and we have no ads.',
         compartilhar:'Share on LinkedIn',
         compNota:'Opens the LinkedIn sharer with the address filled in. The words are yours.' },
@@ -208,7 +224,15 @@ const FICHA_TXT = {
         ideia:'Idea', elogio:'Elogio', problema:'Problema',
         ph:'Escríbelo a tu manera — lo lee una persona.',
         email:'tu correo, si quieres respuesta', enviar:'Enviar',
-        vazio:'Escribe algo antes de enviar.', enviado:'Abrí tu correo.',
+        vazio:'Escribe algo antes de enviar.',
+        enviado:'Recibido. Tu ticket es el {0} — anótalo, es por él que le haces seguimiento.',
+        semEmail:'Sin correo, no puede ser respondido ni consultado.',
+        jaTenho:'Ya tengo un ticket y quiero consultarlo', voltar:'Volver al mensaje',
+        consultaTit:'Escribe el número del ticket y el correo con el que se abrió.',
+        consultar:'Consultar', faltaDado:'Rellena el número y el correo.',
+        naoAchei:'No encontré ese ticket con ese correo.', semResposta:'Todavía sin respuesta.',
+        status:{ aberto:'abierto', analise:'en análisis', respondido:'respondido', fechado:'cerrado' },
+        indo:'Enviando…', erro:'No he podido enviarlo ahora. Inténtalo en un momento.', muitos:'Demasiados mensajes a la vez. Espera un minuto.', semRede:'Sin conexión con el servicio ahora mismo.',
         obrigado:'Gracias. Si te ahorró trabajo, contárselo a una persona ayuda más que cualquier anuncio — y no tenemos anuncios.',
         compartilhar:'Compartir en LinkedIn',
         compNota:'Abre el compartidor de LinkedIn con la dirección ya puesta. El texto es tuyo.' }
@@ -216,10 +240,16 @@ const FICHA_TXT = {
 
 (function () {
   const lang = (document.documentElement.lang || 'pt').slice(0, 2);
+  /* O endereço da Supabase vem do mesmo lugar que a lista de aviso usa: um
+     data-attribute no formulário, estampado pelo build. Sem ele a ficha some,
+     porque uma caixa de recado que não tem para onde mandar é pior que caixa
+     nenhuma. */
+  /* No <body>, e não no formulário da lista de aviso: aquele só existe na
+     página de preços, e a ficha existe em todas. */
+  const SUPA = document.body.dataset.supaUrl || '';
+  const ANON = document.body.dataset.supaKey || '';
   const T = Object.assign({}, FICHA_TXT[lang] || FICHA_TXT.pt, {
     marca: 'Walkstamp',
-    contato: (document.querySelector('a[href^="mailto:"]') || {}).href
-             ? (document.querySelector('a[href^="mailto:"]').href.replace('mailto:', '')) : '',
     url: location.origin,
     /* A medição do site já existe e é a mesma: um evento sem identidade. */
     evento: (nome, valor) => { try { if (window.wsMedir) window.wsMedir(nome, valor); } catch (e) {} }
@@ -258,6 +288,17 @@ const FICHA_TXT = {
           '<button type="button" class="btn" id="fichaEnviar">' + T.enviar + '</button>' +
           '<span class="small muted" id="fichaMsg" role="status"></span></div>' +
       '</div>' +
+      '<div id="fichaConsulta" hidden>' +
+        '<p class="small muted" style="margin:0 0 8px">' + T.consultaTit + '</p>' +
+        '<input id="fichaNum" placeholder="WS-0000" autocomplete="off">' +
+        '<input id="fichaNumEmail" type="email" placeholder="' + T.email + '" autocomplete="email">' +
+        '<div class="row" style="gap:8px;align-items:center;margin-top:6px">' +
+          '<button type="button" class="btn ghost" id="fichaVer">' + T.consultar + '</button>' +
+          '<span class="small muted" id="fichaVerMsg" role="status"></span></div>' +
+        '<div id="fichaVerOut" class="small" style="margin-top:10px"></div>' +
+      '</div>' +
+      '<p class="small" style="margin:12px 0 0">' +
+        '<a href="#" id="fichaTrocar">' + T.jaTenho + '</a></p>' +
       '<div id="fichaPasso3" hidden>' +
         '<p class="small" style="margin:0 0 10px">' + T.obrigado + '</p>' +
         '<a class="btn" id="fichaLinkedin" target="_blank" rel="noopener">' + T.compartilhar + '</a>' +
@@ -321,15 +362,75 @@ const FICHA_TXT = {
     $('fichaLinkedin').onclick = () => { if (T.evento) T.evento('compartilhou', 'linkedin'); };
   }
 
-  $('fichaEnviar').onclick = () => {
+  /* Consultar um chamado: número + e-mail, sem login. O e-mail é o que impede
+     alguém de varrer WS-0001..WS-9999 e ler o que os outros escreveram. */
+  let vendoConsulta = false;
+  $('fichaTrocar').onclick = (e) => {
+    e.preventDefault();
+    vendoConsulta = !vendoConsulta;
+    $('fichaConsulta').hidden = !vendoConsulta;
+    $('fichaPasso1').hidden = vendoConsulta || $('fichaPasso1').dataset.pronto === '1';
+    $('fichaPasso2').hidden = vendoConsulta || $('fichaPasso2').dataset.pronto !== '1';
+    $('fichaTrocar').textContent = vendoConsulta ? T.voltar : T.jaTenho;
+  };
+
+  $('fichaVer').onclick = async () => {
+    const num = ($('fichaNum').value || '').trim();
+    const em = ($('fichaNumEmail').value || '').trim();
+    if (!num || !em) { $('fichaVerMsg').textContent = T.faltaDado; return; }
+    if (!SUPA || !ANON) { $('fichaVerMsg').textContent = T.semRede; return; }
+    $('fichaVer').disabled = true; $('fichaVerMsg').textContent = T.indo;
+    try {
+      const r = await fetch(SUPA + '/rest/v1/rpc/walkstamp_chamado_ver', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', apikey: ANON, Authorization: 'Bearer ' + ANON },
+        body: JSON.stringify({ p_numero: num, p_email: em })
+      });
+      const d = await r.json().catch(() => null);
+      $('fichaVer').disabled = false; $('fichaVerMsg').textContent = '';
+      if (!d || d.erro) { $('fichaVerMsg').textContent = T.naoAchei; $('fichaVerOut').innerHTML = ''; return; }
+      const nomes = T.status || {};
+      $('fichaVerOut').innerHTML =
+        '<b>' + d.numero + '</b> · ' + (nomes[d.status] || d.status) +
+        '<p style="margin:6px 0 0;white-space:pre-wrap">' + (d.texto || '').replace(/[<>&]/g, '') + '</p>' +
+        (d.resposta
+          ? '<p style="margin:10px 0 0;padding:9px;background:#f3f5ff;border-radius:8px;white-space:pre-wrap">' +
+            (d.resposta).replace(/[<>&]/g, '') + '</p>'
+          : '<p class="muted" style="margin:8px 0 0">' + T.semResposta + '</p>');
+    } catch (e) {
+      $('fichaVer').disabled = false; $('fichaVerMsg').textContent = T.erro;
+    }
+  };
+
+  $('fichaEnviar').onclick = async () => {
     const txt = ($('fichaTexto').value || '').trim();
     if (!txt) { $('fichaMsg').textContent = T.vazio; return; }
-    const email = ($('fichaEmail').value || '').trim();
-    const assunto = encodeURIComponent(T.marca + ' · ' + tipo + (email ? ' · ' + email : '') +
-                                       (nota != null ? ' · nota ' + nota : ''));
-    const corpo = encodeURIComponent(txt + '\n\n---\n' + location.href + '\n' + navigator.userAgent.slice(0,120));
-    if (T.evento) T.evento('recado', tipo);
-    window.location.href = 'mailto:' + T.contato + '?subject=' + assunto + '&body=' + corpo;
-    $('fichaMsg').textContent = T.enviado;
+    if (!SUPA || !ANON) { $('fichaMsg').textContent = T.semRede; return; }
+    $('fichaEnviar').disabled = true;
+    $('fichaMsg').textContent = T.indo;
+    try {
+      const r = await fetch(SUPA + '/rest/v1/rpc/walkstamp_recado', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', apikey: ANON, Authorization: 'Bearer ' + ANON },
+        body: JSON.stringify({ p_tipo: tipo, p_texto: txt,
+          p_email: ($('fichaEmail').value || '').trim() || null,
+          p_nota: nota, p_idioma: lang, p_origem: 'site',
+          p_diag: location.href + '\n' + navigator.userAgent.slice(0, 160) })
+      });
+      const resp = await r.json().catch(() => null);
+      $('fichaEnviar').disabled = false;
+      if (!r.ok || resp === 'vazio') { $('fichaMsg').textContent = T.erro; return; }
+      if (resp === 'muitos') { $('fichaMsg').textContent = T.muitos; return; }
+      $('fichaTexto').value = '';
+      /* O número é o que a pessoa anota. Sem e-mail ela não consulta depois, e
+         é melhor dizer isso agora do que deixar descobrir quando precisar. */
+      const temEmail = !!($('fichaEmail').value || '').trim();
+      $('fichaMsg').textContent = T.enviado.replace('{0}', resp) +
+        (temEmail ? '' : ' ' + T.semEmail);
+      if (T.evento) T.evento('recado', tipo);
+    } catch (e) {
+      $('fichaEnviar').disabled = false;
+      $('fichaMsg').textContent = T.erro;
+    }
   };
 })();

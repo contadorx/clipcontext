@@ -789,6 +789,14 @@
       <input type="text" id="unNome" maxlength="24" style="width:auto;max-width:150px">
       <span class="status" id="modeloDica" style="flex-basis:100%;margin:0"></span>
     </div>
+    <!-- Os modelos de documento do cliente, quando há sessão. Ele não aparece
+         para quem não entrou, e não aparece para quem entrou sem modelos
+         cadastrados: um seletor vazio é uma pergunta sem resposta. -->
+    <div class="row hide" id="modelosCx" style="margin:0 0 10px;align-items:center;gap:9px">
+      <label class="chk" for="modeloCliente" data-i18n="mdCliente"></label>
+      <select id="modeloCliente" style="width:auto;max-width:230px"></select>
+      <span class="status" id="modelosMsg"></span>
+    </div>
 
     <div class="row">
       <span class="tag"><span data-i18n="tKeep"></span> <b id="nKeep">0</b></span>
@@ -1276,6 +1284,24 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
          vira suporte. Quem coordena manda um endereço; quem abre já está
          dentro. O campo continua existindo para quando o link chega mutilado. -->
     <p class="status" id="licComo" data-i18n="licComo" style="max-width:660px;margin:0 0 8px"></p>
+    <!-- ---- entrar, aqui dentro ----
+
+         O link mágico já existia, mas só na /time: a pessoa saía do produto,
+         pegava a chave e voltava. Agora ela entra aqui, e a sessão fica.
+
+         O que a sessão faz: renova a licença sozinha e lista os chamados dela.
+         O que a sessão NÃO faz: virar requisito. Sem ela, e com o servidor
+         fora do ar, tudo o que a ferramenta fazia continua funcionando — é
+         essa a regra que separa uma conta que existe de uma conta que é
+         pedágio. -->
+    <div class="row" id="entrarRow" style="margin-bottom:10px;align-items:center;flex-wrap:wrap">
+      <input type="email" id="entrarEmail" autocomplete="email" data-i18n-ph="entrarPh"
+             style="min-width:220px;padding:6px 9px">
+      <button class="ghost sm" id="entrar" data-i18n="entrarBtn"></button>
+      <button class="ghost sm hide" id="sair" data-i18n="sairBtn"></button>
+      <span class="status" id="entrarMsg"></span>
+    </div>
+    <div class="hide" id="meusChamados" style="margin:0 0 12px"></div>
     <div class="row">
       <a class="btn sm" id="licPedir" href="https://walkstamp.com/time" target="_blank" rel="noopener"
          data-i18n="licPedir"></a>
@@ -1338,7 +1364,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   const I18N = {
     pt: {
       docTitle:'Walkstamp — transforme vídeo em contexto para IA',
-      supportLine:'Gratuita, sem anúncio e sem cadastro — nada do que você processa sai deste computador. ',
+      supportLine:'Gratuita, sem anúncio e sem exigir cadastro — nada do que você processa sai deste computador. ',
       pesSeg:'Segurança da informação', pesComp:'Comparativo', pesPrecos:'Preços',
       sub:'Transforme um vídeo em um PDF com os frames que importam e a transcrição sincronizada — pronto para entregar a uma IA. Tudo roda no seu navegador: o vídeo não sai do seu computador.',
       viaRecTag:'Comece por aqui', viaRecH:'Gravar a tela agora',
@@ -1507,7 +1533,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       perfLento:'Mais lento que o próprio vídeo — vale escolher o modelo rápido.',
       docxBtn:'Word (.docx)', zipBtn:'Zip das figuras', wFrames:'Frames neste documento',
       ftPromo:'Passo a passo com hora, gerado no navegador — nenhum vídeo saiu do computador',
-      ftCapa:'Documento gerado inteiramente no navegador de quem executou. O vídeo, o áudio e as imagens não passaram por servidor nenhum — nem nosso, nem de terceiros. Ferramenta gratuita, sem cadastro.',
+      ftCapa:'Documento gerado inteiramente no navegador de quem executou. O vídeo, o áudio e as imagens não passaram por servidor nenhum — nem nosso, nem de terceiros. Ferramenta gratuita, sem exigir cadastro.',
       pkgBuilding:'Montando o arquivo…',
       docxDone:'Documento do Word com {0} frames — pronto para editar.',
       zipDone:'{0} imagens no zip, sem mais nada junto.',
@@ -1597,8 +1623,22 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       ocrStopped:' Interrompido — só o que já foi lido entra no PDF.',
       pOcr:'TEXTO NA TELA',
       grDadosNota:'O .json é o que traz este documento de volta ao Walkstamp depois — guarde-o junto do PDF.',
-      fbNota:'Isto abre o seu programa de e-mail com o texto pronto. Nada é enviado por trás — não temos servidor de recados, pelo mesmo motivo de não termos servidor de vídeo.',
-      fbFeito:'Abri o seu programa de e-mail. Se não abriu, escreva para {0}.',
+      fbNota:'Vai só o que está escrito aqui, mais o relatório se você deixar marcado. Nenhum vídeo, áudio, transcrição ou documento — esses continuam sem sair do seu computador.',
+      fbFeito:'Recebido. O seu chamado é o {0} — anote, é por ele que você acompanha.',
+      fbSemRede:'Esta é a versão offline: não há para onde enviar. Escreva para {0}.',
+      fbMuitos:'Muitos recados ao mesmo tempo. Espere um minuto e tente de novo.',
+      stAberto:'aberto', stAnalise:'em análise', stRespondido:'respondido', stFechado:'fechado',
+      meusNada:'Você ainda não abriu nenhum chamado.', meusErro:'Não consegui buscar os chamados agora.',
+      meusTit:'Os seus chamados ({0})', meusIndo:'Buscando os seus chamados…',
+      entrarComo:'Você está como {0}.',
+      entrarOffline:'Esta é a versão offline: não há como entrar, e nada aqui precisa disso.',
+      entrarRuim:'Esse endereço não parece completo.', entrarFalhou:'Não consegui enviar agora.',
+      entrarIndo:'Enviando o link…', entrarMandei:'Mandei um link para {0}. Abra a mensagem e clique.',
+      degustacao:'Degustação: {0} dias restantes. Depois disso a ferramenta continua funcionando no plano grátis — nada do que você já gerou se perde.',
+      mdCliente:'Modelo do cliente', mdNenhum:'— nenhum —', mdAplicado:'{0} aplicado.',
+      entrarBtn:'Entrar', sairBtn:'Sair', entrarPh:'seu@email.com',
+      fbSemEmail:'Sem e-mail, este chamado não tem como ser respondido nem consultado.',
+      fbErro:'Não consegui enviar agora. Tente de novo, ou escreva para {0}.',
       fbEnviar:'Enviar', fbVazio:'Escreva alguma coisa antes de enviar.', fbIndo:'Abrindo o seu e-mail…',
       fbDiagLbl:'Mandar junto o relatório técnico do navegador', fbVerDiag:'ver o que vai junto',
       fbTextoLbl:'O que aconteceu, ou o que você queria que existisse', fbEmailLbl:'Seu e-mail, se quiser resposta',
@@ -2085,8 +2125,22 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       ocrStopped:' Stopped — only what was already read goes into the PDF.',
       pOcr:'TEXT ON SCREEN',
       grDadosNota:'The .json is what brings this document back into Walkstamp later — keep it next to the PDF.',
-      fbNota:'This opens your e-mail program with the text ready. Nothing is sent behind your back — we have no message server, for the same reason we have no video server.',
-      fbFeito:'I opened your e-mail program. If it did not open, write to {0}.',
+      fbNota:'Only what is written here goes, plus the report if you leave it ticked. No video, audio, transcript or document — those still never leave your computer.',
+      fbFeito:'Got it. Your ticket is {0} — write it down, that is how you follow it.',
+      fbSemRede:'This is the offline version: there is nowhere to send. Write to {0}.',
+      fbMuitos:'Too many messages at once. Wait a minute and try again.',
+      stAberto:'open', stAnalise:'under review', stRespondido:'answered', stFechado:'closed',
+      meusNada:'You have not opened any ticket yet.', meusErro:'I could not fetch the tickets now.',
+      meusTit:'Your tickets ({0})', meusIndo:'Fetching your tickets…',
+      entrarComo:'You are signed in as {0}.',
+      entrarOffline:'This is the offline version: there is no signing in, and nothing here needs it.',
+      entrarRuim:'That address does not look complete.', entrarFalhou:'I could not send it now.',
+      entrarIndo:'Sending the link…', entrarMandei:'I sent a link to {0}. Open the message and click it.',
+      degustacao:'Trial: {0} days left. After that the tool keeps working on the free plan — nothing you already produced is lost.',
+      mdCliente:'Customer template', mdNenhum:'— none —', mdAplicado:'{0} applied.',
+      entrarBtn:'Sign in', sairBtn:'Sign out', entrarPh:'you@company.com',
+      fbSemEmail:'Without an e-mail, this ticket cannot be answered or looked up.',
+      fbErro:'I could not send it now. Try again, or write to {0}.',
       fbEnviar:'Send', fbVazio:'Write something before sending.', fbIndo:'Opening your e-mail…',
       fbDiagLbl:'Send the browser technical report along', fbVerDiag:'see what goes along',
       fbTextoLbl:'What happened, or what you wish existed', fbEmailLbl:'Your e-mail, if you want a reply',
@@ -2573,8 +2627,22 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       ocrStopped:' Interrumpido — solo lo ya leído entra en el PDF.',
       pOcr:'TEXTO EN PANTALLA',
       grDadosNota:'El .json es lo que trae este documento de vuelta a Walkstamp después — guárdalo junto al PDF.',
-      fbNota:'Esto abre tu programa de correo con el texto listo. Nada se envía por detrás — no tenemos servidor de mensajes, por el mismo motivo por el que no tenemos servidor de vídeo.',
-      fbFeito:'Abrí tu programa de correo. Si no se abrió, escribe a {0}.',
+      fbNota:'Va solo lo que está escrito aquí, más el informe si lo dejas marcado. Ningún vídeo, audio, transcripción o documento — esos siguen sin salir de tu ordenador.',
+      fbFeito:'Recibido. Tu ticket es el {0} — anótalo, es por él que le haces seguimiento.',
+      fbSemRede:'Esta es la versión sin conexión: no hay a dónde enviar. Escribe a {0}.',
+      fbMuitos:'Demasiados mensajes a la vez. Espera un minuto e inténtalo de nuevo.',
+      stAberto:'abierto', stAnalise:'en análisis', stRespondido:'respondido', stFechado:'cerrado',
+      meusNada:'Todavía no has abierto ningún ticket.', meusErro:'No he podido buscar los tickets ahora.',
+      meusTit:'Tus tickets ({0})', meusIndo:'Buscando tus tickets…',
+      entrarComo:'Estás como {0}.',
+      entrarOffline:'Esta es la versión sin conexión: no hay forma de entrar, y nada aquí lo necesita.',
+      entrarRuim:'Esa dirección no parece completa.', entrarFalhou:'No he podido enviarlo ahora.',
+      entrarIndo:'Enviando el enlace…', entrarMandei:'Envié un enlace a {0}. Abre el mensaje y haz clic.',
+      degustacao:'Degustación: quedan {0} días. Después la herramienta sigue funcionando en el plan gratuito — nada de lo que ya generaste se pierde.',
+      mdCliente:'Plantilla del cliente', mdNenhum:'— ninguna —', mdAplicado:'{0} aplicada.',
+      entrarBtn:'Entrar', sairBtn:'Salir', entrarPh:'tu@empresa.com',
+      fbSemEmail:'Sin correo, este ticket no puede ser respondido ni consultado.',
+      fbErro:'No he podido enviarlo ahora. Inténtalo de nuevo, o escribe a {0}.',
       fbEnviar:'Enviar', fbVazio:'Escribe algo antes de enviar.', fbIndo:'Abriendo tu correo…',
       fbDiagLbl:'Enviar también el informe técnico del navegador', fbVerDiag:'ver lo que va junto',
       fbTextoLbl:'Qué pasó, o qué te gustaría que existiera', fbEmailLbl:'Tu correo, si quieres respuesta',
@@ -6292,11 +6360,250 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
          numa empresa. Fica só na tela: carimbar um e-mail pessoal no rodapé de
          uma evidência entregue ao cliente é uma decisão de privacidade que não
          é nossa para tomar. */
-      (licenca.e ? ` <span class="status">${t('licPara', licenca.e)}</span>` : '');
+      (licenca.e ? ` <span class="status">${t('licPara', licenca.e)}</span>` : '') +
+      /* A degustação com NOME e com prazo na tela.
+
+         Ela já existia — catorze dias, dados a qualquer e-mail novo — e nunca
+         se chamou nada. Quem estava degustando não sabia que estava, e por isso
+         não tinha por que decidir nada no décimo terceiro dia. E o que acontece
+         no fim precisa estar escrito junto: a ferramenta NÃO para, ela volta ao
+         plano grátis. Um produto que expira e um produto que desliga um recurso
+         são coisas diferentes, e a diferença tem que ser dita antes, não
+         descoberta depois. */
+      (diasDeDegustacao() != null
+        ? `<p class="status" style="margin:6px 0 0">${t('degustacao', diasDeDegustacao())}</p>` : '');
     if (typeof pintarMarcaCliente === 'function') pintarMarcaCliente();
   }
 
+  /* Quantos dias faltam, quando a licença em uso é curta o bastante para ser
+     uma degustação. Catorze dias é o que o emissor dá a um e-mail novo; uma
+     licença de noventa é contrato, e contrato não se chama de degustação. */
+  function diasDeDegustacao(){
+    /* `a` é a data de validade da licença, o mesmo campo que a frase "até {2}"
+       já mostra. Extraído em AAAA-MM-DD para não depender do formato de
+       exibição, que muda com o idioma. */
+    const cru = licenca && (licenca.a || licenca.ate || '');
+    const m = String(cru).match(/\d{4}-\d{2}-\d{2}/);
+    if (!m) return null;
+    const ms = new Date(m[0] + 'T23:59:59').getTime();
+    if (isNaN(ms)) return null;
+    const dias = Math.ceil((ms - Date.now()) / 86400000);
+    if (dias < 0 || dias > 14) return null;
+    return dias;
+  }
+
   $('licBtn').onclick = () => $('licBox').classList.toggle('hide');
+
+  /* ================= a sessão, aqui dentro =================
+
+     A regra que sustenta ela: **aditiva, nunca requisito**. Se o servidor cair
+     ou a rede do cliente bloquear, tudo o que a ferramenta fazia continua
+     funcionando — some só o que é de conta. É isso que separa uma conta que
+     existe de uma conta que é pedágio, e é o que permite continuar dizendo que
+     o produto roda onde o concorrente não roda.
+
+     O token do link mágico vive em `sessionStorage`, e não em `localStorage`,
+     pela mesma razão do resto do produto: a aba fecha, a sessão morre. Uma
+     máquina compartilhada de cliente não pode guardar a sessão de quem passou
+     por ali de manhã. */
+  const SESSAO_CHAVE = 'Walkstamp.sessao';
+  let sessao = null;
+
+  const lerSessao = () => {
+    try {
+      const cru = sessionStorage.getItem(SESSAO_CHAVE);
+      if (!cru) return null;
+      const s2 = JSON.parse(cru);
+      /* Token vencido é o mesmo que sessão nenhuma — e descobrir isso agora é
+         melhor que descobrir num 401 no meio de um pedido. */
+      return (s2 && s2.exp && s2.exp * 1000 > Date.now()) ? s2 : null;
+    } catch (e) { return null; }
+  };
+  const gravarSessao = (s2) => {
+    try {
+      if (s2) sessionStorage.setItem(SESSAO_CHAVE, JSON.stringify(s2));
+      else sessionStorage.removeItem(SESSAO_CHAVE);
+    } catch (e) {}
+  };
+
+  function pintarSessao(){
+    if (!$('entrar')) return;
+    const dentro = !!sessao;
+    $('entrarEmail').classList.toggle('hide', dentro);
+    $('entrar').classList.toggle('hide', dentro);
+    $('sair').classList.toggle('hide', !dentro);
+    $('entrarMsg').textContent = dentro ? t('entrarComo', sessao.email) : '';
+    $('meusChamados').classList.toggle('hide', !dentro);
+    if (dentro) carregarMeus();
+  }
+
+  $('entrar').onclick = async () => {
+    const em = ($('entrarEmail').value || '').trim().toLowerCase();
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)) {
+      $('entrarMsg').innerHTML = `<span class="err">${t('entrarRuim')}</span>`; return;
+    }
+    if (!MEDIR_URL || !MEDIR_KEY) {
+      $('entrarMsg').innerHTML = `<span class="err">${t('entrarOffline')}</span>`; return;
+    }
+    $('entrar').disabled = true;
+    $('entrarMsg').textContent = t('entrarIndo');
+    try {
+      const volta = location.origin + location.pathname;
+      const r = await fetch(MEDIR_URL + '/auth/v1/otp?redirect_to=' + encodeURIComponent(volta), {
+        method: 'POST',
+        headers: { apikey: MEDIR_KEY, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: em, create_user: true })
+      });
+      $('entrar').disabled = false;
+      $('entrarMsg').innerHTML = r.ok
+        ? `<span class="ok">${t('entrarMandei', em)}</span>`
+        : `<span class="err">${t('entrarFalhou')}</span>`;
+    } catch (e) {
+      $('entrar').disabled = false;
+      $('entrarMsg').innerHTML = `<span class="err">${t('entrarFalhou')}</span>`;
+    }
+  };
+
+  $('sair').onclick = () => {
+    sessao = null; gravarSessao(null);
+    $('meusChamados').innerHTML = '';
+    /* Os padrões saem junto com a sessão. O que já foi aplicado num documento
+       em andamento fica — apagar o logotipo de um trabalho em curso porque
+       alguém clicou em "sair" seria destruir trabalho por zelo. */
+    perfilDoCliente = null;
+    pintarModelosDoCliente();
+    pintarSessao();
+  };
+
+  async function carregarMeus(){
+    if (!sessao || !MEDIR_URL) return;
+    const cx = $('meusChamados');
+    cx.innerHTML = `<span class="status">${t('meusIndo')}</span>`;
+    try {
+      const r = await fetch(MEDIR_URL + '/functions/v1/walkstamp-meus', {
+        method: 'POST',
+        headers: { apikey: MEDIR_KEY, Authorization: 'Bearer ' + sessao.token,
+                   'Content-Type': 'application/json' },
+        body: '{}'
+      });
+      const d = await r.json().catch(() => null);
+      if (!r.ok || !d || d.erro) { cx.innerHTML = `<span class="status">${t('meusErro')}</span>`; return; }
+      /* Os padrões do cliente chegam junto e são APLICADOS — é a metade que
+         faltava de duas features que estavam meio prontas: o portal cadastrava
+         e a ferramenta não consumia.
+
+         Aplicados, e não impostos: só entram em campo que está VAZIO. Quem já
+         escreveu alguma coisa manda — sobrescrever o trabalho de alguém na
+         volta de um link de e-mail seria a pior hora possível para fazer isso. */
+      aplicarPerfil(d.perfil);
+      const lista = d.chamados || [];
+      if (!lista.length) { cx.innerHTML = `<span class="status">${t('meusNada')}</span>`; return; }
+      const nomes = { aberto:'stAberto', analise:'stAnalise', respondido:'stRespondido', fechado:'stFechado' };
+      cx.innerHTML = `<p class="status" style="margin:0 0 6px">${t('meusTit', lista.length)}</p>` +
+        lista.map(c =>
+          `<div style="border-top:1px solid var(--line);padding:7px 0;font-size:13.5px">` +
+          `<b>${esc(c.numero)}</b> · ${t(nomes[c.status] || 'stAberto')}` +
+          `<div class="status" style="margin:2px 0 0">${esc(c.texto || '')}</div>` +
+          (c.resposta ? `<div style="margin:5px 0 0;padding:7px 9px;background:var(--bg2,#f3f5ff);` +
+                        `border-radius:7px">${esc(c.resposta)}</div>` : '') +
+          `</div>`).join('');
+    } catch (e) { cx.innerHTML = `<span class="status">${t('meusErro')}</span>`; }
+  }
+
+  /* ---- os padrões do cliente, vindos da conta ---- */
+  let perfilDoCliente = null;
+
+  function aplicarPerfil(pf){
+    perfilDoCliente = pf || null;
+    if (!pf || !pf.cliente) { pintarModelosDoCliente(); return; }
+    const cf = pf.config || {};
+    const vazio = el => el && !String(el.value || '').trim();
+
+    if (cf.empresa && vazio($('mcNome'))) {
+      $('mcNome').value = cf.empresa;
+      marcaCliente.nome = cf.empresa;
+    }
+    /* O rótulo do quadro NUNCA está vazio — ele vem preenchido pelo padrão do
+       cenário. Então a regra aqui é outra: o padrão do cliente vence o padrão
+       nosso, e perde para o que a pessoa trocou à mão. `rotuloManual` já existe
+       exatamente para guardar essa diferença. */
+    if (cf.rotulo && $('unNome') && !rotuloManual) {
+      $('unNome').value = cf.rotulo;
+      $('unNome').dispatchEvent(new Event('input'));
+    }
+    if (cf.ambiente && $('evAmb')) {
+      const tem = [...$('evAmb').options].some(o => o.value === cf.ambiente);
+      if (tem && !$('evAmb').value) $('evAmb').value = cf.ambiente;
+    }
+    /* O logotipo vem por endereço, e é baixado pelo NAVEGADOR de quem usa —
+       não passa por nós. Se o endereço não abrir, o documento sai sem ele em
+       vez de sair quebrado. */
+    if (cf.logo_url && !marcaCliente.img) {
+      const im = new Image();
+      im.crossOrigin = 'anonymous';
+      im.onload = () => {
+        try {
+          const cv = document.createElement('canvas');
+          const lado = 400, prop = im.naturalHeight / im.naturalWidth;
+          cv.width = lado; cv.height = Math.max(1, Math.round(lado * prop));
+          cv.getContext('2d').drawImage(im, 0, 0, cv.width, cv.height);
+          marcaCliente.img = { url: cv.toDataURL('image/png'), w: cv.width, h: cv.height };
+          pintarMarcaCliente();
+        } catch (e) {}
+      };
+      im.onerror = () => {};
+      im.src = cf.logo_url;
+    }
+    if (typeof pintarMarcaCliente === 'function') pintarMarcaCliente();
+    pintarModelosDoCliente();
+  }
+
+  /* Os modelos de documento do cliente. Escolher um preenche o que ele define;
+     não escolher nenhum deixa tudo como está. */
+  function pintarModelosDoCliente(){
+    const cx = $('modelosCx'); if (!cx) return;
+    const lista = (perfilDoCliente && perfilDoCliente.modelos) || [];
+    cx.classList.toggle('hide', !lista.length);
+    if (!lista.length) return;
+    const sel = $('modeloCliente');
+    sel.innerHTML = `<option value="">${t('mdNenhum')}</option>` +
+      lista.map(m => `<option value="${m.id}">${esc(m.nome)}` +
+                     (m.escopo === 'personal' ? ' ·' : '') + `</option>`).join('');
+    sel.onchange = () => {
+      const m = lista.find(x => String(x.id) === sel.value);
+      if (!m || !m.dados) return;
+      const d = m.dados;
+      if (d.cenario && [...$('modelo').options].some(o => o.value === d.cenario)) {
+        $('modelo').value = d.cenario; $('modelo').dispatchEvent(new Event('change'));
+      }
+      if (d.rotulo && $('unNome')) { $('unNome').value = d.rotulo; $('unNome').dispatchEvent(new Event('input')); }
+      if (d.ambiente && $('evAmb')) $('evAmb').value = d.ambiente;
+      if (d.sistema && $('evSis') && !$('evSis').value.trim()) $('evSis').value = d.sistema;
+      if (d.layout && $('layout')) $('layout').value = d.layout;
+      if (d.papel && $('papel')) $('papel').value = d.papel;
+      $('modelosMsg').textContent = t('mdAplicado', m.nome);
+      if (frames.length) render();
+    };
+  }
+
+  /* A volta do link mágico traz os tokens no #fragmento — que, por ser
+     fragmento, não chega a servidor nenhum. Lê, guarda e limpa a barra. */
+  (function daVoltaDoLink(){
+    const h = new URLSearchParams(location.hash.replace(/^#/, ''));
+    const tok = h.get('access_token');
+    if (tok) {
+      try {
+        const carga = JSON.parse(atob(tok.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+        sessao = { token: tok, email: carga.email || '', exp: carga.exp || 0 };
+        gravarSessao(sessao);
+      } catch (e) { sessao = null; }
+      history.replaceState(null, '', location.origin + location.pathname + location.search);
+      if (sessao) $('licBox').classList.remove('hide');
+    } else {
+      sessao = lerSessao();
+    }
+    pintarSessao();
+  })();
 
   /* ---- marca do cliente no documento (plano Time) ----
 
@@ -6603,11 +6910,13 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     if (!abrir) return;
     pintarFbTipo();
     $('fbTexto').focus();
-    if (!$('fbDiagOut').textContent) {
-      $('fbDiagOut').textContent = '…';
-      try { $('fbDiagOut').textContent = await diagTexto(); }
-      catch (e) { $('fbDiagOut').textContent = '(não consegui coletar)'; }
-    }
+    /* Coletado A CADA abertura, e não uma vez só. O relatório em cache era um
+       defeito silencioso: quem gravava, batia num problema e abria o recado
+       mandava o diagnóstico de ANTES da gravação — justamente sem a parte que
+       explicaria o problema. */
+    $('fbDiagOut').textContent = '…';
+    try { $('fbDiagOut').textContent = await diagTexto(); }
+    catch (e) { $('fbDiagOut').textContent = '(não consegui coletar)'; }
   };
   function pintarFbTipo(){
     document.querySelectorAll('.fbTipo').forEach(b2 =>
@@ -6623,23 +6932,47 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     $('fbEnviar').onclick = async () => {
       const txt = ($('fbTexto').value || '').trim();
       if (!txt) { $('fbMsg').innerHTML = `<span class="err">${t('fbVazio')}</span>`; return; }
+      if (!MEDIR_URL || !MEDIR_KEY) {
+        /* Build offline: não há para onde mandar, e dizer isso é melhor que um
+           botão que finge ter enviado. */
+        $('fbMsg').innerHTML = `<span class="err">${t('fbSemRede', CONTATO)}</span>`;
+        return;
+      }
       $('fbEnviar').disabled = true;
       $('fbMsg').textContent = t('fbIndo');
-      const corpo = [txt, '', '--- ' + fbTipo + ' ---',
-                     'idioma: ' + LANG, 'cenário: ' + $('modelo').value,
-                     $('fbDiag').checked ? ($('fbDiagOut').textContent || '') : '(sem diagnóstico)'
-                    ].join('\n');
-      /* Sem servidor de recados: o texto vai pelo cliente de e-mail da pessoa.
-         É feio e é honesto — a alternativa seria um endpoint nosso recebendo
-         texto livre, que é exatamente o tipo de coisa que este produto não
-         tem. O corpo é cortado porque `mailto:` tem limite de tamanho. */
-      const assunto = encodeURIComponent('Walkstamp · ' + fbTipo + (($('fbEmail').value||'').trim() ? ' · ' + $('fbEmail').value.trim() : ''));
-      const url = 'mailto:' + CONTATO + '?subject=' + assunto +
-                  '&body=' + encodeURIComponent(corpo.slice(0, 1600));
-      try { window.location.href = url; } catch (e) {}
-      medir('recado', { p_formato: fbTipo });
-      $('fbEnviar').disabled = false;
-      $('fbMsg').innerHTML = `<span class="ok">${t('fbFeito', CONTATO)}</span>`;
+      try {
+        const r = await fetch(MEDIR_URL + '/rest/v1/rpc/walkstamp_recado', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json',
+                     apikey: MEDIR_KEY, Authorization: 'Bearer ' + MEDIR_KEY },
+          body: JSON.stringify({
+            p_tipo: fbTipo, p_texto: txt,
+            p_email: ($('fbEmail').value || '').trim() || null,
+            p_idioma: LANG, p_cenario: $('modelo').value, p_origem: 'app',
+            /* O diagnóstico só vai se a caixa estiver marcada — e ela está
+               visível, com o conteúdo aberto, antes de alguém apertar enviar. */
+            p_diag: $('fbDiag').checked ? ($('fbDiagOut').textContent || null) : null
+          })
+        });
+        const resp = (await r.json().catch(() => null));
+        $('fbEnviar').disabled = false;
+        if (!r.ok || resp === 'vazio') {
+          $('fbMsg').innerHTML = `<span class="err">${t('fbErro', CONTATO)}</span>`;
+          return;
+        }
+        if (resp === 'muitos') { $('fbMsg').innerHTML = `<span class="err">${t('fbMuitos')}</span>`; return; }
+        $('fbTexto').value = '';
+        /* O número é o que a pessoa anota. Sem ele, "mandei um problema" não
+           tem como virar "e aquele problema?" — e nós não temos como responder
+           sem inventar contexto. */
+        const temEmail = !!($('fbEmail').value || '').trim();
+        $('fbMsg').innerHTML = `<span class="ok">${t('fbFeito', resp)}</span>` +
+          (temEmail ? '' : ` <span class="err">${t('fbSemEmail')}</span>`);
+        medir('recado', { p_formato: fbTipo });
+      } catch (e) {
+        $('fbEnviar').disabled = false;
+        $('fbMsg').innerHTML = `<span class="err">${t('fbErro', CONTATO)}</span>`;
+      }
     };
   }
 
