@@ -78,3 +78,12 @@ emitir-licenca.py
 # segredo que precisa estar na Supabase. Nada aqui é chave, mas é o mapa da
 # fechadura — e num repositório público isso é um convite.
 PLANO-TIME.md
+
+# Next.js
+.next/
+node_modules/
+next-env.d.ts
+
+# Gerados pelo build.py para o Next ler
+src/marca.json
+src/rotas.json

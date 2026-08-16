@@ -51,6 +51,15 @@ nav a.btnTop:hover{color:var(--accent-ink);filter:brightness(1.08)}
 /* No telefone estreito o menu vira só o que importa: abrir a ferramenta e
    trocar de idioma. Preços continua no rodapé e no botão dos planos. */
 @media (max-width:430px){ nav a.hide-xs{display:none} }
+/* Abaixo de 400 nem isso cabia: sobravam 9px para fora, e a página inteira
+   ganhava rolagem lateral por causa deles. O seletor de idioma encolhe. */
+@media (max-width:400px){
+  header .wrap{gap:8px}
+  nav{gap:9px}
+  nav > span{padding-left:8px !important;gap:6px !important;border-left-color:transparent !important}
+  nav a{font-size:12.5px}
+  nav a.btnTop{padding:7px 10px}
+}
 
 /* botões */
 .btn{display:inline-block;background:var(--accent);color:var(--accent-ink);text-decoration:none;
@@ -112,7 +121,8 @@ p{margin:0 0 16px}
 .plan .moedas{margin:2px 0 10px;font-size:14px;color:var(--muted);font-weight:550}
 /* O que ainda não existe fica dito na própria linha. Listar sem marcar seria
    vender o que não foi construído; esconder seria esconder o plano. */
-.plan .soon{display:inline-block;font-size:11px;text-transform:uppercase;letter-spacing:.06em;
+/* Também na tabela de planos, que fica fora de `.plan`. */
+.plan .soon,.tabPlanos .soon{display:inline-block;font-size:11px;text-transform:uppercase;letter-spacing:.06em;
       font-weight:650;color:var(--muted);border:1px solid var(--line);border-radius:99px;
       padding:1px 7px;margin-left:5px;vertical-align:1px;white-space:nowrap}
 .plan .pe{margin:10px 0 0;font-size:13px;color:var(--muted);text-align:center}
@@ -147,10 +157,53 @@ p{margin:0 0 16px}
 .doc table.legal td.sim{color:var(--accent);font-weight:600}
 .doc table.legal td.nao{color:var(--err)}
 
-footer{padding:40px 0 60px;color:var(--muted);font-size:14px}
-footer .wrap{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
-footer a{color:var(--muted);text-decoration:none;margin-right:18px}
+/* O rodapé em três colunas com nome. Era uma fileira de oito links soltos, e as
+   cinco páginas de caso de uso não estavam nele — quem procurava "aquela do
+   teste de usabilidade" não tinha onde procurar. */
+footer{padding:48px 0 60px;color:var(--muted);font-size:14px;border-top:1px solid var(--line)}
+footer .wrap{display:block}
+footer a{color:var(--muted);text-decoration:none}
 footer a:hover{color:var(--ink)}
+.rodapeCols{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:26px 34px}
+.rodapeCols h3{font-size:12.5px;text-transform:uppercase;letter-spacing:.06em;
+      color:var(--ink);font-weight:640;margin:0 0 12px}
+.rodapeCols a{display:block;margin-bottom:9px;line-height:1.4}
+.rodapeFim{margin-top:34px;padding-top:20px;border-top:1px solid var(--line);font-size:13.4px}
+
+/* Só para quem ouve a página. Um "✓" sozinho numa tabela de 65 linhas é mudo
+   para leitor de tela — a palavra vai junto, escondida dos olhos. */
+.soLeitor{position:absolute;width:1px;height:1px;padding:0;margin:-1px;
+      overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+
+/* A tabela de funcionalidades por plano. Rola na horizontal no celular em vez
+   de espremer sessenta linhas em telas de 360px. */
+.tabRolar{overflow-x:auto;margin:26px 0 8px;border:1px solid var(--line);border-radius:12px}
+.tabPlanos{width:100%;min-width:560px;border-collapse:collapse;font-size:14.4px}
+/* O cabeçalho NÃO gruda. Ele grudava, e isso fazia duas coisas erradas: dentro
+   de uma caixa que rola só na horizontal ele nunca chegava a grudar de verdade
+   (a caixa tem a altura da tabela inteira), e a posição fixa escapava do
+   recorte — a página inteira ganhava 168px de rolagem horizontal no telefone. */
+.tabPlanos thead th{background:var(--panel);color:var(--ink);
+      font-weight:640;font-size:13px;padding:12px 10px;text-align:center;
+      border-bottom:1px solid var(--line)}
+.tabPlanos thead th:first-child{text-align:left;width:58%}
+.tabPlanos tbody th{text-align:left;font-weight:450;color:var(--muted);
+      padding:9px 12px;border-top:1px solid var(--line);line-height:1.45}
+.tabPlanos td{text-align:center;padding:9px 10px;border-top:1px solid var(--line);width:14%}
+.tabPlanos tr.grp th{background:var(--bg);color:var(--ink);font-weight:640;font-size:13px;
+      text-transform:uppercase;letter-spacing:.05em;padding:16px 12px 8px}
+.tabPlanos td.sim{color:var(--accent);font-weight:700;font-size:16px}
+.tabPlanos td.nao{color:var(--muted);opacity:.4;font-weight:400}
+.tabPlanos tbody tr:not(.grp):hover th,.tabPlanos tbody tr:not(.grp):hover td{background:var(--panel)}
+@media (max-width:620px){ .tabPlanos{font-size:13.4px} .tabPlanos thead th:first-child{width:50%} }
+
+/* As saídas como fichas, na home. É a coisa que mais gente pergunta e que
+   estava escondida numa frase no meio de um parágrafo. */
+.saidas{display:flex;flex-wrap:wrap;gap:9px;margin:24px 0 6px}
+.saida{display:inline-flex;align-items:center;gap:7px;background:var(--panel);
+      border:1px solid var(--line);border-radius:999px;padding:8px 15px;
+      font-size:14px;color:var(--ink);font-weight:520}
+.saida b{color:var(--accent);font-weight:700;font-size:11.5px;letter-spacing:.03em}
 
 /* lista de aviso */
 .lista{display:flex;gap:10px;flex-wrap:wrap;margin:22px 0 10px;max-width:520px}

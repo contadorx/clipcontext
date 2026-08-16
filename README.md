@@ -43,15 +43,32 @@ Modelos de texto não assistem vídeo. O que eles leem bem é: imagens dos momen
 
 ## Estrutura
 
+São **dois programas** no mesmo repositório, e a separação é deliberada:
+
+| | o que é | por quê |
+|---|---|---|
+| `public/app.html` | a ferramenta: um arquivo, 627 KB, **zero npm em tempo de execução** | é o argumento de venda. Um arquivo que a TI escaneia, versiona e roda sem rede. Virar bundle custaria isso. |
+| o resto | site e área do cliente, em **Next.js** | é onde a sessão em cookie, o checkout e o webhook precisam de servidor |
+
+O Next **nunca renderiza a ferramenta**: ele a serve, intocada, por um `rewrite` de `/app` para
+`/app.html`.
+
 ```
-public/index.html        landing em português   — GERADA, não edite
-public/en/index.html     landing em inglês      — GERADA, não edite
-public/es/index.html     landing em espanhol    — GERADA, não edite
+app/[lang]/              as 45 páginas do site — montam src/site/*.html com os {{tokens}}
+app/conta/               a área do cliente: link mágico, plano, faturas, chamados
+app/api/stripe/webhook/  a cobrança vira plano; a assinatura do corpo é a fechadura inteira
+lib/site.ts              o mapa de endereços e a montagem das páginas
+lib/marca.ts             a identidade, sem tocar disco (o middleware roda no Edge)
+next.config.mjs          o roteamento público: / é a home pt, /precos é /precos
+middleware.ts            renova a sessão — só em /conta, não no site inteiro
+.env.exemplo             os quatro segredos do servidor, com onde pegar cada um
+
 src/site/home.html       modelo da landing, com marcadores {{chave}}
-src/i18n-site.json       os textos da landing nos três idiomas
-public/precos.html       planos e preços
-public/privacidade.html  política de privacidade
-public/termos.html       termos de uso
+src/site/doc.html        modelo das páginas internas
+src/site/bodies/*.html   o corpo de cada página, por idioma
+src/i18n-site.json       os textos do site nos três idiomas
+src/marca.json           GERADO pelo build.py — a identidade, para o TypeScript ler
+src/rotas.json           GERADO pelo build.py — slug, título e descrição de cada página
 public/site.css          estilo compartilhado das páginas institucionais
 public/app.html          A FERRAMENTA — gerada pelo build, não edite
 offline/*.html           build autocontido: um arquivo só, funciona sem internet
@@ -235,14 +252,23 @@ lado. A logo no topo do app também é SVG inline, pelo mesmo motivo.
 
 ## Publicar
 
-O projeto é estático. Na Vercel, aponte o *output directory* para `public/`, não configure comando de build e mantenha
-`cleanUrls` ligado no `vercel.json` (é o que faz `/precos` funcionar sem o `.html`).
+Na Vercel, como projeto Next.js. O comando de build está no `vercel.json` e é
+`python3 build.py && next build`, nessa ordem: o Python monta a ferramenta e escreve `src/marca.json`
+e `src/rotas.json`, que o Next lê para montar o site. Rodar só o `next build` num repositório limpo
+falha — e falha dizendo o que faltou, que é o que se quer.
 
 ```bash
-npx vercel --prod
+python3 build.py && npx next build && npx next start   # local
+npx vercel --prod                                       # no ar
 ```
 
-Serve igualmente em Cloudflare Pages, Netlify ou GitHub Pages.
+Os quatro segredos do servidor vão em *Settings → Environment Variables*, e estão listados um a um
+no `.env.exemplo`. Sem eles o site inteiro funciona; o que fica desligado é o botão de assinar, e
+ele diz por quê.
+
+**Não serve mais em hospedagem só-de-arquivos** (GitHub Pages e afins). A área do cliente e o
+webhook precisam de servidor. A *ferramenta* continua servindo: `public/app.html` é um arquivo e
+roda de qualquer lugar, inclusive de `file://`.
 
 ## Como está sendo testado
 

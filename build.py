@@ -204,6 +204,88 @@ SLUGS = {
 }
 
 
+# Título e descrição de cada página interna, por idioma. Ficavam dentro do
+# gerador; subiram para cá quando o site virou Next.js, porque agora quem os
+# lê é o TypeScript — e continuam saindo daqui, de um lugar só.
+METAS = {
+    "precos": {"pt": (f"Preços — {MARCA}", "A ferramenta no navegador é gratuita e sempre será: não há custo de servidor."),
+               "en": (f"Pricing — {MARCA}", "The browser tool is free and always will be: there is no server cost."),
+               "es": (f"Precios — {MARCA}", "La herramienta del navegador es gratuita y siempre lo será: no hay coste de servidor.")},
+    "privacidade": {"pt": (f"Política de Privacidade — {MARCA}", f"O {MARCA} não coleta dados pessoais e não recebe seus vídeos."),
+                    "en": (f"Privacy Policy — {MARCA}", f"{MARCA} collects no personal data and never receives your videos."),
+                    "es": (f"Política de Privacidad — {MARCA}", f"{MARCA} no recoge datos personales y no recibe tus vídeos.")},
+    "termos": {"pt": (f"Termos de Uso — {MARCA}", f"Condições de uso do {MARCA}, ferramenta gratuita que roda inteira no seu navegador."),
+               "en": (f"Terms of Use — {MARCA}", f"Terms for {MARCA}, a free tool that runs entirely in your browser."),
+               "es": (f"Términos de Uso — {MARCA}", f"Condiciones de uso de {MARCA}, herramienta gratuita que funciona entera en tu navegador.")},
+    "seguranca": {"pt": (f"Segurança da informação — {MARCA}",
+                         "Como funciona sem servidor, o que sai da sua máquina, e a lista honesta das certificações que não temos."),
+                  "en": (f"Information security — {MARCA}",
+                         "How it works with no server, what leaves your machine, and the honest list of certifications we do not hold."),
+                  "es": (f"Seguridad de la información — {MARCA}",
+                         "Cómo funciona sin servidor, qué sale de tu equipo y la lista honesta de las certificaciones que no tenemos.")},
+    "comparativo": {"pt": (f"Comparativo — {MARCA} e as alternativas",
+                           "FlowShare, Scribe, Tosca, Steps Recorder: o que cada um faz, o preço de tabela e onde cada um ganha — inclusive da gente."),
+                    "en": (f"Compare — {MARCA} and the alternatives",
+                           "FlowShare, Scribe, Tosca, Steps Recorder: what each does, list prices, and where each one wins — including against us."),
+                    "es": (f"Comparativa — {MARCA} y las alternativas",
+                           "FlowShare, Scribe, Tosca, Steps Recorder: qué hace cada uno, el precio de tarifa y dónde gana cada uno — incluso a nosotros.")},
+    "verificar": {"pt": (f"Conferir uma evidência — {MARCA}",
+                         "Arraste o zip ou o json e confira, no seu próprio navegador, se as imagens continuam as mesmas."),
+                  "en": (f"Check a piece of evidence — {MARCA}",
+                         "Drop the zip or the json and check, in your own browser, whether the images are still the same."),
+                  "es": (f"Comprobar una evidencia — {MARCA}",
+                         "Arrastra el zip o el json y comprueba, en tu propio navegador, si las imágenes siguen siendo las mismas.")},
+    "link": {"pt": (f"Link pronto para o seu sistema de teste — {MARCA}",
+                    "Monte um link que abre o Walkstamp com o caso, o chamado e o sistema já preenchidos. Cole no Zephyr, no Jira, no TestRail ou numa planilha. Grátis, sem integração e sem cadastro."),
+             "en": (f"A ready-made link for your test management tool — {MARCA}",
+                    "Build a link that opens Walkstamp with the case, the ticket and the system already filled in. Paste it into Zephyr, Jira, TestRail or a spreadsheet. Free, no integration, no sign-up."),
+             "es": (f"Un enlace listo para tu sistema de pruebas — {MARCA}",
+                    "Arma un enlace que abre Walkstamp con el caso, el ticket y el sistema ya rellenados. Pégalo en Zephyr, Jira, TestRail o una hoja de cálculo. Gratis, sin integración y sin registro.")},
+    "casoEv": {"pt": (f"Evidência de teste que a auditoria aceita — {MARCA}",
+                      "Grave o teste e saia com o PDF: uma tela por passo, hora de relógio, cabeçalho de identificação e verificação de integridade. Grátis, no navegador, sem instalar nada."),
+               "en": (f"Test evidence an auditor will accept — {MARCA}",
+                      "Record the test and walk away with the PDF: one screen per step, clock time, identification header and integrity verification. Free, in the browser, nothing to install."),
+               "es": (f"Evidencia de prueba que la auditoría acepta — {MARCA}",
+                      "Graba la prueba y sal con el PDF: una pantalla por paso, hora de reloj, cabecera de identificación y comprobación de integridad. Gratis, en el navegador, sin instalar nada.")},
+    "casoIn": {"pt": (f"Instrução de trabalho sem colar prints à mão — {MARCA}",
+                      "O passo a passo do key user gerado de uma gravação: sua narração vira o texto de cada passo, sem carimbo de data e sem instalar programa."),
+               "en": (f"Work instructions without pasting screenshots by hand — {MARCA}",
+                      "The key user's step-by-step produced from one recording: your narration becomes the text of each step, with no date stamp and nothing to install."),
+               "es": (f"Instrucción de trabajo sin pegar capturas a mano — {MARCA}",
+                      "El paso a paso del key user generado de una grabación: tu narración se vuelve el texto de cada paso, sin sello de fecha y sin instalar nada.")},
+    "casoAta": {"pt": (f"Ata de reunião com as telas do que foi mostrado — {MARCA}",
+                       "A gravação da reunião vira um documento com os momentos que importam, a tela de cada um e a fala pareada. O arquivo não sai do seu computador."),
+                "en": (f"Meeting minutes with the screens of what was shown — {MARCA}",
+                       "The meeting recording becomes a document with the moments that matter, the screen of each one and the speech paired to it. The file never leaves your computer."),
+                "es": (f"Acta de reunión con las pantallas de lo que se mostró — {MARCA}",
+                       "La grabación de la reunión se vuelve un documento con los momentos que importan, la pantalla de cada uno y el habla emparejada. El archivo no sale de tu ordenador.")},
+    "casoIa": {"pt": (f"Um vídeo que a IA consegue ler inteiro — {MARCA}",
+                      "~60 telas em vez de 3.600, cada uma pareada com a fala daquele trecho, e o prompt pronto. Cabe em qualquer modelo, inclusive nos que recusam vídeo."),
+               "en": (f"A video the AI can actually read end to end — {MARCA}",
+                      "~60 screens instead of 3,600, each paired with the speech of that stretch, plus a ready-made prompt. Fits any model, including the ones that refuse video."),
+               "es": (f"Un vídeo que la IA sí puede leer entero — {MARCA}",
+                      "~60 pantallas en vez de 3.600, cada una emparejada con el habla de ese tramo, y el prompt listo. Cabe en cualquier modelo, incluidos los que rechazan vídeo.")},
+    "casoUx": {"pt": (f"Sessão de teste de usabilidade que vira relatório — {MARCA}",
+                      "Moderador e participante separados, momentos marcados durante a sessão e tarja para anonimizar. A gravação do participante não sai do seu computador."),
+               "en": (f"A usability session that turns into a report — {MARCA}",
+                      "Moderator and participant kept apart, moments marked during the session, and redaction to anonymise. The participant's recording never leaves your computer."),
+               "es": (f"Una sesión de usabilidad que se convierte en informe — {MARCA}",
+                      "Moderador y participante separados, momentos marcados durante la sesión y tapado para anonimizar. La grabación del participante no sale de tu ordenador.")},
+    "time": {"pt": (f"Plano Time: receba seu link por e-mail — {MARCA}",
+                    "Informe seu e-mail e receba um link que ativa o plano Time no navegador do seu time. Teste de 14 dias, sem cadastro, sem senha e sem cartão."),
+             "en": (f"Team plan: get your link by email — {MARCA}",
+                    "Enter your email and get a link that switches on the Team plan in your team's browser. 14-day trial, no sign-up, no password, no card."),
+             "es": (f"Plan Equipo: recibe tu enlace por correo — {MARCA}",
+                    "Escribe tu correo y recibe un enlace que activa el plan Equipo en el navegador de tu equipo. Prueba de 14 días, sin registro, sin contraseña y sin tarjeta.")},
+    "steps": {"pt": (f"O Steps Recorder acabou — o que usar no lugar | {MARCA}",
+                     "O Gravador de Etapas do Windows foi descontinuado e nada que a Microsoft indica gera documento de passos. O que fazer."),
+              "en": (f"Steps Recorder is gone — what to use instead | {MARCA}",
+                     "Windows Steps Recorder was deprecated and none of Microsoft's suggested replacements produce a step document. What to do."),
+              "es": (f"Steps Recorder se acabó — qué usar en su lugar | {MARCA}",
+                     "La Grabadora de Acciones de Windows fue descontinuada y nada de lo que Microsoft sugiere genera un documento de pasos. Qué hacer.")},
+}
+
+
 LEMBRAR = """<script>
 /* Só registra a escolha; quem está em /en ou /es chegou por link ou por
    redirecionamento, e nos dois casos a detecção já fez o trabalho dela. */
@@ -230,7 +312,66 @@ def _switcher(lang, paginas_por_idioma, pagina):
             + "".join(itens) + "</span>")
 
 
+def escrever_marca(root: pathlib.Path) -> None:
+    """Despeja a identidade num JSON para o Next.js ler.
+
+    O site saiu do Python e virou Next.js, mas a identidade NÃO saiu daqui: duas
+    fontes de verdade para o nome da marca é exatamente o problema que este
+    arquivo foi escrito para acabar. O build continua mandando — ele só passou a
+    publicar o que sabe num formato que o TypeScript lê.
+
+    `src/marca.json` é gerado, não editado. Quem precisa trocar o domínio troca a
+    constante lá em cima e roda o build, como sempre foi.
+    """
+    import json
+    dados = {
+        "marca": MARCA, "marcaA": MARCA_A, "marcaB": MARCA_B,
+        "site": SITE, "iconV": ICON_V,
+        "empresa": EMPRESA, "cnpj": CNPJ, "contato": CONTATO,
+        "supaUrl": SUPA_URL, "supaKey": SUPA_KEY,
+        "analytics": ANALYTICS,
+        "licPub": LIC_PUB, "licPubAuto": LIC_PUB_AUTO,
+    }
+    arq = root / "src" / "marca.json"
+    arq.write_text(json.dumps(dados, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    print(f"{arq.relative_to(root)}  (identidade para o Next)")
+
+    # E o mapa de endereços, pelo mesmo motivo: o slug de cada página em cada
+    # idioma decide o canonical, o hreflang, o sitemap e o seletor de idioma. Se
+    # o Next tivesse a própria cópia, o dia em que um slug mudasse seria o dia em
+    # que o sitemap passaria a mentir — em silêncio, que é o pior jeito.
+    def so_o_js(bloco: str) -> str:
+        """Tira o <script> de fora. No HTML antigo ele ia no <head> como texto;
+        no Next quem escreve a tag é o React, e ele quer só o miolo."""
+        return re.sub(r"^\s*<script>|</script>\s*$", "", bloco)
+
+    rotas = {"idiomas": IDIOMAS, "slugs": SLUGS,
+             "metas": {pg: {L: {"titulo": m[L][0], "desc": m[L][1]} for L in IDIOMAS}
+                       for pg, m in METAS.items()},
+             "scripts": {"detectarIdioma": so_o_js(REDIRECT),
+                         "lembrarIdioma": so_o_js(LEMBRAR)}}
+    arq = root / "src" / "rotas.json"
+    arq.write_text(json.dumps(rotas, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    print(f"{arq.relative_to(root)}  (endereços para o Next)")
+
+
 def build_site(root: pathlib.Path) -> None:
+    """Os arredores do site — o que não é página e precisa existir como arquivo.
+
+      sitemap.xml   os hreflang de 45 endereços, que os testes leem do disco
+      robots.txt    aponta para o sitemap
+      manifest.webmanifest
+      sw.js         precisa estar na raiz, senão o escopo do service worker encolhe
+      support.js    a aba lateral, com os tokens já trocados
+
+    As PÁGINAS saíram daqui. Quem as monta é o Next, a partir dos mesmos
+    `src/site/*.html` e `src/i18n-site.json`. Durante a migração este arquivo
+    ainda sabia gerá-las, para o `migracao.mjs` comparar as duas saídas página a
+    página — 405 comparações, todas iguais. Feita a comparação, manter dois
+    geradores em sincronia virou o custo sem o benefício: a primeira coisa que o
+    Next passou a montar sozinho (a tabela de planos) já não teria par aqui, e um
+    gerador que só quase acompanha é pior que nenhum.
+    """
     import json
     dic = json.loads((root / "src" / "i18n-site.json").read_text(encoding="utf-8"))
     modelo = (root / "src" / "site" / "home.html").read_text(encoding="utf-8")
@@ -241,7 +382,11 @@ def build_site(root: pathlib.Path) -> None:
         # Sem ele, um navegador em inglês abria o app em inglês mesmo vindo da
         # página em português — e a pessoa achava que era defeito.
         L: dict({"home": pre[L] or "/", "app": "/app?lang=" + L,
-                 "root": "/"},
+                 "root": "/",
+                 # a área do cliente tem endereço traduzido como o resto do
+                 # site: quem lê em espanhol não deveria ter que reconhecer a
+                 # palavra "conta" para achar a própria fatura
+                 "conta": {"pt": "/conta", "en": "/en/account", "es": "/es/cuenta"}[L]},
                 **{pg: pre[L] + "/" + sl[L] for pg, sl in SLUGS.items()})
         for L in IDIOMAS
     }
@@ -280,90 +425,9 @@ def build_site(root: pathlib.Path) -> None:
             print(f"AVISO: chaves sem tradução em {lang}: {sorted(faltando)}", file=sys.stderr)
             return 1
 
-        destino = root / "public" / ("index.html" if lang == "pt" else f"{lang}/index.html")
-        destino.parent.mkdir(parents=True, exist_ok=True)
-        destino.write_text(html, encoding="utf-8")
-        print(f"{destino.relative_to(root)}  {len(html)/1024:.1f} KB")
 
     # páginas internas: mesmo cabeçalho e rodapé, corpo escrito por idioma
     doc = (root / "src" / "site" / "doc.html").read_text(encoding="utf-8")
-    METAS = {
-        "precos": {"pt": (f"Preços — {MARCA}", "A ferramenta no navegador é gratuita e sempre será: não há custo de servidor."),
-                   "en": (f"Pricing — {MARCA}", "The browser tool is free and always will be: there is no server cost."),
-                   "es": (f"Precios — {MARCA}", "La herramienta del navegador es gratuita y siempre lo será: no hay coste de servidor.")},
-        "privacidade": {"pt": (f"Política de Privacidade — {MARCA}", f"O {MARCA} não coleta dados pessoais e não recebe seus vídeos."),
-                        "en": (f"Privacy Policy — {MARCA}", f"{MARCA} collects no personal data and never receives your videos."),
-                        "es": (f"Política de Privacidad — {MARCA}", f"{MARCA} no recoge datos personales y no recibe tus vídeos.")},
-        "termos": {"pt": (f"Termos de Uso — {MARCA}", f"Condições de uso do {MARCA}, ferramenta gratuita que roda inteira no seu navegador."),
-                   "en": (f"Terms of Use — {MARCA}", f"Terms for {MARCA}, a free tool that runs entirely in your browser."),
-                   "es": (f"Términos de Uso — {MARCA}", f"Condiciones de uso de {MARCA}, herramienta gratuita que funciona entera en tu navegador.")},
-        "seguranca": {"pt": (f"Segurança da informação — {MARCA}",
-                             "Como funciona sem servidor, o que sai da sua máquina, e a lista honesta das certificações que não temos."),
-                      "en": (f"Information security — {MARCA}",
-                             "How it works with no server, what leaves your machine, and the honest list of certifications we do not hold."),
-                      "es": (f"Seguridad de la información — {MARCA}",
-                             "Cómo funciona sin servidor, qué sale de tu equipo y la lista honesta de las certificaciones que no tenemos.")},
-        "comparativo": {"pt": (f"Comparativo — {MARCA} e as alternativas",
-                               "FlowShare, Scribe, Tosca, Steps Recorder: o que cada um faz, o preço de tabela e onde cada um ganha — inclusive da gente."),
-                        "en": (f"Compare — {MARCA} and the alternatives",
-                               "FlowShare, Scribe, Tosca, Steps Recorder: what each does, list prices, and where each one wins — including against us."),
-                        "es": (f"Comparativa — {MARCA} y las alternativas",
-                               "FlowShare, Scribe, Tosca, Steps Recorder: qué hace cada uno, el precio de tarifa y dónde gana cada uno — incluso a nosotros.")},
-        "verificar": {"pt": (f"Conferir uma evidência — {MARCA}",
-                             "Arraste o zip ou o json e confira, no seu próprio navegador, se as imagens continuam as mesmas."),
-                      "en": (f"Check a piece of evidence — {MARCA}",
-                             "Drop the zip or the json and check, in your own browser, whether the images are still the same."),
-                      "es": (f"Comprobar una evidencia — {MARCA}",
-                             "Arrastra el zip o el json y comprueba, en tu propio navegador, si las imágenes siguen siendo las mismas.")},
-        "link": {"pt": (f"Link pronto para o seu sistema de teste — {MARCA}",
-                        "Monte um link que abre o Walkstamp com o caso, o chamado e o sistema já preenchidos. Cole no Zephyr, no Jira, no TestRail ou numa planilha. Grátis, sem integração e sem cadastro."),
-                 "en": (f"A ready-made link for your test management tool — {MARCA}",
-                        "Build a link that opens Walkstamp with the case, the ticket and the system already filled in. Paste it into Zephyr, Jira, TestRail or a spreadsheet. Free, no integration, no sign-up."),
-                 "es": (f"Un enlace listo para tu sistema de pruebas — {MARCA}",
-                        "Arma un enlace que abre Walkstamp con el caso, el ticket y el sistema ya rellenados. Pégalo en Zephyr, Jira, TestRail o una hoja de cálculo. Gratis, sin integración y sin registro.")},
-        "casoEv": {"pt": (f"Evidência de teste que a auditoria aceita — {MARCA}",
-                          "Grave o teste e saia com o PDF: uma tela por passo, hora de relógio, cabeçalho de identificação e verificação de integridade. Grátis, no navegador, sem instalar nada."),
-                   "en": (f"Test evidence an auditor will accept — {MARCA}",
-                          "Record the test and walk away with the PDF: one screen per step, clock time, identification header and integrity verification. Free, in the browser, nothing to install."),
-                   "es": (f"Evidencia de prueba que la auditoría acepta — {MARCA}",
-                          "Graba la prueba y sal con el PDF: una pantalla por paso, hora de reloj, cabecera de identificación y comprobación de integridad. Gratis, en el navegador, sin instalar nada.")},
-        "casoIn": {"pt": (f"Instrução de trabalho sem colar prints à mão — {MARCA}",
-                          "O passo a passo do key user gerado de uma gravação: sua narração vira o texto de cada passo, sem carimbo de data e sem instalar programa."),
-                   "en": (f"Work instructions without pasting screenshots by hand — {MARCA}",
-                          "The key user's step-by-step produced from one recording: your narration becomes the text of each step, with no date stamp and nothing to install."),
-                   "es": (f"Instrucción de trabajo sin pegar capturas a mano — {MARCA}",
-                          "El paso a paso del key user generado de una grabación: tu narración se vuelve el texto de cada paso, sin sello de fecha y sin instalar nada.")},
-        "casoAta": {"pt": (f"Ata de reunião com as telas do que foi mostrado — {MARCA}",
-                           "A gravação da reunião vira um documento com os momentos que importam, a tela de cada um e a fala pareada. O arquivo não sai do seu computador."),
-                    "en": (f"Meeting minutes with the screens of what was shown — {MARCA}",
-                           "The meeting recording becomes a document with the moments that matter, the screen of each one and the speech paired to it. The file never leaves your computer."),
-                    "es": (f"Acta de reunión con las pantallas de lo que se mostró — {MARCA}",
-                           "La grabación de la reunión se vuelve un documento con los momentos que importan, la pantalla de cada uno y el habla emparejada. El archivo no sale de tu ordenador.")},
-        "casoIa": {"pt": (f"Um vídeo que a IA consegue ler inteiro — {MARCA}",
-                          "~60 telas em vez de 3.600, cada uma pareada com a fala daquele trecho, e o prompt pronto. Cabe em qualquer modelo, inclusive nos que recusam vídeo."),
-                   "en": (f"A video the AI can actually read end to end — {MARCA}",
-                          "~60 screens instead of 3,600, each paired with the speech of that stretch, plus a ready-made prompt. Fits any model, including the ones that refuse video."),
-                   "es": (f"Un vídeo que la IA sí puede leer entero — {MARCA}",
-                          "~60 pantallas en vez de 3.600, cada una emparejada con el habla de ese tramo, y el prompt listo. Cabe en cualquier modelo, incluidos los que rechazan vídeo.")},
-        "casoUx": {"pt": (f"Sessão de teste de usabilidade que vira relatório — {MARCA}",
-                          "Moderador e participante separados, momentos marcados durante a sessão e tarja para anonimizar. A gravação do participante não sai do seu computador."),
-                   "en": (f"A usability session that turns into a report — {MARCA}",
-                          "Moderator and participant kept apart, moments marked during the session, and redaction to anonymise. The participant's recording never leaves your computer."),
-                   "es": (f"Una sesión de usabilidad que se convierte en informe — {MARCA}",
-                          "Moderador y participante separados, momentos marcados durante la sesión y tapado para anonimizar. La grabación del participante no sale de tu ordenador.")},
-        "time": {"pt": (f"Plano Time: receba seu link por e-mail — {MARCA}",
-                        "Informe seu e-mail e receba um link que ativa o plano Time no navegador do seu time. Teste de 14 dias, sem cadastro, sem senha e sem cartão."),
-                 "en": (f"Team plan: get your link by email — {MARCA}",
-                        "Enter your email and get a link that switches on the Team plan in your team's browser. 14-day trial, no sign-up, no password, no card."),
-                 "es": (f"Plan Equipo: recibe tu enlace por correo — {MARCA}",
-                        "Escribe tu correo y recibe un enlace que activa el plan Equipo en el navegador de tu equipo. Prueba de 14 días, sin registro, sin contraseña y sin tarjeta.")},
-        "steps": {"pt": (f"O Steps Recorder acabou — o que usar no lugar | {MARCA}",
-                         "O Gravador de Etapas do Windows foi descontinuado e nada que a Microsoft indica gera documento de passos. O que fazer."),
-                  "en": (f"Steps Recorder is gone — what to use instead | {MARCA}",
-                         "Windows Steps Recorder was deprecated and none of Microsoft's suggested replacements produce a step document. What to do."),
-                  "es": (f"Steps Recorder se acabó — qué usar en su lugar | {MARCA}",
-                         "La Grabadora de Acciones de Windows fue descontinuada y nada de lo que Microsoft sugiere genera un documento de pasos. Qué hacer.")},
-    }
     for pagina, metas in METAS.items():
         for lang in IDIOMAS:
             corpo_arq = root / "src" / "site" / "bodies" / f"{pagina}.{lang}.html"
@@ -398,11 +462,6 @@ def build_site(root: pathlib.Path) -> None:
             sobrando = set(re.findall(r"\{\{(\w+)\}\}", html))
             if sobrando:
                 print(f"AVISO: chaves sem valor em {pagina}.{lang}: {sorted(sobrando)}", file=sys.stderr)
-            arq = SLUGS[pagina][lang] + ".html"
-            saida = root / "public" / (arq if lang == "pt" else f"{lang}/{arq}")
-            saida.parent.mkdir(parents=True, exist_ok=True)
-            saida.write_text(html, encoding="utf-8")
-            print(f"{saida.relative_to(root)}  {len(html)/1024:.1f} KB")
 
     # sitemap e robots: a página do Steps Recorder só serve se for encontrada,
     # e um site sem mapa deixa o buscador adivinhar. As alternativas de idioma
@@ -496,14 +555,26 @@ self.addEventListener('fetch', e => {
     # A trava da troca de nome: nome antigo em qualquer página que não seja o
     # aviso histórico (termos e privacidade citam o ClipContext de propósito,
     # explicando a mudança) derruba o build em vez de ir parar no ar.
-    permitidos = {"termos.html", "privacidade.html"}
-    for arq in sorted((root / "public").rglob("*")):
-        if arq.suffix not in (".html", ".js", ".xml", ".txt", ".css"):
+    #
+    # A trava passou a olhar a FONTE, não só o que sai. Enquanto as 46 páginas
+    # eram geradas aqui, varrer `public/` pegava tudo. Agora quem as monta é o
+    # Next, e o que ele monta não existe em disco na hora do build — então a
+    # varredura tem que ir onde o texto de verdade mora.
+    permitidos = {"termos", "privacidade"}
+    alvos = [*(root / "public").rglob("*"),
+             *(root / "src" / "site").rglob("*"),
+             *(root / "app").rglob("*"),
+             *(root / "lib").rglob("*"),
+             root / "src" / "i18n-site.json"]
+    for arq in sorted(set(alvos)):
+        if not arq.is_file():
             continue
-        if arq.name in permitidos:
+        if arq.suffix not in (".html", ".js", ".mjs", ".ts", ".tsx", ".xml", ".txt", ".css", ".json"):
+            continue
+        if any(arq.name.startswith(p) for p in permitidos):
             continue
         if "clipcontext" in arq.read_text(encoding="utf-8", errors="ignore").lower():
-            print(f"o nome antigo sobrou em {arq.relative_to(root)} — corrija a fonte", file=sys.stderr)
+            print(f"o nome antigo sobrou em {arq} — corrija a fonte", file=sys.stderr)
             return 1
 
     # A trava do token esquecido. Um __TOKEN__ que sobrevive ao build vira texto
@@ -583,8 +654,9 @@ def main() -> int:
     for path in (out_web, out_off):
         print(f"{path.relative_to(ROOT)}  {len(path.read_text(encoding='utf-8')) / 1024:.1f} KB")
 
-    build_site(ROOT)
-    return 0
+    escrever_marca(ROOT)
+
+    return build_site(ROOT) or 0
 
 
 if __name__ == "__main__":

@@ -191,6 +191,8 @@ const FICHA_TXT = {
         vazio:'Escreva alguma coisa antes de enviar.',
         enviado:'Recebido. O seu chamado é o {0} — anote, é por ele que você acompanha.',
         semEmail:'Sem e-mail, ele não tem como ser respondido nem consultado.',
+        tempo:'Tenho respondido em {0}h, em média, nas últimas {1} respostas. É o número real, não um prazo prometido.',
+        tempoRapido:'Tenho respondido em menos de uma hora, em média, nas últimas {1} respostas. É o número real, não um prazo prometido.',
         jaTenho:'Já tenho um chamado e quero consultar', voltar:'Voltar ao recado',
         consultaTit:'Digite o número do chamado e o e-mail com que ele foi aberto.',
         consultar:'Consultar', faltaDado:'Preencha o número e o e-mail.',
@@ -209,6 +211,8 @@ const FICHA_TXT = {
         vazio:'Write something before sending.',
         enviado:'Got it. Your ticket is {0} — write it down, that is how you follow it.',
         semEmail:'Without an e-mail, it cannot be answered or looked up.',
+        tempo:'I have been replying in {0}h on average across the last {1} replies. That is the real number, not a promised deadline.',
+        tempoRapido:'I have been replying in under an hour on average across the last {1} replies. That is the real number, not a promised deadline.',
         jaTenho:'I already have a ticket and want to check it', voltar:'Back to the message',
         consultaTit:'Type the ticket number and the e-mail it was opened with.',
         consultar:'Check', faltaDado:'Fill in the number and the e-mail.',
@@ -227,6 +231,8 @@ const FICHA_TXT = {
         vazio:'Escribe algo antes de enviar.',
         enviado:'Recibido. Tu ticket es el {0} — anótalo, es por él que le haces seguimiento.',
         semEmail:'Sin correo, no puede ser respondido ni consultado.',
+        tempo:'He respondido en {0}h de media en las últimas {1} respuestas. Es el número real, no un plazo prometido.',
+        tempoRapido:'He respondido en menos de una hora de media en las últimas {1} respuestas. Es el número real, no un plazo prometido.',
         jaTenho:'Ya tengo un ticket y quiero consultarlo', voltar:'Volver al mensaje',
         consultaTit:'Escribe el número del ticket y el correo con el que se abrió.',
         consultar:'Consultar', faltaDado:'Rellena el número y el correo.',
@@ -287,6 +293,7 @@ const FICHA_TXT = {
         '<div class="row" style="gap:8px;align-items:center;margin-top:8px">' +
           '<button type="button" class="btn" id="fichaEnviar">' + T.enviar + '</button>' +
           '<span class="small muted" id="fichaMsg" role="status"></span></div>' +
+        '<p class="small muted" id="fichaTempo" style="margin:8px 0 0" hidden></p>' +
       '</div>' +
       '<div id="fichaConsulta" hidden>' +
         '<p class="small muted" style="margin:0 0 8px">' + T.consultaTit + '</p>' +
@@ -323,8 +330,36 @@ const FICHA_TXT = {
       const jaDeu = (() => { try { return localStorage.getItem(LS); } catch (e) { return null; } })();
       if (jaDeu) { $('fichaPasso1').hidden = true; $('fichaPasso2').hidden = false; }
       (jaDeu ? $('fichaTexto') : notas.querySelector('button')).focus();
+      tempoDeResposta();
     }
   };
+  /* O tempo REAL de resposta, no lugar onde a pessoa decide se vale a pena
+     escrever. Três regras, e as três importam:
+
+       - é a média das últimas vinte respostas, calculada no banco, não um SLA;
+       - abaixo de três respostas ele não aparece: com uma, o número é a última
+         resposta com cara de estatística;
+       - se a rede falhar, ele simplesmente não aparece. Prometer prazo é ruim;
+         prometer prazo por engano, pior.
+
+     Buscado uma vez por visita — a média não muda entre duas aberturas. */
+  let tempoJaBuscado = false;
+  async function tempoDeResposta() {
+    if (tempoJaBuscado || !SUPA || !ANON) return;
+    tempoJaBuscado = true;
+    try {
+      const r = await fetch(SUPA + '/rest/v1/rpc/walkstamp_chamado_resposta', {
+        method: 'POST', headers: { apikey: ANON, Authorization: 'Bearer ' + ANON,
+                                   'Content-Type': 'application/json' }, body: '{}' });
+      if (!r.ok) return;
+      const d = await r.json();
+      if (!d || (d.quantos || 0) < 3) return;
+      const molde = d.horas >= 1 ? T.tempo : T.tempoRapido;
+      $('fichaTempo').textContent = molde.replace('{0}', d.horas).replace('{1}', d.quantos);
+      $('fichaTempo').hidden = false;
+    } catch (e) { /* sem número é melhor que número errado */ }
+  }
+
   aba.onclick = () => abrir(cx.hidden);
   $('fichaFechar').onclick = () => abrir(false);
   cx.addEventListener('click', e => { if (e.target === cx) abrir(false); });

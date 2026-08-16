@@ -1,0 +1,348 @@
+/* A área do cliente.
+ *
+ * O que ela guarda, e o que ela deliberadamente NÃO guarda:
+ *
+ *   guarda      chamado, fatura, assento, licença, logotipo e modelos
+ *   não guarda  vídeo, áudio, transcrição e documento
+ *
+ * A segunda lista é a identidade do produto e não muda por conveniência de
+ * tela. Um `.json` de sessão "só para recuperar" carrega as imagens em base64
+ * dentro — guardá-lo seria guardar o documento inteiro com outro nome.
+ */
+import { notFound } from 'next/navigation';
+import { emailDaSessao } from '@/lib/supabase/servidor';
+import { type Conta, contaDe, temChaveDeServico } from '@/lib/supabase/servico';
+import { PLANOS, temStripe } from '@/lib/stripe';
+import { type Lang, type Textos, ehLang, preencher, textos } from '@/lib/conta/textos';
+import { ajustar, bloquear, comprar, configurar, convidar, entrar, gerenciar, sair } from '../acoes';
+
+export const dynamic = 'force-dynamic';
+
+const LOCALE: Record<Lang, string> = { pt: 'pt-BR', en: 'en-US', es: 'es-ES' };
+
+const dinheiro = (lang: Lang, centavos: number, moeda: string) =>
+  new Intl.NumberFormat(LOCALE[lang], { style: 'currency', currency: moeda || 'BRL' }).format(centavos / 100);
+
+const data = (lang: Lang, iso: string | null) =>
+  iso ? new Intl.DateTimeFormat(LOCALE[lang], { dateStyle: 'medium' }).format(new Date(iso)) : '—';
+
+const escapar = (s: string) =>
+  s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+export default async function Pagina({ params, searchParams }: PageProps<'/conta/[lang]'>) {
+  const { lang } = await params;
+  if (!ehLang(lang)) notFound();
+  const t = textos(lang);
+  const q = await searchParams;
+  const email = await emailDaSessao();
+  const recado = (n: string) => (typeof q[n] === 'string' ? (q[n] as string) : null);
+
+  return (
+    <section style={{ paddingTop: 40 }}>
+      <div className="wrap" style={{ maxWidth: 780 }}>
+        {recado('erro') && <p className="aviso err">{recado('erro')}</p>}
+        {recado('feito') && <p className="aviso ok">{recado('feito')}</p>}
+        {recado('comprou') && <p className="aviso ok">{t.avisoComprou}</p>}
+        {recado('cancelou') && <p className="aviso">{t.avisoCancelou}</p>}
+        {email
+          ? <Portal email={email} lang={lang} t={t} />
+          : <Entrada lang={lang} t={t} enviadoPara={recado('enviado')} />}
+      </div>
+    </section>
+  );
+}
+
+/* ------------------------------------------------------------------ entrar */
+
+function Entrada({ lang, t, enviadoPara }: { lang: Lang; t: Textos; enviadoPara: string | null }) {
+  if (enviadoPara) {
+    const [antes, depois] = t.olheAjuda.split('{link}');
+    return (
+      <>
+        <h1>{t.olheTitulo}</h1>
+        <p className="lead" dangerouslySetInnerHTML={{
+          __html: preencher(t.olheLead, { email: `<b>${escapar(enviadoPara)}</b>` }),
+        }} />
+        <p className="small muted">
+          {antes}<a href="?">{t.olhePedirOutro}</a>{depois}
+        </p>
+      </>
+    );
+  }
+  return (
+    <>
+      <h1>{t.titulo}</h1>
+      <p className="lead">{t.entrarLead}</p>
+      <form action={entrar} style={{ display: 'flex', gap: 10, flexWrap: 'wrap', margin: '20px 0' }}>
+        <input type="hidden" name="lang" value={lang} />
+        <input type="email" name="email" required placeholder={t.entrarPlaceholder}
+               autoComplete="email" style={{ flex: '1 1 260px' }} />
+        <button className="btn" type="submit">{t.entrarBotao}</button>
+      </form>
+      <p className="small muted">
+        <b>{t.opcional}</b> {t.opcionalTexto}{' '}
+        <a href={`/app?lang=${lang}`}>{t.opcionalLink}</a>{t.opcionalFim}
+      </p>
+    </>
+  );
+}
+
+/* ------------------------------------------------------------------ portal */
+
+async function Portal({ email, lang, t }: { email: string; lang: Lang; t: Textos }) {
+  if (!temChaveDeServico) {
+    return (
+      <>
+        <h1>{t.titulo}</h1>
+        <p className="aviso err">{t.erroSemChave} <code>SUPABASE_SERVICE_ROLE_KEY</code></p>
+        <Sair lang={lang} t={t} />
+      </>
+    );
+  }
+
+  let conta: Conta;
+  try {
+    conta = await contaDe(email);
+  } catch (e) {
+    return (
+      <>
+        <h1>{t.titulo}</h1>
+        <p className="aviso err">{t.erroLeitura}</p>
+        <p className="small muted">{String(e).slice(0, 200)}</p>
+        <Sair lang={lang} t={t} />
+      </>
+    );
+  }
+
+  return (
+    <>
+      <h1>{t.titulo}</h1>
+      <p className="lead" style={{ marginBottom: 6 }}>{email}</p>
+      <div style={{ marginBottom: 30 }}><Sair lang={lang} t={t} /></div>
+
+      <Plano conta={conta} lang={lang} t={t} />
+      <Faturas conta={conta} lang={lang} t={t} />
+      <Chamados conta={conta} lang={lang} t={t} />
+      {conta.time && <Time conta={conta} lang={lang} t={t} />}
+    </>
+  );
+}
+
+const Sair = ({ lang, t }: { lang: Lang; t: Textos }) => (
+  <form action={sair}>
+    <input type="hidden" name="lang" value={lang} />
+    <button className="btn ghost" type="submit">{t.sair}</button>
+  </form>
+);
+
+function Plano({ conta, lang, t }: { conta: Conta; lang: Lang; t: Textos }) {
+  /* O motivo importa mais que o nome do plano: "teste" e "conta" mostram o
+     mesmo `time` e são situações completamente diferentes para quem lê. */
+  const legenda: Record<string, string> = {
+    conta: t.motivoConta, dominio: t.motivoDominio, teste: t.motivoTeste,
+    teste_usado: t.motivoTesteUsado, suspensa: t.motivoSuspensa,
+  };
+  const nome = conta.plano === 'time' ? t.planoTeam : conta.plano ? t.planoPersonal : t.planoFree;
+  const semVenda = !temStripe || !PLANOS.personal.preco();
+  return (
+    <div className="card" style={{ marginBottom: 24 }}>
+      <h2 style={{ marginTop: 0 }}>{t.planoTitulo}</h2>
+      <p style={{ margin: '6px 0' }}>
+        <b>{nome}</b>
+        {conta.cliente ? ` · ${conta.cliente}` : ''}
+        {conta.assentos > 1 ? ` · ${conta.assentos} ${t.assentos}` : ''}
+      </p>
+      <p className="small muted">{legenda[conta.motivo] || conta.motivo}</p>
+      {conta.motivo === 'teste' && <p className="small muted">{t.degustacao}</p>}
+
+      <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 14 }}>
+        {conta.assinante ? (
+          <form action={gerenciar}>
+            <input type="hidden" name="lang" value={lang} />
+            <button className="btn" type="submit">{t.gerenciar}</button>
+          </form>
+        ) : (
+          <>
+            <form action={comprar}>
+              <input type="hidden" name="lang" value={lang} />
+              <input type="hidden" name="plano" value="personal" />
+              <button className="btn" type="submit" disabled={semVenda}>{t.assinarPersonal}</button>
+            </form>
+            <form action={comprar} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              <input type="hidden" name="lang" value={lang} />
+              <input type="hidden" name="plano" value="time" />
+              <input type="number" name="assentos" min={5} max={500} defaultValue={5}
+                     aria-label={t.pessoasAria} style={{ width: 78 }} />
+              <button className="btn ghost" type="submit"
+                      disabled={!temStripe || !PLANOS.time.preco()}>{t.assinarTeam}</button>
+            </form>
+          </>
+        )}
+      </div>
+      {semVenda && !conta.assinante && (
+        <p className="small muted" style={{ marginTop: 10 }}>{t.vendaDesligada}</p>
+      )}
+    </div>
+  );
+}
+
+function Faturas({ conta, lang, t }: { conta: Conta; lang: Lang; t: Textos }) {
+  return (
+    <div className="card" style={{ marginBottom: 24 }}>
+      <h2 style={{ marginTop: 0 }}>{t.faturasTitulo}</h2>
+      {conta.faturas.length === 0 ? (
+        <p className="small muted">{t.faturasVazio}</p>
+      ) : (
+        <table className="legal">
+          <thead><tr>
+            <th>{t.colNumero}</th><th>{t.colValor}</th><th>{t.colSituacao}</th>
+            <th>{t.colData}</th><th>{t.colNota}</th>
+          </tr></thead>
+          <tbody>
+            {conta.faturas.map((f, i) => (
+              <tr key={f.numero || i}>
+                <td>{f.numero || '—'}</td>
+                <td>{dinheiro(lang, f.valor, f.moeda)}</td>
+                <td>{f.status}</td>
+                <td>{data(lang, f.pago_em || f.criado_em)}</td>
+                <td>{f.nf_url ? <a href={f.nf_url}>{f.nf_numero || t.notaBaixar}</a> : '—'}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+      <p className="small muted" style={{ marginTop: 10 }}>{t.faturasRodape}</p>
+    </div>
+  );
+}
+
+function Chamados({ conta, lang, t }: { conta: Conta; lang: Lang; t: Textos }) {
+  /* O tempo de resposta só aparece com histórico, e é a média REAL das últimas
+     vinte respostas. Um "SLA de 24h" numa operação de uma pessoa fabrica a
+     decepção para o dia em que não for cumprido. Três respostas é o mínimo:
+     com uma, o número é a última resposta com cara de estatística. */
+  const r = conta.resposta;
+  const temNumero = !!r && r.quantos >= 3;
+  return (
+    <div className="card" style={{ marginBottom: 24 }}>
+      <h2 style={{ marginTop: 0 }}>{t.chamadosTitulo}</h2>
+      {temNumero && (
+        <p className="small muted">
+          {preencher(r!.horas >= 1 ? t.tempoResposta : t.tempoRespostaRapido,
+                     { horas: r!.horas, quantos: r!.quantos })}
+        </p>
+      )}
+      {conta.chamados.length === 0 ? (
+        <p className="small muted">{t.chamadosVazio}</p>
+      ) : (
+        <ul style={{ paddingLeft: 18 }}>
+          {conta.chamados.map((c) => (
+            <li key={c.numero} style={{ marginBottom: 12 }}>
+              <b>{c.numero}</b> · {c.status} · {data(lang, c.criado_em)}
+              <div className="small muted">{c.texto?.slice(0, 220)}</div>
+              {c.resposta && (
+                <div className="small" style={{ marginTop: 4 }}>
+                  <b>{t.chamadoResposta}</b> {c.resposta}
+                </div>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+/* -------------------------------------------------------------------- time */
+
+function Time({ conta, lang, t }: { conta: Conta; lang: Lang; t: Textos }) {
+  const p = conta.time!;
+  const cfg = p.config || {};
+  return (
+    <div className="card" style={{ marginBottom: 24 }}>
+      <h2 style={{ marginTop: 0 }}>{t.timeTitulo}</h2>
+      <p className="small muted">
+        {preencher(t.timeUsados, { usados: p.usados ?? 0, assentos: p.assentos ?? conta.assentos })}
+        {(p.dominios || []).length ? ` · ${(p.dominios || []).join(', ')}` : ''}
+      </p>
+
+      <table className="legal" style={{ marginTop: 12 }}>
+        <thead><tr><th>{t.timePessoa}</th><th>{t.timePediu}</th><th>{t.timeVence}</th><th /></tr></thead>
+        <tbody>
+          {(p.pessoas || []).map((x) => (
+            <tr key={x.email}>
+              <td style={x.ativo ? undefined : { opacity: 0.55, textDecoration: 'line-through' }}>
+                {x.email}
+                {x.papel === 'admin' && <span className="muted small"> · {t.timePapelAdmin}</span>}
+              </td>
+              <td>{data(lang, x.ultima_em)}</td>
+              <td>{x.vence_em || '—'}</td>
+              <td style={{ textAlign: 'right' }}>
+                {/* quem administra não pode se bloquear: a conta ficaria sem
+                    dono e sem ninguém que a destrave. O banco recusa também. */}
+                {!x.admin && (
+                  <form action={bloquear}>
+                    <input type="hidden" name="lang" value={lang} />
+                    <input type="hidden" name="email" value={x.email} />
+                    <input type="hidden" name="bloquear" value={x.ativo ? '1' : '0'} />
+                    <button className="btn ghost" type="submit" style={{ padding: '4px 10px', fontSize: 13 }}>
+                      {x.ativo ? t.timeBloquear : t.timeDesbloquear}
+                    </button>
+                  </form>
+                )}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      <form action={convidar} style={{ display: 'flex', gap: 9, flexWrap: 'wrap', alignItems: 'center', marginTop: 16 }}>
+        <input type="hidden" name="lang" value={lang} />
+        <input type="email" name="email" placeholder={t.timeConvidarPlaceholder}
+               aria-label={t.timeConvidar} style={{ minWidth: 230 }} />
+        <button className="btn ghost" type="submit">{t.timeConvidar}</button>
+      </form>
+
+      <form action={ajustar} style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center', marginTop: 16 }}>
+        <input type="hidden" name="lang" value={lang} />
+        <label className="small" htmlFor="dias">{t.timePrazo}</label>
+        <input id="dias" name="dias" type="number" min={1} max={90} defaultValue={p.dias ?? 90} style={{ width: 78 }} />
+        <span className="small muted">{t.timeDias}</span>
+        <label className="small" htmlFor="assentos">{t.timeAssentos}</label>
+        <input id="assentos" name="assentos" type="number" min={1} max={500}
+               defaultValue={p.assentos ?? conta.assentos} style={{ width: 78 }} />
+        <button className="btn ghost" type="submit">{t.timeSalvar}</button>
+      </form>
+      <p className="small muted" style={{ marginTop: 14 }}>{t.timeAviso}</p>
+
+      <h3 style={{ marginBottom: 4 }}>{t.timeConfigTitulo}</h3>
+      <p className="small muted" style={{ marginTop: 0 }}>{t.timeConfigTexto}</p>
+      <form action={configurar} style={{ display: 'grid', gap: 10, maxWidth: 460 }}>
+        <input type="hidden" name="lang" value={lang} />
+        <label className="small">{t.timeEmpresa}
+          <input name="empresa" defaultValue={cfg.empresa || ''} style={{ width: '100%' }} />
+        </label>
+        <label className="small">{t.timeLogo}
+          <input name="logo_url" type="url" defaultValue={cfg.logo_url || ''} style={{ width: '100%' }} />
+        </label>
+        <label className="small">{t.timeRotulo}
+          <input name="rotulo" defaultValue={cfg.rotulo || ''} style={{ width: '100%' }} />
+        </label>
+        <label className="small">{t.timeAmbiente}
+          <input name="ambiente" defaultValue={cfg.ambiente || ''} style={{ width: '100%' }} />
+        </label>
+        <label className="small">{t.timeCenario}
+          <select name="cenario" defaultValue={cfg.cenario || ''} style={{ width: '100%' }}>
+            <option value="">{t.timeCenarioNenhum}</option>
+            <option value="evidencia">evidência</option>
+            <option value="instrucao">instrução</option>
+            <option value="ata">ata</option>
+            <option value="usabilidade">usabilidade</option>
+            <option value="ia">contexto para IA</option>
+          </select>
+        </label>
+        <div><button className="btn ghost" type="submit">{t.timeSalvar}</button></div>
+      </form>
+    </div>
+  );
+}

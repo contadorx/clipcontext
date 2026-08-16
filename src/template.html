@@ -419,6 +419,16 @@
       <span>__MARCAA__<b>__MARCAB__</b></span>
     </a>
     <nav class="idiomas" id="idiomas" aria-label="Language">
+      <!-- A conta ficava escondida dentro do "Ativar o plano Time", no rodapé,
+           atrás de dois cliques e de uma palavra que fala de licença. Quem
+           procurava a própria conta não achava — e com razão: não estava onde
+           uma conta fica. Agora está aqui, no topo, ao lado das siglas.
+
+           O endereço é absoluto e muda com o idioma: a ferramenta abre de
+           file:// no pacote offline, e um caminho relativo não levaria a lugar
+           nenhum de lá. -->
+      <a id="contaLink" href="__SITE__/conta" data-i18n="contaLink"
+         style="margin-right:12px;border-right:1px solid var(--line);padding-right:12px"></a>
       <a href="?lang=pt" data-l="pt">PT</a>
       <a href="?lang=en" data-l="en">EN</a>
       <a href="?lang=es" data-l="es">ES</a>
@@ -1632,6 +1642,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       degustacao:'Degustação: {0} dias restantes. Depois disso a ferramenta continua funcionando no plano grátis — nada do que você já gerou se perde.',
       mdCliente:'Modelo do cliente', mdNenhum:'— nenhum —', mdAplicado:'{0} aplicado.',
       entrarBtn:'Entrar', sairBtn:'Sair', entrarPh:'seu@email.com',
+      contaLink:'Minha conta',
       fbSemEmail:'Sem e-mail, este chamado não tem como ser respondido nem consultado.',
       fbErro:'Não consegui enviar agora. Tente de novo, ou escreva para {0}.',
       fbEnviar:'Enviar', fbVazio:'Escreva alguma coisa antes de enviar.', fbIndo:'Abrindo o seu e-mail…',
@@ -2134,6 +2145,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       degustacao:'Trial: {0} days left. After that the tool keeps working on the free plan — nothing you already produced is lost.',
       mdCliente:'Customer template', mdNenhum:'— none —', mdAplicado:'{0} applied.',
       entrarBtn:'Sign in', sairBtn:'Sign out', entrarPh:'you@company.com',
+      contaLink:'My account',
       fbSemEmail:'Without an e-mail, this ticket cannot be answered or looked up.',
       fbErro:'I could not send it now. Try again, or write to {0}.',
       fbEnviar:'Send', fbVazio:'Write something before sending.', fbIndo:'Opening your e-mail…',
@@ -2636,6 +2648,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       degustacao:'Degustación: quedan {0} días. Después la herramienta sigue funcionando en el plan gratuito — nada de lo que ya generaste se pierde.',
       mdCliente:'Plantilla del cliente', mdNenhum:'— ninguna —', mdAplicado:'{0} aplicada.',
       entrarBtn:'Entrar', sairBtn:'Salir', entrarPh:'tu@empresa.com',
+      contaLink:'Mi cuenta',
       fbSemEmail:'Sin correo, este ticket no puede ser respondido ni consultado.',
       fbErro:'No he podido enviarlo ahora. Inténtalo de nuevo, o escribe a {0}.',
       fbEnviar:'Enviar', fbVazio:'Escribe algo antes de enviar.', fbIndo:'Abriendo tu correo…',
@@ -2986,9 +2999,14 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     b.title = t(autoTravado + 'Dica');
   }
 
+  /* Os três endereços da área do cliente. Traduzidos como o resto do site —
+     quem lê em espanhol não deveria ter que reconhecer a palavra "conta". */
+  const CAMINHO_CONTA = { pt: '/conta', en: '/en/account', es: '/es/cuenta' };
+
   function applyLang(){
     document.documentElement.lang = LANG;
     document.title = t('docTitle');
+    if ($('contaLink')) $('contaLink').href = '__SITE__' + (CAMINHO_CONTA[LANG] || '/conta');
     document.querySelectorAll('[data-i18n]').forEach(el => {
       el.textContent = t(el.getAttribute('data-i18n'));
     });
@@ -5858,7 +5876,16 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
          motivo na tela. */
       return { erro: t('licSemCripto') };
     }
-    if (dados.p !== 'time') return { erro: t('licInvalida') };
+    /* Os dois planos pagos valem aqui. Antes esta linha exigia `p === 'time'`,
+       e isso era uma armadilha esperando a primeira venda do Personal: a Stripe
+       já vende esse plano, e uma licença assinada com `p:"personal"` seria
+       RECUSADA pela ferramenta — a pessoa pagaria e não destravaria nada.
+
+       O que a licença destrava aqui dentro é uma coisa só: a marca do cliente
+       no documento. A diferença entre Personal e Team não mora na ferramenta,
+       mora na conta — assentos, convite, bloqueio e padrão do time. Por isso os
+       dois planos entram pela mesma porta. */
+    if (dados.p !== 'time' && dados.p !== 'personal') return { erro: t('licInvalida') };
     /* A data de validade é comparada com o relógio da máquina, que a pessoa
        controla. Isso é uma escolha, não um descuido: a alternativa é perguntar a
        hora a um servidor, e um produto que precisa de rede para funcionar deixa

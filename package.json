@@ -1,0 +1,25 @@
+{
+  "name": "walkstamp",
+  "private": true,
+  "scripts": {
+    "ferramenta": "python3 build.py",
+    "dev": "next dev",
+    "build": "python3 build.py && next build",
+    "start": "next start",
+    "stripe:conferir": "node conferir-stripe.mjs"
+  },
+  "dependencies": {
+    "@supabase/ssr": "^0.12.4",
+    "@supabase/supabase-js": "^2.112.3",
+    "next": "^16.3.1",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "stripe": "^22.5.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.2.0",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "typescript": "^7.0.2"
+  }
+}

@@ -38,7 +38,7 @@
           <li>Your domain vocabulary kept, not retyped <span class="soon">soon</span></li>
           <li>Everything in Free</li>
         </ul>
-        <a class="btn" href="{{time}}">Get my link by email</a>
+        <a class="btn" href="{{conta}}">Start the 14 days</a>
         <p class="pe">Right away, no card. Or <a href="mailto:{{contato}}?subject=Walkstamp%20Personal">write to me</a>.</p>
       </div>
 
@@ -51,8 +51,8 @@
         <ul>
           <li>Activated by link: whoever coordinates sends an address, nobody types a key</li>
           <li>A team profile pushed to everyone <span class="soon">soon</span></li>
-          <li>Offline-version package for IT to distribute <span class="soon">soon</span></li>
-          <li>Seat management and renewal <span class="soon">soon</span></li>
+          <li>Seat panel: invite, block and pick the term, from 1 to 90 days</li>
+          <li>Invoices and support tickets in your account</li>
           <li>Everything in Personal</li>
         </ul>
         <a class="btn ghost" href="{{time}}">Talk about Team</a>
@@ -60,6 +60,15 @@
       </div>
 
     </div>
+
+
+    <!-- A lista completa. O dado mora em src/features.json e a tabela é montada
+         no build: sessenta e poucas linhas em três idiomas, escritas à mão,
+         seriam 195 chances de a versão em espanhol prometer o que a portuguesa
+         não promete. -->
+    <h2 style="margin-top:52px">{{tpH}}</h2>
+    <p class="lead">{{tpP}}</p>
+    {{tabelaPlanos}}
 
     <p class="small muted" style="margin-top:24px"><b>Still no server, paid plans included.</b> The key is
     checked inside your browser and works offline — we receive no video, no audio and no document on any

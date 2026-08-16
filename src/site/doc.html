@@ -34,17 +34,36 @@
 
 <footer>
   <div class="wrap">
-    <div>
-      <a href="{{app}}">{{navApp}}</a>
-      <a href="{{precos}}">{{navPrice}}</a>
-      <a href="{{comparativo}}">{{fComp}}</a>
-      <a href="{{seguranca}}">{{fSec}}</a>
-      <a href="{{verificar}}">{{fVerif}}</a>
-      <a href="{{privacidade}}">{{fPriv}}</a>
-      <a href="{{termos}}">{{fTerms}}</a>
-      <a href="{{steps}}">{{fPsr}}</a>
+    <!-- O rodapé virou três colunas com nome. Ele era uma fileira de oito links
+         soltos, e quem procurava "aquela página do teste de usabilidade" não
+         tinha onde procurar: as cinco páginas de caso de uso — que são o produto
+         explicado por quem usa — não estavam nele. -->
+    <div class="rodapeCols">
+      <div>
+        <h3>{{fColProduto}}</h3>
+        <a href="{{app}}">{{navApp}}</a>
+        <a href="{{precos}}">{{navPrice}}</a>
+        <a href="{{comparativo}}">{{fComp}}</a>
+        <a href="{{conta}}">{{fConta}}</a>
+      </div>
+      <div>
+        <h3>{{fColCasos}}</h3>
+        <a href="{{casoEv}}">{{casoEvT}}</a>
+        <a href="{{casoIn}}">{{casoInT}}</a>
+        <a href="{{casoAta}}">{{casoAtaT}}</a>
+        <a href="{{casoUx}}">{{casoUxT}}</a>
+        <a href="{{casoIa}}">{{casoIaT}}</a>
+      </div>
+      <div>
+        <h3>{{fColConfianca}}</h3>
+        <a href="{{seguranca}}">{{fSec}}</a>
+        <a href="{{verificar}}">{{fVerif}}</a>
+        <a href="{{privacidade}}">{{fPriv}}</a>
+        <a href="{{termos}}">{{fTerms}}</a>
+        <a href="{{steps}}">{{fPsr}}</a>
+      </div>
     </div>
-    <div>{{fLicense}}</div>
+    <div class="rodapeFim">{{fLicense}}</div>
   </div>
 </footer>
 

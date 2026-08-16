@@ -38,7 +38,7 @@
           <li>El vocabulario de tu dominio guardado, no reescrito <span class="soon">pronto</span></li>
           <li>Todo lo del Free</li>
         </ul>
-        <a class="btn" href="{{time}}">Recibir mi enlace por correo</a>
+        <a class="btn" href="{{conta}}">Empezar los 14 días</a>
         <p class="pe">Al instante, sin tarjeta. O <a href="mailto:{{contato}}?subject=Walkstamp%20Personal">escríbeme</a>.</p>
       </div>
 
@@ -51,8 +51,8 @@
         <ul>
           <li>Se activa por enlace: quien coordina manda una dirección, nadie escribe claves</li>
           <li>Perfil de equipo enviado a todos <span class="soon">pronto</span></li>
-          <li>Paquete de la versión offline para que TI lo distribuya <span class="soon">pronto</span></li>
-          <li>Gestión de asientos y renovación <span class="soon">pronto</span></li>
+          <li>Panel de asientos: invitar, bloquear y elegir el plazo, de 1 a 90 días</li>
+          <li>Facturas y tickets en tu cuenta</li>
           <li>Todo lo del Personal</li>
         </ul>
         <a class="btn ghost" href="{{time}}">Hablar del Team</a>
@@ -60,6 +60,15 @@
       </div>
 
     </div>
+
+
+    <!-- A lista completa. O dado mora em src/features.json e a tabela é montada
+         no build: sessenta e poucas linhas em três idiomas, escritas à mão,
+         seriam 195 chances de a versão em espanhol prometer o que a portuguesa
+         não promete. -->
+    <h2 style="margin-top:52px">{{tpH}}</h2>
+    <p class="lead">{{tpP}}</p>
+    {{tabelaPlanos}}
 
     <p class="small muted" style="margin-top:24px"><b>Sigue sin servidor, también en el pago.</b> La clave se
     comprueba dentro de tu navegador y funciona sin conexión — no recibimos vídeo, audio ni documento en
