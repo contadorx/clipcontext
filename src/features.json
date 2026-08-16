@@ -12,154 +12,648 @@
     "identidade (a marca do cliente no documento), o que sobrevive entre visitas",
     "(modelos e perfil) e o que é de time (assentos, convite, padrão empurrado)."
   ],
-
   "grupos": [
     {
       "id": "entrada",
-      "titulo": { "pt": "De onde vem o vídeo", "en": "Where the video comes from", "es": "De dónde viene el vídeo" },
+      "titulo": {
+        "pt": "De onde vem o vídeo",
+        "en": "Where the video comes from",
+        "es": "De dónde viene el vídeo"
+      },
       "itens": [
-        { "planos": "fpt", "pt": "Arquivo de vídeo, arrastando ou escolhendo", "en": "A video file, dragged or picked", "es": "Un archivo de vídeo, arrastrado o elegido" },
-        { "planos": "fpt", "pt": "Gravar a tela ali mesmo — o vídeo é descartado no fim", "en": "Record the screen right there — the video is discarded at the end", "es": "Grabar la pantalla ahí mismo — el vídeo se descarta al final" },
-        { "planos": "fpt", "pt": "Trocar a janela compartilhada no meio da gravação", "en": "Switch the shared window mid-recording", "es": "Cambiar la ventana compartida a mitad de la grabación" },
-        { "planos": "fpt", "pt": "Rosto da webcam num canto, em 4 posições e 3 tamanhos", "en": "Webcam face in a corner, 4 positions and 3 sizes", "es": "Cara de la webcam en una esquina, 4 posiciones y 3 tamaños" },
-        { "planos": "fpt", "pt": "Abrir um vídeo do Google Drive", "en": "Open a video from Google Drive", "es": "Abrir un vídeo de Google Drive" },
-        { "planos": "fpt", "pt": "Reabrir um documento já gerado (.json ou .zip) e continuar", "en": "Reopen a document you already made (.json or .zip) and carry on", "es": "Reabrir un documento ya generado (.json o .zip) y seguir" },
-        { "planos": "fpt", "pt": "Juntar várias sessões num documento só", "en": "Merge several sessions into a single document", "es": "Juntar varias sesiones en un solo documento" },
-        { "planos": "fpt", "pt": "Colar ou anexar uma imagem solta como passo", "en": "Paste or attach a loose image as a step", "es": "Pegar o adjuntar una imagen suelta como paso" }
+        {
+          "planos": "fpt",
+          "pt": "Arquivo de vídeo, arrastando ou escolhendo",
+          "en": "A video file, dragged or picked",
+          "es": "Un archivo de vídeo, arrastrado o elegido"
+        },
+        {
+          "planos": "fpt",
+          "pt": "Gravar a tela ali mesmo — o vídeo é descartado no fim",
+          "en": "Record the screen right there — the video is discarded at the end",
+          "es": "Grabar la pantalla ahí mismo — el vídeo se descarta al final"
+        },
+        {
+          "planos": "fpt",
+          "pt": "Trocar a janela compartilhada no meio da gravação",
+          "en": "Switch the shared window mid-recording",
+          "es": "Cambiar la ventana compartida a mitad de la grabación"
+        },
+        {
+          "planos": "fpt",
+          "pt": "Rosto da webcam num canto, em 4 posições e 3 tamanhos",
+          "en": "Webcam face in a corner, 4 positions and 3 sizes",
+          "es": "Cara de la webcam en una esquina, 4 posiciones y 3 tamaños"
+        },
+        {
+          "planos": "fpt",
+          "pt": "Abrir um vídeo do Google Drive",
+          "en": "Open a video from Google Drive",
+          "es": "Abrir un vídeo de Google Drive"
+        },
+        {
+          "planos": "fpt",
+          "pt": "Reabrir um documento já gerado (.json ou .zip) e continuar",
+          "en": "Reopen a document you already made (.json or .zip) and carry on",
+          "es": "Reabrir un documento ya generado (.json o .zip) y seguir"
+        },
+        {
+          "planos": "fpt",
+          "pt": "Juntar várias sessões num documento só",
+          "en": "Merge several sessions into a single document",
+          "es": "Juntar varias sesiones en un solo documento"
+        },
+        {
+          "planos": "fpt",
+          "pt": "Colar ou anexar uma imagem solta como passo",
+          "en": "Paste or attach a loose image as a step",
+          "es": "Pegar o adjuntar una imagen suelta como paso"
+        }
       ]
     },
     {
       "id": "captura",
-      "titulo": { "pt": "Como os quadros são escolhidos", "en": "How the frames get picked", "es": "Cómo se eligen los fotogramas" },
+      "titulo": {
+        "pt": "Como os quadros são escolhidos",
+        "en": "How the frames get picked",
+        "es": "Cómo se eligen los fotogramas"
+      },
       "itens": [
-        { "planos": "fpt", "pt": "Detecção de mudança de tela, com sensibilidade de 1 a 9", "en": "Screen-change detection, sensitivity 1 to 9", "es": "Detección de cambio de pantalla, sensibilidad de 1 a 9" },
-        { "planos": "fpt", "pt": "Ou N quadros distribuídos, ou um a cada X segundos", "en": "Or N frames spread out, or one every X seconds", "es": "O N fotogramas repartidos, o uno cada X segundos" },
-        { "planos": "fpt", "pt": "Teto de quadros e trecho de/até", "en": "Frame cap and a from/to stretch", "es": "Tope de fotogramas y tramo desde/hasta" },
-        { "planos": "fpt", "pt": "Ignorar a faixa do topo ou do rodapé na detecção", "en": "Ignore the top or bottom strip when detecting", "es": "Ignorar la franja superior o inferior en la detección" },
-        { "planos": "fpt", "pt": "Marcar o momento durante a gravação (tecla M)", "en": "Mark the moment while recording (M key)", "es": "Marcar el momento durante la grabación (tecla M)" },
-        { "planos": "fpt", "pt": "Pausar e retomar sem cortar o documento (tecla P)", "en": "Pause and resume without cutting the document (P key)", "es": "Pausar y reanudar sin cortar el documento (tecla P)" },
-        { "planos": "fpt", "pt": "Contagem regressiva de 3 antes de começar", "en": "A 3-count before it starts", "es": "Cuenta atrás de 3 antes de empezar" },
-        { "planos": "fpt", "pt": "Auto-parar depois de N minutos", "en": "Auto-stop after N minutes", "es": "Auto-parar después de N minutos" },
-        { "planos": "fpt", "pt": "Controle flutuante: relógio, volume dos dois canais e botões", "en": "Floating control: clock, both channel meters and buttons", "es": "Control flotante: reloj, volumen de los dos canales y botones" },
-        { "planos": "fpt", "pt": "Clipe de vídeo dos 15 s de cada momento marcado", "en": "A 15 s video clip around each marked moment", "es": "Clip de vídeo de los 15 s de cada momento marcado" }
+        {
+          "planos": "fpt",
+          "pt": "Detecção de mudança de tela, com sensibilidade de 1 a 9",
+          "en": "Screen-change detection, sensitivity 1 to 9",
+          "es": "Detección de cambio de pantalla, sensibilidad de 1 a 9"
+        },
+        {
+          "planos": "fpt",
+          "pt": "Ou N quadros distribuídos, ou um a cada X segundos",
+          "en": "Or N frames spread out, or one every X seconds",
+          "es": "O N fotogramas repartidos, o uno cada X segundos"
+        },
+        {
+          "planos": "fpt",
+          "pt": "Teto de quadros e trecho de/até",
+          "en": "Frame cap and a from/to stretch",
+          "es": "Tope de fotogramas y tramo desde/hasta"
+        },
+        {
+          "planos": "fpt",
+          "pt": "Ignorar a faixa do topo ou do rodapé na detecção",
+          "en": "Ignore the top or bottom strip when detecting",
+          "es": "Ignorar la franja superior o inferior en la detección"
+        },
+        {
+          "planos": "fpt",
+          "pt": "Marcar o momento durante a gravação (tecla M)",
+          "en": "Mark the moment while recording (M key)",
+          "es": "Marcar el momento durante la grabación (tecla M)"
+        },
+        {
+          "planos": "fpt",
+          "pt": "Pausar e retomar sem cortar o documento (tecla P)",
+          "en": "Pause and resume without cutting the document (P key)",
+          "es": "Pausar y reanudar sin cortar el documento (tecla P)"
+        },
+        {
+          "planos": "fpt",
+          "pt": "Contagem regressiva de 3 antes de começar",
+          "en": "A 3-count before it starts",
+          "es": "Cuenta atrás de 3 antes de empezar"
+        },
+        {
+          "planos": "fpt",
+          "pt": "Auto-parar depois de N minutos",
+          "en": "Auto-stop after N minutes",
+          "es": "Auto-parar después de N minutos"
+        },
+        {
+          "planos": "fpt",
+          "pt": "Controle flutuante: relógio, volume dos dois canais e botões",
+          "en": "Floating control: clock, both channel meters and buttons",
+          "es": "Control flotante: reloj, volumen de los dos canales y botones"
+        },
+        {
+          "planos": "fpt",
+          "pt": "Clipe de vídeo dos 15 s de cada momento marcado",
+          "en": "A 15 s video clip around each marked moment",
+          "es": "Clip de vídeo de los 15 s de cada momento marcado"
+        }
       ]
     },
     {
       "id": "transcricao",
-      "titulo": { "pt": "A fala", "en": "The speech", "es": "El habla" },
+      "titulo": {
+        "pt": "A fala",
+        "en": "The speech",
+        "es": "El habla"
+      },
       "itens": [
-        { "planos": "fpt", "pt": "Transcrição no seu aparelho — o áudio não sai da máquina", "en": "Transcription on your device — the audio never leaves your machine", "es": "Transcripción en tu equipo — el audio no sale de tu ordenador" },
-        { "planos": "fpt", "pt": "Três tamanhos de modelo, e aceleração por GPU quando há", "en": "Three model sizes, and GPU acceleration where available", "es": "Tres tamaños de modelo, y aceleración por GPU cuando la hay" },
-        { "planos": "fpt", "pt": "Português, inglês, espanhol ou detecção automática", "en": "Portuguese, English, Spanish or automatic detection", "es": "Portugués, inglés, español o detección automática" },
-        { "planos": "fpt", "pt": "Microfone e som do computador separados, e renomeáveis", "en": "Microphone and computer sound kept apart, and renameable", "es": "Micrófono y sonido del ordenador separados, y renombrables" },
-        { "planos": "fpt", "pt": "Corrigir a fala trecho a trecho, na lente do quadro", "en": "Fix the speech stretch by stretch, in the frame's lens", "es": "Corregir el habla tramo a tramo, en la lupa del fotograma" },
-        { "planos": "fpt", "pt": "Vocabulário do seu domínio, aplicado de uma vez", "en": "Your domain's vocabulary, applied in one go", "es": "Vocabulario de tu dominio, aplicado de una vez" },
-        { "planos": "fpt", "pt": "Remover hesitações (\"é…\", \"tipo\", \"né\")", "en": "Strip fillers (\"um…\", \"like\", \"you know\")", "es": "Quitar muletillas (\"eh…\", \"o sea\")" },
-        { "planos": "fpt", "pt": "Colar uma legenda pronta (.srt, .vtt ou texto)", "en": "Paste a ready-made caption (.srt, .vtt or plain text)", "es": "Pegar un subtítulo ya hecho (.srt, .vtt o texto)" },
-        { "planos": "fpt", "pt": "Traduzir no próprio navegador, onde ele souber", "en": "Translate in the browser itself, where it can", "es": "Traducir en el propio navegador, donde sepa" }
+        {
+          "planos": "fpt",
+          "pt": "Transcrição no seu aparelho — o áudio não sai da máquina",
+          "en": "Transcription on your device — the audio never leaves your machine",
+          "es": "Transcripción en tu equipo — el audio no sale de tu ordenador"
+        },
+        {
+          "planos": "fpt",
+          "pt": "Três tamanhos de modelo, e aceleração por GPU quando há",
+          "en": "Three model sizes, and GPU acceleration where available",
+          "es": "Tres tamaños de modelo, y aceleración por GPU cuando la hay"
+        },
+        {
+          "planos": "fpt",
+          "pt": "Português, inglês, espanhol ou detecção automática",
+          "en": "Portuguese, English, Spanish or automatic detection",
+          "es": "Portugués, inglés, español o detección automática"
+        },
+        {
+          "planos": "fpt",
+          "pt": "Microfone e som do computador separados, e renomeáveis",
+          "en": "Microphone and computer sound kept apart, and renameable",
+          "es": "Micrófono y sonido del ordenador separados, y renombrables"
+        },
+        {
+          "planos": "fpt",
+          "pt": "Corrigir a fala trecho a trecho, na lente do quadro",
+          "en": "Fix the speech stretch by stretch, in the frame's lens",
+          "es": "Corregir el habla tramo a tramo, en la lupa del fotograma"
+        },
+        {
+          "planos": "fpt",
+          "pt": "Vocabulário do seu domínio, aplicado de uma vez",
+          "en": "Your domain's vocabulary, applied in one go",
+          "es": "Vocabulario de tu dominio, aplicado de una vez"
+        },
+        {
+          "planos": "fpt",
+          "pt": "Remover hesitações (\"é…\", \"tipo\", \"né\")",
+          "en": "Strip fillers (\"um…\", \"like\", \"you know\")",
+          "es": "Quitar muletillas (\"eh…\", \"o sea\")"
+        },
+        {
+          "planos": "fpt",
+          "pt": "Colar uma legenda pronta (.srt, .vtt ou texto)",
+          "en": "Paste a ready-made caption (.srt, .vtt or plain text)",
+          "es": "Pegar un subtítulo ya hecho (.srt, .vtt o texto)"
+        },
+        {
+          "planos": "fpt",
+          "pt": "Traduzir no próprio navegador, onde ele souber",
+          "en": "Translate in the browser itself, where it can",
+          "es": "Traducir en el propio navegador, donde sepa"
+        }
       ]
     },
     {
       "id": "edicao",
-      "titulo": { "pt": "Arrumar o documento", "en": "Fixing the document up", "es": "Arreglar el documento" },
+      "titulo": {
+        "pt": "Arrumar o documento",
+        "en": "Fixing the document up",
+        "es": "Arreglar el documento"
+      },
       "itens": [
-        { "planos": "fpt", "pt": "Lente: o passo em tamanho de conferir, em 4 tamanhos", "en": "Lens: the step big enough to check, in 4 sizes", "es": "Lupa: el paso en tamaño para revisar, en 4 tamaños" },
-        { "planos": "fpt", "pt": "Tarjar o que é sensível — e a tarja é queimada na imagem", "en": "Redact what is sensitive — and the redaction is burned into the image", "es": "Tapar lo sensible — y el tapado se quema en la imagen" },
-        { "planos": "fpt", "pt": "Aviso de dado sensível achado na tela, com tarja de um clique", "en": "A warning for sensitive data spotted on screen, redacted in one click", "es": "Aviso de dato sensible encontrado en pantalla, tapado con un clic" },
-        { "planos": "fpt", "pt": "Destacar com retângulo, seta ou caneta, em três cores", "en": "Highlight with a box, an arrow or a pen, in three colours", "es": "Destacar con rectángulo, flecha o lápiz, en tres colores" },
-        { "planos": "fpt", "pt": "Recortar a área que interessa, e desfazer", "en": "Crop to the area that matters, and undo", "es": "Recortar el área que importa, y deshacer" },
-        { "planos": "fpt", "pt": "Duplicar um quadro, ou substituir a imagem de um passo", "en": "Duplicate a frame, or replace a step's image", "es": "Duplicar un fotograma, o sustituir la imagen de un paso" },
-        { "planos": "fpt", "pt": "Comparar dois quadros sobrepostos, com a diferença em vermelho", "en": "Compare two frames overlaid, with the difference in red", "es": "Comparar dos fotogramas superpuestos, con la diferencia en rojo" },
-        { "planos": "fpt", "pt": "Corrigir o instante e a hora de relógio de um quadro", "en": "Fix a frame's instant and clock time", "es": "Corregir el instante y la hora de reloj de un fotograma" },
-        { "planos": "fpt", "pt": "Capítulos: uma gravação vira vários casos, cada um com o seu tempo", "en": "Chapters: one recording becomes several cases, each with its own time", "es": "Capítulos: una grabación se vuelve varios casos, cada uno con su tiempo" },
-        { "planos": "fpt", "pt": "Revisão assistida: percorre passo a passo e recaptura só o que mudou", "en": "Guided review: walks step by step and recaptures only what changed", "es": "Revisión asistida: recorre paso a paso y recaptura solo lo que cambió" },
-        { "planos": "fpt", "pt": "Ler o texto da tela (OCR) para buscar e para a tarja automática", "en": "Read the text on screen (OCR) for search and automatic redaction", "es": "Leer el texto de la pantalla (OCR) para buscar y para el tapado automático" },
-        { "planos": "fpt", "pt": "Descartar repetidos, descartar sem fala, ficar só com os marcados", "en": "Drop duplicates, drop the silent ones, keep only the marked ones", "es": "Descartar repetidos, descartar sin habla, quedarte solo con los marcados" }
+        {
+          "planos": "fpt",
+          "pt": "Lente: o passo em tamanho de conferir, em 4 tamanhos",
+          "en": "Lens: the step big enough to check, in 4 sizes",
+          "es": "Lupa: el paso en tamaño para revisar, en 4 tamaños"
+        },
+        {
+          "planos": "fpt",
+          "pt": "Tarjar o que é sensível — e a tarja é queimada na imagem",
+          "en": "Redact what is sensitive — and the redaction is burned into the image",
+          "es": "Tapar lo sensible — y el tapado se quema en la imagen"
+        },
+        {
+          "planos": "fpt",
+          "pt": "Aviso de dado sensível achado na tela, com tarja de um clique",
+          "en": "A warning for sensitive data spotted on screen, redacted in one click",
+          "es": "Aviso de dato sensible encontrado en pantalla, tapado con un clic"
+        },
+        {
+          "planos": "fpt",
+          "pt": "Destacar com retângulo, seta ou caneta, em três cores",
+          "en": "Highlight with a box, an arrow or a pen, in three colours",
+          "es": "Destacar con rectángulo, flecha o lápiz, en tres colores"
+        },
+        {
+          "planos": "fpt",
+          "pt": "Recortar a área que interessa, e desfazer",
+          "en": "Crop to the area that matters, and undo",
+          "es": "Recortar el área que importa, y deshacer"
+        },
+        {
+          "planos": "fpt",
+          "pt": "Duplicar um quadro, ou substituir a imagem de um passo",
+          "en": "Duplicate a frame, or replace a step's image",
+          "es": "Duplicar un fotograma, o sustituir la imagen de un paso"
+        },
+        {
+          "planos": "fpt",
+          "pt": "Comparar dois quadros sobrepostos, com a diferença em vermelho",
+          "en": "Compare two frames overlaid, with the difference in red",
+          "es": "Comparar dos fotogramas superpuestos, con la diferencia en rojo"
+        },
+        {
+          "planos": "fpt",
+          "pt": "Corrigir o instante e a hora de relógio de um quadro",
+          "en": "Fix a frame's instant and clock time",
+          "es": "Corregir el instante y la hora de reloj de un fotograma"
+        },
+        {
+          "planos": "fpt",
+          "pt": "Capítulos: uma gravação vira vários casos, cada um com o seu tempo",
+          "en": "Chapters: one recording becomes several cases, each with its own time",
+          "es": "Capítulos: una grabación se vuelve varios casos, cada uno con su tiempo"
+        },
+        {
+          "planos": "fpt",
+          "pt": "Revisão assistida: percorre passo a passo e recaptura só o que mudou",
+          "en": "Guided review: walks step by step and recaptures only what changed",
+          "es": "Revisión asistida: recorre paso a paso y recaptura solo lo que cambió"
+        },
+        {
+          "planos": "fpt",
+          "pt": "Ler o texto da tela (OCR) para buscar e para a tarja automática",
+          "en": "Read the text on screen (OCR) for search and automatic redaction",
+          "es": "Leer el texto de la pantalla (OCR) para buscar y para el tapado automático"
+        },
+        {
+          "planos": "fpt",
+          "pt": "Descartar repetidos, descartar sem fala, ficar só com os marcados",
+          "en": "Drop duplicates, drop the silent ones, keep only the marked ones",
+          "es": "Descartar repetidos, descartar sin habla, quedarte solo con los marcados"
+        }
       ]
     },
     {
       "id": "saidas",
-      "titulo": { "pt": "O que sai", "en": "What comes out", "es": "Lo que sale" },
+      "titulo": {
+        "pt": "O que sai",
+        "en": "What comes out",
+        "es": "Lo que sale"
+      },
       "itens": [
-        { "planos": "fpt", "pt": "PDF, em A4 ou Carta", "en": "PDF, in A4 or Letter", "es": "PDF, en A4 o Carta" },
-        { "planos": "fpt", "pt": "Word (.docx), editável", "en": "Word (.docx), editable", "es": "Word (.docx), editable" },
-        { "planos": "fpt", "pt": "PowerPoint (.pptx), um slide por passo", "en": "PowerPoint (.pptx), one slide per step", "es": "PowerPoint (.pptx), una diapositiva por paso" },
-        { "planos": "fpt", "pt": "HTML de um arquivo só, com as imagens dentro", "en": "A single-file HTML, images inside", "es": "HTML de un solo archivo, con las imágenes dentro" },
-        { "planos": "fpt", "pt": "Markdown, para colar onde a sua equipe escreve", "en": "Markdown, to paste wherever your team writes", "es": "Markdown, para pegar donde escribe tu equipo" },
-        { "planos": "fpt", "pt": "Pacote SCORM 1.2 para o LMS (no passo a passo)", "en": "A SCORM 1.2 package for the LMS (in the step-by-step)", "es": "Paquete SCORM 1.2 para el LMS (en el paso a paso)" },
-        { "planos": "fpt", "pt": "Planilha (.csv), uma linha por passo", "en": "A spreadsheet (.csv), one row per step", "es": "Hoja de cálculo (.csv), una fila por paso" },
-        { "planos": "fpt", "pt": "JSON com tudo, para reabrir ou para outro sistema ler", "en": "JSON with everything, to reopen or for another system to read", "es": "JSON con todo, para reabrir o para que otro sistema lo lea" },
-        { "planos": "fpt", "pt": "ZIP com as figuras numeradas, o índice e os clipes", "en": "A ZIP with numbered images, the index and the clips", "es": "ZIP con las imágenes numeradas, el índice y los clips" },
-        { "planos": "fpt", "pt": "Um documento por tarefa, num ZIP (com 2+ capítulos)", "en": "One document per task, in a ZIP (with 2+ chapters)", "es": "Un documento por tarea, en un ZIP (con 2+ capítulos)" },
-        { "planos": "fpt", "pt": "Pacote em vários idiomas de uma vez (HTML e Markdown)", "en": "A multi-language package in one go (HTML and Markdown)", "es": "Paquete en varios idiomas de una vez (HTML y Markdown)" },
-        { "planos": "fpt", "pt": "Legenda .vtt, .srt ou .txt", "en": "Caption as .vtt, .srt or .txt", "es": "Subtítulo .vtt, .srt o .txt" },
-        { "planos": "fpt", "pt": "Enviar direto ao Google Docs (pede confirmação)", "en": "Send straight to Google Docs (asks first)", "es": "Enviar directo a Google Docs (pide confirmación)" },
-        { "planos": "fpt", "pt": "Resumo em marcação de wiki, pronto para colar no Jira", "en": "A wiki-markup summary, ready to paste into Jira", "es": "Resumen en marcado de wiki, listo para pegar en Jira" },
-        { "planos": "fpt", "pt": "Prompt pronto para colar numa IA", "en": "A ready-made prompt to paste into an AI", "es": "Prompt listo para pegar en una IA" }
+        {
+          "planos": "fpt",
+          "pt": "PDF, em A4 ou Carta",
+          "en": "PDF, in A4 or Letter",
+          "es": "PDF, en A4 o Carta"
+        },
+        {
+          "planos": "fpt",
+          "pt": "Word (.docx), editável",
+          "en": "Word (.docx), editable",
+          "es": "Word (.docx), editable"
+        },
+        {
+          "planos": "fpt",
+          "pt": "PowerPoint (.pptx), um slide por passo",
+          "en": "PowerPoint (.pptx), one slide per step",
+          "es": "PowerPoint (.pptx), una diapositiva por paso"
+        },
+        {
+          "planos": "fpt",
+          "pt": "HTML de um arquivo só, com as imagens dentro",
+          "en": "A single-file HTML, images inside",
+          "es": "HTML de un solo archivo, con las imágenes dentro"
+        },
+        {
+          "planos": "fpt",
+          "pt": "Markdown, para colar onde a sua equipe escreve",
+          "en": "Markdown, to paste wherever your team writes",
+          "es": "Markdown, para pegar donde escribe tu equipo"
+        },
+        {
+          "planos": "fpt",
+          "pt": "Pacote SCORM 1.2 para o LMS (no passo a passo)",
+          "en": "A SCORM 1.2 package for the LMS (in the step-by-step)",
+          "es": "Paquete SCORM 1.2 para el LMS (en el paso a paso)"
+        },
+        {
+          "planos": "fpt",
+          "pt": "Planilha (.csv), uma linha por passo",
+          "en": "A spreadsheet (.csv), one row per step",
+          "es": "Hoja de cálculo (.csv), una fila por paso"
+        },
+        {
+          "planos": "fpt",
+          "pt": "JSON com tudo, para reabrir ou para outro sistema ler",
+          "en": "JSON with everything, to reopen or for another system to read",
+          "es": "JSON con todo, para reabrir o para que otro sistema lo lea"
+        },
+        {
+          "planos": "fpt",
+          "pt": "ZIP com as figuras numeradas, o índice e os clipes",
+          "en": "A ZIP with numbered images, the index and the clips",
+          "es": "ZIP con las imágenes numeradas, el índice y los clips"
+        },
+        {
+          "planos": "fpt",
+          "pt": "Um documento por tarefa, num ZIP (com 2+ capítulos)",
+          "en": "One document per task, in a ZIP (with 2+ chapters)",
+          "es": "Un documento por tarea, en un ZIP (con 2+ capítulos)"
+        },
+        {
+          "planos": "fpt",
+          "pt": "Pacote em vários idiomas de uma vez (HTML e Markdown)",
+          "en": "A multi-language package in one go (HTML and Markdown)",
+          "es": "Paquete en varios idiomas de una vez (HTML y Markdown)"
+        },
+        {
+          "planos": "fpt",
+          "pt": "Legenda .vtt, .srt ou .txt",
+          "en": "Caption as .vtt, .srt or .txt",
+          "es": "Subtítulo .vtt, .srt o .txt"
+        },
+        {
+          "planos": "fpt",
+          "pt": "Enviar direto ao Google Docs (pede confirmação)",
+          "en": "Send straight to Google Docs (asks first)",
+          "es": "Enviar directo a Google Docs (pide confirmación)"
+        },
+        {
+          "planos": "fpt",
+          "pt": "Resumo em marcação de wiki, pronto para colar no Jira",
+          "en": "A wiki-markup summary, ready to paste into Jira",
+          "es": "Resumen en marcado de wiki, listo para pegar en Jira"
+        },
+        {
+          "planos": "fpt",
+          "pt": "Prompt pronto para colar numa IA",
+          "en": "A ready-made prompt to paste into an AI",
+          "es": "Prompt listo para pegar en una IA"
+        }
+      ]
+    },
+    {
+      "id": "roteiro",
+      "titulo": {
+        "pt": "Quando são quarenta casos, não um",
+        "en": "When it is forty cases, not one",
+        "es": "Cuando son cuarenta casos, no uno"
+      },
+      "itens": [
+        {
+          "planos": "pt",
+          "pt": "Subir a planilha de casos (.xlsx, .csv, ou colar do Excel)",
+          "en": "Upload your case spreadsheet (.xlsx, .csv, or paste from Excel)",
+          "es": "Subir la hoja de casos (.xlsx, .csv, o pegar desde Excel)"
+        },
+        {
+          "planos": "pt",
+          "pt": "Fila de casos: escolher um e a identificação já vem preenchida",
+          "en": "A case queue: pick one and the identification comes filled in",
+          "es": "Cola de casos: eliges uno y la identificación viene rellenada"
+        },
+        {
+          "planos": "pt",
+          "pt": "A planilha volta com situação, data, arquivo e impressão das telas",
+          "en": "The spreadsheet comes back with status, date, file and screen fingerprint",
+          "es": "La hoja vuelve con situación, fecha, archivo y huella de las pantallas"
+        },
+        {
+          "planos": "pt",
+          "pt": "Reabrir a planilha devolvida e continuar de onde parou",
+          "en": "Reopen the returned spreadsheet and carry on where you left off",
+          "es": "Reabrir la hoja devuelta y seguir donde lo dejaste"
+        },
+        {
+          "planos": "t",
+          "breve": true,
+          "pt": "O mesmo roteiro para o time, e quem executou cada caso",
+          "en": "The same case list across the team, and who ran each case",
+          "es": "La misma lista para el equipo, y quién ejecutó cada caso"
+        }
       ]
     },
     {
       "id": "cenarios",
-      "titulo": { "pt": "Cinco documentos diferentes", "en": "Five different documents", "es": "Cinco documentos distintos" },
+      "titulo": {
+        "pt": "Cinco documentos diferentes",
+        "en": "Five different documents",
+        "es": "Cinco documentos distintos"
+      },
       "itens": [
-        { "planos": "fpt", "pt": "Evidência de teste: resultado, ambiente, hora e hash por imagem", "en": "Test evidence: result, environment, clock time and a hash per image", "es": "Evidencia de prueba: resultado, entorno, hora y hash por imagen" },
-        { "planos": "fpt", "pt": "Instrução de trabalho: dono do processo, versão e sem carimbo de data", "en": "Work instruction: process owner, version and no date stamp", "es": "Instrucción de trabajo: dueño del proceso, versión y sin sello de fecha" },
-        { "planos": "fpt", "pt": "Ata de reunião: participantes, local e os momentos que importam", "en": "Meeting minutes: attendees, place and the moments that matter", "es": "Acta de reunión: participantes, lugar y los momentos que importan" },
-        { "planos": "fpt", "pt": "Sessão de usabilidade: moderador e participante, e o tipo de cada momento", "en": "Usability session: moderator and participant, and each moment's type", "es": "Sesión de usabilidad: moderador y participante, y el tipo de cada momento" },
-        { "planos": "fpt", "pt": "Contexto para IA: ~60 telas em vez de 3.600, com a fala pareada", "en": "Context for AI: ~60 screens instead of 3,600, with the speech paired", "es": "Contexto para IA: ~60 pantallas en vez de 3.600, con el habla emparejada" },
-        { "planos": "fpt", "pt": "Rótulo do quadro à sua escolha: Passo, Trecho, Momento…", "en": "Frame label of your choosing: Step, Stretch, Moment…", "es": "Etiqueta del fotograma a tu gusto: Paso, Tramo, Momento…" }
+        {
+          "planos": "fpt",
+          "pt": "Evidência de teste: resultado, ambiente, hora e hash por imagem",
+          "en": "Test evidence: result, environment, clock time and a hash per image",
+          "es": "Evidencia de prueba: resultado, entorno, hora y hash por imagen"
+        },
+        {
+          "planos": "fpt",
+          "pt": "Instrução de trabalho: dono do processo, versão e sem carimbo de data",
+          "en": "Work instruction: process owner, version and no date stamp",
+          "es": "Instrucción de trabajo: dueño del proceso, versión y sin sello de fecha"
+        },
+        {
+          "planos": "fpt",
+          "pt": "Ata de reunião: participantes, local e os momentos que importam",
+          "en": "Meeting minutes: attendees, place and the moments that matter",
+          "es": "Acta de reunión: participantes, lugar y los momentos que importan"
+        },
+        {
+          "planos": "fpt",
+          "pt": "Sessão de usabilidade: moderador e participante, e o tipo de cada momento",
+          "en": "Usability session: moderator and participant, and each moment's type",
+          "es": "Sesión de usabilidad: moderador y participante, y el tipo de cada momento"
+        },
+        {
+          "planos": "fpt",
+          "pt": "Contexto para IA: ~60 telas em vez de 3.600, com a fala pareada",
+          "en": "Context for AI: ~60 screens instead of 3,600, with the speech paired",
+          "es": "Contexto para IA: ~60 pantallas en vez de 3.600, con el habla emparejada"
+        },
+        {
+          "planos": "fpt",
+          "pt": "Rótulo do quadro à sua escolha: Passo, Trecho, Momento…",
+          "en": "Frame label of your choosing: Step, Stretch, Moment…",
+          "es": "Etiqueta del fotograma a tu gusto: Paso, Tramo, Momento…"
+        }
       ]
     },
     {
       "id": "evidencia",
-      "titulo": { "pt": "O que faz a evidência ser aceita", "en": "What makes the evidence stick", "es": "Lo que hace que la evidencia se acepte" },
+      "titulo": {
+        "pt": "O que faz a evidência ser aceita",
+        "en": "What makes the evidence stick",
+        "es": "Lo que hace que la evidencia se acepte"
+      },
       "itens": [
-        { "planos": "fpt", "pt": "Hash SHA-256 de cada imagem, calculado depois da tarja", "en": "A SHA-256 hash of each image, computed after redaction", "es": "Hash SHA-256 de cada imagen, calculado después del tapado" },
-        { "planos": "fpt", "pt": "Página pública para qualquer um conferir a integridade", "en": "A public page for anyone to check the integrity", "es": "Página pública para que cualquiera compruebe la integridad" },
-        { "planos": "fpt", "pt": "Hora de relógio com fuso escrito por extenso", "en": "Clock time with the time zone spelled out", "es": "Hora de reloj con la zona horaria escrita" },
-        { "planos": "fpt", "pt": "Numeração automática EV-001, EV-002…", "en": "Automatic numbering EV-001, EV-002…", "es": "Numeración automática EV-001, EV-002…" },
-        { "planos": "fpt", "pt": "Link pronto que já abre com o caso e o chamado preenchidos", "en": "A ready-made link that opens with the case and ticket filled in", "es": "Enlace listo que ya abre con el caso y el ticket rellenados" }
+        {
+          "planos": "fpt",
+          "pt": "Hash SHA-256 de cada imagem, calculado depois da tarja",
+          "en": "A SHA-256 hash of each image, computed after redaction",
+          "es": "Hash SHA-256 de cada imagen, calculado después del tapado"
+        },
+        {
+          "planos": "fpt",
+          "pt": "Página pública para qualquer um conferir a integridade",
+          "en": "A public page for anyone to check the integrity",
+          "es": "Página pública para que cualquiera compruebe la integridad"
+        },
+        {
+          "planos": "fpt",
+          "pt": "Hora de relógio com fuso escrito por extenso",
+          "en": "Clock time with the time zone spelled out",
+          "es": "Hora de reloj con la zona horaria escrita"
+        },
+        {
+          "planos": "fpt",
+          "pt": "Numeração automática EV-001, EV-002…",
+          "en": "Automatic numbering EV-001, EV-002…",
+          "es": "Numeración automática EV-001, EV-002…"
+        },
+        {
+          "planos": "fpt",
+          "pt": "Link pronto que já abre com o caso e o chamado preenchidos",
+          "en": "A ready-made link that opens with the case and ticket filled in",
+          "es": "Enlace listo que ya abre con el caso y el ticket rellenados"
+        }
       ]
     },
     {
       "id": "marca",
-      "titulo": { "pt": "O documento com a sua cara", "en": "The document with your face on it", "es": "El documento con tu cara" },
+      "titulo": {
+        "pt": "O documento com a sua cara",
+        "en": "The document with your face on it",
+        "es": "El documento con tu cara"
+      },
       "itens": [
-        { "planos": "pt", "pt": "Logotipo e nome do cliente no PDF, no Word e no HTML", "en": "Client logo and name in the PDF, the Word file and the HTML", "es": "Logotipo y nombre del cliente en el PDF, el Word y el HTML" },
-        { "planos": "pt", "pt": "Modelos de documento seus: cenário, rótulo, sistema e papel prontos", "en": "Your own document templates: scenario, label, system and paper preset", "es": "Plantillas de documento tuyas: escenario, etiqueta, sistema y papel listos" },
-        { "planos": "pt", "pt": "Perfil que volta ao entrar, em qualquer máquina", "en": "A profile that comes back when you sign in, on any machine", "es": "Perfil que vuelve al entrar, en cualquier equipo" },
-        { "planos": "pt", "pt": "Licença conferida dentro do navegador — funciona sem rede", "en": "A licence checked inside the browser — works with no network", "es": "Licencia comprobada dentro del navegador — funciona sin red" }
+        {
+          "planos": "pt",
+          "pt": "Logotipo e nome do cliente no PDF, no Word e no HTML",
+          "en": "Client logo and name in the PDF, the Word file and the HTML",
+          "es": "Logotipo y nombre del cliente en el PDF, el Word y el HTML"
+        },
+        {
+          "planos": "pt",
+          "pt": "Modelos de documento seus: cenário, rótulo, sistema e papel prontos",
+          "en": "Your own document templates: scenario, label, system and paper preset",
+          "es": "Plantillas de documento tuyas: escenario, etiqueta, sistema y papel listos"
+        },
+        {
+          "planos": "pt",
+          "pt": "Perfil que volta ao entrar, em qualquer máquina",
+          "en": "A profile that comes back when you sign in, on any machine",
+          "es": "Perfil que vuelve al entrar, en cualquier equipo"
+        },
+        {
+          "planos": "pt",
+          "pt": "Licença conferida dentro do navegador — funciona sem rede",
+          "en": "A licence checked inside the browser — works with no network",
+          "es": "Licencia comprobada dentro del navegador — funciona sin red"
+        }
       ]
     },
     {
       "id": "time",
-      "titulo": { "pt": "Quando é uma equipe", "en": "When it is a team", "es": "Cuando es un equipo" },
+      "titulo": {
+        "pt": "Quando é uma equipe",
+        "en": "When it is a team",
+        "es": "Cuando es un equipo"
+      },
       "itens": [
-        { "planos": "t", "pt": "Assentos: convidar por e-mail, sem ninguém digitar chave", "en": "Seats: invite by email, nobody types a key", "es": "Asientos: invitar por correo, sin que nadie teclee una clave" },
-        { "planos": "t", "pt": "Bloquear e liberar quem sai e quem entra", "en": "Block and unblock people as they come and go", "es": "Bloquear y liberar a quien sale y a quien entra" },
-        { "planos": "t", "pt": "Prazo da licença escolhido por você, de 1 a 90 dias", "en": "Licence term of your choosing, from 1 to 90 days", "es": "Plazo de la licencia elegido por ti, de 1 a 90 días" },
-        { "planos": "t", "pt": "Padrão do time empurrado para todo mundo", "en": "The team's defaults pushed to everyone", "es": "El estándar del equipo empujado a todos" },
-        { "planos": "t", "pt": "Entrada automática por domínio de e-mail", "en": "Automatic enrolment by email domain", "es": "Entrada automática por dominio de correo" }
+        {
+          "planos": "t",
+          "pt": "Assentos: convidar por e-mail, sem ninguém digitar chave",
+          "en": "Seats: invite by email, nobody types a key",
+          "es": "Asientos: invitar por correo, sin que nadie teclee una clave"
+        },
+        {
+          "planos": "t",
+          "pt": "Bloquear e liberar quem sai e quem entra",
+          "en": "Block and unblock people as they come and go",
+          "es": "Bloquear y liberar a quien sale y a quien entra"
+        },
+        {
+          "planos": "t",
+          "pt": "Prazo da licença escolhido por você, de 1 a 90 dias",
+          "en": "Licence term of your choosing, from 1 to 90 days",
+          "es": "Plazo de la licencia elegido por ti, de 1 a 90 días"
+        },
+        {
+          "planos": "t",
+          "pt": "Padrão do time empurrado para todo mundo",
+          "en": "The team's defaults pushed to everyone",
+          "es": "El estándar del equipo empujado a todos"
+        },
+        {
+          "planos": "t",
+          "pt": "Entrada automática por domínio de e-mail",
+          "en": "Automatic enrolment by email domain",
+          "es": "Entrada automática por dominio de correo"
+        }
       ]
     },
     {
       "id": "conta",
-      "titulo": { "pt": "A sua conta", "en": "Your account", "es": "Tu cuenta" },
+      "titulo": {
+        "pt": "A sua conta",
+        "en": "Your account",
+        "es": "Tu cuenta"
+      },
       "itens": [
-        { "planos": "fpt", "pt": "Entrar por link no e-mail — não existe senha para vazar", "en": "Sign in by emailed link — there is no password to leak", "es": "Entrar por enlace en el correo — no hay contraseña que filtrar" },
-        { "planos": "fpt", "pt": "Abrir chamado com o diagnóstico junto, e acompanhar a resposta", "en": "Open a ticket with the diagnostics attached, and follow the reply", "es": "Abrir un ticket con el diagnóstico adjunto, y seguir la respuesta" },
-        { "planos": "pt", "pt": "Faturas para baixar, e a nota fiscal quando sai", "en": "Invoices to download, and the tax receipt when it is issued", "es": "Facturas para descargar, y la factura fiscal cuando sale" },
-        { "planos": "pt", "pt": "Licença que se renova sozinha, sem colar chave nenhuma", "en": "A licence that renews itself, with no key to paste", "es": "Licencia que se renueva sola, sin pegar ninguna clave" }
+        {
+          "planos": "fpt",
+          "pt": "Entrar por link no e-mail — não existe senha para vazar",
+          "en": "Sign in by emailed link — there is no password to leak",
+          "es": "Entrar por enlace en el correo — no hay contraseña que filtrar"
+        },
+        {
+          "planos": "fpt",
+          "pt": "Abrir chamado com o diagnóstico junto, e acompanhar a resposta",
+          "en": "Open a ticket with the diagnostics attached, and follow the reply",
+          "es": "Abrir un ticket con el diagnóstico adjunto, y seguir la respuesta"
+        },
+        {
+          "planos": "pt",
+          "pt": "Faturas para baixar, e a nota fiscal quando sai",
+          "en": "Invoices to download, and the tax receipt when it is issued",
+          "es": "Facturas para descargar, y la factura fiscal cuando sale"
+        },
+        {
+          "planos": "pt",
+          "pt": "Licença que se renova sozinha, sem colar chave nenhuma",
+          "en": "A licence that renews itself, with no key to paste",
+          "es": "Licencia que se renueva sola, sin pegar ninguna clave"
+        }
       ]
     },
     {
       "id": "privacidade",
-      "titulo": { "pt": "O que nunca sai da sua máquina", "en": "What never leaves your machine", "es": "Lo que nunca sale de tu equipo" },
+      "titulo": {
+        "pt": "O que nunca sai da sua máquina",
+        "en": "What never leaves your machine",
+        "es": "Lo que nunca sale de tu equipo"
+      },
       "itens": [
-        { "planos": "fpt", "pt": "O vídeo, o áudio, a transcrição e o documento", "en": "The video, the audio, the transcript and the document", "es": "El vídeo, el audio, la transcripción y el documento" },
-        { "planos": "fpt", "pt": "A gravação de tela é descartada — só ficam os quadros e a fala", "en": "The screen recording is discarded — only frames and speech remain", "es": "La grabación de pantalla se descarta — solo quedan fotogramas y habla" },
-        { "planos": "fpt", "pt": "Funciona com a internet desligada, depois que a página abre", "en": "Works with the internet switched off, once the page has loaded", "es": "Funciona con internet apagada, una vez que la página ha cargado" },
-        { "planos": "fpt", "pt": "Nenhum cadastro exigido para usar nada disso", "en": "No sign-up required to use any of it", "es": "Ningún registro exigido para usar nada de esto" }
+        {
+          "planos": "fpt",
+          "pt": "O vídeo, o áudio, a transcrição e o documento",
+          "en": "The video, the audio, the transcript and the document",
+          "es": "El vídeo, el audio, la transcripción y el documento"
+        },
+        {
+          "planos": "fpt",
+          "pt": "A gravação de tela é descartada — só ficam os quadros e a fala",
+          "en": "The screen recording is discarded — only frames and speech remain",
+          "es": "La grabación de pantalla se descarta — solo quedan fotogramas y habla"
+        },
+        {
+          "planos": "fpt",
+          "pt": "Funciona com a internet desligada, depois que a página abre",
+          "en": "Works with the internet switched off, once the page has loaded",
+          "es": "Funciona con internet apagada, una vez que la página ha cargado"
+        },
+        {
+          "planos": "fpt",
+          "pt": "Nenhum cadastro exigido para usar nada disso",
+          "en": "No sign-up required to use any of it",
+          "es": "Ningún registro exigido para usar nada de esto"
+        }
       ]
     }
   ]

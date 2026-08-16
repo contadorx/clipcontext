@@ -486,6 +486,31 @@
       </div>
     </div>
 
+
+    <!-- ---- roteiro de casos ----
+
+         A quarta porta de entrada, e a única que muda o RITMO do trabalho em vez
+         da fonte do vídeo. Quem executa quarenta casos de teste não tem quarenta
+         vídeos: tem uma planilha, e digita caso, sistema e chamado quarenta
+         vezes à mão, errando em alguns.
+
+         A planilha entra, vira fila, e volta preenchida. Ela é o estado: não
+         guardamos roteiro em servidor nenhum, e quem fechar a aba no meio
+         reabre a planilha que baixou e continua de onde parou — o que já foi
+         feito está escrito nela. -->
+    <div class="recup" id="rotBloco">
+      <div class="row" style="align-items:center;gap:10px;flex-wrap:wrap">
+        <button class="ghost sm" id="rotAbrir" data-i18n="rotBtn"></button>
+        <input type="file" id="rotArq" accept=".xlsx,.csv,.tsv,.txt" class="hide">
+        <button class="ghost sm" id="rotColar" data-i18n="rotColarBtn"></button>
+        <button class="ghost sm hide" id="rotBaixar" data-i18n="rotBaixarBtn"></button>
+        <button class="ghost sm hide" id="rotFechar" data-i18n="rotFecharBtn"></button>
+        <span class="status" id="rotMsg" data-i18n="rotDica"></span>
+      </div>
+      <div class="hide" id="rotMapa" style="margin-top:12px"></div>
+      <div class="hide" id="rotFila" style="margin-top:12px"></div>
+    </div>
+
     <!-- Dois caminhos, e não uma lista de botões: gravar a tela agora é o que a
          maior parte das pessoas vem fazer, e estava em terceiro lugar, cinza,
          embaixo de uma zona de arraste que só serve para quem já tem arquivo. -->
@@ -1691,6 +1716,28 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       juntarOk:'{0} sessões juntadas, {1} quadros no total. Cada sessão virou uma tarefa, com o tempo de cada uma.',
       juntarBtn:'Juntar várias sessões', juntarUm:'Escolha dois ou mais arquivos — para um só, use \u201cReabrir um documento\u201d.',
       sbE4:'documento gerado', sbE4v:'nenhum documento ainda',
+      rotBtn:'Tenho um roteiro de casos', rotColarBtn:'Colar da planilha',
+      rotBaixarBtn:'Baixar a planilha preenchida', rotFecharBtn:'Fechar o roteiro',
+      rotDica:'Suba a planilha de casos (.xlsx ou .csv) e execute um a um: a identificação vem preenchida, e no fim a planilha volta com o que foi feito.',
+      rotLendo:'Lendo a planilha…', rotErro:'Não consegui ler essa planilha: {0}',
+      rotVazio:'Essa planilha não tem cabeçalho e pelo menos uma linha de caso.',
+      rotColado:'colado', rotColarVazio:'Não havia nada na área de transferência.',
+      rotSemColar:'O navegador não deixou ler a área de transferência. Salve como .csv e use o botão ao lado.',
+      rotMapaTit:'Qual coluna é o quê — eu chutei pelo cabeçalho, corrija se errei:',
+      rotCampoCaso:'Caso', rotCampoTitulo:'Título', rotCampoSistema:'Sistema', rotCampoChamado:'Chamado',
+      rotColuna:'coluna {0}', rotFilaTit:'{0} de {1} casos executados.',
+      rotUsar:'Executar', rotUsando:'Em execução', rotAgora:'em execução',
+      rotAgoraMsg:'Caso <b>{0}</b> preenchido. Grave a tela — ao baixar o documento ele é marcado como feito.',
+      rotFeito:'Executado',
+      rotColSit:'Situação', rotColQuando:'Executado em', rotColArq:'Arquivo', rotColImp:'Impressão das telas',
+      rotSoPago:'O roteiro de casos é do plano Personal.', rotVerPlanos:'ver os planos',
+      revJaAberta:'A revisão já está aberta aqui embaixo.',
+      /* O que aparece onde os botões de saída estão. O primeiro é o motivo de
+         eles estarem desligados — e diz onde os quadros nascem, porque botão
+         desligado sem explicação é beco sem saída. O segundo é a única frase
+         de "o que fazer agora" que o fim do fluxo tinha. */
+      saidaSemQuadros:'Ainda não há quadro nenhum para gerar. Os quadros saem no passo 2 — extraia do vídeo, ou grave a tela, que já extrai enquanto grava.',
+      saidaPronta:'{0} quadros prontos. Escolha um formato — dá para baixar mais de um.',
       sbE3:'{0} campos preenchidos', sbE3v:'opcional, em branco',
       sbE3u:'1 campo preenchido',
       sbE2:'{0} trechos com tempo', sbE2t:'texto colado, sem marcação de tempo', sbE2v:'sem transcrição',
@@ -2194,6 +2241,24 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       juntarOk:'{0} sessions merged, {1} frames in total. Each session became a task, with its own duration.',
       juntarBtn:'Merge several sessions', juntarUm:'Pick two or more files — for a single one, use \u201cReopen a document\u201d.',
       sbE4:'document generated', sbE4v:'no document yet',
+      rotBtn:'I have a list of cases', rotColarBtn:'Paste from the spreadsheet',
+      rotBaixarBtn:'Download the filled spreadsheet', rotFecharBtn:'Close the list',
+      rotDica:'Upload your case spreadsheet (.xlsx or .csv) and run them one by one: the identification comes filled in, and at the end the spreadsheet comes back with what was done.',
+      rotLendo:'Reading the spreadsheet…', rotErro:'I could not read that spreadsheet: {0}',
+      rotVazio:'That spreadsheet has no header and at least one case row.',
+      rotColado:'pasted', rotColarVazio:'There was nothing on the clipboard.',
+      rotSemColar:'The browser would not let me read the clipboard. Save as .csv and use the button next to it.',
+      rotMapaTit:'Which column is what — I guessed from the header, fix it if I got it wrong:',
+      rotCampoCaso:'Case', rotCampoTitulo:'Title', rotCampoSistema:'System', rotCampoChamado:'Ticket',
+      rotColuna:'column {0}', rotFilaTit:'{0} of {1} cases run.',
+      rotUsar:'Run', rotUsando:'Running', rotAgora:'running',
+      rotAgoraMsg:'Case <b>{0}</b> filled in. Record the screen — downloading the document marks it done.',
+      rotFeito:'Done',
+      rotColSit:'Status', rotColQuando:'Run at', rotColArq:'File', rotColImp:'Screen fingerprint',
+      rotSoPago:'The case list is a Personal plan feature.', rotVerPlanos:'see the plans',
+      revJaAberta:'The review is already open just below.',
+      saidaSemQuadros:'There is no frame to build from yet. Frames come out of step 2 — extract them from the video, or record the screen, which extracts as it goes.',
+      saidaPronta:'{0} frames ready. Pick a format — you can download more than one.',
       sbE3:'{0} fields filled', sbE3v:'optional, empty',
       sbE3u:'1 field filled',
       sbE2:'{0} time-stamped cues', sbE2t:'pasted text, no timing', sbE2v:'no transcript',
@@ -2697,6 +2762,24 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       juntarOk:'{0} sesiones juntadas, {1} fotogramas en total. Cada sesión pasó a ser una tarea, con su propia duración.',
       juntarBtn:'Juntar varias sesiones', juntarUm:'Elige dos o más archivos — para uno solo, usa \u201cReabrir un documento\u201d.',
       sbE4:'documento generado', sbE4v:'todavía sin documento',
+      rotBtn:'Tengo una lista de casos', rotColarBtn:'Pegar de la hoja de cálculo',
+      rotBaixarBtn:'Descargar la hoja rellenada', rotFecharBtn:'Cerrar la lista',
+      rotDica:'Sube tu hoja de casos (.xlsx o .csv) y ejecútalos uno a uno: la identificación viene rellenada, y al final la hoja vuelve con lo que se hizo.',
+      rotLendo:'Leyendo la hoja…', rotErro:'No pude leer esa hoja: {0}',
+      rotVazio:'Esa hoja no tiene cabecera y al menos una fila de caso.',
+      rotColado:'pegado', rotColarVazio:'No había nada en el portapapeles.',
+      rotSemColar:'El navegador no dejó leer el portapapeles. Guarda como .csv y usa el botón de al lado.',
+      rotMapaTit:'Qué columna es qué — lo adiviné por la cabecera, corrígelo si fallé:',
+      rotCampoCaso:'Caso', rotCampoTitulo:'Título', rotCampoSistema:'Sistema', rotCampoChamado:'Ticket',
+      rotColuna:'columna {0}', rotFilaTit:'{0} de {1} casos ejecutados.',
+      rotUsar:'Ejecutar', rotUsando:'En ejecución', rotAgora:'en ejecución',
+      rotAgoraMsg:'Caso <b>{0}</b> rellenado. Graba la pantalla — al descargar el documento queda marcado como hecho.',
+      rotFeito:'Ejecutado',
+      rotColSit:'Situación', rotColQuando:'Ejecutado el', rotColArq:'Archivo', rotColImp:'Huella de las pantallas',
+      rotSoPago:'La lista de casos es del plan Personal.', rotVerPlanos:'ver los planes',
+      revJaAberta:'La revisión ya está abierta aquí abajo.',
+      saidaSemQuadros:'Todavía no hay ningún fotograma para generar. Los fotogramas salen en el paso 2 — extráelos del vídeo, o graba la pantalla, que ya extrae mientras graba.',
+      saidaPronta:'{0} fotogramas listos. Elige un formato — puedes descargar más de uno.',
       sbE3:'{0} campos rellenados', sbE3v:'opcional, en blanco',
       sbE3u:'1 campo rellenado',
       sbE2:'{0} tramos con tiempo', sbE2t:'texto pegado, sin marcas de tiempo', sbE2v:'sin transcripción',
@@ -3068,7 +3151,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   const abertoNaMao = new Set();
 
   function ligarCabecalhos(){
-    ['cardTr','cardFrames','prevCard','promptCard'].forEach(id => {
+    /* `cardFrames` não existe no HTML — sobrou de quando a extração era um
+       cartão à parte. Um id inventado numa lista de ids é o tipo de coisa que
+       faz o próximo leitor procurar meia hora por um cartão que nunca houve. */
+    ['cardTr','prevCard','promptCard'].forEach(id => {
       const el = $(id); if (!el) return;
       const h = el.querySelector('h2'); if (!h || h.dataset.clicavel) return;
       h.dataset.clicavel = '1';
@@ -3156,6 +3242,12 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     dobrar('prevCard',    temAlgo || modo === 'arquivo' || modo === 'gravado');
     dica('hintPrev',      temAlgo ? null : 'lockPrev');
     trancar('promptCard', temAlgo);
+    /* Os botões de saída seguem o mesmo relógio das travas dos cartões. Antes
+       eles só eram acertados dentro de `counts()`, que só roda a partir de
+       `render()` — e nem a abertura da página nem o carregar de um vídeo
+       chamam `render()`. Era essa a janela em que onze botões ficavam
+       clicáveis sem ter o que fazer. */
+    if (typeof pintarSaidas === 'function') pintarSaidas();
     dobrar('promptCard',  temAlgo);
     dica('hintPrompt',    temAlgo ? null : 'lockPrompt');
     sincAmbos();
@@ -3830,7 +3922,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     const alvos = [...$('multiLinguas').querySelectorAll('input:checked')].map(i => i.value);
     if (!alvos.length) { $('multiMsg').innerHTML = `<span class="err">${t('multiVazio')}</span>`; return; }
     const kept = frames.filter(f => f.keep);
-    if (!kept.length) return;
+    if (semQuadros('multiMsg')) return;
     if (!TEM_TRADUTOR) { $('multiMsg').innerHTML = `<span class="err">${t('tradSemApi')}</span>`; return; }
 
     $('multiGerar').disabled = true;
@@ -3899,8 +3991,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     const caps = capitulos();
     if (!caps.length) { $('pdfStatus').innerHTML = `<span class="err">${t('capPacoteNao')}</span>`; return; }
     const kept = frames.filter(f => f.keep);
-    if (!kept.length) return;
-    $('capPacote').disabled = true;
+    if (semQuadros()) return;
+    $('capPacote').disabled = true; emUso.add('capPacote');
     $('pdfStatus').textContent = t('pkgBuilding');
     await new Promise(r => setTimeout(r, 40));
     await aplicarTarjas(kept);
@@ -3927,7 +4019,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       frames.forEach((f, i) => { f.keep = guardados[i]; });
       $('evCaso').value = casoOriginal;
       render();
-      $('capPacote').disabled = false;
+      emUso.delete('capPacote'); $('capPacote').disabled = false;
     }
     if (!entradas.length) return;
     baixarBlob(zipar(entradas), 'tarefas-' + nomeBase() + '.zip');
@@ -4394,7 +4486,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
        o nome do vídeo novo. Frames vindos de arquivo não são tocados — ali a
        varredura já os substitui sozinha. */
     if (liveDur > 0) {
-      frames = [];
+      frames = []; esqueceuOQueGerou();
       $('thumbs').innerHTML = '';
       $('grabbed').textContent = '';
       $('liveBox').classList.add('hide');
@@ -4966,7 +5058,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     if (morreu()) return desistir(t('recEnded'), 'err');
 
     // ---- estado inicial da captura ----
-    frames = []; manual = []; limparLive();
+    frames = []; manual = []; limparLive(); esqueceuOQueGerou();
     $('grabbed').textContent = '';
     filaAsr.length = 0; asrPendentes = 0;
     $('tr').value = ''; refreshTr();
@@ -6021,7 +6113,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     /* Quais arquivos o degrau pediu de verdade. Sem isto, dizer "o degrau fp32
        falhou" não diz se ele chegou a pedir o arquivo fp32 — e não chegava. */
     let pedidos = new Set();
-    let baixouAlgo = false;
+    let baixouModelo = false;   // do MODELO de voz — nada a ver com a bolinha 4
     const mb = b => (b / 1048576).toFixed(0);
     /* Percentual por BYTES, e não a média das porcentagens de cada arquivo: a
        média fazia o número saltar para 50% assim que o menor arquivo terminava,
@@ -6030,7 +6122,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       if (!p.file) return;
       pedidos.add(p.file);
       if (p.status === 'progress' || p.status === 'download') {
-        baixouAlgo = true;
+        baixouModelo = true;
         arquivos[p.file] = { loaded: p.loaded || 0, total: p.total || 0 };
         let l = 0, tt = 0;
         for (const k in arquivos) { l += arquivos[k].loaded; tt += arquivos[k].total; }
@@ -7150,11 +7242,11 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
 
     $('extract').disabled = true;
     sincAmbos();
-    $('go').disabled = $('docx').disabled = $('zip').disabled = true;
+    $('go').disabled = $('docx').disabled = $('zip').disabled = true; emUso.add('zip');
     $('cancel').classList.remove('hide');
     trabalhando(true);
     $('barWrap').classList.remove('hide');
-    frames = [];
+    frames = []; esqueceuOQueGerou();
     let limited = '';
     stop = false;
     const t0 = performance.now();
@@ -7257,7 +7349,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     $('status').innerHTML = `<span class="ok">${tr('extracted', frames.length)}</span>${tr('reviewNext')}` +
       avisoFaixa + parou + (limited ? `<span class="err">${limited}</span>` : '');
     $('extract').disabled = false;
-    $('go').disabled = $('docx').disabled = $('zip').disabled = false;
+    $('go').disabled = $('docx').disabled = emUso.delete('zip'); $('zip').disabled = false;
     $('cancel').classList.add('hide');
     /* A barra cheia ficava no lugar depois de terminar — uma faixa azul de
        100% que não quer dizer mais nada, logo abaixo dos botões. */
@@ -7458,6 +7550,54 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     counts();
   }
 
+  /* ---- a porta das saídas ----------------------------------------------
+
+     O defeito que isto conserta, medido: com um vídeo escolhido e nenhum quadro
+     extraído, o passo 3 abria e ONZE botões ficavam clicáveis. Clicar em
+     qualquer um deles não fazia absolutamente nada — cada gerador começava com
+     `if (!kept.length) return;`, um `return` mudo, antes até da linha que
+     escreve "gerando…". A pessoa clica, a tela não muda, ela clica de novo, e
+     depois conclui que o programa está quebrado.
+
+     São duas peças, e as duas são necessárias:
+
+       `pintarSaidas()`  desliga o que não pode funcionar e DIZ onde os quadros
+                         nascem. Botão desligado sem explicação é beco sem saída.
+       `semQuadros()`    responde ao clique que escapou — teclado, `force`, ou
+                         um caminho que eu não previ. Nenhum `return` mudo sobra.
+
+     `emUso` existe porque os próprios handlers desligam o botão contra duplo
+     clique e religam no `finally`: sem isso, um `counts()` no meio de uma
+     geração religaria o botão por baixo dela. */
+  const SAIDAS = ['go','docx','html','md','pptx','scorm','jira','capPacote',
+                  'json','csv','zip','gdocs'];
+  const emUso = new Set();
+
+  function pintarSaidas(){
+    const keep = frames.filter(f => f.keep).length;
+    SAIDAS.forEach(id => {
+      const b = $(id);
+      if (b && !emUso.has(id)) b.disabled = !keep;
+    });
+    const st = $('pdfStatus');
+    if (!st) return;
+    if (!keep) st.innerHTML = `<span class="muted">${t('saidaSemQuadros')}</span>`;
+    /* Só preenche quando está vazio: o resultado de uma geração ("saiu o PDF
+       com 12 telas") mora aqui, e sobrescrevê-lo apagaria a resposta que a
+       pessoa acabou de receber. */
+    else if (!st.textContent.trim()) st.innerHTML = `<span class="muted">${t('saidaPronta', keep)}</span>`;
+  }
+
+  /** Devolve `true` quando NÃO dá para seguir, e nesse caso já explicou por quê.
+   *  A leitura no chamador fica `if (semQuadros()) return;` — o mesmo tamanho
+   *  do `return` mudo que havia antes, com a diferença de que este fala. */
+  function semQuadros(onde){
+    if (frames.filter(f => f.keep).length) return false;
+    const el = $(onde || 'pdfStatus');
+    if (el) el.innerHTML = `<span class="err">${t('saidaSemQuadros')}</span>`;
+    return true;
+  }
+
   function counts(){
     passos();
     const keep = frames.filter(f => f.keep);
@@ -7465,7 +7605,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     $('nOff').textContent = frames.length - keep.length;
     const bytes = keep.reduce((s,f) => s + f.img.url.length * 0.75, 0) + 40000;
     $('size').textContent = (bytes/1048576).toFixed(1);
-    $('go').disabled = $('docx').disabled = $('zip').disabled = !keep.length;
+    pintarSaidas();
     // o botão da fala só faz sentido com transcrição marcada no tempo
     $('falaNota').disabled = !keep.length || !parseTranscript($('tr').value).cues.length;
     if (typeof pintarRevisar === 'function') pintarRevisar();
@@ -7503,20 +7643,29 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     const keep = frames.filter(f => f.keep);
     const cues = parseTranscript($('tr').value).cues;
     const ev = (typeof evDados === 'function') ? evDados() : { algum:false, linhas:[] };
-    const n3 = ev.linhas.length + (ev.caso ? 1 : 0);
+    const n3 = ev.digitado || 0;
     const est = [
       keep.length ? t('sbE1', keep.length) : t('sbE1v'),
       cues.length ? t('sbE2', cues.length) : ($('tr').value.trim() ? t('sbE2t') : t('sbE2v')),
-      ev.algum ? t(n3 === 1 ? 'sbE3u' : 'sbE3', n3) : t('sbE3v'),
+      n3 ? t(n3 === 1 ? 'sbE3u' : 'sbE3', n3) : t('sbE3v'),
       baixouAlgo ? t('sbE4') : t('sbE4v')
     ];
-    const feito = [keep.length > 0, cues.length > 0 || !!$('tr').value.trim(), ev.algum, baixouAlgo];
+    const feito = [keep.length > 0, cues.length > 0 || !!$('tr').value.trim(), n3 > 0, baixouAlgo];
     est.forEach((txt, i) => {
       const el = $('sbEst' + (i + 1)); if (el) el.textContent = txt;
       const d = $('sb' + (i + 1)); if (d) d.classList.toggle('feito', feito[i]);
     });
   }
+  /* A ÚNICA das quatro bolinhas que é guardada, e não calculada — porque "esta
+     pessoa já baixou alguma coisa" não dá para deduzir olhando a tela. Por ser
+     guardada, ela precisa ser apagada à mão quando os quadros somem: uma
+     bolinha verde dizendo "documento gerado" em cima de um documento que não
+     existe mais é pior que bolinha nenhuma. */
   let baixouAlgo = false;
+  function esqueceuOQueGerou(){
+    baixouAlgo = false;
+    const st = $('pdfStatus'); if (st) st.textContent = '';
+  }
 
   document.querySelectorAll('.sbOk').forEach(b2 => {
     b2.onclick = () => {
@@ -8226,13 +8375,31 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       linhas,                       // o que entra na primeira página do documento
       // o zip não tem título onde pendurar o caso de teste, então lá ele volta
       linhasCompletas: (v('evCaso') ? [[t(b.caso), v('evCaso')]] : []).concat(linhas),
-      algum: linhas.length > 0 || !!v('evCaso')
+      algum: linhas.length > 0 || !!v('evCaso'),
+      /* `algum` diz se o documento TEM bloco de identificação — e ele tem, mesmo
+         que a pessoa não tenha digitado nada, porque a hora de início é deduzida
+         da data do arquivo. Usar isso para acender a bolinha do passo 3 fazia a
+         tela dizer "identificado" para quem nunca tocou no bloco.
+
+         `digitado` é a outra pergunta, e é a que a bolinha faz: a pessoa
+         escreveu ou escolheu alguma coisa aqui? Datas deduzidas não contam. */
+      digitado: [v('evCaso'), v('evSis'), v('evQuem'), v('evChamado'), res, amb,
+                 b.proc ? v('evDono') : '', b.proc ? $('evValido').value : '']
+                .filter(Boolean).length
     };
   }
+  $('evRes').addEventListener('change', () => { if (typeof pintarSubpassos === 'function') pintarSubpassos(); });
+  $('evAmb').addEventListener('change', () => { if (typeof pintarSubpassos === 'function') pintarSubpassos(); });
   evCampos.forEach(id => $(id).addEventListener('input', () => {
     if (id === 'evInicio') { $('evEst').classList.add('hide'); render(); }
     else if (frames.length) buildPrompt();
     if (PERFIL_CAMPOS.includes(id)) gravarPerfil();
+    /* A bolinha do passo 3 é o retorno de ter preenchido o bloco — e ela não
+       acendia ao digitar. Só repintava quando ALGUMA OUTRA coisa chamasse
+       `counts()`: extrair de novo, mexer num quadro. Quem preenchia e ficava
+       olhando via a bolinha continuar apagada, que é o oposto do que ela existe
+       para dizer. */
+    if (typeof pintarSubpassos === 'function') pintarSubpassos();
   }));
   lerPerfil();
 
@@ -8240,8 +8407,13 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      SHA-256 do JPEG exatamente como ele sai no documento. Prova que o arquivo
      não foi editado depois; NÃO prova conformidade com 21 CFR Part 11, SOX ou
      CSV, e o produto não diz em lugar nenhum que prova. */
-  async function calcularHashes(kept){
-    if (!evDados().hash || !(crypto.subtle && crypto.subtle.digest)) return;
+  async function calcularHashes(kept, forcar){
+    /* `forcar` existe para o roteiro de casos: a planilha registra a impressão
+       das telas de cada execução, e essa é uma promessa dela — não do
+       documento. Sem isso, a coluna saía vazia justamente para quem não marcou
+       "hash" no bloco de identificação, que é a maioria. O documento continua
+       imprimindo o hash só quando alguém pede. */
+    if ((!forcar && !evDados().hash) || !(crypto.subtle && crypto.subtle.digest)) return;
     for (const f of kept) {
       if (f.hash) continue;
       try {
@@ -9413,9 +9585,15 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   $('ocrStop').onclick = () => { ocrParar = true; };
 
   $('ocr').onclick = async () => {
+    /* Todo clique tem que mudar alguma coisa na tela — inclusive o segundo.
+       Quando a biblioteca não carrega, a mensagem de erro é a MESMA da vez
+       anterior, e uma tela idêntica depois de um clique é indistinguível de um
+       botão quebrado. Limpar e escrever "procurando…" antes de tentar resolve
+       os dois casos: o de sucesso e o de repetir o mesmo erro. */
+    $('status').textContent = t('ocrLoad');
     await aplicarTarjas(frames.filter(f => f.keep));
     const kept = frames.filter(f => f.keep);
-    if (!kept.length) return;
+    if (semQuadros('movMsg')) return;
     $('ocr').disabled = true;
     ocrParar = false;
     trabalhando(true);
@@ -9485,7 +9663,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      imagens embutidas em base64. É o mesmo conteúdo do PDF, legível por máquina. */
   $('json').onclick = async () => {
     const kept = frames.filter(f => f.keep);
-    if (!kept.length) return;
+    if (semQuadros('movMsg')) return;
     await aplicarTarjas(kept); await calcularHashes(kept);
     const { cues, plain } = parseTranscript($('tr').value);
     const ev = evDados();
@@ -9593,7 +9771,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
 
   function revAbrir(){
     const kept = frames.filter(f => f.keep);
-    if (!kept.length) return;
+    if (semQuadros('movMsg')) return;
     revI = 0;
     revConta = { igual: 0, trocada: 0, fora: 0 };
     $('revBox').classList.remove('hide');
@@ -9631,7 +9809,19 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     revPintar();
   }
 
-  $('revisar').onclick = revAbrir;
+  $('revisar').onclick = () => {
+    /* Com a revisão já aberta, `revAbrir()` reiniciava a contagem em silêncio —
+       a tela não mudava, e quem clicou não sabia se tinha acontecido alguma
+       coisa. Se já está aberta, o clique leva o olho até ela. */
+    if (typeof revAtivo === 'function' && revAtivo()) {
+      /* Rolar até a caixa não basta quando ela já está à vista: a tela fica
+         igual e o clique some. A frase é a resposta; a rolagem é a cortesia. */
+      $('movMsg').textContent = t('revJaAberta');
+      $('revBox').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+    revAbrir();
+  };
   $('revSair').onclick = () => revFechar(true);
 
   $('revIgual').onclick = () => { if (revConta) revConta.igual++; revAvancar(); };
@@ -9762,8 +9952,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
 
   $('scorm').onclick = async () => {
     const kept = frames.filter(f => f.keep);
-    if (!kept.length) return;
-    $('scorm').disabled = true;
+    if (semQuadros()) return;
+    $('scorm').disabled = true; emUso.add('scorm');
     $('pdfStatus').textContent = t('pkgBuilding');
     await new Promise(r => setTimeout(r, 40));
     try {
@@ -9785,7 +9975,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       $('pdfStatus').innerHTML = `<span class="ok">${t('scormOk')}</span>`;
     } catch (e) {
       $('pdfStatus').innerHTML = `<span class="err">${t('pkgErr', (e && e.message) || e)}</span>`;
-    } finally { $('scorm').disabled = false; }
+    } finally { emUso.delete('scorm'); $('scorm').disabled = false; }
   };
 
   /* ================= reabrir um documento =================
@@ -9808,6 +9998,164 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      ler as entradas é percorrer os cabeçalhos locais e copiar os bytes. Mesmo
      código do /verificar, e de propósito: dois leitores diferentes do mesmo
      formato divergem no dia em que alguém mexer num só. */
+
+  /* ================= planilha: ler e escrever =========================
+
+     Um `.xlsx` é um zip de XML, e a ferramenta já sabe abrir zip e montar zip —
+     foi assim que o `.docx` e o `.pptx` nasceram aqui, sem biblioteca nova. O
+     que faltava era ler zip COMPRIMIDO: o `lerZip()` que existe só entende o
+     método 0 (armazenado), porque foi escrito para os nossos próprios pacotes.
+     Planilha de Excel e de Google Sheets vem sempre em deflate.
+
+     Quem descomprime é o navegador, com `DecompressionStream` — nativo, sem
+     dependência. E a leitura passa pelo DIRETÓRIO CENTRAL do zip em vez de
+     varrer os cabeçalhos locais: quem escreve zip em fluxo deixa o tamanho
+     fora do cabeçalho local, e varrer daria lixo em silêncio. */
+  async function inflar(u8){
+    const fluxo = new Blob([u8]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
+    return new Uint8Array(await new Response(fluxo).arrayBuffer());
+  }
+
+  async function abrirZip(buf){
+    const b = new Uint8Array(buf), dv = new DataView(buf), saida = {};
+    // o fim do diretório central: assinatura procurada de trás para frente
+    let fim = -1;
+    for (let i = b.length - 22; i >= 0 && i > b.length - 66000; i--) {
+      if (dv.getUint32(i, true) === 0x06054b50) { fim = i; break; }
+    }
+    if (fim < 0) throw new Error('zip');
+    const quantos = dv.getUint16(fim + 10, true);
+    let p2 = dv.getUint32(fim + 16, true);
+    for (let k = 0; k < quantos; k++) {
+      if (dv.getUint32(p2, true) !== 0x02014b50) break;
+      const metodo = dv.getUint16(p2 + 10, true);
+      const comp   = dv.getUint32(p2 + 20, true);
+      const nl     = dv.getUint16(p2 + 28, true);
+      const el     = dv.getUint16(p2 + 30, true);
+      const cl     = dv.getUint16(p2 + 32, true);
+      const local  = dv.getUint32(p2 + 42, true);
+      const nome   = new TextDecoder().decode(b.subarray(p2 + 46, p2 + 46 + nl));
+      const lnl = dv.getUint16(local + 26, true), lel = dv.getUint16(local + 28, true);
+      const ini = local + 30 + lnl + lel;
+      const cru = b.subarray(ini, ini + comp);
+      saida[nome] = metodo === 8 ? await inflar(cru) : cru;
+      p2 += 46 + nl + el + cl;
+    }
+    return saida;
+  }
+
+  const desXml = s2 => String(s2 == null ? '' : s2)
+    .replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'").replace(/&#(\d+);/g, (_, n) => String.fromCharCode(+n))
+    .replace(/&amp;/g, '&');
+
+  /** "AB" -> 27. A coluna vem no atributo `r` de cada célula, e é por ela que
+   *  se sabe onde a célula fica: planilha com coluna vazia no meio não escreve
+   *  a célula, e contar na ordem alinharia tudo errado a partir dali. */
+  function colunaDaRef(ref){
+    let n = 0;
+    for (const ch of ref) n = n * 26 + (ch.charCodeAt(0) - 64);
+    return n - 1;
+  }
+
+  function xlsxParaLinhas(itens){
+    const txt = nome => new TextDecoder().decode(itens[nome] || new Uint8Array());
+    const compart = [...txt('xl/sharedStrings.xml').matchAll(/<si>([\s\S]*?)<\/si>/g)]
+      .map(m => [...m[1].matchAll(/<t[^>]*>([\s\S]*?)<\/t>/g)].map(x => desXml(x[1])).join(''));
+    const nomes = Object.keys(itens).filter(n => /^xl\/worksheets\/.*\.xml$/.test(n)).sort();
+    if (!nomes.length) throw new Error('sem aba');
+    const aba = txt(nomes[0]);
+    const linhas = [];
+    for (const lm of aba.matchAll(/<row[^>]*>([\s\S]*?)<\/row>/g)) {
+      const cels = [];
+      for (const cm of lm[1].matchAll(/<c\b([^>]*?)(?:\/>|>([\s\S]*?)<\/c>)/g)) {
+        const attrs = cm[1] || '', corpo = cm[2] || '';
+        const ref = (attrs.match(/r="([A-Z]+)\d+"/) || [])[1];
+        const onde = ref ? colunaDaRef(ref) : cels.length;
+        let v = '';
+        if (/t="s"/.test(attrs)) v = compart[+((corpo.match(/<v>(\d+)<\/v>/) || [])[1])] || '';
+        else if (/t="inlineStr"/.test(attrs))
+          v = [...corpo.matchAll(/<t[^>]*>([\s\S]*?)<\/t>/g)].map(x => desXml(x[1])).join('');
+        else v = desXml((corpo.match(/<v>([\s\S]*?)<\/v>/) || ['', ''])[1]);
+        while (cels.length < onde) cels.push('');
+        cels[onde] = String(v).trim();
+      }
+      linhas.push(cels);
+    }
+    return linhas;
+  }
+
+  /** Texto separado por tabulação (colar do Excel) ou por vírgula/ponto e
+   *  vírgula (CSV). O separador é adivinhado pela primeira linha — quem cola do
+   *  Excel manda tabulação, e ninguém deveria ter que escolher isso num menu. */
+  function textoParaLinhas(txt){
+    const bruto = String(txt || '').replace(/\r\n?/g, '\n').replace(/^﻿/, '');
+    const primeira = bruto.split('\n')[0] || '';
+    const sep = primeira.includes('\t') ? '\t'
+              : (primeira.split(';').length > primeira.split(',').length ? ';' : ',');
+    const linhas = [];
+    for (const l of bruto.split('\n')) {
+      if (!l.trim()) continue;
+      const cels = []; let atual = '', aspas = false;
+      for (let i = 0; i < l.length; i++) {
+        const ch = l[i];
+        if (ch === '"') { if (aspas && l[i + 1] === '"') { atual += '"'; i++; } else aspas = !aspas; }
+        else if (ch === sep && !aspas) { cels.push(atual.trim()); atual = ''; }
+        else atual += ch;
+      }
+      cels.push(atual.trim());
+      linhas.push(cels);
+    }
+    return linhas;
+  }
+
+  /* Escrever `.xlsx` à mão: cinco arquivos, e todo texto vai como `inlineStr`
+     para não precisar da tabela de strings compartilhadas — ela economiza bytes
+     numa planilha de cem mil linhas e custa um índice para manter certo numa de
+     quarenta. */
+  const xEsc = s2 => String(s2 == null ? '' : s2)
+    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, '')
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  const refDaColuna = n => { let s2 = ''; n++; while (n > 0) { const r = (n - 1) % 26; s2 = String.fromCharCode(65 + r) + s2; n = (n - 1 - r) / 26; } return s2; };
+
+  function montarXlsx(linhas, nomeAba){
+    const corpo = linhas.map((cels, i) =>
+      `<row r="${i + 1}">` + cels.map((v, j) =>
+        `<c r="${refDaColuna(j)}${i + 1}" t="inlineStr"><is><t xml:space="preserve">${xEsc(v)}</t></is></c>`
+      ).join('') + '</row>').join('');
+    const arq = {
+      '[Content_Types].xml':
+        '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+        '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">' +
+        '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>' +
+        '<Default Extension="xml" ContentType="application/xml"/>' +
+        '<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>' +
+        '<Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>' +
+        '</Types>',
+      '_rels/.rels':
+        '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+        '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+        '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>' +
+        '</Relationships>',
+      'xl/workbook.xml':
+        '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+        '<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" ' +
+        'xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">' +
+        `<sheets><sheet name="${xEsc((nomeAba || 'Roteiro').slice(0, 28))}" sheetId="1" r:id="rId1"/></sheets></workbook>`,
+      'xl/_rels/workbook.xml.rels':
+        '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+        '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+        '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>' +
+        '</Relationships>',
+      'xl/worksheets/sheet1.xml':
+        '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+        '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">' +
+        `<sheetData>${corpo}</sheetData></worksheet>`,
+    };
+    return zipar(Object.entries(arq).map(([nome, txt]) => ({ nome, dados: bytesDe(txt) })),
+                 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+  }
+
   function lerZip(buf){
     const b = new Uint8Array(buf), dv = new DataView(buf), saida = {};
     for (let i = 0; i + 30 < b.length; ) {
@@ -10255,11 +10603,259 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     return new Blob([...partes, ...central, fim], { type: tipo || 'application/zip' });
   }
 
+
+  /* ================= roteiro de casos ==================================
+
+     Quem executa quarenta casos tem uma planilha, e hoje digita caso, sistema e
+     chamado quarenta vezes. Aqui a planilha entra, vira fila, e volta
+     preenchida com o que foi feito.
+
+     A PLANILHA É O ESTADO. Não guardamos roteiro em servidor nenhum — seria a
+     primeira coisa nossa a saber o que a pessoa está testando, e isso é
+     exatamente o que o produto promete não fazer. Quem fecha a aba no meio
+     reabre a planilha que baixou: o que já foi feito está escrito nela, e a
+     fila volta de onde parou. O `sessionStorage` é só conforto dentro da aba.
+
+     É recurso de plano pago (Personal), e a razão é de fluxo, não de
+     capacidade: ninguém que grava um vídeo precisa disto, e quem roda quarenta
+     casos economiza uma tarde. Nada que já era gratuito foi para trás. */
+  const ROTEIRO_CHAVE = '__MARCA__.roteiro';
+  let roteiro = null;
+
+  const PISTAS = {
+    caso:    /^(caso|id|c[oó]digo|codigo|case|test\s*case|ct|cen[aá]rio)\b/i,
+    titulo:  /(t[ií]tulo|titulo|title|descri|resumo|summary|nome|passo)/i,
+    sistema: /(sistema|system|aplica|app|m[oó]dulo|modulo|produto)/i,
+    chamado: /(chamado|ticket|issue|jira|hist[oó]ria|story|requisito|demanda)/i,
+  };
+  /* As quatro colunas que a ferramenta acrescenta ao devolver a planilha. Os
+     nomes saem traduzidos, e são reconhecidos na volta para que reabrir a
+     planilha devolvida não crie um segundo conjunto delas. */
+  const COLS_SAIDA = () => [t('rotColSit'), t('rotColQuando'), t('rotColArq'), t('rotColImp')];
+
+  function gravarRoteiro(){
+    try {
+      if (roteiro) sessionStorage.setItem(ROTEIRO_CHAVE, JSON.stringify(roteiro));
+      else sessionStorage.removeItem(ROTEIRO_CHAVE);
+    } catch (e) {}
+  }
+
+  function acharColuna(cab, quais){
+    const i = cab.findIndex(c => quais.test(String(c || '')));
+    return i < 0 ? null : i;
+  }
+
+  /** Entrar com linhas cruas: separa cabeçalho, adivinha o mapa e monta a fila. */
+  function abrirRoteiro(linhas, nome){
+    const uteis = linhas.filter(l => l.some(c => String(c || '').trim()));
+    if (uteis.length < 2) { avisoRoteiro(t('rotVazio'), true); return; }
+    const cab = uteis[0].map(c => String(c || '').trim());
+    const jaTem = COLS_SAIDA().map(c => cab.indexOf(c));
+    roteiro = {
+      nome: (nome || 'roteiro').replace(/\.(xlsx|csv|tsv|txt)$/i, ''),
+      cab, linhas: uteis.slice(1),
+      /* Se a planilha já voltou de uma rodada anterior, as colunas de saída
+         estão nela — e é daí que a fila sabe o que já foi feito. */
+      saida: jaTem.every(i => i >= 0) ? jaTem : null,
+      mapa: {
+        caso:    acharColuna(cab, PISTAS.caso),
+        titulo:  acharColuna(cab, PISTAS.titulo),
+        sistema: acharColuna(cab, PISTAS.sistema),
+        chamado: acharColuna(cab, PISTAS.chamado),
+      },
+      feitos: {},
+      atual: null,
+    };
+    if (roteiro.mapa.caso == null) roteiro.mapa.caso = 0;
+    // o que a planilha devolvida já registrava volta para a memória
+    if (roteiro.saida) {
+      roteiro.linhas.forEach((l, i) => {
+        const sit = String(l[roteiro.saida[0]] || '').trim();
+        if (sit) roteiro.feitos[i] = { quando: l[roteiro.saida[1]] || '',
+                                       arquivo: l[roteiro.saida[2]] || '',
+                                       impressao: l[roteiro.saida[3]] || '' };
+      });
+    }
+    gravarRoteiro();
+    pintarRoteiro();
+  }
+
+  const avisoRoteiro = (txt, ruim) => {
+    const el = $('rotMsg'); if (!el) return;
+    el.innerHTML = ruim ? `<span class="err">${txt}</span>` : txt;
+  };
+
+  function pintarRoteiro(){
+    const mapa = $('rotMapa'), fila = $('rotFila');
+    if (!mapa || !fila) return;
+    $('rotBaixar').classList.toggle('hide', !roteiro);
+    $('rotFechar').classList.toggle('hide', !roteiro);
+    if (!roteiro) {
+      mapa.classList.add('hide'); fila.classList.add('hide');
+      avisoRoteiro(t('rotDica'));
+      return;
+    }
+    mapa.classList.remove('hide'); fila.classList.remove('hide');
+
+    const opcoes = (sel) => '<option value="">—</option>' + roteiro.cab.map((c, i) =>
+      `<option value="${i}"${sel === i ? ' selected' : ''}>${esc(c || t('rotColuna', i + 1))}</option>`).join('');
+    mapa.innerHTML =
+      `<p class="status" style="margin:0 0 6px">${t('rotMapaTit')}</p>` +
+      '<div class="row" style="gap:10px;flex-wrap:wrap;align-items:center">' +
+      [['caso', 'rotCampoCaso'], ['titulo', 'rotCampoTitulo'],
+       ['sistema', 'rotCampoSistema'], ['chamado', 'rotCampoChamado']].map(([k, rot]) =>
+        `<label class="small" for="rotMap_${k}">${t(rot)}</label>` +
+        `<select id="rotMap_${k}" data-campo="${k}" style="padding:5px 7px">${opcoes(roteiro.mapa[k])}</select>`
+      ).join('') + '</div>';
+    mapa.querySelectorAll('select').forEach(sel2 => {
+      sel2.onchange = () => {
+        roteiro.mapa[sel2.dataset.campo] = sel2.value === '' ? null : +sel2.value;
+        gravarRoteiro(); pintarRoteiro();
+      };
+    });
+
+    const val = (l, k) => roteiro.mapa[k] == null ? '' : String(l[roteiro.mapa[k]] || '').trim();
+    const feitos = Object.keys(roteiro.feitos).length;
+    fila.innerHTML =
+      `<p class="status" style="margin:0 0 6px">${t('rotFilaTit', feitos, roteiro.linhas.length)}</p>` +
+      '<div style="max-height:280px;overflow:auto;border:1px solid var(--linha,#e6e6ef);border-radius:8px">' +
+      '<table style="width:100%;border-collapse:collapse;font-size:13.5px">' +
+      roteiro.linhas.map((l, i) => {
+        const f = roteiro.feitos[i];
+        const atual = roteiro.atual === i;
+        return `<tr style="border-top:1px solid var(--linha,#e6e6ef)${atual ? ';background:var(--panel)' : ''}">` +
+          `<td style="padding:6px 9px;white-space:nowrap"><b>${esc(val(l, 'caso') || ('#' + (i + 1)))}</b></td>` +
+          `<td style="padding:6px 9px">${esc(val(l, 'titulo'))}</td>` +
+          `<td style="padding:6px 9px;white-space:nowrap;color:${f ? 'var(--ok,#1f9d55)' : 'var(--muted)'}">` +
+            (f ? '✓ ' + esc(f.quando || '') : (atual ? t('rotAgora') : '—')) + '</td>' +
+          `<td style="padding:6px 9px;text-align:right;white-space:nowrap">` +
+            `<button class="ghost sm rotUsar" data-i="${i}" style="padding:3px 9px;font-size:12.5px">` +
+            (atual ? t('rotUsando') : t('rotUsar')) + '</button></td></tr>';
+      }).join('') + '</table></div>';
+    fila.querySelectorAll('.rotUsar').forEach(b => { b.onclick = () => usarCaso(+b.dataset.i); });
+  }
+
+  /** Põe o caso na tela: preenche a identificação e leva o olho para gravar. */
+  function usarCaso(i){
+    if (!roteiro) return;
+    const l = roteiro.linhas[i]; if (!l) return;
+    const val = k => roteiro.mapa[k] == null ? '' : String(l[roteiro.mapa[k]] || '').trim();
+    roteiro.atual = i;
+    /* O roteiro é de execução de teste: o cenário vai junto, porque escolher
+       "evidência" quarenta vezes é o mesmo trabalho manual que a fila veio
+       acabar. Se a pessoa trocar depois, a troca dela vale. */
+    if ($('modelo').value === 'ia') { $('modelo').value = 'evidencia'; $('modelo').dispatchEvent(new Event('change')); }
+    const por = { evCaso: val('caso') + (val('titulo') ? ' — ' + val('titulo') : ''),
+                  evSis: val('sistema'), evChamado: val('chamado') };
+    for (const [id, v] of Object.entries(por)) {
+      if (v && $(id)) { $(id).value = v; $(id).dispatchEvent(new Event('input')); }
+    }
+    if ($('evBox')) $('evBox').open = true;
+    gravarRoteiro(); pintarRoteiro();
+    avisoRoteiro(t('rotAgoraMsg', val('caso') || ('#' + (i + 1))));
+    const alvo = $('viaRec') && !$('viaRec').classList.contains('hide') ? $('viaRec') : $('cardVideo');
+    if (alvo) alvo.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  /** A impressão do documento: o SHA-256 dos hashes das imagens, em ordem.
+   *  Não é o hash do arquivo baixado — é o das telas que ele contém, que é o
+   *  que a página de conferência sabe recalcular. */
+  async function impressaoDoDocumento(){
+    const kept = frames.filter(f => f.keep);
+    await calcularHashes(kept, true);
+    const juntos = kept.map(f => f.hash || '').join('');
+    if (!juntos) return '';
+    try {
+      const d = await crypto.subtle.digest('SHA-256', bytesDe(juntos));
+      return [...new Uint8Array(d)].map(b2 => pad2(b2.toString(16))).join('').slice(0, 16);
+    } catch (e) { return ''; }
+  }
+
+  /** Chamado de dentro do `baixarBlob`: o caso da vez vira "feito". */
+  async function marcarCasoDoRoteiro(nomeArq){
+    if (!roteiro || roteiro.atual == null) return;
+    const i = roteiro.atual;
+    roteiro.feitos[i] = {
+      quando: new Date().toISOString().slice(0, 16).replace('T', ' '),
+      arquivo: nomeArq || '',
+      impressao: await impressaoDoDocumento(),
+    };
+    /* O caso sai da vez ao ser concluído: deixar "em execução" depois de pronto
+       faria a fila parecer travada no mesmo lugar a rodada inteira. */
+    roteiro.atual = null;
+    gravarRoteiro(); pintarRoteiro();
+  }
+
+  function baixarRoteiro(){
+    if (!roteiro) return;
+    const novasCols = COLS_SAIDA();
+    const base = roteiro.saida ? roteiro.cab.slice() : roteiro.cab.concat(novasCols);
+    const onde = roteiro.saida || novasCols.map((_, k) => roteiro.cab.length + k);
+    const linhas = [base].concat(roteiro.linhas.map((l, i) => {
+      const nova = l.slice();
+      while (nova.length < base.length) nova.push('');
+      const f = roteiro.feitos[i];
+      nova[onde[0]] = f ? t('rotFeito') : '';
+      nova[onde[1]] = f ? f.quando : '';
+      nova[onde[2]] = f ? f.arquivo : '';
+      nova[onde[3]] = f ? f.impressao : '';
+      return nova;
+    }));
+    baixarBlob(montarXlsx(linhas, roteiro.nome), roteiro.nome + '-' +
+               new Date().toISOString().slice(0, 10) + '.xlsx');
+  }
+
+  async function carregarRoteiro(file){
+    try {
+      avisoRoteiro(t('rotLendo'));
+      if (/\.xlsx$/i.test(file.name)) {
+        abrirRoteiro(xlsxParaLinhas(await abrirZip(await file.arrayBuffer())), file.name);
+      } else {
+        abrirRoteiro(textoParaLinhas(await file.text()), file.name);
+      }
+    } catch (e) { avisoRoteiro(t('rotErro', (e && e.message) || e), true); }
+  }
+
+  if ($('rotAbrir')) {
+    /* A trava do plano é uma PORTA, não um muro: o bloco existe, o botão
+       responde, e o que ele diz é o que a coisa faz e onde ela mora. Botão que
+       não reage é indistinguível de defeito — foi o que a auditoria de fluxo
+       mostrou custar caro. */
+    const podeRoteiro = () => {
+      if (temTime()) return true;
+      avisoRoteiro(t('rotSoPago') + ' <a href="__SITE__/precos" target="_blank" rel="noopener">' +
+                   t('rotVerPlanos') + '</a>', false);
+      return false;
+    };
+    $('rotAbrir').onclick = () => { if (podeRoteiro()) $('rotArq').click(); };
+    $('rotArq').onchange = e => { const f = e.target.files[0]; if (f) carregarRoteiro(f); e.target.value = ''; };
+    $('rotColar').onclick = async () => {
+      if (!podeRoteiro()) return;
+      try {
+        const txt = await navigator.clipboard.readText();
+        if (!txt.trim()) return avisoRoteiro(t('rotColarVazio'), true);
+        abrirRoteiro(textoParaLinhas(txt), t('rotColado'));
+      } catch (e) { avisoRoteiro(t('rotSemColar'), true); }
+    };
+    $('rotBaixar').onclick = baixarRoteiro;
+    $('rotFechar').onclick = () => {
+      roteiro = null; gravarRoteiro(); pintarRoteiro();
+    };
+    try {
+      const cru = sessionStorage.getItem(ROTEIRO_CHAVE);
+      if (cru) { roteiro = JSON.parse(cru); pintarRoteiro(); }
+    } catch (e) {}
+  }
+
   function baixarBlob(blob, nome){
     /* Qualquer saída conclui o último subpasso: o passo 3 acaba quando um
        documento existe, e não quando alguém clica em "pronto". */
     baixouAlgo = true;
     if (typeof pintarSubpassos === 'function') setTimeout(pintarSubpassos, 0);
+    /* E, se há um roteiro em execução, o caso da vez fica marcado como feito —
+       com a data, o nome do arquivo e a impressão das telas. É isso que faz a
+       planilha voltar preenchida sem ninguém anotar nada à mão. */
+    if (typeof marcarCasoDoRoteiro === 'function' && !/\.xlsx$/i.test(nome)) marcarCasoDoRoteiro(nome);
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
     a.download = nome;
@@ -10322,8 +10918,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   /* ================= zip só com as figuras ================= */
   $('zip').onclick = async () => {
     const kept = frames.filter(f => f.keep);
-    if (!kept.length) return;
-    $('zip').disabled = true;
+    if (semQuadros()) return;
+    $('zip').disabled = true; emUso.add('zip');
     $('pdfStatus').textContent = t('pkgBuilding');
     // sem ceder a vez, o navegador não chega a pintar a mensagem antes de
     // congelar no trabalho síncrono — que com 400 frames leva segundos
@@ -10369,7 +10965,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       $('pdfStatus').innerHTML = `<span class="ok">${t('zipDone', kept.length)}</span>`;
     } catch (e) {
       $('pdfStatus').innerHTML = `<span class="err">${t('pkgErr', (e && e.message) || e)}</span>`;
-    } finally { $('zip').disabled = false; }
+    } finally { emUso.delete('zip'); $('zip').disabled = false; }
   };
 
   /* ================= HTML, Markdown e CSV =================
@@ -10603,7 +11199,7 @@ ${marcaSvg(46)}
 
   async function baixarTexto(gerar, ext, tipo){
     const kept = frames.filter(f => f.keep);
-    if (!kept.length) return;
+    if (semQuadros()) return;
     $('pdfStatus').textContent = t('pkgBuilding');
     await new Promise(r => setTimeout(r, 40));
     try {
@@ -10921,8 +11517,8 @@ ${relsSlide[i]}</Relationships>`) });
 
   $('pptx').onclick = async () => {
     const kept = frames.filter(f => f.keep);
-    if (!kept.length) return;
-    $('pptx').disabled = true;
+    if (semQuadros()) return;
+    $('pptx').disabled = true; emUso.add('pptx');
     $('pdfStatus').textContent = t('pkgBuilding');
     await new Promise(r => setTimeout(r, 40));
     try {
@@ -10934,7 +11530,7 @@ ${relsSlide[i]}</Relationships>`) });
       $('pdfStatus').innerHTML = `<span class="ok">${t('pptxOk', kept.length)}</span>`;
     } catch (e) {
       $('pdfStatus').innerHTML = `<span class="err">${t('pkgErr', (e && e.message) || e)}</span>`;
-    } finally { $('pptx').disabled = false; }
+    } finally { emUso.delete('pptx'); $('pptx').disabled = false; }
   };
 
   function montarDocx(){
@@ -11148,8 +11744,8 @@ ${relsSlide[i]}</Relationships>`) });
 
   $('docx').onclick = async () => {
     const kept = frames.filter(f => f.keep);
-    if (!kept.length) return;
-    $('docx').disabled = true;
+    if (semQuadros()) return;
+    $('docx').disabled = true; emUso.add('docx');
     $('pdfStatus').textContent = t('pkgBuilding');
     await new Promise(r => setTimeout(r, 40));    // deixa a mensagem aparecer
     try {
@@ -11159,7 +11755,7 @@ ${relsSlide[i]}</Relationships>`) });
       $('pdfStatus').innerHTML = `<span class="ok">${t('docxDone', kept.length)}</span>`;
     } catch (e) {
       $('pdfStatus').innerHTML = `<span class="err">${t('pkgErr', (e && e.message) || e)}</span>`;
-    } finally { $('docx').disabled = false; }
+    } finally { emUso.delete('docx'); $('docx').disabled = false; }
   };
 
   /* --------- Resumo para o Jira ---------
@@ -11332,7 +11928,7 @@ ${relsSlide[i]}</Relationships>`) });
 
   $('jira').onclick = async () => {
     const kept = frames.filter(f => f.keep);
-    if (!kept.length) return;
+    if (semQuadros()) return;
     const txt = resumoJira();
     try {
       await navigator.clipboard.writeText(txt);
@@ -11344,6 +11940,9 @@ ${relsSlide[i]}</Relationships>`) });
       $('pdfStatus').innerHTML = `<span class="ok">${t('jiraBaixado')}</span>`;
     }
     medir('baixou_saida', { p_formato: 'jira' });
+    /* Gerou documento sem passar pelo download: a bolinha 4 é acesa aqui,
+       senão ela mente dizendo que nada foi gerado. */
+    baixouAlgo = true; pintarSubpassos();
   };
 
   /* --------- Enviar para o Google Docs ---------
@@ -11381,9 +11980,9 @@ ${relsSlide[i]}</Relationships>`) });
 
   $('gdocs').onclick = async () => {
     const kept = frames.filter(f => f.keep);
-    if (!kept.length) return;
+    if (semQuadros()) return;
     if (!confirm(t('gdAviso'))) return;
-    $('gdocs').disabled = true;
+    $('gdocs').disabled = true; emUso.add('gdocs');
     try {
       $('pdfStatus').textContent = t('gdAuth');
       await carregarScript('https://accounts.google.com/gsi/client');
@@ -11398,6 +11997,9 @@ ${relsSlide[i]}</Relationships>`) });
         (blob.size > 26214400 ? '  ' + t('gdGrande', tamanho(blob.size)) : '');
       const j = await enviarAoDocs(blob, nomeArquivo());
       medir('baixou_saida', { p_formato: 'gdocs' });
+    /* Gerou documento sem passar pelo download: a bolinha 4 é acesa aqui,
+       senão ela mente dizendo que nada foi gerado. */
+    baixouAlgo = true; pintarSubpassos();
 
       /* Sem window.open: depois de um upload longo o navegador já não conta
          mais como gesto do usuário e a janela seria bloqueada. O link fica
@@ -11407,19 +12009,19 @@ ${relsSlide[i]}</Relationships>`) });
         `<a href="${url}" target="_blank" rel="noopener" style="color:var(--accent)">${t('gdAbrir')}</a>`;
     } catch (e) {
       $('pdfStatus').innerHTML = `<span class="err">${t('gdErr')} ${(e && e.message) || e}</span>`;
-    } finally { $('gdocs').disabled = false; }
+    } finally { emUso.delete('gdocs'); $('gdocs').disabled = false; }
   };
 
   $('go').onclick = async () => {
     const kept = frames.filter(f => f.keep);
-    if (!kept.length) return;
+    if (semQuadros()) return;
     const dur = duracaoTotal();
     const { cues, plain } = parseTranscript($('tr').value);
     const ev = evDados();
     let layout = $('layout').value;
     if (layout === 'auto') layout = cues.length ? 'full' : 'grid';
 
-    $('go').disabled = true;
+    $('go').disabled = true; emUso.add('go');
     $('pdfStatus').textContent = t('pdfBuilding');
     await new Promise(r => setTimeout(r, 40));
     await aplicarTarjas(kept); await calcularHashes(kept);
@@ -11771,7 +12373,7 @@ ${relsSlide[i]}</Relationships>`) });
     doc.save(base + '.pdf');
     medir('baixou_saida', { p_formato: 'pdf' });
     $('pdfStatus').innerHTML = `<span class="ok">${t('pdfDone')}</span>${t('pdfDone2', kept.length, page)}`;
-    $('go').disabled = false;
+    emUso.delete('go'); $('go').disabled = false;
   };
 })();
 </script>
