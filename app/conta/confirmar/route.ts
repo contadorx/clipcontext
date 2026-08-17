@@ -23,12 +23,28 @@ export async function GET(req: Request) {
     NextResponse.redirect(new URL(
       CAMINHO[lang] + (par ? `?${par}=${encodeURIComponent(valor || '')}` : ''), url.origin));
 
+  /* O link volta de UMA de duas formas, e a diferença não é escolha nossa:
+     ela depende de como o modelo de e-mail do Supabase foi escrito.
+
+       ?token_hash=…&type=magiclink   quando o modelo usa `{{ .TokenHash }}`
+       ?code=…                        quando o modelo usa `{{ .ConfirmationURL }}`,
+                                      que é o PADRÃO — o Supabase verifica do
+                                      lado dele e devolve um código PKCE.
+
+     Esta rota só entendia a primeira. Com o modelo padrão, ela recebia um
+     `code` que não sabia ler, não achava `token_hash`, e mandava a pessoa de
+     volta para a tela de pedir o e-mail — que é exatamente o que parece com
+     "o link não faz nada". Entender as duas custa seis linhas e acaba com uma
+     classe inteira de configuração errada. */
   const token_hash = url.searchParams.get('token_hash');
+  const code = url.searchParams.get('code');
   const type = (url.searchParams.get('type') || 'magiclink') as EmailOtpType;
-  if (!token_hash) return volta('erro', t.erroLinkSemCodigo);
+  if (!token_hash && !code) return volta('erro', t.erroLinkSemCodigo);
 
   const supa = await clienteDoServidor();
-  const { error } = await supa.auth.verifyOtp({ type, token_hash });
+  const { error } = token_hash
+    ? await supa.auth.verifyOtp({ type, token_hash })
+    : await supa.auth.exchangeCodeForSession(code as string);
   if (error) {
     /* Link velho ou já usado. É o caso comum e não é culpa de ninguém: o
        cliente de e-mail que "pré-visualiza" links gasta o token antes da

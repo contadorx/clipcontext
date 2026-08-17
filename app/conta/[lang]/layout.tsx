@@ -10,6 +10,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { marca } from '@/lib/marca';
 import { CAMINHO, HTML_LANG, IDIOMAS_CONTA, ehLang, textos } from '@/lib/conta/textos';
+import { type Lang as LangSite, endereco, tokens } from '@/lib/site';
 
 export function generateStaticParams() {
   return IDIOMAS_CONTA.map((lang) => ({ lang }));
@@ -31,7 +32,11 @@ export default async function LayoutDaConta({ children, params }: LayoutProps<'/
   const { lang } = await params;
   if (!ehLang(lang)) notFound();
   const t = textos(lang);
-  const daqui = (p: string) => (lang === 'pt' ? p : `/${lang}${p}`);
+  /* Os textos e os endereços do SITE, para o rodapé ser o mesmo dos dois lados.
+     `endereco()` já sabe o slug traduzido de cada página em cada idioma — é o
+     que evita um `/de/precos` que não existe (lá é `/de/preise`). */
+  const s3 = tokens(lang as LangSite);
+  const rota = (pg: string) => endereco(pg, lang as LangSite);
   return (
     <html lang={HTML_LANG[lang]}>
       <body>
@@ -56,14 +61,45 @@ export default async function LayoutDaConta({ children, params }: LayoutProps<'/
           </div>
         </header>
         {children}
+        {/* O rodapé é o MESMO do site, em três colunas.
+            Ele era uma linha com três links — e a conta é onde a pessoa está
+            quando lembra de procurar a política de privacidade, o comparativo
+            ou a página que explica como conferir uma evidência. Ter que voltar
+            para a home para achar o rodapé é o tipo de caminho que ninguém faz:
+            fecha a aba. As colunas e os textos saem do mesmo `rotas.json` e do
+            mesmo `i18n-site.json` que o site usa, então eles não têm como
+            divergir. */}
         <footer>
           <div className="wrap">
-            <div>
-              <a href={`/app?lang=${lang}`}>{t.abrirFerramenta}</a>
-              <a href={daqui('/precos')}>{t.planoTitulo}</a>
-              <a href={daqui('/privacidade')}>{marca.marca}</a>
+            <div className="rodapeCols">
+              <div>
+                <h3>{s3.fColProduto}</h3>
+                <a href={`/app?lang=${lang}`}>{s3.navApp}</a>
+                <a href={rota('precos')}>{s3.navPrice}</a>
+                <a href={rota('ajuda')}>{s3.fAjuda}</a>
+                <a href={rota('comparativo')}>{s3.fComp}</a>
+                <a href={CAMINHO[lang]}>{s3.fConta}</a>
+              </div>
+              <div>
+                <h3>{s3.fColCasos}</h3>
+                <a href={rota('casoEv')}>{s3.casoEvT}</a>
+                <a href={rota('casoIn')}>{s3.casoInT}</a>
+                <a href={rota('casoAta')}>{s3.casoAtaT}</a>
+                <a href={rota('casoUx')}>{s3.casoUxT}</a>
+                <a href={rota('casoIa')}>{s3.casoIaT}</a>
+              </div>
+              <div>
+                <h3>{s3.fColConfianca}</h3>
+                <a href={rota('seguranca')}>{s3.fSec}</a>
+                <a href={rota('verificar')}>{s3.fVerif}</a>
+                <a href={rota('privacidade')}>{s3.fPriv}</a>
+                <a href={rota('termos')}>{s3.fTerms}</a>
+                <a href={rota('steps')}>{s3.fPsr}</a>
+              </div>
             </div>
-            <div>{marca.empresa} · CNPJ {marca.cnpj}</div>
+            <div className="rodapeFim">
+              {marca.empresa} · CNPJ {marca.cnpj}
+            </div>
           </div>
         </footer>
       </body>

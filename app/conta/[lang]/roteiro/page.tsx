@@ -28,7 +28,8 @@ import Copiar from './Copiar';
 
 export const dynamic = 'force-dynamic';
 
-const LOCALE: Record<Lang, string> = { pt: 'pt-BR', en: 'en-US', es: 'es-ES' };
+const LOCALE: Record<Lang, string> = { pt: 'pt-BR', en: 'en-US', es: 'es-ES',
+                                      de: 'de-DE', fr: 'fr-FR' };
 const quando = (lang: Lang, iso: string | null) =>
   iso ? new Intl.DateTimeFormat(LOCALE[lang], { dateStyle: 'short', timeStyle: 'short' }).format(new Date(iso)) : '—';
 

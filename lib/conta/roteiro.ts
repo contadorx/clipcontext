@@ -70,6 +70,8 @@ export const CAMINHO_ROTEIRO: Record<Lang, string> = {
   pt: '/conta/roteiro',
   en: '/en/account/cases',
   es: '/es/cuenta/casos',
+  de: '/de/konto/testfaelle',
+  fr: '/fr/compte/cas-de-test',
 };
 
 /* O link que a tela gera para cada caso.

@@ -425,12 +425,9 @@ def build_site(root: pathlib.Path) -> None:
                  # a área do cliente tem endereço traduzido como o resto do
                  # site: quem lê em espanhol não deveria ter que reconhecer a
                  # palavra "conta" para achar a própria fatura
-                 # A área do cliente ainda existe em três idiomas. Alemão e
-                 # francês caem no INGLÊS de propósito: mandar quem lê alemão
-                 # para uma tela em português seria pior do que mandá-lo para
-                 # uma em inglês, e fingir que existe `/de/konto` seria um 404.
+                 # A área do cliente agora fala os cinco idiomas, como o resto.
                  "conta": {"pt": "/conta", "en": "/en/account", "es": "/es/cuenta",
-                           "de": "/en/account", "fr": "/en/account"}[L]},
+                           "de": "/de/konto", "fr": "/fr/compte"}[L]},
                 **{pg: pre[L] + "/" + sl[L] for pg, sl in SLUGS.items()})
         for L in IDIOMAS
     }
@@ -635,9 +632,56 @@ self.addEventListener('fetch', e => {
     return 0
 
 
+def sobras_que_tapam_o_site(root: pathlib.Path) -> list[str]:
+    """Arquivos em `public/` que a Vercel serve ANTES das rotas do Next.
+
+    O site já foi HTML estático gerado por este mesmo script, e naquele tempo a
+    home morava em `public/index.html`. Quando ele virou Next.js esses arquivos
+    deixaram de ser gerados — mas quem atualiza a pasta descompactando um zip
+    por cima NUNCA os apaga, porque descompactar acrescenta e sobrescreve, não
+    remove.
+
+    O sintoma é cruel de diagnosticar: a home em português abre a versão de dois
+    meses atrás, e /en, /es, /de e /fr abrem a nova. A pessoa publica, confere o
+    /en, vê que está certo, e continua com uma home velha no ar. Arquivo estático
+    ganha de rota, e ganha em silêncio.
+
+    Por isso isto DERRUBA o build em vez de avisar: um build que passa e publica
+    a página errada é pior do que um que para e diz qual arquivo apagar.
+    """
+    pub = root / "public"
+    if not pub.is_dir():
+        return []
+    achados = []
+    # `app.html` é a ferramenta, e é para ser servida assim mesmo.
+    for f in sorted(pub.rglob("*.html")):
+        if f.name == "app.html" and f.parent == pub:
+            continue
+        achados.append(str(f.relative_to(root)))
+    # e as pastas por idioma, que tapariam /en, /es, /de, /fr inteiros
+    for L in IDIOMAS:
+        if L != "pt" and (pub / L).is_dir():
+            achados.append(str((pub / L).relative_to(root)) + "/")
+    return achados
+
+
 def main() -> int:
     template = ROOT / "src" / "template.html"
     vendor = ROOT / "vendor" / "jspdf.umd.min.js"
+
+    sobras = sobras_que_tapam_o_site(ROOT)
+    if sobras:
+        print("", file=sys.stderr)
+        print("ERRO: há arquivo estático em public/ tapando uma rota do site.", file=sys.stderr)
+        print("", file=sys.stderr)
+        for f in sobras:
+            print("   " + f, file=sys.stderr)
+        print("", file=sys.stderr)
+        print("Isto é sobra do tempo em que o site era HTML gerado. A Vercel serve", file=sys.stderr)
+        print("arquivo antes de rota, então a página velha ganha da nova — e ganha", file=sys.stderr)
+        print("calada. Apague os arquivos acima e publique de novo.", file=sys.stderr)
+        print("", file=sys.stderr)
+        return 1
 
     for path in (template, vendor):
         if not path.exists():

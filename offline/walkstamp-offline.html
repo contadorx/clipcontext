@@ -4783,11 +4783,9 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
 
   /* Os três endereços da área do cliente. Traduzidos como o resto do site —
      quem lê em espanhol não deveria ter que reconhecer a palavra "conta". */
-  /* A área do cliente ainda é trilíngue. Alemão e francês caem no inglês, e
-     não no português: mandar quem lê alemão para uma tela em português seria
-     pior, e um `/de/konto` que não existe seria um 404. */
+  /* A área do cliente fala os cinco, como o resto. */
   const CAMINHO_CONTA = { pt: '/conta', en: '/en/account', es: '/es/cuenta',
-                          de: '/en/account', fr: '/en/account' };
+                          de: '/de/konto', fr: '/fr/compte' };
 
   /* Os endereços do site também são traduzidos, e a ferramenta apontava para os
      de português em qualquer idioma. Quem lia em inglês e clicava em

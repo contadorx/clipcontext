@@ -11,12 +11,12 @@
  */
 import bruto from '@/src/i18n-conta.json';
 
-export type Lang = 'pt' | 'en' | 'es';
+export type Lang = 'pt' | 'en' | 'es' | 'de' | 'fr';
 export type Textos = Record<string, string>;
 
 const dicionarios = bruto as unknown as Record<string, Textos>;
 
-export const IDIOMAS_CONTA: Lang[] = ['pt', 'en', 'es'];
+export const IDIOMAS_CONTA: Lang[] = ['pt', 'en', 'es', 'de', 'fr'];
 
 /** O endereço da área do cliente em cada idioma. Traduzido, como as outras
  *  páginas do site: quem lê em espanhol não deveria ter que reconhecer a
@@ -25,11 +25,13 @@ export const CAMINHO: Record<Lang, string> = {
   pt: '/conta',
   en: '/en/account',
   es: '/es/cuenta',
+  de: '/de/konto',
+  fr: '/fr/compte',
 };
 
-export const HTML_LANG: Record<Lang, string> = { pt: 'pt-BR', en: 'en', es: 'es' };
+export const HTML_LANG: Record<Lang, string> = { pt: 'pt-BR', en: 'en', es: 'es', de: 'de', fr: 'fr' };
 
-export const ehLang = (v: string): v is Lang => v === 'pt' || v === 'en' || v === 'es';
+export const ehLang = (v: string): v is Lang => IDIOMAS_CONTA.includes(v as Lang);
 
 export function textos(lang: Lang): Textos {
   return dicionarios[lang];

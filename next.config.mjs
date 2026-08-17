@@ -23,11 +23,13 @@ const paginas = Object.keys(slugs);
 /* A área do cliente tem endereço traduzido como o resto do site: quem lê em
    espanhol não deveria ter que reconhecer a palavra "conta" para achar a
    própria fatura. Por dentro ela mora em `/conta/<idioma>`. */
-const CONTA = { pt: '/conta', en: '/en/account', es: '/es/cuenta' };
+const CONTA = { pt: '/conta', en: '/en/account', es: '/es/cuenta',
+                de: '/de/konto', fr: '/fr/compte' };
 /* A tela de controle do roteiro de casos, dentro da conta e traduzida igual.
    Ela é separada da ferramenta: quem organiza a fila e quem grava o vídeo são
    momentos diferentes, e quase sempre pessoas diferentes. */
-const ROTEIRO = { pt: '/conta/roteiro', en: '/en/account/cases', es: '/es/cuenta/casos' };
+const ROTEIRO = { pt: '/conta/roteiro', en: '/en/account/cases', es: '/es/cuenta/casos',
+                  de: '/de/konto/testfaelle', fr: '/fr/compte/cas-de-test' };
 /* O site fala cinco idiomas; a área do cliente ainda fala três. Os laços da
    conta andam por ESTA lista, e não por `idiomas` — senão cada idioma novo do
    site pede uma rota de conta que não existe, e o build quebra com um

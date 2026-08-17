@@ -20,7 +20,8 @@ import Licenca from './Licenca';
 
 export const dynamic = 'force-dynamic';
 
-const LOCALE: Record<Lang, string> = { pt: 'pt-BR', en: 'en-US', es: 'es-ES' };
+const LOCALE: Record<Lang, string> = { pt: 'pt-BR', en: 'en-US', es: 'es-ES',
+                                      de: 'de-DE', fr: 'fr-FR' };
 
 const dinheiro = (lang: Lang, centavos: number, moeda: string) =>
   new Intl.NumberFormat(LOCALE[lang], { style: 'currency', currency: moeda || 'BRL' }).format(centavos / 100);
