@@ -285,6 +285,10 @@
   /* O painel da revisão assistida. Ele ocupa o lugar de honra do cartão de
      revisão enquanto está aberto: uma revisão guiada que divide a atenção com
      vinte miniaturas não guia ninguém. */
+  /* O botão que não pode se perder no meio dos outros. */
+  button.destaque{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);
+    font-weight:650}
+  button.destaque:hover{filter:brightness(1.08)}
   .revBox{border:2px solid var(--accent);border-radius:12px;padding:18px;margin:16px 0;
       background:color-mix(in srgb,var(--accent) 5%,var(--panel))}
   .revGrid{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(210px,.9fr);gap:18px;
@@ -451,6 +455,18 @@
      saem. */
   button.ghost#gdocs{border-style:dashed}
   button.ghost#gdocs::before{content:'\2197\00a0'}
+  /* O espelho do vídeo, durante a captura ao vivo.
+
+     Ele mostrava, dentro do passo 1, a MESMA tela que a pessoa está olhando —
+     e quando o compartilhamento é da tela inteira isso vira o túnel de espelhos
+     clássico. Não informa nada, ocupa meia página e empurra a contagem para
+     fora da vista.
+
+     Sumir por `display:none` seria o jeito errado: é DESTE elemento que cada
+     quadro é copiado, e um vídeo que o navegador considera fora de layout pode
+     parar de decodificar — a gravação terminaria com zero quadros. Então ele
+     continua sendo desenhado, e só deixa de ser visto. */
+  #playerBox.soCaptura{max-height:0;margin:0;overflow:hidden;opacity:0;pointer-events:none}
   .vu.off span{color:var(--err)}
   .live .who{font-weight:600;color:var(--accent)}
   .live .who.sys{color:var(--warn)}
@@ -568,6 +584,7 @@
           <button class="sm hide" id="recStop" data-i18n="recStopBtn"></button>
           <button class="ghost sm hide" id="recPause" data-i18n="recPauseBtn"></button>
           <button class="ghost sm hide" id="recMark" data-i18n="recMarkBtn"></button>
+          <button class="ghost sm hide" id="recPip" data-i18n="recPipBtn"></button>
         </div>
         <!-- A caixa que comenta a marcação.
 
@@ -919,7 +936,12 @@
     <!-- Revisar passo a passo mora aqui, e não no cartão do vídeo: é o que se
          faz COM os quadros que já estão na tela, não uma forma de trazê-los. -->
     <div class="row" style="margin-top:10px">
-      <button class="ghost sm hide" id="revisar" data-i18n="revisarBtn"></button>
+      <!-- Sem `ghost`: a revisão assistida é a coisa mais valiosa desta linha e
+           era o botão mais apagado dela. É ela que transforma "trinta telas
+           antigas" em "trinta telas conferidas", e num documento reaberto seis
+           meses depois é o trabalho inteiro. Um botão cinza entre nove cinzas
+           não é encontrado por quem não sabe que ele existe. -->
+      <button class="sm hide destaque" id="revisar" data-i18n="revisarBtn"></button>
       <span class="status" data-i18n="clickHint"></span>
     </div>
     <!-- O que acabou de acontecer com a ordem, em palavras. role=status para o
@@ -960,7 +982,20 @@
           <img id="revImg" alt="">
         </figure>
         <div class="revAcoes">
-          <p class="status" id="revNota"></p>
+          <!-- A anotação vira CAMPO, e não texto morto.
+               Conferir um passo e não poder corrigir a frase que o descreve é
+               parar no meio: quem descobre que a tela mudou descobre, no mesmo
+               segundo, que a anotação envelheceu junto. -->
+          <label class="status" for="revNotaEd" data-i18n="revNotaLbl"></label>
+          <input type="text" id="revNotaEd" maxlength="180" autocomplete="off"
+                 style="width:100%;padding:8px 10px;border:1px solid var(--line);
+                        border-radius:7px;background:var(--bg);color:var(--ink);
+                        font:inherit;font-size:14px;margin-bottom:4px">
+          <!-- Tarja, destaque, seta, caneta e recorte moram na LENTE, e continuam
+               lá: uma segunda cópia deles aqui seria uma segunda cópia para
+               manter, e a primeira divergiria da segunda em dois meses. O que
+               faltava era a porta — este botão abre a lente já neste quadro. -->
+          <button class="ghost" id="revEditar" data-i18n="revEditarBtn"></button>
           <button id="revIgual" data-i18n="revIgualBtn"></button>
           <button class="ghost" id="revTrocar" data-i18n="revTrocarBtn"></button>
           <input type="file" id="revArq" accept="image/*" class="hide">
@@ -1577,8 +1612,9 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recAdiantando:'Baixando o modelo de voz agora, para não atrasar a gravação. Pode escolher a tela quando quiser.',
       recPronto:'Modelo pronto. A gravação começa na hora.',
       recPauseBtn:'Pausar', recResumeBtn:'Retomar', recMarkBtn:'Marcar este passo',
+      recPipBtn:'Trazer a janelinha de volta',
       recNotaPh:'o que aconteceu aqui', recNotaEsp:'marque um passo para comentar',
-      recNotaEm:'comentando a marcação {0}',
+      recNotaEm:'comentando a marcação {0}', recNotaOk:'guardado neste passo',
       recPausado:'PAUSADO —', recMarcado:'passo marcado.',
       pipPausado:'Pausado: nada sendo guardado.',
       micNegado:'O navegador bloqueou o microfone para este site. Clique no cadeado ao lado do endereço, permita o microfone e grave de novo.',
@@ -1927,7 +1963,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       trocarErro:'Não consegui ler esta imagem.',
       dupFeito:'{0} duplicado logo depois deste.',
       trocadoTag:'imagem trocada',
-      revisarBtn:'Revisar passo a passo',
+      revisarBtn:'Revisar passo a passo', revNotaLbl:'Anotação deste passo',
+      revEditarBtn:'Editar a imagem: tarja, destaque, seta, caneta',
       revAntes:'A tela que está no documento hoje',
       revPos:'{0} de {1}',
       revSemNota:'Este passo não tem anotação — só a tela.',
@@ -2108,8 +2145,9 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recAdiantando:'Downloading the speech model now, so it does not delay the recording. Pick your screen whenever you like.',
       recPronto:'Model ready. Recording starts immediately.',
       recPauseBtn:'Pause', recResumeBtn:'Resume', recMarkBtn:'Mark this step',
+      recPipBtn:'Bring the control window back',
       recNotaPh:'what happened here', recNotaEsp:'mark a step to comment on it',
-      recNotaEm:'commenting on mark {0}',
+      recNotaEm:'commenting on mark {0}', recNotaOk:'saved on this step',
       recPausado:'PAUSED —', recMarcado:'step marked.',
       pipPausado:'Paused: nothing being kept.',
       micNegado:'The browser blocked the microphone for this site. Click the padlock next to the address, allow the microphone and record again.',
@@ -2452,7 +2490,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       trocarErro:'I could not read this image.',
       dupFeito:'{0} duplicated right after this one.',
       trocadoTag:'image replaced',
-      revisarBtn:'Review step by step',
+      revisarBtn:'Review step by step', revNotaLbl:'Note for this step',
+      revEditarBtn:'Edit the image: redaction, highlight, arrow, pen',
       revAntes:'The screen that is in the document today',
       revPos:'{0} of {1}',
       revSemNota:'This step has no note — just the screen.',
@@ -2631,8 +2670,9 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recAdiantando:'Descargando el modelo de voz ahora, para no retrasar la grabación. Elige la pantalla cuando quieras.',
       recPronto:'Modelo listo. La grabación empieza al instante.',
       recPauseBtn:'Pausar', recResumeBtn:'Reanudar', recMarkBtn:'Marcar este paso',
+      recPipBtn:'Traer la ventana de control de vuelta',
       recNotaPh:'qué pasó aquí', recNotaEsp:'marca un paso para comentarlo',
-      recNotaEm:'comentando la marca {0}',
+      recNotaEm:'comentando la marca {0}', recNotaOk:'guardado en este paso',
       recPausado:'EN PAUSA —', recMarcado:'paso marcado.',
       pipPausado:'En pausa: no se guarda nada.',
       micNegado:'El navegador bloqueó el micrófono para este sitio. Pulsa el candado junto a la dirección, permite el micrófono y graba de nuevo.',
@@ -2977,7 +3017,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       trocarErro:'No pude leer esta imagen.',
       dupFeito:'{0} duplicado justo después de este.',
       trocadoTag:'imagen cambiada',
-      revisarBtn:'Revisar paso a paso',
+      revisarBtn:'Revisar paso a paso', revNotaLbl:'Anotación de este paso',
+      revEditarBtn:'Editar la imagen: zona tachada, resalte, flecha, lápiz',
       revAntes:'La pantalla que está hoy en el documento',
       revPos:'{0} de {1}',
       revSemNota:'Este paso no tiene anotación — solo la pantalla.',
@@ -3157,8 +3198,9 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recAdiantando:'Das Spracherkennungsmodell wird jetzt heruntergeladen, damit es die Aufnahme nicht verzögert. Sie können den Bildschirm jederzeit auswählen.',
       recPronto:'Modell bereit. Die Aufnahme startet sofort.',
       recPauseBtn:'Pause', recResumeBtn:'Fortsetzen', recMarkBtn:'Diesen Schritt markieren',
+      recPipBtn:'Steuerungsfenster zurückholen',
       recNotaPh:'was hier passiert ist', recNotaEsp:'markieren Sie einen Schritt, um ihn zu kommentieren',
-      recNotaEm:'Kommentar zu Markierung {0}',
+      recNotaEm:'Kommentar zu Markierung {0}', recNotaOk:'in diesem Schritt gespeichert',
       recPausado:'PAUSIERT —', recMarcado:'Schritt markiert.',
       pipPausado:'Pausiert: Es wird nichts gespeichert.',
       micNegado:'Der Browser hat das Mikrofon für diese Website blockiert. Klicken Sie auf das Schloss neben der Adresse, erlauben Sie das Mikrofon und nehmen Sie erneut auf.',
@@ -3507,7 +3549,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       trocarErro:'Dieses Bild konnte nicht gelesen werden.',
       dupFeito:'{0} direkt nach diesem dupliziert.',
       trocadoTag:'Bild ausgetauscht',
-      revisarBtn:'Schritt für Schritt prüfen',
+      revisarBtn:'Schritt für Schritt prüfen', revNotaLbl:'Notiz zu diesem Schritt',
+      revEditarBtn:'Bild bearbeiten: Schwärzung, Hervorhebung, Pfeil, Stift',
       revAntes:'Der Bildschirm, der heute im Dokument steht',
       revPos:'{0} von {1}',
       revSemNota:'Dieser Schritt hat keine Notiz — nur den Bildschirm.',
@@ -3687,8 +3730,9 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recAdiantando:'Téléchargement du modèle de reconnaissance vocale maintenant, pour ne pas retarder l’enregistrement. Vous pouvez choisir l’écran quand vous voulez.',
       recPronto:'Modèle prêt. L’enregistrement démarre immédiatement.',
       recPauseBtn:'Pause', recResumeBtn:'Reprendre', recMarkBtn:'Marquer cette étape',
+      recPipBtn:'Rouvrir la fenêtre de contrôle',
       recNotaPh:'ce qui s’est passé ici', recNotaEsp:'marquez une étape pour la commenter',
-      recNotaEm:'commentaire de la marque {0}',
+      recNotaEm:'commentaire de la marque {0}', recNotaOk:'enregistré sur cette étape',
       recPausado:'EN PAUSE —', recMarcado:'étape marquée.',
       pipPausado:'En pause : rien n’est conservé.',
       micNegado:'Le navigateur a bloqué le microphone pour ce site. Cliquez sur le cadenas à côté de l’adresse, autorisez le microphone et enregistrez de nouveau.',
@@ -4037,7 +4081,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       trocarErro:'Impossible de lire cette image.',
       dupFeito:'{0} : une copie a été ajoutée juste après.',
       trocadoTag:'image remplacée',
-      revisarBtn:'Réviser étape par étape',
+      revisarBtn:'Réviser étape par étape', revNotaLbl:'Note de cette étape',
+      revEditarBtn:'Modifier l’image : caviardage, surlignage, flèche, stylo',
       revAntes:'L’écran qui figure aujourd’hui dans le document',
       revPos:'{0} sur {1}',
       revSemNota:'Cette étape n’a pas de note — seulement l’écran.',
@@ -4640,6 +4685,9 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       porOrigem(f.lastModified && isFinite(video.duration)
                   ? f.lastModified - video.duration * 1000 : null, true);
       $('playerBox').classList.remove('hide');
+      /* Um arquivo aberto QUER o vídeo à vista: é nele que a pessoa procura o
+         trecho. O disfarce da captura ao vivo não pode sobreviver a isso. */
+      $('playerBox').classList.remove('soCaptura');
       $('auto').disabled = false;
       st('');
       $('extract').disabled = false;
@@ -5606,7 +5654,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   let pipAviso = '', pipAvisoAte = 0;
   let pipWin = null, pipTexto = null, pipRelogio = null, pipFrames = null;
   let pipVm = null, pipVs = null, pipCalar = null, pipMarcar = null, pipPausa = null;
-  let pipNota = null;
+  let pipNota = null, pipNotaTic = null;
   /* Pausa e marcação vivem fora do bloco da gravação porque a janelinha e o
      cartão precisam alcançá-las, e as duas são recriadas a cada captura. */
   let pausado = false, alternarPausa = null, marcarAgora = null;
@@ -5664,9 +5712,29 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      comentário de quem para a gravação com o cursor ainda dentro do campo — que
      é exatamente o que se faz quando a última coisa anotada é o motivo de
      parar. */
+  /* E DIZ que guardou.
+     Sem isto o campo era mudo: a pessoa digitava, não via nada acontecer, e
+     concluía — com razão — que não tinha salvado. Um campo que guarda em
+     silêncio é indistinguível de um campo quebrado, e a diferença entre os dois
+     só apareceria meia hora depois, na revisão. */
+  let avisoNotaTic = null;
+  function avisarNotaGuardada(){
+    const est = $('recNotaEst'); if (!est) return;
+    est.textContent = t('recNotaOk');
+    est.classList.add('ok');
+    clearTimeout(avisoNotaTic);
+    avisoNotaTic = setTimeout(() => {
+      est.classList.remove('ok');
+      est.textContent = notaAlvo
+        ? t('recNotaEm', frames.filter((x) => x.manual).length) : '';
+    }, 1400);
+  }
+
   if ($('recNota')) $('recNota').oninput = () => {
     if (!notaAlvo) return;
     notaAlvo.nota = ($('recNota').value || '').slice(0, 180);
+    avisarNotaGuardada();
+    if (pipNota && pipNota.value !== $('recNota').value) pipNota.value = $('recNota').value;
   };
 
   const PIP_CSS = `
@@ -5680,6 +5748,13 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     @keyframes pulsa{0%,100%{opacity:1}50%{opacity:.25}}
     .rel{font:600 22px/1 ui-monospace,Menlo,Consolas,monospace;letter-spacing:.5px}
     .txt{color:#949bab;font-size:12.5px}
+    /* A contagem, aqui, grande.
+       Ela já era grande na aba — e a aba, durante a contagem, está ATRÁS da
+       tela que a pessoa acabou de escolher compartilhar. Ou seja: o único
+       lugar onde ela era grande é o único lugar onde ninguém estava olhando.
+       Aqui é onde o olho está. */
+    .txt.contando{color:#e9ebf1;font-size:44px;font-weight:800;line-height:1.05;
+                  text-align:center;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
     button{width:100%;padding:11px;border:0;border-radius:9px;background:#737cf0;
            color:#121419;font:600 15px system-ui,sans-serif;cursor:pointer}
     button:hover{filter:brightness(1.08)}
@@ -5702,6 +5777,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
                border-radius:7px;padding:7px 9px;font:13px system-ui,sans-serif}
     input.nota:disabled{opacity:.45}
     input.nota::placeholder{color:#6b7280}
+    input.nota.guardou{border-color:#737cf0;box-shadow:0 0 0 2px rgba(115,124,240,.28)}
   `;
 
   async function abrirControle(){
@@ -5747,6 +5823,13 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       if (!notaAlvo) return;
       notaAlvo.nota = (pipNota.value || '').slice(0, 180);
       if ($('recNota')) $('recNota').value = notaAlvo.nota;
+      avisarNotaGuardada();
+      /* A janelinha é onde a pessoa está: o aviso tem que aparecer AQUI, e não
+         só na aba que ela não está vendo. O próprio contorno do campo
+         confirma — não cabe uma segunda linha de texto em 258px. */
+      pipNota.classList.add('guardou');
+      clearTimeout(pipNotaTic);
+      pipNotaTic = setTimeout(() => pipNota.classList.remove('guardou'), 1400);
     };
     /* O botão da janelinha não duplica lógica: chama o mesmo `alternarMic` da
        aba, e o rótulo dos dois é repintado pela mesma função. */
@@ -5757,7 +5840,12 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
        destruir uma reunião de uma hora. O botão da aba continua valendo. */
     pipWin.addEventListener('pagehide', () => {
       pipWin = null; pipRelogio = pipTexto = pipFrames = pipVm = pipVs = pipCalar = null;
-      pipMarcar = pipPausa = null;
+      pipMarcar = pipPausa = pipNota = null;
+      /* Fechada por engano, e a gravação continua: some o relógio, o medidor,
+         o marcar, o pausar e a caixa de comentário — tudo que existe DURANTE a
+         gravação. Sem um jeito de trazer de volta, a única saída era parar e
+         gravar de novo. Agora o botão aparece na aba, ao lado do Parar. */
+      pintarVoltarJanelinha();
     });
   }
 
@@ -5788,17 +5876,25 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
         pipPausa.textContent = pausado ? t('recResumeBtn') : t('recPauseBtn');
         pipPausa.classList.toggle('off', pausado);
       }
+      if (pipTexto) pipTexto.classList.remove('contando');
       // o ponto vermelho para de pulsar na pausa: é o sinal que se lê sem ler
       if (pipWin) { const dot = pipWin.document.querySelector('.dot');
                     if (dot) dot.style.animationPlayState = pausado ? 'paused' : 'running'; }
       return;
     }
     if (etapa === 'contando') {
-      if (pipTexto) pipTexto.textContent = t('recCountN', dados.n);
+      if (pipTexto) {
+        /* Só o número. "Começando em 3…" a 44px não cabe numa janela de 258px,
+           e a palavra não acrescenta nada: o que a pessoa precisa saber é
+           quanto falta, e ela sabe por que está contando. */
+        pipTexto.textContent = String(dados.n);
+        pipTexto.classList.add('contando');
+      }
       return;
     }
     const rotulos = { prep: 'pipPrep', mic: 'pipMic', modelo: 'pipModelo', tela: 'pipTela' };
-    if (pipTexto) pipTexto.textContent = t(rotulos[etapa] || 'pipPrep');
+    if (pipTexto) { pipTexto.classList.remove('contando');
+                    pipTexto.textContent = t(rotulos[etapa] || 'pipPrep'); }
   }
 
   /* Espelhos da janelinha. Copiam largura e rótulo — não há segundo medidor
@@ -5816,6 +5912,13 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     pipCalar.classList.remove('hide');
     pipCalar.textContent = on ? t('micMudo') : t('micVolta');
     pipCalar.classList.toggle('off', !on);
+  }
+
+  /* O botão de trazer a janelinha de volta. Só existe enquanto há gravação
+     rodando E a janelinha não está aberta — fora disso é ruído. */
+  function pintarVoltarJanelinha(){
+    const b2 = $('recPip'); if (!b2) return;
+    b2.classList.toggle('hide', !(liveOn && !pipWin && 'documentPictureInPicture' in window));
   }
 
   function fecharControle(){
@@ -6245,6 +6348,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       $('rec').disabled = false;
       abrindoCaptura = false;
       $('recPause').classList.add('hide'); $('recMark').classList.add('hide');
+      $('recPip').classList.add('hide');
       esconderNota();
       pausado = false; alternarPausa = null; marcarAgora = null;
     };
@@ -6415,6 +6519,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     video.muted = true;
     try { await video.play(); } catch (e) {}
     $('playerBox').classList.remove('hide');
+    $('playerBox').classList.add('soCaptura');
 
     fileName = t('recFile');
     fileSize = 0;
@@ -6689,11 +6794,21 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     };
     $('recPause').onclick = alternarPausa;
     $('recMark').onclick  = marcarAgora;
+    $('recPip').onclick   = async () => {
+      await abrirControle();
+      /* `abrirControle` desenha a janelinha no estado 'prep'. Aqui a gravação
+         já está rolando: sem este empurrão, a janela voltaria dizendo
+         "preparando" com o relógio parado. */
+      if (pipWin) { controle('gravando', { seg: agora(), frames: frames.length });
+                    apontarNota(notaAlvo); }
+      pintarVoltarJanelinha();
+    };
     $('recPause').classList.remove('hide'); $('recPause').classList.add('ghost');
     $('recMark').classList.remove('hide');
     /* Aparece já na largada, desligada e dizendo o que espera: uma caixa que só
        surge depois da primeira marcação seria uma caixa que ninguém descobre. */
     apontarNota(null);
+    pintarVoltarJanelinha();
     $('recPause').textContent = t('recPauseBtn');
     $('recMark').disabled = false;
 
@@ -6815,6 +6930,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       video.removeAttribute('src');
       video.load();
       $('playerBox').classList.add('hide');
+      $('playerBox').classList.remove('soCaptura');
 
       frames.sort((a, b) => a.t - b.t);
       $('rec').classList.remove('hide');
@@ -6822,6 +6938,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       // os controles da gravação somem junto com ela, e a pausa não pode
       // sobreviver para envenenar a próxima captura
       $('recPause').classList.add('hide'); $('recMark').classList.add('hide');
+      $('recPip').classList.add('hide');
       esconderNota();
       pausado = false; alternarPausa = null; marcarAgora = null;
       trabalhando(false);
@@ -11259,8 +11376,34 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     $('revImg').src = imgFinal(f);
     /* A anotação do passo é o que diz o que aquela tela devia provar. Sem ela
        na frente, "esta tela ainda está assim?" é uma pergunta sobre pixels. */
-    $('revNota').textContent = f.nota ? f.nota : t('revSemNota');
+    $('revNotaEd').value = f.nota || '';
+    $('revNotaEd').placeholder = t('revSemNota');
   }
+
+  /* Escrito direto no quadro, a cada tecla — o mesmo contrato da caixa de
+     comentário da gravação, e pelo mesmo motivo: guardar só no `blur` perderia
+     o texto de quem sai do passo pelo botão em vez de pelo campo. */
+  $('revNotaEd').oninput = () => {
+    const kept = frames.filter(f2 => f2.keep);
+    const f = kept[revI]; if (!f) return;
+    f.nota = ($('revNotaEd').value || '').slice(0, 180);
+    /* A miniatura correspondente acompanha, sem `render()`: redesenhar a grade
+       inteira a cada tecla roubaria o foco do campo que está sendo digitado —
+       e o campo é este aqui. Os dois apontam para o MESMO quadro, então
+       espelhar o valor é sincronizar a tela, não guardar duas verdades. */
+    const espelho = $('thumbs') &&
+      $('thumbs').querySelector(`input.nota[data-i="${frames.indexOf(f)}"]`);
+    if (espelho && espelho.value !== f.nota) espelho.value = f.nota;
+  };
+
+  /* A porta para as ferramentas. A lente já tem tarja, destaque (retângulo,
+     seta e caneta), recorte, comparar, trocar e duplicar — abrir a que já
+     existe é melhor do que crescer uma segunda barra aqui. */
+  $('revEditar').onclick = () => {
+    const kept = frames.filter(f2 => f2.keep);
+    const f = kept[revI]; if (!f) return;
+    abrirLente(frames.indexOf(f));
+  };
 
   function revAvancar(){
     revI++;
@@ -11328,7 +11471,11 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       render();
       revAvancar();
     } catch (err) {
-      $('revNota').innerHTML = `<span class="err">${t('trocarErro')}</span>`;
+      /* O aviso ia para o `<p id="revNota">`, que virou campo de texto — e
+         escrever HTML dentro de um `<input>` não mostra nada. Uma troca de
+         imagem que falha em silêncio é o pior tipo de silêncio: a pessoa segue
+         achando que trocou. */
+      $('revPos').innerHTML = `<span class="err">${t('trocarErro')}</span>`;
     } finally { URL.revokeObjectURL(url); }
   };
 
