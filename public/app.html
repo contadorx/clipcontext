@@ -214,6 +214,16 @@
       clip-path:inset(50%);white-space:nowrap}
   }
   .fbTipo.on{border-color:var(--accent) !important;color:var(--accent) !important;font-weight:650}
+  /* O convite fica visualmente separado das saídas: ele não é mais um botão de
+     gerar coisa, é outra conversa — e misturado com os onze ele viraria o
+     décimo segundo, que ninguém lê. */
+  .compCx{margin-top:22px;padding:16px 18px;border:1px solid var(--line);
+    border-radius:10px;background:color-mix(in srgb,var(--accent) 4%,transparent)}
+  .compTit{margin:0 0 10px;font-size:14.5px;font-weight:600;color:var(--ink)}
+  .compCx .btnLike{display:inline-flex;align-items:center;padding:6px 12px;
+    border:1px solid var(--line);border-radius:8px;background:var(--panel);
+    color:var(--ink);text-decoration:none;font:600 13px ui-sans-serif,system-ui;cursor:pointer}
+  .compCx .btnLike:hover{border-color:var(--accent);color:var(--accent)}
   .saidaGrupo{margin-top:16px}
   .saidaTit{display:block;font:600 12px/1 ui-sans-serif,system-ui;letter-spacing:.06em;
     text-transform:uppercase;color:var(--muted);margin-bottom:7px}
@@ -1327,6 +1337,26 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
          e só aparece depois que um documento existe: um "marcar como feito" ao
          lado de um caso não executado é um convite para mentir na planilha. -->
     <div class="row hide" id="rotVolta" style="margin-top:10px"></div>
+
+    <!-- O convite, depois de o documento sair.
+         Este produto não tem cadastro, não tem anúncio e não rastreia ninguém —
+         então o único jeito de mais alguém saber que ele existe é uma pessoa
+         contando para outra. E a hora de contar não é quando se chega: é agora,
+         com o arquivo pronto na pasta e a tarde de trabalho que ele poupou
+         ainda fresca.
+         O que se compartilha é o ENDEREÇO DA FERRAMENTA, e a frase diz isso com
+         todas as letras. Compartilhar o documento seria a traição exata da
+         promessa do produto — e é o que uma pessoa apressada suporia. -->
+    <div class="hide compCx" id="compCx">
+      <p class="compTit" id="compTit"></p>
+      <div class="row" style="gap:8px;flex-wrap:wrap;align-items:center">
+        <button class="ghost sm" id="compCopiar"></button>
+        <a class="ghost sm btnLike" id="compLinkedin" target="_blank" rel="noopener"></a>
+        <a class="ghost sm btnLike" id="compEmail"></a>
+        <span class="status" id="compMsg"></span>
+      </div>
+      <p class="note" id="compNota" style="margin:8px 0 0"></p>
+    </div>
       </div>
     </details>
 
@@ -1616,6 +1646,11 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   /* ================= idiomas ================= */
   const I18N = {
     pt: {
+      compTit:'Deu certo? Conte para alguém que perde a tarde fazendo isso à mão.',
+      compCopiar:'Copiar o endereço', compCopiado:'copiado', compEmail:'Mandar por e-mail',
+      compAssunto:'Isto transforma gravação de tela em documento',
+      compCorpo:'Gravei a tela e saiu um PDF com um print por passo, a hora e o que foi falado. Roda no navegador, é grátis e não pede cadastro:',
+      compNota:'O que vai no link é o endereço da ferramenta. O seu documento não sai deste computador — nem aqui, nem em lugar nenhum.',
       docTitle:'Walkstamp — transforme vídeo em contexto para IA',
       supportLine:'Gratuita, sem anúncio e sem exigir cadastro — nada do que você processa sai deste computador. ',
       pesSeg:'Segurança da informação', pesComp:'Comparativo', pesPrecos:'Preços',
@@ -2149,6 +2184,11 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     },
 
     en: {
+      compTit:'Worked out? Tell someone who still loses an afternoon doing this by hand.',
+      compCopiar:'Copy the address', compCopiado:'copied', compEmail:'Send by e-mail',
+      compAssunto:'This turns a screen recording into a document',
+      compCorpo:'I recorded my screen and got a PDF with one screenshot per step, the time and what was said. Runs in the browser, free, no sign-up:',
+      compNota:'What the link carries is the address of the tool. Your document does not leave this computer — not here, not anywhere.',
       docTitle:'Walkstamp — turn video into context an AI can read',
       supportLine:'Free, no ads, no sign-up — nothing you process leaves this computer. ',
       pesSeg:'Information security', pesComp:'Compare', pesPrecos:'Pricing',
@@ -2676,6 +2716,11 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     },
 
     es: {
+      compTit:'¿Funcionó? Cuéntaselo a alguien que aún pierde la tarde haciendo esto a mano.',
+      compCopiar:'Copiar la dirección', compCopiado:'copiado', compEmail:'Enviar por correo',
+      compAssunto:'Esto convierte una grabación de pantalla en un documento',
+      compCorpo:'Grabé la pantalla y salió un PDF con una captura por paso, la hora y lo que se dijo. Funciona en el navegador, es gratis y no pide registro:',
+      compNota:'Lo que va en el enlace es la dirección de la herramienta. Tu documento no sale de este ordenador — ni aquí, ni en ningún sitio.',
       docTitle:'Walkstamp — convierte tu vídeo en contexto para la IA',
       supportLine:'Gratuita, sin anuncios ni registro — nada de lo que procesas sale de este equipo. ',
       pesSeg:'Seguridad de la información', pesComp:'Comparativa', pesPrecos:'Precios',
@@ -3202,6 +3247,11 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       pr8:'Tarea: ', prFree:'(describe aquí lo que quieres)', prNoName:'sin nombre'
     },
     de: {
+      compTit:'Hat es geklappt? Erzählen Sie es jemandem, der dafür noch einen Nachmittag von Hand verliert.',
+      compCopiar:'Adresse kopieren', compCopiado:'kopiert', compEmail:'Per E-Mail senden',
+      compAssunto:'Das macht aus einer Bildschirmaufnahme ein Dokument',
+      compCorpo:'Ich habe den Bildschirm aufgenommen und ein PDF bekommen — ein Screenshot pro Schritt, mit Uhrzeit und dem Gesagten. Läuft im Browser, kostenlos, ohne Registrierung:',
+      compNota:'Der Link enthält die Adresse des Tools. Ihr Dokument verlässt diesen Rechner nicht — weder hier noch sonst wo.',
       docTitle:'Walkstamp — Video in Kontext für KI verwandeln',
       supportLine:'Kostenlos, ohne Werbung und ohne Registrierung — nichts, was Sie verarbeiten, verlässt diesen Computer. ',
       pesSeg:'Informationssicherheit', pesComp:'Vergleich', pesPrecos:'Preise',
@@ -3734,6 +3784,11 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       pr8:'Aufgabe: ', prFree:'(beschreiben Sie hier, was Sie möchten)', prNoName:'ohne Namen'
     },
     fr: {
+      compTit:'Ça a marché ? Parlez-en à quelqu’un qui y perd encore un après-midi à la main.',
+      compCopiar:'Copier l’adresse', compCopiado:'copié', compEmail:'Envoyer par e-mail',
+      compAssunto:'Ceci transforme un enregistrement d’écran en document',
+      compCorpo:'J’ai enregistré mon écran et j’ai obtenu un PDF avec une capture par étape, l’heure et ce qui a été dit. Ça tourne dans le navigateur, c’est gratuit et sans inscription :',
+      compNota:'Ce que le lien contient, c’est l’adresse de l’outil. Votre document ne quitte pas cet ordinateur — ni ici, ni ailleurs.',
       docTitle:'Walkstamp — transformez une vidéo en contexte pour l’IA',
       supportLine:'Gratuit, sans publicité et sans inscription — rien de ce que vous traitez ne quitte cet ordinateur. ',
       pesSeg:'Sécurité de l’information', pesComp:'Comparatif', pesPrecos:'Tarifs',
@@ -4292,6 +4347,9 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   const GOOGLE_APP_ID    = '184815388097';      // número do projeto (só dígitos)
 
   const LANGS = ['pt','en','es','de','fr'];
+  /* O vídeo de exemplo tem narração e legenda, e só foi gravado em três. */
+  const DEMO_LANGS = ['pt','en','es'];
+  const demoLang = () => (DEMO_LANGS.includes(LANG) ? LANG : 'en');
   const qLang = new URLSearchParams(location.search).get('lang');
   let LANG = LANGS.includes(qLang) ? qLang
            : LANGS.includes((navigator.language || 'pt').slice(0,2).toLowerCase())
@@ -4347,6 +4405,11 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     navigator.doNotTrack === '1' || window.doNotTrack === '1';
 
   function medir(nome, extra){
+    /* Um documento saiu — e este é o único lugar do arquivo por onde TODA saída
+       passa. Pendurar o convite aqui é o que evita catorze lugares para lembrar
+       de chamar, e um deles esquecido. A medição pode estar desligada; o
+       convite não depende dela, então ele vem antes do `return`. */
+    if (nome === 'baixou_saida') { try { convidarACompartilhar(); } catch (e) {} }
     if (!MEDIR_URL || !MEDIR_KEY || naoQuerMedir()) return;
     try {
       fetch(MEDIR_URL + '/rest/v1/rpc/walkstamp_evento', {
@@ -4392,6 +4455,43 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   /* Os três endereços da área do cliente. Traduzidos como o resto do site —
      quem lê em espanhol não deveria ter que reconhecer a palavra "conta". */
   /* A área do cliente fala os cinco, como o resto. */
+  /* ---- o convite para contar a alguém ----
+
+     Sem cadastro, sem anúncio e sem rastrear ninguém, o único canal que este
+     produto tem é uma pessoa contando para outra. E a hora não é quando ela
+     chega: é quando o arquivo acabou de sair e a tarde que ele poupou ainda
+     está fresca na cabeça.
+
+     Aparece UMA vez por sessão. Um convite que reaparece a cada documento vira
+     ruído em quem gera trinta por dia — e ruído é o que se aprende a não ver. */
+  let jaConvidou = false;
+  function convidarACompartilhar(){
+    if (jaConvidou) return;
+    const cx = $('compCx'); if (!cx) return;
+    jaConvidou = true;
+    const url = 'https://walkstamp.com' + (ROTAS_SITE.ajuda[LANG] ? (LANG === 'pt' ? '' : '/' + LANG) : '');
+    $('compTit').textContent = t('compTit');
+    $('compCopiar').textContent = t('compCopiar');
+    $('compLinkedin').textContent = 'LinkedIn';
+    $('compEmail').textContent = t('compEmail');
+    $('compNota').textContent = t('compNota');
+    $('compLinkedin').href =
+      'https://www.linkedin.com/sharing/share-offsite/?url=' + encodeURIComponent(url);
+    $('compEmail').href = 'mailto:?subject=' + encodeURIComponent(t('compAssunto')) +
+      '&body=' + encodeURIComponent(t('compCorpo') + '\n\n' + url);
+    $('compCopiar').onclick = () => {
+      /* O endereço da FERRAMENTA. Nunca o documento: ele não sai desta máquina,
+         e é essa a promessa que o produto vende. */
+      const escrever = navigator.clipboard && navigator.clipboard.writeText
+        ? navigator.clipboard.writeText(url) : Promise.reject();
+      escrever.then(() => {
+        $('compMsg').innerHTML = '<span class="ok">' + t('compCopiado') + '</span>';
+        setTimeout(() => { $('compMsg').textContent = ''; }, 2600);
+      }, () => { $('compMsg').textContent = url; });
+    };
+    cx.classList.remove('hide');
+  }
+
   const CAMINHO_CONTA = { pt: '/conta', en: '/en/account', es: '/es/cuenta',
                           de: '/de/konto', fr: '/fr/compte' };
 
@@ -4904,7 +5004,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     try {
       // alguns navegadores (Firefox em certos sistemas) não decodificam H.264
       const h264 = !!document.createElement('video').canPlayType('video/mp4; codecs="avc1.42E01E"');
-      const arq = 'exemplo.' + LANG + (h264 ? '.mp4' : '.webm');
+      /* O exemplo existe em pt, en e es. Em alemão e francês ele cairia num
+         404, e a pessoa leria "não consegui baixar o exemplo" — que soa como
+         defeito da ferramenta, e não como um vídeo que ninguém gravou ainda. */
+      const arq = 'exemplo.' + demoLang() + (h264 ? '.mp4' : '.webm');
       const tipo = h264 ? 'video/mp4' : 'video/webm';
 
       const { base, r: vr } = await acharDemo(arq);
@@ -4924,7 +5027,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       await ok;
 
       try {
-        const sr = await fetch(base + 'exemplo.' + LANG + '.vtt');
+        const sr = await fetch(base + 'exemplo.' + demoLang() + '.vtt');
         if (sr.ok) { $('tr').value = await sr.text(); refreshTr(); }
       } catch (e) {}
 
@@ -8634,7 +8737,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     say('vídeo de exemplo:');
     say('  H.264 no navegador: ' + (document.createElement('video').canPlayType('video/mp4; codecs="avc1.42E01E"') || 'NAO suportado'));
     for (const base of DEMO_BASES) {
-      for (const arq of ['exemplo.' + LANG + '.mp4', 'exemplo.' + LANG + '.webm', 'exemplo.' + LANG + '.vtt']) {
+      for (const arq of ['exemplo.' + demoLang() + '.mp4', 'exemplo.' + demoLang() + '.webm', 'exemplo.' + demoLang() + '.vtt']) {
         try { const r = await fetch(base + arq, { method:'HEAD' });
               say('  ' + (base + arq).padEnd(46) + ' HTTP ' + r.status); }
         catch (e) { say('  ' + (base + arq).padEnd(46) + ' FALHOU -> ' + (e && e.message)); }

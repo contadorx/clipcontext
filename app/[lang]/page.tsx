@@ -2,6 +2,15 @@
 import type { Metadata } from 'next';
 import { IDIOMAS, type Lang, SCRIPTS, alternativas, endereco, marca, paginaHtml, tokens, trocar } from '@/lib/site';
 
+/* A imagem de compartilhamento. Ela não existia, e um link sem imagem numa
+   linha do tempo é um link que ninguém clica — cada compartilhamento era o
+   canal de crescimento de um produto sem cadastro sendo jogado fora.
+   É PNG e não SVG: LinkedIn e WhatsApp não renderizam SVG em prévia. */
+const ogImagem = (lang: string) => ({
+  url: `${marca.site}/og/og.${lang}.png`,
+  width: 1200, height: 630,
+});
+
 export const dynamicParams = false;
 
 export function generateStaticParams() {
@@ -20,7 +29,11 @@ export async function generateMetadata({ params }: PageProps<'/[lang]'>): Promis
     title: titulo,
     description: trocar(t.desc, t),
     alternates: { canonical: marca.site + endereco('home', lang), languages: alternativas('home', true) },
-    openGraph: { type: 'website', title: titulo, description: trocar(t.ogDesc, t) },
+    openGraph: { type: 'website', title: titulo, description: trocar(t.ogDesc, t),
+                 url: marca.site + endereco('home', lang), siteName: marca.marca,
+                 locale: lang, images: [ogImagem(lang)] },
+    twitter: { card: 'summary_large_image', title: titulo,
+               description: trocar(t.ogDesc, t), images: [ogImagem(lang).url] },
   };
 }
 

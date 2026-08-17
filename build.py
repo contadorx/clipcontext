@@ -425,6 +425,7 @@ def build_site(root: pathlib.Path) -> None:
     """
     import json
     dic = json.loads((root / "src" / "i18n-site.json").read_text(encoding="utf-8"))
+    gerar_og(root, {L: dic[L] for L in IDIOMAS})
     modelo = (root / "src" / "site" / "home.html").read_text(encoding="utf-8")
 
     pre = {L: ("" if L == "pt" else "/" + L) for L in IDIOMAS}
@@ -467,6 +468,12 @@ def build_site(root: pathlib.Path) -> None:
         t["duoCompLinked"] = t["duoComp"].replace(
             "{0}", f'<a href="{caminhos[lang]["comparativo"]}" style="color:var(--accent)">').replace("{1}", "</a>")
         t["lang"] = lang
+        # O vídeo do tour e o de exemplo existem em pt, en e es. Alemão e
+        # francês entraram no site e NÃO no estúdio — e um `<video>` apontando
+        # para um arquivo que não existe não é um vídeo faltando: é uma caixa
+        # preta vazia no alto da home, que é a primeira coisa que a pessoa vê.
+        # Cai no inglês até os dois serem gravados.
+        t["demoLang"] = lang if (ROOT / "public" / "demo" / f"tour.{lang}.webm").exists() else "en"
         t["redirect"] = REDIRECT if lang == "pt" else LEMBRAR
         # A figura do fluxo, na home. Ela não tem uma palavra dentro; o que
         # muda por idioma é o rótulo de acessibilidade e a legenda.
@@ -814,6 +821,104 @@ def figura_fluxo() -> str:
     return ('<figure class="figFluxo"><svg viewBox="0 0 474 124" role="img" '
             'aria-labelledby="figFluxoT"><title id="figFluxoT">__ALT__</title>'
             + "".join(p) + '</svg><figcaption>__LEG__</figcaption></figure>')
+
+
+# ---------------------------------------------------------------------------
+# A imagem de compartilhamento.
+#
+# Não existia nenhuma. Quem colava walkstamp.com no LinkedIn, no Slack ou no
+# WhatsApp postava um retângulo cinza com o endereço embaixo — e um link sem
+# imagem, numa linha do tempo, é um link que ninguém clica. Cada compartilhamento
+# desperdiçado é o canal de crescimento de um produto sem cadastro sendo jogado
+# fora.
+#
+# É PNG, e não SVG: LinkedIn e WhatsApp não renderizam SVG em prévia. É gerada
+# no build, com a mesma marca e as mesmas cores do resto — e o texto vem do
+# mesmo `i18n-site.json`, então ela fala o idioma da página compartilhada.
+# ---------------------------------------------------------------------------
+
+OG_FONTE_B = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
+OG_FONTE_R = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
+
+
+def _quebrar(desenho, texto, fonte, largura):
+    """Quebra o texto na largura disponível. Sem isto, uma frase alemã sai pela
+    borda da imagem — e alemão é onde as palavras são mais compridas."""
+    linhas, atual = [], ""
+    for palavra in texto.split():
+        tenta = (atual + " " + palavra).strip()
+        if desenho.textlength(tenta, font=fonte) <= largura:
+            atual = tenta
+        else:
+            if atual:
+                linhas.append(atual)
+            atual = palavra
+    if atual:
+        linhas.append(atual)
+    return linhas
+
+
+def gerar_og(root: pathlib.Path, textos_por_idioma: dict) -> None:
+    from PIL import Image, ImageDraw, ImageFont
+
+    destino = root / "public" / "og"
+    destino.mkdir(parents=True, exist_ok=True)
+    A = (58, 63, 158)
+    INK = (31, 36, 48)
+    MUTED = (92, 100, 115)
+    LINHA = (230, 232, 238)
+
+    for lang, t in textos_por_idioma.items():
+        im = Image.new("RGB", (1200, 630), (247, 248, 250))
+        d = ImageDraw.Draw(im)
+
+        # a faixa de cima, como o cabeçalho do site
+        d.rectangle([0, 0, 1200, 8], fill=A)
+
+        # a marca: o símbolo e o nome, do mesmo desenho das outras telas —
+        # inclusive o selo do relógio, que é o "stamp" do nome
+        d.rounded_rectangle([76, 68, 148, 140], radius=17, fill=A)
+        d.rounded_rectangle([91, 81, 133, 104], radius=4, fill=(255, 255, 255))
+        d.rounded_rectangle([91, 111, 133, 116], radius=3, fill=(255, 255, 255))
+        d.rounded_rectangle([91, 120, 116, 125], radius=3, fill=(190, 192, 226))
+        d.ellipse([122, 114, 143, 135], fill=(255, 255, 255))
+        d.ellipse([124, 116, 141, 133], fill=A)
+        d.line([132, 120, 132, 125], fill=(255, 255, 255), width=2)
+        d.line([132, 125, 136, 128], fill=(255, 255, 255), width=2)
+        f_marca = ImageFont.truetype(OG_FONTE_B, 44)
+        d.text((166, 78), MARCA_A, font=f_marca, fill=INK)
+        larg_a = d.textlength(MARCA_A, font=f_marca)
+        d.text((166 + larg_a, 78), MARCA_B, font=f_marca, fill=A)
+
+        # a frase: o mesmo `h1` da home daquele idioma, sem as tags dentro —
+        # o `h1` traz um `<br>` para quebrar a linha na home, e ele apareceria
+        # escrito no meio da imagem
+        frase = re.sub(r"<[^>]+>", " ", t.get("h1", MARCA))
+        frase = re.sub(r"\s+", " ", frase).strip()
+        f_h1 = ImageFont.truetype(OG_FONTE_B, 62)
+        linhas = _quebrar(d, frase, f_h1, 1010)
+        # com quatro linhas a frase encosta na tira de baixo; encolhe antes disso
+        if len(linhas) > 3:
+            f_h1 = ImageFont.truetype(OG_FONTE_B, 50)
+            linhas = _quebrar(d, frase, f_h1, 1010)
+        y = 214
+        for ln in linhas[:4]:
+            d.text((76, y), ln, font=f_h1, fill=INK)
+            y += f_h1.size + 14
+
+        # a linha de apoio, e o endereço
+        f_sub = ImageFont.truetype(OG_FONTE_R, 27)
+        sub = re.sub(r"<[^>]+>", " ", t.get("ogDesc") or t.get("desc") or "")
+        sub = re.sub(r"\s+", " ", sub).strip()
+        for ln in _quebrar(d, sub, f_sub, 1010)[:2]:
+            d.text((76, y + 12), ln, font=f_sub, fill=MUTED)
+            y += 38
+        d.line([76, 546, 1124, 546], fill=LINHA, width=2)
+        f_dom = ImageFont.truetype(OG_FONTE_B, 25)
+        d.text((76, 566), SITE.split("//")[-1], font=f_dom, fill=A)
+
+        im.save(destino / f"og.{lang}.png", "PNG", optimize=True)
+    print(f"public/og/  ({len(textos_por_idioma)} imagens de compartilhamento)")
 
 
 def sobras_que_tapam_o_site(root: pathlib.Path) -> list[str]:

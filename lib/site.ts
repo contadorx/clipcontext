@@ -231,6 +231,10 @@ export function paginaHtml(pagina: string, lang: Lang): string {
     t.redirect = '';
     t.analytics = '';
     t.title = t.title || '';
+    /* O tour só foi gravado em pt, en e es. Onde ele não existe, cai no
+       inglês: um `<video>` apontando para um 404 é uma caixa preta vazia no
+       alto da home — pior do que um vídeo em outro idioma. */
+    t.demoLang = ['pt', 'en', 'es'].includes(lang) ? lang : 'en';
     t.figuraFluxo = ((FIGURAS as Record<string, string>).fluxo ?? '')
       .replace('__ALT__', String(t.fluxoAlt ?? ''))
       .replace('__LEG__', String(t.fluxoLeg ?? ''));
