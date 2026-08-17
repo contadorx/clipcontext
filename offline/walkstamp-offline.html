@@ -416,16 +416,22 @@
   .topbar select{width:auto;padding:5px 9px;font-size:13px}
   /* A marca vai inline, e não como <img src>: assim o arquivo offline mostra a
      logo sem depender de rede nem de um arquivo ao lado. */
-  .brand{display:inline-flex;align-items:center;gap:10px;text-decoration:none;color:var(--ink);
-         font-weight:600;font-size:16.5px;letter-spacing:-.2px}
+  /* Os MESMOS números da home: 24px, peso 700, espaçamento -.015em, respiro de
+     11. O símbolo tinha crescido para 38 e o nome tinha ficado nos 16,5 de
+     antes — do lado de um símbolo desse tamanho ele parecia legenda, e não
+     marca. Duas telas do mesmo produto com a mesma marca em dois tamanhos é a
+     diferença que ninguém sabe nomear e todo mundo sente. */
+  .brand{display:inline-flex;align-items:center;gap:11px;text-decoration:none;color:var(--ink);
+         font-weight:700;font-size:24px;letter-spacing:-.015em}
   /* Símbolo E nome, como na home. O nome tinha saído porque aparecia três
      vezes na mesma tela — no símbolo, escrito ao lado, e como <h1>. A
      duplicação era o <h1>, que continua escondido da vista e presente para
      quem ouve a página. O nome ao lado do símbolo não é repetição: é a marca,
      e um símbolo sozinho não se lê. */
-  .brand svg{width:38px;height:38px;display:block;flex:none}
+  .brand svg{width:36px;height:36px;display:block;flex:none}
   .brand b{font-weight:700;color:var(--accent)}
-  @media (max-width:560px){ .brand svg{width:32px;height:32px} }
+  @media (max-width:560px){ .brand svg{width:32px;height:32px} .brand{font-size:21px} }
+  @media (max-width:430px){ .brand svg{width:29px;height:29px} .brand{font-size:19px} }
   /* Siglas em vez de caixa de seleção, como na home: três letras ocupam menos
      que um <select> de "Português" e ficam iguais nos dois lugares. */
   .idiomas{display:inline-flex;gap:9px;align-items:center;
@@ -477,11 +483,20 @@
 
   <div class="topbar">
     <a href="https://walkstamp.com/" class="brand">
+      <!-- O MESMO desenho de `public/logo.svg`, do rodapé do documento e do PDF.
+           Ele ganhou o selo do relógio — o "stamp" do nome — e esta cópia, que
+           é a única escrita à mão dentro do HTML, ficou para trás: a home tinha
+           um símbolo e a ferramenta tinha outro. Aqui ele é inline e não `<img>`
+           porque a ferramenta abre de `file://` no pacote offline, e um arquivo
+           externo não existiria de lá. -->
       <svg viewBox="0 0 64 64" role="img" aria-label="Walkstamp">
         <rect width="64" height="64" rx="15" fill="#3A3F9E"/>
-        <rect x="14" y="14" width="36" height="20" rx="3" fill="#fff"/>
-        <rect x="14" y="40" width="36" height="4.5" rx="2.25" fill="#fff"/>
-        <rect x="14" y="48" width="23" height="4.5" rx="2.25" fill="#fff" opacity=".62"/>
+        <rect x="13" y="12" width="38" height="21" rx="3" fill="#fff"/>
+        <rect x="13" y="39" width="38" height="4.5" rx="2.25" fill="#fff"/>
+        <rect x="13" y="47" width="22" height="4.5" rx="2.25" fill="#fff" opacity=".62"/>
+        <circle cx="48" cy="48" r="9.5" fill="#fff"/>
+        <circle cx="48" cy="48" r="7.6" fill="#3A3F9E"/>
+        <path d="M48 43.6V48l3 2" stroke="#fff" stroke-width="1.9" stroke-linecap="round" fill="none"/>
       </svg>
       <span aria-hidden="true">Walk<b>stamp</b></span>
     </a>
@@ -4942,6 +4957,22 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
        O que NÃO trava junto: o botão de parar e o de pular, que moram no passo
        1. Uma espera sem saída seria pior do que a bagunça que isto evita. */
     const emAndamento = liveOn || emCauda;
+    /* O passo 2 entra na mesma trava. Durante a gravação ele não tem o que
+       fazer: a transcrição está acontecendo sozinha, ao vivo, e a extração de
+       quadros também. Mexer nos ajustes no meio disso muda o que já está
+       correndo — e o cartão ficava lá, aberto pelo cabeçalho, convidando.
+       Depois que a gravação termina ele volta, porque aí sim há trabalho:
+       colar uma transcrição que não veio, corrigir uma sigla, traduzir. */
+    trancar('cardTr',     !emAndamento);
+    /* Só MEXE na dica do passo 2 durante a captura. Fora dela quem manda é o
+       ramo do modo, logo acima, que já escolheu entre "escolha um vídeo no
+       passo 1", "a gravação acabou" e nenhuma. Sobrescrever com `null` aqui
+       apagava a primeira — e a primeira é a única coisa que explica, numa
+       página recém-aberta, por que o passo 2 está fechado. */
+    if (emAndamento) {
+      dobrar('cardTr', false);
+      dica('hintTr', liveOn ? 'lockGravando' : 'lockCauda');
+    }
     trancar('prevCard',   (temAlgo || modo !== 'nada') && !emAndamento);
     /* Aberto assim que existe material, mesmo sem quadro nenhum: é aqui que se
        cola uma transcrição pronta, e um cartão fechado é um campo que não
@@ -6136,28 +6167,54 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
 
   const PIP_CSS = `
     *{box-sizing:border-box;margin:0}
-    body{font:14px/1.4 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
-         background:#121419;color:#e9ebf1;padding:14px;display:flex;
-         flex-direction:column;gap:10px;justify-content:center;height:100vh}
+    /* A classe .hide mora no CSS da aba, e a janelinha é OUTRO documento — o
+       estilo da aba não chega aqui. Sem esta linha, o botão de calar o
+       microfone, que nasce escondido, aparecia como uma caixa vazia de 28px no
+       meio da janela: um botão que não faz nada, ocupando espaço que é tela da
+       pessoa. O código escondia; o CSS é que não sabia o que escondido queria
+       dizer.
+
+       E o motivo de não haver crase nenhuma neste comentário: ele vive DENTRO
+       de um template literal. Uma crase aqui fecha a string e leva o script
+       inteiro junto — foi exatamente o que aconteceu na primeira tentativa. */
+    .hide{display:none !important}
+    /* A janelinha fica POR CIMA da tela que está sendo gravada. Cada pixel dela
+       é um pixel a menos do trabalho que a pessoa está documentando — e ainda
+       aparece nos quadros. Então ela encolhe: menos respiro, menos altura de
+       botão, e nada que não seja usado durante a gravação. */
+    body{font:13px/1.35 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+         background:#121419;color:#e9ebf1;padding:11px;display:flex;
+         flex-direction:column;gap:7px;justify-content:center;height:100vh}
     .top{display:flex;align-items:center;gap:8px}
     .dot{width:10px;height:10px;border-radius:50%;background:#ef8484;flex:none;
          animation:pulsa 1.4s ease-in-out infinite}
     @keyframes pulsa{0%,100%{opacity:1}50%{opacity:.25}}
-    .rel{font:600 22px/1 ui-monospace,Menlo,Consolas,monospace;letter-spacing:.5px}
+    .rel{font:600 19px/1 ui-monospace,Menlo,Consolas,monospace;letter-spacing:.4px}
     .txt{color:#949bab;font-size:12.5px}
     /* A contagem, aqui, grande.
        Ela já era grande na aba — e a aba, durante a contagem, está ATRÁS da
        tela que a pessoa acabou de escolher compartilhar. Ou seja: o único
        lugar onde ela era grande é o único lugar onde ninguém estava olhando.
        Aqui é onde o olho está. */
-    .txt.contando{color:#e9ebf1;font-size:44px;font-weight:800;line-height:1.05;
-                  text-align:center;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
-    button{width:100%;padding:11px;border:0;border-radius:9px;background:#737cf0;
-           color:#121419;font:600 15px system-ui,sans-serif;cursor:pointer}
+    .txt.contando{color:#e9ebf1;font-size:64px;font-weight:800;line-height:1;
+                  text-align:center;font-variant-numeric:tabular-nums;letter-spacing:-.03em}
+    /* Durante a contagem não existe relógio para ler, nível de áudio para
+       conferir, passo para marcar nem comentário para escrever: existe um
+       número. Esconder o resto é o que permite esse número ser enorme SEM a
+       janela crescer — e crescer é o que ela não pode fazer. */
+    body.contando .top,body.contando .vus,body.contando .pe,
+    body.contando input.nota,body.contando button:not(#stop){display:none}
+    /* "Nada de vídeo é guardado" é uma frase que se lê UMA vez, e a hora de
+       lê-la é enquanto a janelinha ainda está preparando — que é quando a
+       pergunta existe. Repetida durante a gravação inteira ela só cobra
+       altura, e altura aqui é tela da pessoa. */
+    body.gravando .pe{display:none}
+    button{width:100%;padding:9px;border:0;border-radius:8px;background:#737cf0;
+           color:#121419;font:600 14px system-ui,sans-serif;cursor:pointer}
     button:hover{filter:brightness(1.08)}
     button:disabled{opacity:.5;cursor:default}
     button.sec{background:transparent;color:#e9ebf1;border:1px solid #282c36;
-               font-size:13px;padding:8px}
+               font-size:12.5px;padding:6px}
     button.sec.off{border-color:#ef8484;color:#ef8484}
     /* O flash de "marcou". Numa janelinha de 240 px não cabe uma mensagem de
        confirmação ao lado do botão — então o próprio botão confirma. */
@@ -6166,12 +6223,12 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     .vus{display:flex;gap:6px}
     .vb{flex:1;height:6px;border-radius:3px;background:#282c36;overflow:hidden}
     .vb i{display:block;height:100%;width:0;background:#737cf0}
-    .pe{font-size:11.5px;color:#737cf0}
+    .pe{font-size:11px;color:#737cf0;line-height:1.3}
     /* A caixa do comentário. Ela precisa existir AQUI e não só no cartão:
        durante a gravação a aba do produto está atrás da tela compartilhada, e
        um campo que a pessoa não vê é um campo que não existe. */
     input.nota{width:100%;background:#1a1d24;color:#e9ebf1;border:1px solid #282c36;
-               border-radius:7px;padding:7px 9px;font:13px system-ui,sans-serif}
+               border-radius:6px;padding:6px 8px;font:12.5px system-ui,sans-serif}
     input.nota:disabled{opacity:.45}
     input.nota::placeholder{color:#6b7280}
     input.nota.guardou{border-color:#737cf0;box-shadow:0 0 0 2px rgba(115,124,240,.28)}
@@ -6180,7 +6237,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
   async function abrirControle(){
     if (!('documentPictureInPicture' in window)) return;
     try {
-      pipWin = await documentPictureInPicture.requestWindow({ width: 258, height: 282 });
+      pipWin = await documentPictureInPicture.requestWindow({ width: 250, height: 244 });
     } catch (e) { pipWin = null; return; }
 
     const d = pipWin.document;
@@ -6274,6 +6331,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
         pipPausa.classList.toggle('off', pausado);
       }
       if (pipTexto) pipTexto.classList.remove('contando');
+      if (pipWin) { pipWin.document.body.classList.remove('contando');
+                    pipWin.document.body.classList.add('gravando'); }
       // o ponto vermelho para de pulsar na pausa: é o sinal que se lê sem ler
       if (pipWin) { const dot = pipWin.document.querySelector('.dot');
                     if (dot) dot.style.animationPlayState = pausado ? 'paused' : 'running'; }
@@ -6281,15 +6340,17 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     }
     if (etapa === 'contando') {
       if (pipTexto) {
-        /* Só o número. "Começando em 3…" a 44px não cabe numa janela de 258px,
+        /* Só o número. "Começando em 3…" grande não cabe numa janela de 250px,
            e a palavra não acrescenta nada: o que a pessoa precisa saber é
            quanto falta, e ela sabe por que está contando. */
         pipTexto.textContent = String(dados.n);
         pipTexto.classList.add('contando');
+        if (pipWin) pipWin.document.body.classList.add('contando');
       }
       return;
     }
     const rotulos = { prep: 'pipPrep', mic: 'pipMic', modelo: 'pipModelo', tela: 'pipTela' };
+    if (pipWin) pipWin.document.body.classList.remove('contando', 'gravando');
     if (pipTexto) { pipTexto.classList.remove('contando');
                     pipTexto.textContent = t(rotulos[etapa] || 'pipPrep'); }
   }
@@ -11094,6 +11155,16 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     if (lenteVoltar && document.contains(lenteVoltar)) lenteVoltar.focus();
     else { const b = $('thumbs').querySelector('.lupa'); if (b) b.focus(); }
     lenteVoltar = null;
+    /* Se a lente foi aberta DE DENTRO da revisão assistida, é para lá que a
+       pessoa volta — e a imagem que ela vê ali tem que ser a imagem que ela
+       acabou de tarjar. Sem isto o painel continuava mostrando a versão de
+       antes: a tarja existia no documento e não na tela, e o que a pessoa
+       concluía era que a marcação não tinha pegado. */
+    if (revAtivo()) {
+      revPintar();
+      $('revBox').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      const b2 = $('revEditar'); if (b2) b2.focus();
+    }
   }
   /* ---- trocar a imagem deste passo ----
 
