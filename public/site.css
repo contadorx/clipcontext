@@ -60,6 +60,19 @@ nav a.btnTop:hover{color:var(--accent-ink);filter:brightness(1.08)}
   nav a{font-size:12.5px}
   nav a.btnTop{padding:7px 10px}
 }
+/* Com cinco idiomas o encolhimento acabou: PT EN ES DE FR mais o botão não
+   cabem numa linha de telefone por menor que fique a fonte, e continuar
+   apertando produziria um cabeçalho ilegível para ganhar 20px.
+
+   Então abaixo de 500 o cabeçalho passa a ter DUAS linhas: a marca em cima, o
+   menu embaixo, encostado à direita. É o que a maioria dos sites faz no
+   telefone, e é infinitamente melhor do que a página inteira andar para o lado
+   — que é o defeito que este bloco de regras existe para evitar. */
+@media (max-width:500px){
+  header .wrap{flex-wrap:wrap;height:auto;padding-top:9px;padding-bottom:9px;row-gap:7px}
+  nav{width:100%;justify-content:flex-end}
+  nav > span{border-left-color:transparent !important;padding-left:0 !important}
+}
 
 /* botões */
 .btn{display:inline-block;background:var(--accent);color:var(--accent-ink);text-decoration:none;

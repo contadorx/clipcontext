@@ -5,6 +5,8 @@
     <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://walkstamp.com/de"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://walkstamp.com/fr"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en"/>
   </url>
   <url>
@@ -12,6 +14,8 @@
     <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://walkstamp.com/de"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://walkstamp.com/fr"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en"/>
   </url>
   <url>
@@ -19,6 +23,26 @@
     <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://walkstamp.com/de"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://walkstamp.com/fr"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en"/>
+  </url>
+  <url>
+    <loc>https://walkstamp.com/de</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://walkstamp.com/de"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://walkstamp.com/fr"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en"/>
+  </url>
+  <url>
+    <loc>https://walkstamp.com/fr</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://walkstamp.com/de"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://walkstamp.com/fr"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en"/>
   </url>
   <url>
@@ -26,6 +50,8 @@
     <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/precos"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/precos"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/precos"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://walkstamp.com/de/preise"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://walkstamp.com/fr/tarifs"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/precos"/>
   </url>
   <url>
@@ -33,6 +59,8 @@
     <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/precos"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/precos"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/precos"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://walkstamp.com/de/preise"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://walkstamp.com/fr/tarifs"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/precos"/>
   </url>
   <url>
@@ -40,6 +68,26 @@
     <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/precos"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/precos"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/precos"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://walkstamp.com/de/preise"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://walkstamp.com/fr/tarifs"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/precos"/>
+  </url>
+  <url>
+    <loc>https://walkstamp.com/de/preise</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/precos"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/precos"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/precos"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://walkstamp.com/de/preise"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://walkstamp.com/fr/tarifs"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/precos"/>
+  </url>
+  <url>
+    <loc>https://walkstamp.com/fr/tarifs</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/precos"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/precos"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/precos"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://walkstamp.com/de/preise"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://walkstamp.com/fr/tarifs"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/precos"/>
   </url>
   <url>
@@ -47,6 +95,8 @@
     <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/privacidade"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/privacidade"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/privacidade"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://walkstamp.com/de/privacidade"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://walkstamp.com/fr/privacidade"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/privacidade"/>
   </url>
   <url>
@@ -54,6 +104,8 @@
     <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/privacidade"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/privacidade"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/privacidade"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://walkstamp.com/de/privacidade"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://walkstamp.com/fr/privacidade"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/privacidade"/>
   </url>
   <url>
@@ -61,6 +113,26 @@
     <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/privacidade"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/privacidade"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/privacidade"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://walkstamp.com/de/privacidade"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://walkstamp.com/fr/privacidade"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/privacidade"/>
+  </url>
+  <url>
+    <loc>https://walkstamp.com/de/privacidade</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/privacidade"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/privacidade"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/privacidade"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://walkstamp.com/de/privacidade"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://walkstamp.com/fr/privacidade"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/privacidade"/>
+  </url>
+  <url>
+    <loc>https://walkstamp.com/fr/privacidade</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/privacidade"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/privacidade"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/privacidade"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://walkstamp.com/de/privacidade"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://walkstamp.com/fr/privacidade"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/privacidade"/>
   </url>
   <url>
@@ -68,6 +140,8 @@
     <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/termos"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/termos"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/termos"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://walkstamp.com/de/termos"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://walkstamp.com/fr/termos"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/termos"/>
   </url>
   <url>
@@ -75,6 +149,8 @@
     <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/termos"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/termos"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/termos"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://walkstamp.com/de/termos"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://walkstamp.com/fr/termos"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/termos"/>
   </url>
   <url>
@@ -82,6 +158,26 @@
     <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/termos"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/termos"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/termos"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://walkstamp.com/de/termos"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://walkstamp.com/fr/termos"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/termos"/>
+  </url>
+  <url>
+    <loc>https://walkstamp.com/de/termos</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/termos"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/termos"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/termos"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://walkstamp.com/de/termos"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://walkstamp.com/fr/termos"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/termos"/>
+  </url>
+  <url>
+    <loc>https://walkstamp.com/fr/termos</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/termos"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/termos"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/termos"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://walkstamp.com/de/termos"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://walkstamp.com/fr/termos"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/termos"/>
   </url>
   <url>
@@ -89,6 +185,8 @@
     <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/seguranca"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/security"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/seguridad"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://walkstamp.com/de/informationssicherheit"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://walkstamp.com/fr/securite-de-l-information"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/security"/>
   </url>
   <url>
@@ -96,6 +194,8 @@
     <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/seguranca"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/security"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/seguridad"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://walkstamp.com/de/informationssicherheit"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://walkstamp.com/fr/securite-de-l-information"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/security"/>
   </url>
   <url>
@@ -103,6 +203,26 @@
     <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/seguranca"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/security"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/seguridad"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://walkstamp.com/de/informationssicherheit"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://walkstamp.com/fr/securite-de-l-information"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/security"/>
+  </url>
+  <url>
+    <loc>https://walkstamp.com/de/informationssicherheit</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/seguranca"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/security"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/seguridad"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://walkstamp.com/de/informationssicherheit"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://walkstamp.com/fr/securite-de-l-information"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/security"/>
+  </url>
+  <url>
+    <loc>https://walkstamp.com/fr/securite-de-l-information</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/seguranca"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/security"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/seguridad"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://walkstamp.com/de/informationssicherheit"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://walkstamp.com/fr/securite-de-l-information"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/security"/>
   </url>
   <url>
@@ -110,6 +230,8 @@
     <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/verificar"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/verify"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/verificar"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://walkstamp.com/de/pruefen"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://walkstamp.com/fr/verifier"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/verify"/>
   </url>
   <url>
@@ -117,6 +239,8 @@
     <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/verificar"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/verify"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/verificar"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://walkstamp.com/de/pruefen"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://walkstamp.com/fr/verifier"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/verify"/>
   </url>
   <url>
@@ -124,6 +248,26 @@
     <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/verificar"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/verify"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/verificar"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://walkstamp.com/de/pruefen"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://walkstamp.com/fr/verifier"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/verify"/>
+  </url>
+  <url>
+    <loc>https://walkstamp.com/de/pruefen</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/verificar"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/verify"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/verificar"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://walkstamp.com/de/pruefen"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://walkstamp.com/fr/verifier"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/verify"/>
+  </url>
+  <url>
+    <loc>https://walkstamp.com/fr/verifier</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/verificar"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/verify"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/verificar"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://walkstamp.com/de/pruefen"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://walkstamp.com/fr/verifier"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/verify"/>
   </url>
   <url>
@@ -131,6 +275,8 @@
     <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/comparativo"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/compare"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/comparativa"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://walkstamp.com/de/vergleich"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://walkstamp.com/fr/comparatif"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/compare"/>
   </url>
   <url>
@@ -138,6 +284,8 @@
     <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/comparativo"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/compare"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/comparativa"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://walkstamp.com/de/vergleich"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://walkstamp.com/fr/comparatif"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/compare"/>
   </url>
   <url>
@@ -145,6 +293,26 @@
     <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/comparativo"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/compare"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/comparativa"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://walkstamp.com/de/vergleich"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://walkstamp.com/fr/comparatif"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/compare"/>
+  </url>
+  <url>
+    <loc>https://walkstamp.com/de/vergleich</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/comparativo"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/compare"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/comparativa"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://walkstamp.com/de/vergleich"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://walkstamp.com/fr/comparatif"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/compare"/>
+  </url>
+  <url>
+    <loc>https://walkstamp.com/fr/comparatif</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/comparativo"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/compare"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/comparativa"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://walkstamp.com/de/vergleich"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://walkstamp.com/fr/comparatif"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/compare"/>
   </url>
   <url>
@@ -152,6 +320,8 @@
     <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/link"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/link"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/link"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://walkstamp.com/de/link"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://walkstamp.com/fr/link"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/link"/>
   </url>
   <url>
@@ -159,6 +329,8 @@
     <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/link"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/link"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/link"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://walkstamp.com/de/link"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://walkstamp.com/fr/link"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/link"/>
   </url>
   <url>
@@ -166,6 +338,26 @@
     <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/link"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/link"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/link"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://walkstamp.com/de/link"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://walkstamp.com/fr/link"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/link"/>
+  </url>
+  <url>
+    <loc>https://walkstamp.com/de/link</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/link"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/link"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/link"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://walkstamp.com/de/link"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://walkstamp.com/fr/link"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/link"/>
+  </url>
+  <url>
+    <loc>https://walkstamp.com/fr/link</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/link"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/link"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/link"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://walkstamp.com/de/link"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://walkstamp.com/fr/link"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/link"/>
   </url>
   <url>
@@ -173,6 +365,8 @@
     <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/time"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/team"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/equipo"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://walkstamp.com/de/team"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://walkstamp.com/fr/equipe"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/team"/>
   </url>
   <url>
@@ -180,6 +374,8 @@
     <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/time"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/team"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/equipo"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://walkstamp.com/de/team"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://walkstamp.com/fr/equipe"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/team"/>
   </url>
   <url>
@@ -187,6 +383,26 @@
     <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/time"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/team"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/equipo"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://walkstamp.com/de/team"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://walkstamp.com/fr/equipe"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/team"/>
+  </url>
+  <url>
+    <loc>https://walkstamp.com/de/team</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/time"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/team"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/equipo"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://walkstamp.com/de/team"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://walkstamp.com/fr/equipe"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/team"/>
+  </url>
+  <url>
+    <loc>https://walkstamp.com/fr/equipe</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/time"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/team"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/equipo"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://walkstamp.com/de/team"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://walkstamp.com/fr/equipe"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/team"/>
   </url>
   <url>
@@ -194,6 +410,8 @@
     <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/ajuda"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/help"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/ayuda"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://walkstamp.com/de/hilfe"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://walkstamp.com/fr/aide"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/help"/>
   </url>
   <url>
@@ -201,6 +419,8 @@
     <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/ajuda"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/help"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/ayuda"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://walkstamp.com/de/hilfe"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://walkstamp.com/fr/aide"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/help"/>
   </url>
   <url>
@@ -208,6 +428,26 @@
     <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/ajuda"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/help"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/ayuda"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://walkstamp.com/de/hilfe"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://walkstamp.com/fr/aide"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/help"/>
+  </url>
+  <url>
+    <loc>https://walkstamp.com/de/hilfe</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/ajuda"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/help"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/ayuda"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://walkstamp.com/de/hilfe"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://walkstamp.com/fr/aide"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/help"/>
+  </url>
+  <url>
+    <loc>https://walkstamp.com/fr/aide</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/ajuda"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/help"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/ayuda"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://walkstamp.com/de/hilfe"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://walkstamp.com/fr/aide"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/help"/>
   </url>
   <url>
@@ -215,6 +455,8 @@
     <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/evidencia-de-teste"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/test-evidence"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/evidencia-de-prueba"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://walkstamp.com/de/testnachweis"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://walkstamp.com/fr/preuve-de-test"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/test-evidence"/>
   </url>
   <url>
@@ -222,6 +464,8 @@
     <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/evidencia-de-teste"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/test-evidence"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/evidencia-de-prueba"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://walkstamp.com/de/testnachweis"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://walkstamp.com/fr/preuve-de-test"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/test-evidence"/>
   </url>
   <url>
@@ -229,6 +473,26 @@
     <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/evidencia-de-teste"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/test-evidence"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/evidencia-de-prueba"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://walkstamp.com/de/testnachweis"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://walkstamp.com/fr/preuve-de-test"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/test-evidence"/>
+  </url>
+  <url>
+    <loc>https://walkstamp.com/de/testnachweis</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/evidencia-de-teste"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/test-evidence"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/evidencia-de-prueba"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://walkstamp.com/de/testnachweis"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://walkstamp.com/fr/preuve-de-test"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/test-evidence"/>
+  </url>
+  <url>
+    <loc>https://walkstamp.com/fr/preuve-de-test</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/evidencia-de-teste"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/test-evidence"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/evidencia-de-prueba"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://walkstamp.com/de/testnachweis"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://walkstamp.com/fr/preuve-de-test"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/test-evidence"/>
   </url>
   <url>
@@ -236,6 +500,8 @@
     <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/instrucao-de-trabalho"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/work-instruction"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/instruccion-de-trabajo"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://walkstamp.com/de/arbeitsanweisung"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://walkstamp.com/fr/mode-operatoire"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/work-instruction"/>
   </url>
   <url>
@@ -243,6 +509,8 @@
     <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/instrucao-de-trabalho"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/work-instruction"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/instruccion-de-trabajo"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://walkstamp.com/de/arbeitsanweisung"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://walkstamp.com/fr/mode-operatoire"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/work-instruction"/>
   </url>
   <url>
@@ -250,6 +518,26 @@
     <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/instrucao-de-trabalho"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/work-instruction"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/instruccion-de-trabajo"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://walkstamp.com/de/arbeitsanweisung"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://walkstamp.com/fr/mode-operatoire"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/work-instruction"/>
+  </url>
+  <url>
+    <loc>https://walkstamp.com/de/arbeitsanweisung</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/instrucao-de-trabalho"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/work-instruction"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/instruccion-de-trabajo"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://walkstamp.com/de/arbeitsanweisung"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://walkstamp.com/fr/mode-operatoire"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/work-instruction"/>
+  </url>
+  <url>
+    <loc>https://walkstamp.com/fr/mode-operatoire</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/instrucao-de-trabalho"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/work-instruction"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/instruccion-de-trabajo"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://walkstamp.com/de/arbeitsanweisung"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://walkstamp.com/fr/mode-operatoire"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/work-instruction"/>
   </url>
   <url>
@@ -257,6 +545,8 @@
     <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/ata-de-reuniao"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/meeting-minutes"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/acta-de-reunion"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://walkstamp.com/de/besprechungsprotokoll"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://walkstamp.com/fr/compte-rendu-de-reunion"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/meeting-minutes"/>
   </url>
   <url>
@@ -264,6 +554,8 @@
     <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/ata-de-reuniao"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/meeting-minutes"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/acta-de-reunion"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://walkstamp.com/de/besprechungsprotokoll"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://walkstamp.com/fr/compte-rendu-de-reunion"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/meeting-minutes"/>
   </url>
   <url>
@@ -271,6 +563,26 @@
     <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/ata-de-reuniao"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/meeting-minutes"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/acta-de-reunion"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://walkstamp.com/de/besprechungsprotokoll"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://walkstamp.com/fr/compte-rendu-de-reunion"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/meeting-minutes"/>
+  </url>
+  <url>
+    <loc>https://walkstamp.com/de/besprechungsprotokoll</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/ata-de-reuniao"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/meeting-minutes"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/acta-de-reunion"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://walkstamp.com/de/besprechungsprotokoll"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://walkstamp.com/fr/compte-rendu-de-reunion"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/meeting-minutes"/>
+  </url>
+  <url>
+    <loc>https://walkstamp.com/fr/compte-rendu-de-reunion</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/ata-de-reuniao"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/meeting-minutes"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/acta-de-reunion"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://walkstamp.com/de/besprechungsprotokoll"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://walkstamp.com/fr/compte-rendu-de-reunion"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/meeting-minutes"/>
   </url>
   <url>
@@ -278,6 +590,8 @@
     <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/contexto-para-ia"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/context-for-ai"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/contexto-para-ia"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://walkstamp.com/de/kontext-fuer-ki"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://walkstamp.com/fr/contexte-pour-ia"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/context-for-ai"/>
   </url>
   <url>
@@ -285,6 +599,8 @@
     <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/contexto-para-ia"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/context-for-ai"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/contexto-para-ia"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://walkstamp.com/de/kontext-fuer-ki"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://walkstamp.com/fr/contexte-pour-ia"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/context-for-ai"/>
   </url>
   <url>
@@ -292,6 +608,26 @@
     <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/contexto-para-ia"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/context-for-ai"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/contexto-para-ia"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://walkstamp.com/de/kontext-fuer-ki"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://walkstamp.com/fr/contexte-pour-ia"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/context-for-ai"/>
+  </url>
+  <url>
+    <loc>https://walkstamp.com/de/kontext-fuer-ki</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/contexto-para-ia"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/context-for-ai"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/contexto-para-ia"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://walkstamp.com/de/kontext-fuer-ki"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://walkstamp.com/fr/contexte-pour-ia"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/context-for-ai"/>
+  </url>
+  <url>
+    <loc>https://walkstamp.com/fr/contexte-pour-ia</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/contexto-para-ia"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/context-for-ai"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/contexto-para-ia"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://walkstamp.com/de/kontext-fuer-ki"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://walkstamp.com/fr/contexte-pour-ia"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/context-for-ai"/>
   </url>
   <url>
@@ -299,6 +635,8 @@
     <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/teste-de-usabilidade"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/usability-test"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/prueba-de-usabilidad"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://walkstamp.com/de/usability-test"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://walkstamp.com/fr/test-d-utilisabilite"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/usability-test"/>
   </url>
   <url>
@@ -306,6 +644,8 @@
     <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/teste-de-usabilidade"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/usability-test"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/prueba-de-usabilidad"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://walkstamp.com/de/usability-test"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://walkstamp.com/fr/test-d-utilisabilite"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/usability-test"/>
   </url>
   <url>
@@ -313,6 +653,26 @@
     <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/teste-de-usabilidade"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/usability-test"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/prueba-de-usabilidad"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://walkstamp.com/de/usability-test"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://walkstamp.com/fr/test-d-utilisabilite"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/usability-test"/>
+  </url>
+  <url>
+    <loc>https://walkstamp.com/de/usability-test</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/teste-de-usabilidade"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/usability-test"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/prueba-de-usabilidad"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://walkstamp.com/de/usability-test"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://walkstamp.com/fr/test-d-utilisabilite"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/usability-test"/>
+  </url>
+  <url>
+    <loc>https://walkstamp.com/fr/test-d-utilisabilite</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/teste-de-usabilidade"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/usability-test"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/prueba-de-usabilidad"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://walkstamp.com/de/usability-test"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://walkstamp.com/fr/test-d-utilisabilite"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/usability-test"/>
   </url>
   <url>
@@ -320,6 +680,8 @@
     <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/substituto-do-steps-recorder"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/steps-recorder-replacement"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/alternativa-al-steps-recorder"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://walkstamp.com/de/steps-recorder-ersatz"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://walkstamp.com/fr/alternative-au-steps-recorder"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/steps-recorder-replacement"/>
   </url>
   <url>
@@ -327,6 +689,8 @@
     <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/substituto-do-steps-recorder"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/steps-recorder-replacement"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/alternativa-al-steps-recorder"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://walkstamp.com/de/steps-recorder-ersatz"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://walkstamp.com/fr/alternative-au-steps-recorder"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/steps-recorder-replacement"/>
   </url>
   <url>
@@ -334,6 +698,26 @@
     <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/substituto-do-steps-recorder"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/steps-recorder-replacement"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/alternativa-al-steps-recorder"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://walkstamp.com/de/steps-recorder-ersatz"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://walkstamp.com/fr/alternative-au-steps-recorder"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/steps-recorder-replacement"/>
+  </url>
+  <url>
+    <loc>https://walkstamp.com/de/steps-recorder-ersatz</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/substituto-do-steps-recorder"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/steps-recorder-replacement"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/alternativa-al-steps-recorder"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://walkstamp.com/de/steps-recorder-ersatz"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://walkstamp.com/fr/alternative-au-steps-recorder"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/steps-recorder-replacement"/>
+  </url>
+  <url>
+    <loc>https://walkstamp.com/fr/alternative-au-steps-recorder</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/substituto-do-steps-recorder"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/steps-recorder-replacement"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/alternativa-al-steps-recorder"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://walkstamp.com/de/steps-recorder-ersatz"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://walkstamp.com/fr/alternative-au-steps-recorder"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/steps-recorder-replacement"/>
   </url>
 </urlset>

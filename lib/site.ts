@@ -44,7 +44,11 @@ export const METAS = rotas.metas;
 /** Os nomes das páginas internas — `precos`, `seguranca`, `casoEv`… */
 export const PAGINAS = Object.keys(rotas.slugs);
 
-const PREFIXO: Record<Lang, string> = { pt: '', en: '/en', es: '/es' };
+/* O prefixo de cada idioma. Era uma tabela escrita à mão, e cada idioma novo
+   exigia lembrar dela — que é a definição de lugar onde se esquece. Agora sai
+   de `IDIOMAS`, que vem do `build.py`: o português é a raiz, o resto é a sigla. */
+const PREFIXO: Record<Lang, string> =
+  Object.fromEntries(IDIOMAS.map((l) => [l, l === 'pt' ? '' : '/' + l])) as Record<Lang, string>;
 
 /** O endereço público de uma página, no idioma dela. `home` é `/`, `/en`, `/es`. */
 export function endereco(pagina: string, lang: Lang): string {
@@ -157,7 +161,7 @@ export function tabelaDePlanos(lang: Lang, t: Dicionario): string {
   const blocos = features.grupos.map((g) => {
     const pagosNoGrupo = g.itens.filter((i) => !i.planos.includes('f')).length;
     const itens = g.itens.map((item) => {
-      const rotulo = escapar(String(item[lang] ?? ''));
+      const rotulo = escapar(String(item[lang] ?? item.en ?? ''));
       const breve = item.breve ? ` <span class="soon">${escapar(t.tpBreve)}</span>` : '';
       return `<li>${rotulo}${breve}${seloDoPlano(item.planos, t)}</li>`;
     }).join('');
@@ -173,7 +177,10 @@ export function tabelaDePlanos(lang: Lang, t: Dicionario): string {
     const mesmoPlano = new Set(g.itens.map((i) => i.planos)).size === 1;
     const sinal = g.itens.length > 0 && pagosNoGrupo === g.itens.length && mesmoPlano
       ? seloDoPlano(g.itens[0].planos, t) : '';
-    return `<details class="grpF" open><summary><b>${escapar(g.titulo[lang])}</b>${conta}${sinal}</summary>` +
+    /* `?? g.titulo.en`: um idioma novo do site não pode DERRUBAR a página de
+       preços enquanto a lista de funcionalidades não é traduzida. Cair no
+       inglês é visivelmente incompleto; cair num build quebrado é pior. */
+    return `<details class="grpF" open><summary><b>${escapar(g.titulo[lang] ?? g.titulo.en)}</b>${conta}${sinal}</summary>` +
       `<ul class="fts">${itens}</ul></details>`;
   }).join('');
 
@@ -259,11 +266,13 @@ export function paginaHtml(pagina: string, lang: Lang): string {
  *  ele diz para onde mandar quem não casa com nenhum idioma, e quem chega numa
  *  página interna chegou por link, não por sorteio. */
 export function alternativas(pagina: string, comDefault = false): Record<string, string> {
-  const alt: Record<string, string> = {
-    'pt-BR': marca.site + endereco(pagina, 'pt'),
-    en: marca.site + endereco(pagina, 'en'),
-    es: marca.site + endereco(pagina, 'es'),
-  };
+  /* Sai de `IDIOMAS`, e não escrito à mão: era aqui que o alemão e o francês
+     iam ficar de fora sem ninguém perceber — a página abre, o texto está certo,
+     e só o buscador sabe que a versão existe. O português leva a região porque
+     é `pt-BR` de verdade, e não `pt` genérico. */
+  const alt: Record<string, string> = Object.fromEntries(
+    IDIOMAS.map((l) => [l === 'pt' ? 'pt-BR' : l, marca.site + endereco(pagina, l)]),
+  );
   if (comDefault) alt['x-default'] = marca.site + endereco(pagina, 'en');
   return alt;
 }

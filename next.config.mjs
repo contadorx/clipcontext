@@ -14,7 +14,10 @@ import fs from 'node:fs';
 
 const rotas = JSON.parse(fs.readFileSync('./src/rotas.json', 'utf8'));
 const { idiomas, slugs } = rotas;
-const PREFIXO = { pt: '', en: '/en', es: '/es' };
+/* Sai de `idiomas`, e não escrito à mão: uma tabela de prefixos que precisa ser
+   lembrada a cada idioma novo é uma tabela que vai ser esquecida — e o sintoma
+   é um `undefined/aide.html` no build, que não aponta para a causa. */
+const PREFIXO = Object.fromEntries(idiomas.map((L) => [L, L === 'pt' ? '' : '/' + L]));
 const paginas = Object.keys(slugs);
 
 /* A área do cliente tem endereço traduzido como o resto do site: quem lê em
@@ -25,6 +28,11 @@ const CONTA = { pt: '/conta', en: '/en/account', es: '/es/cuenta' };
    Ela é separada da ferramenta: quem organiza a fila e quem grava o vídeo são
    momentos diferentes, e quase sempre pessoas diferentes. */
 const ROTEIRO = { pt: '/conta/roteiro', en: '/en/account/cases', es: '/es/cuenta/casos' };
+/* O site fala cinco idiomas; a área do cliente ainda fala três. Os laços da
+   conta andam por ESTA lista, e não por `idiomas` — senão cada idioma novo do
+   site pede uma rota de conta que não existe, e o build quebra com um
+   "`source` is missing" que não diz nada sobre a causa. */
+const IDIOMAS_CONTA = Object.keys(CONTA);
 
 /** O endereço público de cada página, no idioma dela. */
 const publico = (pg, L) => (pg === 'home' ? PREFIXO[L] || '/' : PREFIXO[L] + '/' + slugs[pg][L]);
@@ -66,6 +74,8 @@ const config = {
       for (const pg of paginas) {
         r.push({ source: `${publico(pg, L)}.html`, destination: publico(pg, L), permanent: true });
       }
+    }
+    for (const L of IDIOMAS_CONTA) {
       // e o endereço interno da conta também não é para ser visitado por fora
       r.push({ source: `/conta/${L}`, destination: CONTA[L], permanent: true });
       r.push({ source: `/conta/${L}/roteiro`, destination: ROTEIRO[L], permanent: true });
@@ -81,7 +91,7 @@ const config = {
         depois.push({ source: publico(pg, 'pt'), destination: interno(pg, 'pt') });
       }
     }
-    for (const L of idiomas) depois.push({ source: CONTA[L], destination: `/conta/${L}` });
+    for (const L of IDIOMAS_CONTA) depois.push({ source: CONTA[L], destination: `/conta/${L}` });
     // A ferramenta é um arquivo estático em `public/app.html` e continua sendo.
     // O `/app` sem extensão é o endereço que o site inteiro cita há meses.
     depois.push({ source: '/app', destination: '/app.html' });
@@ -92,7 +102,7 @@ const config = {
        consultada quando NENHUMA rota casou. O resultado seria um 404 numa tela
        que existe. `/conta/planilha` não precisa disto: é rota estática de
        verdade, e estática ganha da dinâmica sem ponte nenhuma. */
-    const antes = idiomas.map((L) => ({ source: ROTEIRO[L], destination: `/conta/${L}/roteiro` }));
+    const antes = IDIOMAS_CONTA.map((L) => ({ source: ROTEIRO[L], destination: `/conta/${L}/roteiro` }));
 
     return { beforeFiles: antes, afterFiles: depois };
   },
