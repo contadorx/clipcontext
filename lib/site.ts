@@ -238,6 +238,10 @@ export function paginaHtml(pagina: string, lang: Lang): string {
     t.figuraFluxo = ((FIGURAS as Record<string, string>).fluxo ?? '')
       .replace('__ALT__', String(t.fluxoAlt ?? ''))
       .replace('__LEG__', String(t.fluxoLeg ?? ''));
+    /* A figura da dobra principal. Sem legenda: numa dobra a legenda compete
+       com a subida do texto e com o botão. Só o rótulo de acessibilidade. */
+    t.figuraDobra = ((FIGURAS as Record<string, string>).dobra ?? '')
+      .replace('__ALT__', String(t.dobraAlt ?? ''));
     bruto = ler('site/home.html');
   } else {
     const m = METAS[pagina]?.[lang];

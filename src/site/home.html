@@ -35,13 +35,29 @@
   </div>
 </header>
 
+<!-- A dobra principal, em duas colunas.
+
+     O que está à direita é a PÁGINA QUE SAI, e não a gravação entrando. O
+     caminho já é contado duas vezes: pelo vídeo do tour, logo abaixo, e pelo
+     desenho de fluxo no "#como". O resultado não era contado em lugar nenhum —
+     e é ele que faz querer, porque ninguém consegue ver o documento antes de
+     abrir a ferramenta.
+
+     Em tela estreita as duas colunas viram uma e o desenho fica DEPOIS do
+     botão: num telefone, ilustração acima do texto empurra para fora da
+     primeira tela a única coisa que precisa estar nela. -->
 <section style="padding-top:78px">
   <div class="wrap">
-    <p class="eyebrow">{{eyebrow}}</p>
-    <h1>{{h1}}</h1>
-    <p class="lead">{{lead}}</p>
-    <p><a class="btn" href="{{app}}">{{cta}}</a></p>
-    <p class="small muted" style="margin-top:16px">{{ctaSub}}</p>
+    <div class="heroDuo">
+      <div class="heroTxt">
+        <p class="eyebrow">{{eyebrow}}</p>
+        <h1>{{h1}}</h1>
+        <p class="lead">{{lead}}</p>
+        <p><a class="btn" href="{{app}}">{{cta}}</a></p>
+        <p class="small muted" style="margin-top:16px">{{ctaSub}}</p>
+      </div>
+      {{figuraDobra}}
+    </div>
 
     <figure class="tour">
       <video poster="/demo/tour.{{demoLang}}.jpg" autoplay muted loop playsinline preload="metadata"

@@ -397,6 +397,7 @@ def escrever_marca(root: pathlib.Path) -> None:
                          "lembrarIdioma": so_o_js(LEMBRAR)}}
     figs = {pg: figura_documento(c) for pg, c in CENARIO_DA_PAGINA.items()}
     figs["fluxo"] = figura_fluxo()
+    figs["dobra"] = figura_dobra()
     (root / "src" / "figuras.json").write_text(
         json.dumps(figs, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print("src/figuras.json  (as figuras dos casos de uso, sem uma palavra dentro)")
@@ -480,6 +481,9 @@ def build_site(root: pathlib.Path) -> None:
         t["figuraFluxo"] = (figura_fluxo()
                             .replace("__ALT__", t.get("fluxoAlt", ""))
                             .replace("__LEG__", t.get("fluxoLeg", "")))
+        # A figura da dobra principal. Sem legenda de propósito — ver o docstring
+        # de `figura_dobra`.
+        t["figuraDobra"] = figura_dobra().replace("__ALT__", t.get("dobraAlt", ""))
 
         html = modelo
         for k, v in t.items():
@@ -519,6 +523,17 @@ def build_site(root: pathlib.Path) -> None:
             t["switcher"] = _switcher(lang, paginas, pagina)
             # A figura do documento, nas cinco páginas de caso de uso. Ela não
             # tem uma palavra dentro: serve aos cinco idiomas sem tradução.
+            #
+            # Esta volta NÃO escreve arquivo — quem serve estas páginas é o
+            # Next, com o `lib/site.ts`. Ela existe só para conferir se falta
+            # tradução, e por isso precisa montar as mesmas chaves que o Next
+            # monta: faltando a `figura`, o conferente reclamava dela em quinze
+            # linhas a cada build, e quinze linhas de aviso falso escondem o
+            # aviso verdadeiro que aparecer no meio.
+            if pagina in CENARIO_DA_PAGINA:
+                t["figura"] = (figura_documento(CENARIO_DA_PAGINA[pagina])
+                               .replace("__ALT__", t.get("figAlt", ""))
+                               .replace("__LEG__", t.get("figLegenda", "")))
 
             corpo = corpo_arq.read_text(encoding="utf-8")
             for k, v in t.items():
@@ -659,6 +674,111 @@ self.addEventListener('fetch', e => {
     return 0
 
 
+# ---------------------------------------------------------------------------
+# A paleta das figuras.
+#
+# Eram sete cores escritas à mão — `#fff` para a folha, `#EEF0F7` para o
+# preenchimento, e por aí. Isso funcionava enquanto ninguém olhava o site no
+# modo escuro: lá as figuras viravam cartões brancos ACESOS num fundo quase
+# preto, que é o defeito clássico de ilustração feita só à luz do dia.
+#
+# Agora vêm das mesmas variáveis do resto do site. Como o SVG é embutido no
+# HTML — e não carregado por `<img>` — a variável de CSS alcança ele.
+#
+# Cuidado ao mexer: o gerador de og:image logo abaixo NÃO pode usar isto. Lá o
+# PIL desenha pixel, não entende `var()`, e a imagem sairia em branco.
+# ---------------------------------------------------------------------------
+FIG_A = "var(--accent)"
+FIG_PAPEL = "var(--panel)"
+FIG_LIN = "var(--line)"
+FIG_INK = "var(--ink)"
+FIG_MUT = "var(--muted)"
+FIG_ESC = "color-mix(in srgb, var(--ink) 8%, transparent)"
+FIG_TXT = "color-mix(in srgb, var(--ink) 22%, transparent)"
+FIG_TXT2 = "color-mix(in srgb, var(--ink) 42%, transparent)"
+FIG_VERM = "#EF6E6E"
+
+
+def figura_selo(cx: float, cy: float, r: float) -> str:
+    """O selo de relógio da marca, do tamanho que pedirem.
+
+    O anel de fora é da cor da folha, e não transparente: ele existe para abrir
+    um buraco quando o selo cai em cima de outra coisa.
+    """
+    h = r * .46
+    return (f'<circle cx="{cx}" cy="{cy}" r="{r + r * .26}" fill="{FIG_PAPEL}"/>'
+            f'<circle cx="{cx}" cy="{cy}" r="{r}" fill="{FIG_A}"/>'
+            f'<path d="M{cx} {cy - h} V{cy} l{h * .68:.1f} {h * .45:.1f}" '
+            f'stroke="{FIG_PAPEL}" stroke-width="{max(1.4, r * .2):.1f}" '
+            f'stroke-linecap="round" stroke-linejoin="round" fill="none"/>')
+
+
+def figura_dobra() -> str:
+    """A dobra principal da home: a página que sai, e não o caminho até ela.
+
+    O vídeo do tour logo abaixo já mostra o PROCESSO, e o desenho de fluxo lá no
+    "#como" também. O que ninguém consegue ver antes de abrir a ferramenta é o
+    RESULTADO — e é o resultado que faz querer. Por isso aqui é uma página
+    pronta: três passos numerados, cada um com a imagem, o texto e a hora, uma
+    tarja no segundo, e embaixo a linha do hash com o selo.
+
+    A folha de trás não é enfeite: é o que diz "isto é um documento de várias
+    páginas" sem precisar escrever a palavra em cinco idiomas.
+
+    Não tem legenda, ao contrário das outras figuras. Numa dobra principal a
+    legenda compete com a subida do texto e com o botão — o rótulo de
+    acessibilidade basta.
+    """
+    p = []
+    add = p.append
+
+    add(f'<rect x="30" y="26" width="250" height="372" rx="10" fill="{FIG_PAPEL}" '
+        f'stroke="{FIG_LIN}" opacity=".55"/>')
+    add(f'<rect x="18" y="14" width="250" height="372" rx="10" fill="{FIG_PAPEL}" '
+        f'stroke="{FIG_LIN}"/>')
+
+    # o cabeçalho: marca, título, "válido a partir de"
+    add(f'<rect x="38" y="34" width="15" height="15" rx="4" fill="{FIG_A}"/>')
+    add(f'<rect x="59" y="37" width="62" height="6" rx="3" fill="{FIG_TXT2}"/>')
+    add(f'<rect x="38" y="60" width="150" height="9" rx="4.5" fill="{FIG_TXT2}"/>')
+    add(f'<rect x="38" y="76" width="96" height="6" rx="3" fill="{FIG_TXT}"/>')
+    add(f'<line x1="38" y1="94" x2="248" y2="94" stroke="{FIG_LIN}"/>')
+
+    y = 108
+    for n, largura in enumerate([88, 70, 82], start=1):
+        add(f'<circle cx="46" cy="{y + 8}" r="8" fill="{FIG_A}"/>')
+        add(f'<text x="46" y="{y + 11.5}" font-family="system-ui,sans-serif" font-size="9" '
+            f'font-weight="700" fill="{FIG_PAPEL}" text-anchor="middle">{n}</text>')
+        add(f'<rect x="62" y="{y + 2}" width="{largura}" height="6" rx="3" fill="{FIG_TXT2}"/>')
+        add(f'<rect x="62" y="{y + 16}" width="104" height="52" rx="5" fill="{FIG_ESC}" '
+            f'stroke="{FIG_LIN}"/>')
+        add(f'<rect x="70" y="{y + 24}" width="42" height="7" rx="2" fill="{FIG_TXT}"/>')
+        # o segundo passo leva a tarja: é a marcação que a ferramenta faz, e ela
+        # tem que aparecer na dobra, porque é metade do motivo de existir
+        add(f'<rect x="70" y="{y + 38}" width="{38 if n == 2 else 52}" '
+            f'height="{9 if n == 2 else 7}" rx="2" '
+            f'fill="{FIG_TXT2 if n == 2 else FIG_TXT}"/>')
+        add(f'<rect x="70" y="{y + 52}" width="30" height="7" rx="2" fill="{FIG_TXT}"/>')
+        for i, w in enumerate([64, 58, 44]):
+            add(f'<rect x="176" y="{y + 18 + i * 12}" width="{w}" height="5" rx="2.5" '
+                f'fill="{FIG_TXT}"/>')
+        # a hora, que é o que transforma uma captura de tela em prova
+        add(f'<rect x="176" y="{y + 56}" width="40" height="12" rx="6" fill="{FIG_A}" '
+            f'opacity=".14"/>')
+        add(f'<rect x="182" y="{y + 60}" width="28" height="4" rx="2" fill="{FIG_A}"/>')
+        y += 82
+
+    add(f'<line x1="38" y1="{y - 2}" x2="248" y2="{y - 2}" stroke="{FIG_LIN}"/>')
+    for i, w in enumerate([116, 92]):
+        add(f'<rect x="38" y="{y + 10 + i * 11}" width="{w}" height="5" rx="2.5" '
+            f'fill="{FIG_TXT}"/>')
+    add(figura_selo(224, y + 16, 15))
+
+    return ('<figure class="figDobra"><svg viewBox="0 0 300 412" role="img" '
+            'aria-labelledby="figDobraT"><title id="figDobraT">__ALT__</title>'
+            + "".join(p) + '</svg></figure>')
+
+
 def figura_documento(cenario: str) -> str:
     """A página do documento, desenhada. Muda com o cenário, porque o documento muda.
 
@@ -667,20 +787,20 @@ def figura_documento(cenario: str) -> str:
     trabalho tem passos numerados e nenhuma data, a ata tem duas vozes. Dizer
     isso em texto exigiria traduzir cinco vezes; mostrar não exige nada.
     """
-    A, ESC, LIN, TXT = "#3A3F9E", "#EEF0F7", "#E6E8EE", "#C7CBD8"
+    A, ESC, LIN, TXT = FIG_A, FIG_ESC, FIG_LIN, FIG_TXT
     p = []
     add = p.append
 
     # a banda da marca, no alto — o que mudou no PDF nesta rodada
     add(f'<rect x="24" y="22" width="16" height="16" rx="4" fill="{A}"/>')
-    add(f'<rect x="27" y="25" width="10" height="6" rx="1.4" fill="#fff"/>')
-    add(f'<rect x="27" y="33" width="10" height="1.6" rx=".8" fill="#fff"/>')
+    add(f'<rect x="27" y="25" width="10" height="6" rx="1.4" fill=FIG_PAPEL/>')
+    add(f'<rect x="27" y="33" width="10" height="1.6" rx=".8" fill=FIG_PAPEL/>')
     add(f'<rect x="47" y="24.5" width="56" height="5.5" rx="2.75" fill="{A}"/>')
     add(f'<rect x="47" y="33" width="34" height="3.5" rx="1.75" fill="{TXT}"/>')
     add(f'<line x1="24" y1="48" x2="416" y2="48" stroke="{LIN}"/>')
 
     # o título do caso
-    add(f'<rect x="24" y="60" width="186" height="9" rx="4.5" fill="#1F2430"/>')
+    add(f'<rect x="24" y="60" width="186" height="9" rx="4.5" fill="{FIG_INK}"/>')
 
     # a identificação: linhas de rótulo e valor. A evidência tem quatro; o
     # contexto para IA não tem nenhuma — e é essa a diferença que se vê.
@@ -688,7 +808,7 @@ def figura_documento(cenario: str) -> str:
     y = 80
     for i in range(linhas):
         add(f'<rect x="24" y="{y}" width="46" height="4" rx="2" fill="{TXT}"/>')
-        add(f'<rect x="78" y="{y}" width="{92 - (i % 3) * 16}" height="4" rx="2" fill="#5C6473"/>')
+        add(f'<rect x="78" y="{y}" width="{92 - (i % 3) * 16}" height="4" rx="2" fill="{FIG_MUT}"/>')
         y += 11
     if linhas:
         add(f'<line x1="24" y1="{y + 2}" x2="416" y2="{y + 2}" stroke="{LIN}"/>')
@@ -701,15 +821,15 @@ def figura_documento(cenario: str) -> str:
     for n in range(passos):
         add(f'<rect x="24" y="{y}" width="150" height="86" rx="5" fill="{ESC}" stroke="{LIN}"/>')
         # dentro da tela, uma janelinha qualquer — só para não ser um bloco morto
-        add(f'<rect x="34" y="{y + 10}" width="130" height="12" rx="2.5" fill="#fff"/>')
-        add(f'<rect x="34" y="{y + 28}" width="58" height="48" rx="3" fill="#fff"/>')
-        add(f'<rect x="98" y="{y + 28}" width="66" height="20" rx="3" fill="#fff"/>')
+        add(f'<rect x="34" y="{y + 10}" width="130" height="12" rx="2.5" fill=FIG_PAPEL/>')
+        add(f'<rect x="34" y="{y + 28}" width="58" height="48" rx="3" fill=FIG_PAPEL/>')
+        add(f'<rect x="98" y="{y + 28}" width="66" height="20" rx="3" fill=FIG_PAPEL/>')
         add(f'<rect x="98" y="{y + 54}" width="66" height="22" rx="3" fill="{A}" opacity=".16"/>')
 
         # o número do passo, no canto
         add(f'<circle cx="34" cy="{y + 10}" r="9" fill="{A}"/>')
         add(f'<text x="34" y="{y + 13.6}" font-family="system-ui,sans-serif" font-size="10" '
-            f'font-weight="700" fill="#fff" text-anchor="middle">{n + 1}</text>')
+            f'font-weight="700" fill=FIG_PAPEL text-anchor="middle">{n + 1}</text>')
 
         # a coluna da direita
         yy = y + 4
@@ -724,10 +844,10 @@ def figura_documento(cenario: str) -> str:
         if cenario in ("ata", "ux"):
             # duas vozes: a fala marcada com quem falou
             add(f'<rect x="188" y="{yy + 3}" width="10" height="4" rx="2" fill="{A}"/>')
-            add(f'<rect x="202" y="{yy + 3}" width="150" height="4" rx="2" fill="#5C6473"/>')
+            add(f'<rect x="202" y="{yy + 3}" width="150" height="4" rx="2" fill="{FIG_MUT}"/>')
             yy += 14
         else:
-            add(f'<rect x="188" y="{yy + 3}" width="164" height="4" rx="2" fill="#5C6473"/>')
+            add(f'<rect x="188" y="{yy + 3}" width="164" height="4" rx="2" fill="{FIG_MUT}"/>')
             yy += 14
         if cenario == "evidencia":
             # a impressão digital, em fonte de máquina
@@ -745,7 +865,7 @@ def figura_documento(cenario: str) -> str:
     # leva nenhuma, então uma altura só cortaria uma e sobraria na outra.
     alt = y + 28
     folha = (f'<rect x="1" y="1" width="438" height="{alt - 2}" rx="10" '
-             f'fill="#fff" stroke="#E6E8EE"/>')
+             f'fill=FIG_PAPEL stroke="{FIG_LIN}"/>')
     # `__ALT__` e `__LEG__`, e não `{{...}}`: a troca de tokens é uma passada só
     # por chave, então um `{{figAlt}}` que só aparece DEPOIS de `{{figura}}` ser
     # trocada nunca seria alcançado. Quem monta a legenda é quem sabe o idioma.
@@ -765,7 +885,7 @@ def figura_fluxo() -> str:
     Sem uma palavra dentro, pelo mesmo motivo da figura do documento: cinco
     idiomas, um desenho.
     """
-    A, ESC, LIN, TXT = "#3A3F9E", "#EEF0F7", "#E6E8EE", "#C7CBD8"
+    A, ESC, LIN, TXT = FIG_A, FIG_ESC, FIG_LIN, FIG_TXT
     p = []
     add = p.append
 
@@ -774,10 +894,10 @@ def figura_fluxo() -> str:
             f'fill="none" stroke-linecap="round" stroke-linejoin="round"/>')
 
     # 1. a tela sendo gravada — o ponto vermelho é o que diz "isto está correndo"
-    add(f'<rect x="6" y="18" width="132" height="88" rx="8" fill="#fff" stroke="{LIN}"/>')
+    add(f'<rect x="6" y="18" width="132" height="88" rx="8" fill=FIG_PAPEL stroke="{LIN}"/>')
     add(f'<rect x="6" y="18" width="132" height="16" rx="8" fill="{ESC}"/>')
     add(f'<rect x="6" y="26" width="132" height="8" fill="{ESC}"/>')
-    add(f'<circle cx="18" cy="26" r="4" fill="#EF8484"/>')
+    add(f'<circle cx="18" cy="26" r="4" fill="{FIG_VERM}"/>')
     add(f'<rect x="30" y="23.5" width="30" height="5" rx="2.5" fill="{TXT}"/>')
     add(f'<rect x="18" y="44" width="52" height="34" rx="4" fill="{ESC}"/>')
     add(f'<rect x="78" y="44" width="48" height="15" rx="4" fill="{ESC}"/>')
@@ -788,7 +908,7 @@ def figura_fluxo() -> str:
     # 2. o que sobra da gravação: alguns quadros, e a fala embaixo. Dois ficam,
     #    um é descartado — é essa a decisão que a ferramenta toma sozinha.
     for i, (x, fora) in enumerate([(184, False), (232, True), (280, False)]):
-        cor = "#fff" if not fora else ESC
+        cor = FIG_PAPEL if not fora else ESC
         tr = ' opacity=".45"' if fora else ''
         add(f'<g{tr}><rect x="{x}" y="26" width="40" height="30" rx="4" fill="{cor}" stroke="{LIN}"/>')
         add(f'<rect x="{x + 5}" y="31" width="30" height="8" rx="2" fill="{ESC}"/>')
@@ -807,7 +927,7 @@ def figura_fluxo() -> str:
     seta(322)
 
     # 3. a página que sai
-    add(f'<rect x="362" y="14" width="106" height="96" rx="7" fill="#fff" stroke="{LIN}"/>')
+    add(f'<rect x="362" y="14" width="106" height="96" rx="7" fill=FIG_PAPEL stroke="{LIN}"/>')
     add(f'<rect x="374" y="26" width="9" height="9" rx="2.5" fill="{A}"/>')
     add(f'<rect x="388" y="28" width="30" height="4" rx="2" fill="{A}"/>')
     add(f'<line x1="374" y1="42" x2="456" y2="42" stroke="{LIN}"/>')
@@ -816,7 +936,7 @@ def figura_fluxo() -> str:
         add(f'<rect x="374" y="{yy}" width="34" height="22" rx="3" fill="{ESC}"/>')
         add(f'<rect x="414" y="{yy + 2}" width="42" height="3.5" rx="1.75" fill="{TXT}"/>')
         add(f'<rect x="414" y="{yy + 9}" width="34" height="3.5" rx="1.75" fill="{TXT}"/>')
-        add(f'<rect x="414" y="{yy + 16}" width="42" height="3.5" rx="1.75" fill="#5C6473"/>')
+        add(f'<rect x="414" y="{yy + 16}" width="42" height="3.5" rx="1.75" fill="{FIG_MUT}"/>')
         yy += 28
     return ('<figure class="figFluxo"><svg viewBox="0 0 474 124" role="img" '
             'aria-labelledby="figFluxoT"><title id="figFluxoT">__ALT__</title>'
