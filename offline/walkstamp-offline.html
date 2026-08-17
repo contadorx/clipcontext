@@ -146,7 +146,26 @@
   @media (max-width:560px){ .contagem{font-size:42px} }
   label.opt{display:flex;align-items:center;gap:9px;padding:7px 0;font-size:14.5px;cursor:pointer}
   label.opt input[type=checkbox]{flex:none}
+  /* A etiqueta do plano no cabeçalho. Discreta de propósito: é um estado, não
+     um botão de ação — quem já pagou não precisa ser convidado de novo. */
+  .licTag{background:color-mix(in srgb,var(--accent) 12%,transparent);color:var(--accent);
+     border:1px solid color-mix(in srgb,var(--accent) 34%,transparent);border-radius:99px;
+     padding:3px 11px;font-size:12.5px;font-weight:600;cursor:pointer;margin-right:12px}
+  .licTag:hover{background:color-mix(in srgb,var(--accent) 20%,transparent)}
   .optNota{margin-left:auto;font-weight:400;font-size:12.5px;color:var(--muted)}
+  /* "recomendado" não é uma nota de rodapé: é uma resposta. Quem lê uma caixa
+     marcada e não sabe se desmarca está fazendo uma pergunta, e esta é a
+     resposta dela. Cor da marca, e não cinza de observação. */
+  .optNota.rec{color:var(--accent);font-weight:600;font-size:12px;
+        text-transform:lowercase;letter-spacing:.01em}
+  /* O título de um sub-bloco dentro do cartão. Ele separa "o que fazer com os
+     quadros" de "como chamar um quadro" — duas perguntas que estavam na mesma
+     fileira e por isso não eram duas. */
+  .subTit{font-size:14px;font-weight:650;color:var(--ink);margin:16px 0 2px}
+  /* O placar fica por último e mais leve: ele é consequência do que está
+     acima, não um controle. Uma borda em cima o separa das ações sem precisar
+     de mais um título. */
+  .placar{border-top:1px solid var(--line);padding-top:12px}
   details.sub{border:1px solid var(--linha,#e6e6ef);border-radius:12px;margin:0 0 10px;background:#fff}
   details.sub[open]{box-shadow:0 1px 3px rgba(16,20,40,.05)}
   details.sub>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;
@@ -546,6 +565,16 @@
            O endereço é absoluto e muda com o idioma: a ferramenta abre de
            file:// no pacote offline, e um caminho relativo não levaria a lugar
            nenhum de lá. -->
+      <!-- A etiqueta do plano. Ela NÃO vende: só existe quando já há plano.
+
+           O botão "Ativar o plano Time" que saiu do rodapé fazia duas coisas
+           ao mesmo tempo — convidava quem não tem e informava quem tem. A
+           primeira não pertence a uma ferramenta de trabalho; a segunda sim,
+           porque quem paga precisa saber que a chave pegou, e onde soltá-la.
+
+           Clicar abre a mesma caixa de antes: trocar a chave, sair, ver o
+           nome do cliente. Para quem não tem plano, não há nada aqui. -->
+      <button type="button" id="licTag" class="licTag hide"></button>
       <a id="contaLink" href="https://walkstamp.com/conta" data-i18n="contaLink"
          style="margin-right:12px;border-right:1px solid var(--line);padding-right:12px"></a>
       <!-- As siglas ficam escritas aqui, uma a uma, e não geradas do `LANGS`:
@@ -601,6 +630,19 @@
         <option value="ata" data-i18n="mAta"></option>
         <option value="usabilidade" data-i18n="mUx"></option>
         <option value="ia" data-i18n="mIa"></option>
+        <!-- "Outro", por último e de propósito.
+
+             Cinco cenários cobrem o que a gente CONHECE. Quem chega com um
+             sexto — auditoria, treinamento de fornecedor, laudo — hoje escolhia
+             o que menos incomodava e recebia um documento com cara de outra
+             coisa. Uma lista fechada não impede o uso fora dela; só faz a
+             pessoa mentir na resposta.
+
+             Ele se comporta como o genérico (sequência com a fala, sem
+             cabeçalho de nenhum ofício), porque é o único formato que não
+             promete o que não sabe. O que muda é o nome: quem escolhe "Outro"
+             sabe que escolheu o genérico, em vez de achar que escolheu errado. -->
+        <option value="outro" data-i18n="mOutro"></option>
       </select>
       <p class="status" id="cenDica"></p>
     </div>
@@ -652,7 +694,12 @@
           <button class="sm hide" id="recStop" data-i18n="recStopBtn"></button>
           <button class="ghost sm hide" id="recPause" data-i18n="recPauseBtn"></button>
           <button class="ghost sm hide" id="recMark" data-i18n="recMarkBtn"></button>
-          <button class="ghost sm hide" id="recPip" data-i18n="recPipBtn"></button>
+          <!-- Sem `ghost`. Ele só existe numa situação: a gravação está
+               rolando e a janelinha foi fechada — quer dizer, a pessoa acabou
+               de perder o relógio, o medidor, o marcar, o pausar e a caixa de
+               comentário, todos de uma vez. Um botão cinza entre botões cinzas
+               é a resposta errada para "sumiu tudo". -->
+          <button class="sm hide destaque" id="recPip" data-i18n="recPipBtn"></button>
         </div>
         <!-- A caixa que comenta a marcação.
 
@@ -685,8 +732,21 @@
           <!-- Uma opção por linha. Elas eram cinco numa fileira que quebrava em
                duas, e uma fileira quebrada não se lê: lê-se a primeira e
                ignora-se o resto. -->
+          <!-- O tamanho do modelo saiu daqui.
+
+               Ele existia para a pessoa não ser surpreendida por um download de
+               249 MB depois de clicar em Gravar. Desde que o download passou a
+               correr em paralelo com o seletor de tela — e a começar sozinho ao
+               abrir a página —, a surpresa deixou de existir: quando ela clica,
+               ou já acabou, ou está adiantado, e a barra do passo 1 mostra.
+               Anunciar megabytes ao lado de uma caixa marcada virou um custo
+               que já não se paga, escrito onde ele assusta.
+
+               No lugar entra o que a caixa precisa dizer: que ficar marcada é
+               a escolha certa para quase todo mundo. O número continua a um
+               clique, na ajuda "?" ao lado. -->
           <label class="opt"><input type="checkbox" id="recTr" checked><span data-i18n="recTrLbl"></span>
-            <b class="optNota" id="optTr"></b></label>
+            <b class="optNota rec" id="optTr" data-i18n="recomendado"></b></label>
           <!-- Três segundos antes de começar. Sem eles, o primeiro quadro é
                quase sempre o seletor de tela do navegador — a janela que a
                pessoa acabou de fechar — e ela descobre isso na revisão. -->
@@ -977,9 +1037,14 @@
       <summary><i class="sbN">1</i><span data-i18n="sb1H"></span>
         <b class="sbEst" id="sbEst1"></b></summary>
       <div class="sbCorpo">
+    <!-- "Chamar cada quadro/frame de:" — e não "rótulo".
+         O rótulo é o que a coisa É para nós; o nome dela na cabeça de quem usa
+         é a pergunta que o campo responde. Um campo chamado "rótulo" ao lado de
+         uma caixa vazia não diz o que escrever nela. -->
     <div class="modelo">
       <label for="unNome" data-i18n="unLbl"></label>
-      <input type="text" id="unNome" maxlength="24" style="width:auto;max-width:150px">
+      <input type="text" id="unNome" maxlength="24" style="width:auto;max-width:170px"
+             data-i18n-ph="unPh">
       <span class="status" id="modeloDica" style="flex-basis:100%;margin:0"></span>
     </div>
     <!-- Os modelos de documento do cliente, quando há sessão. Ele não aparece
@@ -997,10 +1062,24 @@
       <span class="status" id="modelosMsg"></span>
     </div>
 
+    <!-- ---- a ordem deste bloco é o conserto ----
+
+         Estava tudo numa fileira só: três contadores, nove botões e a revisão
+         assistida no meio, tudo do mesmo tamanho e da mesma cor. Uma fileira
+         assim não se lê — lê-se o primeiro item e ignora-se o resto —, e o
+         RESULTADO (quantos ficaram, quanto pesa) aparecia ANTES de existir
+         qualquer ação que o mudasse.
+
+         Agora são três coisas em ordem de leitura:
+           1. como este documento chama um quadro  — decisão de vocabulário;
+           2. o que fazer com os quadros           — as ações, juntas;
+           3. o que sobrou disso                   — o resultado, por último.
+
+         Resultado antes de ação é placar antes do jogo. -->
+
+    <p class="subTit" data-i18n="orgTit"></p>
+    <p class="status" data-i18n="orgComo" style="margin:0 0 8px;max-width:620px"></p>
     <div class="row">
-      <span class="tag"><span data-i18n="tKeep"></span> <b id="nKeep">0</b></span>
-      <span class="tag"><span data-i18n="tOff"></span> <b id="nOff">0</b></span>
-      <span class="tag">PDF ~<b id="size">0</b> MB</span>
       <button class="ghost sm" id="allOn" data-i18n="keepAll"></button>
       <button class="ghost sm hide" id="soMarcados" data-i18n="keepMarked"></button>
       <button class="ghost sm" id="addTela" data-i18n="addTelaBtn"></button>
@@ -1011,16 +1090,28 @@
       <button class="ghost sm hide" id="ocrStop" data-i18n="stopBtn"></button>
       <button class="ghost sm" id="falaNota" data-i18n="falaNota"></button>
     </div>
-    <!-- Revisar passo a passo mora aqui, e não no cartão do vídeo: é o que se
-         faz COM os quadros que já estão na tela, não uma forma de trazê-los. -->
-    <div class="row" style="margin-top:10px">
-      <!-- Sem `ghost`: a revisão assistida é a coisa mais valiosa desta linha e
-           era o botão mais apagado dela. É ela que transforma "trinta telas
+    <!-- Revisar quadro a quadro mora aqui, e não no cartão do vídeo: é o que se
+         faz COM os quadros que já estão na tela, não uma forma de trazê-los.
+         E fica DEPOIS das ações soltas, não no meio delas: é a operação
+         completa, a que passa por todos — as de cima são atalhos para um
+         pedaço. -->
+    <div class="row" style="margin-top:12px">
+      <!-- Sem `ghost`: a revisão assistida é a coisa mais valiosa deste cartão e
+           era o botão mais apagado dele. É ela que transforma "trinta telas
            antigas" em "trinta telas conferidas", e num documento reaberto seis
            meses depois é o trabalho inteiro. Um botão cinza entre nove cinzas
            não é encontrado por quem não sabe que ele existe. -->
       <button class="sm hide destaque" id="revisar" data-i18n="revisarBtn"></button>
-      <span class="status" data-i18n="clickHint"></span>
+      <!-- O "clique na imagem para descartar" que morava aqui subiu para o
+           `orgComo`, junto do título. Estava dito duas vezes na mesma tela, com
+           palavras quase iguais e a três centímetros de distância: instrução
+           repetida não reforça, faz duvidar de que sejam a mesma instrução. -->
+    </div>
+    <!-- E o placar, por último: ele é consequência do que está acima. -->
+    <div class="row placar" style="margin-top:12px">
+      <span class="tag"><span data-i18n="tKeep"></span> <b id="nKeep">0</b></span>
+      <span class="tag"><span data-i18n="tOff"></span> <b id="nOff">0</b></span>
+      <span class="tag">PDF ~<b id="size">0</b> MB</span>
     </div>
     <!-- O que acabou de acontecer com a ordem, em palavras. role=status para o
          leitor de tela anunciar sem roubar o foco de quem está no botão. -->
@@ -1124,9 +1215,13 @@ Reconheço automaticamente:
 
 Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trecho."></textarea>
     <div class="status" id="trInfo" style="margin-top:8px"></div>
-    <div class="row" style="margin-top:8px;align-items:baseline;gap:8px">
+    <!-- `align-items:center` e uma margem à direita: a frase é longa, quebra
+         em duas linhas e encostava na borda do cartão. Texto colado na borda
+         se lê pior do que texto menor. -->
+    <div class="row" style="margin-top:8px;align-items:center;gap:10px">
       <button class="ghost sm" id="pickVtt" data-i18n="openSub"></button>
-      <span class="status" data-i18n="subDeOnde"></span>
+      <span class="status" data-i18n="subDeOnde" style="flex:1;min-width:200px;
+            max-width:620px;padding-right:6px;line-height:1.55"></span>
     </div>
     <!-- Vocabulário do domínio. Fica logo abaixo da transcrição porque é ali que
          o erro aparece, e não num painel de configuração que ninguém abre. -->
@@ -1147,12 +1242,16 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       </div>
       <p class="note hide" id="hesitarNota" data-i18n="hesitarUx" style="margin:6px 0 0"></p>
     </div>
-    <div class="row hide" id="expRow" style="margin-top:10px">
-      <span class="status" data-i18n="expLabel"></span>
-      <button class="ghost sm" id="expVtt">.vtt</button>
-      <button class="ghost sm" id="expSrt">.srt</button>
-      <button class="ghost sm" id="expTxt">.txt</button>
-    </div>
+    <!-- Baixar a transcrição solta saiu.
+
+         Eram mais três arquivos numa ferramenta que já entrega quinze, e não é
+         o que ela faz: ela transforma gravação em DOCUMENTO. A fala já sai
+         dentro do PDF, do Word, do HTML e do .zip, ancorada no quadro em que
+         foi dita — que é a única forma dela valer alguma coisa como evidência.
+         Baixar .vtt solto era oferecer o ingrediente cru ao lado do prato.
+
+         Quem precisa mesmo do arquivo de legenda tem o .zip, que continua
+         levando tudo. -->
     <!-- Tradução no aparelho. Só aparece onde o navegador tem o tradutor
          embutido; onde não tem, a linha explica o caminho que existe. -->
     <div class="row hide" id="tradRow" style="margin-top:10px">
@@ -1960,13 +2059,17 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
        Ele não sumiu: virou o ANEXO de um recado. Quem tem um problema quer
        contar o problema, não ler uma lista de capacidades do navegador — e nós
        queremos exatamente essa lista junto do recado. -->
-  <div class="rodapeAjuda">
-    <!-- O plano mora aqui, e não no cartão 2. Ele não é um passo do trabalho:
-         é uma propriedade de quem você é, como o idioma. E o caminho normal é
-         entrar pelo link do e-mail — colar chave à mão continua existindo,
-         atrás de um clique, para quem recebeu a chave por outro caminho. -->
-    <button class="ghost sm" id="licBtn" data-i18n="licBtn"></button>
-  </div>
+  <!-- "Ativar o plano Time" saiu do rodapé da ferramenta.
+
+       Ele não é um passo do trabalho e nem sequer é uma decisão que se toma
+       aqui: quem tem plano entra pelo link do e-mail, e a chave se aplica
+       sozinha. Um botão de vender no rodapé de uma ferramenta grátis é a
+       terceira coisa que a pessoa lê e a única que não a ajuda a gravar.
+
+       O caminho continua inteiro: o link do e-mail aplica a chave, e o campo
+       de colar à mão continua existindo — ele só não fica mais gritando de
+       dentro do cartão de trabalho. A caixa `licBox` segue no HTML, escondida,
+       porque o link e o portal a abrem. -->
 
   <!-- A aba flutuante. Fica fora de todos os cartões de propósito: ela não é um
        passo do trabalho, é a saída de emergência dele. -->
@@ -2130,7 +2233,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       recAskMic:'Permita o microfone nesta aba — a tela só será pedida depois.',
       recAskTela:'Agora escolha a tela ou a janela para compartilhar.',
       pipTit:'Walkstamp — gravando',
-      pipPrep:'preparando…', pipMic:'liberando o microfone', pipModelo:'baixando o modelo',
+      pipBaixando:'baixando o modelo · {0}%', pipErro:'O modelo de voz não carregou. Nada foi gravado — veja a aba do Walkstamp.', pipPrep:'preparando…', pipMic:'liberando o microfone', pipModelo:'baixando o modelo',
       pipTela:'escolha a tela', pipStop:'Parar', pipFrames:'{0} frames',
       pipMarcado:'✓ tela marcada ({0})', pipMarcados:'{0} marcadas',
       pipNoVideo:'nenhum vídeo é guardado',
@@ -2382,7 +2485,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       dropDupN:'Descartar repetidos ({0})',
       dropQuietN:'Descartar sem fala ({0})',
       lenteTam:'tamanho',
-      unLbl:'Chamar cada quadro de',
+      unLbl:'Chamar cada quadro/frame de:',
       unPasso:'Passo', unMomento:'Momento', unIa:'Trecho',
       recCountCancel:'Cancelado antes de começar. Nada foi gravado.',
       recAutoLbl:'Parar sozinho depois de', recAutoMinLbl:'minutos',
@@ -2466,7 +2569,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       trocarErro:'Não consegui ler esta imagem.',
       dupFeito:'{0} duplicado logo depois deste.',
       trocadoTag:'imagem trocada',
-      revisarBtn:'Revisar passo a passo', revNotaLbl:'Anotação deste passo',
+      revisarBtn:'Revisar quadro a quadro', revNotaLbl:'Anotação deste passo',
       revEditarBtn:'Editar a imagem: tarja, destaque, seta, caneta',
       revAntes:'A tela que está no documento hoje',
       revPos:'{0} de {1}',
@@ -2519,8 +2622,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       mEscolha:'— escolha o cenário de uso —',
       cenFalta:'Escolha primeiro o cenário de uso, ali em cima. Ele decide o formato do documento inteiro.',
       cenPorQue:'O cenário decide o cabeçalho, a hora de relógio, o nome de cada passo e o prompt. Escolha antes de gravar.',
-      mIa:'Contexto para IA', mEv:'Evidência de teste', mTut:'Passo a passo', mAta:'Ata de reunião',
-      mIaH:'Sequência com a fala de cada trecho, para o modelo entender o vídeo inteiro. É o documento genérico.',
+      mOutro:'Outro (documento genérico)', recomendado:'recomendado', unPh:'passo, tela, momento…', orgTit:'Organize os quadros/frames', orgComo:'Clique numa imagem para descartar ou trazer de volta; o campo abaixo dela é a sua anotação. Os botões fazem isso em lote, e a revisão passa por todos, um a um.', mIa:'Contexto para IA', mEv:'Evidência de teste', mTut:'Passo a passo', mAta:'Ata de reunião',
+      mOutroH:'O formato neutro: sequência de quadros com a fala de cada trecho, sem cabeçalho de ofício nenhum. É o que serve quando o seu caso não é nenhum dos cinco acima — e é honesto sobre isso.', mIaH:'Sequência com a fala de cada trecho, para o modelo entender o vídeo inteiro. É o documento genérico.',
       mEvH:'Um passo por bloco, com a hora de relógio e a sua anotação acima da imagem. Preencha os dados da evidência mais abaixo.',
       mTutH:'Um passo por bloco, com a sua anotação como título e a fala como descrição. Sem hora de relógio.',
       mAtaH:'Grade compacta de telas e a transcrição completa no fim — o formato de quem vai ler o que foi dito.',
@@ -2673,7 +2776,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       recAskMic:'Allow the microphone on this tab — the screen is only asked for afterwards.',
       recAskTela:'Now pick the screen or window to share.',
       pipTit:'Walkstamp — recording',
-      pipPrep:'getting ready…', pipMic:'allowing the microphone', pipModelo:'downloading the model',
+      pipBaixando:'downloading the model · {0}%', pipErro:'The speech model did not load. Nothing was recorded — check the Walkstamp tab.', pipPrep:'getting ready…', pipMic:'allowing the microphone', pipModelo:'downloading the model',
       pipTela:'pick the screen', pipStop:'Stop', pipFrames:'{0} frames',
       pipMarcado:'✓ screen marked ({0})', pipMarcados:'{0} marked',
       pipNoVideo:'no video is kept',
@@ -2925,7 +3028,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       dropDupN:'Discard duplicates ({0})',
       dropQuietN:'Discard the silent ones ({0})',
       lenteTam:'size',
-      unLbl:'Call each frame a',
+      unLbl:'Call each frame/screenshot:',
       unPasso:'Step', unMomento:'Moment', unIa:'Segment',
       recCountCancel:'Cancelled before it started. Nothing was recorded.',
       recAutoLbl:'Stop by itself after', recAutoMinLbl:'minutes',
@@ -3003,7 +3106,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       trocarErro:'I could not read this image.',
       dupFeito:'{0} duplicated right after this one.',
       trocadoTag:'image replaced',
-      revisarBtn:'Review step by step', revNotaLbl:'Note for this step',
+      revisarBtn:'Review frame by frame', revNotaLbl:'Note for this step',
       revEditarBtn:'Edit the image: redaction, highlight, arrow, pen',
       revAntes:'The screen that is in the document today',
       revPos:'{0} of {1}',
@@ -3056,8 +3159,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       mEscolha:'— choose what this recording is for —',
       cenFalta:'Choose what this recording is for, up above. It decides the format of the whole document.',
       cenPorQue:'The scenario decides the header, the wall-clock time, what each step is called and the prompt. Choose before recording.',
-      mIa:'Context for AI', mEv:'Test evidence', mTut:'Step-by-step guide', mAta:'Meeting minutes',
-      mIaH:'A sequence with the speech for each interval, so the model understands the whole video. This is the general-purpose document.',
+      mOutro:'Other (generic document)', recomendado:'recommended', unPh:'step, screen, moment…', orgTit:'Organise the frames', orgComo:'Click an image to discard it or bring it back; the field under it is your note. The buttons do that in bulk, and the review walks through every one of them.', mIa:'Context for AI', mEv:'Test evidence', mTut:'Step-by-step guide', mAta:'Meeting minutes',
+      mOutroH:'The neutral format: a sequence of frames with the speech from each stretch, with no professional header of any kind. It is what fits when your case is none of the five above — and it is honest about that.', mIaH:'A sequence with the speech for each interval, so the model understands the whole video. This is the general-purpose document.',
       mEvH:'One step per block, with the clock time and your note above the image. Fill in the evidence details further down.',
       mTutH:'One step per block, with your note as the heading and the speech as the description. No clock times.',
       mAtaH:'A compact grid of screens plus the full transcript at the end — the format for someone who will read what was said.',
@@ -3208,7 +3311,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       recAskMic:'Permite el micrófono en esta pestaña — la pantalla se pide después.',
       recAskTela:'Ahora elige la pantalla o la ventana que vas a compartir.',
       pipTit:'Walkstamp — grabando',
-      pipPrep:'preparando…', pipMic:'permitiendo el micrófono', pipModelo:'descargando el modelo',
+      pipBaixando:'descargando el modelo · {0}%', pipErro:'El modelo de voz no cargó. No se grabó nada — mira la pestaña de Walkstamp.', pipPrep:'preparando…', pipMic:'permitiendo el micrófono', pipModelo:'descargando el modelo',
       pipTela:'elige la pantalla', pipStop:'Detener', pipFrames:'{0} fotogramas',
       pipMarcado:'✓ pantalla marcada ({0})', pipMarcados:'{0} marcadas',
       pipNoVideo:'no se guarda ningún vídeo',
@@ -3462,7 +3565,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       dropDupN:'Descartar repetidos ({0})',
       dropQuietN:'Descartar sin habla ({0})',
       lenteTam:'tamaño',
-      unLbl:'Llamar a cada cuadro de',
+      unLbl:'Llamar a cada cuadro/fotograma:',
       unPasso:'Paso', unMomento:'Momento', unIa:'Fragmento',
       recCountCancel:'Cancelado antes de empezar. No se grabó nada.',
       recAutoLbl:'Parar solo después de', recAutoMinLbl:'minutos',
@@ -3540,7 +3643,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       trocarErro:'No pude leer esta imagen.',
       dupFeito:'{0} duplicado justo después de este.',
       trocadoTag:'imagen cambiada',
-      revisarBtn:'Revisar paso a paso', revNotaLbl:'Anotación de este paso',
+      revisarBtn:'Revisar fotograma a fotograma', revNotaLbl:'Anotación de este paso',
       revEditarBtn:'Editar la imagen: zona tachada, resalte, flecha, lápiz',
       revAntes:'La pantalla que está hoy en el documento',
       revPos:'{0} de {1}',
@@ -3593,8 +3696,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       mEscolha:'— elige el escenario de uso —',
       cenFalta:'Elige primero el escenario de uso, ahí arriba. Decide el formato de todo el documento.',
       cenPorQue:'El escenario decide el encabezado, la hora de reloj, el nombre de cada paso y el prompt. Elige antes de grabar.',
-      mIa:'Contexto para IA', mEv:'Evidencia de prueba', mTut:'Paso a paso', mAta:'Acta de reunión',
-      mIaH:'Secuencia con el habla de cada tramo, para que el modelo entienda el vídeo entero. Es el documento genérico.',
+      mOutro:'Otro (documento genérico)', recomendado:'recomendado', unPh:'paso, pantalla, momento…', orgTit:'Organiza los fotogramas', orgComo:'Haz clic en una imagen para descartarla o recuperarla; el campo de abajo es tu anotación. Los botones lo hacen en lote, y la revisión pasa por todos, uno a uno.', mIa:'Contexto para IA', mEv:'Evidencia de prueba', mTut:'Paso a paso', mAta:'Acta de reunión',
+      mOutroH:'El formato neutro: secuencia de fotogramas con el habla de cada tramo, sin encabezado de ningún oficio. Es lo que sirve cuando tu caso no es ninguno de los cinco de arriba — y lo dice con franqueza.', mIaH:'Secuencia con el habla de cada tramo, para que el modelo entienda el vídeo entero. Es el documento genérico.',
       mEvH:'Un paso por bloque, con la hora de reloj y tu anotación encima de la imagen. Rellena los datos de la evidencia más abajo.',
       mTutH:'Un paso por bloque, con tu anotación como título y el habla como descripción. Sin hora de reloj.',
       mAtaH:'Rejilla compacta de pantallas y la transcripción completa al final — el formato para quien va a leer lo que se dijo.',
@@ -3746,7 +3849,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       recAskMic:'Erlauben Sie das Mikrofon in diesem Tab — der Bildschirm wird erst danach angefragt.',
       recAskTela:'Wählen Sie jetzt den Bildschirm oder das Fenster zur Freigabe aus.',
       pipTit:'Walkstamp — Aufnahme läuft',
-      pipPrep:'wird vorbereitet…', pipMic:'Mikrofon wird freigegeben', pipModelo:'Modell wird heruntergeladen',
+      pipBaixando:'Modell wird geladen · {0}%', pipErro:'Das Sprachmodell wurde nicht geladen. Es wurde nichts aufgenommen — siehe den Walkstamp-Tab.', pipPrep:'wird vorbereitet…', pipMic:'Mikrofon wird freigegeben', pipModelo:'Modell wird heruntergeladen',
       pipTela:'Bildschirm auswählen', pipStop:'Stopp', pipFrames:'{0} Screenshots',
       pipMarcado:'✓ Bildschirm markiert ({0})', pipMarcados:'{0} markiert',
       pipNoVideo:'es wird kein Video gespeichert',
@@ -3998,7 +4101,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       dropDupN:'Wiederholungen verwerfen ({0})',
       dropQuietN:'Ohne Sprache verwerfen ({0})',
       lenteTam:'Größe',
-      unLbl:'Jeden Screenshot bezeichnen als',
+      unLbl:'Jedes Bild/jeden Frame nennen:',
       unPasso:'Schritt', unMomento:'Moment', unIa:'Abschnitt',
       recCountCancel:'Vor dem Start abgebrochen. Es wurde nichts aufgenommen.',
       recAutoLbl:'Von selbst stoppen nach', recAutoMinLbl:'Minuten',
@@ -4082,7 +4185,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       trocarErro:'Dieses Bild konnte nicht gelesen werden.',
       dupFeito:'{0} direkt nach diesem dupliziert.',
       trocadoTag:'Bild ausgetauscht',
-      revisarBtn:'Schritt für Schritt prüfen', revNotaLbl:'Notiz zu diesem Schritt',
+      revisarBtn:'Bild für Bild prüfen', revNotaLbl:'Notiz zu diesem Schritt',
       revEditarBtn:'Bild bearbeiten: Schwärzung, Hervorhebung, Pfeil, Stift',
       revAntes:'Der Bildschirm, der heute im Dokument steht',
       revPos:'{0} von {1}',
@@ -4135,8 +4238,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       mEscolha:'— Einsatzszenario wählen —',
       cenFalta:'Wählen Sie zuerst oben das Einsatzszenario. Es bestimmt das Format des gesamten Dokuments.',
       cenPorQue:'Das Szenario bestimmt die Kopfzeile, die Uhrzeit, die Bezeichnung jedes Schritts und den Prompt. Wählen Sie vor der Aufnahme.',
-      mIa:'Kontext für KI', mEv:'Testnachweis', mTut:'Schritt-für-Schritt-Anleitung', mAta:'Besprechungsprotokoll',
-      mIaH:'Eine Abfolge mit dem Gesprochenen zu jedem Abschnitt, damit das Modell das gesamte Video versteht. Das ist das allgemeine Dokument.',
+      mOutro:'Anderes (allgemeines Dokument)', recomendado:'empfohlen', unPh:'Schritt, Bildschirm, Moment…', orgTit:'Bilder ordnen', orgComo:'Klicken Sie auf ein Bild, um es zu verwerfen oder zurückzuholen; das Feld darunter ist Ihre Notiz. Die Schaltflächen tun das für viele auf einmal, und die Prüfung geht jedes einzelne durch.', mIa:'Kontext für KI', mEv:'Testnachweis', mTut:'Schritt-für-Schritt-Anleitung', mAta:'Besprechungsprotokoll',
+      mOutroH:'Das neutrale Format: eine Folge von Bildern mit der Sprache des jeweiligen Abschnitts, ohne Kopfzeile irgendeines Fachs. Es passt, wenn Ihr Fall keiner der fünf oben ist — und sagt das auch so.', mIaH:'Eine Abfolge mit dem Gesprochenen zu jedem Abschnitt, damit das Modell das gesamte Video versteht. Das ist das allgemeine Dokument.',
       mEvH:'Ein Schritt je Block, mit der Uhrzeit und Ihrer Notiz über dem Bild. Die Daten des Nachweises füllen Sie weiter unten aus.',
       mTutH:'Ein Schritt je Block, mit Ihrer Notiz als Überschrift und dem Gesprochenen als Beschreibung. Ohne Uhrzeit.',
       mAtaH:'Kompaktes Raster der Bildschirme und die vollständige Transkription am Ende — das Format für alle, die lesen wollen, was gesagt wurde.',
@@ -4288,7 +4391,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       recAskMic:'Autorisez le microphone dans cet onglet — l’écran ne sera demandé qu’ensuite.',
       recAskTela:'Choisissez maintenant l’écran ou la fenêtre à partager.',
       pipTit:'Walkstamp — enregistrement en cours',
-      pipPrep:'préparation…', pipMic:'autorisation du microphone', pipModelo:'téléchargement du modèle',
+      pipBaixando:'téléchargement du modèle · {0}%', pipErro:'Le modèle vocal n’a pas chargé. Rien n’a été enregistré — voyez l’onglet Walkstamp.', pipPrep:'préparation…', pipMic:'autorisation du microphone', pipModelo:'téléchargement du modèle',
       pipTela:'choisissez l’écran', pipStop:'Arrêter', pipFrames:'{0} captures',
       pipMarcado:'✓ écran marqué ({0})', pipMarcados:'{0} marquées',
       pipNoVideo:'aucune vidéo n’est conservée',
@@ -4540,7 +4643,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       dropDupN:'Écarter les doublons ({0})',
       dropQuietN:'Écarter les captures sans parole ({0})',
       lenteTam:'taille',
-      unLbl:'Appeler chaque capture',
+      unLbl:'Appeler chaque image/capture :',
       unPasso:'Étape', unMomento:'Moment', unIa:'Segment',
       recCountCancel:'Annulé avant le début. Rien n’a été enregistré.',
       recAutoLbl:'Arrêter tout seul après', recAutoMinLbl:'minutes',
@@ -4624,7 +4727,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       trocarErro:'Impossible de lire cette image.',
       dupFeito:'{0} : une copie a été ajoutée juste après.',
       trocadoTag:'image remplacée',
-      revisarBtn:'Réviser étape par étape', revNotaLbl:'Note de cette étape',
+      revisarBtn:'Vérifier image par image', revNotaLbl:'Note de cette étape',
       revEditarBtn:'Modifier l’image : caviardage, surlignage, flèche, stylo',
       revAntes:'L’écran qui figure aujourd’hui dans le document',
       revPos:'{0} sur {1}',
@@ -4677,8 +4780,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       mEscolha:'— choisissez le cas d’usage —',
       cenFalta:'Choisissez d’abord le cas d’usage, ci-dessus. Il décide du format de tout le document.',
       cenPorQue:'Le cas d’usage décide de l’en-tête, de l’heure d’horloge, du nom de chaque étape et du prompt. Choisissez avant d’enregistrer.',
-      mIa:'Contexte pour l’IA', mEv:'Preuve de test', mTut:'Mode opératoire', mAta:'Compte rendu de réunion',
-      mIaH:'Séquence avec la parole de chaque segment, pour que le modèle comprenne toute la vidéo. C’est le document générique.',
+      mOutro:'Autre (document générique)', recomendado:'recommandé', unPh:'étape, écran, moment…', orgTit:'Organisez les images', orgComo:'Cliquez sur une image pour l’écarter ou la récupérer ; le champ en dessous est votre note. Les boutons le font en lot, et la vérification les passe toutes, une par une.', mIa:'Contexte pour l’IA', mEv:'Preuve de test', mTut:'Mode opératoire', mAta:'Compte rendu de réunion',
+      mOutroH:'Le format neutre : une suite d’images avec la parole de chaque passage, sans en-tête d’aucun métier. C’est ce qui convient quand votre cas n’est aucun des cinq ci-dessus — et il le dit franchement.', mIaH:'Séquence avec la parole de chaque segment, pour que le modèle comprenne toute la vidéo. C’est le document générique.',
       mEvH:'Une étape par bloc, avec l’heure d’horloge et votre note au-dessus de l’image. Remplissez les données de la preuve plus bas.',
       mTutH:'Une étape par bloc, avec votre note comme titre et la parole comme description. Sans heure d’horloge.',
       mAtaH:'Grille compacte d’écrans et la transcription complète à la fin — le format pour qui va lire ce qui a été dit.',
@@ -5421,6 +5524,49 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     if ($('recTr') && $('recTr').checked) adiantarModelo();
   });
 
+  /* ---- começar a baixar ao CHEGAR na página ----
+
+     É o último pedaço da espera. O download já corria em paralelo com o
+     seletor de tela; agora ele começa antes disso, enquanto a pessoa ainda
+     está lendo a tela e escolhendo o cenário — meio minuto que não estava
+     sendo usado para nada.
+
+     E aqui vem a parte que não é óbvia, porque baixar sozinho pode ser um
+     desserviço. A promessa da ferramenta é "grátis, sem instalar nada"; puxar
+     249 MB no celular de quem só abriu para ver o que é seria cobrar uma conta
+     de dados sem avisar. Então há três recusas, cada uma com motivo:
+
+       - `saveData` ligado: a pessoa DISSE ao navegador que quer economizar
+         dados. Ignorar isso é decidir por ela;
+       - rede 2g ou lenta: o download não terminaria a tempo de ajudar e
+         atrapalharia o resto da página enquanto isso;
+       - conexão medida (`metered`, quando o navegador informa): dado pago.
+
+     Nesses três casos tudo continua funcionando como antes — o download
+     acontece no clique em Gravar. O que se perde é a antecipação, não a
+     função. E desmarcar a caixa da transcrição continua sendo a saída de quem
+     não quer o modelo de jeito nenhum.
+
+     Os 1200 ms não são superstição: a página acabou de montar, o service
+     worker está se registrando e o vídeo de exemplo pode estar sendo buscado.
+     Entrar na frente disso seria trocar uma espera por outra. */
+  function podeAdiantarSozinho(){
+    try {
+      const c = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+      if (!c) return true;                       // sem informação, o padrão é ajudar
+      if (c.saveData) return false;
+      if (c.metered) return false;
+      if (/^(slow-)?2g$/.test(c.effectiveType || '')) return false;
+    } catch (e) {}
+    return true;
+  }
+
+  setTimeout(() => {
+    if (!podeAdiantarSozinho()) return;
+    if (liveOn || abrindoCaptura) return;        // já há coisa acontecendo
+    adiantarModelo();
+  }, 1200);
+
   /* Troca de idioma pelas siglas. Continua sem recarregar: a página inteira é
      repintada por applyLang(), e um vídeo já carregado não se perde. */
   $('idiomas').addEventListener('click', e => {
@@ -5740,7 +5886,9 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     $('trInfo').innerHTML = !n ? '' : cues.length
       ? `<span class="ok">${t('trCues', cues.length)}</span>${t('trCues2')}`
       : t('trPlain');
-    $('expRow').classList.toggle('hide', !n);
+    /* `expRow` foi removida com os botões de baixar a legenda solta. A linha
+       fica aqui, guardada, para o dia em que alguém procurar por onde a
+       transcrição saía. */
     $('tradRow').classList.toggle('hide', !n || !TEM_TRADUTOR);
     if (n && !TEM_TRADUTOR && !$('tradMsg').textContent) $('tradMsg').textContent = t('tradSemApi');
     /* O resumo na aba fechada. Sem ele a pessoa não tem como saber se há texto
@@ -6267,7 +6415,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
   let pipAviso = '', pipAvisoAte = 0;
   let pipWin = null, pipTexto = null, pipRelogio = null, pipFrames = null;
   let pipVm = null, pipVs = null, pipCalar = null, pipMarcar = null, pipPausa = null;
-  let pipNota = null;
+  let pipNota = null, pipErroTic = null;
   /* Pausa e marcação vivem fora do bloco da gravação porque a janelinha e o
      cartão precisam alcançá-las, e as duas são recriadas a cada captura. */
   let pausado = false, alternarPausa = null, marcarAgora = null;
@@ -6465,13 +6613,28 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     .vb{flex:1;height:6px;border-radius:3px;background:#282c36;overflow:hidden}
     .vb i{display:block;height:100%;width:0;background:#737cf0}
     .pe{font-size:11px;color:#737cf0;line-height:1.3}
+    /* O estado de problema. Vermelho e com o texto quebrando em várias linhas:
+       em 250px uma frase de erro não cabe numa linha só, e cortá-la seria
+       esconder justamente a parte que diz o que fazer. */
+    .txt.ruim{color:#ef8484;font-size:12.5px;line-height:1.35;white-space:normal}
     /* A caixa do comentário. Ela precisa existir AQUI e não só no cartão:
        durante a gravação a aba do produto está atrás da tela compartilhada, e
        um campo que a pessoa não vê é um campo que não existe. */
     input.nota{width:100%;background:#1a1d24;color:#e9ebf1;border:1px solid #282c36;
                border-radius:6px;padding:6px 8px;font:12.5px system-ui,sans-serif}
-    input.nota:disabled{opacity:.45}
-    input.nota::placeholder{color:#6b7280}
+    /* NADA DE CRASE AQUI DENTRO. Este bloco é um template literal, e uma crase
+       num comentário fecha a string e quebra o script inteiro — a ferramenta
+       deixa de abrir e o erro aparece a mil linhas daqui. Já custou dois
+       ciclos de depuração; o segundo foi este comentário.
+
+       Desligada, mas LEGÍVEL. Com opacidade .45 a frase "marque um passo para
+       comentar" ficava cinza sobre cinza escuro num campo de 250px: presente
+       no código e ausente na tela, que é o pior dos dois mundos — quem procura
+       não acha, e quem não procura também não. Agora a caixa fica pontilhada
+       (o sinal de "ainda não vale") e a frase se lê. */
+    input.nota:disabled{opacity:1;background:#15181e;color:#8a93a3;
+                        border-style:dashed;border-color:#3a4150}
+    input.nota::placeholder{color:#9aa3b2;opacity:1}
     input.nota.guardou{border-color:#737cf0;box-shadow:0 0 0 2px rgba(115,124,240,.28)}
   `;
 
@@ -6612,9 +6775,37 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       }
       return;
     }
+    /* ---- o problema também aparece AQUI ----
+
+       A janelinha dizia "preparando" e ficava dizendo isso enquanto o modelo
+       falhava atrás dela. Quem grava está olhando para a janelinha — a aba do
+       produto está atrás da tela compartilhada. Um erro que só existe na aba é
+       um erro que ninguém lê, e a pessoa fica esperando uma gravação que já
+       desistiu de começar.
+
+       Dois estados novos: `baixando`, com a porcentagem, e `erro`, em vermelho
+       e sem sumir sozinho. */
+    if (etapa === 'baixando') {
+      if (pipTexto) { pipTexto.classList.remove('contando', 'ruim');
+                      pipTexto.textContent = dados && dados.pct != null
+                        ? t('pipBaixando', Math.round(dados.pct))
+                        : t('pipModelo'); }
+      return;
+    }
+    if (etapa === 'erro') {
+      if (pipWin) pipWin.document.body.classList.remove('contando', 'gravando');
+      if (pipTexto) { pipTexto.classList.remove('contando');
+                      pipTexto.classList.add('ruim');
+                      pipTexto.textContent = t('pipErro'); }
+      /* Os botões param de convidar: não há o que marcar nem o que pausar. */
+      if (pipMarcar) pipMarcar.disabled = true;
+      if (pipPausa)  pipPausa.disabled  = true;
+      if (pipFrames) pipFrames.disabled = true;
+      return;
+    }
     const rotulos = { prep: 'pipPrep', mic: 'pipMic', modelo: 'pipModelo', tela: 'pipTela' };
     if (pipWin) pipWin.document.body.classList.remove('contando', 'gravando');
-    if (pipTexto) { pipTexto.classList.remove('contando');
+    if (pipTexto) { pipTexto.classList.remove('contando', 'ruim');
                     pipTexto.textContent = t(rotulos[etapa] || 'pipPrep'); }
   }
 
@@ -7205,10 +7396,28 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
        E o erro de verdade vai junto: engolir a mensagem do navegador me deixou
        cego por três rodadas de depuração. */
     const modeloFalhou = (e) => {
+        /* Antes de tudo: dizer na janelinha. `fecharControle()` logo abaixo a
+           apaga, e uma janela que some sem explicar deixa a pessoa procurando
+           o que fez de errado. Meio segundo com a frase em vermelho é a
+           diferença entre "quebrou" e "quebrou por isto". */
+        controle('erro');
         prog(null); progRec(false); st('');
         const detalhe = (e && (e.message || String(e)) || '').slice(0, 200);
         $('rec').disabled = false;
-        fecharControle();
+        /* A janelinha NÃO fecha aqui.
+
+           Fechar em seguida ao `controle('erro')` mostraria a frase por zero
+           milissegundo — a janela sumiria junto com a explicação, e sumir sem
+           explicar é exatamente o que faz a pessoa achar que quebrou por culpa
+           dela. Ela fica seis segundos com o recado em vermelho, ou fecha na
+           hora se a pessoa escolher uma das duas saídas abaixo.
+
+           Seis e não dois: a tela compartilhada está sendo desligada neste
+           instante e o foco ainda vai voltar para a aba. Uma mensagem que
+           expira antes de o olho chegar nela é uma mensagem que não existiu. */
+        const fecharJanelinha = () => { clearTimeout(pipErroTic); fecharControle(); };
+        clearTimeout(pipErroTic);
+        pipErroTic = setTimeout(fecharControle, 6000);
         if (micStream) micStream.getTracks().forEach(x => x.stop());
         if (telaStream) telaStream.getTracks().forEach(x => x.stop());
         $('recMsg').innerHTML =
@@ -7217,12 +7426,17 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
           ` <button class="ghost sm" id="recDiag">${t('diagBtn')}</button>` +
           ` <button class="ghost sm" id="recSoFrames">${t('recSoFramesBtn')}</button>`;
         const bd = $('recDiag');
-        if (bd) bd.onclick = () => { coletarDiag($('diagOut')); irPara('cardTr', true); };
+        if (bd) bd.onclick = () => { fecharJanelinha();
+                                     coletarDiag($('diagOut')); irPara('cardTr', true); };
         const bf = $('recSoFrames');
         /* O atalho não é cortesia: quem chegou até aqui já tinha uma reunião
            para gravar, e obrigá-la a caçar a caixa de seleção no passo 1 é
-           perder a reunião por burocracia. */
-        if (bf) bf.onclick = () => { $('recTr').checked = false; notaTr(); $('rec').click(); };
+           perder a reunião por burocracia.
+
+           `fecharJanelinha()` antes do clique: sem isso o `rec.click()` abriria
+           uma SEGUNDA janelinha por cima da que ainda mostra o erro. */
+        if (bf) bf.onclick = () => { fecharJanelinha();
+                                     $('recTr').checked = false; notaTr(); $('rec').click(); };
         abrindoCaptura = false;
     };
 
@@ -7869,9 +8083,11 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     medir('baixou_saida', { p_formato: ext === 'json' ? 'json' : 'vtt' });
   }
 
-  $('expVtt').onclick = () => baixar(montarLegenda('vtt'), 'vtt');
-  $('expSrt').onclick = () => baixar(montarLegenda('srt'), 'srt');
-  $('expTxt').onclick = () => baixar(montarLegenda('txt'), 'txt');
+  /* Os três botões de baixar a legenda solta saíram da tela. `montarLegenda`
+     NÃO foi apagada: é ela que escreve `legenda.vtt` e `legenda.srt` dentro do
+     .zip, que é onde eles fazem sentido — ao lado das imagens e do documento a
+     que pertencem. Quando escrevi esta frase pela primeira vez ela era falsa: o
+     .zip não os levava. O `vitrine.mjs` pegou, e aí eles passaram a ir. */
 
   function readSub(f){
     const r = new FileReader();
@@ -8059,11 +8275,19 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
   /* A pergunta "quer transcrição?" agora é respondida no passo 1, antes de
      qualquer download — e é isso que permite gravar sem baixar nada. */
   function notaTr(){
-    /* O número de megabytes também sai inline, ao lado da caixa. A frase
-       inteira virou ajuda; o CUSTO não pode virar — quem liga a transcrição
-       precisa saber, antes de gravar, que vai baixar um modelo. */
+    /* O que fica ao lado da caixa é "recomendado", e não os megabytes.
+
+       O número existia para a pessoa não ser surpreendida por um download
+       depois de clicar em Gravar. Essa surpresa acabou: o download começa
+       sozinho ao abrir a página e corre em paralelo com o seletor de tela, e a
+       barra do passo 1 mostra o andamento. Sobrou o susto sem a causa —
+       megabytes escritos ao lado de uma caixa marcada, que é o lugar onde eles
+       fazem desmarcar.
+
+       O número continua na ajuda do "?" ao lado, para quem quiser saber o que
+       vai baixar antes de deixar marcado. */
     const mb = $('optTr');
-    if (mb) mb.textContent = ($('recTr') && $('recTr').checked) ? t('dlSize', tamanhoModelo()) : '';
+    if (mb) mb.textContent = ($('recTr') && $('recTr').checked) ? t('recomendado') : '';
     const el = $('recTrNote'); if (!el) return;
     const querTr = $('recTr') && $('recTr').checked;
     el.textContent = querTr ? t('recTrOn', tamanhoModelo()) : t('recTrOff');
@@ -8452,6 +8676,9 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
         const restam = taxa > 0 ? (tt - l) / taxa : 0;
         const eta = restam > 3 ? ' ' + t('modelDlFalta', duracao(restam)) : '';
         prog(pct); progRec(pct);
+        /* E na janelinha, se ela já estiver aberta: é para lá que a pessoa
+           olha quando a gravação está a caminho. */
+        controle('baixando', { pct });
         const msg = t('modelDl2', pct.toFixed(0), mb(l), mb(tt)) + eta;
         st(msg);
         /* E no passo 1, que é para onde a pessoa está olhando depois de clicar
@@ -8791,8 +9018,14 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
   /* ---- interface da licença ---- */
   function pintarLicenca(){
     const ativo = temTime();
-    $('licBtn').textContent = ativo ? t('licAtiva', licenca.q) : t('licBtn');
-    $('licBtn').classList.toggle('ok', ativo);
+    /* O botão de vender saiu do rodapé; a ETIQUETA de estado ficou, no
+       cabeçalho, e só aparece para quem já tem plano. Sem plano, nada. */
+    const bl = $('licBtn');
+    if (bl) { bl.textContent = ativo ? t('licAtiva', licenca.q) : t('licBtn');
+              bl.classList.toggle('ok', ativo); }
+    const tag = $('licTag');
+    if (tag) { tag.classList.toggle('hide', !ativo);
+               if (ativo) tag.textContent = t('licAtiva', licenca.q); }
     $('licTirar').classList.toggle('hide', !ativo);
     $('licChave').classList.toggle('hide', ativo);
     $('licAtivar').classList.toggle('hide', ativo);
@@ -8835,7 +9068,16 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     return dias;
   }
 
-  $('licBtn').onclick = () => $('licBox').classList.toggle('hide');
+  if ($('licBtn')) $('licBtn').onclick = () => $('licBox').classList.toggle('hide');
+  /* A etiqueta abre a mesma caixa: trocar a chave, sair, ver o cliente. É o
+     único caminho que sobrou de dentro da ferramenta, e ele só existe para
+     quem já tem plano — que é exatamente quem precisa dele. */
+  if ($('licTag')) $('licTag').onclick = () => {
+    $('licBox').classList.toggle('hide');
+    if (!$('licBox').classList.contains('hide')) {
+      try { $('licBox').scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) {}
+    }
+  };
 
   /* ================= a sessão, aqui dentro =================
 
@@ -10130,7 +10372,19 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     /* Sessão de pesquisa: layout cheio (a tela do participante é o dado),
        identificação própria e um objetivo de prompt que não existe nos outros —
        relatório de sessão não é ata nem evidência. */
-    usabilidade:{ layout:'full', ev:true,  goal:'sessao',    prefixo:'sessao',        dica:'mUxH' }
+    usabilidade:{ layout:'full', ev:true,  goal:'sessao',    prefixo:'sessao',        dica:'mUxH' },
+    /* "Outro" é o genérico com outro nome, e isso é a coisa toda.
+
+       Ele se comporta exatamente como o `ia` — sequência com a fala, sem
+       cabeçalho de nenhum ofício — porque é o único formato que não promete o
+       que não sabe. O que muda é a HONESTIDADE da escolha: quem tem um sexto
+       caso de uso escolhia o que menos incomodava e recebia um documento com
+       cara de outra coisa. Agora ele diz "não é nenhum destes" e recebe o
+       formato neutro, sabendo que é neutro.
+
+       O prefixo do arquivo é 'documento' e não 'analise': quem escolheu Outro
+       não fez uma análise. */
+    outro:     { layout:'auto', ev:false, goal:'resumo',    prefixo:'documento',     dica:'mOutroH' }
   };
   const modeloAtual = () => MODELOS[$('modelo').value] || MODELOS.ia;
 
@@ -10147,7 +10401,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
 
      Trocado à mão, o valor não é mais reescrito ao trocar de modelo — senão a
      escolha de alguém seria apagada pela primeira mexida num select. */
-  const ROTULO_PADRAO = { ia:'unIa', evidencia:'unPasso', tutorial:'unPasso', ata:'unMomento',
+  const ROTULO_PADRAO = { ia:'unIa', outro:'unIa', evidencia:'unPasso', tutorial:'unPasso', ata:'unMomento',
                           usabilidade:'unMomento' };
   let rotuloManual = null;
 
@@ -10215,7 +10469,9 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     evidencia: ['evidencia','revisao','livre'],
     tutorial:  ['passos','resumo','livre'],
     ata:       ['ata','resumo','revisao','livre'],
-    usabilidade:['sessao','resumo','revisao','livre']
+    usabilidade:['sessao','resumo','revisao','livre'],
+    // mesmos objetivos do genérico: quem escolheu Outro não descartou nenhum
+    outro:     ['resumo','revisao','passos','livre']
   };
   const ROTULO_OBJ = { resumo:'gSum', passos:'gSteps', ata:'gMinutes',
                        evidencia:'gEvid', revisao:'gReview', livre:'gFree',
@@ -13183,6 +13439,26 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
                                    '  (' + t('lenteClipeNota', fmt(f.clipe.em), String(Math.round(f.clipe.seg))) + ')');
         });
         entradas.unshift({ nome: 'indice.txt', dados: bytesDe(linhas.join('\r\n') + '\r\n') });
+      }
+      /* ---- a legenda viaja no .zip ----
+
+         Os três botões de baixar .vtt/.srt/.txt soltos saíram da tela: eram
+         mais três arquivos numa ferramenta que já entrega quinze, e transcrever
+         não é o que ela faz — ela transforma gravação em documento.
+
+         Mas tirar o botão não pode tirar o FORMATO: a home anuncia VTT e SRT
+         entre as saídas, e um site que promete um formato que o produto não
+         produz é o mesmo defeito do `revoke` que não revogava. (Eu tinha
+         escrito num comentário que o .zip já os levava. Não levava. O
+         `vitrine.mjs` — que confere ficha por ficha da home contra a ferramenta
+         — pegou.)
+
+         Então eles entram aqui, no pacote que já se baixa de qualquer jeito:
+         um arquivo a menos para a pessoa e um formato a mais dentro dele. */
+      const legenda = ($('tr').value || '').trim();
+      if (legenda) {
+        entradas.push({ nome: 'legenda.vtt', dados: bytesDe(montarLegenda('vtt')) });
+        entradas.push({ nome: 'legenda.srt', dados: bytesDe(montarLegenda('srt')) });
       }
       /* Os clipes viajam junto. Sem isto, o vídeo do momento existiria só
          enquanto a aba estivesse aberta — e a sessão de pesquisa termina com a
