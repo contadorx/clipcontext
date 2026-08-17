@@ -374,6 +374,17 @@
         border-radius:8px;background:var(--panel);color:var(--ink);font:inherit;font-size:15px;
         font-weight:550}
   .cenario .status{flex-basis:100%;margin:0}
+  /* Enquanto ninguém escolheu, a caixa PARECE uma pergunta em aberto: contorno
+     na cor da marca, e a linha de baixo dizendo por que a pergunta importa.
+     Depois de respondida ela volta a ser um campo comum — o realce é para quem
+     ainda não respondeu, e não enfeite permanente. */
+  .cenario select.pede{border-color:var(--accent);
+        box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 16%,transparent);
+        animation:pedeCen .5s ease 2}
+  .cenario .status.pede{color:var(--accent)}
+  @keyframes pedeCen{0%,100%{transform:translateX(0)}25%{transform:translateX(-3px)}
+        75%{transform:translateX(3px)}}
+  @media (prefers-reduced-motion:reduce){ .cenario select.pede{animation:none} }
   /* Fora da vista, dentro da página. É a diferença entre esconder de todo
      mundo (`display:none`, que apaga também para quem ouve) e esconder só de
      quem enxerga. */
@@ -577,12 +588,25 @@
          que a pessoa precisa ver continua sendo o botão de gravar. -->
     <div class="cenario">
       <label for="modelo" data-i18n="cenLbl"></label>
+      <!-- A primeira opção é um PEDIDO, e não um cenário.
+
+           Antes vinha "Contexto para IA" já escolhido. Um padrão aqui não é
+           conveniência: o cenário decide o cabeçalho, o prompt, a hora de
+           relógio, o nome que se dá a um quadro e o formato do documento
+           inteiro. Quem não reparou na caixa gravava quarenta minutos e recebia
+           o documento errado — e descobria no fim, que é quando não há mais o
+           que fazer.
+
+           `disabled` para não se voltar a ela por engano depois de escolher, e
+           `selected` para ser o que aparece de saída. Quem cobra a escolha é o
+           clique em Gravar. -->
       <select id="modelo">
+        <option value="" selected disabled data-i18n="mEscolha"></option>
         <option value="evidencia" data-i18n="mEv"></option>
         <option value="tutorial" data-i18n="mTut"></option>
         <option value="ata" data-i18n="mAta"></option>
         <option value="usabilidade" data-i18n="mUx"></option>
-        <option value="ia" selected data-i18n="mIa"></option>
+        <option value="ia" data-i18n="mIa"></option>
       </select>
       <p class="status" id="cenDica"></p>
     </div>
@@ -653,6 +677,16 @@
           <span class="status" id="recNotaEst"></span>
         </div>
         <span class="status" id="recMsg" data-i18n="recHint"></span>
+        <!-- A barra do modelo, AQUI.
+
+             O download escrevia numa barra do passo 2 — o cartão do áudio, que
+             está mais abaixo e que a pessoa não está olhando. Do passo 1 se via
+             só uma frase parada dizendo "preparando", enquanto 300 MB desciam
+             sem sinal nenhum. Quem clica em Gravar fica olhando para o botão de
+             Gravar; é ao lado dele que o progresso tem que aparecer. -->
+        <div class="bar hide" id="recBarWrap" style="flex-basis:100%;max-width:520px">
+          <i id="recBar"></i>
+        </div>
         <div class="hide" id="recOpts" style="margin-top:12px">
           <!-- Uma opção por linha. Elas eram cinco numa fileira que quebrava em
                duas, e uma fileira quebrada não se lê: lê-se a primeira e
@@ -1689,7 +1723,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recPauseBtn:'Pausar', recResumeBtn:'Retomar', recMarkBtn:'Marcar este passo',
       recPipBtn:'Trazer a janelinha de volta',
       recNotaPh:'o que aconteceu aqui', recNotaEsp:'marque um passo para comentar',
-      recNotaEm:'comentando a marcação {0}', recNotaOk:'guardado neste passo',
+      recNotaEm:'comentando a marcação {0}', recNotaOk:'guardado neste passo', recNotaNaPip:'o comentário está na janelinha',
       recPausado:'PAUSADO —', recMarcado:'passo marcado.',
       pipPausado:'Pausado: nada sendo guardado.',
       micNegado:'O navegador bloqueou o microfone para este site. Clique no cadeado ao lado do endereço, permita o microfone e grave de novo.',
@@ -1739,7 +1773,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recPrep:'Preparando o modelo de transcrição…',
       recNoModel:'Não consegui carregar o modelo: vou guardar os frames sem transcrever.',
       linhasCairam:'O runtime não pôde usar várias linhas neste navegador — tentando de novo com uma só.',
-      recNoModelStop:'Não consegui carregar o modelo de transcrição, então parei antes de pedir a sua tela — melhor agora do que no fim de uma reunião inteira. Rode o diagnóstico para ver onde trava, ou grave só os frames.',
+      recNoModelStop:'Não consegui carregar o modelo de transcrição, então parei antes de começar a gravar e desliguei a captura — melhor agora do que no fim de uma reunião inteira. Rode o diagnóstico para ver onde trava, ou grave só os frames.',
       recSoFramesBtn:'Gravar só os frames',
       recMicNo:'Sem microfone: só o som do computador será transcrito.',
       recSysNo:'Você não marcou “compartilhar áudio”: só o microfone será transcrito.',
@@ -1873,6 +1907,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       audioExtract:'Extraindo o áudio do vídeo…', audioFail:'este vídeo parece não ter faixa de áudio, ou o formato do áudio não é suportado pelo navegador',
       noAudio:'este vídeo não tem áudio', modelLoad:'Carregando o modelo…',
       modelDl:'Etapa 1 de 2 — baixando o modelo: {0}% (só na primeira vez)',
+      modelDlInicio:'Começando o download do modelo de voz… {0} MB até agora. É uma vez só: depois ele fica guardado no seu navegador.',
+      modelDlFalta:'Faltam cerca de {0}.',
       modelDl2:'Baixando o modelo de voz: {0}% — {1} de {2} MB. É uma vez só: depois ele fica guardado no seu navegador e a próxima transcrição começa na hora.',
       modelCache:'O modelo já está guardado neste navegador. Abrindo — não há download.',
       ocrSemCdn:'Não consegui alcançar a biblioteca de leitura de texto em nenhum dos endereços. Se a rede da empresa bloqueia CDN público, este recurso não vai funcionar aqui — o resto da ferramenta funciona igual.',
@@ -2088,6 +2124,9 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       pNoteRel:'A hora de relógio de cada imagem é o início informado da gravação somado ao tempo decorrido. O documento registra o que foi capturado; a trilha de aprovação continua no seu sistema de mudanças.',
       gEvid:'Montar a ata de evidência de teste',
       modelH:'Modelo de saída',
+      mEscolha:'— escolha o cenário de uso —',
+      cenFalta:'Escolha primeiro o cenário de uso, ali em cima. Ele decide o formato do documento inteiro.',
+      cenPorQue:'O cenário decide o cabeçalho, a hora de relógio, o nome de cada passo e o prompt. Escolha antes de gravar.',
       mIa:'Contexto para IA', mEv:'Evidência de teste', mTut:'Passo a passo', mAta:'Ata de reunião',
       mIaH:'Sequência com a fala de cada trecho, para o modelo entender o vídeo inteiro. É o documento genérico.',
       mEvH:'Um passo por bloco, com a hora de relógio e a sua anotação acima da imagem. Preencha os dados da evidência mais abaixo.',
@@ -2227,7 +2266,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recPauseBtn:'Pause', recResumeBtn:'Resume', recMarkBtn:'Mark this step',
       recPipBtn:'Bring the control window back',
       recNotaPh:'what happened here', recNotaEsp:'mark a step to comment on it',
-      recNotaEm:'commenting on mark {0}', recNotaOk:'saved on this step',
+      recNotaEm:'commenting on mark {0}', recNotaOk:'saved on this step', recNotaNaPip:'the comment box is in the floating window',
       recPausado:'PAUSED —', recMarcado:'step marked.',
       pipPausado:'Paused: nothing being kept.',
       micNegado:'The browser blocked the microphone for this site. Click the padlock next to the address, allow the microphone and record again.',
@@ -2277,7 +2316,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recPrep:'Preparing the transcription model…',
       recNoModel:'Could not load the model: I will keep the frames without transcribing.',
       linhasCairam:'The runtime could not use multiple threads in this browser — trying again with a single one.',
-      recNoModelStop:'I could not load the transcription model, so I stopped before asking for your screen — better now than at the end of a whole meeting. Run the diagnostics to see where it gets stuck, or record frames only.',
+      recNoModelStop:'I could not load the transcription model, so I stopped before recording anything and switched the capture off — better now than at the end of a whole meeting. Run the diagnostics to see where it gets stuck, or record frames only.',
       recSoFramesBtn:'Record frames only',
       recMicNo:'No microphone: only the computer sound will be transcribed.',
       recSysNo:'You did not tick “share audio”: only the microphone will be transcribed.',
@@ -2411,6 +2450,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       audioExtract:'Extracting the audio…', audioFail:'this video appears to have no audio track, or the audio format is not supported by the browser',
       noAudio:'this video has no audio', modelLoad:'Loading the model…',
       modelDl:'Step 1 of 2 — downloading the model: {0}% (first time only)',
+      modelDlInicio:'Starting the speech model download… {0} MB so far. Once only: after this it stays in your browser.',
+      modelDlFalta:'About {0} left.',
       modelDl2:'Downloading the speech model: {0}% — {1} of {2} MB. Once only: after this it stays in your browser and the next transcription starts right away.',
       modelCache:'The model is already stored in this browser. Opening it — nothing to download.',
       ocrSemCdn:'I could not reach the text-reading library at any of the addresses. If your company network blocks public CDNs, this feature will not work here — the rest of the tool works the same.',
@@ -2620,6 +2661,9 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       pNoteRel:'The clock time of each image is the stated recording start plus the elapsed time. This document records what was captured; the approval trail stays in your change management system.',
       gEvid:'Write the test evidence record',
       modelH:'Output model',
+      mEscolha:'— choose what this recording is for —',
+      cenFalta:'Choose what this recording is for, up above. It decides the format of the whole document.',
+      cenPorQue:'The scenario decides the header, the wall-clock time, what each step is called and the prompt. Choose before recording.',
       mIa:'Context for AI', mEv:'Test evidence', mTut:'Step-by-step guide', mAta:'Meeting minutes',
       mIaH:'A sequence with the speech for each interval, so the model understands the whole video. This is the general-purpose document.',
       mEvH:'One step per block, with the clock time and your note above the image. Fill in the evidence details further down.',
@@ -2757,7 +2801,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recPauseBtn:'Pausar', recResumeBtn:'Reanudar', recMarkBtn:'Marcar este paso',
       recPipBtn:'Traer la ventana de control de vuelta',
       recNotaPh:'qué pasó aquí', recNotaEsp:'marca un paso para comentarlo',
-      recNotaEm:'comentando la marca {0}', recNotaOk:'guardado en este paso',
+      recNotaEm:'comentando la marca {0}', recNotaOk:'guardado en este paso', recNotaNaPip:'el comentario está en la ventanita',
       recPausado:'EN PAUSA —', recMarcado:'paso marcado.',
       pipPausado:'En pausa: no se guarda nada.',
       micNegado:'El navegador bloqueó el micrófono para este sitio. Pulsa el candado junto a la dirección, permite el micrófono y graba de nuevo.',
@@ -2807,7 +2851,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recPrep:'Preparando el modelo de transcripción…',
       recNoModel:'No pude cargar el modelo: guardaré los fotogramas sin transcribir.',
       linhasCairam:'El runtime no pudo usar varios hilos en este navegador — probando de nuevo con uno solo.',
-      recNoModelStop:'No pude cargar el modelo de transcripción, así que paré antes de pedir tu pantalla — mejor ahora que al final de una reunión entera. Ejecuta el diagnóstico para ver dónde se atasca, o graba solo los fotogramas.',
+      recNoModelStop:'No pude cargar el modelo de transcripción, así que paré antes de grabar nada y apagué la captura — mejor ahora que al final de una reunión entera. Ejecuta el diagnóstico para ver dónde se atasca, o graba solo los fotogramas.',
       recSoFramesBtn:'Grabar solo los fotogramas',
       recMicNo:'Sin micrófono: solo se transcribirá el sonido del ordenador.',
       recSysNo:'No marcaste “compartir audio”: solo se transcribirá el micrófono.',
@@ -2943,6 +2987,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       audioExtract:'Extrayendo el audio…', audioFail:'este vídeo parece no tener pista de audio, o el formato del audio no es compatible con el navegador',
       noAudio:'este vídeo no tiene audio', modelLoad:'Cargando el modelo…',
       modelDl:'Paso 1 de 2 — descargando el modelo: {0}% (solo la primera vez)',
+      modelDlInicio:'Empezando la descarga del modelo de voz… {0} MB hasta ahora. Es una sola vez: después queda guardado en tu navegador.',
+      modelDlFalta:'Faltan unos {0}.',
       modelDl2:'Descargando el modelo de voz: {0}% — {1} de {2} MB. Es una sola vez: después queda guardado en tu navegador y la próxima transcripción empieza al instante.',
       modelCache:'El modelo ya está guardado en este navegador. Abriéndolo — no hay descarga.',
       ocrSemCdn:'No pude alcanzar la biblioteca de lectura de texto en ninguna de las direcciones. Si la red de la empresa bloquea los CDN públicos, esta función no va a funcionar aquí — el resto de la herramienta funciona igual.',
@@ -3152,6 +3198,9 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       pNoteRel:'La hora de reloj de cada imagen es el inicio indicado de la grabación más el tiempo transcurrido. El documento registra lo que se capturó; la traza de aprobación sigue en tu sistema de cambios.',
       gEvid:'Redactar el acta de evidencia de prueba',
       modelH:'Modelo de salida',
+      mEscolha:'— elige el escenario de uso —',
+      cenFalta:'Elige primero el escenario de uso, ahí arriba. Decide el formato de todo el documento.',
+      cenPorQue:'El escenario decide el encabezado, la hora de reloj, el nombre de cada paso y el prompt. Elige antes de grabar.',
       mIa:'Contexto para IA', mEv:'Evidencia de prueba', mTut:'Paso a paso', mAta:'Acta de reunión',
       mIaH:'Secuencia con el habla de cada tramo, para que el modelo entienda el vídeo entero. Es el documento genérico.',
       mEvH:'Un paso por bloque, con la hora de reloj y tu anotación encima de la imagen. Rellena los datos de la evidencia más abajo.',
@@ -3290,7 +3339,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recPauseBtn:'Pause', recResumeBtn:'Fortsetzen', recMarkBtn:'Diesen Schritt markieren',
       recPipBtn:'Steuerungsfenster zurückholen',
       recNotaPh:'was hier passiert ist', recNotaEsp:'markieren Sie einen Schritt, um ihn zu kommentieren',
-      recNotaEm:'Kommentar zu Markierung {0}', recNotaOk:'in diesem Schritt gespeichert',
+      recNotaEm:'Kommentar zu Markierung {0}', recNotaOk:'in diesem Schritt gespeichert', recNotaNaPip:'Das Kommentarfeld ist im kleinen Fenster',
       recPausado:'PAUSIERT —', recMarcado:'Schritt markiert.',
       pipPausado:'Pausiert: Es wird nichts gespeichert.',
       micNegado:'Der Browser hat das Mikrofon für diese Website blockiert. Klicken Sie auf das Schloss neben der Adresse, erlauben Sie das Mikrofon und nehmen Sie erneut auf.',
@@ -3340,7 +3389,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recPrep:'Das Transkriptionsmodell wird vorbereitet…',
       recNoModel:'Das Modell konnte nicht geladen werden: Die Screenshots werden ohne Transkription gespeichert.',
       linhasCairam:'Die Laufzeitumgebung konnte in diesem Browser nicht mehrere Threads nutzen — neuer Versuch mit nur einem.',
-      recNoModelStop:'Das Transkriptionsmodell konnte nicht geladen werden, deshalb wurde abgebrochen, bevor nach Ihrem Bildschirm gefragt wurde — besser jetzt als am Ende einer ganzen Besprechung. Führen Sie die Diagnose aus, um zu sehen, wo es hängt, oder nehmen Sie nur die Screenshots auf.',
+      recNoModelStop:'Das Transkriptionsmodell konnte nicht geladen werden, deshalb wurde abgebrochen, bevor irgendetwas aufgenommen wurde, und die Aufnahme abgeschaltet — besser jetzt als am Ende einer ganzen Besprechung. Führen Sie die Diagnose aus, um zu sehen, wo es hängt, oder nehmen Sie nur die Screenshots auf.',
       recSoFramesBtn:'Nur die Screenshots aufnehmen',
       recMicNo:'Kein Mikrofon: Es wird nur der Computerton transkribiert.',
       recSysNo:'Sie haben „Audio freigeben“ nicht angehakt: Es wird nur das Mikrofon transkribiert.',
@@ -3474,6 +3523,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       audioExtract:'Der Ton wird aus dem Video extrahiert…', audioFail:'dieses Video scheint keine Tonspur zu haben, oder das Tonformat wird vom Browser nicht unterstützt',
       noAudio:'dieses Video hat keinen Ton', modelLoad:'Das Modell wird geladen…',
       modelDl:'Schritt 1 von 2 — das Modell wird heruntergeladen: {0} % (nur beim ersten Mal)',
+      modelDlInicio:'Der Download des Sprachmodells beginnt… bisher {0} MB. Nur dieses eine Mal: danach bleibt es in Ihrem Browser.',
+      modelDlFalta:'Noch etwa {0}.',
       modelDl2:'Das Spracherkennungsmodell wird heruntergeladen: {0} % — {1} von {2} MB. Nur einmal: Danach bleibt es in Ihrem Browser gespeichert und die nächste Transkription startet sofort.',
       modelCache:'Das Modell ist in diesem Browser bereits gespeichert. Es wird geöffnet — kein Download nötig.',
       ocrSemCdn:'Die Bibliothek zur Texterkennung war unter keiner der Adressen erreichbar. Wenn das Firmennetz öffentliche CDNs blockiert, funktioniert diese Funktion hier nicht — der Rest des Werkzeugs arbeitet unverändert.',
@@ -3689,6 +3740,9 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       pNoteRel:'Die Uhrzeit jedes Bildes ist der angegebene Beginn der Aufnahme plus die verstrichene Zeit. Das Dokument hält fest, was erfasst wurde; die Freigabekette bleibt in Ihrem Änderungsmanagement.',
       gEvid:'Das Protokoll des Testnachweises erstellen',
       modelH:'Art der Ausgabe',
+      mEscolha:'— Einsatzszenario wählen —',
+      cenFalta:'Wählen Sie zuerst oben das Einsatzszenario. Es bestimmt das Format des gesamten Dokuments.',
+      cenPorQue:'Das Szenario bestimmt die Kopfzeile, die Uhrzeit, die Bezeichnung jedes Schritts und den Prompt. Wählen Sie vor der Aufnahme.',
       mIa:'Kontext für KI', mEv:'Testnachweis', mTut:'Schritt-für-Schritt-Anleitung', mAta:'Besprechungsprotokoll',
       mIaH:'Eine Abfolge mit dem Gesprochenen zu jedem Abschnitt, damit das Modell das gesamte Video versteht. Das ist das allgemeine Dokument.',
       mEvH:'Ein Schritt je Block, mit der Uhrzeit und Ihrer Notiz über dem Bild. Die Daten des Nachweises füllen Sie weiter unten aus.',
@@ -3827,7 +3881,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recPauseBtn:'Pause', recResumeBtn:'Reprendre', recMarkBtn:'Marquer cette étape',
       recPipBtn:'Rouvrir la fenêtre de contrôle',
       recNotaPh:'ce qui s’est passé ici', recNotaEsp:'marquez une étape pour la commenter',
-      recNotaEm:'commentaire de la marque {0}', recNotaOk:'enregistré sur cette étape',
+      recNotaEm:'commentaire de la marque {0}', recNotaOk:'enregistré sur cette étape', recNotaNaPip:'le commentaire est dans la petite fenêtre',
       recPausado:'EN PAUSE —', recMarcado:'étape marquée.',
       pipPausado:'En pause : rien n’est conservé.',
       micNegado:'Le navigateur a bloqué le microphone pour ce site. Cliquez sur le cadenas à côté de l’adresse, autorisez le microphone et enregistrez de nouveau.',
@@ -3877,7 +3931,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recPrep:'Préparation du modèle de transcription…',
       recNoModel:'Impossible de charger le modèle : les captures seront conservées sans transcription.',
       linhasCairam:'Le runtime n’a pas pu utiliser plusieurs threads dans ce navigateur — nouvel essai avec un seul.',
-      recNoModelStop:'Impossible de charger le modèle de transcription : tout s’est arrêté avant de demander votre écran — mieux vaut maintenant qu’à la fin d’une réunion entière. Lancez le diagnostic pour voir où ça bloque, ou enregistrez les captures seules.',
+      recNoModelStop:'Impossible de charger le modèle de transcription : tout s’est arrêté avant le moindre enregistrement et la capture a été coupée — mieux vaut maintenant qu’à la fin d’une réunion entière. Lancez le diagnostic pour voir où ça bloque, ou enregistrez les captures seules.',
       recSoFramesBtn:'Enregistrer les captures seules',
       recMicNo:'Sans microphone : seul le son de l’ordinateur sera transcrit.',
       recSysNo:'Vous n’avez pas coché « partager l’audio » : seul le microphone sera transcrit.',
@@ -4011,6 +4065,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       audioExtract:'Extraction de l’audio de la vidéo…', audioFail:'cette vidéo semble ne pas avoir de piste audio, ou le format audio n’est pas pris en charge par le navigateur',
       noAudio:'cette vidéo n’a pas d’audio', modelLoad:'Chargement du modèle…',
       modelDl:'Étape 1 sur 2 — téléchargement du modèle : {0} % (seulement la première fois)',
+      modelDlInicio:'Début du téléchargement du modèle vocal… {0} Mo jusqu’ici. Une seule fois : ensuite il reste dans votre navigateur.',
+      modelDlFalta:'Il reste environ {0}.',
       modelDl2:'Téléchargement du modèle de reconnaissance vocale : {0} % — {1} sur {2} Mo. Une seule fois : ensuite il reste dans votre navigateur et la prochaine transcription démarre immédiatement.',
       modelCache:'Le modèle est déjà stocké dans ce navigateur. Ouverture — aucun téléchargement.',
       ocrSemCdn:'La bibliothèque de lecture de texte est restée injoignable à toutes les adresses essayées. Si le réseau de votre entreprise bloque les CDN publics, cette fonction ne marchera pas ici — le reste de l’outil fonctionne normalement.',
@@ -4226,6 +4282,9 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       pNoteRel:'L’heure d’horloge de chaque image est le début d’enregistrement déclaré plus le temps écoulé. Ce document consigne ce qui a été capturé ; la piste d’approbation reste dans votre système de gestion des changements.',
       gEvid:'Rédiger le compte rendu de preuve de test',
       modelH:'Modèle de document',
+      mEscolha:'— choisissez le cas d’usage —',
+      cenFalta:'Choisissez d’abord le cas d’usage, ci-dessus. Il décide du format de tout le document.',
+      cenPorQue:'Le cas d’usage décide de l’en-tête, de l’heure d’horloge, du nom de chaque étape et du prompt. Choisissez avant d’enregistrer.',
       mIa:'Contexte pour l’IA', mEv:'Preuve de test', mTut:'Mode opératoire', mAta:'Compte rendu de réunion',
       mIaH:'Séquence avec la parole de chaque segment, pour que le modèle comprenne toute la vidéo. C’est le document générique.',
       mEvH:'Une étape par bloc, avec l’heure d’horloge et votre note au-dessus de l’image. Remplissez les données de la preuve plus bas.',
@@ -4823,6 +4882,11 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   $('file').onchange = e => { const f = e.target.files[0]; if (f && !capturando()) load(f); };
 
   function load(f, origem){
+    /* O cenário vale para a porta do vídeo tanto quanto para a da gravação: um
+       arquivo enviado sem cenário produz o mesmo documento errado. A única
+       porta que não passa por aqui é a de reabrir um documento — e ela não
+       precisa, porque o cenário vem escrito dentro do arquivo. */
+    if (!exigirCenario()) { try { $('file').value = ''; } catch (e) {} return; }
     /* Sem isto, a duração e os rótulos de uma captura anterior contaminariam o
        arquivo novo: o PDF diria 30 s para um vídeo de 10 min, e o prompt
        explicaria canais de áudio que não existem neste material. */
@@ -5811,7 +5875,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   let pipAviso = '', pipAvisoAte = 0;
   let pipWin = null, pipTexto = null, pipRelogio = null, pipFrames = null;
   let pipVm = null, pipVs = null, pipCalar = null, pipMarcar = null, pipPausa = null;
-  let pipNota = null, pipNotaTic = null;
+  let pipNota = null;
   /* Pausa e marcação vivem fora do bloco da gravação porque a janelinha e o
      cartão precisam alcançá-las, e as duas são recriadas a cada captura. */
   let pausado = false, alternarPausa = null, marcarAgora = null;
@@ -5830,29 +5894,49 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      cai no quadro que acabou de ser guardado — até a marcação seguinte. */
   let notaAlvo = null;
 
+  /* ---- uma caixa de cada vez ----
+
+     As duas existiam ao mesmo tempo, espelhadas. Na teoria era conveniente; na
+     prática eram dois campos com o mesmo texto pedindo para serem digitados, e
+     ninguém sabe qual dos dois vale. Pior no meio de uma gravação, que é
+     quando a pessoa menos tem paciência para descobrir.
+
+     Agora a janelinha GANHA enquanto está aberta: é ela que fica por cima da
+     tela compartilhada, é para ela que a pessoa está olhando. O cartão recolhe
+     o campo e deixa uma linha dizendo onde ele foi. Fechou a janelinha, o
+     campo volta para o cartão — e volta com o texto, porque o texto nunca
+     morou no campo: mora no quadro. */
+  function notaMoraNaJanelinha(){ return !!(pipWin && pipNota); }
+
   function apontarNota(f){
     const cx = $('recNotaCx'), inp = $('recNota'), est = $('recNotaEst');
     if (!cx || !inp) return;
     notaAlvo = f || null;
+    const naJanela = notaMoraNaJanelinha();
+
     cx.classList.remove('hide');
+    cx.classList.toggle('naJanelinha', naJanela);
+    inp.classList.toggle('hide', naJanela);
     inp.disabled    = !notaAlvo;
     inp.placeholder = t(notaAlvo ? 'recNotaPh' : 'recNotaEsp');
     inp.value       = (notaAlvo && notaAlvo.nota) || '';
-    if (est) est.textContent = notaAlvo
-      ? t('recNotaEm', frames.filter((x) => x.manual).length) : '';
+    if (est) est.textContent = naJanela ? t('recNotaNaPip')
+      : notaAlvo ? t('recNotaEm', frames.filter((x) => x.manual).length) : '';
     if (pipNota) {
       pipNota.disabled    = !notaAlvo;
       pipNota.placeholder = t(notaAlvo ? 'recNotaPh' : 'recNotaEsp');
-      pipNota.value       = inp.value;
+      pipNota.value       = (notaAlvo && notaAlvo.nota) || '';
     }
     /* O foco vai para a caixa da janela que a pessoa está usando, e só para
        ela. Focar às cegas o campo do cartão seria pior do que não focar: quem
        marcou pela janelinha continuaria digitando no vazio, achando que estava
-       comentando. E focar às cegas o da janelinha desviaria a digitação de
-       quem está com o cursor na aba. */
+       comentando. */
     if (notaAlvo) {
-      try { if (document.hasFocus()) inp.focus(); } catch (e) {}
-      try { if (pipNota && pipWin && pipWin.document.hasFocus()) pipNota.focus(); } catch (e) {}
+      if (naJanela) {
+        try { if (pipWin.document.hasFocus()) pipNota.focus(); } catch (e) {}
+      } else {
+        try { if (document.hasFocus()) inp.focus(); } catch (e) {}
+      }
     }
   }
 
@@ -5893,6 +5977,42 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     avisarNotaGuardada();
     if (pipNota && pipNota.value !== $('recNota').value) pipNota.value = $('recNota').value;
   };
+
+  /* ---- o Enter dentro da caixa de comentário ----
+
+     Ele não tinha dono. Numa janela de 250px, com "Parar" logo abaixo do
+     campo, um Enter solto é um risco desproporcional: ele encerra a gravação
+     que estava sendo comentada. E mesmo sem chegar ao botão, um Enter que não
+     faz nada visível ensina a pessoa que o texto não foi aceito — ela apaga e
+     digita de novo, ou desiste.
+
+     Agora Enter CONFIRMA, e para aqui: o texto já está guardado a cada tecla,
+     então confirmar é dizer isso em voz alta e não deixar a tecla seguir
+     viagem. O campo não perde o foco — quem confirmou continua ali, e a
+     próxima marcação é que muda o assunto. */
+  function confirmarNota(e, campo){
+    if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); campo.blur(); return; }
+    if (e.key !== 'Enter') return;
+    e.preventDefault();
+    e.stopPropagation();
+    if (!notaAlvo) return;
+    notaAlvo.nota = (campo.value || '').slice(0, 180);
+    avisarNotaGuardada();
+    piscarGuardou(campo);
+  }
+
+  /* O contorno que confirma. Vale para os dois campos: na janelinha não cabe
+     uma segunda linha de texto, e no cartão o contorno chega antes do olho
+     descer até a linha de status. */
+  const guardouTic = new WeakMap();
+  function piscarGuardou(campo){
+    if (!campo) return;
+    campo.classList.add('guardou');
+    clearTimeout(guardouTic.get(campo));
+    guardouTic.set(campo, setTimeout(() => campo.classList.remove('guardou'), 1400));
+  }
+
+  if ($('recNota')) $('recNota').onkeydown = e => confirmarNota(e, $('recNota'));
 
   const PIP_CSS = `
     *{box-sizing:border-box;margin:0}
@@ -6009,15 +6129,33 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       avisarNotaGuardada();
       /* A janelinha é onde a pessoa está: o aviso tem que aparecer AQUI, e não
          só na aba que ela não está vendo. O próprio contorno do campo
-         confirma — não cabe uma segunda linha de texto em 258px. */
-      pipNota.classList.add('guardou');
-      clearTimeout(pipNotaTic);
-      pipNotaTic = setTimeout(() => pipNota.classList.remove('guardou'), 1400);
+         confirma — não cabe uma segunda linha de texto em 258px.
+
+         `piscarGuardou` e não um `setTimeout` escrito aqui: o timer daqui
+         apontava para a VARIÁVEL `pipNota`, e a variável vira nula quando a
+         janelinha fecha. Digitar e fechar a janela em menos de 1,4 s — que é o
+         que se faz quando se fecha por engano logo depois de comentar —
+         estourava `Cannot read properties of null` um segundo e meio depois,
+         longe do gesto que causou. `piscarGuardou` guarda o ELEMENTO. */
+      piscarGuardou(pipNota);
     };
+    /* Enter aqui dentro confirma e MORRE aqui. É o ponto mais perigoso da
+       ferramenta inteira para uma tecla solta: "Parar" está a dois centímetros
+       do campo, e parar é irreversível — a reunião não se repete. */
+    pipNota.onkeydown = e => confirmarNota(e, pipNota);
+    /* E a mesma trava um degrau acima, no documento da janelinha: qualquer
+       Enter que nasça dentro do campo não chega a botão nenhum. */
+    d.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && e.target === pipNota) { e.preventDefault(); e.stopPropagation(); }
+    }, true);
     /* O botão da janelinha não duplica lógica: chama o mesmo `alternarMic` da
        aba, e o rótulo dos dois é repintado pela mesma função. */
     pipCalar.onclick = () => { if (alternarMic) alternarMic(); };
     controle('prep');
+    /* A janelinha nasceu: o cartão recolhe o campo dele agora, e não no
+       próximo "marcar". Dois campos iguais na tela ao mesmo tempo, mesmo por
+       dez segundos, já é tempo de a pessoa digitar no errado. */
+    if (liveOn) apontarNota(notaAlvo);
 
     /* Fechar a janelinha NÃO para a gravação: fechar sem querer não pode
        destruir uma reunião de uma hora. O botão da aba continua valendo. */
@@ -6029,6 +6167,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
          gravação. Sem um jeito de trazer de volta, a única saída era parar e
          gravar de novo. Agora o botão aparece na aba, ao lado do Parar. */
       pintarVoltarJanelinha();
+      /* E o campo de comentário volta para o cartão, com o texto: ele nunca
+         morou no campo, mora no quadro. Sem esta linha a pessoa fechava a
+         janelinha e ficava sem lugar nenhum para comentar. */
+      if (liveOn) apontarNota(notaAlvo);
     });
   }
 
@@ -6111,6 +6253,12 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   function fecharControle(){
     if (pipWin) { try { pipWin.close(); } catch (e) {} }
     pipWin = null; pipRelogio = pipTexto = pipFrames = pipVm = pipVs = pipCalar = null;
+    /* Estes três faltavam. O `pagehide` os zerava e este aqui não — então,
+       depois de fechar pelo código, `pipNota` continuava apontando para um
+       campo de um documento morto, e `notaMoraNaJanelinha()` respondia "sim"
+       para uma janela que não existe mais: o cartão escondia o campo dele e a
+       pessoa ficava sem os dois. */
+    pipMarcar = pipPausa = pipNota = null;
   }
   let liveAgora = () => 0;
 
@@ -6497,8 +6645,30 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
 
   let pararLive = null;
 
+  /* Cobra o cenário, e cobra AQUI.
+
+     A alternativa seria deixar gravar e perguntar depois. Não serve: o cenário
+     decide se a hora de relógio entra em cada quadro, e a hora de relógio só
+     existe enquanto se grava — perguntar no fim seria perguntar quando a
+     resposta já não pode mais ser aplicada.
+
+     Não é um alerta: alerta se fecha e se esquece. É a caixa piscando, a
+     página rolando até ela, e o foco dentro — a pessoa chega no lugar de
+     responder, e não num aviso sobre o lugar. */
+  function exigirCenario(){
+    if (!semCenario()) return true;
+    const s = $('modelo'); if (!s) return true;
+    $('recMsg').innerHTML = `<span class="err">${t('cenFalta')}</span>`;
+    s.classList.add('pede');
+    setTimeout(() => s.classList.remove('pede'), 2000);
+    try { s.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) {}
+    try { s.focus(); } catch (e) {}
+    return false;
+  }
+
   $('rec').onclick = async () => {
     if (!podeGravar) { $('recMsg').innerHTML = `<span class="err">${t('recNo')}</span>`; return; }
+    if (!exigirCenario()) return;
     /* A trava fecha antes do primeiro await. `liveOn` só liga bem mais adiante,
        depois de permissões e do modelo; sem esta linha, dois cliques rápidos
        abrem duas capturas paralelas e a primeira fica órfã, com os relógios
@@ -6582,38 +6752,73 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       }
     }
 
-    /* ---- 2. o modelo, também antes de compartilhar a tela ----
-       Só baixa se a pessoa pediu transcrição no passo 1. Sem isso, gravar custava
-       obrigatoriamente 77 a 586 MB de espera antes do primeiro frame — mesmo para
-       quem só queria as telas. */
+    /* ---- 2. o modelo COMEÇA aqui, e ninguém espera por ele ----
+
+       Houve três versões, e vale registrar as três porque a segunda parecia a
+       certa.
+
+       Primeira: modelo depois de compartilhar. Péssima. A tela ficava
+       compartilhada e parada por dezenas de segundos, e qualquer interrupção
+       — encerrar pela barra do navegador, trocar de janela — matava tudo com
+       "o compartilhamento foi encerrado antes de começar".
+
+       Segunda: modelo antes de compartilhar, esperando terminar. Correta e
+       lenta. A pessoa clicava em Gravar e olhava uma barra por meio minuto
+       antes de o navegador sequer perguntar qual tela ela quer.
+
+       Terceira, esta: o download começa aqui e o seletor de tela abre no mesmo
+       instante. O navegador leva de cinco a quinze segundos até alguém
+       escolher a janela e apertar Compartilhar — tempo que era jogado fora e
+       agora é tempo de download. A espera passa a ser o RESTO, e não o total;
+       com o modelo já em cache, ela é zero.
+
+       Por que isto não é a primeira versão de novo: lá a tela já estava sendo
+       capturada e a captura podia morrer. Aqui, enquanto o seletor está
+       aberto, não há nada compartilhado — não há o que morrer. E o
+       `getDisplayMedia` continua nascendo do mesmo clique, porque nada é
+       aguardado antes dele. */
     $('rec').disabled = true;
     let podeTranscrever = false;
+    let baixando = null;
     if (querTranscrever) {
-      try {
-        $('recMsg').textContent = t('recPrep');
-        controle('modelo');
-        const modelId = $('model').value;
-        // se o adiantamento já está em curso, espera ELE em vez de começar
+      const modelId = $('model').value;
+      controle('modelo');
+      baixando = (async () => {
+        // se o adiantamento já está em curso, espera ELE em vez de disparar
         // outro download igual em paralelo
         if (adiantando) await adiantando;
         if (pipeId !== modelId) { pipe = await buildPipe(modelId); pipeId = modelId; }
-        podeTranscrever = true;
-        prog(null); st('');
-      } catch (e) {
-        prog(null); st('');
-        /* PARA AQUI, e não no fim.
+      })();
+      /* Um `catch` vazio agora, e o tratamento de verdade no `await` lá
+         embaixo. Sem isto, um download que falha enquanto ninguém está
+         esperando por ele vira "unhandled rejection" no console — barulho que
+         esconde o erro que importa. */
+      baixando.catch(() => {});
+    }
+    $('rec').disabled = false;
 
-           Antes o modelo falhava e a gravação seguia assim mesmo: a pessoa
-           gravava a reunião inteira e só descobria no fim que não havia
-           transcrição — e a reunião não se repete. Se a transcrição foi pedida
-           e não vai acontecer, a decisão é dela, tomada agora.
+    /* O que fazer quando o modelo falha — e ele PARA a gravação, em vez de
+       seguir sem transcrição.
 
-           E o erro de verdade vai junto: engolir a mensagem do navegador me
-           deixou cego por três rodadas de depuração. */
+       Antes o modelo falhava e a gravação seguia assim mesmo: a pessoa gravava
+       a reunião inteira e só descobria no fim que não havia transcrição — e a
+       reunião não se repete. Se a transcrição foi pedida e não vai acontecer, a
+       decisão é dela, tomada agora.
+
+       Virou função porque a falha agora é descoberta DEPOIS da escolha da tela,
+       e não antes: há um `telaStream` para desligar junto. Deixar a captura
+       viva depois de desistir é a pessoa ficando com o ícone de
+       "compartilhando" aceso sem nada sendo gravado.
+
+       E o erro de verdade vai junto: engolir a mensagem do navegador me deixou
+       cego por três rodadas de depuração. */
+    const modeloFalhou = (e) => {
+        prog(null); progRec(false); st('');
         const detalhe = (e && (e.message || String(e)) || '').slice(0, 200);
         $('rec').disabled = false;
         fecharControle();
         if (micStream) micStream.getTracks().forEach(x => x.stop());
+        if (telaStream) telaStream.getTracks().forEach(x => x.stop());
         $('recMsg').innerHTML =
           `<span class="err">${t('recNoModelStop')}</span>` +
           (detalhe ? ` <span class="status">(${detalhe.replace(/</g,'&lt;')})</span>` : '') +
@@ -6627,12 +6832,9 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
            perder a reunião por burocracia. */
         if (bf) bf.onclick = () => { $('recTr').checked = false; notaTr(); $('rec').click(); };
         abrindoCaptura = false;
-        return;
-      }
-    }
-    $('rec').disabled = false;
+    };
 
-    // ---- 3. a tela, por último ----
+    // ---- 3. a tela, agora sem espera nenhuma antes ----
     controle('tela');
     $('recMsg').textContent = t('recAskTela');
     try {
@@ -6693,6 +6895,31 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
 
     const trilhaTela = telaStream.getVideoTracks()[0];
     const morreu = () => !trilhaTela || trilhaTela.readyState === 'ended';
+    if (morreu()) return desistir(t('recEnded'), 'err');
+
+    /* ---- 4. o resto do download, se sobrou algum ----
+
+       Aqui a tela já está escolhida e o download vinha correndo desde o clique.
+       Na maioria das vezes esta linha não espera nada: ou o modelo estava em
+       cache, ou os segundos do seletor deram conta. Quando sobra, o que sobra é
+       o resto — e a tela DIZ que está esperando, com barra e minutos, em vez de
+       ficar muda com a captura ligada.
+
+       A captura só começa depois. Gravar durante a espera pareceria melhor e
+       seria pior: os primeiros minutos entrariam sem transcrição e ninguém
+       saberia por quê. */
+    if (baixando) {
+      try {
+        $('recMsg').textContent = t('recPrep');
+        progRec(null);
+        await baixando;
+        podeTranscrever = true;
+        prog(null); progRec(false); st('');
+      } catch (e) {
+        modeloFalhou(e);
+        return;
+      }
+    }
     if (morreu()) return desistir(t('recEnded'), 'err');
 
     // ---- estado inicial da captura ----
@@ -7272,6 +7499,26 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   /* ================= transcrição automática ================= */
   const st = (m, c) => { $('astatus').innerHTML = c ? `<span class="${c}">${m}</span>` : m; };
   const prog = p => { $('abarWrap').classList.toggle('hide', p == null); if (p != null) $('abar').style.width = p + '%'; };
+
+  /* A barra do passo 1, para o que acontece ANTES de gravar.
+
+     Três estados, e o do meio é o que faltava:
+       progRec(false)  — some;
+       progRec(null)   — aparece LISTRADA, andando. É o "estou baixando e ainda
+                         não sei quanto falta". Antes este caso virava `0%`
+                         escrito na tela, que é a pior das três respostas
+                         possíveis: parece travado, e não desconhecido;
+       progRec(37)     — aparece com 37% de largura.
+
+     A diferença entre "não sei" e "zero" é a diferença entre esperar e
+     recarregar a página. */
+  const progRec = p => {
+    const w = $('recBarWrap'), b = $('recBar'); if (!w || !b) return;
+    if (p === false) { w.classList.add('hide'); w.classList.remove('indef'); return; }
+    w.classList.remove('hide');
+    w.classList.toggle('indef', p == null);
+    if (p != null) b.style.width = Math.max(0, Math.min(100, p)) + '%';
+  };
   /* Endereço da biblioteca, com alternativas — pelo mesmo motivo dos endereços
      do wasm logo abaixo. Uma versão fixada que sai do ar (ou que nunca existiu,
      depois de um erro de digitação) faz TODOS os degraus da fila falharem
@@ -7782,6 +8029,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     /* Percentual por BYTES, e não a média das porcentagens de cada arquivo: a
        média fazia o número saltar para 50% assim que o menor arquivo terminava,
        e depois travar. E com os megabytes na tela dá para decidir se dá tempo. */
+    /* O relógio do download, para poder dizer quanto FALTA. Uma porcentagem
+       sozinha responde "quanto já foi"; quem está parado esperando para gravar
+       quer saber outra coisa — se dá tempo de buscar um café. */
+    const t0 = performance.now();
     const progress_callback = p => {
       if (!p.file) return;
       pedidos.add(p.file);
@@ -7790,9 +8041,31 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
         arquivos[p.file] = { loaded: p.loaded || 0, total: p.total || 0 };
         let l = 0, tt = 0;
         for (const k in arquivos) { l += arquivos[k].loaded; tt += arquivos[k].total; }
-        const pct = tt ? Math.min(100, l / tt * 100) : 0;
-        prog(pct);
-        st(t('modelDl2', pct.toFixed(0), mb(l), mb(tt)));
+
+        /* `tt === 0` quer dizer "o servidor ainda não disse o tamanho". Isto
+           virava `pct = 0`, e a tela escrevia **0%** — que se lê como travado,
+           e não como desconhecido. São coisas diferentes e merecem telas
+           diferentes: aqui vai barra listrada andando e a frase honesta. */
+        if (!tt) {
+          prog(null); progRec(null);
+          const msg = t('modelDlInicio', mb(l));
+          st(msg);
+          if ($('recMsg') && !liveOn) $('recMsg').textContent = msg;
+          return;
+        }
+
+        const pct = Math.min(100, l / tt * 100);
+        const seg = (performance.now() - t0) / 1000;
+        const taxa = seg > 1.5 ? l / seg : 0;                 // bytes por segundo
+        const restam = taxa > 0 ? (tt - l) / taxa : 0;
+        const eta = restam > 3 ? ' ' + t('modelDlFalta', duracao(restam)) : '';
+        prog(pct); progRec(pct);
+        const msg = t('modelDl2', pct.toFixed(0), mb(l), mb(tt)) + eta;
+        st(msg);
+        /* E no passo 1, que é para onde a pessoa está olhando depois de clicar
+           em Gravar. Só enquanto não há captura rolando: durante a gravação
+           esta linha pertence ao relógio e à contagem de quadros. */
+        if ($('recMsg') && !liveOn) $('recMsg').textContent = msg;
       }
     };
 
@@ -9581,11 +9854,17 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   let sessoesJuntadas = 0;
   const querHora = () => $('modelo').value !== 'tutorial' && !sessoesJuntadas;
   const ehTutorial = () => $('modelo').value === 'tutorial';
+  /* Ninguém escolheu ainda. Não é o mesmo que "escolheu o padrão": o documento
+     inteiro depende disto, e a tela tem que dizer que a pergunta continua
+     aberta em vez de fingir uma resposta. */
+  const semCenario = () => !$('modelo') || !$('modelo').value;
+
   const dicaModelo = () => {
     /* A explicação do cenário mora no passo 1, ao lado da escolha. A linha da
        revisão continua existindo para quem chegou lá sem passar pelo topo. */
-    const txt = t(modeloAtual().dica);
+    const txt = semCenario() ? t('cenPorQue') : t(modeloAtual().dica);
     if ($('cenDica')) $('cenDica').textContent = txt;
+    if ($('cenDica')) $('cenDica').classList.toggle('pede', semCenario());
     if ($('modeloDica')) $('modeloDica').textContent =
       t('cenTroca', $('modelo').selectedOptions[0] ? $('modelo').selectedOptions[0].textContent : '');
   };
