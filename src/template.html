@@ -412,7 +412,16 @@
   .tag{display:inline-block;background:var(--bg);border:1px solid var(--line);border-radius:99px;
        padding:3px 10px;font-size:12px;color:var(--muted);margin-right:6px}
   .tag b{color:var(--ink);font-weight:600}
-  .topbar{display:flex;justify-content:space-between;align-items:center;gap:14px;margin:0 0 12px}
+  /* Os mesmos números do site: 62px de altura, fundo com 88% de opacidade,
+     desfoque de 9px e uma borda de 1px embaixo. */
+  header.topo{border-bottom:1px solid var(--line);position:sticky;top:0;z-index:30;
+    background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(9px)}
+  header.topo .wrap{padding-top:0;padding-bottom:0}
+  .topbar{display:flex;justify-content:space-between;align-items:center;gap:14px;
+    height:62px}
+  @media (max-width:560px){ .topbar{height:56px;gap:10px} }
+  /* O miolo perdeu o respiro que o cabeçalho ocupava; devolve aqui. */
+  header.topo + .wrap{padding-top:26px}
   .topbar .back{color:var(--muted);text-decoration:none;font-size:13.5px}
   .topbar select{width:auto;padding:5px 9px;font-size:13px}
   /* A marca vai inline, e não como <img src>: assim o arquivo offline mostra a
@@ -480,8 +489,15 @@
 </style>
 </head>
 <body>
-<div class="wrap">
-
+<!-- O cabeçalho é uma FAIXA, como no site.
+     Ele era uma fileira solta dentro do miolo: sem fundo, sem borda, 37px de
+     altura contra os 62 do site, e a marca começando 32px mais à esquerda. Duas
+     telas do mesmo produto com dois cabeçalhos diferentes — e o pulo entre elas
+     acontece o tempo todo, porque o site é onde se lê e a ferramenta é onde se
+     faz. Agora é a mesma faixa: mesma altura, mesmo fundo, mesma borda, e
+     grudada no topo ao rolar. -->
+<header class="topo">
+  <div class="wrap">
   <div class="topbar">
     <a href="__SITE__/" class="brand">
       <!-- O MESMO desenho de `public/logo.svg`, do rodapé do documento e do PDF.
@@ -522,6 +538,10 @@
       <a href="?lang=fr" data-l="fr">FR</a>
     </nav>
   </div>
+  </div>
+</header>
+
+<div class="wrap">
   <h1 class="soLeitor">__MARCA__</h1>
   <p class="sub" data-i18n="sub"></p>
 
