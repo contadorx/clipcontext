@@ -174,6 +174,45 @@
   .sbCorpo{padding:0 15px 15px}
   .rodapeAjuda{max-width:960px;margin:26px auto 40px;padding:0 20px;display:flex;
     align-items:center;gap:10px;flex-wrap:wrap}
+
+  /* ---- a aba flutuante ----
+
+     "Avisar um problema" morava no rodapé, e rodapé é onde a pessoa chega
+     depois de rolar a página inteira — ou seja, nunca, porque quem está com
+     problema para de rolar exatamente onde o problema aconteceu. A aba fica
+     onde o olho procura ajuda em qualquer produto: canto de baixo, à direita, e
+     não sai de lá.
+
+     São dois botões e não um, porque são duas perguntas diferentes: "como isso
+     funciona?" tem resposta escrita, e "isso está errado" precisa de gente. Um
+     botão só forçaria quem quer a primeira a mandar recado para descobrir. */
+  .abaLado{position:fixed;right:0;top:50%;transform:translateY(-50%);z-index:40;
+    display:flex;flex-direction:column;align-items:flex-end;gap:2px}
+  .abaLado a,.abaLado button{writing-mode:vertical-rl;transform:rotate(180deg);
+    display:inline-flex;align-items:center;gap:8px;border:0;cursor:pointer;
+    background:var(--accent);color:#fff;text-decoration:none;
+    padding:15px 8px;font:600 13px/1 ui-sans-serif,system-ui;letter-spacing:.02em;
+    box-shadow:0 2px 10px rgba(16,20,40,.18)}
+  /* A primeira arredonda em cima e a última embaixo — depois do `rotate(180deg)`
+     o que se vê invertido, e é por isso que os cantos parecem trocados aqui. */
+  .abaLado a{border-radius:0 0 8px 8px}
+  .abaLado button{background:var(--card);color:var(--accent);
+    box-shadow:0 2px 10px rgba(16,20,40,.13);border-radius:8px 8px 0 0}
+  .abaLado a:hover{filter:brightness(1.08)}
+  .abaLado button:hover{background:var(--accent);color:#fff}
+  .abaLado svg{width:14px;height:14px;flex:none;transform:rotate(90deg)}
+  /* A aba vive na margem: com 1000 px de conteúdo centrado, sobram uns 100 px de
+     cada lado numa tela grande e ela não encosta em nada. Abaixo disso encostaria
+     — e cobrir um botão de saída com um botão de ajuda seria a pior troca
+     possível. Então ela desce para o canto, em símbolo, onde nada compete. */
+  @media(max-width:1120px){
+    .abaLado{right:12px;bottom:12px;top:auto;transform:none;flex-direction:row;gap:8px}
+    .abaLado a,.abaLado button{writing-mode:horizontal-tb;transform:none;
+      padding:11px;border-radius:50%}
+    .abaLado svg{transform:none}
+    .abaLado span{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);
+      clip-path:inset(50%);white-space:nowrap}
+  }
   .fbTipo.on{border-color:var(--accent) !important;color:var(--accent) !important;font-weight:650}
   .saidaGrupo{margin-top:16px}
   .saidaTit{display:block;font:600 12px/1 ui-sans-serif,system-ui;letter-spacing:.06em;
@@ -381,10 +420,11 @@
      logo sem depender de rede nem de um arquivo ao lado. */
   .brand{display:inline-flex;align-items:center;gap:10px;text-decoration:none;color:var(--ink);
          font-weight:600;font-size:16.5px;letter-spacing:-.2px}
-  /* Só o símbolo, e do tamanho da home. O nome escrito ao lado dele duplicava
-     a marca dentro de um cabeçalho de duas linhas — e quem está aqui já sabe
-     onde está. O nome continua existindo para quem ouve a página, no
-     `aria-label` do <svg>. */
+  /* Símbolo E nome, como na home. O nome tinha saído porque aparecia três
+     vezes na mesma tela — no símbolo, escrito ao lado, e como <h1>. A
+     duplicação era o <h1>, que continua escondido da vista e presente para
+     quem ouve a página. O nome ao lado do símbolo não é repetição: é a marca,
+     e um símbolo sozinho não se lê. */
   .brand svg{width:38px;height:38px;display:block;flex:none}
   .brand b{font-weight:700;color:var(--accent)}
   @media (max-width:560px){ .brand svg{width:32px;height:32px} }
@@ -433,6 +473,7 @@
         <rect x="14" y="40" width="36" height="4.5" rx="2.25" fill="#fff"/>
         <rect x="14" y="48" width="23" height="4.5" rx="2.25" fill="#fff" opacity=".62"/>
       </svg>
+      <span aria-hidden="true">Walk<b>stamp</b></span>
     </a>
     <nav class="idiomas" id="idiomas" aria-label="Language">
       <!-- A conta ficava escondida dentro do "Ativar o plano Time", no rodapé,
@@ -1373,9 +1414,9 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
 
   <p class="status" style="text-align:center;margin-top:26px">
     <span data-i18n="supportLine"></span>
-    <a href="https://walkstamp.com/seguranca" style="color:var(--accent)" data-i18n="pesSeg"></a> ·
-    <a href="https://walkstamp.com/comparativo" style="color:var(--accent)" data-i18n="pesComp"></a> ·
-    <a href="https://walkstamp.com/precos" style="color:var(--accent)" data-i18n="pesPrecos"></a>
+    <a href="https://walkstamp.com/seguranca" data-rota="seguranca" style="color:var(--accent)" data-i18n="pesSeg"></a> ·
+    <a href="https://walkstamp.com/comparativo" data-rota="comparativo" style="color:var(--accent)" data-i18n="pesComp"></a> ·
+    <a href="https://walkstamp.com/precos" data-rota="precos" style="color:var(--accent)" data-i18n="pesPrecos"></a>
   </p>
 
 </div>
@@ -1394,8 +1435,23 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
          entrar pelo link do e-mail — colar chave à mão continua existindo,
          atrás de um clique, para quem recebeu a chave por outro caminho. -->
     <button class="ghost sm" id="licBtn" data-i18n="licBtn"></button>
-    <button class="ghost sm" id="avisar" data-i18n="avisarBtn"></button>
-    <span class="status" data-i18n="avisarDica"></span>
+  </div>
+
+  <!-- A aba flutuante. Fica fora de todos os cartões de propósito: ela não é um
+       passo do trabalho, é a saída de emergência dele. -->
+  <div class="abaLado" id="abaLado">
+    <a id="abaKb" href="https://walkstamp.com/ajuda" data-rota="ajuda" target="_blank" rel="noopener"
+       data-i18n-title="abaKbDica">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+      </svg><span data-i18n="abaKb"></span></a>
+    <button type="button" id="avisar" data-i18n-title="avisarDica">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+      </svg><span data-i18n="fbTit"></span></button>
   </div>
     <div class="hide" id="licBox" style="margin:8px 0 0">
     <!-- O caminho normal é o LINK, e não uma chave digitada.
@@ -1771,7 +1827,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       fbDiagLbl:'Mandar junto o relatório técnico do navegador', fbVerDiag:'ver o que vai junto',
       fbTextoLbl:'O que aconteceu, ou o que você queria que existisse', fbEmailLbl:'Seu e-mail, se quiser resposta',
       fbTit:'Falar com a gente', fbIdeia:'Ideia', fbElogio:'Elogio', fbProblema:'Problema',
-      avisarBtn:'Avisar um problema ou dar uma ideia', avisarDica:'Vai junto um relatório técnico do seu navegador — você vê antes de mandar.',
+      avisarBtn:'Avisar um problema ou dar uma ideia', avisarDica:'Problema, ideia ou elogio — vai junto um relatório técnico do seu navegador, que você vê antes de mandar.',
+      abaKb:'Como funciona', abaKbDica:'Base de conhecimento: o que cada parte faz, por tema.',
       grFormato:'Formato', fmtLayout:'Layout', fmtPapel:'Papel',
       fmtConta:'O formato padrão vem da configuração de {0} — trocar aqui vale só para este documento.',
       grDoc:'O documento', grEntregar:'Entregar em outro sistema', grDados:'Dados e recuperação',
@@ -2301,7 +2358,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       fbDiagLbl:'Send the browser technical report along', fbVerDiag:'see what goes along',
       fbTextoLbl:'What happened, or what you wish existed', fbEmailLbl:'Your e-mail, if you want a reply',
       fbTit:'Talk to us', fbIdeia:'Idea', fbElogio:'Praise', fbProblema:'Problem',
-      avisarBtn:'Report a problem or share an idea', avisarDica:'A technical report of your browser goes along — you see it before sending.',
+      avisarBtn:'Report a problem or share an idea', avisarDica:'Problem, idea or praise — a technical report of your browser goes along, and you see it before sending.',
+      abaKb:'How it works', abaKbDica:'Knowledge base: what each part does, by topic.',
       grFormato:'Format', fmtLayout:'Layout', fmtPapel:'Paper',
       fmtConta:"The default format comes from {0}'s settings — changing it here applies to this document only.",
       grDoc:'The document', grEntregar:'Deliver to another system', grDados:'Data and recovery',
@@ -2825,7 +2883,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       fbDiagLbl:'Enviar también el informe técnico del navegador', fbVerDiag:'ver lo que va junto',
       fbTextoLbl:'Qué pasó, o qué te gustaría que existiera', fbEmailLbl:'Tu correo, si quieres respuesta',
       fbTit:'Hablar con nosotros', fbIdeia:'Idea', fbElogio:'Elogio', fbProblema:'Problema',
-      avisarBtn:'Avisar de un problema o dar una idea', avisarDica:'Va junto un informe técnico de tu navegador — lo ves antes de enviar.',
+      avisarBtn:'Avisar de un problema o dar una idea', avisarDica:'Problema, idea o elogio — va junto un informe técnico de tu navegador, que ves antes de enviar.',
+      abaKb:'Cómo funciona', abaKbDica:'Base de conocimiento: qué hace cada parte, por tema.',
       grFormato:'Formato', fmtLayout:'Diseño', fmtPapel:'Papel',
       fmtConta:'El formato predeterminado viene de la configuración de {0} — cambiarlo aquí vale solo para este documento.',
       grDoc:'El documento', grEntregar:'Entregar a otro sistema', grDados:'Datos y recuperación',
@@ -3189,16 +3248,38 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      quem lê em espanhol não deveria ter que reconhecer a palavra "conta". */
   const CAMINHO_CONTA = { pt: '/conta', en: '/en/account', es: '/es/cuenta' };
 
+  /* Os endereços do site também são traduzidos, e a ferramenta apontava para os
+     de português em qualquer idioma. Quem lia em inglês e clicava em
+     "Information security" ia parar numa página que, em inglês, tem outro
+     endereço. O `data-rota` diz qual página é; o `applyLang` monta o endereço
+     do idioma em que a pessoa está. */
+  const ROTAS_SITE = {
+    seguranca:   { pt: '/seguranca',   en: '/en/security',  es: '/es/seguridad' },
+    comparativo: { pt: '/comparativo', en: '/en/compare',   es: '/es/comparativa' },
+    precos:      { pt: '/precos',      en: '/en/precos',    es: '/es/precos' },
+    ajuda:       { pt: '/ajuda',       en: '/en/help',      es: '/es/ayuda' }
+  };
+
   function applyLang(){
     document.documentElement.lang = LANG;
     document.title = t('docTitle');
     if ($('contaLink')) $('contaLink').href = 'https://walkstamp.com' + (CAMINHO_CONTA[LANG] || '/conta');
+    document.querySelectorAll('[data-rota]').forEach(a2 => {
+      const r = ROTAS_SITE[a2.getAttribute('data-rota')];
+      if (r) a2.href = 'https://walkstamp.com' + (r[LANG] || r.pt);
+    });
     document.querySelectorAll('[data-i18n]').forEach(el => {
       el.textContent = t(el.getAttribute('data-i18n'));
     });
     /* Campos de texto não têm textContent para traduzir — têm placeholder. */
     document.querySelectorAll('[data-i18n-ph]').forEach(el => {
       el.placeholder = t(el.getAttribute('data-i18n-ph'));
+    });
+    /* E na aba flutuante o texto some numa tela estreita: sobra o símbolo, e o
+       `title` passa a ser a única coisa que diz o que ele faz. */
+    document.querySelectorAll('[data-i18n-title]').forEach(el => {
+      el.title = t(el.getAttribute('data-i18n-title'));
+      if (!el.getAttribute('aria-label')) el.setAttribute('aria-label', el.title);
     });
     pintarAuto();
     $('tr').placeholder = t('trPh');

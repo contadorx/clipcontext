@@ -110,7 +110,9 @@
     "saidasH": "Um documento, no formato que a sua rotina pede",
     "saidasP": "A mesma gravação sai em qualquer um destes. Você escolhe no fim, e pode baixar mais de um.",
     "tpSoNo": "só no",
-    "tpResumo": "São {0} funcionalidades. {1} delas estão no plano gratuito e não têm marca nenhuma abaixo; as {2} pagas vêm marcadas com o plano. Cada grupo abre e fecha."
+    "tpResumo": "São {0} funcionalidades. {1} delas estão no plano gratuito e não têm marca nenhuma abaixo; as {2} pagas vêm marcadas com o plano. Cada grupo abre e fecha.",
+    "fAjuda": "Base de conhecimento",
+    "navAjuda": "Base de conhecimento"
   },
   "en": {
     "htmlLang": "en",
@@ -223,7 +225,9 @@
     "saidasH": "One document, in whatever format your routine asks for",
     "saidasP": "The same recording comes out as any of these. You choose at the end, and you can download more than one.",
     "tpSoNo": "only on",
-    "tpResumo": "{0} features in all. {1} of them are on the free plan and carry no mark below; the {2} paid ones are marked with their plan. Each group folds open and shut."
+    "tpResumo": "{0} features in all. {1} of them are on the free plan and carry no mark below; the {2} paid ones are marked with their plan. Each group folds open and shut.",
+    "fAjuda": "Knowledge base",
+    "navAjuda": "Knowledge base"
   },
   "es": {
     "htmlLang": "es",
@@ -336,6 +340,8 @@
     "saidasH": "Un documento, en el formato que tu rutina pida",
     "saidasP": "La misma grabación sale en cualquiera de estos. Eliges al final, y puedes descargar más de uno.",
     "tpSoNo": "solo en",
-    "tpResumo": "Son {0} funcionalidades. {1} de ellas están en el plan gratuito y no llevan ninguna marca abajo; las {2} de pago vienen marcadas con su plan. Cada grupo se abre y se cierra."
+    "tpResumo": "Son {0} funcionalidades. {1} de ellas están en el plan gratuito y no llevan ninguna marca abajo; las {2} de pago vienen marcadas con su plan. Cada grupo se abre y se cierra.",
+    "fAjuda": "Base de conocimiento",
+    "navAjuda": "Base de conocimiento"
   }
 }

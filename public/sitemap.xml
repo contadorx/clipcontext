@@ -190,6 +190,27 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/team"/>
   </url>
   <url>
+    <loc>https://walkstamp.com/ajuda</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/ajuda"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/help"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/ayuda"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/help"/>
+  </url>
+  <url>
+    <loc>https://walkstamp.com/en/help</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/ajuda"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/help"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/ayuda"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/help"/>
+  </url>
+  <url>
+    <loc>https://walkstamp.com/es/ayuda</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/ajuda"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/help"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/ayuda"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/help"/>
+  </url>
+  <url>
     <loc>https://walkstamp.com/evidencia-de-teste</loc>
     <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/evidencia-de-teste"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/test-evidence"/>

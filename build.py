@@ -191,6 +191,9 @@ SLUGS = {
     "comparativo": {"pt": "comparativo",  "en": "compare",     "es": "comparativa"},
     "link":        {"pt": "link",        "en": "link",        "es": "link"},
     "time":        {"pt": "time",        "en": "team",        "es": "equipo"},
+    # A base de conhecimento. O endereço é traduzido porque é uma página de
+    # BUSCA: ninguém procura "ajuda" em inglês.
+    "ajuda":       {"pt": "ajuda",       "en": "help",        "es": "ayuda"},
     # As cinco páginas de caso de uso. O endereço é traduzido de propósito: é
     # nelas que a busca acontece, e ninguém procura "caso-usabilidade" em inglês.
     "casoEv":  {"pt": "evidencia-de-teste",    "en": "test-evidence",    "es": "evidencia-de-prueba"},
@@ -214,6 +217,12 @@ METAS = {
     "privacidade": {"pt": (f"Política de Privacidade — {MARCA}", f"O {MARCA} não coleta dados pessoais e não recebe seus vídeos."),
                     "en": (f"Privacy Policy — {MARCA}", f"{MARCA} collects no personal data and never receives your videos."),
                     "es": (f"Política de Privacidad — {MARCA}", f"{MARCA} no recoge datos personales y no recibe tus vídeos.")},
+    "ajuda": {"pt": (f"Base de conhecimento — {MARCA}",
+                     "Como cada parte funciona, por tema: gravar, transcrever, revisar os quadros, gerar o documento, e o que fazer quando dá errado."),
+              "en": (f"Knowledge base — {MARCA}",
+                     "How each part works, by topic: recording, transcribing, reviewing frames, building the document, and what to do when something goes wrong."),
+              "es": (f"Base de conocimiento — {MARCA}",
+                     "Cómo funciona cada parte, por tema: grabar, transcribir, revisar los fotogramas, generar el documento y qué hacer cuando algo falla.")},
     "termos": {"pt": (f"Termos de Uso — {MARCA}", f"Condições de uso do {MARCA}, ferramenta gratuita que roda inteira no seu navegador."),
                "en": (f"Terms of Use — {MARCA}", f"Terms for {MARCA}, a free tool that runs entirely in your browser."),
                "es": (f"Términos de Uso — {MARCA}", f"Condiciones de uso de {MARCA}, herramienta gratuita que funciona entera en tu navegador.")},
