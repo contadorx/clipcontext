@@ -396,6 +396,7 @@ def escrever_marca(root: pathlib.Path) -> None:
              "scripts": {"detectarIdioma": so_o_js(REDIRECT),
                          "lembrarIdioma": so_o_js(LEMBRAR)}}
     figs = {pg: figura_documento(c) for pg, c in CENARIO_DA_PAGINA.items()}
+    figs["fluxo"] = figura_fluxo()
     (root / "src" / "figuras.json").write_text(
         json.dumps(figs, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print("src/figuras.json  (as figuras dos casos de uso, sem uma palavra dentro)")
@@ -467,6 +468,11 @@ def build_site(root: pathlib.Path) -> None:
             "{0}", f'<a href="{caminhos[lang]["comparativo"]}" style="color:var(--accent)">').replace("{1}", "</a>")
         t["lang"] = lang
         t["redirect"] = REDIRECT if lang == "pt" else LEMBRAR
+        # A figura do fluxo, na home. Ela não tem uma palavra dentro; o que
+        # muda por idioma é o rótulo de acessibilidade e a legenda.
+        t["figuraFluxo"] = (figura_fluxo()
+                            .replace("__ALT__", t.get("fluxoAlt", ""))
+                            .replace("__LEG__", t.get("fluxoLeg", "")))
 
         html = modelo
         for k, v in t.items():
@@ -739,6 +745,75 @@ def figura_documento(cenario: str) -> str:
     return (f'<figure class="figDoc"><svg viewBox="0 0 440 {alt}" role="img" '
             'aria-labelledby="figDocT"><title id="figDocT">__ALT__</title>'
             + folha + "".join(p) + '</svg><figcaption>__LEG__</figcaption></figure>')
+
+
+def figura_fluxo() -> str:
+    """Gravação → quadros e fala → documento, desenhada.
+
+    A home explica isso em três parágrafos numerados, e a explicação é boa — mas
+    a coisa é espacial: uma tela entra de um lado e uma página sai do outro, e
+    entre as duas alguém joga fora o que não mudou. Um parágrafo conta; um
+    desenho mostra em meio segundo.
+
+    Sem uma palavra dentro, pelo mesmo motivo da figura do documento: cinco
+    idiomas, um desenho.
+    """
+    A, ESC, LIN, TXT = "#3A3F9E", "#EEF0F7", "#E6E8EE", "#C7CBD8"
+    p = []
+    add = p.append
+
+    def seta(x):
+        add(f'<path d="M{x} 62 h26 m-7 -6 l7 6 -7 6" stroke="{TXT}" stroke-width="2" '
+            f'fill="none" stroke-linecap="round" stroke-linejoin="round"/>')
+
+    # 1. a tela sendo gravada — o ponto vermelho é o que diz "isto está correndo"
+    add(f'<rect x="6" y="18" width="132" height="88" rx="8" fill="#fff" stroke="{LIN}"/>')
+    add(f'<rect x="6" y="18" width="132" height="16" rx="8" fill="{ESC}"/>')
+    add(f'<rect x="6" y="26" width="132" height="8" fill="{ESC}"/>')
+    add(f'<circle cx="18" cy="26" r="4" fill="#EF8484"/>')
+    add(f'<rect x="30" y="23.5" width="30" height="5" rx="2.5" fill="{TXT}"/>')
+    add(f'<rect x="18" y="44" width="52" height="34" rx="4" fill="{ESC}"/>')
+    add(f'<rect x="78" y="44" width="48" height="15" rx="4" fill="{ESC}"/>')
+    add(f'<rect x="78" y="65" width="48" height="13" rx="4" fill="{A}" opacity=".18"/>')
+    add(f'<rect x="18" y="86" width="80" height="5" rx="2.5" fill="{ESC}"/>')
+    seta(144)
+
+    # 2. o que sobra da gravação: alguns quadros, e a fala embaixo. Dois ficam,
+    #    um é descartado — é essa a decisão que a ferramenta toma sozinha.
+    for i, (x, fora) in enumerate([(184, False), (232, True), (280, False)]):
+        cor = "#fff" if not fora else ESC
+        tr = ' opacity=".45"' if fora else ''
+        add(f'<g{tr}><rect x="{x}" y="26" width="40" height="30" rx="4" fill="{cor}" stroke="{LIN}"/>')
+        add(f'<rect x="{x + 5}" y="31" width="30" height="8" rx="2" fill="{ESC}"/>')
+        add(f'<rect x="{x + 5}" y="43" width="18" height="8" rx="2" fill="{ESC}"/></g>')
+        if fora:
+            # o X do descarte, no quadro que não mudou o bastante
+            add(f'<path d="M{x + 12} 34 l16 14 m0 -14 l-16 14" stroke="{TXT}" '
+                f'stroke-width="2" stroke-linecap="round"/>')
+    # a onda da fala, e a linha de transcrição embaixo dela
+    ondas = [5, 11, 7, 14, 9, 6, 12, 8, 15, 7, 10, 6, 13, 9, 5, 11, 8, 6]
+    for i, h in enumerate(ondas):
+        add(f'<rect x="{184 + i * 7}" y="{78 - h / 2}" width="3" height="{h}" rx="1.5" '
+            f'fill="{A}" opacity=".55"/>')
+    add(f'<rect x="184" y="92" width="120" height="4" rx="2" fill="{TXT}"/>')
+    add(f'<rect x="184" y="100" width="86" height="4" rx="2" fill="{TXT}"/>')
+    seta(322)
+
+    # 3. a página que sai
+    add(f'<rect x="362" y="14" width="106" height="96" rx="7" fill="#fff" stroke="{LIN}"/>')
+    add(f'<rect x="374" y="26" width="9" height="9" rx="2.5" fill="{A}"/>')
+    add(f'<rect x="388" y="28" width="30" height="4" rx="2" fill="{A}"/>')
+    add(f'<line x1="374" y1="42" x2="456" y2="42" stroke="{LIN}"/>')
+    yy = 50
+    for _ in range(2):
+        add(f'<rect x="374" y="{yy}" width="34" height="22" rx="3" fill="{ESC}"/>')
+        add(f'<rect x="414" y="{yy + 2}" width="42" height="3.5" rx="1.75" fill="{TXT}"/>')
+        add(f'<rect x="414" y="{yy + 9}" width="34" height="3.5" rx="1.75" fill="{TXT}"/>')
+        add(f'<rect x="414" y="{yy + 16}" width="42" height="3.5" rx="1.75" fill="#5C6473"/>')
+        yy += 28
+    return ('<figure class="figFluxo"><svg viewBox="0 0 474 124" role="img" '
+            'aria-labelledby="figFluxoT"><title id="figFluxoT">__ALT__</title>'
+            + "".join(p) + '</svg><figcaption>__LEG__</figcaption></figure>')
 
 
 def sobras_que_tapam_o_site(root: pathlib.Path) -> list[str]:

@@ -231,6 +231,9 @@ export function paginaHtml(pagina: string, lang: Lang): string {
     t.redirect = '';
     t.analytics = '';
     t.title = t.title || '';
+    t.figuraFluxo = ((FIGURAS as Record<string, string>).fluxo ?? '')
+      .replace('__ALT__', String(t.fluxoAlt ?? ''))
+      .replace('__LEG__', String(t.fluxoLeg ?? ''));
     bruto = ler('site/home.html');
   } else {
     const m = METAS[pagina]?.[lang];

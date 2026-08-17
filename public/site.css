@@ -1,10 +1,15 @@
 :root{
   --bg:#f7f8fa; --panel:#ffffff; --ink:#15171c; --muted:#5c6473;
   --line:#e0e3ea; --accent:#3a3f9e; --accent-ink:#ffffff;
+  /* `--err` nunca existiu aqui. A classe `.nao` da tabela de comparação pintava
+     com uma variável indefinida desde sempre — ou seja, não pintava. O valor é
+     o mesmo da ferramenta, para as duas telas terem o mesmo vermelho. */
+  --err:#b32a3a;
   --max:940px;
 }
 @media (prefers-color-scheme:dark){
-  :root{--bg:#121419;--panel:#1a1d24;--ink:#e9ebf1;--muted:#949bab;
+  :root{--err:#ef8484;
+        --bg:#121419;--panel:#1a1d24;--ink:#e9ebf1;--muted:#949bab;
         --line:#282c36;--accent:#737cf0;--accent-ink:#121419}
 }
 *{box-sizing:border-box}
@@ -167,8 +172,24 @@ p{margin:0 0 16px}
 .doc code{font:13px ui-monospace,Menlo,Consolas,monospace;background:var(--panel);
       border:1px solid var(--line);border-radius:5px;padding:1px 5px;color:var(--ink)}
 /* na tabela de comparação, o que a ferramenta faz e o que ela não faz */
+/* A tabela do comparativo É o gráfico da página — e estava cinza.
+   Onze linhas por cinco concorrentes é uma parede de texto onde a única coisa
+   que a pessoa quer saber é "de que lado está cada um". A cor já existia; o que
+   faltava era o SINAL: um sinal se lê de longe, uma palavra exige leitura.
+   O glifo é `::before` e não caractere no HTML — cinco idiomas, uma regra. */
 .doc table.legal td.sim{color:var(--accent);font-weight:600}
 .doc table.legal td.nao{color:var(--err)}
+.doc table.legal td.sim::before,.doc table.legal td.nao::before{
+  display:inline-block;width:15px;margin-right:5px;
+  font-size:14px;font-weight:700;line-height:1}
+.doc table.legal td.sim::before{content:'✓';color:var(--accent)}
+.doc table.legal td.nao::before{content:'✕';color:var(--err)}
+/* A coluna do Walkstamp é a primeira depois do rótulo, e é a que a pessoa veio
+   comparar contra as outras. Um fundo de 6% não grita e resolve o "qual é a
+   nossa?" que se faz em toda linha. */
+.doc table.legal td:nth-child(2),.doc table.legal th:nth-child(2){
+  background:color-mix(in srgb,var(--accent) 6%,transparent)}
+.doc table.legal th:nth-child(2){color:var(--accent)}
 
 /* O rodapé em três colunas com nome. Era uma fileira de oito links soltos, e as
    cinco páginas de caso de uso não estavam nele — quem procurava "aquela do
