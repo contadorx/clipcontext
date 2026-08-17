@@ -10,6 +10,7 @@
  * não copiou uma linha de conteúdo — trocou apenas quem monta a casca em volta.
  */
 import fs from 'node:fs';
+import FIGURAS from '@/src/figuras.json';
 import path from 'node:path';
 
 /* Tudo o que se lê daqui mora em `src/`, e o caminho é montado com esse prefixo
@@ -240,6 +241,14 @@ export function paginaHtml(pagina: string, lang: Lang): string {
     t.enPath = endereco(pagina, 'en');
     t.esPath = endereco(pagina, 'es');
     t.analytics = '';
+    /* A figura do documento, nas cinco páginas de caso de uso. Quem desenha é o
+       `build.py` — o mesmo lugar que desenha a marca no PDF —, e ela chega aqui
+       como dado, pelo `figuras.json`. Duas cópias do mesmo desenho, uma em
+       Python e outra em TypeScript, divergiriam na primeira mudança.
+       Ela não tem uma palavra dentro: serve aos cinco idiomas sem tradução. */
+    t.figura = ((FIGURAS as Record<string, string>)[pagina] ?? '')
+      .replace('__ALT__', String(t.figAlt ?? ''))
+      .replace('__LEG__', String(t.figLegenda ?? ''));
     t.body = trocar(ler(`site/bodies/${pagina}.${lang}.html`), t);
     bruto = ler('site/doc.html');
   }

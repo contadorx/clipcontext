@@ -182,6 +182,12 @@ REDIRECT = """<script>
 # digita, e "/en/substituto-do-steps-recorder" não seria encontrado por ninguém.
 # As páginas legais mantêm o mesmo caminho nos três idiomas, porque quem chega
 # nelas chega por link, não por busca.
+# Qual documento cada página de caso de uso mostra na figura.
+CENARIO_DA_PAGINA = {
+    "casoEv": "evidencia", "casoIn": "instrucao", "casoAta": "ata",
+    "casoUx": "ux", "casoIa": "ia",
+}
+
 SLUGS = {
     "precos":      {"pt": "precos",      "en": "precos",      "es": "precos", "de": "preise", "fr": "tarifs"},
     "privacidade": {"pt": "privacidade", "en": "privacidade", "es": "privacidade", "de": "privacidade", "fr": "privacidade"},
@@ -389,6 +395,11 @@ def escrever_marca(root: pathlib.Path) -> None:
                        for pg, m in METAS.items()},
              "scripts": {"detectarIdioma": so_o_js(REDIRECT),
                          "lembrarIdioma": so_o_js(LEMBRAR)}}
+    figs = {pg: figura_documento(c) for pg, c in CENARIO_DA_PAGINA.items()}
+    (root / "src" / "figuras.json").write_text(
+        json.dumps(figs, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    print("src/figuras.json  (as figuras dos casos de uso, sem uma palavra dentro)")
+
     arq = root / "src" / "rotas.json"
     arq.write_text(json.dumps(rotas, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(f"{arq.relative_to(root)}  (endereços para o Next)")
@@ -493,6 +504,9 @@ def build_site(root: pathlib.Path) -> None:
             t["enPath"] = paginas["en"][pagina]
             t["esPath"] = paginas["es"][pagina]
             t["switcher"] = _switcher(lang, paginas, pagina)
+            # A figura do documento, nas cinco páginas de caso de uso. Ela não
+            # tem uma palavra dentro: serve aos cinco idiomas sem tradução.
+
             corpo = corpo_arq.read_text(encoding="utf-8")
             for k, v in t.items():
                 corpo = corpo.replace("{{" + k + "}}", str(v))
@@ -630,6 +644,101 @@ self.addEventListener('fetch', e => {
                   file=sys.stderr)
             return 1
     return 0
+
+
+def figura_documento(cenario: str) -> str:
+    """A página do documento, desenhada. Muda com o cenário, porque o documento muda.
+
+    Sem uma palavra dentro: o que distingue um cenário do outro aqui é o que
+    APARECE — a evidência tem hora de relógio e impressão digital, a instrução de
+    trabalho tem passos numerados e nenhuma data, a ata tem duas vozes. Dizer
+    isso em texto exigiria traduzir cinco vezes; mostrar não exige nada.
+    """
+    A, ESC, LIN, TXT = "#3A3F9E", "#EEF0F7", "#E6E8EE", "#C7CBD8"
+    p = []
+    add = p.append
+
+    # a banda da marca, no alto — o que mudou no PDF nesta rodada
+    add(f'<rect x="24" y="22" width="16" height="16" rx="4" fill="{A}"/>')
+    add(f'<rect x="27" y="25" width="10" height="6" rx="1.4" fill="#fff"/>')
+    add(f'<rect x="27" y="33" width="10" height="1.6" rx=".8" fill="#fff"/>')
+    add(f'<rect x="47" y="24.5" width="56" height="5.5" rx="2.75" fill="{A}"/>')
+    add(f'<rect x="47" y="33" width="34" height="3.5" rx="1.75" fill="{TXT}"/>')
+    add(f'<line x1="24" y1="48" x2="416" y2="48" stroke="{LIN}"/>')
+
+    # o título do caso
+    add(f'<rect x="24" y="60" width="186" height="9" rx="4.5" fill="#1F2430"/>')
+
+    # a identificação: linhas de rótulo e valor. A evidência tem quatro; o
+    # contexto para IA não tem nenhuma — e é essa a diferença que se vê.
+    linhas = {"evidencia": 4, "instrucao": 2, "ata": 2, "ux": 3, "ia": 0}.get(cenario, 3)
+    y = 80
+    for i in range(linhas):
+        add(f'<rect x="24" y="{y}" width="46" height="4" rx="2" fill="{TXT}"/>')
+        add(f'<rect x="78" y="{y}" width="{92 - (i % 3) * 16}" height="4" rx="2" fill="#5C6473"/>')
+        y += 11
+    if linhas:
+        add(f'<line x1="24" y1="{y + 2}" x2="416" y2="{y + 2}" stroke="{LIN}"/>')
+        y += 14
+    else:
+        y = 80
+
+    # os passos: a tela, e ao lado a hora, a fala e a impressão digital
+    passos = 2
+    for n in range(passos):
+        add(f'<rect x="24" y="{y}" width="150" height="86" rx="5" fill="{ESC}" stroke="{LIN}"/>')
+        # dentro da tela, uma janelinha qualquer — só para não ser um bloco morto
+        add(f'<rect x="34" y="{y + 10}" width="130" height="12" rx="2.5" fill="#fff"/>')
+        add(f'<rect x="34" y="{y + 28}" width="58" height="48" rx="3" fill="#fff"/>')
+        add(f'<rect x="98" y="{y + 28}" width="66" height="20" rx="3" fill="#fff"/>')
+        add(f'<rect x="98" y="{y + 54}" width="66" height="22" rx="3" fill="{A}" opacity=".16"/>')
+
+        # o número do passo, no canto
+        add(f'<circle cx="34" cy="{y + 10}" r="9" fill="{A}"/>')
+        add(f'<text x="34" y="{y + 13.6}" font-family="system-ui,sans-serif" font-size="10" '
+            f'font-weight="700" fill="#fff" text-anchor="middle">{n + 1}</text>')
+
+        # a coluna da direita
+        yy = y + 4
+        if cenario in ("evidencia", "ux", "ata"):
+            # hora de relógio: um selo, porque é o que faz a evidência valer
+            add(f'<rect x="188" y="{yy}" width="52" height="12" rx="6" fill="{A}" opacity=".12"/>')
+            add(f'<rect x="196" y="{yy + 4.5}" width="36" height="3.5" rx="1.75" fill="{A}"/>')
+            yy += 20
+        for w in (196, 168, 140):
+            add(f'<rect x="188" y="{yy}" width="{w}" height="4" rx="2" fill="{TXT}"/>')
+            yy += 9
+        if cenario in ("ata", "ux"):
+            # duas vozes: a fala marcada com quem falou
+            add(f'<rect x="188" y="{yy + 3}" width="10" height="4" rx="2" fill="{A}"/>')
+            add(f'<rect x="202" y="{yy + 3}" width="150" height="4" rx="2" fill="#5C6473"/>')
+            yy += 14
+        else:
+            add(f'<rect x="188" y="{yy + 3}" width="164" height="4" rx="2" fill="#5C6473"/>')
+            yy += 14
+        if cenario == "evidencia":
+            # a impressão digital, em fonte de máquina
+            add(f'<rect x="188" y="{yy + 2}" width="112" height="9" rx="2" fill="{ESC}"/>')
+            add(f'<rect x="193" y="{yy + 5}" width="102" height="3" rx="1.5" fill="{TXT}"/>')
+        y += 96
+
+    # o rodapé da página
+    add(f'<line x1="24" y1="{y + 6}" x2="416" y2="{y + 6}" stroke="{LIN}"/>')
+    add(f'<rect x="24" y="{y + 12}" width="80" height="4" rx="2" fill="{TXT}"/>')
+    add(f'<rect x="404" y="{y + 12}" width="12" height="4" rx="2" fill="{TXT}"/>')
+
+    # A folha tem a altura do que coube dentro dela, e não um número fixo: a
+    # evidência leva quatro linhas de identificação e o contexto para IA não
+    # leva nenhuma, então uma altura só cortaria uma e sobraria na outra.
+    alt = y + 28
+    folha = (f'<rect x="1" y="1" width="438" height="{alt - 2}" rx="10" '
+             f'fill="#fff" stroke="#E6E8EE"/>')
+    # `__ALT__` e `__LEG__`, e não `{{...}}`: a troca de tokens é uma passada só
+    # por chave, então um `{{figAlt}}` que só aparece DEPOIS de `{{figura}}` ser
+    # trocada nunca seria alcançado. Quem monta a legenda é quem sabe o idioma.
+    return (f'<figure class="figDoc"><svg viewBox="0 0 440 {alt}" role="img" '
+            'aria-labelledby="figDocT"><title id="figDocT">__ALT__</title>'
+            + folha + "".join(p) + '</svg><figcaption>__LEG__</figcaption></figure>')
 
 
 def sobras_que_tapam_o_site(root: pathlib.Path) -> list[str]:
