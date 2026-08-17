@@ -17,6 +17,7 @@ import { contaDe, rpc } from '@/lib/supabase/servico';
 import { PLANOS, ehPlano, stripe, temStripe } from '@/lib/stripe';
 import { marca } from '@/lib/marca';
 import { CAMINHO, type Lang, ehLang, textos } from '@/lib/conta/textos';
+import { type Chave, emitirChave } from '@/lib/conta/licenca';
 
 /** O idioma vem do formulário de propósito: ele decide só em que língua a
  *  resposta é escrita, e não dá acesso a nada. */
@@ -127,6 +128,19 @@ export async function gerenciar(form: FormData) {
   redirect(portal.url);
 }
 
+/* ----------------------------------------------------------------- licença */
+
+/** Emite a chave e devolve o link. É uma Server Action com retorno (e não um
+ *  redirecionamento) porque o link é longo demais para caber num endereço, e
+ *  porque ele não deveria ficar no histórico do navegador. */
+export async function emitirLicenca(_antes: Chave | null, form: FormData): Promise<Chave> {
+  const lang = idioma(form);
+  const email = await emailDaSessao();
+  if (!email) return { erro: 'sem_sessao' };
+  void lang;
+  return emitirChave();
+}
+
 /* -------------------------------------------------------------------- time */
 
 /** Chama uma função de time com o administrador vindo da sessão. As quatro
@@ -170,9 +184,26 @@ export async function ajustar(form: FormData) {
   });
 }
 
+/* Apagar um modelo do time. Ele NASCE dentro da ferramenta, no botão "salvar
+   como meu modelo" — é lá que cenário, rótulo, sistema e papel já estão
+   preenchidos. Aqui é onde ele se vê e se apaga, e era a única função que ainda
+   só existia na `/time`. */
+export async function apagarModelo(form: FormData) {
+  const lang = idioma(form);
+  return comoAdmin(lang, 'walkstamp_time_modelo', {
+    p_id: Number(form.get('id')) || 0,
+    p_nome: null, p_escopo: null, p_dados: null, p_apagar: true,
+  });
+}
+
 export async function configurar(form: FormData) {
   const lang = idioma(form);
   const campo = (n: string) => String(form.get(n) || '').trim() || null;
+  /* Uma caixa desmarcada não aparece no formulário — ela some, e `null` no
+     banco significa "não decidi". Aqui a ausência vira `false` de propósito:
+     quem desmarcou decidiu que não quer, e isso é diferente de nunca ter
+     configurado. */
+  const marcado = (n: string) => form.get(n) === '1';
   return comoAdmin(lang, 'walkstamp_time_config', {
     p_config: {
       empresa: campo('empresa'),
@@ -180,6 +211,10 @@ export async function configurar(form: FormData) {
       cenario: campo('cenario'),
       rotulo: campo('rotulo'),
       ambiente: campo('ambiente'),
+      papel: campo('papel'),
+      layout: campo('layout'),
+      hash: marcado('hash'),
+      numerar: marcado('numerar'),
     },
   });
 }

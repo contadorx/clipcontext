@@ -15,7 +15,8 @@ import { type Conta, contaDe, temChaveDeServico } from '@/lib/supabase/servico';
 import { PLANOS, temStripe } from '@/lib/stripe';
 import { type Lang, type Textos, ehLang, preencher, textos } from '@/lib/conta/textos';
 import { CAMINHO_ROTEIRO } from '@/lib/conta/roteiro';
-import { ajustar, bloquear, comprar, configurar, convidar, entrar, gerenciar, sair } from '../acoes';
+import { ajustar, apagarModelo, bloquear, comprar, configurar, convidar, entrar, gerenciar, sair } from '../acoes';
+import Licenca from './Licenca';
 
 export const dynamic = 'force-dynamic';
 
@@ -122,6 +123,10 @@ async function Portal({ email, lang, t }: { email: string; lang: Lang; t: Textos
       <div style={{ marginBottom: 30 }}><Sair lang={lang} t={t} /></div>
 
       <Plano conta={conta} lang={lang} t={t} />
+      {/* A chave vinha só da página de venda, e quem já estava logado aqui
+          precisava entrar de novo por lá para pegá-la. Duas portas para a mesma
+          coisa é o que esta rodada veio acabar. */}
+      {conta.plano && conta.motivo !== 'suspensa' && <Licenca lang={lang} t={t} />}
       <RoteiroAtalho conta={conta} lang={lang} t={t} />
       <Faturas conta={conta} lang={lang} t={t} />
       <Chamados conta={conta} lang={lang} t={t} />
@@ -337,6 +342,14 @@ function Time({ conta, lang, t }: { conta: Conta; lang: Lang; t: Textos }) {
 
       <h3 style={{ marginBottom: 4 }}>{t.timeConfigTitulo}</h3>
       <p className="small muted" style={{ marginTop: 0 }}>{t.timeConfigTexto}</p>
+      <Modelos p={p} lang={lang} t={t} />
+      <Emissoes p={p} lang={lang} t={t} />
+
+      {/* A frase que existia na /time e não podia se perder na mudança: o que
+          esta área tem, e o que ela continua não tendo. É a tese do produto
+          dita no lugar onde alguém poderia duvidar dela. */}
+      <p className="small muted" style={{ marginTop: 18 }}>{t.timeNada}</p>
+
       <form action={configurar} style={{ display: 'grid', gap: 10, maxWidth: 460 }}>
         <input type="hidden" name="lang" value={lang} />
         <label className="small">{t.timeEmpresa}
@@ -361,8 +374,110 @@ function Time({ conta, lang, t }: { conta: Conta; lang: Lang; t: Textos }) {
             <option value="ia">contexto para IA</option>
           </select>
         </label>
+
+        {/* O FORMATO. Os campos acima dizem com que cara o documento sai; estes
+            dizem com que forma. É a forma que uma empresa padroniza — e é a que
+            some no meio de quarenta arquivos quando não está padronizada.
+            Continua sendo padrão, e não trava: a ferramenta preenche, e quem
+            está com o caso na mão troca se aquele caso pedir outra coisa. */}
+        <h4 style={{ margin: '10px 0 0', fontSize: 15 }}>{t.timeFormatoTit}</h4>
+        <p className="small muted" style={{ margin: 0 }}>{t.timeFormatoTexto}</p>
+
+        <label className="small">{t.timePapel}
+          <select name="papel" defaultValue={cfg.papel || ''} style={{ width: '100%' }}>
+            <option value="">{t.timePapelNada}</option>
+            <option value="a4">A4</option>
+            <option value="letter">Carta / Letter</option>
+          </select>
+        </label>
+        <label className="small">{t.timeLayout}
+          <select name="layout" defaultValue={cfg.layout || ''} style={{ width: '100%' }}>
+            <option value="">{t.timePapelNada}</option>
+            <option value="auto">{t.timeLayoutAuto}</option>
+            <option value="full">{t.timeLayoutFull}</option>
+            <option value="grid">{t.timeLayoutGrid}</option>
+          </select>
+        </label>
+        <label className="small" style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
+          <input type="checkbox" name="hash" value="1" defaultChecked={Boolean(cfg.hash)} />
+          <span>{t.timeHash}</span>
+        </label>
+        <label className="small" style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
+          <input type="checkbox" name="numerar" value="1" defaultChecked={Boolean(cfg.numerar)} />
+          <span>{t.timeNumerar}</span>
+        </label>
+
         <div><button className="btn ghost" type="submit">{t.timeSalvar}</button></div>
       </form>
     </div>
+  );
+}
+
+/* ---- o que só existia na /time ---------------------------------------- */
+
+function Modelos({ p, lang, t }: { p: NonNullable<Conta['time']>; lang: Lang; t: Textos }) {
+  const ms = p.modelos || [];
+  return (
+    <>
+      <h3 style={{ marginBottom: 4 }}>{t.timeModelosTit}</h3>
+      {/* Onde eles NASCEM é a informação que falta a quem chega aqui procurando
+          um botão de criar. Ele não existe nesta tela de propósito: cenário,
+          rótulo, sistema e papel já estão preenchidos é dentro da ferramenta. */}
+      <p className="small muted" style={{ marginTop: 0 }}
+         dangerouslySetInnerHTML={{ __html: t.timeModelosOnde }} />
+      {ms.length === 0 ? (
+        <p className="small muted">{t.timeModelosVazio}</p>
+      ) : (
+        <table className="legal">
+          <thead><tr><th>{t.timeModelosTit}</th><th>{t.timeConfigTitulo}</th><th /></tr></thead>
+          <tbody>
+            {ms.map((m) => (
+              <tr key={m.id}>
+                <td>{m.nome}</td>
+                <td>{m.escopo === 'time' ? t.timeModeloTime : t.timeModeloMeu}</td>
+                <td style={{ textAlign: 'right' }}>
+                  <form action={apagarModelo}>
+                    <input type="hidden" name="lang" value={lang} />
+                    <input type="hidden" name="id" value={m.id} />
+                    <button className="btn ghost" type="submit" style={{ padding: '4px 10px', fontSize: 13 }}>
+                      {t.timeModeloApagar}
+                    </button>
+                  </form>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </>
+  );
+}
+
+function Emissoes({ p, lang, t }: { p: NonNullable<Conta['time']>; lang: Lang; t: Textos }) {
+  const hs = p.emissoes || [];
+  return (
+    <>
+      <h3 style={{ marginBottom: 4 }}>{t.timeHistTit}</h3>
+      {hs.length === 0 ? (
+        <p className="small muted" style={{ marginTop: 0 }}>{t.timeHistVazio}</p>
+      ) : (
+        <table className="legal">
+          <thead><tr>
+            <th>{t.timeHistQuando}</th><th>{t.timePessoa}</th>
+            <th>{t.timeVence}</th><th>{t.timeHistDias}</th>
+          </tr></thead>
+          <tbody>
+            {hs.map((h, i) => (
+              <tr key={`${h.email}-${i}`}>
+                <td>{data(lang, h.criado_em)}</td>
+                <td>{h.email}</td>
+                <td>{h.vence_em || '—'}</td>
+                <td>{h.dias ?? '—'}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </>
   );
 }

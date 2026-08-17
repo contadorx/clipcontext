@@ -40,7 +40,11 @@
            token — não por nada que esta página mande. O conteúdo é desenhado
            por JavaScript a partir de um dicionário: três cópias do mesmo HTML
            em três idiomas é onde as traduções começam a divergir. -->
-      <div id="tmPainel" hidden style="margin-top:26px;border-top:1px solid var(--linha,#e6e6ef);padding-top:22px"></div>
+      <div id="tmPainel" style="margin-top:26px;border-top:1px solid var(--line);padding-top:22px">
+        <h3 style="margin:0 0 4px">Managing your team</h3>
+        <p class="small muted" style="margin:0 0 12px">Seats, invites, invoices, document defaults and templates live in your account.</p>
+        <a class="btn ghost" href="/en/account">Open my account</a>
+      </div>
     </div>
 
     <h2>How it works underneath</h2>
@@ -167,7 +171,6 @@
         };
         return diz(motivos[d.erro] || 'I could not issue it right now. Write to me at {{contato}}.', true);
       }
-      tokenVivo = token;
       $('tmPedir').hidden = true;
       $('tmPronto').hidden = false;
       $('tmUrl').textContent = d.link;
@@ -189,201 +192,17 @@
     }
   }
 
-  const TP = {"tit": "Manage your team", "sub": "You manage", "abaTime": "People", "abaFatura": "Invoices", "abaConfig": "Defaults", "abaHist": "History", "pessoa": "Person", "pediu": "Requested", "vence": "Expires", "papelAdm": "admin", "bloq": "Block", "desbloq": "Allow", "convite": "Invite someone from the team", "convBtn": "Invite", "convPh": "person@company.com", "assentos": "Seats", "usados": "in use", "prazo": "The licence lasts", "dias": "days", "salvar": "Save", "salvo": "Saved.", "semFatura": "No invoices yet.", "competencia": "Period", "valor": "Amount", "situacao": "Status", "nf": "Tax invoice", "baixarNf": "Download it", "st_aberta": "open", "st_paga": "paid", "st_vencida": "overdue", "st_cancelada": "cancelled", "nfDepois": "The tax invoice is issued after payment and shows up here when it does.", "cfEmpresa": "Company name in the document", "cfLogo": "Logo address (URL)", "cfRotulo": "What to call each frame", "cfCenario": "Default scenario", "cfAmb": "Default environment", "cfNota": "This is pushed to the tool for anyone holding a licence of this customer: it arrives pre-filled, and the person can still change it. It is not content — it is a logo, a name and a label.", "mdTit": "Document templates", "mdNome": "Template name", "mdNovo": "Add", "mdEscopo": "Applies to", "mdTime": "the whole team", "mdPersonal": "just me", "mdOnde": "Templates are saved <b>inside the tool</b>, with the “Save as my template” button — that is where the scenario, the label, the system and the paper size are already filled in. Here you see and delete them.", "mdApagar": "Delete", "semHist": "No licence issued yet.", "quando": "When", "erros": {"nao_admin": "You do not manage this customer.", "sem_assento": "No free seat. Raise the seat count or block someone.", "email_invalido": "That address does not look complete.", "ja_de_outro": "That e-mail already belongs to another customer. Talk to me.", "nao_a_si": "You cannot block yourself.", "fora_do_cliente": "That person is not on your team.", "sem_nome": "Give the template a name."}, "aviso": "<b>What a block does, and what it does not.</b> It stops the <b>next</b> issuance — the key already in that person’s browser keeps working until it expires. There is no instant cut, and there will not be: for that, the tool would have to ask a server for permission to work, and it would then stop working on a client machine with the network locked down, which is exactly where it needs to work. <b>The term above is your real control:</b> at 7 days, a cut bites within a week; at 90, it can take three months.", "nada": "Nothing you record passes through here. This area holds seats, invoices and document defaults — video, audio, transcript and document still never leave your computer, on the paid plan exactly as on the free one."};
+  /* O painel do time NÃO mora mais aqui.
+     Ele existia nesta página em JavaScript no navegador, com o JWT do link
+     mágico na mão, falando com a Edge Function `walkstamp-time`. E existia
+     TAMBÉM em /conta, em Server Actions, com o e-mail vindo da sessão. Duas
+     telas para o mesmo painel divergem — é questão de tempo até uma ganhar um
+     conserto que a outra não tem. Ficou a de /conta, que é a que não confia em
+     nada que o navegador diga.
 
-  /* ================= o painel do cliente =================
-     Assentos, convite, faturas, padrões e histórico. Ele aparece depois da
-     chave, e só se o servidor disser que este e-mail administra um cliente.
-     A página não decide isso: ela pergunta. */
-  const FNT = SUPA + '/functions/v1/walkstamp-time';
-  let tokenVivo = null, aba = 'time', ultimo = null;
+     Esta página voltou a ser o que ela é: a porta de entrada do plano. Ela pede
+     o e-mail, emite a chave, e aponta para a conta. */
 
-  const esc = s => String(s == null ? '' : s)
-    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-  const dinheiro = (c, m) => (m === 'BRL' ? 'R$ ' : m === 'EUR' ? '€ ' : 'US$ ') +
-    (c / 100).toFixed(2).replace('.', m === 'USD' ? '.' : ',');
-  const dia = s => s ? String(s).slice(0, 10) : '—';
-
-  async function painel(corpo){
-    if (!tokenVivo) return null;
-    let d = {};
-    try {
-      const r = await fetch(FNT, {
-        method: 'POST',
-        headers: { apikey: ANON, Authorization: 'Bearer ' + tokenVivo, 'Content-Type': 'application/json' },
-        body: JSON.stringify(corpo || { acao: 'listar' })
-      });
-      d = await r.json().catch(() => ({}));
-      if (!r.ok || !d || d.erro) return { erro: (d && d.erro) || 'falha' };
-    } catch (e) { return { erro: 'falha' }; }
-    return d;
-  }
-
-  function pintarPainel(p){
-    if (!p || p.erro) return;
-    ultimo = p;
-    const cx = $('tmPainel');
-    cx.hidden = false;
-    const abas = [['time', TP.abaTime], ['fatura', TP.abaFatura],
-                  ['config', TP.abaConfig], ['hist', TP.abaHist]];
-    cx.innerHTML =
-      '<h3 style="margin:0 0 4px">' + TP.tit + '</h3>' +
-      '<p class="small muted" style="margin:0 0 16px">' + TP.sub + ' <b>' + esc(p.cliente) + '</b>' +
-        ((p.dominios || []).length ? ' <span class="muted">(' + p.dominios.map(esc).join(', ') + ')</span>' : '') +
-        ' · ' + p.usados + '/' + p.assentos + ' ' + TP.usados + '</p>' +
-      '<div class="row" id="tpAbas" style="gap:8px;margin-bottom:16px;flex-wrap:wrap">' +
-        abas.map(([k, r]) => '<button class="btn ghost tpAba" data-aba="' + k + '"' +
-          (aba === k ? ' style="border-color:var(--accent);color:var(--accent)"' : '') +
-          '>' + r + '</button>').join('') + '</div>' +
-      '<div id="tpConteudo"></div>' +
-      '<p class="small muted" style="margin:18px 0 0">' + TP.nada + '</p>';
-    cx.querySelectorAll('.tpAba').forEach(b => {
-      b.onclick = () => { aba = b.dataset.aba; pintarPainel(ultimo); };
-    });
-    ({ time: abaTime, fatura: abaFatura, config: abaConfig, hist: abaHist }[aba] || abaTime)(p);
-  }
-
-  const linha = celulas => '<tr style="border-top:1px solid var(--linha,#e6e6ef)">' +
-    celulas.map(c => '<td style="padding:7px 8px' + (c[1] ? ';' + c[1] : '') + '">' + c[0] + '</td>').join('') + '</tr>';
-  const cabec = nomes => '<thead><tr>' + nomes.map(n =>
-    '<th style="text-align:left;padding:6px 8px;font-weight:600">' + n + '</th>').join('') + '</tr></thead>';
-  const tabela = (nomes, corpo) =>
-    '<table style="width:100%;border-collapse:collapse;font-size:14px">' + cabec(nomes) +
-    '<tbody>' + corpo + '</tbody></table>';
-
-  function abaTime(p){
-    $('tpConteudo').innerHTML =
-      '<div class="row" style="gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:14px">' +
-        '<label class="small" for="tpDias">' + TP.prazo + '</label>' +
-        '<input id="tpDias" type="number" min="1" max="90" value="' + p.dias + '" style="width:78px;padding:6px 8px">' +
-        '<span class="small muted">' + TP.dias + '</span>' +
-        '<label class="small" for="tpAssentos">' + TP.assentos + '</label>' +
-        '<input id="tpAssentos" type="number" min="1" max="500" value="' + p.assentos + '" style="width:78px;padding:6px 8px">' +
-        '<button class="btn ghost" id="tpSalvar">' + TP.salvar + '</button>' +
-        '<span class="small muted" id="tpMsg" role="status"></span>' +
-      '</div>' +
-      tabela([TP.pessoa, TP.pediu, TP.vence, ''],
-        (p.pessoas || []).map(x => linha([
-          [esc(x.email) + (x.papel === 'admin' ? ' <span class="muted small">· ' + TP.papelAdm + '</span>' : ''),
-           x.ativo ? '' : 'opacity:.55;text-decoration:line-through'],
-          [dia(x.ultima_em)], [x.vence_em || '—'],
-          [x.admin ? '' : '<button class="btn ghost tpB" data-email="' + esc(x.email) + '" data-bloq="' +
-            (x.ativo ? '1' : '0') + '" style="padding:4px 10px;font-size:13px">' +
-            (x.ativo ? TP.bloq : TP.desbloq) + '</button>', 'text-align:right']
-        ])).join('')) +
-      '<div class="row" style="gap:9px;align-items:center;margin-top:16px;flex-wrap:wrap">' +
-        '<label class="small" for="tpConvEmail">' + TP.convite + '</label>' +
-        '<input id="tpConvEmail" type="email" placeholder="' + TP.convPh + '" style="min-width:230px;padding:6px 8px">' +
-        '<button class="btn ghost" id="tpConvidar">' + TP.convBtn + '</button>' +
-        '<span class="small muted" id="tpConvMsg" role="status"></span>' +
-      '</div>' +
-      '<p class="small muted" style="margin:16px 0 0">' + TP.aviso + '</p>';
-
-    $('tpConteudo').querySelectorAll('.tpB').forEach(b => {
-      b.onclick = async () => {
-        b.disabled = true;
-        const n = await painel({ acao: 'bloquear', email: b.dataset.email, bloquear: b.dataset.bloq === '1' });
-        if (n && !n.erro) pintarPainel(n); else { b.disabled = false; erroEm('tpMsg', n); }
-      };
-    });
-    $('tpSalvar').onclick = async () => {
-      $('tpSalvar').disabled = true; $('tpMsg').textContent = '…';
-      const n = await painel({ acao: 'ajustar', dias: +$('tpDias').value || 90,
-                               assentos: +$('tpAssentos').value || 25 });
-      $('tpSalvar').disabled = false;
-      if (n && !n.erro) { pintarPainel(n); $('tpMsg').textContent = TP.salvo; } else erroEm('tpMsg', n);
-    };
-    $('tpConvidar').onclick = async () => {
-      const e = ($('tpConvEmail').value || '').trim();
-      if (!e) return;
-      $('tpConvidar').disabled = true; $('tpConvMsg').textContent = '…';
-      const n = await painel({ acao: 'convidar', email: e });
-      $('tpConvidar').disabled = false;
-      if (n && !n.erro) pintarPainel(n); else erroEm('tpConvMsg', n);
-    };
-    $('tpConvEmail').addEventListener('keydown', ev => { if (ev.key === 'Enter') $('tpConvidar').click(); });
-  }
-
-  function erroEm(id, n){
-    const el = $(id); if (!el) return;
-    el.innerHTML = '<span style="color:#c0392b">' +
-      ((n && TP.erros[n.erro]) || (n && n.erro) || '✗') + '</span>';
-  }
-
-  function abaFatura(p){
-    const fs = p.faturas || [];
-    $('tpConteudo').innerHTML = !fs.length
-      ? '<p class="small muted">' + TP.semFatura + ' ' + TP.nfDepois + '</p>'
-      : tabela([TP.competencia, TP.valor, TP.situacao, TP.vence, TP.nf],
-          fs.map(f => linha([
-            [esc(f.numero || dia(f.competencia))],
-            [dinheiro(f.valor_centavos, f.moeda)],
-            [TP['st_' + f.status] || esc(f.status)],
-            [f.vence_em || '—'],
-            /* A nota sai depois do pagamento, no sistema fiscal — aqui fica o
-               endereço dela. Prometer a nota junto da cobrança seria prometer
-               uma coisa que a Stripe não faz e que a contabilidade faz. */
-            [f.nf_url ? '<a href="' + esc(f.nf_url) + '" rel="noopener" target="_blank">' +
-                        (esc(f.nf_numero) || TP.baixarNf) + '</a>'
-                      : '<span class="muted">—</span>']
-          ])).join('')) + '<p class="small muted" style="margin:14px 0 0">' + TP.nfDepois + '</p>';
-  }
-
-  function abaConfig(p){
-    const c = p.config || {};
-    const campo = (id, rot, val, ph) =>
-      '<div style="margin-bottom:10px"><label class="small" for="' + id + '" style="display:block;margin-bottom:3px">' +
-      rot + '</label><input id="' + id + '" value="' + esc(val || '') + '"' +
-      (ph ? ' placeholder="' + esc(ph) + '"' : '') + ' style="width:100%;max-width:420px;padding:6px 8px"></div>';
-    $('tpConteudo').innerHTML =
-      campo('cfEmpresa', TP.cfEmpresa, c.empresa) +
-      campo('cfLogo', TP.cfLogo, c.logo_url, 'https://') +
-      campo('cfRotulo', TP.cfRotulo, c.rotulo) +
-      campo('cfAmb', TP.cfAmb, c.ambiente, 'PRD') +
-      '<div class="row" style="gap:9px;align-items:center;margin:6px 0 0">' +
-        '<button class="btn ghost" id="cfSalvar">' + TP.salvar + '</button>' +
-        '<span class="small muted" id="cfMsg" role="status"></span></div>' +
-      '<p class="small muted" style="margin:14px 0 18px">' + TP.cfNota + '</p>' +
-      '<h4 style="margin:0 0 8px">' + TP.mdTit + '</h4>' +
-      '<p class="small muted" style="margin:0 0 10px">' + TP.mdOnde + '</p>' +
-      tabela([TP.mdNome, TP.mdEscopo, ''],
-        (p.modelos || []).map(m => linha([
-          [esc(m.nome)],
-          [m.escopo === 'personal' ? TP.mdPersonal : TP.mdTime],
-          ['<button class="btn ghost mdX" data-id="' + m.id + '" style="padding:4px 10px;font-size:13px">' +
-           TP.mdApagar + '</button>', 'text-align:right']
-        ])).join('')) +
-      '<div class="row" style="gap:9px;align-items:center;margin-top:12px;flex-wrap:wrap">' +
-        '<select id="mdEscopo" style="padding:6px 8px"><option value="time">' + TP.mdTime +
-        '</option><option value="personal">' + TP.mdPersonal + '</option></select>' +
-        '<span class="small muted" id="mdMsg" role="status"></span></div>';
-
-    $('cfSalvar').onclick = async () => {
-      $('cfSalvar').disabled = true; $('cfMsg').textContent = '…';
-      const n = await painel({ acao: 'config', config: {
-        empresa: $('cfEmpresa').value, logo_url: $('cfLogo').value,
-        rotulo: $('cfRotulo').value, ambiente: $('cfAmb').value } });
-      $('cfSalvar').disabled = false;
-      if (n && !n.erro) { ultimo = n; $('cfMsg').textContent = TP.salvo; } else erroEm('cfMsg', n);
-    };
-    $('tpConteudo').querySelectorAll('.mdX').forEach(b => {
-      b.onclick = async () => {
-        b.disabled = true;
-        const n = await painel({ acao: 'modelo', id: +b.dataset.id, apagar: true });
-        if (n && !n.erro) pintarPainel(n); else { b.disabled = false; erroEm('mdMsg', n); }
-      };
-    });
-  }
-
-  function abaHist(p){
-    const h = p.emissoes || [];
-    $('tpConteudo').innerHTML = !h.length
-      ? '<p class="small muted">' + TP.semHist + '</p>'
-      : tabela([TP.quando, TP.pessoa, TP.vence, TP.dias],
-          h.map(x => linha([[dia(x.criado_em)], [esc(x.email)], [x.vence_em || '—'],
-                            [x.dias == null ? '—' : x.dias]])).join(''));
-  }
-
-  daVolta().then(() => painel().then(pintarPainel));
+  daVolta();
 })();
 </script>

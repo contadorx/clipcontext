@@ -67,11 +67,21 @@ export type Conta = {
   time: {
     cliente?: string; assentos?: number; usados?: number; dias?: number;
     dominios?: string[];
-    config?: { empresa?: string; logo_url?: string; cenario?: string; rotulo?: string; ambiente?: string };
+    /* O padrão do documento. Os cinco primeiros dizem com que CARA ele sai; os
+       quatro últimos, com que FORMA — e é a forma que uma empresa padroniza. */
+    config?: {
+      empresa?: string; logo_url?: string; cenario?: string; rotulo?: string; ambiente?: string;
+      papel?: string; layout?: string; hash?: boolean; numerar?: boolean;
+    };
     pessoas?: Array<{
       email: string; papel: string; ativo: boolean; admin: boolean;
       ultima_em: string | null; vence_em: string | null;
     }>;
+    /* Estes dois já vinham do banco e não tinham onde aparecer: eram a parte do
+       painel que só existia na `/time`. Ficam aqui porque o painel passou a
+       morar num lugar só, e um painel a menos é uma divergência a menos. */
+    modelos?: Array<{ id: number; nome: string; escopo: string; dados: unknown }>;
+    emissoes?: Array<{ email: string; vence_em: string | null; dias: number | null; criado_em: string }>;
   } | null;
 };
 

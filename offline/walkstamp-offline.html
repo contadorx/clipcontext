@@ -141,9 +141,9 @@
   /* ---- subpassos da revisão ---- */
   /* uma opção por linha */
   /* A contagem regressiva, grande. */
-  .contagem{display:block;font-size:34px;font-weight:800;line-height:1.15;margin:6px 0 2px;
+  .contagem{display:block;font-size:56px;font-weight:800;line-height:1.05;margin:10px 0 4px;
     letter-spacing:-.02em;font-variant-numeric:tabular-nums}
-  @media (max-width:560px){ .contagem{font-size:27px} }
+  @media (max-width:560px){ .contagem{font-size:42px} }
   label.opt{display:flex;align-items:center;gap:9px;padding:7px 0;font-size:14.5px;cursor:pointer}
   label.opt input[type=checkbox]{flex:none}
   .optNota{margin-left:auto;font-weight:400;font-size:12.5px;color:var(--muted)}
@@ -315,6 +315,14 @@
         border-radius:8px;background:var(--panel);color:var(--ink);font:inherit;font-size:15px;
         font-weight:550}
   .cenario .status{flex-basis:100%;margin:0}
+  /* Fora da vista, dentro da página. É a diferença entre esconder de todo
+     mundo (`display:none`, que apaga também para quem ouve) e esconder só de
+     quem enxerga. */
+  .soLeitor{position:absolute;width:1px;height:1px;padding:0;margin:-1px;
+        overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+  .entreCards{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:-6px 0 18px;
+        padding:0 2px}
+  .entreCards .note{margin:0}
   .modelo{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin:0 0 16px}
   .modelo label{font-size:13.5px;font-weight:600;color:var(--ink)}
   .modelo select{width:auto;min-width:220px;padding:8px 10px;border:1px solid var(--line);
@@ -367,9 +375,13 @@
      logo sem depender de rede nem de um arquivo ao lado. */
   .brand{display:inline-flex;align-items:center;gap:10px;text-decoration:none;color:var(--ink);
          font-weight:600;font-size:16.5px;letter-spacing:-.2px}
-  .brand svg{width:34px;height:34px;display:block;flex:none}
+  /* Só o símbolo, e do tamanho da home. O nome escrito ao lado dele duplicava
+     a marca dentro de um cabeçalho de duas linhas — e quem está aqui já sabe
+     onde está. O nome continua existindo para quem ouve a página, no
+     `aria-label` do <svg>. */
+  .brand svg{width:38px;height:38px;display:block;flex:none}
   .brand b{font-weight:700;color:var(--accent)}
-  @media (max-width:560px){ .brand svg{width:29px;height:29px} }
+  @media (max-width:560px){ .brand svg{width:32px;height:32px} }
   /* Siglas em vez de caixa de seleção, como na home: três letras ocupam menos
      que um <select> de "Português" e ficam iguais nos dois lugares. */
   .idiomas{display:inline-flex;gap:9px;align-items:center;
@@ -415,7 +427,6 @@
         <rect x="14" y="40" width="36" height="4.5" rx="2.25" fill="#fff"/>
         <rect x="14" y="48" width="23" height="4.5" rx="2.25" fill="#fff" opacity=".62"/>
       </svg>
-      <span>Walk<b>stamp</b></span>
     </a>
     <nav class="idiomas" id="idiomas" aria-label="Language">
       <!-- A conta ficava escondida dentro do "Ativar o plano Time", no rodapé,
@@ -433,7 +444,7 @@
       <a href="?lang=es" data-l="es">ES</a>
     </nav>
   </div>
-  <h1>Walkstamp</h1>
+  <h1 class="soLeitor">Walkstamp</h1>
   <p class="sub" data-i18n="sub"></p>
 
   <div class="card" id="cardVideo">
@@ -476,13 +487,13 @@
          decisão à parte. Com dois ou mais, cada arquivo vira um capítulo.
 
          Continua sem servidor: o arquivo está na máquina de quem usa. -->
-    <div class="recup" id="recupBloco">
-      <div class="row" style="align-items:center;gap:10px;flex-wrap:wrap">
-        <button class="ghost sm" id="reabrir" data-i18n="reabrirBtn"></button>
-        <input type="file" id="reabrirArq" multiple
-               accept=".json,.zip,application/json,application/zip" class="hide">
-        <span class="status" id="reabrirMsg" data-i18n="reabrirDica"></span>
-      </div>
+    <div class="cenario" id="recupBloco">
+      <label for="reabrir" data-i18n="reabrirLbl"></label>
+      <button class="ghost" id="reabrir" data-i18n="reabrirBtn"
+              style="padding:9px 14px;font-size:14.5px"></button>
+      <input type="file" id="reabrirArq" multiple
+             accept=".json,.zip,application/json,application/zip" class="hide">
+      <span class="status" id="reabrirMsg" data-i18n="reabrirDica"></span>
     </div>
 
 
@@ -510,6 +521,22 @@
           <button class="sm hide" id="recStop" data-i18n="recStopBtn"></button>
           <button class="ghost sm hide" id="recPause" data-i18n="recPauseBtn"></button>
           <button class="ghost sm hide" id="recMark" data-i18n="recMarkBtn"></button>
+        </div>
+        <!-- A caixa que comenta a marcação.
+
+             Marcar guardava a tela e mais nada. Na revisão, meia hora depois,
+             sobravam sete quadros marcados e nenhum deles dizia POR QUÊ — e o
+             porquê é justamente o que só existe no instante: "aqui o total veio
+             errado" é óbvio na hora e irrecuperável depois.
+
+             Ela comenta SEMPRE a última marcação, e não a próxima: ninguém
+             descreve um problema antes de vê-lo. Por isso nasce desligada,
+             acende no primeiro "marcar", e o que se digita cai no quadro que
+             acabou de ser guardado — até a marcação seguinte. -->
+        <div class="row hide" id="recNotaCx" style="margin-top:8px;gap:8px;align-items:center">
+          <input type="text" id="recNota" maxlength="180" autocomplete="off"
+                 style="flex:1;min-width:200px;max-width:460px" disabled>
+          <span class="status" id="recNotaEst"></span>
         </div>
         <span class="status" id="recMsg" data-i18n="recHint"></span>
         <div class="hide" id="recOpts" style="margin-top:12px">
@@ -622,6 +649,16 @@
     </div>
   </div>
 
+  <!-- Recomeçar do zero. Ficava escondido no FIM do passo 2, que é o último
+       lugar onde alguém procura por ele: quem quer recomeçar já desistiu do que
+       está na tela, e desiste no meio do caminho — aqui, entre o vídeo e a
+       transcrição. Não confundir com "apagar o modelo guardado", que fica lá
+       dentro e faz outra coisa: joga fora os megabytes do modelo de voz. -->
+  <div class="entreCards">
+    <button class="ghost sm" id="reset" data-i18n="resetBtn"></button>
+    <span class="note" data-i18n="resetNota"></span>
+  </div>
+
   <div class="card" id="cardTr">
     <h2><span class="step">2</span><span data-i18n="s2"></span></h2>
     <p class="lockHint hide" id="hintTr"></p>
@@ -631,7 +668,6 @@
          dele é recortado por overflow:hidden). O diagnóstico ficava
          inalcançável exatamente na hora em que era preciso. -->
     <div class="row ferramentas">
-      <button class="ghost sm" id="limparModelo" data-i18n="limparBtn"></button>
       <span class="status" id="diagStatus"></span>
     </div>
     <pre id="diagOut" class="hide"></pre>
@@ -658,6 +694,8 @@
              a pessoa decidir sobre áudio antes de pensar em áudio. O padrão
              continua ligado, e vale para a gravação ao vivo também. -->
         <label class="chk"><input type="checkbox" id="recMic" checked><span data-i18n="recMicLbl"></span></label>
+        <button class="ghost sm" id="limparModelo" data-i18n="limparBtn"
+                style="margin-left:auto"></button>
       </div>
       <!-- O nome dos dois canais. Ele esteve, por uma hora, dentro do modal do
            clipe — errado: renomear canal é coisa de quem transcreve, não de
@@ -758,9 +796,6 @@
     <div class="bar hide" id="barWrap"><i id="bar"></i></div>
     <div class="status" id="status"></div>
     <p class="note"><b data-i18n="noteB"></b> <span data-i18n="noteT"></span></p>
-    <div class="row" style="margin-top:14px">
-      <button class="ghost" id="reset" data-i18n="resetBtn"></button>
-    </div>
 
 
     </div></div><!-- /dobra -->
@@ -971,10 +1006,15 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
          português, inglês e espanhol saindo da MESMA gravação, sem que nada
          suba para lugar nenhum.
 
-         Só HTML e Markdown, e isso é dito na tela: o PDF e o Word carregam as
-         imagens de novo a cada idioma, e cinco idiomas de um documento de
-         quarenta telas derrubariam a aba de quem tem 8 GB. O HTML autocontido
-         imprime bem e é um arquivo só — para distribuir, resolve. -->
+         Só HTML, e isso é dito na tela. O PDF e o Word carregam as imagens de
+         novo a cada idioma, e cinco idiomas de um documento de quarenta telas
+         derrubariam a aba de quem tem 8 GB. O HTML autocontido imprime bem e é
+         um arquivo só — para distribuir, resolve.
+
+         O Markdown saiu do pacote: ele embute as mesmas imagens em base64, ou
+         seja, dobrava o tamanho do zip para entregar o MESMO conteúdo num
+         segundo formato. Quem precisa dele continua tendo pelo "Traduzir" ao
+         lado, um idioma por vez — e é assim que colar numa wiki acontece. -->
     <div class="hide" id="multiBox" style="margin-top:8px">
       <p class="status" data-i18n="multiComo" style="max-width:660px;margin:0 0 8px"></p>
       <div class="row" id="multiLinguas" style="gap:14px"></div>
@@ -1084,8 +1124,44 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
 
          Eram onze botões numa fileira que quebrava em três linhas, todos com o
          mesmo peso visual: o PDF, que é o que quase todo mundo quer, tinha o
-         mesmo tamanho do pacote SCORM, que quase ninguém quer. Agora são três
+         mesmo tamanho do pacote SCORM, que quase ninguém quer. Agora são
          grupos com nome, e o formato do documento vem primeiro. -->
+
+    <!-- ---- o FORMATO, antes das saídas ----
+
+         Layout e papel eram dois seletores no fim de uma fileira de botões, sem
+         rótulo. Ali eles pareciam mais dois botões, e mais estreitos: quem
+         procurava "onde eu mudo para Carta" varria a tela inteira. E são
+         decisões de outra natureza — os botões PRODUZEM o arquivo, estes dois
+         dizem com que forma ele sai. Misturar as duas coisas na mesma linha é o
+         que fazia alguém clicar em Gerar PDF antes de escolher o layout.
+
+         Também é onde a configuração da conta aparece. Depois que o padrão do
+         time passou a chegar pela rede, o papel podia virar Carta sozinho —
+         e um controle que muda sem explicação é o jeito mais rápido de a pessoa
+         parar de confiar no que vê. A nota diz de onde veio, e diz que dá para
+         trocar. -->
+    <div class="saidaGrupo">
+      <span class="saidaTit" data-i18n="grFormato"></span>
+      <div class="row" style="gap:16px;align-items:center">
+        <span class="row" style="gap:7px;align-items:center">
+          <label class="status" for="layout" data-i18n="fmtLayout"></label>
+          <select id="layout" style="width:auto">
+            <option value="auto" data-i18n="layAuto"></option>
+            <option value="full" data-i18n="layFull"></option>
+            <option value="grid" data-i18n="layGrid"></option>
+          </select>
+        </span>
+        <span class="row" style="gap:7px;align-items:center">
+          <label class="status" for="papel" data-i18n="fmtPapel"></label>
+          <select id="papel" style="width:auto">
+            <option value="a4">A4</option>
+            <option value="letter" data-i18n="papelCarta"></option>
+          </select>
+        </span>
+      </div>
+      <p class="note hide" id="fmtConta" style="margin:7px 0 0"></p>
+    </div>
     <div class="saidaGrupo">
       <span class="saidaTit" data-i18n="grDoc"></span>
       <div class="row">
@@ -1093,15 +1169,6 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
         <button class="ghost" id="docx" data-i18n="docxBtn"></button>
         <button class="ghost" id="html" data-i18n="htmlBtn"></button>
         <button class="ghost" id="md" data-i18n="mdBtn"></button>
-        <select id="layout" style="width:auto">
-          <option value="auto" data-i18n="layAuto"></option>
-          <option value="full" data-i18n="layFull"></option>
-          <option value="grid" data-i18n="layGrid"></option>
-        </select>
-        <select id="papel" style="width:auto">
-          <option value="a4">A4</option>
-          <option value="letter" data-i18n="papelCarta"></option>
-        </select>
       </div>
     </div>
     <div class="saidaGrupo">
@@ -1823,6 +1890,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       recAdiantando:'Baixando o modelo de voz agora, para não atrasar a gravação. Pode escolher a tela quando quiser.',
       recPronto:'Modelo pronto. A gravação começa na hora.',
       recPauseBtn:'Pausar', recResumeBtn:'Retomar', recMarkBtn:'Marcar este passo',
+      recNotaPh:'o que aconteceu aqui', recNotaEsp:'marque um passo para comentar',
+      recNotaEm:'comentando a marcação {0}',
       recPausado:'PAUSADO —', recMarcado:'passo marcado.',
       pipPausado:'Pausado: nada sendo guardado.',
       micNegado:'O navegador bloqueou o microfone para este site. Clique no cadeado ao lado do endereço, permita o microfone e grave de novo.',
@@ -1845,6 +1914,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       lockPrevTr:'A transcrição está aqui embaixo, em Transcrição — dá para corrigir e exportar.',
       lockPrev:'Os frames aparecem aqui depois do passo 2 — é onde você descarta os que não servem, corrige a transcrição e gera o documento.',
       lockPrompt:'O texto para a IA é montado depois que os frames existirem.',
+      lockGravando:'Gravando. Este passo abre quando você parar — mexer nos quadros enquanto eles ainda estão sendo guardados é o jeito de perder um.',
+      lockCauda:'Aguarde: a transcrição e os quadros ainda estão sendo fechados. Se não quiser esperar, use o "Pular" no passo 1.',
       lockRec:'Gravando. Os frames e a transcrição estão saindo sozinhos — clique em Parar quando terminar.',
       lockTrRec:'A transcrição está sendo feita ao vivo, enquanto você grava.',
       lockTrNone:'Esta gravação foi só de frames. Se você tiver a transcrição da reunião, cole ou arraste aqui embaixo — ela entra no PDF pareada com as telas.',
@@ -1946,7 +2017,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       autoSemAudioDica:'Esta captura não guardou áudio, então não há o que transcrever. Você pode colar ou abrir uma transcrição no campo abaixo.',
       motorGuardado:'Este navegador já sabe qual combinação funciona aqui — indo direto nela.',
       tentandoCaro:'As opções leves não subiram. Tentando uma que baixa ~{0} MB — é a partir daqui que fica grande.',
-      limparBtn:'apagar o modelo guardado',
+      limparBtn:'apagar o modelo de voz baixado',
       limparFeito:'Apaguei {0} arquivo(s) do modelo guardado. A próxima transcrição baixa de novo.',
       limparVazio:'Não havia nada guardado.',
       motorCaiu:'O modelo não abriu na {0}. Tentando no processador…',
@@ -1979,7 +2050,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       trBoxVazio:'ainda vazia', trBoxCheia:'{0} linhas',
       tradLbl:'Traduzir a transcrição e as anotações para', tradBtn:'Traduzir',
       multiBtn:'Vários idiomas de uma vez', multiGerar:'Gerar o pacote',
-      multiComo:'Marque os idiomas. Sai um .zip com o mesmo documento em cada um — em HTML e Markdown. O PDF e o Word continuam um idioma por vez: eles carregam as imagens de novo a cada idioma, e cinco versões de um documento grande derrubariam a aba.',
+      multiComo:'Marque os idiomas. Sai um .zip com o mesmo documento em cada um, em HTML — um arquivo só, que abre em qualquer navegador e imprime. Para PDF, Word ou Markdown, use o “Traduzir” aqui em cima: um idioma por vez, e depois é só gerar como sempre.',
       multiVazio:'Marque pelo menos um idioma.',
       multiIndo:'Traduzindo para {0} ({1} de {2})…',
       multiFeito:'Pacote pronto, com {0} idioma(s). Nada saiu do seu computador: a tradução roda no navegador.',
@@ -2069,6 +2140,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       fbTextoLbl:'O que aconteceu, ou o que você queria que existisse', fbEmailLbl:'Seu e-mail, se quiser resposta',
       fbTit:'Falar com a gente', fbIdeia:'Ideia', fbElogio:'Elogio', fbProblema:'Problema',
       avisarBtn:'Avisar um problema ou dar uma ideia', avisarDica:'Vai junto um relatório técnico do seu navegador — você vê antes de mandar.',
+      grFormato:'Formato', fmtLayout:'Layout', fmtPapel:'Papel',
+      fmtConta:'O formato padrão vem da configuração de {0} — trocar aqui vale só para este documento.',
       grDoc:'O documento', grEntregar:'Entregar em outro sistema', grDados:'Dados e recuperação',
       jsonBtn:'Save to reopen later (.json)',
       quietN:'{0} frame(s) sem fala foram descartados.',
@@ -2174,7 +2247,9 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       revForaBtn:'Não existe mais — descartar',
       revSairBtn:'Parar a revisão',
       revFim:'Revisão concluída: {0} confirmados, {1} com imagem nova, {2} descartados.',
+      reabrirLbl:'Já tem um documento?',
       reabrirBtn:'Abrir um documento gerado antes',
+      resetNota:'joga fora o que está na tela e começa do zero',
       reabrirDica:'para corrigir um passo sem regravar — aceita o .json e o .zip que saíram daqui',
       reabrirLendo:'Lendo o arquivo…',
       reabrirOk:'{0} quadros de volta. Corrija o que precisar e gere de novo.',
@@ -2343,6 +2418,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       recAdiantando:'Downloading the speech model now, so it does not delay the recording. Pick your screen whenever you like.',
       recPronto:'Model ready. Recording starts immediately.',
       recPauseBtn:'Pause', recResumeBtn:'Resume', recMarkBtn:'Mark this step',
+      recNotaPh:'what happened here', recNotaEsp:'mark a step to comment on it',
+      recNotaEm:'commenting on mark {0}',
       recPausado:'PAUSED —', recMarcado:'step marked.',
       pipPausado:'Paused: nothing being kept.',
       micNegado:'The browser blocked the microphone for this site. Click the padlock next to the address, allow the microphone and record again.',
@@ -2365,6 +2442,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       lockPrevTr:'The transcript is below, under Transcript — you can fix it and export it.',
       lockPrev:'The frames show up here after step 2 — this is where you discard the ones you do not want, fix the transcript and build the document.',
       lockPrompt:'The text for the AI is written once the frames exist.',
+      lockGravando:'Recording. This step opens when you stop — touching the frames while they are still being stored is how you lose one.',
+      lockCauda:'Hold on: the transcript and the frames are still being wrapped up. If you would rather not wait, use "Skip" in step 1.',
       lockRec:'Recording. The frames and the transcript are coming out on their own — click Stop when you are done.',
       lockTrRec:'The transcript is being made live, while you record.',
       lockTrNone:'This recording was frames only. If you have the meeting transcript, paste or drop it below — it goes into the PDF paired with the screens.',
@@ -2466,7 +2545,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       autoSemAudioDica:'This capture stored no audio, so there is nothing to transcribe. You can paste or open a transcript in the field below.',
       motorGuardado:'This browser already knows which combination works here — going straight to it.',
       tentandoCaro:'The light options did not come up. Trying one that downloads ~{0} MB — this is where it gets big.',
-      limparBtn:'delete the stored model',
+      limparBtn:'delete the downloaded voice model',
       limparFeito:'Deleted {0} stored model file(s). The next transcription downloads again.',
       limparVazio:'There was nothing stored.',
       motorCaiu:'The model would not open on the {0}. Trying the CPU…',
@@ -2499,7 +2578,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       trBoxVazio:'still empty', trBoxCheia:'{0} lines',
       tradLbl:'Translate the transcript and the notes into', tradBtn:'Translate',
       multiBtn:'Several languages at once', multiGerar:'Build the package',
-      multiComo:'Tick the languages. You get a .zip with the same document in each one — as HTML and Markdown. PDF and Word stay one language at a time: they load the images again for every language, and five versions of a large document would bring the tab down.',
+      multiComo:'Tick the languages. You get a .zip with the same document in each one, as HTML — a single file that opens in any browser and prints. For PDF, Word or Markdown, use “Translate” above: one language at a time, then generate as usual.',
       multiVazio:'Tick at least one language.',
       multiIndo:'Translating into {0} ({1} of {2})…',
       multiFeito:'Package ready, with {0} language(s). Nothing left your computer: the translation runs in the browser.',
@@ -2589,6 +2668,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       fbTextoLbl:'What happened, or what you wish existed', fbEmailLbl:'Your e-mail, if you want a reply',
       fbTit:'Talk to us', fbIdeia:'Idea', fbElogio:'Praise', fbProblema:'Problem',
       avisarBtn:'Report a problem or share an idea', avisarDica:'A technical report of your browser goes along — you see it before sending.',
+      grFormato:'Format', fmtLayout:'Layout', fmtPapel:'Paper',
+      fmtConta:"The default format comes from {0}'s settings — changing it here applies to this document only.",
       grDoc:'The document', grEntregar:'Deliver to another system', grDados:'Data and recovery',
       jsonBtn:'Save to reopen later (.json)',
       quietN:'{0} frame(s) with no speech were discarded.',
@@ -2688,7 +2769,9 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       revForaBtn:'It is gone — discard',
       revSairBtn:'Stop the review',
       revFim:'Review done: {0} confirmed, {1} with a new image, {2} discarded.',
+      reabrirLbl:'Already have a document?',
       reabrirBtn:'Open a document made earlier',
+      resetNota:'throws away what is on screen and starts from zero',
       reabrirDica:'to fix one step without re-recording — takes the .json and the .zip that came out of here',
       reabrirLendo:'Reading the file…',
       reabrirOk:'{0} frames back. Fix what you need and generate again.',
@@ -2855,6 +2938,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       recAdiantando:'Descargando el modelo de voz ahora, para no retrasar la grabación. Elige la pantalla cuando quieras.',
       recPronto:'Modelo listo. La grabación empieza al instante.',
       recPauseBtn:'Pausar', recResumeBtn:'Reanudar', recMarkBtn:'Marcar este paso',
+      recNotaPh:'qué pasó aquí', recNotaEsp:'marca un paso para comentarlo',
+      recNotaEm:'comentando la marca {0}',
       recPausado:'EN PAUSA —', recMarcado:'paso marcado.',
       pipPausado:'En pausa: no se guarda nada.',
       micNegado:'El navegador bloqueó el micrófono para este sitio. Pulsa el candado junto a la dirección, permite el micrófono y graba de nuevo.',
@@ -2877,6 +2962,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       lockPrevTr:'La transcripción está aquí abajo, en Transcripción — puedes corregirla y exportarla.',
       lockPrev:'Los fotogramas aparecen aquí después del paso 2 — es donde descartas los que no sirven, corriges la transcripción y generas el documento.',
       lockPrompt:'El texto para la IA se arma cuando existan los fotogramas.',
+      lockGravando:'Grabando. Este paso se abre cuando pares — tocar los fotogramas mientras se están guardando es la forma de perder uno.',
+      lockCauda:'Espera: la transcripción y los fotogramas todavía se están cerrando. Si no quieres esperar, usa "Saltar" en el paso 1.',
       lockRec:'Grabando. Los fotogramas y la transcripción salen solos — pulsa Detener cuando termines.',
       lockTrRec:'La transcripción se está haciendo en vivo, mientras grabas.',
       lockTrNone:'Esta grabación fue solo de fotogramas. Si tienes la transcripción de la reunión, pégala o arrástrala aquí abajo — entra en el PDF junto a las pantallas.',
@@ -2978,7 +3065,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       autoSemAudioDica:'Esta captura no guardó audio, así que no hay nada que transcribir. Puedes pegar o abrir una transcripción en el campo de abajo.',
       motorGuardado:'Este navegador ya sabe qué combinación funciona aquí — voy directo a ella.',
       tentandoCaro:'Las opciones ligeras no arrancaron. Probando una que descarga ~{0} MB — a partir de aquí se pone grande.',
-      limparBtn:'borrar el modelo guardado',
+      limparBtn:'borrar el modelo de voz descargado',
       limparFeito:'Borré {0} archivo(s) del modelo guardado. La próxima transcripción vuelve a descargar.',
       limparVazio:'No había nada guardado.',
       motorCaiu:'El modelo no abrió en la {0}. Probando en el procesador…',
@@ -3013,7 +3100,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       trBoxVazio:'aún vacía', trBoxCheia:'{0} líneas',
       tradLbl:'Traducir la transcripción y las anotaciones a', tradBtn:'Traducir',
       multiBtn:'Varios idiomas de una vez', multiGerar:'Generar el paquete',
-      multiComo:'Marca los idiomas. Sale un .zip con el mismo documento en cada uno — en HTML y Markdown. El PDF y el Word siguen siendo de un idioma por vez: cargan las imágenes otra vez en cada idioma, y cinco versiones de un documento grande tumbarían la pestaña.',
+      multiComo:'Marca los idiomas. Sale un .zip con el mismo documento en cada uno, en HTML — un solo archivo que abre en cualquier navegador y se imprime. Para PDF, Word o Markdown, usa “Traducir” aquí arriba: un idioma por vez, y después generas como siempre.',
       multiVazio:'Marca al menos un idioma.',
       multiIndo:'Traduciendo a {0} ({1} de {2})…',
       multiFeito:'Paquete listo, con {0} idioma(s). Nada salió de tu ordenador: la traducción corre en el navegador.',
@@ -3103,6 +3190,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       fbTextoLbl:'Qué pasó, o qué te gustaría que existiera', fbEmailLbl:'Tu correo, si quieres respuesta',
       fbTit:'Hablar con nosotros', fbIdeia:'Idea', fbElogio:'Elogio', fbProblema:'Problema',
       avisarBtn:'Avisar de un problema o dar una idea', avisarDica:'Va junto un informe técnico de tu navegador — lo ves antes de enviar.',
+      grFormato:'Formato', fmtLayout:'Diseño', fmtPapel:'Papel',
+      fmtConta:'El formato predeterminado viene de la configuración de {0} — cambiarlo aquí vale solo para este documento.',
       grDoc:'El documento', grEntregar:'Entregar a otro sistema', grDados:'Datos y recuperación',
       jsonBtn:'Guardar para recuperar después (.json)',
       quietN:'{0} fotograma(s) sin habla fueron descartados.',
@@ -3202,7 +3291,9 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       revForaBtn:'Ya no existe — descartar',
       revSairBtn:'Parar la revisión',
       revFim:'Revisión terminada: {0} confirmados, {1} con imagen nueva, {2} descartados.',
+      reabrirLbl:'¿Ya tienes un documento?',
       reabrirBtn:'Abrir un documento hecho antes',
+      resetNota:'tira lo que está en pantalla y empieza de cero',
       reabrirDica:'para corregir un paso sin volver a grabar — acepta el .json y el .zip que salieron de aquí',
       reabrirLendo:'Leyendo el archivo…',
       reabrirOk:'{0} fotogramas de vuelta. Corrige lo que haga falta y genera otra vez.',
@@ -3610,13 +3701,27 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
        houver frames impediria justamente quem quer COLAR uma transcrição de
        chegar ao campo. Então basta haver material — vídeo ou gravação — para
        ele poder ser tocado; ele só não abre sozinho antes da hora. */
-    trancar('prevCard',   temAlgo || modo !== 'nada');
+    /* Enquanto a captura roda, e enquanto a cauda termina de transcrever, os
+       passos seguintes ficam FECHADOS de verdade.
+
+       Não é zelo: durante a gravação os quadros entram no array um a um, e
+       durante a cauda a transcrição ainda está sendo costurada às falas. Quem
+       abre a revisão nessa janela edita uma lista que está mudando debaixo dele
+       — descarta um quadro e outro toma o lugar, corrige uma fala que a próxima
+       janela de áudio vai reescrever. E a chance de alguém tentar é alta
+       justamente porque a espera é chata.
+
+       O que NÃO trava junto: o botão de parar e o de pular, que moram no passo
+       1. Uma espera sem saída seria pior do que a bagunça que isto evita. */
+    const emAndamento = liveOn || emCauda;
+    trancar('prevCard',   (temAlgo || modo !== 'nada') && !emAndamento);
     /* Aberto assim que existe material, mesmo sem quadro nenhum: é aqui que se
        cola uma transcrição pronta, e um cartão fechado é um campo que não
        existe para quem não sabe que o cabeçalho abre. */
     dobrar('prevCard',    temAlgo || modo === 'arquivo' || modo === 'gravado');
-    dica('hintPrev',      temAlgo ? null : 'lockPrev');
-    trancar('promptCard', temAlgo);
+    dica('hintPrev',      liveOn ? 'lockGravando' : emCauda ? 'lockCauda'
+                                 : temAlgo ? null : 'lockPrev');
+    trancar('promptCard', temAlgo && !emAndamento);
     /* Os botões de saída seguem o mesmo relógio das travas dos cartões. Antes
        eles só eram acertados dentro de `counts()`, que só roda a partir de
        `render()` — e nem a abertura da página nem o carregar de um vídeo
@@ -3624,7 +3729,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
        clicáveis sem ter o que fazer. */
     if (typeof pintarSaidas === 'function') pintarSaidas();
     dobrar('promptCard',  temAlgo);
-    dica('hintPrompt',    temAlgo ? null : 'lockPrompt');
+    dica('hintPrompt',    liveOn ? 'lockGravando' : emCauda ? 'lockCauda'
+                                : temAlgo ? null : 'lockPrompt');
     sincAmbos();
   }
 
@@ -4337,9 +4443,12 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
           frames.forEach((f, i) => { f.nota = notasOriginais[i]; });
           refreshTr();
         }
-        const base = nomeBase() + '-' + alvo;
-        entradas.push({ nome: base + '.html', dados: bytesDe(montarHtml()) });
-        entradas.push({ nome: base + '.md',   dados: bytesDe(montarMd()) });
+        /* Só HTML. O Markdown saía junto e dobrava o pacote: os dois embutem
+           as imagens em base64, então três idiomas de um documento de quarenta
+           telas viravam seis arquivos gigantes onde bastavam três. Quem quer
+           Markdown para colar numa wiki continua tendo — pelo botão "Traduzir",
+           um idioma por vez, que é como esse uso acontece de verdade. */
+        entradas.push({ nome: nomeBase() + '-' + alvo + '.html', dados: bytesDe(montarHtml()) });
       }
     } catch (e) {
       $('multiMsg').innerHTML = `<span class="err">${(e && e.message) || t('tradErro')}</span>`;
@@ -4352,7 +4461,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     if (!entradas.length) return;
     baixarBlob(zipar(entradas), 'idiomas-' + nomeBase() + '.zip');
     medir('baixou_saida', { p_formato: 'zip' });
-    $('multiMsg').innerHTML = `<span class="ok">${t('multiFeito', entradas.length / 2)}</span>`;
+    $('multiMsg').innerHTML = `<span class="ok">${t('multiFeito', entradas.length)}</span>`;
   };
 
   /* ---- um documento por tarefa ----
@@ -4711,9 +4820,68 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
   let pipAviso = '', pipAvisoAte = 0;
   let pipWin = null, pipTexto = null, pipRelogio = null, pipFrames = null;
   let pipVm = null, pipVs = null, pipCalar = null, pipMarcar = null, pipPausa = null;
+  let pipNota = null;
   /* Pausa e marcação vivem fora do bloco da gravação porque a janelinha e o
      cartão precisam alcançá-las, e as duas são recriadas a cada captura. */
   let pausado = false, alternarPausa = null, marcarAgora = null;
+
+  /* ---- a caixa que comenta a marcação ----
+
+     "Marcar este passo" guardava a tela e nada mais. Na revisão, meia hora
+     depois, sobravam sete quadros marcados sem nenhum dizendo POR QUÊ — e o
+     porquê é o que só existe no instante: "aqui o total veio errado" é óbvio na
+     hora e irrecuperável depois. Reconstruir isso na revisão é o trabalho que a
+     ferramenta existe para não dar.
+
+     Ela comenta a ÚLTIMA marcação, nunca a próxima. Ninguém descreve um
+     problema antes de vê-lo: o gesto real é ver, marcar, e então dizer. Por
+     isso ela nasce desligada, acende no primeiro "marcar", e o que se digita
+     cai no quadro que acabou de ser guardado — até a marcação seguinte. */
+  let notaAlvo = null;
+
+  function apontarNota(f){
+    const cx = $('recNotaCx'), inp = $('recNota'), est = $('recNotaEst');
+    if (!cx || !inp) return;
+    notaAlvo = f || null;
+    cx.classList.remove('hide');
+    inp.disabled    = !notaAlvo;
+    inp.placeholder = t(notaAlvo ? 'recNotaPh' : 'recNotaEsp');
+    inp.value       = (notaAlvo && notaAlvo.nota) || '';
+    if (est) est.textContent = notaAlvo
+      ? t('recNotaEm', frames.filter((x) => x.manual).length) : '';
+    if (pipNota) {
+      pipNota.disabled    = !notaAlvo;
+      pipNota.placeholder = t(notaAlvo ? 'recNotaPh' : 'recNotaEsp');
+      pipNota.value       = inp.value;
+    }
+    /* O foco vai para a caixa da janela que a pessoa está usando, e só para
+       ela. Focar às cegas o campo do cartão seria pior do que não focar: quem
+       marcou pela janelinha continuaria digitando no vazio, achando que estava
+       comentando. E focar às cegas o da janelinha desviaria a digitação de
+       quem está com o cursor na aba. */
+    if (notaAlvo) {
+      try { if (document.hasFocus()) inp.focus(); } catch (e) {}
+      try { if (pipNota && pipWin && pipWin.document.hasFocus()) pipNota.focus(); } catch (e) {}
+    }
+  }
+
+  function esconderNota(){
+    const cx = $('recNotaCx'), inp = $('recNota'), est = $('recNotaEst');
+    notaAlvo = null;
+    if (cx)  cx.classList.add('hide');
+    if (inp) { inp.value = ''; inp.disabled = true; }
+    if (est) est.textContent = '';
+    if (pipNota) { pipNota.value = ''; pipNota.disabled = true; }
+  }
+
+  /* Escrito direto no quadro, a cada tecla. Guardar só no `blur` perderia o
+     comentário de quem para a gravação com o cursor ainda dentro do campo — que
+     é exatamente o que se faz quando a última coisa anotada é o motivo de
+     parar. */
+  if ($('recNota')) $('recNota').oninput = () => {
+    if (!notaAlvo) return;
+    notaAlvo.nota = ($('recNota').value || '').slice(0, 180);
+  };
 
   const PIP_CSS = `
     *{box-sizing:border-box;margin:0}
@@ -4741,12 +4909,19 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     .vb{flex:1;height:6px;border-radius:3px;background:#282c36;overflow:hidden}
     .vb i{display:block;height:100%;width:0;background:#737cf0}
     .pe{font-size:11.5px;color:#737cf0}
+    /* A caixa do comentário. Ela precisa existir AQUI e não só no cartão:
+       durante a gravação a aba do produto está atrás da tela compartilhada, e
+       um campo que a pessoa não vê é um campo que não existe. */
+    input.nota{width:100%;background:#1a1d24;color:#e9ebf1;border:1px solid #282c36;
+               border-radius:7px;padding:7px 9px;font:13px system-ui,sans-serif}
+    input.nota:disabled{opacity:.45}
+    input.nota::placeholder{color:#6b7280}
   `;
 
   async function abrirControle(){
     if (!('documentPictureInPicture' in window)) return;
     try {
-      pipWin = await documentPictureInPicture.requestWindow({ width: 258, height: 236 });
+      pipWin = await documentPictureInPicture.requestWindow({ width: 258, height: 282 });
     } catch (e) { pipWin = null; return; }
 
     const d = pipWin.document;
@@ -4757,6 +4932,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       '<div class="txt" id="txt"></div>' +
       '<div class="vus"><div class="vb"><i id="vm"></i></div><div class="vb"><i id="vs"></i></div></div>' +
       '<button id="marcar" class="sec" disabled></button>' +
+      '<input id="pipNota" class="nota" maxlength="180" autocomplete="off" disabled>' +
       '<button id="pausa" class="sec" disabled></button>' +
       '<button id="calar" class="sec hide"></button>' +
       '<button id="stop" disabled></button>' +
@@ -4769,6 +4945,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     pipVs      = d.getElementById('vs');
     pipCalar   = d.getElementById('calar');
     pipMarcar  = d.getElementById('marcar');
+    pipNota    = d.getElementById('pipNota');
     pipPausa   = d.getElementById('pausa');
     pipFrames.textContent = t('pipStop');
     pipFrames.onclick = () => { if (pararLive) pararLive(); };
@@ -4777,6 +4954,14 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
        chamam a mesma função do cartão — nenhuma lógica duplicada. */
     pipMarcar.onclick = () => { if (marcarAgora) marcarAgora(); };
     pipPausa.onclick  = () => { if (alternarPausa) alternarPausa(); };
+    /* Os dois campos escrevem no MESMO quadro e se espelham. Um estado por
+       janela seria o jeito de a pessoa digitar na janelinha e encontrar o
+       cartão em branco na revisão. */
+    pipNota.oninput = () => {
+      if (!notaAlvo) return;
+      notaAlvo.nota = (pipNota.value || '').slice(0, 180);
+      if ($('recNota')) $('recNota').value = notaAlvo.nota;
+    };
     /* O botão da janelinha não duplica lógica: chama o mesmo `alternarMic` da
        aba, e o rótulo dos dois é repintado pela mesma função. */
     pipCalar.onclick = () => { if (alternarMic) alternarMic(); };
@@ -5274,6 +5459,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       $('rec').disabled = false;
       abrindoCaptura = false;
       $('recPause').classList.add('hide'); $('recMark').classList.add('hide');
+      esconderNota();
       pausado = false; alternarPausa = null; marcarAgora = null;
     };
 
@@ -5696,6 +5882,11 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
         /* E na janelinha, que é para onde a pessoa está olhando. */
         pipAviso = t('pipMarcado', frames.filter(f => f.manual).length);
         pipAvisoAte = performance.now() + 2200;
+        /* A caixa passa a comentar ESTE quadro. Zerar o texto é parte da
+           regra: herdar o comentário da marcação anterior encheria o documento
+           de repetição, e repetição num documento de evidência é pior do que
+           silêncio — ela parece confirmação. */
+        apontarNota(frames[frames.length - 1]);
         controle('gravando', { seg: agora(), frames: frames.length });
       }
     };
@@ -5714,6 +5905,9 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     $('recMark').onclick  = marcarAgora;
     $('recPause').classList.remove('hide'); $('recPause').classList.add('ghost');
     $('recMark').classList.remove('hide');
+    /* Aparece já na largada, desligada e dizendo o que espera: uma caixa que só
+       surge depois da primeira marcação seria uma caixa que ninguém descobre. */
+    apontarNota(null);
     $('recPause').textContent = t('recPauseBtn');
     $('recMark').disabled = false;
 
@@ -5790,6 +5984,9 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
         guardarMotivos();
       }
       emCauda = true; pularCauda = false;
+      /* Repintar os passos: a cauda é um estado, e um estado que ninguém pinta
+         é um estado que só existe na cabeça de quem escreveu o código. */
+      passos();
       caudaT0 = performance.now();
       /* A fila já é conhecida AQUI, e não só quando a bomba der a primeira
          volta: contar antes é o que permite a barra existir desde o começo. */
@@ -5821,6 +6018,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       await bombearAsr();
       while (asrRodando) await new Promise(r => setTimeout(r, 150));
       emCauda = false; pularCauda = false;
+      passos();
       if (caudaTic) { clearInterval(caudaTic); caudaTic = null; }
       $('recStop').textContent = t('recStopBtn');
 
@@ -5838,6 +6036,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       // os controles da gravação somem junto com ela, e a pausa não pode
       // sobreviver para envenenar a próxima captura
       $('recPause').classList.add('hide'); $('recMark').classList.add('hide');
+      esconderNota();
       pausado = false; alternarPausa = null; marcarAgora = null;
       trabalhando(false);
       abrindoCaptura = false;
@@ -7001,6 +7200,15 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
 
   /* ---- os padrões do cliente, vindos da conta ---- */
   let perfilDoCliente = null;
+  /* Quem a PESSOA mexeu. O padrão da conta chega quando a sessão responde, que
+     pode ser depois de alguém já ter trocado o papel — e sobrescrever a escolha
+     de quem está olhando para o caso é o jeito mais rápido de a configuração do
+     time virar estorvo. */
+  const formatoManual = {};
+  for (const id of ['papel', 'layout', 'evHash', 'evNum']) {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('change', e => { if (e.isTrusted) formatoManual[id] = true; });
+  }
 
   function aplicarPerfil(pf){
     perfilDoCliente = pf || null;
@@ -7023,6 +7231,47 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     if (cf.ambiente && $('evAmb')) {
       const tem = [...$('evAmb').options].some(o => o.value === cf.ambiente);
       if (tem && !$('evAmb').value) $('evAmb').value = cf.ambiente;
+    }
+
+    /* ---- o FORMATO, vindo da conta ----
+     *
+     * Os campos acima dizem com que cara o documento sai. Estes dizem com que
+     * FORMA: papel, telas por página, se cada imagem leva impressão digital, se
+     * o caso é numerado sozinho. É a forma que uma empresa padroniza — metade
+     * das evidências em A4 e metade em Carta é a diferença que ninguém vê em
+     * quarenta arquivos e alguém pergunta na reunião.
+     *
+     * É PADRÃO, e não trava. `formatoManual` guarda quem já mexeu no controle:
+     * o padrão do cliente vence o nosso, e perde para a mão de quem está com o
+     * caso aberto. Empurrar sem deixar trocar viraria camisa de força — e quem
+     * sabe que ESTE caso precisa de outro layout é quem está olhando para ele.
+     */
+    const porFora = (id, valor) => {
+      const el = $(id);
+      if (!el || !valor || formatoManual[id]) return false;
+      if (![...el.options].some(o => o.value === valor)) return false;
+      el.value = valor;
+      el.dispatchEvent(new Event('change'));
+      return true;
+    };
+    /* `some` depois do array, e não `||` entre as duas: com curto-circuito o
+       layout nem seria tentado quando o papel já tivesse pegado. */
+    const formatoVeio = [porFora('papel', cf.papel), porFora('layout', cf.layout)].some(Boolean);
+    /* Dizer DE ONDE veio. Um seletor que muda sozinho, sem explicação, é o
+       jeito mais rápido de a pessoa achar que a ferramenta está mexendo nas
+       coisas pelas costas dela. E a segunda coisa que ela precisa saber é que
+       pode trocar — senão o padrão do time vira ordem em vez de padrão. */
+    if ($('fmtConta')) {
+      const quem = cf.empresa || pf.cliente;
+      $('fmtConta').textContent = formatoVeio ? t('fmtConta', quem) : '';
+      $('fmtConta').classList.toggle('hide', !formatoVeio);
+    }
+    for (const [id, quer] of [['evHash', cf.hash], ['evNum', cf.numerar]]) {
+      const el = $(id);
+      if (el && typeof quer === 'boolean' && !formatoManual[id]) {
+        el.checked = quer;
+        el.dispatchEvent(new Event('change'));
+      }
     }
     /* O logotipo vem por endereço, e é baixado pelo NAVEGADOR de quem usa —
        não passa por nós. Se o endereço não abrir, o documento sai sem ele em
