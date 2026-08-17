@@ -367,7 +367,7 @@
            background:color-mix(in srgb,var(--accent) 4%,transparent)}
   #promptOut{background:var(--bg);border:1px solid var(--line);border-radius:7px;padding:14px;
            font:13px/1.6 ui-monospace,Menlo,Consolas,monospace;white-space:pre-wrap;margin:14px 0 0;
-           user-select:all;color:var(--ink);max-height:340px;overflow:auto}
+           user-select:all;color:var(--ink);max-height:min(62vh,760px);overflow:auto}
   #diagOut{background:var(--bg);border:1px solid var(--line);border-radius:7px;padding:11px;
            font:12px/1.6 ui-monospace,Menlo,Consolas,monospace;white-space:pre-wrap;margin:12px 0 0;
            user-select:all;color:var(--ink)}
@@ -952,10 +952,14 @@
     <details class="ev" id="trBox" open>
       <summary><span data-i18n="trBoxH"></span> <span class="sub" id="trBoxSub"></span></summary>
     <div id="trManual">
-    <div class="row" style="margin-bottom:9px">
-      <button class="ghost sm" id="pickVtt" data-i18n="openSub"></button>
-      <span class="status" data-i18n="orDrag"></span>
-    </div>
+    <!-- Abrir uma legenda pronta saiu DAQUI, de cima.
+         Era a primeira coisa que se via numa caixa cujo trabalho é mostrar o
+         RESULTADO da transcrição — um convite a procurar arquivo antes de saber
+         que a ferramenta transcreve sozinha. Continua existindo, e continua
+         alcançável pelo teclado, mas agora embaixo, junto das outras operações
+         de arquivo, e dizendo de onde essa legenda costuma vir: de uma reunião
+         que já foi transcrita pelo Teams, pelo Meet ou pelo Zoom. Esse é o dono
+         real deste botão — não quem manda vídeo e áudio junto. -->
     <input type="file" id="vttFile" accept=".vtt,.srt,.txt,text/plain">
     <textarea id="tr" placeholder="Cole aqui a transcrição do Google Drive, ou arraste um arquivo .srt / .vtt.
 
@@ -966,6 +970,10 @@ Reconheço automaticamente:
 
 Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trecho."></textarea>
     <div class="status" id="trInfo" style="margin-top:8px"></div>
+    <div class="row" style="margin-top:8px;align-items:baseline;gap:8px">
+      <button class="ghost sm" id="pickVtt" data-i18n="openSub"></button>
+      <span class="status" data-i18n="subDeOnde"></span>
+    </div>
     <!-- Vocabulário do domínio. Fica logo abaixo da transcrição porque é ali que
          o erro aparece, e não num painel de configuração que ninguém abre. -->
     <div class="row" style="margin-top:10px;align-items:flex-start;gap:8px">
@@ -1343,7 +1351,22 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     <input type="text" id="goalFree" class="hide" placeholder="O que você quer que a IA faça com este vídeo?"
            style="width:100%;margin-top:10px;padding:9px 11px;border:1px solid var(--line);border-radius:7px;
                   background:var(--bg);color:var(--ink);font:inherit;font-size:14px">
-    <pre id="promptOut"></pre>
+    <!-- O prompt recolhido.
+
+         Ele saía aberto, com trinta linhas de texto para um modelo ler — e
+         para uma pessoa NÃO ler. Quem chega aqui quer o texto no ChatGPT, não
+         na tela: o gesto é apertar copiar e sair. Trinta linhas empurravam a
+         explicação de como usar (a nota abaixo) para fora da vista, e essa a
+         pessoa precisa ler.
+
+         Recolhido, com o tamanho no rótulo — porque copiar algo sem saber se
+         são trezentos ou seis mil caracteres é copiar às cegas. Aberto, ele é
+         LONGO: 62% da altura da janela, não os 340 px de antes, que davam três
+         parágrafos e uma barra de rolagem. -->
+    <details class="ev" id="promptBox">
+      <summary><span data-i18n="promptVer"></span> <span class="sub" id="promptTam"></span></summary>
+      <pre id="promptOut"></pre>
+    </details>
     <p class="note" data-i18n="s5note"></p>
     </div></div><!-- /dobra -->
   </div>
@@ -1675,7 +1698,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       mBase:'Rápido — menos preciso', mSmall:'Recomendado — equilibrado',
       mTurbo:'Máxima precisão — download grande',
       autoDetect:'Detectar sozinho', diagBtn:'Diagnóstico',
-      openSub:'Abrir arquivo .vtt / .srt', orDrag:'ou arraste o arquivo sobre o campo abaixo, ou cole o texto',
+      openSub:'Abrir uma legenda pronta', orDrag:'ou arraste o arquivo sobre o campo acima, ou cole o texto',
+      subDeOnde:'.vtt ou .srt de uma reunião já transcrita pelo Teams, Meet ou Zoom — assim não precisa baixar o modelo de voz. Também dá para arrastar sobre a caixa, ou simplesmente colar.',
       trPh:'Cole aqui a transcrição, ou arraste um arquivo .srt / .vtt.\n\nReconheço automaticamente:\n  00:00:12,400 --> 00:00:15,900   (SRT / VTT)\n  0:12  texto falado             (colado de um painel de legendas)\n  texto solto sem marcação de tempo\n\nCom marcação de tempo, cada frame sai no PDF junto do que é dito naquele trecho.',
       trCues:'{0} trechos com marcação de tempo', trCues2:' — cada frame sai junto da fala correspondente.',
       trPlain:'Texto sem marcação de tempo — vai entrar no PDF como um bloco no final.',
@@ -1966,7 +1990,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       gSum:'Resumir o conteúdo', gSteps:'Transformar em passo a passo', gMinutes:'Produzir uma ata de reunião',
       gReview:'Apontar erros e inconsistências', gFree:'Escrever meu próprio pedido',
       freePh:'O que você quer que a IA faça com este vídeo?',
-      copyBtn:'Copiar prompt', copied:'copiado', selected:'selecionado — use Ctrl+C',
+      copyBtn:'Copiar o prompt para a IA', copied:'copiado', selected:'selecionado — use Ctrl+C',
+      promptVer:'ver o prompt', promptTam:'{0} caracteres', promptTamVazio:'ainda vazio',
       goals:{
         resumo:'Resuma o conteúdo em ordem cronológica, destacando os pontos principais e o que muda na tela ao longo do vídeo.',
         passos:'Transforme o conteúdo em um passo a passo numerado. Para cada passo, informe o instante correspondente e descreva o que aparece na tela naquele momento.',
@@ -2203,7 +2228,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       mBase:'Fast — less accurate', mSmall:'Recommended — balanced',
       mTurbo:'Highest accuracy — large download',
       autoDetect:'Detect automatically', diagBtn:'Diagnostics',
-      openSub:'Open .vtt / .srt file', orDrag:'or drag the file onto the box below, or paste the text',
+      openSub:'Open an existing transcript', orDrag:'or drag the file onto the box above, or paste the text',
+      subDeOnde:'.vtt or .srt from a meeting already transcribed by Teams, Meet or Zoom — that way there is no speech model to download. You can also drag it onto the box, or just paste.',
       trPh:'Paste the transcript here, or drag in a .srt / .vtt file.\n\nRecognised automatically:\n  00:00:12,400 --> 00:00:15,900   (SRT / VTT)\n  0:12  spoken text              (pasted from a caption panel)\n  plain text with no timestamps\n\nWith timestamps, each frame appears in the PDF next to what is said at that point.',
       trCues:'{0} timestamped segments', trCues2:' — each frame will appear next to its matching speech.',
       trPlain:'Text without timestamps — it will go into the PDF as a block at the end.',
@@ -2488,7 +2514,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       gSum:'Summarise the content', gSteps:'Turn it into step-by-step instructions', gMinutes:'Write meeting minutes',
       gReview:'Point out errors and inconsistencies', gFree:'Write my own request',
       freePh:'What do you want the AI to do with this video?',
-      copyBtn:'Copy prompt', copied:'copied', selected:'selected — press Ctrl+C',
+      copyBtn:'Copy the prompt for the AI', copied:'copied', selected:'selected — press Ctrl+C',
+      promptVer:'see the prompt', promptTam:'{0} characters', promptTamVazio:'still empty',
       goals:{
         resumo:'Summarise the content in chronological order, highlighting the main points and what changes on screen over the course of the video.',
         passos:'Turn the content into numbered step-by-step instructions. For each step, give the corresponding timestamp and describe what is on screen at that moment.',
@@ -2725,7 +2752,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       mBase:'Rápido — menos preciso', mSmall:'Recomendado — equilibrado',
       mTurbo:'Máxima precisión — descarga grande',
       autoDetect:'Detectar automáticamente', diagBtn:'Diagnóstico',
-      openSub:'Abrir archivo .vtt / .srt', orDrag:'o arrastra el archivo sobre el campo de abajo, o pega el texto',
+      openSub:'Abrir una transcripción ya hecha', orDrag:'o arrastra el archivo sobre el campo de arriba, o pega el texto',
+      subDeOnde:'.vtt o .srt de una reunión ya transcrita por Teams, Meet o Zoom — así no hay que descargar el modelo de voz. También puedes arrastrarlo sobre la caja, o simplemente pegar.',
       trPh:'Pega aquí la transcripción, o arrastra un archivo .srt / .vtt.\n\nReconozco automáticamente:\n  00:00:12,400 --> 00:00:15,900   (SRT / VTT)\n  0:12  texto hablado            (copiado de un panel de subtítulos)\n  texto suelto sin marcas de tiempo\n\nCon marcas de tiempo, cada fotograma aparece en el PDF junto a lo que se dice en ese tramo.',
       trCues:'{0} tramos con marca de tiempo', trCues2:' — cada fotograma saldrá junto al habla correspondiente.',
       trPlain:'Texto sin marcas de tiempo — irá al PDF como un bloque al final.',
@@ -3010,7 +3038,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       gSum:'Resumir el contenido', gSteps:'Convertir en paso a paso', gMinutes:'Redactar un acta de reunión',
       gReview:'Señalar errores e inconsistencias', gFree:'Escribir mi propia petición',
       freePh:'¿Qué quieres que la IA haga con este vídeo?',
-      copyBtn:'Copiar prompt', copied:'copiado', selected:'seleccionado — pulsa Ctrl+C',
+      copyBtn:'Copiar el prompt para la IA', copied:'copiado', selected:'seleccionado — pulsa Ctrl+C',
+      promptVer:'ver el prompt', promptTam:'{0} caracteres', promptTamVazio:'todavía vacío',
       goals:{
         resumo:'Resume el contenido en orden cronológico, destacando los puntos principales y lo que cambia en pantalla a lo largo del vídeo.',
         passos:'Convierte el contenido en instrucciones numeradas paso a paso. Para cada paso, indica el instante correspondiente y describe lo que aparece en pantalla en ese momento.',
@@ -3180,7 +3209,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
        traduzida, e deixá-la em português numa página em inglês é o tipo de
        resto que faz a pessoa duvidar do resto da tradução. */
     if (typeof pintarClipe === 'function') { pintarClipe(); pintarCanais(); }
-    if (!frames.length) $('promptOut').textContent = t('promptPh');
+    if (!frames.length) { $('promptOut').textContent = t('promptPh'); pintarTamanhoDoPrompt(); }
     // render() e não só buildPrompt(): "Passo 3" e o texto de apoio da anotação
     // ficariam no idioma anterior dentro de cada miniatura
     else render();
@@ -10602,6 +10631,16 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     ];
     $('promptOut').textContent = linhas.join('\n');
     $('copyPrompt').disabled = false;
+    pintarTamanhoDoPrompt();
+  }
+
+  /* O tamanho no rótulo do bloco recolhido. Copiar um texto sem saber se são
+     trezentos ou seis mil caracteres é copiar às cegas — e o limite de contexto
+     de um modelo é uma das poucas coisas que a pessoa não descobre até colar. */
+  function pintarTamanhoDoPrompt(){
+    const el = $('promptTam'); if (!el) return;
+    const n = ($('promptOut').textContent || '').length;
+    el.textContent = n ? t('promptTam', n.toLocaleString(LANG)) : t('promptTamVazio');
   }
 
   $('copyPrompt').disabled = true;
@@ -10633,6 +10672,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       await navigator.clipboard.writeText(txt);
       $('copyMsg').innerHTML = `<span class="ok">${t('copied')}</span>`;
     } catch (e) {
+      /* Abrir antes de selecionar. Num <details> fechado a seleção existe e
+         não se vê — a mensagem diria "selecionado, use Ctrl+C" apontando para
+         o nada, que é pior do que a falha original. */
+      if ($('promptBox')) $('promptBox').open = true;
       const r = document.createRange();
       r.selectNodeContents($('promptOut'));
       const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r);
@@ -11089,6 +11132,15 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     const titulo = ev.caso || t('pTitle');
     const cab = ev.linhasCompletas.map(([k, v]) =>
       `<tr><th>${esc(k)}</th><td>${esc(v)}</td></tr>`).join('');
+    /* A banda da marca é uma só, e o que muda é ONDE ela entra: sem marca de
+       cliente ela é o cabeçalho do documento, no alto, antes do título; com
+       marca de cliente o alto é do cliente, e a nossa desce para depois da
+       identificação. O alto do documento diz de quem ele é — e no caso grátis
+       ele estava vazio, com a plataforma aparecendo só no rodapé. */
+    const temMarcaDoCliente = temTime() && !!(marcaCliente.img || marcaCliente.nome);
+    const bandaDaMarca = `<div class="abre">${marcaSvg(46)}` +
+      `<div><p class="nome"><b>Walk</b>stamp</p>` +
+      `<p class="dom"><a href="https://walkstamp.com">walkstamp.com</a> &middot; ${esc(t('ftPromo'))}</p></div></div>`;
     const blocos = linhas.map(l => `
   ${l.capAbre ? `<h2 class="cap">${esc(l.capitulo)}${l.tarefa ? ` <small>· ${esc(t('capTempo', l.tarefa))}</small>` : ''}</h2>` : ''}
   <section class="passo">
@@ -11143,16 +11195,15 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
  .pe .frase{margin:0;color:#777;font-size:12.5px;line-height:1.5}
  @media print{ body{max-width:none} .passo{break-inside:avoid} }
 </style></head><body>
-${temTime() && (marcaCliente.img || marcaCliente.nome) ? `<div class="cliente">` +
+${temMarcaDoCliente ? `<div class="cliente">` +
   (marcaCliente.img ? `<img src="${marcaCliente.img.url}" alt="">` : '') +
   (marcaCliente.nome ? `<b>${esc(marcaCliente.nome)}</b>` : '') + `</div>` : ''}
+${temMarcaDoCliente ? '' : bandaDaMarca}
 <h1>${esc(titulo)}</h1>
 <p class="arq">${esc(fileName || t('prNoName'))}</p>
 ${cab ? `<table class="id">${cab}</table>` : ''}
 <p class="arq">${esc(t('pNote'))}${ev.horaVisivel ? ' ' + esc(t('pNoteRel')) : ''}</p>
-<div class="abre">${marcaSvg(46)}
-<div><p class="nome"><b>Walk</b>stamp</p>
-<p class="dom"><a href="https://walkstamp.com">walkstamp.com</a> &middot; ${esc(t('ftPromo'))}</p></div></div>
+${temMarcaDoCliente ? bandaDaMarca : ''}
 ${blocos}
 <footer class="pe">
 ${marcaSvg(46)}
@@ -12138,6 +12189,11 @@ ${relsSlide[i]}</Relationships>`) });
     /* A marca do cliente vem ANTES do título, no alto da primeira página — é o
        lugar onde um documento corporativo põe de quem ele é. Logotipo à
        esquerda, nome ao lado; qualquer um dos dois sozinho também funciona. */
+    /* O alto do documento diz DE QUEM ele é, sempre. Quem tem marca de cliente
+       configurada põe a dela; quem não tem, põe a nossa — no mesmo lugar, com a
+       mesma geometria. Antes o alto ficava vazio no caso grátis e a plataforma
+       só aparecia no rodapé de cada página e num bloco lá embaixo da capa, que
+       é onde ninguém olha: quem recebe uma evidência lê o topo. */
     let topo = 32;
     if (temTime() && (marcaCliente.img || marcaCliente.nome)) {
       let x = M;
@@ -12151,6 +12207,19 @@ ${relsSlide[i]}</Relationships>`) });
         doc.text(marcaCliente.nome, x, 21.5);
       }
       doc.setDrawColor(225).line(M, 28.5, PW - M, 28.5);
+      topo = 41;
+    } else {
+      marca(M, 14, 11);
+      doc.setFont('helvetica','bold').setFontSize(13).setTextColor(58, 63, 158);
+      doc.text('Walk', M + 14.5, 21.5);
+      const wa = doc.getTextWidth('Walk');
+      doc.setTextColor(60);
+      doc.text('stamp', M + 14.5 + wa, 21.5);
+      const wb = doc.getTextWidth('stamp');
+      doc.setFont('helvetica','normal').setFontSize(8.8).setTextColor(150);
+      doc.text(SITE_DOM, M + 14.5 + wa + wb + 4, 21.5);
+      doc.setDrawColor(225).line(M, 28.5, PW - M, 28.5);
+      doc.setTextColor(30);
       topo = 41;
     }
 
