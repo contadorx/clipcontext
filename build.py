@@ -793,8 +793,8 @@ def figura_documento(cenario: str) -> str:
 
     # a banda da marca, no alto — o que mudou no PDF nesta rodada
     add(f'<rect x="24" y="22" width="16" height="16" rx="4" fill="{A}"/>')
-    add(f'<rect x="27" y="25" width="10" height="6" rx="1.4" fill=FIG_PAPEL/>')
-    add(f'<rect x="27" y="33" width="10" height="1.6" rx=".8" fill=FIG_PAPEL/>')
+    add(f'<rect x="27" y="25" width="10" height="6" rx="1.4" fill="{FIG_PAPEL}"/>')
+    add(f'<rect x="27" y="33" width="10" height="1.6" rx=".8" fill="{FIG_PAPEL}"/>')
     add(f'<rect x="47" y="24.5" width="56" height="5.5" rx="2.75" fill="{A}"/>')
     add(f'<rect x="47" y="33" width="34" height="3.5" rx="1.75" fill="{TXT}"/>')
     add(f'<line x1="24" y1="48" x2="416" y2="48" stroke="{LIN}"/>')
@@ -821,15 +821,15 @@ def figura_documento(cenario: str) -> str:
     for n in range(passos):
         add(f'<rect x="24" y="{y}" width="150" height="86" rx="5" fill="{ESC}" stroke="{LIN}"/>')
         # dentro da tela, uma janelinha qualquer — só para não ser um bloco morto
-        add(f'<rect x="34" y="{y + 10}" width="130" height="12" rx="2.5" fill=FIG_PAPEL/>')
-        add(f'<rect x="34" y="{y + 28}" width="58" height="48" rx="3" fill=FIG_PAPEL/>')
-        add(f'<rect x="98" y="{y + 28}" width="66" height="20" rx="3" fill=FIG_PAPEL/>')
+        add(f'<rect x="34" y="{y + 10}" width="130" height="12" rx="2.5" fill="{FIG_PAPEL}"/>')
+        add(f'<rect x="34" y="{y + 28}" width="58" height="48" rx="3" fill="{FIG_PAPEL}"/>')
+        add(f'<rect x="98" y="{y + 28}" width="66" height="20" rx="3" fill="{FIG_PAPEL}"/>')
         add(f'<rect x="98" y="{y + 54}" width="66" height="22" rx="3" fill="{A}" opacity=".16"/>')
 
         # o número do passo, no canto
         add(f'<circle cx="34" cy="{y + 10}" r="9" fill="{A}"/>')
         add(f'<text x="34" y="{y + 13.6}" font-family="system-ui,sans-serif" font-size="10" '
-            f'font-weight="700" fill=FIG_PAPEL text-anchor="middle">{n + 1}</text>')
+            f'font-weight="700" fill="{FIG_PAPEL}" text-anchor="middle">{n + 1}</text>')
 
         # a coluna da direita
         yy = y + 4
@@ -865,7 +865,7 @@ def figura_documento(cenario: str) -> str:
     # leva nenhuma, então uma altura só cortaria uma e sobraria na outra.
     alt = y + 28
     folha = (f'<rect x="1" y="1" width="438" height="{alt - 2}" rx="10" '
-             f'fill=FIG_PAPEL stroke="{FIG_LIN}"/>')
+             f'fill="{FIG_PAPEL}" stroke="{FIG_LIN}"/>')
     # `__ALT__` e `__LEG__`, e não `{{...}}`: a troca de tokens é uma passada só
     # por chave, então um `{{figAlt}}` que só aparece DEPOIS de `{{figura}}` ser
     # trocada nunca seria alcançado. Quem monta a legenda é quem sabe o idioma.
@@ -894,7 +894,7 @@ def figura_fluxo() -> str:
             f'fill="none" stroke-linecap="round" stroke-linejoin="round"/>')
 
     # 1. a tela sendo gravada — o ponto vermelho é o que diz "isto está correndo"
-    add(f'<rect x="6" y="18" width="132" height="88" rx="8" fill=FIG_PAPEL stroke="{LIN}"/>')
+    add(f'<rect x="6" y="18" width="132" height="88" rx="8" fill="{FIG_PAPEL}" stroke="{LIN}"/>')
     add(f'<rect x="6" y="18" width="132" height="16" rx="8" fill="{ESC}"/>')
     add(f'<rect x="6" y="26" width="132" height="8" fill="{ESC}"/>')
     add(f'<circle cx="18" cy="26" r="4" fill="{FIG_VERM}"/>')
@@ -927,7 +927,7 @@ def figura_fluxo() -> str:
     seta(322)
 
     # 3. a página que sai
-    add(f'<rect x="362" y="14" width="106" height="96" rx="7" fill=FIG_PAPEL stroke="{LIN}"/>')
+    add(f'<rect x="362" y="14" width="106" height="96" rx="7" fill="{FIG_PAPEL}" stroke="{LIN}"/>')
     add(f'<rect x="374" y="26" width="9" height="9" rx="2.5" fill="{A}"/>')
     add(f'<rect x="388" y="28" width="30" height="4" rx="2" fill="{A}"/>')
     add(f'<line x1="374" y1="42" x2="456" y2="42" stroke="{LIN}"/>')
@@ -979,9 +979,37 @@ def _quebrar(desenho, texto, fonte, largura):
 
 
 def gerar_og(root: pathlib.Path, textos_por_idioma: dict) -> None:
-    from PIL import Image, ImageDraw, ImageFont
+    """As imagens de compartilhamento, uma por idioma.
 
+    Elas são PNG, e PNG não sai de f-string: precisa do Pillow. O Pillow está
+    na máquina de quem escreve e NÃO está na máquina que publica — o Vercel
+    monta com `python3 build.py && next build` e o que ele tem é o Python
+    pelado. A primeira publicação depois de isto existir morreu com
+    `ModuleNotFoundError: No module named 'PIL'`, e o site inteiro deixou de
+    subir por causa de cinco imagens que já estavam no repositório.
+
+    Então: os PNG são artefato COMMITADO, e esta função só os REFAZ. Sem
+    Pillow ela confere se os cinco continuam lá e segue em frente.
+
+    O que ela não faz é deixar passar em silêncio o caso que importa —
+    Pillow ausente E imagem faltando —, porque aí a etiqueta `og:image`
+    apontaria para um 404 e o link compartilhado abriria sem cartão, que é
+    exatamente o defeito que estas imagens existem para não ter.
+    """
     destino = root / "public" / "og"
+    faltam = [L for L in textos_por_idioma if not (destino / f"og.{L}.png").exists()]
+    try:
+        from PIL import Image, ImageDraw, ImageFont
+    except ModuleNotFoundError:
+        if faltam:
+            print("ERRO: sem Pillow e sem as imagens de compartilhamento de "
+                  + ", ".join(faltam)
+                  + ". Instale com `pip install pillow` e monte de novo, ou traga "
+                    "os PNG para public/og/.", file=sys.stderr)
+            raise
+        print("public/og/*.png  (mantidos: este ambiente não tem Pillow)")
+        return
+
     destino.mkdir(parents=True, exist_ok=True)
     A = (58, 63, 158)
     INK = (31, 36, 48)
