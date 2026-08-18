@@ -30,6 +30,9 @@ import { marca } from '@/lib/marca';
 
 const rotas: {
   idiomas: Lang[];
+  /* Quais idiomas têm vídeo do tour. Escrito pelo `build.py`, que olha o disco —
+     ver o comentário no ponto de uso, mais abaixo. */
+  demoLangs?: string[];
   slugs: Record<string, Record<Lang, string>>;
   metas: Record<string, Record<Lang, { titulo: string; desc: string }>>;
   scripts: { detectarIdioma: string; lembrarIdioma: string };
@@ -231,10 +234,17 @@ export function paginaHtml(pagina: string, lang: Lang): string {
     t.redirect = '';
     t.analytics = '';
     t.title = t.title || '';
-    /* O tour só foi gravado em pt, en e es. Onde ele não existe, cai no
-       inglês: um `<video>` apontando para um 404 é uma caixa preta vazia no
-       alto da home — pior do que um vídeo em outro idioma. */
-    t.demoLang = ['pt', 'en', 'es'].includes(lang) ? lang : 'en';
+    /* Onde o tour não existe, cai no inglês: um `<video>` apontando para um
+       404 é uma caixa preta vazia no alto da home — pior do que um vídeo em
+       outro idioma.
+
+       A lista de quem TEM tour vem do `rotas.json`, montado pelo `build.py`
+       olhando o disco. Escrita à mão aqui, ela ficou meses dizendo
+       `['pt','en','es']` depois de o vídeo alemão existir — e ninguém viu,
+       porque um vídeo em inglês numa página alemã não quebra nada, só
+       decepciona. */
+    const comTour: string[] = rotas.demoLangs ?? ['en'];
+    t.demoLang = comTour.includes(lang) ? lang : 'en';
     t.figuraFluxo = ((FIGURAS as Record<string, string>).fluxo ?? '')
       .replace('__ALT__', String(t.fluxoAlt ?? ''))
       .replace('__LEG__', String(t.fluxoLeg ?? ''));

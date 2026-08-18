@@ -1485,8 +1485,36 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       <div class="row" style="gap:8px;flex-wrap:wrap;align-items:center">
         <button class="ghost sm" id="compCopiar"></button>
         <a class="ghost sm btnLike" id="compLinkedin" target="_blank" rel="noopener"></a>
-        <a class="ghost sm btnLike" id="compEmail"></a>
+        <button class="ghost sm" id="compEmailAbrir"></button>
         <span class="status" id="compMsg"></span>
+      </div>
+      <!-- ---- mandar por e-mail ----
+
+           Era um `mailto:`, e o `mailto:` depende de haver um programa de
+           e-mail configurado na máquina. Em computador corporativo com webmail
+           o clique abria o Outlook que ninguém usa, ou não abria nada — um
+           botão que não faz nada em metade das máquinas é pior que botão
+           nenhum.
+
+           Agora quem manda somos nós, e por isso este é o ÚNICO ponto do
+           produto em que alguma coisa sai daqui: o endereço de quem vai
+           receber. Nem vídeo, nem transcrição, nem documento — e a linha
+           embaixo do formulário diz isso, porque quem escreve um e-mail dentro
+           de uma ferramenta que promete não enviar nada merece a frase na
+           mesma tela, e não numa página de privacidade que ninguém abre.
+
+           Dois campos e ponto. Não há caixa de mensagem: um endereço que manda
+           texto livre com o nosso remetente é um envelope aberto — o conteúdo
+           é de quem chamou e a reputação queimada é a nossa. -->
+      <div class="hide" id="compEmailCx" style="margin:10px 0 0">
+        <div class="row" style="gap:8px;flex-wrap:wrap;align-items:center">
+          <input type="email" id="compPara" autocomplete="off" maxlength="254"
+                 style="flex:1;min-width:200px;max-width:280px">
+          <input type="text" id="compQuem" autocomplete="off" maxlength="40"
+                 style="width:auto;max-width:170px">
+          <button class="sm" id="compEnviar"></button>
+        </div>
+        <p class="note" id="compEmailNota" style="margin:8px 0 0"></p>
       </div>
       <p class="note" id="compNota" style="margin:8px 0 0"></p>
     </div>
@@ -1785,7 +1813,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     pt: {
       compTit:'Deu certo? Conte para alguém que perde a tarde fazendo isso à mão.',
       compCopiar:'Copiar o endereço', compCopiado:'copiado', compEmail:'Mandar por e-mail',
-      compAssunto:'Isto transforma gravação de tela em documento',
+      compParaPh:'e-mail de quem vai receber', compQuemPh:'seu nome (opcional)', compEnviar:'Mandar o convite', compEnviando:'mandando…', compEnviado:'Convite enviado.', compEmailRuim:'Esse e-mail não parece completo.', compLimite:'Já saíram convites demais daqui na última hora. Tente mais tarde, ou copie o endereço.', compSemRede:'Sem rede aqui — abrindo o seu programa de e-mail.', compSemServidor:'Não consegui mandar daqui — abrindo o seu programa de e-mail.', compEmailNota:'É o único ponto da ferramenta em que alguma coisa sai daqui: o endereço de quem vai receber, para nós mandarmos o convite. Nem vídeo, nem transcrição, nem documento.', compAssunto:'Isto transforma gravação de tela em documento',
       compCorpo:'Gravei a tela e saiu um PDF com um print por passo, a hora e o que foi falado. Roda no navegador, é grátis e não pede cadastro:',
       compNota:'O que vai no link é o endereço da ferramenta. O seu documento não sai deste computador — nem aqui, nem em lugar nenhum.',
       docTitle:'Walkstamp — transforme vídeo em contexto para IA',
@@ -2180,7 +2208,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       revisarBtn:'Revisar quadro a quadro', revNotaLbl:'Anotação deste passo',
       revEditarBtn:'Editar a imagem: tarja, destaque, seta, caneta',
       revAntes:'A tela que está no documento hoje',
-      revPos:'{0} de {1}',
+      revUltimo:'o último', revIgualFim:'Continua assim — finalizar', revTrocarFim:'Mudou — trocar e finalizar', revForaFim:'Não existe mais — descartar e finalizar', revPos:'{0} de {1}',
       revSemNota:'Este passo não tem anotação — só a tela.',
       revIgualBtn:'Continua assim →',
       revTrocarBtn:'Mudou — trocar a imagem',
@@ -2328,7 +2356,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     en: {
       compTit:'Worked out? Tell someone who still loses an afternoon doing this by hand.',
       compCopiar:'Copy the address', compCopiado:'copied', compEmail:'Send by e-mail',
-      compAssunto:'This turns a screen recording into a document',
+      compParaPh:'email of the person receiving it', compQuemPh:'your name (optional)', compEnviar:'Send the invitation', compEnviando:'sending…', compEnviado:'Invitation sent.', compEmailRuim:'That email does not look complete.', compLimite:'Too many invitations have gone out from here in the last hour. Try later, or copy the address.', compSemRede:'No network here — opening your email program.', compSemServidor:'I could not send it from here — opening your email program.', compEmailNota:'This is the only point in the tool where anything leaves: the address of the person receiving it, so we can send the invitation. No video, no transcript, no document.', compAssunto:'This turns a screen recording into a document',
       compCorpo:'I recorded my screen and got a PDF with one screenshot per step, the time and what was said. Runs in the browser, free, no sign-up:',
       compNota:'What the link carries is the address of the tool. Your document does not leave this computer — not here, not anywhere.',
       docTitle:'Walkstamp — turn video into context an AI can read',
@@ -2717,7 +2745,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       revisarBtn:'Review frame by frame', revNotaLbl:'Note for this step',
       revEditarBtn:'Edit the image: redaction, highlight, arrow, pen',
       revAntes:'The screen that is in the document today',
-      revPos:'{0} of {1}',
+      revUltimo:'the last one', revIgualFim:'Still like this — finish', revTrocarFim:'Changed — replace and finish', revForaFim:'Gone — discard and finish', revPos:'{0} of {1}',
       revSemNota:'This step has no note — just the screen.',
       revIgualBtn:'Still like this →',
       revTrocarBtn:'It changed — replace the image',
@@ -2865,7 +2893,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     es: {
       compTit:'¿Funcionó? Cuéntaselo a alguien que aún pierde la tarde haciendo esto a mano.',
       compCopiar:'Copiar la dirección', compCopiado:'copiado', compEmail:'Enviar por correo',
-      compAssunto:'Esto convierte una grabación de pantalla en un documento',
+      compParaPh:'correo de quien lo va a recibir', compQuemPh:'tu nombre (opcional)', compEnviar:'Mandar la invitación', compEnviando:'enviando…', compEnviado:'Invitación enviada.', compEmailRuim:'Ese correo no parece completo.', compLimite:'Ya salieron demasiadas invitaciones de aquí en la última hora. Prueba más tarde, o copia la dirección.', compSemRede:'Sin red aquí — abriendo tu programa de correo.', compSemServidor:'No pude enviarlo desde aquí — abriendo tu programa de correo.', compEmailNota:'Es el único punto de la herramienta en que algo sale de aquí: la dirección de quien lo va a recibir, para que mandemos la invitación. Ni vídeo, ni transcripción, ni documento.', compAssunto:'Esto convierte una grabación de pantalla en un documento',
       compCorpo:'Grabé la pantalla y salió un PDF con una captura por paso, la hora y lo que se dijo. Funciona en el navegador, es gratis y no pide registro:',
       compNota:'Lo que va en el enlace es la dirección de la herramienta. Tu documento no sale de este ordenador — ni aquí, ni en ningún sitio.',
       docTitle:'Walkstamp — convierte tu vídeo en contexto para la IA',
@@ -3254,7 +3282,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       revisarBtn:'Revisar fotograma a fotograma', revNotaLbl:'Anotación de este paso',
       revEditarBtn:'Editar la imagen: zona tachada, resalte, flecha, lápiz',
       revAntes:'La pantalla que está hoy en el documento',
-      revPos:'{0} de {1}',
+      revUltimo:'el último', revIgualFim:'Sigue así — finalizar', revTrocarFim:'Cambió — cambiar y finalizar', revForaFim:'Ya no existe — descartar y finalizar', revPos:'{0} de {1}',
       revSemNota:'Este paso no tiene anotación — solo la pantalla.',
       revIgualBtn:'Sigue así →',
       revTrocarBtn:'Cambió — cambiar la imagen',
@@ -3401,7 +3429,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     de: {
       compTit:'Hat es geklappt? Erzählen Sie es jemandem, der dafür noch einen Nachmittag von Hand verliert.',
       compCopiar:'Adresse kopieren', compCopiado:'kopiert', compEmail:'Per E-Mail senden',
-      compAssunto:'Das macht aus einer Bildschirmaufnahme ein Dokument',
+      compParaPh:'E-Mail der empfangenden Person', compQuemPh:'Ihr Name (optional)', compEnviar:'Einladung senden', compEnviando:'wird gesendet…', compEnviado:'Einladung gesendet.', compEmailRuim:'Diese E-Mail sieht unvollständig aus.', compLimite:'Von hier sind in der letzten Stunde zu viele Einladungen ausgegangen. Versuchen Sie es später, oder kopieren Sie die Adresse.', compSemRede:'Hier ist kein Netz — Ihr E-Mail-Programm wird geöffnet.', compSemServidor:'Konnte von hier nicht senden — Ihr E-Mail-Programm wird geöffnet.', compEmailNota:'Dies ist die einzige Stelle im Werkzeug, an der etwas hinausgeht: die Adresse der empfangenden Person, damit wir die Einladung senden können. Kein Video, keine Transkription, kein Dokument.', compAssunto:'Das macht aus einer Bildschirmaufnahme ein Dokument',
       compCorpo:'Ich habe den Bildschirm aufgenommen und ein PDF bekommen — ein Screenshot pro Schritt, mit Uhrzeit und dem Gesagten. Läuft im Browser, kostenlos, ohne Registrierung:',
       compNota:'Der Link enthält die Adresse des Tools. Ihr Dokument verlässt diesen Rechner nicht — weder hier noch sonst wo.',
       docTitle:'Walkstamp — Video in Kontext für KI verwandeln',
@@ -3796,7 +3824,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       revisarBtn:'Bild für Bild prüfen', revNotaLbl:'Notiz zu diesem Schritt',
       revEditarBtn:'Bild bearbeiten: Schwärzung, Hervorhebung, Pfeil, Stift',
       revAntes:'Der Bildschirm, der heute im Dokument steht',
-      revPos:'{0} von {1}',
+      revUltimo:'das letzte', revIgualFim:'Unverändert — abschließen', revTrocarFim:'Geändert — ersetzen und abschließen', revForaFim:'Gibt es nicht mehr — verwerfen und abschließen', revPos:'{0} von {1}',
       revSemNota:'Dieser Schritt hat keine Notiz — nur den Bildschirm.',
       revIgualBtn:'Bleibt so →',
       revTrocarBtn:'Hat sich geändert — Bild austauschen',
@@ -3943,7 +3971,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     fr: {
       compTit:'Ça a marché ? Parlez-en à quelqu’un qui y perd encore un après-midi à la main.',
       compCopiar:'Copier l’adresse', compCopiado:'copié', compEmail:'Envoyer par e-mail',
-      compAssunto:'Ceci transforme un enregistrement d’écran en document',
+      compParaPh:'e-mail de la personne qui reçoit', compQuemPh:'votre nom (facultatif)', compEnviar:'Envoyer l’invitation', compEnviando:'envoi…', compEnviado:'Invitation envoyée.', compEmailRuim:'Cet e-mail ne semble pas complet.', compLimite:'Trop d’invitations sont parties d’ici dans la dernière heure. Réessayez plus tard, ou copiez l’adresse.', compSemRede:'Pas de réseau ici — ouverture de votre programme de messagerie.', compSemServidor:'Je n’ai pas pu l’envoyer d’ici — ouverture de votre programme de messagerie.', compEmailNota:'C’est le seul point de l’outil où quelque chose sort d’ici : l’adresse de la personne qui reçoit, pour que nous envoyions l’invitation. Ni vidéo, ni transcription, ni document.', compAssunto:'Ceci transforme un enregistrement d’écran en document',
       compCorpo:'J’ai enregistré mon écran et j’ai obtenu un PDF avec une capture par étape, l’heure et ce qui a été dit. Ça tourne dans le navigateur, c’est gratuit et sans inscription :',
       compNota:'Ce que le lien contient, c’est l’adresse de l’outil. Votre document ne quitte pas cet ordinateur — ni ici, ni ailleurs.',
       docTitle:'Walkstamp — transformez une vidéo en contexte pour l’IA',
@@ -4338,7 +4366,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       revisarBtn:'Vérifier image par image', revNotaLbl:'Note de cette étape',
       revEditarBtn:'Modifier l’image : caviardage, surlignage, flèche, stylo',
       revAntes:'L’écran qui figure aujourd’hui dans le document',
-      revPos:'{0} sur {1}',
+      revUltimo:'la dernière', revIgualFim:'Inchangée — terminer', revTrocarFim:'A changé — remplacer et terminer', revForaFim:'N’existe plus — écarter et terminer', revPos:'{0} sur {1}',
       revSemNota:'Cette étape n’a pas de note — seulement l’écran.',
       revIgualBtn:'Toujours pareil →',
       revTrocarBtn:'A changé — remplacer l’image',
@@ -4509,8 +4537,19 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   const GOOGLE_APP_ID    = '184815388097';      // número do projeto (só dígitos)
 
   const LANGS = ['pt','en','es','de','fr'];
-  /* O vídeo de exemplo tem narração e legenda, e só foi gravado em três. */
-  const DEMO_LANGS = ['pt','en','es'];
+  /* O vídeo de exemplo: um sistema de compras sendo percorrido — abrir a lista,
+     criar um pedido, LEVAR UMA RECUSA do sistema, corrigir e sair com um número
+     de protocolo.
+
+     Antes era a gravação de um relatório trimestral, slides passando. Aquilo
+     mostrava a ferramenta funcionando e mostrava o produto errado: quem procura
+     "evidência de teste" ou "instrução de trabalho" não grava slides, grava um
+     sistema. Um exemplo que não parece o trabalho de quem chega faz a pessoa
+     concluir que a ferramenta é para outra coisa.
+
+     Nas cinco línguas, e a tela do sistema também: um documento em alemão de um
+     sistema em português deixa a costura à mostra. */
+  const DEMO_LANGS = ['pt','en','es','de','fr'];
   const demoLang = () => (DEMO_LANGS.includes(LANG) ? LANG : 'en');
   const qLang = new URLSearchParams(location.search).get('lang');
   let LANG = LANGS.includes(qLang) ? qLang
@@ -4634,13 +4673,93 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     const url = 'https://walkstamp.com' + (ROTAS_SITE.ajuda[LANG] ? (LANG === 'pt' ? '' : '/' + LANG) : '');
     $('compTit').textContent = t('compTit');
     $('compCopiar').textContent = t('compCopiar');
-    $('compLinkedin').textContent = 'LinkedIn';
-    $('compEmail').textContent = t('compEmail');
+    /* O logo do LinkedIn, em SVG e à mão.
+
+       Não é enfeite: um botão escrito "LinkedIn" ao lado de "Copiar" e
+       "E-mail" é lido como mais uma palavra; o quadradinho azul é reconhecido
+       antes de ser lido. E vai INLINE porque a ferramenta abre de file:// no
+       pacote offline — uma imagem externa não carregaria, e um botão de
+       compartilhar sem ícone é pior que um sem imagem nenhuma.
+
+       A cor é a da marca deles (#0A66C2) e não a nossa: um logo repintado na
+       cor de outra empresa é um logo que não se reconhece. */
+    $('compLinkedin').innerHTML =
+      '<svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" ' +
+      'style="vertical-align:-2px;margin-right:6px" fill="#0A66C2">' +
+      '<path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67' +
+      'H9.35V9h3.41v1.56h.05c.48-.9 1.63-1.85 3.36-1.85 3.6 0 4.27 2.37 4.27 5.45v6.29zM5.34 7.43' +
+      'a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13zM7.12 20.45H3.55V9h3.57v11.45z' +
+      'M22.22 0H1.77C.79 0 0 .77 0 1.72v20.56C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.72' +
+      'V1.72C24 .77 23.2 0 22.22 0z"/></svg>LinkedIn';
+    $('compEmailAbrir').textContent = t('compEmail');
     $('compNota').textContent = t('compNota');
+    $('compPara').placeholder = t('compParaPh');
+    $('compQuem').placeholder = t('compQuemPh');
+    $('compEnviar').textContent = t('compEnviar');
+    $('compEmailNota').textContent = t('compEmailNota');
     $('compLinkedin').href =
       'https://www.linkedin.com/sharing/share-offsite/?url=' + encodeURIComponent(url);
-    $('compEmail').href = 'mailto:?subject=' + encodeURIComponent(t('compAssunto')) +
+    /* O `mailto:` continua existindo, como RESERVA. Ele é o caminho de quando o
+       servidor não responde — e é o único caminho no pacote offline, que abre
+       de file:// e não tem rede. Um convite que só funciona com internet numa
+       ferramenta que se orgulha de funcionar sem ela seria uma contradição. */
+    const mailto = 'mailto:?subject=' + encodeURIComponent(t('compAssunto')) +
       '&body=' + encodeURIComponent(t('compCorpo') + '\n\n' + url);
+    const caiNoMailto = (motivo) => {
+      $('compMsg').innerHTML = '<span class="status">' + t(motivo) + '</span>';
+      location.href = mailto;
+    };
+
+    $('compEmailAbrir').onclick = () => {
+      const cx = $('compEmailCx');
+      const abre = cx.classList.contains('hide');
+      cx.classList.toggle('hide', !abre);
+      if (abre) { try { $('compPara').focus(); } catch (e) {} }
+    };
+
+    let mandando = false;
+    $('compEnviar').onclick = async () => {
+      if (mandando) return;
+      const para = ($('compPara').value || '').trim();
+      /* A conferência de verdade é a mensagem chegar; validar e-mail por
+         expressão regular é armadilha conhecida. O que se quer aqui é só não
+         gastar uma ida ao servidor com o que claramente não é endereço. */
+      if (!/^[^\s@,;]+@[^\s@,;]+\.[^\s@,;]{2,}$/.test(para)) {
+        $('compMsg').innerHTML = '<span class="err">' + t('compEmailRuim') + '</span>';
+        try { $('compPara').focus(); } catch (e) {}
+        return;
+      }
+      /* O pacote offline abre de file:// e não tem rede: nem tenta, vai direto
+         para o programa de e-mail da pessoa. */
+      if (location.protocol === 'file:') return caiNoMailto('compSemRede');
+      mandando = true;
+      $('compEnviar').disabled = true;
+      $('compMsg').innerHTML = '<span class="status">' + t('compEnviando') + '</span>';
+      try {
+        const r = await fetch('https://walkstamp.com/api/convite', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ para, quem: ($('compQuem').value || '').trim(), lang: LANG }),
+        });
+        if (r.ok) {
+          $('compMsg').innerHTML = '<span class="ok">' + t('compEnviado') + '</span>';
+          $('compEmailCx').classList.add('hide');
+          $('compPara').value = '';
+        } else if (r.status === 429) {
+          /* Limite estourado NÃO cai no mailto: cair seria transformar uma
+             recusa deliberada em "tente por outro caminho", que é o contrário
+             de um limite. */
+          $('compMsg').innerHTML = '<span class="err">' + t('compLimite') + '</span>';
+        } else {
+          caiNoMailto('compSemServidor');
+        }
+      } catch (e) {
+        caiNoMailto('compSemServidor');
+      } finally {
+        mandando = false;
+        $('compEnviar').disabled = false;
+      }
+    };
     $('compCopiar').onclick = () => {
       /* O endereço da FERRAMENTA. Nunca o documento: ele não sai desta máquina,
          e é essa a promessa que o produto vende. */
@@ -5236,8 +5355,21 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       load(new File([blob], 'walkstamp-' + arq, { type: tipo }), 'exemplo');
       await ok;
 
+      /* A LEGENDA segue o idioma da PÁGINA; o vídeo segue o que foi gravado.
+         São duas coisas diferentes e por muito tempo foram tratadas como uma.
+
+         O vídeo do exemplo existe em três idiomas — regravá-lo em alemão e
+         francês custa um estúdio. A legenda custa um arquivo de 700 bytes. E é
+         a legenda que aparece na tela: ela vira o texto do documento, é o que a
+         pessoa lê no passo 2 e o que sai no PDF. Deixar a fala em inglês numa
+         página em alemão fazia o exemplo inteiro parecer um pedaço solto de
+         outro produto.
+
+         Cai no idioma do vídeo se a legenda daquela língua não existir — o que
+         é a situação de antes, e não um erro novo. */
       try {
-        const sr = await fetch(base + 'exemplo.' + demoLang() + '.vtt');
+        let sr = await fetch(base + 'exemplo.' + LANG + '.vtt');
+        if (!sr.ok) sr = await fetch(base + 'exemplo.' + demoLang() + '.vtt');
         if (sr.ok) { $('tr').value = await sr.text(); refreshTr(); }
       } catch (e) {}
 
@@ -6467,6 +6599,11 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       $('liveBox').classList.add('hide');
       $('liveStat').textContent = '';
     }
+    /* A barra da cauda vai junto: trocar de vídeo com ela na tela deixaria a
+       barra do material antigo andando em cima do material novo. */
+    if ($('caudaBar')) { $('caudaBar').classList.add('hide');
+                         $('caudaBar').classList.remove('indef'); }
+    if (typeof progRec === 'function') progRec(false);
     liveDur = 0; liveW = 0; liveH = 0; liveCues = []; liveCanais = null;
     /* Voltando a haver vídeo, o botão volta a ser um botão. */
     autoTravado = null;
@@ -7549,6 +7686,22 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       emCauda = false; pularCauda = false;
       passos();
       if (caudaTic) { clearInterval(caudaTic); caudaTic = null; }
+      /* E a barra some AQUI, sem depender de mais nada.
+
+         Ela já era escondida no fim do `bombearAsr`, mas dentro de um
+         `if (emCauda)` — e o relógio da cauda, que roda a cada segundo, podia
+         reaparecer com ela na fresta entre aquele esconder e este
+         `emCauda = false`. Depois disso o `atualizarLive` sai cedo (não há mais
+         cauda nem gravação) e ninguém mais mexe nela: a barra listrada ficava
+         andando na tela, sozinha, dizendo que trabalhava depois de o trabalho
+         ter acabado — e uma barra que anda sem nada acontecer é pior do que
+         nenhuma, porque faz a pessoa esperar.
+
+         Duas linhas em vez de uma condição mais esperta: o custo de esconder
+         uma barra que já estava escondida é zero. */
+      $('caudaBar').classList.add('hide');
+      $('caudaBar').classList.remove('indef');
+      progRec(false);
       $('recStop').textContent = t('recStopBtn');
 
       if (ctx) { try { await ctx.close(); } catch (e) {} }
@@ -9917,6 +10070,16 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      guardado: um "concluído" que a pessoa marca e que depois deixa de ser
      verdade — porque ela apagou os quadros — é pior que nenhum. O botão do fim
      só fecha e abre o próximo, que é o gesto, não a verdade. */
+  /* O que a pessoa DECLARA, por subpasso. Só os índices 1 e 2 (os subpassos 2 e
+     3) são consultados — ver o comentário dentro de `pintarSubpassos`.
+
+     Declarado AQUI, acima de quem usa, e não junto do botão que o escreve: o
+     `esqueceuOQueGerou` roda na montagem da página, antes daquele trecho, e um
+     `const` ainda não inicializado não é "indefinido" — ele ESTOURA, e até o
+     `typeof` estoura. Um guarda que parecia defensivo teria derrubado o script
+     inteiro na primeira carga. */
+  const sbDito = [false, false, false, false];
+
   function pintarSubpassos(){
     if (!$('sb1')) return;
     const keep = frames.filter(f => f.keep);
@@ -9929,7 +10092,30 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       n3 ? t(n3 === 1 ? 'sbE3u' : 'sbE3', n3) : t('sbE3v'),
       baixouAlgo ? t('sbE4') : t('sbE4v')
     ];
-    const feito = [keep.length > 0, cues.length > 0 || !!$('tr').value.trim(), n3 > 0, baixouAlgo];
+    /* ---- verde por cálculo OU por declaração ----
+
+       O estado nasceu calculado, e por um bom motivo: um "concluído" que a
+       pessoa marca e que depois deixa de ser verdade — porque ela apagou os
+       quadros — é pior que nenhum.
+
+       Mas dois dos quatro subpassos podem estar legitimamente VAZIOS. Uma
+       gravação sem fala não tem transcrição; um cenário genérico não tem
+       identificação para preencher. Neles o cálculo respondia "não feito" para
+       sempre, e apertar "Pronto — ir para gerar" fechava o bloco deixando a
+       bolinha cinza — a tela dizendo que faltava coisa numa etapa que não tinha
+       o que fazer.
+
+       Então: nos subpassos 2 e 3, apertar Pronto também vale. Nos subpassos 1 e
+       4 não vale, e isso não é inconsistência — é a mesma regra. "Zero quadros"
+       e "nada gerado" não são estados legítimos de um passo concluído, são
+       trabalho que falta; declarar o contrário seria a bolinha mentindo.
+
+       E a declaração é apagada junto com os quadros (`esqueceuOQueGerou`), pelo
+       motivo do primeiro parágrafo. */
+    const feito = [keep.length > 0,
+                   cues.length > 0 || !!$('tr').value.trim() || sbDito[1],
+                   n3 > 0 || sbDito[2],
+                   baixouAlgo];
     est.forEach((txt, i) => {
       const el = $('sbEst' + (i + 1)); if (el) el.textContent = txt;
       const d = $('sb' + (i + 1)); if (d) d.classList.toggle('feito', feito[i]);
@@ -9943,12 +10129,18 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   let baixouAlgo = false;
   function esqueceuOQueGerou(){
     baixouAlgo = false;
+    /* O que a pessoa declarou vale para ESTE material. Sumindo os quadros,
+       some a declaração junto — senão a bolinha verde de "identificação
+       preenchida" sobreviveria a um documento que não existe mais, que é
+       exatamente o defeito que o cálculo existia para evitar. */
+    sbDito.fill(false);
     const st = $('pdfStatus'); if (st) st.textContent = '';
   }
 
   document.querySelectorAll('.sbOk').forEach(b2 => {
     b2.onclick = () => {
       const n = +b2.dataset.sb;
+      sbDito[n - 1] = true;
       const eu = $('sb' + n), prox = $('sb' + (n + 1));
       if (eu) eu.open = false;
       if (prox) { prox.open = true; irPara('sb' + (n + 1), true); }
@@ -12104,7 +12296,24 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     if (!kept.length || revI >= kept.length) { revFechar(true); return; }
     const f = kept[revI];
     $('revTit').textContent = passoN(revI + 1);
-    $('revPos').textContent = t('revPos', revI + 1, kept.length);
+    /* ---- o último quadro precisa dizer que é o último ----
+
+       A revisão acabava sozinha: confirmava-se o último quadro e a caixa
+       simplesmente sumia. Do lado de cá parece um fechamento; do lado de lá
+       parece que alguma coisa deu errado — não houve um gesto de terminar, e a
+       pessoa fica sem saber se percorreu tudo ou se a tela pulou.
+
+       Agora o botão principal muda de nome no fim: "está igual" vira "está
+       igual — finalizar", e a linha de posição diz que aquele é o último. As
+       outras duas saídas continuam terminando também, porque avançar do último
+       sempre fechou — o que faltava era avisar. */
+    const ultimo = revI === kept.length - 1;
+    $('revPos').textContent = t('revPos', revI + 1, kept.length) +
+      (ultimo ? ' · ' + t('revUltimo') : '');
+    $('revIgual').textContent  = t(ultimo ? 'revIgualFim' : 'revIgualBtn');
+    $('revTrocar').textContent = t(ultimo ? 'revTrocarFim' : 'revTrocarBtn');
+    $('revFora').textContent   = t(ultimo ? 'revForaFim' : 'revForaBtn');
+    $('revIgual').classList.toggle('destaque', ultimo);
     $('revImg').src = imgFinal(f);
     /* A anotação do passo é o que diz o que aquela tela devia provar. Sem ela
        na frente, "esta tela ainda está assim?" é uma pergunta sobre pixels. */

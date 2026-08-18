@@ -390,7 +390,13 @@ def escrever_marca(root: pathlib.Path) -> None:
         no Next quem escreve a tag é o React, e ele quer só o miolo."""
         return re.sub(r"^\s*<script>|</script>\s*$", "", bloco)
 
-    rotas = {"idiomas": IDIOMAS, "slugs": SLUGS,
+    # Quais idiomas têm vídeo do tour. Sai daqui, do lado que OLHA O DISCO, e não
+    # de uma lista escrita à mão nos dois lugares que precisam da resposta. Foi
+    # assim que o alemão e o francês ficaram meses vendo o tour em inglês depois
+    # de o vídeo deles existir: o build.py conferia o arquivo e o lib/site.ts
+    # tinha ['pt','en','es'] escrito dentro.
+    com_tour = [L for L in IDIOMAS if (root / "public" / "demo" / f"tour.{L}.webm").exists()]
+    rotas = {"idiomas": IDIOMAS, "demoLangs": com_tour, "slugs": SLUGS,
              "metas": {pg: {L: {"titulo": m[L][0], "desc": m[L][1]} for L in IDIOMAS}
                        for pg, m in METAS.items()},
              "scripts": {"detectarIdioma": so_o_js(REDIRECT),

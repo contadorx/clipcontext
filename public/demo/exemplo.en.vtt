@@ -1,16 +1,19 @@
 WEBVTT
 
-00:00:01.000 --> 00:00:08.500
-Good morning. This is the quarterly report, with the results and the next steps.
+00:00:00.800 --> 00:00:04.000
+I opened the intranet purchasing system, on my department's list of orders.
 
-00:00:10.500 --> 00:00:19.000
-Revenue grew across all four quarters, and the last one closed at three hundred and fifty-five thousand.
+00:00:04.600 --> 00:00:08.800
+I clicked New order to register the purchase of maintenance parts.
 
-00:00:21.000 --> 00:00:29.000
-Overall we grew forty-eight percent, well above the thirty percent target we set in January.
+00:00:09.200 --> 00:00:14.000
+I filled in the supplier, the total amount, the expected delivery and the justification.
 
-00:00:31.000 --> 00:00:39.000
-On the other side, three things eat too much time: data rework, approvals, and meetings with no agenda.
+00:00:14.600 --> 00:00:19.500
+I saved without the cost centre, and the system refused: the field is required above one thousand.
 
-00:00:41.000 --> 00:00:49.000
-So the next steps are automating the data load, shortening the approval cycle, and revisiting the weekly schedule.
+00:00:20.000 --> 00:00:23.600
+I filled in cost centre CC-4420 and saved again.
+
+00:00:24.200 --> 00:00:29.000
+The order was registered as number 48213, awaiting approval, with supplier TecnoParts.
