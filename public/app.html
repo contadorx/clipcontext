@@ -374,8 +374,16 @@
   .tarjas i.nova{background:rgba(0,0,0,.6);outline:2px dashed #fff}
   .lenteCampos{display:grid;gap:12px;margin-top:14px}
   .lenteCampos label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px;font-weight:500}
-  .lenteCampos input{width:100%;box-sizing:border-box;padding:9px 11px;border:1px solid var(--line);
-      border-radius:7px;background:var(--bg);color:var(--ink);font:inherit;font-size:14px}
+  .lenteCampos input,.lenteCampos textarea{width:100%;box-sizing:border-box;padding:9px 11px;
+      border:1px solid var(--line);border-radius:7px;background:var(--bg);color:var(--ink);
+      font:inherit;font-size:14px}
+  .lenteCampos textarea{min-height:74px;resize:vertical;line-height:1.5}
+  /* O número da espera. Grande porque é a resposta que a pessoa está
+     procurando, e tabular para não dançar a cada repintura — um "9%" que vira
+     "10%" empurrando o resto da linha para o lado chama mais atenção que o
+     próprio número. */
+  b.contando{font-size:22px;font-weight:700;letter-spacing:-.02em;color:var(--accent);
+      font-variant-numeric:tabular-nums;margin:0 2px}
   .lenteFala{display:flex;gap:9px;align-items:center;margin-bottom:8px}
   .lenteFala span{font:12px ui-monospace,Menlo,monospace;color:var(--muted);flex:none;width:52px}
   .lenteNav{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:16px}
@@ -1519,6 +1527,18 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       </div>
       <p class="note" id="compNota" style="margin:8px 0 0"></p>
     </div>
+      <!-- O fim do passo 3.
+
+           Os subpassos 1, 2 e 3 tinham um "Pronto" que fechava e abria o
+           seguinte. O quarto não tinha nada: a pessoa gerava o documento e
+           ficava ali, com quatro blocos abertos e o cartão do prompt embaixo,
+           fora da vista. Um caminho que conduz até o penúltimo passo e larga no
+           último é pior do que um que não conduz — ele ensina a esperar uma
+           mão que não vem.
+
+           Ele leva ao PROMPT, e não a "recomeçar": depois de baixar o
+           documento, o que ainda há para fazer é entregá-lo a um modelo. -->
+      <div class="row sbFim"><button class="ghost sm sbOk" data-sb="4" data-i18n="sbOk4"></button></div>
       </div>
     </details>
 
@@ -1551,7 +1571,12 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
         <div class="tarjas" id="lenteTarjas"></div>
         <svg class="marcas" id="lenteMarcas" viewBox="0 0 1000 1000" preserveAspectRatio="none"></svg>
       </div>
-      <div class="row" style="margin-top:12px">
+      <!-- Um título em cima da fileira. Eram oito botões cinzas do mesmo
+           tamanho, sem nada dizendo que são um conjunto — e uma fileira sem
+           nome se lê como barra de ferramentas de editor de imagem, que é
+           exatamente o que ninguém quer encarar no meio de uma evidência. -->
+      <p class="subTit" data-i18n="lenteAcoes" style="margin:16px 0 7px"></p>
+      <div class="row">
         <button class="ghost sm" id="tarjaModo" data-i18n="tarjaBtn"></button>
         <button class="ghost sm hide" id="tarjaLimpar" data-i18n="tarjaLimpar"></button>
         <button class="ghost sm" id="mkModo" data-i18n="mkBtn"></button>
@@ -1593,8 +1618,21 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
         <button class="ghost sm" id="cmpDiff" data-i18n="cmpDiff"></button>
       </div>
       <div class="lenteCampos">
+        <!-- A anotação do passo, em CAIXA DE VÁRIAS LINHAS.
+
+             Era um `input` de uma linha para um texto de até 180 caracteres:
+             cabiam umas 60 na tela e o resto rolava para fora pela esquerda.
+             Quem escreve "o total veio errado quando o centro de custo está
+             vazio e o valor passa de mil" não consegue reler o que escreveu, e
+             o que não se relê não se corrige.
+
+             O limite continua 180 — ele existe porque a anotação vira título de
+             passo no documento, e título não é parágrafo. O que mudou é caber
+             na tela. -->
         <div><label for="lenteNota" data-i18n="notaPh"></label>
-             <input type="text" id="lenteNota" maxlength="180" autocomplete="off"></div>
+             <textarea id="lenteNota" maxlength="180" rows="3"
+                       autocomplete="off"></textarea>
+             <p class="evPe" style="padding:5px 0 0"><span id="lenteNotaConta"></span></p></div>
         <div id="lenteHoraCx"><label for="lenteHora" data-i18n="lenteHora"></label>
              <input type="datetime-local" step="1" id="lenteHora">
              <p class="evPe" style="padding:6px 0 0" data-i18n="lenteHoraNota"></p></div>
@@ -1634,6 +1672,19 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       <div class="lenteNav">
         <button class="ghost sm" id="lentePrev" data-i18n="lenteAnt"></button>
         <span class="status" id="lentePos"></span>
+        <!-- A volta para a revisão, e o fim dela.
+
+             A lente é aberta de dois lugares: da miniatura, onde ela é só uma
+             lupa, e de DENTRO da revisão quadro a quadro, onde ela é o meio de
+             consertar a imagem daquele passo. No segundo caso a pessoa está no
+             meio de um percurso, e a lente não sabia disso: fechar a levava de
+             volta para uma revisão que continuava aberta, sem dizer que
+             continuava — e no último quadro não havia como terminar sem sair da
+             lente primeiro.
+
+             Este botão só existe quando a lente veio da revisão. No último
+             quadro ele encerra; nos outros, devolve. -->
+        <button class="sm hide" id="lenteRev"></button>
         <button class="ghost sm" id="lenteProx" data-i18n="lenteProx"></button>
       </div>
     </div>
@@ -1946,7 +1997,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       jiraCopiado:'Resumo copiado. Cole no comentário do chamado e arraste o PDF junto.',
       jiraBaixado:'Não consegui usar a área de transferência, então baixei o resumo como .txt.',
       jiraRodape:'Evidência gerada no Walkstamp e anexada como {0}. As imagens e a hora de cada passo estão no arquivo.',
-      mkBtn:'Destacar', mkRet:'Retângulo', mkSeta:'Seta', mkCaneta:'Caneta',
+      mkBtn:'Apontar na imagem', mkRet:'Retângulo', mkSeta:'Seta', mkCaneta:'Caneta',
       mkCor:'cor do destaque', mkDesfazer:'desfazer', mkLimpar:'limpar os destaques',
       mkComo:'Arraste sobre a imagem para apontar o que importa. O destaque é queimado na figura, como a tarja — ninguém remove depois.',
       mkN:'{0} destaque(s) nesta tela.',
@@ -2143,7 +2194,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       cmpIndo:'Comparando…', cmpErro:'Não consegui comparar estes dois quadros.',
       cmpDif:'{0}% dos pixels mudaram, em vermelho.', cmpIgual:'Os dois quadros são iguais.',
       cmpMsg:'{0}% do outro quadro por cima. Arraste para o quadro piscar: o que mudou é a única coisa que se mexe.',
-      cmpBtn:'Comparar', cmpCom:'com', cmpDiff:'Mostrar só a diferença',
+      cmpBtn:'Comparar com outro quadro', cmpCom:'com', cmpDiff:'Mostrar só a diferença',
       juntarLinhaV:'{0} sessões diferentes, uma por tarefa. Sem hora de relógio: cada sessão tinha o seu próprio início.',
       juntarNome:'{0}-sessoes', juntarLinha:'Documento consolidado',
       juntarPulou:'{0} arquivo(s) não deram para ler e ficaram de fora.',
@@ -2172,7 +2223,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       sbE3u:'1 campo preenchido',
       sbE2:'{0} trechos com tempo', sbE2t:'texto colado, sem marcação de tempo', sbE2v:'sem transcrição',
       sbE1:'{0} quadros mantidos', sbE1v:'nenhum quadro ainda',
-      sbOk1:'Pronto — ir para a fala', sbOk2:'Pronto — ir para a identificação', sbOk3:'Pronto — ir para gerar', sbOk4:'Recomeçar',
+      sbOk1:'Pronto — ir para a fala', sbOk2:'Pronto — ir para a identificação', sbOk3:'Pronto — ir para gerar', sbOk4:'Pronto — ir para o prompt',
       sb1H:'Conferir os quadros', sb2H:'Revisar a fala', sb3H:'Identificar o documento', sb4H:'Gerar',
       clipeBotaoOn:'Clipe de {0} s ligado', clipeBotaoCam:' · com webcam',
       clipeModalTit:'Clipe e webcam', clipeBotaoOff:'Clipe do momento: desligado',
@@ -2201,7 +2252,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       scormOk:'Pacote SCORM 1.2 pronto. Suba no seu LMS como conteúdo — ele é que registra quem concluiu; nós continuamos sem saber.',
       pptxBtn:'PowerPoint',
       pptxOk:'Apresentação pronta: {0} slides mais a capa. Abre no PowerPoint, no Keynote e no Google Slides, e cada slide é editável — a imagem, o título e a nota estão soltos, não achatados.',
-      trocarBtn:'Trocar a imagem', dupBtn:'Duplicar',
+      trocarBtn:'Trocar por outra imagem', dupBtn:'Duplicar este passo',
       trocarOk:'Imagem trocada. As tarjas e os destaques do quadro antigo saíram junto — eles apontavam para pixels que não existem mais.',
       trocarErro:'Não consegui ler esta imagem.',
       dupFeito:'{0} duplicado logo depois deste.',
@@ -2268,7 +2319,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       evPerfil:'O sistema e quem executou ficam guardados enquanto esta aba estiver aberta, para você não redigitar a cada caso. Fechou a aba, some.',
       evLimpar:'Esquecer', evSalvar:'Salvar perfil', evAbrir:'Abrir perfil',
       ampliar:'Ampliar este passo', fecharBtn:'Fechar',
-      tarjaBtn:'Tarjar', tarjaFim:'Terminar de tarjar', tarjaLimpar:'Tirar todas',
+      lenteRevVolta:'Voltar para a revisão', lenteRevFim:'Finalizar a revisão', demoCenario:'Escolhemos “Evidência de teste” para o exemplo — troque no passo 1 se o seu caso for outro.', lenteAcoes:'O que dá para fazer com esta imagem', lenteNotaResta:'{0} caracteres restantes — ela vira o título deste passo no documento.', tarjaBtn:'Tapar um dado', tarjaFim:'Terminar de tarjar', tarjaLimpar:'Tirar as tarjas',
       tarjaComo:'Arraste sobre a imagem para cobrir. Clique numa tarja para tirá-la.',
       tarjaN:'{0} tarja(s) neste passo — elas são queimadas na imagem que sai no documento.',
       tarjaTirar:'clique para tirar esta tarja',
@@ -2284,7 +2335,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       gdErr:'Não consegui criar o documento no Google.',
       gdGrande:'O documento tem {0}. O envio pode demorar.',
       saiuArq:'{0} gerado com {1} passos.',
-      cropBtn:'Recortar', cropFim:'Cancelar recorte', cropTirar:'Tirar o recorte',
+      cropBtn:'Cortar as bordas', cropFim:'Cancelar recorte', cropTirar:'Desfazer o corte',
       cropComo:'Arraste a área que interessa. O mesmo recorte vale para todos os quadros.',
       cropIndo:'Recortando os quadros…',
       cropFeito:'{0} quadros recortados. As tarjas foram desfeitas — refaça-as sobre a imagem nova.',
@@ -2489,7 +2540,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       jiraCopiado:'Summary copied. Paste it into the issue comment and drag the PDF along.',
       jiraBaixado:'I could not use the clipboard, so I downloaded the summary as .txt.',
       jiraRodape:'Evidence generated in Walkstamp and attached as {0}. The images and the clock time of each step are in the file.',
-      mkBtn:'Highlight', mkRet:'Rectangle', mkSeta:'Arrow', mkCaneta:'Pen',
+      mkBtn:'Point at something', mkRet:'Rectangle', mkSeta:'Arrow', mkCaneta:'Pen',
       mkCor:'highlight colour', mkDesfazer:'undo', mkLimpar:'clear the highlights',
       mkComo:'Drag over the image to point at what matters. The highlight is burned into the picture, like the redaction — nobody removes it afterwards.',
       mkN:'{0} highlight(s) on this screen.',
@@ -2686,7 +2737,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       cmpIndo:'Comparing…', cmpErro:'I could not compare these two frames.',
       cmpDif:'{0}% of the pixels changed, in red.', cmpIgual:'The two frames are identical.',
       cmpMsg:'{0}% of the other frame on top. Drag to make the frame blink: what changed is the only thing that moves.',
-      cmpBtn:'Compare', cmpCom:'with', cmpDiff:'Show only the difference',
+      cmpBtn:'Compare with another frame', cmpCom:'with', cmpDiff:'Show only the difference',
       juntarLinhaV:'{0} different sessions, one per task. No wall-clock time: each session had its own start.',
       juntarNome:'{0}-sessions', juntarLinha:'Consolidated document',
       juntarPulou:'{0} file(s) could not be read and were left out.',
@@ -2709,7 +2760,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       sbE3u:'1 field filled',
       sbE2:'{0} time-stamped cues', sbE2t:'pasted text, no timing', sbE2v:'no transcript',
       sbE1:'{0} frames kept', sbE1v:'no frames yet',
-      sbOk1:'Done — go to the speech', sbOk2:'Done — go to identification', sbOk3:'Done — go to generate', sbOk4:'Start over',
+      sbOk1:'Done — go to the speech', sbOk2:'Done — go to identification', sbOk3:'Done — go to generate', sbOk4:'Done — go to the prompt',
       sb1H:'Check the frames', sb2H:'Review the speech', sb3H:'Identify the document', sb4H:'Generate',
       clipeBotaoOn:'{0} s clip on', clipeBotaoCam:' · with webcam',
       clipeModalTit:'Clip and webcam', clipeBotaoOff:'Moment clip: off',
@@ -2738,7 +2789,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       scormOk:'SCORM 1.2 package ready. Upload it to your LMS as content — the LMS is what records who completed it; we still do not know.',
       pptxBtn:'PowerPoint',
       pptxOk:'Deck ready: {0} slides plus the cover. It opens in PowerPoint, Keynote and Google Slides, and every slide is editable — the image, the title and the note are separate objects, not a flattened picture.',
-      trocarBtn:'Replace the image', dupBtn:'Duplicate',
+      trocarBtn:'Replace with another image', dupBtn:'Duplicate this step',
       trocarOk:'Image replaced. The old frame’s redactions and highlights went with it — they pointed at pixels that no longer exist.',
       trocarErro:'I could not read this image.',
       dupFeito:'{0} duplicated right after this one.',
@@ -2805,7 +2856,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       evPerfil:'The system and who ran it are kept while this tab stays open, so you do not retype them for every case. Close the tab and they are gone.',
       evLimpar:'Forget', evSalvar:'Save profile', evAbrir:'Open profile',
       ampliar:'Enlarge this step', fecharBtn:'Close',
-      tarjaBtn:'Redact', tarjaFim:'Done redacting', tarjaLimpar:'Remove all',
+      lenteRevVolta:'Back to the review', lenteRevFim:'Finish the review', demoCenario:'We picked “Test evidence” for the example — change it in step 1 if your case is another.', lenteAcoes:'What you can do with this image', lenteNotaResta:'{0} characters left — it becomes the title of this step in the document.', tarjaBtn:'Hide a detail', tarjaFim:'Done redacting', tarjaLimpar:'Remove the bars',
       tarjaComo:'Drag over the image to cover it. Click a box to remove it.',
       tarjaN:'{0} redaction(s) on this step — they are burned into the image that goes in the document.',
       tarjaTirar:'click to remove this redaction',
@@ -2821,7 +2872,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       gdErr:'Could not create the document at Google.',
       gdGrande:'The document is {0}. Sending may take a while.',
       saiuArq:'{0} generated with {1} steps.',
-      cropBtn:'Crop', cropFim:'Cancel crop', cropTirar:'Remove the crop',
+      cropBtn:'Crop the edges', cropFim:'Cancel crop', cropTirar:'Undo the crop',
       cropComo:'Drag the area that matters. The same crop applies to every frame.',
       cropIndo:'Cropping the frames…',
       cropFeito:'{0} frames cropped. Redactions were undone — redraw them on the new image.',
@@ -3024,7 +3075,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       jiraCopiado:'Resumen copiado. Pégalo en el comentario del ticket y arrastra el PDF junto.',
       jiraBaixado:'No pude usar el portapapeles, así que descargué el resumen como .txt.',
       jiraRodape:'Evidencia generada en Walkstamp y adjuntada como {0}. Las imágenes y la hora de cada paso están en el archivo.',
-      mkBtn:'Destacar', mkRet:'Rectángulo', mkSeta:'Flecha', mkCaneta:'Lápiz',
+      mkBtn:'Señalar en la imagen', mkRet:'Rectángulo', mkSeta:'Flecha', mkCaneta:'Lápiz',
       mkCor:'color del destaque', mkDesfazer:'deshacer', mkLimpar:'limpiar los destaques',
       mkComo:'Arrastra sobre la imagen para señalar lo que importa. El destaque se quema en la figura, como la tarja — nadie lo quita después.',
       mkN:'{0} destaque(s) en esta pantalla.',
@@ -3223,7 +3274,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       cmpIndo:'Comparando…', cmpErro:'No he podido comparar estos dos fotogramas.',
       cmpDif:'{0}% de los píxeles cambiaron, en rojo.', cmpIgual:'Los dos fotogramas son idénticos.',
       cmpMsg:'{0}% del otro fotograma encima. Arrastra para que el fotograma parpadee: lo que cambió es lo único que se mueve.',
-      cmpBtn:'Comparar', cmpCom:'con', cmpDiff:'Mostrar solo la diferencia',
+      cmpBtn:'Comparar con otro fotograma', cmpCom:'con', cmpDiff:'Mostrar solo la diferencia',
       juntarLinhaV:'{0} sesiones distintas, una por tarea. Sin hora de reloj: cada sesión tenía su propio inicio.',
       juntarNome:'{0}-sesiones', juntarLinha:'Documento consolidado',
       juntarPulou:'{0} archivo(s) no se pudieron leer y quedaron fuera.',
@@ -3246,7 +3297,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       sbE3u:'1 campo rellenado',
       sbE2:'{0} tramos con tiempo', sbE2t:'texto pegado, sin marcas de tiempo', sbE2v:'sin transcripción',
       sbE1:'{0} fotogramas mantenidos', sbE1v:'todavía sin fotogramas',
-      sbOk1:'Listo — ir al habla', sbOk2:'Listo — ir a la identificación', sbOk3:'Listo — ir a generar', sbOk4:'Empezar de nuevo',
+      sbOk1:'Listo — ir al habla', sbOk2:'Listo — ir a la identificación', sbOk3:'Listo — ir a generar', sbOk4:'Listo — ir al prompt',
       sb1H:'Revisar los fotogramas', sb2H:'Revisar el habla', sb3H:'Identificar el documento', sb4H:'Generar',
       clipeBotaoOn:'Clip de {0} s activado', clipeBotaoCam:' · con webcam',
       clipeModalTit:'Clip y webcam', clipeBotaoOff:'Clip del momento: apagado',
@@ -3275,7 +3326,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       scormOk:'Paquete SCORM 1.2 listo. Súbelo a tu LMS como contenido — es él quien registra quién lo completó; nosotros seguimos sin saberlo.',
       pptxBtn:'PowerPoint',
       pptxOk:'Presentación lista: {0} diapositivas más la portada. Se abre en PowerPoint, Keynote y Google Slides, y cada diapositiva es editable — la imagen, el título y la nota van sueltos, no aplastados.',
-      trocarBtn:'Cambiar la imagen', dupBtn:'Duplicar',
+      trocarBtn:'Cambiar por otra imagen', dupBtn:'Duplicar este paso',
       trocarOk:'Imagen cambiada. Los tapados y destacados del fotograma antiguo se fueron con ella — apuntaban a píxeles que ya no existen.',
       trocarErro:'No pude leer esta imagen.',
       dupFeito:'{0} duplicado justo después de este.',
@@ -3342,7 +3393,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       evPerfil:'El sistema y quién lo ejecutó se guardan mientras esta pestaña siga abierta, para no reescribirlos en cada caso. Cierras la pestaña y desaparecen.',
       evLimpar:'Olvidar', evSalvar:'Guardar perfil', evAbrir:'Abrir perfil',
       ampliar:'Ampliar este paso', fecharBtn:'Cerrar',
-      tarjaBtn:'Tachar', tarjaFim:'Terminar de tachar', tarjaLimpar:'Quitar todas',
+      lenteRevVolta:'Volver a la revisión', lenteRevFim:'Finalizar la revisión', demoCenario:'Elegimos “Evidencia de prueba” para el ejemplo — cámbialo en el paso 1 si tu caso es otro.', lenteAcoes:'Lo que puedes hacer con esta imagen', lenteNotaResta:'Quedan {0} caracteres — se convierte en el título de este paso en el documento.', tarjaBtn:'Tapar un dato', tarjaFim:'Terminar de tachar', tarjaLimpar:'Quitar las franjas',
       tarjaComo:'Arrastra sobre la imagen para cubrir. Haz clic en una zona para quitarla.',
       tarjaN:'{0} zona(s) tachada(s) en este paso — se queman en la imagen que sale en el documento.',
       tarjaTirar:'haz clic para quitar esta zona',
@@ -3358,7 +3409,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       gdErr:'No pude crear el documento en Google.',
       gdGrande:'El documento pesa {0}. El envío puede tardar.',
       saiuArq:'{0} generado con {1} pasos.',
-      cropBtn:'Recortar', cropFim:'Cancelar recorte', cropTirar:'Quitar el recorte',
+      cropBtn:'Recortar los bordes', cropFim:'Cancelar recorte', cropTirar:'Deshacer el recorte',
       cropComo:'Arrastra el área que importa. El mismo recorte vale para todos los fotogramas.',
       cropIndo:'Recortando los fotogramas…',
       cropFeito:'{0} fotogramas recortados. Las zonas tachadas se deshicieron — vuelve a marcarlas sobre la imagen nueva.',
@@ -3562,7 +3613,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       jiraCopiado:'Zusammenfassung kopiert. Fügen Sie sie in den Ticket-Kommentar ein und ziehen Sie das PDF dazu.',
       jiraBaixado:'Die Zwischenablage war nicht verfügbar, deshalb wurde die Zusammenfassung als .txt heruntergeladen.',
       jiraRodape:'Nachweis in Walkstamp erzeugt und als {0} angehängt. Die Bilder und die Uhrzeit jedes Schritts stehen in der Datei.',
-      mkBtn:'Hervorheben', mkRet:'Rechteck', mkSeta:'Pfeil', mkCaneta:'Stift',
+      mkBtn:'Auf etwas zeigen', mkRet:'Rechteck', mkSeta:'Pfeil', mkCaneta:'Stift',
       mkCor:'Farbe der Hervorhebung', mkDesfazer:'rückgängig', mkLimpar:'Hervorhebungen löschen',
       mkComo:'Ziehen Sie über das Bild, um auf das Wesentliche zu zeigen. Die Hervorhebung wird fest in das Bild eingebrannt, wie die Schwärzung — sie lässt sich später nicht entfernen.',
       mkN:'{0} Hervorhebung(en) auf diesem Bildschirm.',
@@ -3759,7 +3810,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       cmpIndo:'Wird verglichen…', cmpErro:'Diese beiden Screenshots konnten nicht verglichen werden.',
       cmpDif:'{0} % der Pixel haben sich geändert, in Rot.', cmpIgual:'Die beiden Screenshots sind identisch.',
       cmpMsg:'{0} % des anderen Screenshots liegen darüber. Ziehen Sie, damit das Bild blinkt: Was sich geändert hat, ist das Einzige, was sich bewegt.',
-      cmpBtn:'Vergleichen', cmpCom:'mit', cmpDiff:'Nur den Unterschied zeigen',
+      cmpBtn:'Mit anderem Bild vergleichen', cmpCom:'mit', cmpDiff:'Nur den Unterschied zeigen',
       juntarLinhaV:'{0} verschiedene Sitzungen, eine je Aufgabe. Ohne Uhrzeit: Jede Sitzung hatte ihren eigenen Beginn.',
       juntarNome:'{0}-sitzungen', juntarLinha:'Konsolidiertes Dokument',
       juntarPulou:'{0} Datei(en) waren nicht lesbar und blieben außen vor.',
@@ -3788,7 +3839,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       sbE3u:'1 Feld ausgefüllt',
       sbE2:'{0} Abschnitte mit Zeitmarke', sbE2t:'eingefügter Text, ohne Zeitmarken', sbE2v:'keine Transkription',
       sbE1:'{0} Screenshots behalten', sbE1v:'noch keine Screenshots',
-      sbOk1:'Fertig — weiter zur Transkription', sbOk2:'Fertig — weiter zur Identifikation', sbOk3:'Fertig — weiter zum Erzeugen', sbOk4:'Neu beginnen',
+      sbOk1:'Fertig — weiter zur Transkription', sbOk2:'Fertig — weiter zur Identifikation', sbOk3:'Fertig — weiter zum Erzeugen', sbOk4:'Fertig — weiter zum Prompt',
       sb1H:'Screenshots prüfen', sb2H:'Transkription prüfen', sb3H:'Dokument identifizieren', sb4H:'Erzeugen',
       clipeBotaoOn:'Clip von {0} s aktiv', clipeBotaoCam:' · mit Webcam',
       clipeModalTit:'Clip und Webcam', clipeBotaoOff:'Clip zum Moment: aus',
@@ -3817,7 +3868,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       scormOk:'SCORM-1.2-Paket fertig. Laden Sie es als Inhalt in Ihr LMS — das LMS erfasst, wer es abgeschlossen hat; wir erfahren davon weiterhin nichts.',
       pptxBtn:'PowerPoint',
       pptxOk:'Präsentation fertig: {0} Folien plus Titelfolie. Sie öffnet sich in PowerPoint, Keynote und Google Slides, und jede Folie ist bearbeitbar — Bild, Titel und Notiz liegen einzeln vor, nicht zu einer Grafik verschmolzen.',
-      trocarBtn:'Bild austauschen', dupBtn:'Duplizieren',
+      trocarBtn:'Durch anderes Bild ersetzen', dupBtn:'Diesen Schritt duplizieren',
       trocarOk:'Bild ausgetauscht. Die Schwärzungen und Hervorhebungen des alten Screenshots sind mitgegangen — sie zeigten auf Pixel, die es nicht mehr gibt.',
       trocarErro:'Dieses Bild konnte nicht gelesen werden.',
       dupFeito:'{0} direkt nach diesem dupliziert.',
@@ -3884,7 +3935,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       evPerfil:'System und ausführende Person bleiben gespeichert, solange dieser Tab geöffnet ist, damit Sie sie nicht bei jedem Fall neu eintippen müssen. Wenn Sie den Tab schließen, sind sie weg.',
       evLimpar:'Vergessen', evSalvar:'Profil speichern', evAbrir:'Profil öffnen',
       ampliar:'Diesen Schritt vergrößern', fecharBtn:'Schließen',
-      tarjaBtn:'Schwärzen', tarjaFim:'Schwärzen beenden', tarjaLimpar:'Alle entfernen',
+      lenteRevVolta:'Zurück zur Prüfung', lenteRevFim:'Prüfung abschließen', demoCenario:'Für das Beispiel haben wir „Testnachweis“ gewählt — ändern Sie es in Schritt 1, wenn Ihr Fall ein anderer ist.', lenteAcoes:'Was Sie mit diesem Bild tun können', lenteNotaResta:'Noch {0} Zeichen — sie wird zur Überschrift dieses Schritts im Dokument.', tarjaBtn:'Etwas schwärzen', tarjaFim:'Schwärzen beenden', tarjaLimpar:'Schwärzungen entfernen',
       tarjaComo:'Ziehen Sie über das Bild, um es abzudecken. Klicken Sie auf eine Schwärzung, um sie zu entfernen.',
       tarjaN:'{0} Schwärzung(en) in diesem Schritt — sie werden fest in das Bild eingebrannt, das in das Dokument kommt.',
       tarjaTirar:'klicken, um diese Schwärzung zu entfernen',
@@ -3900,7 +3951,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       gdErr:'Das Dokument konnte bei Google nicht erstellt werden.',
       gdGrande:'Das Dokument hat {0}. Das Senden kann dauern.',
       saiuArq:'{0} mit {1} Schritten erzeugt.',
-      cropBtn:'Zuschneiden', cropFim:'Zuschneiden abbrechen', cropTirar:'Zuschnitt entfernen',
+      cropBtn:'Ränder beschneiden', cropFim:'Zuschneiden abbrechen', cropTirar:'Zuschnitt aufheben',
       cropComo:'Ziehen Sie den Bereich auf, der zählt. Derselbe Zuschnitt gilt für alle Screenshots.',
       cropIndo:'Die Screenshots werden zugeschnitten…',
       cropFeito:'{0} Screenshots zugeschnitten. Die Schwärzungen wurden aufgehoben — setzen Sie sie auf dem neuen Bild erneut.',
@@ -4104,7 +4155,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       jiraCopiado:'Résumé copié. Collez-le dans le commentaire du ticket et joignez le PDF.',
       jiraBaixado:'Le presse-papiers n’est pas accessible : le résumé a été téléchargé en .txt.',
       jiraRodape:'Preuve générée dans Walkstamp et jointe sous {0}. Les images et l’heure de chaque étape sont dans le fichier.',
-      mkBtn:'Surligner', mkRet:'Rectangle', mkSeta:'Flèche', mkCaneta:'Stylo',
+      mkBtn:'Pointer sur l’image', mkRet:'Rectangle', mkSeta:'Flèche', mkCaneta:'Stylo',
       mkCor:'couleur du surlignage', mkDesfazer:'annuler', mkLimpar:'effacer les surlignages',
       mkComo:'Faites glisser sur l’image pour pointer ce qui compte. Le surlignage est incrusté dans l’image, comme le caviardage — personne ne l’enlève ensuite.',
       mkN:'{0} surlignage(s) sur cet écran.',
@@ -4301,7 +4352,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       cmpIndo:'Comparaison…', cmpErro:'Impossible de comparer ces deux captures.',
       cmpDif:'{0} % des pixels ont changé, en rouge.', cmpIgual:'Les deux captures sont identiques.',
       cmpMsg:'{0} % de l’autre capture par-dessus. Faites glisser pour faire clignoter la capture : ce qui a changé est la seule chose qui bouge.',
-      cmpBtn:'Comparer', cmpCom:'avec', cmpDiff:'Afficher seulement la différence',
+      cmpBtn:'Comparer avec une autre image', cmpCom:'avec', cmpDiff:'Afficher seulement la différence',
       juntarLinhaV:'{0} sessions différentes, une par tâche. Sans heure d’horloge : chaque session avait son propre début.',
       juntarNome:'{0}-sessions', juntarLinha:'Document consolidé',
       juntarPulou:'{0} fichier(s) illisibles ont été laissés de côté.',
@@ -4330,7 +4381,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       sbE3u:'1 champ rempli',
       sbE2:'{0} segments horodatés', sbE2t:'texte collé, sans marquage temporel', sbE2v:'sans transcription',
       sbE1:'{0} captures gardées', sbE1v:'aucune capture pour l’instant',
-      sbOk1:'Terminé — passer à la parole', sbOk2:'Terminé — passer à l’identification', sbOk3:'Terminé — passer à la génération', sbOk4:'Recommencer',
+      sbOk1:'Terminé — passer à la parole', sbOk2:'Terminé — passer à l’identification', sbOk3:'Terminé — passer à la génération', sbOk4:'Terminé — passer au prompt',
       sb1H:'Vérifier les captures', sb2H:'Réviser la parole', sb3H:'Identifier le document', sb4H:'Générer',
       clipeBotaoOn:'Clip de {0} s activé', clipeBotaoCam:' · avec webcam',
       clipeModalTit:'Clip et webcam', clipeBotaoOff:'Clip du moment : désactivé',
@@ -4359,7 +4410,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       scormOk:'Paquet SCORM 1.2 prêt. Déposez-le dans votre LMS comme contenu — c’est lui qui enregistre qui a terminé ; nous, nous ne le savons toujours pas.',
       pptxBtn:'PowerPoint',
       pptxOk:'Présentation prête : {0} diapositives plus la couverture. Elle s’ouvre dans PowerPoint, Keynote et Google Slides, et chaque diapositive est modifiable — l’image, le titre et la note sont des objets distincts, pas une image aplatie.',
-      trocarBtn:'Remplacer l’image', dupBtn:'Dupliquer',
+      trocarBtn:'Remplacer par une autre image', dupBtn:'Dupliquer cette étape',
       trocarOk:'Image remplacée. Les caviardages et les surlignages de l’ancienne capture sont partis avec — ils pointaient vers des pixels qui n’existent plus.',
       trocarErro:'Impossible de lire cette image.',
       dupFeito:'{0} : une copie a été ajoutée juste après.',
@@ -4426,7 +4477,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       evPerfil:'Le système et l’exécutant restent conservés tant que cet onglet est ouvert, pour ne pas les ressaisir à chaque cas. Onglet fermé, ils disparaissent.',
       evLimpar:'Oublier', evSalvar:'Enregistrer le profil', evAbrir:'Ouvrir le profil',
       ampliar:'Agrandir cette étape', fecharBtn:'Fermer',
-      tarjaBtn:'Caviarder', tarjaFim:'Terminer le caviardage', tarjaLimpar:'Tout retirer',
+      lenteRevVolta:'Retour à la vérification', lenteRevFim:'Terminer la vérification', demoCenario:'Nous avons choisi « Preuve de test » pour l’exemple — changez-le à l’étape 1 si votre cas est autre.', lenteAcoes:'Ce que vous pouvez faire avec cette image', lenteNotaResta:'{0} caractères restants — elle devient le titre de cette étape dans le document.', tarjaBtn:'Masquer une donnée', tarjaFim:'Terminer le caviardage', tarjaLimpar:'Retirer les bandeaux',
       tarjaComo:'Faites glisser sur l’image pour couvrir. Cliquez sur un caviardage pour le retirer.',
       tarjaN:'{0} caviardage(s) sur cette étape — ils sont incrustés dans l’image qui sort dans le document.',
       tarjaTirar:'cliquez pour retirer ce caviardage',
@@ -4442,7 +4493,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       gdErr:'Impossible de créer le document sur Google.',
       gdGrande:'Le document pèse {0}. L’envoi peut prendre du temps.',
       saiuArq:'{0} généré avec {1} étapes.',
-      cropBtn:'Rogner', cropFim:'Annuler le rognage', cropTirar:'Retirer le rognage',
+      cropBtn:'Rogner les bords', cropFim:'Annuler le rognage', cropTirar:'Annuler le rognage',
       cropComo:'Faites glisser sur la zone qui vous intéresse. Le même rognage vaut pour toutes les captures.',
       cropIndo:'Rognage des captures…',
       cropFeito:'{0} captures rognées. Les caviardages ont été défaits — refaites-les sur la nouvelle image.',
@@ -5329,6 +5380,26 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
 
   $('demo').onclick = async () => {
     if (capturando()) return;
+    /* ---- o exemplo escolhe o cenário, se ninguém escolheu ----
+
+       O cenário é obrigatório, e com razão: ele decide o documento inteiro.
+       Mas quem clica em "usar vídeo de exemplo" está pedindo para VER a
+       ferramenta funcionar, não para responder um formulário — e travar o
+       exemplo numa pergunta é perder a pessoa no primeiro clique.
+
+       Então o exemplo responde por ela: evidência de teste, que é o cenário do
+       vídeo (um pedido de compra sendo homologado, com a recusa do sistema no
+       meio). Escolher em silêncio seria voltar ao padrão invisível que a gente
+       acabou de tirar — por isso a caixa PISCA e a linha ao lado diz que a
+       escolha foi feita e pode ser trocada. */
+    if (semCenario()) {
+      $('modelo').value = 'evidencia';
+      $('modelo').dispatchEvent(new Event('change'));
+      const cx = $('modelo');
+      cx.classList.add('pede');
+      setTimeout(() => cx.classList.remove('pede'), 2000);
+      avisar(t('demoCenario'), 7);
+    }
     $('demo').disabled = true;
     $('demoMsg').textContent = t('demoLoading');
     try {
@@ -6957,13 +7028,22 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
         st(t('transcribing2', pct.toFixed(0), caudaTotal - asrPendentes, caudaTotal, falta));
         /* Também no #recMsg: é para onde a pessoa está olhando quando acaba de
            apertar Parar, e não para o cartão 2 mais abaixo. */
-        $('recMsg').innerHTML = t('recTail') + ' <b>' + pct.toFixed(0) + '%</b>' +
+        /* O número GRANDE. Esta é a espera mais longa da ferramenta — a
+           transcrição terminando depois de a gravação parar — e ela era
+           anunciada em 13px, do mesmo tamanho da dica ao lado. Quem acabou de
+           gravar quarenta minutos fica olhando para esta linha; ela precisa
+           responder "quanto falta" de longe, sem procurar. */
+        $('recMsg').innerHTML = t('recTail') +
+          ' <b class="contando">' + pct.toFixed(0) + '%</b>' +
           (falta ? ' <span class="status">' + falta + '</span>' : '') +
           ' <span class="status">' + relogioTxt + '</span>';
       } else {
         $('caudaFill').style.width = '100%';
+        /* Sem porcentagem ainda, o que cresce é o RELÓGIO: é o único número
+           honesto que existe neste instante, e uma tela sem número nenhum é a
+           que faz recarregar a página. */
         $('recMsg').innerHTML = t('recTail') +
-          ' <span class="status">' + relogioTxt + '</span>';
+          ' <b class="contando">' + duracao(seg) + '</b>';
       }
       return;
     }
@@ -10145,6 +10225,11 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       const eu = $('sb' + n), prox = $('sb' + (n + 1));
       if (eu) eu.open = false;
       if (prox) { prox.open = true; irPara('sb' + (n + 1), true); }
+      /* O quarto não tem "próximo" dentro do cartão: o que vem depois dele é o
+         cartão 4, o prompt para a IA. Sem esta linha o caminho conduzia até o
+         penúltimo passo e largava no último — o que é pior do que não conduzir,
+         porque ensina a esperar uma mão que não vem. */
+      else if (n === 4) irPara('promptCard', true);
       pintarSubpassos();
     };
   });
@@ -11518,6 +11603,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
                                 (horaDe(f.t) ? '  ·  ' + horaDe(f.t) : '');
     $('lentePos').textContent = t('lentePos', lenteI + 1, frames.length);
     $('lenteNota').value = f.nota || '';
+    pintarNotaResta();
     const ux = $('modelo').value === 'usabilidade';
     $('lenteTipoCx').classList.toggle('hide', !ux);
     if (ux) $('lenteTipo').value = f.tipo || '';
@@ -11594,13 +11680,53 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
            .replace(/[^\w.-]+/g, '-') + ext;
   }
 
+  /* Quantos caracteres ainda cabem. O limite de 180 não é capricho: a anotação
+     vira TÍTULO do passo no documento, e título não é parágrafo. Um campo que
+     para de aceitar texto sem dizer por quê parece quebrado; um que conta
+     explica a regra enquanto ela é aplicada. */
+  function pintarNotaResta(){
+    const el = $('lenteNota'), c = $('lenteNotaConta');
+    if (!el || !c) return;
+    c.textContent = t('lenteNotaResta', 180 - (el.value || '').length);
+  }
+  if ($('lenteNota')) $('lenteNota').addEventListener('input', pintarNotaResta);
+
   function abrirLente(i){
     if (!frames[i]) return;
     lenteI = i;
     lenteVoltar = document.activeElement;
     $('lente').classList.remove('hide');
     pintarLente();
+    pintarLenteRevisao();
     $('lenteFechar').focus();
+  }
+
+  /* O botão de voltar para a revisão, dentro da lente.
+
+     Ele só existe quando a lente foi aberta DE DENTRO da revisão quadro a
+     quadro. Aberta pela lupa de uma miniatura, a lente é só uma lupa e não há
+     percurso nenhum a que voltar — um botão dizendo "finalizar a revisão" ali
+     seria uma porta para um lugar onde a pessoa não está. */
+  function pintarLenteRevisao(){
+    const b = $('lenteRev'); if (!b) return;
+    const dentro = typeof revAtivo === 'function' && revAtivo();
+    b.classList.toggle('hide', !dentro);
+    if (!dentro) return;
+    const kept = frames.filter(f => f.keep);
+    const ultimo = revI === kept.length - 1;
+    b.textContent = t(ultimo ? 'lenteRevFim' : 'lenteRevVolta');
+    b.classList.toggle('destaque', ultimo);
+    b.onclick = () => {
+      if (ultimo) {
+        /* Fecha a lente PRIMEIRO. `revAvancar` do último chama `revFechar`, que
+           esconde o painel da revisão — e uma lente por cima de um painel que
+           não existe mais é uma janela órfã. */
+        fecharLente();
+        revAvancar();
+      } else {
+        fecharLente();
+      }
+    };
   }
   function fecharLente(){
     if (tarjando) modoTarja(false);
