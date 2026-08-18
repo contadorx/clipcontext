@@ -390,8 +390,20 @@ table.legal td:first-child .small,table.legal td:first-child .muted{font-weight:
    O menu não é enfeite: ele é a única coisa que diz O QUE EXISTE.
    ========================================================================== */
 .painelCx{padding:34px 0 64px;border-bottom:0}
+/* 1220, e não os 1080 originais — nem os 940 do resto do site.
+
+   A conta, medida no navegador e não no olho: 1220 de grade, menos 44 de
+   respiro lateral, menos 214 do menu, menos 34 do vão = 928 de corpo; menos o
+   forro do cartão sobram ~882 para a tabela de casos do roteiro, que tem
+   `min-width:860`.
+
+   Em 1080 sobravam 822, e a tabela nascia com barra de rolagem horizontal
+   SEMPRE — a coluna de ações cortada em toda visita, numa tela larga, num
+   painel que não tinha por que estar apertado. O `--max:940` do site vale para
+   texto corrido, onde linha curta é virtude; aqui dentro é tabela, onde ela é
+   defeito. */
 .painelGrade{display:grid;grid-template-columns:214px minmax(0,1fr);gap:34px;
-      align-items:start;max-width:1080px}
+      align-items:start;max-width:1220px}
 
 /* `display:block`, e isto NÃO é redundante.
 

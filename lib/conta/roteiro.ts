@@ -17,7 +17,8 @@
  */
 import 'server-only';
 import { rpc } from '@/lib/supabase/servico';
-import type { Lang } from '@/lib/conta/textos';
+import { type Lang, IDIOMAS_CONTA } from '@/lib/conta/textos';
+import { enderecoDoItem } from '@/lib/conta/nav';
 
 export type Caso = {
   id: number;
@@ -66,13 +67,18 @@ export const verRoteiro = (email: string, id: number) =>
 
 /** O endereço público da tela, por idioma. Traduzido como o resto: quem lê em
  *  espanhol não deveria ter que reconhecer a palavra "roteiro". */
-export const CAMINHO_ROTEIRO: Record<Lang, string> = {
-  pt: '/conta/roteiro',
-  en: '/en/account/cases',
-  es: '/es/cuenta/casos',
-  de: '/de/konto/testfaelle',
-  fr: '/fr/compte/cas-de-test',
-};
+/* O endereço da tela, em cada idioma.
+ *
+ * Ele era esta mesma tabela escrita à mão — e escrita à mão ela já estava certa
+ * por sorte, não por construção: a MESMA tabela existe no `rotas.json`, é dela
+ * que o `next.config.mjs` monta a ponte de reescrita, e é dela que a barra
+ * lateral monta o link do menu. Uma cópia errada aqui não daria erro nenhum de
+ * build: daria um link do produto apontando para 404, em um idioma só.
+ *
+ * Agora sai de onde os outros dois saem. */
+export const CAMINHO_ROTEIRO: Record<Lang, string> = Object.fromEntries(
+  IDIOMAS_CONTA.map((L) => [L, enderecoDoItem('roteiro', L)]),
+) as Record<Lang, string>;
 
 /* O link que a tela gera para cada caso.
  *

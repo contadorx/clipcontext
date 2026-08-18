@@ -44,6 +44,11 @@
       background:color-mix(in srgb,var(--accent) 14%,transparent);
       border-radius:99px;padding:3px 9px}
   .caminhos .vtag.alt{color:var(--muted);background:var(--panel);border:1px solid var(--line)}
+  /* O cartão do "não dá para gravar aqui". Ele NÃO leva a borda de destaque do
+     `#viaRec`: destacar o caminho que não existe é apontar para a parede. */
+  .caminhos #viaSemTela{background:var(--panel)}
+  .caminhos .comoGravar{margin:0 0 8px;font-size:13px;line-height:1.55;color:var(--muted)}
+  .caminhos .comoGravar.aviso{margin:0;padding-top:8px;border-top:1px solid var(--line)}
   .caminhos .drop{padding:22px 16px}
   .drop{border:2px dashed var(--line);border-radius:10px;padding:36px 20px;text-align:center;cursor:pointer;transition:.15s}
   .drop:hover,.drop.over{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 6%,transparent)}
@@ -694,6 +699,28 @@
          maior parte das pessoas vem fazer, e estava em terceiro lugar, cinza,
          embaixo de uma zona de arraste que só serve para quem já tem arquivo. -->
     <div class="caminhos">
+      <!-- O que aparece no LUGAR de "Gravar a tela agora" quando o navegador não
+           tem captura de tela — que é o caso de TODO celular e tablet: nem
+           Chrome nem Safari expõem `getDisplayMedia` neles, e no iOS isso é
+           estrutural, porque todo navegador de lá roda WebKit.
+
+           Antes, esse bloco simplesmente sumia. A mensagem existia — "use Chrome
+           ou Edge no computador" — mas só disparava no clique de um botão que
+           não estava mais na tela. Resultado: quem abria no telefone via um
+           passo 1 com metade do conteúdo e não sabia se o produto não fazia ou
+           se o aparelho não deixava. E o caminho que FUNCIONA no telefone — o
+           gravador de tela do próprio aparelho, que grava tela e microfone
+           juntos — não era sugerido em lugar nenhum.
+
+           Ele fica onde o cartão de gravar ficaria, e não num aviso no topo:
+           a pergunta nasce aqui, olhando para a coluna vazia. -->
+      <div class="via semTela hide" id="viaSemTela">
+        <span class="vtag alt" data-i18n="viaSemTag"></span>
+        <h3 data-i18n="viaSemH"></h3>
+        <p data-i18n="viaSemP"></p>
+        <p class="comoGravar" data-i18n="viaSemComo"></p>
+        <p class="comoGravar aviso" data-i18n="viaSemLento"></p>
+      </div>
       <div class="via hide" id="viaRec">
         <span class="vtag" data-i18n="viaRecTag"></span>
         <h3 data-i18n="viaRecH"></h3>
@@ -1867,6 +1894,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       supportLine:'Gratuita, sem anúncio e sem exigir cadastro — nada do que você processa sai deste computador. ',
       pesSeg:'Segurança da informação', pesComp:'Comparativo', pesPrecos:'Preços',
       sub:'Transforme um vídeo em um PDF com os frames que importam e a transcrição sincronizada — pronto para entregar a uma IA. Tudo roda no seu navegador: o vídeo não sai do seu computador.',
+      viaSemTag:'Neste aparelho não dá', viaSemH:'Grave pelo próprio aparelho',
+      viaSemP:'Este navegador não permite gravar a tela — e em celular e tablet nenhum permite, nem Chrome nem Safari. Mas o seu aparelho já tem um gravador de tela, e ele grava a tela com o microfone junto.',
+      viaSemComo:'iPhone e iPad: Central de Controle → Gravação de Tela. Android: puxe os atalhos rápidos → Gravador de tela. Depois traga o arquivo em “Usar um arquivo”, nesta mesma página.',
+      viaSemLento:'Um aviso honesto: no celular a transcrição roda no processador, sem placa de vídeo — funciona, mas devagar, e o modelo é um download grande. Se puder, grave no telefone e monte o documento no computador.',
       viaRecTag:'Comece por aqui', viaRecH:'Gravar a tela agora',
       viaRecP:'Você faz o percurso na tela e fala o que está fazendo. Nada de vídeo é guardado: saem só as telas que mudaram e a sua narração transcrita.',
       viaRecPclipe:'Você faz o percurso na tela e fala o que está fazendo. A gravação inteira é descartada: saem as telas que mudaram, a sua narração transcrita, e um clipe curto de cada momento que você marcar.',
@@ -2410,6 +2441,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       supportLine:'Free, no ads, no sign-up — nothing you process leaves this computer. ',
       pesSeg:'Information security', pesComp:'Compare', pesPrecos:'Pricing',
       sub:'Turn a video into a PDF with the frames that matter and a synced transcript — ready to hand to an AI. It all runs in your browser: the video never leaves your computer.',
+      viaSemTag:'Not on this device', viaSemH:'Record with the device itself',
+      viaSemP:'This browser cannot record the screen — and on phones and tablets none can, neither Chrome nor Safari. But your device already has a screen recorder, and it captures the screen with the microphone.',
+      viaSemComo:'iPhone and iPad: Control Centre → Screen Recording. Android: pull down the quick settings → Screen recorder. Then bring the file in “Use a file”, on this same page.',
+      viaSemLento:'An honest warning: on a phone the transcription runs on the CPU, with no GPU — it works, but slowly, and the model is a large download. If you can, record on the phone and build the document on a computer.',
       viaRecTag:'Start here', viaRecH:'Record the screen now',
       viaRecP:'You walk through the screen and say what you are doing. No video is kept: what comes out are the screens that changed and your narration, transcribed.',
       viaRecPclipe:'You walk through the screen and say what you are doing. The whole recording is discarded: what comes out are the screens that changed, your narration transcribed, and a short clip of each moment you mark.',
@@ -2947,6 +2982,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       supportLine:'Gratuita, sin anuncios ni registro — nada de lo que procesas sale de este equipo. ',
       pesSeg:'Seguridad de la información', pesComp:'Comparativa', pesPrecos:'Precios',
       sub:'Convierte un vídeo en un PDF con los fotogramas que importan y la transcripción sincronizada, listo para entregar a una IA. Todo se ejecuta en tu navegador: el vídeo no sale de tu ordenador.',
+      viaSemTag:'En este aparato no se puede', viaSemH:'Graba con el propio aparato',
+      viaSemP:'Este navegador no permite grabar la pantalla — y en móviles y tabletas ninguno lo permite, ni Chrome ni Safari. Pero tu aparato ya tiene un grabador de pantalla, y graba la pantalla junto con el micrófono.',
+      viaSemComo:'iPhone y iPad: Centro de Control → Grabación de Pantalla. Android: despliega los ajustes rápidos → Grabador de pantalla. Luego trae el archivo en “Usar un archivo”, en esta misma página.',
+      viaSemLento:'Un aviso honesto: en el móvil la transcripción corre en el procesador, sin tarjeta gráfica — funciona, pero despacio, y el modelo es una descarga grande. Si puedes, graba en el móvil y monta el documento en el ordenador.',
       viaRecTag:'Empieza por aquí', viaRecH:'Grabar la pantalla ahora',
       viaRecP:'Haces el recorrido en la pantalla y dices lo que estás haciendo. No se guarda vídeo: salen solo las pantallas que cambiaron y tu narración transcrita.',
       viaRecPclipe:'Haces el recorrido en la pantalla y dices lo que estás haciendo. La grabación entera se descarta: salen las pantallas que cambiaron, tu narración transcrita y un clip corto de cada momento que marques.',
@@ -3483,6 +3522,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       supportLine:'Kostenlos, ohne Werbung und ohne Registrierung — nichts, was Sie verarbeiten, verlässt diesen Computer. ',
       pesSeg:'Informationssicherheit', pesComp:'Vergleich', pesPrecos:'Preise',
       sub:'Machen Sie aus einem Video ein PDF mit den Screenshots, die zählen, und der synchronisierten Transkription — fertig zur Übergabe an eine KI. Alles läuft in Ihrem Browser: Das Video verlässt Ihren Computer nicht.',
+      viaSemTag:'Auf diesem Gerät geht es nicht', viaSemH:'Nehmen Sie mit dem Gerät selbst auf',
+      viaSemP:'Dieser Browser kann den Bildschirm nicht aufnehmen — und auf Handys und Tablets kann es keiner, weder Chrome noch Safari. Ihr Gerät hat aber bereits einen Bildschirmrekorder, und der nimmt den Bildschirm zusammen mit dem Mikrofon auf.',
+      viaSemComo:'iPhone und iPad: Kontrollzentrum → Bildschirmaufnahme. Android: Schnelleinstellungen aufziehen → Bildschirmrekorder. Bringen Sie die Datei danach unter „Eine Datei verwenden“ herüber, auf derselben Seite.',
+      viaSemLento:'Ein ehrlicher Hinweis: Auf dem Handy läuft die Transkription auf dem Prozessor, ohne Grafikkarte — es funktioniert, aber langsam, und das Modell ist ein großer Download. Wenn möglich: auf dem Handy aufnehmen, das Dokument am Computer bauen.',
       viaRecTag:'Hier beginnen', viaRecH:'Jetzt den Bildschirm aufnehmen',
       viaRecP:'Sie gehen den Ablauf am Bildschirm durch und sprechen dabei, was Sie tun. Es wird kein Video gespeichert: Heraus kommen nur die Bildschirme, die sich geändert haben, und Ihr gesprochener Kommentar als Transkription.',
       viaRecPclipe:'Sie gehen den Ablauf am Bildschirm durch und sprechen dabei, was Sie tun. Die gesamte Aufnahme wird verworfen: Heraus kommen die Bildschirme, die sich geändert haben, Ihr gesprochener Kommentar als Transkription und ein kurzer Clip zu jedem Moment, den Sie markieren.',
@@ -4025,6 +4068,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       supportLine:'Gratuit, sans publicité et sans inscription — rien de ce que vous traitez ne quitte cet ordinateur. ',
       pesSeg:'Sécurité de l’information', pesComp:'Comparatif', pesPrecos:'Tarifs',
       sub:'Transformez une vidéo en PDF, avec les captures qui comptent et la transcription synchronisée — prêt à remettre à une IA. Tout tourne dans votre navigateur : la vidéo ne quitte pas votre ordinateur.',
+      viaSemTag:'Pas sur cet appareil', viaSemH:'Enregistrez avec l’appareil lui-même',
+      viaSemP:'Ce navigateur ne permet pas d’enregistrer l’écran — et sur téléphone et tablette aucun ne le permet, ni Chrome ni Safari. Mais votre appareil a déjà un enregistreur d’écran, et il capte l’écran avec le microphone.',
+      viaSemComo:'iPhone et iPad : Centre de contrôle → Enregistrement de l’écran. Android : ouvrez les réglages rapides → Enregistreur d’écran. Apportez ensuite le fichier dans « Utiliser un fichier », sur cette même page.',
+      viaSemLento:'Un avertissement honnête : sur téléphone la transcription tourne sur le processeur, sans carte graphique — ça marche, mais lentement, et le modèle est un gros téléchargement. Si vous le pouvez : enregistrez sur le téléphone et montez le document sur l’ordinateur.',
       viaRecTag:'Commencez ici', viaRecH:'Enregistrer l’écran maintenant',
       viaRecP:'Vous parcourez l’écran et dites ce que vous faites. Aucune vidéo n’est conservée : il ne sort que les écrans qui ont changé et votre narration transcrite.',
       viaRecPclipe:'Vous parcourez l’écran et dites ce que vous faites. L’enregistrement entier est jeté : il en sort les écrans qui ont changé, votre narration transcrite, et un clip court de chaque moment que vous marquez.',
@@ -5928,6 +5975,18 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
 
   const podeGravar = !!(navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia);
   if (podeGravar) { $('viaRec').classList.remove('hide'); $('recOpts').classList.remove('hide'); }
+  /* E quando NÃO pode, o lugar não fica vazio. Era o que acontecia: o cartão
+     sumia e nada tomava o lugar dele. A mensagem `recNo` existia, mas só
+     disparava no clique do `#rec` — um botão que, justamente ali, não estava
+     mais na tela. Quem abria no celular via um passo 1 pela metade e não tinha
+     como saber se o produto não fazia ou se o aparelho não deixava.
+
+     Vale para todo celular e tablet (nenhum navegador de lá tem
+     `getDisplayMedia`; no iOS é estrutural, porque todos rodam WebKit) e
+     também para o navegador de mesa antigo que passar por aqui — e o texto é
+     verdade nos dois casos de propósito, porque duas versões da mesma frase é
+     uma delas ficando para trás. */
+  else $('viaSemTela').classList.remove('hide');
 
   const SR_ASR = 16000;              // taxa que o Whisper espera
   const JANELA_S = 20;               // segundos por janela de transcrição

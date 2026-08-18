@@ -1,4 +1,21 @@
-/* A tela de controle do roteiro de casos.
+/* A tela de controle do roteiro de casos — uma rota do PAINEL da conta.
+ *
+ * Ela nasceu como página inteira, com largura própria, título próprio e um
+ * "← Sua conta" no alto para voltar. Era o desenho certo enquanto a conta era
+ * uma página só; virou o errado no dia em que a conta ganhou barra lateral.
+ * O sintoma: clicar em `Casos de teste` no menu fazia o menu SUMIR. A pessoa
+ * saía do painel sem ter pedido para sair, e o único caminho de volta era um
+ * link de texto que ela precisava achar.
+ *
+ * Agora ela mora dentro da casca, como faturas, chamados e time. Com isso
+ * sumiram daqui três coisas que o `carga.tsx` já fazia melhor: a tela de
+ * "entre na sua conta", a de "falta a chave de serviço" e o `try/catch` da
+ * leitura. Cada uma delas escrita duas vezes é uma que um dia responde
+ * diferente da outra.
+ *
+ * A ferramenta continua sendo página inteira, e isso é de propósito: lá a
+ * pessoa está GRAVANDO, e uma barra de menu ao lado de uma captura de tela é
+ * distração no momento em que menos cabe.
  *
  * Ela é separada da ferramenta de propósito. A ferramenta é de quem EXECUTA:
  * grava, revisa, baixa. O roteiro é de quem ORGANIZA — e as duas coisas quase
@@ -16,10 +33,10 @@
  *               a data, o nome do arquivo e a impressão digital dele
  *   não guarda  o vídeo, os quadros, a transcrição, o documento
  */
-import { notFound } from 'next/navigation';
-import { emailDaSessao } from '@/lib/supabase/servidor';
-import { type Conta, contaDe, temChaveDeServico } from '@/lib/supabase/servico';
+import { notFound, redirect } from 'next/navigation';
+import type { Conta } from '@/lib/supabase/servico';
 import { type Lang, type Textos, CAMINHO, ehLang, preencher, textos } from '@/lib/conta/textos';
+import { Envolver, carregar } from '../carga';
 import { type Caso, type Resumo, type Roteiro, CAMINHO_ROTEIRO, linkDoCaso, meusRoteiros, verRoteiro } from '@/lib/conta/roteiro';
 import { apagarAnexoDoCaso, apagarRoteiro, atribuirCaso, marcarFeito } from '../../roteiro-acoes';
 import { lerRecibo, resumoDoRecibo } from '@/lib/conta/recibo';
@@ -39,53 +56,63 @@ export default async function Pagina({ params, searchParams }: PageProps<'/conta
   const t = textos(lang);
   const q = await searchParams;
   const um = (n: string) => (typeof q[n] === 'string' ? (q[n] as string) : null);
-  const email = await emailDaSessao();
+
+  /* Sem sessão, sem chave ou com o banco mudo, quem sabe explicar é a raiz do
+     painel — e ela já explica, com as mesmas palavras para as cinco rotas.
+     Repetir as três telas de recusa aqui era ter uma quarta versão delas.
+     
+     COM UMA EXCEÇÃO, e ela tem motivo. Quando a pessoa volta da ferramenta com
+     `?marcar=…`, o endereço carrega coisas que não existem em nenhum outro
+     lugar: o nome do arquivo que ela acabou de gerar, a impressão digital das
+     telas e o recibo. Mandá-la para a raiz do painel jogaria tudo isso fora, e
+     a única forma de recuperar seria gerar o documento de novo. Então aqui o
+     endereço FICA de pé, dizendo o que falta — e recarregar depois de entrar
+     retoma exatamente de onde parou. */
+  const carga = await carregar();
+  const marcar = Number(um('marcar')) || null;
+  if (carga.estado !== 'ok') {
+    if (!marcar) redirect(CAMINHO[lang]);
+    return (
+      <section style={{ paddingTop: 40 }}>
+        <div className="wrap" style={{ maxWidth: 720 }}>
+          <h1>{t.rotTitulo}</h1>
+          <p className="lead">{t.rotEntreLead}</p>
+          {/* "Não feche esta aba" não é frescura: é a instrução que salva o
+              recibo. Entrar abre outra aba; esta é a que tem o endereço. */}
+          <p className="small muted">{t.rotVoltaGuarde}</p>
+          <p><a className="btn" href={CAMINHO[lang]} target="_blank" rel="noreferrer">{t.entrarBotao}</a></p>
+        </div>
+      </section>
+    );
+  }
 
   return (
-    <section style={{ paddingTop: 40 }}>
-      <div className="wrap" style={{ maxWidth: 900 }}>
-        <p className="small"><a href={CAMINHO[lang]}>← {t.titulo}</a></p>
-        <h1>{t.rotTitulo}</h1>
-        {um('erro') && <p className="aviso err">{um('erro')}</p>}
-        {um('feito') && <p className="aviso ok">{um('feito')}</p>}
-        {!email
-          ? <NaoEntrou lang={lang} t={t} />
-          : !temChaveDeServico
-            ? <p className="aviso err">{t.erroSemChave} <code>SUPABASE_SERVICE_ROLE_KEY</code></p>
-            : <Tela email={email} lang={lang} t={t}
-                    id={Number(um('id')) || null}
-                    marcar={Number(um('marcar')) || null}
-                    arq={um('arq')} imp={um('imp')} rec={um('rec')} />}
-      </div>
-    </section>
+    <Envolver lang={lang} t={t} slug="roteiro" carga={carga}>
+      {/* O título visível é o do bloco de conteúdo. Mas a página precisa de um
+          `h1`: sem ele, quem navega por cabeçalhos com leitor de tela cai num
+          documento que começa no meio. */}
+      <h1 className="soLeitor">{t.rotTitulo}</h1>
+      {um('erro') && <p className="aviso err">{um('erro')}</p>}
+      {um('feito') && <p className="aviso ok">{um('feito')}</p>}
+      <Tela conta={carga.conta} email={carga.email} lang={lang} t={t}
+            id={Number(um('id')) || null}
+            marcar={marcar}
+            arq={um('arq')} imp={um('imp')} rec={um('rec')} />
+    </Envolver>
   );
 }
-
-const NaoEntrou = ({ lang, t }: { lang: Lang; t: Textos }) => (
-  <>
-    <p className="lead">{t.rotEntreLead}</p>
-    <p><a className="btn" href={CAMINHO[lang]}>{t.entrarBotao}</a></p>
-  </>
-);
 
 /* ------------------------------------------------------------------- tela */
 
 async function Tela(
-  { email, lang, t, id, marcar, arq, imp, rec }:
-  { email: string; lang: Lang; t: Textos; id: number | null; marcar: number | null;
+  { conta, email, lang, t, id, marcar, arq, imp, rec }:
+  { conta: Conta; email: string; lang: Lang; t: Textos; id: number | null; marcar: number | null;
     arq: string | null; imp: string | null; rec: string | null },
 ) {
-  let conta: Conta;
-  try {
-    conta = await contaDe(email);
-  } catch (e) {
-    return (
-      <>
-        <p className="aviso err">{t.erroLeitura}</p>
-        <p className="small muted">{String(e).slice(0, 200)}</p>
-      </>
-    );
-  }
+  /* A conta chega pronta, lida uma vez pelo `carga.tsx` que a barra lateral já
+     usou para montar o menu. Ler de novo aqui seria a segunda viagem ao banco
+     na mesma tela — e as duas leituras podendo discordar sobre o plano, que é
+     justamente o que decide o que aparece logo abaixo. */
 
   /* A trava do plano é uma PORTA, não um muro: a tela existe, diz o que o
      recurso faz e onde ele mora. Tela em branco com um cadeado é
