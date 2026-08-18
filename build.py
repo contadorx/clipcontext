@@ -396,7 +396,33 @@ def escrever_marca(root: pathlib.Path) -> None:
     # de o vídeo deles existir: o build.py conferia o arquivo e o lib/site.ts
     # tinha ['pt','en','es'] escrito dentro.
     com_tour = [L for L in IDIOMAS if (root / "public" / "demo" / f"tour.{L}.webm").exists()]
-    rotas = {"idiomas": IDIOMAS, "demoLangs": com_tour, "slugs": SLUGS,
+    # As sub-rotas do painel da conta, traduzidas. Elas são lidas pelo
+    # `next.config.mjs` (que monta a ponte de reescrita) E pelo `lib/conta/nav.ts`
+    # (que monta o menu). Duas tabelas para a mesma coisa é exatamente como o
+    # alemão ficou sem hreflang e depois vendo o tour em inglês — então a tabela
+    # mora aqui, e os dois lados leem.
+    sub_conta = {
+        "roteiro":  {"pt": "roteiro",  "en": "cases",    "es": "casos",       "de": "testfaelle", "fr": "cas-de-test"},
+        "faturas":  {"pt": "faturas",  "en": "invoices", "es": "facturas",    "de": "rechnungen", "fr": "factures"},
+        "chamados": {"pt": "chamados", "en": "tickets",  "es": "incidencias", "de": "tickets",    "fr": "tickets"},
+        "time":     {"pt": "time",     "en": "team",     "es": "equipo",      "de": "team",       "fr": "equipe"},
+        "negocio":  {"pt": "negocio",  "en": "business", "es": "negocio",     "de": "geschaeft",  "fr": "activite"},
+    }
+    # As abas do back-office. Elas NÃO são traduzidas, e isto é uma decisão:
+    # o `/negocio` é o escritório de UMA pessoa — o dono, checado pelo
+    # WALKSTAMP_DONO. Traduzir "cobranças" para cinco idiomas que ninguém vai
+    # abrir seria manutenção paga em cinco lugares para uma tela que tem um
+    # leitor. O que é traduzido é o item do MENU (`navNegocio`), porque ele
+    # divide a barra com itens que clientes leem.
+    #
+    # A lista mora aqui pelo mesmo motivo de todas as outras: o
+    # `next.config.mjs` precisa dela para montar a ponte de reescrita de
+    # `/conta/negocio/<aba>`, e o `lib/conta/negocio.ts` precisa dela para
+    # montar a faixa de abas. Escrita nos dois, é uma aba que existe no menu e
+    # dá 404 no clique.
+    abas_negocio = ["contas", "cobrancas", "chamados", "interesse"]
+    rotas = {"idiomas": IDIOMAS, "demoLangs": com_tour, "subConta": sub_conta,
+             "abasNegocio": abas_negocio, "slugs": SLUGS,
              "metas": {pg: {L: {"titulo": m[L][0], "desc": m[L][1]} for L in IDIOMAS}
                        for pg, m in METAS.items()},
              "scripts": {"detectarIdioma": so_o_js(REDIRECT),

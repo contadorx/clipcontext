@@ -25,11 +25,20 @@ const paginas = Object.keys(slugs);
    própria fatura. Por dentro ela mora em `/conta/<idioma>`. */
 const CONTA = { pt: '/conta', en: '/en/account', es: '/es/cuenta',
                 de: '/de/konto', fr: '/fr/compte' };
-/* A tela de controle do roteiro de casos, dentro da conta e traduzida igual.
-   Ela é separada da ferramenta: quem organiza a fila e quem grava o vídeo são
-   momentos diferentes, e quase sempre pessoas diferentes. */
-const ROTEIRO = { pt: '/conta/roteiro', en: '/en/account/cases', es: '/es/cuenta/casos',
-                  de: '/de/konto/testfaelle', fr: '/fr/compte/cas-de-test' };
+/* AS SUB-ROTAS DO PAINEL, traduzidas como o resto.
+
+   Cada uma precisa de ponte `beforeFiles`, e não `afterFiles`: `/conta/faturas`
+   casa com a rota dinâmica `/conta/[lang]` — com `lang` valendo a palavra
+   "faturas" — e uma reescrita `afterFiles` só é consultada quando NENHUMA rota
+   casou. O resultado seria 404 numa tela que existe. O roteiro já tinha
+   aprendido isso sozinho; agora a regra vale para as quatro.
+
+   Uma tabela só. Duas tabelas para a mesma coisa é exatamente como o alemão
+   ficou sem `hreflang` e depois vendo o tour em inglês. */
+const SUB = rotas.subConta;
+/* O roteiro continua tendo nome próprio porque outros arquivos o citam. */
+const ROTEIRO = Object.fromEntries(
+  Object.keys(CONTA).map((L) => [L, `${CONTA[L]}/${SUB.roteiro[L]}`]));
 /* O site fala cinco idiomas; a área do cliente ainda fala três. Os laços da
    conta andam por ESTA lista, e não por `idiomas` — senão cada idioma novo do
    site pede uma rota de conta que não existe, e o build quebra com um
@@ -104,7 +113,22 @@ const config = {
        consultada quando NENHUMA rota casou. O resultado seria um 404 numa tela
        que existe. `/conta/planilha` não precisa disto: é rota estática de
        verdade, e estática ganha da dinâmica sem ponte nenhuma. */
-    const antes = IDIOMAS_CONTA.map((L) => ({ source: ROTEIRO[L], destination: `/conta/${L}/roteiro` }));
+    const antes = [];
+    for (const [nome, trad] of Object.entries(SUB)) {
+      for (const L of IDIOMAS_CONTA) {
+        antes.push({ source: `${CONTA[L]}/${trad[L]}`, destination: `/conta/${L}/${nome}` });
+      }
+    }
+    /* As abas do back-office são um nível mais fundo — `/conta/negocio/contas`
+       — e caem na MESMA armadilha: `/conta/negocio` já é uma reescrita, e sem
+       ponte própria a aba vira 404. A lista sai do `rotas.json`, e não escrita
+       aqui: uma aba na faixa e ausente nesta ponte é um clique que quebra. */
+    for (const aba of rotas.abasNegocio) {
+      for (const L of IDIOMAS_CONTA) {
+        antes.push({ source: `${CONTA[L]}/${SUB.negocio[L]}/${aba}`,
+                     destination: `/conta/${L}/negocio/${aba}` });
+      }
+    }
 
     return { beforeFiles: antes, afterFiles: depois };
   },
