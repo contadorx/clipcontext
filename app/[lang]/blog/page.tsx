@@ -46,7 +46,10 @@ export default async function Indice({ params }: PageProps<'/[lang]/blog'>) {
 
   return (
     <section style={{ paddingTop: 40 }}>
-      <div className="wrap" style={{ maxWidth: 820 }}>
+      {/* Sem largura própria: a `.wrap` do site já tem uma, e uma segunda
+          aqui desalinhava o título do índice em relação ao logotipo do
+          cabeçalho — 28 px de desencontro que se veem de longe. */}
+      <div className="wrap">
         <h1>{b.titulo}</h1>
         <p className="lead">{b.lead}</p>
 
