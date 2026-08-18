@@ -1072,6 +1072,23 @@
         <input type="number" id="interval" value="10" min="0.5" step="0.5">
       </div>
       <div>
+        <!-- O RITMO. Ele existe porque uma reunião e um passo a passo pedem
+             coisas opostas do mesmo detector: no passo a passo cada troca de
+             tela é um passo e não pode escapar; numa reunião, a tela "muda" o
+             tempo todo — câmeras, cursor, alguém rolando — e guardar tudo dá um
+             quadro a cada dois segundos e um documento que é a mesma reunião
+             fotografada trezentas vezes.
+
+             Ele não é mais um botão para a pessoa entender: o cenário do passo 1
+             já escolhe por ela. Fica visível para quem quiser discordar. -->
+        <label class="f" for="ritmo" data-i18n="lRitmo"></label>
+        <select id="ritmo">
+          <option value="tudo" data-i18n="ritmoTudo"></option>
+          <option value="equilibrado" selected data-i18n="ritmoEquilibrado"></option>
+          <option value="reuniao" data-i18n="ritmoReuniao"></option>
+        </select>
+      </div>
+      <div>
         <label class="f" for="maxf" data-i18n="lMax"></label>
         <input type="number" id="maxf" value="300" min="1" max="2000">
       </div>
@@ -2245,6 +2262,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       s3:'Escolha dos frames', lCrit:'Critério', mScene:'Quando a imagem muda (recomendado)',
       mCount:'Quantidade fixa, espalhados', mInt:'A cada N segundos',
       lSens:'Sensibilidade', lCount:'Quantos frames', lInt:'Intervalo (segundos)',
+      lRitmo:'Ritmo dos quadros',
+      ritmoTudo:'Cada mudança vira quadro',
+      ritmoEquilibrado:'Equilibrado — espera a tela parar',
+      ritmoReuniao:'Reunião — ignora câmeras e vídeo',
       lMax:'Limite de frames', lQual:'Qualidade da imagem',
       lIgnorar:'Ignorar na detecção', ign0:'nada — a tela inteira conta',
       ign1:'a barra de baixo (relógio do Windows)', ign2:'a barra de cima (macOS)', ign3:'as duas barras',
@@ -2799,6 +2820,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       s3:'Frame selection', lCrit:'Method', mScene:'When the image changes (recommended)',
       mCount:'Fixed count, evenly spread', mInt:'Every N seconds',
       lSens:'Sensitivity', lCount:'How many frames', lInt:'Interval (seconds)',
+      lRitmo:'Frame pace',
+      ritmoTudo:'Every change becomes a frame',
+      ritmoEquilibrado:'Balanced — waits for the screen to settle',
+      ritmoReuniao:'Meeting — ignores cameras and video',
       lMax:'Frame limit', lQual:'Image quality',
       lIgnorar:'Ignore in detection', ign0:'nothing — the whole screen counts',
       ign1:'the bottom bar (Windows clock)', ign2:'the top bar (macOS)', ign3:'both bars',
@@ -3347,6 +3372,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       s3:'Elección de fotogramas', lCrit:'Criterio', mScene:'Cuando la imagen cambia (recomendado)',
       mCount:'Cantidad fija, repartidos', mInt:'Cada N segundos',
       lSens:'Sensibilidad', lCount:'Cuántos fotogramas', lInt:'Intervalo (segundos)',
+      lRitmo:'Ritmo de fotogramas',
+      ritmoTudo:'Cada cambio es un fotograma',
+      ritmoEquilibrado:'Equilibrado — espera a que la pantalla pare',
+      ritmoReuniao:'Reunión — ignora cámaras y vídeo',
       lMax:'Límite de fotogramas', lQual:'Calidad de imagen',
       lIgnorar:'Ignorar en la detección', ign0:'nada — cuenta la pantalla entera',
       ign1:'la barra de abajo (reloj de Windows)', ign2:'la barra de arriba (macOS)', ign3:'las dos barras',
@@ -3894,6 +3923,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       s3:'Auswahl der Screenshots', lCrit:'Kriterium', mScene:'Wenn sich das Bild ändert (empfohlen)',
       mCount:'Feste Anzahl, gleichmäßig verteilt', mInt:'Alle N Sekunden',
       lSens:'Empfindlichkeit', lCount:'Wie viele Screenshots', lInt:'Intervall (Sekunden)',
+      lRitmo:'Bildtakt',
+      ritmoTudo:'Jede Änderung wird ein Bild',
+      ritmoEquilibrado:'Ausgewogen — wartet, bis der Bildschirm ruht',
+      ritmoReuniao:'Besprechung — ignoriert Kameras und Video',
       lMax:'Screenshot-Limit', lQual:'Bildqualität',
       lIgnorar:'Bei der Erkennung ignorieren', ign0:'nichts — der gesamte Bildschirm zählt',
       ign1:'die untere Leiste (Windows-Uhr)', ign2:'die obere Leiste (macOS)', ign3:'beide Leisten',
@@ -4447,6 +4480,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       s3:'Sélection des captures', lCrit:'Critère', mScene:'Quand l’image change (recommandé)',
       mCount:'Nombre fixe, répartis', mInt:'Toutes les N secondes',
       lSens:'Sensibilité', lCount:'Combien de captures', lInt:'Intervalle (secondes)',
+      lRitmo:'Rythme des images',
+      ritmoTudo:'Chaque changement devient une image',
+      ritmoEquilibrado:'Équilibré — attend que l’écran se stabilise',
+      ritmoReuniao:'Réunion — ignore caméras et vidéo',
       lMax:'Limite de captures', lQual:'Qualité de l’image',
       lIgnorar:'Ignorer dans la détection', ign0:'rien — tout l’écran compte',
       ign1:'la barre du bas (horloge Windows)', ign2:'la barre du haut (macOS)', ign3:'les deux barres',
@@ -7913,8 +7950,14 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
        aparece — e "sem frames, ainda com problemas" foi como chegou. Estes
        contadores custam nada e transformam a queixa em diagnóstico. */
     let avisoTeto = '', avisouPerto = false;
+    /* O estado do detector novo: quando a mudança começou, quantas amostras
+       seguidas a tela ficou parada, qual foi a última assinatura vista (mesmo
+       nas amostras que não viraram quadro) e quando foi o último quadro. */
+    let mudouEm = -1, paradas = 0, ultimaSig = null, ultimoGuardado = -1;
+    const movimento = criarMovimento();
     motivosFrame = { semVideo: 0, semAssinatura: 0, semImagem: 0, poucaMudanca: 0,
                      limite: 0, maiorDiff: 0, maiorMedia: 0, maiorArea: 0,
+                     cedoDemais: 0, valvula: 0, mascaradas: 0,
                      limiar: thr, erroImagem: '' };
 
     const capturar = (forcar, marcado) => {
@@ -7975,13 +8018,84 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       try { sig = signature(); }
       catch (e) { motivosFrame.semAssinatura++; if (!forcar) return false; }
       if (!liveW) { liveW = video.videoWidth; liveH = video.videoHeight; showMeta(); }
-      if (!forcar && prevSig !== null && sig) {
-        const d = diff(prevSig, sig);
-        if (d > motivosFrame.maiorDiff) motivosFrame.maiorDiff = d;
-        if (ultimaMedida.media > motivosFrame.maiorMedia) motivosFrame.maiorMedia = ultimaMedida.media;
-        if (ultimaMedida.area  > motivosFrame.maiorArea)  motivosFrame.maiorArea  = ultimaMedida.area;
-        if (d < thr) { motivosFrame.poucaMudanca++; return false; }
+
+      if (!forcar && sig) {
+        const r = ritmoAgora();
+        /* A máscara aprende com CADA amostra, inclusive as que não viram
+           quadro: é a sequência de amostras que revela o que se mexe sempre. */
+        if (ultimaSig) motivosFrame.mascaradas = movimento.ver(ultimaSig, sig);
+        const mascara = r.mascara ? movimento.mascara : null;
+
+        if (prevSig !== null) {
+          /* DUAS PERGUNTAS DIFERENTES, e confundi-las foi o defeito.
+           *
+           * A primeira versão comparava tudo contra `prevSig` — a assinatura do
+           * último quadro GUARDADO. Com isso, depois de uma troca de tela a
+           * diferença continuava alta para sempre (a tela nova nunca volta a
+           * parecer com a antiga), a tela nunca "assentava" e só a válvula de
+           * 45 segundos guardava alguma coisa. Medido: três trocas de slide
+           * viraram um quadro.
+           *
+           *   `mexendo`  compara com a AMOSTRA ANTERIOR — a tela ainda está
+           *              mudando? É o que decide se dá para guardar agora.
+           *   `novidade` compara com o último quadro GUARDADO — o que está na
+           *              tela é diferente do que já tenho? É o que decide se
+           *              vale a pena guardar. */
+          const mexendo = ultimaSig ? diff(ultimaSig, sig, mascara) : 255;
+          const novidade = diff(prevSig, sig, mascara);
+          if (novidade > motivosFrame.maiorDiff) motivosFrame.maiorDiff = novidade;
+          if (ultimaMedida.media > motivosFrame.maiorMedia) motivosFrame.maiorMedia = ultimaMedida.media;
+          if (ultimaMedida.area  > motivosFrame.maiorArea)  motivosFrame.maiorArea  = ultimaMedida.area;
+
+          /* Nada de novo em relação ao que já foi guardado: não há o que
+             discutir, e o relógio de assentamento nem começa. */
+          if (novidade >= 0 && novidade < thr) {
+            motivosFrame.poucaMudanca++;
+            mudouEm = -1; paradas = 0; ultimaSig = sig;
+            return false;
+          }
+
+          /* ---- 1. INTERVALO MÍNIMO entre quadros guardados ----
+             O piso que faltava. Sem ele, uma tela que muda de verdade a cada
+             segundo — um terminal rolando, uma animação — vira um quadro por
+             segundo, e o documento deixa de ser um passo a passo para virar um
+             flipbook. */
+          const desde = agora() - ultimoGuardado;
+          if (ultimoGuardado >= 0 && desde < r.minSeg) {
+            motivosFrame.cedoDemais++;
+            /* `prevSig` NÃO é tocado: a mudança que aconteceu durante a espera
+               precisa continuar contando como novidade quando o piso passar. */
+            ultimaSig = sig;
+            return false;
+          }
+
+          /* ---- 2. ESPERAR A TELA ASSENTAR ----
+             Antes, a primeira amostra diferente já virava quadro — e numa troca
+             de tela a primeira amostra é o MEIO da transição: menu abrindo,
+             página em branco, animação pela metade. Agora a mudança abre uma
+             janela e o quadro só sai quando a tela para de mexer por `r.parar`
+             amostras seguidas. Guarda-se o estado final. */
+          if (r.parar > 0) {
+            if (mexendo >= thr) {
+              if (mudouEm < 0) mudouEm = agora();
+              paradas = 0;
+              /* ---- 3. A VÁLVULA ----
+                 Tela que nunca para — vídeo em tela cheia, alguém rolando sem
+                 parar — jamais assentaria, e o documento sairia vazio. Passado
+                 `r.maxEspera`, guarda assim mesmo: um quadro do meio do
+                 movimento é pior que o estado final, e é muito melhor que
+                 quadro nenhum. */
+              if (agora() - mudouEm < r.maxEspera) { ultimaSig = sig; return false; }
+              motivosFrame.valvula++;
+            } else if (++paradas < r.parar) {
+              ultimaSig = sig;
+              return false;
+            }
+            mudouEm = -1; paradas = 0;
+          }
+        }
       }
+
       /* Se a imagem em si não puder ser lida, o motivo é outro do que "não
          mudou" — e ele precisa aparecer com nome próprio. Um `snap` que estoura
          dentro do `setInterval` derrubaria o laço inteiro em silêncio, e o que
@@ -7990,8 +8104,14 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       try { img = snap(900, q); }
       catch (e) { motivosFrame.semImagem++; motivosFrame.erroImagem =
                     (e && e.message) || String(e); return false; }
+      /* Espelho para o teste enxergar por que um quadro entrou ou não. Custa
+         uma atribuição e transforma "guardou pouco" em diagnóstico. */
+      try { window.__motivos = motivosFrame; } catch (e) {}
       frames.push({ t: agora(), img, keep: true, sig, manual: !!marcado });
       prevSig = sig;
+      ultimaSig = sig;
+      ultimoGuardado = agora();
+      mudouEm = -1; paradas = 0;
       atualizarLive();
       return true;
     };
@@ -10212,10 +10332,24 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      A escala casa por acaso feliz com os limiares que já existiam: 5,5 vira
      "2,2% das células mudaram", e 26 vira "10,2%". Uma célula solta (o cursor,
      o relógio da barra) vale 0,4 e não move ninguém. */
-  function diff(a, b){
+  function diff(a, b, mascara){
     if (!a || !b) return 255;
-    let soma = 0, celulas = 0, mudadas = 0;
-    for (let i = 0; i + 2 < a.length; i += 3) {
+    let soma = 0, celulas = 0, mudadas = 0, pulou = 0;
+    for (let i = 0, c = 0; i + 2 < a.length; i += 3, c++) {
+      /* A célula que se mexe SEMPRE não conta.
+
+         É a inteligência que faltava para reunião: numa chamada de vídeo, os
+         quadradinhos das câmeras mudam a cada amostra — rosto, luz, ruído do
+         codec — e arrastavam a diferença da tela inteira para cima do limiar a
+         cada 700 ms. O resultado medido em uso real: um quadro a cada dois
+         segundos, e um documento que é a mesma reunião fotografada trezentas
+         vezes.
+
+         A máscara é construída pelo próprio uso (ver `movMascara`): quem mudou
+         em quase todas as amostras recentes é vídeo, e vídeo não é troca de
+         tela. O que sobra — o slide compartilhado, o documento, o campo que
+         alguém preencheu — volta a decidir sozinho. */
+      if (mascara && mascara[c]) { pulou++; continue; }
       const dr = Math.abs(a[i] - b[i]),
             dg = Math.abs(a[i+1] - b[i+1]),
             db = Math.abs(a[i+2] - b[i+2]);
@@ -10223,10 +10357,116 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       celulas++;
       if (dr > CEL_MUDOU || dg > CEL_MUDOU || db > CEL_MUDOU) mudadas++;
     }
-    const media = soma / a.length;
-    const area  = celulas ? (mudadas / celulas) * 255 : 0;
-    ultimaMedida = { media, area, mudadas, celulas };
+    /* AMOSTRA PEQUENA DEMAIS É "NÃO SEI DIZER", e não "não mudou".
+     *
+     * O caso que ensinou isto: um vídeo em tela cheia mascarou 544 das 576
+     * células. As 32 que sobraram — cantos onde a cor quase não mexe — deram
+     * diferença abaixo do limiar, e o detector concluiu "a tela não mudou" 85
+     * vezes seguidas numa tela que mudava trinta vezes por segundo. O
+     * documento saiu com um quadro.
+     *
+     * Medir num punhado de células é pior do que não medir: produz um número
+     * com cara de resposta. Abaixo de 15% sobrando, ele devolve −1, e quem
+     * decide passa a ser o relógio — que é o certo para uma tela que é vídeo
+     * inteiro. */
+    const MINIMO_CELULAS = Math.ceil((a.length / 3) * 0.15);
+    if (celulas < MINIMO_CELULAS) {
+      ultimaMedida = { media: 0, area: 0, mudadas: 0, celulas, pulou };
+      return -1;
+    }
+    const media = soma / (celulas * 3);
+    const area  = (mudadas / celulas) * 255;
+    ultimaMedida = { media, area, mudadas, celulas, pulou };
     return Math.max(media, area);
+  }
+
+  /* ---------------------------------------------- a máscara de movimento
+
+     Uma célula por posição da assinatura, contando em quantas das últimas
+     amostras ela mudou. Passou de `MOV_FRACAO`, é vídeo: entra na máscara e
+     deixa de opinar.
+
+     `MOV_JANELA` amostras a 700 ms dão uns oito segundos de memória — tempo
+     suficiente para distinguir "a câmera de alguém" de "a tela trocou". E a
+     máscara é reconstruída o tempo todo: quem parou de se mexer volta a contar
+     na amostra seguinte, que é o que faz um vídeo pausado virar um passo. */
+  /* Os três ritmos, e o que cada número faz:
+
+       minSeg     piso entre dois quadros guardados
+       parar      quantas amostras seguidas a tela precisa ficar parada
+       maxEspera  depois de quanto tempo mexendo ele guarda assim mesmo
+       mascara    ignora as células que se mexem em quase toda amostra
+
+     `tudo` é o comportamento antigo, para quem depende dele: cada mudança vira
+     quadro, na hora. Ele continua existindo porque para um passo a passo curto
+     é o certo — e porque tirar de alguém um comportamento em que já confia é
+     pior do que oferecer um melhor ao lado. */
+  const RITMOS = {
+    tudo:        { minSeg: 0,  parar: 0, maxEspera: 0,  mascara: false },
+    /* 1,5 s e não 3.
+     
+       Três segundos derrubaram dois testes que gravam uma sequência rápida — e
+       eles estavam certos em cair. Numa evidência de teste a pessoa clica por
+       uma tela a cada dois segundos, e perder um passo ali é perder a prova do
+       passo. O piso existe para matar o flipbook (um quadro por segundo, ou
+       mais), não para escolher o que é passo. Quem quer menos escolhe
+       `reuniao`; quem não quer piso nenhum escolhe `tudo`. */
+    equilibrado: { minSeg: 1.5, parar: 1, maxEspera: 10, mascara: true  },
+    reuniao:     { minSeg: 12, parar: 2, maxEspera: 45, mascara: true  },
+  };
+  const ritmoAgora = () => RITMOS[($('ritmo') && $('ritmo').value) || 'equilibrado'] || RITMOS.equilibrado;
+
+  /* O cenário do passo 1 escolhe o ritmo, e a pessoa pode discordar depois.
+     Uma ata de reunião e uma evidência de teste pedem coisas opostas do mesmo
+     detector; perguntar duas vezes a mesma coisa é o que o cenário veio
+     evitar. */
+  /* `usabilidade` fica em EQUILIBRADO, e não em reunião.
+   
+     A primeira versão jogou os dois juntos porque os dois têm câmera. Mas o
+     que se documenta numa sessão de usabilidade é o participante NAVEGANDO —
+     cada tela por onde ele passa é o dado, e um piso de doze segundos come
+     metade delas. O rosto dele, que é o que se mexe sempre, já é resolvido
+     pela máscara; ele não precisava de piso nenhum.
+     
+     Foi o teste da webcam que apontou isto, gravando doze segundos e recebendo
+     um quadro. */
+  const RITMO_DO_CENARIO = { ata: 'reuniao',
+                             usabilidade: 'equilibrado', evidencia: 'equilibrado',
+                             tutorial: 'equilibrado', ia: 'equilibrado',
+                             outro: 'equilibrado' };
+
+  const MOV_JANELA = 12;
+  const MOV_FRACAO = 0.6;
+  function criarMovimento(){
+    const N = 32 * 18;
+    const hist = [];                    // cada item: Uint8Array(N) de 0/1
+    const soma = new Uint16Array(N);
+    const mascara = new Uint8Array(N);
+    return {
+      mascara,
+      /* Alimenta com o par (anterior, atual) e devolve quantas células estão
+         mascaradas — o diagnóstico mostra esse número, que é o que explica um
+         "não guardou nada" numa chamada de vídeo. */
+      ver(a, b){
+        if (!a || !b) return 0;
+        const agora = new Uint8Array(N);
+        for (let i = 0, c = 0; i + 2 < a.length; i += 3, c++) {
+          if (Math.abs(a[i] - b[i]) > CEL_MUDOU ||
+              Math.abs(a[i+1] - b[i+1]) > CEL_MUDOU ||
+              Math.abs(a[i+2] - b[i+2]) > CEL_MUDOU) agora[c] = 1;
+        }
+        hist.push(agora);
+        for (let c = 0; c < N; c++) soma[c] += agora[c];
+        if (hist.length > MOV_JANELA) {
+          const velho = hist.shift();
+          for (let c = 0; c < N; c++) soma[c] -= velho[c];
+        }
+        let n = 0;
+        const teto = Math.max(2, Math.ceil(hist.length * MOV_FRACAO));
+        for (let c = 0; c < N; c++) { mascara[c] = soma[c] >= teto ? 1 : 0; n += mascara[c]; }
+        return n;
+      },
+    };
   }
   /* Guardado para o diagnóstico poder mostrar as duas partes separadas — sem
      isso, "maior mudança vista" vira um número sem como ser interpretado. */
@@ -10908,8 +11148,30 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       t('cenTroca', $('modelo').selectedOptions[0] ? $('modelo').selectedOptions[0].textContent : '');
   };
 
+  /* Quem mexeu no ritmo à mão manda: o cenário sugere, e para de sugerir a
+     partir do instante em que a pessoa discordou. Sobrescrever a escolha dela
+     na próxima troca de cenário é o jeito mais rápido de um controle parecer
+     quebrado. */
+  let ritmoManual = false, ritmoAutomatico = false;
+  /* `e.isTrusted` não serve como sinal aqui: ele distingue clique humano de
+     evento sintético, e o que precisa ser distinguido é OUTRA coisa — a troca
+     que o cenário fez da troca que qualquer outro caminho fez. A bandeira é
+     erguida por quem sabe a resposta: o próprio `ritmoDoCenario`. */
+  if ($('ritmo')) $('ritmo').addEventListener('change', () => {
+    if (!ritmoAutomatico) ritmoManual = true;
+  });
+  function ritmoDoCenario(){
+    if (ritmoManual || !$('ritmo')) return;
+    const r = RITMO_DO_CENARIO[$('modelo').value];
+    if (!r || $('ritmo').value === r) return;
+    ritmoAutomatico = true;
+    $('ritmo').value = r;
+    try { $('ritmo').dispatchEvent(new Event('change', { bubbles: true })); } finally { ritmoAutomatico = false; }
+  }
+
   $('modelo').onchange = () => {
     const m = modeloAtual();
+    ritmoDoCenario();
     $('layout').value = m.layout;
     pintarBloco();
     $('goal').value   = m.goal;
