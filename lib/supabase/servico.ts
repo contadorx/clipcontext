@@ -126,6 +126,7 @@ export type Painel = {
     diagnostico: string | null; criado_em: string; respondido_em: string | null;
   }>;
   interesse: Array<{ email: string; idioma: string | null; criado_em: string }>;
+  nps: Nps;
   uso: {
     formato: Array<{ chave: string; n: number }>;
     idioma: Array<{ chave: string; n: number }>;
@@ -135,3 +136,16 @@ export type Painel = {
 };
 
 export const painelDoNegocio = () => rpc<Painel>('walkstamp_negocio_painel', {});
+
+/** O NPS, calculado no banco a partir das notas de 0 a 10 que o site coleta.
+ *  `quantos` viaja junto de propósito: um NPS de duas respostas não é um NPS, e
+ *  −50 lido de duas notas parece catástrofe. */
+export type Nps = {
+  total: number; promotores: number; passivos: number; detratores: number;
+  media: number | null; nps: number | null;
+  faixas: Array<{ chave: string; n: number }>;
+};
+
+export const responderChamado = (numero: string, texto: string) =>
+  rpc<{ ok?: boolean; erro?: string; email?: string | null }>(
+    'walkstamp_chamado_responder', { p_numero: numero, p_texto: texto });

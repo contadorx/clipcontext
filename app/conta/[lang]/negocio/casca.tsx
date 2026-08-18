@@ -42,7 +42,7 @@ function Abas({ lang, aba }: { lang: Lang; aba: string }) {
 
 export function paginaDoNegocio(
   aba: string,
-  Conteudo: (p: { d: Painel }) => React.ReactNode,
+  Conteudo: (p: { d: Painel; lang: Lang }) => React.ReactNode,
 ) {
   return async function Pagina({ params }: { params: Promise<{ lang: string }> }) {
     const { lang } = await params;
@@ -66,7 +66,7 @@ export function paginaDoNegocio(
       <Envolver lang={lang} t={t} slug="negocio" carga={carga}>
         <h1 className="soLeitor">{t.navNegocio}</h1>
         <Abas lang={lang} aba={aba} />
-        {d ? <Conteudo d={d} /> : (
+        {d ? <Conteudo d={d} lang={lang} /> : (
           <div className="card">
             <h2>Não deu para ler o painel</h2>
             <p className="small muted">

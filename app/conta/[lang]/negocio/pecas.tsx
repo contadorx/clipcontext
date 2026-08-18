@@ -10,6 +10,8 @@
  * enquanto a lista ao lado mostra 4 porque foram lidos em segundos diferentes.
  */
 import type { Painel } from '@/lib/supabase/servico';
+import type { Lang } from '@/lib/conta/textos';
+import { responder } from './acoes';
 
 /* ---------------------------------------------------------------- formatos */
 
@@ -86,7 +88,7 @@ export function Barras({ titulo, itens, vazio }: {
 
 /* ------------------------------------------------------------------- radar */
 
-export function Radar({ d }: { d: Painel }) {
+export function Radar({ d }: { d: Painel; lang?: Lang }) {
   const r = d.resumo;
   /* O assento pago e parado é a conversa mais útil que este painel puxa: é
      dinheiro que já entrou e valor que não está sendo entregue — o que aparece
@@ -108,6 +110,9 @@ export function Radar({ d }: { d: Painel }) {
   }
   if (r.interesse30 > 0) {
     atencao.push(`${r.interesse30} pessoa(s) pediram aviso nos últimos 30 dias e ainda não viraram conta.`);
+  }
+  if (d.nps.total >= 10 && d.nps.nps !== null && d.nps.nps < 0) {
+    atencao.push(`NPS negativo (${d.nps.nps}) em ${d.nps.total} respostas — há mais detratores que promotores.`);
   }
 
   return (
@@ -153,6 +158,43 @@ export function Radar({ d }: { d: Painel }) {
         </div>
       </div>
 
+      <div className="card" style={{ marginBottom: 24 }}>
+        <h2>NPS</h2>
+        <p className="small muted" style={{ marginTop: 0 }}>
+          Sai das notas de 0 a 10 que a caixinha do site coleta — que já é a
+          escala do NPS de verdade, e não uma de 1 a 5 travestida. Promotores são
+          9 e 10, detratores 0 a 6; quem está em 7 e 8 não entra na conta, e é
+          assim que o índice foi definido.
+        </p>
+        {d.nps.total === 0 ? (
+          <p className="small muted">Nenhuma nota ainda.</p>
+        ) : (
+          <>
+            <div className="negNums">
+              <Num rotulo="NPS" valor={d.nps.nps === null ? '—' : String(d.nps.nps)}
+                   nota={`${d.nps.total} resposta(s)`}
+                   alerta={d.nps.nps !== null && d.nps.nps < 0} />
+              <Num rotulo="Nota média" valor={d.nps.media === null ? '—' : String(d.nps.media)} />
+              <Num rotulo="Promotores" valor={String(d.nps.promotores)} nota="9 e 10" />
+              <Num rotulo="Detratores" valor={String(d.nps.detratores)} nota="0 a 6"
+                   alerta={d.nps.detratores > d.nps.promotores} />
+            </div>
+            {/* Com menos de dez respostas o índice não diz nada, e mostrá-lo sem
+                esta ressalva é convidar a decidir roteiro de produto em cima de
+                três pessoas. */}
+            {d.nps.total < 10 && (
+              <p className="small muted" style={{ marginTop: 12 }}>
+                São {d.nps.total} respostas. Abaixo de umas dez, este número
+                oscila muito com uma nota só — olhe a distribuição, não o índice.
+              </p>
+            )}
+            <div style={{ marginTop: 16 }}>
+              <Barras titulo="Distribuição das notas" itens={d.nps.faixas} vazio="—" />
+            </div>
+          </>
+        )}
+      </div>
+
       <div className="card">
         <h2>Precisa de você</h2>
         {atencao.length === 0 ? (
@@ -172,7 +214,7 @@ export function Radar({ d }: { d: Painel }) {
 
 /* ------------------------------------------------------------------ contas */
 
-export function Contas({ d }: { d: Painel }) {
+export function Contas({ d }: { d: Painel; lang?: Lang }) {
   return (
     <>
       <div className="card" style={{ marginBottom: 24 }}>
@@ -242,7 +284,7 @@ export function Contas({ d }: { d: Painel }) {
 
 /* --------------------------------------------------------------- cobranças */
 
-export function Cobrancas({ d }: { d: Painel }) {
+export function Cobrancas({ d }: { d: Painel; lang?: Lang }) {
   /* Vencidas primeiro. Ordenar por data seria o padrão e estaria errado: a
      razão de abrir esta tela é achar o que não foi pago, e ele estaria no meio
      da lista, indistinguível. */
@@ -294,7 +336,7 @@ export function Cobrancas({ d }: { d: Painel }) {
 
 /* ---------------------------------------------------------------- chamados */
 
-export function Chamados({ d }: { d: Painel }) {
+export function Chamados({ d, lang }: { d: Painel; lang: Lang }) {
   /* Sem resposta primeiro, e dentro disso o mais velho no topo: a fila que
      importa é a de quem está esperando há mais tempo, não a do que chegou
      por último. */
@@ -345,6 +387,23 @@ export function Chamados({ d }: { d: Painel }) {
                   <span className="muted">respondido {faz(c.respondido_em)}:</span> {c.resposta}
                 </p>
               )}
+              {/* Responder aqui dentro, e não pelo e-mail.
+                  Pelo e-mail a resposta existe na caixa de duas pessoas e em
+                  lugar nenhum do produto: a própria pessoa, que abre
+                  `/conta/chamados` para ver, continua vendo "sem resposta".
+                  Gravar aqui é o que faz o chamado ficar respondido dos dois
+                  lados. O e-mail continua sendo um link, para quando a conversa
+                  precisar de ida e volta. */}
+              {!c.resposta && c.numero && (
+                <form action={responder} style={{ marginTop: 10, display: 'grid', gap: 8 }}>
+                  <input type="hidden" name="lang" value={lang} />
+                  <input type="hidden" name="numero" value={c.numero} />
+                  <textarea name="texto" rows={3} required
+                            placeholder="Responder a este chamado"
+                            aria-label={`Responder ao chamado ${c.numero}`} />
+                  <div><button className="btn" type="submit">Responder</button></div>
+                </form>
+              )}
             </li>
           ))}
         </ul>
@@ -355,7 +414,7 @@ export function Chamados({ d }: { d: Painel }) {
 
 /* --------------------------------------------------------------- interesse */
 
-export function Interesse({ d }: { d: Painel }) {
+export function Interesse({ d }: { d: Painel; lang?: Lang }) {
   /* Quem já virou conta some da lista: um "pediu aviso" que já entrou não é
      conversão pendente, é ruído — e ruído numa lista de contato é o jeito mais
      rápido de escrever para a pessoa errada. */
