@@ -250,6 +250,30 @@
     texte — et ils existent pour que le diagnostic reste disponible si la page est rechargée après
     que quelque chose a mal tourné. Cela disparaît à la fermeture de l’onglet, comme le reste.</p>
 
+    <h2>Les écrans d’un enregistrement en cours</h2>
+    <p>C’est la seule chose que l’outil garde plus longtemps que l’onglet, et elle existe pour une
+    raison concrète : <b>un onglet peut planter</b>. Avant, un plantage à 110 minutes d’un
+    enregistrement de deux heures effaçait les deux heures — et, lors d’une longue attente, fermer
+    l’onglet est justement la décision que prend toute personne raisonnable.</p>
+    <p>C’est pourquoi, pendant que vous enregistrez, chaque écran capturé est aussi écrit dans le
+    <b>stockage privé de votre navigateur</b> (l’<i>Origin Private File System</i>). Cela reste
+    <b>sur votre ordinateur</b>, dans une zone que seule cette page peut lire, et n’est <b>envoyé
+    nulle part</b> — le test du F12 tient toujours : chargez une vidéo de plusieurs gigaoctets et les
+    octets envoyés restent à zéro.</p>
+    <p>Trois choses qui méritent d’être écrites :</p>
+    <ul>
+      <li><b>Cela s’efface tout seul dès qu’un document sort.</b> À l’instant où vous générez le PDF,
+      le Word, le .zip ou toute autre sortie, le travail a quitté l’outil et la copie sur le disque
+      est supprimée.</li>
+      <li><b>Cela s’efface tout seul au bout de sept jours</b>, même si aucun document n’est sorti.</li>
+      <li><b>On peut le désactiver</b>, dans la case &laquo;&nbsp;Garder les écrans sur mon ordinateur
+      pendant que j’enregistre&nbsp;&raquo; à l’étape 1. La décocher efface sur-le-champ ce qui était
+      déjà stocké — elle ne se contente pas d’arrêter d’écrire ensuite.</li>
+    </ul>
+    <p>Quand un enregistrement est stocké, l’étape 1 le dit franchement — combien d’écrans, de quand,
+    quelle place — et propose les deux seules choses qu’on puisse vouloir : le récupérer ou le
+    jeter.</p>
+
     <h2>Cookies</h2>
     <p>Nous n’utilisons ni cookies propres ni cookies de tiers — ni pour le pistage, ni pour la publicité,
     ni pour la mesure. Le décompte des visites et les trois jalons décrits ci-dessus fonctionnent <b>sans cookie et sans

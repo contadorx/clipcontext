@@ -125,6 +125,17 @@ PARES = [
 
 if __name__ == '__main__':
     import sys
+    # A REGRESSÃO LÊ DAQUI.
+    #
+    # O `testes/preview.mjs` repinta o site e a ferramenta em cada paleta para
+    # inspeção visual. Ele lia isto de um `/tmp/paletas.json` escrito à mão uma
+    # vez, que não viajava no zip: quem abria o pacote via o teste morrer com
+    # ENOENT, e quem mexesse numa cor aqui repintaria com as cores velhas sem
+    # saber. Duas listas, uma delas de mentira. Agora é uma.
+    if '--json' in sys.argv:
+        import json
+        print(json.dumps(PALETAS, ensure_ascii=False))
+        sys.exit(0)
     ruim = 0
     for chave, p in PALETAS.items():
         print(f"\n=== {p['nome']} ===")

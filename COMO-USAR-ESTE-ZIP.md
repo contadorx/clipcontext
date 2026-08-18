@@ -59,3 +59,30 @@ Estratégia e decisões, cada um respondendo a uma pergunta:
 Vários deles estão no `.gitignore` de propósito: são de estratégia, e um repositório
 público guardaria o histórico para sempre. Se um dia publicar algum, tire da lista com
 intenção — não por descuido.
+
+## Para conferir que ele funciona
+
+```bash
+bash testes/preparar.sh     # reaponta a regressão e gera os vídeos de amostra
+npm install                 # o playwright, que os testes usam
+python3 build.py
+bash testes/rapido.sh app   # ~4 min
+bash testes/rodar.sh        # a regressão inteira, ~50 min
+```
+
+`testes/LEIA-ME.md` explica as duas esteiras e diz **o que não roda a partir deste
+zip**: os três testes de licença e um bloco do `semmarca` dependem de
+`emitir-licenca.py` e de `PLANO-TIME.md`, que guardam as chaves privadas e não podem
+viajar aqui. Eles pulam dizendo isso, em vez de morrer com um erro que parece defeito
+do produto.
+
+## Para montar o próximo zip
+
+```bash
+bash testes/empacotar.sh          # -> /tmp/walkstamp.zip, montado de dentro e AUDITADO
+```
+
+Ele monta de dentro da raiz (montar da pasta de cima já vazou as chaves uma vez),
+confere por nome **e por conteúdo** — procura o material da chave, não a palavra —, e
+cobra também o que tem que estar lá: sem os testes, o pacote entrega o produto sem a
+rede que prova que ele funciona.

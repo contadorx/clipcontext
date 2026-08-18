@@ -209,6 +209,34 @@
   @media (prefers-reduced-motion: reduce){ .bar.indef>i{animation:none} }
   .status{font-size:13px;color:var(--muted);min-height:19px}
   .thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:9px;margin-top:16px}
+  /* ---- por que a grade NÃO é virtualizada ----
+
+     A proposta era `IntersectionObserver` na `.thumbs`: instanciar o `<figure>`
+     completo só para o que está visível e reciclar o resto. Medi antes
+     (`testes/grade.mjs`, passo fixo de 120 px por quadro de tela, que é o ritmo
+     de quem rola com o dedo):
+
+       300 quadros:  47,5 · 47,2 · 51,9 FPS   render() 15–22 ms
+       900 quadros:  45,4 FPS                 render() 47 ms
+
+     Não há problema de rolagem para consertar. Três mil nós de DOM não incomodam
+     um navegador de 2026.
+
+     Tentei mesmo assim o caminho mais barato — `content-visibility:auto` com
+     `contain-intrinsic-size`, que deixa o motor do navegador pular o que está
+     fora da tela sem tirar nada do documento. Medido três vezes de cada lado,
+     ele deixou a rolagem PIOR:
+
+       300 quadros:  43,1 · 43,1 · 40,9 FPS  (contra 47,5 · 47,2 · 51,9)
+       900 quadros:  34,3 FPS, render() 91 ms (contra 45,4 e 47 ms)
+
+     Foi removido. E a virtualização à mão, que custaria muito mais, cobraria o
+     pior preço possível: o campo de anotação seria RECICLADO, e reciclar um campo
+     com texto dentro apaga o comentário de quem acabou de digitar. Além disso,
+     tirar `<figure>` do documento quebra de uma vez a barra de rolagem, o
+     Ctrl+F, o leitor de tela e a contagem de passos.
+
+     Se um dia a medição mudar, ela está guardada em `testes/grade.mjs`. */
   .thumbs figure{margin:0;position:relative;border-radius:6px;overflow:hidden;
                  border:2px solid transparent;transition:.12s;background:var(--bg)}
   .thumbs figure:hover{border-color:var(--accent)}
@@ -222,7 +250,13 @@
      irmão dele. `all:unset` desfaz o estilo global de button sem cascata. */
   .thumbs .toque{all:unset;display:block;width:100%;cursor:pointer}
   .thumbs .toque:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
-  .thumbs img{width:100%;display:block}
+  /* `height:auto` com os atributos `width`/`height` no `<img>`: é assim que o
+     navegador reserva a caixa CERTA antes de a imagem chegar. Sem isso a
+     miniatura tem altura zero até carregar, a fileira inteira encolhe e salta
+     quando as imagens entram — e, pior, os botões que ficam por cima dela
+     (a lupa, as setas de mover) se empilham uns sobre os outros num quadro de
+     altura zero. */
+  .thumbs img{width:100%;height:auto;display:block}
   .thumbs figcaption{font:11px ui-monospace,Menlo,monospace;color:var(--muted);padding:4px 0 5px;text-align:center}
   .thumbs figcaption .passo{display:block;color:var(--ink);font-weight:700;font-size:11.5px}
   .thumbs figcaption .rel{display:block;font-size:10px;margin-top:1px}
@@ -484,6 +518,18 @@
         border-radius:8px;background:var(--panel);color:var(--ink);font:inherit;font-size:15px;
         font-weight:550}
   .cenario .status{flex-basis:100%;margin:0}
+  /* A caixa da gravação que ficou para trás. Contorno na cor da marca pelo mesmo
+     motivo do seletor de cenário sem resposta: é uma pergunta em aberto, e quem
+     abre a ferramenta depois de perder duas horas precisa ver isso antes de ver
+     qualquer outra coisa. */
+  .cenario.espelho{border-color:var(--accent);flex-direction:column;align-items:stretch;
+        background:color-mix(in srgb,var(--accent) 6%,var(--bg))}
+  .espelhoTopo b{display:block;font-size:15px;color:var(--ink)}
+  .espelhoTopo .status{margin:3px 0 0}
+  .espelhoLista{list-style:none;margin:4px 0 0;padding:0;display:grid;gap:7px}
+  .espelhoLista li{display:flex;gap:10px;align-items:center;flex-wrap:wrap;
+        border-top:1px solid var(--line);padding-top:7px;font-size:13.5px;color:var(--muted)}
+  .espelhoLista li b{color:var(--ink);font-weight:650}
   /* Enquanto ninguém escolheu, a caixa PARECE uma pergunta em aberto: contorno
      na cor da marca, e a linha de baixo dizendo por que a pergunta importa.
      Depois de respondida ela volta a ser um campo comum — o realce é para quem
@@ -780,6 +826,32 @@
       <span class="status" id="reabrirMsg" data-i18n="reabrirDica"></span>
     </div>
 
+    <!-- ---- a gravação que ficou para trás ----
+
+         Este bloco só existe porque uma aba pode morrer. Enquanto se grava, cada
+         tela é ESPELHADA no armazenamento privado do navegador (OPFS) — no
+         computador de quem usa, sem sair de lá. Se a aba fechar, travar ou for
+         recarregada, o trabalho continua existindo, e é aqui que ele reaparece.
+
+         Ele fica ACIMA do "recuperar um documento" e não dentro dele porque as
+         duas coisas são diferentes: aquilo é um arquivo que a pessoa tem na mão;
+         isto é um trabalho que ela achava que tinha perdido. Só aparece quando há
+         o que recuperar — um bloco permanente dizendo "nada aqui" seria ruído
+         numa tela cujo primeiro trabalho é fazer alguém apertar Gravar. -->
+    <div class="cenario espelho hide" id="espelhoCx">
+      <div class="espelhoTopo">
+        <b id="espelhoTit"></b>
+        <span class="status" id="espelhoSub"></span>
+      </div>
+      <div class="row" style="gap:9px;flex-wrap:wrap">
+        <button id="espelhoAbrir" type="button" class="sm"></button>
+        <button id="espelhoJogar" type="button" class="ghost sm"></button>
+        <button id="espelhoTodas" type="button" class="ghost sm hide"></button>
+      </div>
+      <ul class="espelhoLista hide" id="espelhoLista"></ul>
+      <span class="status" id="espelhoMsg"></span>
+    </div>
+
 
     <!-- O roteiro de casos NÃO mora mais aqui.
          Ele virou tela própria, em /conta/roteiro. O motivo é de ritmo: quem
@@ -891,6 +963,21 @@
             <input type="number" id="recAutoMin" value="45" min="1" max="240"
                    style="width:66px;padding:4px 7px;font-size:13px;margin-left:8px">
             <span class="status" data-i18n="recAutoMinLbl"></span></label>
+          <!-- O espelho no disco.
+
+               A ferramenta promete não guardar nada, e essa promessa é o
+               argumento inteiro do produto — então esta caixa não podia ser
+               ligada em silêncio. Ela está aqui, marcada, dizendo o que faz e
+               onde: no armazenamento privado do NAVEGADOR, na máquina de quem
+               usa, sem sair de lá; e apagado sozinho assim que um documento sai.
+
+               Marcada por padrão porque o custo de errar tem tamanhos muito
+               diferentes: desligada, um travamento aos 110 minutos apaga duas
+               horas; ligada, ficam alguns megabytes no disco de quem usa até o
+               documento ficar pronto. A caixa desliga, e o bloco do passo 1
+               apaga na hora. -->
+          <label class="opt hide" id="recEspelhoCx"><input type="checkbox" id="recEspelho" checked><span data-i18n="recEspelhoLbl"></span>
+            <b class="optNota rec" data-i18n="recEspelhoNota"></b></label>
           <!-- O clipe e a webcam saíram da lista e viraram um botão: são a
                opção mais rara e a que mais precisa de explicação, e as duas
                juntas ocupavam metade do cartão para servir a um cenário só. -->
@@ -2403,6 +2490,12 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
   const video = $('v');
   let manual = [], fileName = '', fileSize = 0, currentFile = null, frames = [], stop = false;
 
+  /* O espelho por onde a régua enxerga os quadros (`testes/pesagem.mjs`).
+     É uma FUNÇÃO e não a referência: `frames` é reatribuído quando alguém
+     recomeça, e uma referência guardada mediria a gravação anterior para
+     sempre — um instrumento que mente é pior do que instrumento nenhum. */
+  try { window.__quadros = () => frames; } catch (e) {}
+
   /* ================= idiomas ================= */
   const I18N = {
     pt: {
@@ -2827,6 +2920,18 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       reabrirBtn:'Abrir um documento gerado antes',
       resetNota:'joga fora o que está na tela e começa do zero',
       reabrirDica:'para corrigir um passo sem regravar — aceita o .json e o .zip que saíram daqui',
+      recEspelhoLbl:'Guardar as telas no meu computador enquanto gravo',
+      recEspelhoNota:'para não perder tudo se a aba fechar',
+      espTit:'Uma gravação ficou aqui.',
+      espSub:'{0} telas, de {1} ({2}). Elas foram guardadas no seu computador enquanto você gravava, porque nenhum documento chegou a sair. Nada disso saiu do seu aparelho.',
+      espAbrir:'Trazer de volta',
+      espJogar:'Jogar fora',
+      espTodas:'ver as outras ({0})',
+      espItemAbrir:'trazer de volta',
+      espItemJogar:'jogar fora',
+      espFeito:'{0} telas de volta. Confira e gere o documento — o que estava guardado no disco já foi apagado.',
+      espErro:'Não consegui ler o que estava guardado: {0}',
+      espFalhou:'Não consegui guardar as telas no seu computador ({0}). A gravação continua, mas se a aba fechar antes de sair um documento, ela se perde.',
       reabrirLendo:'Lendo o arquivo…',
       reabrirOk:'{0} quadros de volta. Corrija o que precisar e gere de novo.',
       reabrirTarja:'As tarjas voltam queimadas na imagem: elas nunca foram uma camada por cima, e não há como desfazê-las.',
@@ -3378,6 +3483,18 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       reabrirBtn:'Open a document made earlier',
       resetNota:'throws away what is on screen and starts from zero',
       reabrirDica:'to fix one step without re-recording — takes the .json and the .zip that came out of here',
+      recEspelhoLbl:'Keep the screens on my computer while I record',
+      recEspelhoNota:'so nothing is lost if the tab closes',
+      espTit:'A recording was left here.',
+      espSub:'{0} screens, from {1} ({2}). They were kept on your computer while you were recording, because no document ever came out. None of it left your device.',
+      espAbrir:'Bring it back',
+      espJogar:'Throw it away',
+      espTodas:'see the others ({0})',
+      espItemAbrir:'bring back',
+      espItemJogar:'throw away',
+      espFeito:'{0} screens are back. Check them and generate the document — what was on disk has already been erased.',
+      espErro:'I could not read what was stored: {0}',
+      espFalhou:'I could not keep the screens on your computer ({0}). The recording continues, but if the tab closes before a document comes out, it is lost.',
       reabrirLendo:'Reading the file…',
       reabrirOk:'{0} frames back. Fix what you need and generate again.',
       reabrirTarja:'Redactions come back burned into the image: they were never a layer on top, and there is no undoing them.',
@@ -3553,6 +3670,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       driveErr:'No pude traer el archivo de Drive.',
       driveNoScope:'Google denegó el acceso a este archivo. Elige el archivo por el selector y no por un acceso directo.',
       driveBlocked:'El navegador bloqueó la ventana de Google. Permite las ventanas emergentes para este sitio e inténtalo de nuevo.',
+      demoHasAudio:'El ejemplo está narrado: la transcripción ya viene rellenada, pero puedes borrarla y pulsar "Transcribir automáticamente" para ver el reconocimiento de voz en acción.',
+      mark:'Marcar este momento',
       recBtn:'Grabar la pantalla', recStopBtn:'Detener grabación',
       recAdiantando:'Descargando el modelo de voz ahora, para no retrasar la grabación. Elige la pantalla cuando quieras.',
       recPronto:'Modelo listo. La grabación empieza al instante.',
@@ -3712,8 +3831,6 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       recTailN:'Faltan {0} tramos por transcribir.',
       recTailPular:'Pulsa “{0}” otra vez para no esperar.',
       prSpk:'La transcripción viene de dos canales separados: “Micrófono” es quien está en el ordenador, y “Ordenador” es el sonido que salió de los altavoces — en una reunión, las demás personas.',
-      demoHasAudio:'El ejemplo está narrado: la transcripción ya viene rellenada, pero puedes borrarla y pulsar "Transcribir automáticamente" para ver el reconocimiento de voz en acción.',
-      mark:'Marcar este momento',
       marked:'{0} momento(s) marcado(s) — se incluyen siempre, aunque la imagen no cambie.',
       mDur:'duración', mRes:'resolución', mFile:'archivo',
       videoErr:'El navegador no pudo abrir este vídeo. Conviértelo a MP4 (H.264) e inténtalo de nuevo.',
@@ -3929,6 +4046,18 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       reabrirBtn:'Abrir un documento hecho antes',
       resetNota:'tira lo que está en pantalla y empieza de cero',
       reabrirDica:'para corregir un paso sin volver a grabar — acepta el .json y el .zip que salieron de aquí',
+      recEspelhoLbl:'Guardar las pantallas en mi ordenador mientras grabo',
+      recEspelhoNota:'para no perderlo todo si se cierra la pestaña',
+      espTit:'Quedó una grabación aquí.',
+      espSub:'{0} pantallas, del {1} ({2}). Se guardaron en tu ordenador mientras grababas, porque no llegó a salir ningún documento. Nada de esto salió de tu dispositivo.',
+      espAbrir:'Recuperarla',
+      espJogar:'Descartarla',
+      espTodas:'ver las otras ({0})',
+      espItemAbrir:'recuperar',
+      espItemJogar:'descartar',
+      espFeito:'{0} pantallas de vuelta. Revísalas y genera el documento — lo que estaba en el disco ya se borró.',
+      espErro:'No pude leer lo que estaba guardado: {0}',
+      espFalhou:'No pude guardar las pantallas en tu ordenador ({0}). La grabación sigue, pero si se cierra la pestaña antes de salir un documento, se pierde.',
       reabrirLendo:'Leyendo el archivo…',
       reabrirOk:'{0} fotogramas de vuelta. Corrige lo que haga falta y genera otra vez.',
       reabrirTarja:'Los tapados vuelven quemados en la imagen: nunca fueron una capa encima, y no hay forma de deshacerlos.',
@@ -4485,6 +4614,18 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       reabrirBtn:'Ein zuvor erzeugtes Dokument öffnen',
       resetNota:'verwirft, was auf dem Bildschirm steht, und beginnt bei null',
       reabrirDica:'um einen Schritt zu korrigieren, ohne neu aufzunehmen — nimmt die .json und die .zip, die hier entstanden sind',
+      recEspelhoLbl:'Die Bildschirme während der Aufnahme auf meinem Computer behalten',
+      recEspelhoNota:'damit nichts verloren geht, wenn der Tab schließt',
+      espTit:'Hier ist eine Aufnahme liegen geblieben.',
+      espSub:'{0} Bildschirme vom {1} ({2}). Sie wurden während der Aufnahme auf Ihrem Computer behalten, weil nie ein Dokument herauskam. Nichts davon hat Ihr Gerät verlassen.',
+      espAbrir:'Zurückholen',
+      espJogar:'Verwerfen',
+      espTodas:'die anderen ansehen ({0})',
+      espItemAbrir:'zurückholen',
+      espItemJogar:'verwerfen',
+      espFeito:'{0} Bildschirme sind zurück. Prüfen Sie sie und erzeugen Sie das Dokument — was auf der Festplatte lag, wurde bereits gelöscht.',
+      espErro:'Ich konnte das Gespeicherte nicht lesen: {0}',
+      espFalhou:'Ich konnte die Bildschirme nicht auf Ihrem Computer behalten ({0}). Die Aufnahme läuft weiter, aber wenn der Tab schließt, bevor ein Dokument herauskommt, ist sie verloren.',
       reabrirLendo:'Die Datei wird gelesen…',
       reabrirOk:'{0} Screenshots zurück. Korrigieren Sie, was nötig ist, und erzeugen Sie erneut.',
       reabrirTarja:'Die Schwärzungen kommen fest in das Bild eingebrannt zurück: Sie waren nie eine Ebene darüber, und sie lassen sich nicht rückgängig machen.',
@@ -5041,6 +5182,18 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       reabrirBtn:'Ouvrir un document généré auparavant',
       resetNota:'jette ce qui est à l’écran et repart de zéro',
       reabrirDica:'pour corriger une étape sans réenregistrer — accepte le .json et le .zip sortis d’ici',
+      recEspelhoLbl:'Garder les écrans sur mon ordinateur pendant que j’enregistre',
+      recEspelhoNota:'pour ne rien perdre si l’onglet se ferme',
+      espTit:'Un enregistrement est resté ici.',
+      espSub:'{0} écrans, du {1} ({2}). Ils ont été gardés sur votre ordinateur pendant l’enregistrement, parce qu’aucun document n’est sorti. Rien de tout cela n’a quitté votre appareil.',
+      espAbrir:'Le récupérer',
+      espJogar:'Le jeter',
+      espTodas:'voir les autres ({0})',
+      espItemAbrir:'récupérer',
+      espItemJogar:'jeter',
+      espFeito:'{0} écrans récupérés. Vérifiez-les et générez le document — ce qui était sur le disque a déjà été effacé.',
+      espErro:'Je n’ai pas pu lire ce qui était stocké : {0}',
+      espFalhou:'Je n’ai pas pu garder les écrans sur votre ordinateur ({0}). L’enregistrement continue, mais si l’onglet se ferme avant qu’un document sorte, il est perdu.',
       reabrirLendo:'Lecture du fichier…',
       reabrirOk:'{0} captures récupérées. Corrigez ce qu’il faut et générez de nouveau.',
       reabrirTarja:'Les caviardages reviennent incrustés dans l’image : ils n’ont jamais été une couche par-dessus, et il n’y a pas moyen de les défaire.',
@@ -5535,6 +5688,11 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     $('lang').value = LANG;   // idioma da transcrição acompanha o da interface
     notaTr();
     passos();                 // as dicas dos passos não têm data-i18n: são escritas aqui
+    /* O bloco da gravação guardada também é escrito à mão, com número dentro
+       ("15 telas, de …"), e por isso não tem `data-i18n` para o laço acima
+       traduzir. Sem esta linha ele ficaria no idioma anterior — e é justamente
+       o bloco que alguém lê quando acabou de perder duas horas de trabalho. */
+    if (typeof pintarEspelho === 'function') pintarEspelho();
   }
 
 
@@ -6510,7 +6668,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
            telas viravam seis arquivos gigantes onde bastavam três. Quem quer
            Markdown para colar numa wiki continua tendo — pelo botão "Traduzir",
            um idioma por vez, que é como esse uso acontece de verdade. */
-        entradas.push({ nome: nomeBase() + '-' + alvo + '.html', dados: bytesDe(montarHtml()) });
+        entradas.push({ nome: nomeBase() + '-' + alvo + '.html', dados: bytesDe(await montarHtml()) });
       }
     } catch (e) {
       $('multiMsg').innerHTML = `<span class="err">${(e && e.message) || t('tradErro')}</span>`;
@@ -6521,7 +6679,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       $('multiGerar').disabled = false;
     }
     if (!entradas.length) return;
-    baixarBlob(zipar(entradas), 'idiomas-' + nomeBase() + '.zip');
+    baixarBlob(await zipar(entradas), 'idiomas-' + nomeBase() + '.zip');
     medir('baixou_saida', { p_formato: 'zip' });
     $('multiMsg').innerHTML = `<span class="ok">${t('multiFeito', entradas.length)}</span>`;
   };
@@ -6555,9 +6713,9 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
            procura na pasta depois, não "gravação de terça". */
         $('evCaso').value = c.nome;
         const base = nomeBase();
-        entradas.push({ nome: base + '.html', dados: bytesDe(montarHtml()) });
-        entradas.push({ nome: base + '.md',   dados: bytesDe(montarMd()) });
-        entradas.push({ nome: base + '.csv',  dados: bytesDe(montarCsv()) });
+        entradas.push({ nome: base + '.html', dados: bytesDe(await montarHtml()) });
+        entradas.push({ nome: base + '.md',   dados: bytesDe(await montarMd()) });
+        entradas.push({ nome: base + '.csv',  dados: bytesDe(await montarCsv()) });
       }
     } catch (e) {
       $('pdfStatus').innerHTML = `<span class="err">${t('pkgErr', (e && e.message) || e)}</span>`;
@@ -6568,7 +6726,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       emUso.delete('capPacote'); $('capPacote').disabled = false;
     }
     if (!entradas.length) return;
-    baixarBlob(zipar(entradas), 'tarefas-' + nomeBase() + '.zip');
+    baixarBlob(await zipar(entradas), 'tarefas-' + nomeBase() + '.zip');
     medir('baixou_saida', { p_formato: 'zip' });
     $('pdfStatus').innerHTML = `<span class="ok">${t('capPacoteOk', caps.length)}</span>`;
   };
@@ -7006,6 +7164,10 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     if (!notaAlvo) return;
     notaAlvo.nota = ($('recNota').value || '').slice(0, 180);
     avisarNotaGuardada();
+    /* O comentário também é trabalho, e some junto se ficar só na memória. Ele
+       vai para o espelho pelo índice do quadro que está sendo comentado — não
+       pela posição na tela, que muda quando alguém move um passo depois. */
+    espelharNota(frames.indexOf(notaAlvo) + 1, notaAlvo.nota);
     if (pipNota && pipNota.value !== $('recNota').value) pipNota.value = $('recNota').value;
   };
 
@@ -7361,7 +7523,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
        o nome do vídeo novo. Frames vindos de arquivo não são tocados — ali a
        varredura já os substitui sozinha. */
     if (liveDur > 0) {
-      frames = []; esqueceuOQueGerou();
+      trocarQuadros([]); esqueceuOQueGerou();
       $('thumbs').innerHTML = '';
       $('grabbed').textContent = '';
       $('liveBox').classList.add('hide');
@@ -8187,7 +8349,10 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     if (morreu()) return desistir(t('recEnded'), 'err');
 
     // ---- estado inicial da captura ----
-    frames = []; manual = []; limparLive(); esqueceuOQueGerou();
+    trocarQuadros([]); manual = []; limparLive(); esqueceuOQueGerou();
+    /* O espelho abre junto com a gravação e sem ser esperado: se o OPFS demorar
+       ou falhar, quem não pode atrasar é a captura. */
+    abrirEspelho().then(pintarEspelho).catch(() => {});
     $('grabbed').textContent = '';
     filaAsr.length = 0; asrPendentes = 0;
     $('tr').value = ''; refreshTr();
@@ -8411,7 +8576,37 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     motivosFrame = { semVideo: 0, semAssinatura: 0, semImagem: 0, poucaMudanca: 0,
                      limite: 0, maiorDiff: 0, maiorMedia: 0, maiorArea: 0,
                      cedoDemais: 0, valvula: 0, mascaradas: 0, guardados: 0,
-                     limiar: thr, erroImagem: '' };
+                     limiar: thr, erroImagem: '',
+                     bloqueio: 0, piorTarefa: 0, tarefas: 0, motor: '', comTr: false };
+
+    /* ---- QUANTO O FIO PRINCIPAL FICOU TRAVADO, medido na máquina de quem usa ----
+
+       Esta é a pergunta que eu não consigo responder daqui. Medi o custo da
+       captura de tela com a transcrição DESLIGADA — 59 FPS, 2,4% de fio
+       bloqueado — e concluí que não havia problema. Mas o Whisper roda numa
+       escada de ambientes: no primeiro degrau (`proxy: true` + WebGPU) a
+       inferência sai do fio principal e o número continua valendo; nos degraus
+       de queda ela volta para cá, e aí a resposta é outra.
+
+       Em qual degrau as máquinas reais caem é coisa que só as máquinas reais
+       sabem. Então o instrumento vai junto com elas, e sai no Diagnóstico — que
+       é o botão que a pessoa aperta quando algo dá errado, a lição que já custou
+       uma rodada inteira a este projeto.
+
+       `longtask` é uma tarefa que passou de 50 ms; o que excede isso é tempo em
+       que a página não pinta e não atende clique. */
+    try {
+      if (obsTarefas) obsTarefas.disconnect();
+      obsTarefas = new PerformanceObserver(lista => {
+        if (!motivosFrame) return;
+        for (const e of lista.getEntries()) {
+          motivosFrame.tarefas++;
+          motivosFrame.bloqueio += Math.max(0, e.duration - 50);
+          if (e.duration > motivosFrame.piorTarefa) motivosFrame.piorTarefa = e.duration;
+        }
+      });
+      obsTarefas.observe({ entryTypes: ['longtask'] });
+    } catch (e) { /* Firefox e Safari não têm; o resto da gravação não depende */ }
 
     const capturar = (forcar, marcado) => {
       if (!video.videoWidth) { motivosFrame.semVideo++; return false; }
@@ -8586,6 +8781,9 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
          uma atribuição e transforma "guardou pouco" em diagnóstico. */
       try { window.__motivos = motivosFrame; } catch (e) {}
       frames.push({ t: agora(), img, keep: true, sig, manual: !!marcado });
+      /* E vai para o disco. Depois do `push`, nunca antes: a lista é a verdade,
+         e o espelho é o que a segue — nunca o contrário. */
+      espelharQuadro(frames[frames.length - 1], frames.length);
       motivosFrame.guardados++;
       prevSig = sig;
       ultimaSig = sig;
@@ -8724,6 +8922,12 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
         motivosFrame.video = video.videoWidth + '×' + video.videoHeight;
         motivosFrame.limite_max = limiteAgora();
         motivosFrame.passo_ms = PASSO_FRAME_MS;
+        /* O degrau em que o modelo subiu vai JUNTO do bloqueio: separados, os
+           dois números não respondem nada. "2,4% de fio travado" só quer dizer
+           alguma coisa quando se sabe se a inferência estava no worker ou aqui. */
+        motivosFrame.motor = motorEmUso || '';
+        motivosFrame.comTr = !!($('recTr') && $('recTr').checked);
+        try { if (obsTarefas) obsTarefas.disconnect(); } catch (e) {}
         guardarMotivos();
       }
       emCauda = true; pularCauda = false;
@@ -8916,6 +9120,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     a.download = `${nome}.${ext}`;
     a.click();
     setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+    registrarSaida();
     /* srt e txt entram como 'vtt' de propósito: o vocabulário da função no
        servidor é fechado, e o que interessa aqui é "saiu legenda", não qual. */
     medir('baixou_saida', { p_formato: ext === 'json' ? 'json' : 'vtt' });
@@ -9390,6 +9595,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
      a página perderia justamente o relatório que veio buscar. Morre com a aba,
      como o resto: são contadores de tela, não conteúdo. */
   const FRAMES_CHAVE = 'Walkstamp.ultimaCaptura';
+  let obsTarefas = null;
   let motivosFrame = (() => {
     try { return JSON.parse(sessionStorage.getItem(FRAMES_CHAVE) || 'null'); }
     catch (e) { return null; }
@@ -10555,6 +10761,64 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     say('wasm de fábrica: ' + (wasmPadrao === undefined ? '(a biblioteca resolve sozinha)' : wasmPadrao));
     say('wasm reserva  : ' + (b || 'nenhum respondeu'));
 
+    /* ---- MEMÓRIA, medida na máquina de quem usa ----
+
+       A pergunta que ficou em aberto: quanto uma gravação de duas horas ocupa de
+       verdade, com fila de áudio e clipes, e não só os quadros. Daqui eu consigo
+       medir os quadros (13,6 KB cada, medido) e não consigo medir o modelo de
+       voz, que é o suspeito de dominar tudo — ele não sobe nesta máquina.
+
+       `measureUserAgentSpecificMemory` responde a pergunta inteira, incluindo
+       worker, WebAssembly e Blob, e ela existe justamente porque a página é
+       isolada entre origens (o `credentialless` do `next.config.mjs`, que a
+       proposta queria trocar por `require-corp` e que é o que faz isto e o
+       `SharedArrayBuffer` funcionarem).
+
+       Ela é lenta de propósito — o navegador espera uma coleta de lixo — e por
+       isso mora aqui, no botão que se aperta quando há um problema, e não num
+       laço durante a gravação. */
+    say('');
+    say('memória:');
+    {
+      let bytes = 0;
+      for (const f of frames) {
+        [f.img, f.tarjado, f.orig].forEach(im => { if (im) bytes += pesoDe(im); });
+      }
+      say('  quadros nesta aba: ' + frames.length + '   ' + (bytes / 1048576).toFixed(1) + ' MB' +
+          (frames.length ? '   (' + (bytes / frames.length / 1024).toFixed(1) + ' KB cada)' : ''));
+      say('  clipes de vídeo  : ' + frames.filter(f => f.clipe).length);
+      say('  espelho no disco : ' +
+          (!(await espelhoServe()) ? (espelhoExiste()
+              ? 'o navegador tem OPFS mas ele recusou aqui (de file:// a origem é opaca)'
+              : 'este navegador não tem OPFS')
+            : !espelhoQuer() ? 'desligado pela pessoa'
+            : espelho ? ('gravando — ' + espelho.n + ' telas' +
+                         (espelho.erro ? '   FALHOU: ' + espelho.erro : ''))
+            : 'ligado (nenhuma gravação em curso)'));
+      if (performance.measureUserAgentSpecificMemory) {
+        try {
+          const r = await performance.measureUserAgentSpecificMemory();
+          say('  a aba inteira    : ' + (r.bytes / 1048576).toFixed(1) + ' MB');
+          /* Por tipo, porque um total sozinho não se interpreta: 300 MB de
+             WebAssembly e 300 MB de imagem pedem consertos opostos. */
+          const porTipo = {};
+          (r.breakdown || []).forEach(b2 => {
+            const k = (b2.types || ['?']).join('+');
+            porTipo[k] = (porTipo[k] || 0) + b2.bytes;
+          });
+          Object.entries(porTipo).sort((x, y) => y[1] - x[1]).slice(0, 6)
+            .forEach(([k, v]) => say('     ' + (v / 1048576).toFixed(1).padStart(8) + ' MB  ' + k));
+        } catch (e) { say('  a aba inteira    : não deu para medir (' + ((e && e.message) || e) + ')'); }
+      } else {
+        /* A API só é EXPOSTA em página isolada entre origens, então a ausência é
+           ambígua — e um diagnóstico ambíguo manda procurar no lugar errado.
+           O `crossOriginIsolated` desfaz a dúvida em uma palavra. */
+        say('  a aba inteira    : não disponível   (isolamento entre origens: ' +
+            (typeof crossOriginIsolated !== 'undefined' && crossOriginIsolated ? 'sim' : 'não') +
+            ' — de file:// e sem os cabeçalhos do site ela não existe)');
+      }
+    }
+
     say('');
     say('última gravação de tela:');
     if (!motivosFrame) say('  (nenhuma gravação nesta aba ainda)');
@@ -10571,6 +10835,16 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
           '  mudança abaixo do limiar=' + (m.poucaMudanca || 0) +
           '  limite atingido=' + (m.limite || 0));
       if (m.erroImagem) say('  erro ao gravar a imagem: ' + String(m.erroImagem).slice(0, 200));
+      /* O fio principal. Esta linha existe para uma pergunta que só a máquina de
+         quem usa responde: em qual degrau da escada do Whisper ela caiu, e
+         quanto isso custou de travamento. */
+      say('  fio principal    : bloqueado ' + Math.round(m.bloqueio || 0) + ' ms' +
+          (m.segundos ? ' em ' + m.segundos.toFixed(0) + ' s (' +
+            ((m.bloqueio || 0) / (m.segundos * 1000) * 100).toFixed(1) + '%)' : '') +
+          '   pior tarefa ' + Math.round(m.piorTarefa || 0) + ' ms' +
+          (m.tarefas ? '   (' + m.tarefas + ' tarefas longas)' : '   (nenhuma tarefa longa)'));
+      say('  transcrição      : ' + (m.comTr ? 'ligada' : 'desligada') +
+          '   motor: ' + (m.motor || '(não subiu)'));
       say('  mudança: maior vista=' + (m.maiorDiff || 0).toFixed(1) +
           '   limiar em vigor=' + (m.limiar || 0).toFixed(1) + '   (escala 0–255)');
       say('    das duas partes: média=' + (m.maiorMedia || 0).toFixed(1) +
@@ -10724,6 +10998,557 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     });
   }
 
+  /* ================= a imagem de um quadro =================
+
+     Durante muito tempo um quadro era uma STRING: `c.toDataURL('image/jpeg')`,
+     base64, morando no heap JavaScript. Isso custava três coisas ao mesmo tempo:
+
+       1. base64 infla o binário em 33% — 41 KB de JPEG viram 54 KB de texto;
+       2. o texto mora no heap, que é exatamente onde o navegador aperta
+          primeiro, e onde o coletor de lixo precisa andar por cima;
+       3. e um JPEG é o dobro de um WebP na mesma qualidade. Medido nesta
+          máquina, sobre uma captura de tela de verdade a 900 px:
+          JPEG q0,85 = 40,8 KB (PSNR 38,95) contra WebP q0,85 = 22,5 KB
+          (PSNR 40,11). O WebP é MENOR e mais fiel ao mesmo tempo.
+
+     Agora um quadro é um Blob fora do heap, com uma URL para a tela.
+
+     O preço é que `canvas.toBlob` é assíncrono, e não existe caminho síncrono
+     de canvas para bytes em navegador nenhum. Por isso toda imagem nasce com
+     `pronta`, e quem precisa dos pixels espera por ela. Ler `.url` sem passar
+     por `pronta` é o defeito clássico deste desenho: funciona na máquina de
+     quem escreveu e falha na de quem usa. */
+
+  /* WebP não é universal. A pergunta é feita UMA vez, num canvas de 8×8, e
+     `toDataURL` responde na hora — quem não sabe codificar WebP devolve PNG e o
+     prefixo entrega. `toDataURL` e `toBlob` compartilham o mesmo codificador,
+     então perguntar a um e usar o outro não é chute. */
+  const FORMATO = (() => {
+    try {
+      const c = document.createElement('canvas'); c.width = c.height = 8;
+      return c.toDataURL('image/webp').indexOf('data:image/webp') === 0
+        ? 'image/webp' : 'image/jpeg';
+    } catch (e) { return 'image/jpeg'; }
+  })();
+
+  /* O formato do ARQUIVO é sempre JPEG. Três razões, todas medidas:
+
+       - **Word e PowerPoint anteriores a 2021 não leem WebP.** O público desta
+         ferramenta é justamente quem trabalha em estação travada por política de
+         empresa, que é onde o Office velho vive. Uma imagem que não abre num
+         documento de evidência é pior do que uma imagem grande.
+
+       - **O `.json` de sessão precisa continuar reabrível pelas versões
+         anteriores**, e isso só vale se o que está lá dentro continuar sendo o
+         mesmo JPEG de sempre.
+
+       - **O SHA-256.** O jsPDF converte WebP para JPEG por conta própria — foi
+         medido, e eu tinha diagnosticado errado antes de medir: cheguei a
+         escrever aqui que ele gravava bytes WebP sob a etiqueta `/DCTDecode`.
+         Não grava; `pdfimages -list` mostra JPEG válido nos dois casos. Mas se
+         QUEM converte for ele, a imagem que chega ao PDF deixa de ser a imagem
+         cuja impressão digital o documento imprime ao lado — e o hash passaria a
+         provar um arquivo que ninguém recebeu. Converter aqui é o que mantém as
+         duas coisas sendo a mesma coisa.
+
+     O custo medido de transcodificar é 7,4 ms por quadro, uma vez por saída. */
+  const FORMATO_DOC = 'image/jpeg';
+
+  /* Toda imagem criada aqui. Não serve para revogar "no caminho que descarta o
+     quadro" — essa seria uma lista escrita à mão ao lado de uma lista de
+     verdade, e a lista de verdade é `frames`. Serve para VARRER: veja
+     `recolherImagens`. Guarda o OBJETO e não a URL, porque a varredura precisa
+     saber uma coisa a mais sobre cada imagem: se ela já chegou à lista. */
+  const IMAGENS = new Set();
+
+  function novaImagem(c, q){
+    const im = { w: c.width, h: c.height, url: '', blob: null, tipo: FORMATO, q,
+                 arquivo: null, chegou: false };
+    IMAGENS.add(im);
+    im.pronta = new Promise(res => {
+      const guardar = b => {
+        /* Sem Blob não há imagem, e uma imagem vazia num documento de evidência
+           é uma tela que ninguém viu. A queda é o caminho de sempre — data URL
+           — e ela é a MESMA para quem não tem `toBlob` e para quem tem e
+           falhou, porque duas quedas são duas coisas para manter. */
+        if (!b) {
+          im.tipo = FORMATO_DOC;
+          im.url = c.toDataURL(FORMATO_DOC, q);
+          return res(im);
+        }
+        im.blob = b; im.tipo = b.type || FORMATO;
+        im.url = URL.createObjectURL(b);
+        res(im);
+      };
+      try { c.toBlob(guardar, FORMATO, q); } catch (e) { guardar(null); }
+    });
+    return im;
+  }
+
+  /* Uma imagem que veio de fora (um `.json` reaberto, uma imagem do zip, uma
+     tela colada). Entra pela mesma porta para sair pelas mesmas portas. */
+  function imagemDeBlob(blob, w, h){
+    const im = { w, h, url: URL.createObjectURL(blob), blob,
+                 tipo: blob.type || FORMATO_DOC, q: null, arquivo: null,
+                 chegou: false };
+    im.pronta = Promise.resolve(im);
+    IMAGENS.add(im);
+    return im;
+  }
+
+  const carregarImagem = src => new Promise((ok, err) => {
+    const i = new Image();
+    i.onload = () => ok(i);
+    i.onerror = () => err(new Error('imagem'));
+    i.src = src;
+  });
+
+  /* Põe uma imagem num elemento da tela. Existe para que ninguém precise
+     lembrar de esperar `pronta`: quem esquece vê um `<img>` vazio só na máquina
+     em que a codificação demora, que nunca é a de quem escreveu o código. */
+  function pintarEm(el, im, comoFundo){
+    if (!el || !im) return Promise.resolve();
+    return im.pronta.then(() => {
+      if (comoFundo) el.style.backgroundImage = 'url(' + im.url + ')';
+      else el.src = im.url;
+    }, () => {});
+  }
+
+  /* A ÚNICA porta por onde uma imagem sai daqui para um arquivo — PDF, DOCX,
+     PPTX, SCORM, HTML, zip e o `.json` da sessão passam todos por aqui.
+
+     Guardar o resultado no próprio objeto não é só velocidade: é o que garante
+     que o SHA-256 impresso no anexo e a imagem embutida no documento são os
+     MESMOS bytes. Dois transcodes independentes dariam o mesmo resultado por
+     sorte do codificador, e evidência não se apoia em sorte. O cache é solto
+     por `recolherImagens` junto com o quadro. */
+  async function paraArquivo(im){
+    await im.pronta;
+    if (im.arquivo) return im.arquivo;
+    if (im.blob && im.tipo === FORMATO_DOC) { im.arquivo = im.blob; return im.arquivo; }
+    const el = await carregarImagem(im.url);
+    const c = document.createElement('canvas');
+    c.width = im.w; c.height = im.h;
+    c.getContext('2d').drawImage(el, 0, 0, c.width, c.height);
+    im.arquivo = await new Promise(r => c.toBlob(r, FORMATO_DOC, im.q == null ? 0.85 : im.q));
+    return im.arquivo;
+  }
+
+  /* Quanto um quadro pesa AGORA, em bytes, seja qual for a forma em que está.
+     A régua (`testes/pesagem.mjs`) e o "tamanho estimado" da tela fazem a mesma
+     pergunta, e ela tem uma resposta só. */
+  const pesoDe = im => !im ? 0 : (im.blob ? im.blob.size : (im.url || '').length * 0.75);
+
+  /* O tamanho estimado do documento fala de JPEG — que é o que vai para o
+     arquivo — e o que está na memória é WebP. A razão entre os dois depende da
+     tela, não de uma constante: uma tela de texto comprime diferente de um
+     gráfico. Então ela é MEDIDA numa amostra, uma vez, e reaplicada. Até a
+     medida chegar vale 1, que erra para baixo — melhor um número um pouco baixo
+     do que um número inventado. */
+  let razaoArquivo = 1;
+  let medindoRazao = false;
+  async function medirRazaoArquivo(f){
+    if (!f || medindoRazao || razaoArquivo !== 1 || FORMATO === FORMATO_DOC) return;
+    medindoRazao = true;
+    try {
+      const im = telaDe(f);
+      await im.pronta;
+      const a = await paraArquivo(im);
+      if (a && im.blob && im.blob.size) {
+        razaoArquivo = a.size / im.blob.size;
+        counts();
+      }
+    } catch (e) { /* sem razão medida, segue com 1 */ }
+    medindoRazao = false;
+  }
+
+  async function bytesDoArquivo(im){
+    return new Uint8Array(await (await paraArquivo(im)).arrayBuffer());
+  }
+  async function dataUrlDoArquivo(im){
+    const b = await paraArquivo(im);
+    return await new Promise((ok, err) => {
+      const fr = new FileReader();
+      fr.onload = () => ok(fr.result);
+      fr.onerror = err;
+      fr.readAsDataURL(b);
+    });
+  }
+
+  /* A varredura. Um Blob que ninguém revoga é o vazamento que a proposta dizia
+     estar consertando — e a receita óbvia ("revogar em todo caminho que
+     descarta um quadro") é a receita que este projeto já pagou caro para não
+     escrever: apagar, refazer, recomeçar a gravação, reabrir um `.json`,
+     recortar, queimar uma tarja, colar uma tela, duplicar um passo na lente.
+     Nove caminhos hoje, dez amanhã, e o décimo é o que vaza.
+
+     Então não se revoga por caminho: pergunta-se a `frames` quem ainda está
+     vivo e solta-se o resto. Duplicar um passo compartilha o mesmo objeto de
+     imagem — e por isso ele continua em uso enquanto qualquer cópia existir,
+     de graça, sem contador de referência.
+
+     `chegou` é a única sutileza, e ela custou uma tarde: uma imagem nasce ANTES
+     de entrar na lista. Reabrir um `.json` monta trezentas imagens novas e só
+     então troca `frames`; se uma varredura acontecer no meio — e acontece, o
+     `render()` da lista velha dispara uma —, todas as recém-nascidas seriam
+     revogadas por ainda não estarem em lugar nenhum. O navegador não avisa: ele
+     entrega `<img>` com `naturalWidth` zero, a miniatura fica com altura zero, e
+     o que se vê na tela é a lupa embaixo da seta de mover.
+
+     Uma imagem só pode ser recolhida depois de ter chegado à lista pelo menos
+     uma vez. Antes disso ela está a caminho. */
+  function recolherImagens(){
+    const vivas = new Set();
+    const marcar = im => { if (im) vivas.add(im); };
+    frames.forEach(f => { marcar(f.img); marcar(f.tarjado); marcar(f.orig); });
+    marcar(marcaCliente && marcaCliente.img);
+    for (const im of IMAGENS) {
+      if (vivas.has(im)) {
+        im.chegou = true;
+        /* O JPEG de exportação é transitório por definição: existe para escrever
+           um arquivo, não para ficar. Solto aqui, ele nunca soma com o WebP por
+           mais de uma exportação. */
+        im.arquivo = null;
+        continue;
+      }
+      if (!im.chegou) continue;
+      if (im.url) URL.revokeObjectURL(im.url);
+      IMAGENS.delete(im);
+    }
+    try { window.__vivas = IMAGENS.size; } catch (e) {}
+  }
+  /* Trocar a lista inteira de quadros — recomeçar, gravar de novo, reabrir um
+     documento, juntar vários arquivos. Existe para que a varredura não dependa
+     de alguém lembrar: quem troca a lista solta o que saiu dela, no mesmo
+     gesto, e não num `URL.revokeObjectURL` copiado para cinco lugares. */
+  function trocarQuadros(novos){
+    frames = novos;
+    recolherImagens();
+  }
+
+  /* Fechar a aba com a gravação aberta também solta: o navegador limparia
+     sozinho, mas um `pagehide` explícito é o que torna o vazamento testável. */
+  addEventListener('pagehide', () => {
+    for (const im of IMAGENS) if (im.url) URL.revokeObjectURL(im.url);
+    IMAGENS.clear();
+  });
+
+  /* ================= o espelho no disco =================
+
+     O PROBLEMA, e ele não é memória: hoje um travamento da aba perde a gravação
+     inteira. Duas horas que morrem aos 110 minutos voltam como nada. E o pior
+     é que a decisão racional de quem está numa espera cega — fechar a aba — é
+     exatamente a que destrói o trabalho.
+
+     A RESPOSTA NÃO É trocar de lugar. Os quadros continuam no array, porque é
+     isso que faz `file://` funcionar e porque o OPFS não existe em navegador
+     nenhum de iPhone antigo. Quando ele EXISTE, cada quadro é também gravado no
+     disco assim que capturado. Um caminho só, com espelho opcional — nunca dois
+     caminhos de persistência disputando qual é o verdadeiro.
+
+     TRÊS DECISÕES QUE MERECEM ESTAR ESCRITAS:
+
+     1. **O índice é append-only** (`indice.jsonl`, uma linha por quadro).
+        Reescrever um índice inteiro a cada quadro custa gravação crescente numa
+        reunião de duas horas — e, pior, um arquivo reescrito pode ser truncado
+        no meio, que é justamente a hora em que ele precisa estar inteiro. Uma
+        linha quebrada no fim se joga fora; um arquivo quebrado no meio, não.
+
+     2. **A sessão é apagada quando um documento sai.** O espelho existe para
+        atravessar o acidente, não para virar arquivo. Assim que a pessoa baixa
+        qualquer coisa, o trabalho saiu da ferramenta e o que estava no disco
+        deixou de ter dono. Sem essa regra, o disco de quem usa toda semana
+        enche em silêncio — e o bloco do passo 1 viraria uma lista de gravações
+        velhas que ninguém quer.
+
+     3. **Isto mexe com a promessa central do produto**, e por isso está numa
+        caixa marcada, com o texto na tela e na política: o que fica guardado
+        são as TELAS da gravação em curso, no armazenamento privado do
+        navegador, na máquina de quem usa. Nada sai de lá — a aba continua sem
+        mandar um byte para lugar nenhum, e isso é conferível no F12. */
+
+  const ESPELHO_PASTA = 'gravacoes';
+  const ESPELHO_CHAVE = 'Walkstamp.espelho';
+  /* Sete dias. Uma gravação que sobreviveu a uma semana sem virar documento não
+     vai virar — e o disco de quem usa não é nosso para encher. */
+  const ESPELHO_DIAS = 7;
+
+  const espelhoExiste = () => {
+    try { return !!(navigator.storage && navigator.storage.getDirectory); }
+    catch (e) { return false; }
+  };
+  const espelhoQuer = () => {
+    try { return localStorage.getItem(ESPELHO_CHAVE) !== 'nao'; } catch (e) { return true; }
+  };
+
+  /* A API EXISTIR NÃO É A MESMA COISA QUE ELA FUNCIONAR.
+     Num arquivo aberto de `file://` — que é exatamente como o pacote offline é
+     usado — a origem é opaca e o OPFS recusa. Uma caixa marcada dizendo "guardo
+     as suas telas" num lugar onde nada é guardado é uma promessa sem código
+     atrás, e é a pior das promessas: a pessoa grava duas horas confiando nela.
+     Então se pergunta ao disco, uma vez, e se guarda a resposta. */
+  let espelhoServeCache = null;
+  async function espelhoServe(){
+    if (espelhoServeCache !== null) return espelhoServeCache;
+    if (!espelhoExiste()) { espelhoServeCache = false; return false; }
+    /* Só LER a raiz: perguntar não pode criar pasta na máquina de quem só abriu
+       a página e não vai gravar nada. */
+    try { await navigator.storage.getDirectory(); espelhoServeCache = true; }
+    catch (e) { espelhoServeCache = false; }
+    return espelhoServeCache;
+  }
+
+  let espelho = null;          // a sessão em curso, quando há uma
+
+  async function pastaEspelho(criar){
+    const raiz = await navigator.storage.getDirectory();
+    return await raiz.getDirectoryHandle(ESPELHO_PASTA, { create: !!criar });
+  }
+  async function escreverNoEspelho(dir, nome, dados){
+    const h = await dir.getFileHandle(nome, { create: true });
+    const w = await h.createWritable();
+    await w.write(dados);
+    await w.close();
+  }
+  async function lerDoEspelho(dir, nome){
+    const h = await dir.getFileHandle(nome);
+    return await (await h.getFile()).text();
+  }
+
+  /* Começa a espelhar. Devolve `null` sem drama quando o navegador não tem OPFS
+     ou quando a pessoa desmarcou a caixa: gravar continua funcionando, que é a
+     única coisa que não pode depender disto. */
+  async function abrirEspelho(){
+    espelho = null;
+    if (!espelhoQuer() || !(await espelhoServe())) return null;
+    try {
+      const pai = await pastaEspelho(true);
+      const comecou = new Date();
+      const id = comecou.toISOString().replace(/[:.]/g, '-') + '-' +
+                 Math.floor(performance.now() % 100000);
+      const dir = await pai.getDirectoryHandle(id, { create: true });
+      const e = { id, dir, pos: 0, fila: Promise.resolve(), erro: '', n: 0 };
+      await escreverNoEspelho(dir, 'sessao.json', JSON.stringify({
+        versao: 1, id, comecou: comecou.toISOString(),
+        cenario: $('modelo') ? $('modelo').value : '', idioma: LANG
+      }));
+      espelho = e;
+      return e;
+    } catch (err) { return null; }
+  }
+
+  /* Uma linha nova no índice. `keepExistingData` + posição é o que torna isto
+     um APPEND de verdade: sem ele, `createWritable` começa um arquivo vazio e a
+     gravação anterior some inteira no primeiro quadro do minuto seguinte. */
+  async function anexarAoIndice(e, obj){
+    const bytes = new TextEncoder().encode(JSON.stringify(obj) + '\n');
+    const h = await e.dir.getFileHandle('indice.jsonl', { create: true });
+    const w = await h.createWritable({ keepExistingData: true });
+    await w.write({ type: 'write', position: e.pos, data: bytes });
+    await w.close();
+    e.pos += bytes.length;
+  }
+
+  /* O quadro entra na fila e a captura segue. A fila é serial de propósito: em
+     paralelo, duas escritas no mesmo `indice.jsonl` disputariam a mesma posição
+     e o arquivo sairia com uma linha por cima da outra. */
+  function espelharQuadro(f, n){
+    if (!espelho) return;
+    const e = espelho;
+    e.fila = e.fila.then(async () => {
+      const im = await f.img.pronta;
+      if (!im.blob) return;
+      const nome = String(n).padStart(4, '0') +
+                   (im.tipo === 'image/webp' ? '.webp' : '.jpg');
+      await escreverNoEspelho(e.dir, nome, im.blob);
+      /* `b` é o tamanho do arquivo, e ele vai no índice de propósito: sem ele, a
+         única forma de dizer "42 KB" na tela seria abrir os 2000 arquivos da
+         sessão um a um, toda vez que o bloco do passo 1 é pintado. */
+      await anexarAoIndice(e, { n, arquivo: nome, t: +f.t.toFixed(2),
+                                w: im.w, h: im.h, b: im.blob.size,
+                                nota: f.nota || '', manual: !!f.manual });
+      e.n = n;
+    }).catch(err => falhouOEspelho(e, err));
+  }
+
+  /* UM AVISO, uma vez. Um espelho que para de funcionar em silêncio é pior do
+     que não ter espelho nenhum: a pessoa segue gravando duas horas confiando
+     numa rede que não está mais lá. O disco cheio é o caso comum — e ele não
+     avisa sozinho.
+
+     Uma vez só porque o erro se repete a cada quadro, e um aviso por quadro
+     numa gravação de duas horas é ruído que se aprende a ignorar. */
+  function falhouOEspelho(e, err){
+    const msg = (err && err.message) || String(err);
+    if (e.erro) return;
+    e.erro = msg;
+    try { avisarNaLive(t('espFalhou', msg.slice(0, 90)), 'err'); } catch (x) {}
+  }
+
+  /* A anotação escrita durante a gravação também é trabalho, e some junto se
+     ficar só na memória. Ela vai como linha nova — a última vence na leitura —
+     em vez de reescrever a linha do quadro, pelo mesmo motivo de tudo aqui. */
+  function espelharNota(n, texto){
+    if (!espelho || !n) return;
+    const e = espelho;
+    e.fila = e.fila.then(() => anexarAoIndice(e, { n, nota: texto || '' }))
+                   .catch(err => falhouOEspelho(e, err));
+  }
+
+  /* O documento saiu: o espelho cumpriu o trabalho e vai embora. Chamado de
+     `baixarBlob` e de `baixar`, que são as duas portas por onde um arquivo sai
+     daqui — e não de cada botão, que seria a lista à mão de sempre. */
+  function espelhoEntregue(){
+    if (!espelho) return;
+    const e = espelho;
+    espelho = null;
+    e.fila.then(() => descartarEspelho(e.id)).catch(() => {});
+  }
+
+  async function descartarEspelho(id){
+    try {
+      const pai = await pastaEspelho(false);
+      await pai.removeEntry(id, { recursive: true });
+    } catch (e) { /* já não estava lá */ }
+  }
+
+  async function lerIndiceEspelho(dir){
+    let cru = '';
+    try { cru = await lerDoEspelho(dir, 'indice.jsonl'); } catch (e) { return []; }
+    const por = new Map();
+    for (const linha of cru.split('\n')) {
+      if (!linha.trim()) continue;
+      let o;
+      /* A ÚLTIMA LINHA PODE ESTAR PELA METADE, e é o caso normal: o arquivo foi
+         interrompido por um travamento. Jogar fora uma linha quebrada é o
+         objetivo do formato, não um remendo. */
+      try { o = JSON.parse(linha); } catch (err) { continue; }
+      if (!o || !o.n) continue;
+      por.set(o.n, Object.assign(por.get(o.n) || {}, o));
+    }
+    return [...por.values()].filter(q => q.arquivo).sort((a, b) => a.n - b.n);
+  }
+
+  /* Tudo que está guardado, mais novo primeiro. Sessões velhas demais saem
+     daqui — apagadas, e não escondidas. */
+  async function sessoesGuardadas(){
+    if (!espelhoExiste()) return [];
+    let pai;
+    try { pai = await pastaEspelho(false); } catch (e) { return []; }
+    const limite = Date.now() - ESPELHO_DIAS * 86400000;
+    const out = [];
+    try {
+      for await (const [nome, h] of pai.entries()) {
+        if (h.kind !== 'directory') continue;
+        if (espelho && nome === espelho.id) continue;   // a que está gravando agora
+        let meta = null;
+        try { meta = JSON.parse(await lerDoEspelho(h, 'sessao.json')); } catch (e) {}
+        const quando = meta && meta.comecou ? Date.parse(meta.comecou) : 0;
+        const quadros = await lerIndiceEspelho(h);
+        if (!quadros.length || (quando && quando < limite)) {
+          await descartarEspelho(nome);
+          continue;
+        }
+        const bytes = quadros.reduce((acc, q) => acc + (q.b || 0), 0);
+        out.push({ id: nome, dir: h, meta: meta || {}, quadros, bytes, quando });
+      }
+    } catch (e) { return out; }
+    out.sort((a, b) => b.quando - a.quando);
+    return out;
+  }
+
+  async function recuperarEspelho(s){
+    const novos = [];
+    for (const q of s.quadros) {
+      let file;
+      try { file = await (await s.dir.getFileHandle(q.arquivo)).getFile(); }
+      catch (e) { continue; }
+      novos.push({ t: typeof q.t === 'number' ? q.t : 0,
+                   img: imagemDeBlob(file, q.w, q.h), keep: true,
+                   nota: q.nota || '', manual: !!q.manual,
+                   /* Recuperada, e não capturada agora. A etiqueta existe pelo
+                      mesmo motivo do `reaberto`: não fingir que houve uma
+                      gravação que não houve. */
+                   recuperado: true });
+    }
+    if (!novos.length) throw new Error('vazio');
+    trocarQuadros(novos);
+    if (s.meta.cenario && $('modelo') &&
+        [...$('modelo').options].some(o => o.value === s.meta.cenario)) {
+      $('modelo').value = s.meta.cenario;
+      $('modelo').dispatchEvent(new Event('change'));
+    }
+    return novos.length;
+  }
+
+  /* ---- o bloco na tela ----
+     Ele diz o que há e oferece as duas únicas coisas que se pode querer:
+     trazer de volta, ou jogar fora. "Jogar fora" tem que estar no mesmo lugar e
+     no mesmo tamanho de "trazer de volta" — um armazenamento que só sabe
+     encher é o que enche o disco de quem usa em silêncio. */
+  let espelhoLista = [];
+
+  const espelhoQuando = s => {
+    if (!s.quando) return '';
+    try { return new Date(s.quando).toLocaleString(LANG); }
+    catch (e) { return new Date(s.quando).toISOString().slice(0, 16).replace('T', ' '); }
+  };
+
+  async function pintarEspelho(){
+    const cx = $('espelhoCx');
+    if (!cx) return;
+    const serve = await espelhoServe();
+    if ($('recEspelhoCx')) $('recEspelhoCx').classList.toggle('hide', !serve);
+    if ($('recEspelho')) $('recEspelho').checked = espelhoQuer();
+    if (!serve) { cx.classList.add('hide'); return; }
+    try { espelhoLista = await sessoesGuardadas(); } catch (e) { espelhoLista = []; }
+    if (!espelhoLista.length) { cx.classList.add('hide'); return; }
+    cx.classList.remove('hide');
+    const s = espelhoLista[0];
+    $('espelhoTit').textContent = t('espTit');
+    $('espelhoSub').textContent = t('espSub', s.quadros.length, espelhoQuando(s), tamanho(s.bytes));
+    $('espelhoAbrir').textContent = t('espAbrir');
+    $('espelhoJogar').textContent = t('espJogar');
+    const outras = espelhoLista.length - 1;
+    $('espelhoTodas').classList.toggle('hide', outras < 1);
+    $('espelhoTodas').textContent = t('espTodas', outras);
+
+    const ul = $('espelhoLista');
+    ul.innerHTML = '';
+    espelhoLista.slice(1).forEach(o => {
+      const li = document.createElement('li');
+      const txt = document.createElement('span');
+      txt.innerHTML = `<b>${o.quadros.length}</b> · ${esc(espelhoQuando(o))} · ${esc(tamanho(o.bytes))}`;
+      const b1 = document.createElement('button');
+      b1.type = 'button'; b1.className = 'ghost sm'; b1.textContent = t('espItemAbrir');
+      b1.onclick = () => trazerDoEspelho(o);
+      const b2 = document.createElement('button');
+      b2.type = 'button'; b2.className = 'ghost sm'; b2.textContent = t('espItemJogar');
+      b2.onclick = async () => { await descartarEspelho(o.id); await pintarEspelho(); };
+      li.appendChild(txt); li.appendChild(b1); li.appendChild(b2);
+      ul.appendChild(li);
+    });
+  }
+
+  async function trazerDoEspelho(s){
+    try {
+      const n = await recuperarEspelho(s);
+      render(); passos();
+      /* Recuperada é entregue: quem trouxe de volta está com o trabalho na mão
+         outra vez, e deixar a cópia no disco só serviria para o bloco reaparecer
+         amanhã oferecendo o que a pessoa já tem. */
+      await descartarEspelho(s.id);
+      await pintarEspelho();
+      $('status').innerHTML = `<span class="ok">${t('espFeito', n)}</span>`;
+      if ($('prevCard')) $('prevCard').classList.remove('hide');
+      $('espelhoMsg').textContent = '';
+      const alvo = $('prevCard') || $('thumbs');
+      if (alvo && alvo.scrollIntoView) alvo.scrollIntoView({ block: 'start', behavior: 'smooth' });
+    } catch (e) {
+      $('espelhoMsg').innerHTML = `<span class="err">${t('espErro', (e && e.message) || e)}</span>`;
+    }
+  }
+
   function snap(w, q){
     const c = document.createElement('canvas');
     c.width = w; c.height = Math.round(w * video.videoHeight / video.videoWidth);
@@ -10732,7 +11557,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     /* Depois da tela, nunca antes: o rosto é sobreposição, e a assinatura que
        decide o que é passo já foi tirada da tela limpa. */
     camDesenhar(g, c.width, c.height);
-    return { url: c.toDataURL('image/jpeg', q), w: c.width, h: c.height };
+    return novaImagem(c, q);
   }
 
   // Assinatura 32x18 guardando R, G e B separados.
@@ -11004,7 +11829,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     $('cancel').classList.remove('hide');
     trabalhando(true);
     $('barWrap').classList.remove('hide');
-    frames = []; esqueceuOQueGerou();
+    trocarQuadros([]); esqueceuOQueGerou();
     let limited = '';
     stop = false;
     const t0 = performance.now();
@@ -11177,7 +12002,19 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       toque.type = 'button';
       toque.className = 'toque';
       toque.dataset.i = i;
-      toque.innerHTML = `<img src="${imgFinal(f)}" alt="">`;
+      /* O `src` sai da promessa, SEMPRE — inclusive quando a imagem já está
+         pronta, caso em que o `then` resolve no mesmo microtique. Um `if (já
+         pronta) ... else ...` seria um caminho que só roda na máquina rápida e
+         outro que só roda na lenta; o que nunca roda aqui é o que quebra lá. */
+      const mini = document.createElement('img');
+      mini.alt = '';
+      /* As medidas vão no elemento ANTES da imagem: elas são conhecidas desde a
+         captura, e é com elas que o navegador desenha a caixa no lugar certo em
+         vez de deixar a fileira saltar quando cada imagem chega. */
+      const im0 = telaDe(f);
+      if (im0 && im0.w && im0.h) { mini.width = im0.w; mini.height = im0.h; }
+      toque.appendChild(mini);
+      pintarEm(mini, im0);
       toque.setAttribute('aria-pressed', String(!f.keep));
 
       const n = f.keep ? ++passo : 0;
@@ -11305,6 +12142,12 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
         if (eraNota) volta.setSelectionRange(volta.value.length, volta.value.length);
       }
     }
+    /* A varredura das imagens mora aqui porque `render()` é o que acontece
+       depois de TODA mudança na lista: descartar, mover, trocar a imagem de um
+       passo, duplicar, colar uma tela. Pendurar a liberação em cada um desses
+       caminhos seria a lista escrita à mão que este projeto já pagou caro para
+       não ter. Ela custa uma passada por `frames` e nada mais. */
+    recolherImagens();
     counts();
   }
 
@@ -11361,8 +12204,9 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     const keep = frames.filter(f => f.keep);
     $('nKeep').textContent = keep.length;
     $('nOff').textContent = frames.length - keep.length;
-    const bytes = keep.reduce((s,f) => s + f.img.url.length * 0.75, 0) + 40000;
+    const bytes = keep.reduce((s, f) => s + pesoDe(f.img), 0) * razaoArquivo + 40000;
     $('size').textContent = (bytes/1048576).toFixed(1);
+    medirRazaoArquivo(keep[0]);
     pintarSaidas();
     // o botão da fala só faz sentido com transcrição marcada no tempo
     $('falaNota').disabled = !keep.length || !parseTranscript($('tr').value).cues.length;
@@ -11453,6 +12297,21 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
      bolinha verde dizendo "documento gerado" em cima de um documento que não
      existe mais é pior que bolinha nenhuma. */
   let baixouAlgo = false;
+  /* SAIU UM DOCUMENTO. Uma função e não uma atribuição, porque três coisas
+     dependem deste instante e elas estavam em lugares diferentes: a bolinha 4
+     do passo 3, a medição, e agora o espelho no disco, que existe até aqui e
+     não além.
+
+     Escrevendo isto encontrei um defeito velho: o PDF — a saída principal —
+     nunca acendia a bolinha 4. `baixarBlob` acendia, o Jira acendia, o Google
+     Docs acendia, e o `#go` chamava `doc.save()` direto do jsPDF, que não passa
+     por porta nenhuma. Quem gerava o PDF via o passo 3 dizer que nada tinha
+     sido gerado. */
+  function registrarSaida(){
+    baixouAlgo = true;
+    espelhoEntregue();
+    if (typeof pintarSubpassos === 'function') setTimeout(pintarSubpassos, 0);
+  }
   function esqueceuOQueGerou(){
     baixouAlgo = false;
     /* O que a pessoa declarou vale para ESTE material. Sumindo os quadros,
@@ -12247,6 +13106,39 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
   }));
   lerPerfil();
 
+  /* ---- o espelho, na partida ----
+     A pergunta "sobrou alguma coisa aqui?" é feita uma vez, ao abrir, e é ela
+     que faz o bloco do passo 1 aparecer. Sem `await`: ler o disco não pode
+     atrasar a primeira tela de quem só quer apertar Gravar. */
+  if ($('recEspelho')) {
+    $('recEspelho').onchange = async () => {
+      const quer = $('recEspelho').checked;
+      try { localStorage.setItem(ESPELHO_CHAVE, quer ? 'sim' : 'nao'); } catch (e) {}
+      if (!quer) {
+        /* Desmarcar não é só "pare de guardar daqui para frente": o que já está
+           no disco some junto, na hora. Uma caixa de privacidade que deixa
+           rastro para trás não é uma caixa de privacidade. */
+        espelho = null;
+        for (const s2 of await sessoesGuardadas()) await descartarEspelho(s2.id);
+      }
+      await pintarEspelho();
+    };
+  }
+  if ($('espelhoAbrir')) $('espelhoAbrir').onclick = () => {
+    if (espelhoLista[0]) trazerDoEspelho(espelhoLista[0]);
+  };
+  if ($('espelhoJogar')) $('espelhoJogar').onclick = async () => {
+    if (!espelhoLista[0]) return;
+    await descartarEspelho(espelhoLista[0].id);
+    await pintarEspelho();
+  };
+  if ($('espelhoTodas')) $('espelhoTodas').onclick = () => {
+    const ul = $('espelhoLista');
+    ul.classList.toggle('hide');
+    $('espelhoTodas').setAttribute('aria-expanded', String(!ul.classList.contains('hide')));
+  };
+  pintarEspelho();
+
   /* ---- impressão digital das imagens ----
      SHA-256 do JPEG exatamente como ele sai no documento. Prova que o arquivo
      não foi editado depois; NÃO prova conformidade com 21 CFR Part 11, SOX ou
@@ -12261,7 +13153,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     for (const f of kept) {
       if (f.hash) continue;
       try {
-        const d = await crypto.subtle.digest('SHA-256', bytesDaImagem(imgFinal(f)));
+        const d = await crypto.subtle.digest('SHA-256', await bytesDoArquivo(telaDe(f)));
         f.hash = [...new Uint8Array(d)].map(b => pad2(b.toString(16))).join('');
       } catch (e) { f.hash = ''; }
     }
@@ -12437,7 +13329,11 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
         exportado — não existe "camada" para alguém remover depois.
      3. A impressão digital é calculada sobre a imagem JÁ tarjada, senão o hash
         provaria um arquivo que ninguém recebeu. */
-  const imgFinal = f => f.tarjado || f.img.url;
+  /* Devolve a IMAGEM (o objeto), não a URL. O nome mudou junto — era `imgFinal`
+     e devolvia string — de propósito: com um objeto no lugar de uma string,
+     qualquer lugar que tivesse ficado para trás cairia em silêncio, escrevendo
+     "[object Object]" num `src`. Renomear transforma esse silêncio em erro. */
+  const telaDe = f => f.tarjado || f.img;
 
   /* ================= destaque: retângulo, seta e caneta =================
 
@@ -12495,13 +13391,9 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
   const temSobreposicao = f => (f.tarjas && f.tarjas.length) || (f.marcas && f.marcas.length);
 
   async function queimarTarjas(f){
-    if (!temSobreposicao(f)) { f.tarjado = null; f.hash = null; f.ocr = f.ocr || ''; return; }
-    const im = await new Promise((ok, err) => {
-      const i = new Image();
-      i.onload = () => ok(i);
-      i.onerror = () => err(new Error('imagem'));
-      i.src = f.img.url;
-    });
+    if (!temSobreposicao(f)) { f.tarjado = null; f.hash = null; f.ocr = f.ocr || ''; recolherImagens(); return; }
+    await f.img.pronta;
+    const im = await carregarImagem(f.img.url);
     const c = document.createElement('canvas');
     c.width = f.img.w; c.height = f.img.h;
     const x = c.getContext('2d');
@@ -12513,7 +13405,9 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       Math.round(t.x * c.width), Math.round(t.y * c.height),
       Math.max(1, Math.round(t.w * c.width)), Math.max(1, Math.round(t.h * c.height))));
     (f.marcas || []).forEach(m => desenharMarca(x, c, m));
-    f.tarjado = c.toDataURL('image/jpeg', parseFloat($('quality').value) || 0.8);
+    f.tarjado = novaImagem(c, parseFloat($('quality').value) || 0.8);
+    await f.tarjado.pronta;
+    recolherImagens();             // a queimada anterior deste quadro, se havia
     f.hash = null;                 // a imagem mudou: o hash antigo não vale mais
     /* E o texto lido antes da tarja some junto. Ele foi lido da imagem inteira e
        pode conter exatamente o que acabou de ser coberto — mantê-lo publicaria o
@@ -12547,23 +13441,25 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       if (!f.orig) f.orig = f.img;                  // guarda uma vez só
       const base = f.orig;
       if (!recorte) { f.img = base; f.tarjado = null; f.hash = null; continue; }
-      const im = await new Promise((ok, err) => {
-        const i = new Image(); i.onload = () => ok(i); i.onerror = () => err(new Error('imagem'));
-        i.src = base.url;
-      });
+      await base.pronta;
+      const im = await carregarImagem(base.url);
       const sx = Math.round(recorte.x * base.w), sy = Math.round(recorte.y * base.h);
       const sw = Math.max(8, Math.round(recorte.w * base.w));
       const sh = Math.max(8, Math.round(recorte.h * base.h));
       const c = document.createElement('canvas');
       c.width = sw; c.height = sh;
       c.getContext('2d').drawImage(im, sx, sy, sw, sh, 0, 0, sw, sh);
-      f.img = { url: c.toDataURL('image/jpeg', parseFloat($('quality').value) || 0.8), w: sw, h: sh };
+      f.img = novaImagem(c, parseFloat($('quality').value) || 0.8);
+      await f.img.pronta;
       /* Tarja e recorte não se compõem bem: as coordenadas da tarja eram
          relativas à imagem inteira e deixariam de apontar o mesmo lugar. Em vez
          de recalcular e errar por um pixel numa evidência, as tarjas do quadro
          são desfeitas e a pessoa refaz sobre a imagem nova. */
       f.tarjas = []; f.tarjado = null; f.hash = null; f.ocr = '';
     }
+    /* Uma vez no fim, e não a cada quadro: recortar 300 telas trocaria 300
+       imagens, e varrer a lista inteira 300 vezes é trabalho ao quadrado. */
+    recolherImagens();
   }
 
   /* ================= a lente de um passo =================
@@ -12862,7 +13758,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     const kept = frames.filter(x => x.keep);
     const k = kept.indexOf(f);
     const n = k >= 0 ? k + 1 : 0;
-    $('lenteImg').src = imgFinal(f);
+    pintarEm($('lenteImg'), telaDe(f));
     $('cropTirar').classList.toggle('hide', !recorte);
     pintarTarjas();
     pintarMarcas();
@@ -13041,10 +13937,12 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       const cv = document.createElement('canvas');
       cv.width = w; cv.height = h;
       cv.getContext('2d').drawImage(im, 0, 0, w, h);
-      f.img = { url: cv.toDataURL('image/jpeg', +($('quality').value || 0.85)), w, h };
+      f.img = novaImagem(cv, +($('quality').value || 0.85));
+      await f.img.pronta;
       f.orig = null; f.tarjado = null; f.tarjas = []; f.marcas = [];
       f.hash = null; f.ocr = '';
       f.trocado = true;
+      recolherImagens();          // a imagem antiga deste passo não volta
       pintarLente();
       render();
       $('tarjaMsg').innerHTML = `<span class="ok">${t('trocarOk')}</span>`;
@@ -13131,7 +14029,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     const outro = frames[+$('cmpCom').value];
     const cam = $('cmpCamada');
     if (!outro || !cam) return;
-    cam.style.backgroundImage = 'url(' + imgFinal(outro) + ')';
+    pintarEm(cam, telaDe(outro), true);
     cam.style.opacity = (+$('cmpMistura').value) / 100;
     $('cmpMsg').textContent = t('cmpMsg', $('cmpMistura').value);
   }
@@ -13168,10 +14066,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     const cam = $('cmpCamada'); if (!cam) return;
     $('cmpMsg').textContent = t('cmpIndo');
     try {
-      const carregar = url => new Promise((res, rej) => {
-        const im = new Image(); im.onload = () => res(im); im.onerror = rej; im.src = url;
-      });
-      const [a, b] = await Promise.all([carregar(imgFinal(f)), carregar(imgFinal(outro))]);
+      const carregar = async im => carregarImagem((await im.pronta).url);
+      const [a, b] = await Promise.all([carregar(telaDe(f)), carregar(telaDe(outro))]);
       /* No menor dos dois: quadros de tamanhos diferentes acontecem quando
          alguém trocou a imagem de um passo, e é justamente aí que se compara. */
       const W = Math.min(a.naturalWidth, b.naturalWidth);
@@ -13283,7 +14179,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       const q = parseFloat($('quality').value) || 0.8;
       const ultimo = frames.length ? frames[frames.length - 1].t : 0;
       frames.push({
-        t: ultimo, img: { url: c2.toDataURL('image/jpeg', q), w: c2.width, h: c2.height },
+        t: ultimo, img: novaImagem(c2, q),
         keep: true, colado: true, manual: true, nota: ''
       });
       render(); passos();
@@ -13517,7 +14413,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
         if (ocrParar) break;
         /* A imagem final, e não a original: o OCR do quadro tarjado não pode
            devolver ao documento justamente o texto que a tarja cobriu. */
-        const r = await worker.recognize(imgFinal(f));
+        const r = await worker.recognize((await telaDe(f).pronta).url);
         const txt = ((r && r.data && r.data.text) || '').replace(/\s+/g, ' ').trim();
         f.ocr = txt.length > 3 ? txt : '';
         /* As CAIXAS das palavras, normalizadas. É o que permite tarjar o padrão
@@ -13560,6 +14456,13 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     const kept = frames.filter(f => f.keep);
     if (semQuadros('movMsg')) return;
     await aplicarTarjas(kept); await calcularHashes(kept);
+    /* As imagens do arquivo, uma de cada vez e em JPEG — o mesmo JPEG de sempre,
+       para que um `.json` gravado hoje continue abrindo onde os de ontem abrem.
+       Uma de cada vez porque em paralelo 300 quadros decodificariam 300 imagens
+       ao mesmo tempo, e o pico seria pior do que o problema que a troca por Blob
+       veio resolver. */
+    const imagens = [];
+    for (const f of kept) imagens.push(await dataUrlDoArquivo(telaDe(f)));
     const { cues, plain } = parseTranscript($('tr').value);
     const ev = evDados();
     const dados = {
@@ -13608,7 +14511,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
           ? f.palavras.map(w => ({ t: w.txt, x: +w.x.toFixed(4), y: +w.y.toFixed(4),
                                    w: +w.w.toFixed(4), h: +w.h.toFixed(4) }))
           : undefined,
-        imagemBase64: imgFinal(f),
+        imagemBase64: imagens[i],
         tarjas: (f.tarjas || []).length,
         destaques: (f.marcas || []).length,
         /* Anexada à mão: não tem instante no vídeo, e quem lê a evidência
@@ -13708,7 +14611,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     $('revTrocar').textContent = t(ultimo ? 'revTrocarFim' : 'revTrocarBtn');
     $('revFora').textContent   = t(ultimo ? 'revForaFim' : 'revForaBtn');
     $('revIgual').classList.toggle('destaque', ultimo);
-    $('revImg').src = imgFinal(f);
+    pintarEm($('revImg'), telaDe(f));
     /* A anotação do passo é o que diz o que aquela tela devia provar. Sem ela
        na frente, "esta tela ainda está assim?" é uma pergunta sobre pixels. */
     $('revNotaEd').value = f.nota || '';
@@ -13796,12 +14699,14 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       const cv = document.createElement('canvas');
       cv.width = w; cv.height = h;
       cv.getContext('2d').drawImage(im, 0, 0, w, h);
-      f.img = { url: cv.toDataURL('image/jpeg', +($('quality').value || 0.85)), w, h };
+      f.img = novaImagem(cv, +($('quality').value || 0.85));
+      await f.img.pronta;
       /* Mesma regra do trocar da lente: o que descrevia a imagem antiga morre
          com ela. A anotação e o instante ficam — continuam verdadeiros. */
       f.orig = null; f.tarjado = null; f.tarjas = []; f.marcas = [];
       f.hash = null; f.ocr = ''; f.palavras = [];
       f.trocado = true;
+      recolherImagens();          // a imagem antiga deste passo não volta
       if (revConta) revConta.trocada++;
       render();
       revAvancar();
@@ -13905,14 +14810,14 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       /* O identificador precisa ser estável e sem espaço: alguns LMS usam o
          identifier do manifesto como chave e recusam caractere estranho. */
       const id = 'WS-' + (nomeBase() || 'doc').replace(/[^A-Za-z0-9_-]+/g, '-').slice(0, 48);
-      const corpo = montarHtml().replace('</body>',
+      const corpo = (await montarHtml()).replace('</body>',
         '<script src="scorm.js"><\/script>\n</body>');
       const entradas = [
         { nome: 'imsmanifest.xml', dados: bytesDe(manifestoScorm(titulo, id)) },
         { nome: 'scorm.js',        dados: bytesDe(SCORM_JS) },
         { nome: 'index.html',      dados: bytesDe(corpo) }
       ];
-      baixarBlob(zipar(entradas), 'scorm-' + nomeBase() + '.zip');
+      baixarBlob(await zipar(entradas), 'scorm-' + nomeBase() + '.zip');
       medir('baixou_saida', { p_formato: 'zip' });
       $('pdfStatus').innerHTML = `<span class="ok">${t('scormOk')}</span>`;
     } catch (e) {
@@ -13963,21 +14868,22 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     return saida;
   }
 
-  const bytesParaDataUrl = (u8, tipo) => new Promise((ok2, erro) => {
-    const fr = new FileReader();
-    fr.onload = () => ok2(fr.result);
-    fr.onerror = erro;
-    fr.readAsDataURL(new Blob([u8], { type: tipo || 'image/jpeg' }));
-  });
+  /* Uma imagem que chegou de fora — de um `.json` reaberto ou de dentro de um
+     `.zip`. Descobre largura e altura (o documento precisa delas para escolher
+     o layout e desenhar no PDF sem deformar) e entra como Blob, pela mesma
+     porta dos quadros recém-capturados.
 
-  /* Descobre largura e altura de uma imagem já em memória. O documento precisa
-     delas para escolher o layout e para desenhar no PDF sem deformar. */
-  const medirImagem = url => new Promise((ok2, erro) => {
-    const im = new Image();
-    im.onload = () => ok2({ url, w: im.naturalWidth, h: im.naturalHeight });
-    im.onerror = erro;
-    im.src = url;
-  });
+     Reabrir um documento de 300 telas era, até aqui, 300 strings base64 no heap
+     — o mesmo peso da gravação que gerou o arquivo. */
+  async function imagemDeFora(u8ouUrl, tipo){
+    const blob = (u8ouUrl instanceof Uint8Array)
+      ? new Blob([u8ouUrl], { type: tipo || FORMATO_DOC })
+      : await (await fetch(u8ouUrl)).blob();
+    const url = URL.createObjectURL(blob);
+    const im = await carregarImagem(url).catch(e => { URL.revokeObjectURL(url); throw e; });
+    URL.revokeObjectURL(url);
+    return imagemDeBlob(blob, im.naturalWidth, im.naturalHeight);
+  }
 
   const mmss = txt => {
     const m = String(txt || '').match(/(\d+)[:\-](\d+)(?:[:\-](\d+))?/);
@@ -13994,7 +14900,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     const novos = [];
     for (const f of j.frames) {
       if (!f.imagemBase64) continue;
-      const img = await medirImagem(f.imagemBase64);
+      const img = await imagemDeFora(f.imagemBase64);
       novos.push({
         t: typeof f.segundos === 'number' ? f.segundos : mmss(f.tempo),
         img, keep: true,
@@ -14066,7 +14972,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     }
     const novos = [];
     for (const n of nomes) {
-      const img = await medirImagem(await bytesParaDataUrl(itens[n]));
+      const img = await imagemDeFora(itens[n], /\.png$/i.test(n) ? 'image/png' : 'image/jpeg');
       novos.push({ t: mmss(n.replace(/^\d+-/, '')), img, keep: true,
                    nota: notas[n] || '', reaberto: true });
     }
@@ -14107,7 +15013,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       const novos = /\.zip$/i.test(file.name)
         ? await reabrirZip(await file.arrayBuffer())
         : await reabrirJson(JSON.parse(await file.text()));
-      frames = novos;
+      trocarQuadros(novos);
       manual = [];
       if (!fileName) fileName = file.name.replace(/\.(json|zip)$/i, '');
       render();
@@ -14197,7 +15103,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
         desloc += dur + 1;
       }
       if (juntos.length < 1) throw new Error(t('reabrirVazio'));
-      frames = juntos;
+      trocarQuadros(juntos);
       manual = [];
       sessoesJuntadas = nomes.length;
       porOrigem(null, false);              // não há UM início: a hora sai do documento
@@ -14354,12 +15260,17 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
      o produz. A forma de função existe por memória: com 400 frames as imagens
      somam mais de 100 MB, e decodificar todas antes de começar derruba a aba em
      navegador de celular. Assim cada imagem é decodificada, copiada para um
-     Blob (que o navegador pode mandar para o disco) e liberada em seguida. */
-  function zipar(entradas, tipo){
+     Blob (que o navegador pode mandar para o disco) e liberada em seguida.
+
+     A função pode devolver uma promessa, e desde que a imagem virou Blob ela
+     sempre devolve: transcodificar para o JPEG do arquivo é assíncrono. O laço
+     espera uma de cada vez, que é o mesmo motivo de antes — o pico de memória é
+     o que se está protegendo aqui. */
+  async function zipar(entradas, tipo){
     const partes = [], central = [];
     let desloc = 0;
     for (const e of entradas) {
-      const dados = typeof e.dados === 'function' ? e.dados() : e.dados;
+      const dados = typeof e.dados === 'function' ? await e.dados() : e.dados;
       const nome = bytesDe(e.nome), crc = crc32(dados), n = dados.length;
 
       const local = new Uint8Array(30 + nome.length);
@@ -14552,8 +15463,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
   function baixarBlob(blob, nome){
     /* Qualquer saída conclui o último subpasso: o passo 3 acaba quando um
        documento existe, e não quando alguém clica em "pronto". */
-    baixouAlgo = true;
-    if (typeof pintarSubpassos === 'function') setTimeout(pintarSubpassos, 0);
+    registrarSaida();
     /* E, se a pessoa veio de um caso do roteiro, aparece o link de volta que
        marca esse caso como feito — com o nome do arquivo e a impressão das
        telas dentro. Quem grava é a conta dela, do outro lado do link. */
@@ -14633,7 +15543,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
         // ordem primeiro para o gerenciador de arquivos ordenar certo,
         // instante depois para saber de onde a imagem veio
         nome: String(i + 1).padStart(4, '0') + '-' + fmt(f.t).replace(/:/g, '-') + '.jpg',
-        dados: () => bytesDaImagem(imgFinal(f))
+        dados: () => bytesDoArquivo(telaDe(f))
       }));
       /* Um índice de texto junto das imagens: sem ele, um zip de evidência é
          uma pasta de JPEGs sem passo, sem hora e sem a anotação — exatamente o
@@ -14682,7 +15592,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
         const buf = new Uint8Array(await f.clipe.blob.arrayBuffer());
         entradas.push({ nome: nomeDoClipe(f, i + 1), dados: buf });
       }
-      baixarBlob(zipar(entradas), 'frames-' + nomeBase() + '.zip');
+      baixarBlob(await zipar(entradas), 'frames-' + nomeBase() + '.zip');
       medir('baixou_saida', { p_formato: 'zip' });
       $('pdfStatus').innerHTML = `<span class="ok">${t('zipDone', kept.length)}</span>`;
     } catch (e) {
@@ -14699,7 +15609,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
 
      As três respeitam as mesmas regras dos modelos de saída: numeração de
      passo, hora de relógio quando há, anotação, fala do trecho — e a imagem
-     JÁ TARJADA, porque `imgFinal` é a única porta por onde imagem sai daqui. */
+     JÁ TARJADA, porque `telaDe` é a única porta por onde imagem sai daqui. */
   const esc = t => String(t == null ? '' : t)
     .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 
@@ -14734,7 +15644,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     return caps;
   }
 
-  function linhasDoDoc(){
+  async function linhasDoDoc(){
     const kept = frames.filter(f => f.keep);
     const { cues } = parseTranscript($('tr').value);
     const dur = duracaoTotal();
@@ -14743,6 +15653,12 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       for (let k = caps.length - 1; k >= 0; k--) if (i >= caps[k].de) return caps[k];
       return null;
     };
+    /* O HTML e o Markdown embutem a imagem no próprio arquivo, então aqui ela
+       precisa virar data URL — em JPEG, pela mesma porta de todo o resto. Uma de
+       cada vez: 300 quadros decodificando ao mesmo tempo é o pico que se está
+       tentando não ter. */
+    const imagens = [];
+    for (const f of kept) imagens.push(await dataUrlDoArquivo(telaDe(f)));
     return kept.map((f, i) => ({
       passo: i + 1,
       /* `capitulo` vai em TODA linha, e não só na primeira do capítulo: numa
@@ -14763,7 +15679,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       fala: cues.length ? falaDoFrame(kept, i, cues, dur, true) : '',
       ocr: f.ocr || '',
       hash: f.hash || '',
-      img: imgFinal(f)
+      img: imagens[i]
     }));
   }
 
@@ -14776,10 +15692,10 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
 <circle cx="48" cy="48" r="9.5" fill="#fff"/><circle cx="48" cy="48" r="7.6" fill="#3A3F9E"/>
 <path d="M48 43.6V48l3 2" stroke="#fff" stroke-width="1.9" stroke-linecap="round" fill="none"/></svg>`;
 
-  function montarHtml(){
+  async function montarHtml(){
     const ev = evDados();
     const tut = ehTutorial();
-    const linhas = linhasDoDoc();
+    const linhas = await linhasDoDoc();
     const titulo = ev.caso || t('pTitle');
     const cab = ev.linhasCompletas.map(([k, v]) =>
       `<tr><th>${esc(k)}</th><td>${esc(v)}</td></tr>`).join('');
@@ -14865,10 +15781,10 @@ ${marcaSvg(46)}
 </body></html>`;
   }
 
-  function montarMd(){
+  async function montarMd(){
     const ev = evDados();
     const tut = ehTutorial();
-    const linhas = linhasDoDoc();
+    const linhas = await linhasDoDoc();
     const out = ['# ' + (ev.caso || t('pTitle')), '', '_' + (fileName || t('prNoName')) + '_', ''];
     ev.linhasCompletas.forEach(([k, v]) => out.push('- **' + k + ':** ' + v));
     if (ev.linhasCompletas.length) out.push('');
@@ -14903,7 +15819,7 @@ ${marcaSvg(46)}
 
   /* CSV com ponto e vírgula e BOM: é o que o Excel em português abre em colunas
      sem passar pelo assistente de importação. */
-  function montarCsv(){
+  async function montarCsv(){
     /* A coluna do tipo só existe onde ela significa alguma coisa: numa planilha
        de evidência, uma coluna vazia chamada "Tipo do momento" faz o auditor
        perguntar o que deveria estar ali. */
@@ -14923,7 +15839,7 @@ ${marcaSvg(46)}
       .concat(['nota','fala','ocr','hash']);
     const cel = v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
     const linhas = [cabec.map(cel).join(';')];
-    linhasDoDoc().forEach(l => linhas.push(campos.map(c => cel(l[c])).join(';')));
+    (await linhasDoDoc()).forEach(l => linhas.push(campos.map(c => cel(l[c])).join(';')));
     return '\ufeff' + linhas.join('\r\n') + '\r\n';
   }
 
@@ -14935,7 +15851,7 @@ ${marcaSvg(46)}
     try {
       await aplicarTarjas(kept);
       await calcularHashes(kept);
-      const txt = gerar();
+      const txt = await gerar();
       baixarBlob(new Blob([txt], { type: tipo + ';charset=utf-8' }), nomeArquivo() + '.' + ext);
       medir('baixou_saida', { p_formato: ext });
       $('pdfStatus').innerHTML = `<span class="ok">${t('saiuArq', ext.toUpperCase(), kept.length)}</span>`;
@@ -15103,7 +16019,7 @@ ${interno}</p:spTree></p:cSld><p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></
     kept.forEach((f, i) => {
       const rid = 'rId9';
       const nome = 'img' + String(i + 1).padStart(4, '0') + '.jpg';
-      midias.push({ nome: 'ppt/media/' + nome, dados: () => bytesDaImagem(imgFinal(f)) });
+      midias.push({ nome: 'ppt/media/' + nome, dados: () => bytesDoArquivo(telaDe(f)) });
 
       /* A imagem ocupa o alto do slide, com a proporção dela preservada — uma
          tela esticada num deck é a marca de quem colou print no PowerPoint às
@@ -15253,7 +16169,7 @@ ${relsSlide[i]}</Relationships>`) });
     await new Promise(r => setTimeout(r, 40));
     try {
       await aplicarTarjas(kept);
-      baixarBlob(zipar(montarPptx(),
+      baixarBlob(await zipar(montarPptx(),
         'application/vnd.openxmlformats-officedocument.presentationml.presentation'),
         nomeArquivo() + '.pptx');
       medir('baixou_saida', { p_formato: 'pptx' });
@@ -15263,10 +16179,10 @@ ${relsSlide[i]}</Relationships>`) });
     } finally { emUso.delete('pptx'); $('pptx').disabled = false; }
   };
 
-  function montarDocx(){
+  async function montarDocx(){
     const kept = frames.filter(f => f.keep);
     const dur = duracaoTotal();
-    const linhasDoc = linhasDoDoc();          // é daqui que saem os capítulos
+    const linhasDoc = await linhasDoDoc();    // é daqui que saem os capítulos
     const { cues, plain } = parseTranscript($('tr').value);
 
     const ev = evDados();
@@ -15357,7 +16273,7 @@ ${relsSlide[i]}</Relationships>`) });
     kept.forEach((f, i) => {
       const rid = 'rIdImg' + (i + 1);
       const nome = 'frame' + String(i + 1).padStart(4, '0') + '.jpg';
-      midias.push({ nome: 'word/media/' + nome, dados: () => bytesDaImagem(imgFinal(f)) });
+      midias.push({ nome: 'word/media/' + nome, dados: () => bytesDoArquivo(telaDe(f)) });
       rels.push(`<Relationship Id="${rid}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/${nome}"/>`);
 
       const { cx, cy } = medidaImagem(f.img);
@@ -15480,7 +16396,7 @@ ${relsSlide[i]}</Relationships>`) });
     await new Promise(r => setTimeout(r, 40));    // deixa a mensagem aparecer
     try {
       await aplicarTarjas(kept); await calcularHashes(kept);
-      baixarBlob(montarDocx(), nomeArquivo() + '.docx');
+      baixarBlob(await montarDocx(), nomeArquivo() + '.docx');
       medir('baixou_saida', { p_formato: 'docx' });
       $('pdfStatus').innerHTML = `<span class="ok">${t('docxDone', kept.length)}</span>`;
     } catch (e) {
@@ -15672,7 +16588,7 @@ ${relsSlide[i]}</Relationships>`) });
     medir('baixou_saida', { p_formato: 'jira' });
     /* Gerou documento sem passar pelo download: a bolinha 4 é acesa aqui,
        senão ela mente dizendo que nada foi gerado. */
-    baixouAlgo = true; pintarSubpassos();
+    registrarSaida();
   };
 
   /* --------- Enviar para o Google Docs ---------
@@ -15721,7 +16637,7 @@ ${relsSlide[i]}</Relationships>`) });
       $('pdfStatus').textContent = t('gdMontando');
       await new Promise(r => setTimeout(r, 40));
       await aplicarTarjas(kept); await calcularHashes(kept);
-      const blob = montarDocx();
+      const blob = await montarDocx();
 
       $('pdfStatus').textContent = t('gdEnviando', tamanho(blob.size)) +
         (blob.size > 26214400 ? '  ' + t('gdGrande', tamanho(blob.size)) : '');
@@ -15729,7 +16645,7 @@ ${relsSlide[i]}</Relationships>`) });
       medir('baixou_saida', { p_formato: 'gdocs' });
     /* Gerou documento sem passar pelo download: a bolinha 4 é acesa aqui,
        senão ela mente dizendo que nada foi gerado. */
-    baixouAlgo = true; pintarSubpassos();
+    registrarSaida();
 
       /* Sem window.open: depois de um upload longo o navegador já não conta
          mais como gesto do usuário e a janela seria bloqueada. O link fica
@@ -15766,7 +16682,7 @@ ${relsSlide[i]}</Relationships>`) });
     const PH = papel === 'letter' ? 279.4 : 297;
     const M = 15, CW = PW - M*2;
     const base = nomeArquivo();   // usado no nome do arquivo baixado
-    const linhasPdf = linhasDoDoc();          // é daqui que saem os capítulos
+    const linhasPdf = await linhasDoDoc();    // é daqui que saem os capítulos
     let page = 0;
 
     /* A marca desenhada com primitivas, e não como imagem: são quatro
@@ -16021,7 +16937,12 @@ ${relsSlide[i]}</Relationships>`) });
           doc.text(notaL, M, yy + 3, { lineHeightFactor: 1.3 });
           yy += notaL.length * 4.8 + 1.5;
         }
-        doc.addImage(imgFinal(f), 'JPEG', ix, yy, iw, ih0);
+        /* A imagem vem de `linhasPdf`, que é a MESMA lista que alimenta o
+           HTML, o Markdown e a planilha. Ela já é o JPEG do arquivo, montado
+           uma vez: pedir a imagem outra vez aqui seria transcodificar duas
+           vezes o mesmo quadro e — pior — abrir a porta para o PDF e o HTML
+           carregarem bytes diferentes com o mesmo SHA-256 impresso ao lado. */
+        doc.addImage(linhasPdf[i].img, 'JPEG', ix, yy, iw, ih0);
         yy += ih0;
         if (cues.length) {
           yy += 6;
@@ -16058,7 +16979,7 @@ ${relsSlide[i]}</Relationships>`) });
         const blockH = ihG + 7 + (hora ? 3.6 : 0) + notaG.length * 3.4;
         if (col === 0 && top + blockH > PH - 18) { foot(); doc.addPage(); top = M; }
         const x = M + col * (cellW + gap) + (cellW - iwG) / 2;
-        doc.addImage(imgFinal(f), 'JPEG', x, top, iwG, ihG);
+        doc.addImage(linhasPdf[i].img, 'JPEG', x, top, iwG, ihG);
         let cy2 = top + ihG + 4.5;
         doc.setFont('helvetica','bold').setFontSize(8.5).setTextColor(60)
            .text(passoN(i + 1) + '  ·  ' + quando(f), x, cy2);
@@ -16119,6 +17040,9 @@ ${relsSlide[i]}</Relationships>`) });
     }
 
     doc.save(base + '.pdf');
+    /* `doc.save` é a porta do jsPDF, e não a nossa: sem esta linha o PDF era a
+       única saída do produto que não contava que tinha saído. */
+    registrarSaida();
     medir('baixou_saida', { p_formato: 'pdf' });
     $('pdfStatus').innerHTML = `<span class="ok">${t('pdfDone')}</span>${t('pdfDone2', kept.length, page)}`;
     emUso.delete('go'); $('go').disabled = false;

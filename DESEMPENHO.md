@@ -897,3 +897,163 @@ vezes**, e as duas vale registrar:
 `/tmp/rolar.mjs`, registrado nas duas esteiras. Cinco blocos: rolar uma caixa de entrada de verdade e
 parar; a gagueira do Whisper; o desmanche da máscara (no ritmo em que ela existe, senão o bloco testa
 o nada); a frase do fim nos cinco idiomas; e a página de vídeo que não pode terminar com um quadro só.
+
+---
+
+## 18/08/2026, décima rodada — o quadro saiu do heap, e três coisas que a medição desmentiu
+
+Esta rodada começou com a lista de "performance de memória e rolagem" e terminou com
+duas coisas feitas, uma **não** feita por medição, e um defeito velho encontrado de
+caminho. Os números são todos desta máquina, com a régua que agora mora no repositório
+(`testes/pesagem.mjs`, `testes/grade.mjs`, `testes/varredura.mjs`) — antes eles moravam
+numa sessão de chat, que é o mesmo que não morarem em lugar nenhum.
+
+### O quadro deixou de ser texto
+
+Um quadro era `c.toDataURL('image/jpeg')`: uma string base64 no heap JavaScript. Três
+custos ao mesmo tempo — base64 infla o binário em 33%, o texto mora exatamente onde o
+navegador aperta primeiro, e JPEG é o dobro de WebP na mesma qualidade.
+
+Medido sobre uma captura de tela **de verdade** a 900 px:
+
+| | bytes | PSNR |
+|---|---|---|
+| JPEG q0,85 (o de antes) | 40,8 KB | 38,95 |
+| **WebP q0,85** | **22,5 KB** | **40,11** |
+
+O WebP é menor **e** mais fiel. Como base64 acrescenta 33% por cima do JPEG, o que
+estava no heap eram 54,4 KB por quadro.
+
+Na régua completa (1920×1080 mudando 3×/s, 25 s, sem transcrição):
+
+| medida | antes | depois |
+|---|---|---|
+| custo de um quadro | 24,4 KB | **13,6 KB** |
+| … no heap JavaScript | 24,4 KB | **0 KB** |
+| projeção em 300 quadros | 7,1 MB | **4,0 MB** |
+| projeção em 2000 quadros | 47,6 MB | **26,6 MB** |
+| FPS durante a gravação | 59,8 | 59,4 |
+
+(Os absolutos não batem com os 73,8 KB da rodada anterior porque a tela sintética da
+régua é mais lisa que uma tela real. O que se compara aqui é antes contra depois na
+mesma régua.)
+
+**O arquivo continua saindo em JPEG.** Todos: PDF, DOCX, PPTX, ZIP, HTML, SCORM e o
+`.json` da sessão. Três razões:
+
+- Word e PowerPoint anteriores a 2021 não leem WebP, e o público desta ferramenta é
+  quem trabalha em estação travada por política — que é onde o Office velho vive;
+- o `.json` precisa continuar reabrível pelas versões anteriores, e vice-versa;
+- e o **SHA-256**. Aqui eu **errei um diagnóstico e corrijo**: cheguei a escrever no
+  código que o jsPDF grava bytes WebP sob a etiqueta `/Filter /DCTDecode`. Não grava —
+  `pdfimages -list` mostra JPEG válido nos dois casos, ele converte sozinho. Mas se
+  QUEM converte for ele, a imagem que chega ao PDF deixa de ser a imagem cuja impressão
+  digital o documento imprime ao lado. Converter na nossa porta é o que mantém as duas
+  sendo a mesma coisa — e `testes/memoria.mjs` agora prova que o `.json`, o `.zip` e o
+  `.docx` levam o **mesmo byte** do mesmo passo, com o mesmo hash.
+
+Transcodificar custa 7,4 ms por quadro, uma vez por saída.
+
+E a liberação dos blobs **não é por caminho**. "Revogar em todo lugar que descarta um
+quadro" seriam nove lugares hoje e dez amanhã, e o décimo é o que vaza. Pergunta-se a
+`frames` quem ainda está vivo e solta-se o resto. Uma sutileza custou uma tarde: uma
+imagem nasce **antes** de entrar na lista, e reabrir um `.json` monta trezentas imagens
+novas antes de trocar `frames` — a varredura do `render()` da lista velha revogava todas.
+O navegador não avisa: entrega `<img>` com `naturalWidth` zero, a miniatura fica com
+altura zero, e o que se vê é a lupa embaixo da seta de mover.
+
+### A grade NÃO foi virtualizada, e o motivo é o número
+
+Medido com passo fixo de 120 px por quadro de tela — o ritmo de quem rola com o dedo:
+
+| grade | rolando | `render()` completo |
+|---|---|---|
+| 300 quadros | 47,5 · 47,2 · 51,9 FPS | 15–22 ms |
+| 900 quadros | 45,4 FPS | 47 ms |
+
+Não há problema de rolagem para consertar. Tentei mesmo assim o caminho mais barato,
+`content-visibility:auto`, que deixa o motor do navegador pular o que está fora da tela
+**sem tirar nada do documento**. Três medições de cada lado: ele deixou **pior** —
+43,1 · 43,1 · 40,9 FPS a 300 quadros, e 34,3 FPS com `render()` de 91 ms a 900. Removido.
+
+A virtualização à mão custaria muito mais e cobraria o preço que já estava previsto:
+reciclar um campo de anotação com texto dentro apaga o comentário de quem acabou de
+digitar; e tirar `<figure>` do documento quebra de uma vez a barra de rolagem, o Ctrl+F,
+o leitor de tela e a contagem de passos.
+
+**Uma nota de método:** a primeira medição deu 27,3 FPS e quase me fez consertar o que
+funcionava. O erro era do harness — ele rolava uma FRAÇÃO da altura da grade, então uma
+grade mais alta pulava mais conteúdo por passo e o número piorava sem nada ter ficado
+lento. É o mesmo erro da rodada do Gmail, com outra roupa: um cenário de teste ruim
+quase me fez consertar o que funcionava.
+
+### O espelho no disco — o item que valia mais, e não por RAM
+
+Um travamento da aba perdia a gravação inteira. Duas horas que morrem aos 110 minutos
+voltavam como nada — e, numa espera longa, fechar a aba é a decisão racional.
+
+Agora cada tela capturada é também gravada no armazenamento privado do navegador (OPFS),
+na máquina de quem usa. Os quadros continuam no array — é isso que faz `file://`
+funcionar — e o disco é espelho, nunca substituto.
+
+- **Índice append-only** (`indice.jsonl`, uma linha por quadro). Reescrever o índice
+  inteiro a cada quadro custaria gravação crescente numa reunião de duas horas e, pior,
+  um arquivo reescrito pode ser truncado no meio — que é justamente a hora em que ele
+  precisa estar inteiro. Uma linha quebrada no fim se joga fora; um arquivo quebrado no
+  meio, não. `testes/espelho.mjs` escreve meia linha de propósito e exige o resto de volta.
+- **Some quando um documento sai.** O espelho atravessa o acidente; ele não vira arquivo.
+- Some sozinho depois de sete dias, e a caixa do passo 1 desliga **e apaga na hora**.
+
+Isto mexe com a promessa central do produto e não podia ficar em silêncio: a seção nova
+está na página de privacidade nos cinco idiomas, e a página de segurança foi **corrigida**
+nos cinco — ela dizia "a única coisa que persiste é o modelo de transcrição", e isso
+passou a ser falso no instante em que o espelho existiu.
+
+### O defeito que apareceu de caminho: o PDF não contava que tinha saído
+
+Escrevendo "apagar o espelho quando um documento sai", fui procurar onde um documento
+sai. `baixarBlob` acendia a bolinha 4 do passo 3; o Jira acendia; o Google Docs acendia.
+O `#go` chamava `doc.save()` direto do jsPDF, que não passa por porta nenhuma — quem
+gerava **o PDF, a saída principal**, via o passo 3 dizer que nada tinha sido gerado.
+Agora existe `registrarSaida()`, e todas as cinco saídas passam por ela.
+
+### A varredura de uma hora de vídeo (o caminho do passo 2)
+
+Ninguém tinha medido. `/tmp/longo.webm`, 60 minutos, 120 trocas de tela:
+
+| medida | valor |
+|---|---|
+| tempo de parede | **32,7 s** (110× o tempo real) |
+| telas encontradas | **120 de 120** |
+| FPS da página durante a varredura | **59,2** — p50 16,8 ms, p95 20,4 ms |
+| bloqueio do fio principal | **18 ms em 33 s (0,1%)**, pior 68 ms |
+| as telas em memória | 1,1 MB (9,2 KB cada) |
+
+O `seek` cede o fio como se supunha. Não há nada a consertar aqui.
+
+### O que continua sem resposta, e o instrumento que foi junto
+
+**Em qual degrau da escada do Whisper as máquinas reais caem** é coisa que só as máquinas
+reais sabem — o modelo não sobe nesta máquina (a CDN não é alcançável daqui). Então o
+instrumento viaja com elas: o Diagnóstico agora imprime, da última gravação,
+
+```
+  fio principal    : bloqueado 0 ms em 25 s (0.0%)   pior tarefa 0 ms   (nenhuma tarefa longa)
+  transcrição      : desligada   motor: (não subiu)
+```
+
+e uma seção de **memória** com o peso dos quadros nesta aba e, onde a página está isolada
+entre origens, `measureUserAgentSpecificMemory()` com a quebra por tipo — que é o número
+que responde "quanto uma gravação de duas horas ocupa de verdade", incluindo worker,
+WebAssembly e Blob. O bloqueio e o degrau saem **na mesma linha** de propósito: separados,
+nenhum dos dois se interpreta.
+
+É a mesma lição da sétima rodada, de novo: o instrumento tem que estar no botão que a
+pessoa aperta quando algo dá errado.
+
+### Os cabeçalhos não foram tocados
+
+`Cross-Origin-Embedder-Policy: credentialless` continua como está. A proposta pedia
+`require-corp`, que obrigaria cada recurso externo (jsPDF do CDN, arquivos do modelo,
+figuras do blog) a mandar CORP. É regressão, não configuração — e, de brinde, é o
+`credentialless` que faz o `measureUserAgentSpecificMemory` acima existir.

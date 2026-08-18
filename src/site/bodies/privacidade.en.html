@@ -244,6 +244,28 @@
     they exist so the diagnostics survive a page reload after something goes wrong. They vanish when
     the tab closes, like everything else.</p>
 
+    <h2>The screens of a recording in progress</h2>
+    <p>This is the only thing the tool keeps for longer than the tab, and it exists for a concrete
+    reason: <b>a tab can crash</b>. Before, a crash 110 minutes into a two-hour recording erased the
+    two hours — and during a long wait, closing the tab is exactly the decision any reasonable person
+    makes.</p>
+    <p>So while you record, each captured screen is also written to your <b>browser's private
+    storage</b> (the <i>Origin Private File System</i>). That lives <b>on your computer</b>, in an
+    area only this page can read, and it is <b>not sent anywhere</b> — the F12 test still holds: load
+    a multi-gigabyte video and the bytes sent stay at zero.</p>
+    <p>Three things worth writing down:</p>
+    <ul>
+      <li><b>It erases itself as soon as a document comes out.</b> The moment you generate the PDF,
+      the Word file, the .zip or any other output, the work has left the tool and the copy on disk is
+      deleted.</li>
+      <li><b>It erases itself after seven days</b>, even if no document ever came out.</li>
+      <li><b>You can turn it off</b>, in the &ldquo;Keep the screens on my computer while I
+      record&rdquo; box in step 1. Unchecking it erases whatever is already stored, right then — it
+      does not merely stop writing from that point on.</li>
+    </ul>
+    <p>When a recording is stored, step 1 says so plainly — how many screens, from when, how much
+    space — and offers the only two things anyone could want: bring it back, or throw it away.</p>
+
     <h2>Cookies</h2>
     <p>We use no first-party or third-party cookies — not for tracking, not for advertising, not for
     measurement. The page-view count and the three milestones described above work <b>without cookies and

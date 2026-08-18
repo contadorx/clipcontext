@@ -111,7 +111,13 @@
     <p>Alongside the model there is a <b>configuration</b> note: which combination of library and
     file format manages to open the model on this machine. Version names, no content — and the
     button that deletes the model deletes the note with it.</p>
-    <p>The only thing that persists is the <b>transcription model</b>, cached by the browser itself so it is
+    <p><b>The screens of a recording in progress</b> are kept in the browser's private storage (OPFS),
+    on your computer, so a tab crash does not erase the work — before this, a crash 110 minutes into a
+    two-hour recording erased the two hours. They are deleted as soon as any document is generated, and
+    after seven days in any case; the &ldquo;Keep the screens on my computer while I record&rdquo; box in
+    step 1 turns this off and erases whatever is already there. None of it is sent anywhere — the F12
+    test still shows zero bytes sent.</p>
+    <p>Apart from that, what persists is the <b>transcription model</b>, cached by the browser itself so it is
     not downloaded again. It sits on your device, under your control, and is removed when you clear browsing
     data. We use no <i>cookies</i> — neither our own nor third-party ones.</p>
 

@@ -1,0 +1,177 @@
+/* A arrumação da tela de trabalho.
+ *
+ * Nenhum destes itens é uma função nova. Todos são a mesma função no lugar
+ * certo — que é o trabalho que menos aparece e o que mais muda o uso.
+ *
+ *   - "Outro" no fim dos cenários: uma lista fechada não impede o uso fora
+ *     dela, só faz a pessoa mentir na resposta;
+ *   - o custo do modelo sai do rótulo da transcrição e entra "recomendado":
+ *     desde que o download começa sozinho ao abrir a página, anunciar
+ *     megabytes ao lado de uma caixa marcada é assustar por um preço que já
+ *     não se paga;
+ *   - no passo 3, resultado DEPOIS da ação: placar antes do jogo não é placar;
+ *   - o campo do comentário na janelinha tem que ser LEGÍVEL quando está
+ *     desligado, senão a frase existe no código e não na tela;
+ *   - e a janelinha avisa quando o modelo falha, porque é para ela que a
+ *     pessoa está olhando enquanto a aba está atrás da tela compartilhada.
+ */
+import { chromium } from 'playwright';
+import http from 'http'; import fs from 'fs';
+
+const ROOT = '/root/walkstamp/public';
+const html = fs.readFileSync(ROOT + '/app.html', 'utf8');
+const srv = http.createServer((q, r) => {
+  const u = q.url.split('?')[0];
+  if (u.startsWith('/_vercel/')) { r.writeHead(200,{'Content-Type':'text/javascript'}); return r.end('') }
+  if (u === '/sw.js') { r.writeHead(200,{'Content-Type':'text/javascript'}); return r.end(fs.readFileSync(ROOT+'/sw.js')) }
+  r.writeHead(200, {'Content-Type':'text/html'}); r.end(html);
+});
+await new Promise(r => srv.listen(8949, r));
+
+const br = await chromium.launch({
+  executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome',
+  args: ['--autoplay-policy=no-user-gesture-required']
+});
+let falhas = 0;
+const ok = (n, c, e) => { console.log((c ? '  ok   ' : '  FALHA') + '  ' + n + (e ? '  → ' + e : '')); if (!c) falhas++; };
+
+const ctx = await br.newContext({ viewport: { width: 1150, height: 980 } });
+const pg = await ctx.newPage();
+const erros = [];
+pg.on('pageerror', e => erros.push(e.message));
+await pg.addInitScript(() => {
+  function tela(){
+    const c = document.createElement('canvas'); c.width = 1280; c.height = 720;
+    const g = c.getContext('2d'); let i = 0;
+    setInterval(() => { i++; g.fillStyle = ['#123','#eee','#567','#fa0'][i%4]; g.fillRect(0,0,1280,720); }, 700);
+    return c.captureStream(12);
+  }
+  navigator.mediaDevices.getDisplayMedia = async () => tela();
+  navigator.mediaDevices.getUserMedia = async () => { throw new Error('sem mic'); };
+});
+await pg.goto('http://localhost:8949/app.html?lang=pt');
+await pg.waitForTimeout(700);
+
+console.log('[1] "Outro" existe, é o último, e é o genérico assumido');
+{
+  const vals = await pg.locator('#modelo option').evaluateAll(o => o.map(x => x.value));
+  ok('é a última opção da lista', vals[vals.length - 1] === 'outro', vals.join(','));
+  ok('e continua havendo o pedido em primeiro', vals[0] === '');
+  await pg.selectOption('#modelo', 'outro');
+  await pg.waitForTimeout(350);
+  const dica = (await pg.locator('#cenDica').textContent() || '').trim();
+  ok('a explicação diz que é o formato neutro',
+     /neutro|nenhum dos cinco/i.test(dica), dica.slice(0, 62));
+  /* A parte que impede a mentira: quem escolhe Outro tem que receber o
+     genérico DE VERDADE, e não um cabeçalho de evidência sem os campos. */
+  ok('não pede dados de evidência', await pg.locator('#evBox').evaluate(
+     e => e.classList.contains('hide')).catch(() => true));
+}
+
+console.log('\n[2] a transcrição diz "recomendado", e não "249 MB"');
+{
+  const nota = (await pg.locator('#optTr').textContent() || '').trim();
+  ok('a nota ao lado da caixa é a recomendação', /recomendad/i.test(nota), nota);
+  ok('e não anuncia megabytes', !/\bMB\b|\d{2,}\s*MB/i.test(nota), nota);
+  ok('a caixa continua marcada por padrão', await pg.locator('#recTr').isChecked());
+  /* O número não sumiu do produto: ele continua na ajuda, atrás do "?", para
+     quem quiser saber o que vai ser baixado antes de deixar marcado. */
+  const fonte = fs.readFileSync(ROOT + '/app.html', 'utf8');
+  ok('o tamanho continua existindo na ajuda', /recTrOn/.test(fonte));
+}
+
+console.log('\n[3] o modelo começa a baixar ao chegar na página');
+{
+  const fonte = fs.readFileSync(ROOT + '/app.html', 'utf8');
+  ok('há um adiantamento disparado sozinho', /setTimeout\(\(\) => \{[\s\S]{0,200}?adiantarModelo\(\);/.test(fonte));
+  /* E as três recusas. Puxar 249 MB no celular de quem só abriu para ver o que
+     é seria cobrar uma conta de dados sem avisar — numa ferramenta cuja
+     promessa é "grátis, sem instalar nada". */
+  ok('mas não com economia de dados ligada', /c\.saveData/.test(fonte));
+  ok('nem em conexão medida', /c\.metered/.test(fonte));
+  ok('nem em rede 2g', /slow-\)\?2g/.test(fonte));
+}
+
+console.log('\n[4] no passo 3, o resultado vem DEPOIS da ação');
+{
+  const fonte = fs.readFileSync(ROOT + '/app.html', 'utf8');
+  const iTit  = fonte.indexOf('data-i18n="orgTit"');
+  const iAcao = fonte.indexOf('id="allOn"');
+  const iRev  = fonte.indexOf('id="revisar"');
+  const iPlac = fonte.indexOf('id="nKeep"');
+  ok('o título de organizar vem antes das ações', iTit > 0 && iTit < iAcao);
+  ok('a revisão quadro a quadro vem depois das ações soltas', iAcao < iRev);
+  ok('e o placar vem por último', iRev < iPlac, `${iAcao} < ${iRev} < ${iPlac}`);
+  ok('o placar está separado por uma linha', /class="row placar"/.test(fonte));
+  const lbl = (await pg.locator('label[for="unNome"]').textContent() || '').trim();
+  ok('o campo diz o que se escreve nele', /quadro\/frame/i.test(lbl), lbl);
+  ok('e o botão fala de quadros, não de passos',
+     /quadro a quadro/i.test(await pg.locator('#revisar').textContent() || ''),
+     await pg.locator('#revisar').textContent());
+}
+
+console.log('\n[5] baixar a transcrição solta saiu, e o plano saiu do rodapé');
+{
+  ok('não há mais .vtt/.srt/.txt soltos', (await pg.locator('#expVtt').count()) === 0);
+  ok('nem o botão de ativar o plano', (await pg.locator('#licBtn').count()) === 0);
+  /* Nenhum dos dois pode ter levado função junto: a legenda continua saindo
+     dentro do .zip, e a chave continua se aplicando pelo link do e-mail. */
+  const fonte = fs.readFileSync(ROOT + '/app.html', 'utf8');
+  ok('mas a legenda continua sendo montada para o .zip', /function montarLegenda/.test(fonte));
+  ok('e a caixa da licença continua existindo para o link', /id="licBox"/.test(fonte));
+  ok('a frase do .vtt não encosta na borda', /data-i18n="subDeOnde" style="flex:1/.test(fonte));
+}
+
+console.log('\n[6] a caixa da janelinha é legível mesmo desligada');
+{
+  const fonte = fs.readFileSync(ROOT + '/app.html', 'utf8');
+  ok('desligada não é quase invisível',
+     !/input\.nota:disabled\{opacity:\.45\}/.test(fonte));
+  ok('ela fica pontilhada, que é o sinal de "ainda não vale"',
+     /input\.nota:disabled\{[^}]*border-style:dashed/.test(fonte));
+  ok('e a frase dentro dela tem contraste', /input\.nota::placeholder\{color:#9aa3b2/.test(fonte));
+  ok('o botão de trazer a janelinha de volta é destacado',
+     /class="sm hide destaque" id="recPip"/.test(fonte));
+}
+
+console.log('\n[7] a janelinha avisa quando a gravação morre');
+{
+  const fonte = fs.readFileSync(ROOT + '/app.html', 'utf8');
+  ok('há um estado de erro na janelinha', /if \(etapa === 'erro'\)/.test(fonte));
+  ok('e um de download com porcentagem', /if \(etapa === 'baixando'\)/.test(fonte));
+  /* O estado de erro deixou de pertencer ao modelo — o modelo não derruba mais
+     a gravação (ver linhas.mjs [L3]). Ele passou a pertencer a `desistir`, que
+     é quem realmente desiste: permissão negada, compartilhamento encerrado. E
+     é ELE que precisa aparecer na janelinha, porque é para lá que quem grava
+     está olhando quando a gravação morre. */
+  ok('o erro é chamado quando a gravação desiste de verdade',
+     /const desistir = \(msg, classe\) => \{[\s\S]{0,900}?controle\('erro', \{ msg \}\)/.test(fonte));
+  ok('e a janelinha mostra o MOTIVO, não um "deu erro"',
+     /pipTexto\.textContent = \(dados && dados\.msg\) \|\| t\('pipErro'\)/.test(fonte));
+  /* E a janela NÃO fecha em seguida: fechar junto mostraria a frase por zero
+     milissegundo, e sumir sem explicar é o que faz a pessoa achar que a culpa
+     foi dela. */
+  ok('e a janelinha fica na tela tempo de ser lida',
+     /pipErroTic = setTimeout\(fecharControle, 6000\)/.test(fonte));
+  ok('o texto de erro é vermelho e quebra linha', /\.txt\.ruim\{color:#ef8484/.test(fonte));
+}
+
+console.log('\n[8] os cinco idiomas, sem rótulo em branco');
+for (const L of ['pt', 'en', 'es', 'de', 'fr']) {
+  const p2 = await ctx.newPage();
+  await p2.goto('http://localhost:8949/app.html?lang=' + L);
+  await p2.waitForTimeout(500);
+  const vazios = await p2.evaluate(() => [...document.querySelectorAll('[data-i18n]')]
+    .filter(e => !e.textContent.trim()).map(e => e.getAttribute('data-i18n')));
+  ok(`${L}: nenhum rótulo em branco`, vazios.length === 0, vazios.slice(0, 6).join(' '));
+  const outro = await p2.locator('#modelo option[value="outro"]').textContent();
+  ok(`${L}: "Outro" traduzido`, (outro || '').trim().length > 4, outro);
+  await p2.close();
+}
+
+console.log('\n[9] nada disso quebrou o JS');
+ok('sem erro de JS', erros.length === 0, erros.join(' | ').slice(0, 170));
+
+await br.close(); srv.close();
+console.log(falhas ? `\n${falhas} FALHA(S)` : '\nArrumação da tela: tudo passou.');
+process.exit(falhas ? 1 : 0);
