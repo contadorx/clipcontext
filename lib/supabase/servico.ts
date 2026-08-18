@@ -86,3 +86,52 @@ export type Conta = {
 };
 
 export const contaDe = (email: string) => rpc<Conta>('walkstamp_conta_do_usuario', { p_email: email });
+
+/* ------------------------------------------------------------------ negócio
+ *
+ * O back-office. Esta função não pergunta quem está chamando: ela devolve a
+ * receita, a lista de e-mails e os chamados de TODO MUNDO. Quem decide se é o
+ * dono é o servidor do site, pelo `WALKSTAMP_DONO`, ANTES de chegar aqui — e no
+ * banco ela está revogada de `anon` e `authenticated` justamente porque a
+ * chave publicável vai dentro do HTML por construção.
+ */
+export type Painel = {
+  resumo: {
+    contas: number; contas30: number; clientes: number; clientesAtivos: number;
+    assentosVendidos: number; assentosUsados: number;
+    pago: number; aberto: number; vencido: number; nVencidas: number;
+    chamadosAbertos: number; chamadosParados: number; chamadosTotal: number;
+    interesse: number; interesse30: number; eventos30: number; emissoes30: number;
+  };
+  clientes: Array<{
+    id: number; nome: string | null; plano: string | null; ativo: boolean;
+    assentos: number | null; dias: number | null; criado_em: string;
+    stripe: boolean; usados: number; pago: number; aberto: number;
+  }>;
+  contas: Array<{
+    email: string; plano: string | null; cliente: string | null; ativo: boolean;
+    assentos: number | null; dias: number | null; emissoes: number | null;
+    ultima_em: string | null; vence_em: string | null; criado_em: string;
+  }>;
+  faturas: Array<{
+    numero: string | null; cliente: string | null; valor: number; moeda: string;
+    status: string; vence_em: string | null; pago_em: string | null;
+    nf_numero: string | null; nf_url: string | null; competencia: string | null;
+    criado_em: string; atrasada: boolean;
+  }>;
+  chamados: Array<{
+    numero: string | null; tipo: string | null; status: string | null; texto: string | null;
+    resposta: string | null; email: string | null; nota: number | null;
+    idioma: string | null; cenario: string | null; origem: string | null;
+    diagnostico: string | null; criado_em: string; respondido_em: string | null;
+  }>;
+  interesse: Array<{ email: string; idioma: string | null; criado_em: string }>;
+  uso: {
+    formato: Array<{ chave: string; n: number }>;
+    idioma: Array<{ chave: string; n: number }>;
+    origem: Array<{ chave: string; n: number }>;
+    dia: Array<{ chave: string; n: number }>;
+  };
+};
+
+export const painelDoNegocio = () => rpc<Painel>('walkstamp_negocio_painel', {});

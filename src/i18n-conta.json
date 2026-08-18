@@ -213,7 +213,17 @@
     "timeLayoutFull": "uma por página",
     "timeLayoutGrid": "em grade",
     "timeHash": "Imprimir a impressão digital SHA-256 de cada imagem",
-    "timeNumerar": "Numerar os casos sozinho (EV-001, EV-002…)"
+    "timeNumerar": "Numerar os casos sozinho (EV-001, EV-002…)",
+    "navInicio": "Início",
+    "navRoteiro": "Casos de teste",
+    "navFaturas": "Faturas",
+    "navChamados": "Chamados",
+    "navTime": "Time",
+    "navNegocio": "Negócio",
+    "painelTit": "Sua conta",
+    "painelMenu": "Menu da conta",
+    "painelVoltar": "Voltar ao Walkstamp",
+    "painelFerramenta": "Abrir a ferramenta"
   },
   "en": {
     "tituloAba": "Your account",
@@ -428,7 +438,17 @@
     "timeLayoutFull": "one per page",
     "timeLayoutGrid": "in a grid",
     "timeHash": "Print the SHA-256 fingerprint of every image",
-    "timeNumerar": "Number the cases automatically (EV-001, EV-002…)"
+    "timeNumerar": "Number the cases automatically (EV-001, EV-002…)",
+    "navInicio": "Home",
+    "navRoteiro": "Test cases",
+    "navFaturas": "Invoices",
+    "navChamados": "Tickets",
+    "navTime": "Team",
+    "navNegocio": "Business",
+    "painelTit": "Your account",
+    "painelMenu": "Account menu",
+    "painelVoltar": "Back to Walkstamp",
+    "painelFerramenta": "Open the tool"
   },
   "es": {
     "tituloAba": "Tu cuenta",
@@ -643,7 +663,17 @@
     "timeLayoutFull": "una por página",
     "timeLayoutGrid": "en cuadrícula",
     "timeHash": "Imprimir la huella SHA-256 de cada imagen",
-    "timeNumerar": "Numerar los casos solo (EV-001, EV-002…)"
+    "timeNumerar": "Numerar los casos solo (EV-001, EV-002…)",
+    "navInicio": "Inicio",
+    "navRoteiro": "Casos de prueba",
+    "navFaturas": "Facturas",
+    "navChamados": "Incidencias",
+    "navTime": "Equipo",
+    "navNegocio": "Negocio",
+    "painelTit": "Tu cuenta",
+    "painelMenu": "Menú de la cuenta",
+    "painelVoltar": "Volver a Walkstamp",
+    "painelFerramenta": "Abrir la herramienta"
   },
   "de": {
     "tituloAba": "Ihr Konto",
@@ -858,7 +888,17 @@
     "timeLayoutFull": "einer pro Seite",
     "timeLayoutGrid": "im Raster",
     "timeHash": "Die SHA-256-Prüfsumme jedes Bildes drucken",
-    "timeNumerar": "Die Testfälle automatisch nummerieren (EV-001, EV-002…)"
+    "timeNumerar": "Die Testfälle automatisch nummerieren (EV-001, EV-002…)",
+    "navInicio": "Start",
+    "navRoteiro": "Testfälle",
+    "navFaturas": "Rechnungen",
+    "navChamados": "Tickets",
+    "navTime": "Team",
+    "navNegocio": "Geschäft",
+    "painelTit": "Ihr Konto",
+    "painelMenu": "Kontomenü",
+    "painelVoltar": "Zurück zu Walkstamp",
+    "painelFerramenta": "Werkzeug öffnen"
   },
   "fr": {
     "tituloAba": "Votre compte",
@@ -1073,6 +1113,16 @@
     "timeLayoutFull": "un par page",
     "timeLayoutGrid": "en grille",
     "timeHash": "Imprimer l’empreinte SHA-256 de chaque image",
-    "timeNumerar": "Numéroter les cas automatiquement (EV-001, EV-002…)"
+    "timeNumerar": "Numéroter les cas automatiquement (EV-001, EV-002…)",
+    "navInicio": "Accueil",
+    "navRoteiro": "Cas de test",
+    "navFaturas": "Factures",
+    "navChamados": "Tickets",
+    "navTime": "Équipe",
+    "navNegocio": "Activité",
+    "painelTit": "Votre compte",
+    "painelMenu": "Menu du compte",
+    "painelVoltar": "Retour à Walkstamp",
+    "painelFerramenta": "Ouvrir l’outil"
   }
 }
