@@ -426,6 +426,7 @@ def escrever_marca(root: pathlib.Path) -> None:
         "faturas":  {"pt": "faturas",  "en": "invoices", "es": "facturas",    "de": "rechnungen", "fr": "factures"},
         "chamados": {"pt": "chamados", "en": "tickets",  "es": "incidencias", "de": "tickets",    "fr": "tickets"},
         "time":     {"pt": "time",     "en": "team",     "es": "equipo",      "de": "team",       "fr": "equipe"},
+        "modelos":  {"pt": "modelos",  "en": "templates","es": "plantillas",  "de": "vorlagen",   "fr": "modeles"},
         "negocio":  {"pt": "negocio",  "en": "business", "es": "negocio",     "de": "geschaeft",  "fr": "activite"},
     }
     # As abas do back-office. Elas NÃO são traduzidas, e isto é uma decisão:
@@ -471,6 +472,8 @@ def escrever_marca(root: pathlib.Path) -> None:
          "icone": "M6 2h12v20l-3-2-3 2-3-2-3 2z M9 7h6 M9 11h6"},
         {"slug": "chamados", "rotulo": "navChamados",
          "icone": "M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"},
+        {"slug": "modelos", "rotulo": "navModelos", "exige": "time",
+         "icone": "M4 4h9l4 4v12H4z M13 4v5h4 M8 13h6 M8 16h6"},
         {"slug": "time", "rotulo": "navTime", "exige": "time",
          "icone": "M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2 M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8 M23 21v-2a4 4 0 0 0-3-3.87 M16 3.13a4 4 0 0 1 0 7.75"},
         {"slug": "negocio", "rotulo": "navNegocio", "quando": "dono",

@@ -11,6 +11,7 @@ import { redirect } from 'next/navigation';
 import { emailDaSessao } from '@/lib/supabase/servidor';
 import { responderChamado } from '@/lib/supabase/servico';
 import { ehLang, CAMINHO } from '@/lib/conta/textos';
+import { avisarChamadoRespondido } from '@/lib/conta/aviso-chamado';
 
 const DONO = (process.env.WALKSTAMP_DONO || '').trim().toLowerCase();
 
@@ -28,13 +29,20 @@ export async function responder(form: FormData) {
   const texto = String(form.get('texto') || '').trim();
   if (!numero || !texto) redirect(`${destino}?erro=vazio`);
 
-  let r: { ok?: boolean; erro?: string } = {};
+  let r: { ok?: boolean; erro?: string; email?: string | null } = {};
   try {
     r = await responderChamado(numero, texto);
   } catch (e) {
     redirect(`${destino}?erro=${encodeURIComponent(String(e).slice(0, 120))}`);
   }
   if (r.erro) redirect(`${destino}?erro=${encodeURIComponent(r.erro)}`);
+
+  /* O aviso vai DEPOIS de a resposta estar gravada, e a falha dele nao desfaz
+     nada: a resposta e o trabalho, o e-mail e a noticia. Sem isto, responder
+     pelo painel grava a resposta e mais nada acontece — quem escreveu nao tem
+     por que voltar a `/conta/chamados` para conferir. */
+  try { await avisarChamadoRespondido(r.email, numero, String(form.get('idioma') || 'pt')); }
+  catch { /* ja registrado no log la dentro; a resposta continua salva */ }
 
   /* A tela lê de uma função `stable` sem cache do Next, mas a rota é dinâmica e
      o roteador do cliente guarda a última resposta. Sem isto, responder e voltar
@@ -121,4 +129,70 @@ export async function apagarPublicacao(form: FormData) {
   catch (e) { redirect(`${base}?erro=${encodeURIComponent(String(e).slice(0, 120))}`); }
   revalidatePath(base);
   redirect(`${base}?feito=apagado`);
+}
+
+/* ------------------------------------------------------------- as figuras */
+
+import { figuraAdd, figuraDel, definirCapa } from '@/lib/blog';
+import { subirFigura, apagarFigura, extensaoDe, TETO_FIGURA } from '@/lib/supabase/figura';
+
+export async function enviarFigura(form: FormData) {
+  const lang = String(form.get('lang') || 'pt');
+  await souDono(lang);
+  const base = `${CAMINHO[ehLang(lang) ? lang : 'pt']}/negocio/blog`;
+  const chave = String(form.get('chave') || '').trim();
+  const volta = `${base}?chave=${encodeURIComponent(chave)}`;
+
+  const arq = form.get('figura');
+  if (!chave || !(arq instanceof File) || !arq.size) redirect(`${volta}&erro=sem_figura`);
+  const f = arq as File;
+
+  /* O tipo vem do ARQUIVO, e a extensão sai dele. Confiar no nome deixaria
+     entrar um `.png` que é outra coisa — servido depois com o tipo errado. */
+  const ext = extensaoDe(f.type);
+  if (!ext) redirect(`${volta}&erro=tipo`);
+  if (f.size > TETO_FIGURA) redirect(`${volta}&erro=grande`);
+
+  /* O caminho leva o instante: uma figura trocada não pode reaproveitar o
+     endereço da anterior, senão o cache de um ano serve a imagem velha. */
+  const caminho = `${chave}/${Date.now()}.${ext}`;
+  try {
+    const url = await subirFigura(caminho, await f.arrayBuffer(), f.type);
+    const r = await figuraAdd(chave, caminho, url, String(form.get('alt') || '').trim());
+    if (r.erro) redirect(`${volta}&erro=${r.erro}`);
+  } catch (e) {
+    redirect(`${volta}&erro=${encodeURIComponent(String(e).slice(0, 120))}`);
+  }
+  revalidatePath(base);
+  redirect(`${volta}&feito=figura`);
+}
+
+export async function removerFigura(form: FormData) {
+  const lang = String(form.get('lang') || 'pt');
+  await souDono(lang);
+  const base = `${CAMINHO[ehLang(lang) ? lang : 'pt']}/negocio/blog`;
+  const chave = String(form.get('chave') || '').trim();
+  const caminho = String(form.get('caminho') || '');
+  try {
+    /* O arquivo primeiro, o registro depois. Na ordem inversa, um erro no meio
+       deixaria o arquivo no balde sem ninguém apontando para ele — órfão que
+       ninguém encontra para apagar. */
+    await apagarFigura(caminho);
+    await figuraDel(chave, caminho);
+  } catch (e) {
+    redirect(`${base}?chave=${encodeURIComponent(chave)}&erro=${encodeURIComponent(String(e).slice(0, 120))}`);
+  }
+  revalidatePath(base);
+  redirect(`${base}?chave=${encodeURIComponent(chave)}&feito=figura_apagada`);
+}
+
+export async function escolherCapa(form: FormData) {
+  const lang = String(form.get('lang') || 'pt');
+  await souDono(lang);
+  const base = `${CAMINHO[ehLang(lang) ? lang : 'pt']}/negocio/blog`;
+  const chave = String(form.get('chave') || '').trim();
+  try { await definirCapa(chave, String(form.get('url') || '')); }
+  catch (e) { redirect(`${base}?chave=${encodeURIComponent(chave)}&erro=${encodeURIComponent(String(e).slice(0, 120))}`); }
+  revalidatePath(base);
+  redirect(`${base}?chave=${encodeURIComponent(chave)}&feito=capa`);
 }

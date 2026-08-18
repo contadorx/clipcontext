@@ -95,9 +95,11 @@ guardar nada que identifique alguém.
 
 | variável | o que é | se faltar |
 |---|---|---|
-| `RESEND_API_KEY` | a chave do Resend | 503 → o app cai no `mailto:` |
+| `BREVO_API_KEY` | a chave do Brevo (Settings → SMTP & API → API keys) | 503 → o app cai no `mailto:` |
+| `EMAIL_DE` | o remetente, ex.: `ola@walkstamp.com` | 503 |
+| `EMAIL_DE_NOME` | o nome que aparece, ex.: `Walkstamp` | usa "Walkstamp" |
 | `CONVITE_SAL` | um texto longo e aleatório, o sal dos hashes | usa o `CRON_SECRET`; sem nenhum dos dois, 503 |
-| `CONVITE_DE` | o remetente, ex.: `Walkstamp <ola@walkstamp.com>` | monta a partir do domínio da marca |
+| `CONVITE_DE` | forma antiga do remetente, `Nome <endereço>` — continua aceita | — |
 | `SUPABASE_SERVICE_ROLE_KEY` | já existe, para a conta | 503 |
 | `SUPABASE_URL` | já existe | 503 |
 
@@ -105,16 +107,23 @@ guardar nada que identifique alguém.
 todos os hashes, e as contagens do último dia se perdem — não é grave, mas é bom
 saber por que os limites "zeraram sozinhos".
 
-### O domínio, no Resend
+### O domínio, no Brevo
 
 Antes de a primeira mensagem chegar em caixa de entrada e não em spam:
 
-1. Resend → Domains → adicione `walkstamp.com`;
-2. cole no DNS os três registros que ele der (SPF, DKIM e o de retorno);
-3. espere verificar — costuma levar minutos, às vezes horas.
+1. Brevo → **Senders, Domains & Dedicated IPs** → adicione `walkstamp.com`;
+2. cole no DNS os registros que ele der (DKIM e o `dmarc`, além do SPF);
+3. espere autenticar — costuma levar minutos, às vezes horas.
 
-Enquanto o domínio não estiver verificado, o Resend só entrega para o e-mail da
-própria conta. Isso é útil para testar e é inútil em produção.
+> ⚠️ **SPF: um registro, não dois.** A HostGator já criou o dela quando você
+> criou a primeira caixa. O Brevo vai pedir um `include:`. Dois TXT de SPF no
+> mesmo nome é **erro permanente** pela especificação — o servidor que recebe
+> descarta os dois, e a sua autenticação some inteira. Junte num só.
+>
+> DKIM não tem esse problema: os seletores são diferentes e convivem.
+
+Enquanto o domínio não estiver autenticado, o e-mail sai mas cai em spam com
+frequência alta. Isso é útil para testar e é ruim em produção.
 
 ---
 

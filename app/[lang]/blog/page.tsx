@@ -59,9 +59,15 @@ export default async function Indice({ params }: PageProps<'/[lang]/blog'>) {
         <ul className="postList">
           {posts.map((p) => (
             <li key={p.chave}>
-              <a href={`${enderecoBlog(L)}/${p.slug}`}>
-                <h2>{p.titulo}</h2>
-                <p>{p.resumo}</p>
+              <a href={`${enderecoBlog(L)}/${p.slug}`} className={p.capa ? 'comCapa' : undefined}>
+                {/* A capa entra como IMAGEM e não como fundo de CSS: fundo não
+                    tem `alt`, não é lido por leitor de tela e não aparece quando
+                    a imagem demora. */}
+                {p.capa && <img src={p.capa} alt="" loading="lazy" />}
+                <div>
+                  <h2>{p.titulo}</h2>
+                  <p>{p.resumo}</p>
+                </div>
               </a>
               <p className="small muted">
                 <time dateTime={p.publicado_em}>{dataDe(L, p.publicado_em)}</time>

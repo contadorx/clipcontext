@@ -556,3 +556,23 @@ table.legal td:first-child .small,table.legal td:first-child .muted{font-weight:
 .painelCorpo form label.small textarea{display:block;width:100%;margin-top:4px}
 .painelCorpo form textarea{font:14px/1.6 ui-monospace,Menlo,Consolas,monospace;resize:vertical}
 .painelCorpo details summary{padding:6px 0}
+
+/* A galeria de figuras do post, no back-office. */
+.figLista{list-style:none;margin:16px 0 0;padding:0;display:grid;gap:14px}
+.figLista li{display:grid;grid-template-columns:120px minmax(0,1fr);gap:14px;align-items:start;
+  border:1px solid var(--line);border-radius:10px;padding:10px}
+.figLista img{width:120px;height:80px;object-fit:cover;border-radius:6px;border:1px solid var(--line)}
+.figMd{display:block;font-size:12.5px;word-break:break-all;background:var(--panel);
+  border-radius:6px;padding:6px 8px}
+@media(max-width:620px){ .figLista li{grid-template-columns:1fr} .figLista img{width:100%} }
+
+/* A capa, na lista e no post. */
+.postList a.comCapa{display:grid;grid-template-columns:180px minmax(0,1fr);gap:18px;align-items:start}
+.postList a.comCapa img{width:180px;height:112px;object-fit:cover;border-radius:10px;
+  border:1px solid var(--line)}
+.postCapa{display:block;width:100%;height:auto;border-radius:12px;border:1px solid var(--line);
+  margin:22px 0 0}
+@media(max-width:620px){
+  .postList a.comCapa{grid-template-columns:1fr}
+  .postList a.comCapa img{width:100%;height:auto;aspect-ratio:16/10}
+}

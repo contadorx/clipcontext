@@ -229,6 +229,37 @@ export function Time({ conta, lang, t }: { conta: Conta; lang: Lang; t: Textos }
       </form>
       <p className="small muted" style={{ marginTop: 14 }}>{t.timeAviso}</p>
 
+      {/* Os PADRÕES do documento saíram daqui e viraram a aba `Modelos`.
+
+          Eles estavam no fim de uma tela cujo assunto é assento: quem entra em
+          `Time` vem bloquear alguém ou convidar alguém, e o logotipo da empresa
+          ficava depois de tudo isso, onde ninguém rola. São dois assuntos e dois
+          momentos — um se mexe quando entra gente, o outro se mexe uma vez e
+          vale para sempre. */}
+      <Emissoes p={p} lang={lang} t={t} />
+
+      {/* A frase que existia na /time e não podia se perder na mudança: o que
+          esta área tem, e o que ela continua não tendo. É a tese do produto
+          dita no lugar onde alguém poderia duvidar dela. */}
+      <p className="small muted" style={{ marginTop: 18 }}>{t.timeNada}</p>
+    </div>
+  );
+}
+
+/* ---------------------------------------------------------- os PADRÕES ----
+
+   O nome da empresa, o logotipo e a forma de cada saída — aplicados a todo
+   mundo do time, sem ninguém ter que lembrar.
+
+   Eles vivem numa aba própria porque são de outro momento: assento se mexe
+   quando entra ou sai gente; padrão se acerta uma vez e vale para sempre. No
+   fim da tela de assentos, esse acerto ficava abaixo da dobra de uma página que
+   ninguém termina de ler. */
+export function Padroes({ conta, lang, t }: { conta: Conta; lang: Lang; t: Textos }) {
+  const p = conta.time!;
+  const cfg = p.config || {};
+  return (
+    <div className="card" style={{ marginBottom: 24 }}>
       <h3 style={{ marginBottom: 4 }}>{t.timeConfigTitulo}</h3>
       <p className="small muted" style={{ marginTop: 0 }}>{t.timeConfigTexto}</p>
       <Modelos p={p} lang={lang} t={t} />

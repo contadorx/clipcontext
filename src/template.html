@@ -1073,7 +1073,7 @@
       </div>
       <div>
         <label class="f" for="maxf" data-i18n="lMax"></label>
-        <input type="number" id="maxf" value="60" min="1" max="400">
+        <input type="number" id="maxf" value="300" min="1" max="2000">
       </div>
       <div>
         <label class="f" for="tIni" data-i18n="lFrom"></label>
@@ -2090,6 +2090,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recNoModel:'Não consegui carregar o modelo: vou guardar os frames sem transcrever.',
       linhasCairam:'O runtime não pôde usar várias linhas neste navegador — tentando de novo com uma só.',
       recTrChegou:'O modelo de voz chegou — a transcrição começou, inclusive do que já foi gravado.',
+      recTeto:'Cheguei no limite de {0} quadros e PAREI de guardar imagem — a gravação e o áudio continuam. Aumente o "Limite de frames" no passo 3 e volto a guardar na hora.',
+      recMaisFrames:'Aumentar para {0}',
+      recTetoVoltou:'Limite aumentado — voltei a guardar os quadros.',
+      recTetoPerto:'{0} de {1} quadros. Perto do limite — dá para aumentar o "Limite de frames" no passo 3 agora, sem parar a gravação.',
       recTrCaiu:'Não consegui baixar o modelo de voz. A gravação CONTINUA e os quadros estão sendo guardados — só a transcrição não vem. Dá para transcrever depois, no passo 2.',
       recNoModelStop:'Não consegui carregar o modelo de transcrição, então parei antes de começar a gravar e desliguei a captura — melhor agora do que no fim de uma reunião inteira. Rode o diagnóstico para ver onde trava, ou grave só os frames.',
       recSoFramesBtn:'Gravar só os frames',
@@ -2640,6 +2644,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recNoModel:'Could not load the model: I will keep the frames without transcribing.',
       linhasCairam:'The runtime could not use multiple threads in this browser — trying again with a single one.',
       recTrChegou:'The speech model arrived — transcription started, including what was already recorded.',
+      recTeto:'Hit the {0}-frame limit and STOPPED keeping images — the recording and the audio continue. Raise "Frame limit" in step 3 and I start keeping again right away.',
+      recMaisFrames:'Raise to {0}',
+      recTetoVoltou:'Limit raised — I am keeping frames again.',
+      recTetoPerto:'{0} of {1} frames. Close to the limit — you can raise "Frame limit" in step 3 now, without stopping the recording.',
       recTrCaiu:'Could not download the speech model. Recording CONTINUES and the frames are being kept — only the transcript is missing. You can transcribe later, in step 2.',
       recNoModelStop:'I could not load the transcription model, so I stopped before recording anything and switched the capture off — better now than at the end of a whole meeting. Run the diagnostics to see where it gets stuck, or record frames only.',
       recSoFramesBtn:'Record frames only',
@@ -3182,6 +3190,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recNoModel:'No pude cargar el modelo: guardaré los fotogramas sin transcribir.',
       linhasCairam:'El runtime no pudo usar varios hilos en este navegador — probando de nuevo con uno solo.',
       recTrChegou:'El modelo de voz llegó — la transcripción empezó, incluso de lo ya grabado.',
+      recTeto:'Llegué al límite de {0} fotogramas y DEJÉ de guardar imagen — la grabación y el audio siguen. Sube el "Límite de fotogramas" en el paso 3 y vuelvo a guardar al instante.',
+      recMaisFrames:'Subir a {0}',
+      recTetoVoltou:'Límite aumentado — vuelvo a guardar los fotogramas.',
+      recTetoPerto:'{0} de {1} fotogramas. Cerca del límite — puedes subir el "Límite de fotogramas" en el paso 3 ahora, sin parar la grabación.',
       recTrCaiu:'No pude descargar el modelo de voz. La grabación CONTINÚA y los fotogramas se están guardando — solo falta la transcripción. Puedes transcribir después, en el paso 2.',
       recNoModelStop:'No pude cargar el modelo de transcripción, así que paré antes de grabar nada y apagué la captura — mejor ahora que al final de una reunión entera. Ejecuta el diagnóstico para ver dónde se atasca, o graba solo los fotogramas.',
       recSoFramesBtn:'Grabar solo los fotogramas',
@@ -3727,6 +3739,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recNoModel:'Das Modell konnte nicht geladen werden: Die Screenshots werden ohne Transkription gespeichert.',
       linhasCairam:'Die Laufzeitumgebung konnte in diesem Browser nicht mehrere Threads nutzen — neuer Versuch mit nur einem.',
       recTrChegou:'Das Sprachmodell ist da — die Transkription läuft, auch für das bereits Aufgenommene.',
+      recTeto:'Grenze von {0} Bildern erreicht, ich speichere KEINE Bilder mehr — Aufnahme und Ton laufen weiter. Erhöhen Sie „Bildgrenze" in Schritt 3, dann speichere ich sofort wieder.',
+      recMaisFrames:'Auf {0} erhöhen',
+      recTetoVoltou:'Grenze erhöht — ich speichere wieder Bilder.',
+      recTetoPerto:'{0} von {1} Bildern. Nahe an der Grenze — Sie können „Bildgrenze" in Schritt 3 jetzt erhöhen, ohne die Aufnahme zu stoppen.',
       recTrCaiu:'Das Sprachmodell konnte nicht geladen werden. Die Aufnahme LÄUFT WEITER und die Bilder werden gesichert — nur das Transkript fehlt. Sie können später in Schritt 2 transkribieren.',
       recNoModelStop:'Das Transkriptionsmodell konnte nicht geladen werden, deshalb wurde abgebrochen, bevor irgendetwas aufgenommen wurde, und die Aufnahme abgeschaltet — besser jetzt als am Ende einer ganzen Besprechung. Führen Sie die Diagnose aus, um zu sehen, wo es hängt, oder nehmen Sie nur die Screenshots auf.',
       recSoFramesBtn:'Nur die Screenshots aufnehmen',
@@ -4276,6 +4292,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recNoModel:'Impossible de charger le modèle : les captures seront conservées sans transcription.',
       linhasCairam:'Le runtime n’a pas pu utiliser plusieurs threads dans ce navigateur — nouvel essai avec un seul.',
       recTrChegou:'Le modèle vocal est arrivé — la transcription a démarré, y compris pour ce qui est déjà enregistré.',
+      recTeto:'Limite de {0} images atteinte, j’ai ARRÊTÉ de garder des images — l’enregistrement et le son continuent. Augmentez « Limite d’images » à l’étape 3 et je recommence aussitôt.',
+      recMaisFrames:'Passer à {0}',
+      recTetoVoltou:'Limite augmentée — je garde de nouveau les images.',
+      recTetoPerto:'{0} sur {1} images. Proche de la limite — vous pouvez augmenter « Limite d’images » à l’étape 3 maintenant, sans arrêter l’enregistrement.',
       recTrCaiu:'Impossible de télécharger le modèle vocal. L’enregistrement CONTINUE et les images sont conservées — seule la transcription manque. Vous pourrez transcrire ensuite, à l’étape 2.',
       recNoModelStop:'Impossible de charger le modèle de transcription : tout s’est arrêté avant le moindre enregistrement et la capture a été coupée — mieux vaut maintenant qu’à la fin d’une réunion entière. Lancez le diagnostic pour voir où ça bloque, ou enregistrez les captures seules.',
       recSoFramesBtn:'Enregistrer les captures seules',
@@ -6944,6 +6964,21 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       ? `<span class="err">${avisoCurto}</span>` : t('recHint');
   };
 
+  /* O clique do "aumentar" e DELEGADO ao `#recMsg`.
+
+     O relogio reescreve aquele bloco inteiro a cada segundo; um `onclick`
+     amarrado ao botao morreria no primeiro tique, e o botao ficaria ali,
+     bonito e morto — que e pior do que nao ter botao. */
+  $('recMsg').addEventListener('click', (e) => {
+    const b = e.target.closest && e.target.closest('#recMaisFrames');
+    if (!b) return;
+    const campo = $('maxf');
+    if (!campo) return;
+    const novo = Math.min(Number(campo.max) || 2000, Math.max(1, +campo.value || 300) * 2);
+    campo.value = String(novo);
+    campo.dispatchEvent(new Event('input', { bubbles: true }));
+  });
+
   function capturando(){
     if (!liveOn && !emCauda) return false;
     avisar(t('recBusy'), 5);
@@ -7679,7 +7714,17 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     currentFile = null;
 
     const thr = [0,26,19,13,9,5.5,4,2.8,1.8,1][+$('sens').value];
-    const maxf = Math.max(1, +$('maxf').value || 60);
+    /* O LIMITE E LIDO A CADA QUADRO, e nao uma vez no comeco.
+     *
+     * Ele era `const maxf` aqui: o numero congelava no instante em que a
+     * gravacao comecava. Quem batesse no teto no meio de uma reuniao nao tinha
+     * saida nenhuma — aumentar o campo nao fazia efeito, e parar para recomecar
+     * era perder a reuniao. Agora aumentar vale na hora, com a captura rolando.
+     *
+     * O padrao subiu de 60 para 300. Sessenta era numero de video curto de
+     * demonstracao; uma reuniao de uma hora passa disso na primeira meia hora, e
+     * o que acontecia era a captura parar em silencio. */
+    const limiteAgora = () => Math.max(1, +$('maxf').value || 300);
     const q = parseFloat($('quality').value);
 
     /* Os canais de áudio abrem por último, imediatamente antes do relógio.
@@ -7867,13 +7912,58 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
        que a tela mudou é indistinguível de defeito enquanto o motivo não
        aparece — e "sem frames, ainda com problemas" foi como chegou. Estes
        contadores custam nada e transformam a queixa em diagnóstico. */
+    let avisoTeto = '', avisouPerto = false;
     motivosFrame = { semVideo: 0, semAssinatura: 0, semImagem: 0, poucaMudanca: 0,
                      limite: 0, maiorDiff: 0, maiorMedia: 0, maiorArea: 0,
                      limiar: thr, erroImagem: '' };
 
     const capturar = (forcar, marcado) => {
       if (!video.videoWidth) { motivosFrame.semVideo++; return false; }
-      if (frames.length >= maxf) { motivosFrame.limite++; return false; }
+      const teto = limiteAgora();
+      if (frames.length >= teto) {
+        motivosFrame.limite++;
+        /* O aviso do teto entra em `avisos`, e nao no aviso com prazo.
+         *
+         * Antes isto so incrementava um contador que aparecia no diagnostico: a
+         * captura parava de guardar quadro e a pessoa seguia a reuniao inteira
+         * achando que estava gravando. Um limite que se atinge em silencio e um
+         * limite que destroi trabalho.
+         *
+         * E um aviso de oito segundos nao serve aqui. Quem grava reuniao esta
+         * olhando para a reuniao; se a frase expira enquanto ela fala, ela perde
+         * o resto igual. Este fica ENQUANTO durar a condicao — o relogio o
+         * repete a cada segundo — e some sozinho quando o limite sobe. */
+        if (!avisoTeto) {
+          /* O BOTAO VAI JUNTO DO AVISO, e nao um "va ate o passo 3".
+           *
+           * O campo do limite fica abaixo da dobra durante a gravacao — medido:
+           * y=1167 numa janela de 1000. Mandar a pessoa procurar um campo que
+           * ela nao esta vendo, no meio de uma reuniao, e quase tao ruim quanto
+           * nao avisar: ela vai olhar para a reuniao de novo e o resto se perde
+           * igual. Um clique, no lugar onde o recado esta. */
+          avisoTeto = t('recTeto', teto) +
+            ` <button class="ghost sm" id="recMaisFrames">${t('recMaisFrames', teto * 2)}</button>`;
+          avisos.push(avisoTeto);
+          controle('semModelo');   // a janelinha tambem, que e para onde ela olha
+          pipAviso = t('recTeto', teto); pipAvisoAte = performance.now() + 3600000;
+        }
+        return false;
+      }
+      /* Voltou a caber: o limite subiu no meio da gravacao. O recado sai da
+         tela, senao ele vira um alarme que grita depois de resolvido. */
+      if (avisoTeto) {
+        const i = avisos.indexOf(avisoTeto);
+        if (i >= 0) avisos.splice(i, 1);
+        avisoTeto = '';
+        pipAvisoAte = 0;
+        avisarNaLive(t('recTetoVoltou'), 'ok');
+      }
+      /* O aviso de que ele esta CHEGANDO, com folga para reagir: aumentar o
+         campo ainda salva o resto da reuniao. */
+      if (!avisouPerto && frames.length >= Math.floor(teto * 0.85)) {
+        avisouPerto = true;
+        avisarNaLive(t('recTetoPerto', frames.length, teto), 'err');
+      }
       // pausado, o laço automático não guarda nada; marcar à mão continua valendo
       if (pausado && !forcar) return false;
       /* A assinatura serve ao DETECTOR de mudança. Numa captura forçada — a de
@@ -8033,7 +8123,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
         motivosFrame.frames = frames.length;
         motivosFrame.segundos = liveDur;
         motivosFrame.video = video.videoWidth + '×' + video.videoHeight;
-        motivosFrame.limite_max = maxf;
+        motivosFrame.limite_max = limiteAgora();
         motivosFrame.passo_ms = PASSO_FRAME_MS;
         guardarMotivos();
       }
@@ -10165,7 +10255,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     else if (ini > 0 || fim < dur - 0.05) avisoFaixa = ' ' + t('faixa', fmt(ini), fmt(fim));
     const janela = fim - ini;
     const q = parseFloat($('quality').value), mode = $('mode').value;
-    const maxf = Math.max(1, +$('maxf').value || 60);
+    const maxf = Math.max(1, +$('maxf').value || 300);
     const px = 900;
 
     $('extract').disabled = true;

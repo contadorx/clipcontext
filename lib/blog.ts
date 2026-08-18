@@ -18,9 +18,13 @@ import { rpc } from '@/lib/supabase/servico';
 
 export type Lang = 'pt' | 'en' | 'es' | 'de' | 'fr';
 
+export type Figura = { caminho: string; url: string; alt: string };
+
 export type Resumo = {
   chave: string; slug: string; titulo: string; resumo: string;
   autor: string | null; tags: string[]; publicado_em: string;
+  /** a figura que vai na lista e na prévia de quem compartilha */
+  capa: string | null;
 };
 export type Post = Resumo & {
   corpo: string; atualizado_em: string;
@@ -31,9 +35,10 @@ export type Post = Resumo & {
 };
 export type Versao = { slug: string; titulo: string; resumo: string; corpo: string };
 export type PostAdmin = {
-  chave: string; autor: string | null; tags: string[];
+  chave: string; autor: string | null; tags: string[]; capa: string | null;
   publicado_em: string | null; criado_em: string; atualizado_em: string;
   versoes: Partial<Record<Lang, Versao>>;
+  figuras: Figura[];
 };
 
 export const lista = (lang: Lang) => rpc<Resumo[]>('walkstamp_blog_lista', { p_lang: lang });
@@ -48,6 +53,14 @@ export const publicar = (chave: string, pub: boolean) =>
     { p_chave: chave, p_publicar: pub });
 export const apagar = (chave: string) =>
   rpc<{ ok?: boolean }>('walkstamp_blog_apagar', { p_chave: chave });
+export const figuraAdd = (chave: string, caminho: string, url: string, alt: string) =>
+  rpc<{ ok?: boolean; erro?: string }>('walkstamp_blog_figura_add',
+    { p_chave: chave, p_caminho: caminho, p_url: url, p_alt: alt });
+export const figuraDel = (chave: string, caminho: string) =>
+  rpc<{ ok?: boolean; erro?: string }>('walkstamp_blog_figura_del',
+    { p_chave: chave, p_caminho: caminho });
+export const definirCapa = (chave: string, url: string) =>
+  rpc<{ ok?: boolean }>('walkstamp_blog_capa', { p_chave: chave, p_url: url });
 
 /* ------------------------------------------------------- markdown → html */
 

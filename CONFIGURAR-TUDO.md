@@ -5,7 +5,7 @@ Três coisas, e elas **não se misturam**:
 | | onde | para quê |
 |---|---|---|
 | **Variáveis** | Vercel | é o que liga cada função do produto |
-| **E-mail** | HostGator (caixas) + Resend (disparo) | são coisas diferentes — a seção 2 explica por quê |
+| **E-mail** | HostGator (caixas) + Brevo (disparo) | são coisas diferentes — a seção 2 explica por quê |
 | **Cobrança** | Stripe | é o que faz o botão de assinar funcionar |
 
 **Nada quebra enquanto não estiver configurado.** Cada peça que falta desliga a
@@ -64,9 +64,10 @@ disso. A seção 3 é o passo a passo.
 
 | variável | o que é | sem ela |
 |---|---|---|
-| `RESEND_API_KEY` | a chave do Resend | 503 → o app volta ao `mailto:` e diz por quê |
+| `BREVO_API_KEY` | a chave do Brevo | 503 → o app volta ao `mailto:` e diz por quê |
+| `EMAIL_DE` | o remetente, ex.: `ola@walkstamp.com` | 503 |
+| `EMAIL_DE_NOME` | o nome que aparece | usa "Walkstamp" |
 | `CONVITE_SAL` | um texto longo e aleatório | usa o `CRON_SECRET`; sem nenhum dos dois, 503 |
-| `CONVITE_DE` | `Walkstamp <ola@walkstamp.com>` | monta a partir do domínio da marca |
 
 > **O sal não pode mudar depois de entrar em produção.** Trocar o sal reescreve
 > todos os hashes e as contagens do último dia se perdem. Não é grave; é bom
@@ -109,14 +110,14 @@ curl -i https://walkstamp.com/api/faxina
 
 ---
 
-# 2. O e-mail — HostGator e Resend fazem coisas diferentes
+# 2. O e-mail — HostGator e Brevo fazem coisas diferentes
 
 Esta é a parte onde mais gente se enrola, porque parecem a mesma coisa e não são:
 
 | | quem usa | o quê |
 |---|---|---|
 | **HostGator** | **pessoas** | as caixas `privacidade@`, `contato@`. Alguém abre e responde. |
-| **Resend** | **o produto** | o convite que o app dispara sozinho, sem ninguém no meio. |
+| **Brevo** | **o produto** | o convite que o app dispara sozinho, sem ninguém no meio. |
 
 **Não use a HostGator para o disparo do produto.** Não é preciosismo: a política
 dela proíbe envio em massa em hospedagem compartilhada, o limite não é publicado
@@ -124,7 +125,7 @@ dela proíbe envio em massa em hospedagem compartilhada, o limite não é public
 ou encerramento da conta** — a mesma conta que hospeda o seu e-mail. Trocar um
 disparo automático por um risco desses não fecha a conta.
 
-O Resend, no plano grátis, dá **3.000 mensagens por mês, 100 por dia, 1 domínio**.
+O Brevo, no plano grátis, dá **3.000 mensagens por mês, 100 por dia, 1 domínio**.
 O convite do Walkstamp é limitado a 5 por hora por origem e 2 por dia por destino —
 não chega perto do teto.
 
@@ -161,13 +162,13 @@ na HostGator** e criar lá dois registros apontando para a Vercel:
 Assim o e-mail nem toma conhecimento da mudança. O passo a passo completo, com
 os domínios `.app` e `.com.br` redirecionando, está em `DOMINIO-E-EMAIL.md`.
 
-## 2.3 O Resend, e o registro que quase todo mundo erra
+## 2.3 O Brevo, e o registro que quase todo mundo erra
 
-1. Resend → **Domains** → adicione `walkstamp.com`;
+1. Brevo → **Domains** → adicione `walkstamp.com`;
 2. ele dá três registros — cole na **zona de DNS da HostGator**;
 3. espere verificar (minutos, às vezes horas).
 
-Enquanto o domínio não verifica, o Resend só entrega para o e-mail da própria
+Enquanto o domínio não verifica, o Brevo só entrega para o e-mail da própria
 conta. Útil para testar, inútil em produção.
 
 > ### ⚠️ O SPF: um registro, não dois
@@ -179,7 +180,7 @@ conta. Útil para testar, inútil em produção.
 > v=spf1 +a +mx +ip4:SEU.IP ~all
 > ```
 >
-> O Resend vai pedir para incluir o dele. **Não crie um segundo registro TXT de
+> O Brevo vai pedir para incluir o dele. **Não crie um segundo registro TXT de
 > SPF.** Dois SPF no mesmo nome é erro permanente pela especificação: o servidor
 > que recebe não escolhe um — ele descarta os dois, e a sua autenticação some.
 > **Junte num só:**
@@ -188,12 +189,12 @@ conta. Útil para testar, inútil em produção.
 > v=spf1 +a +mx +ip4:SEU.IP include:amazonses.com ~all
 > ```
 >
-> (use o `include:` exato que o Resend mostrar na tela dele, não este).
+> (use o `include:` exato que o Brevo mostrar na tela dele, não este).
 >
 > **DKIM não tem esse problema:** a HostGator usa o seletor `default._domainkey` e
-> o Resend usa o dele. São nomes diferentes, convivem.
+> o Brevo usa o dele. São nomes diferentes, convivem.
 >
-> **E o MX que o Resend pede não conflita:** ele é de um subdomínio
+> **E o MX que o Brevo pede não conflita:** ele é de um subdomínio
 > (`send.walkstamp.com`), para o retorno de mensagem devolvida. O MX do apex
 > continua sendo o da HostGator, que é quem entrega na sua caixa.
 
@@ -301,7 +302,7 @@ da nota lá.
 | 3 | `CRON_SECRET` | Vercel | **não** — sem ele a retenção prometida não acontece |
 | 4 | `privacidade@` e `contato@` | cPanel HostGator | não — tem prazo legal |
 | 5 | **testar o e-mail recebendo de fora** | seu telefone | não |
-| 6 | Resend: domínio + SPF junto num registro só | Resend + DNS HostGator | sim |
+| 6 | Brevo: domínio + SPF junto num registro só | Brevo + DNS HostGator | sim |
 | 7 | SQL do convite | Supabase | sim |
 | 8 | `RESEND_API_KEY`, `CONVITE_SAL`, `CONVITE_DE` | Vercel | sim |
 | 9 | Stripe em modo de teste, ponta a ponta | Stripe + Vercel | sim |
@@ -318,6 +319,6 @@ percebe — e os dois são justamente os que têm prazo legal atrás.
 
 - [Preços da Stripe no Brasil](https://stripe.com/br/pricing) · [Webhooks](https://docs.stripe.com/webhooks)
 - [Regras de envio de e-mail da HostGator](https://suporte.hostgator.com.br/hc/pt-br/articles/30822248903827-Quais-s%C3%A3o-as-regras-para-envio-de-e-mails) · [Política de e-mails](https://www.hostgator.com.br/politica-de-emails)
-- [Preços do Resend](https://resend.com/pricing)
+- [Preços do Brevo](https://resend.com/pricing)
 - [A Vercel não oferece serviço de e-mail](https://vercel.com/kb/guide/using-email-with-your-vercel-domain) · [Por que o e-mail parou](https://vercel.com/support/articles/why-has-email-stopped-working)
 - SPF: um registro por domínio — [RFC 7208 §3.2](https://www.rfc-editor.org/rfc/rfc7208#section-3.2)

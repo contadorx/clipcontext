@@ -398,6 +398,9 @@ export function Chamados({ d, lang }: { d: Painel; lang: Lang }) {
                 <form action={responder} style={{ marginTop: 10, display: 'grid', gap: 8 }}>
                   <input type="hidden" name="lang" value={lang} />
                   <input type="hidden" name="numero" value={c.numero} />
+                  {/* O idioma de quem ESCREVEU, para o aviso sair na língua
+                      dele — e não na do painel, que é sempre português. */}
+                  <input type="hidden" name="idioma" value={c.idioma || 'pt'} />
                   <textarea name="texto" rows={3} required
                             placeholder="Responder a este chamado"
                             aria-label={`Responder ao chamado ${c.numero}`} />

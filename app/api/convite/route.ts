@@ -41,6 +41,7 @@
 import { NextResponse } from 'next/server';
 import { createHash } from 'crypto';
 import marca from '@/src/marca.json';
+import { mandarEmail, podeMandarEmail } from '@/lib/email';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -50,11 +51,13 @@ type Lang = (typeof IDIOMAS)[number];
 
 const URL_BASE = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
 const CHAVE_BANCO = process.env.SUPABASE_SERVICE_ROLE_KEY;
-const CHAVE_EMAIL = process.env.RESEND_API_KEY;
+/* O disparo saiu daqui e virou `lib/email.ts`: agora há um segundo e-mail no
+   produto (a resposta de um chamado) e vão aparecer outros. Cada rota com a sua
+   chamada é cada rota com a sua versão do remetente e do tratamento de erro. */
 const SAL = process.env.CONVITE_SAL || process.env.CRON_SECRET;
-const DE = process.env.CONVITE_DE || `Walkstamp <ola@${(marca.site || '').replace(/^https?:\/\//, '')}>`;
 
-const temTudo = Boolean(URL_BASE && CHAVE_BANCO && CHAVE_EMAIL && SAL);
+
+const temTudo = Boolean(URL_BASE && CHAVE_BANCO && podeMandarEmail() && SAL);
 
 /* Hash, e não o valor. Contar quantos convites saíram de um IP não exige
    guardar o IP; contar quantos chegaram num endereço não exige guardar o
@@ -225,23 +228,13 @@ export async function POST(req: Request) {
 
   const t = TEXTOS[lang];
   const url = marca.site + (lang === 'pt' ? '' : '/' + lang);
-  const r = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${CHAVE_EMAIL}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      from: DE,
-      to: [para],
-      subject: t.assunto(quem),
-      html: montarHtml(t, nome, quem, url),
-      text: `${t.ola(nome)}\n\n${t.corpo}\n\n${url}\n\n${t.porque(quem)}\n${t.rodape}`,
-    }),
-    cache: 'no-store',
+  const enviado = await mandarEmail({
+    para,
+    nome: nome || undefined,
+    assunto: t.assunto(quem),
+    html: montarHtml(t, nome, quem, url),
+    texto: `${t.ola(nome)}\n\n${t.corpo}\n\n${url}\n\n${t.porque(quem)}\n${t.rodape}`,
   });
-  if (!r.ok) {
-    /* O erro do serviço vai para o log e NÃO para a tela: ele às vezes traz o
-       endereço de destino, e a tela é a de quem enviou, não a de quem recebe. */
-    console.error('convite: resend respondeu', r.status, (await r.text()).slice(0, 300));
-    return NextResponse.json({ erro: 'envio' }, { status: 502 });
-  }
+  if (!enviado.ok) return NextResponse.json({ erro: 'envio' }, { status: 502 });
   return NextResponse.json({ ok: true });
 }

@@ -15,7 +15,8 @@ import { ehLang, textos, CAMINHO } from '@/lib/conta/textos';
 import { Envolver, carregar } from '../../carga';
 import { todos, type PostAdmin } from '@/lib/blog';
 import { ABAS } from '@/lib/conta/negocio';
-import { salvarPublicacao, alternarPublicacao, apagarPublicacao } from '../acoes';
+import { salvarPublicacao, alternarPublicacao, apagarPublicacao,
+         enviarFigura, removerFigura, escolherCapa } from '../acoes';
 
 export const dynamic = 'force-dynamic';
 
@@ -75,10 +76,18 @@ export default async function Pagina({ params, searchParams }: PageProps<'/conta
       {um('erro') && !['falta_idioma', 'endereco_repetido'].includes(um('erro') || '') && (
         <p className="aviso err">{um('erro')}</p>
       )}
+      {um('erro') === 'tipo' && (
+        <p className="aviso err">Só PNG, JPG, WebP, GIF ou SVG.</p>
+      )}
+      {um('erro') === 'grande' && (
+        <p className="aviso err">A figura passou de 8 MB. Exporte menor — um post
+          bem servido raramente precisa de mais que 300 KB.</p>
+      )}
       {um('feito') && <p className="aviso ok">{um('feito')}</p>}
       {erroLeitura && <p className="aviso err">{erroLeitura}</p>}
 
       <Editor lang={lang} post={atual} />
+      {atual && <Figuras lang={lang} post={atual} />}
 
       <div className="card">
         <h2>Publicações</h2>
@@ -203,6 +212,81 @@ function Editor({ lang, post }: { lang: string; post: PostAdmin | null }) {
           {post && <a className="btn ghost" href="?">Novo post</a>}
         </div>
       </form>
+    </div>
+  );
+}
+
+/* AS FIGURAS DO POST.
+ *
+ * Sem editor de texto rico, pelo mesmo motivo de sempre: editor rico produz
+ * HTML, e HTML de formulário injetado numa página pública é a porta que o
+ * `paraHtml` existe para fechar. Então o fluxo é o do markdown: envia a figura,
+ * a tela devolve a linha pronta, você cola onde quiser no corpo.
+ *
+ * Isso tem uma vantagem que um editor rico não tem: a MESMA figura serve os
+ * cinco idiomas, e a legenda de cada um é a que estiver no corpo daquele
+ * idioma.
+ */
+function Figuras({ lang, post }: { lang: string; post: PostAdmin }) {
+  const figs = post.figuras || [];
+  return (
+    <div className="card" style={{ marginBottom: 24 }}>
+      <h2>Figuras</h2>
+      <p className="small muted" style={{ marginTop: 0 }}>
+        A primeira vira a capa sozinha — é ela que aparece na lista do blog e na
+        prévia de quem compartilha no LinkedIn. Um link sem imagem numa linha do
+        tempo é um link que ninguém clica.
+      </p>
+
+      <form action={enviarFigura} encType="multipart/form-data"
+            style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'flex-end' }}>
+        <input type="hidden" name="lang" value={lang} />
+        <input type="hidden" name="chave" value={post.chave} />
+        <label className="small" style={{ flex: '1 1 240px' }}>Arquivo
+          <input type="file" name="figura" accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml" required />
+        </label>
+        <label className="small" style={{ flex: '1 1 220px' }}>Descrição
+          <input name="alt" placeholder="o que a imagem mostra" />
+        </label>
+        <button className="btn" type="submit">Enviar</button>
+      </form>
+
+      {figs.length === 0 ? (
+        <p className="small muted" style={{ marginTop: 14 }}>Nenhuma figura ainda.</p>
+      ) : (
+        <ul className="figLista">
+          {figs.map((f) => (
+            <li key={f.caminho}>
+              <img src={f.url} alt={f.alt} />
+              <div>
+                {/* A linha pronta, para copiar e colar no corpo. Digitar o
+                    endereço à mão é como se erra o endereço. */}
+                <code className="figMd">{`![${f.alt}](${f.url})`}</code>
+                <div className="row" style={{ gap: 6, marginTop: 8 }}>
+                  {post.capa === f.url ? (
+                    <span className="badge">capa</span>
+                  ) : (
+                    <form action={escolherCapa}>
+                      <input type="hidden" name="lang" value={lang} />
+                      <input type="hidden" name="chave" value={post.chave} />
+                      <input type="hidden" name="url" value={f.url} />
+                      <button className="btn ghost" type="submit"
+                              style={{ padding: '4px 10px', fontSize: 13 }}>Usar como capa</button>
+                    </form>
+                  )}
+                  <form action={removerFigura}>
+                    <input type="hidden" name="lang" value={lang} />
+                    <input type="hidden" name="chave" value={post.chave} />
+                    <input type="hidden" name="caminho" value={f.caminho} />
+                    <button className="btn ghost" type="submit"
+                            style={{ padding: '4px 10px', fontSize: 13 }}>Apagar</button>
+                  </form>
+                </div>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

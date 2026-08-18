@@ -42,10 +42,16 @@ export async function generateMetadata({ params }: PageProps<'/[lang]/blog/[slug
     openGraph: {
       type: 'article', title: p.titulo, description: p.resumo, url,
       siteName: marca.marca, locale: L, publishedTime: p.publicado_em,
-      images: [{ url: `${marca.site}/og/og.${L}.png`, width: 1200, height: 630 }],
+      /* A capa do post, quando existe, no lugar da imagem generica do site.
+         Compartilhar cinco posts com a mesma figura e quase o mesmo que
+         compartilhar sem figura: a linha do tempo deixa de distinguir um do
+         outro. */
+      images: [p.capa
+        ? { url: p.capa }
+        : { url: `${marca.site}/og/og.${L}.png`, width: 1200, height: 630 }],
     },
     twitter: { card: 'summary_large_image', title: p.titulo, description: p.resumo,
-               images: [`${marca.site}/og/og.${L}.png`] },
+               images: [p.capa || `${marca.site}/og/og.${L}.png`] },
   };
 }
 
@@ -70,6 +76,7 @@ export default async function Publicacao({ params }: PageProps<'/[lang]/blog/[sl
             {' · '}{minutos(p.corpo)} {b.minutos}
           </p>
           {p.resumo && <p className="lead">{p.resumo}</p>}
+          {p.capa && <img className="postCapa" src={p.capa} alt="" />}
           {/* O HTML aqui foi montado pelo `paraHtml`, que escapa TUDO antes de
               aplicar as marcas permitidas. É o único ponto do site que injeta
               HTML vindo do banco, e é por isso que a conversão mora numa função
