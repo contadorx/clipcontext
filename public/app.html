@@ -28,6 +28,62 @@
   body{margin:0;background:var(--bg);color:var(--ink);
        font:15px/1.55 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
   .wrap{max-width:1000px;margin:0 auto;padding:32px 20px 90px}
+
+  /* ---------------------------------------------- a barra da conta
+
+     Por que o estilo está AQUI e não no `site.css`: a ferramenta é um arquivo
+     só, que precisa abrir do `file://` sem baixar nada. Uma folha externa é
+     exatamente o que ela não pode ter. Então sim, este bloco parece com o
+     `.painel*` do site — e parecer é o objetivo: é a mesma barra, nos dois
+     lados do produto.
+
+     O truque do layout: a `.wrap` vira grade de duas colunas e TUDO que já
+     estava dentro dela cai na segunda, sem precisar embrulhar catorze mil
+     linhas de HTML num `<div>` novo. A barra ocupa a primeira e se estica por
+     todas as linhas. */
+  body.comBarra .wrap{display:grid;grid-template-columns:206px minmax(0,1fr);
+      column-gap:30px;row-gap:0;align-items:start;max-width:1240px}
+  body.comBarra .wrap > *{grid-column:2}
+  /* `span 99`, e nao `1 / -1`.
+     
+     `-1` aponta para a ultima linha do grid EXPLICITO, e este grid nao declara
+     linha nenhuma -- entao `1 / -1` vira `1 / 2` e a barra ocupa uma linha so.
+     O sintoma foi um buraco de trezentos pixels entre a frase de abertura e o
+     cartao 1: a primeira linha crescia ate a altura da barra e o conteudo,
+     alinhado ao topo, ficava boiando nela.
+     
+     O `span 99` cria linhas implicitas vazias, e por isso o `row-gap` acima e
+     ZERO: com vao entre linhas, noventa e nove linhas vazias virariam tres mil
+     pixels de nada. O espacamento entre os cartoes continua vindo das margens
+     deles, como sempre veio -- esta `.wrap` era fluxo normal ate agora. */
+  body.comBarra .wrap > .barraConta{grid-column:1;grid-row:1/span 99;
+      position:sticky;top:78px;align-self:start}
+
+  .barraConta .quem{font-size:12.5px;color:var(--muted);font-weight:600;
+      margin:0 0 12px;padding:0 10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .barraConta ul{list-style:none;margin:0;padding:0;display:grid;gap:2px}
+  .barraConta a{display:flex;align-items:center;gap:10px;padding:8px 10px;
+      border-radius:8px;font-size:14px;font-weight:600;color:var(--muted);text-decoration:none}
+  .barraConta a:hover{background:var(--panel);color:var(--ink)}
+  .barraConta a.on{background:color-mix(in srgb,var(--accent) 12%,transparent);color:var(--accent)}
+  .barraConta svg{width:17px;height:17px;flex:0 0 17px}
+  .barraConta .risco{height:1px;background:var(--line);margin:12px 6px}
+
+  @media(max-width:900px){
+    /* Numa tela estreita a barra vira uma fileira no alto: uma coluna de 206px
+       ao lado do trabalho não cabe, e escondê-la aqui seria tirar da pessoa o
+       único caminho para a conta justamente onde o cabeçalho já é apertado. */
+    body.comBarra .wrap{grid-template-columns:1fr;column-gap:0;row-gap:0}
+    body.comBarra .wrap > *{grid-column:1}
+    body.comBarra .wrap > .barraConta{grid-column:1;grid-row:auto;position:static;
+        display:flex;gap:6px;overflow-x:auto;margin:0 0 18px;padding-bottom:2px}
+    /* As duas listas -- os itens da conta e a propria ferramenta -- viram uma
+       fileira so. Em duas, "Abrir a ferramenta" caia sozinha numa segunda
+       linha, como se fosse outra coisa. */
+    .barraConta ul{display:flex;gap:6px}
+    .barraConta .quem,.barraConta .risco{display:none}
+    .barraConta a{white-space:nowrap;border:1px solid var(--line)}
+  }
   h1{font-size:22px;margin:0 0 4px;letter-spacing:-.01em}
   h2{font-size:14px;margin:0 0 14px;letter-spacing:.03em;text-transform:uppercase;color:var(--muted)}
   .sub{color:var(--muted);margin:0 0 26px;font-size:14px}
@@ -610,6 +666,17 @@
 </header>
 
 <div class="wrap">
+  <!-- A BARRA DA CONTA.
+
+       Ela nasce vazia e escondida, e só existe se o `/api/menu` responder — o
+       que só acontece na web, com sessão. Aberta do `file://`, ou sem conta, a
+       ferramenta é exatamente o que sempre foi.
+
+       O menu NÃO está escrito aqui. Ele vem pronto do servidor, da mesma função
+       que desenha a barra do painel. Escrever a lista de novo dentro desta
+       página resolveria a tela e criaria o defeito: dois menus à mão divergem, e
+       o sintoma é a pessoa jurando que viu um link que sumiu. -->
+  <nav id="barraConta" class="barraConta hide" aria-label="Sua conta"></nav>
   <h1 class="soLeitor">Walkstamp</h1>
   <p class="sub" data-i18n="sub"></p>
 
@@ -5404,6 +5471,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     u.searchParams.set('lang', LANG);
     history.replaceState(null, '', u);
     applyLang();
+    /* A barra da conta nao e repintada pelo `applyLang()`: os rotulos dela
+       vem do servidor, nao do dicionario daqui. Sem esta linha ela ficaria
+       em portugues numa tela em alemao -- a mentira pequena de sempre. */
+    if (typeof montarBarraDaConta === 'function') montarBarraDaConta();
   });
 
   /* Vídeo de demonstração.
@@ -8992,6 +9063,71 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      pela mesma razão do resto do produto: a aba fecha, a sessão morre. Uma
      máquina compartilhada de cliente não pode guardar a sessão de quem passou
      por ali de manhã. */
+  /* ================= a barra da conta =================
+
+     Ela pergunta ao `/api/menu` quem está logado e quais itens essa pessoa vê —
+     a MESMA função que desenha a barra do painel, servida como JSON. Nada da
+     lista está escrito aqui: dois menus escritos à mão divergem, e o sintoma é
+     a pessoa jurando que viu um link que sumiu.
+
+     Três recusas silenciosas, todas de propósito:
+
+       `file://`   o pacote offline não tem servidor a quem perguntar. Nem
+                   tenta — um `fetch` que falha suja o console de quem abriu o
+                   arquivo local e não pediu conta nenhuma.
+       204         sem sessão. Não estar logado não é erro: a ferramenta sem
+                   conta é o uso principal do produto, não uma falha dele.
+       qualquer    rede bloqueada, servidor fora, resposta estranha. A barra
+       outra       simplesmente não nasce, e tudo o mais continua.
+
+     É a regra que vale para toda a conta aqui dentro: **aditiva, nunca
+     requisito**. */
+  async function montarBarraDaConta(){
+    if (location.protocol === 'file:') return;
+    let d;
+    try {
+      const r = await fetch('/api/menu?lang=' + encodeURIComponent(LANG),
+                            { credentials: 'same-origin', cache: 'no-store' });
+      if (r.status !== 200) return;
+      d = await r.json();
+    } catch (e) { return; }
+    if (!d || !Array.isArray(d.itens) || !d.itens.length) return;
+
+    const cx = $('barraConta');
+    if (!cx) return;
+
+    /* O ícone chega em `path`, separado por " M" quando tem mais de um traço —
+       o mesmo formato que o painel usa, porque é a mesma tabela. */
+    /* Escapar aqui, com o escapador daqui: o `esc` do produto e declarado
+       la embaixo, no bloco das saidas, e `const` antes da declaracao e erro
+       de verdade -- nao `undefined`, excecao. */
+    const seg1 = (v) => String(v == null ? '' : v)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    const icone = (d2) => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" '
+      + 'stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
+      + String(d2 || '').split(' M').map((seg, n) => `<path d="${seg1(n ? 'M' + seg : seg)}"/>`).join('')
+      + '</svg>';
+
+    const linhas = d.itens.map(i =>
+      `<li><a href="${seg1(i.href)}">${icone(i.icone)}<span>${seg1(i.rotulo)}</span></a></li>`).join('');
+
+    /* A ferramenta entra na lista, marcada como onde a pessoa ESTÁ. No painel
+       ela é a saída; aqui é o lugar. Um menu que não mostra onde você está é um
+       menu que faz você procurar. */
+    const aqui = d.ferramenta
+      ? `<div class="risco"></div><ul><li><a class="on" aria-current="page" href="${seg1(d.ferramenta.href)}">`
+        + icone('M4 4h16v12H4z M8 20h8 M12 16v4')
+        + `<span>${seg1(d.ferramenta.rotulo)}</span></a></li></ul>`
+      : '';
+
+    cx.innerHTML = `<p class="quem" title="${seg1(d.email || '')}">${seg1(d.email || '')}</p>`
+                 + `<ul>${linhas}</ul>` + aqui;
+    cx.classList.remove('hide');
+    document.body.classList.add('comBarra');
+  }
+  montarBarraDaConta();
+
   const SESSAO_CHAVE = 'Walkstamp.sessao';
   let sessao = null;
 

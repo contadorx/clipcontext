@@ -421,8 +421,33 @@ def escrever_marca(root: pathlib.Path) -> None:
     # montar a faixa de abas. Escrita nos dois, é uma aba que existe no menu e
     # dá 404 no clique.
     abas_negocio = ["contas", "cobrancas", "chamados", "interesse"]
+    # OS ITENS DA BARRA LATERAL, na ordem em que aparecem.
+    #
+    # Eles moravam no `lib/conta/nav.ts`, e isso bastava enquanto a barra
+    # existia num lugar só. Agora ela existe em DOIS: no painel, desenhado pelo
+    # Next no servidor, e dentro da própria ferramenta, desenhada em JavaScript
+    # no navegador. Duas listas para o mesmo menu é este projeto de novo: foi
+    # assim que o alemão ficou sem `hreflang` e depois vendo o tour em inglês.
+    #
+    # `rotulo` é a CHAVE do dicionário (`src/i18n-conta.json`), nunca o texto.
+    # `quando` diz para quem o item existe; sem isso, é para todo mundo.
+    # `icone` é `path` de SVG 24×24, separado por " M" quando tem mais de um.
+    menu_conta = [
+        {"slug": "", "rotulo": "navInicio",
+         "icone": "M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"},
+        {"slug": "roteiro", "rotulo": "navRoteiro",
+         "icone": "M4 4h16v16H4z M8 9h8 M8 13h8 M8 17h5"},
+        {"slug": "faturas", "rotulo": "navFaturas",
+         "icone": "M6 2h12v20l-3-2-3 2-3-2-3 2z M9 7h6 M9 11h6"},
+        {"slug": "chamados", "rotulo": "navChamados",
+         "icone": "M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"},
+        {"slug": "time", "rotulo": "navTime", "quando": "time",
+         "icone": "M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2 M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8 M23 21v-2a4 4 0 0 0-3-3.87 M16 3.13a4 4 0 0 1 0 7.75"},
+        {"slug": "negocio", "rotulo": "navNegocio", "quando": "dono",
+         "icone": "M3 3v18h18 M7 15l4-4 3 3 5-6"},
+    ]
     rotas = {"idiomas": IDIOMAS, "demoLangs": com_tour, "subConta": sub_conta,
-             "abasNegocio": abas_negocio, "slugs": SLUGS,
+             "abasNegocio": abas_negocio, "menuConta": menu_conta, "slugs": SLUGS,
              "metas": {pg: {L: {"titulo": m[L][0], "desc": m[L][1]} for L in IDIOMAS}
                        for pg, m in METAS.items()},
              "scripts": {"detectarIdioma": so_o_js(REDIRECT),

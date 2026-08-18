@@ -32,9 +32,10 @@ import { CAMINHO } from '@/lib/conta/textos';
    reescrita — e é isso que impede o menu apontar para `/de/konto/faturas`
    enquanto a ponte só conhece `/de/konto/rechnungen`, que daria 404 num link
    do próprio produto. */
-const SUB: Record<string, Record<Lang, string>> = JSON.parse(
+const rotas = JSON.parse(
   fs.readFileSync(path.join(process.cwd(), 'src', 'rotas.json'), 'utf8'),
-).subConta;
+) as { subConta: Record<string, Record<Lang, string>>; menuConta: ItemNav[] };
+const SUB = rotas.subConta;
 
 export interface ItemNav {
   /** o pedaço final do endereço; vazio é a raiz do painel */
@@ -47,23 +48,20 @@ export interface ItemNav {
   quando?: 'time' | 'plano' | 'dono';
 }
 
-/* Os ícones são traçados à mão, em `path`, e vão inline: a área do cliente já
-   carrega o `site.css` e nada mais, e um pacote de ícones para seis desenhos
-   seria mais bytes que o painel inteiro. */
-export const NAV: ItemNav[] = [
-  { slug: '',          rotulo: 'navInicio',
-    icone: 'M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z' },
-  { slug: 'roteiro',   rotulo: 'navRoteiro',
-    icone: 'M4 4h16v16H4z M8 9h8 M8 13h8 M8 17h5' },
-  { slug: 'faturas',   rotulo: 'navFaturas',
-    icone: 'M6 2h12v20l-3-2-3 2-3-2-3 2z M9 7h6 M9 11h6' },
-  { slug: 'chamados',  rotulo: 'navChamados',
-    icone: 'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z' },
-  { slug: 'time',      rotulo: 'navTime', quando: 'time',
-    icone: 'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2 M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8 M23 21v-2a4 4 0 0 0-3-3.87 M16 3.13a4 4 0 0 1 0 7.75' },
-  { slug: 'negocio',   rotulo: 'navNegocio', quando: 'dono',
-    icone: 'M3 3v18h18 M7 15l4-4 3 3 5-6' },
-];
+/* A LISTA sai do `rotas.json`, escrito pelo `build.py`, e não daqui.
+ *
+ * Ela morava aqui, e isso bastava enquanto a barra existia num lugar só. Agora
+ * ela existe em DOIS: neste painel, desenhado no servidor, e dentro da própria
+ * ferramenta (`public/app.html`), desenhada em JavaScript no navegador a partir
+ * do que o `/api/menu` devolve. Dois menus escritos à mão divergem — é questão
+ * de tempo até um ganhar um item que o outro não tem, e o sintoma é a pessoa
+ * jurar que viu um link que "sumiu".
+ *
+ * Os ícones vão inline, em `path`: a área do cliente carrega o `site.css` e
+ * mais nada, e um pacote de ícones para seis desenhos seria mais bytes que o
+ * painel inteiro.
+ */
+export const NAV: ItemNav[] = rotas.menuConta;
 
 /** O endereço público de um item, no idioma dele. */
 export function enderecoDoItem(slug: string, lang: Lang): string {
