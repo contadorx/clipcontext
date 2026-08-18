@@ -6,7 +6,8 @@
  */
 import { notFound, redirect } from 'next/navigation';
 import { ehLang, textos, CAMINHO } from '@/lib/conta/textos';
-import { Envolver, carregar } from '../carga';
+import { podeAbrir } from '@/lib/conta/nav';
+import { Envolver, Porta, capacidades, carregar } from '../carga';
 import { Chamados } from '../secoes';
 
 export const dynamic = 'force-dynamic';
@@ -16,10 +17,12 @@ export default async function Pagina({ params }: PageProps<'/conta/[lang]/chamad
   if (!ehLang(lang)) notFound();
   const t = textos(lang);
   const carga = await carregar();
-  /* Sem sessão, sem chave ou com o banco mudo, quem sabe explicar é a raiz do
-     painel — e ela já explica. Mandar para lá é melhor do que repetir aqui as
-     três telas de recusa em cada rota. */
-  if (carga.estado !== 'ok') redirect(CAMINHO[lang]);
+  /* Chave faltando ou banco mudo continuam indo para a raiz: são defeito de
+     configuração, e a raiz é quem sabe explicar isso. O que MUDOU é o caso de
+     não haver sessão — antes ele também caía lá, e a pessoa perdia o menu
+     junto, que é a única coisa da tela que diz o que existe aqui dentro. */
+  if (carga.estado === 'semChave' || carga.estado === 'erro') redirect(CAMINHO[lang]);
+  const liberado = carga.estado === 'ok' && podeAbrir('chamados', capacidades(carga));
 
   return (
     <Envolver lang={lang} t={t} slug="chamados" carga={carga}>
@@ -28,7 +31,11 @@ export default async function Pagina({ params }: PageProps<'/conta/[lang]/chamad
           precisa de um `h1`: sem ele, quem navega por cabeçalhos com leitor de
           tela cai num documento que começa no meio. */}
       <h1 className="soLeitor">{t.navChamados}</h1>
-      <Chamados conta={carga.conta} lang={lang} t={t} />
+      {carga.estado === 'ok' && liberado
+        ? <Chamados conta={carga.conta} lang={lang} t={t} />
+        : <Porta lang={lang} t={t}
+                 motivo={carga.estado === 'fora' ? 'fora' : 'plano'}
+                 titulo={t.navChamados} texto={t.pitchChamados} />}
     </Envolver>
   );
 }

@@ -497,3 +497,12 @@ table.legal td:first-child .small,table.legal td:first-child .muted{font-weight:
 @media(max-width:760px){
   .negTrio{grid-template-columns:1fr}
 }
+
+/* O cadeado do menu. Ele é discreto de propósito: o item tem que continuar
+   parecendo um caminho, não um aviso. Um item pago desenhado como erro faz a
+   pessoa desviar dele — e o ponto de mostrá-lo é o contrário disso. */
+.painelMenu a.trancado{color:var(--muted)}
+.painelMenu a.trancado svg{opacity:.55}
+.painelTranca{display:block;font-size:10.5px;font-style:normal;font-weight:600;
+  letter-spacing:.02em;color:var(--accent);opacity:.85;margin-top:1px}
+.painelMenu a.trancado span{line-height:1.15}

@@ -36,7 +36,7 @@
 import { notFound, redirect } from 'next/navigation';
 import type { Conta } from '@/lib/supabase/servico';
 import { type Lang, type Textos, CAMINHO, ehLang, preencher, textos } from '@/lib/conta/textos';
-import { Envolver, carregar } from '../carga';
+import { Envolver, Porta, carregar } from '../carga';
 import { type Caso, type Resumo, type Roteiro, CAMINHO_ROTEIRO, linkDoCaso, meusRoteiros, verRoteiro } from '@/lib/conta/roteiro';
 import { apagarAnexoDoCaso, apagarRoteiro, atribuirCaso, marcarFeito } from '../../roteiro-acoes';
 import { lerRecibo, resumoDoRecibo } from '@/lib/conta/recibo';
@@ -70,8 +70,19 @@ export default async function Pagina({ params, searchParams }: PageProps<'/conta
      retoma exatamente de onde parou. */
   const carga = await carregar();
   const marcar = Number(um('marcar')) || null;
+  if (carga.estado === 'semChave' || carga.estado === 'erro') redirect(CAMINHO[lang]);
   if (carga.estado !== 'ok') {
-    if (!marcar) redirect(CAMINHO[lang]);
+    /* Sem sessão, a tela mostra o MENU e o que este item faz — e não some. Um
+       recurso que a pessoa nunca viu não é desejado, e mandá-la para uma caixa
+       de e-mail sem dizer o que ela ganha ao entrar é o mesmo que escondê-lo. */
+    if (!marcar) {
+      return (
+        <Envolver lang={lang} t={t} slug="roteiro" carga={carga}>
+          <h1 className="soLeitor">{t.rotTitulo}</h1>
+          <Porta lang={lang} t={t} motivo="fora" titulo={t.rotTitulo} texto={t.pitchRoteiro} />
+        </Envolver>
+      );
+    }
     return (
       <section style={{ paddingTop: 40 }}>
         <div className="wrap" style={{ maxWidth: 720 }}>

@@ -73,6 +73,10 @@ export async function GET(req: Request) {
       raiz: CAMINHO[lang],
       itens: menuDe(lang, tem).map((i) => ({
         slug: i.slug, rotulo: t[i.rotulo], href: i.href, icone: i.icone,
+        /* O cadeado viaja junto. Sem ele, a barra da ferramenta mostraria como
+           aberto o que o painel mostra como pago — e a pessoa descobriria a
+           diferença clicando. */
+        bloqueado: i.bloqueado, selo: i.bloqueado ? t.menuTrancado : null,
       })),
       /* A própria ferramenta, com o mesmo rótulo que o painel usa no link de
          volta. Ela entra na lista dos dois lados: no painel como saída, aqui

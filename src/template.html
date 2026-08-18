@@ -63,6 +63,13 @@
   .barraConta a.on{background:color-mix(in srgb,var(--accent) 12%,transparent);color:var(--accent)}
   .barraConta svg{width:17px;height:17px;flex:0 0 17px}
   .barraConta .risco{height:1px;background:var(--line);margin:12px 6px}
+  /* O cadeado. Discreto de proposito: o item tem que continuar parecendo um
+     caminho, e nao um aviso. Um item pago desenhado como erro faz a pessoa
+     desviar dele -- e o ponto de mostra-lo e o contrario disso. */
+  .barraConta a.trancado{color:var(--muted)}
+  .barraConta a.trancado svg{opacity:.55}
+  .barraConta .tranca{display:block;font-size:10.5px;font-style:normal;font-weight:600;
+      letter-spacing:.02em;color:var(--accent);opacity:.85;margin-top:1px}
 
   @media(max-width:900px){
     /* Numa tela estreita a barra vira uma fileira no alto: uma coluna de 206px
@@ -9105,7 +9112,11 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       + '</svg>';
 
     const linhas = d.itens.map(i =>
-      `<li><a href="${seg1(i.href)}">${icone(i.icone)}<span>${seg1(i.rotulo)}</span></a></li>`).join('');
+      `<li><a class="${i.bloqueado ? 'trancado' : ''}" href="${seg1(i.href)}">`
+      + icone(i.icone)
+      + `<span>${seg1(i.rotulo)}`
+      + (i.selo ? `<em class="tranca">${seg1(i.selo)}</em>` : '')
+      + `</span></a></li>`).join('');
 
     /* A ferramenta entra na lista, marcada como onde a pessoa ESTÁ. No painel
        ela é a saída; aqui é o lugar. Um menu que não mostra onde você está é um

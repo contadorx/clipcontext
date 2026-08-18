@@ -44,8 +44,10 @@ export interface ItemNav {
   rotulo: keyof Textos;
   /** o desenho do ícone, em `path` de SVG 24×24 */
   icone: string;
-  /** quando este item só existe para parte das pessoas */
-  quando?: 'time' | 'plano' | 'dono';
+  /** o item APARECE para todo mundo, com cadeado para quem não tem */
+  exige?: 'time' | 'plano';
+  /** o item NÃO EXISTE para quem não se encaixa */
+  quando?: 'dono';
 }
 
 /* A LISTA sai do `rotas.json`, escrito pelo `build.py`, e não daqui.
@@ -71,10 +73,42 @@ export function enderecoDoItem(slug: string, lang: Lang): string {
   return `${base}/${traduzido}`;
 }
 
-/** O menu que ESTA pessoa vê. */
+/** O menu que ESTA pessoa vê — e o que dele ela ainda não pode abrir.
+ *
+ * ---- por que TRANCADO e não escondido ----
+ *
+ * A área do cliente escondia o que era de plano pago: quem não tinha, não via.
+ * Isso é limpo e não vende nada. Um recurso que nunca apareceu não é desejado —
+ * quem nunca leu "Casos de teste" no menu não tem por que querer o plano que o
+ * libera, e a página de preços fica tentando descrever de fora um recurso que a
+ * pessoa poderia ter visto de dentro.
+ *
+ * Agora o item aparece para todo mundo, marcado, e clicar leva a uma tela que
+ * explica o que ele faz e oferece os preços. É porta, não muro.
+ *
+ * ---- a exceção, e por que ela é o contrário ----
+ *
+ * O `negocio` continua ESCONDIDO. Uma aba de administração com cadeado anuncia
+ * a cada visitante que ela existe, e um endereço conhecido é metade do caminho
+ * de quem procura. Ali esconder não é desenho de venda, é a trava — e é por
+ * isso que `quando` e `exige` são campos diferentes, e não um só com dois usos.
+ */
 export function menuDe(lang: Lang, tem: { time: boolean; plano: boolean; dono: boolean }) {
   return NAV.filter((i) => !i.quando || tem[i.quando]).map((i) => ({
     ...i,
     href: enderecoDoItem(i.slug, lang),
+    /* `bloqueado` é o que a tela desenha; `exige` é o motivo, que a tela usa
+       para dizer QUAL plano abre a porta. Mandar só um booleano faria a tela
+       escrever "assine um plano" onde cabia "isto é do plano Time". */
+    bloqueado: Boolean(i.exige) && !tem[i.exige as 'time' | 'plano'],
   }));
+}
+
+/** Esta pessoa pode abrir esta rota? A mesma resposta que o menu usa para
+ *  desenhar o cadeado, para a rota não discordar do menu que levou até ela. */
+export function podeAbrir(slug: string, tem: { time: boolean; plano: boolean; dono: boolean }) {
+  const item = NAV.find((i) => i.slug === slug);
+  if (!item) return true;
+  if (item.quando && !tem[item.quando]) return false;
+  return !item.exige || tem[item.exige];
 }

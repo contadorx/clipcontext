@@ -52,13 +52,16 @@ export default async function Pagina({ params, searchParams }: PageProps<'/conta
   );
 
   if (!email) {
+    /* Deslogado, a caixa de e-mail vem DENTRO do painel, com o menu ao lado.
+       Antes era uma página nua: quem chegava aqui via um campo de e-mail e nada
+       que dissesse o que existe do outro lado. O menu é a única peça da tela que
+       responde "o que eu ganho ao entrar" — e agora os itens pagos aparecem
+       nele, marcados, levando a uma tela que explica o recurso e aos preços. */
     return (
-      <section style={{ paddingTop: 40 }}>
-        <div className="wrap" style={{ maxWidth: 780 }}>
-          {avisos}
-          <Entrada lang={lang} t={t} enviadoPara={recado('enviado')} />
-        </div>
-      </section>
+      <Envolver lang={lang} t={t} slug="" carga={{ estado: 'fora' }}>
+        {avisos}
+        <Entrada lang={lang} t={t} enviadoPara={recado('enviado')} />
+      </Envolver>
     );
   }
   return <><div className="wrap" style={{ paddingTop: 26 }}>{avisos}</div>
@@ -120,7 +123,13 @@ async function Portal({ email, lang, t }: { email: string; lang: Lang; t: Textos
       </Recusa>
     );
   }
-  if (carga.estado !== 'ok') return <Entrada lang={lang} t={t} enviadoPara={null} />;
+  if (carga.estado !== 'ok') {
+    return (
+      <Envolver lang={lang} t={t} slug="" carga={carga}>
+        <Entrada lang={lang} t={t} enviadoPara={null} />
+      </Envolver>
+    );
+  }
 
   const { conta } = carga;
   return (
