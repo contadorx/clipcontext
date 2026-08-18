@@ -77,6 +77,7 @@ export default async function LayoutDaConta({ children, params }: LayoutProps<'/
                 <a href={`/app?lang=${lang}`}>{s3.navApp}</a>
                 <a href={rota('precos')}>{s3.navPrice}</a>
                 <a href={rota('ajuda')}>{s3.fAjuda}</a>
+                <a href={s3.blog}>{s3.fBlog}</a>
                 <a href={rota('comparativo')}>{s3.fComp}</a>
                 <a href={CAMINHO[lang]}>{s3.fConta}</a>
               </div>

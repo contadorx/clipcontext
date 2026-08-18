@@ -23,8 +23,7 @@ const paginas = Object.keys(slugs);
 /* A área do cliente tem endereço traduzido como o resto do site: quem lê em
    espanhol não deveria ter que reconhecer a palavra "conta" para achar a
    própria fatura. Por dentro ela mora em `/conta/<idioma>`. */
-const CONTA = { pt: '/conta', en: '/en/account', es: '/es/cuenta',
-                de: '/de/konto', fr: '/fr/compte' };
+const CONTA = rotas.caminhoConta;
 /* AS SUB-ROTAS DO PAINEL, traduzidas como o resto.
 
    Cada uma precisa de ponte `beforeFiles`, e não `afterFiles`: `/conta/faturas`
@@ -75,6 +74,8 @@ const config = {
     // por fora, vai para o endereço de verdade. Duas URLs para a mesma página é
     // o buscador dividindo a força dela entre as duas.
     r.push({ source: '/pt', destination: '/', permanent: true });
+    r.push({ source: '/pt/blog', destination: '/blog', permanent: true });
+    r.push({ source: '/pt/blog/:slug', destination: '/blog/:slug', permanent: true });
     for (const pg of paginas) {
       r.push({ source: `/pt/${slugs[pg].pt}`, destination: publico(pg, 'pt'), permanent: true });
     }
@@ -103,6 +104,13 @@ const config = {
       }
     }
     for (const L of IDIOMAS_CONTA) depois.push({ source: CONTA[L], destination: `/conta/${L}` });
+    /* O blog. `blog` é a mesma palavra nos cinco idiomas, então ele NÃO entra
+       na tabela de slugs traduzidos — mas o português continua precisando da
+       ponte, porque o endereço público é `/blog` e por dentro ele mora em
+       `/pt/blog`. O `:slug` cobre o post. */
+    depois.push({ source: '/blog', destination: '/pt/blog' });
+    depois.push({ source: '/blog/:slug', destination: '/pt/blog/:slug' });
+
     // A ferramenta é um arquivo estático em `public/app.html` e continua sendo.
     // O `/app` sem extensão é o endereço que o site inteiro cita há meses.
     depois.push({ source: '/app', destination: '/app.html' });

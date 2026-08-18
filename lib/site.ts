@@ -19,7 +19,19 @@ import path from 'node:path';
    tem a ferramenta de 600 KB dentro — para dentro do código do servidor. */
 const ler = (p: string) => fs.readFileSync(path.join(process.cwd(), 'src', p), 'utf8');
 
-export type Lang = 'pt' | 'en' | 'es';
+/* CINCO, e não três.
+ *
+ * Esta união dizia `'pt' | 'en' | 'es'` desde a época em que o site falava três
+ * idiomas. O site passou a falar cinco — o `rotas.json` lista os cinco, o
+ * `build.py` gera as cinco páginas, o alemão e o francês estão no ar — e este
+ * tipo continuou em três. Ele não quebrou nada porque todo mundo lia os idiomas
+ * do `rotas.json` em tempo de execução; ele quebrou na primeira vez que alguém
+ * escreveu uma tabela nova com as cinco chaves, e o compilador recusou `de`.
+ *
+ * A trava logo abaixo é o que impede o mesmo esquecimento de novo: se o
+ * `rotas.json` ganhar um sexto idioma sem que esta linha ganhe também, o build
+ * quebra aqui, e não numa página em alemão que ninguém abre. */
+export type Lang = 'pt' | 'en' | 'es' | 'de' | 'fr';
 export type Dicionario = Record<string, string>;
 
 /* A identidade mora em `lib/marca.ts`, que não toca disco — ela é importada
@@ -33,6 +45,7 @@ const rotas: {
   /* Quais idiomas têm vídeo do tour. Escrito pelo `build.py`, que olha o disco —
      ver o comentário no ponto de uso, mais abaixo. */
   demoLangs?: string[];
+  caminhoConta: Record<Lang, string>;
   slugs: Record<string, Record<Lang, string>>;
   metas: Record<string, Record<Lang, { titulo: string; desc: string }>>;
   scripts: { detectarIdioma: string; lembrarIdioma: string };
@@ -43,6 +56,21 @@ export const SCRIPTS = rotas.scripts;
 const dic: Record<Lang, Dicionario> = JSON.parse(ler('i18n-site.json'));
 
 export const IDIOMAS = rotas.idiomas;
+/* A trava: o `rotas.json` e o tipo `Lang` têm que dizer a mesma coisa. Um
+   idioma novo no JSON e ausente aqui quebra o build agora, em vez de virar um
+   `undefined` numa tabela meses depois. */
+{
+  const previstos: Lang[] = ['pt', 'en', 'es', 'de', 'fr'];
+  const sobrando = IDIOMAS.filter((L) => !previstos.includes(L));
+  const faltando = previstos.filter((L) => !IDIOMAS.includes(L));
+  if (sobrando.length || faltando.length) {
+    throw new Error(
+      'lib/site.ts: o tipo Lang e o rotas.json divergem' +
+      (sobrando.length ? ` — no JSON e não no tipo: ${sobrando.join(', ')}` : '') +
+      (faltando.length ? ` — no tipo e não no JSON: ${faltando.join(', ')}` : ''),
+    );
+  }
+}
 export const SLUGS = rotas.slugs;
 export const METAS = rotas.metas;
 /** Os nomes das páginas internas — `precos`, `seguranca`, `casoEv`… */
@@ -72,7 +100,17 @@ export function caminhos(lang: Lang): Dicionario {
     // a área do cliente tem endereço traduzido como o resto do site: quem lê em
     // espanhol não deveria ter que reconhecer a palavra "conta" para achar a
     // própria fatura
-    conta: { pt: '/conta', en: '/en/account', es: '/es/cuenta' }[lang],
+    /* Vem do `rotas.json`, e não escrito aqui.
+       
+       Escrito aqui, esta tabela tinha TRÊS idiomas num site que fala cinco — e
+       o link "Sua conta" do rodapé saía `undefined` em alemão e em francês.
+       Ninguém viu: `undefined` num `href` não quebra a página, só não leva a
+       lugar nenhum. É a mesma tabela que o `next.config.mjs` usa para montar a
+       ponte de reescrita. */
+    conta: rotas.caminhoConta[lang],
+    /* `blog` é a mesma palavra nos cinco idiomas, então ele não entra na tabela
+       de slugs traduzidos — ela existe para os casos em que a palavra muda. */
+    blog: lang === 'pt' ? '/blog' : `/${lang}/blog`,
   };
   for (const pg of PAGINAS) c[pg] = endereco(pg, lang);
   return c;

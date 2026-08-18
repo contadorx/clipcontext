@@ -506,3 +506,53 @@ table.legal td:first-child .small,table.legal td:first-child .muted{font-weight:
 .painelTranca{display:block;font-size:10.5px;font-style:normal;font-weight:600;
   letter-spacing:.02em;color:var(--accent);opacity:.85;margin-top:1px}
 .painelMenu a.trancado span{line-height:1.15}
+
+/* ------------------------------------------------------------------ blog */
+.postList{list-style:none;margin:28px 0 0;padding:0;display:grid;gap:26px}
+.postList li{border-bottom:1px solid var(--line);padding-bottom:22px}
+.postList li:last-child{border-bottom:0}
+.postList a{text-decoration:none;color:inherit;display:block}
+.postList h2{margin:0 0 6px;font-size:21px;line-height:1.25}
+.postList a:hover h2{color:var(--accent)}
+.postList p{margin:0;color:var(--muted);font-size:15px;line-height:1.6}
+
+.post h1{margin:0 0 8px;line-height:1.15}
+.postCorpo{margin-top:22px;font-size:16.5px;line-height:1.75}
+.postCorpo h2{margin:34px 0 10px;font-size:22px}
+.postCorpo h3{margin:26px 0 8px;font-size:18px}
+.postCorpo p{margin:0 0 16px}
+.postCorpo ul,.postCorpo ol{margin:0 0 16px;padding-left:22px}
+.postCorpo li{margin:0 0 6px}
+.postCorpo img{max-width:100%;height:auto;border-radius:10px;border:1px solid var(--line)}
+.postCorpo pre{background:var(--panel);border:1px solid var(--line);border-radius:10px;
+  padding:14px 16px;overflow-x:auto;font-size:13.5px}
+.postCorpo code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:14px;
+  background:var(--panel);border-radius:5px;padding:1px 5px}
+.postCorpo pre code{background:none;padding:0}
+.postCorpo blockquote{margin:0 0 16px;padding:2px 0 2px 16px;border-left:3px solid var(--accent);
+  color:var(--muted)}
+.postCorpo hr{border:0;border-top:1px solid var(--line);margin:28px 0}
+
+/* Compartilhar: links de verdade, sem script de rede nenhuma. Um botão oficial
+   traz o rastreador da rede junto — e a política deste site diz que não há. */
+.partilhar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;
+  margin:34px 0 0;padding-top:20px;border-top:1px solid var(--line)}
+.partilharTit{font-size:13px;font-weight:650;color:var(--muted);margin-right:4px}
+.partilhar a,.partilharCopiar{display:inline-flex;align-items:center;gap:7px;
+  border:1px solid var(--line);border-radius:8px;padding:7px 12px;background:var(--bg);
+  font:600 13px/1 inherit;color:var(--muted);text-decoration:none;cursor:pointer}
+.partilhar a:hover,.partilharCopiar:hover{color:var(--accent);border-color:var(--accent)}
+.partilhar svg{width:16px;height:16px}
+@media(max-width:620px){
+  .partilhar a span,.partilharCopiar span{position:absolute;width:1px;height:1px;
+    overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+  .partilhar a,.partilharCopiar{padding:9px 11px}
+}
+
+/* O editor do blog. Campos largos, porque o que se escreve neles é texto longo
+   — e um campo de 260px para um post inteiro é o motivo de ninguém escrever. */
+.painelCorpo form label.small{display:block}
+.painelCorpo form label.small input,
+.painelCorpo form label.small textarea{display:block;width:100%;margin-top:4px}
+.painelCorpo form textarea{font:14px/1.6 ui-monospace,Menlo,Consolas,monospace;resize:vertical}
+.painelCorpo details summary{padding:6px 0}

@@ -27,6 +27,17 @@ MARCA_A, MARCA_B = "Walk", "stamp"
 # hreflang e para o link do topo da ferramenta — trocar de domínio é mudar esta linha.
 SITE = "https://walkstamp.com"
 
+# O endereço da área do cliente em cada idioma.
+#
+# Ele existia escrito à mão em TRÊS lugares: no `lib/conta/textos.ts`, no
+# `next.config.mjs` e no `lib/site.ts`. Os dois primeiros tinham cinco idiomas;
+# o terceiro tinha três — e por isso o link "Sua conta" do rodapé saía
+# `undefined` nas páginas em alemão e em francês, num site que fala cinco
+# idiomas há semanas. Ninguém viu porque `undefined` num `href` não quebra
+# nada: só leva a lugar nenhum.
+CAMINHO_CONTA = {"pt": "/conta", "en": "/en/account", "es": "/es/cuenta",
+                 "de": "/de/konto", "fr": "/fr/compte"}
+
 # Versão dos ícones. O navegador guarda favicon com unhas e dentes: sem um
 # parâmetro que mude, quem já visitou o site continua vendo o ícone antigo
 # mesmo depois do deploy. Suba este número sempre que a marca mudar.
@@ -401,6 +412,14 @@ def escrever_marca(root: pathlib.Path) -> None:
     # (que monta o menu). Duas tabelas para a mesma coisa é exatamente como o
     # alemão ficou sem hreflang e depois vendo o tour em inglês — então a tabela
     # mora aqui, e os dois lados leem.
+    # O endereço da área do cliente em cada idioma.
+    #
+    # Ele existia escrito à mão em TRÊS lugares: no `lib/conta/textos.ts`, no
+    # `next.config.mjs` e no `lib/site.ts`. Os dois primeiros tinham cinco
+    # idiomas; o terceiro tinha três — e por isso o link "Sua conta" do rodapé
+    # saía `undefined` nas páginas em alemão e em francês, num site que fala
+    # cinco idiomas há semanas. Ninguém viu porque `undefined` num `href` não
+    # quebra nada: só leva a lugar nenhum.
     sub_conta = {
         "roteiro":  {"pt": "roteiro",  "en": "cases",    "es": "casos",       "de": "testfaelle", "fr": "cas-de-test"},
         "faturas":  {"pt": "faturas",  "en": "invoices", "es": "facturas",    "de": "rechnungen", "fr": "factures"},
@@ -420,7 +439,7 @@ def escrever_marca(root: pathlib.Path) -> None:
     # `/conta/negocio/<aba>`, e o `lib/conta/negocio.ts` precisa dela para
     # montar a faixa de abas. Escrita nos dois, é uma aba que existe no menu e
     # dá 404 no clique.
-    abas_negocio = ["contas", "cobrancas", "chamados", "interesse"]
+    abas_negocio = ["contas", "cobrancas", "chamados", "interesse", "blog"]
     # OS ITENS DA BARRA LATERAL, na ordem em que aparecem.
     #
     # Eles moravam no `lib/conta/nav.ts`, e isso bastava enquanto a barra
@@ -457,7 +476,8 @@ def escrever_marca(root: pathlib.Path) -> None:
          "icone": "M3 3v18h18 M7 15l4-4 3 3 5-6"},
     ]
     rotas = {"idiomas": IDIOMAS, "demoLangs": com_tour, "subConta": sub_conta,
-             "abasNegocio": abas_negocio, "menuConta": menu_conta, "slugs": SLUGS,
+             "abasNegocio": abas_negocio, "menuConta": menu_conta,
+             "caminhoConta": CAMINHO_CONTA, "slugs": SLUGS,
              "metas": {pg: {L: {"titulo": m[L][0], "desc": m[L][1]} for L in IDIOMAS}
                        for pg, m in METAS.items()},
              "scripts": {"detectarIdioma": so_o_js(REDIRECT),
@@ -507,8 +527,11 @@ def build_site(root: pathlib.Path) -> None:
                  # site: quem lê em espanhol não deveria ter que reconhecer a
                  # palavra "conta" para achar a própria fatura
                  # A área do cliente agora fala os cinco idiomas, como o resto.
-                 "conta": {"pt": "/conta", "en": "/en/account", "es": "/es/cuenta",
-                           "de": "/de/konto", "fr": "/fr/compte"}[L]},
+                 "conta": CAMINHO_CONTA[L],
+                 # `blog` é a mesma palavra nos cinco idiomas, então ele não
+                 # entra na tabela de slugs traduzidos — ela existe para os
+                 # casos em que a palavra muda.
+                 "blog": (pre[L] or "") + "/blog"},
                 **{pg: pre[L] + "/" + sl[L] for pg, sl in SLUGS.items()})
         for L in IDIOMAS
     }
