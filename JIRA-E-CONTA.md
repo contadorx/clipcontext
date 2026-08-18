@@ -95,7 +95,7 @@ linha é pior que não ter coluna. Virou "Hora de relógio", e "Hora" virou "Tem
 
 ## 5. É Zephyr — e isso muda a recomendação
 
-Confirmado com o Leandro em 15/08/2026: a Natura usa **Zephyr**. Pesquisado no mesmo dia, e a
+Confirmado com o Leandro em 15/08/2026: o cliente usa **Zephyr**. Pesquisado no mesmo dia, e a
 descoberta inverte a ordem que eu tinha proposto.
 
 **O Zephyr Scale Cloud aparentemente não faz CORS.** Há pedido público de clientes na comunidade da
