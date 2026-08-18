@@ -8,6 +8,7 @@ Gera os dois builds a partir de src/template.html.
 Edite sempre src/template.html. Os arquivos gerados são descartáveis.
 """
 
+import json
 import pathlib
 import re
 import sys
@@ -1218,10 +1219,41 @@ def main() -> int:
     src = template.read_text(encoding="utf-8")
     src = src.replace("__MARCA__", MARCA)
     src = src.replace("__CONTATO__", CONTATO)
+    src = src.replace("__EMPRESA__", EMPRESA).replace("__CNPJ__", CNPJ)
     src = src.replace("__MARCAA__", MARCA_A).replace("__MARCAB__", MARCA_B)
     src = src.replace("__SITE__", SITE)                      # domínio público, definido no topo
     src = src.replace("__SITEDOM__", SITE.split("//")[-1])  # o mesmo, sem o esquema, para exibir
     src = src.replace("__ICONV__", ICON_V)
+
+    # ---- O RODAPÉ DA FERRAMENTA, igual ao do site ----
+    #
+    # A ferramenta tinha um rodapé de UMA linha com três links, enquanto o site
+    # e a área do cliente tinham três colunas com dezesseis. São a mesma marca e
+    # o pulo entre elas acontece o tempo todo — o site é onde se lê e a
+    # ferramenta é onde se faz.
+    #
+    # Os endereços e os rótulos são INJETADOS aqui, e não escritos no template:
+    # a ferramenta é um arquivo só que abre de `file://` e troca de idioma sem
+    # recarregar, então ela precisa da tabela inteira dentro dela. Escrita à mão
+    # lá, seria a enésima cópia — e a que existia tinha QUATRO páginas das
+    # dezesseis, todas as outras apontando para o português em qualquer idioma.
+    rotas_app = {}
+    for pg, sl in SLUGS.items():
+        rotas_app[pg] = {L: (("" if L == "pt" else "/" + L) + "/" + sl[L]) for L in IDIOMAS}
+    rotas_app["blog"] = {L: (("" if L == "pt" else "/" + L) + "/blog") for L in IDIOMAS}
+    rotas_app["conta"] = dict(CAMINHO_CONTA)
+    src = src.replace("__ROTAS_SITE__", json.dumps(rotas_app, ensure_ascii=False))
+
+    # Os rótulos do rodapé saem do dicionário do SITE, para as duas telas
+    # dizerem as mesmas palavras. Só as chaves usadas — mandar o dicionário
+    # inteiro seriam dezenas de KB dentro de um arquivo que já tem 900.
+    CHAVES_RODAPE = ["fColProduto", "fColCasos", "fColConfianca",
+                     "navApp", "navPrice", "fAjuda", "fBlog", "fComp", "fConta",
+                     "casoEvT", "casoInT", "casoAtaT", "casoUxT", "casoIaT",
+                     "fSec", "fVerif", "fPriv", "fTerms", "fPsr"]
+    i18n_site = json.loads((ROOT / "src" / "i18n-site.json").read_text(encoding="utf-8"))
+    rodape_txt = {L: {k: i18n_site[L].get(k, k) for k in CHAVES_RODAPE} for L in IDIOMAS}
+    src = src.replace("__RODAPE_TXT__", json.dumps(rodape_txt, ensure_ascii=False))
     # a chave PÚBLICA da licença vale nos dois builds: ela só confere assinatura
     src = src.replace("__LICPUB__", LIC_PUB)
     src = src.replace("__LICPUBAUTO__", LIC_PUB_AUTO)

@@ -24,6 +24,27 @@
        font:15px/1.55 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
   .wrap{max-width:1000px;margin:0 auto;padding:32px 20px 90px}
 
+  /* O rodape da ferramenta. As mesmas tres colunas do site — mesmas medidas,
+     mesmos rotulos, mesma ordem —, e por isso as regras aqui sao copia das de
+     la: a ferramenta e um arquivo so e nao pode baixar o `site.css`. */
+  /* O botao do cabecalho, igual ao `.btnTop` do site. Copiado e nao importado
+     pelo motivo de sempre: a ferramenta e um arquivo so. */
+  .btnTopo{display:inline-block;background:var(--accent);color:#fff !important;
+      border-radius:8px;padding:7px 14px;font-weight:650;font-size:13.5px;
+      text-decoration:none;margin-right:12px}
+  .btnTopo:hover{filter:brightness(1.08)}
+  .rodapeApp{border-top:1px solid var(--line);margin-top:40px;padding:34px 0 30px;background:var(--panel)}
+  .rodapeApp .wrap{padding:0 20px;max-width:1240px}
+  .rodapeApp .rodapeCols{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:26px}
+  .rodapeApp .rodapeCols h3{font-size:12px;text-transform:uppercase;letter-spacing:.07em;
+      color:var(--muted);margin:0 0 10px}
+  .rodapeApp .rodapeCols a{display:block;font-size:14px;color:var(--muted);
+      text-decoration:none;margin:0 0 7px}
+  .rodapeApp .rodapeCols a:hover{color:var(--accent)}
+  .rodapeApp .rodapeFim{margin-top:26px;padding-top:18px;border-top:1px solid var(--line);
+      font-size:12.5px;color:var(--muted)}
+  body.comBarra .rodapeApp .wrap{max-width:1240px}
+
   /* ---------------------------------------------- a barra da conta
 
      Por que o estilo está AQUI e não no `site.css`: a ferramenta é um arquivo
@@ -652,8 +673,11 @@
            Clicar abre a mesma caixa de antes: trocar a chave, sair, ver o
            nome do cliente. Para quem não tem plano, não há nada aqui. -->
       <button type="button" id="licTag" class="licTag hide"></button>
-      <a id="contaLink" href="__SITE__/conta" data-i18n="contaLink"
-         style="margin-right:12px;border-right:1px solid var(--line);padding-right:12px"></a>
+      <!-- Botao cheio, como o "Abrir a ferramenta" do cabecalho da conta.
+           Era um link de texto cinza, e o mesmo lugar das duas telas tinha dois
+           pesos diferentes: na conta, o caminho para a ferramenta saltava; aqui,
+           o caminho para a conta se escondia. Sao a mesma marca. -->
+      <a id="contaLink" class="btnTopo" href="__SITE__/conta" data-i18n="contaLink"></a>
       <!-- As siglas ficam escritas aqui, uma a uma, e não geradas do `LANGS`:
            a ferramenta abre de `file://` no pacote offline, e um cabeçalho que
            só existe depois que o JavaScript roda é um cabeçalho que pisca. -->
@@ -1828,12 +1852,21 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
 
   <p class="status" style="text-align:center;margin-top:26px">
     <span data-i18n="supportLine"></span>
-    <a href="__SITE__/seguranca" data-rota="seguranca" style="color:var(--accent)" data-i18n="pesSeg"></a> ·
-    <a href="__SITE__/comparativo" data-rota="comparativo" style="color:var(--accent)" data-i18n="pesComp"></a> ·
-    <a href="__SITE__/precos" data-rota="precos" style="color:var(--accent)" data-i18n="pesPrecos"></a>
   </p>
 
 </div>
+
+<!-- O RODAPE, o mesmo do site e o mesmo da area do cliente.
+
+     Ele era uma linha com tres links, enquanto as outras duas telas do produto
+     tinham tres colunas com dezesseis. Sao a mesma marca, e o pulo entre elas
+     acontece o tempo todo — o site e onde se le, a ferramenta e onde se faz.
+
+     Ele nasce vazio e e preenchido pelo `pintarRodape()`, porque a ferramenta
+     troca de idioma SEM RECARREGAR: escrito no HTML, ele ficaria em portugues
+     numa tela em alemao. -->
+<footer class="rodapeApp"><div class="wrap"><div class="rodapeCols" id="rodapeCols"></div>
+<div class="rodapeFim" id="rodapeFim"></div></div></footer>
 
 <script>/*__JSPDF__*/</script>
   <!-- ---- avisar um problema ----
@@ -2056,6 +2089,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recPrep:'Preparando o modelo de transcrição…',
       recNoModel:'Não consegui carregar o modelo: vou guardar os frames sem transcrever.',
       linhasCairam:'O runtime não pôde usar várias linhas neste navegador — tentando de novo com uma só.',
+      recTrChegou:'O modelo de voz chegou — a transcrição começou, inclusive do que já foi gravado.',
+      recTrCaiu:'Não consegui baixar o modelo de voz. A gravação CONTINUA e os quadros estão sendo guardados — só a transcrição não vem. Dá para transcrever depois, no passo 2.',
       recNoModelStop:'Não consegui carregar o modelo de transcrição, então parei antes de começar a gravar e desliguei a captura — melhor agora do que no fim de uma reunião inteira. Rode o diagnóstico para ver onde trava, ou grave só os frames.',
       recSoFramesBtn:'Gravar só os frames',
       recMicNo:'Sem microfone: só o som do computador será transcrito.',
@@ -2408,6 +2443,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       gEvid:'Montar a ata de evidência de teste',
       modelH:'Modelo de saída',
       mEscolha:'— escolha o cenário de uso —',
+      cenAssumido:'Nenhum cenário escolhido — usei “Outro (documento genérico)”. Dá para trocar depois, no passo 1.',
       cenFalta:'Escolha primeiro o cenário de uso, ali em cima. Ele decide o formato do documento inteiro.',
       cenPorQue:'O cenário decide o cabeçalho, a hora de relógio, o nome de cada passo e o prompt. Escolha antes de gravar.',
       mOutro:'Outro (documento genérico)', recomendado:'recomendado', unPh:'passo, tela, momento…', orgTit:'Organize os quadros/frames', orgComo:'Clique numa imagem para descartar ou trazer de volta; o campo abaixo dela é a sua anotação. Os botões fazem isso em lote, e a revisão passa por todos, um a um.', mIa:'Contexto para IA', mEv:'Evidência de teste', mTut:'Passo a passo', mAta:'Ata de reunião',
@@ -2603,6 +2639,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recPrep:'Preparing the transcription model…',
       recNoModel:'Could not load the model: I will keep the frames without transcribing.',
       linhasCairam:'The runtime could not use multiple threads in this browser — trying again with a single one.',
+      recTrChegou:'The speech model arrived — transcription started, including what was already recorded.',
+      recTrCaiu:'Could not download the speech model. Recording CONTINUES and the frames are being kept — only the transcript is missing. You can transcribe later, in step 2.',
       recNoModelStop:'I could not load the transcription model, so I stopped before recording anything and switched the capture off — better now than at the end of a whole meeting. Run the diagnostics to see where it gets stuck, or record frames only.',
       recSoFramesBtn:'Record frames only',
       recMicNo:'No microphone: only the computer sound will be transcribed.',
@@ -2949,6 +2987,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       gEvid:'Write the test evidence record',
       modelH:'Output model',
       mEscolha:'— choose what this recording is for —',
+      cenAssumido:'No use case chosen — I used “Other (generic document)”. You can change it later, in step 1.',
       cenFalta:'Choose what this recording is for, up above. It decides the format of the whole document.',
       cenPorQue:'The scenario decides the header, the wall-clock time, what each step is called and the prompt. Choose before recording.',
       mOutro:'Other (generic document)', recomendado:'recommended', unPh:'step, screen, moment…', orgTit:'Organise the frames', orgComo:'Click an image to discard it or bring it back; the field under it is your note. The buttons do that in bulk, and the review walks through every one of them.', mIa:'Context for AI', mEv:'Test evidence', mTut:'Step-by-step guide', mAta:'Meeting minutes',
@@ -3142,6 +3181,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recPrep:'Preparando el modelo de transcripción…',
       recNoModel:'No pude cargar el modelo: guardaré los fotogramas sin transcribir.',
       linhasCairam:'El runtime no pudo usar varios hilos en este navegador — probando de nuevo con uno solo.',
+      recTrChegou:'El modelo de voz llegó — la transcripción empezó, incluso de lo ya grabado.',
+      recTrCaiu:'No pude descargar el modelo de voz. La grabación CONTINÚA y los fotogramas se están guardando — solo falta la transcripción. Puedes transcribir después, en el paso 2.',
       recNoModelStop:'No pude cargar el modelo de transcripción, así que paré antes de grabar nada y apagué la captura — mejor ahora que al final de una reunión entera. Ejecuta el diagnóstico para ver dónde se atasca, o graba solo los fotogramas.',
       recSoFramesBtn:'Grabar solo los fotogramas',
       recMicNo:'Sin micrófono: solo se transcribirá el sonido del ordenador.',
@@ -3490,6 +3531,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       gEvid:'Redactar el acta de evidencia de prueba',
       modelH:'Modelo de salida',
       mEscolha:'— elige el escenario de uso —',
+      cenAssumido:'Ningún escenario elegido — usé “Otro (documento genérico)”. Puedes cambiarlo después, en el paso 1.',
       cenFalta:'Elige primero el escenario de uso, ahí arriba. Decide el formato de todo el documento.',
       cenPorQue:'El escenario decide el encabezado, la hora de reloj, el nombre de cada paso y el prompt. Elige antes de grabar.',
       mOutro:'Otro (documento genérico)', recomendado:'recomendado', unPh:'paso, pantalla, momento…', orgTit:'Organiza los fotogramas', orgComo:'Haz clic en una imagen para descartarla o recuperarla; el campo de abajo es tu anotación. Los botones lo hacen en lote, y la revisión pasa por todos, uno a uno.', mIa:'Contexto para IA', mEv:'Evidencia de prueba', mTut:'Paso a paso', mAta:'Acta de reunión',
@@ -3684,6 +3726,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recPrep:'Das Transkriptionsmodell wird vorbereitet…',
       recNoModel:'Das Modell konnte nicht geladen werden: Die Screenshots werden ohne Transkription gespeichert.',
       linhasCairam:'Die Laufzeitumgebung konnte in diesem Browser nicht mehrere Threads nutzen — neuer Versuch mit nur einem.',
+      recTrChegou:'Das Sprachmodell ist da — die Transkription läuft, auch für das bereits Aufgenommene.',
+      recTrCaiu:'Das Sprachmodell konnte nicht geladen werden. Die Aufnahme LÄUFT WEITER und die Bilder werden gesichert — nur das Transkript fehlt. Sie können später in Schritt 2 transkribieren.',
       recNoModelStop:'Das Transkriptionsmodell konnte nicht geladen werden, deshalb wurde abgebrochen, bevor irgendetwas aufgenommen wurde, und die Aufnahme abgeschaltet — besser jetzt als am Ende einer ganzen Besprechung. Führen Sie die Diagnose aus, um zu sehen, wo es hängt, oder nehmen Sie nur die Screenshots auf.',
       recSoFramesBtn:'Nur die Screenshots aufnehmen',
       recMicNo:'Kein Mikrofon: Es wird nur der Computerton transkribiert.',
@@ -4036,6 +4080,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       gEvid:'Das Protokoll des Testnachweises erstellen',
       modelH:'Art der Ausgabe',
       mEscolha:'— Einsatzszenario wählen —',
+      cenAssumido:'Kein Anwendungsfall gewählt — ich habe „Sonstiges (generisches Dokument)“ genommen. Änderbar später, in Schritt 1.',
       cenFalta:'Wählen Sie zuerst oben das Einsatzszenario. Es bestimmt das Format des gesamten Dokuments.',
       cenPorQue:'Das Szenario bestimmt die Kopfzeile, die Uhrzeit, die Bezeichnung jedes Schritts und den Prompt. Wählen Sie vor der Aufnahme.',
       mOutro:'Anderes (allgemeines Dokument)', recomendado:'empfohlen', unPh:'Schritt, Bildschirm, Moment…', orgTit:'Bilder ordnen', orgComo:'Klicken Sie auf ein Bild, um es zu verwerfen oder zurückzuholen; das Feld darunter ist Ihre Notiz. Die Schaltflächen tun das für viele auf einmal, und die Prüfung geht jedes einzelne durch.', mIa:'Kontext für KI', mEv:'Testnachweis', mTut:'Schritt-für-Schritt-Anleitung', mAta:'Besprechungsprotokoll',
@@ -4230,6 +4275,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recPrep:'Préparation du modèle de transcription…',
       recNoModel:'Impossible de charger le modèle : les captures seront conservées sans transcription.',
       linhasCairam:'Le runtime n’a pas pu utiliser plusieurs threads dans ce navigateur — nouvel essai avec un seul.',
+      recTrChegou:'Le modèle vocal est arrivé — la transcription a démarré, y compris pour ce qui est déjà enregistré.',
+      recTrCaiu:'Impossible de télécharger le modèle vocal. L’enregistrement CONTINUE et les images sont conservées — seule la transcription manque. Vous pourrez transcrire ensuite, à l’étape 2.',
       recNoModelStop:'Impossible de charger le modèle de transcription : tout s’est arrêté avant le moindre enregistrement et la capture a été coupée — mieux vaut maintenant qu’à la fin d’une réunion entière. Lancez le diagnostic pour voir où ça bloque, ou enregistrez les captures seules.',
       recSoFramesBtn:'Enregistrer les captures seules',
       recMicNo:'Sans microphone : seul le son de l’ordinateur sera transcrit.',
@@ -4582,6 +4629,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       gEvid:'Rédiger le compte rendu de preuve de test',
       modelH:'Modèle de document',
       mEscolha:'— choisissez le cas d’usage —',
+      cenAssumido:'Aucun cas d’usage choisi — j’ai pris « Autre (document générique) ». Modifiable ensuite, à l’étape 1.',
       cenFalta:'Choisissez d’abord le cas d’usage, ci-dessus. Il décide du format de tout le document.',
       cenPorQue:'Le cas d’usage décide de l’en-tête, de l’heure d’horloge, du nom de chaque étape et du prompt. Choisissez avant d’enregistrer.',
       mOutro:'Autre (document générique)', recomendado:'recommandé', unPh:'étape, écran, moment…', orgTit:'Organisez les images', orgComo:'Cliquez sur une image pour l’écarter ou la récupérer ; le champ en dessous est votre note. Les boutons le font en lot, et la vérification les passe toutes, une par une.', mIa:'Contexte pour l’IA', mEv:'Preuve de test', mTut:'Mode opératoire', mAta:'Compte rendu de réunion',
@@ -4949,16 +4997,53 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      "Information security" ia parar numa página que, em inglês, tem outro
      endereço. O `data-rota` diz qual página é; o `applyLang` monta o endereço
      do idioma em que a pessoa está. */
-  const ROTAS_SITE = {
-    seguranca:   { pt: '/seguranca',   en: '/en/security',  es: '/es/seguridad',
-                   de: '/de/informationssicherheit', fr: '/fr/securite-de-l-information' },
-    comparativo: { pt: '/comparativo', en: '/en/compare',   es: '/es/comparativa',
-                   de: '/de/vergleich', fr: '/fr/comparatif' },
-    precos:      { pt: '/precos',      en: '/en/precos',    es: '/es/precos',
-                   de: '/de/preise',   fr: '/fr/tarifs' },
-    ajuda:       { pt: '/ajuda',       en: '/en/help',      es: '/es/ayuda',
-                   de: '/de/hilfe',    fr: '/fr/aide' }
-  };
+  /* A tabela vem do `build.py`, e nao escrita aqui.
+
+     Escrita aqui, ela tinha QUATRO paginas — seguranca, comparativo, precos,
+     ajuda — de dezesseis. O rodape novo precisa das dezesseis, e uma tabela
+     que se escreve a mao a cada pagina nova e uma tabela que fica para tras:
+     era exatamente o que estava acontecendo, com o resto do site apontando
+     para o portugues em qualquer idioma. */
+  const ROTAS_SITE = __ROTAS_SITE__;
+  /* Os rotulos do rodape, tambem do `build.py`, do dicionario do SITE: as duas
+     telas dizem as mesmas palavras porque leem a mesma fonte. */
+  const RODAPE_TXT = __RODAPE_TXT__;
+
+
+  /* O rodape, montado a cada troca de idioma.
+   *
+   * As tres colunas sao as MESMAS do site, na mesma ordem e com os mesmos
+   * rotulos — os dois leem do mesmo dicionario. `app` e `conta` sao especiais:
+   * um e esta propria pagina, o outro tem endereco proprio por idioma. */
+  const RODAPE_COLS = [
+    ['fColProduto',   [['app', 'navApp'], ['precos', 'navPrice'], ['ajuda', 'fAjuda'],
+                       ['blog', 'fBlog'], ['comparativo', 'fComp'], ['conta', 'fConta']]],
+    ['fColCasos',     [['casoEv', 'casoEvT'], ['casoIn', 'casoInT'], ['casoAta', 'casoAtaT'],
+                       ['casoUx', 'casoUxT'], ['casoIa', 'casoIaT']]],
+    ['fColConfianca', [['seguranca', 'fSec'], ['verificar', 'fVerif'], ['privacidade', 'fPriv'],
+                       ['termos', 'fTerms'], ['steps', 'fPsr']]],
+  ];
+
+  function pintarRodape(){
+    const cx = $('rodapeCols');
+    if (!cx || typeof RODAPE_TXT === 'undefined') return;
+    const tx = RODAPE_TXT[LANG] || RODAPE_TXT.pt || {};
+    const seg = (v) => String(v == null ? '' : v)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    const alvo = (pg) => {
+      if (pg === 'app') return '?lang=' + LANG;
+      const r = ROTAS_SITE[pg];
+      return '__SITE__' + ((r && (r[LANG] || r.pt)) || '/');
+    };
+    cx.innerHTML = RODAPE_COLS.map(([tit, itens]) =>
+      '<div><h3>' + seg(tx[tit] || '') + '</h3>' +
+      itens.map(([pg, chave]) =>
+        '<a href="' + seg(alvo(pg)) + '">' + seg(tx[chave] || chave) + '</a>').join('') +
+      '</div>').join('');
+    const fim = $('rodapeFim');
+    if (fim) fim.textContent = '__EMPRESA__ · CNPJ __CNPJ__';
+  }
 
   function applyLang(){
     document.documentElement.lang = LANG;
@@ -4971,6 +5056,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     document.querySelectorAll('[data-i18n]').forEach(el => {
       el.textContent = t(el.getAttribute('data-i18n'));
     });
+    pintarRodape();
     /* Campos de texto não têm textContent para traduzir — têm placeholder. */
     document.querySelectorAll('[data-i18n-ph]').forEach(el => {
       el.placeholder = t(el.getAttribute('data-i18n-ph'));
@@ -6073,6 +6159,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
 
   let liveOn = false, liveDur = 0, liveCues = [], liveCanais = null, liveW = 0, liveH = 0;
   let abrindoCaptura = false, emCauda = false, pularCauda = false;
+  /* O modelo de voz chegou? Ele deixou de segurar a gravacao, entao a
+     resposta muda NO MEIO dela — e quem pergunta e a fila de audio e o
+     recado da janelinha. */
+  let modeloPronto = false;
 
   /* ================= o clipe do momento marcado =================
 
@@ -6357,6 +6447,14 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
 
      Onde a API não existe (Firefox, Safari) tudo segue igual, sem a janelinha. */
   let pipAviso = '', pipAvisoAte = 0;
+  /* Um recado durante a gravacao vale nos DOIS lugares: a janelinha, para onde
+     a pessoa esta olhando, e a aba, para quando ela voltar. Escrito so num
+     deles, ele existe para metade das pessoas. */
+  function avisarNaLive(msg, classe){
+    pipAviso = msg; pipAvisoAte = performance.now() + 8000;
+    avisar(msg, 8);
+    if (classe === 'ok' && $('liveStat')) $('liveStat').textContent = msg;
+  }
   let pipWin = null, pipTexto = null, pipRelogio = null, pipFrames = null;
   let pipVm = null, pipVs = null, pipCalar = null, pipMarcar = null, pipPausa = null;
   let pipNota = null, pipErroTic = null;
@@ -6675,6 +6773,20 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
 
   function controle(etapa, dados){
     if (!pipWin) return;
+    /* `semModelo` nao para nada: a gravacao segue e a janelinha passa a dizer
+       que a transcricao nao vem. Antes deste estado, um modelo que falhava
+       levava a gravacao junto. */
+    if (etapa === 'semModelo') {
+      /* Ele NAO limpa a classe `gravando` nem desliga os botoes, e essa e a
+         diferenca inteira para o `erro` la embaixo: aqui a gravacao continua.
+         So o recado muda, e volta a ser o relogio no proximo segundo -- por
+         isso ele tambem entra no `pipAviso`, que sobrevive as repintagens. */
+      pipAviso = t('recTrCaiu'); pipAvisoAte = performance.now() + 10000;
+      if (pipTexto) { pipTexto.classList.remove('contando');
+                      pipTexto.classList.add('aviso');
+                      pipTexto.textContent = t('recTrCaiu'); }
+      return;
+    }
     if (etapa === 'gravando') {
       if (pipFrames) pipFrames.disabled = false;
       controleMic();
@@ -7196,15 +7308,27 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      Não é um alerta: alerta se fecha e se esquece. É a caixa piscando, a
      página rolando até ela, e o foco dentro — a pessoa chega no lugar de
      responder, e não num aviso sobre o lugar. */
+  /* SEM CENARIO ESCOLHIDO, VALE "OUTRO" — e nao "nao deixo gravar".
+   *
+   * Esta funcao barrava: escrevia o pedido em vermelho, sacudia o seletor e
+   * devolvia `false`, e o clique em Gravar morria ali. A intencao era boa (o
+   * cenario decide cabecalho, hora de relogio, nome do passo e prompt) e o
+   * preco era alto demais: quem clica em Gravar tem algo acontecendo na tela
+   * AGORA, e uma tela que se recusa a comecar por causa de um campo de
+   * formulario perde o que ela existia para registrar.
+   *
+   * "Outro" existe justamente para isto: e o documento generico, que serve
+   * para qualquer gravacao. Entao a funcao escolhe ele, avisa em uma linha, e
+   * deixa gravar. Trocar o cenario depois continua valendo — nada do que ele
+   * decide e destruido pela escolha tardia. */
   function exigirCenario(){
     if (!semCenario()) return true;
     const s = $('modelo'); if (!s) return true;
-    $('recMsg').innerHTML = `<span class="err">${t('cenFalta')}</span>`;
-    s.classList.add('pede');
-    setTimeout(() => s.classList.remove('pede'), 2000);
-    try { s.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) {}
-    try { s.focus(); } catch (e) {}
-    return false;
+    if (!MODELOS.outro) return true;
+    s.value = 'outro';
+    try { s.dispatchEvent(new Event('change', { bubbles: true })); } catch (e) {}
+    avisar(t('cenAssumido'), 7);
+    return true;
   }
 
   $('rec').onclick = async () => {
@@ -7353,6 +7477,34 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
 
        E o erro de verdade vai junto: engolir a mensagem do navegador me deixou
        cego por três rodadas de depuração. */
+    /* O aviso que NAO tira nada de ninguem.
+     *
+     * O `modeloFalhou` logo abaixo desliga a captura e devolve o botao: ele
+     * serve para quando a falha acontece ANTES de a gravacao existir. Depois
+     * que ela comecou, desligar seria jogar fora o que ja foi gravado por causa
+     * de um recurso que era acessorio -- exatamente o que este conserto veio
+     * impedir.
+     *
+     * Entao aqui: a gravacao continua, e o recado fica em dois lugares, porque
+     * quem grava esta olhando para a janelinha e nao para esta aba. */
+    const modeloFalhouSemParar = (e) => {
+      const detalhe = ((e && (e.message || String(e))) || '').slice(0, 200);
+      modeloPronto = false;
+      prog(null); progRec(false); st('');
+      controle('semModelo');
+      if (liveOn) avisarNaLive(t('recTrCaiu'), 'err');
+      /* A fila de audio para de crescer: sem modelo ela nunca drena, e cada
+         janela de 30 s guarda perto de dois megabytes. Uma hora de reuniao
+         viraria um quarto de giga de memoria esperando por algo que nao vem. */
+      filaAsr.length = 0; asrPendentes = 0;
+      $('recMsg').innerHTML =
+        `<span class="err">${t('recTrCaiu')}</span>` +
+        (detalhe ? ` <span class="status">(${detalhe.replace(/</g, '&lt;')})</span>` : '') +
+        ` <button class="ghost sm" id="recDiag2">${t('diagBtn')}</button>`;
+      const bd = $('recDiag2');
+      if (bd) bd.onclick = () => { coletarDiag($('diagOut')); irPara('cardTr', true); };
+    };
+
     const modeloFalhou = (e) => {
         /* Antes de tudo: dizer na janelinha. `fecharControle()` logo abaixo a
            apaga, e uma janela que some sem explicar deixa a pessoa procurando
@@ -7472,17 +7624,40 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
        A captura só começa depois. Gravar durante a espera pareceria melhor e
        seria pior: os primeiros minutos entrariam sem transcrição e ninguém
        saberia por quê. */
+    /* ---- O MODELO NAO SEGURA MAIS A GRAVACAO ----
+     *
+     * Aqui havia um `await baixando`. A intencao era boa e esta escrita logo
+     * acima: quem pediu transcricao e grava uma reuniao inteira sem ela so
+     * descobre no fim, e a reuniao nao se repete. Entao o produto preferia
+     * PARAR a comecar sem.
+     *
+     * O que isso custou na vida real, numa rede de empresa: o download entrou
+     * na escada de tentativas, ficou minutos subindo e descendo, e A GRAVACAO
+     * NUNCA COMECOU. A pessoa clicou em Gravar, escolheu a tela, e ficou
+     * olhando uma barra. O que ela queria gravar aconteceu e passou.
+     *
+     * A conta certa: uma gravacao com quadros e sem transcricao vale muito
+     * mais que gravacao nenhuma. E a transcricao nem sempre se perde -- o
+     * audio ja entra na fila e e transcrito quando o modelo chega, porque a
+     * bomba (`bombearAsr`) so espera existir `pipe`.
+     *
+     * Entao: comeca a gravar agora. Se o modelo chegar, a fila drena sozinha e
+     * a janelinha avisa. Se falhar, a gravacao CONTINUA e o aviso fica na tela
+     * e na janelinha -- ruidoso, repetido, e sem tirar nada de ninguem. */
     if (baixando) {
-      try {
-        $('recMsg').textContent = t('recPrep');
-        progRec(null);
-        await baixando;
-        podeTranscrever = true;
+      podeTranscrever = true;
+      $('recMsg').textContent = t('recPrep');
+      progRec(null);
+      baixando.then(() => {
         prog(null); progRec(false); st('');
-      } catch (e) {
-        modeloFalhou(e);
-        return;
-      }
+        modeloPronto = true;
+        controle('gravando');
+        /* A fila pode ter enchido enquanto o modelo vinha. `bombearAsr` so e
+           chamada quando chega janela nova; sem este empurrao, o que ja estava
+           esperando so sairia no proximo trecho de audio. */
+        bombearAsr();
+        if (liveOn) avisarNaLive(t('recTrChegou'), 'ok');
+      }).catch((e) => modeloFalhouSemParar(e));
     }
     if (morreu()) return desistir(t('recEnded'), 'err');
 
@@ -8610,7 +8785,30 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
 
   async function buildPipe(modelId){
     degraus = [];
-    const arquivos = {};
+    /* ---- POR QUE ISTO SE ZERA A CADA TENTATIVA ----
+     *
+     * `buildPipe` nao faz UM download: ele desce uma escada de tentativas
+     * (placa de video, processador, modelo reserva...). Cada degrau pede
+     * arquivos diferentes, e um degrau que falha e refeito do zero.
+     *
+     * O acumulador era um so para a escada inteira, e o efeito na tela foi
+     * relatado assim: "o relogio ficou louco, subindo e descendo e alterando o
+     * que baixava". Estava certo. Ao trocar de degrau, arquivo novo entrava no
+     * total e a porcentagem CAIA; ao refazer um arquivo, o `loaded` voltava a
+     * zero e ela caia de novo; e o nome na tela trocava porque o degrau
+     * seguinte baixa outro modelo.
+     *
+     * Agora cada degrau tem contagem propria, relogio proprio e um piso: a
+     * porcentagem mostrada nunca desce dentro do mesmo degrau. E quando a
+     * escada troca de degrau, a tela DIZ que trocou, em vez de deixar o numero
+     * andar para tras sem explicacao. */
+    let arquivos = {};
+    let t0 = performance.now();
+    let pisoPct = 0;
+    let degrauN = 0;
+    const novoDegrau = () => {
+      arquivos = {}; t0 = performance.now(); pisoPct = 0; degrauN++;
+    };
     /* Quais arquivos o degrau pediu de verdade. Sem isto, dizer "o degrau fp32
        falhou" não diz se ele chegou a pedir o arquivo fp32 — e não chegava. */
     let pedidos = new Set();
@@ -8621,8 +8819,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
        e depois travar. E com os megabytes na tela dá para decidir se dá tempo. */
     /* O relógio do download, para poder dizer quanto FALTA. Uma porcentagem
        sozinha responde "quanto já foi"; quem está parado esperando para gravar
-       quer saber outra coisa — se dá tempo de buscar um café. */
-    const t0 = performance.now();
+       quer saber outra coisa — se dá tempo de buscar um café. Ele mora lá em
+       cima, junto do acumulador, porque os dois se zeram juntos. */
     const progress_callback = p => {
       if (!p.file) return;
       pedidos.add(p.file);
@@ -8644,7 +8842,13 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
           return;
         }
 
-        const pct = Math.min(100, l / tt * 100);
+        /* O piso. Dentro de um degrau a porcentagem so sobe: um arquivo
+           refeito faz `l` cair, e um numero que anda para tras le-se como
+           defeito. O que muda de verdade — a troca de degrau — e dita em
+           palavras, e nao por um salto no numero. */
+        const cru = Math.min(100, l / tt * 100);
+        const pct = Math.max(pisoPct, cru);
+        pisoPct = pct;
         const seg = (performance.now() - t0) / 1000;
         const taxa = seg > 1.5 ? l / seg : 0;                 // bytes por segundo
         const restam = taxa > 0 ? (tt - l) / taxa : 0;
@@ -8687,6 +8891,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
           if (lembrado.runtime === 'sondado') { const b0 = await findWasmBase(); if (b0) w0.wasmPaths = b0; }
         }
         pedidos = new Set();
+        novoDegrau();
         const pp = await mod0.pipeline('automatic-speech-recognition', lembrado.alvo,
           Object.assign({ progress_callback }, lembrado.opcoes));
         libMod = mod0; tjsEmUso = lembrado.lib;
@@ -8795,6 +9000,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
            velocidade e funcionar, tenta com linhas e refaz com uma só. */
         for (let passe = 0; passe < 2; passe++) {
           pedidos = new Set();
+          /* Contagem nova para cada passe, e nao so para cada tentativa: um
+             passe repete os MESMOS arquivos do zero, e sem zerar aqui o
+             `loaded` voltando a zero derrubava a porcentagem. */
+          novoDegrau();
           try {
             const pp = await mod.pipeline('automatic-speech-recognition', alvo,
               Object.assign({ progress_callback }, tent.opcoes));
@@ -9127,8 +9336,13 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
         + `<span>${seg1(d.ferramenta.rotulo)}</span></a></li></ul>`
       : '';
 
-    cx.innerHTML = `<p class="quem" title="${seg1(d.email || '')}">${seg1(d.email || '')}</p>`
-                 + `<ul>${linhas}</ul>` + aqui;
+    /* Deslogado a primeira linha convida a entrar, em vez de dizer quem e
+       voce. E o mesmo desenho do painel, e e ele que faz o menu servir para
+       quem ainda nao tem conta — que e quem a estrategia quer alcancar. */
+    const topo = d.email
+      ? `<p class="quem" title="${seg1(d.email)}">${seg1(d.email)}</p>`
+      : `<p class="quem"><a href="${seg1(d.raiz || '/conta')}">${seg1(d.entrar || '')}</a></p>`;
+    cx.innerHTML = topo + `<ul>${linhas}</ul>` + aqui;
     cx.classList.remove('hide');
     document.body.classList.add('comBarra');
   }

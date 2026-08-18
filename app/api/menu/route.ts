@@ -48,12 +48,20 @@ export async function GET(req: Request) {
   const lang = ehLang(bruto) ? bruto : 'pt';
 
   const email = await emailDaSessao();
-  /* 204, e não um 401 com explicação: não estar logado não é erro. A ferramenta
-     aberta sem conta é o uso principal do produto, não uma falha dele. */
-  if (!email || !temChaveDeServico) return new NextResponse(null, { status: 204 });
 
+  /* O MENU EXISTE MESMO SEM SESSAO.
+   *
+   * Ele respondia 204 para quem nao estava logado, e a ferramenta ficava sem
+   * barra nenhuma. Estava alinhado com "a conta e opcional" e desalinhado com a
+   * estrategia: o menu e a unica peca da tela que diz O QUE EXISTE alem da
+   * ferramenta gratuita. Sem ele, quem usa o produto de graca — que e quase
+   * todo mundo — nunca ve que ha roteiro de casos, time, faturas.
+   *
+   * Deslogado, o menu vem com todos os itens visiveis e os pagos marcados, e a
+   * primeira linha convida a entrar. Nada da conta e lido: sem sessao nao ha o
+   * que ler. */
   let tem = { time: false, plano: false, dono: false };
-  try {
+  if (email && temChaveDeServico) try {
     const conta = await contaDe(email);
     tem = {
       time: Boolean(conta.time),
@@ -69,7 +77,10 @@ export async function GET(req: Request) {
   const t = textos(lang);
   return NextResponse.json(
     {
-      email,
+      /* `null` deslogado, e a barra troca o nome de quem e por um convite a
+         entrar — o mesmo que o painel faz. */
+      email: email || null,
+      entrar: email ? null : t.painelEntrar,
       raiz: CAMINHO[lang],
       itens: menuDe(lang, tem).map((i) => ({
         slug: i.slug, rotulo: t[i.rotulo], href: i.href, icone: i.icone,
