@@ -2509,8 +2509,6 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       recTetoVoltou:'Limite aumentado — voltei a guardar os quadros.',
       recTetoPerto:'{0} de {1} quadros. Perto do limite — dá para aumentar o "Limite de frames" no passo 3 agora, sem parar a gravação.',
       recTrCaiu:'Não consegui baixar o modelo de voz. A gravação CONTINUA e os quadros estão sendo guardados — só a transcrição não vem. Dá para transcrever depois, no passo 2.',
-      recNoModelStop:'Não consegui carregar o modelo de transcrição, então parei antes de começar a gravar e desliguei a captura — melhor agora do que no fim de uma reunião inteira. Rode o diagnóstico para ver onde trava, ou grave só os frames.',
-      recSoFramesBtn:'Gravar só os frames',
       recMicNo:'Sem microfone: só o som do computador será transcrito.',
       recSysNo:'Você não marcou “compartilhar áudio”: só o microfone será transcrito.',
       recNoAudio:'Não consegui abrir os canais de áudio; a gravação segue só com os frames.',
@@ -2605,7 +2603,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       recEnded:'O compartilhamento foi encerrado antes de a gravação começar.',
       recBusy:'Termine a captura antes de carregar outro vídeo.',
       recSkip:'Não esperar',
-      recTailN:'Faltam {0} trechos para transcrever. Dá para não esperar.',
+      recTailN:'Faltam {0} trechos para transcrever.',
+      recTailPular:'Aperte “{0}” de novo para não esperar.',
       prSpk:'A transcrição vem de dois canais separados: “Microfone” é quem está no computador, e “Computador” é o som que saiu dos alto-falantes — em uma reunião, as outras pessoas.',
       marked:'{0} momento(s) marcado(s) — entram sempre, mesmo que a imagem não mude.',
       mDur:'duração', mRes:'resolução', mFile:'arquivo',
@@ -3067,8 +3066,6 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       recTetoVoltou:'Limit raised — I am keeping frames again.',
       recTetoPerto:'{0} of {1} frames. Close to the limit — you can raise "Frame limit" in step 3 now, without stopping the recording.',
       recTrCaiu:'Could not download the speech model. Recording CONTINUES and the frames are being kept — only the transcript is missing. You can transcribe later, in step 2.',
-      recNoModelStop:'I could not load the transcription model, so I stopped before recording anything and switched the capture off — better now than at the end of a whole meeting. Run the diagnostics to see where it gets stuck, or record frames only.',
-      recSoFramesBtn:'Record frames only',
       recMicNo:'No microphone: only the computer sound will be transcribed.',
       recSysNo:'You did not tick “share audio”: only the microphone will be transcribed.',
       recNoAudio:'Could not open the audio channels; recording continues with frames only.',
@@ -3163,7 +3160,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       recEnded:'Screen sharing ended before the recording could start.',
       recBusy:'Finish the capture before loading another video.',
       recSkip:'Do not wait',
-      recTailN:'{0} segments left to transcribe. You can skip the wait.',
+      recTailN:'{0} segments left to transcribe.',
+      recTailPular:'Press “{0}” again to skip the wait.',
       prSpk:'The transcript comes from two separate channels: “Microphone” is the person at the computer, and “Computer” is the sound coming out of the speakers — in a meeting, the other participants.',
       marked:'{0} moment(s) marked — always included, even if the image does not change.',
       mDur:'duration', mRes:'resolution', mFile:'file',
@@ -3617,8 +3615,6 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       recTetoVoltou:'Límite aumentado — vuelvo a guardar los fotogramas.',
       recTetoPerto:'{0} de {1} fotogramas. Cerca del límite — puedes subir el "Límite de fotogramas" en el paso 3 ahora, sin parar la grabación.',
       recTrCaiu:'No pude descargar el modelo de voz. La grabación CONTINÚA y los fotogramas se están guardando — solo falta la transcripción. Puedes transcribir después, en el paso 2.',
-      recNoModelStop:'No pude cargar el modelo de transcripción, así que paré antes de grabar nada y apagué la captura — mejor ahora que al final de una reunión entera. Ejecuta el diagnóstico para ver dónde se atasca, o graba solo los fotogramas.',
-      recSoFramesBtn:'Grabar solo los fotogramas',
       recMicNo:'Sin micrófono: solo se transcribirá el sonido del ordenador.',
       recSysNo:'No marcaste “compartir audio”: solo se transcribirá el micrófono.',
       recNoAudio:'No pude abrir los canales de audio; la grabación sigue solo con los fotogramas.',
@@ -3713,7 +3709,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       recEnded:'El uso compartido terminó antes de que empezara la grabación.',
       recBusy:'Termina la captura antes de cargar otro vídeo.',
       recSkip:'No esperar',
-      recTailN:'Faltan {0} tramos por transcribir. Puedes no esperar.',
+      recTailN:'Faltan {0} tramos por transcribir.',
+      recTailPular:'Pulsa “{0}” otra vez para no esperar.',
       prSpk:'La transcripción viene de dos canales separados: “Micrófono” es quien está en el ordenador, y “Ordenador” es el sonido que salió de los altavoces — en una reunión, las demás personas.',
       demoHasAudio:'El ejemplo está narrado: la transcripción ya viene rellenada, pero puedes borrarla y pulsar "Transcribir automáticamente" para ver el reconocimiento de voz en acción.',
       mark:'Marcar este momento',
@@ -4170,8 +4167,6 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       recTetoVoltou:'Grenze erhöht — ich speichere wieder Bilder.',
       recTetoPerto:'{0} von {1} Bildern. Nahe an der Grenze — Sie können „Bildgrenze" in Schritt 3 jetzt erhöhen, ohne die Aufnahme zu stoppen.',
       recTrCaiu:'Das Sprachmodell konnte nicht geladen werden. Die Aufnahme LÄUFT WEITER und die Bilder werden gesichert — nur das Transkript fehlt. Sie können später in Schritt 2 transkribieren.',
-      recNoModelStop:'Das Transkriptionsmodell konnte nicht geladen werden, deshalb wurde abgebrochen, bevor irgendetwas aufgenommen wurde, und die Aufnahme abgeschaltet — besser jetzt als am Ende einer ganzen Besprechung. Führen Sie die Diagnose aus, um zu sehen, wo es hängt, oder nehmen Sie nur die Screenshots auf.',
-      recSoFramesBtn:'Nur die Screenshots aufnehmen',
       recMicNo:'Kein Mikrofon: Es wird nur der Computerton transkribiert.',
       recSysNo:'Sie haben „Audio freigeben“ nicht angehakt: Es wird nur das Mikrofon transkribiert.',
       recNoAudio:'Die Tonspuren konnten nicht geöffnet werden; die Aufnahme läuft nur mit den Screenshots weiter.',
@@ -4266,7 +4261,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       recEnded:'Die Freigabe wurde beendet, bevor die Aufnahme starten konnte.',
       recBusy:'Beenden Sie die Aufnahme, bevor Sie ein anderes Video laden.',
       recSkip:'Nicht warten',
-      recTailN:'Es fehlen noch {0} Abschnitte zum Transkribieren. Sie können auf das Warten verzichten.',
+      recTailN:'Es fehlen noch {0} Abschnitte zum Transkribieren.',
+      recTailPular:'Drücken Sie erneut „{0}“, um nicht zu warten.',
       prSpk:'Die Transkription stammt aus zwei getrennten Kanälen: „Mikrofon“ ist die Person am Computer, und „Computer“ ist der Ton aus den Lautsprechern — in einer Besprechung also die anderen Personen.',
       marked:'{0} Moment(e) markiert — sie kommen immer mit, auch wenn sich das Bild nicht ändert.',
       mDur:'Dauer', mRes:'Auflösung', mFile:'Datei',
@@ -4727,8 +4723,6 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       recTetoVoltou:'Limite augmentée — je garde de nouveau les images.',
       recTetoPerto:'{0} sur {1} images. Proche de la limite — vous pouvez augmenter « Limite d’images » à l’étape 3 maintenant, sans arrêter l’enregistrement.',
       recTrCaiu:'Impossible de télécharger le modèle vocal. L’enregistrement CONTINUE et les images sont conservées — seule la transcription manque. Vous pourrez transcrire ensuite, à l’étape 2.',
-      recNoModelStop:'Impossible de charger le modèle de transcription : tout s’est arrêté avant le moindre enregistrement et la capture a été coupée — mieux vaut maintenant qu’à la fin d’une réunion entière. Lancez le diagnostic pour voir où ça bloque, ou enregistrez les captures seules.',
-      recSoFramesBtn:'Enregistrer les captures seules',
       recMicNo:'Sans microphone : seul le son de l’ordinateur sera transcrit.',
       recSysNo:'Vous n’avez pas coché « partager l’audio » : seul le microphone sera transcrit.',
       recNoAudio:'Impossible d’ouvrir les canaux audio ; l’enregistrement continue avec les captures seules.',
@@ -4823,7 +4817,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       recEnded:'Le partage a été interrompu avant le début de l’enregistrement.',
       recBusy:'Terminez la capture avant de charger une autre vidéo.',
       recSkip:'Ne pas attendre',
-      recTailN:'Il reste {0} segments à transcrire. Vous pouvez ne pas attendre.',
+      recTailN:'Il reste {0} segments à transcrire.',
+      recTailPular:'Appuyez de nouveau sur « {0} » pour ne pas attendre.',
       prSpk:'La transcription vient de deux canaux séparés : « Microphone », c’est la personne devant l’ordinateur, et « Ordinateur », c’est le son sorti des haut-parleurs — en réunion, les autres personnes.',
       marked:'{0} moment(s) marqué(s) — ils entrent toujours, même si l’image ne change pas.',
       mDur:'durée', mRes:'résolution', mFile:'fichier',
@@ -7306,7 +7301,10 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       if (pipWin) pipWin.document.body.classList.remove('contando', 'gravando');
       if (pipTexto) { pipTexto.classList.remove('contando');
                       pipTexto.classList.add('ruim');
-                      pipTexto.textContent = t('pipErro'); }
+                      /* O motivo, quando quem chamou souber dizer. "Deu erro" é
+                         a mensagem que não ajuda ninguém a fazer diferente na
+                         próxima vez; `pipErro` só entra quando não há motivo. */
+                      pipTexto.textContent = (dados && dados.msg) || t('pipErro'); }
       /* Os botões param de convidar: não há o que marcar nem o que pausar. */
       if (pipMarcar) pipMarcar.disabled = true;
       if (pipPausa)  pipPausa.disabled  = true;
@@ -7617,6 +7615,65 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     .replace(/\s+/g, ' ')
     .trim();
 
+  /* ------------------------------------------- a gagueira do modelo
+
+     O Whisper, diante de ruído sem fala — ar-condicionado, um clique, o silêncio
+     de uma sala com microfone aberto —, entra em laço e devolve a mesma palavra
+     centenas de vezes dentro de UM trecho. Da última reunião gravada:
+
+       Microfone: Vem, vim, vim, vim, vim, vim, vim, vim, vim, vim, … (×170)
+
+     A trava que já existia compara trechos VIZINHOS e não via nada: para ela
+     isto era um trecho só, com um texto comprido e legítimo. O laço mora dentro
+     do trecho, e é lá que ele tem que ser cortado.
+
+     O que esta função faz, em ordem:
+
+       1. corta a repetição de UMA palavra ("vim vim vim vim" → "vim");
+       2. corta a repetição de um GRUPO curto de palavras, que é a forma mais
+          comum quando o modelo pega uma frase de duas ou três ("obrigado pessoal
+          obrigado pessoal obrigado pessoal" → "obrigado pessoal");
+       3. e, se depois disso o que sobrou for uma coisa só repetida muitas vezes,
+          devolve VAZIO — porque não era fala, era ruído, e uma linha de legenda
+          dizendo "vim" no meio de uma ata é pior do que linha nenhuma.
+
+     O limite de três é generoso de propósito: gente repete ("não, não, não"), e
+     cortar fala de verdade seria um estrago maior que o defeito. */
+  const REPETE_MAX = 3;
+  /* Exposta para o teste. Ela é pura — texto entra, texto sai — e é o tipo de
+     coisa que se prova com uma tabela de casos, e não gravando meia hora de
+     ruído para ver se o modelo gagueja hoje. */
+  function semGagueira(txt){
+    const bruto = String(txt || '').trim();
+    if (!bruto) return '';
+    const palavras = bruto.split(/\s+/);
+    if (palavras.length < 6) return bruto;
+
+    /* 1 e 2 juntos: para cada tamanho de grupo, colapsa as repetições seguidas. */
+    let saida = palavras;
+    for (const n of [1, 2, 3, 4]) {
+      const fora = [];
+      let i = 0;
+      while (i < saida.length) {
+        const grupo = saida.slice(i, i + n).join(' ').toLowerCase();
+        let vezes = 1;
+        while (saida.slice(i + vezes * n, i + (vezes + 1) * n).join(' ').toLowerCase() === grupo
+               && grupo) vezes++;
+        const quantas = Math.min(vezes, REPETE_MAX);
+        for (let k = 0; k < quantas; k++) fora.push(...saida.slice(i, i + n));
+        i += vezes * n;
+      }
+      saida = fora;
+    }
+
+    /* 3. Sobrou pouca coisa distinta num texto que era enorme? Era ruído. */
+    const distintas = new Set(saida.map((w) => w.toLowerCase().replace(/[^\p{L}\p{N}]/gu, '')));
+    if (palavras.length >= 12 && distintas.size <= 2) return '';
+    return saida.join(' ');
+  }
+
+  try { window.__semGagueira = semGagueira; } catch (e) {}
+
   function ultimaFalaDo(rot){
     for (let i = liveCues.length - 1; i >= 0; i--)
       if (liveCues[i].rot === rot) return liveCues[i];
@@ -7640,7 +7697,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
         const chunks = (r && r.chunks && r.chunks.length) ? r.chunks
           : [{ timestamp: [0, j.dados.length / SR_ASR], text: (r && r.text) || '' }];
         chunks.forEach(c => {
-          const txt = (c.text || '').trim();
+          const txt = semGagueira((c.text || '').trim());
           if (!txt) return;
           const a = j.t0 + (c.timestamp[0] ?? 0);
           const b = j.t0 + (c.timestamp[1] ?? (c.timestamp[0] ?? 0) + 2);
@@ -7728,7 +7785,17 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       const { pct, falta } = progressoCauda();
       const seg = Math.max(0, Math.round((performance.now() - caudaT0) / 1000));
       const relogioTxt = t('recTailSeg', duracao(seg));
-      $('liveStat').textContent = t('recTailN', asrPendentes) + (falta ? ' ' + falta : '');
+      /* "Dá para não esperar" era uma promessa que a frase não ensinava a
+         cumprir — e que nem sempre era verdade. O pulo é apertar o mesmo botão
+         de Parar uma segunda vez; quem não sabe disso lê "dá para não esperar",
+         não vê como, e espera assim mesmo achando que a tela mentiu.
+         
+         Agora a frase diz QUAL botão, e só aparece quando o botão está lá. */
+      const podePular = $('recStop') && !$('recStop').classList.contains('hide')
+                        && $('recStop').offsetParent !== null;
+      $('liveStat').textContent = t('recTailN', asrPendentes)
+        + (falta ? ' ' + falta : '')
+        + (podePular ? ' ' + t('recTailPular', t('recStopBtn')) : '');
       /* A barra aparece SEMPRE, desde o primeiro segundo. Sem porcentagem ainda
          ela fica listrada e andando — que é a forma honesta de dizer "estou
          trabalhando e ainda não sei quanto falta". Esconder até ter número é
@@ -7834,7 +7901,19 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     const desistir = (msg, classe) => {
       if (telaStream) telaStream.getTracks().forEach(x => x.stop());
       if (micStream)  micStream.getTracks().forEach(x => x.stop());
-      fecharControle();
+      /* A JANELINHA DIZ O MOTIVO ANTES DE FECHAR.
+
+         Ela fechava na hora, e quem estava gravando olhava para ela — não para
+         esta aba. O que a pessoa via era a janela sumir: sumir sem explicar é o
+         que faz alguém achar que quebrou por culpa dela, e a explicação ficava
+         numa aba que ela nem tinha na frente.
+
+         Seis segundos, e não dois: a tela compartilhada está sendo desligada
+         neste instante e o foco ainda vai voltar para a aba. Uma mensagem que
+         expira antes de o olho chegar nela é uma mensagem que não existiu. */
+      controle('erro', { msg });
+      clearTimeout(pipErroTic);
+      pipErroTic = setTimeout(fecharControle, 6000);
       $('recMsg').innerHTML = classe ? `<span class="${classe}">${msg}</span>` : msg;
       $('rec').disabled = false;
       abrindoCaptura = false;
@@ -7918,9 +7997,14 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       const modelId = $('model').value;
       controle('modelo');
       baixando = (async () => {
-        // se o adiantamento já está em curso, espera ELE em vez de disparar
-        // outro download igual em paralelo
-        if (adiantando) await adiantando;
+        /* O adiantamento — o download que começa quando a página abre — é
+           esperado, mas a FALHA dele não conta como falha desta gravação.
+           
+           Ele roda sem ninguém olhando, pode ter pegado a rede num momento ruim,
+           e a escada de degraus do `buildPipe` logo abaixo tem outras cartas
+           para jogar. Deixar a rejeição dele passar reto foi o que produziu o
+           recado vermelho numa gravação que transcreveu do começo ao fim. */
+        if (adiantando) { try { await adiantando; } catch (e) {} }
         if (pipeId !== modelId) { pipe = await buildPipe(modelId); pipeId = modelId; }
       })();
       /* Um `catch` vazio agora, e o tratamento de verdade no `await` lá
@@ -7931,32 +8015,32 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     }
     $('rec').disabled = false;
 
-    /* O que fazer quando o modelo falha — e ele PARA a gravação, em vez de
-       seguir sem transcrição.
+    /* O QUE FAZER QUANDO O MODELO FALHA: nada que atrapalhe a gravação.
 
-       Antes o modelo falhava e a gravação seguia assim mesmo: a pessoa gravava
-       a reunião inteira e só descobria no fim que não havia transcrição — e a
-       reunião não se repete. Se a transcrição foi pedida e não vai acontecer, a
-       decisão é dela, tomada agora.
+       Houve uma versão em que ele PARAVA — desligava a captura e devolvia o
+       botão — com o argumento de que a reunião não se repete e a pessoa
+       precisava decidir agora. O argumento se virou contra ele em uso real: o
+       modelo engasgava, a gravação nem começava, e a reunião era perdida por
+       causa de um acessório. O pedido foi curto: "não devemos bloquear a
+       gravação".
 
-       Virou função porque a falha agora é descoberta DEPOIS da escolha da tela,
-       e não antes: há um `telaStream` para desligar junto. Deixar a captura
-       viva depois de desistir é a pessoa ficando com o ícone de
-       "compartilhando" aceso sem nada sendo gravado.
-
-       E o erro de verdade vai junto: engolir a mensagem do navegador me deixou
-       cego por três rodadas de depuração. */
-    /* O aviso que NAO tira nada de ninguem.
-     *
-     * O `modeloFalhou` logo abaixo desliga a captura e devolve o botao: ele
-     * serve para quando a falha acontece ANTES de a gravacao existir. Depois
-     * que ela comecou, desligar seria jogar fora o que ja foi gravado por causa
-     * de um recurso que era acessorio -- exatamente o que este conserto veio
-     * impedir.
-     *
-     * Entao aqui: a gravacao continua, e o recado fica em dois lugares, porque
-     * quem grava esta olhando para a janelinha e nao para esta aba. */
+       Então a gravação continua, os quadros continuam sendo guardados, e o
+       recado sai em dois lugares — a página e a janelinha — porque quem está
+       gravando olha para a janelinha, não para esta aba. Transcrever depois,
+       no passo 2, continua valendo. */
     const modeloFalhouSemParar = (e) => {
+      /* SE O MODELO ESTÁ DE PÉ, NÃO HOUVE FALHA A CONTAR.
+       *
+       * Relatado: "deu mensagem para o meu computador porém gravou... e
+       * transcreveu". O caminho: o adiantamento — o download que começa quando
+       * a página abre — falhou, e é ELE que esta promessa espera primeiro. A
+       * tentativa da própria gravação seguiu adiante pela escada de degraus e
+       * deu certo. Resultado: transcrição funcionando e um recado vermelho
+       * dizendo que não ia funcionar.
+       *
+       * Uma mensagem de erro sobre algo que deu certo é pior do que nenhuma:
+       * ela ensina a pessoa a não acreditar nas mensagens. */
+      if (pipe) { modeloPronto = true; return; }
       const detalhe = ((e && (e.message || String(e))) || '').slice(0, 200);
       modeloPronto = false;
       prog(null); progRec(false); st('');
@@ -7974,50 +8058,17 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       if (bd) bd.onclick = () => { coletarDiag($('diagOut')); irPara('cardTr', true); };
     };
 
-    const modeloFalhou = (e) => {
-        /* Antes de tudo: dizer na janelinha. `fecharControle()` logo abaixo a
-           apaga, e uma janela que some sem explicar deixa a pessoa procurando
-           o que fez de errado. Meio segundo com a frase em vermelho é a
-           diferença entre "quebrou" e "quebrou por isto". */
-        controle('erro');
-        prog(null); progRec(false); st('');
-        const detalhe = (e && (e.message || String(e)) || '').slice(0, 200);
-        $('rec').disabled = false;
-        /* A janelinha NÃO fecha aqui.
+    /* AQUI MORAVA `modeloFalhou`, que desligava a captura e devolvia o botão.
 
-           Fechar em seguida ao `controle('erro')` mostraria a frase por zero
-           milissegundo — a janela sumiria junto com a explicação, e sumir sem
-           explicar é exatamente o que faz a pessoa achar que quebrou por culpa
-           dela. Ela fica seis segundos com o recado em vermelho, ou fecha na
-           hora se a pessoa escolher uma das duas saídas abaixo.
-
-           Seis e não dois: a tela compartilhada está sendo desligada neste
-           instante e o foco ainda vai voltar para a aba. Uma mensagem que
-           expira antes de o olho chegar nela é uma mensagem que não existiu. */
-        const fecharJanelinha = () => { clearTimeout(pipErroTic); fecharControle(); };
-        clearTimeout(pipErroTic);
-        pipErroTic = setTimeout(fecharControle, 6000);
-        if (micStream) micStream.getTracks().forEach(x => x.stop());
-        if (telaStream) telaStream.getTracks().forEach(x => x.stop());
-        $('recMsg').innerHTML =
-          `<span class="err">${t('recNoModelStop')}</span>` +
-          (detalhe ? ` <span class="status">(${detalhe.replace(/</g,'&lt;')})</span>` : '') +
-          ` <button class="ghost sm" id="recDiag">${t('diagBtn')}</button>` +
-          ` <button class="ghost sm" id="recSoFrames">${t('recSoFramesBtn')}</button>`;
-        const bd = $('recDiag');
-        if (bd) bd.onclick = () => { fecharJanelinha();
-                                     coletarDiag($('diagOut')); irPara('cardTr', true); };
-        const bf = $('recSoFrames');
-        /* O atalho não é cortesia: quem chegou até aqui já tinha uma reunião
-           para gravar, e obrigá-la a caçar a caixa de seleção no passo 1 é
-           perder a reunião por burocracia.
-
-           `fecharJanelinha()` antes do clique: sem isso o `rec.click()` abriria
-           uma SEGUNDA janelinha por cima da que ainda mostra o erro. */
-        if (bf) bf.onclick = () => { fecharJanelinha();
-                                     $('recTr').checked = false; notaTr(); $('rec').click(); };
-        abrindoCaptura = false;
-    };
+       Ele foi removido inteiro, e não desligado: era código morto desde que a
+       gravação parou de depender do modelo. O pedido foi direto — "não devemos
+       bloquear a gravação" — e a promessa nova é `modeloFalhouSemParar`: a
+       gravação segue, os quadros continuam sendo guardados, e o recado sai na
+       página e na janelinha. Um caminho que não roda mais mas continua no
+       arquivo é a próxima pessoa lendo duas promessas contrárias e acreditando
+       na errada. Com ele foram as chaves `recNoModelStop` e `recSoFramesBtn`
+       nos cinco idiomas, e o botão "gravar só os frames" — que não faz sentido
+       quando os frames já estão sendo gravados. */
 
     // ---- 3. a tela, agora sem espera nenhuma antes ----
     controle('tela');
@@ -8120,6 +8171,11 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       baixando.then(() => {
         prog(null); progRec(false); st('');
         modeloPronto = true;
+        /* O recado de falha some quando o motivo dele deixa de existir. Um
+           aviso que sobrevive ao próprio problema vira ruído — e este ficava na
+           janelinha, que é para onde a pessoa olha enquanto grava. */
+        pipAvisoAte = 0;
+        avisoCurto = ''; avisoAte = 0;
         controle('gravando');
         /* A fila pode ter enchido enquanto o modelo vinha. `bombearAsr` so e
            chamada quando chega janela nova; sem este empurrao, o que ja estava
@@ -8354,7 +8410,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     const movimento = criarMovimento();
     motivosFrame = { semVideo: 0, semAssinatura: 0, semImagem: 0, poucaMudanca: 0,
                      limite: 0, maiorDiff: 0, maiorMedia: 0, maiorArea: 0,
-                     cedoDemais: 0, valvula: 0, mascaradas: 0,
+                     cedoDemais: 0, valvula: 0, mascaradas: 0, guardados: 0,
                      limiar: thr, erroImagem: '' };
 
     const capturar = (forcar, marcado) => {
@@ -8420,7 +8476,15 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
         const r = ritmoAgora();
         /* A máscara aprende com CADA amostra, inclusive as que não viram
            quadro: é a sequência de amostras que revela o que se mexe sempre. */
-        if (ultimaSig) motivosFrame.mascaradas = movimento.ver(ultimaSig, sig);
+        /* O PICO, e não o valor de agora. Ler a máscara no instante em que a
+           gravação para diz quase nada: ela se desfaz em poucos segundos de
+           tela quieta. O número que explica um "a chamada inteira virou um
+           quadro só" é o quanto da tela chegou a ser tratada como movimento
+           constante. */
+        if (ultimaSig) {
+          const m = movimento.ver(ultimaSig, sig);
+          if (m > motivosFrame.mascaradas) motivosFrame.mascaradas = m;
+        }
         const mascara = r.mascara ? movimento.mascara : null;
 
         if (prevSig !== null) {
@@ -8439,6 +8503,23 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
            *              tela é diferente do que já tenho? É o que decide se
            *              vale a pena guardar. */
           const mexendo = ultimaSig ? diff(ultimaSig, sig, mascara) : 255;
+          /* POR QUE NÃO EXISTE AQUI UM "compara sem máscara porque a região
+           * parou": eu escrevi esse desvio e ele era código morto.
+           *
+           * O relato era rolar a caixa do Gmail e não sair quadro. O raciocínio
+           * parecia certo: a rolagem põe meia tela na máscara, e ao parar o
+           * conteúdo NOVO está justamente nas células mascaradas. Só que a
+           * máscara é atualizada NESTA MESMA AMOSTRA, logo acima, antes de
+           * `diff` usá-la — quando o movimento para, as células saem da máscara
+           * e a comparação já as enxerga. O desvio ligava tudo de volta,
+           * inclusive o que continuava se mexendo, e só podia produzir quadro
+           * falso. Medido: com ele forçado a nunca disparar, o resultado do
+           * caso é idêntico ao número.
+           *
+           * O que resolve de verdade é o desmanche da máscara: doze amostras de
+           * janela, sessenta por cento de teto, então cinco amostras (3,5 s)
+           * depois que a região para ela já não opina. Três segundos e meio de
+           * atraso numa tela que ficou parada não mudam o quadro guardado. */
           const novidade = diff(prevSig, sig, mascara);
           if (novidade > motivosFrame.maiorDiff) motivosFrame.maiorDiff = novidade;
           if (ultimaMedida.media > motivosFrame.maiorMedia) motivosFrame.maiorMedia = ultimaMedida.media;
@@ -8505,6 +8586,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
          uma atribuição e transforma "guardou pouco" em diagnóstico. */
       try { window.__motivos = motivosFrame; } catch (e) {}
       frames.push({ t: agora(), img, keep: true, sig, manual: !!marcado });
+      motivosFrame.guardados++;
       prevSig = sig;
       ultimaSig = sig;
       ultimoGuardado = agora();
@@ -9755,7 +9837,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
         const chunks = (r && r.chunks && r.chunks.length) ? r.chunks
           : [{ timestamp: [0, seg.length / SR], text: (r && r.text) || '' }];
         chunks.forEach(c => {
-          const t = (c.text || '').trim(); if (!t) return;
+          const t = semGagueira((c.text || '').trim()); if (!t) return;
           const a = base + (c.timestamp[0] ?? 0);
           const b = base + (c.timestamp[1] ?? (c.timestamp[0] ?? 0) + 2);
           /* Mesma repetição do caminho ao vivo, mesma regra. Ver o comentário
@@ -10808,7 +10890,25 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
        passo. O piso existe para matar o flipbook (um quadro por segundo, ou
        mais), não para escolher o que é passo. Quem quer menos escolhe
        `reuniao`; quem não quer piso nenhum escolhe `tudo`. */
-    equilibrado: { minSeg: 1.5, parar: 1, maxEspera: 10, mascara: true  },
+    equilibrado: { minSeg: 1.5, parar: 1, maxEspera: 10, mascara: false },
+    /* A MÁSCARA É DA REUNIÃO, e só dela.
+
+       Ela nasceu para um problema de reunião: os quadradinhos de câmera mudam
+       a cada amostra e arrastavam a tela inteira acima do limiar. Ligada no
+       ritmo de todo dia, ela fazia o oposto do que promete. Medido numa página
+       de vídeo — o vídeo ocupando metade da tela, moldura parada em volta,
+       três trocas de cena em 36 s: com máscara, 1 quadro; sem máscara, 3. O
+       relato foi exatamente esse, "gravei com o YouTube e ficou pouco
+       sensível".
+
+       O motivo é que a máscara pergunta "o que se mexe sempre?" e responde "o
+       vídeo" — certo numa chamada, onde o vídeo é a moldura e o slide é o
+       assunto; errado num tutorial, onde o vídeo É o assunto. Quem sabe a
+       diferença é o cenário, e o cenário já escolhe o ritmo.
+
+       Fora da reunião o flipbook continua barrado pelo piso de 1,5 s e pelo
+       assentamento — que é o que fazia esse trabalho antes de a máscara
+       existir. */
     reuniao:     { minSeg: 12, parar: 2, maxEspera: 45, mascara: true  },
   };
   const ritmoAgora = () => RITMOS[($('ritmo') && $('ritmo').value) || 'equilibrado'] || RITMOS.equilibrado;
@@ -10860,7 +10960,10 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
         }
         let n = 0;
         const teto = Math.max(2, Math.ceil(hist.length * MOV_FRACAO));
-        for (let c = 0; c < N; c++) { mascara[c] = soma[c] >= teto ? 1 : 0; n += mascara[c]; }
+        for (let c = 0; c < N; c++) {
+          mascara[c] = soma[c] >= teto ? 1 : 0;
+          n += mascara[c];
+        }
         return n;
       },
     };

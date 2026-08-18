@@ -8,6 +8,7 @@ Gera os dois builds a partir de src/template.html.
 Edite sempre src/template.html. Os arquivos gerados são descartáveis.
 """
 
+import functools
 import json
 import pathlib
 import re
@@ -199,6 +200,25 @@ CENARIO_DA_PAGINA = {
     "casoEv": "evidencia", "casoIn": "instrucao", "casoAta": "ata",
     "casoUx": "ux", "casoIa": "ia",
 }
+
+@functools.lru_cache(maxsize=1)
+def chaves_do_render():
+    """As chaves que o Next escreve na hora de renderizar, e não o dicionário.
+
+    Sem isto o validador acusava `tabelaPlanos` e `quantasFeatures` como "sem
+    valor" em cinco idiomas a cada build: dez linhas de aviso falso, todo dia,
+    escondendo o aviso verdadeiro que aparecesse no meio. Elas são LIDAS de
+    `lib/site.ts` — repetir os nomes aqui seria criar a segunda lista que já
+    apagou o hreflang de duas línguas e deixou o rodapé apontando para
+    `undefined`. Se alguém acrescentar uma terceira, ela aparece sozinha; se
+    alguém apagar uma, o aviso volta, que é o que se quer.
+    """
+    arq = ROOT / "lib" / "site.ts"
+    if not arq.exists():
+        return frozenset()
+    return frozenset(re.findall(r"^\s*t\.(\w+)\s*=",
+                                arq.read_text(encoding="utf-8"), re.M))
+
 
 SLUGS = {
     "precos":      {"pt": "precos",      "en": "precos",      "es": "precos", "de": "preise", "fr": "tarifs"},
@@ -636,7 +656,7 @@ def build_site(root: pathlib.Path) -> None:
             html = doc
             for k, v in t.items():
                 html = html.replace("{{" + k + "}}", str(v))
-            sobrando = set(re.findall(r"\{\{(\w+)\}\}", html))
+            sobrando = set(re.findall(r"\{\{(\w+)\}\}", html)) - chaves_do_render()
             if sobrando:
                 print(f"AVISO: chaves sem valor em {pagina}.{lang}: {sorted(sobrando)}", file=sys.stderr)
 

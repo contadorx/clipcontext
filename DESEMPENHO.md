@@ -829,3 +829,71 @@ Uma nota de método sobre o teste: a primeira versão media também "clicar nos 
 reiniciava a varredura do zero, e o teste media o trabalho duas vezes. Na tela ninguém consegue
 fazer isso, porque o botão fica desabilitado enquanto a varredura corre. Um teste que mede o que o
 produto não permite não mede nada; esse caso saiu.
+
+---
+
+## 18/08/2026 — o ritmo dos quadros: onde a máscara ajuda e onde ela cega
+
+Três relatos na mesma semana, e os três eram o mesmo mecanismo puxando para lados opostos.
+
+**O relato 1, reunião:** *"ele troca na média 1 frame a cada 2 segundos"*. Numa chamada de vídeo os
+quadradinhos das câmeras mudam a cada amostra e arrastavam a tela inteira acima do limiar. A resposta
+foi a **máscara de movimento**: a célula que muda em ≥60% das últimas 12 amostras é vídeo, e deixa de
+opinar. O que sobra — o slide, o documento — volta a decidir sozinho.
+
+**O relato 2, YouTube:** *"gravei com o YouTube e ficou pouco sensível no novo cenário"*. Medido com
+uma página em que o vídeo ocupa metade da tela, moldura parada em volta, **três trocas de cena em 36
+segundos**:
+
+| ritmo `equilibrado` | quadros | por quê |
+|---|---|---|
+| com máscara | **1** | o vídeo inteiro entrou na máscara; quem decidia era a moldura parada |
+| sem máscara | **3** | as trocas de cena voltaram a contar; a válvula de 10 s segura o resto |
+
+A máscara pergunta *"o que se mexe sempre?"* e responde *"o vídeo"*. Isso é **certo numa chamada**,
+onde o vídeo é a moldura e o slide é o assunto, e **errado num tutorial**, onde o vídeo é o assunto.
+Quem sabe a diferença é o cenário — e o cenário já escolhe o ritmo. Então a máscara passou a existir
+só em `reuniao`. Fora dela o flipbook continua barrado pelo piso de 1,5 s e pelo assentamento, que era
+quem fazia esse trabalho antes de a máscara existir.
+
+**O relato 3, Gmail:** *"rolando o email não pegou o frame"*. Este eu **diagnostiquei errado duas
+vezes**, e as duas vale registrar:
+
+1. Achei que era a resolução da assinatura — texto some ao encolher para 32×18. Medi: uma caixa de
+   entrada rolada dá diferença de **20 a 47** contra um limiar de 5,5, em 32×18. Subir para 48×27 ou
+   64×36 não mudava a decisão em nenhuma amostra. **A assinatura estava certa.** O que estava errado
+   era o meu primeiro teste, que renumerava um texto *parado* em vez de rolar pixel — e o Gmail não
+   faz isso. Um cenário de teste ruim quase me fez consertar o que funcionava.
+2. Achei que era a máscara cegando a comparação quando a rolagem para, e escrevi um desvio
+   (`parouRegiao`) que ligava a comparação sem máscara nesse instante. **Era código morto:** a
+   máscara é atualizada na mesma amostra, *antes* de a comparação usá-la, então as células liberadas
+   já estavam visíveis. Com o desvio forçado a nunca disparar, o resultado do caso saiu idêntico ao
+   número. Ele só podia produzir quadro falso, porque religava também o que continuava se mexendo.
+   Foi removido. Quem resolve de verdade é o **desmanche** da máscara: 5 amostras (3,5 s) depois de a
+   região parar, ela já não opina.
+
+### A tabela de ritmos, hoje
+
+| ritmo | piso entre quadros | amostras paradas p/ guardar | válvula | máscara |
+|---|---|---|---|---|
+| `tudo` | 0 | 0 | — | não |
+| `equilibrado` | 1,5 s | 1 | 10 s | **não** |
+| `reuniao` | 12 s | 2 | 45 s | **sim** |
+
+`ata` usa `reuniao`; todo o resto usa `equilibrado`; `tudo` é escolha manual.
+
+### O que ficou de diagnóstico
+
+- `mascaradas` passou a guardar o **pico**, não o valor do instante em que a gravação parou — a
+  máscara se desfaz em segundos de tela quieta, e ler o valor final não explicava nada.
+- `guardados` conta os quadros mantidos, legível **durante** a gravação. Sem isso um teste só
+  conseguia contar miniaturas, que só existem depois de parar.
+- O validador do `build.py` passou a ler de `lib/site.ts` quais chaves o Next preenche na hora de
+  renderizar. Ele acusava `tabelaPlanos` e `quantasFeatures` como "sem valor" em cinco idiomas a cada
+  build: dez linhas de aviso falso por dia, escondendo o aviso verdadeiro que aparecesse no meio.
+
+### O teste
+
+`/tmp/rolar.mjs`, registrado nas duas esteiras. Cinco blocos: rolar uma caixa de entrada de verdade e
+parar; a gagueira do Whisper; o desmanche da máscara (no ritmo em que ela existe, senão o bloco testa
+o nada); a frase do fim nos cinco idiomas; e a página de vídeo que não pode terminar com um quadro só.
