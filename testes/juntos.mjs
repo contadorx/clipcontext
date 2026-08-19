@@ -34,18 +34,36 @@ console.log('[1] são quatro cartões, numerados 1 a 4');
   ok('o passo 2 diz que é opcional',
      /opcional/i.test(await pg.locator('#cardTr h2').textContent()),
      await pg.locator('#cardTr h2').textContent());
+  /* Ele deixou de se chamar "Transcrição e frames": os frames não moram mais
+     aqui como decisão — eles saem sozinhos. O que sobra neste cartão é a fala. */
+  ok('e ele fala da FALA, não mais dos frames',
+     !/frame/i.test(await pg.locator('#cardTr h2').textContent()),
+     await pg.locator('#cardTr h2').textContent());
   ok('o passo 3 é a revisão', /Revis/.test(await pg.locator('#prevCard h2').textContent()));
 }
 
-console.log('\n[2] o passo 2 tem os três botões e os ajustes dos dois lados');
+console.log('\n[2] o passo 2 tem DOIS botões, a ação antes dos ajustes');
 {
-  for (const [id, o_que] of [['auto','só transcrever'], ['extract','só frames'], ['ambos','os dois']])
+  /* Eram três: "Ambos", "Só transcrever", "Só frames". O "Ambos" morreu de causa
+     natural quando as telas passaram a sair sozinhas — ele existia porque elas
+     dependiam de um clique. Três botões obrigavam a pessoa a modelar o produto
+     cruzado de duas coisas independentes antes de apertar qualquer uma. */
+  ok('o terceiro botão não existe mais', (await pg.locator('#ambos').count()) === 0);
+  for (const [id, o_que] of [['auto','transcrever a fala'], ['extract','as telas']])
     ok('existe o botão de ' + o_que, (await pg.locator('#' + id).count()) === 1);
-  ok('"Ambos" é o botão cheio, não um fantasma',
-     !(await pg.locator('#ambos').getAttribute('class') || '').includes('ghost'));
-  ok('os três nascem desabilitados (não há vídeo)',
-     (await pg.locator('#auto').isDisabled()) && (await pg.locator('#extract').isDisabled()) &&
-     (await pg.locator('#ambos').isDisabled()));
+  ok('a fala é o botão cheio, não um fantasma',
+     !(await pg.locator('#auto').getAttribute('class') || '').includes('ghost'));
+  ok('os dois nascem desabilitados (não há vídeo)',
+     (await pg.locator('#auto').isDisabled()) && (await pg.locator('#extract').isDisabled()));
+  /* A AÇÃO VEM ANTES DOS AJUSTES. Ela ficava depois de dezesseis controles de
+     afinação — todo mundo atravessava uma parede para apertar um botão. */
+  ok('a ação vem antes do bloco de ajustes',
+     await pg.evaluate(() => {
+       const a = document.querySelector('#cardTr .acoes');
+       const j = document.querySelector('#cardTr .ajustesTit');
+       return !!a && !!j &&
+              (a.compareDocumentPosition(j) & Node.DOCUMENT_POSITION_FOLLOWING) > 0;
+     }));
   /* Ajustes de voz e de frames no mesmo cartão: era esse o pedido. */
   for (const id of ['model','lang','gpu','mode','maxf','tIni','tFim','quality'])
     ok('o ajuste #' + id + ' está no passo 2',
@@ -72,9 +90,16 @@ await pg.setInputFiles('#file', '/tmp/amostra.webm');
 await pg.waitForFunction(() => !document.getElementById('extract').disabled, null, { timeout: 25000 });
 await pg.waitForTimeout(500);
 {
-  ok('os três botões acordaram juntos',
-     !(await pg.locator('#auto').isDisabled()) && !(await pg.locator('#extract').isDisabled()) &&
-     !(await pg.locator('#ambos').isDisabled()));
+  ok('os dois botões acordaram juntos',
+     !(await pg.locator('#auto').isDisabled()) && !(await pg.locator('#extract').isDisabled()));
+  /* E AS TELAS COMEÇAM A SAIR SOZINHAS. É a mudança de fluxo: um vídeo carregado
+     dava numa parede de dezesseis controles, e nada acontecia até alguém
+     escolher entre três botões. */
+  await pg.waitForFunction(() => document.querySelectorAll('#thumbs figure').length > 0,
+                           null, { timeout: 60000 });
+  ok('as telas saem sem ninguém clicar em nada',
+     (await pg.locator('#thumbs figure').count()) > 0,
+     String(await pg.locator('#thumbs figure').count()));
   ok('a página rolou até o passo 2', await pg.evaluate(() => window.scrollY > 40),
      'scrollY=' + await pg.evaluate(() => window.scrollY));
   ok('a revisão já abre, porque é onde se cola uma transcrição pronta',

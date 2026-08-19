@@ -63,8 +63,16 @@ const bolinhas = () => pg.evaluate(() =>
 
 console.log('[1] antes de ter quadro, nada convida ao clique');
 await pg.selectOption('#modelo', 'evidencia');
-await pg.setInputFiles('#file', '/tmp/amostra.webm');
-await pg.waitForTimeout(2600);
+/* SEM VÍDEO. Antes este bloco carregava um vídeo e afirmava sobre "vídeo
+   carregado, zero quadros" — um estado em que a pessoa ficava parada até
+   escolher entre três botões.
+
+   As telas passaram a sair sozinhas quando o vídeo entra, e esse estado deixou
+   de existir como lugar onde se espera: ele dura um segundo e meio. A afirmação
+   que continua valendo, e vale mais, é sobre o começo de tudo — nada de saída
+   convida ao clique antes de haver o que exportar. O bloco [1b] cobre o outro
+   lado da mesma moeda: que elas abrem sozinhas depois. */
+await pg.waitForTimeout(600);
 {
   const e = await estados();
   const soltos = SAIDAS.filter((id) => e[id] === 'clicavel');
@@ -80,8 +88,28 @@ await pg.waitForTimeout(2600);
   ok('nem os que este teste não conhece', naTela.length === 0, naTela.join(' '));
 }
 
+console.log('\n[1b] com o vídeo, as telas saem sozinhas e as saídas abrem');
+{
+  await pg.setInputFiles('#file', '/tmp/amostra.webm');
+  /* Nenhum clique entre o vídeo entrar e as telas existirem: é a mudança de
+     fluxo inteira numa linha. */
+  await pg.waitForFunction(() => document.querySelectorAll('#thumbs figure').length > 0,
+                           null, { timeout: 60000 });
+  await pg.waitForFunction(() => !document.getElementById('extract').disabled,
+                           null, { timeout: 60000 });
+  await pg.waitForTimeout(400);
+  const e = await estados();
+  const presos = ['go', 'docx', 'zip'].filter((id) => e[id] !== 'clicavel');
+  ok('as saídas abrem sem ninguém ter clicado em nada', presos.length === 0, presos.join(' '));
+}
+
 console.log('\n[2] o clique que escapa da trava recebe resposta');
 {
+  /* Volta ao estado sem quadro: é dele que este bloco fala. */
+  await pg.evaluate(() => {
+    document.querySelectorAll('#thumbs .toque').forEach(b => b.click());
+  });
+  await pg.waitForTimeout(300);
   /* `force` passa por cima do `disabled` visual do Playwright, e é o que
      acontece na vida com teclado, extensão ou um caminho não previsto. */
   await pg.evaluate(() => { document.getElementById('pdfStatus').textContent = ''; });
@@ -95,7 +123,11 @@ console.log('\n[3] com quadros, tudo abre e a tela diz o que fazer');
 await pg.selectOption('#mode', 'count');
 await pg.fill('#count', '4');
 await pg.locator('#extract').click();
-await pg.waitForFunction(() => document.querySelectorAll('#thumbs figure').length >= 4, null, { timeout: 40000 });
+/* Espera a varredura ACABAR, e não "haver quatro miniaturas". Desde que a grade
+   passou a encher enquanto a varredura corre, "já há quatro" acontece no meio
+   do trabalho — e a linha de status ao lado, que este bloco lê logo abaixo,
+   ainda estava contando outra coisa. */
+await pg.waitForFunction(() => !document.getElementById('extract').disabled, null, { timeout: 60000 });
 await pg.waitForTimeout(700);
 {
   const e = await estados();

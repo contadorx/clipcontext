@@ -519,6 +519,11 @@
         border-radius:8px;background:var(--panel);color:var(--ink);font:inherit;font-size:15px;
         font-weight:550}
   .cenario .status{flex-basis:100%;margin:0}
+  /* O título que separa o que se FAZ do que se afina. Discreto de propósito:
+     ele não é um passo, é uma gaveta que quase ninguém abre. */
+  .ajustesTit{margin:26px 0 12px;padding-top:16px;border-top:1px solid var(--line);
+        font:600 13px/1.3 inherit;color:var(--muted);text-transform:uppercase;
+        letter-spacing:.06em}
   .faixa{position:fixed;left:0;right:0;bottom:0;z-index:60;display:flex;gap:12px;
         align-items:center;padding:9px 16px;background:var(--panel);
         border-top:1px solid var(--line);box-shadow:0 -6px 18px rgba(0,0,0,.10);
@@ -1111,6 +1116,32 @@
     <pre id="diagOut" class="hide"></pre>
     <div class="dobra"><div>
 
+    <!-- ---- A AÇÃO VEM PRIMEIRO ----
+
+         Ela ficava no FIM do cartão, depois de sete controles de voz e nove de
+         imagem. Todo mundo atravessava uma parede de afinação — coisa de uma
+         sessão em vinte — para chegar ao único botão que importa. Agora a
+         ordem é a do uso: o que se faz em cima, o que quase ninguém mexe
+         embaixo.
+
+         E são DOIS botões, não três. "Ambos" existia porque as telas
+         dependiam de um clique; agora elas vêm sozinhas quando o vídeo entra,
+         e o que sobra é uma escolha de verdade: a fala, e refazer as telas. -->
+    <div class="row acoes">
+      <button id="auto" disabled data-i18n="autoBtn"></button>
+      <button class="ghost" id="extract" disabled data-i18n="extractBtn"></button>
+      <button class="ghost hide" id="cancel" data-i18n="stopBtn"></button>
+    </div>
+    <div class="bar hide" id="abarWrap"><i id="abar"></i></div>
+    <div class="status" id="astatus"></div>
+    <div class="status" id="autoDica"></div>
+    <p class="note hide" id="keepOpen" data-i18n="keepOpen"></p>
+    <div class="bar hide" id="barWrap"><i id="bar"></i></div>
+    <div class="status" id="status"></div>
+    <p class="note"><b data-i18n="noteB"></b> <span data-i18n="noteT"></span></p>
+
+    <h3 class="ajustesTit" data-i18n="ajustesTit"></h3>
+
     <div id="trAuto">
     <div class="autobox">
       <div class="row">
@@ -1238,19 +1269,6 @@
 
          "Ambos" é o botão cheio porque é o caminho de quase todo mundo. Os
          outros dois continuam existindo para quem só quer um dos lados. -->
-    <div class="row acoes" style="margin-top:20px">
-      <button id="ambos" disabled data-i18n="acAmbos"></button>
-      <button class="ghost" id="auto" disabled data-i18n="autoBtn"></button>
-      <button class="ghost" id="extract" disabled data-i18n="extractBtn"></button>
-      <button class="ghost hide" id="cancel" data-i18n="stopBtn"></button>
-    </div>
-    <div class="bar hide" id="abarWrap"><i id="abar"></i></div>
-    <div class="status" id="astatus"></div>
-    <div class="status" id="autoDica"></div>
-    <p class="note hide" id="keepOpen" data-i18n="keepOpen"></p>
-    <div class="bar hide" id="barWrap"><i id="bar"></i></div>
-    <div class="status" id="status"></div>
-    <p class="note"><b data-i18n="noteB"></b> <span data-i18n="noteT"></span></p>
 
 
     </div></div><!-- /dobra -->
@@ -2340,8 +2358,9 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       videoErr:'O navegador não conseguiu abrir este vídeo. Converta para MP4 (H.264) e tente de novo.',
       reportar:'Me avise qual formato falhou',
       reportarDica:' — é o que vai definir se vale a pena construir a conversão automática.',
-      s2:'Transcrição e frames (opcional)', autoBtn:'Só transcrever',
-      acAmbos:'Transcrever e extrair frames',
+      s2:'A fala (opcional)', autoBtn:'Transcrever a fala',
+      ajustesTit:'Ajustes — quase ninguém precisa mexer',
+      refazerTelas:'Refazer as telas',
       trBoxH:'Transcrição', trBoxSub:'corrigir, aplicar vocabulário, traduzir',
       trBoxVazio:'ainda vazia', trBoxCheia:'{0} linhas',
       tradLbl:'Traduzir a transcrição e as anotações para', tradBtn:'Traduzir',
@@ -2910,8 +2929,9 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       videoErr:'The browser could not open this video. Convert it to MP4 (H.264) and try again.',
       reportar:'Tell me which format failed',
       reportarDica:' — that is what will decide whether automatic conversion is worth building.',
-      s2:'Transcript and frames (optional)', autoBtn:'Transcript only',
-      acAmbos:'Transcribe and extract frames',
+      s2:'The speech (optional)', autoBtn:'Transcribe the speech',
+      ajustesTit:'Settings — almost nobody needs these',
+      refazerTelas:'Redo the screens',
       trBoxH:'Transcript', trBoxSub:'fix, apply vocabulary, translate',
       trBoxVazio:'still empty', trBoxCheia:'{0} lines',
       tradLbl:'Translate the transcript and the notes into', tradBtn:'Translate',
@@ -3474,8 +3494,9 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       videoErr:'El navegador no pudo abrir este vídeo. Conviértelo a MP4 (H.264) e inténtalo de nuevo.',
       reportar:'Dime qué formato falló',
       reportarDica:' — eso decidirá si vale la pena construir la conversión automática.',
-      s2:'Transcripción y fotogramas (opcional)', autoBtn:'Solo transcribir',
-      acAmbos:'Transcribir y extraer fotogramas',
+      s2:'El habla (opcional)', autoBtn:'Transcribir el habla',
+      ajustesTit:'Ajustes — casi nadie necesita tocarlos',
+      refazerTelas:'Rehacer las pantallas',
       trBoxH:'Transcripción', trBoxSub:'corregir, aplicar vocabulario, traducir',
       trBoxVazio:'aún vacía', trBoxCheia:'{0} líneas',
       tradLbl:'Traducir la transcripción y las anotaciones a', tradBtn:'Traducir',
@@ -4037,8 +4058,9 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       videoErr:'Der Browser konnte dieses Video nicht öffnen. Konvertieren Sie es in MP4 (H.264) und versuchen Sie es erneut.',
       reportar:'Melden Sie uns, welches Format fehlgeschlagen ist',
       reportarDica:' — davon hängt ab, ob sich eine automatische Konvertierung lohnt.',
-      s2:'Transkription und Screenshots (optional)', autoBtn:'Nur transkribieren',
-      acAmbos:'Transkribieren und Screenshots extrahieren',
+      s2:'Der Ton (optional)', autoBtn:'Den Ton transkribieren',
+      ajustesTit:'Einstellungen — fast niemand braucht sie',
+      refazerTelas:'Bildschirme neu erstellen',
       trBoxH:'Transkription', trBoxSub:'korrigieren, Fachwortliste anwenden, übersetzen',
       trBoxVazio:'noch leer', trBoxCheia:'{0} Zeilen',
       tradLbl:'Transkription und Notizen übersetzen nach', tradBtn:'Übersetzen',
@@ -4606,8 +4628,9 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       videoErr:'Le navigateur n’a pas réussi à ouvrir cette vidéo. Convertissez-la en MP4 (H.264) et réessayez.',
       reportar:'Dites-nous quel format a échoué',
       reportarDica:' — c’est ce qui décidera si la conversion automatique vaut la peine d’être développée.',
-      s2:'Transcription et captures (facultatif)', autoBtn:'Transcrire seulement',
-      acAmbos:'Transcrire et extraire les captures',
+      s2:'La parole (facultatif)', autoBtn:'Transcrire la parole',
+      ajustesTit:'Réglages — presque personne n’en a besoin',
+      refazerTelas:'Refaire les écrans',
       trBoxH:'Transcription', trBoxSub:'corriger, appliquer le lexique métier, traduire',
       trBoxVazio:'encore vide', trBoxCheia:'{0} lignes',
       tradLbl:'Traduire la transcription et les notes en', tradBtn:'Traduire',
@@ -5502,13 +5525,57 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     sincAmbos();
   }
 
-  /* "Ambos" não tem estado próprio: ele vale exatamente quando os dois lados
-     valem. Calcular aqui, e não guardar em outro lugar, evita o terceiro botão
-     ficar aceso depois que os outros dois apagaram. */
+  /* O rótulo do botão das telas. Ele diz "extrair" enquanto não há nenhuma e
+     "refazer" depois que a varredura automática já trouxe as suas — a mesma
+     ação, e duas frases diferentes, porque a segunda avisa que existe algo a
+     perder. `sincAmbos` era o nome de quando havia um terceiro botão; ficou o
+     nome, porque é ele que os quatro lugares chamam, e trocar cinco linhas para
+     renomear uma função não é conserto. */
   function sincAmbos(){
-    const b = $('ambos'); if (!b) return;
-    b.disabled = $('auto').disabled || $('extract').disabled;
+    const b = $('extract'); if (!b) return;
+    b.textContent = t(frames.length ? 'refazerTelas' : 'extractBtn');
   }
+
+  /* ================= as telas saem sozinhas =================
+
+     O QUE MUDA. Antes, um vídeo carregado dava numa parede: dezesseis controles
+     de afinação e três botões, e nada acontecia até alguém escolher entre eles.
+     A pessoa que só quer o documento tinha que aprender a diferença entre
+     "Ambos", "Só transcrever" e "Só frames" antes de ver uma única tela.
+
+     Agora a varredura começa sozinha. Ela é barata (medido: 33 s para uma hora
+     de vídeo, 110× o tempo real), roda inteira no computador de quem usa, e é o
+     que a ferramenta existe para fazer. O caminho vira **vídeo → telas →
+     documento**, e a fala chega por cima quando alguém pedir.
+
+     TRÊS REGRAS, e as três existem para ela não atrapalhar:
+
+     1. **Ela espera.** Um segundo e meio antes de começar. Quem chegou com uma
+        configuração na cabeça — mudar o critério, o limite, o trecho — mexe
+        primeiro, e mexer CANCELA o agendamento. A ferramenta não disputa o
+        volante com quem já está dirigindo.
+     2. **Ela nunca refaz o trabalho de ninguém.** Se já há quadros, não roda.
+     3. **Ela é cancelável**, com o mesmo botão de sempre, e diz o que está
+        fazendo na mesma linha de status de sempre. */
+  let varreduraAgendada = null;
+  function agendarVarredura(){
+    cancelarVarreduraAgendada();
+    varreduraAgendada = setTimeout(() => {
+      varreduraAgendada = null;
+      if (frames.length || liveDur || liveOn) return;
+      const b = $('extract');
+      if (!b || b.disabled) return;
+      b.click();
+    }, 1500);
+  }
+  function cancelarVarreduraAgendada(){
+    if (varreduraAgendada) { clearTimeout(varreduraAgendada); varreduraAgendada = null; }
+  }
+  /* Qualquer toque nos ajustes de imagem, ou nos botões, cancela. Delegado no
+     cartão inteiro em vez de amarrado a cada controle: um controle novo amanhã
+     entra na regra sem ninguém lembrar de acrescentá-lo a uma lista. */
+  ['pointerdown', 'keydown', 'change'].forEach(ev =>
+    $('cardTr').addEventListener(ev, cancelarVarreduraAgendada, true));
 
   /* Rolagem suave até o próximo passo. Respeita quem pediu menos movimento no
      sistema — para essas pessoas o salto é seco, e não uma animação. */
@@ -5643,6 +5710,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       medir('carregou_video', { p_origem: origem || 'arquivo' });
       passos();
       irPara('cardTr');          // o vídeo abriu: o próximo passo são os ajustes
+      agendarVarredura();        // e as telas começam a sair sozinhas
     };
     video.onerror = () => {
       let extra = '';
@@ -9741,14 +9809,18 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      por conta própria e a escolha da pessoa virava enfeite. */
   let juntarFrames = false;
 
-  $('ambos').onclick = () => {
-    juntarFrames = true;
-    $('auto').click();
-  };
+  /* O "Ambos" morreu de causa natural: ele existia porque as telas dependiam de
+     um clique. Agora elas vêm sozinhas quando o vídeo entra, e "transcrever a
+     fala" traz as que faltarem junto — que é o que o "Ambos" fazia. Uma escolha
+     a menos para quem chega, e nenhum caminho perdido. */
 
   $('auto').onclick = async () => {
     if (!currentFile) return;
-    const juntar = juntarFrames; juntarFrames = false;
+    /* SEMPRE junta. Antes isto dependia do botão "Ambos"; hoje o único jeito de
+       chegar aqui sem telas é a varredura automática ter sido cancelada ou ter
+       falhado — e nesses dois casos trazer as telas junto é exatamente o que a
+       pessoa quer. */
+    const juntar = true; juntarFrames = false;
     const modelId = $('model').value, lang = $('lang').value;
 
     /* Varrer os frames JUNTO, e não depois.
@@ -9774,7 +9846,6 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
        acontecendo — e a transcrição de um vídeo longo leva minutos. Agora ele
        diz o que está fazendo, e a linha ao lado diz o que ela pode fazer. */
     $('auto').disabled = true;
-    $('ambos').disabled = true;
     transcrevendoPct = 0;
     $('auto').textContent = t('autoIndo');
     $('autoDica').textContent = t('autoEspere');
@@ -11654,7 +11725,13 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     $('cancel').classList.remove('hide');
     trabalhando(true);
     $('barWrap').classList.remove('hide');
-    trocarQuadros([]); esqueceuOQueGerou();
+    /* A grade some no MESMO gesto em que a lista é esvaziada. Sem o `render()`
+       aqui, as miniaturas da varredura anterior ficavam na tela durante todo o
+       tempo de busca do primeiro quadro — segundos, num vídeo longo — e eram
+       clicáveis: descartar, mover ou anotar nelas escrevia numa lista que já
+       não existia. Uma tela que mostra o que já foi jogado fora não é atraso de
+       desenho, é mentira sobre o estado da ferramenta. */
+    trocarQuadros([]); esqueceuOQueGerou(); render();
     let limited = '';
     stop = false;
     const t0 = performance.now();
@@ -11878,13 +11955,20 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       campo.placeholder = t('notaPh');
       campo.value = f.nota || '';
       campo.setAttribute('aria-label', t('notaPh') + ' ' + (n ? passoN(n) : fmt(f.t)));
-      campo.oninput = () => { frames[i].nota = campo.value; };
+      /* Escreve no OBJETO do quadro, e não em `frames[i]`. O índice é uma
+         posição numa lista que pode ser trocada por baixo — recomeçar a
+         varredura, reabrir um documento, juntar arquivos — enquanto o campo
+         continua na tela até o próximo `render()`. Pelo índice, digitar nesse
+         intervalo dava "Cannot set properties of undefined"; pelo objeto, a
+         escrita cai num quadro que já saiu da lista e não faz nada, que é o
+         comportamento certo para um campo que já não representa nada. */
+      campo.oninput = () => { f.nota = campo.value; };
       // sem isto, digitar espaço na anotação descartaria o frame
       campo.onclick = e => e.stopPropagation();
       campo.onkeydown = e => e.stopPropagation();
 
       const alterna = () => {
-        frames[i].keep = !frames[i].keep;
+        f.keep = !f.keep;
         render();          // renumera todo mundo: o passo 3 tem que virar o 2
       };
       toque.onclick = alterna;
@@ -12119,6 +12203,18 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     });
     const st = $('pdfStatus');
     if (!st) return;
+    /* QUANTOS QUADROS ESTA LINHA JÁ DESCREVEU.
+       A regra antiga era "só preenche quando está vazio", para não apagar o
+       resultado de uma geração ("saiu o PDF com 12 telas"). Ela era certa
+       enquanto os quadros apareciam todos de uma vez. Desde que a grade enche
+       durante a varredura, a linha era escrita no PRIMEIRO quadro — "1 quadro
+       pronto" — e ficava lá, mentindo, com quarenta na tela.
+       Guardar o número resolve os dois: a linha é reescrita quando a contagem
+       muda, e um resultado de geração também é substituído quando os quadros
+       mudam — porque aí ele descreve um documento que já não corresponde. */
+    const jaDito = st.dataset.n;
+    if (jaDito != null && jaDito !== String(keep)) st.textContent = '';
+    st.dataset.n = String(keep);
     if (!keep) st.innerHTML = `<span class="muted">${t('saidaSemQuadros')}</span>`;
     /* O aviso da transcrição em curso ganha do resto enquanto ela corre: é a
        única informação aqui que muda o que sai do documento. */

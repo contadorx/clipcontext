@@ -1166,3 +1166,68 @@ bloqueio do fio principal junto do degrau em que o motor subiu, e a seção de
 memória com `measureUserAgentSpecificMemory()` quebrada por tipo — que separa
 WebAssembly de imagem e responde, numa máquina real, quanto o Whisper está
 custando ali.
+
+---
+
+## 19/08/2026, décima segunda rodada — a espera, e o fluxo que ela obrigou a mexer
+
+A queixa não era um número, era uma sensação: *"mais do que medição, pense no
+UX"*. Então a medição aqui serve só para descrever o defeito, e o que foi feito
+é desenho.
+
+### O defeito, medido antes
+
+Vídeo de uma hora, botão "Ambos". Aos **51 segundos** a transcrição já tinha
+terminado e a varredura estava em 23:00 de 1:00:00 com **46 quadros guardados**.
+A tela mostrava **zero**. Os 120 trechos transcritos também não estavam em lugar
+nenhum: o campo só era escrito depois da última janela.
+
+A ferramenta calculava em pedaços e revelava em bloco. É o que faz uma espera
+parecer o dobro do que ela é — e neste produto fechar a aba significa perder o
+trabalho.
+
+### O que passou a acontecer
+
+| | antes | agora |
+|---|---|---|
+| primeira miniatura na tela | no fim da varredura | **enquanto ela corre** |
+| primeiro texto no campo | depois da última janela | **enquanto ela corre** |
+| progresso com a página rolada | fora da tela | faixa fixa |
+| gerar um PDF no meio | saía sem a fala, calado | **avisa antes** |
+
+O campo fica somente-leitura enquanto enche e destrava no fim: um texto que se
+desfaz enquanto se digita é pior que um campo vazio. `testes/espera.mjs` cobra os
+cinco, e cobra o **instante** de cada um contra o instante do fim — um marco que
+só acontece no fim é exatamente o defeito que isto removeu.
+
+### O fluxo, que era o problema de verdade
+
+Três botões onde a pessoa precisava escolher antes de saber o que queria, e os
+ajustes na frente da ação. Agora:
+
+- **a varredura começa sozinha** 1,5 s depois de o vídeo entrar — e qualquer
+  toque nos ajustes CANCELA o agendamento. A ferramenta não disputa o volante
+  com quem já está dirigindo, e nunca refaz o trabalho de ninguém;
+- **dois botões**, não três: "Transcrever a fala" (que traz as telas que
+  faltarem junto) e "Refazer as telas", que só existe quando há telas;
+- **a ação antes dos ajustes**, com os ajustes sob um título próprio.
+
+### Os dois defeitos que a mudança destapou
+
+Mexer no caminho que 49 arquivos de teste percorrem cobra o preço na hora, e
+cobrou:
+
+1. **"Refazer as telas" esvaziava a lista e deixava as miniaturas antigas na
+   tela** até o primeiro quadro novo chegar — segundos, num vídeo longo. Nesse
+   intervalo os campos continuavam clicáveis. O `render()` passou a acontecer no
+   mesmo gesto do `trocarQuadros([])`. Uma tela que mostra o que já foi jogado
+   fora não é atraso de desenho: é mentira sobre o estado da ferramenta.
+2. **A anotação era escrita em `frames[i]`, por índice.** Com a lista trocada por
+   baixo, o índice apontava para o vazio: `Cannot set properties of undefined
+   (setting 'nota')`, e a anotação sumia. Agora a escrita vai para o **objeto**
+   do quadro. Se o quadro já saiu da lista, a escrita não faz nada — que é o
+   certo para um campo que já não representa nada.
+
+Os dois estão cobrados em `testes/grade.mjs`, e os dois foram conferidos
+desligando o conserto: com ele desligado o arquivo falha em três afirmações e
+imprime a mesma linha de erro que apareceu na regressão.

@@ -176,6 +176,45 @@ ok('e um campo de anotação por miniatura',
   ok('o que se digita numa anotação mora no quadro, não no campo',
      guardou === 'anotação do último passo', JSON.stringify(guardou));
 }
+/* ---- REFAZER A VARREDURA ESVAZIA A GRADE NO MESMO GESTO ----
+   O defeito: "Refazer as telas" esvaziava a LISTA e deixava as miniaturas
+   antigas na tela até o primeiro quadro novo chegar — segundos, num vídeo
+   longo. Nesse intervalo os campos continuavam clicáveis, e escrever num deles
+   escrevia em `frames[i]` de uma lista que já não tinha o índice i: a anotação
+   sumia e o console cuspia "Cannot set properties of undefined".
+
+   As duas metades do conserto são cobradas aqui: a grade some junto (não há
+   onde clicar), e a escrita passou a ir para o OBJETO do quadro (se alguém
+   guardar o campo, escrever nele não derruba nada e não inventa anotação). */
+{
+  const TEXTO = 'anotação num campo que já saiu da tela';
+  await pg.selectOption('#mode', 'count');
+  await pg.fill('#count', '3');
+  const r = await pg.evaluate(txt => {
+    const campoVelho = document.querySelector('#thumbs input.nota');
+    const antes = document.querySelectorAll('#thumbs figure').length;
+    /* O clique aqui dentro, e não pelo Playwright: o manipulador roda até o
+       primeiro `await`, e é dentro dessa mesma tarefa que a grade tem que
+       esvaziar. Medir depois seria medir a varredura nova, não o conserto. */
+    document.getElementById('extract').click();
+    const logoDepois = document.querySelectorAll('#thumbs figure').length;
+    campoVelho.value = txt;
+    campoVelho.dispatchEvent(new Event('input', { bubbles: true }));
+    return { antes, logoDepois, aindaNoDocumento: campoVelho.isConnected };
+  }, TEXTO);
+  console.log('\n  ao refazer a varredura:');
+  linha('miniaturas antes do clique', r.antes);
+  linha('miniaturas no mesmo instante depois', r.logoDepois);
+  ok('a grade some no mesmo gesto em que a lista é esvaziada',
+     r.logoDepois === 0, r.antes + ' → ' + r.logoDepois);
+  ok('e o campo antigo saiu do documento junto', !r.aindaNoDocumento);
+  await pg.waitForTimeout(500);
+  const vazou = await pg.evaluate(txt => (window.__quadros() || []).some(q => q.nota === txt), TEXTO);
+  ok('escrever no campo órfão não inventa anotação em quadro nenhum', !vazou);
+  await pg.locator('#cancel').click().catch(() => {});
+  await pg.waitForFunction(() => !document.getElementById('extract').disabled,
+                           null, { timeout: 60000 });
+}
 ok('sem erro de JavaScript', erros.length === 0, erros.join(' | ').slice(0, 200));
 
 await br.close(); srv.close();

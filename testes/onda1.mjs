@@ -33,7 +33,12 @@ const prep = async () => {
   await pg.dispatchEvent('#tr','input');
   await pg.selectOption('#mode','count'); await pg.fill('#count','3');
   await pg.click('#extract');
-  await pg.waitForFunction(()=>document.querySelectorAll('#thumbs figure').length>=3,null,{timeout:40000});
+  /* Espera a VARREDURA ACABAR, e não "haver três miniaturas". Desde que as telas
+     começam a sair sozinhas quando o vídeo entra, contar miniaturas encontra as
+     da varredura automática — que estão na tela quando esta, com `count=3`, mal
+     começou. O teste então media a grade errada e a lente dizia "1 de 5". */
+  await pg.waitForFunction(()=>!document.getElementById('extract').disabled,null,{timeout:60000});
+  await pg.waitForTimeout(300);
   await pg.selectOption('#modelo','evidencia');
   await pg.waitForTimeout(250);
 };

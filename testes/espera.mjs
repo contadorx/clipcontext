@@ -96,8 +96,12 @@ await pg.evaluate(() => {
   }, 60);
 });
 
+/* "Transcrever a fala" — que agora traz as telas que faltarem junto. O terceiro
+   botão ("Ambos") deixou de existir quando as telas passaram a sair sozinhas.
+   Aqui o agendamento automático foi cancelado pelos ajustes acima, que é o
+   desenho: quem mexe nos ajustes está dirigindo, e a ferramenta não disputa. */
 const t0 = Date.now();
-await pg.locator('#ambos').click();
+await pg.locator('#auto').click();
 /* Enquanto corre, a pessoa desce para revisar — que é o gesto que a melhoria
    provoca, e é ele que tira a barra de verdade da tela. */
 await pg.waitForTimeout(2500);
@@ -122,7 +126,7 @@ const total = Date.now() - t0;
 const m = await pg.evaluate(() => window.__m);
 
 const linha = (k, v) => console.log('   ' + k.padEnd(40) + v);
-console.log('\n  "Ambos" num vídeo de ' +
+console.log('\n  "Transcrever a fala" num vídeo de ' +
             (await pg.evaluate(() => Math.round(document.getElementById('v').duration / 60))) +
             ' minutos — total ' + (total / 1000).toFixed(1) + ' s\n');
 linha('primeira miniatura na tela', (m.miniatura == null ? 'nunca' : m.miniatura + ' ms'));
