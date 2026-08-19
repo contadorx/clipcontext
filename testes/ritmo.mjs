@@ -46,7 +46,7 @@ async function gravar(pg, ritmo, roteiro, segundos) {
   await pg.selectOption('#modelo', 'outro');
   await pg.selectOption('#ritmo', ritmo);
   await pg.locator('#recTr').uncheck();
-  await pg.locator('#recCount').uncheck();
+  await pg.evaluate(() => window.__contagem(1));
   await pg.evaluate((r) => {
     const c = document.createElement('canvas');
     c.width = 960; c.height = 540;
@@ -127,7 +127,7 @@ console.log('\n[3] tela que NUNCA para não termina com zero quadros');
   await pg.selectOption('#modelo', 'outro');
   await pg.selectOption('#ritmo', 'reuniao');
   await pg.locator('#recTr').uncheck();
-  await pg.locator('#recCount').uncheck();
+  await pg.evaluate(() => window.__contagem(1));
   /* Tela INTEIRA em movimento: um vídeo em tela cheia. Sem a válvula, ela
      nunca assentaria e o documento sairia vazio. */
   await pg.evaluate(() => {

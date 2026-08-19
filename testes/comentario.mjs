@@ -63,7 +63,7 @@ console.log('\n[2] gravando: a caixa é UMA SÓ, e é a da janelinha');
 /* Sem transcrever e sem contagem: o que este arquivo prova é a caixa, e baixar
    um modelo de voz de 249 MB para isso seria trocar um teste por uma espera. */
 await pg.locator('#recTr').uncheck();
-await pg.locator('#recCount').uncheck();
+await pg.evaluate(() => window.__contagem(1));
 await pg.locator('#rec').click();
 await pg.waitForSelector('#recStop:visible', { timeout: 40000 });
 await pg.waitForTimeout(2500);

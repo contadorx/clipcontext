@@ -91,7 +91,7 @@ ok('marcar escondido antes de gravar', await pg.locator('#recMark').isHidden());
 
 /* A contagem regressiva de 3 é opção do produto e vem ligada; num teste
      que mede a gravação ela só adiciona três segundos de espera por rodada. */
-  await pg.evaluate(() => { const c = document.getElementById('recCount'); if (c) c.checked = false; });
+  await pg.evaluate(() => window.__contagem(1));
   await pg.locator('#rec').click();
 await pg.waitForTimeout(3000);
 ok('pausar apareceu ao gravar', await pg.locator('#recPause').isVisible());

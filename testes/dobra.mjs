@@ -21,8 +21,21 @@ await pg.selectOption('#modelo', 'ia').catch(() => {});
 const fechado = id => pg.locator('#'+id).evaluate(e=>e.classList.contains('fechado'));
 const alturaCorpo = id => pg.locator('#'+id+' .dobra > div').evaluate(e=>e.getBoundingClientRect().height);
 
+const gavetaAberta = () => pg.locator('#ajustesCx').evaluate(e => e.classList.contains('aberta'));
+const alturaGaveta = () => pg.locator('#ajustesCx > div').evaluate(e => e.getBoundingClientRect().height);
+
 console.log('\n[1] página nova');
-ok('passo 2 fechado', await fechado('cardTr'));
+/* O PASSO 2 ABRE, e quem fecha agora são os AJUSTES.
+   Fechado, ele era uma faixa cinza que não dizia o que fazia — e a pergunta que
+   ele gerava era "isto só serve para vídeo enviado?". Não serve: o modelo de
+   voz, o idioma e a sensibilidade valem para a gravação ao vivo também. O que
+   sobrava de parede — dezesseis controles — foi para dentro de uma gaveta. */
+ok('passo 2 ABERTO, mesmo sem vídeo', !(await fechado('cardTr')));
+ok('e os dois botões dele estão à vista',
+   await pg.locator('#auto').isVisible() && await pg.locator('#extract').isVisible());
+ok('mas os ajustes estão fechados', !(await gavetaAberta()));
+ok('e a gaveta dos ajustes tem mesmo altura zero', (await alturaGaveta()) < 2,
+   (await alturaGaveta()).toFixed(1) + 'px');
 ok('passo 3 (revisão) fechado', await fechado('prevCard'));
 ok('passo 4 (prompt) fechado', await fechado('promptCard'));
 ok('o passo 3 EXISTE na tela (a numeração não pula)',
@@ -35,41 +48,50 @@ ok('e explica quando vai servir',
   ok('os quatro passos estão numerados em sequência',
      JSON.stringify(nums) === JSON.stringify(['1','2','3','4']), nums.join(','));
 }
-ok('e o corpo do passo 2 está mesmo com altura zero', (await alturaCorpo('cardTr')) < 2,
-   (await alturaCorpo('cardTr')).toFixed(1) + 'px');
-ok('mas o cabeçalho e a dica continuam visíveis',
+ok('o cabeçalho e a dica continuam visíveis',
    await pg.locator('#cardTr h2').isVisible() && await pg.locator('#hintTr').isVisible());
 const altura = await pg.evaluate(()=>document.documentElement.scrollHeight);
-console.log('     altura da página fechada:', altura + 'px');
+console.log('     altura da página com os ajustes fechados:', altura + 'px');
 
-console.log('\n[1b] o cabeçalho abre o cartão fechado');
-await pg.locator('#cardTr h2').click();
+console.log('\n[1b] a gaveta dos ajustes abre e fecha');
+/* O NÚMERO QUE IMPORTA: com a gaveta fechada, a placa de vídeo NÃO é
+   alcançável. Uma gaveta que só muda de cor e deixa tudo clicável por baixo
+   não guardou nada — e era exatamente o que o título "quase ninguém precisa
+   mexer" fazia antes: avisava, e mostrava os dezesseis controles assim mesmo. */
+ok('com a gaveta fechada não dá para marcar a placa de vídeo',
+   !(await pg.locator('#gpu').check({ timeout: 1200 }).then(()=>true).catch(()=>false)));
+await pg.locator('#ajustesBtn').click();
 await pg.waitForTimeout(450);
-ok('clicar no cabeçalho abre o passo 2', !(await fechado('cardTr')));
+ok('clicar em "ajustes" abre a gaveta', await gavetaAberta());
 ok('e os ajustes ficam alcançáveis antes de gravar',
-   (await alturaCorpo('cardTr')) > 100 && !(await pg.locator('#gpu').isDisabled()),
-   (await alturaCorpo('cardTr')).toFixed(0) + 'px');
+   (await alturaGaveta()) > 100 && !(await pg.locator('#gpu').isDisabled()),
+   (await alturaGaveta()).toFixed(0) + 'px');
 ok('dá para marcar a placa de vídeo sem ter vídeo nenhum',
    await pg.locator('#gpu').check().then(()=>true).catch(()=>false));
 await pg.locator('#gpu').uncheck();
-ok('o cabeçalho é alcançável por teclado',
-   (await pg.locator('#cardTr h2').getAttribute('tabindex')) === '0');
-await pg.locator('#cardTr h2').click();
+ok('o botão diz o seu estado para quem não vê a seta',
+   (await pg.locator('#ajustesBtn').getAttribute('aria-expanded')) === 'true');
+const alturaAberta = await pg.evaluate(()=>document.documentElement.scrollHeight);
+console.log('     altura da página com os ajustes abertos :', alturaAberta + 'px');
+/* Em pixels, e não em proporção da página: a página inteira tem cinco cartões,
+   então uma razão dilui justamente o que se quer medir — quanto de parede a
+   gaveta tirou da frente de quem abre a ferramenta. */
+ok('a gaveta guarda uma parede de controles, não um enfeite',
+   alturaAberta - altura > 250,
+   (alturaAberta - altura) + 'px de controles fora do caminho');
+await pg.locator('#ajustesBtn').click();
 await pg.waitForTimeout(450);
-ok('e clicar de novo fecha', await fechado('cardTr'));
+ok('e clicar de novo fecha', !(await gavetaAberta()));
+ok('o cabeçalho do cartão continua alcançável por teclado',
+   (await pg.locator('#cardTr h2').getAttribute('tabindex')) === '0');
 
-console.log('\n[2] carregar um vídeo abre o passo 2');
+console.log('\n[2] carregar um vídeo mantém o passo 2 aberto');
 await pg.setInputFiles('#file','/tmp/cinco.webm');
 await pg.waitForFunction(()=>!document.getElementById('extract').disabled,null,{timeout:20000});
 await pg.waitForTimeout(700);
-ok('passo 2 abriu', !(await fechado('cardTr')));
-ok('o prompt continua fechado (sem frames ainda)', await fechado('promptCard'));
+ok('passo 2 aberto', !(await fechado('cardTr')));
 ok('e o corpo do passo 2 tem altura de verdade', (await alturaCorpo('cardTr')) > 100,
    (await alturaCorpo('cardTr')).toFixed(0) + 'px');
-const altura2 = await pg.evaluate(()=>document.documentElement.scrollHeight);
-console.log('     altura da página aberta :', altura2 + 'px');
-ok('a página fechada é bem menor que a aberta', altura2 > altura * 1.4,
-   altura + ' → ' + altura2);
 
 console.log('\n[3] extrair frames abre a revisão e o prompt');
 await pg.click('#extract');

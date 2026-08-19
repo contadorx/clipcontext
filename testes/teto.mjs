@@ -75,7 +75,7 @@ console.log('\n[2] gravando: o limite é lido a cada quadro, e bater nele FALA')
   await pg.locator('#maxf').fill('6');
   await pg.selectOption('#modelo', 'ata').catch(() => {});
   await pg.locator('#recTr').uncheck();
-  await pg.locator('#recCount').uncheck();
+  await pg.evaluate(() => window.__contagem(1));
   await pg.locator('#rec').click();
   await pg.waitForSelector('#recStop:visible', { timeout: 40000 });
 

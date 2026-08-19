@@ -34,7 +34,8 @@ Rode-os na máquina onde o emissor vive.
 ## As duas esteiras
 
 ```bash
-bash testes/rapido.sh app      # a ferramenta: build + testes de tela   (~3 min)
+bash testes/rapido.sh app      # a ferramenta, só comportamento       (~3m30)
+bash testes/rapido.sh medir    # as réguas: memória, peso, espelho, espera (~12 min)
 bash testes/rapido.sh site     # o site: build + next build + páginas
 bash testes/rapido.sh a.mjs b.mjs
 bash testes/rodar.sh           # a regressão inteira                    (~40 min)

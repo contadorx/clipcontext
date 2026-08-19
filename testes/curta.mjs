@@ -39,11 +39,20 @@ for (const [rot, espera, semTr, semImagem] of [['parar em 200 ms', 200, false, f
   if (semTr) await pg.uncheck('#recTr');
   /* A contagem regressiva de 3 é opção do produto e vem ligada; num teste
      que mede a gravação ela só adiciona três segundos de espera por rodada. */
-  await pg.evaluate(() => { const c = document.getElementById('recCount'); if (c) c.checked = false; });
+  await pg.evaluate(() => window.__contagem(1));
   await pg.click('#rec');
   const comecou = await pg.waitForFunction(()=>document.getElementById('recStop').offsetParent!==null,
                                            null,{timeout:20000}).then(()=>true).catch(()=>false);
   if (comecou) {
+    /* `#recStop` aparece DURANTE a contagem, de propósito: três segundos depois
+       de escolher a tela é exatamente quando a pessoa percebe que compartilhou
+       a janela errada, e um botão que só aparece depois disso chega tarde. Mas
+       o que este arquivo mede é "gravou e parou logo", não "desistiu antes de
+       começar" — então a espera curta é contada a partir do zero da contagem, e
+       não do clique. */
+    await pg.waitForFunction(
+      () => !/\d/.test(document.getElementById('recMsg').textContent || ''),
+      null, { timeout: 20000 }).catch(() => {});
     await pg.waitForTimeout(espera);
     await pg.click('#recStop');
     await pg.waitForFunction(()=>document.getElementById('rec').offsetParent!==null,null,{timeout:25000});

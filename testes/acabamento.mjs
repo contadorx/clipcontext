@@ -61,7 +61,7 @@ await pg.waitForTimeout(500);
 
 console.log('[1] a barra da cauda não fica pensando depois que acabou');
 await pg.locator('#recTr').uncheck();
-await pg.locator('#recCount').uncheck();
+await pg.evaluate(() => window.__contagem(1));
 await pg.locator('#rec').click();
 await pg.waitForSelector('#recStop:visible', { timeout: 40000 });
 await pg.waitForTimeout(2500);

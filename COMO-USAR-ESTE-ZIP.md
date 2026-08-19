@@ -66,7 +66,8 @@ intenção — não por descuido.
 bash testes/preparar.sh     # reaponta a regressão e gera os vídeos de amostra
 npm install                 # o playwright, que os testes usam
 python3 build.py
-bash testes/rapido.sh app   # ~4 min
+bash testes/rapido.sh app   # ~3m30 — o comportamento
+bash testes/rapido.sh medir # ~12 min — as réguas, quando você mexe na mecânica
 bash testes/rodar.sh        # a regressão inteira, ~50 min
 ```
 

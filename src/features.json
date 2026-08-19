@@ -232,10 +232,10 @@
           "fr": "Corriger la parole segment par segment, dans la loupe de la capture"
         },
         {
-          "planos": "fpt",
-          "pt": "Vocabulário do seu domínio, aplicado de uma vez",
-          "en": "Your domain's vocabulary, applied in one go",
-          "es": "Vocabulario de tu dominio, aplicado de una vez",
+          "planos": "pt",
+          "pt": "Termos do seu sistema, aplicados de uma vez na transcrição",
+          "en": "Your system's terms, applied to the transcript in one go",
+          "es": "Términos de tu sistema, aplicados de una vez a la transcripción",
           "de": "Fachwortliste Ihres Bereichs, auf einmal angewendet",
           "fr": "Lexique métier de votre domaine, appliqué en une fois"
         },

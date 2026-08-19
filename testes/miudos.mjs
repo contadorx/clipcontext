@@ -64,37 +64,50 @@ ok('e o prompt manda usar a classificação',
   ok('com o valor preenchido', /fricção/.test(csv));
 }
 
-console.log('\n[3] a contagem regressiva');
+console.log('\n[3] a contagem regressiva — sempre, e sem caixa para desligar');
 {
   const fonte = fs.readFileSync('/root/walkstamp/public/app.html','utf8');
-  ok('a caixa existe e vem marcada', /id="recCount" checked/.test(fonte));
-  ok('e conta antes de zerar o relógio',
-     fonte.indexOf("recCount') && $('recCount').checked") < fonte.indexOf('const t0 = performance.now()'));
+  /* A caixa saiu: ela existia só para oferecer o jeito de estragar o primeiro
+     quadro da própria gravação — sem os três segundos, o primeiro quadro é
+     quase sempre o seletor de tela do navegador que a pessoa acabou de fechar. */
+  ok('a caixa de desligar não existe mais', !/id="recCount"/.test(fonte));
+  ok('e a contagem conta antes de zerar o relógio',
+     fonte.indexOf('for (let c = SEG_CONTAGEM;') < fonte.indexOf('const t0 = performance.now()'));
+  /* A régua dos testes encurta um NÚMERO de segundos, e não desvia de caminho:
+     o laço que roda aqui é o mesmo que roda na máquina de quem grava. */
+  ok('os testes encurtam a contagem sem pular o laço',
+     /window\.__contagem = n =>/.test(fonte));
 }
 
 console.log('\n[4] tirar hesitações — desligado por padrão');
 ok('a caixa começa desmarcada', !(await pg.locator('#hesitar').isChecked()));
 await pg.fill('#tr', 'WEBVTT\n\n00:00:00.000 --> 00:00:09.000\nMicrofone: é... eu vou, hã, abrir a tela, tipo, agora');
 await pg.dispatchEvent('#tr','input');
-await pg.locator('#vocModo').click(); await pg.waitForTimeout(200);
-await pg.fill('#vocLista','ME21N');
-await pg.locator('#vocAplicar').click(); await pg.waitForTimeout(400);
-ok('sem marcar, o texto não muda', /é\.\.\. eu vou, hã/.test(await pg.locator('#tr').inputValue()),
-   (await pg.locator('#tr').inputValue()).split('\n').pop());
+/* "Termos do seu sistema" virou item do Personal e do Team, e a limpeza de
+   hesitação NÃO foi junto: ela é gratuita, e por isso ganhou botão próprio.
+   Esta é a afirmação que impede o conserto de arrastar uma função grátis para
+   trás de uma trava de plano. */
+ok('sem plano, "Termos do seu sistema" não aparece',
+   !(await pg.locator('#vocRow').isVisible()));
+ok('mas tirar hesitações continua à mão de quem não paga',
+   await pg.locator('#hesitar').isVisible());
+ok('sem marcar, não há botão para apertar',
+   !(await pg.locator('#hesAplicar').isVisible()));
 await pg.locator('#hesitar').check(); await pg.waitForTimeout(200);
 ok('marcada na sessão de pesquisa, a nota avisa que a hesitação é o dado',
    !(await pg.locator('#hesitarNota').evaluate(e=>e.classList.contains('hide'))));
-await pg.locator('#vocAplicar').click(); await pg.waitForTimeout(500);
+ok('e o botão aparece', await pg.locator('#hesAplicar').isVisible());
+await pg.locator('#hesAplicar').click(); await pg.waitForTimeout(500);
 {
   const txt = (await pg.locator('#tr').inputValue()).split('\n').pop();
   console.log('      ' + txt);
   ok('as hesitações saíram', !/hã/.test(txt) && !/^Microfone: é\.\.\./.test(txt), txt);
   ok('a fala continua inteira', /abrir a tela/.test(txt));
   ok('e a linha de tempo do VTT não foi tocada', /00:00:00\.000 --> 00:00:09\.000/.test(await pg.locator('#tr').inputValue()));
-  ok('a mensagem conta quantas', /hesita/i.test(await pg.locator('#vocMsg').textContent()),
-     (await pg.locator('#vocMsg').textContent()).slice(0,60));
+  ok('a mensagem conta quantas', /hesita/i.test(await pg.locator('#hesMsg').textContent()),
+     (await pg.locator('#hesMsg').textContent()).slice(0,60));
 }
-await pg.locator('#vocDesfazer').click(); await pg.waitForTimeout(300);
+await pg.locator('#hesDesfazer').click(); await pg.waitForTimeout(300);
 ok('e dá para desfazer', /hã/.test(await pg.locator('#tr').inputValue()));
 
 ok('sem erro de JS', erros.length === 0, erros.join(' | ').slice(0,180));

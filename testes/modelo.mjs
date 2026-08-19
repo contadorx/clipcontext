@@ -86,6 +86,11 @@ await pg.route('**/@huggingface/transformers**', r => r.fulfill({
   status: 200, headers: { 'content-type': 'text/javascript' }, body: BIBLIOTECA_FALSA }));
 await pg.goto('http://localhost:8943/app.html?lang=pt');
 await pg.selectOption('#modelo', 'evidencia').catch(() => {});
+/* O modelo de voz, a placa e o "apagar o modelo" moram na gaveta de ajustes,
+   que nasce fechada — é a parede de dezesseis controles que saiu da frente de
+   quem só quer apertar um botão. Quem vem mexer no modelo abre a gaveta, e é
+   isso que este arquivo faz, pelo mesmo botão da pessoa. */
+await pg.locator('#ajustesBtn').click();
 await pg.waitForTimeout(400);
 await pg.setInputFiles('#file', '/tmp/amostra.webm');
 await pg.waitForFunction(() => !document.getElementById('extract').disabled,

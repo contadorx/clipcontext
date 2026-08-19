@@ -87,7 +87,15 @@ await pg.evaluate(() => {
   setInterval(() => {
     if (document.querySelectorAll('#thumbs figure').length) marca('miniatura');
     const tr = document.getElementById('tr');
-    if ((tr.value || '').trim()) marca('texto');
+    if ((tr.value || '').trim()) {
+      marca('texto');
+      /* ENCHER E NINGUÉM VER é o mesmo que não encher. `#tr` mora no passo 3, e
+         quem aperta "Transcrever a fala" está olhando para o passo 2 — depois
+         que as telas passaram a sair sozinhas, o empurrão da página para baixo
+         acontecia ANTES da transcrição, e ela enchia um campo fora da tela. */
+      const r = tr.getBoundingClientRect();
+      if (r.top < innerHeight && r.bottom > 0) marca('textoNaTela');
+    }
     if (tr.readOnly) marca('campoTravado');
     if (/sem a fala/i.test(document.getElementById('pdfStatus').textContent || '')) marca('avisoSaida');
     const f = document.getElementById('faixa');
@@ -144,6 +152,11 @@ ok('as miniaturas aparecem enquanto a varredura corre',
 ok('o texto enche o campo enquanto a transcrição corre',
    m.texto != null && m.fim != null && m.texto < m.fim,
    m.texto + ' ms contra ' + m.fim + ' ms de fim');
+/* E na TELA. Sem esta linha, a anterior passava com o campo enchendo dois mil
+   pixels abaixo do que a pessoa está olhando — que foi exatamente a queixa. */
+ok('e o campo está na tela enquanto ele enche',
+   m.textoNaTela != null && m.fim != null && m.textoNaTela < m.fim,
+   m.textoNaTela == null ? 'nunca esteve à vista' : m.textoNaTela + ' ms');
 ok('o campo fica somente-leitura enquanto enche',
    m.campoTravado != null, String(m.campoTravado));
 ok('e destrava quando ela acaba',

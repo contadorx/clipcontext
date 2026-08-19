@@ -42,7 +42,7 @@ async function cenario({superficie='monitor', comSomTela=true, modeloQuebra=fals
   await pg.selectOption('#modelo', 'ia').catch(() => {});
   /* A contagem regressiva de 3 é opção do produto e vem ligada; num teste
      que mede a gravação ela só adiciona três segundos de espera por rodada. */
-  await pg.evaluate(() => { const c = document.getElementById('recCount'); if (c) c.checked = false; });
+  await pg.evaluate(() => window.__contagem(1));
   await pg.click('#rec');
   await pg.waitForFunction(()=>document.getElementById('recStop').offsetParent!==null,null,{timeout:25000});
   await pg.waitForTimeout(2200);
@@ -91,7 +91,7 @@ console.log('\n[S2] modelo quebrado: a gravação segue, e os medidores vivem se
   await pg.goto('http://localhost:8876/app.html?lang=pt'); await pg.waitForTimeout(400);
   // o cenário virou obrigatório antes de o vídeo entrar ou de a gravação começar
   await pg.selectOption('#modelo', 'ia').catch(() => {});
-  await pg.evaluate(() => { const c = document.getElementById('recCount'); if (c) c.checked = false; });
+  await pg.evaluate(() => window.__contagem(1));
   await pg.click('#rec');
   /* A gravação não é mais barrada pelo modelo (ver linhas.mjs [L3]): ela começa
      sozinha, e o que este bloco cobra é o que vem DEPOIS — os medidores vivendo

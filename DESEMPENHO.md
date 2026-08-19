@@ -1231,3 +1231,102 @@ cobrou:
 Os dois estão cobrados em `testes/grade.mjs`, e os dois foram conferidos
 desligando o conserto: com ele desligado o arquivo falha em três afirmações e
 imprime a mesma linha de erro que apareceu na regressão.
+
+---
+
+## 19/08/2026, décima terceira rodada — tirar coisas do caminho
+
+Nove pedidos do Leandro, e o fio comum é o mesmo: **menos escolhas antes da
+primeira ação.**
+
+### Duas caixas saíram, e o comportamento ficou
+
+| caixa | antes | agora |
+|---|---|---|
+| "Contar 3 antes de começar" | marcada, desligável | **sempre**, sem caixa |
+| "Guardar as telas no meu computador enquanto gravo" | marcada, desligável | **padrão**, sem caixa |
+
+Nenhuma das duas tinha um lado bom para desligar. Sem os três segundos, o
+primeiro quadro é quase sempre o seletor de tela do navegador — a janela que a
+pessoa acabou de fechar. Sem o espelho, um travamento aos 110 minutos apaga duas
+horas; com ele, ficam alguns megabytes no disco até o documento sair.
+
+O que sobreviveu de desligar: `espelhoQuer()` continua lendo a mesma chave, então
+**quem tinha desligado continua desligado** — `espelho.mjs` cobra esse zero, e
+ele é a diferença entre uma decisão respeitada e uma decisão revogada em silêncio
+por uma atualização. E o botão "jogar fora" do passo 1 continua apagando na hora.
+As páginas de privacidade e de segurança foram reescritas nos cinco idiomas: elas
+descreviam uma caixa que não existe mais.
+
+Os testes encurtam a contagem com `window.__contagem(1)`. É um **número**, não um
+desvio: o laço que roda no teste é o mesmo que roda na máquina de quem grava.
+
+### O passo 2: abriu, e emagreceu
+
+Ele nascia fechado e cinza, e a pergunta que gerava era literal — *"ele só serve
+para o vídeo?"*. Não serve: o modelo de voz, o idioma, a placa e a sensibilidade
+valem igual para a gravação ao vivo, e numa gravação nunca existe "vídeo
+carregado" antes de começar.
+
+O que era parede não era o cartão, eram os **dezesseis controles**. Eles foram
+para uma gaveta que abre num clique e **lembra** a escolha. Medido: **329 px de
+controles fora do caminho**, e com a gaveta fechada a placa de vídeo não é
+clicável — uma gaveta que só muda de cor e deixa tudo clicável por baixo não
+guardou nada.
+
+### O texto enchia fora da tela
+
+A queixa: *"primeira miniatura e primeira fala não abriu durante a transcrição"*.
+Medido, e o número é feio: o campo da transcrição só entrava no campo de visão
+aos **137 880 ms** — depois de tudo terminado. `#tr` mora no passo 3, e quem
+aperta "Transcrever a fala" está olhando para o passo 2. Enquanto as telas ainda
+dependiam de um clique, o primeiro quadro empurrava a página para baixo e o campo
+vinha junto **por acidente**; quando a varredura passou a acontecer sozinha, esse
+empurrão passou a acontecer antes, e a transcrição ficou enchendo um campo
+invisível.
+
+| | antes | agora |
+|---|---|---|
+| campo da transcrição à vista | 137 880 ms (no fim) | **25 921 ms** (junto com a primeira fala) |
+
+`espera.mjs` cobra isso agora, e a linha nova falha com o conserto desligado.
+
+### A faixa do fim da página, maior
+
+Ela tinha 9 px de respiro, texto de 13,5 e barra de 6 px — tamanho de rodapé,
+para o trabalho de ser o **único** sinal de vida numa espera de vinte minutos com
+a página rolada. Agora: 15 px de respiro, texto de 15,5, barra de 10 px por 240,
+e borda superior na cor da marca. A folga do corpo subiu junto, de 52 para 76 px.
+
+### "Termos do seu sistema" virou item de plano
+
+Passou a ser do Personal e do Team, na tabela (`src/features.json`, de `fpt` para
+`pt`), nos cartões dos cinco idiomas e **no código**: sem chave a linha não
+aparece, pela mesma regra do logotipo do cliente. Uma tabela que promete
+exclusividade enquanto o produto entrega de graça é uma contradição — só na
+direção de que ninguém reclama.
+
+Um efeito colateral que quase passou: **tirar hesitações é gratuito** e só era
+aplicável pelo botão "Corrigir os termos", que agora é pago. Ela ganhou botão
+próprio. `miudos.mjs` cobra as duas coisas na mesma respiração.
+
+E "Tapar um dado" virou **"Tarjar um dado"**: o produto inteiro chama isto de
+tarja — `aplicarTarjas`, "Terminar de tarjar", "Tirar as tarjas" — e só o botão
+da lente dizia outra coisa.
+
+### A pista rápida ficou rápida de novo
+
+Cinco arquivos respondiam por dois terços do tempo do `rapido.sh app`, e nenhum
+deles pergunta "isto ainda funciona?": `espera.mjs` roda uma hora de vídeo,
+`espelho.mjs` grava quatro vezes, `memoria.mjs` e `pesagem.mjs` são réguas. Eles
+foram para um grupo próprio.
+
+| pista | antes | agora |
+|---|---|---|
+| `rapido.sh app` | ~9 min | **3 min 31 s** |
+| `rapido.sh medir` | — | ~12 min, quando se mexe na mecânica |
+| `rodar.sh` | ~20 min | igual — é o portão da entrega, e continua com tudo |
+
+O teto real desta máquina são **2 CPUs**: dois testes de cada vez. Quem manda no
+relógio é isso, não o número de arquivos — por isso a resposta foi tirar arquivos
+da pista curta, e não tentar rodar mais em paralelo.

@@ -77,7 +77,7 @@ console.log('[1] de saída, ninguém escolheu nada');
 
 console.log('\n[2] clicar em Gravar sem escolher ASSUME "Outro" — e grava');
 await pg.locator('#recTr').uncheck();
-await pg.locator('#recCount').uncheck();
+await pg.evaluate(() => window.__contagem(1));
 await pg.locator('#rec').click();
 await pg.waitForSelector('#recStop:visible', { timeout: 40000 });
 {

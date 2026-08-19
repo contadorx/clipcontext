@@ -54,10 +54,17 @@ console.log('\n[P1] estado inicial: só o passo 1 está aberto');
 {
   const {pg,ctx,erros}=await pagina();
   const inerte = async id => (await pg.locator('#'+id).getAttribute('inert')) !== null;
-  /* O passo 2 nasce FECHADO, não travado: os ajustes de modelo e placa de vídeo
-     precisam ser mexíveis antes de gravar, porque na gravação não existe "vídeo
-     carregado" antes de começar. A trava que vale é a do botão de ação. */
-  ok('passo 2 fechado, mas alcançável', await pg.locator('#cardTr').evaluate(e=>e.classList.contains('fechado')));
+  /* O passo 2 nasce ABERTO e não travado. Fechado, ele era uma faixa cinza que
+     não dizia o que fazia, e a pergunta que ele gerava era "isto só serve para
+     vídeo enviado?" — não serve: o modelo de voz, o idioma e a placa valem para
+     a gravação ao vivo também, e numa gravação nunca existe "vídeo carregado"
+     antes de começar. O que fechou no lugar dele foi a GAVETA dos ajustes: eram
+     eles, dezesseis controles, a parede. A trava que vale continua sendo a do
+     botão de ação. */
+  ok('passo 2 aberto e alcançável',
+     !(await pg.locator('#cardTr').evaluate(e=>e.classList.contains('fechado'))));
+  ok('e os ajustes dele nascem guardados na gaveta',
+     !(await pg.locator('#ajustesCx').evaluate(e=>e.classList.contains('aberta'))));
   ok('e a AÇÃO do passo 2 continua desabilitada', await pg.locator('#auto').isDisabled());
   ok('as opções de frames nascem alcançáveis', !(await inerte('framesCorpo')));
   ok('passo 5 (prompt) travado',      await inerte('promptCard'));

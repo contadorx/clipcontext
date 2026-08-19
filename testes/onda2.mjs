@@ -71,11 +71,11 @@ console.log('\n[1] tarjar');
 {
   await abrirLente(0);
   /* O rótulo compara com o CONVITE, e não com o nome da ferramenta: ligado, o
-     botão passa a dizer "pronto"/"terminar". "Tapar um dado" é o convite —
+     botão passa a dizer "pronto"/"terminar". "Tarjar um dado" é o convite —
      antes era só "Tarjar", um verbo solto que escondia o objeto e não dizia o
      que ia acontecer com a imagem. */
   ok('o modo tarja começa desligado',
-     (await pg.locator('#tarjaModo').textContent()).trim() === 'Tapar um dado',
+     (await pg.locator('#tarjaModo').textContent()).trim() === 'Tarjar um dado',
      (await pg.locator('#tarjaModo').textContent()).trim());
   await pg.click('#tarjaModo');
   await pg.waitForTimeout(200);

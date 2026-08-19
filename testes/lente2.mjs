@@ -68,7 +68,11 @@ console.log('[1] o exemplo escolhe o cenário — e DIZ que escolheu');
 console.log('\n[2] as ações da imagem dizem o objeto, e não só o verbo');
 {
   const fonte = fs.readFileSync(ROOT + '/app.html', 'utf8');
-  for (const [antes, agora] of [['Tarjar', 'Tapar um dado'],
+  /* "Tapar" saiu: o produto inteiro chama isto de TARJA — `aplicarTarjas`,
+     `tarjaauto.mjs`, "Terminar de tarjar", "Tirar as tarjas". Só o botão da
+     lente dizia outra coisa, e uma ferramenta que usa dois nomes para o mesmo
+     gesto faz a pessoa procurar duas vezes. */
+  for (const [antes, agora] of [['o verbo solto', 'Tarjar um dado'],
                                 ['Destacar', 'Apontar na imagem'],
                                 ['Recortar', 'Cortar as bordas'],
                                 ['Duplicar', 'Duplicar este passo'],

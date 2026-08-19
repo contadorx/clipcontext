@@ -70,7 +70,7 @@ console.log('[1] antes de qualquer coisa, 3 e 4 já estão travados — e dizend
 
 console.log('\n[2] gravando: continuam travados, e a dica muda de assunto');
 await pg.locator('#recTr').uncheck();
-await pg.locator('#recCount').uncheck();
+await pg.evaluate(() => window.__contagem(1));
 await pg.locator('#rec').click();
 await pg.waitForSelector('#recStop:visible', { timeout: 40000 });
 await pg.waitForTimeout(2500);

@@ -75,7 +75,7 @@ await pg.waitForTimeout(500);
 console.log('[1] gravando com um modelo que repete a mesma frase');
 /* A contagem regressiva de 3 é opção do produto e vem ligada; num teste
      que mede a gravação ela só adiciona três segundos de espera por rodada. */
-  await pg.evaluate(() => { const c = document.getElementById('recCount'); if (c) c.checked = false; });
+  await pg.evaluate(() => window.__contagem(1));
   await pg.locator('#rec').click();
 await pg.waitForSelector('#recStop:visible', { timeout: 40000 });
 await pg.waitForTimeout(26000);            // mais de uma janela de ASR

@@ -526,15 +526,32 @@
   .cenario .status{flex-basis:100%;margin:0}
   /* O título que separa o que se FAZ do que se afina. Discreto de propósito:
      ele não é um passo, é uma gaveta que quase ninguém abre. */
-  .ajustesTit{margin:26px 0 12px;padding-top:16px;border-top:1px solid var(--line);
+  .ajustesTit{display:flex;align-items:center;gap:8px;width:100%;
+        margin:26px 0 0;padding:16px 0 10px;border:0;border-top:1px solid var(--line);
+        background:none;box-shadow:none;border-radius:0;text-align:left;cursor:pointer;
         font:600 13px/1.3 inherit;color:var(--muted);text-transform:uppercase;
         letter-spacing:.06em}
-  .faixa{position:fixed;left:0;right:0;bottom:0;z-index:60;display:flex;gap:12px;
-        align-items:center;padding:9px 16px;background:var(--panel);
-        border-top:1px solid var(--line);box-shadow:0 -6px 18px rgba(0,0,0,.10);
-        font-size:13.5px;color:var(--ink)}
-  .faixaTxt{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .faixaBar{flex:0 0 160px;height:6px;border-radius:4px;background:var(--line);overflow:hidden}
+  .ajustesTit:hover{color:var(--ink)}
+  .ajustesTit .seta{transition:transform .2s ease;display:inline-block;font-size:11px}
+  .ajustesTit[aria-expanded="true"] .seta{transform:rotate(90deg)}
+  /* A gaveta usa a mesma mecânica da dobra dos cartões: grid-template-rows de
+     0fr a 1fr anima sem precisar medir altura em JavaScript, e o conteúdo
+     continua no documento (Ctrl+F e leitor de tela continuam achando). */
+  .gaveta{display:grid;grid-template-rows:0fr;transition:grid-template-rows .24s ease}
+  .gaveta > div{overflow:hidden;min-height:0}
+  .gaveta.aberta{grid-template-rows:1fr;margin-top:12px}
+  @media (prefers-reduced-motion:reduce){ .gaveta{transition:none} }
+  /* Maior. Na primeira versão ela tinha 9px de respiro, texto de 13,5 e uma
+     barra de 6px de altura — do tamanho de um rodapé, quando o trabalho dela é
+     ser o ÚNICO sinal de vida numa espera de vinte minutos com a página rolada.
+     Quem está esperando não deve precisar procurar onde está o progresso. */
+  .faixa{position:fixed;left:0;right:0;bottom:0;z-index:60;display:flex;gap:16px;
+        align-items:center;padding:15px 20px;background:var(--panel);
+        border-top:2px solid var(--accent);box-shadow:0 -8px 24px rgba(0,0,0,.14);
+        font-size:15.5px;color:var(--ink)}
+  .faixaTxt{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+        font-weight:550}
+  .faixaBar{flex:0 0 240px;height:10px;border-radius:5px;background:var(--line);overflow:hidden}
   .faixaBar i{display:block;height:100%;width:0;background:var(--accent);transition:width .2s}
   /* Listrada quando não se sabe a porcentagem — que é diferente de zero por
      cento, e as duas coisas mereciam telas diferentes. */
@@ -542,8 +559,11 @@
         var(--accent) 0 12px, transparent 12px 24px);animation:faixaAnda 1s linear infinite}
   @keyframes faixaAnda{ to{ background-position:24px 0 } }
   @media (prefers-reduced-motion:reduce){ .faixaBar.solta i{animation:none} }
-  body.comFaixa{padding-bottom:52px}
-  @media (max-width:560px){ .faixaBar{flex-basis:80px} }
+  /* A folga acompanha a faixa: ela cresceu, e o último passo não pode ficar
+     por baixo dela. Este número e a altura da faixa são a mesma medida escrita
+     duas vezes, e `espera.mjs` cobra que o fim da página continua alcançável. */
+  body.comFaixa{padding-bottom:76px}
+  @media (max-width:560px){ .faixaBar{flex-basis:110px} .faixa{font-size:14px;padding:12px 14px} }
   /* A caixa da gravação que ficou para trás. Contorno na cor da marca pelo mesmo
      motivo do seletor de cenário sem resposta: é uma pergunta em aberto, e quem
      abre a ferramenta depois de perder duas horas precisa ver isso antes de ver
@@ -978,10 +998,12 @@
                clique, na ajuda "?" ao lado. -->
           <label class="opt"><input type="checkbox" id="recTr" checked><span data-i18n="recTrLbl"></span>
             <b class="optNota rec" id="optTr" data-i18n="recomendado"></b></label>
-          <!-- Três segundos antes de começar. Sem eles, o primeiro quadro é
-               quase sempre o seletor de tela do navegador — a janela que a
-               pessoa acabou de fechar — e ela descobre isso na revisão. -->
-          <label class="opt"><input type="checkbox" id="recCount" checked><span data-i18n="recCountLbl"></span></label>
+          <!-- A contagem de três segundos NÃO é mais uma caixa: ela sempre
+               acontece. Sem ela o primeiro quadro é quase sempre o seletor de
+               tela do navegador — a janela que a pessoa acabou de fechar — e
+               ela descobre isso na revisão. Ninguém desliga isso de propósito;
+               a caixa só ocupava uma linha da lista de opções para oferecer um
+               jeito de piorar a própria gravação. -->
           <!-- "Esqueci gravando" é o acidente mais caro que esta ferramenta
                pode causar. O limite é generoso e desligável, e ele PARA como se
                a pessoa tivesse apertado Parar — o documento sai inteiro. -->
@@ -989,21 +1011,19 @@
             <input type="number" id="recAutoMin" value="45" min="1" max="240"
                    style="width:66px;padding:4px 7px;font-size:13px;margin-left:8px">
             <span class="status" data-i18n="recAutoMinLbl"></span></label>
-          <!-- O espelho no disco.
+          <!-- O espelho no disco TAMBÉM saiu da lista, e é padrão.
 
-               A ferramenta promete não guardar nada, e essa promessa é o
-               argumento inteiro do produto — então esta caixa não podia ser
-               ligada em silêncio. Ela está aqui, marcada, dizendo o que faz e
-               onde: no armazenamento privado do NAVEGADOR, na máquina de quem
-               usa, sem sair de lá; e apagado sozinho assim que um documento sai.
+               Ele continua sendo o que era: as telas ficam no armazenamento
+               privado do NAVEGADOR, na máquina de quem usa, sem sair de lá, e
+               apagadas sozinhas assim que um documento sai. O que mudou é que
+               isso deixou de ser uma pergunta feita antes de cada gravação —
+               a assimetria não justificava a pergunta: desligado, um travamento
+               aos 110 minutos apaga duas horas; ligado, ficam alguns megabytes
+               no disco de quem usa até o documento ficar pronto.
 
-               Marcada por padrão porque o custo de errar tem tamanhos muito
-               diferentes: desligada, um travamento aos 110 minutos apaga duas
-               horas; ligada, ficam alguns megabytes no disco de quem usa até o
-               documento ficar pronto. A caixa desliga, e o bloco do passo 1
-               apaga na hora. -->
-          <label class="opt hide" id="recEspelhoCx"><input type="checkbox" id="recEspelho" checked><span data-i18n="recEspelhoLbl"></span>
-            <b class="optNota rec" data-i18n="recEspelhoNota"></b></label>
+               A explicação não sumiu junto: ela mora na ajuda "?" logo abaixo e
+               na página de privacidade, que é onde uma promessa de produto é
+               lida por inteiro em vez de espremida ao lado de uma caixa. -->
           <!-- O clipe e a webcam saíram da lista e viraram um botão: são a
                opção mais rara e a que mais precisa de explicação, e as duas
                juntas ocupavam metade do cartão para servir a um cenário só. -->
@@ -1145,7 +1165,21 @@
     <div class="status" id="status"></div>
     <p class="note"><b data-i18n="noteB"></b> <span data-i18n="noteT"></span></p>
 
-    <h3 class="ajustesTit" data-i18n="ajustesTit"></h3>
+    <!-- ---- OS AJUSTES VIRARAM GAVETA DE VERDADE ----
+
+         O título já dizia "quase ninguém precisa mexer" e mesmo assim os
+         dezesseis controles ficavam todos abertos embaixo dele. Dizer que algo
+         é raro e mostrá-lo inteiro é a mesma parede de antes com uma legenda.
+
+         Agora é um botão que abre. Fechado, o passo 2 é o que ele realmente é:
+         dois botões e uma linha de status. Quem precisa do modelo de voz, da
+         placa, da sensibilidade ou do limite de quadros abre — e continua tudo
+         lá dentro, na mesma ordem, sem nada escondido de verdade. -->
+    <button type="button" class="ajustesTit" id="ajustesBtn"
+            aria-expanded="false" aria-controls="ajustesCx">
+      <span class="seta" aria-hidden="true">▸</span><span data-i18n="ajustesTit"></span>
+    </button>
+    <div id="ajustesCx" class="gaveta"><div>
 
     <div id="trAuto">
     <div class="autobox">
@@ -1263,6 +1297,7 @@
       </div>
     </div>
     </div><!-- /framesCorpo -->
+    </div></div><!-- /ajustesCx -->
 
     <!-- Uma decisão, três botões, e não dois cartões em fila.
 
@@ -1501,8 +1536,14 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
             max-width:620px;padding-right:6px;line-height:1.55"></span>
     </div>
     <!-- Vocabulário do domínio. Fica logo abaixo da transcrição porque é ali que
-         o erro aparece, e não num painel de configuração que ninguém abre. -->
-    <div class="row" style="margin-top:10px;align-items:flex-start;gap:8px">
+         o erro aparece, e não num painel de configuração que ninguém abre.
+
+         É do Personal e do Team, e segue a MESMA regra do logotipo do cliente:
+         sem plano a linha não aparece. Mostrar um botão que abre uma caixa
+         dizendo "isto é pago" é pior do que não mostrar — ocupa a mesma altura
+         e entrega uma recusa em vez de uma ferramenta. Onde ele é anunciado é
+         na página de preços, que é onde se decide comprar. -->
+    <div class="row hide" id="vocRow" style="margin-top:10px;align-items:flex-start;gap:8px">
       <button class="ghost sm" id="vocModo" data-i18n="vocBtn"></button>
       <span class="status" id="vocMsg"></span>
     </div>
@@ -1513,12 +1554,29 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       <div class="row" style="margin-top:8px">
         <button class="ghost sm" id="vocAplicar" data-i18n="vocAplicar"></button>
         <button class="ghost sm hide" id="vocDesfazer" data-i18n="vocDesfazer"></button>
-        <!-- Desligada por padrão, e continua desligada: numa sessão de pesquisa
-             a hesitação É o dado. Quem quiser um passo a passo limpo marca. -->
-        <label class="chk"><input type="checkbox" id="hesitar"><span data-i18n="hesitarLbl"></span></label>
       </div>
-      <p class="note hide" id="hesitarNota" data-i18n="hesitarUx" style="margin:6px 0 0"></p>
     </div>
+    <!-- TIRAR HESITAÇÕES SAIU DE DENTRO DA CAIXA DE VOCABULÁRIO.
+
+         Ela morava lá por vizinhança — as duas mexem no texto — e isso passou a
+         custar quando "Termos do seu sistema" virou item de plano: uma caixa
+         gratuita ficaria escondida atrás de um botão pago. São coisas
+         diferentes e agora moram em lugares diferentes.
+
+         Desligada por padrão, e continua desligada: numa sessão de pesquisa a
+         hesitação É o dado. Quem quiser um passo a passo limpo marca. -->
+    <div class="row" style="margin-top:10px;align-items:center;gap:8px">
+      <label class="chk"><input type="checkbox" id="hesitar"><span data-i18n="hesitarLbl"></span></label>
+      <!-- O botão PRÓPRIO. Antes a limpeza só acontecia pelo "Corrigir os
+           termos", que agora é do Personal e do Team: sem ele, uma função
+           gratuita ficaria sem botão nenhum. Quem tem plano continua tendo as
+           duas num gesto só — a caixa marcada faz o "Corrigir os termos"
+           limpar junto, como sempre fez. -->
+      <button class="ghost sm hide" id="hesAplicar" data-i18n="hesAplicarBtn"></button>
+      <button class="ghost sm hide" id="hesDesfazer" data-i18n="vocDesfazer"></button>
+      <span class="status" id="hesMsg"></span>
+    </div>
+    <p class="note hide" id="hesitarNota" data-i18n="hesitarUx" style="margin:6px 0 0"></p>
     <!-- Baixar a transcrição solta saiu.
 
          Eram mais três arquivos numa ferramenta que já entrega quinze, e não é
@@ -2488,7 +2546,6 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recAutoLbl:'Parar sozinho depois de', recAutoMinLbl:'minutos',
       recAutoParou:'A gravação parou sozinha no limite de {0} minutos que você definiu. Tudo o que foi capturado até aqui está no documento.',
       atalhos:'Atalhos, quando o foco não está num campo: G grava e para, M marca a tela, P pausa.',
-      recCountLbl:'Contar 3 antes de começar',
       recCamNao:'Não consegui abrir a webcam; a gravação continua sem ela.',
       recCamNota:'O rosto é desenhado por cima da tela, nos quadros e nos clipes. Ele NÃO participa da detecção de mudança — senão cada respiração viraria um passo novo. Como todo o resto, a imagem não sai do seu computador; e como é rosto, peça permissão a quem está sendo filmado.',
       camTD:'canto de cima, à direita', camTE:'canto de cima, à esquerda', camP:'pequena', camM:'média', camG:'grande',
@@ -2551,6 +2608,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       clipeDescartado:'Vídeos dos momentos descartados em {0}.',
       recCountN:'Começando em {0}…',
       hesitarLbl:'tirar hesitações (é…, hã…, tipo…)',
+      hesAplicarBtn:'Tirar agora',
       hesitarFeito:'{0} hesitações tiradas.',
       hesitarNada:'Nenhuma hesitação encontrada.',
       hesitarUx:'Numa sessão de pesquisa a hesitação É o dado — pense duas vezes antes de tirá-la.',
@@ -2581,8 +2639,6 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       reabrirBtn:'Abrir um documento gerado antes',
       resetNota:'joga fora o que está na tela e começa do zero',
       reabrirDica:'para corrigir um passo sem regravar — aceita o .json e o .zip que saíram daqui',
-      recEspelhoLbl:'Guardar as telas no meu computador enquanto gravo',
-      recEspelhoNota:'para não perder tudo se a aba fechar',
       espTit:'Uma gravação ficou aqui.',
       espSub:'{0} telas, de {1} ({2}). Elas foram guardadas no seu computador enquanto você gravava, porque nenhum documento chegou a sair. Nada disso saiu do seu aparelho.',
       espAbrir:'Trazer de volta',
@@ -2642,7 +2698,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       evPerfil:'O sistema e quem executou ficam guardados enquanto esta aba estiver aberta, para você não redigitar a cada caso. Fechou a aba, some.',
       evLimpar:'Esquecer', evSalvar:'Salvar perfil', evAbrir:'Abrir perfil',
       ampliar:'Ampliar este passo', fecharBtn:'Fechar',
-      lenteRevVolta:'Voltar para a revisão', lenteRevFim:'Finalizar a revisão', demoCenario:'Escolhemos “Evidência de teste” para o exemplo — troque no passo 1 se o seu caso for outro.', lenteAcoes:'O que dá para fazer com esta imagem', lenteNotaResta:'{0} caracteres restantes — ela vira o título deste passo no documento.', tarjaBtn:'Tapar um dado', tarjaFim:'Terminar de tarjar', tarjaLimpar:'Tirar as tarjas',
+      lenteRevVolta:'Voltar para a revisão', lenteRevFim:'Finalizar a revisão', demoCenario:'Escolhemos “Evidência de teste” para o exemplo — troque no passo 1 se o seu caso for outro.', lenteAcoes:'O que dá para fazer com esta imagem', lenteNotaResta:'{0} caracteres restantes — ela vira o título deste passo no documento.', tarjaBtn:'Tarjar um dado', tarjaFim:'Terminar de tarjar', tarjaLimpar:'Tirar as tarjas',
       tarjaComo:'Arraste sobre a imagem para cobrir. Clique numa tarja para tirá-la.',
       tarjaN:'{0} tarja(s) neste passo — elas são queimadas na imagem que sai no documento.',
       tarjaTirar:'clique para tirar esta tarja',
@@ -3059,7 +3115,6 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recAutoLbl:'Stop by itself after', recAutoMinLbl:'minutes',
       recAutoParou:'The recording stopped by itself at the {0}-minute limit you set. Everything captured up to here is in the document.',
       atalhos:'Shortcuts, when focus is not in a field: G records and stops, M marks the screen, P pauses.',
-      recCountLbl:'Count 3 before starting',
       recCamNao:'I could not open the webcam; the recording continues without it.',
       recCamNota:'The face is drawn on top of the screen, in the frames and in the clips. It does NOT take part in change detection — otherwise every breath would become a new step. Like everything else, the image never leaves your computer; and because it is a face, ask permission from whoever is being filmed.',
       camTD:'top right', camTE:'top left', camP:'small', camM:'medium', camG:'large',
@@ -3116,6 +3171,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       clipeDescartado:'Moment videos discarded on {0}.',
       recCountN:'Starting in {0}…',
       hesitarLbl:'remove hesitations (um…, uh…, like…)',
+      hesAplicarBtn:'Remove them now',
       hesitarFeito:'{0} hesitations removed.',
       hesitarNada:'No hesitations found.',
       hesitarUx:'In a research session the hesitation IS the data — think twice before removing it.',
@@ -3146,8 +3202,6 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       reabrirBtn:'Open a document made earlier',
       resetNota:'throws away what is on screen and starts from zero',
       reabrirDica:'to fix one step without re-recording — takes the .json and the .zip that came out of here',
-      recEspelhoLbl:'Keep the screens on my computer while I record',
-      recEspelhoNota:'so nothing is lost if the tab closes',
       espTit:'A recording was left here.',
       espSub:'{0} screens, from {1} ({2}). They were kept on your computer while you were recording, because no document ever came out. None of it left your device.',
       espAbrir:'Bring it back',
@@ -3624,7 +3678,6 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recAutoLbl:'Parar solo después de', recAutoMinLbl:'minutos',
       recAutoParou:'La grabación se detuvo sola en el límite de {0} minutos que definiste. Todo lo capturado hasta aquí está en el documento.',
       atalhos:'Atajos, cuando el foco no está en un campo: G graba y detiene, M marca la pantalla, P pausa.',
-      recCountLbl:'Contar 3 antes de empezar',
       recCamNao:'No he podido abrir la webcam; la grabación continúa sin ella.',
       recCamNota:'La cara se dibuja encima de la pantalla, en los fotogramas y en los clips. NO participa en la detección de cambio — si no, cada respiración sería un paso nuevo. Como todo lo demás, la imagen no sale de tu ordenador; y como es una cara, pide permiso a quien está siendo filmado.',
       camTD:'arriba a la derecha', camTE:'arriba a la izquierda', camP:'pequeña', camM:'mediana', camG:'grande',
@@ -3681,6 +3734,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       clipeDescartado:'Vídeos de los momentos descartados el {0}.',
       recCountN:'Empezando en {0}…',
       hesitarLbl:'quitar vacilaciones (eh…, este…, o sea…)',
+      hesAplicarBtn:'Quitarlas ahora',
       hesitarFeito:'{0} vacilaciones quitadas.',
       hesitarNada:'No encontré vacilaciones.',
       hesitarUx:'En una sesión de investigación la vacilación ES el dato — piénsalo dos veces antes de quitarla.',
@@ -3711,8 +3765,6 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       reabrirBtn:'Abrir un documento hecho antes',
       resetNota:'tira lo que está en pantalla y empieza de cero',
       reabrirDica:'para corregir un paso sin volver a grabar — acepta el .json y el .zip que salieron de aquí',
-      recEspelhoLbl:'Guardar las pantallas en mi ordenador mientras grabo',
-      recEspelhoNota:'para no perderlo todo si se cierra la pestaña',
       espTit:'Quedó una grabación aquí.',
       espSub:'{0} pantallas, del {1} ({2}). Se guardaron en tu ordenador mientras grababas, porque no llegó a salir ningún documento. Nada de esto salió de tu dispositivo.',
       espAbrir:'Recuperarla',
@@ -4188,7 +4240,6 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recAutoLbl:'Von selbst stoppen nach', recAutoMinLbl:'Minuten',
       recAutoParou:'Die Aufnahme wurde beim von Ihnen gesetzten Limit von {0} Minuten von selbst gestoppt. Alles bis hierher Erfasste steht im Dokument.',
       atalhos:'Tastenkürzel, wenn der Fokus nicht in einem Feld liegt: G startet und stoppt die Aufnahme, M markiert den Bildschirm, P pausiert.',
-      recCountLbl:'Vor dem Start bis 3 zählen',
       recCamNao:'Die Webcam konnte nicht geöffnet werden; die Aufnahme läuft ohne sie weiter.',
       recCamNota:'Das Gesicht wird über den Bildschirm gezeichnet, in den Screenshots und in den Clips. Es nimmt NICHT an der Änderungserkennung teil — sonst würde jeder Atemzug zu einem neuen Schritt. Wie alles andere verlässt das Bild Ihren Computer nicht; und weil es ein Gesicht ist, holen Sie die Erlaubnis der gefilmten Person ein.',
       camTD:'oben rechts', camTE:'oben links', camP:'klein', camM:'mittel', camG:'groß',
@@ -4251,6 +4302,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       clipeDescartado:'Videos der Momente verworfen am {0}.',
       recCountN:'Beginn in {0}…',
       hesitarLbl:'Füllwörter entfernen (äh…, ähm…, also…)',
+      hesAplicarBtn:'Jetzt entfernen',
       hesitarFeito:'{0} Füllwörter entfernt.',
       hesitarNada:'Keine Füllwörter gefunden.',
       hesitarUx:'In einer Forschungssitzung SIND die Füllwörter die eigentlichen Daten — überlegen Sie zweimal, bevor Sie sie entfernen.',
@@ -4281,8 +4333,6 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       reabrirBtn:'Ein zuvor erzeugtes Dokument öffnen',
       resetNota:'verwirft, was auf dem Bildschirm steht, und beginnt bei null',
       reabrirDica:'um einen Schritt zu korrigieren, ohne neu aufzunehmen — nimmt die .json und die .zip, die hier entstanden sind',
-      recEspelhoLbl:'Die Bildschirme während der Aufnahme auf meinem Computer behalten',
-      recEspelhoNota:'damit nichts verloren geht, wenn der Tab schließt',
       espTit:'Hier ist eine Aufnahme liegen geblieben.',
       espSub:'{0} Bildschirme vom {1} ({2}). Sie wurden während der Aufnahme auf Ihrem Computer behalten, weil nie ein Dokument herauskam. Nichts davon hat Ihr Gerät verlassen.',
       espAbrir:'Zurückholen',
@@ -4758,7 +4808,6 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recAutoLbl:'Arrêter tout seul après', recAutoMinLbl:'minutes',
       recAutoParou:'L’enregistrement s’est arrêté tout seul à la limite de {0} minutes que vous avez définie. Tout ce qui a été capturé jusqu’ici est dans le document.',
       atalhos:'Raccourcis, quand le focus n’est pas dans un champ : G lance et arrête l’enregistrement, M marque l’écran, P met en pause.',
-      recCountLbl:'Compter 3 avant de démarrer',
       recCamNao:'Impossible d’ouvrir la webcam ; l’enregistrement continue sans elle.',
       recCamNota:'Le visage est dessiné par-dessus l’écran, dans les captures et dans les clips. Il ne participe PAS à la détection de changement — sinon chaque respiration deviendrait une nouvelle étape. Comme tout le reste, l’image ne quitte pas votre ordinateur ; et comme il s’agit d’un visage, demandez l’autorisation à la personne filmée.',
       camTD:'en haut à droite', camTE:'en haut à gauche', camP:'petite', camM:'moyenne', camG:'grande',
@@ -4821,6 +4870,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       clipeDescartado:'Vidéos des moments supprimées le {0}.',
       recCountN:'Démarrage dans {0}…',
       hesitarLbl:'retirer les hésitations (euh…, hum…, genre…)',
+      hesAplicarBtn:'Les retirer maintenant',
       hesitarFeito:'{0} hésitations retirées.',
       hesitarNada:'Aucune hésitation trouvée.',
       hesitarUx:'Dans une session de recherche, l’hésitation EST la donnée — réfléchissez à deux fois avant de la retirer.',
@@ -4851,8 +4901,6 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       reabrirBtn:'Ouvrir un document généré auparavant',
       resetNota:'jette ce qui est à l’écran et repart de zéro',
       reabrirDica:'pour corriger une étape sans réenregistrer — accepte le .json et le .zip sortis d’ici',
-      recEspelhoLbl:'Garder les écrans sur mon ordinateur pendant que j’enregistre',
-      recEspelhoNota:'pour ne rien perdre si l’onglet se ferme',
       espTit:'Un enregistrement est resté ici.',
       espSub:'{0} écrans, du {1} ({2}). Ils ont été gardés sur votre ordinateur pendant l’enregistrement, parce qu’aucun document n’est sorti. Rien de tout cela n’a quitté votre appareil.',
       espAbrir:'Le récupérer',
@@ -5464,7 +5512,15 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
          sentido. */
       trancar('trAuto', true); trancar('trManual', true); trancar('framesCorpo', true);
       dica('hintTr', 'lockHint');
-      dobrar('cardTr', false);
+      /* ABERTO, mesmo sem vídeo. Fechado, o passo 2 era uma faixa cinza que não
+         dizia o que ele faz — e a pergunta que ele gerava era "isto só serve
+         para vídeo enviado?". Não serve: o modelo de voz, o idioma, a placa e a
+         sensibilidade valem igual para a gravação ao vivo, e a resposta certa a
+         essa pergunta é mostrar os dois botões, não escondê-los.
+
+         Isto só passou a caber depois que os ajustes viraram gaveta: aberto, o
+         cartão agora são dois botões e uma linha, não dezesseis controles. */
+      dobrar('cardTr', true);
     }
     /* O passo 4 não some mais. Escondê-lo deixava a numeração visível em
        1, 2, 3, 5 — um buraco que a pessoa lê como defeito, e que ficou gritante
@@ -6739,6 +6795,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     $('clipeApagar').classList.toggle('hide', !tem);
   }
   let contando = false, cancelouContagem = false;
+  /* Quantos segundos a contagem conta. Três para quem usa; os testes encurtam
+     para 1 pela régua abaixo, e continuam percorrendo o mesmo laço. */
+  let SEG_CONTAGEM = 3;
+  window.__contagem = n => { SEG_CONTAGEM = Math.max(1, Math.min(9, n | 0)); };
   /* Relógio próprio da finalização.
 
      O que a pessoa relatou: aperta Parar e a tela fica parada, sem dizer se
@@ -8207,13 +8267,21 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
        gravando". Ela acontece DEPOIS de tudo estar montado e ANTES do relógio
        zero — a hora de relógio da evidência tem que ser a do primeiro quadro
        real, não a do momento em que a pessoa clicou. */
-    if ($('recCount') && $('recCount').checked) {
+    /* Sempre. A caixa "Contar 3 antes de começar" saiu: ela existia só para
+       oferecer o jeito de estragar o primeiro quadro da própria gravação.
+
+       `SEG_CONTAGEM` é um NÚMERO, e não um desvio: os testes o encurtam para 1
+       para não pagar três segundos vezes vinte e cinco arquivos, e o que roda
+       lá é exatamente o mesmo laço que roda aqui — a diferença é quantas voltas
+       ele dá. Um `if (teste) pule` seria um caminho que nunca é exercitado, que
+       é o defeito que este projeto já pagou caro. */
+    {
       /* Parar já vale AQUI. Três segundos depois de escolher a tela é
          exatamente quando a pessoa percebe que compartilhou a janela errada —
          e um botão que só aparece depois disso chega tarde. */
       contando = true; cancelouContagem = false;
       $('rec').classList.add('hide'); $('recStop').classList.remove('hide');
-      for (let c = 3; c >= 1 && !cancelouContagem; c--) {
+      for (let c = SEG_CONTAGEM; c >= 1 && !cancelouContagem; c--) {
         /* Grande de propósito: a contagem é o único momento em que a pessoa
            precisa OLHAR para a página em vez de para a tela que vai gravar, e
            num status de 13px ela passava despercebida — quem não a via
@@ -9960,13 +10028,26 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      que está escrito perderia a correção na próxima janela, que reescreve o
      campo. Um texto que se desfaz enquanto se digita é pior do que um campo
      vazio. Ele destrava no fim, que é quando corrigir passa a valer. */
-  let ultimoTexto = 0;
+  let ultimoTexto = 0, jaLevouAoTexto = false;
   function escreverParcial(out){
     const agora2 = performance.now();
     if (agora2 - ultimoTexto < 900) return;
     ultimoTexto = agora2;
     const campo = $('tr');
     if (!campo) return;
+    /* ---- E A PESSOA PRECISA ESTAR VENDO O CAMPO ----
+
+       O texto enchia, e ninguém via: `#tr` mora no passo 3, e quem aperta
+       "Transcrever a fala" está olhando para o passo 2. Enquanto as telas ainda
+       dependiam de um clique, o primeiro quadro levava a página para baixo e o
+       campo vinha junto por acidente — mas depois que a varredura passou a
+       acontecer sozinha, esse empurrão já tinha acontecido ANTES de a
+       transcrição começar, e ela ficava enchendo um campo fora da tela.
+
+       Uma vez só, e pela mesma regra do primeiro quadro: rolar a página por
+       baixo de quem está lendo é a coisa mais irritante que uma tela faz. */
+    if ($('prevCard')) $('prevCard').classList.remove('hide');
+    if (!jaLevouAoTexto) { jaLevouAoTexto = true; irPara('prevCard', true); }
     campo.readOnly = true;
     campo.value = 'WEBVTT\n\n' + out.join('\n\n');
     /* Rolado para o fim: o que interessa é a linha que acabou de chegar. */
@@ -10005,6 +10086,11 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     $('licTirar').classList.toggle('hide', !ativo);
     $('licChave').classList.toggle('hide', ativo);
     $('licAtivar').classList.toggle('hide', ativo);
+    /* "Termos do seu sistema" segue o logotipo do cliente: é do Personal e do
+       Team. Fica aqui, junto do resto do estado da licença, e não numa segunda
+       função que alguém teria que lembrar de chamar quando a chave entra. */
+    if ($('vocRow')) $('vocRow').classList.toggle('hide', !ativo);
+    if (!ativo && $('vocBox')) $('vocBox').classList.add('hide');
     if (ativo) $('licMsg').innerHTML =
       `<span class="ok">${t('licValida', licenca.q, licenca.n, licenca.a)}</span>` +
       /* A quem esta licença foi dada, escrito onde a pessoa vê. Não impede o
@@ -11399,8 +11485,6 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     const cx = $('espelhoCx');
     if (!cx) return;
     const serve = await espelhoServe();
-    if ($('recEspelhoCx')) $('recEspelhoCx').classList.toggle('hide', !serve);
-    if ($('recEspelho')) $('recEspelho').checked = espelhoQuer();
     if (!serve) { cx.classList.add('hide'); return; }
     try { espelhoLista = await sessoesGuardadas(); } catch (e) { espelhoLista = []; }
     if (!espelhoLista.length) { cx.classList.add('hide'); return; }
@@ -13161,20 +13245,34 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      A pergunta "sobrou alguma coisa aqui?" é feita uma vez, ao abrir, e é ela
      que faz o bloco do passo 1 aparecer. Sem `await`: ler o disco não pode
      atrasar a primeira tela de quem só quer apertar Gravar. */
-  if ($('recEspelho')) {
-    $('recEspelho').onchange = async () => {
-      const quer = $('recEspelho').checked;
-      try { localStorage.setItem(ESPELHO_CHAVE, quer ? 'sim' : 'nao'); } catch (e) {}
-      if (!quer) {
-        /* Desmarcar não é só "pare de guardar daqui para frente": o que já está
-           no disco some junto, na hora. Uma caixa de privacidade que deixa
-           rastro para trás não é uma caixa de privacidade. */
-        espelho = null;
-        for (const s2 of await sessoesGuardadas()) await descartarEspelho(s2.id);
-      }
-      await pintarEspelho();
+  /* A caixa que ligava e desligava o espelho saiu do cartão de gravar: ele é
+     padrão. `espelhoQuer()` continua lendo a mesma chave — quem já tinha
+     desligado continua desligado, e o botão "jogar fora" do bloco de recuperação
+     continua apagando o que está no disco. O que deixou de existir é a pergunta
+     antes de cada gravação. */
+  /* ---- a gaveta de ajustes do passo 2 ----
+     Fechada por padrão, e ela LEMBRA: quem abriu uma vez quase sempre é quem
+     mexe sempre (troca o modelo de voz, usa a placa), e fechar de novo a cada
+     recarga seria fazer essa pessoa procurar todo dia o que ela usa todo dia. */
+  const AJUSTES_CHAVE = 'Walkstamp.ajustes';
+  if ($('ajustesBtn')) {
+    const pintarGaveta = a => {
+      $('ajustesCx').classList.toggle('aberta', a);
+      $('ajustesBtn').setAttribute('aria-expanded', String(a));
+    };
+    let aberta = false;
+    try { aberta = localStorage.getItem(AJUSTES_CHAVE) === 'sim'; } catch (e) {}
+    pintarGaveta(aberta);
+    $('ajustesBtn').onclick = () => {
+      aberta = !aberta;
+      pintarGaveta(aberta);
+      try { localStorage.setItem(AJUSTES_CHAVE, aberta ? 'sim' : 'nao'); } catch (e) {}
+      /* Abrir a gaveta é mexer nos ajustes: quem abre está dirigindo, e a
+         varredura automática não disputa o volante. */
+      cancelarVarreduraAgendada();
     };
   }
+
   if ($('espelhoAbrir')) $('espelhoAbrir').onclick = () => {
     if (espelhoLista[0]) trazerDoEspelho(espelhoLista[0]);
   };
@@ -16566,7 +16664,34 @@ ${relsSlide[i]}</Relationships>`) });
     const el = $('hesitarNota'); if (!el) return;
     el.classList.toggle('hide', $('modelo').value !== 'usabilidade' || !$('hesitar').checked);
   }
-  $('hesitar').onchange = pintarHesitar;
+  $('hesitar').onchange = () => { pintarHesitar(); pintarHesBtn(); };
+
+  /* ---- tirar hesitações, sozinho ----
+     O botão só aparece com a caixa marcada: marcar e não ter o que apertar é
+     tão ruim quanto ter um botão que não faz nada até alguém marcar. */
+  let hesAntes = null;
+  function pintarHesBtn(){
+    if ($('hesAplicar')) $('hesAplicar').classList.toggle('hide', !$('hesitar').checked);
+    if (!$('hesitar').checked && $('hesDesfazer')) $('hesDesfazer').classList.add('hide');
+  }
+  pintarHesBtn();
+  if ($('hesAplicar')) $('hesAplicar').onclick = () => {
+    const antes = $('tr').value;
+    if (!antes.trim()) { $('hesMsg').innerHTML = `<span class="err">${t('vocSemTexto')}</span>`; return; }
+    const L = ($('lang').value || LANG || 'pt').slice(0, 2);
+    const rh = tirarHesitacoes(antes, LETRAS[L] ? L : 'pt');
+    if (!rh.trocas) { $('hesMsg').textContent = t('hesitarNada'); return; }
+    hesAntes = antes;
+    $('tr').value = rh.texto; refreshTr();
+    $('hesDesfazer').classList.remove('hide');
+    $('hesMsg').innerHTML = `<span class="ok">${t('hesitarFeito', rh.trocas)}</span>`;
+  };
+  if ($('hesDesfazer')) $('hesDesfazer').onclick = () => {
+    if (hesAntes == null) return;
+    $('tr').value = hesAntes; hesAntes = null; refreshTr();
+    $('hesDesfazer').classList.add('hide');
+    $('hesMsg').textContent = t('vocDesfeito');
+  };
 
   $('vocAplicar').onclick = () => {
     const termos = vocTermos();

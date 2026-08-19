@@ -91,7 +91,7 @@ await pg.evaluate(() => {
    teste espera a primeira janela de verdade — mas só a metade dela. */
 await fecharModal();
 await pg.locator('#recTr').uncheck();
-await pg.locator('#recCount').uncheck();
+await pg.evaluate(() => window.__contagem(1));
 await pg.waitForTimeout(200);
 await pg.locator('#rec').click();
 await pg.waitForFunction(()=>!document.getElementById('recStop').classList.contains('hide'),null,{timeout:20000});

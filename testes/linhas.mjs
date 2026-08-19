@@ -64,7 +64,7 @@ console.log('\n[L1] a página está isolada (é o que liga as linhas)');
 console.log('\n[L2] runtime barrado com várias linhas: cai para uma e FUNCIONA');
 {
   const {pg,erros}=await pagina(FAKE);
-  await pg.evaluate(() => { const c = document.getElementById('recCount'); if (c) c.checked = false; });
+  await pg.evaluate(() => window.__contagem(1));
   await pg.click('#rec');
   await pg.waitForFunction(()=>document.getElementById('recStop').offsetParent!==null,null,{timeout:30000});
   await pg.waitForTimeout(2500);
@@ -97,7 +97,7 @@ console.log('\n[L3] modelo irrecuperável: a gravação CONTINUA, e o recado apa
  * antiga sobreviveu ao código dela por uma rodada inteira. */
 {
   const {pg,erros}=await pagina(FAKE_MORTO);
-  await pg.evaluate(() => { const c = document.getElementById('recCount'); if (c) c.checked = false; });
+  await pg.evaluate(() => window.__contagem(1));
   await pg.click('#rec');
   await pg.waitForFunction(()=>document.getElementById('recStop').offsetParent!==null,
                            null,{timeout:30000});

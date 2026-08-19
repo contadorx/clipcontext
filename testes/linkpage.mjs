@@ -82,7 +82,14 @@ await pg.waitForTimeout(300);
   const time = await pg.locator('.plan').nth(1).innerHTML();
   ok('está no cartão Free', /Link pronto/.test(gratis), gratis.match(/Link[^<]*/)||'');
   ok('saiu do cartão pago', !/Link de equipe/.test(time));
-  ok('e o Personal continua com a identidade', /Logotipo e nome do cliente/.test(time));
+  ok('e o Personal continua com a identidade',
+     /Identificar o documento:<\/b> logotipo e nome do cliente/.test(time),
+     (time.match(/Identificar[^<]*/) || ['(não achou)'])[0]);
+  /* "Termos do seu sistema" entrou no cartão pago e saiu do gratuito. A régua
+     olha os DOIS cartões: prometer no pago e continuar entregando no grátis é a
+     mesma contradição, só que na direção que ninguém reclama. */
+  ok('"Termos do seu sistema" está no cartão pago', /Termos do seu sistema/.test(time));
+  ok('e não está no gratuito', !/Termos do seu sistema/.test(gratis));
 }
 
 ok('sem erro de JS', erros.length === 0, erros.join(' | ').slice(0, 200));

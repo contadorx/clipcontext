@@ -118,7 +118,7 @@ async function paginaGravando(ctx, segundos, semOpfs){
   await pg.selectOption('#modelo', 'evidencia');
   await pg.selectOption('#ritmo', 'tudo');
   await pg.locator('#recTr').uncheck();
-  await pg.locator('#recCount').uncheck();
+  await pg.evaluate(() => window.__contagem(1));
   await pg.locator('#rec').click();
   await pg.waitForSelector('#recStop:visible', { timeout: 40000 });
   await pg.waitForTimeout(segundos * 1000);
@@ -146,8 +146,11 @@ const ctx = await br.newContext({ viewport: { width: 1250, height: 980 },
 let quadros = 0;
 {
   const { pg, erros } = await paginaGravando(ctx, 6);
-  ok('a caixa que explica o que está sendo guardado existe e está marcada',
-     await pg.locator('#recEspelho').isChecked());
+  /* Sem caixa e sem pergunta: o espelho é padrão. O que se cobra aqui deixou de
+     ser "a caixa está marcada" e passou a ser o fato — as telas chegam ao
+     disco, que é a única coisa que uma caixa marcada prometia. */
+  ok('não há caixa a marcar: o espelho é padrão',
+     (await pg.locator('#recEspelho').count()) === 0);
   /* A escrita entra numa fila para não atrasar a captura: dar um instante aqui
      é medir o que a pessoa veria, não correr na frente do produto. */
   await pg.waitForTimeout(1500);
@@ -336,7 +339,20 @@ console.log('\n[4] uma linha quebrada no fim do índice não leva o resto junto'
 }
 
 // ---------------------------------------------------------------------------
-console.log('\n[5] desmarcar a caixa apaga o que já estava lá');
+/* A CAIXA DE LIGAR E DESLIGAR SAIU DO CARTÃO DE GRAVAR, e o espelho virou
+   padrão: perguntar antes de cada gravação não se justificava diante da
+   assimetria — desligado, um travamento aos 110 minutos apaga duas horas;
+   ligado, ficam alguns megabytes no disco de quem usa até o documento sair.
+
+   O que este bloco cobra passou a ser o que SOBROU, e é o que importa:
+
+     1. "jogar fora" continua apagando de verdade — é o gesto que ficou;
+     2. quem já tinha desligado CONTINUA desligado. `espelhoQuer()` lê a mesma
+        chave de sempre, e tirar a caixa não podia religar o espelho na máquina
+        de quem escolheu que não. Isso não é detalhe de teste: é a diferença
+        entre uma decisão respeitada e uma decisão revogada em silêncio por uma
+        atualização. */
+console.log('\n[5] o que sobrou de desligar: jogar fora, e a escolha antiga respeitada');
 {
   const { pg, erros } = await paginaGravando(ctx, 5);
   await pg.locator('#recStop').click();
@@ -344,26 +360,31 @@ console.log('\n[5] desmarcar a caixa apaga o que já estava lá');
                            null, { timeout: 60000 });
   await pg.waitForTimeout(1500);
   ok('havia algo guardado', (await noDisco(pg)).length === 1);
-  await pg.locator('#recEspelho').uncheck();
+  ok('e a caixa de desligar não existe mais no cartão de gravar',
+     (await pg.locator('#recEspelho').count()) === 0);
+  await pg.reload();
+  await pg.waitForTimeout(1200);
+  ok('o bloco de recuperação aparece sozinho',
+     !(await pg.locator('#espelhoCx').evaluate(e => e.classList.contains('hide'))));
+  await pg.locator('#espelhoJogar').click();
   await pg.waitForTimeout(1500);
-  ok('desmarcar apagou o que já estava no disco', (await noDisco(pg)).length === 0,
+  ok('"jogar fora" apagou o que estava no disco', (await noDisco(pg)).length === 0,
      JSON.stringify(await noDisco(pg)));
   await pg.close();
 
-  /* E a escolha atravessa a visita: uma caixa de privacidade que volta marcada
-     sozinha é uma caixa que não decide nada. */
+  /* Quem desligou antes de a caixa sair continua desligado. */
   const p2 = await ctx.newPage();
   const e2 = [];
   p2.on('pageerror', e => e2.push(e.message));
   await p2.goto('http://localhost:8938/app.html?lang=pt');
+  await p2.evaluate(() => localStorage.setItem('Walkstamp.espelho', 'nao'));
+  await p2.reload();
   await p2.waitForTimeout(800);
-  ok('e a escolha continua valendo na visita seguinte',
-     !(await p2.locator('#recEspelho').isChecked()));
   await p2.evaluate(telaFalsa);
   await p2.selectOption('#modelo', 'evidencia');
   await p2.selectOption('#ritmo', 'tudo');
   await p2.locator('#recTr').uncheck();
-  await p2.locator('#recCount').uncheck();
+  await p2.evaluate(() => window.__contagem(1));
   await p2.locator('#rec').click();
   await p2.waitForSelector('#recStop:visible', { timeout: 40000 });
   await p2.waitForTimeout(5000);
@@ -371,13 +392,15 @@ console.log('\n[5] desmarcar a caixa apaga o que já estava lá');
   await p2.waitForFunction(() => document.getElementById('rec').offsetParent !== null,
                            null, { timeout: 60000 });
   await p2.waitForTimeout(1200);
-  ok('e desmarcada, gravar não escreve nada no disco',
+  /* O NÚMERO QUE IMPORTA: zero. Um só significaria que tirar a caixa religou o
+     espelho na máquina de quem tinha decidido que não. */
+  ok('quem tinha desligado continua desligado — nada foi escrito',
      (await noDisco(p2)).length === 0, JSON.stringify(await noDisco(p2)));
   ok('mas a gravação em si continua inteira',
      (await p2.locator('#thumbs figure').count()) >= 3,
      String(await p2.locator('#thumbs figure').count()));
   ok('sem erro de JavaScript', e2.length === 0, e2.join(' | ').slice(0, 200));
-  await p2.locator('#recEspelho').check();      // devolve o padrão para o próximo bloco
+  await p2.evaluate(() => localStorage.removeItem('Walkstamp.espelho'));
   await p2.waitForTimeout(300);
   await p2.close();
   ok('sem erro de JavaScript na gravação', erros.length === 0, erros.join(' | ').slice(0, 200));
@@ -413,7 +436,7 @@ console.log('\n[6] quando o disco recusa, ela FICA SABENDO');
   await pg.selectOption('#modelo', 'evidencia');
   await pg.selectOption('#ritmo', 'tudo');
   await pg.locator('#recTr').uncheck();
-  await pg.locator('#recCount').uncheck();
+  await pg.evaluate(() => window.__contagem(1));
   await pg.locator('#rec').click();
   await pg.waitForSelector('#recStop:visible', { timeout: 40000 });
   await pg.waitForFunction(() => /não consegui guardar as telas/i.test(

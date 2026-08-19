@@ -2,19 +2,29 @@
 # A pista rápida. `rodar.sh` roda os 74 e leva ~20 min; isto roda só o que o
 # que você mexeu pode ter quebrado, e leva 1 a 3.
 #
-#   rapido.sh app        -> a ferramenta (build + os testes de tela)
+#   rapido.sh app        -> a ferramenta, só o comportamento (~4 min)
+#   rapido.sh medir      -> as réguas: memória, peso, espelho, espera (~12 min)
 #   rapido.sh site       -> o site (build + next build + os testes de página)
 #   rapido.sh a.mjs b.mjs -> exatamente esses
 #
 # Com 2 CPUs, dois de cada vez é o teto: mais que isso e os testes começam a
-# estourar o tempo por disputa de máquina, não por defeito.
+# estourar o tempo por disputa de máquina, não por defeito. É ELE que manda no
+# relógio desta pista — não o número de arquivos.
+#
+# POR QUE `app` E `medir` SÃO SEPARADOS. Cinco arquivos respondiam por dois
+# terços do tempo do `app`, e nenhum deles pergunta "isto ainda funciona?":
+# `espera.mjs` roda uma hora de vídeo, `espelho.mjs` grava quatro vezes,
+# `memoria.mjs` e `pesagem.mjs` são réguas. Eles medem, e medir é o que se faz
+# ao MUDAR a mecânica — não a cada ajuste de tela. Continuam obrigatórios no
+# `rodar.sh`, que é o portão da entrega.
 cd /root/walkstamp || exit 1
 GRUPO="$1"; shift
 
 case "$GRUPO" in
   app)  TESTES="smoke.mjs saidas.mjs passos.mjs dobra.mjs travado.mjs gravando.mjs
                 janelinha.mjs comentario.mjs marcados.mjs revisao.mjs marca.mjs
-                formato.mjs promptcx.mjs appidioma.mjs compartilhar.mjs celular.mjs barraapp.mjs paridade.mjs teto.mjs ritmo.mjs rolar.mjs cenario1.mjs organiza.mjs acabamento.mjs lente2.mjs memoria.mjs pesagem.mjs espelho.mjs modelo.mjs espera.mjs traducao.mjs" ; SITE=0 ;;
+                formato.mjs promptcx.mjs appidioma.mjs compartilhar.mjs celular.mjs barraapp.mjs paridade.mjs teto.mjs rolar.mjs cenario1.mjs organiza.mjs acabamento.mjs lente2.mjs traducao.mjs" ; SITE=0 ;;
+  medir) TESTES="memoria.mjs pesagem.mjs espelho.mjs modelo.mjs espera.mjs ritmo.mjs" ; SITE=0 ;;
   site) TESTES="cinco.mjs ajuda.mjs vitrine.mjs venda.mjs paginas.mjs idiomas.mjs figuras.mjs dobrafig.mjs
                 linkpage.mjs legal.mjs contradicao.mjs negocio.mjs isca.mjs blog.mjs convite.mjs email.mjs tourvid.mjs semmarca.mjs" ; SITE=1 ;;
   *)    TESTES="$GRUPO $*" ; SITE=1 ;;
