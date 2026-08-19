@@ -17584,9 +17584,27 @@ ${relsSlide[i]}</Relationships>`) });
     if (layout === 'full') {
       const tut = ehTutorial();
       const LH = 4.6, MAXL = 9, MAXIH = 110;
-      const ar = kept[0].img.h / kept[0].img.w;
-      const ih0 = Math.min(CW * ar, MAXIH);
-      const iw = ih0 / ar, ix = M + (CW - iw) / 2;
+      /* ---- A MEDIDA É DE CADA IMAGEM, e não do primeiro quadro ----
+
+         O DEFEITO, relatado no uso: cortar UMA tela deformava todas as outras.
+         A causa está uma linha acima do que parece — a proporção era lida de
+         `kept[0]` e aplicada a todas as imagens do documento. Recortar o
+         primeiro quadro mudava a proporção dele, e as outras doze passavam a
+         ser desenhadas numa caixa com o formato do primeiro: esticadas.
+
+         Ele é MAIS VELHO que o corte por quadro; o corte só o destapou. Ele já
+         disparava com "colar uma tela": qualquer imagem anexada de fora com
+         outra proporção — um print de celular, um recorte — deformava o
+         documento inteiro, e ninguém tinha ligado uma coisa à outra.
+
+         O Word já fazia certo (`medidaImagem` mede imagem por imagem). Era só o
+         PDF que perguntava uma vez e respondia sempre a mesma coisa. */
+      const medida = im => {
+        const ar = (im && im.h && im.w) ? im.h / im.w : 9 / 16;
+        const ih = Math.min(CW * ar, MAXIH);
+        const iw = ih / ar;
+        return { ih, iw, ix: M + (CW - iw) / 2 };
+      };
       let yy = 0, open = false;
       const newPage = () => { if (open) foot(); doc.addPage(); yy = M; open = true; };
       newPage();
@@ -17628,7 +17646,8 @@ ${relsSlide[i]}</Relationships>`) });
         const capTxt = (linCap && linCap.capAbre)
           ? linCap.capitulo + (linCap.tarefa ? '   ·   ' + t('capTempo', linCap.tarefa) : '') : '';
         const capH = capTxt ? 12 : 0;
-        const blockH = capH + cabH + notaL.length * 4.8 + (notaL.length ? 1.5 : 0) + ih0 +
+        const { ih, iw, ix } = medida(telaDe(f));
+        const blockH = capH + cabH + notaL.length * 4.8 + (notaL.length ? 1.5 : 0) + ih +
                        (cues.length ? 6 + lines.length * LH : 0) + ocrH + gapFim;
         if (yy + blockH > PH - 16) newPage();
         if (capTxt) {
@@ -17652,8 +17671,8 @@ ${relsSlide[i]}</Relationships>`) });
            uma vez: pedir a imagem outra vez aqui seria transcodificar duas
            vezes o mesmo quadro e — pior — abrir a porta para o PDF e o HTML
            carregarem bytes diferentes com o mesmo SHA-256 impresso ao lado. */
-        doc.addImage(linhasPdf[i].img, 'JPEG', ix, yy, iw, ih0);
-        yy += ih0;
+        doc.addImage(linhasPdf[i].img, 'JPEG', ix, yy, iw, ih);
+        yy += ih;
         if (cues.length) {
           yy += 6;
           doc.setFontSize(9.3).setTextColor(55);
@@ -17675,8 +17694,14 @@ ${relsSlide[i]}</Relationships>`) });
       foot();
     } else {
       const cols = 2, gap = 8, cellW = (CW - gap) / cols;
-      const arG = kept[0].img.h / kept[0].img.w;
-      const ihG = Math.min(cellW * arG, 74), iwG = ihG / arG;
+      /* Mesma correção na grade: cada célula tem a proporção da SUA imagem. A
+         fileira já crescia pela mais alta (`rowH`), então nada mais precisou
+         mudar para telas de tamanhos diferentes conviverem na mesma página. */
+      const medidaG = im => {
+        const ar = (im && im.h && im.w) ? im.h / im.w : 9 / 16;
+        const ih = Math.min(cellW * ar, 74);
+        return { ihG: ih, iwG: ih / ar };
+      };
       let col = 0, top = M + 6, rowH = 0;
       doc.addPage();
       doc.setFont('helvetica','bold').setFontSize(12).text(t('pFramesH'), M, M);
@@ -17686,6 +17711,7 @@ ${relsSlide[i]}</Relationships>`) });
         doc.setFont('helvetica','normal').setFontSize(7.4);
         const hora = horaDe(f.t);
         const notaG = f.nota ? doc.splitTextToSize(f.nota, cellW).slice(0, 3) : [];
+        const { ihG, iwG } = medidaG(telaDe(f));
         const blockH = ihG + 7 + (hora ? 3.6 : 0) + notaG.length * 3.4;
         if (col === 0 && top + blockH > PH - 18) { foot(); doc.addPage(); top = M; }
         const x = M + col * (cellW + gap) + (cellW - iwG) / 2;

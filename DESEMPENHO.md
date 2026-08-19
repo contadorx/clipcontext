@@ -1541,3 +1541,31 @@ desatualizadas pelas decisões já tomadas — `ux.mjs` contava três caixas de 
 onde agora há duas, `tapado.mjs` esperava o cartão 2 fechado, `espelho.mjs`
 escrevia no campo de comentário que saiu. As três reescritas e verdes; nenhuma
 linha de produto mudou depois da corrida.
+
+### O corte que deformava as outras — e o defeito era mais velho
+
+Relato com um PDF de 13 telas: cortar a **primeira** esticou as outras doze.
+
+A causa está uma linha acima do que parece. O PDF lia a proporção de
+`kept[0].img` **uma vez** e desenhava todas as imagens com ela. Recortar o
+primeiro quadro mudava a proporção dele, e as outras doze passavam a ser
+desenhadas numa caixa com o formato do primeiro.
+
+**Ele é mais velho que o corte por quadro; o corte só o destapou.** Ele já
+disparava com "colar uma tela": qualquer imagem anexada de fora com outra
+proporção — um print de celular, um recorte — deformava o documento inteiro. O
+Word já fazia certo (`medidaImagem` mede imagem por imagem); era só o PDF que
+perguntava uma vez e respondia sempre a mesma coisa, nos dois layouts.
+
+Medido, com a primeira tela cortada:
+
+| | razão de cada caixa desenhada |
+|---|---|
+| antes | `[1.125, 1.125, 1.125, 1.125, 1.125]` |
+| agora | `[1.125, 0.562, 0.562, 0.562, 0.562]` |
+
+**A régua embrulha o CONSTRUTOR, e não o protótipo.** A primeira versão do teste
+remendava `jsPDF.prototype.addImage` e passava com a lista vazia — o jsPDF
+instala os métodos de desenho na INSTÂNCIA, e o remendo ficava num protótipo que
+ninguém consulta. Um teste que mede nada é pior do que teste nenhum: ele diz que
+está tudo bem.

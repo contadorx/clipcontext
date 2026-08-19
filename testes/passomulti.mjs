@@ -273,6 +273,84 @@ console.log('\n[8] cortar só ESTA tela não mexe nas outras');
   await pg.waitForTimeout(300);
 }
 
+// ---------------------------------------------------------------------------
+console.log('\n[9] cortar UMA tela não deforma as outras no PDF');
+{
+  /* O DEFEITO, relatado no uso com um PDF de 13 telas: cortar a primeira
+     esticou as outras doze. A proporção era lida de `kept[0]` e aplicada a
+     TODAS as imagens do documento — recortar o primeiro quadro fazia o resto
+     ser desenhado numa caixa com o formato dele.
+
+     Ele é mais velho que o corte por quadro. Já disparava com "colar uma tela":
+     qualquer imagem anexada com outra proporção deformava o documento inteiro.
+
+     COMO SE MEDE ISSO SEM OLHAR O PDF. O jsPDF é falsificado só o suficiente
+     para registrar cada `addImage` com a largura e a altura pedidas. O que se
+     afirma é a RAZÃO de cada caixa desenhada — que é exatamente o que a pessoa
+     vê como "esticado" e que nenhuma inspeção de bytes revelaria. */
+  await pg.evaluate(() => { (window.__quadros() || []).forEach(f => { f.keep = true; }); });
+  await redesenhar();
+
+  /* A RÉGUA EMBRULHA O CONSTRUTOR, e não o protótipo. Remendar
+     `jsPDF.prototype.addImage` não pega nada: o jsPDF instala os métodos de
+     desenho na INSTÂNCIA, e o remendo fica num protótipo que ninguém consulta.
+     Foi a primeira tentativa aqui, e ela passou com a lista vazia — que é
+     exatamente o teste que não testa nada. */
+  await pg.evaluate(() => {
+    window.__caixas = [];
+    const mod = window.jspdf, Orig = mod.jsPDF;
+    function Medido(...args){
+      const doc = new Orig(...args);
+      const antes = doc.addImage.bind(doc);
+      doc.addImage = function(dados, tipo, x, y, w, h){
+        window.__caixas.push({ w: Math.round(w * 100) / 100, h: Math.round(h * 100) / 100 });
+        return antes(dados, tipo, x, y, w, h);
+      };
+      return doc;
+    }
+    Medido.prototype = Orig.prototype;
+    mod.jsPDF = Medido;
+  });
+
+  // corta SÓ a primeira, que é o caso do relato
+  await pg.locator('#thumbs figure .lupa').first().click();
+  await pg.waitForSelector('#lente:not(.hide)');
+  await pg.locator('#cropUma').click();
+  await pg.waitForTimeout(250);
+  const cx = await pg.locator('#lenteImg').boundingBox();
+  await pg.mouse.move(cx.x + cx.width * 0.30, cx.y + cx.height * 0.10);
+  await pg.mouse.down();
+  await pg.mouse.move(cx.x + cx.width * 0.70, cx.y + cx.height * 0.90, { steps: 12 });
+  await pg.mouse.up();
+  await pg.waitForTimeout(2500);
+  await pg.locator('#lenteFechar').click().catch(() => {});
+  await pg.waitForTimeout(300);
+
+  const dl = pg.waitForEvent('download', { timeout: 90000 });
+  await pg.locator('#go').click();
+  await (await dl).saveAs('/tmp/pm-corte.pdf');
+  await pg.waitForTimeout(500);
+
+  const razoes = await pg.evaluate(() => (window.__caixas || [])
+    .filter(c => c.w > 20)                       // só as telas; a marca é minúscula
+    .map(c => Math.round((c.h / c.w) * 1000) / 1000));
+  const daTela = await pg.evaluate(() => (window.__quadros() || [])
+    .filter(f => f.keep).map(f => Math.round((f.img.h / f.img.w) * 1000) / 1000));
+  console.log('     razão de cada quadro : ' + JSON.stringify(daTela));
+  console.log('     razão de cada caixa  : ' + JSON.stringify(razoes.slice(0, daTela.length)));
+
+  ok('a primeira ficou com uma razão diferente das outras',
+     daTela[0] !== daTela[1], JSON.stringify(daTela));
+  /* O NÚMERO QUE IMPORTA: a caixa desenhada tem a razão da SUA imagem. Com o
+     defeito, todas as caixas saíam com a razão da primeira. */
+  ok('cada imagem foi desenhada com a própria proporção',
+     daTela.every((r, i) => razoes[i] != null && Math.abs(razoes[i] - r) < 0.02),
+     JSON.stringify(razoes.slice(0, daTela.length)));
+  ok('o PDF saiu inteiro',
+     fs.existsSync('/tmp/pm-corte.pdf') && fs.statSync('/tmp/pm-corte.pdf').size > 20000,
+     (fs.statSync('/tmp/pm-corte.pdf').size / 1024).toFixed(0) + ' KB');
+}
+
 ok('sem erro de JavaScript', erros.length === 0, erros.join(' | ').slice(0, 200));
 
 await br.close(); srv.close();
