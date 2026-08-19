@@ -609,6 +609,12 @@
   /* A folga acompanha a faixa: ela cresceu, e o último passo não pode ficar
      por baixo dela. Este número e a altura da faixa são a mesma medida escrita
      duas vezes, e `espera.mjs` cobra que o fim da página continua alcançável. */
+  /* O estado "acabou": mesma faixa, outra cor. Verde e não indigo porque a
+     pergunta que ela responde mudou — de "quanto falta" para "terminou". */
+  .faixa.pronta{border-top-color:#2f9e44;
+        background:color-mix(in srgb,#2f9e44 9%,var(--panel))}
+  .faixa.pronta .faixaBar i{background:#2f9e44}
+  .faixa.pronta .faixaTxt{font-weight:650}
   body.comFaixa{padding-bottom:76px}
   @media (max-width:560px){ .faixaBar{flex-basis:110px} .faixa{font-size:14px;padding:12px 14px} }
   /* A caixa da gravação que ficou para trás. Contorno na cor da marca pelo mesmo
@@ -1260,6 +1266,26 @@
     <div class="status" id="astatus"></div>
     <div class="status" id="autoDica"></div>
     <p class="note hide" id="keepOpen" data-i18n="keepOpen"></p>
+    <!-- O QUE FAZER DURANTE A ESPERA.
+         Numa transcrição de quarenta minutos a pergunta de quem está na tela
+         deixa de ser "quanto falta" e passa a ser "preciso ficar aqui?". A
+         resposta estava só na negativa — "mantenha a aba aberta" — e não
+         dizia o que É possível fazer. Agora diz as duas coisas, e oferece o
+         caminho de quem tem outra gravação esperando. -->
+    <!-- A OFERTA DE TROCAR DE MODO, com o número na frente.
+         Ela só aparece quando a espera medida é longa E existe uma configuração
+         mais rápida que a atual. Nunca antes da segunda janela: um "vai demorar
+         38 minutos" calculado sobre uma amostra só é chute, e chute sobre
+         espera é o que faz a pessoa desistir de uma coisa que ia ser rápida. -->
+    <p class="note hide" id="trocaOferta">
+      <span id="trocaTxt"></span>
+      <button type="button" class="ghost sm" id="trocaBtn" style="margin-left:8px"></button>
+    </p>
+    <p class="note hide" id="esperaDica">
+      <span data-i18n="esperaDica"></span>
+      <button type="button" class="ghost sm" id="novaSessao" data-i18n="esperaNova"
+              style="margin-left:8px"></button>
+    </p>
     <div class="bar hide" id="barWrap"><i id="bar"></i></div>
     <div class="status" id="status"></div>
     <p class="note"><b data-i18n="noteB"></b> <span data-i18n="noteT"></span></p>
@@ -1284,8 +1310,16 @@
     <div class="autobox">
       <div class="row">
         <select id="model" style="width:auto">
-          <option value="onnx-community/whisper-small" selected data-i18n="mSmall"></option>
-          <option value="onnx-community/whisper-base" data-i18n="mBase"></option>
+          <!-- O PADRÃO É O BASE, e a ordem da lista segue o padrão.
+               O `small` vinha selecionado, e num relato de campo isso custou
+               40 minutos de espera para 40 minutos de reunião: ele é ~3x mais
+               lento que o base e baixa 249 MB no processador. O base com a
+               placa baixa 206 MB e transcreve em uma fração do tempo.
+               Quem precisa de nome próprio e sigla certos escolhe o `small`
+               — e agora escolhe SABENDO o que está comprando, porque o
+               rótulo diz "bem mais lento". -->
+          <option value="onnx-community/whisper-base" selected data-i18n="mBase"></option>
+          <option value="onnx-community/whisper-small" data-i18n="mSmall"></option>
           <option value="onnx-community/whisper-large-v3-turbo" data-i18n="mTurbo"></option>
         </select>
         <span class="status" id="modelSize"></span>
@@ -2609,8 +2643,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       tradErro:'Não consegui traduzir.',
       tradSemApi:'Tradução no aparelho: por enquanto só no Chrome e no Edge para computador. Em outros navegadores a transcrição sai no idioma falado, e a tradução fica para depois — o texto é seu, dá para exportar e traduzir onde quiser.',
       autoIndo:'Transcrevendo…', autoEspere:'Pode deixar em segundo plano — mas não feche a aba: o trabalho é feito aqui dentro.',
-      mBase:'Rápido — menos preciso', mSmall:'Recomendado — equilibrado',
-      mTurbo:'Máxima precisão — download grande',
+      mBase:'Recomendado — rápido', mSmall:'Mais preciso — bem mais lento',
+      mTurbo:'Máxima precisão — download grande, muito lento',
       autoDetect:'Detectar sozinho', diagBtn:'Diagnóstico',
       openSub:'Abrir uma legenda pronta', orDrag:'ou arraste o arquivo sobre o campo acima, ou cole o texto',
       subDeOnde:'.vtt ou .srt de uma reunião já transcrita pelo Teams, Meet ou Zoom — assim não precisa baixar o modelo de voz. Também dá para arrastar sobre a caixa, ou simplesmente colar.',
@@ -2629,7 +2663,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       erroSessao:'O arquivo comprimido do modelo não abre neste computador. Já tentei as versões alternativas, e nenhuma subiu. Rode o diagnóstico, ou grave só os frames e escreva as anotações à mão.',
       transcribing2:'Etapa 2 de 2 — transcrevendo: {0}% (bloco {1} de {2}){3}',
       etaTr:' — faltam ~{0}',
-      keepOpen:'Mantenha esta aba aberta e visível. O processamento acontece no seu navegador, e fica muito mais lento se a aba ficar em segundo plano.',
+      keepOpen:'Não feche esta aba: tudo acontece aqui, e fechar perde o trabalho. Trocar de aba pode deixar mais lento — o navegador reduz o que roda em segundo plano —, mas não interrompe.', esperaDica:'Quando terminar, o título da aba pisca e o ícone muda — você não precisa ficar olhando. Se tiver outra gravação esperando, comece agora: a máquina será dividida entre as duas, então cada uma leva mais tempo do que levaria sozinha.', esperaNova:'Abrir uma sessão nova numa aba',
       leaveWarn:'O processamento ainda está em andamento. Se sair agora, perde o que já foi feito.', noGpu:'WebGPU indisponível — usando o processador, vai demorar mais.',
       transcribing:'Transcrevendo… bloco {0} de {1}', trDone:'Transcrição pronta — {0} trechos.',
       trErr:'Não consegui transcrever aqui: {0} — clique em Diagnóstico para ver em qual etapa trava.',
@@ -2897,7 +2931,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       sensTarjado1:'1 tarja aplicada. Confira na lente antes de gerar — a tarja é queimada na imagem.',
       sensTarjar:'Tarjar as {0} ocorrências',
       sensTarjado:'{0} tarjas aplicadas. Confira na lente antes de gerar — a tarja é queimada na imagem.',
-      sensNaoAchou:'Nada para tarjar automaticamente', pessoasH:'Tem gente nesta gravação.', pessoas_ata:'Você marcou o cenário “Ata de reunião”.', pessoas_ux:'Você marcou o cenário “Sessão de usabilidade”.', pessoas_canal:'A transcrição tem a voz do outro lado da chamada.', pessoasP:'Numa chamada de vídeo, cada tela guardada leva a fita de participantes — rosto, nome e cargo de quem estava lá. Isso não é texto, então a varredura acima não enxerga. Confira as telas antes de gerar.', pessoasBtn:'Abrir a lente para tarjar as pessoas',
+      sensNaoAchou:'Nada para tarjar automaticamente', trocaPlaca:'Neste ritmo, faltam cerca de {0}. Sua máquina tem placa de vídeo e ela não está sendo usada — ligá-la costuma acelerar bastante, sem perder precisão.', trocaModelo:'Neste ritmo, faltam cerca de {0}. O modo rápido usa um modelo menor: transcreve em uma fração do tempo, com menos acerto em nome próprio, sigla e sotaque carregado.', trocaBtn:'Trocar agora e continuar daqui', trocaIndo:'Trocando… o que já foi transcrito continua no lugar.', avisoAbaTr:'Transcrição pronta', avisoTr:'Transcrição concluída: {0} trechos em {1}. Ela está no campo do passo 2.', avisoFechar:'Entendi', pessoasH:'Tem gente nesta gravação.', pessoas_ata:'Você marcou o cenário “Ata de reunião”.', pessoas_ux:'Você marcou o cenário “Sessão de usabilidade”.', pessoas_canal:'A transcrição tem a voz do outro lado da chamada.', pessoasP:'Numa chamada de vídeo, cada tela guardada leva a fita de participantes — rosto, nome e cargo de quem estava lá. Isso não é texto, então a varredura acima não enxerga. Confira as telas antes de gerar.', pessoasBtn:'Abrir a lente para tarjar as pessoas',
       sensNaoAchouDica:'O padrão foi encontrado no texto corrido, mas não em cima de nenhuma palavra localizável na imagem. Tarje à mão na lente.',
       sensSemCaixa:'Tarjar automaticamente não disponível',
       sensSemCaixaDica:'Esta versão do leitor de texto não devolveu a posição das palavras. Dá para tarjar à mão na lente.',
@@ -3191,8 +3225,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       tradErro:'I could not translate.',
       tradSemApi:'On-device translation: for now only in Chrome and Edge on desktop. In other browsers the transcript comes out in the spoken language and translation waits — the text is yours, you can export it and translate it wherever you like.',
       autoIndo:'Transcribing…', autoEspere:'You can leave it in the background — but do not close the tab: the work happens in here.',
-      mBase:'Fast — less accurate', mSmall:'Recommended — balanced',
-      mTurbo:'Highest accuracy — large download',
+      mBase:'Recommended — fast', mSmall:'More accurate — much slower',
+      mTurbo:'Highest accuracy — large download, very slow',
       autoDetect:'Detect automatically', diagBtn:'Diagnostics',
       openSub:'Open an existing transcript', orDrag:'or drag the file onto the box above, or paste the text',
       subDeOnde:'.vtt or .srt from a meeting already transcribed by Teams, Meet or Zoom — that way there is no speech model to download. You can also drag it onto the box, or just paste.',
@@ -3211,7 +3245,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       erroSessao:'The compressed model file will not open on this computer. I already tried the alternative builds and none came up. Run the diagnostics, or record the frames only and write the notes by hand.',
       transcribing2:'Step 2 of 2 — transcribing: {0}% (chunk {1} of {2}){3}',
       etaTr:' — about {0} left',
-      keepOpen:'Keep this tab open and visible. Processing happens in your browser, and gets much slower if the tab goes to the background.',
+      keepOpen:'Do not close this tab: everything happens here, and closing loses the work. Switching tabs may slow it down — browsers throttle what runs in the background — but it does not stop it.', esperaDica:'When it finishes, the tab title blinks and the icon changes — you do not have to watch it. If you have another recording waiting, start it now: the machine is shared between the two, so each takes longer than it would alone.', esperaNova:'Open a new session in a tab',
       leaveWarn:'Processing is still running. If you leave now, you lose what has been done.', noGpu:'WebGPU unavailable — using the CPU, this will be slower.',
       transcribing:'Transcribing… chunk {0} of {1}', trDone:'Transcript ready — {0} segments.',
       trErr:'Could not transcribe here: {0} — click Diagnostics to see which step fails.',
@@ -3473,7 +3507,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       sensTarjado1:'1 redaction applied. Check it in the lens before generating — the redaction is burned into the image.',
       sensTarjar:'Redact the {0} occurrences',
       sensTarjado:'{0} redactions applied. Check them in the lens before generating — the redaction is burned into the image.',
-      sensNaoAchou:'Nothing to redact automatically', pessoasH:'There are people in this recording.', pessoas_ata:'You picked the “Meeting minutes” scenario.', pessoas_ux:'You picked the “Usability session” scenario.', pessoas_canal:'The transcript carries the voice from the other end of the call.', pessoasP:'In a video call every captured screen carries the participant strip — face, name and job title of everyone who was there. That is not text, so the scan above cannot see it. Check the screens before you generate.', pessoasBtn:'Open the lens to redact the people',
+      sensNaoAchou:'Nothing to redact automatically', trocaPlaca:'At this pace, about {0} left. Your machine has a graphics card and it is not being used — turning it on is usually much faster, with no loss of accuracy.', trocaModelo:'At this pace, about {0} left. Fast mode uses a smaller model: it transcribes in a fraction of the time, with less accuracy on proper nouns, acronyms and strong accents.', trocaBtn:'Switch now and carry on from here', trocaIndo:'Switching… what has been transcribed stays.', avisoAbaTr:'Transcript ready', avisoTr:'Transcription finished: {0} segments in {1}. It is in the field in step 2.', avisoFechar:'Got it', pessoasH:'There are people in this recording.', pessoas_ata:'You picked the “Meeting minutes” scenario.', pessoas_ux:'You picked the “Usability session” scenario.', pessoas_canal:'The transcript carries the voice from the other end of the call.', pessoasP:'In a video call every captured screen carries the participant strip — face, name and job title of everyone who was there. That is not text, so the scan above cannot see it. Check the screens before you generate.', pessoasBtn:'Open the lens to redact the people',
       sensNaoAchouDica:'The pattern was found in the running text, but not over any word that can be located on the image. Redact by hand in the lens.',
       sensSemCaixa:'Automatic redaction unavailable',
       sensSemCaixaDica:'This version of the text reader did not return word positions. You can still redact by hand in the lens.',
@@ -3767,8 +3801,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       tradErro:'No pude traducir.',
       tradSemApi:'Traducción en el dispositivo: por ahora solo en Chrome y Edge de escritorio. En otros navegadores la transcripción sale en el idioma hablado y la traducción queda para después — el texto es tuyo, puedes exportarlo y traducirlo donde quieras.',
       autoIndo:'Transcribiendo…', autoEspere:'Puedes dejarlo en segundo plano — pero no cierres la pestaña: el trabajo se hace aquí dentro.',
-      mBase:'Rápido — menos preciso', mSmall:'Recomendado — equilibrado',
-      mTurbo:'Máxima precisión — descarga grande',
+      mBase:'Recomendado — rápido', mSmall:'Más preciso — bastante más lento',
+      mTurbo:'Máxima precisión — descarga grande, muy lento',
       autoDetect:'Detectar automáticamente', diagBtn:'Diagnóstico',
       openSub:'Abrir una transcripción ya hecha', orDrag:'o arrastra el archivo sobre el campo de arriba, o pega el texto',
       subDeOnde:'.vtt o .srt de una reunión ya transcrita por Teams, Meet o Zoom — así no hay que descargar el modelo de voz. También puedes arrastrarlo sobre la caja, o simplemente pegar.',
@@ -3787,7 +3821,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       erroSessao:'El archivo comprimido del modelo no abre en este equipo. Ya probé las versiones alternativas y ninguna arrancó. Ejecuta el diagnóstico, o graba solo los fotogramas y escribe las anotaciones a mano.',
       transcribing2:'Paso 2 de 2 — transcribiendo: {0}% (bloque {1} de {2}){3}',
       etaTr:' — faltan ~{0}',
-      keepOpen:'Mantén esta pestaña abierta y visible. El procesamiento ocurre en tu navegador y se vuelve mucho más lento si la pestaña queda en segundo plano.',
+      keepOpen:'No cierres esta pestaña: todo ocurre aquí, y cerrarla pierde el trabajo. Cambiar de pestaña puede hacerlo más lento — el navegador reduce lo que corre en segundo plano —, pero no lo interrumpe.', esperaDica:'Al terminar, el título de la pestaña parpadea y el icono cambia — no hace falta que lo mires. Si tienes otra grabación esperando, empiézala ya: la máquina se reparte entre las dos, así que cada una tarda más de lo que tardaría sola.', esperaNova:'Abrir una sesión nueva en una pestaña',
       leaveWarn:'El procesamiento sigue en curso. Si sales ahora, pierdes lo que ya se hizo.', noGpu:'WebGPU no disponible — usando el procesador, será más lento.',
       transcribing:'Transcribiendo… bloque {0} de {1}', trDone:'Transcripción lista — {0} tramos.',
       trErr:'No pude transcribir aquí: {0} — pulsa Diagnóstico para ver en qué paso falla.',
@@ -4049,7 +4083,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       sensTarjado1:'1 tapado aplicado. Compruébalo en la lupa antes de generar — el tapado se quema en la imagen.',
       sensTarjar:'Tapar las {0} apariciones',
       sensTarjado:'{0} tapados aplicados. Compruébalos en la lupa antes de generar — el tapado se quema en la imagen.',
-      sensNaoAchou:'Nada que tapar automáticamente', pessoasH:'Hay personas en esta grabación.', pessoas_ata:'Elegiste el escenario “Acta de reunión”.', pessoas_ux:'Elegiste el escenario “Sesión de usabilidad”.', pessoas_canal:'La transcripción trae la voz del otro lado de la llamada.', pessoasP:'En una videollamada cada pantalla guardada lleva la tira de participantes — cara, nombre y cargo de quien estaba allí. Eso no es texto, así que el análisis de arriba no lo ve. Revisa las pantallas antes de generar.', pessoasBtn:'Abrir la lupa para tapar a las personas',
+      sensNaoAchou:'Nada que tapar automáticamente', trocaPlaca:'A este ritmo faltan unos {0}. Tu equipo tiene tarjeta gráfica y no se está usando — activarla suele acelerar bastante, sin perder precisión.', trocaModelo:'A este ritmo faltan unos {0}. El modo rápido usa un modelo menor: transcribe en una fracción del tiempo, con menos acierto en nombres propios, siglas y acentos marcados.', trocaBtn:'Cambiar ahora y seguir desde aquí', trocaIndo:'Cambiando… lo ya transcrito se mantiene.', avisoAbaTr:'Transcripción lista', avisoTr:'Transcripción terminada: {0} tramos en {1}. Está en el campo del paso 2.', avisoFechar:'Entendido', pessoasH:'Hay personas en esta grabación.', pessoas_ata:'Elegiste el escenario “Acta de reunión”.', pessoas_ux:'Elegiste el escenario “Sesión de usabilidad”.', pessoas_canal:'La transcripción trae la voz del otro lado de la llamada.', pessoasP:'En una videollamada cada pantalla guardada lleva la tira de participantes — cara, nombre y cargo de quien estaba allí. Eso no es texto, así que el análisis de arriba no lo ve. Revisa las pantallas antes de generar.', pessoasBtn:'Abrir la lupa para tapar a las personas',
       sensNaoAchouDica:'El patrón se encontró en el texto corrido, pero no sobre ninguna palabra localizable en la imagen. Tapa a mano en la lupa.',
       sensSemCaixa:'Tapado automático no disponible',
       sensSemCaixaDica:'Esta versión del lector de texto no devolvió la posición de las palabras. Puedes tapar a mano en la lupa.',
@@ -4342,8 +4376,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       tradErro:'Die Übersetzung ist fehlgeschlagen.',
       tradSemApi:'Übersetzung auf dem Gerät: vorerst nur in Chrome und Edge auf dem Computer. In anderen Browsern kommt die Transkription in der gesprochenen Sprache heraus und die Übersetzung entfällt — der Text gehört Ihnen, Sie können ihn exportieren und beliebig übersetzen.',
       autoIndo:'Wird transkribiert…', autoEspere:'Sie können das im Hintergrund laufen lassen — schließen Sie aber den Tab nicht: Die Arbeit passiert hier drin.',
-      mBase:'Schnell — weniger genau', mSmall:'Empfohlen — ausgewogen',
-      mTurbo:'Höchste Genauigkeit — großer Download',
+      mBase:'Empfohlen — schnell', mSmall:'Genauer — deutlich langsamer',
+      mTurbo:'Höchste Genauigkeit — großer Download, sehr langsam',
       autoDetect:'Automatisch erkennen', diagBtn:'Diagnose',
       openSub:'Fertige Untertiteldatei öffnen', orDrag:'oder ziehen Sie die Datei auf das Feld oben, oder fügen Sie den Text ein',
       subDeOnde:'.vtt oder .srt aus einer Besprechung, die Teams, Meet oder Zoom bereits transkribiert hat — so muss kein Spracherkennungsmodell heruntergeladen werden. Sie können die Datei auch auf das Feld ziehen oder den Text einfach einfügen.',
@@ -4362,7 +4396,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       erroSessao:'Die komprimierte Modelldatei lässt sich auf diesem Computer nicht öffnen. Die alternativen Versionen wurden bereits versucht, keine ist gestartet. Führen Sie die Diagnose aus, oder nehmen Sie nur die Screenshots auf und schreiben Sie die Notizen von Hand.',
       transcribing2:'Schritt 2 von 2 — wird transkribiert: {0} % (Block {1} von {2}){3}',
       etaTr:' — noch ca. {0}',
-      keepOpen:'Lassen Sie diesen Tab geöffnet und sichtbar. Die Verarbeitung läuft in Ihrem Browser und wird deutlich langsamer, wenn der Tab in den Hintergrund gerät.',
+      keepOpen:'Schließen Sie diesen Tab nicht: Alles läuft hier, und Schließen verwirft die Arbeit. Ein Tab-Wechsel kann es verlangsamen — Browser drosseln, was im Hintergrund läuft —, bricht es aber nicht ab.', esperaDica:'Am Ende blinkt der Tab-Titel und das Symbol wechselt — Sie müssen nicht zusehen. Wenn eine weitere Aufnahme wartet, beginnen Sie jetzt: Die Maschine wird geteilt, jede dauert also länger als allein.', esperaNova:'Neue Sitzung in einem Tab öffnen',
       leaveWarn:'Die Verarbeitung läuft noch. Wenn Sie jetzt gehen, geht das bereits Erledigte verloren.', noGpu:'WebGPU nicht verfügbar — es wird der Prozessor verwendet, das dauert länger.',
       transcribing:'Wird transkribiert… Block {0} von {1}', trDone:'Transkription fertig — {0} Abschnitte.',
       trErr:'Die Transkription war hier nicht möglich: {0} — klicken Sie auf Diagnose, um zu sehen, in welchem Schritt es hängt.',
@@ -4630,7 +4664,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       sensTarjado1:'1 Schwärzung angewendet. Prüfen Sie sie vor dem Erzeugen in der Lupe — die Schwärzung wird fest in das Bild eingebrannt.',
       sensTarjar:'Die {0} Treffer schwärzen',
       sensTarjado:'{0} Schwärzungen angewendet. Prüfen Sie sie vor dem Erzeugen in der Lupe — die Schwärzung wird fest in das Bild eingebrannt.',
-      sensNaoAchou:'Nichts automatisch zu schwärzen', pessoasH:'In dieser Aufnahme sind Personen zu sehen.', pessoas_ata:'Sie haben das Szenario „Besprechungsprotokoll“ gewählt.', pessoas_ux:'Sie haben das Szenario „Usability-Sitzung“ gewählt.', pessoas_canal:'Die Transkription enthält die Stimme der Gegenseite.', pessoasP:'In einer Videokonferenz zeigt jede gespeicherte Aufnahme die Teilnehmerleiste — Gesicht, Name und Funktion aller Anwesenden. Das ist kein Text, die Prüfung oben sieht es also nicht. Prüfen Sie die Aufnahmen vor dem Erzeugen.', pessoasBtn:'Lupe öffnen und Personen schwärzen',
+      sensNaoAchou:'Nichts automatisch zu schwärzen', trocaPlaca:'In diesem Tempo dauert es noch etwa {0}. Ihr Rechner hat eine Grafikkarte, die nicht genutzt wird — sie einzuschalten ist meist deutlich schneller, ohne Genauigkeitsverlust.', trocaModelo:'In diesem Tempo dauert es noch etwa {0}. Der schnelle Modus nutzt ein kleineres Modell: ein Bruchteil der Zeit, dafür weniger Treffsicherheit bei Eigennamen, Abkürzungen und starkem Akzent.', trocaBtn:'Jetzt wechseln und hier weitermachen', trocaIndo:'Wird gewechselt … das bereits Transkribierte bleibt.', avisoAbaTr:'Transkription fertig', avisoTr:'Transkription abgeschlossen: {0} Abschnitte in {1}. Sie steht im Feld in Schritt 2.', avisoFechar:'Verstanden', pessoasH:'In dieser Aufnahme sind Personen zu sehen.', pessoas_ata:'Sie haben das Szenario „Besprechungsprotokoll“ gewählt.', pessoas_ux:'Sie haben das Szenario „Usability-Sitzung“ gewählt.', pessoas_canal:'Die Transkription enthält die Stimme der Gegenseite.', pessoasP:'In einer Videokonferenz zeigt jede gespeicherte Aufnahme die Teilnehmerleiste — Gesicht, Name und Funktion aller Anwesenden. Das ist kein Text, die Prüfung oben sieht es also nicht. Prüfen Sie die Aufnahmen vor dem Erzeugen.', pessoasBtn:'Lupe öffnen und Personen schwärzen',
       sensNaoAchouDica:'Das Muster wurde im laufenden Text gefunden, aber über keinem im Bild auffindbaren Wort. Schwärzen Sie es von Hand in der Lupe.',
       sensSemCaixa:'Automatisches Schwärzen nicht verfügbar',
       sensSemCaixaDica:'Diese Version der Texterkennung hat die Position der Wörter nicht zurückgegeben. Von Hand in der Lupe schwärzen ist weiterhin möglich.',
@@ -4923,8 +4957,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       tradErro:'Impossible de traduire.',
       tradSemApi:'Traduction sur l’appareil : pour l’instant seulement dans Chrome et Edge sur ordinateur. Dans les autres navigateurs, la transcription sort dans la langue parlée et la traduction attend — le texte est à vous, vous pouvez l’exporter et le traduire où vous voulez.',
       autoIndo:'Transcription…', autoEspere:'Vous pouvez la laisser en arrière-plan — mais ne fermez pas l’onglet : le travail se fait ici même.',
-      mBase:'Rapide — moins précis', mSmall:'Recommandé — équilibré',
-      mTurbo:'Précision maximale — téléchargement volumineux',
+      mBase:'Recommandé — rapide', mSmall:'Plus précis — bien plus lent',
+      mTurbo:'Précision maximale — téléchargement volumineux, très lent',
       autoDetect:'Détecter automatiquement', diagBtn:'Diagnostic',
       openSub:'Ouvrir un fichier de sous-titres', orDrag:'ou déposez le fichier sur le champ ci-dessus, ou collez le texte',
       subDeOnde:'.vtt ou .srt d’une réunion déjà transcrite par Teams, Meet ou Zoom — ainsi, aucun modèle de reconnaissance vocale à télécharger. Vous pouvez aussi le déposer sur la zone, ou simplement coller.',
@@ -4943,7 +4977,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       erroSessao:'Le fichier compressé du modèle ne s’ouvre pas sur cet ordinateur. Les versions alternatives ont déjà été essayées, aucune n’a démarré. Lancez le diagnostic, ou enregistrez les captures seules et saisissez les notes à la main.',
       transcribing2:'Étape 2 sur 2 — transcription : {0} % (bloc {1} sur {2}){3}',
       etaTr:' — il reste ~{0}',
-      keepOpen:'Gardez cet onglet ouvert et visible. Le traitement se fait dans votre navigateur, et devient beaucoup plus lent si l’onglet passe en arrière-plan.',
+      keepOpen:'Ne fermez pas cet onglet : tout se passe ici, et le fermer perd le travail. Changer d’onglet peut ralentir le traitement — le navigateur bride ce qui tourne en arrière-plan —, mais ne l’interrompt pas.', esperaDica:'À la fin, le titre de l’onglet clignote et l’icône change — inutile de surveiller. Si un autre enregistrement attend, commencez-le maintenant : la machine est partagée entre les deux, chacun prendra donc plus de temps que seul.', esperaNova:'Ouvrir une nouvelle session dans un onglet',
       leaveWarn:'Le traitement est encore en cours. Si vous partez maintenant, vous perdez ce qui a déjà été fait.', noGpu:'WebGPU indisponible — utilisation du processeur, ce sera plus long.',
       transcribing:'Transcription… bloc {0} sur {1}', trDone:'Transcription prête — {0} segments.',
       trErr:'Transcription impossible ici : {0} — cliquez sur Diagnostic pour voir à quelle étape ça bloque.',
@@ -5211,7 +5245,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       sensTarjado1:'1 caviardage appliqué. Vérifiez dans la loupe avant de générer — le caviardage est incrusté dans l’image.',
       sensTarjar:'Caviarder les {0} occurrences',
       sensTarjado:'{0} caviardages appliqués. Vérifiez dans la loupe avant de générer — le caviardage est incrusté dans l’image.',
-      sensNaoAchou:'Rien à caviarder automatiquement', pessoasH:'Il y a des personnes dans cet enregistrement.', pessoas_ata:'Vous avez choisi le scénario « Compte rendu de réunion ».', pessoas_ux:'Vous avez choisi le scénario « Séance d’utilisabilité ».', pessoas_canal:'La transcription contient la voix de l’autre bout de l’appel.', pessoasP:'Dans un appel vidéo, chaque écran capturé porte la bande des participants — visage, nom et fonction de chacun. Ce n’est pas du texte, l’analyse ci-dessus ne le voit donc pas. Vérifiez les écrans avant de générer.', pessoasBtn:'Ouvrir la loupe pour caviarder les personnes',
+      sensNaoAchou:'Rien à caviarder automatiquement', trocaPlaca:'À ce rythme, il reste environ {0}. Votre machine a une carte graphique inutilisée — l’activer est en général bien plus rapide, sans perte de précision.', trocaModelo:'À ce rythme, il reste environ {0}. Le mode rapide utilise un modèle plus petit : une fraction du temps, avec moins de justesse sur les noms propres, les sigles et les accents prononcés.', trocaBtn:'Changer maintenant et continuer d’ici', trocaIndo:'Changement… ce qui est déjà transcrit reste en place.', avisoAbaTr:'Transcription prête', avisoTr:'Transcription terminée : {0} segments en {1}. Elle est dans le champ de l’étape 2.', avisoFechar:'Compris', pessoasH:'Il y a des personnes dans cet enregistrement.', pessoas_ata:'Vous avez choisi le scénario « Compte rendu de réunion ».', pessoas_ux:'Vous avez choisi le scénario « Séance d’utilisabilité ».', pessoas_canal:'La transcription contient la voix de l’autre bout de l’appel.', pessoasP:'Dans un appel vidéo, chaque écran capturé porte la bande des participants — visage, nom et fonction de chacun. Ce n’est pas du texte, l’analyse ci-dessus ne le voit donc pas. Vérifiez les écrans avant de générer.', pessoasBtn:'Ouvrir la loupe pour caviarder les personnes',
       sensNaoAchouDica:'Le motif a été trouvé dans le texte courant, mais au-dessus d’aucun mot localisable sur l’image. Caviardez à la main dans la loupe.',
       sensSemCaixa:'Caviardage automatique indisponible',
       sensSemCaixaDica:'Cette version du lecteur de texte n’a pas renvoyé la position des mots. Vous pouvez caviarder à la main dans la loupe.',
@@ -5390,6 +5424,19 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   function trabalhando(v){
     ocupado = v;
     $('keepOpen').classList.toggle('hide', !v);
+    if ($('esperaDica')) $('esperaDica').classList.toggle('hide', !v);
+  }
+  /* A SESSÃO NOVA, numa aba.
+     Quem tem cinco gravações para documentar não pode ficar refém da primeira.
+     A aba nova é uma sessão independente — nada é compartilhado entre elas,
+     porque nada sai do navegador —, e o aviso de que a máquina será dividida
+     está no texto: duas transcrições ao mesmo tempo não terminam na metade do
+     tempo, terminam nas duas somadas, e o modelo é baixado outra vez. */
+  if ($('novaSessao')) {
+    $('novaSessao').onclick = () => {
+      medir('nova_sessao', { p_de: 'espera' });
+      window.open(location.pathname + location.search, '_blank', 'noopener');
+    };
   }
   window.addEventListener('beforeunload', e => {
     if (!ocupado) return;
@@ -7125,7 +7172,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      depois, e não tem como se atualizar sozinho. Sem carimbo, "estou com um
      problema no offline" é uma conversa sem chão — ninguém sabe de qual build
      se fala nem se o defeito já foi consertado. */
-  const VERSAO = '2026.08.19-44';
+  const VERSAO = '2026.08.19-69';
   window.__versao = () => VERSAO;
 
   const PIP_CSS = `
@@ -10108,6 +10155,61 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      transcrição inteira morre e o usuário fica com uma linha de C++. */
   const ERRO_SESSAO = /session|Missing required scale|MatMulNBits|DequantizeLinear|ERROR_CODE/i;
 
+  /* ================= O MODO RÁPIDO, OFERECIDO COM O NÚMERO NA FRENTE =========
+
+     O RELATO: 40 minutos de reunião levaram 40 minutos para transcrever. A
+     causa eram dois padrões somados — o modelo maior no processador —, e os
+     dois já foram trocados. Mas o padrão só ajuda quem começa depois dele:
+     quem escolheu o modelo preciso de propósito, ou cuja placa não deu conta,
+     continua esperando, e continua sem saber quanto.
+
+     Esta oferta usa o RITMO MEDIDO, e não uma tabela: depois de duas janelas o
+     aplicativo já sabe quanto tempo cada uma custa nesta máquina, com este
+     áudio. Quando isso projeta uma espera longa e existe uma configuração mais
+     rápida ainda não usada, ele diz a previsão e oferece a troca.
+
+     O QUE ELA NÃO FAZ: prometer um múltiplo. "Três vezes mais rápido" seria um
+     número que eu não medi na máquina de quem está lendo, e a previsão se
+     corrige sozinha assim que a primeira janela do modo novo termina — o que é
+     melhor do que qualquer promessa.
+
+     E ela NÃO recomeça. A troca vale da janela seguinte em diante; o que já foi
+     transcrito fica. Recomeçar seria cobrar de novo o tempo que a pessoa já
+     pagou, exatamente no momento em que ela reclamou do tempo. */
+  let trocaPedida = null;
+
+  /* A configuração mais rápida que ainda não está em uso. Derivada do estado,
+     e não de uma lista de casos: primeiro a placa (ganho maior, sem custo de
+     precisão), depois o modelo menor. */
+  function modoMaisRapido(){
+    if (navigator.gpu && $('gpu') && !$('gpu').checked) return { gpu: true, rotulo: 'placa' };
+    if ($('model') && $('model').value !== 'onnx-community/whisper-base')
+      return { modelo: 'onnx-community/whisper-base', rotulo: 'modelo' };
+    return null;
+  }
+
+  function oferecerTroca(segundosRestantes){
+    const cx = $('trocaOferta'); if (!cx) return;
+    const alvo = (segundosRestantes > 300) ? modoMaisRapido() : null;
+    cx.classList.toggle('hide', !alvo);
+    if (!alvo) return;
+    $('trocaTxt').textContent =
+      t(alvo.rotulo === 'placa' ? 'trocaPlaca' : 'trocaModelo', duracao(segundosRestantes));
+    $('trocaBtn').textContent = t('trocaBtn');
+    $('trocaBtn').onclick = () => {
+      /* A troca é PEDIDA, e aplicada pelo laço entre uma janela e outra. Trocar
+         o motor no meio de uma inferência que está correndo é como puxar a
+         toalha da mesa posta. */
+      trocaPedida = alvo;
+      if (alvo.gpu && $('gpu')) { $('gpu').checked = true; $('gpu').dataset.mao = '1'; }
+      if (alvo.modelo && $('model')) $('model').value = alvo.modelo;
+      mostrarTamanho();
+      $('trocaBtn').disabled = true;
+      $('trocaTxt').textContent = t('trocaIndo');
+      medir('trocou_modo', { p_para: alvo.rotulo });
+    };
+  }
+
   async function transcrever(dados, opts){
     const seg = dados.length / 16000;
     const t0 = performance.now();
@@ -10128,7 +10230,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       pipe = await libMod.pipeline('automatic-speech-recognition', idAntes, { dtype:'q8' });
       pipeId = idAntes; pipeDev = 'cpu';
       motorEmUso = 'processador';
-      if ($('gpu')) $('gpu').checked = false;      // não tentar de novo nesta sessão
+      /* Não tentar de novo nesta sessão — e marcar como DECIDIDO, senão a
+         próxima repintura devolve o padrão "marcada" por cima da placa que
+         acabou de falhar, e a queda vira um laço. */
+      if ($('gpu')) { $('gpu').checked = false; $('gpu').dataset.mao = '1'; }
       const t1 = performance.now();
       const r = await pipe(dados, opts);           // o MESMO pedido, uma vez só
       relogio.audio += seg; relogio.ms += performance.now() - t1;
@@ -10197,6 +10302,13 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
 
       const SR = 16000, WIN = 30 * SR, total = Math.ceil(data.length / WIN), out = [];
       const inicio = performance.now();
+      /* DOIS RELÓGIOS, e é a troca de modo que os separa. `inicio` mede o
+         trabalho inteiro — é o que a mensagem do fim conta. `inicioModo` mede
+         só o modo em uso, e é dele que sai a previsão: depois de trocar, a
+         média dos dois modos descreveria um ritmo que não existe mais e a
+         previsão levaria minutos para se corrigir, justo quando a pessoa está
+         olhando para ver se a troca adiantou. */
+      let inicioModo = inicio, feitosNoModo = 0;
 
       /* Peneira de silêncio: o Whisper processa SEMPRE 30 segundos, com ou sem
          fala dentro. Uma janela muda custa o mesmo que uma cheia — e ainda
@@ -10208,6 +10320,22 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       let ultimaChave = null;
 
       for (let i = 0; i < total; i++) {
+        /* A TROCA DE MODO ACONTECE AQUI, entre uma janela e a seguinte.
+           `out` não é tocado: as janelas já transcritas continuam valendo, e o
+           relógio é zerado para a previsão passar a descrever o modo novo em
+           vez da média dos dois. */
+        if (trocaPedida) {
+          const alvo = trocaPedida; trocaPedida = null;
+          const idNovo = alvo.modelo || $('model').value;
+          esperando(await modeloEmCache(idNovo) ? t('modelCache') : t('modelLoad'));
+          prog('?');
+          try { await trocarPipe(idNovo); } catch (e) { st(t('trErr', (e && e.message) || e), 'err'); }
+          pararEspera();
+          relogio.audio = 0; relogio.ms = 0;
+          feitosNoModo = 0; inicioModo = performance.now();
+          if ($('trocaOferta')) $('trocaOferta').classList.add('hide');
+          if ($('trocaBtn')) $('trocaBtn').disabled = false;
+        }
         const off = i * WIN, seg = data.slice(off, Math.min(off + WIN, data.length)), base = off / SR;
         if (!janelaTemVoz(quadros.subarray(i*QJ, (i+1)*QJ), limiar)) {
           pulados++;
@@ -10243,20 +10371,27 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
            depende deste trecho estar certo pela metade. */
         escreverParcial(out);
         const feitos = i + 1, pct = feitos / total * 100;
+        feitosNoModo++;
         transcrevendoPct = pct;
         pintarSaidas();
         prog(pct);
-        // previsão a partir do ritmo medido, não de estimativa fixa
-        const resta = (performance.now() - inicio) / feitos * (total - feitos) / 1000;
-        const falta = (feitos >= 2 && resta > 3) ? t('etaTr', duracao(resta)) : '';
+        // previsão a partir do ritmo medido NESTE MODO, não de estimativa fixa
+        const resta = (performance.now() - inicioModo) / feitosNoModo * (total - feitos) / 1000;
+        const falta = (feitosNoModo >= 2 && resta > 3) ? t('etaTr', duracao(resta)) : '';
+        if (feitosNoModo >= 2) oferecerTroca(resta);
         st(t('transcribing2', pct.toFixed(0), feitos, total, falta));
       }
       pararEspera();
+      if ($('trocaOferta')) $('trocaOferta').classList.add('hide');
       $('tr').value = 'WEBVTT\n\n' + out.join('\n\n');
       $('tr').readOnly = false;
       refreshTr(); prog(100);
       st(t('trDone', out.length) + (pulados ? ' ' + t('trPulou', pulados) : '') +
          contarDesempenho(), 'ok');
+      /* O aviso sai daqui, do caminho de SUCESSO, e não do `finally`: um
+         "pronto" piscando na aba depois de a transcrição morrer no meio manda
+         a pessoa voltar correndo para ler um erro. */
+      avisarPronto(t('avisoAbaTr'), t('avisoTr', out.length, duracao((performance.now() - inicio) / 1000)));
     } catch (e) {
       prog(null);
       st(t('trErr', (e && e.message ? e.message : e)), 'err');
@@ -10323,15 +10458,30 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      a máquina não tem é só uma forma de fazer a pessoa tentar e não entender o
      resultado.
 
-     Ela continua DESMARCADA por padrão, e isso é deliberado: o caminho da placa
-     baixa 206 MB contra 77 MB do processador, e encarecer o primeiro uso de
-     todo mundo para acelerar alguns seria pagar no lugar errado. Quem tem placa
-     e quer velocidade marca. Quem não marca e cai no defeito do wasm é
-     resgatado automaticamente — a fila de montagem tenta a placa por conta
-     própria no fim, antes de desistir. */
+     ELA NASCE MARCADA quando a máquina tem placa — e por muito tempo nasceu
+     desmarcada, com este comentário defendendo a escolha assim: "o caminho da
+     placa baixa 206 MB contra 77 MB do processador, e encarecer o primeiro uso
+     de todo mundo para acelerar alguns seria pagar no lugar errado".
+
+     O argumento estava certo e a conta estava errada, porque comparava a placa
+     com o modelo BASE enquanto o padrão que saía era o SMALL. O que o produto
+     realmente entregava era 249 MB no processador — mais download que a placa
+     com o base (206 MB) e várias vezes mais lento. A pessoa pagava os dois
+     preços.
+
+     Com o base como padrão, marcar a placa custa 206 MB contra 77 MB, e compra
+     a diferença entre 40 minutos e alguns. O relato que trouxe isto: uma
+     reunião de 40 minutos transcrevendo por 40 minutos.
+
+     `dataset.mao` guarda quem MEXEU. Sem ele, a repintura devolveria o padrão
+     por cima da escolha de quem desmarcou de propósito — e a escolha da pessoa
+     tem que ganhar do padrão em qualquer repintura. É o mesmo mecanismo do nome
+     dos canais de áudio. */
   if ($('gpu')) {
-    $('gpu').closest('label').classList.toggle('hide', !navigator.gpu);
-    $('gpu').onchange = mostrarTamanho;
+    const cx = $('gpu');
+    cx.closest('label').classList.toggle('hide', !navigator.gpu);
+    if (!cx.dataset.mao && navigator.gpu) cx.checked = true;
+    cx.onchange = () => { cx.dataset.mao = '1'; mostrarTamanho(); };
   }
   $('model').onchange = mostrarTamanho;
   mostrarTamanho();
@@ -12522,13 +12672,37 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       const w = $(f.bar);
       return w && !w.classList.contains('hide');
     });
-    /* Só quando a barra de verdade está FORA da vista. Duas barras dizendo a
-       mesma coisa na mesma tela seriam ruído. */
-    const naTela = viva && (() => {
-      const r = $(viva.bar).getBoundingClientRect();
-      return r.bottom > 0 && r.top < innerHeight;
-    })();
-    const mostrar = !!viva && !naTela;
+    /* ELA FICA, e não some quando a barra de verdade aparece.
+
+       A regra anterior era "só quando a barra de verdade está fora da vista",
+       com o argumento de que duas barras dizendo a mesma coisa seriam ruído. O
+       argumento era meu, e o relato de campo o desmentiu: numa transcrição de
+       quarenta minutos a pessoa rola a página para conferir uma tela, a faixa
+       some, ela rola de volta, a faixa volta — e o ÚNICO sinal global de que a
+       máquina ainda está trabalhando pisca conforme o scroll.
+
+       Redundância numa espera longa não é ruído. É a diferença entre saber e
+       não saber que a coisa anda, e o custo de olhar duas barras é zero perto
+       do custo de fechar a aba achando que travou. */
+    /* ---- A FAIXA TAMBÉM DÁ A NOTÍCIA DO FIM ----
+       Quando não há trabalho correndo mas existe um aviso guardado, a mesma
+       faixa que a pessoa vinha olhando muda de estado e diz que acabou. Um
+       segundo elemento flutuante para isso seria uma segunda coisa a
+       posicionar, a esconder e a testar — e a faixa já é o lugar onde os olhos
+       de quem esperou estavam. */
+    if (!viva && avisoPronto) {
+      el.classList.remove('hide');
+      el.classList.add('pronta');
+      document.body.classList.add('comFaixa');
+      $('faixaTxt').textContent = avisoPronto.texto;
+      $('faixaTxt').nextElementSibling.classList.remove('solta');
+      $('faixaBarI').style.width = '100%';
+      $('faixaParar').classList.remove('hide');
+      $('faixaParar').textContent = t('avisoFechar');
+      return;
+    }
+    el.classList.remove('pronta');
+    const mostrar = !!viva;
     el.classList.toggle('hide', !mostrar);
     document.body.classList.toggle('comFaixa', mostrar);
     if (!mostrar) return;
@@ -12545,7 +12719,89 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     $('faixaParar').classList.toggle('hide', !podeParar);
     if (podeParar) $('faixaParar').textContent = c.textContent;
   }
-  if ($('faixaParar')) $('faixaParar').onclick = () => { const c = $('cancel'); if (c) c.click(); };
+  /* O botão da faixa tem dois trabalhos porque a faixa tem dois estados: parar
+     o que está correndo, ou dispensar o aviso do que terminou. */
+  if ($('faixaParar')) $('faixaParar').onclick = () => {
+    if ($('faixa').classList.contains('pronta')) { limparAviso(); pintarFaixa(); return; }
+    const c = $('cancel'); if (c) c.click();
+  };
+
+  /* ================= O AVISO DE QUE ACABOU =================
+
+     O RELATO: uma reunião de 40 minutos transcrevendo por 40 minutos. Ninguém
+     fica olhando uma barra por quarenta minutos — a pessoa troca de aba, vai
+     fazer outra coisa, e a transcrição termina para uma tela que ninguém está
+     vendo. O trabalho fica pronto e continua parecendo que não.
+
+     TRÊS CANAIS, e nenhum pede permissão:
+
+       1. o TÍTULO da aba pisca — é o que se lê na barra de abas sem sair do
+          que se está fazendo;
+       2. o ÍCONE muda para o de concluído, porque numa janela com quinze abas
+          o título fica cortado em seis caracteres e o ícone não;
+       3. ao VOLTAR, a faixa que ela vinha olhando diz o que ficou pronto.
+
+     Notificação do sistema ficou de fora de propósito: ela pede permissão, e
+     uma permissão pedida por uma ferramenta que se vende por "não manda nada
+     para lugar nenhum" custa mais confiança do que compra atenção. Som também
+     não — um bipe disparando quarenta minutos depois, numa aba esquecida, toca
+     no meio da reunião de outra pessoa. */
+  const TITULO_ORIG = document.title;
+  const ICONE_PRONTO = "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'>" +
+    "<rect width='64' height='64' rx='14' fill='%232F9E44'/>" +
+    "<path d='M17 33l10 10 20-22' fill='none' stroke='%23fff' stroke-width='8'" +
+    " stroke-linecap='round' stroke-linejoin='round'/></svg>";
+  let avisoPronto = null, piscaTimer = null, piscaEstado = false;
+
+  const iconeDaAba = () => document.querySelector("link[rel='icon'][type='image/svg+xml']");
+
+  function pararPisca(){
+    if (piscaTimer) { clearInterval(piscaTimer); piscaTimer = null; }
+    document.title = TITULO_ORIG;
+    const ic = iconeDaAba();
+    if (ic && ic.dataset.orig) { ic.href = ic.dataset.orig; delete ic.dataset.orig; }
+  }
+
+  function limparAviso(){
+    avisoPronto = null;
+    pararPisca();
+  }
+
+  /* `curto` é o que cabe numa aba estreita; `texto` é o que a faixa mostra.
+     São dois textos porque são dois lugares com espaços muito diferentes — e
+     cortar o longo com reticências daria "Transcrição conclu…" na aba. */
+  function avisarPronto(curto, texto){
+    avisoPronto = { texto };
+    /* Só pisca se a pessoa NÃO estiver olhando. Piscar o título de uma aba em
+       foco é enfeite irritante: quem está aqui já viu a barra chegar a 100%. */
+    if (!document.hidden) { pintarFaixa(); return; }
+    const ic = iconeDaAba();
+    if (ic && !ic.dataset.orig) { ic.dataset.orig = ic.href; ic.href = ICONE_PRONTO; }
+    if (piscaTimer) clearInterval(piscaTimer);
+    piscaEstado = false;
+    piscaTimer = setInterval(() => {
+      piscaEstado = !piscaEstado;
+      document.title = piscaEstado ? '✓ ' + curto : TITULO_ORIG;
+    }, 1200);
+    pintarFaixa();
+  }
+
+  /* Voltar para a aba encerra o piscar — mas NÃO o aviso: o piscar é para
+     chamar de longe, e a faixa é para contar de perto. Quem volta precisa ler
+     o que aconteceu enquanto esteve fora, e não achar uma tela que se
+     recompôs sozinha como se nada tivesse corrido. */
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && avisoPronto) { pararPisca(); pintarFaixa(); }
+  });
+
+  /* Os dois espelhos que `testes/espera2.mjs` usa. Eles não são um segundo
+     caminho: chamam as MESMAS funções que a transcrição chama, com os mesmos
+     textos do dicionário. O que eles evitam é só ter que transcrever quarenta
+     minutos de áudio de verdade para conferir que o título pisca. */
+  try {
+    window.__avisar = () => avisarPronto(t('avisoAbaTr'), t('avisoTr', 12, '3 min'));
+    window.__ocupado = v => trabalhando(!!v);
+  } catch (e) {}
   /* Duas fontes de repintura: o relógio (o progresso muda sozinho) e a rolagem
      (a barra de verdade entra e sai da tela). O intervalo é curto porque a
      faixa é texto e uma largura — repintar isso custa menos que decidir se

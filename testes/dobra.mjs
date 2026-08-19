@@ -58,17 +58,30 @@ console.log('\n[1b] a gaveta dos ajustes abre e fecha');
    alcançável. Uma gaveta que só muda de cor e deixa tudo clicável por baixo
    não guardou nada — e era exatamente o que o título "quase ninguém precisa
    mexer" fazia antes: avisava, e mostrava os dezesseis controles assim mesmo. */
-ok('com a gaveta fechada não dá para marcar a placa de vídeo',
-   !(await pg.locator('#gpu').check({ timeout: 1200 }).then(()=>true).catch(()=>false)));
+/* CLIQUE, e não `check()`.
+   `check()` não clica quando a caixa JÁ está no estado pedido — ele volta na
+   hora, com sucesso. Desde que a placa passou a nascer marcada onde existe
+   WebGPU (e existe, neste Chromium, quando a página vem por http), esta linha
+   passou a afirmar "consegui marcar o que já estava marcado" e reprovou uma
+   gaveta que continuava fechando direitinho. O clique sempre age, então o que
+   se mede volta a ser o que interessa: dá ou não dá para ALCANÇAR o controle. */
+ok('com a gaveta fechada não dá para alcançar a placa de vídeo',
+   !(await pg.locator('#gpu').click({ timeout: 1200 }).then(()=>true).catch(()=>false)));
 await pg.locator('#ajustesBtn').click();
 await pg.waitForTimeout(450);
 ok('clicar em "ajustes" abre a gaveta', await gavetaAberta());
 ok('e os ajustes ficam alcançáveis antes de gravar',
    (await alturaGaveta()) > 100 && !(await pg.locator('#gpu').isDisabled()),
    (await alturaGaveta()).toFixed(0) + 'px');
-ok('dá para marcar a placa de vídeo sem ter vídeo nenhum',
-   await pg.locator('#gpu').check().then(()=>true).catch(()=>false));
-await pg.locator('#gpu').uncheck();
+/* E aberta ela é alcançável — medido pelo estado que MUDA, e não por um
+   `check()` que pode ser um não-fazer-nada. */
+const antesDoClique = await pg.locator('#gpu').isChecked();
+ok('dá para mexer na placa de vídeo sem ter vídeo nenhum',
+   await pg.locator('#gpu').click().then(()=>true).catch(()=>false));
+ok('e o clique realmente mudou o estado da caixa',
+   (await pg.locator('#gpu').isChecked()) !== antesDoClique,
+   antesDoClique + ' → ' + (await pg.locator('#gpu').isChecked()));
+await pg.locator('#gpu').setChecked(antesDoClique);
 ok('o botão diz o seu estado para quem não vê a seta',
    (await pg.locator('#ajustesBtn').getAttribute('aria-expanded')) === 'true');
 const alturaAberta = await pg.evaluate(()=>document.documentElement.scrollHeight);

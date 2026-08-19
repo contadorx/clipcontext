@@ -628,6 +628,7 @@ def build_site(root: pathlib.Path) -> None:
         t["empresa"] = EMPRESA
         t["cnpj"] = CNPJ
         t["contato"] = CONTATO
+        t["encarregado"] = ENCARREGADO
         t["selfPath"] = caminhos[lang]["home"]
         t["switcher"] = _switcher(lang, paginas, "home")
         # o link do comparativo vai montado aqui: colocar <a> dentro do JSON de
@@ -680,6 +681,7 @@ def build_site(root: pathlib.Path) -> None:
             t["empresa"] = EMPRESA
             t["cnpj"] = CNPJ
             t["contato"] = CONTATO
+            t["encarregado"] = ENCARREGADO
             t["lang"] = lang
             t["docTitle"], t["docDesc"] = metas[lang]
             t["selfPath"] = caminhos[lang][pagina]

@@ -190,10 +190,30 @@ ok('e ela diz o que está acontecendo, não só uma barra',
    (faixaDescido.texto || '').length > 10, faixaDescido.texto);
 ok('e o corpo ganha folga para ela não cobrir o último passo',
    faixaDescido.corpoComFolga);
-ok('acabado o trabalho, a faixa sai da tela',
-   await pg.evaluate(() => document.getElementById('faixa').classList.contains('hide')));
-ok('e o corpo devolve a folga',
-   !(await pg.evaluate(() => document.body.classList.contains('comFaixa'))));
+/* ACABADO O TRABALHO, a faixa não some: ela MUDA DE ESTADO e dá a notícia.
+   Esta linha afirmava que ela saía da tela, e estava certa enquanto a faixa só
+   sabia falar de progresso. Depois do relato dos 40 minutos ela ganhou um
+   segundo estado — verde, com o que ficou pronto —, porque quem passou a espera
+   fora da aba precisa ler o que aconteceu ao voltar, e não achar uma tela que
+   se recompôs sozinha.
+
+   O que continua sendo cobrado é o mesmo de sempre, e é o que importa para o
+   layout: a faixa e a folga do corpo andam JUNTAS. Uma folga de 76px sem faixa
+   nenhuma é um buraco no fim da página; uma faixa sem folga cobre o último
+   passo. As duas afirmações abaixo travam esse par nos dois estados. */
+const fim = await pg.evaluate(() => ({
+  faixa: !document.getElementById('faixa').classList.contains('hide'),
+  pronta: document.getElementById('faixa').classList.contains('pronta'),
+  folga: document.body.classList.contains('comFaixa'),
+  txt: (document.getElementById('faixaTxt').textContent || '').trim(),
+}));
+linha('no fim do trabalho', JSON.stringify(fim));
+ok('acabado o trabalho, a faixa some OU vira o aviso de concluído',
+   !fim.faixa || fim.pronta, JSON.stringify(fim));
+ok('e a folga do corpo acompanha a faixa, nos dois casos',
+   fim.folga === fim.faixa, JSON.stringify(fim));
+ok('e quando ela vira aviso, ela diz o que ficou pronto',
+   !fim.pronta || fim.txt.length > 10, fim.txt);
 ok('sem erro de JavaScript', erros.length === 0, erros.join(' | ').slice(0, 200));
 
 await br.close(); srv.close();
