@@ -106,6 +106,24 @@ EMPRESA = "Produtize Produtos e Serviços Inteligentes Ltda."
 CNPJ    = "48.417.292/0001-99"
 CONTATO = "privacidade@walkstamp.com"
 
+# O encarregado pelo tratamento de dados pessoais (art. 41 da LGPD).
+#
+# O QUE A LEI PEDE, e é só isto: a IDENTIDADE e as INFORMAÇÕES DE CONTATO,
+# divulgadas publicamente, de forma clara e objetiva (art. 41, §1º). Nome e
+# canal. Nada além disso.
+#
+# O QUE NÃO ENTRA AQUI, e a recusa é deliberada: CPF, RG, endereço, telefone
+# pessoal. Publicar o CPF de alguém numa página aberta da internet é entregar,
+# de graça e para sempre, o dado que abre conta e contrata crédito no Brasil —
+# e fazer isso dentro de uma POLÍTICA DE PRIVACIDADE seria o documento se
+# contradizendo na própria linha em que promete cuidado. A lei não pede, o
+# avaliador de fornecedor não procura, e o dano é irreversível: página indexada
+# não se despublica de verdade.
+#
+# Se algum dia um contrato exigir a qualificação completa do encarregado, ela
+# vai no INSTRUMENTO ASSINADO entre as partes — que é privado —, e não no site.
+ENCARREGADO = "Leandro Batista de Oliveira"
+
 # ---------------------------------------------------------------------------
 # Google Drive e Google Docs. Os três nascem VAZIOS e é assim que devem ficar
 # em qualquer cópia que não seja a sua: com eles vazios, nenhum botão do Google
@@ -438,6 +456,7 @@ def escrever_marca(root: pathlib.Path) -> None:
         "marca": MARCA, "marcaA": MARCA_A, "marcaB": MARCA_B,
         "site": SITE, "iconV": ICON_V,
         "empresa": EMPRESA, "cnpj": CNPJ, "contato": CONTATO,
+        "encarregado": ENCARREGADO,
         "supaUrl": SUPA_URL, "supaKey": SUPA_KEY,
         "analytics": ANALYTICS,
         "licPub": LIC_PUB, "licPubAuto": LIC_PUB_AUTO,
@@ -773,6 +792,7 @@ self.addEventListener('fetch', e => {
     robots = f"User-agent: *\nAllow: /\n\nSitemap: {SITE}/sitemap.xml\n"
     (root / "public" / "robots.txt").write_text(robots, encoding="utf-8")
     print("public/robots.txt")
+
 
     # support.js: o único texto do site que não vinha de template — e foi
     # exatamente onde o nome antigo sobreviveu à troca. Agora ele mora em src

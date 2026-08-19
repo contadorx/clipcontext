@@ -51,13 +51,47 @@ for (const [rota, {tem, nao}] of Object.entries(paginas)) {
      linhas trancava um número; o que interessa é que cada linha tenha as quatro
      colunas preenchidas e que as duas que faltavam estejam lá. */
   if (rota.includes('privacidade')) {
-    const linhas = await pg.locator('table.legal tr').count();
+    /* CADA TABELA PELO SEU `id`.
+       Esta conferência mirava em `table.legal` — que era uma tabela só quando
+       foi escrita. Quando a política ganhou a tabela de PAPÉIS (3 colunas) e a
+       de SUBOPERADORES (5), o seletor passou a somar as três e a acusar 11
+       linhas "sem as quatro colunas" numa página correta. Uma régua que mira
+       numa classe compartilhada mede o que aparecer ali depois. */
+    const linhas = await pg.locator('table#basesLegais tr').count();
     ok('a tabela de bases legais renderiza como tabela', linhas >= 5, linhas + ' linhas');
-    const vazias = await pg.locator('table.legal tr').evaluateAll((trs) =>
+    const vazias = await pg.locator('table#basesLegais tr').evaluateAll((trs) =>
       trs.slice(1).filter((tr) => [...tr.querySelectorAll('td')].length !== 4
         || [...tr.querySelectorAll('td')].some((td) => !td.textContent.trim())).length);
     ok('e cada linha diz dado, finalidade, base legal e prazo', vazias === 0, String(vazias));
-    const col1 = await pg.locator('table.legal tr td:first-child').allTextContents();
+
+    /* AS DUAS TABELAS NOVAS — por ora só em português.
+       A separação de papéis e a tabela de suboperadores entraram primeiro em
+       `privacidade.pt.html`, para serem revisadas antes de virarem cinco
+       traduções de um texto jurídico. Quando en/es/de/fr receberem as duas
+       seções, ESTA CONDIÇÃO SAI e a cobrança passa a valer nas três rotas.
+       Quem não deixa isso ser esquecido é `testes/terceiros.mjs`, que já falha
+       hoje, por idioma, dizendo qual tabela falta.
+
+       O que cada uma tem que afirmar:
+       A de papéis é a que decide uma avaliação de fornecedor: dizer-se
+       "controladora" dos dados que o cliente confia à conta paga é o erro que
+       reprova sozinho, porque quem decide finalidade e meios ali é o cliente. */
+    if (rota === '/privacidade.html') {
+    const papeis = (await pg.locator('table#papeis').textContent().catch(() => '')) || '';
+    ok('a política separa os dois papéis', /operadora/i.test(papeis) && /controladora/i.test(papeis),
+       papeis ? 'tem a tabela' : 'falta table#papeis');
+    ok('e a conta paga está do lado de OPERADORA',
+       /operadora[\s\S]{0,120}cliente/i.test(papeis.replace(/\s+/g, ' ')),
+       papeis.replace(/\s+/g, ' ').slice(0, 100));
+
+    const subs = await pg.locator('table#suboperadores tr').evaluateAll((trs) =>
+      trs.slice(1).filter((tr) => [...tr.querySelectorAll('td')].length !== 5
+        || [...tr.querySelectorAll('td')].some((td) => !td.textContent.trim())).length);
+    ok('e a tabela de suboperadores diz nome, função, dado, país e salvaguarda',
+       subs === 0, String(subs));
+    }
+
+    const col1 = await pg.locator('table#basesLegais tr td:first-child').allTextContents();
     ok('a conta paga está na tabela de prazos',
        col1.some((c) => /conta paga|paid-account|cuenta de pago/i.test(c)), col1.join(' | ').slice(0, 120));
     ok('e a fatura também, que é a que NÃO é apagada em 90 dias',

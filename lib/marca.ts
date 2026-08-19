@@ -13,7 +13,7 @@ import dados from '@/src/marca.json';
 
 export const marca: {
   marca: string; marcaA: string; marcaB: string; site: string; iconV: string;
-  empresa: string; cnpj: string; contato: string;
+  empresa: string; cnpj: string; contato: string; encarregado: string;
   supaUrl: string; supaKey: string; analytics: string;
   licPub: string; licPubAuto: string;
 } = dados;

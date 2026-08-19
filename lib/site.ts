@@ -131,6 +131,7 @@ export function tokens(lang: Lang): Dicionario {
     empresa: marca.empresa,
     cnpj: marca.cnpj,
     contato: marca.contato,
+    encarregado: marca.encarregado,
     lang,
   };
 }

@@ -9,13 +9,38 @@
     Até 14 de agosto de 2026 este serviço se chamava <b>ClipContext</b>. Só o nome mudou — a
     controladora, as bases legais e os prazos abaixo continuam exatamente os mesmos.</p>
 
-    <h2>Quem é responsável</h2>
-    <p>O {{marca}} é oferecido por <b>{{empresa}}</b>, inscrita no CNPJ sob o nº <b>{{cnpj}}</b>,
-    que atua como <b>controladora</b> dos poucos dados pessoais descritos nesta política, nos termos da
-    Lei nº 13.709/2018 (LGPD).</p>
-    <p>Pedidos de titular, dúvidas e reclamações sobre privacidade:
-    <a href="mailto:{{contato}}" style="color:var(--accent)">{{contato}}</a>. Esse é também o canal do
-    encarregado pelo tratamento de dados pessoais (art. 41 da LGPD).</p>
+    <h2>Quem é responsável, e em que papel</h2>
+    <p>O {{marca}} é oferecido por <b>{{empresa}}</b>, inscrita no CNPJ sob o nº <b>{{cnpj}}</b>, nos
+    termos da Lei nº 13.709/2018 (LGPD).</p>
+    <p>O papel dela <b>não é o mesmo para tudo</b>, e a distinção importa para quem contrata:</p>
+    <table class="legal" id="papeis">
+      <tr><th>Dado</th><th>Papel da {{empresa}}</th><th>Quem decide finalidade e meios</th></tr>
+      <tr><td>E-mail da lista de aviso, marcos de uso, visitas de página, registros de acesso ao
+          servidor, faturamento</td>
+          <td><b>Controladora</b> (art. 5º, VI)</td>
+          <td>{{empresa}}</td></tr>
+      <tr><td>Conteúdo da conta paga — roteiros, casos a executar, chamados de suporte, recibos,
+          anexos <code>.json</code> com telas, modelos de documento, assentos do time</td>
+          <td><b>Operadora</b> (art. 5º, VII)</td>
+          <td><b>A empresa cliente</b> que contratou o plano</td></tr>
+    </table>
+    <p>Nos dados da conta paga, tratamos <b>exclusivamente conforme as instruções do cliente
+    contratante</b>, que é o controlador desses dados. Não os usamos para finalidade própria, não os
+    cruzamos com outros dados, não os cedemos e não os usamos para treinar modelo nenhum. Se um titular
+    desses dados nos procurar diretamente, encaminhamos o pedido ao cliente controlador e o auxiliamos a
+    responder — não decidimos por ele.</p>
+    <p class="small muted">Esta separação existe desde que o plano pago nasceu; o texto anterior dizia
+    &ldquo;controladora&rdquo; para tudo, o que descrevia bem a parte gratuita e mal a paga.</p>
+    <!-- O art. 41, §1º pede a IDENTIDADE e as INFORMAÇÕES DE CONTATO do
+         encarregado, divulgadas de forma clara e objetiva. Nome e canal — e
+         nada além disso. CPF, RG e endereço não entram aqui: publicar o CPF de
+         alguém numa página aberta é entregar o dado que abre conta e contrata
+         crédito no Brasil, e fazê-lo dentro de uma política de privacidade
+         seria o documento se contradizendo na linha em que promete cuidado. -->
+    <p><b>Encarregado pelo tratamento de dados pessoais</b> (art. 41 da LGPD):
+    <b>{{encarregado}}</b>.<br>
+    Pedidos de titular, dúvidas e reclamações sobre privacidade, e o canal direto do encarregado:
+    <a href="mailto:{{contato}}" style="color:var(--accent)">{{contato}}</a>.</p>
 
     <h2>Resumo</h2>
     <p><b>Não recebemos seus vídeos, seu áudio, seus quadros, suas transcrições nem os documentos que você
@@ -133,21 +158,78 @@
     para medição, não é lido por script de terceiro e existe apenas nas páginas da conta — a ferramenta
     continua funcionando sem cookie nenhum.</p>
 
-    <h2>Conexões externas</h2>
-    <p>A página faz um número reduzido de conexões a serviços de terceiros, e nenhuma delas transporta seu
-    conteúdo:</p>
-    <ul>
-      <li><strong>jsDelivr</strong> — rede de distribuição que entrega as bibliotecas de geração de PDF e de
-      transcrição. Recebe apenas o pedido do arquivo da biblioteca.</li>
-      <li><strong>Hugging Face</strong> — de onde o modelo de transcrição é baixado, e somente se você acionar
-      a transcrição automática. Recebe o pedido do modelo, nunca o seu áudio.</li>
-      <li><strong>Supabase</strong> — banco de dados que recebe os três marcos de uso e, se você preencher,
-      o e-mail da lista de aviso. Nunca recebe vídeo, áudio ou transcrição.</li>
-      <li><strong>Vercel</strong> — hospedagem da página e a contagem de visitas. Como qualquer servidor web, registra tecnicamente os
-      acessos ao site.</li>
-    </ul>
+    <h2>Conexões externas e suboperadores</h2>
+    <p>A página faz um número reduzido de conexões a serviços de terceiros, e <b>nenhuma delas transporta
+    seu conteúdo</b>. Esta é a lista completa — nome, para que serve, o que recebe, onde fica e com que
+    salvaguarda:</p>
+    <!-- O `id` não é enfeite: `testes/terceiros.mjs` lê ESTA tabela, em todos os
+         idiomas, e confere contra os terceiros que o código conhece. Sem o id,
+         a conferência teria que procurar o nome do fornecedor no documento
+         inteiro — e passaria só porque a Stripe é citada de passagem noutro
+         parágrafo, que é exatamente o estado em que o defeito nasceu. -->
+    <table class="legal" id="suboperadores">
+      <tr><th>Terceiro</th><th>Função</th><th>Dado que recebe</th><th>País</th><th>Salvaguarda</th></tr>
+      <tr><td><b>Supabase</b></td>
+          <td>Banco de dados e armazenamento do anexo da sessão</td>
+          <td>E-mail da lista, marcos de uso, e todo o conteúdo da conta paga. <b>Nunca</b> vídeo, áudio
+          ou transcrição</td>
+          <td>Brasil (região de São Paulo)</td>
+          <td>Contrato de tratamento do fornecedor; dados em repouso no território nacional</td></tr>
+      <tr><td><b>Vercel</b></td>
+          <td>Hospedagem do site e contagem de visitas</td>
+          <td>Registros técnicos de acesso e a contagem de visitas, sem cookie e sem identificador</td>
+          <td>Rede global</td>
+          <td>Cláusulas contratuais padrão do fornecedor (art. 33, II da LGPD)</td></tr>
+      <tr><td><b>Stripe</b></td>
+          <td>Cobrança da assinatura</td>
+          <td>Nome, e-mail e dados de pagamento de quem contrata. <b>Não recebemos o número do cartão</b>
+          — ele vai direto para a Stripe</td>
+          <td>Estados Unidos e União Europeia</td>
+          <td>Cláusulas contratuais padrão; certificação PCI-DSS do fornecedor</td></tr>
+      <tr><td><b>Brevo</b></td>
+          <td>Envio do link de acesso à conta e do convite por e-mail</td>
+          <td>O endereço de e-mail do destinatário e o texto da mensagem</td>
+          <td>União Europeia (França)</td>
+          <td>Cláusulas contratuais padrão; país com nível de proteção adequado</td></tr>
+      <tr><td><b>jsDelivr</b></td>
+          <td>Entrega das bibliotecas de geração de PDF e de transcrição</td>
+          <td>Só o pedido do arquivo da biblioteca</td>
+          <td>Rede global</td>
+          <td>Não recebe dado de conta nem conteúdo; conexão sempre cifrada</td></tr>
+      <tr><td><b>Hugging Face</b></td>
+          <td>De onde o modelo de transcrição é baixado, e só se você acionar a transcrição</td>
+          <td>Só o pedido do modelo. <b>Nunca o seu áudio</b></td>
+          <td>Estados Unidos</td>
+          <td>Não recebe dado de conta nem conteúdo; conexão sempre cifrada</td></tr>
+      <tr><td><b>Google</b><br><span class="small muted">não é suboperador nosso</span></td>
+          <td>Abrir um vídeo do seu Drive, e o botão <b>Enviar para o Google Docs</b> — <b>só se você
+          clicar</b></td>
+          <td>Ao abrir: nada além do pedido do arquivo que você escolher. Ao enviar para o Docs: <b>o
+          documento gerado</b>, que vai do seu navegador direto para a sua conta do Google</td>
+          <td>Conforme a sua conta Google</td>
+          <td>Permissão mínima (<code>drive.file</code>), restrita aos arquivos que você selecionar. O
+          envio pede confirmação explícita</td></tr>
+    </table>
+    <p class="small muted">O <b>Google</b> está nesta tabela por transparência, e não como suboperador:
+    quando você usa esses dois botões, o Google age por <b>sua</b> instrução, na <b>sua</b> conta, e nada
+    passa por servidor nosso. A partir do momento em que o documento chega lá, ele está sujeito às
+    políticas do Google — está detalhado na seção <b>Google Drive</b>, mais abaixo.</p>
     <p>Esses terceiros possuem políticas próprias e podem registrar dados técnicos da conexão, como endereço
     de IP, da mesma forma que ocorre ao visitar qualquer site.</p>
+    <p><b>Troca de suboperador.</b> Se formos substituir ou acrescentar um suboperador que trate dados da
+    conta paga, avisamos os clientes pagos por e-mail com <b>30 dias de antecedência</b>. Nesse prazo, o
+    cliente pode se opor; havendo oposição que não consigamos acomodar, ele pode encerrar a assinatura sem
+    multa e levar os dados consigo.</p>
+
+    <div class="lockHint" style="border-left:3px solid var(--accent);padding-left:12px;margin:22px 0">
+      <p style="margin:0 0 8px"><b>Nada seu treina modelo de IA.</b></p>
+      <p style="margin:0">Nenhum conteúdo seu — vídeo, áudio, transcrição, documento gerado ou anexo de
+      sessão — é usado para treinar modelo de inteligência artificial, nosso ou de terceiro. <b>Não há
+      como:</b> o conteúdo não chega até nós. O modelo de transcrição é baixado pronto, já treinado, e roda
+      dentro do seu navegador; ele nunca envia o que ouviu para lugar nenhum. Isto não é uma promessa de
+      conduta que dependa de nós cumprirmos — é uma consequência de onde o processamento acontece, e você
+      pode conferir com o F12 aberto na aba Rede.</p>
+    </div>
 
     <h2>Gravação de tela e microfone</h2>
     <p>Ao usar a gravação, o navegador pede sua permissão para capturar a tela e, se você marcar a opção,
@@ -276,16 +358,21 @@
     identificador que persista entre visitas</b>, e é justamente por isso que não existe aviso de cookies
     nesta página: não haveria o que consentir.</p>
 
-    <h2>Menores de idade</h2>
-    <p>O serviço não é direcionado a menores de 13 anos, e a lista de aviso não deve ser preenchida por
-    eles. Não temos como verificar idade — não há cadastro. Se souber que um menor deixou o e-mail,
-    escreva para <a href="mailto:{{contato}}" style="color:var(--accent)">{{contato}}</a> e ele é
-    removido. Fora isso, não há dado de menor em nosso poder, porque não há dado de ninguém: o vídeo
-    nunca sai do dispositivo.</p>
+    <h2>Crianças e adolescentes</h2>
+    <p>O serviço é uma ferramenta de trabalho e <b>não é direcionado a crianças nem a adolescentes</b>. A
+    LGPD trata como <b>criança</b> quem tem até 12 anos incompletos e como <b>adolescente</b> quem tem
+    entre 12 e 18 (art. 14, combinado com o art. 2º do ECA), e exige consentimento específico e destacado
+    de ao menos um dos pais ou responsável legal para o tratamento de dados de criança — consentimento que
+    não temos como colher aqui, porque não há cadastro.</p>
+    <p>Por isso, a lista de aviso e a conta paga não devem ser usadas por crianças ou adolescentes. Se
+    souber que uma criança ou adolescente deixou o e-mail, escreva para
+    <a href="mailto:{{contato}}" style="color:var(--accent)">{{contato}}</a> e ele é removido. Fora isso,
+    não há dado de menor em nosso poder, porque não há dado de ninguém: o vídeo nunca sai do
+    dispositivo.</p>
 
     <h2>Bases legais, finalidades e prazos</h2>
     <p>O que é tratado, por quê, com que fundamento e por quanto tempo:</p>
-    <table class="legal">
+    <table class="legal" id="basesLegais">
       <tr><th>Dado</th><th>Para quê</th><th>Base legal</th><th>Prazo</th></tr>
       <tr><td>E-mail da lista de aviso</td><td>Avisar quando o plano pago existir</td>
           <td>Consentimento (art. 7º, I)</td><td>Até você revogar, ou 24 meses sem uso</td></tr>
@@ -312,6 +399,66 @@
     <p class="small muted">Os marcos de uso e as visitas foram desenhados para não identificar ninguém; se
     ainda assim forem considerados dado pessoal por alguma autoridade, o fundamento é o legítimo interesse
     em manter e melhorar o serviço, e você pode se opor pelo contato acima.</p>
+
+    <h2>Segurança da informação</h2>
+    <p>O escopo aqui é pequeno de propósito, e a lista abaixo diz <b>quem faz o quê</b> — não atribuímos a
+    nós controles que são do fornecedor de infraestrutura, porque um questionário de segurança respondido
+    assim se desfaz na primeira pergunta de acompanhamento.</p>
+    <ul>
+      <li><b>Em trânsito:</b> todo tráfego do site, da ferramenta e das chamadas de servidor é cifrado com
+      TLS. Não há endereço em texto claro.</li>
+      <li><b>Em repouso:</b> o banco de dados e o armazenamento do anexo são cifrados em repouso pela
+      <b>Supabase</b>, na região de São Paulo. A cifra é do fornecedor; a configuração da região é
+      nossa.</li>
+      <li><b>Autenticação:</b> o acesso à conta é por <b>link de uso único enviado por e-mail</b> — não há
+      senha para vazar, reusar ou adivinhar. O link vence, e usá-lo uma vez o invalida.</li>
+      <li><b>Controle de acesso ao banco:</b> as tabelas reais vivem em um schema próprio, fora do alcance
+      do navegador. O que o navegador enxerga são funções de leitura específicas, e a permissão de execução
+      é <b>revogada</b> dos papéis públicos e concedida apenas ao papel de serviço, que só existe no
+      servidor. Uma chave de navegador vazada não lê tabela nenhuma.</li>
+      <li><b>O anexo da sessão</b> fica em um balde <b>privado, sem política de leitura pública</b>. Quem
+      entrega o arquivo é o servidor, depois de perguntar ao banco se aquela sessão pode ver aquele caso, e
+      o endereço devolvido é <b>assinado e vence em dois minutos</b>.</li>
+      <li><b>Segregação de ambiente:</b> as chaves de serviço vivem só em variáveis de ambiente do servidor
+      e nunca são embarcadas no que o navegador recebe.</li>
+      <li><b>Registros de acesso</b> ao servidor web são mantidos por 6 meses, conforme o art. 15 do Marco
+      Civil da Internet, e depois descartados.</li>
+      <li><b>Limite de abuso:</b> o envio de e-mail passa por limitação por origem e por destinatário, com
+      os identificadores guardados de forma disfarçada — o endereço de quem recebeu não fica legível no
+      controle de limite.</li>
+    </ul>
+    <p class="small muted">Não temos certificação SOC 2 nem ISO 27001, e não vamos escrever que temos. O
+    que oferecemos no lugar é a arquitetura: a maior parte do que uma certificação dessas protege — o
+    conteúdo do cliente em repouso no fornecedor — <b>não existe aqui</b>, porque o vídeo, o áudio e a
+    transcrição nunca saem da máquina de quem gravou.</p>
+
+    <h2>Incidentes de segurança</h2>
+    <p>Se ocorrer incidente de segurança que possa acarretar risco ou dano relevante:</p>
+    <ul>
+      <li>comunicamos o <b>cliente controlador</b> em até <b>48 horas</b> da ciência do fato, pelo e-mail
+      de contato da conta;</li>
+      <li>comunicamos a <b>ANPD</b> e, quando aplicável, os titulares, nos termos do art. 48 da LGPD;</li>
+      <li>a comunicação diz o que se sabe: quais dados foram afetados, quantos titulares, o que já foi
+      feito, o risco envolvido e as medidas que recomendamos — e é atualizada conforme a apuração avança,
+      em vez de esperar estar completa;</li>
+      <li>cooperamos com a autoridade e com o cliente na apuração e na correção.</li>
+    </ul>
+    <p>Vale registrar o alcance de um incidente aqui: mesmo no pior caso, <b>não há vídeo, áudio nem
+    transcrição em nosso poder</b> para vazar. O que existe do nosso lado é o que está descrito nesta
+    política.</p>
+
+    <h2>Pedidos de autoridade</h2>
+    <p>Não compartilhamos dados com terceiros, incluindo entidades governamentais, exceto mediante
+    <b>ordem com fundamento legal válido</b> — ordem judicial ou requisição de autoridade competente na
+    forma da lei. Nesses casos:</p>
+    <ul>
+      <li>conferimos a base legal e o alcance do pedido, e entregamos <b>apenas o que foi requisitado</b>;</li>
+      <li><b>avisamos o cliente</b> cujos dados foram pedidos, para que ele possa se defender, salvo quando
+      houver vedação legal expressa a esse aviso;</li>
+      <li>e o argumento que só nós podemos fazer: <b>o que não temos não pode ser entregue.</b> Não há
+      vídeo, áudio nem transcrição em nosso poder para qualquer autoridade requerer — de nós, de ninguém.
+      Uma requisição sobre o conteúdo de uma gravação tem que ser dirigida a quem gravou.</li>
+    </ul>
 
     <h2>Onde os dados ficam</h2>
     <p>O e-mail da lista e os marcos de uso ficam em banco de dados hospedado pela <b>Supabase na região de
@@ -341,8 +488,13 @@
     seus direitos não foram respeitados.</p>
 
     <h2>Alterações</h2>
-    <p>Se esta política mudar, a data no topo será atualizada. Mudanças relevantes — especialmente qualquer
-    passagem a coletar dados — serão anunciadas nesta página, com a data no topo atualizada.</p>
+    <p>Se esta política mudar, a data no topo será atualizada, e a mudança é anunciada nesta página.</p>
+    <p>Para <b>clientes de plano pago</b>, isso não basta e não é o que combinamos: <b>mudança material</b>
+    — qualquer passagem a coletar dado novo, troca ou acréscimo de suboperador que trate dados da conta,
+    mudança de país de armazenamento, ou alteração de prazo de guarda — é comunicada <b>por e-mail, com 30
+    dias de antecedência</b>. Nesse prazo o cliente pode se opor e, se a objeção não for acomodada,
+    encerrar a assinatura sem multa e levar os dados consigo. Uma mudança de contrato descoberta pela data
+    no rodapé de uma página não é aviso.</p>
 
     <h2>Contato</h2>
     <p>{{empresa}} — CNPJ {{cnpj}}.<br>
