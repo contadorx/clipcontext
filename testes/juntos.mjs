@@ -90,8 +90,12 @@ await pg.setInputFiles('#file', '/tmp/amostra.webm');
 await pg.waitForFunction(() => !document.getElementById('extract').disabled, null, { timeout: 25000 });
 await pg.waitForTimeout(500);
 {
-  ok('os dois botões acordaram juntos',
-     !(await pg.locator('#auto').isDisabled()) && !(await pg.locator('#extract').isDisabled()));
+  /* O que "destravou" quer dizer aqui: o vídeo foi aceito e o bloco de opções
+     das telas está ao alcance. A fala é cobrada mais abaixo, DEPOIS da
+     varredura — que é quando ela começa. */
+  ok('o bloco das telas destravou',
+     (await pg.locator('#framesCorpo').getAttribute('inert')) === null);
+
   /* E AS TELAS COMEÇAM A SAIR SOZINHAS. É a mudança de fluxo: um vídeo carregado
      dava numa parede de dezesseis controles, e nada acontecia até alguém
      escolher entre três botões. */
@@ -104,6 +108,58 @@ await pg.waitForTimeout(500);
      'scrollY=' + await pg.evaluate(() => window.scrollY));
   ok('a revisão já abre, porque é onde se cola uma transcrição pronta',
      !(await pg.locator('#prevCard').getAttribute('class')).includes('fechado'));
+
+  /* ---- E A FALA COMEÇA SOZINHA, DEPOIS DAS TELAS ----
+
+     O pedido: gravando, a caixa "transcrever a fala" faz a fala sair sozinha;
+     abrindo um arquivo, a mesma caixa marcada não fazia nada e era preciso
+     achar um botão no passo 2 — "entendi que a transcrição tenho que apertar o
+     botão, né".
+
+     DEPOIS das telas, e não junto: transcrever desabilita o `#extract`, e a
+     varredura automática desiste quando encontra esse botão desabilitado. A
+     primeira versão começava 60 ms depois de abrir o vídeo e MATAVA as telas
+     automáticas — a parte que já funcionava. Por isso a espera aqui é pelo fim
+     da varredura, e não por um relógio. */
+  await pg.waitForFunction(() => document.getElementById('auto').disabled,
+                           null, { timeout: 45000 }).catch(() => {});
+  const falaAndando = await pg.evaluate(() => ({
+    caixa: document.getElementById('recTr').checked,
+    ocupado: document.getElementById('auto').disabled,
+    quadros: document.querySelectorAll('#thumbs figure').length,
+    st: (document.getElementById('astatus').textContent || '').trim(),
+  }));
+  console.log('     ' + JSON.stringify(falaAndando));
+  ok('a fala começou sozinha, porque a caixa está marcada',
+     falaAndando.caixa && falaAndando.ocupado && falaAndando.st.length > 0,
+     JSON.stringify(falaAndando));
+  /* E as telas não foram atropeladas por ela: é a metade que a primeira
+     versão quebrou sem ninguém notar. */
+  ok('e as telas saíram antes, inteiras', falaAndando.quadros > 0,
+     String(falaAndando.quadros));
+
+  /* A OUTRA METADE, e sem ela a de cima não prova nada: com a caixa
+     DESMARCADA, nada começa sozinho e o botão continua ao alcance de quem
+     mudar de ideia. Um começo automático que ignora a caixa seria pior do que
+     o clique que ele veio substituir. */
+  {
+    const ctx2 = await br.newContext();
+    const p2 = await ctx2.newPage();
+    await p2.goto('http://localhost:8917/app.html?lang=pt');
+    await p2.selectOption('#modelo', 'evidencia').catch(() => {});
+    await p2.locator('#recTr').uncheck();
+    await p2.setInputFiles('#file', '/tmp/amostra.webm');
+    await p2.waitForFunction(() => document.querySelectorAll('#thumbs figure').length > 0,
+                             null, { timeout: 60000 });
+    await p2.waitForTimeout(1500);
+    const parado = await p2.evaluate(() => ({
+      autoLivre: !document.getElementById('auto').disabled,
+      st: (document.getElementById('astatus').textContent || '').trim(),
+    }));
+    ok('com a caixa desmarcada, a fala NÃO começa sozinha',
+       parado.autoLivre && parado.st === '', JSON.stringify(parado));
+    await ctx2.close();
+  }
 }
 
 console.log('\n[5] "Só extrair frames" não inventa transcrição');

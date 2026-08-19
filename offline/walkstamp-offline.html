@@ -116,7 +116,21 @@
   /* Os dois caminhos do passo 1. O de gravar tem borda de destaque porque é o
      que a maioria vem fazer; o de arquivo continua inteiro ao lado, e não
      escondido atrás de um "ou". */
-  .caminhos{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+  .caminhos{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+  /* A linha de opção fica FORA das caixas e ATRAVESSA as três: é o que a faz
+     ler como "vale para qualquer caminho" em vez de "é do caminho de cima". */
+  /* Grupo de ações com nome. O título é pequeno e o texto ao lado é a razão
+     de ser do grupo — sem ele um nome de grupo é só uma etiqueta. */
+  .grupoOrg{margin:0 0 12px}
+  .grupoTit{margin:0 0 6px;font-size:13.5px;display:flex;gap:9px;
+    align-items:baseline;flex-wrap:wrap}
+  .grupoTit b{color:var(--ink)}
+  .grupoTit .status{margin:0}
+  /* O de conferir respira mais: ele é a fronteira entre "mexer no monte" e
+     "olhar uma por uma", e fica encostado na grade de propósito. */
+  .grupoOrg.conferir{margin-top:18px;padding-top:14px;border-top:1px solid var(--line)}
+  .opcoesVias{margin-top:14px;padding:12px 14px;border:1px dashed var(--line);
+    border-radius:10px;background:var(--bg)}
   .caminhos .via{border:1px solid var(--line);border-radius:10px;padding:16px;background:var(--bg)}
   .caminhos #viaRec{border:2px solid var(--accent);
       background:color-mix(in srgb,var(--accent) 5%,transparent)}
@@ -321,6 +335,15 @@
      continua sendo obviamente da mesma família — mesma forma, mesmo tamanho —
      e obviamente um degrau abaixo. É a hierarquia dita pelo peso, que é como
      ela se diz sem precisar de legenda. */
+  /* UMA MANEIRA SÓ DE DIZER "OPCIONAL".
+     O passo 2 dizia no próprio título, entre parênteses; as partes b e c do
+     passo 1 não diziam de jeito nenhum, e quem abria a ferramenta lia três
+     blocos em fila achando que tinha três coisas a fazer antes de gravar.
+     Duas grafias para a mesma ideia é o começo de três — então virou etiqueta,
+     e o texto sai do dicionário num lugar só. */
+  .opc{display:inline-block;margin-left:8px;padding:1px 7px;border-radius:999px;
+    background:var(--line);color:var(--muted);font:600 11px/17px ui-sans-serif,system-ui;
+    letter-spacing:.2px;vertical-align:middle;font-style:normal}
   .sbN{flex:none;width:23px;height:23px;border-radius:50%;
     background:color-mix(in srgb,var(--accent) 14%,var(--panel));
     color:var(--accent);border:1px solid color-mix(in srgb,var(--accent) 35%,transparent);
@@ -918,6 +941,7 @@
     <div class="cenario" id="recupBloco">
       <i class="sbN">b</i>
       <label for="reabrir" data-i18n="reabrirLbl"></label>
+      <span class="opc" data-i18n="opcional"></span>
       <button class="ghost" id="reabrir" data-i18n="reabrirBtn"
               style="padding:9px 14px;font-size:14.5px"></button>
       <input type="file" id="reabrirArq" multiple
@@ -949,6 +973,7 @@
       <div class="row" style="gap:9px 12px;align-items:center;flex-wrap:wrap">
         <i class="sbN">c</i>
         <label for="roteiroAbrir" data-i18n="rotLbl"></label>
+        <span class="opc" data-i18n="opcional"></span>
         <button class="ghost" id="roteiroAbrir" data-i18n="rotBtn"
                 style="padding:9px 14px;font-size:14.5px"></button>
         <input type="file" id="roteiroArq" accept=".txt,.csv,text/plain,text/csv" class="hide">
@@ -1095,8 +1120,6 @@
                No lugar entra o que a caixa precisa dizer: que ficar marcada é
                a escolha certa para quase todo mundo. O número continua a um
                clique, na ajuda "?" ao lado. -->
-          <label class="opt"><input type="checkbox" id="recTr" checked><span data-i18n="recTrLbl"></span>
-            <b class="optNota rec" id="optTr" data-i18n="recomendado"></b></label>
           <!-- A contagem de três segundos NÃO é mais uma caixa: ela sempre
                acontece. Sem ela o primeiro quadro é quase sempre o seletor de
                tela do navegador — a janela que a pessoa acabou de fechar — e
@@ -1136,7 +1159,6 @@
                os megabytes do modelo — e a outra é a promessa do produto. O que
                mudou é que ninguém precisa lê-las para gravar. -->
           <div class="hide" id="recAjudaCx" style="margin-top:8px">
-            <p class="note" id="recTrNote" style="margin:0"></p>
             <p class="note" data-i18n="recWarn" style="margin:6px 0 0"></p>
           </div>
         </div>
@@ -1173,7 +1195,15 @@
         </div>
       </div>
 
-      <div class="via">
+      <!-- ---- TRÊS CAMINHOS, e não dois com um enxerto ----
+
+           O Drive era uma FILEIRA DENTRO do caminho do arquivo: mesma caixa,
+           mesmo título "Usar um arquivo", um botão a mais lá embaixo. Quem
+           chega com o vídeo no Drive lia "usar um arquivo", não se reconhecia,
+           e não descia até o botão. São duas origens diferentes com o mesmo
+           destino, e origem diferente merece caixa própria — a grade já
+           acomoda três, porque ela é `auto-fit`. -->
+      <div class="via" id="viaArq">
         <span class="vtag alt" data-i18n="viaArqTag"></span>
         <h3 data-i18n="viaArqH"></h3>
         <p data-i18n="viaArqP"></p>
@@ -1186,12 +1216,37 @@
           <button class="ghost sm" id="demo" data-i18n="demoBtn"></button>
         </div>
         <span class="status" id="demoMsg" data-i18n="demoHint"></span>
-        <div class="row hide" id="driveRow" style="margin-top:10px">
+      </div>
+
+      <div class="via hide" id="viaDrive">
+        <span class="vtag alt" data-i18n="viaDriveTag"></span>
+        <h3 data-i18n="viaDriveH"></h3>
+        <p data-i18n="viaDriveP"></p>
+        <div class="row" id="driveRow" style="margin-top:12px">
           <button class="ghost sm" id="drive" data-i18n="driveBtn"></button>
           <button class="ghost sm hide" id="driveStop" data-i18n="stopBtn"></button>
         </div>
-        <span class="status hide" id="driveMsg" data-i18n="driveHint"></span>
+        <span class="status" id="driveMsg" data-i18n="driveHint"></span>
       </div>
+    </div>
+
+    <!-- ---- A PERGUNTA QUE VALE PARA OS TRÊS CAMINHOS ----
+
+         "Transcrever a fala" morava DENTRO da caixa de gravar, e por isso
+         parecia uma opção de quem grava. Ela nunca foi: é ela que decide se o
+         modelo de voz é baixado, e vale igual para quem chega com arquivo ou
+         com um link do Drive. O relato que trouxe isto: "no gravado tem a
+         opção de transcrever enquanto gravo, falta o equivalente no outro
+         lado" — e o equivalente não era uma segunda caixa. Era esta, no lugar
+         certo.
+
+         Uma caixa só, e não duas espelhadas: duas caixas para a mesma pergunta
+         é a segunda lista ao lado da lista de verdade, e um dia elas discordam
+         sobre se o modelo deve baixar. -->
+    <div class="opcoesVias" id="opcoesVias">
+      <label class="opt"><input type="checkbox" id="recTr" checked><span data-i18n="recTrLbl"></span>
+        <b class="optNota rec" id="optTr" data-i18n="recomendado"></b></label>
+      <p class="note" id="recTrNote" style="margin:6px 0 0"></p>
     </div>
     <div class="hide" id="liveBox" style="margin-top:12px">
       <div class="vus" id="vuBox">
@@ -1227,7 +1282,7 @@
   </div>
 
   <div class="card" id="cardTr">
-    <h2><span class="step">2</span><span data-i18n="s2"></span></h2>
+    <h2><span class="step">2</span><span data-i18n="s2"></span><span class="opc" data-i18n="opcional"></span></h2>
     <p class="lockHint hide" id="hintTr"></p>
     <!-- Fora da dobra de propósito. Estes dois botões são as ferramentas de
          quem está com problema — e o cartão 2 fica TRAVADO justamente quando há
@@ -1277,8 +1332,16 @@
     </p>
     <p class="note hide" id="esperaDica">
       <span data-i18n="esperaDica"></span>
+      <!-- O CUSTO NÃO PODE SUMIR JUNTO COM O TEXTO LONGO.
+           A frase de convite encolheu a pedido, e com ela saiu o aviso de que
+           duas sessões dividem a máquina. Convidar a abrir a segunda sem dizer
+           isso promete um paralelismo que não existe: duas transcrições
+           terminam nas duas somadas, não na metade. O custo desceu para o
+           `title`, que é curto na tela e legível para quem se pergunta — e o
+           `data-i18n-title` ainda o publica como `aria-label`, então quem usa
+           leitor de tela ouve o aviso inteiro. -->
       <button type="button" class="ghost sm" id="novaSessao" data-i18n="esperaNova"
-              style="margin-left:8px"></button>
+              data-i18n-title="esperaNovaDica" style="margin-left:8px"></button>
     </p>
     <div class="bar hide" id="barWrap"><i id="bar"></i></div>
     <div class="status" id="status"></div>
@@ -1516,36 +1579,52 @@
 
          Resultado antes de ação é placar antes do jogo. -->
 
+    <!-- ---- OITO BOTÕES NUMA FILEIRA VIRARAM DOIS GRUPOS ----
+
+         O relato: "o revisar quadro a quadro deve ficar mais próximo do
+         quadro, pois ainda tem os mantidos; na organização deve ter algo para
+         reduzir os frames, e depois a revisão individual".
+
+         Ele está descrevendo uma ORDEM que a tela não contava. Os oito botões
+         estavam lado a lado, do mesmo tamanho e da mesma cor: "manter todos" e
+         "ler o texto da tela" pareciam a mesma classe de coisa, e a revisão
+         assistida — que é a operação mais valiosa daqui — ficava a meia tela
+         de distância das miniaturas em que ela mexe.
+
+         Agora são dois grupos com nome, na ordem em que se usam: primeiro
+         DIMINUIR o monte, depois ACRESCENTAR o que falta. E conferir tela por
+         tela desceu para junto da grade, com a contagem no próprio botão —
+         ninguém entra numa fila de dezoito sem saber que são dezoito. -->
     <p class="subTit" data-i18n="orgTit"></p>
-    <p class="status" data-i18n="orgComo" style="margin:0 0 8px;max-width:620px"></p>
-    <div class="row">
-      <button class="ghost sm" id="allOn" data-i18n="keepAll"></button>
-      <button class="ghost sm hide" id="soMarcados" data-i18n="keepMarked"></button>
-      <button class="ghost sm" id="addTela" data-i18n="addTelaBtn"></button>
-      <input type="file" id="addArq" accept="image/*" class="hide">
-      <button class="ghost sm" id="dedup" data-i18n="dropDup"></button>
-      <button class="ghost sm" id="mute" data-i18n="dropQuiet"></button>
-      <button class="ghost sm" id="ocr" data-i18n="ocrBtn"></button>
-      <button class="ghost sm hide" id="ocrStop" data-i18n="stopBtn"></button>
-      <button class="ghost sm" id="falaNota" data-i18n="falaNota"></button>
+    <p class="status" data-i18n="orgComo" style="margin:0 0 12px;max-width:620px"></p>
+
+    <div class="grupoOrg">
+      <p class="grupoTit"><b data-i18n="orgReduzirH"></b>
+        <span class="status" data-i18n="orgReduzirP"></span></p>
+      <div class="row">
+        <button class="ghost sm" id="dedup" data-i18n="dropDup"></button>
+        <button class="ghost sm" id="mute" data-i18n="dropQuiet"></button>
+        <button class="ghost sm" id="allOn" data-i18n="keepAll"></button>
+        <button class="ghost sm hide" id="soMarcados" data-i18n="keepMarked"></button>
+      </div>
+    </div>
+
+    <div class="grupoOrg">
+      <p class="grupoTit"><b data-i18n="orgJuntarH"></b></p>
+      <div class="row">
+        <button class="ghost sm" id="addTela" data-i18n="addTelaBtn"></button>
+        <input type="file" id="addArq" accept="image/*" class="hide">
+        <button class="ghost sm" id="ocr" data-i18n="ocrBtn"></button>
+        <button class="ghost sm hide" id="ocrStop" data-i18n="stopBtn"></button>
+        <button class="ghost sm" id="falaNota" data-i18n="falaNota"></button>
+      </div>
     </div>
     <!-- Revisar quadro a quadro mora aqui, e não no cartão do vídeo: é o que se
          faz COM os quadros que já estão na tela, não uma forma de trazê-los.
          E fica DEPOIS das ações soltas, não no meio delas: é a operação
          completa, a que passa por todos — as de cima são atalhos para um
          pedaço. -->
-    <div class="row" style="margin-top:12px">
-      <!-- Sem `ghost`: a revisão assistida é a coisa mais valiosa deste cartão e
-           era o botão mais apagado dele. É ela que transforma "trinta telas
-           antigas" em "trinta telas conferidas", e num documento reaberto seis
-           meses depois é o trabalho inteiro. Um botão cinza entre nove cinzas
-           não é encontrado por quem não sabe que ele existe. -->
-      <button class="sm hide destaque" id="revisar" data-i18n="revisarBtn"></button>
-      <!-- O "clique na imagem para descartar" que morava aqui subiu para o
-           `orgComo`, junto do título. Estava dito duas vezes na mesma tela, com
-           palavras quase iguais e a três centímetros de distância: instrução
-           repetida não reforça, faz duvidar de que sejam a mesma instrução. -->
-    </div>
+
     <!-- E o placar, por último: ele é consequência do que está acima. -->
     <div class="row placar" style="margin-top:12px">
       <span class="tag"><span data-i18n="tKeep"></span> <b id="nKeep">0</b></span>
@@ -1626,6 +1705,25 @@
          outra pessoa na chamada — e o aviso diz isso, não finge saber mais. -->
     <p class="note hide" id="pessoasAviso" style="margin-top:12px"></p>
     <p class="note hide" id="sensAviso" style="margin-top:12px"></p>
+
+    <!-- ---- CONFERIR TELA POR TELA, COLADO NA GRADE ----
+
+         Ele morava lá em cima, entre os botões de lote e o placar. É a
+         operação que MEXE nestas miniaturas — renomear, tarjar, recortar,
+         trocar a imagem —, e estava a meia tela de distância delas.
+
+         Sem `ghost`, e continua sendo o único destacado daqui: entre nove
+         botões cinzas, o mais valioso era o mais apagado. A contagem vai no
+         próprio botão porque ninguém entra numa fila sem saber o tamanho
+         dela. -->
+    <div class="grupoOrg conferir hide" id="conferirCx">
+      <p class="grupoTit"><b data-i18n="orgConferirH"></b>
+        <span class="status" data-i18n="orgConferirP"></span></p>
+      <div class="row">
+        <button class="sm destaque" id="revisar" data-i18n="revisarBtn"></button>
+      </div>
+    </div>
+
     <div class="thumbs" id="thumbs"></div>
       <div class="row sbFim"><button class="ghost sm sbOk" data-sb="1" data-i18n="sbOk1"></button></div>
       </div>
@@ -2753,6 +2851,21 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     <p class="status" data-i18n="licNota" style="max-width:640px"></p>
   </div>
 
+  <!-- ---- COMEÇAR OUTRO, DEPOIS DE TERMINAR ESTE ----
+
+       Existe um "Recomeçar" lá em cima, entre o passo 1 e o 2 — e ele está no
+       lugar certo para quem DESISTE no meio. Mas quem terminou não desistiu:
+       gerou o documento, e agora tem a segunda gravação da fila esperando. Essa
+       pessoa chegava ao fim da página e não tinha para onde ir; subia rolando
+       procurando o botão de desistir.
+
+       Só aparece quando existe documento: um "começar outro" numa tela vazia
+       oferece sair de onde ninguém entrou ainda. -->
+  <div class="entreCards hide" id="novoFluxoCx">
+    <button class="sm" id="novoFluxo" data-i18n="novoFluxoBtn"></button>
+    <span class="note" data-i18n="novoFluxoNota"></span>
+  </div>
+
 
   <div class="lente hide" id="fbModal" role="dialog" aria-modal="true" aria-labelledby="fbTit">
     <div class="modalCx" style="max-width:560px">
@@ -2820,7 +2933,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       viaRecP:'Você faz o percurso na tela e fala o que está fazendo. Nada de vídeo é guardado: saem só as telas que mudaram e a sua narração transcrita.',
       viaRecPclipe:'Você faz o percurso na tela e fala o que está fazendo. A gravação inteira é descartada: saem as telas que mudaram, a sua narração transcrita, e um clipe curto de cada momento que você marcar.',
       recWarnClipe:'A gravação inteira é descartada — só ficam os clipes dos momentos que você marcar. Durante a captura a ferramenta separa os frames que importam e transcreve os dois canais de áudio em separado. A transcrição divide a máquina com a captura; em computador modesto a tela pode perder alguma troca.',
-      viaArqTag:'Já tenho o vídeo', viaArqH:'Usar um arquivo',
+      viaArqTag:'Já tenho o vídeo', viaArqH:'Usar um arquivo', viaDriveTag:'Está no Drive', viaDriveH:'Abrir do Google Drive', viaDriveP:'O arquivo vai do Drive direto para o seu navegador. Pedimos a permissão mais restrita que existe: só os arquivos que você escolher na janela do Google.',
       viaArqP:'Uma gravação que você já fez, de reunião ou de tela. O arquivo é lido pelo navegador e não sai do seu computador.',
       s1:'Vídeo', drop1:'Escolher ou arrastar o vídeo aqui',
       drop2:'MP4 / MOV / WebM — o tamanho do arquivo não importa',
@@ -3014,7 +3127,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       videoErr:'O navegador não conseguiu abrir este vídeo. Converta para MP4 (H.264) e tente de novo.',
       reportar:'Me avise qual formato falhou',
       reportarDica:' — é o que vai definir se vale a pena construir a conversão automática.',
-      s2:'A fala (opcional)', autoBtn:'Transcrever a fala',
+      s2:'A fala', opcional:'opcional', autoBtn:'Transcrever a fala',
       ajustesTit:'Ajustes — quase ninguém precisa mexer',
       refazerTelas:'Refazer as telas',
       trBoxH:'Transcrição', trBoxSub:'corrigir, aplicar vocabulário, traduzir',
@@ -3055,7 +3168,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       erroSessao:'O arquivo comprimido do modelo não abre neste computador. Já tentei as versões alternativas, e nenhuma subiu. Rode o diagnóstico, ou grave só os frames e escreva as anotações à mão.',
       transcribing2:'Etapa 2 de 2 — transcrevendo: {0}% (bloco {1} de {2}){3}',
       etaTr:' — faltam ~{0}',
-      keepOpen:'Não feche esta aba: tudo acontece aqui, e fechar perde o trabalho. Trocar de aba pode deixar mais lento — o navegador reduz o que roda em segundo plano —, mas não interrompe.', esperaDica:'Quando terminar, o título da aba pisca e o ícone muda — você não precisa ficar olhando. Se tiver outra gravação esperando, comece agora: a máquina será dividida entre as duas, então cada uma leva mais tempo do que levaria sozinha.', esperaNova:'Abrir uma sessão nova numa aba',
+      keepOpen:'Processando. Não feche esta aba.', esperaDica:'Avisamos no título da aba quando terminar. Para outro vídeo, abra uma nova sessão:', esperaNova:'Nova sessão', esperaNovaDica:'Cada sessão usa a mesma máquina: duas ao mesmo tempo ficam mais lentas.',
       leaveWarn:'O processamento ainda está em andamento. Se sair agora, perde o que já foi feito.', noGpu:'WebGPU indisponível — usando o processador, vai demorar mais.',
       transcribing:'Transcrevendo… bloco {0} de {1}', trDone:'Transcrição pronta — {0} trechos.',
       trErr:'Não consegui transcrever aqui: {0} — clique em Diagnóstico para ver em qual etapa trava.',
@@ -3076,7 +3189,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       faixa:'Trecho analisado: {0} a {1}.',
       qLow:'Leve', qMid:'Equilibrada', qHigh:'Alta',
       sens:['','muito baixa','baixa','baixa+','média-','média','média+','alta','alta+','muito alta'],
-      extractBtn:'Só extrair frames', stopBtn:'Parar', resetBtn:'Recomeçar',
+      extractBtn:'Só extrair frames', stopBtn:'Parar', resetBtn:'Recomeçar', novoFluxoBtn:'Começar outro documento', novoFluxoNota:'Volta ao passo 1, com a tela limpa.', novoFluxoConf:'Começar outro documento? As telas e a fala desta sessão saem da tela — se ainda não gerou o arquivo, gere antes.',
       noteB:'Se o vídeo não abrir:', noteT:'o navegador não decodifica alguns formatos (HEVC, certos MKV). Nesse caso, converta para MP4 / H.264.',
       noDur:'Duração do vídeo indisponível.',
       scanning:'Procurando mudanças de imagem… {0} de {1} — {2} frame(s) guardado(s)',
@@ -3219,7 +3332,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       trocarErro:'Não consegui ler esta imagem.',
       dupFeito:'{0} duplicado logo depois deste.',
       trocadoTag:'imagem trocada',
-      revisarBtn:'Revisar quadro a quadro', revNotaLbl:'Anotação deste passo',
+      revisarBtn:'Revisar quadro a quadro', revisarBtnN:'Conferir os {0} {1}', orgReduzirH:'1 · Reduzir de uma vez', orgReduzirP:'Tire o que se repete e o que ficou mudo antes de olhar tela por tela.', orgJuntarH:'2 · Acrescentar', orgConferirH:'3 · Conferir tela por tela', orgConferirP:'Passa por cada tela mantida: renomear o passo, tarjar um dado, recortar a borda, trocar a imagem.', revNotaLbl:'Anotação deste passo',
       revEditarBtn:'Editar a imagem: tarja, destaque, seta, caneta',
       revAntes:'A tela que está no documento hoje',
       revUltimo:'o último', revIgualFim:'Continua assim — finalizar', revTrocarFim:'Mudou — trocar e finalizar', revForaFim:'Não existe mais — descartar e finalizar', revPos:'{0} de {1}',
@@ -3323,7 +3436,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       sensTarjado1:'1 tarja aplicada. Confira na lente antes de gerar — a tarja é queimada na imagem.',
       sensTarjar:'Tarjar as {0} ocorrências',
       sensTarjado:'{0} tarjas aplicadas. Confira na lente antes de gerar — a tarja é queimada na imagem.',
-      sensNaoAchou:'Nada para tarjar automaticamente', trocaPlaca:'Neste ritmo, faltam cerca de {0}. Sua máquina tem placa de vídeo e ela não está sendo usada — ligá-la costuma acelerar bastante, sem perder precisão.', trocaModelo:'Neste ritmo, faltam cerca de {0}. O modo rápido usa um modelo menor: transcreve em uma fração do tempo, com menos acerto em nome próprio, sigla e sotaque carregado.', trocaBtn:'Trocar agora e continuar daqui', trocaIndo:'Trocando… o que já foi transcrito continua no lugar.', avisoAbaTr:'Transcrição pronta', avisoTr:'Transcrição concluída: {0} trechos em {1}. Ela está no campo do passo 2.', avisoFechar:'Entendi', pessoasH:'Tem gente nesta gravação.', pessoas_ata:'Você marcou o cenário “Ata de reunião”.', pessoas_ux:'Você marcou o cenário “Sessão de usabilidade”.', pessoas_canal:'A transcrição tem a voz do outro lado da chamada.', pessoasP:'Numa chamada de vídeo, cada tela guardada leva a fita de participantes — rosto, nome e cargo de quem estava lá. Isso não é texto, então a varredura acima não enxerga. Confira as telas antes de gerar.', pessoasBtn:'Abrir a lente para tarjar as pessoas',
+      sensNaoAchou:'Nada para tarjar automaticamente', trocaPlaca:'Faltam ~{0}. A placa de vídeo desta máquina não está sendo usada.', trocaModelo:'Faltam ~{0}. O modo rápido é bem mais veloz, com menos acerto em nome próprio e sigla.', trocaBtn:'Acelerar', trocaIndo:'Trocando — o que já saiu fica.', avisoAbaTr:'Transcrição pronta', avisoTr:'Transcrição pronta — {0} trechos em {1}.', avisoFechar:'Entendi', pessoasH:'Tem gente nesta gravação.', pessoas_ata:'Você marcou o cenário “Ata de reunião”.', pessoas_ux:'Você marcou o cenário “Sessão de usabilidade”.', pessoas_canal:'A transcrição tem a voz do outro lado da chamada.', pessoasP:'Numa chamada de vídeo, cada tela guardada leva a fita de participantes — rosto, nome e cargo de quem estava lá. Isso não é texto, então a varredura acima não enxerga. Confira as telas antes de gerar.', pessoasBtn:'Abrir a lente para tarjar as pessoas',
       sensNaoAchouDica:'O padrão foi encontrado no texto corrido, mas não em cima de nenhuma palavra localizável na imagem. Tarje à mão na lente.',
       sensSemCaixa:'Tarjar automaticamente não disponível',
       sensSemCaixaDica:'Esta versão do leitor de texto não devolveu a posição das palavras. Dá para tarjar à mão na lente.',
@@ -3402,7 +3515,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       viaRecP:'You walk through the screen and say what you are doing. No video is kept: what comes out are the screens that changed and your narration, transcribed.',
       viaRecPclipe:'You walk through the screen and say what you are doing. The whole recording is discarded: what comes out are the screens that changed, your narration transcribed, and a short clip of each moment you mark.',
       recWarnClipe:'The whole recording is discarded — only the clips of the moments you mark are kept. While capturing, the tool pulls out the frames that matter and transcribes the two audio channels separately. Transcription shares the machine with the capture; on a modest computer the screen may miss a change.',
-      viaArqTag:'I already have the video', viaArqH:'Use a file',
+      viaArqTag:'I already have the video', viaArqH:'Use a file', viaDriveTag:'It is on Drive', viaDriveH:'Open from Google Drive', viaDriveP:'The file goes from Drive straight to your browser. We ask for the narrowest permission there is: only the files you pick in the Google window.',
       viaArqP:'A recording you already made, of a meeting or of a screen. The file is read by the browser and never leaves your computer.',
       s1:'Video', drop1:'Choose or drag your video here',
       drop2:'MP4 / MOV / WebM — file size does not matter',
@@ -3596,7 +3709,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       videoErr:'The browser could not open this video. Convert it to MP4 (H.264) and try again.',
       reportar:'Tell me which format failed',
       reportarDica:' — that is what will decide whether automatic conversion is worth building.',
-      s2:'The speech (optional)', autoBtn:'Transcribe the speech',
+      s2:'The speech', opcional:'optional', autoBtn:'Transcribe the speech',
       ajustesTit:'Settings — almost nobody needs these',
       refazerTelas:'Redo the screens',
       trBoxH:'Transcript', trBoxSub:'fix, apply vocabulary, translate',
@@ -3637,7 +3750,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       erroSessao:'The compressed model file will not open on this computer. I already tried the alternative builds and none came up. Run the diagnostics, or record the frames only and write the notes by hand.',
       transcribing2:'Step 2 of 2 — transcribing: {0}% (chunk {1} of {2}){3}',
       etaTr:' — about {0} left',
-      keepOpen:'Do not close this tab: everything happens here, and closing loses the work. Switching tabs may slow it down — browsers throttle what runs in the background — but it does not stop it.', esperaDica:'When it finishes, the tab title blinks and the icon changes — you do not have to watch it. If you have another recording waiting, start it now: the machine is shared between the two, so each takes longer than it would alone.', esperaNova:'Open a new session in a tab',
+      keepOpen:'Processing. Do not close this tab.', esperaDica:'We flag the tab title when it is done. For another video, open a new session:', esperaNova:'New session', esperaNovaDica:'Each session uses the same machine: two at once both run slower.',
       leaveWarn:'Processing is still running. If you leave now, you lose what has been done.', noGpu:'WebGPU unavailable — using the CPU, this will be slower.',
       transcribing:'Transcribing… chunk {0} of {1}', trDone:'Transcript ready — {0} segments.',
       trErr:'Could not transcribe here: {0} — click Diagnostics to see which step fails.',
@@ -3658,7 +3771,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       faixa:'Range analysed: {0} to {1}.',
       qLow:'Light', qMid:'Balanced', qHigh:'High',
       sens:['','very low','low','low+','medium-','medium','medium+','high','high+','very high'],
-      extractBtn:'Frames only', stopBtn:'Stop', resetBtn:'Start over',
+      extractBtn:'Frames only', stopBtn:'Stop', resetBtn:'Start over', novoFluxoBtn:'Start another document', novoFluxoNota:'Back to step 1, with a clean screen.', novoFluxoConf:'Start another document? The screens and the speech in this session will be cleared — if you have not generated the file yet, do that first.',
       noteB:'If the video will not open:', noteT:'browsers cannot decode some formats (HEVC, certain MKV files). Convert to MP4 / H.264 in that case.',
       noDur:'Video duration unavailable.',
       scanning:'Looking for image changes… {0} of {1} — {2} frame(s) kept',
@@ -3795,7 +3908,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       trocarErro:'I could not read this image.',
       dupFeito:'{0} duplicated right after this one.',
       trocadoTag:'image replaced',
-      revisarBtn:'Review frame by frame', revNotaLbl:'Note for this step',
+      revisarBtn:'Review frame by frame', revisarBtnN:'Check the {0} {1}', orgReduzirH:'1 · Cut it down in one go', orgReduzirP:'Drop what repeats and what came out silent before looking screen by screen.', orgJuntarH:'2 · Add to it', orgConferirH:'3 · Check screen by screen', orgConferirP:'Goes through every kept screen: rename the step, redact a detail, crop the edge, swap the image.', revNotaLbl:'Note for this step',
       revEditarBtn:'Edit the image: redaction, highlight, arrow, pen',
       revAntes:'The screen that is in the document today',
       revUltimo:'the last one', revIgualFim:'Still like this — finish', revTrocarFim:'Changed — replace and finish', revForaFim:'Gone — discard and finish', revPos:'{0} of {1}',
@@ -3899,7 +4012,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       sensTarjado1:'1 redaction applied. Check it in the lens before generating — the redaction is burned into the image.',
       sensTarjar:'Redact the {0} occurrences',
       sensTarjado:'{0} redactions applied. Check them in the lens before generating — the redaction is burned into the image.',
-      sensNaoAchou:'Nothing to redact automatically', trocaPlaca:'At this pace, about {0} left. Your machine has a graphics card and it is not being used — turning it on is usually much faster, with no loss of accuracy.', trocaModelo:'At this pace, about {0} left. Fast mode uses a smaller model: it transcribes in a fraction of the time, with less accuracy on proper nouns, acronyms and strong accents.', trocaBtn:'Switch now and carry on from here', trocaIndo:'Switching… what has been transcribed stays.', avisoAbaTr:'Transcript ready', avisoTr:'Transcription finished: {0} segments in {1}. It is in the field in step 2.', avisoFechar:'Got it', pessoasH:'There are people in this recording.', pessoas_ata:'You picked the “Meeting minutes” scenario.', pessoas_ux:'You picked the “Usability session” scenario.', pessoas_canal:'The transcript carries the voice from the other end of the call.', pessoasP:'In a video call every captured screen carries the participant strip — face, name and job title of everyone who was there. That is not text, so the scan above cannot see it. Check the screens before you generate.', pessoasBtn:'Open the lens to redact the people',
+      sensNaoAchou:'Nothing to redact automatically', trocaPlaca:'~{0} left. This machine has a graphics card that is not being used.', trocaModelo:'~{0} left. Fast mode is much quicker, with less accuracy on proper nouns and acronyms.', trocaBtn:'Speed up', trocaIndo:'Switching — what is done stays.', avisoAbaTr:'Transcript ready', avisoTr:'Transcript ready — {0} segments in {1}.', avisoFechar:'Got it', pessoasH:'There are people in this recording.', pessoas_ata:'You picked the “Meeting minutes” scenario.', pessoas_ux:'You picked the “Usability session” scenario.', pessoas_canal:'The transcript carries the voice from the other end of the call.', pessoasP:'In a video call every captured screen carries the participant strip — face, name and job title of everyone who was there. That is not text, so the scan above cannot see it. Check the screens before you generate.', pessoasBtn:'Open the lens to redact the people',
       sensNaoAchouDica:'The pattern was found in the running text, but not over any word that can be located on the image. Redact by hand in the lens.',
       sensSemCaixa:'Automatic redaction unavailable',
       sensSemCaixaDica:'This version of the text reader did not return word positions. You can still redact by hand in the lens.',
@@ -3978,7 +4091,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       viaRecP:'Haces el recorrido en la pantalla y dices lo que estás haciendo. No se guarda vídeo: salen solo las pantallas que cambiaron y tu narración transcrita.',
       viaRecPclipe:'Haces el recorrido en la pantalla y dices lo que estás haciendo. La grabación entera se descarta: salen las pantallas que cambiaron, tu narración transcrita y un clip corto de cada momento que marques.',
       recWarnClipe:'La grabación entera se descarta — solo quedan los clips de los momentos que marques. Durante la captura la herramienta separa los fotogramas que importan y transcribe los dos canales de audio por separado. La transcripción comparte la máquina con la captura; en un ordenador modesto la pantalla puede perder algún cambio.',
-      viaArqTag:'Ya tengo el vídeo', viaArqH:'Usar un archivo',
+      viaArqTag:'Ya tengo el vídeo', viaArqH:'Usar un archivo', viaDriveTag:'Está en Drive', viaDriveH:'Abrir desde Google Drive', viaDriveP:'El archivo va de Drive directo a tu navegador. Pedimos el permiso más restringido que existe: solo los archivos que elijas en la ventana de Google.',
       viaArqP:'Una grabación que ya hiciste, de una reunión o de pantalla. El archivo lo lee el navegador y no sale de tu equipo.',
       s1:'Vídeo', drop1:'Elige o arrastra tu vídeo aquí',
       drop2:'MP4 / MOV / WebM — el tamaño del archivo no importa',
@@ -4172,7 +4285,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       videoErr:'El navegador no pudo abrir este vídeo. Conviértelo a MP4 (H.264) e inténtalo de nuevo.',
       reportar:'Dime qué formato falló',
       reportarDica:' — eso decidirá si vale la pena construir la conversión automática.',
-      s2:'El habla (opcional)', autoBtn:'Transcribir el habla',
+      s2:'El habla', opcional:'opcional', autoBtn:'Transcribir el habla',
       ajustesTit:'Ajustes — casi nadie necesita tocarlos',
       refazerTelas:'Rehacer las pantallas',
       trBoxH:'Transcripción', trBoxSub:'corregir, aplicar vocabulario, traducir',
@@ -4213,7 +4326,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       erroSessao:'El archivo comprimido del modelo no abre en este equipo. Ya probé las versiones alternativas y ninguna arrancó. Ejecuta el diagnóstico, o graba solo los fotogramas y escribe las anotaciones a mano.',
       transcribing2:'Paso 2 de 2 — transcribiendo: {0}% (bloque {1} de {2}){3}',
       etaTr:' — faltan ~{0}',
-      keepOpen:'No cierres esta pestaña: todo ocurre aquí, y cerrarla pierde el trabajo. Cambiar de pestaña puede hacerlo más lento — el navegador reduce lo que corre en segundo plano —, pero no lo interrumpe.', esperaDica:'Al terminar, el título de la pestaña parpadea y el icono cambia — no hace falta que lo mires. Si tienes otra grabación esperando, empiézala ya: la máquina se reparte entre las dos, así que cada una tarda más de lo que tardaría sola.', esperaNova:'Abrir una sesión nueva en una pestaña',
+      keepOpen:'Procesando. No cierres esta pestaña.', esperaDica:'Avisamos en el título de la pestaña al terminar. Para otro vídeo, abre una nueva sesión:', esperaNova:'Nueva sesión', esperaNovaDica:'Cada sesión usa la misma máquina: dos a la vez van más lentas.',
       leaveWarn:'El procesamiento sigue en curso. Si sales ahora, pierdes lo que ya se hizo.', noGpu:'WebGPU no disponible — usando el procesador, será más lento.',
       transcribing:'Transcribiendo… bloque {0} de {1}', trDone:'Transcripción lista — {0} tramos.',
       trErr:'No pude transcribir aquí: {0} — pulsa Diagnóstico para ver en qué paso falla.',
@@ -4234,7 +4347,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       faixa:'Tramo analizado: {0} a {1}.',
       qLow:'Ligera', qMid:'Equilibrada', qHigh:'Alta',
       sens:['','muy baja','baja','baja+','media-','media','media+','alta','alta+','muy alta'],
-      extractBtn:'Solo fotogramas', stopBtn:'Parar', resetBtn:'Empezar de nuevo',
+      extractBtn:'Solo fotogramas', stopBtn:'Parar', resetBtn:'Empezar de nuevo', novoFluxoBtn:'Empezar otro documento', novoFluxoNota:'Vuelve al paso 1, con la pantalla limpia.', novoFluxoConf:'¿Empezar otro documento? Las pantallas y el habla de esta sesión se borran — si aún no generaste el archivo, hazlo antes.',
       noteB:'Si el vídeo no se abre:', noteT:'el navegador no decodifica algunos formatos (HEVC, ciertos MKV). En ese caso, conviértelo a MP4 / H.264.',
       noDur:'Duración del vídeo no disponible.',
       scanning:'Buscando cambios de imagen… {0} de {1} — {2} fotograma(s) guardado(s)',
@@ -4371,7 +4484,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       trocarErro:'No pude leer esta imagen.',
       dupFeito:'{0} duplicado justo después de este.',
       trocadoTag:'imagen cambiada',
-      revisarBtn:'Revisar fotograma a fotograma', revNotaLbl:'Anotación de este paso',
+      revisarBtn:'Revisar fotograma a fotograma', revisarBtnN:'Revisar los {0} {1}', orgReduzirH:'1 · Reducir de una vez', orgReduzirP:'Quita lo que se repite y lo que salió mudo antes de mirar pantalla por pantalla.', orgJuntarH:'2 · Añadir', orgConferirH:'3 · Revisar pantalla por pantalla', orgConferirP:'Pasa por cada pantalla conservada: renombrar el paso, tapar un dato, recortar el borde, cambiar la imagen.', revNotaLbl:'Anotación de este paso',
       revEditarBtn:'Editar la imagen: zona tachada, resalte, flecha, lápiz',
       revAntes:'La pantalla que está hoy en el documento',
       revUltimo:'el último', revIgualFim:'Sigue así — finalizar', revTrocarFim:'Cambió — cambiar y finalizar', revForaFim:'Ya no existe — descartar y finalizar', revPos:'{0} de {1}',
@@ -4475,7 +4588,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       sensTarjado1:'1 tapado aplicado. Compruébalo en la lupa antes de generar — el tapado se quema en la imagen.',
       sensTarjar:'Tapar las {0} apariciones',
       sensTarjado:'{0} tapados aplicados. Compruébalos en la lupa antes de generar — el tapado se quema en la imagen.',
-      sensNaoAchou:'Nada que tapar automáticamente', trocaPlaca:'A este ritmo faltan unos {0}. Tu equipo tiene tarjeta gráfica y no se está usando — activarla suele acelerar bastante, sin perder precisión.', trocaModelo:'A este ritmo faltan unos {0}. El modo rápido usa un modelo menor: transcribe en una fracción del tiempo, con menos acierto en nombres propios, siglas y acentos marcados.', trocaBtn:'Cambiar ahora y seguir desde aquí', trocaIndo:'Cambiando… lo ya transcrito se mantiene.', avisoAbaTr:'Transcripción lista', avisoTr:'Transcripción terminada: {0} tramos en {1}. Está en el campo del paso 2.', avisoFechar:'Entendido', pessoasH:'Hay personas en esta grabación.', pessoas_ata:'Elegiste el escenario “Acta de reunión”.', pessoas_ux:'Elegiste el escenario “Sesión de usabilidad”.', pessoas_canal:'La transcripción trae la voz del otro lado de la llamada.', pessoasP:'En una videollamada cada pantalla guardada lleva la tira de participantes — cara, nombre y cargo de quien estaba allí. Eso no es texto, así que el análisis de arriba no lo ve. Revisa las pantallas antes de generar.', pessoasBtn:'Abrir la lupa para tapar a las personas',
+      sensNaoAchou:'Nada que tapar automáticamente', trocaPlaca:'Faltan ~{0}. La tarjeta gráfica de este equipo no se está usando.', trocaModelo:'Faltan ~{0}. El modo rápido es mucho más veloz, con menos acierto en nombres propios y siglas.', trocaBtn:'Acelerar', trocaIndo:'Cambiando — lo hecho se mantiene.', avisoAbaTr:'Transcripción lista', avisoTr:'Transcripción lista — {0} tramos en {1}.', avisoFechar:'Entendido', pessoasH:'Hay personas en esta grabación.', pessoas_ata:'Elegiste el escenario “Acta de reunión”.', pessoas_ux:'Elegiste el escenario “Sesión de usabilidad”.', pessoas_canal:'La transcripción trae la voz del otro lado de la llamada.', pessoasP:'En una videollamada cada pantalla guardada lleva la tira de participantes — cara, nombre y cargo de quien estaba allí. Eso no es texto, así que el análisis de arriba no lo ve. Revisa las pantallas antes de generar.', pessoasBtn:'Abrir la lupa para tapar a las personas',
       sensNaoAchouDica:'El patrón se encontró en el texto corrido, pero no sobre ninguna palabra localizable en la imagen. Tapa a mano en la lupa.',
       sensSemCaixa:'Tapado automático no disponible',
       sensSemCaixaDica:'Esta versión del lector de texto no devolvió la posición de las palabras. Puedes tapar a mano en la lupa.',
@@ -4553,7 +4666,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       viaRecP:'Sie gehen den Ablauf am Bildschirm durch und sprechen dabei, was Sie tun. Es wird kein Video gespeichert: Heraus kommen nur die Bildschirme, die sich geändert haben, und Ihr gesprochener Kommentar als Transkription.',
       viaRecPclipe:'Sie gehen den Ablauf am Bildschirm durch und sprechen dabei, was Sie tun. Die gesamte Aufnahme wird verworfen: Heraus kommen die Bildschirme, die sich geändert haben, Ihr gesprochener Kommentar als Transkription und ein kurzer Clip zu jedem Moment, den Sie markieren.',
       recWarnClipe:'Die gesamte Aufnahme wird verworfen — erhalten bleiben nur die Clips der Momente, die Sie markieren. Während der Aufnahme trennt das Werkzeug die Screenshots heraus, die zählen, und transkribiert die beiden Tonspuren getrennt. Die Transkription teilt sich den Rechner mit der Aufnahme; auf einem schwächeren Computer kann ein Bildwechsel verloren gehen.',
-      viaArqTag:'Ich habe das Video bereits', viaArqH:'Datei verwenden',
+      viaArqTag:'Ich habe das Video bereits', viaArqH:'Datei verwenden', viaDriveTag:'Liegt in Drive', viaDriveH:'Aus Google Drive öffnen', viaDriveP:'Die Datei geht von Drive direkt in Ihren Browser. Wir fragen die engste mögliche Berechtigung ab: nur die Dateien, die Sie im Google-Fenster auswählen.',
       viaArqP:'Eine Aufnahme, die Sie bereits erstellt haben — von einer Besprechung oder vom Bildschirm. Die Datei wird vom Browser gelesen und verlässt Ihren Computer nicht.',
       s1:'Video', drop1:'Video auswählen oder hierher ziehen',
       drop2:'MP4 / MOV / WebM — die Dateigröße spielt keine Rolle',
@@ -4747,7 +4860,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       videoErr:'Der Browser konnte dieses Video nicht öffnen. Konvertieren Sie es in MP4 (H.264) und versuchen Sie es erneut.',
       reportar:'Melden Sie uns, welches Format fehlgeschlagen ist',
       reportarDica:' — davon hängt ab, ob sich eine automatische Konvertierung lohnt.',
-      s2:'Der Ton (optional)', autoBtn:'Den Ton transkribieren',
+      s2:'Der Ton', opcional:'optional', autoBtn:'Den Ton transkribieren',
       ajustesTit:'Einstellungen — fast niemand braucht sie',
       refazerTelas:'Bildschirme neu erstellen',
       trBoxH:'Transkription', trBoxSub:'korrigieren, Fachwortliste anwenden, übersetzen',
@@ -4788,7 +4901,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       erroSessao:'Die komprimierte Modelldatei lässt sich auf diesem Computer nicht öffnen. Die alternativen Versionen wurden bereits versucht, keine ist gestartet. Führen Sie die Diagnose aus, oder nehmen Sie nur die Screenshots auf und schreiben Sie die Notizen von Hand.',
       transcribing2:'Schritt 2 von 2 — wird transkribiert: {0} % (Block {1} von {2}){3}',
       etaTr:' — noch ca. {0}',
-      keepOpen:'Schließen Sie diesen Tab nicht: Alles läuft hier, und Schließen verwirft die Arbeit. Ein Tab-Wechsel kann es verlangsamen — Browser drosseln, was im Hintergrund läuft —, bricht es aber nicht ab.', esperaDica:'Am Ende blinkt der Tab-Titel und das Symbol wechselt — Sie müssen nicht zusehen. Wenn eine weitere Aufnahme wartet, beginnen Sie jetzt: Die Maschine wird geteilt, jede dauert also länger als allein.', esperaNova:'Neue Sitzung in einem Tab öffnen',
+      keepOpen:'Wird verarbeitet. Diesen Tab nicht schließen.', esperaDica:'Wir melden es im Tab-Titel. Für ein weiteres Video eine neue Sitzung öffnen:', esperaNova:'Neue Sitzung', esperaNovaDica:'Jede Sitzung nutzt dieselbe Maschine: zwei gleichzeitig laufen langsamer.',
       leaveWarn:'Die Verarbeitung läuft noch. Wenn Sie jetzt gehen, geht das bereits Erledigte verloren.', noGpu:'WebGPU nicht verfügbar — es wird der Prozessor verwendet, das dauert länger.',
       transcribing:'Wird transkribiert… Block {0} von {1}', trDone:'Transkription fertig — {0} Abschnitte.',
       trErr:'Die Transkription war hier nicht möglich: {0} — klicken Sie auf Diagnose, um zu sehen, in welchem Schritt es hängt.',
@@ -4809,7 +4922,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       faixa:'Analysierter Abschnitt: {0} bis {1}.',
       qLow:'Gering', qMid:'Ausgewogen', qHigh:'Hoch',
       sens:['','sehr niedrig','niedrig','niedrig+','mittel-','mittel','mittel+','hoch','hoch+','sehr hoch'],
-      extractBtn:'Nur Screenshots extrahieren', stopBtn:'Stopp', resetBtn:'Neu beginnen',
+      extractBtn:'Nur Screenshots extrahieren', stopBtn:'Stopp', resetBtn:'Neu beginnen', novoFluxoBtn:'Weiteres Dokument beginnen', novoFluxoNota:'Zurück zu Schritt 1, mit leerem Bildschirm.', novoFluxoConf:'Weiteres Dokument beginnen? Die Aufnahmen und die Transkription dieser Sitzung verschwinden — erzeugen Sie die Datei vorher, falls noch nicht geschehen.',
       noteB:'Wenn sich das Video nicht öffnen lässt:', noteT:'der Browser dekodiert manche Formate nicht (HEVC, bestimmte MKV). Konvertieren Sie es in diesem Fall in MP4 / H.264.',
       noDur:'Videodauer nicht verfügbar.',
       scanning:'Es wird nach Bildänderungen gesucht… {0} von {1} — {2} Screenshot(s) gespeichert',
@@ -4952,7 +5065,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       trocarErro:'Dieses Bild konnte nicht gelesen werden.',
       dupFeito:'{0} direkt nach diesem dupliziert.',
       trocadoTag:'Bild ausgetauscht',
-      revisarBtn:'Bild für Bild prüfen', revNotaLbl:'Notiz zu diesem Schritt',
+      revisarBtn:'Bild für Bild prüfen', revisarBtnN:'Die {0} {1} prüfen', orgReduzirH:'1 · Auf einmal ausdünnen', orgReduzirP:'Werfen Sie Wiederholungen und Stummes raus, bevor Sie Bild für Bild schauen.', orgJuntarH:'2 · Ergänzen', orgConferirH:'3 · Aufnahme für Aufnahme prüfen', orgConferirP:'Geht jede behaltene Aufnahme durch: Schritt umbenennen, Detail schwärzen, Rand beschneiden, Bild tauschen.', revNotaLbl:'Notiz zu diesem Schritt',
       revEditarBtn:'Bild bearbeiten: Schwärzung, Hervorhebung, Pfeil, Stift',
       revAntes:'Der Bildschirm, der heute im Dokument steht',
       revUltimo:'das letzte', revIgualFim:'Unverändert — abschließen', revTrocarFim:'Geändert — ersetzen und abschließen', revForaFim:'Gibt es nicht mehr — verwerfen und abschließen', revPos:'{0} von {1}',
@@ -5056,7 +5169,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       sensTarjado1:'1 Schwärzung angewendet. Prüfen Sie sie vor dem Erzeugen in der Lupe — die Schwärzung wird fest in das Bild eingebrannt.',
       sensTarjar:'Die {0} Treffer schwärzen',
       sensTarjado:'{0} Schwärzungen angewendet. Prüfen Sie sie vor dem Erzeugen in der Lupe — die Schwärzung wird fest in das Bild eingebrannt.',
-      sensNaoAchou:'Nichts automatisch zu schwärzen', trocaPlaca:'In diesem Tempo dauert es noch etwa {0}. Ihr Rechner hat eine Grafikkarte, die nicht genutzt wird — sie einzuschalten ist meist deutlich schneller, ohne Genauigkeitsverlust.', trocaModelo:'In diesem Tempo dauert es noch etwa {0}. Der schnelle Modus nutzt ein kleineres Modell: ein Bruchteil der Zeit, dafür weniger Treffsicherheit bei Eigennamen, Abkürzungen und starkem Akzent.', trocaBtn:'Jetzt wechseln und hier weitermachen', trocaIndo:'Wird gewechselt … das bereits Transkribierte bleibt.', avisoAbaTr:'Transkription fertig', avisoTr:'Transkription abgeschlossen: {0} Abschnitte in {1}. Sie steht im Feld in Schritt 2.', avisoFechar:'Verstanden', pessoasH:'In dieser Aufnahme sind Personen zu sehen.', pessoas_ata:'Sie haben das Szenario „Besprechungsprotokoll“ gewählt.', pessoas_ux:'Sie haben das Szenario „Usability-Sitzung“ gewählt.', pessoas_canal:'Die Transkription enthält die Stimme der Gegenseite.', pessoasP:'In einer Videokonferenz zeigt jede gespeicherte Aufnahme die Teilnehmerleiste — Gesicht, Name und Funktion aller Anwesenden. Das ist kein Text, die Prüfung oben sieht es also nicht. Prüfen Sie die Aufnahmen vor dem Erzeugen.', pessoasBtn:'Lupe öffnen und Personen schwärzen',
+      sensNaoAchou:'Nichts automatisch zu schwärzen', trocaPlaca:'Noch ~{0}. Die Grafikkarte dieses Rechners wird nicht genutzt.', trocaModelo:'Noch ~{0}. Der schnelle Modus ist deutlich flotter, dafür ungenauer bei Eigennamen und Abkürzungen.', trocaBtn:'Beschleunigen', trocaIndo:'Wechsel — Fertiges bleibt.', avisoAbaTr:'Transkription fertig', avisoTr:'Transkription fertig — {0} Abschnitte in {1}.', avisoFechar:'Verstanden', pessoasH:'In dieser Aufnahme sind Personen zu sehen.', pessoas_ata:'Sie haben das Szenario „Besprechungsprotokoll“ gewählt.', pessoas_ux:'Sie haben das Szenario „Usability-Sitzung“ gewählt.', pessoas_canal:'Die Transkription enthält die Stimme der Gegenseite.', pessoasP:'In einer Videokonferenz zeigt jede gespeicherte Aufnahme die Teilnehmerleiste — Gesicht, Name und Funktion aller Anwesenden. Das ist kein Text, die Prüfung oben sieht es also nicht. Prüfen Sie die Aufnahmen vor dem Erzeugen.', pessoasBtn:'Lupe öffnen und Personen schwärzen',
       sensNaoAchouDica:'Das Muster wurde im laufenden Text gefunden, aber über keinem im Bild auffindbaren Wort. Schwärzen Sie es von Hand in der Lupe.',
       sensSemCaixa:'Automatisches Schwärzen nicht verfügbar',
       sensSemCaixaDica:'Diese Version der Texterkennung hat die Position der Wörter nicht zurückgegeben. Von Hand in der Lupe schwärzen ist weiterhin möglich.',
@@ -5134,7 +5247,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       viaRecP:'Vous parcourez l’écran et dites ce que vous faites. Aucune vidéo n’est conservée : il ne sort que les écrans qui ont changé et votre narration transcrite.',
       viaRecPclipe:'Vous parcourez l’écran et dites ce que vous faites. L’enregistrement entier est jeté : il en sort les écrans qui ont changé, votre narration transcrite, et un clip court de chaque moment que vous marquez.',
       recWarnClipe:'L’enregistrement entier est jeté — seuls restent les clips des moments que vous marquez. Pendant la capture, l’outil isole les captures qui comptent et transcrit séparément les deux canaux audio. La transcription partage la machine avec la capture ; sur un ordinateur modeste, l’écran peut rater un changement.',
-      viaArqTag:'J’ai déjà la vidéo', viaArqH:'Utiliser un fichier',
+      viaArqTag:'J’ai déjà la vidéo', viaArqH:'Utiliser un fichier', viaDriveTag:'C’est sur Drive', viaDriveH:'Ouvrir depuis Google Drive', viaDriveP:'Le fichier va de Drive directement à votre navigateur. Nous demandons la permission la plus étroite qui soit : seuls les fichiers que vous choisissez dans la fenêtre Google.',
       viaArqP:'Un enregistrement que vous avez déjà fait, de réunion ou d’écran. Le fichier est lu par le navigateur et ne quitte pas votre ordinateur.',
       s1:'Vidéo', drop1:'Choisir la vidéo ou la déposer ici',
       drop2:'MP4 / MOV / WebM — la taille du fichier n’a pas d’importance',
@@ -5328,7 +5441,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       videoErr:'Le navigateur n’a pas réussi à ouvrir cette vidéo. Convertissez-la en MP4 (H.264) et réessayez.',
       reportar:'Dites-nous quel format a échoué',
       reportarDica:' — c’est ce qui décidera si la conversion automatique vaut la peine d’être développée.',
-      s2:'La parole (facultatif)', autoBtn:'Transcrire la parole',
+      s2:'La parole', opcional:'facultatif', autoBtn:'Transcrire la parole',
       ajustesTit:'Réglages — presque personne n’en a besoin',
       refazerTelas:'Refaire les écrans',
       trBoxH:'Transcription', trBoxSub:'corriger, appliquer le lexique métier, traduire',
@@ -5369,7 +5482,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       erroSessao:'Le fichier compressé du modèle ne s’ouvre pas sur cet ordinateur. Les versions alternatives ont déjà été essayées, aucune n’a démarré. Lancez le diagnostic, ou enregistrez les captures seules et saisissez les notes à la main.',
       transcribing2:'Étape 2 sur 2 — transcription : {0} % (bloc {1} sur {2}){3}',
       etaTr:' — il reste ~{0}',
-      keepOpen:'Ne fermez pas cet onglet : tout se passe ici, et le fermer perd le travail. Changer d’onglet peut ralentir le traitement — le navigateur bride ce qui tourne en arrière-plan —, mais ne l’interrompt pas.', esperaDica:'À la fin, le titre de l’onglet clignote et l’icône change — inutile de surveiller. Si un autre enregistrement attend, commencez-le maintenant : la machine est partagée entre les deux, chacun prendra donc plus de temps que seul.', esperaNova:'Ouvrir une nouvelle session dans un onglet',
+      keepOpen:'Traitement en cours. Ne fermez pas cet onglet.', esperaDica:'Nous le signalons dans le titre de l’onglet. Pour une autre vidéo, ouvrez une nouvelle session :', esperaNova:'Nouvelle session', esperaNovaDica:'Chaque session utilise la même machine : deux à la fois sont plus lentes.',
       leaveWarn:'Le traitement est encore en cours. Si vous partez maintenant, vous perdez ce qui a déjà été fait.', noGpu:'WebGPU indisponible — utilisation du processeur, ce sera plus long.',
       transcribing:'Transcription… bloc {0} sur {1}', trDone:'Transcription prête — {0} segments.',
       trErr:'Transcription impossible ici : {0} — cliquez sur Diagnostic pour voir à quelle étape ça bloque.',
@@ -5390,7 +5503,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       faixa:'Plage analysée : {0} à {1}.',
       qLow:'Légère', qMid:'Équilibrée', qHigh:'Haute',
       sens:['','très basse','basse','basse+','moyenne-','moyenne','moyenne+','haute','haute+','très haute'],
-      extractBtn:'Extraire les captures seulement', stopBtn:'Arrêter', resetBtn:'Recommencer',
+      extractBtn:'Extraire les captures seulement', stopBtn:'Arrêter', resetBtn:'Recommencer', novoFluxoBtn:'Commencer un autre document', novoFluxoNota:'Retour à l’étape 1, écran vierge.', novoFluxoConf:'Commencer un autre document ? Les écrans et la parole de cette session disparaissent — si le fichier n’est pas encore généré, faites-le avant.',
       noteB:'Si la vidéo ne s’ouvre pas :', noteT:'le navigateur ne décode pas certains formats (HEVC, certains MKV). Dans ce cas, convertissez en MP4 / H.264.',
       noDur:'Durée de la vidéo indisponible.',
       scanning:'Recherche des changements d’image… {0} sur {1} — {2} capture(s) conservée(s)',
@@ -5533,7 +5646,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       trocarErro:'Impossible de lire cette image.',
       dupFeito:'{0} : une copie a été ajoutée juste après.',
       trocadoTag:'image remplacée',
-      revisarBtn:'Vérifier image par image', revNotaLbl:'Note de cette étape',
+      revisarBtn:'Vérifier image par image', revisarBtnN:'Vérifier les {0} {1}', orgReduzirH:'1 · Réduire d’un coup', orgReduzirP:'Enlevez ce qui se répète et ce qui est resté muet avant de regarder écran par écran.', orgJuntarH:'2 · Ajouter', orgConferirH:'3 · Vérifier écran par écran', orgConferirP:'Passe par chaque écran conservé : renommer l’étape, caviarder une donnée, rogner le bord, remplacer l’image.', revNotaLbl:'Note de cette étape',
       revEditarBtn:'Modifier l’image : caviardage, surlignage, flèche, stylo',
       revAntes:'L’écran qui figure aujourd’hui dans le document',
       revUltimo:'la dernière', revIgualFim:'Inchangée — terminer', revTrocarFim:'A changé — remplacer et terminer', revForaFim:'N’existe plus — écarter et terminer', revPos:'{0} sur {1}',
@@ -5637,7 +5750,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       sensTarjado1:'1 caviardage appliqué. Vérifiez dans la loupe avant de générer — le caviardage est incrusté dans l’image.',
       sensTarjar:'Caviarder les {0} occurrences',
       sensTarjado:'{0} caviardages appliqués. Vérifiez dans la loupe avant de générer — le caviardage est incrusté dans l’image.',
-      sensNaoAchou:'Rien à caviarder automatiquement', trocaPlaca:'À ce rythme, il reste environ {0}. Votre machine a une carte graphique inutilisée — l’activer est en général bien plus rapide, sans perte de précision.', trocaModelo:'À ce rythme, il reste environ {0}. Le mode rapide utilise un modèle plus petit : une fraction du temps, avec moins de justesse sur les noms propres, les sigles et les accents prononcés.', trocaBtn:'Changer maintenant et continuer d’ici', trocaIndo:'Changement… ce qui est déjà transcrit reste en place.', avisoAbaTr:'Transcription prête', avisoTr:'Transcription terminée : {0} segments en {1}. Elle est dans le champ de l’étape 2.', avisoFechar:'Compris', pessoasH:'Il y a des personnes dans cet enregistrement.', pessoas_ata:'Vous avez choisi le scénario « Compte rendu de réunion ».', pessoas_ux:'Vous avez choisi le scénario « Séance d’utilisabilité ».', pessoas_canal:'La transcription contient la voix de l’autre bout de l’appel.', pessoasP:'Dans un appel vidéo, chaque écran capturé porte la bande des participants — visage, nom et fonction de chacun. Ce n’est pas du texte, l’analyse ci-dessus ne le voit donc pas. Vérifiez les écrans avant de générer.', pessoasBtn:'Ouvrir la loupe pour caviarder les personnes',
+      sensNaoAchou:'Rien à caviarder automatiquement', trocaPlaca:'Reste ~{0}. La carte graphique de cette machine n’est pas utilisée.', trocaModelo:'Reste ~{0}. Le mode rapide est bien plus vif, moins juste sur les noms propres et les sigles.', trocaBtn:'Accélérer', trocaIndo:'Changement — l’acquis reste.', avisoAbaTr:'Transcription prête', avisoTr:'Transcription prête — {0} segments en {1}.', avisoFechar:'Compris', pessoasH:'Il y a des personnes dans cet enregistrement.', pessoas_ata:'Vous avez choisi le scénario « Compte rendu de réunion ».', pessoas_ux:'Vous avez choisi le scénario « Séance d’utilisabilité ».', pessoas_canal:'La transcription contient la voix de l’autre bout de l’appel.', pessoasP:'Dans un appel vidéo, chaque écran capturé porte la bande des participants — visage, nom et fonction de chacun. Ce n’est pas du texte, l’analyse ci-dessus ne le voit donc pas. Vérifiez les écrans avant de générer.', pessoasBtn:'Ouvrir la loupe pour caviarder les personnes',
       sensNaoAchouDica:'Le motif a été trouvé dans le texte courant, mais au-dessus d’aucun mot localisable sur l’image. Caviardez à la main dans la loupe.',
       sensSemCaixa:'Caviardage automatique indisponible',
       sensSemCaixaDica:'Cette version du lecteur de texte n’a pas renvoyé la position des mots. Vous pouvez caviarder à la main dans la loupe.',
@@ -5813,6 +5926,9 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
   /* Enquanto algo longo está rodando, avisa antes de fechar a aba: como tudo
      acontece no navegador, sair significa perder o trabalho. */
   let ocupado = false;
+  /* "A pessoa pediu a fala ao abrir este vídeo." Vive fora do `load` porque
+     quem a consome é o fim da varredura, que acontece muito depois. */
+  let falaPedida = false;
   function trabalhando(v){
     ocupado = v;
     $('keepOpen').classList.toggle('hide', !v);
@@ -6450,6 +6566,9 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       passos();
       irPara('cardTr');          // o vídeo abriu: o próximo passo são os ajustes
       agendarVarredura();        // e as telas começam a sair sozinhas
+      /* A fala também começa sozinha — mas DEPOIS das telas, e não agora.
+         Ver `falaDepoisDaVarredura`, no fim da varredura. */
+      falaPedida = !!($('recTr') && $('recTr').checked);
     };
     video.onerror = () => {
       let extra = '';
@@ -6521,6 +6640,21 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
   };
   $('sens').oninput = () => { $('sensV').textContent = t('sens')[+$('sens').value]; };
   $('reset').onclick = () => location.reload();   // o recarregamento devolve os passos ao início
+
+  /* O "começar outro" do FIM da página. Ele recarrega, como o de cima — mas
+     PERGUNTA antes, e o de cima não precisa: lá em cima não há nada feito para
+     perder; aqui há um documento inteiro. Um botão que apaga trinta telas
+     conferidas sem perguntar é o botão que ninguém clica duas vezes. */
+  if ($('novoFluxo')) $('novoFluxo').onclick = () => {
+    if (frames.filter(f => f.keep).length && !confirm(t('novoFluxoConf'))) return;
+    medir('novo_fluxo', {});
+    location.reload();
+  };
+  /* Ele acompanha a existência de documento, pela mesma conta do placar. */
+  function pintarNovoFluxo(){
+    const cx = $('novoFluxoCx'); if (!cx) return;
+    cx.classList.toggle('hide', frames.filter(f => f.keep).length === 0);
+  }
   /* ---- adiantar o modelo ----
      A queixa foi justa: marcar "transcrever enquanto gravo" e só descobrir o
      download de 77 MB ao clicar em Gravar transforma "vou gravar agora" em
@@ -6724,7 +6858,10 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
      permissão por arquivo escolhido. Melhor não mostrar o botão. */
   const DRIVE_ON = !!(GOOGLE_CLIENT_ID && GOOGLE_API_KEY && GOOGLE_APP_ID)
                    && /^https?:/.test(location.protocol);
-  if (DRIVE_ON) $('driveRow').classList.remove('hide');
+  /* A caixa inteira do Drive aparece ou não aparece — antes era só a fileira
+     de dentro, e quem não tinha o Drive ligado via um caminho a menos sem
+     saber que ele existia. */
+  if (DRIVE_ON) { $('viaDrive').classList.remove('hide'); }
   /* O envio para o Google Docs só precisa do client_id: quem abre o seletor
      de arquivos é a chave de API e o App ID, e criar um arquivo novo não passa
      pelo seletor. Então o botão de enviar pode existir mesmo sem eles. */
@@ -7564,7 +7701,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
      depois, e não tem como se atualizar sozinho. Sem carimbo, "estou com um
      problema no offline" é uma conversa sem chão — ninguém sabe de qual build
      se fala nem se o defeito já foi consertado. */
-  const VERSAO = '2026.08.19-69';
+  const VERSAO = '2026.08.19-87';
   window.__versao = () => VERSAO;
 
   const PIP_CSS = `
@@ -12744,7 +12881,37 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     render();
     passos();
     irPara('prevCard', true);      // os frames saíram: agora é revisar
+    falaDepoisDaVarredura();
   };
+
+  /* ---- A FALA COMEÇA SOZINHA, DEPOIS DAS TELAS ----
+
+     O DEFEITO era de simetria, e quem o achou foi o dono da ferramenta usando
+     a própria ferramenta: gravando, a caixa "transcrever a fala" faz a fala
+     sair sozinha; abrindo um arquivo, a mesma caixa marcada não fazia nada e
+     era preciso descobrir um botão no passo 2. Ele descreveu assim: "entendi
+     que a transcrição tenho que apertar o botão, né".
+
+     DEPOIS, e não junto. A primeira versão disparava 60 ms depois de o vídeo
+     abrir, e estava errada por dois motivos que só apareceram medindo:
+
+       1. transcrever DESABILITA o `#extract`, e a varredura automática desiste
+          quando encontra esse botão desabilitado — ou seja, a fala automática
+          matava as telas automáticas, que eram justamente a parte que já
+          funcionava;
+       2. os dois disputam a mesma máquina. Começar juntos não termina antes:
+          termina nos dois somados, com as telas — que é o que a pessoa fica
+          olhando — saindo mais devagar.
+
+     `falaPedida` é consumido de uma vez: uma segunda varredura da mesma sessão
+     não pode redisparar uma transcrição que a pessoa já viu terminar. */
+  function falaDepoisDaVarredura(){
+    if (!falaPedida) return;
+    falaPedida = false;
+    const b = $('auto');
+    if (!b || b.disabled || !frames.length) return;
+    setTimeout(() => { if (!$('auto').disabled) $('auto').click(); }, 120);
+  }
 
   $('cancel').onclick = () => {
     stop = true;
@@ -13060,7 +13227,17 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       { bar: 'abarWrap', barI: 'abar', txt: 'astatus' },   // transcrição
       { bar: 'barWrap',  barI: 'bar',  txt: 'status'   }   // varredura
     ];
-    const viva = fontes.find(f => {
+    /* A FAIXA SÓ FALA DE TRABALHO QUE A PESSOA COMEÇOU.
+       O DEFEITO, relatado ao abrir uma sessão nova: a aba nova mostrava a faixa
+       de progresso sem nada rodando nela. A causa não era a aba nova — era o
+       `adiantarModelo()`, que baixa o modelo sozinho ao abrir a página para o
+       clique em Gravar não esperar. Esse download é uma CORTESIA, e ele
+       acendia a mesma barra que uma transcrição acende; a faixa, que é global,
+       repetia a cortesia como se fosse tarefa.
+       O download adiantado já tem onde se descrever: a barra e a mensagem do
+       passo 1. `ocupado` é o que distingue os dois, e ele já existia — é o
+       mesmo estado que decide avisar antes de fechar a aba. */
+    const viva = ocupado && fontes.find(f => {
       const w = $(f.bar);
       return w && !w.classList.contains('hide');
     });
@@ -13311,6 +13488,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     // o botão da fala só faz sentido com transcrição marcada no tempo
     $('falaNota').disabled = !keep.length || !parseTranscript($('tr').value).cues.length;
     if (typeof pintarRevisar === 'function') pintarRevisar();
+    if (typeof pintarNovoFluxo === 'function') pintarNovoFluxo();
     pintarClipeRow();
     if (typeof pintarSubpassos === 'function') pintarSubpassos();
     pintarCapitulos();
@@ -16272,10 +16450,29 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     } finally { URL.revokeObjectURL(url); }
   };
 
-  /* O botão só existe quando há documento para revisar. */
+  /* O botão só existe quando há documento para revisar — e agora ele diz
+     QUANTAS telas vai percorrer. O bloco inteiro some junto, porque um título
+     "Conferir tela por tela" sobre um botão escondido é um cabeçalho órfão. */
   function pintarRevisar(){
     const b = $('revisar'); if (!b) return;
-    b.classList.toggle('hide', frames.filter(f => f.keep).length === 0);
+    const n = frames.filter(f => f.keep).length;
+    const cx = $('conferirCx');
+    if (cx) cx.classList.toggle('hide', n === 0);
+    b.classList.toggle('hide', n === 0);
+    /* O número vem da MESMA conta do placar (`nKeep`), e não de uma segunda
+       varredura: dois números diferentes para "quantas telas" na mesma tela é
+       a contradição que se descobre no meio da fila.
+
+       E a PALAVRA vem de `rotuloUnidade()`, como nos outros dezoito lugares
+       que nomeiam um quadro. Escrever "telas" aqui à mão faria o botão dizer
+       "Conferir as 18 telas" numa ata cuja unidade é "Momento" — a mesma tela
+       usando dois nomes para a mesma coisa. */
+    /* Com quadros, ele diz quantos. SEM quadros ele mantém o rótulo do
+       dicionário (`data-i18n="revisarBtn"`) — um botão de texto vazio antes da
+       primeira pintura é o que acontece quando a contagem é a única fonte do
+       texto, e ele fica vazio na tela de quem ainda não abriu vídeo. */
+    if (n > 0)
+      b.textContent = t('revisarBtnN', n, rotuloUnidade().toLowerCase() + (n === 1 ? '' : 's'));
   }
 
   /* ================= pacote SCORM =================

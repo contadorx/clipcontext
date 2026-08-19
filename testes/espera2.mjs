@@ -123,6 +123,10 @@ console.log('\n[3] a faixa de progresso não pisca conforme o scroll');
   /* Simula um trabalho longo em curso mexendo só no que a faixa LÊ — ela se
      alimenta da barra do cartão, então acender a barra é o estado real. */
   await pg.evaluate(() => {
+    /* `__ocupado(true)` é o que separa TRABALHO de CORTESIA — sem ele a faixa
+       não fala, e é isso que conserta o defeito do bloco [6] abaixo. Ele chama
+       a mesma `trabalhando()` que a transcrição chama. */
+    window.__ocupado(true);
     document.getElementById('abarWrap').classList.remove('hide');
     document.getElementById('abar').style.width = '42%';
     document.getElementById('astatus').textContent = 'transcrevendo 42%…';
@@ -233,7 +237,7 @@ console.log('\n[4] terminou: o título pisca e a faixa dá a notícia');
   });
   console.log('     ' + JSON.stringify(faixa));
   ok('e a faixa conta o que ficou pronto',
-     faixa.visivel && faixa.pronta && /conclu/i.test(faixa.texto), JSON.stringify(faixa));
+     faixa.visivel && faixa.pronta && /pront/i.test(faixa.texto), JSON.stringify(faixa));
 
   await pg.locator('#faixaParar').click();
   await pg.waitForTimeout(600);
@@ -255,11 +259,17 @@ console.log('\n[5] durante a espera, a tela diz o que DÁ para fazer');
   ok('trabalhando, ele aparece', await pg.locator('#esperaDica').isVisible());
   const txt = (await pg.locator('#esperaDica').textContent()).replace(/\s+/g, ' ');
   console.log('     ' + txt.slice(0, 130));
-  ok('ele diz que a aba avisa quando terminar', /pisca/i.test(txt), txt.slice(0, 60));
-  /* O CUSTO TEM QUE ESTAR DITO. Convidar a abrir uma segunda sessão sem avisar
-     que a máquina será dividida é prometer paralelismo que não existe: duas
-     transcrições terminam nas duas somadas, não na metade. */
-  ok('e avisa que a máquina será dividida', /dividida/i.test(txt), txt.slice(0, 200));
+  ok('ele diz que a aba avisa quando terminar', /t[íi]tulo da aba/i.test(txt), txt.slice(0, 60));
+  /* O CUSTO TEM QUE ESTAR DITO — em algum lugar alcançável.
+     Convidar a abrir uma segunda sessão sem avisar que a máquina é dividida
+     promete um paralelismo que não existe: duas transcrições terminam nas duas
+     somadas, não na metade. O texto da tela encolheu a pedido, então o aviso
+     desceu para o `title` do botão, que o `data-i18n-title` também publica como
+     `aria-label`. O que se cobra aqui é que ele exista, e não onde. */
+  const dica = (await pg.locator('#novaSessao').getAttribute('title')) || '';
+  ok('e o custo de dividir a máquina continua dito', /mesma m[áa]quina|lentas/i.test(dica), dica);
+  ok('e chega a quem usa leitor de tela',
+     ((await pg.locator('#novaSessao').getAttribute('aria-label')) || '') === dica, dica);
   ok('o botão da sessão nova está lá', await pg.locator('#novaSessao').isVisible());
 
   /* E o texto ao lado não pode contradizê-lo: ele dizia "mantenha a aba
@@ -271,6 +281,41 @@ console.log('\n[5] durante a espera, a tela diz o que DÁ para fazer');
   await pg.waitForTimeout(200);
   ok('e some quando o trabalho acaba',
      await pg.locator('#esperaDica').evaluate(e => e.classList.contains('hide')));
+  await pg.close();
+}
+
+// ---------------------------------------------------------------------------
+console.log('\n[6] a faixa só fala de trabalho que a pessoa começou');
+{
+  /* O DEFEITO, relatado ao usar o botão de sessão nova: a aba recém-aberta
+     mostrava a faixa de progresso sem nada rodando nela.
+
+     A causa não era a aba nova. É o `adiantarModelo()`, que baixa o modelo
+     sozinho ao abrir a página para o clique em Gravar não esperar — e esse
+     download acende a MESMA barra que uma transcrição acende. A faixa, que é
+     global e agora fica sempre, repetia a cortesia como se fosse tarefa.
+
+     Aqui a cortesia é simulada acendendo a barra SEM `ocupado`, que é
+     exatamente o estado em que o download adiantado deixa a página. */
+  const pg = await (await br.newContext({ viewport: { width: 1250, height: 900 } })).newPage();
+  await pg.goto('http://localhost:8957/app.html?lang=pt');
+  await pg.selectOption('#modelo', 'evidencia');
+  await pg.evaluate(() => {
+    document.getElementById('abarWrap').classList.remove('hide');
+    document.getElementById('astatus').textContent = 'baixando o modelo…';
+  });
+  await pg.waitForTimeout(1200);
+  /* O NÚMERO QUE IMPORTA: escondida. Com a faixa aparecendo aqui, quem abre
+     uma sessão nova acha que ela herdou o trabalho da outra aba. */
+  ok('barra acesa por cortesia não acende a faixa',
+     await pg.locator('#faixa').evaluate(e => e.classList.contains('hide')));
+
+  /* E a outra metade: com trabalho de verdade, ela fala. Sem esta linha, o
+     conserto poderia ser "nunca mostrar a faixa" e o teste passaria. */
+  await pg.evaluate(() => window.__ocupado(true));
+  await pg.waitForTimeout(1000);
+  ok('mas com trabalho de verdade ela aparece',
+     !(await pg.locator('#faixa').evaluate(e => e.classList.contains('hide'))));
   await pg.close();
 }
 

@@ -201,6 +201,21 @@ ok('e o corpo ganha folga para ela não cobrir o último passo',
    layout: a faixa e a folga do corpo andam JUNTAS. Uma folga de 76px sem faixa
    nenhuma é um buraco no fim da página; uma faixa sem folga cobre o último
    passo. As duas afirmações abaixo travam esse par nos dois estados. */
+/* ESPERAR TUDO PARAR ANTES DE PERGUNTAR SE PAROU.
+   Desde que a fala começa sozinha depois da varredura (o pedido de paridade
+   com o lado de gravar), "acabou a varredura" deixou de ser "acabou o
+   trabalho": um segundo trabalho começa em seguida. Esta linha reprovava o
+   produto por perguntar cedo demais — a faixa dizia "Extraindo o áudio…",
+   que é a resposta certa para o instante errado. */
+await pg.waitForFunction(() => {
+  const vivo = ['abarWrap', 'barWrap'].some(id => {
+    const el = document.getElementById(id);
+    return el && !el.classList.contains('hide');
+  });
+  return !vivo;
+}, null, { timeout: 120000 }).catch(() => {});
+await pg.waitForTimeout(900);
+
 const fim = await pg.evaluate(() => ({
   faixa: !document.getElementById('faixa').classList.contains('hide'),
   pronta: document.getElementById('faixa').classList.contains('pronta'),

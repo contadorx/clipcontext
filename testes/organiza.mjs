@@ -95,19 +95,55 @@ console.log('\n[3] o modelo começa a baixar ao chegar na página');
 console.log('\n[4] no passo 3, o resultado vem DEPOIS da ação');
 {
   const fonte = fs.readFileSync(ROOT + '/app.html', 'utf8');
+  /* A ORDEM MUDOU, e esta é a nova — pedida assim: "o revisar quadro a quadro
+     deve ficar mais próximo do quadro; na organização deve ter algo para
+     reduzir os frames, e depois a revisão individual".
+
+     Antes: título → oito botões em fila → revisar → placar → grade.
+     Agora:  título → reduzir → acrescentar → placar → CONFERIR → grade.
+
+     O que se afirma continua sendo relação de posição, e não pixel: as ações
+     de lote antes do placar (resultado depois da ação), e o conferir COLADO na
+     grade, que é o pedido inteiro em uma linha. */
   const iTit  = fonte.indexOf('data-i18n="orgTit"');
-  const iAcao = fonte.indexOf('id="allOn"');
-  const iRev  = fonte.indexOf('id="revisar"');
+  const iRed  = fonte.indexOf('data-i18n="orgReduzirH"');
+  const iAcao = fonte.indexOf('id="dedup"');
   const iPlac = fonte.indexOf('id="nKeep"');
-  ok('o título de organizar vem antes das ações', iTit > 0 && iTit < iAcao);
-  ok('a revisão quadro a quadro vem depois das ações soltas', iAcao < iRev);
-  ok('e o placar vem por último', iRev < iPlac, `${iAcao} < ${iRev} < ${iPlac}`);
+  const iRev  = fonte.indexOf('id="revisar"');
+  const iGrade = fonte.indexOf('id="thumbs"');
+  ok('o título de organizar vem antes das ações', iTit > 0 && iTit < iRed && iRed < iAcao);
+  ok('as ações de lote vêm antes do placar', iAcao < iPlac, `${iAcao} < ${iPlac}`);
+  ok('e o conferir vem depois do placar, já perto da grade',
+     iPlac < iRev && iRev < iGrade, `${iPlac} < ${iRev} < ${iGrade}`);
+  /* O NÚMERO QUE IMPORTA: entre o botão de conferir e a grade não sobra
+     nenhuma outra AÇÃO. "Mais próximo do quadro" é isto — se um botão novo se
+     enfiar no meio, esta conta acusa. */
+  const miolo = fonte.slice(fonte.indexOf('id="conferirCx"'), iGrade);
+  const botoesNoMeio = (miolo.match(/<button/g) || []).length;
+  ok('e nada se enfia entre o conferir e a grade', botoesNoMeio === 1,
+     botoesNoMeio + ' botão(ões) no trecho');
   ok('o placar está separado por uma linha', /class="row placar"/.test(fonte));
+  /* O "começar outro" fica DEPOIS de tudo, no fim da página: quem terminou não
+     desistiu — gerou o documento e tem a próxima gravação esperando. O
+     "Recomeçar" de cima serve a outra pessoa, a que desiste no meio. */
+  const iNovo = fonte.indexOf('id="novoFluxo"');
+  const iReset = fonte.indexOf('id="reset"');
+  const iPrompt = fonte.indexOf('id="promptCard"');
+  ok('o começar-outro vem depois do passo 4', iPrompt > 0 && iPrompt < iNovo,
+     `${iPrompt} < ${iNovo}`);
+  ok('e não é o mesmo botão do recomeçar do meio', iReset > 0 && iReset < iPrompt,
+     `${iReset} < ${iPrompt}`);
   const lbl = (await pg.locator('label[for="unNome"]').textContent() || '').trim();
   ok('o campo diz o que se escreve nele', /quadro\/frame/i.test(lbl), lbl);
-  ok('e o botão fala de quadros, não de passos',
-     /quadro a quadro/i.test(await pg.locator('#revisar').textContent() || ''),
-     await pg.locator('#revisar').textContent());
+  /* O botão passou a dizer QUANTAS e a usar a palavra do cenário — a mesma
+     que `rotuloUnidade()` dá aos outros dezoito lugares. Antes ele dizia
+     "Revisar quadro a quadro", fixo; numa ata, a tela inteira falava em
+     "Momento" e só este botão falava em "quadro". */
+  const txtRev = (await pg.locator('#revisar').textContent() || '').trim();
+  ok('e o botão fala de quadros, não de passos', /quadro a quadro/i.test(txtRev), txtRev);
+  /* A versão COM contagem é cobrada em `revisao.mjs`, que tem quadros na tela;
+     aqui não há vídeo nenhum, e um botão que exigisse contagem para ter texto
+     apareceria vazio nesta mesma tela. */
 }
 
 console.log('\n[5] baixar a transcrição solta saiu, e o plano saiu do rodapé');

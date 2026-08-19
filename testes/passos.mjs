@@ -91,8 +91,23 @@ console.log('\n[P2] carregar um vídeo destrava e leva ao próximo passo');
   await pg.waitForTimeout(500);
   ok('passo 2 aberto', !(await pg.locator('#cardTr').evaluate(e=>e.classList.contains('fechado'))));
   ok('as opções de frames destravaram', await pg.locator('#framesCorpo').getAttribute('inert') === null);
-  ok('o passo do prompt continua travado (ainda não há frames)',
-     await pg.locator('#promptCard').getAttribute('inert') !== null);
+  /* A TRAVA DO PASSO 4 É SOBRE FRAMES, e não sobre tempo.
+     Esta linha afirmava "continua travado" meio segundo depois de abrir o
+     vídeo, com o argumento "ainda não há frames". Ela era uma CORRIDA contra a
+     varredura automática — e a varredura automática é comportamento de
+     projeto: as telas começam a sair sozinhas assim que o vídeo abre. Medido:
+     o primeiro quadro chega antes dos 500 ms.
+     Então o que se afirma agora é a REGRA, e não o instante: o passo 4 está
+     destravado exatamente quando existe quadro. Assim ela vale no meio
+     segundo, no quinto e depois de trocar a máquina. */
+  {
+    const est = await pg.evaluate(() => ({
+      travado: document.getElementById('promptCard').getAttribute('inert') !== null,
+      quadros: document.querySelectorAll('#thumbs figure').length,
+    }));
+    ok('o passo do prompt destrava exatamente quando existe quadro',
+       est.travado === (est.quadros === 0), JSON.stringify(est));
+  }
   ok('a página rolou até o passo 2',
      await pg.evaluate(() => window.scrollY > 40), 'scrollY=' + await pg.evaluate(()=>window.scrollY));
 

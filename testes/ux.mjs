@@ -21,8 +21,21 @@ ok('e continua ligado por padrão', await pg.locator('#recMic').isChecked());
    computador" saíram da lista e viraram padrão — nenhuma das duas tinha um lado
    bom para desligar. O que este teste protege é o LAYOUT (uma por linha), e não
    quantas sobraram. */
-ok('as opções são uma por linha', (await pg.locator('#recOpts label.opt').count()) >= 2,
-   String(await pg.locator('#recOpts label.opt').count()));
+/* E AGORA O TESTE MEDE O QUE O COMENTÁRIO ACIMA JÁ DIZIA.
+   Ele contava `>= 2` — usava a quantidade como procuração para o layout. Quando
+   "Transcrever a fala" saiu daqui para uma linha comum aos três caminhos (ela
+   nunca foi opção de quem grava: é ela que decide se o modelo baixa), a
+   contagem caiu para 1 e o teste reprovou um layout que continuava certo.
+   O que se afirma agora é a propriedade: cada opção começa na mesma coluna e
+   em alturas diferentes — uma por linha, que é o que estava escrito. */
+{
+  const caixas = await pg.locator('#recOpts label.opt, #opcoesVias label.opt').evaluateAll(
+    els => els.map(e => { const r = e.getBoundingClientRect();
+                          return { x: Math.round(r.left), y: Math.round(r.top) }; }));
+  ok('há opções para medir', caixas.length >= 2, String(caixas.length));
+  const mesmasLinhas = caixas.some((c, i) => caixas.some((d, j) => j !== i && d.y === c.y));
+  ok('as opções são uma por linha', !mesmasLinhas, JSON.stringify(caixas));
+}
 ok('as duas frases longas viraram ajuda', await pg.locator('#recAjudaCx').isHidden());
 /* O que fica ao lado da caixa é a RECOMENDAÇÃO, e não os megabytes.
 

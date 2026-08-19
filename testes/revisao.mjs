@@ -16,6 +16,9 @@ await pg.goto('http://localhost:8928/app.html?lang=pt');
 
 console.log('[1] sem documento, não há o que revisar');
 ok('o botão começa escondido', await pg.locator('#revisar').isHidden());
+/* E o "começar outro" também: numa tela sem documento ele ofereceria sair de
+   onde ninguém entrou. */
+ok('e o começar-outro também', await pg.locator('#novoFluxo').isHidden());
 
 await pg.selectOption('#modelo','tutorial');
 await pg.setInputFiles('#file','/tmp/amostra.webm'); await pg.waitForTimeout(2500);
@@ -30,6 +33,23 @@ const antes = await pg.locator('#thumbs figure img').nth(1).getAttribute('src');
 
 console.log('\n[2] a revisão conduz um passo por vez');
 ok('o botão aparece com o documento pronto', await pg.locator('#revisar').isVisible());
+ok('e o começar-outro aparece junto', await pg.locator('#novoFluxo').isVisible());
+/* E COM A CONTAGEM. Um botão que abre uma fila sem dizer o tamanho dela faz a
+   pessoa entrar sem saber se são três telas ou trinta — e a decisão de começar
+   agora ou depois depende exatamente disso. O número é o mesmo do placar:
+   se os dois discordarem, um deles está contando outra coisa. */
+{
+  const txt = (await pg.locator('#revisar').textContent() || '').trim();
+  const placar = (await pg.locator('#nKeep').textContent() || '').trim();
+  ok('e diz quantas telas serão conferidas', /\d+/.test(txt), txt);
+  ok('e o número é o mesmo do placar',
+     (txt.match(/\d+/) || [''])[0] === placar, txt + '  ·  placar: ' + placar);
+  /* A palavra vem do cenário, como nos outros dezoito lugares que nomeiam um
+     quadro: numa ata a tela toda diz "Momento", e este botão dizia "quadro". */
+  const unidade = (await pg.locator('#unNome').inputValue() || '').toLowerCase();
+  ok('e usa a palavra do cenário em vigor',
+     !unidade || txt.toLowerCase().includes(unidade), txt + '  ·  unidade: ' + unidade);
+}
 await pg.locator('#revisar').click();
 await pg.waitForTimeout(400);
 ok('o painel abriu', await pg.locator('#revBox').isVisible());
