@@ -184,15 +184,25 @@ def longo(w, h, minutos, segundos_por_cena):
     return quadros
 
 
-def escrever_longo(caminho, quadros, segundos_por_cena):
+def escrever_longo(caminho, quadros, segundos_por_cena, dur):
     tmp = tempfile.mkdtemp(prefix='walkstamp-longo-')
     try:
         for i, q in enumerate(quadros):
             q.save(os.path.join(tmp, '%05d.png' % i))
+        # COM SOM, e ESTEREO a 48 kHz — que e o que sai de uma gravacao de tela
+        # de verdade. Um video mudo mediria a decodificacao de audio pela
+        # metade: sem canal para misturar e sem reamostragem para fazer.
         subprocess.run(
             ['ffmpeg', '-y', '-loglevel', 'error',
              '-framerate', '1/%d' % segundos_por_cena,
              '-i', os.path.join(tmp, '%05d.png'),
+             '-f', 'lavfi', '-t', str(dur),
+             '-i', 'sine=frequency=300:sample_rate=48000',
+             '-f', 'lavfi', '-t', str(dur),
+             '-i', 'sine=frequency=440:sample_rate=48000',
+             '-filter_complex', '[1:a][2:a]join=inputs=2:channel_layout=stereo[a]',
+             '-map', '0:v', '-map', '[a]',
+             '-c:a', 'libopus', '-b:a', '48k',
              '-c:v', 'libvpx', '-b:v', '350k', '-deadline', 'realtime',
              '-cpu-used', '8', '-r', '5', '-pix_fmt', 'yuv420p', caminho],
             check=True)
@@ -207,7 +217,7 @@ def main():
         if os.path.exists(alvo) and not forcar:
             print('  amostra longa: já estava em ' + alvo)
         else:
-            escrever_longo(alvo, longo(640, 360, 60, 30), 30)
+            escrever_longo(alvo, longo(640, 360, 60, 30), 30, 3600)
             print('  amostra: %s  %.1f MB' % (alvo, os.path.getsize(alvo) / 1048576))
         return
     alvos = {

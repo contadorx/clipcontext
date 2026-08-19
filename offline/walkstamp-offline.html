@@ -518,6 +518,21 @@
         border-radius:8px;background:var(--panel);color:var(--ink);font:inherit;font-size:15px;
         font-weight:550}
   .cenario .status{flex-basis:100%;margin:0}
+  .faixa{position:fixed;left:0;right:0;bottom:0;z-index:60;display:flex;gap:12px;
+        align-items:center;padding:9px 16px;background:var(--panel);
+        border-top:1px solid var(--line);box-shadow:0 -6px 18px rgba(0,0,0,.10);
+        font-size:13.5px;color:var(--ink)}
+  .faixaTxt{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .faixaBar{flex:0 0 160px;height:6px;border-radius:4px;background:var(--line);overflow:hidden}
+  .faixaBar i{display:block;height:100%;width:0;background:var(--accent);transition:width .2s}
+  /* Listrada quando não se sabe a porcentagem — que é diferente de zero por
+     cento, e as duas coisas mereciam telas diferentes. */
+  .faixaBar.solta i{width:100%;background:repeating-linear-gradient(90deg,
+        var(--accent) 0 12px, transparent 12px 24px);animation:faixaAnda 1s linear infinite}
+  @keyframes faixaAnda{ to{ background-position:24px 0 } }
+  @media (prefers-reduced-motion:reduce){ .faixaBar.solta i{animation:none} }
+  body.comFaixa{padding-bottom:52px}
+  @media (max-width:560px){ .faixaBar{flex-basis:80px} }
   /* A caixa da gravação que ficou para trás. Contorno na cor da marca pelo mesmo
      motivo do seletor de cenário sem resposta: é uma pergunta em aberto, e quem
      abre a ferramenta depois de perder duas horas precisa ver isso antes de ver
@@ -1913,6 +1928,24 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     </div>
   </div>
 
+  <!-- ---- A FAIXA QUE NÃO SAI DA TELA ----
+
+       A barra de progresso da transcrição mora no cartão 2. Assim que a grade
+       de miniaturas começa a encher — e agora ela enche em um segundo — a
+       pessoa desce para revisar, e **o progresso sai da tela**. Ela passa os
+       próximos minutos trabalhando sem a menor ideia de quanto falta, o que é
+       exatamente a condição que a nona rodada descreveu: numa espera cega,
+       fechar a aba é a decisão racional.
+
+       Ela aparece SÓ quando a barra de verdade está fora da vista. Duas barras
+       dizendo a mesma coisa na mesma tela seriam ruído; uma barra que some
+       quando você desce é o defeito. -->
+  <div class="faixa hide" id="faixa" role="status" aria-live="polite">
+    <span class="faixaTxt" id="faixaTxt"></span>
+    <span class="faixaBar"><i id="faixaBarI"></i></span>
+    <button type="button" class="ghost sm hide" id="faixaParar"></button>
+  </div>
+
   <div class="card" id="promptCard">
     <h2><span class="step">4</span><span data-i18n="s5"></span></h2>
     <p class="lockHint hide" id="hintPrompt"></p>
@@ -2868,6 +2901,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
          de "o que fazer agora" que o fim do fluxo tinha. */
       saidaSemQuadros:'Ainda não há quadro nenhum para gerar. Os quadros saem no passo 2 — extraia do vídeo, ou grave a tela, que já extrai enquanto grava.',
       saidaPronta:'{0} quadros prontos. Escolha um formato — dá para baixar mais de um.',
+      saidaSemFala:'A transcrição está em {0}% — um documento gerado agora sai sem a fala que ainda falta.',
       sbE3:'{0} campos preenchidos', sbE3v:'opcional, em branco',
       sbE3u:'1 campo preenchido',
       sbE2:'{0} trechos com tempo', sbE2t:'texto colado, sem marcação de tempo', sbE2v:'sem transcrição',
@@ -3431,6 +3465,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       revJaAberta:'The review is already open just below.',
       saidaSemQuadros:'There is no frame to build from yet. Frames come out of step 2 — extract them from the video, or record the screen, which extracts as it goes.',
       saidaPronta:'{0} frames ready. Pick a format — you can download more than one.',
+      saidaSemFala:'Transcription is at {0}% — a document generated now comes out without the speech that is still missing.',
       sbE3:'{0} fields filled', sbE3v:'optional, empty',
       sbE3u:'1 field filled',
       sbE2:'{0} time-stamped cues', sbE2t:'pasted text, no timing', sbE2v:'no transcript',
@@ -3994,6 +4029,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       revJaAberta:'La revisión ya está abierta aquí abajo.',
       saidaSemQuadros:'Todavía no hay ningún fotograma para generar. Los fotogramas salen en el paso 2 — extráelos del vídeo, o graba la pantalla, que ya extrae mientras graba.',
       saidaPronta:'{0} fotogramas listos. Elige un formato — puedes descargar más de uno.',
+      saidaSemFala:'La transcripción va por {0}% — un documento generado ahora sale sin el habla que aún falta.',
       sbE3:'{0} campos rellenados', sbE3v:'opcional, en blanco',
       sbE3u:'1 campo rellenado',
       sbE2:'{0} tramos con tiempo', sbE2t:'texto pegado, sin marcas de tiempo', sbE2v:'sin transcripción',
@@ -4562,6 +4598,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
          de "o que fazer agora" que o fim do fluxo tinha. */
       saidaSemQuadros:'Es gibt noch keinen Screenshot zum Erzeugen. Die Screenshots entstehen in Schritt 2 — extrahieren Sie sie aus dem Video, oder nehmen Sie den Bildschirm auf, was bereits während der Aufnahme extrahiert.',
       saidaPronta:'{0} Screenshots bereit. Wählen Sie ein Format — Sie können mehrere herunterladen.',
+      saidaSemFala:'Die Transkription ist bei {0}% — ein jetzt erzeugtes Dokument kommt ohne den noch fehlenden Ton heraus.',
       sbE3:'{0} Felder ausgefüllt', sbE3v:'optional, leer',
       sbE3u:'1 Feld ausgefüllt',
       sbE2:'{0} Abschnitte mit Zeitmarke', sbE2t:'eingefügter Text, ohne Zeitmarken', sbE2v:'keine Transkription',
@@ -5130,6 +5167,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
          de "o que fazer agora" que o fim do fluxo tinha. */
       saidaSemQuadros:'Il n’y a encore aucune capture à partir de laquelle générer. Les captures sortent à l’étape 2 — extrayez-les de la vidéo, ou enregistrez l’écran, ce qui les extrait au fil de l’enregistrement.',
       saidaPronta:'{0} captures prêtes. Choisissez un format — vous pouvez en télécharger plusieurs.',
+      saidaSemFala:'La transcription est à {0}% — un document généré maintenant sort sans la parole qui manque encore.',
       sbE3:'{0} champs remplis', sbE3v:'facultatif, vide',
       sbE3u:'1 champ rempli',
       sbE2:'{0} segments horodatés', sbE2t:'texte collé, sans marquage temporel', sbE2v:'sans transcription',
@@ -6088,12 +6126,11 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
   function adiantarModelo(){
     if (!$('recTr') || !$('recTr').checked) return;
     const modelId = $('model').value;
-    if (pipeId === modelId || adiantando) return;
+    if (pipeServe(modelId) || adiantando) return;
     adiantando = (async () => {
       try {
         $('recMsg').textContent = t('recAdiantando');
-        pipe = await buildPipe(modelId);
-        pipeId = modelId;
+        await trocarPipe(modelId);
         prog(null); st('');
         $('recMsg').textContent = t('recPronto');
       } catch (e) {
@@ -8167,7 +8204,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
            para jogar. Deixar a rejeição dele passar reto foi o que produziu o
            recado vermelho numa gravação que transcreveu do começo ao fim. */
         if (adiantando) { try { await adiantando; } catch (e) {} }
-        if (pipeId !== modelId) { pipe = await buildPipe(modelId); pipeId = modelId; }
+        if (!pipeServe(modelId)) await trocarPipe(modelId);
       })();
       /* Um `catch` vazio agora, e o tratamento de verdade no `await` lá
          embaixo. Sem isto, um download que falha enquanto ninguém está
@@ -9202,18 +9239,82 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     return `${pad2(h)}:${pad2(m)}:${sec.toFixed(3).padStart(6,'0')}`;
   }
 
+  /* ---- O ÁUDIO QUE VAI PARA O MODELO ----
+
+     O Whisper quer 16 kHz, um canal. Uma gravação de tela chega em 48 kHz
+     estéreo: seis vezes mais bytes para a mesma fala. Numa hora de vídeo é a
+     diferença entre 110 MB e 660 MB, e é por isso que o corte é feito NA
+     DECODIFICAÇÃO — o contexto nasce a 16 kHz e o navegador reamostra enquanto
+     decodifica.
+
+     A ordem importa e é contraintuitiva: decodificar no padrão do navegador e
+     encolher depois aloca o buffer grande E o pequeno, com os dois vivos ao
+     mesmo tempo no instante da conversão. Pedir 16 kHz na criação do contexto
+     nunca aloca o grande. */
   async function decodeTo16k(file){
     const buf = await file.arrayBuffer();
     const AC = window.AudioContext || window.webkitAudioContext;
-    const ctx = new AC({ sampleRate: 16000 });
+    let ctx;
+    /* Nem todo navegador aceita a opção; o que não aceita, joga. */
+    try { ctx = new AC({ sampleRate: SR_ASR }); } catch (e) { ctx = new AC(); }
     const dec = await ctx.decodeAudioData(buf);
-    ctx.close();
-    if (dec.numberOfChannels === 1) return dec.getChannelData(0);
-    const a = dec.getChannelData(0), b = dec.getChannelData(1);
-    const out = new Float32Array(a.length);
-    for (let i = 0; i < a.length; i++) out[i] = (a[i] + b[i]) / 2;
+    try { ctx.close(); } catch (e) {}
+    const canal = misturarCanais(dec);
+    /* `sampleRate` no construtor é um PEDIDO, não uma ordem — o Safari o ignorou
+       por anos, e um navegador que o ignore devolve 48 kHz sem erro nenhum. O
+       modelo receberia a fala três vezes mais rápida e o defeito chegaria como
+       "a transcrição veio errada", que manda procurar no lugar errado. Conferir
+       custa uma comparação; supor custou transcrições inteiras em outros
+       projetos. */
+    if (dec.sampleRate === SR_ASR) return canal;
+    return await reamostrar(canal, dec.sampleRate, SR_ASR);
+  }
+
+  /* A mistura soma TODOS os canais, e não os dois primeiros.
+     Num 5.1 a fala mora no canal do meio (índice 2): pegar só esquerda e direita
+     entregaria ao modelo a trilha e o ambiente, sem o diálogo — e o sintoma
+     seria "ele não transcreveu quase nada", que não parece um erro de mistura.
+
+     E soma NO PRIMEIRO CANAL, no lugar. Um terceiro array do tamanho do áudio
+     custaria mais 110 MB numa hora de vídeo, e existiria só para ser lido uma
+     vez. O `AudioBuffer` é descartado logo em seguida; a view continua válida
+     enquanto alguém a segurar. */
+  function misturarCanais(dec){
+    const n = dec.numberOfChannels;
+    if (n === 1) return dec.getChannelData(0);
+    const out = dec.getChannelData(0);
+    for (let c = 1; c < n; c++) {
+      const x = dec.getChannelData(c);
+      for (let i = 0; i < out.length; i++) out[i] += x[i];
+    }
+    for (let i = 0; i < out.length; i++) out[i] /= n;
     return out;
   }
+
+  /* A queda, para o navegador que ignorou o pedido de 16 kHz. Ela aloca o buffer
+     grande e o pequeno ao mesmo tempo — é cara, e é por isso que é queda e não
+     caminho: aqui ela roda em vez de a transcrição sair errada. */
+  async function reamostrar(dados, de, para){
+    const OAC = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+    if (!OAC || !de || de === para) return dados;
+    const n = Math.max(1, Math.round(dados.length * para / de));
+    const off = new OAC(1, n, para);
+    const b = off.createBuffer(1, dados.length, de);
+    b.copyToChannel(dados, 0);
+    const src = off.createBufferSource();
+    src.buffer = b;
+    src.connect(off.destination);
+    src.start();
+    return (await off.startRendering()).getChannelData(0);
+  }
+
+  /* Espelhos para a régua (`testes/audio.mjs`). Medir uma cópia da função aqui
+     mediria a cópia. */
+  try {
+    window.__audio16k = decodeTo16k;
+    window.__misturarCanais = misturarCanais;
+    window.__arquivoAtual = () => currentFile;
+  } catch (e) {}
 
   // Endereços alternativos do runtime, para o caso do endereço de fábrica sair
   // do ar. NÃO são o caminho padrão: a versão que a biblioteca traz é a que
@@ -9935,7 +10036,70 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     throw new Error(ultimoErroModelo);
   }
 
-  let pipe = null, pipeId = null, libMod = null;
+  let pipe = null, pipeId = null, pipeDev = null, libMod = null;
+
+  /* ---- SOLTAR O MODELO DA MEMÓRIA ----
+
+     `pipe = null` não solta nada. As sessões do ONNX Runtime não vivem no heap
+     JavaScript: elas vivem na memória linear do WebAssembly e, no caminho da
+     placa, na VRAM. O coletor de lixo não alcança nenhuma das duas — ele libera
+     o objeto de 200 bytes que apontava para 250 MB e considera o trabalho feito.
+
+     Três caminhos deste arquivo trocavam de pipeline sem soltar o anterior, e
+     nos três a pessoa ficava com DOIS modelos residentes:
+
+       1. trocar de modelo (base → small);
+       2. a queda da placa para o processador, que monta um pipeline novo com o
+          da placa ainda vivo — o pior dos três, porque acontece justamente na
+          máquina que já estava com problema;
+       3. "apagar o modelo de voz baixado", que apagava o CACHE em disco e
+          deixava o modelo carregado na memória. O botão dizia que tinha
+          liberado; não tinha.
+
+     O que NÃO é feito aqui, de propósito: soltar ao fim de cada transcrição.
+     Quem transcreve três vídeos seguidos pagaria a montagem inteira três vezes
+     — e montar é o passo lento, não o de gastar memória. A decisão certa depende
+     de um número que esta máquina não tem (o modelo não sobe aqui); ele está no
+     Diagnóstico, na quebra por tipo da memória, e sai da máquina de quem usa. */
+  /* Quantas inferências estão correndo agora. Uma inferência em curso segura o
+     pipeline numa variável local: soltar a sessão por baixo dela derruba a
+     transcrição com uma linha de C++, e o gesto que causa isso é inocente —
+     clicar em "apagar o modelo de voz" enquanto a barra anda. Esperar é a única
+     coisa correta, e é curto: o que se espera é UMA janela de 20 segundos. */
+  let usandoPipe = 0;
+
+  async function soltarPipe(){
+    const velho = pipe;
+    pipe = null; pipeId = null; pipeDev = null;
+    if (!velho) return false;
+    for (let i = 0; usandoPipe > 0 && i < 600; i++) {
+      await new Promise(r => setTimeout(r, 100));
+    }
+    try {
+      if (typeof velho.dispose === 'function') await velho.dispose();
+      else if (velho.model && typeof velho.model.dispose === 'function') await velho.model.dispose();
+      else return false;
+    } catch (e) { return false; }
+    try { window.__soltou = (window.__soltou || 0) + 1; } catch (e) {}
+    return true;
+  }
+
+  /* Qual pipeline serve para o que se quer AGORA. A placa entra na conta porque
+     a caixa "usar a placa de vídeo" não mudava nada depois do primeiro modelo
+     montado: `pipeId !== modelId` era falso, o pipeline antigo era reusado, e a
+     caixa virava enfeite até alguém trocar de modelo. */
+  const devDesejado = () => usaPlaca() ? 'gpu' : 'cpu';
+  const pipeServe = modelId => !!pipe && pipeId === modelId && pipeDev === devDesejado();
+
+  /* Monta trocando: solta o que estava antes de alocar o novo, e não depois.
+     Ao contrário faz os dois coexistirem no pico, que é exatamente o instante em
+     que a máquina fraca desiste. */
+  async function trocarPipe(modelId){
+    await soltarPipe();
+    const novo = await buildPipe(modelId);
+    pipe = novo; pipeId = modelId; pipeDev = devDesejado();
+    return novo;
+  }
 
   /* O erro que o arquivo de 4 bits produz quando a máquina não consegue abri-lo.
      Ele NÃO acontece ao montar o pipeline: acontece na primeira inferência,
@@ -9946,6 +10110,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
   async function transcrever(dados, opts){
     const seg = dados.length / 16000;
     const t0 = performance.now();
+    usandoPipe++;
     try {
       const r = await pipe(dados, opts);
       relogio.audio += seg; relogio.ms += performance.now() - t0;
@@ -9954,14 +10119,20 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       const msg = (e && e.message) || String(e);
       if (!(motorEmUso === 'placa de vídeo' && ERRO_SESSAO.test(msg) && libMod)) throw e;
       st(t('motorQuebrou'));
-      pipe = await libMod.pipeline('automatic-speech-recognition', pipeId, { dtype:'q8' });
+      /* SOLTA A PLACA ANTES de montar o processador. Sem esta linha os dois
+         modelos ficavam residentes ao mesmo tempo — e isto acontece justamente
+         na máquina que acabou de falhar por não dar conta. */
+      const idAntes = pipeId;
+      await soltarPipe();
+      pipe = await libMod.pipeline('automatic-speech-recognition', idAntes, { dtype:'q8' });
+      pipeId = idAntes; pipeDev = 'cpu';
       motorEmUso = 'processador';
       if ($('gpu')) $('gpu').checked = false;      // não tentar de novo nesta sessão
       const t1 = performance.now();
       const r = await pipe(dados, opts);           // o MESMO pedido, uma vez só
       relogio.audio += seg; relogio.ms += performance.now() - t1;
       return r;
-    }
+    } finally { usandoPipe--; }
   }
   /* Ligado só pelo botão "Ambos". Sem ele, "Só transcrever" varria os frames
      por conta própria e a escolha da pessoa virava enfeite. */
@@ -10001,6 +10172,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
        diz o que está fazendo, e a linha ao lado diz o que ela pode fazer. */
     $('auto').disabled = true;
     $('ambos').disabled = true;
+    transcrevendoPct = 0;
     $('auto').textContent = t('autoIndo');
     $('autoDica').textContent = t('autoEspere');
     trabalhando(true);
@@ -10012,9 +10184,9 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       catch (e) { throw new Error(t('audioFail')); }
       if (!data.length) throw new Error(t('noAudio'));
 
-      if (pipeId !== modelId) {
+      if (!pipeServe(modelId)) {
         st(await modeloEmCache(modelId) ? t('modelCache') : t('modelLoad'));
-        prog(0); pipe = await buildPipe(modelId); pipeId = modelId;
+        prog(0); await trocarPipe(modelId);
       }
 
       const SR = 16000, WIN = 30 * SR, total = Math.ceil(data.length / WIN), out = [];
@@ -10053,7 +10225,20 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
           ultimaChave = { ch, a };
           out.push(`${vttTime(a)} --> ${vttTime(Math.max(b, a + 0.4))}\n${t}`);
         });
+        /* O TEXTO APARECE ENQUANTO SAI, e não só no fim.
+
+           Antes, `$('tr').value` era escrito uma única vez, depois da última
+           janela: numa transcrição de meia hora a pessoa olhava para uma barra
+           andando sobre um campo vazio. O texto já existia — 40 das 120 janelas
+           prontas — e nada dele estava na tela.
+
+           Ver a fala chegando é a diferença entre esperar e acompanhar. E é o
+           mesmo conteúdo: no fim o campo é reescrito com o total, então nada
+           depende deste trecho estar certo pela metade. */
+        escreverParcial(out);
         const feitos = i + 1, pct = feitos / total * 100;
+        transcrevendoPct = pct;
+        pintarSaidas();
         prog(pct);
         // previsão a partir do ritmo medido, não de estimativa fixa
         const resta = (performance.now() - inicio) / feitos * (total - feitos) / 1000;
@@ -10061,6 +10246,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
         st(t('transcribing2', pct.toFixed(0), feitos, total, falta));
       }
       $('tr').value = 'WEBVTT\n\n' + out.join('\n\n');
+      $('tr').readOnly = false;
       refreshTr(); prog(100);
       st(t('trDone', out.length) + (pulados ? ' ' + t('trPulou', pulados) : '') +
          contarDesempenho(), 'ok');
@@ -10071,10 +10257,43 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       $('auto').disabled = false;
       $('auto').textContent = t('autoBtn');
       $('autoDica').textContent = '';
+      /* Destravado no `finally` e não só no caminho feliz: uma transcrição que
+         morre no meio deixaria o campo somente-leitura para sempre, e o texto
+         parcial que está lá dentro é justamente o que a pessoa quer salvar. */
+      $('tr').readOnly = false;
+      transcrevendoPct = null;
+      /* A BARRA CHEIA SAI DA TELA. Ela ficava ali, azul e em 100%, dizendo
+         nada — é o mesmo defeito que a varredura já tinha corrigido do lado
+         dela, e agora ele custava mais: a faixa fixa lê as barras vivas para
+         saber se há trabalho correndo, e uma barra parada em 100% a deixava
+         acesa para sempre. O fim é dito em palavras, na linha de status. */
+      prog(null);
+      pintarSaidas();
       sincAmbos();
       trabalhando(false);
     }
   };
+
+  /* O texto parcial no campo, estrangulado como as miniaturas e pelo mesmo
+     motivo — `refreshTr()` reanalisa a transcrição inteira a cada chamada.
+
+     E o campo fica SOMENTE-LEITURA enquanto corre: quem começasse a corrigir o
+     que está escrito perderia a correção na próxima janela, que reescreve o
+     campo. Um texto que se desfaz enquanto se digita é pior do que um campo
+     vazio. Ele destrava no fim, que é quando corrigir passa a valer. */
+  let ultimoTexto = 0;
+  function escreverParcial(out){
+    const agora2 = performance.now();
+    if (agora2 - ultimoTexto < 900) return;
+    ultimoTexto = agora2;
+    const campo = $('tr');
+    if (!campo) return;
+    campo.readOnly = true;
+    campo.value = 'WEBVTT\n\n' + out.join('\n\n');
+    /* Rolado para o fim: o que interessa é a linha que acabou de chegar. */
+    try { campo.scrollTop = campo.scrollHeight; } catch (e) {}
+    refreshTr();
+  }
 
   /* A caixa da placa de vídeo some onde não há WebGPU: oferecer um atalho que
      a máquina não tem é só uma forma de fazer a pessoa tentar e não entender o
@@ -10704,7 +10923,10 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     try {
       const n = await limparCacheModelo();
       esquecerMotor();                 // a combinação lembrada apontava para o que acabou de sumir
-      pipe = null; pipeId = null;      // a próxima transcrição remonta do zero
+      /* E SOLTA O QUE ESTÁ CARREGADO. Antes isto era `pipe = null`, que apagava
+         o cache do disco e deixava os 250 MB do modelo na memória da aba — com o
+         botão dizendo que tinha liberado. */
+      await soltarPipe();              // a próxima transcrição remonta do zero
       /* No #diagStatus, e não no #astatus: este último vive dentro da dobra e
          some junto com ela quando o cartão está travado — que é quando o botão
          costuma ser usado. */
@@ -11875,6 +12097,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       const guardar = a => {
         frames.push({ t: a.t, img: snap(px, q), keep: true, sig: a.sig });
         kept++;
+        mostrarParcial();
       };
 
       let ant = await olhar(ini);
@@ -11913,6 +12136,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
         await seek(times[i]);
         await new Promise(r => requestAnimationFrame(r));
         frames.push({ t: video.currentTime, img: snap(px, q), keep: true, sig: signature() });
+        mostrarParcial();
         $('bar').style.width = ((i+1)/times.length*100) + '%';
         $('status').textContent = tr('extracting', i+1, times.length) + eta(i+1, times.length);
       }
@@ -11925,6 +12149,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       await seek(mt);
       await new Promise(r => requestAnimationFrame(r));
       frames.push({ t: video.currentTime, img: snap(px, q), keep: true, manual: true });
+      mostrarParcial();
     }
 
     frames.sort((a,b) => a.t - b.t);
@@ -12151,6 +12376,101 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     counts();
   }
 
+  /* ---- MOSTRAR ENQUANTO AINDA ESTÁ FAZENDO ----
+
+     A varredura de uma hora de vídeo leva por volta de meio minuto sozinha, e
+     mais quando divide a máquina com a transcrição. Medido: com as duas
+     rodando, aos 51 segundos a transcrição já tinha terminado e a varredura
+     estava em 23:00 de 1:00:00 com **46 quadros guardados** — e a tela mostrava
+     ZERO. Todos apareciam de uma vez, no fim.
+
+     Esse é o defeito que faz uma espera parecer o dobro do que ela é: a
+     ferramenta calcula em pedaços e revela em bloco. Uma barra andando diz
+     "estou fazendo"; uma grade que enche diz "isto é seu, olhe". A segunda é
+     trabalho pronto, e ela ainda deixa a pessoa começar a descartar antes de a
+     varredura acabar.
+
+     Estrangulado no tempo, e não a cada quadro: `render()` refaz a grade inteira
+     (medido: 15–22 ms com 300 miniaturas, 47 ms com 900), e chamar isso a cada
+     quadro guardado seria trabalho ao quadrado disputando a máquina com a
+     própria varredura. A cada 700 ms o custo fica abaixo de 3% e o olho não
+     distingue de contínuo. */
+  let ultimoParcial = 0, jaLevouAoPrimeiro = false;
+  function mostrarParcial(forcar){
+    const agora2 = performance.now();
+    if (!forcar && agora2 - ultimoParcial < 700) return;
+    ultimoParcial = agora2;
+    if ($('prevCard')) $('prevCard').classList.remove('hide');
+    render();
+    /* NO PRIMEIRO QUADRO, e uma vez só. Antes a página só descia para a revisão
+       quando a varredura ACABAVA — a pessoa ficava olhando uma barra enquanto o
+       trabalho dela já estava pronto embaixo. Agora ela desce assim que existe
+       o primeiro quadro, e o resto chega com ela já lá.
+
+       Uma vez só, e não a cada quadro: rolar a página por baixo de quem está
+       lendo é a coisa mais irritante que uma tela faz. O `irPara` do fim da
+       varredura continua existindo para quem subiu de volta no meio. */
+    if (!jaLevouAoPrimeiro && frames.length) {
+      jaLevouAoPrimeiro = true;
+      irPara('prevCard', true);
+    }
+  }
+
+  /* ---- a faixa fixa ----
+
+     Ela existe por causa da melhoria acima: agora que a pessoa desce para a
+     revisão em um segundo, a barra de progresso da transcrição — que mora no
+     cartão 2 — fica fora da tela pelos minutos seguintes. Ela trabalha às
+     cegas, e trabalhar às cegas numa espera longa é o que faz alguém fechar a
+     aba.
+
+     Ela NÃO tem texto próprio: mostra o mesmo que a linha de status de quem
+     está trabalhando. Um segundo texto seria uma segunda verdade para manter,
+     e este projeto já sabe o preço disso. */
+  function pintarFaixa(){
+    const el = $('faixa');
+    if (!el) return;
+    /* Qual trabalho está correndo, e onde ele já se descreve. A ordem é a da
+       urgência: a transcrição é a espera longa. */
+    const fontes = [
+      { bar: 'abarWrap', barI: 'abar', txt: 'astatus' },   // transcrição
+      { bar: 'barWrap',  barI: 'bar',  txt: 'status'   }   // varredura
+    ];
+    const viva = fontes.find(f => {
+      const w = $(f.bar);
+      return w && !w.classList.contains('hide');
+    });
+    /* Só quando a barra de verdade está FORA da vista. Duas barras dizendo a
+       mesma coisa na mesma tela seriam ruído. */
+    const naTela = viva && (() => {
+      const r = $(viva.bar).getBoundingClientRect();
+      return r.bottom > 0 && r.top < innerHeight;
+    })();
+    const mostrar = !!viva && !naTela;
+    el.classList.toggle('hide', !mostrar);
+    document.body.classList.toggle('comFaixa', mostrar);
+    if (!mostrar) return;
+    $('faixaTxt').textContent = ($(viva.txt).textContent || '').trim();
+    const larg = $(viva.barI).style.width;
+    /* Sem largura definida quer dizer "não sei a porcentagem" — a barra
+       listrada, e não zero por cento, que se lê como travado. */
+    $('faixaTxt').nextElementSibling.classList.toggle('solta', !larg);
+    $('faixaBarI').style.width = larg || '100%';
+    /* O cancelar é o MESMO botão do cartão, delegado: um segundo botão de parar
+       seria um segundo caminho de parar. */
+    const c = $('cancel');
+    const podeParar = c && !c.classList.contains('hide');
+    $('faixaParar').classList.toggle('hide', !podeParar);
+    if (podeParar) $('faixaParar').textContent = c.textContent;
+  }
+  if ($('faixaParar')) $('faixaParar').onclick = () => { const c = $('cancel'); if (c) c.click(); };
+  /* Duas fontes de repintura: o relógio (o progresso muda sozinho) e a rolagem
+     (a barra de verdade entra e sai da tela). O intervalo é curto porque a
+     faixa é texto e uma largura — repintar isso custa menos que decidir se
+     valia a pena. */
+  setInterval(pintarFaixa, 400);
+  addEventListener('scroll', pintarFaixa, { passive: true });
+
   /* ---- a porta das saídas ----------------------------------------------
 
      O defeito que isto conserta, medido: com um vídeo escolhido e nenhum quadro
@@ -12174,6 +12494,20 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
                   'json','csv','zip','gdocs'];
   const emUso = new Set();
 
+  /* Em que ponto está a transcrição, ou `null` quando não há uma correndo.
+
+     Ela existe por causa de uma armadilha que a própria melhoria criou: agora
+     que as miniaturas aparecem enquanto a varredura corre, as saídas liberam no
+     primeiro quadro — medido, **1,0 segundo** depois do clique. A transcrição
+     ainda vai levar minutos, e um PDF gerado nesse intervalo sai com a fala
+     pela metade, em silêncio. Convidar alguém a revisar e deixar a porta da
+     frente aberta para um documento incompleto é pior do que não convidar.
+
+     Não desabilita: quem quer um documento só de telas tem esse direito, e
+     desabilitar sem explicar é o `return` mudo que este projeto já pagou caro
+     para não ter. Diz. */
+  let transcrevendoPct = null;
+
   function pintarSaidas(){
     const keep = frames.filter(f => f.keep).length;
     SAIDAS.forEach(id => {
@@ -12183,6 +12517,19 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     const st = $('pdfStatus');
     if (!st) return;
     if (!keep) st.innerHTML = `<span class="muted">${t('saidaSemQuadros')}</span>`;
+    /* O aviso da transcrição em curso ganha do resto enquanto ela corre: é a
+       única informação aqui que muda o que sai do documento. */
+    else if (transcrevendoPct != null) {
+      st.innerHTML = `<span class="err">${t('saidaSemFala', transcrevendoPct.toFixed(0))}</span>`;
+      /* Marcado como NOSSO. Sem isto o aviso ficava na tela depois de a
+         transcrição terminar — dizendo "está em 100%, vai sair sem a fala"
+         justamente quando a fala inteira já estava lá. A regra logo abaixo só
+         escreve em campo vazio, e o campo não estava vazio: estava com o aviso
+         de antes. */
+      st.dataset.aviso = '1';
+    }
+    else if (st.dataset.aviso) { delete st.dataset.aviso; st.innerHTML =
+      `<span class="muted">${t('saidaPronta', keep)}</span>`; }
     /* Só preenche quando está vazio: o resultado de uma geração ("saiu o PDF
        com 12 telas") mora aqui, e sobrescrevê-lo apagaria a resposta que a
        pessoa acabou de receber. */

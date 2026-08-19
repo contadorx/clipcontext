@@ -1057,3 +1057,112 @@ pessoa aperta quando algo dá errado.
 `require-corp`, que obrigaria cada recurso externo (jsPDF do CDN, arquivos do modelo,
 figuras do blog) a mandar CORP. É regressão, não configuração — e, de brinde, é o
 `credentialless` que faz o `measureUserAgentSpecificMemory` acima existir.
+
+---
+
+## 18/08/2026, décima primeira rodada — a transcrição: três já estavam feitas, uma estava mesmo quebrada
+
+Avaliei quatro otimizações propostas para o consumo da transcrição. Três delas já
+existiam no arquivo — e uma delas, do jeito proposto, seria **pior** do que o que
+está lá. A quarta era real, e era um vazamento de verdade.
+
+### 1. "Extrair o áudio direto em 16 kHz mono" — já é assim, e a proposta invertia a ordem
+
+Os dois caminhos já pedem 16 kHz na criação do contexto: `decodeTo16k()` para o
+arquivo e `new AudioContext({sampleRate: SR_ASR})` para a captura ao vivo.
+
+A proposta era decodificar no padrão do navegador e reamostrar depois com
+`OfflineAudioContext`. Isso **aloca o buffer grande e o pequeno**, com os dois
+vivos no instante da conversão. Pedir 16 kHz na criação nunca aloca o grande.
+
+Medido, com uma hora de vídeo com áudio estéreo a 48 kHz (`testes/audio.mjs`):
+
+| medida | valor |
+|---|---|
+| áudio entregue ao modelo | 57.600.000 amostras = 60,0 min a 16 kHz |
+| o buffer que fica | **219,7 MB** |
+| … se fosse 48 kHz estéreo | 1.318,4 MB |
+| pico do heap durante a extração | 445 MB |
+| heap RETIDO depois da coleta | **224 MB** |
+| tempo | 20,8 s (173× o tempo real) |
+
+O corte de 80% que a proposta queria fazer já estava feito. Mas medir esse
+caminho encontrou **dois defeitos de verdade nele**:
+
+**A taxa era SUPOSTA.** `sampleRate` no construtor é um pedido, não uma ordem —
+o Safari o ignorou por anos. Um navegador que o ignore devolve 48 kHz sem erro
+nenhum. Com o navegador forçado a mentir, medido: uma hora de vídeo virava
+**9.922 segundos** de áudio entregue ao modelo — a fala 2,8× mais lenta, e o
+sintoma chegaria como "a transcrição veio errada", que manda procurar no lugar
+errado. Agora a taxa é conferida, e a queda é reamostrar (que é exatamente o
+código da proposta, no lugar onde ele serve: a exceção, não o caminho).
+
+**A mistura jogava fora o canal do meio.** Ela somava o canal 0 e o 1. Num 5.1 a
+fala mora no canal 2: o modelo receberia trilha e ambiente, sem o diálogo. Agora
+soma todos — e soma no primeiro canal, no lugar, o que evita um terceiro array de
+220 MB numa hora de vídeo.
+
+### 2. Soltar a sessão do ONNX — era real, e eram três caminhos
+
+`pipe = null` não solta nada. As sessões não vivem no heap JavaScript: vivem na
+memória linear do WebAssembly e, no caminho da placa, na VRAM. O coletor de lixo
+libera o objeto de duzentos bytes que apontava para duzentos e cinquenta
+megabytes e considera o trabalho feito.
+
+Três caminhos trocavam de pipeline sem soltar o anterior. Medido com a biblioteca
+falsificada (`testes/modelo.mjs`), com o conserto desligado:
+
+| gesto | modelos vivos antes | agora |
+|---|---|---|
+| trocar de modelo (small → base) | **2** | 1 |
+| queda da placa para o processador | **2** | 1 |
+| "apagar o modelo de voz baixado" | **2** | 0 |
+
+O terceiro é o que mais incomoda: o botão apagava o cache **em disco** e dizia na
+tela que tinha liberado, com o modelo inteiro ainda carregado.
+
+E de caminho: **a caixa "usar a placa de vídeo" era enfeite**. A condição de
+remontagem era `pipeId !== modelId`, então marcar ou desmarcar a caixa não fazia
+nada até alguém trocar de modelo. Agora o dispositivo entra na identidade do
+pipeline.
+
+**O que NÃO foi feito, de propósito:** soltar ao fim de cada transcrição. Quem
+transcreve três vídeos seguidos pagaria a montagem inteira três vezes, e montar é
+o passo lento. A decisão certa depende de um número que esta máquina não tem — o
+modelo não sobe aqui — e ele está no Diagnóstico, na quebra por tipo da memória.
+
+Um detalhe que o conserto trouxe junto: soltar a sessão **por baixo de uma
+inferência em curso** derruba a transcrição com uma linha de C++, e o gesto que
+causa isso é inocente (clicar em "apagar o modelo" enquanto a barra anda). O
+`soltarPipe` espera a janela em curso terminar.
+
+### 3. "Limitar as linhas do WASM" — já está, e mais conservador que a proposta
+
+`quantasLinhas()`: **1** quando a página não está isolada entre origens, e
+`min(4, núcleos - 1)` quando está. A proposta pedia `min(4, núcleos / 2)`. A
+diferença é de uma linha em máquina de oito núcleos, e o comentário que já estava
+lá explica a escolha: a transcrição pode estar dividindo a máquina com uma captura
+de tela acontecendo, e tomar todos os núcleos faria a captura engasgar.
+
+`ort.env.wasm.simd = true` não foi acrescentado: a partir do onnxruntime-web 1.17
+o SIMD é detectado sozinho e a opção não faz nada. Uma linha que não faz nada é
+uma linha que alguém vai defender daqui a um ano.
+
+### 4. "Forçar quantização q8/q4" — já está, e com um porquê que a proposta não tem
+
+A escada já usa `dtype:'q8'` no processador e `q4` no decodificador da placa. A
+proposta sugeria `quantized: true`, que é a API do transformers.js **v2**; a
+biblioteca aqui é a 3.x, onde essa opção é ignorada em silêncio.
+
+E o codificador na placa fica em `fp32` de propósito — está escrito no código:
+as versões comprimidas produzem texto quebrado em parte das máquinas. Uma
+otimização que faz o produto entregar texto errado não é uma otimização.
+
+### O que continua sendo o dominante, e continua sem número
+
+O modelo de voz. Ele não sobe nesta máquina, e nenhuma das quatro mudanças acima
+o toca. O que existe hoje para responder é o instrumento: o Diagnóstico imprime o
+bloqueio do fio principal junto do degrau em que o motor subiu, e a seção de
+memória com `measureUserAgentSpecificMemory()` quebrada por tipo — que separa
+WebAssembly de imagem e responde, numa máquina real, quanto o Whisper está
+custando ali.
