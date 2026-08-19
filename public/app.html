@@ -219,6 +219,9 @@
      de ler o número. Sem isso, "Passo 3 · 2/3" seria a única pista de que
      aquelas três miniaturas são a mesma ação, e ninguém lê legenda de
      miniatura antes de decidir o que está olhando. */
+  .fixoTag{position:absolute;right:5px;top:5px;z-index:3;font:600 10.5px/1 ui-sans-serif,system-ui;
+    background:var(--panel);color:var(--ink);border:1px solid var(--line);
+    border-radius:99px;padding:4px 7px;letter-spacing:.02em}
   .thumbs figure.juntoAoAnterior{border-left:3px solid color-mix(in srgb,var(--accent) 40%,transparent);
     border-top-left-radius:0;border-bottom-left-radius:0}
   .thumbs figure.juntoAoAnterior .passo{color:var(--muted);font-weight:500}
@@ -1049,22 +1052,21 @@
                é a resposta errada para "sumiu tudo". -->
           <button class="sm hide destaque" id="recPip" data-i18n="recPipBtn"></button>
         </div>
-        <!-- A caixa que comenta a marcação.
+        <!-- A CAIXA DE COMENTÁRIO AO VIVO SAIU DAQUI E DA JANELINHA.
 
-             Marcar guardava a tela e mais nada. Na revisão, meia hora depois,
-             sobravam sete quadros marcados e nenhum deles dizia POR QUÊ — e o
-             porquê é justamente o que só existe no instante: "aqui o total veio
-             errado" é óbvio na hora e irrecuperável depois.
+             Ela dizia "o que aconteceu aqui" e comentava a última marcação. O
+             relato de uso foi direto: confusa, e não ajuda. Concordo, e o
+             motivo é o mesmo dos dois botões — quem grava está olhando para o
+             sistema que testa, não para nós. Escrever às cegas, num campo de
+             uma linha, sobre uma imagem que não se está vendo, é a pior hora
+             possível para descrever qualquer coisa. E com dois botões de
+             captura, "sobre qual tela eu estou escrevendo" virou uma pergunta a
+             mais no pior momento.
 
-             Ela comenta SEMPRE a última marcação, e não a próxima: ninguém
-             descreve um problema antes de vê-lo. Por isso nasce desligada,
-             acende no primeiro "marcar", e o que se digita cai no quadro que
-             acabou de ser guardado — até a marcação seguinte. -->
-        <div class="row hide" id="recNotaCx" style="margin-top:8px;gap:8px;align-items:center">
-          <input type="text" id="recNota" maxlength="180" autocomplete="off"
-                 style="flex:1;min-width:200px;max-width:460px" disabled>
-          <span class="status" id="recNotaEst"></span>
-        </div>
+             O QUE SE PERDE, e vale estar escrito: anotar no calor do momento.
+             O que fica no lugar é melhor — na revisão e na lente a anotação é
+             escrita com a imagem grande na frente, e o roteiro colado no passo
+             1 já entrega o título de cada passo sem ninguém digitar nada. -->
         <span class="status" id="recMsg" data-i18n="recHint"></span>
         <!-- A barra do modelo, AQUI.
 
@@ -1999,7 +2001,15 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
         <button class="ghost sm hide" id="tarjaLimpar" data-i18n="tarjaLimpar"></button>
         <button class="ghost sm" id="mkModo" data-i18n="mkBtn"></button>
         <button class="ghost sm" id="cropModo" data-i18n="cropBtn"></button>
+        <!-- Cortar SÓ esta. Um pop-up no canto, uma janela de erro menor, uma
+             tela que veio de outro monitor: aplicar em todos ali é destruir 39
+             quadros para consertar 1. -->
+        <button class="ghost sm" id="cropUma" data-i18n="cropUmaBtn"></button>
         <button class="ghost sm hide" id="cropTirar" data-i18n="cropTirar"></button>
+        <!-- Fixar. Fica com as outras ações da imagem porque é uma decisão
+             sobre ESTA imagem, e é aqui que a pessoa a vê grande o bastante
+             para decidir se ela importa. -->
+        <button class="ghost sm" id="fixarModo" data-i18n="fixarBtn"></button>
         <!-- Trocar a imagem deste passo é o gesto mais repetido de quem MANTÉM
              um documento: a tela mudou, o resto do procedimento não. Fazia-se
              pelo caminho torto — anexar, mover com as setas até o lugar,
@@ -2359,7 +2369,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recAdiantando:'Baixando o modelo de voz agora, para não atrasar a gravação. Pode escolher a tela quando quiser.',
       recPronto:'Modelo pronto. A gravação começa na hora.',
       recPauseBtn:'Pausar', recResumeBtn:'Retomar', recMarkBtn:'Marcar este passo',
-      recTelaBtn:'+ mais uma tela deste passo',
+      recTelaBtn:'Mais uma tela deste passo',
       recTelaFeita:'Mais uma tela guardada no {0}.',
       rotLbl:'Já tem o roteiro?', rotBtn:'Colar os passos',
       rotDica:'uma linha por passo — do documento que você já tem',
@@ -2369,8 +2379,6 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       rotPronto:'{0} passos prontos — cada marcação já sai com o título.',
       passoTelas:'{0} telas',
       recPipBtn:'Trazer a janelinha de volta',
-      recNotaPh:'o que aconteceu aqui', recNotaEsp:'marque um passo para comentar',
-      recNotaEm:'comentando a marcação {0}', recNotaOk:'guardado neste passo', recNotaNaPip:'o comentário está na janelinha',
       recPausado:'PAUSADO —', recMarcado:'passo marcado.',
       pipPausado:'Pausado: nada sendo guardado.',
       micNegado:'O navegador bloqueou o microfone para este site. Clique no cadeado ao lado do endereço, permita o microfone e grave de novo.',
@@ -2822,7 +2830,12 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       gdErr:'Não consegui criar o documento no Google.',
       gdGrande:'O documento tem {0}. O envio pode demorar.',
       saiuArq:'{0} gerado com {1} passos.',
-      cropBtn:'Cortar as bordas', cropFim:'Cancelar recorte', cropTirar:'Desfazer o corte',
+      cropBtn:'Cortar as bordas (todas)', cropUmaBtn:'Cortar só esta',
+      cropComoUma:'Arraste a área que interessa. O corte vale só para esta tela.',
+      cropFeitoUma:'Cortado só este quadro. Os outros seguem inteiros.',
+      fixarBtn:'Manter sempre', fixarTirar:'Não manter mais',
+      fixarFeito:'Fixado: as limpezas automáticas não descartam mais este quadro.',
+      fixarSaiu:'Deixou de ser fixado.', fixarTag:'fixado', cropFim:'Cancelar recorte', cropTirar:'Desfazer o corte',
       cropComo:'Arraste a área que interessa. O mesmo recorte vale para todos os quadros.',
       cropIndo:'Recortando os quadros…',
       cropFeito:'{0} quadros recortados. As tarjas foram desfeitas — refaça-as sobre a imagem nova.',
@@ -2938,7 +2951,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recAdiantando:'Downloading the speech model now, so it does not delay the recording. Pick your screen whenever you like.',
       recPronto:'Model ready. Recording starts immediately.',
       recPauseBtn:'Pause', recResumeBtn:'Resume', recMarkBtn:'Mark this step',
-      recTelaBtn:'+ one more screen of this step',
+      recTelaBtn:'One more screen of this step',
       recTelaFeita:'One more screen saved in {0}.',
       rotLbl:'Already have the script?', rotBtn:'Paste the steps',
       rotDica:'one line per step — from the document you already have',
@@ -2948,8 +2961,6 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       rotPronto:'{0} steps ready — every mark comes with its title.',
       passoTelas:'{0} screens',
       recPipBtn:'Bring the control window back',
-      recNotaPh:'what happened here', recNotaEsp:'mark a step to comment on it',
-      recNotaEm:'commenting on mark {0}', recNotaOk:'saved on this step', recNotaNaPip:'the comment box is in the floating window',
       recPausado:'PAUSED —', recMarcado:'step marked.',
       pipPausado:'Paused: nothing being kept.',
       micNegado:'The browser blocked the microphone for this site. Click the padlock next to the address, allow the microphone and record again.',
@@ -3395,7 +3406,12 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       gdErr:'Could not create the document at Google.',
       gdGrande:'The document is {0}. Sending may take a while.',
       saiuArq:'{0} generated with {1} steps.',
-      cropBtn:'Crop the edges', cropFim:'Cancel crop', cropTirar:'Undo the crop',
+      cropBtn:'Crop the edges (all)', cropUmaBtn:'Crop only this one',
+      cropComoUma:'Drag the area that matters. The crop applies to this screen only.',
+      cropFeitoUma:'Only this frame was cropped. The others are untouched.',
+      fixarBtn:'Always keep', fixarTirar:'Stop keeping',
+      fixarFeito:'Pinned: the automatic cleanups will no longer discard this frame.',
+      fixarSaiu:'No longer pinned.', fixarTag:'pinned', cropFim:'Cancel crop', cropTirar:'Undo the crop',
       cropComo:'Drag the area that matters. The same crop applies to every frame.',
       cropIndo:'Cropping the frames…',
       cropFeito:'{0} frames cropped. Redactions were undone — redraw them on the new image.',
@@ -3511,7 +3527,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recAdiantando:'Descargando el modelo de voz ahora, para no retrasar la grabación. Elige la pantalla cuando quieras.',
       recPronto:'Modelo listo. La grabación empieza al instante.',
       recPauseBtn:'Pausar', recResumeBtn:'Reanudar', recMarkBtn:'Marcar este paso',
-      recTelaBtn:'+ una pantalla más de este paso',
+      recTelaBtn:'Una pantalla más de este paso',
       recTelaFeita:'Una pantalla más guardada en {0}.',
       rotLbl:'¿Ya tienes el guion?', rotBtn:'Pegar los pasos',
       rotDica:'una línea por paso — del documento que ya tienes',
@@ -3521,8 +3537,6 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       rotPronto:'{0} pasos listos — cada marca ya sale con su título.',
       passoTelas:'{0} pantallas',
       recPipBtn:'Traer la ventana de control de vuelta',
-      recNotaPh:'qué pasó aquí', recNotaEsp:'marca un paso para comentarlo',
-      recNotaEm:'comentando la marca {0}', recNotaOk:'guardado en este paso', recNotaNaPip:'el comentario está en la ventanita',
       recPausado:'EN PAUSA —', recMarcado:'paso marcado.',
       pipPausado:'En pausa: no se guarda nada.',
       micNegado:'El navegador bloqueó el micrófono para este sitio. Pulsa el candado junto a la dirección, permite el micrófono y graba de nuevo.',
@@ -3968,7 +3982,12 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       gdErr:'No pude crear el documento en Google.',
       gdGrande:'El documento pesa {0}. El envío puede tardar.',
       saiuArq:'{0} generado con {1} pasos.',
-      cropBtn:'Recortar los bordes', cropFim:'Cancelar recorte', cropTirar:'Deshacer el recorte',
+      cropBtn:'Recortar los bordes (todos)', cropUmaBtn:'Recortar solo esta',
+      cropComoUma:'Arrastra el área que importa. El recorte vale solo para esta pantalla.',
+      cropFeitoUma:'Solo se recortó este fotograma. Los demás siguen enteros.',
+      fixarBtn:'Mantener siempre', fixarTirar:'Dejar de mantener',
+      fixarFeito:'Fijado: las limpiezas automáticas ya no descartan este fotograma.',
+      fixarSaiu:'Dejó de estar fijado.', fixarTag:'fijado', cropFim:'Cancelar recorte', cropTirar:'Deshacer el recorte',
       cropComo:'Arrastra el área que importa. El mismo recorte vale para todos los fotogramas.',
       cropIndo:'Recortando los fotogramas…',
       cropFeito:'{0} fotogramas recortados. Las zonas tachadas se deshicieron — vuelve a marcarlas sobre la imagen nueva.',
@@ -4083,7 +4102,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recAdiantando:'Das Spracherkennungsmodell wird jetzt heruntergeladen, damit es die Aufnahme nicht verzögert. Sie können den Bildschirm jederzeit auswählen.',
       recPronto:'Modell bereit. Die Aufnahme startet sofort.',
       recPauseBtn:'Pause', recResumeBtn:'Fortsetzen', recMarkBtn:'Diesen Schritt markieren',
-      recTelaBtn:'+ noch ein Bildschirm zu diesem Schritt',
+      recTelaBtn:'Noch ein Bildschirm zu diesem Schritt',
       recTelaFeita:'Noch ein Bildschirm in {0} gespeichert.',
       rotLbl:'Haben Sie das Skript schon?', rotBtn:'Schritte einfügen',
       rotDica:'eine Zeile pro Schritt — aus dem Dokument, das Sie schon haben',
@@ -4093,8 +4112,6 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       rotPronto:'{0} Schritte bereit — jede Markierung kommt mit ihrem Titel.',
       passoTelas:'{0} Bildschirme',
       recPipBtn:'Steuerungsfenster zurückholen',
-      recNotaPh:'was hier passiert ist', recNotaEsp:'markieren Sie einen Schritt, um ihn zu kommentieren',
-      recNotaEm:'Kommentar zu Markierung {0}', recNotaOk:'in diesem Schritt gespeichert', recNotaNaPip:'Das Kommentarfeld ist im kleinen Fenster',
       recPausado:'PAUSIERT —', recMarcado:'Schritt markiert.',
       pipPausado:'Pausiert: Es wird nichts gespeichert.',
       micNegado:'Der Browser hat das Mikrofon für diese Website blockiert. Klicken Sie auf das Schloss neben der Adresse, erlauben Sie das Mikrofon und nehmen Sie erneut auf.',
@@ -4546,7 +4563,12 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       gdErr:'Das Dokument konnte bei Google nicht erstellt werden.',
       gdGrande:'Das Dokument hat {0}. Das Senden kann dauern.',
       saiuArq:'{0} mit {1} Schritten erzeugt.',
-      cropBtn:'Ränder beschneiden', cropFim:'Zuschneiden abbrechen', cropTirar:'Zuschnitt aufheben',
+      cropBtn:'Ränder beschneiden (alle)', cropUmaBtn:'Nur dieses beschneiden',
+      cropComoUma:'Ziehen Sie den wichtigen Bereich auf. Der Zuschnitt gilt nur für diesen Bildschirm.',
+      cropFeitoUma:'Nur dieses Bild wurde beschnitten. Die anderen bleiben ganz.',
+      fixarBtn:'Immer behalten', fixarTirar:'Nicht mehr behalten',
+      fixarFeito:'Fixiert: die automatischen Bereinigungen verwerfen dieses Bild nicht mehr.',
+      fixarSaiu:'Nicht mehr fixiert.', fixarTag:'fixiert', cropFim:'Zuschneiden abbrechen', cropTirar:'Zuschnitt aufheben',
       cropComo:'Ziehen Sie den Bereich auf, der zählt. Derselbe Zuschnitt gilt für alle Screenshots.',
       cropIndo:'Die Screenshots werden zugeschnitten…',
       cropFeito:'{0} Screenshots zugeschnitten. Die Schwärzungen wurden aufgehoben — setzen Sie sie auf dem neuen Bild erneut.',
@@ -4661,7 +4683,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recAdiantando:'Téléchargement du modèle de reconnaissance vocale maintenant, pour ne pas retarder l’enregistrement. Vous pouvez choisir l’écran quand vous voulez.',
       recPronto:'Modèle prêt. L’enregistrement démarre immédiatement.',
       recPauseBtn:'Pause', recResumeBtn:'Reprendre', recMarkBtn:'Marquer cette étape',
-      recTelaBtn:'+ un écran de plus pour cette étape',
+      recTelaBtn:'Un écran de plus pour cette étape',
       recTelaFeita:'Un écran de plus enregistré dans {0}.',
       rotLbl:'Vous avez déjà le script ?', rotBtn:'Coller les étapes',
       rotDica:'une ligne par étape — du document que vous avez déjà',
@@ -4671,8 +4693,6 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       rotPronto:'{0} étapes prêtes — chaque marque arrive avec son titre.',
       passoTelas:'{0} écrans',
       recPipBtn:'Rouvrir la fenêtre de contrôle',
-      recNotaPh:'ce qui s’est passé ici', recNotaEsp:'marquez une étape pour la commenter',
-      recNotaEm:'commentaire de la marque {0}', recNotaOk:'enregistré sur cette étape', recNotaNaPip:'le commentaire est dans la petite fenêtre',
       recPausado:'EN PAUSE —', recMarcado:'étape marquée.',
       pipPausado:'En pause : rien n’est conservé.',
       micNegado:'Le navigateur a bloqué le microphone pour ce site. Cliquez sur le cadenas à côté de l’adresse, autorisez le microphone et enregistrez de nouveau.',
@@ -5124,7 +5144,12 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       gdErr:'Impossible de créer le document sur Google.',
       gdGrande:'Le document pèse {0}. L’envoi peut prendre du temps.',
       saiuArq:'{0} généré avec {1} étapes.',
-      cropBtn:'Rogner les bords', cropFim:'Annuler le rognage', cropTirar:'Annuler le rognage',
+      cropBtn:'Rogner les bords (toutes)', cropUmaBtn:'Rogner celle-ci seulement',
+      cropComoUma:'Faites glisser la zone qui compte. Le rognage ne vaut que pour cet écran.',
+      cropFeitoUma:'Seule cette image a été rognée. Les autres restent entières.',
+      fixarBtn:'Toujours garder', fixarTirar:'Ne plus garder',
+      fixarFeito:'Épinglée : les nettoyages automatiques ne suppriment plus cette image.',
+      fixarSaiu:'N’est plus épinglée.', fixarTag:'épinglée', cropFim:'Annuler le rognage', cropTirar:'Annuler le rognage',
       cropComo:'Faites glisser sur la zone qui vous intéresse. Le même rognage vaut pour toutes les captures.',
       cropIndo:'Rognage des captures…',
       cropFeito:'{0} captures rognées. Les caviardages ont été défaits — refaites-les sur la nouvelle image.',
@@ -6983,7 +7008,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      atualizada conforme as etapas passam.
 
      Onde a API não existe (Firefox, Safari) tudo segue igual, sem a janelinha. */
-  let pipAviso = '', pipAvisoAte = 0;
+  /* `pipAvisoDe` diz QUEM causou o aviso — 'marcar' ou 'tela'. Sem isto o
+     destaque ia sempre para o primeiro botão, e apertar o segundo acendia o
+     outro: o retorno visual mentia sobre o gesto de quem apertou. */
+  let pipAviso = '', pipAvisoAte = 0, pipAvisoDe = '';
   /* Um recado durante a gravacao vale nos DOIS lugares: a janelinha, para onde
      a pessoa esta olhando, e a aba, para quando ela voltar. Escrito so num
      deles, ele existe para metade das pessoas. */
@@ -6994,7 +7022,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   }
   let pipWin = null, pipTexto = null, pipRelogio = null, pipFrames = null;
   let pipVm = null, pipVs = null, pipCalar = null, pipMarcar = null, pipTela = null, pipPausa = null;
-  let pipNota = null, pipErroTic = null;
+  let pipErroTic = null;
   /* Pausa e marcação vivem fora do bloco da gravação porque a janelinha e o
      cartão precisam alcançá-las, e as duas são recriadas a cada captura. */
   let pausado = false, alternarPausa = null, marcarAgora = null, maisUmaTela = null;
@@ -7011,7 +7039,6 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      problema antes de vê-lo: o gesto real é ver, marcar, e então dizer. Por
      isso ela nasce desligada, acende no primeiro "marcar", e o que se digita
      cai no quadro que acabou de ser guardado — até a marcação seguinte. */
-  let notaAlvo = null;
 
   /* ---- uma caixa de cada vez ----
 
@@ -7025,108 +7052,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      o campo e deixa uma linha dizendo onde ele foi. Fechou a janelinha, o
      campo volta para o cartão — e volta com o texto, porque o texto nunca
      morou no campo: mora no quadro. */
-  function notaMoraNaJanelinha(){ return !!(pipWin && pipNota); }
-
-  function apontarNota(f){
-    const cx = $('recNotaCx'), inp = $('recNota'), est = $('recNotaEst');
-    if (!cx || !inp) return;
-    notaAlvo = f || null;
-    const naJanela = notaMoraNaJanelinha();
-
-    cx.classList.remove('hide');
-    cx.classList.toggle('naJanelinha', naJanela);
-    inp.classList.toggle('hide', naJanela);
-    inp.disabled    = !notaAlvo;
-    inp.placeholder = t(notaAlvo ? 'recNotaPh' : 'recNotaEsp');
-    inp.value       = (notaAlvo && notaAlvo.nota) || '';
-    if (est) est.textContent = naJanela ? t('recNotaNaPip')
-      : notaAlvo ? t('recNotaEm', frames.filter((x) => x.manual).length) : '';
-    if (pipNota) {
-      pipNota.disabled    = !notaAlvo;
-      pipNota.placeholder = t(notaAlvo ? 'recNotaPh' : 'recNotaEsp');
-      pipNota.value       = (notaAlvo && notaAlvo.nota) || '';
-    }
-    /* O foco vai para a caixa da janela que a pessoa está usando, e só para
-       ela. Focar às cegas o campo do cartão seria pior do que não focar: quem
-       marcou pela janelinha continuaria digitando no vazio, achando que estava
-       comentando. */
-    if (notaAlvo) {
-      if (naJanela) {
-        try { if (pipWin.document.hasFocus()) pipNota.focus(); } catch (e) {}
-      } else {
-        try { if (document.hasFocus()) inp.focus(); } catch (e) {}
-      }
-    }
-  }
-
-  function esconderNota(){
-    const cx = $('recNotaCx'), inp = $('recNota'), est = $('recNotaEst');
-    notaAlvo = null;
-    if (cx)  cx.classList.add('hide');
-    if (inp) { inp.value = ''; inp.disabled = true; }
-    if (est) est.textContent = '';
-    if (pipNota) { pipNota.value = ''; pipNota.disabled = true; }
-  }
-
-  /* Escrito direto no quadro, a cada tecla. Guardar só no `blur` perderia o
-     comentário de quem para a gravação com o cursor ainda dentro do campo — que
-     é exatamente o que se faz quando a última coisa anotada é o motivo de
-     parar. */
-  /* E DIZ que guardou.
-     Sem isto o campo era mudo: a pessoa digitava, não via nada acontecer, e
-     concluía — com razão — que não tinha salvado. Um campo que guarda em
-     silêncio é indistinguível de um campo quebrado, e a diferença entre os dois
-     só apareceria meia hora depois, na revisão. */
-  let avisoNotaTic = null;
-  function avisarNotaGuardada(){
-    const est = $('recNotaEst'); if (!est) return;
-    est.textContent = t('recNotaOk');
-    est.classList.add('ok');
-    clearTimeout(avisoNotaTic);
-    avisoNotaTic = setTimeout(() => {
-      est.classList.remove('ok');
-      est.textContent = notaAlvo
-        ? t('recNotaEm', frames.filter((x) => x.manual).length) : '';
-    }, 1400);
-  }
-
-  if ($('recNota')) $('recNota').oninput = () => {
-    if (!notaAlvo) return;
-    notaAlvo.nota = ($('recNota').value || '').slice(0, 180);
-    avisarNotaGuardada();
-    /* O comentário também é trabalho, e some junto se ficar só na memória. Ele
-       vai para o espelho pelo índice do quadro que está sendo comentado — não
-       pela posição na tela, que muda quando alguém move um passo depois. */
-    espelharNota(frames.indexOf(notaAlvo) + 1, notaAlvo.nota);
-    if (pipNota && pipNota.value !== $('recNota').value) pipNota.value = $('recNota').value;
-  };
-
-  /* ---- o Enter dentro da caixa de comentário ----
-
-     Ele não tinha dono. Numa janela de 250px, com "Parar" logo abaixo do
-     campo, um Enter solto é um risco desproporcional: ele encerra a gravação
-     que estava sendo comentada. E mesmo sem chegar ao botão, um Enter que não
-     faz nada visível ensina a pessoa que o texto não foi aceito — ela apaga e
-     digita de novo, ou desiste.
-
-     Agora Enter CONFIRMA, e para aqui: o texto já está guardado a cada tecla,
-     então confirmar é dizer isso em voz alta e não deixar a tecla seguir
-     viagem. O campo não perde o foco — quem confirmou continua ali, e a
-     próxima marcação é que muda o assunto. */
-  function confirmarNota(e, campo){
-    if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); campo.blur(); return; }
-    if (e.key !== 'Enter') return;
-    e.preventDefault();
-    e.stopPropagation();
-    if (!notaAlvo) return;
-    notaAlvo.nota = (campo.value || '').slice(0, 180);
-    avisarNotaGuardada();
-    piscarGuardou(campo);
-  }
-
-  /* O contorno que confirma. Vale para os dois campos: na janelinha não cabe
-     uma segunda linha de texto, e no cartão o contorno chega antes do olho
-     descer até a linha de status. */
+  /* `piscarGuardou` sobreviveu à saída do comentário ao vivo: o campo de
+     anotação da lente ainda o usa para dizer que guardou. */
   const guardouTic = new WeakMap();
   function piscarGuardou(campo){
     if (!campo) return;
@@ -7134,8 +7061,6 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     clearTimeout(guardouTic.get(campo));
     guardouTic.set(campo, setTimeout(() => campo.classList.remove('guardou'), 1400));
   }
-
-  if ($('recNota')) $('recNota').onkeydown = e => confirmarNota(e, $('recNota'));
 
   const PIP_CSS = `
     *{box-sizing:border-box;margin:0}
@@ -7191,6 +7116,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     /* O flash de "marcou". Numa janelinha de 240 px não cabe uma mensagem de
        confirmação ao lado do botão — então o próprio botão confirma. */
     button.sec.piscou{border-color:#737cf0;color:#121419;background:#737cf0}
+    button.sec.fina.piscou{color:#121419;opacity:1}
     .txt.aviso{color:#a9b2ff;font-weight:600}
     .vus{display:flex;gap:6px}
     .vb{flex:1;height:6px;border-radius:3px;background:#282c36;overflow:hidden}
@@ -7248,7 +7174,6 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
          ia capturar. Um botão que só existe na página é um botão que não
          existe durante a gravação. */
       '<button id="maisTela" class="sec fina" disabled></button>' +
-      '<input id="pipNota" class="nota" maxlength="180" autocomplete="off" disabled>' +
       '<button id="pausa" class="sec" disabled></button>' +
       '<button id="calar" class="sec hide"></button>' +
       '<button id="stop" disabled></button>' +
@@ -7262,7 +7187,6 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     pipCalar   = d.getElementById('calar');
     pipMarcar  = d.getElementById('marcar');
     pipTela    = d.getElementById('maisTela');
-    pipNota    = d.getElementById('pipNota');
     pipPausa   = d.getElementById('pausa');
     pipFrames.textContent = t('pipStop');
     pipFrames.onclick = () => { if (pararLive) pararLive(); };
@@ -7272,35 +7196,6 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     pipMarcar.onclick = () => { if (marcarAgora) marcarAgora(); };
     if (pipTela) pipTela.onclick = () => { if (maisUmaTela) maisUmaTela(); };
     pipPausa.onclick  = () => { if (alternarPausa) alternarPausa(); };
-    /* Os dois campos escrevem no MESMO quadro e se espelham. Um estado por
-       janela seria o jeito de a pessoa digitar na janelinha e encontrar o
-       cartão em branco na revisão. */
-    pipNota.oninput = () => {
-      if (!notaAlvo) return;
-      notaAlvo.nota = (pipNota.value || '').slice(0, 180);
-      if ($('recNota')) $('recNota').value = notaAlvo.nota;
-      avisarNotaGuardada();
-      /* A janelinha é onde a pessoa está: o aviso tem que aparecer AQUI, e não
-         só na aba que ela não está vendo. O próprio contorno do campo
-         confirma — não cabe uma segunda linha de texto em 258px.
-
-         `piscarGuardou` e não um `setTimeout` escrito aqui: o timer daqui
-         apontava para a VARIÁVEL `pipNota`, e a variável vira nula quando a
-         janelinha fecha. Digitar e fechar a janela em menos de 1,4 s — que é o
-         que se faz quando se fecha por engano logo depois de comentar —
-         estourava `Cannot read properties of null` um segundo e meio depois,
-         longe do gesto que causou. `piscarGuardou` guarda o ELEMENTO. */
-      piscarGuardou(pipNota);
-    };
-    /* Enter aqui dentro confirma e MORRE aqui. É o ponto mais perigoso da
-       ferramenta inteira para uma tecla solta: "Parar" está a dois centímetros
-       do campo, e parar é irreversível — a reunião não se repete. */
-    pipNota.onkeydown = e => confirmarNota(e, pipNota);
-    /* E a mesma trava um degrau acima, no documento da janelinha: qualquer
-       Enter que nasça dentro do campo não chega a botão nenhum. */
-    d.addEventListener('keydown', e => {
-      if (e.key === 'Enter' && e.target === pipNota) { e.preventDefault(); e.stopPropagation(); }
-    }, true);
     /* O botão da janelinha não duplica lógica: chama o mesmo `alternarMic` da
        aba, e o rótulo dos dois é repintado pela mesma função. */
     pipCalar.onclick = () => { if (alternarMic) alternarMic(); };
@@ -7308,13 +7203,12 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     /* A janelinha nasceu: o cartão recolhe o campo dele agora, e não no
        próximo "marcar". Dois campos iguais na tela ao mesmo tempo, mesmo por
        dez segundos, já é tempo de a pessoa digitar no errado. */
-    if (liveOn) apontarNota(notaAlvo);
 
     /* Fechar a janelinha NÃO para a gravação: fechar sem querer não pode
        destruir uma reunião de uma hora. O botão da aba continua valendo. */
     pipWin.addEventListener('pagehide', () => {
       pipWin = null; pipRelogio = pipTexto = pipFrames = pipVm = pipVs = pipCalar = null;
-      pipMarcar = pipTela = pipPausa = pipNota = null;
+      pipMarcar = pipTela = pipPausa = null;
       /* Fechada por engano, e a gravação continua: some o relógio, o medidor,
          o marcar, o pausar e a caixa de comentário — tudo que existe DURANTE a
          gravação. Sem um jeito de trazer de volta, a única saída era parar e
@@ -7323,8 +7217,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       /* E o campo de comentário volta para o cartão, com o texto: ele nunca
          morou no campo, mora no quadro. Sem esta linha a pessoa fechava a
          janelinha e ficava sem lugar nenhum para comentar. */
-      if (liveOn) apontarNota(notaAlvo);
-    });
+      });
   }
 
   function controle(etapa, dados){
@@ -7358,14 +7251,20 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       if (pipTexto) pipTexto.textContent = aviso ? aviso
         : pausado ? t('pipPausado')
         : t('pipFrames', dados.frames) + (marcados ? ' · ' + t('pipMarcados', marcados) : '');
+      /* O DESTAQUE VAI PARA O BOTÃO QUE FOI APERTADO, e não sempre para o
+         primeiro. Antes qualquer aviso acendia o "marcar": apertar "mais uma
+         tela" fazia o OUTRO botão mudar de cor, e quem apertou concluía que
+         tinha clicado errado — um retorno visual que mente sobre o próprio
+         gesto é pior do que retorno nenhum. */
       if (pipMarcar) {
         pipMarcar.disabled = pausado;
         pipMarcar.textContent = t('recMarkBtn');
-        pipMarcar.classList.toggle('piscou', !!aviso);
+        pipMarcar.classList.toggle('piscou', !!aviso && pipAvisoDe !== 'tela');
       }
       if (pipTela) {
         pipTela.disabled = pausado;
         pipTela.textContent = t('recTelaBtn');
+        pipTela.classList.toggle('piscou', !!aviso && pipAvisoDe === 'tela');
       }
       if (pipPausa)  {
         pipPausa.disabled = false;
@@ -7461,7 +7360,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
        campo de um documento morto, e `notaMoraNaJanelinha()` respondia "sim"
        para uma janela que não existe mais: o cartão escondia o campo dele e a
        pessoa ficava sem os dois. */
-    pipMarcar = pipTela = pipPausa = pipNota = null;
+    pipMarcar = pipTela = pipPausa = null;
   }
   let liveAgora = () => 0;
 
@@ -8032,7 +7931,6 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       $('recPause').classList.add('hide'); $('recMark').classList.add('hide');
       if ($('recTela')) $('recTela').classList.add('hide');
       $('recPip').classList.add('hide');
-      esconderNota();
       pausado = false; alternarPausa = null; marcarAgora = null; maisUmaTela = null;
     };
 
@@ -8794,12 +8692,12 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
         pintarRecMsg();
         /* E na janelinha, que é para onde a pessoa está olhando. */
         pipAviso = t('pipMarcado', frames.filter(f => f.manual).length);
+        pipAvisoDe = 'marcar';
         pipAvisoAte = performance.now() + 2200;
         /* A caixa passa a comentar ESTE quadro. Zerar o texto é parte da
            regra: herdar o comentário da marcação anterior encheria o documento
            de repetição, e repetição num documento de evidência é pior do que
            silêncio — ela parece confirmação. */
-        apontarNota(frames[frames.length - 1]);
         controle('gravando', { seg: agora(), frames: frames.length });
       }
     };
@@ -8814,6 +8712,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
         avisoAte = performance.now() + 2600;
         pintarRecMsg();
         pipAviso = avisoCurto;
+        pipAvisoDe = 'tela';
         pipAvisoAte = performance.now() + 2200;
         controle('gravando', { seg: agora(), frames: frames.length });
       }
@@ -8838,8 +8737,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       /* `abrirControle` desenha a janelinha no estado 'prep'. Aqui a gravação
          já está rolando: sem este empurrão, a janela voltaria dizendo
          "preparando" com o relógio parado. */
-      if (pipWin) { controle('gravando', { seg: agora(), frames: frames.length });
-                    apontarNota(notaAlvo); }
+      if (pipWin) controle('gravando', { seg: agora(), frames: frames.length });
       pintarVoltarJanelinha();
     };
     $('recPause').classList.remove('hide'); $('recPause').classList.add('ghost');
@@ -8847,7 +8745,6 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     if ($('recTela')) $('recTela').classList.remove('hide');
     /* Aparece já na largada, desligada e dizendo o que espera: uma caixa que só
        surge depois da primeira marcação seria uma caixa que ninguém descobre. */
-    apontarNota(null);
     pintarVoltarJanelinha();
     $('recPause').textContent = t('recPauseBtn');
     $('recMark').disabled = false;
@@ -9003,7 +8900,6 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       $('recPause').classList.add('hide'); $('recMark').classList.add('hide');
       if ($('recTela')) $('recTela').classList.add('hide');
       $('recPip').classList.add('hide');
-      esconderNota();
       pausado = false; alternarPausa = null; marcarAgora = null; maisUmaTela = null;
       trabalhando(false);
       abrindoCaptura = false;
@@ -12265,6 +12161,16 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       /* A etiqueta vem daqui, e não do CSS: escrita como content:'descartado'
          ela escapava do i18n e aparecia em português para quem usa em inglês. */
       fig.dataset.off = t('offTag');
+      /* O SELO DO FIXADO. Sem ele, "manter sempre" seria uma promessa
+         invisível: a pessoa aperta "descartar repetidos", vê a grade encolher
+         e não tem como saber se o que ela protegeu sobreviveu — e conferir
+         quadro a quadro é o trabalho que o botão veio evitar. */
+      if (f.fixo) {
+        const pin = document.createElement('span');
+        pin.className = 'fixoTag';
+        pin.textContent = '📌 ' + t('fixarTag');
+        fig.appendChild(pin);
+      }
 
       /* Descartar frame era exclusivo de mouse. Agora é um <button> de verdade
          — e precisa ser, porque o campo de anotação mora ao lado dele: um
@@ -12337,7 +12243,14 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
          intervalo dava "Cannot set properties of undefined"; pelo objeto, a
          escrita cai num quadro que já saiu da lista e não faz nada, que é o
          comportamento certo para um campo que já não representa nada. */
-      campo.oninput = () => { f.nota = campo.value; };
+      campo.oninput = () => {
+        f.nota = campo.value;
+        /* E vai para o espelho. Antes quem escrevia isto era o comentário ao
+           vivo, que saiu; sem esta linha, anotar quarenta passos na revisão e
+           perder a aba levaria as quarenta anotações junto — e é justamente
+           depois da gravação que a pessoa passa meia hora escrevendo. */
+        espelharNota(frames.indexOf(f) + 1, f.nota);
+      };
       // sem isto, digitar espaço na anotação descartaria o frame
       campo.onclick = e => e.stopPropagation();
       campo.onkeydown = e => e.stopPropagation();
@@ -14009,25 +13922,45 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
 
   /* ================= recortar =================
      Gravação de tela inteira traz barra de tarefas, notificação e a janela que
-     ficou aberta atrás. O recorte é UM só, aplicado a todos os quadros: numa
-     mesma gravação a área que interessa é sempre a mesma, e recortar quadro a
-     quadro seria trabalho repetido para o mesmo resultado.
+     ficou aberta atrás. Numa mesma gravação a área que interessa costuma ser a
+     mesma, e por isso o recorte nasceu valendo para TODOS os quadros de uma vez.
+
+     O QUE FALTAVA, e o relato de uso pegou: recortar SÓ ESTA tela. Acontece
+     toda hora — uma janela de erro que abriu menor, um pop-up no canto, uma
+     tela que veio de outro monitor. Aplicar em todos ali é destruir 39 quadros
+     para consertar 1, e o "desfazer o corte" devolvia os 40 juntos.
+
+     Agora são dois botões, e a diferença está escrita neles. O de sempre
+     continua sendo o de sempre — quem já usava não muda de gesto.
 
      Ele é destrutivo como a tarja — o que sai no documento é a imagem recortada
-     — mas guarda o original em memória, então "tirar o recorte" devolve tudo
-     sem precisar extrair de novo. */
+     — mas guarda o original em memória, então "tirar o corte" devolve tudo sem
+     precisar extrair de novo. É por isso que o corte de um quadro só pode
+     conviver com o corte geral: cada quadro guarda o SEU original. */
   let recorte = null;         // {x,y,w,h} normalizado, ou null
 
-  async function aplicarRecorte(){
-    for (const f of frames) {
+  /* `alvo` vazio quer dizer "todos os quadros", que é o comportamento antigo e
+     continua sendo o padrão. Com um quadro dentro, o recorte é dele e o
+     `recorte` global não é tocado — senão cortar uma tela reescreveria a área
+     que vale para as outras 39. */
+  async function aplicarRecorte(alvo){
+    const lista = alvo ? [alvo] : frames;
+    for (const f of lista) {
       if (!f.orig) f.orig = f.img;                  // guarda uma vez só
       const base = f.orig;
-      if (!recorte) { f.img = base; f.tarjado = null; f.hash = null; continue; }
+      /* Qual área vale para ESTE quadro: a dele, se ele tiver uma própria; a
+         geral, se não. Uma pergunta só, para não haver dois lugares decidindo
+         a mesma coisa. */
+      const area = f.recorte || (alvo ? null : recorte);
+      if (!area) { f.img = base; f.tarjado = null; f.hash = null; delete f.recorte; continue; }
+      /* `area`, e não uma variável chamada `recorte` de novo: sombrear aqui o
+         `recorte` de fora é a mesma armadilha que uma segunda função com o
+         mesmo nome — funciona, e engana quem lê. */
       await base.pronta;
       const im = await carregarImagem(base.url);
-      const sx = Math.round(recorte.x * base.w), sy = Math.round(recorte.y * base.h);
-      const sw = Math.max(8, Math.round(recorte.w * base.w));
-      const sh = Math.max(8, Math.round(recorte.h * base.h));
+      const sx = Math.round(area.x * base.w), sy = Math.round(area.y * base.h);
+      const sw = Math.max(8, Math.round(area.w * base.w));
+      const sh = Math.max(8, Math.round(area.h * base.h));
       const c = document.createElement('canvas');
       c.width = sw; c.height = sh;
       c.getContext('2d').drawImage(im, sx, sy, sw, sh, 0, 0, sw, sh);
@@ -14227,18 +14160,49 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
 
   $('tarjaModo').onclick = () => modoTarja(!tarjando);
 
-  function modoCrop(on){
+  /* `soEsta` diz se o próximo arrasto corta SÓ este quadro ou todos. Ele é uma
+     propriedade do modo, e não um segundo modo: o gesto é o mesmo arrasto, e
+     dois modos de arrastar seriam dois caminhos para a mesma coisa. */
+  let cortarSoEsta = false;
+  function modoCrop(on, soEsta){
     if (on) soEste('crop');
     cortando = on;
+    cortarSoEsta = !!(on && soEsta);
     $('lenteImgCx').classList.toggle('tarjando', on || tarjando);
-    $('cropModo').textContent = t(on ? 'cropFim' : 'cropBtn');
-    $('cropModo').classList.toggle('ghost', !on);
-    if (on) $('tarjaMsg').textContent = t('cropComo');
+    $('cropModo').textContent = t(on && !cortarSoEsta ? 'cropFim' : 'cropBtn');
+    $('cropModo').classList.toggle('ghost', !(on && !cortarSoEsta));
+    if ($('cropUma')) {
+      $('cropUma').textContent = t(cortarSoEsta ? 'cropFim' : 'cropUmaBtn');
+      $('cropUma').classList.toggle('ghost', !cortarSoEsta);
+    }
+    if (on) $('tarjaMsg').textContent = t(cortarSoEsta ? 'cropComoUma' : 'cropComo');
     else pintarTarjas();
   }
-  $('cropModo').onclick = () => modoCrop(!cortando);
+  $('cropModo').onclick = () => modoCrop(!(cortando && !cortarSoEsta), false);
+  /* ---- fixar este quadro ---- */
+  function pintarFixar(){
+    const b = $('fixarModo'); if (!b) return;
+    const f = frames[lenteI];
+    const on = !!(f && f.fixo);
+    b.textContent = t(on ? 'fixarTirar' : 'fixarBtn');
+    b.classList.toggle('ghost', on);
+  }
+  if ($('fixarModo')) $('fixarModo').onclick = () => {
+    const f = frames[lenteI]; if (!f) return;
+    if (f.fixo) delete f.fixo; else f.fixo = true;
+    /* Fixar não muda `keep`: um quadro descartado pode ser fixado para
+       sobreviver ao próximo lote quando alguém o trouxer de volta. Fixar é
+       sobre o automático, e manter é sobre a pessoa. */
+    pintarFixar(); render();
+    $('tarjaMsg').textContent = t(f.fixo ? 'fixarFeito' : 'fixarSaiu');
+  };
+  if ($('cropUma')) $('cropUma').onclick = () => modoCrop(!(cortando && cortarSoEsta), true);
+  /* Desfazer devolve TUDO: o corte geral e os cortes de quadro. Um botão que
+     desfizesse só metade deixaria a pessoa com um documento meio cortado e sem
+     nenhum jeito de saber quais telas ainda estão. */
   $('cropTirar').onclick = async () => {
     recorte = null;
+    frames.forEach(f => { delete f.recorte; });
     $('tarjaMsg').textContent = t('cropIndo');
     await aplicarRecorte();
     $('cropTirar').classList.add('hide');
@@ -14323,13 +14287,23 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     if (!c || c.w < 0.012 || c.h < 0.012 || !f) { pintarTarjas(); return; }
 
     if (cortando) {
-      recorte = c;
+      const uma = cortarSoEsta;
       $('tarjaMsg').textContent = t('cropIndo');
-      await aplicarRecorte();
+      if (uma) {
+        /* Só este quadro: a área mora NELE, e o `recorte` geral não é tocado.
+           Sem essa separação, cortar uma tela redefiniria a área que vale para
+           as outras — e o defeito só apareceria na próxima vez que alguém
+           mexesse no corte geral. */
+        f.recorte = c;
+        await aplicarRecorte(f);
+      } else {
+        recorte = c;
+        await aplicarRecorte();
+      }
       modoCrop(false);
       $('cropTirar').classList.remove('hide');
       pintarLente(); render();
-      $('tarjaMsg').textContent = t('cropFeito', frames.length);
+      $('tarjaMsg').textContent = uma ? t('cropFeitoUma') : t('cropFeito', frames.length);
       return;
     }
     f.tarjas = (f.tarjas || []).concat(c);
@@ -14357,13 +14331,14 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
 
   function pintarLente(){
     const f = frames[lenteI]; if (!f) return;
-    const kept = frames.filter(x => x.keep);
-    const k = kept.indexOf(f);
-    const n = k >= 0 ? k + 1 : 0;
+    /* O número do PASSO, e não a posição na lista de mantidos: com telas
+       agrupadas, o quarto quadro mantido pode ser a segunda tela do passo 3. */
+    const n = f.keep ? numeroDoQuadro(f) : 0;
     pintarEm($('lenteImg'), telaDe(f));
-    $('cropTirar').classList.toggle('hide', !recorte);
+    $('cropTirar').classList.toggle('hide', !(recorte || frames.some(x => x.recorte)));
     pintarTarjas();
     pintarMarcas();
+    pintarFixar();
     $('lenteTit').textContent = (n ? passoN(n) : t('offTag')) + '  ·  ' + fmt(f.t) +
                                 (horaDe(f.t) ? '  ·  ' + horaDe(f.t) : '');
     $('lentePos').textContent = t('lentePos', lenteI + 1, frames.length);
@@ -14589,7 +14564,12 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   };
 
   $('lenteNota').oninput = () => {
-    if (frames[lenteI]) { frames[lenteI].nota = $('lenteNota').value; }
+    if (frames[lenteI]) {
+      frames[lenteI].nota = $('lenteNota').value;
+      // pelo mesmo motivo do campo da grade: anotar e perder a aba não pode
+      // custar as anotações
+      espelharNota(lenteI + 1, frames[lenteI].nota);
+    }
   };
   /* Corrigir a hora de UM passo reancora a gravação inteira: o instante zero
      passa a ser essa hora menos o tempo decorrido até aqui. É o que a pessoa
@@ -14870,10 +14850,21 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       });
   }
   const pintarSoMarcados = pintarFiltros;
+  /* ---- O QUADRO FIXADO ----
+
+     Os três botões de limpeza — repetidos, sem fala, só os marcados — jogam
+     quadros fora em lote, e não havia como salvar um do lote. O relato de uso
+     é o caso exato: "descartar repetidos" levava junto a tela que a pessoa
+     queria. Ela desfazia tudo com "manter todos" e recomeçava à mão.
+
+     `fixo` é a resposta, e ela é passiva: um quadro fixado nunca é DESCARTADO
+     por uma ação em lote. Ele continua podendo ser descartado com um clique na
+     própria miniatura — fixar protege do automático, não da pessoa. Uma trava
+     que a própria dona não consegue abrir é uma armadilha, não uma proteção. */
   $('soMarcados').onclick = () => {
     const n = frames.filter(f => f.manual).length;
     if (!n) return;
-    frames.forEach(f => { f.keep = !!f.manual; });
+    frames.forEach(f => { f.keep = !!f.manual || !!f.fixo; });
     filtroAtivo = 'marcados';
     render();
     $('status').textContent = t('keepMarkedN', n, frames.length - n);
@@ -14882,6 +14873,11 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     let prev = null, n = 0;
     frames.forEach(f => {
       if (!f.sig) return;
+      /* O fixado não é descartado — e também não vira a nova referência de
+         comparação, senão fixar um quadro mudaria QUAIS outros são
+         considerados repetidos, e a proteção de um mexeria no destino dos
+         vizinhos. Fixar protege quem foi fixado, e mais ninguém. */
+      if (f.fixo) return;
       if (prev && diff(prev, f.sig) < 4) { f.keep = false; n++; }
       else prev = f.sig;
     });
@@ -14933,7 +14929,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     }
 
     let n = 0;
-    frames.forEach((f, i) => { if (!temFala[i] && f.keep) { f.keep = false; n++; } });
+    frames.forEach((f, i) => { if (!temFala[i] && f.keep && !f.fixo) { f.keep = false; n++; } });
     filtroAtivo = 'semfala';
     render();
     $('status').textContent = n ? t('quietN', n) : t('quiet0');

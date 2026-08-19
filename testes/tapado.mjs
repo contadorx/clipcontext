@@ -67,8 +67,16 @@ async function pagina(){
 console.log('[A] cartão 2 travado (sem vídeo no passo 1) — o estado da queixa');
 const { pg, ctx, erros } = await pagina();
 {
-  ok('o cartão está mesmo travado',
-     await pg.evaluate(() => document.getElementById('cardTr').classList.contains('fechado')));
+  /* O CARTÃO 2 DEIXOU DE NASCER FECHADO. Fechado, ele era uma faixa cinza que
+     não dizia o que fazia — e a pergunta que gerava era literal: "isto só serve
+     para vídeo enviado?". Não serve. Quem fechou no lugar dele foi a GAVETA dos
+     ajustes, que é onde estavam os dezesseis controles, e é ela que agora
+     esconde o "apagar o modelo de voz" — a queixa que deu origem a este
+     arquivo. O caminho é o mesmo, o botão que o abre é outro. */
+  ok('o cartão nasce aberto',
+     !(await pg.evaluate(() => document.getElementById('cardTr').classList.contains('fechado'))));
+  ok('mas os ajustes dele nascem guardados',
+     !(await pg.evaluate(() => document.getElementById('ajustesCx').classList.contains('aberta'))));
   const d = await alcancavel(pg, 'avisar');   // o diagnóstico virou o anexo do recado, no rodapé
   ok('Diagnóstico alcançável', d.ok, d.motivo);
 
@@ -96,13 +104,24 @@ const { pg, ctx, erros } = await pagina();
   ok('o cabeçalho do cartão 2 se anuncia como botão',
      !!cab && cab.papel === 'button' && cab.foco === '0' && cab.cursor === 'pointer',
      JSON.stringify(cab));
+  /* E a gaveta também: um botão de verdade, que diz o próprio estado. Um
+     esconderijo que só "funciona no clique" sem se anunciar é um truque, e
+     truque é o mesmo que estar tapado. */
+  const gav = await pg.evaluate(() => {
+    const b = document.getElementById('ajustesBtn');
+    return b && { tag: b.tagName, aberto: b.getAttribute('aria-expanded'),
+                  controla: b.getAttribute('aria-controls') };
+  });
+  ok('e o botão dos ajustes também se anuncia',
+     !!gav && gav.tag === 'BUTTON' && gav.aberto === 'false' && gav.controla === 'ajustesCx',
+     JSON.stringify(gav));
   const tapadoAntes = await alcancavel(pg, 'limparModelo');
-  ok('com o cartão fechado ele está mesmo escondido (é o que o cabeçalho resolve)',
+  ok('com a gaveta fechada ele está mesmo escondido (é o que o botão resolve)',
      !tapadoAntes.ok, tapadoAntes.motivo);
-  await pg.locator('#cardTr h2').click();
+  await pg.locator('#ajustesBtn').click();
   await pg.waitForTimeout(400);
   const l = await alcancavel(pg, 'limparModelo');
-  ok('e um clique no cabeçalho o torna alcançável', l.ok, l.motivo);
+  ok('e um clique em "ajustes" o torna alcançável', l.ok, l.motivo);
   /* O cartão fica aberto daqui para a frente: é o estado em que a pessoa que
      veio apagar o modelo está quando aperta o botão, e é ele que o bloco [B]
      precisa exercitar. */
