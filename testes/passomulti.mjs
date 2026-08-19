@@ -23,6 +23,7 @@
 import { chromium } from 'playwright';
 import http from 'http';
 import fs from 'fs';
+import { execSync } from 'child_process';
 
 const RAIZ = '/root/walkstamp';
 const html = fs.readFileSync(RAIZ + '/public/app.html', 'utf8');
@@ -179,6 +180,104 @@ console.log('\n[5] OS FORMATOS NÃO SE CONTRADIZEM');
   /* O texto do PDF é comprimido; o que dá para afirmar sem descomprimir é que
      ele saiu inteiro. A concordância de número é cobrada acima, na planilha e
      no HTML, que saem da MESMA régua que o PDF usa. */
+}
+
+// ---------------------------------------------------------------------------
+console.log('\n[5b] o PowerPoint é um slide por PASSO, não um por tela');
+{
+  /* O DEFEITO, visto num deck real: uma reunião de 119 quadros virou 120
+     slides de UMA imagem cada. Quem apresenta passa vinte minutos clicando em
+     "próximo" para mostrar a mesma tarefa vista de quatro ângulos.
+
+     O NÚMERO QUE IMPORTA: cinco telas em dois passos têm que dar TRÊS slides
+     (capa + 2), e não seis. Se der seis, o agrupamento não chegou ao PPTX e o
+     deck contradiz o HTML do mesmo pacote. */
+  const dl = pg.waitForEvent('download', { timeout: 90000 });
+  await pg.locator('#pptx').click();
+  await (await dl).saveAs('/tmp/pm.pptx');
+  const lista = execSync('unzip -Z1 /tmp/pm.pptx', { encoding: 'utf8' }).trim().split('\n');
+  const nSlides = lista.filter(n => /^ppt\/slides\/slide\d+\.xml$/.test(n)).length;
+  const nImgs = lista.filter(n => /^ppt\/media\//.test(n)).length;
+  console.log('     slides: ' + nSlides + '   imagens: ' + nImgs);
+  ok('capa + um slide por passo = 3', nSlides === 3, String(nSlides));
+  ok('e as cinco telas continuam todas no arquivo', nImgs === 5, String(nImgs));
+
+  const s2 = execSync('unzip -p /tmp/pm.pptx ppt/slides/slide2.xml', { encoding: 'utf8' });
+  const pics = (s2.match(/<p:pic>/g) || []).length;
+  ok('o slide do passo 1 leva as TRÊS telas dele lado a lado', pics === 3, String(pics));
+  ok('e o cabeçalho dele diz o passo, não a posição na lista',
+     /Passo 1/.test(s2), (s2.match(/Passo \d+/) || ['(não achou)'])[0]);
+
+  /* Cada imagem na sua proporção — a mesma régua que o PDF passou a usar.
+     Três telas iguais lado a lado têm que sair com caixas de razão igual. */
+  /* Só as caixas de IMAGEM: `<a:ext>` também aparece em caixa de texto, e uma
+     régua que mede o cabeçalho junto passa a dizer qualquer coisa. */
+  const razoes = [...s2.matchAll(/<p:pic>[\s\S]*?<\/p:pic>/g)]
+    .map(b => b[0].match(/<a:ext cx="(\d+)" cy="(\d+)"\/>/))
+    .filter(Boolean)
+    .map(m => Math.round((+m[2] / +m[1]) * 100) / 100);
+  const daTelaP = await pg.evaluate(() => (window.__quadros() || [])
+    .filter(f => f.keep).slice(0, 3).map(f => Math.round((f.img.h / f.img.w) * 100) / 100));
+  console.log('     razão das caixas do slide 2: ' + JSON.stringify(razoes) +
+              '   das telas: ' + JSON.stringify(daTelaP));
+  ok('cada caixa saiu com a proporção da sua imagem',
+     razoes.length === 3 && razoes.every((r, i) => Math.abs(r - daTelaP[i]) < 0.02),
+     JSON.stringify(razoes));
+
+  const rel2 = execSync('unzip -p /tmp/pm.pptx ppt/slides/_rels/slide2.xml.rels', { encoding: 'utf8' });
+  const alvos = [...rel2.matchAll(/Target="\.\.\/media\/([^"]+)"/g)].map(m => m[1]);
+  /* Com um rId fixo por slide, três imagens no mesmo slide apontariam todas
+     para o mesmo arquivo — o slide sairia com a mesma tela repetida três
+     vezes, e nada no tamanho do .pptx denunciaria isso. */
+  ok('as três apontam para arquivos DIFERENTES',
+     new Set(alvos).size === alvos.length && alvos.length === 3, JSON.stringify(alvos));
+}
+
+// ---------------------------------------------------------------------------
+console.log('\n[5c] o índice lista passos anotados, e não repete a narração');
+{
+  /* Item 11 do levantamento: o índice reimprimia a mesma fala que aparece três
+     centímetros abaixo, embaixo da imagem. E o PDF tinha uma CÓPIA da conta da
+     fala escrita à mão enquanto o Word chamava `falaDoFrame` — duas verdades
+     para a mesma pergunta, dentro do mesmo pacote. */
+  const linhas = await pg.evaluate(() => window.__indice().map(l => l.n + '|' + l.texto));
+  console.log('     ' + JSON.stringify(linhas));
+  /* O NÚMERO QUE IMPORTA: dois passos anotados, duas linhas — e não cinco,
+     uma por imagem. */
+  ok('uma linha por passo anotado, não por imagem', linhas.length === 2,
+     String(linhas.length));
+  ok('e o texto de cada linha é a anotação do passo',
+     linhas[0] === '1|Abrir a ME21N' && linhas[1] === '2|Preencher o cabecalho do pedido',
+     JSON.stringify(linhas));
+
+  /* O CASO QUE SEPARA AS DUAS RÉGUAS, e sem ele o bloco acima passaria com o
+     defeito ligado: aqui SÓ O PRIMEIRO passo tem anotação. Um índice enxuto
+     lista uma linha; o índice antigo listava duas, e a segunda era o começo da
+     narração que já aparece embaixo da imagem. */
+  const misto = await pg.evaluate(() => {
+    const q = window.__quadros();
+    const guardada = q[3].nota;
+    q[3].nota = '';
+    const r = window.__indice().map(l => l.n + '|' + l.texto);
+    q[3].nota = guardada;
+    return r;
+  });
+  console.log('     com só um passo anotado: ' + JSON.stringify(misto));
+  ok('com um passo anotado e outro não, só o anotado entra',
+     misto.length === 1 && misto[0] === '1|Abrir a ME21N', JSON.stringify(misto));
+
+  /* A OUTRA METADE: sem nenhuma anotação o índice não pode ficar vazio — aí a
+     narração é tudo o que há, e ele volta a listar todos os passos. */
+  const semNota = await pg.evaluate(() => {
+    const q = window.__quadros();
+    const guardadas = q.map(f => f.nota);
+    q.forEach(f => { f.nota = ''; });
+    const r = window.__indice().length;
+    q.forEach((f, i) => { f.nota = guardadas[i]; });
+    return r;
+  });
+  ok('sem anotação nenhuma, ele volta a listar os dois passos', semNota === 2,
+     String(semNota));
 }
 
 // ---------------------------------------------------------------------------

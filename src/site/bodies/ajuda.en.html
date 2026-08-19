@@ -226,6 +226,40 @@
         “Context for AI” asks for no identification at all: the reader is a machine.</p>
       </details>
       <details>
+        <summary>Which scenario for which material</summary>
+        <p>Picking the wrong one here is the mistake that ruins the most documents — and nothing warns
+        you. A meeting filed as “test evidence” comes out with the wrong title, with the word “Step”
+        where it should say “Moment”, and with one screen captured every time the video tile of
+        whoever was speaking moved. By what you actually recorded:</p>
+        <table class="legal">
+          <tr><th>What you recorded</th><th>Scenario</th><th>What changes in the document</th></tr>
+          <tr><td>I ran a test case and need to prove it passed</td>
+              <td><b>Test evidence</b></td>
+              <td>Case, system, ticket and result fields; SHA-256 fingerprint of every image;
+                  the unit is “Step”</td></tr>
+          <tr><td>I taught someone how to do a task in the system</td>
+              <td><b>Work instruction</b></td>
+              <td>Title, version and author; the note becomes the step title; unlocks the SCORM
+                  output for the LMS</td></tr>
+          <tr><td>A meeting, a call, a demo for the client</td>
+              <td><b>Meeting minutes</b></td>
+              <td>Subject, place, who ran it and who attended; the unit becomes “Moment”; the speech
+                  weighs more than the screen</td></tr>
+          <tr><td>I watched someone use the product and want the findings</td>
+              <td><b>Usability session</b></td>
+              <td>Study, task, moderator and the participant <b>code</b> — never the name; the
+                  participant's screen comes out large, because it is the data</td></tr>
+          <tr><td>I am going to attach this to a conversation with an AI model</td>
+              <td><b>Context for AI</b></td>
+              <td>No identification at all: the reader is a machine. The prompt comes with it</td></tr>
+          <tr><td>An audit, an expert report, supplier training — none of the above</td>
+              <td><b>Other</b></td>
+              <td>The generic one: a sequence with the speech, no official letterhead</td></tr>
+        </table>
+        <p>You can change it later: go back to step 1, pick another scenario and generate again. The
+        screens, the notes and the transcript stay where they were.</p>
+      </details>
+      <details>
         <summary>Format: layout and paper size</summary>
         <p>The <b>layout</b> decides how the screens are distributed — automatic, one per page with the
         speech from that stretch, or a compact grid of six per page. The <b>paper size</b> is A4 or

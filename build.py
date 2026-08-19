@@ -8,6 +8,7 @@ Gera os dois builds a partir de src/template.html.
 Edite sempre src/template.html. Os arquivos gerados são descartáveis.
 """
 
+import datetime as _dt
 import functools
 import json
 import pathlib
@@ -22,6 +23,38 @@ CDN = "https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"
 # Antes disto ele estava escrito à mão em 46 lugares, em três idiomas — o tipo de
 # coisa que faz uma decisão de dez minutos virar uma tarde de caça.
 MARCA = "Walkstamp"
+
+# ---------------------------------------------------------------------------
+# A VERSÃO DO BUILD.
+#
+# O motivo é o pacote OFFLINE. Ele é um arquivo solto que a pessoa guarda no
+# computador dela, manda por e-mail e abre meses depois — e não tem como se
+# atualizar sozinho. Sem carimbo, "estou com um problema no offline" é uma
+# conversa sem chão: ninguém sabe de qual build se está falando, nem se o
+# defeito já foi consertado três versões atrás.
+#
+# O formato é a DATA seguida de um contador do dia: `2026.08.19-1`. Data porque
+# é o que a pessoa consegue comparar de cabeça ("o meu é de junho"), e contador
+# porque num dia de ajustes saem vários. O contador vive num arquivo, ao lado
+# do build, e é derivado — ninguém digita versão à mão.
+VER_ARQ = "src/.build"
+
+
+def versao_do_build(root):
+    """Data de hoje mais quantos builds já saíram hoje. Deriva, não se digita."""
+    hoje = _dt.date.today().isoformat()
+    arq = root / VER_ARQ
+    try:
+        anterior, n = arq.read_text(encoding="utf-8").strip().split()
+        n = int(n)
+    except Exception:
+        anterior, n = "", 0
+    n = n + 1 if anterior == hoje else 1
+    try:
+        arq.write_text(f"{hoje} {n}\n", encoding="utf-8")
+    except Exception:
+        pass
+    return f"{hoje.replace('-', '.')}-{n}"
 # O logotipo escreve a marca em duas metades, a segunda em destaque.
 MARCA_A, MARCA_B = "Walk", "stamp"
 
@@ -1247,6 +1280,11 @@ def main() -> int:
     src = src.replace("__SITE__", SITE)                      # domínio público, definido no topo
     src = src.replace("__SITEDOM__", SITE.split("//")[-1])  # o mesmo, sem o esquema, para exibir
     src = src.replace("__ICONV__", ICON_V)
+    # O carimbo da versão. Ele entra no app e no offline pelo mesmo caminho de
+    # todo o resto: um token no template, trocado aqui.
+    VER = versao_do_build(ROOT)
+    src = src.replace("__VERSAO__", VER)
+    print(f"versão do build: {VER}")
 
     # ---- O RODAPÉ DA FERRAMENTA, igual ao do site ----
     #

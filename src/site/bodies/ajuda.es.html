@@ -227,6 +227,40 @@
         IA” no pide ninguna identificación: el lector es una máquina.</p>
       </details>
       <details>
+        <summary>Qué escenario para qué material</summary>
+        <p>Elegir mal aquí es el error que más documentos estropea — y no avisa. Una reunión registrada
+        como “evidencia de prueba” sale con el título equivocado, con la palabra “Paso” donde debería
+        decir “Momento”, y con una pantalla guardada cada vez que el recuadro de quien hablaba cambió
+        de sitio. Según lo que grabaste:</p>
+        <table class="legal">
+          <tr><th>Lo que grabaste</th><th>Escenario</th><th>Qué cambia en el documento</th></tr>
+          <tr><td>Ejecuté un caso de prueba y necesito probar que pasó</td>
+              <td><b>Evidencia de prueba</b></td>
+              <td>Campos de caso, sistema, incidencia y resultado; huella SHA-256 de cada imagen;
+                  la unidad es “Paso”</td></tr>
+          <tr><td>Le enseñé a alguien a hacer una tarea en el sistema</td>
+              <td><b>Instrucción de trabajo</b></td>
+              <td>Título, versión y autor; la anotación se vuelve el título del paso; habilita la
+                  salida SCORM para el LMS</td></tr>
+          <tr><td>Una reunión, una llamada, una demostración para el cliente</td>
+              <td><b>Acta de reunión</b></td>
+              <td>Asunto, lugar, quién la condujo y participantes; la unidad pasa a “Momento”; el
+                  habla pesa más que la pantalla</td></tr>
+          <tr><td>Observé a alguien usar el producto y quiero los hallazgos</td>
+              <td><b>Sesión de usabilidad</b></td>
+              <td>Estudio, tarea, moderador y el <b>código</b> del participante — nunca el nombre; la
+                  pantalla del participante sale grande, porque es el dato</td></tr>
+          <tr><td>Voy a adjuntar esto en una conversación con un modelo de IA</td>
+              <td><b>Contexto para IA</b></td>
+              <td>Ninguna identificación: el lector es una máquina. El prompt sale junto</td></tr>
+          <tr><td>Auditoría, peritaje, formación de proveedores — nada de lo anterior</td>
+              <td><b>Otro</b></td>
+              <td>El genérico: secuencia con el habla, sin encabezado de oficio</td></tr>
+        </table>
+        <p>Se puede cambiar después: vuelve al paso 1, elige otro escenario y genera de nuevo. Las
+        pantallas, las anotaciones y la transcripción siguen donde estaban.</p>
+      </details>
+      <details>
         <summary>Formato: diseño y papel</summary>
         <p>El <b>diseño</b> decide cómo se distribuyen las pantallas — automático, una por página con el habla
         de ese tramo, o cuadrícula compacta de seis por página. El <b>papel</b> es A4 o Carta. Los dos están

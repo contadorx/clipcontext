@@ -41,7 +41,15 @@ await pg.selectOption('#mode', 'count');
 await pg.fill('#count', '4');
 await pg.locator('#extract').click();
 await pg.waitForSelector('#prevCard:not(.hide)', { timeout: 40000 });
-await pg.waitForTimeout(600);
+/* A ESPERA É PELA CONDIÇÃO, e não por um relógio.
+   `#prevCard` sai do `hide` no PRIMEIRO quadro — a grade enche durante a
+   varredura, de propósito. Esperar 600 ms depois disso era uma aposta sobre
+   quanto os outros três demoram, e ela perdia uma vez em três com a máquina
+   ocupada por outro teste ao lado. O que se afirma continua igual: quatro
+   quadros, nem mais nem menos — a espera só deixou de ser um palpite. */
+await pg.waitForFunction(() => document.querySelectorAll('#thumbs figure').length >= 4,
+                         null, { timeout: 40000 }).catch(() => {});
+await pg.waitForTimeout(400);
 const n = await pg.locator('#thumbs figure').count();
 ok('frames extraídos', n === 4, n + ' miniaturas');
 

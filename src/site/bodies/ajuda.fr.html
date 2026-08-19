@@ -228,6 +228,40 @@
         pour l’IA » ne demande aucune identification : le lecteur est une machine.</p>
       </details>
       <details>
+        <summary>Quel cas d’usage pour quel matériau</summary>
+        <p>Se tromper ici est l’erreur qui gâche le plus de documents — et rien ne prévient. Une réunion
+        classée en « preuve de test » sort avec le mauvais titre, avec le mot « Étape » là où il faudrait
+        « Moment », et avec un écran gardé chaque fois que la vignette de la personne qui parlait a
+        changé de place. Selon ce que vous avez enregistré :</p>
+        <table class="legal">
+          <tr><th>Ce que vous avez enregistré</th><th>Cas d’usage</th><th>Ce qui change dans le document</th></tr>
+          <tr><td>J’ai exécuté un cas de test et je dois prouver qu’il est passé</td>
+              <td><b>Preuve de test</b></td>
+              <td>Champs cas, système, ticket et résultat ; empreinte SHA-256 de chaque image ;
+                  l’unité est « Étape »</td></tr>
+          <tr><td>J’ai montré à quelqu’un comment faire une tâche dans le système</td>
+              <td><b>Mode opératoire</b></td>
+              <td>Titre, version et auteur ; l’annotation devient le titre de l’étape ; débloque la
+                  sortie SCORM pour le LMS</td></tr>
+          <tr><td>Une réunion, un appel, une démonstration pour le client</td>
+              <td><b>Compte rendu de réunion</b></td>
+              <td>Sujet, lieu, qui animait et participants ; l’unité devient « Moment » ; la parole
+                  pèse plus que l’écran</td></tr>
+          <tr><td>J’ai observé quelqu’un utiliser le produit et je veux les constats</td>
+              <td><b>Séance d’utilisabilité</b></td>
+              <td>Étude, tâche, animateur et le <b>code</b> du participant — jamais le nom ; l’écran du
+                  participant sort en grand, car c’est lui la donnée</td></tr>
+          <tr><td>Je vais joindre ceci à une conversation avec un modèle d’IA</td>
+              <td><b>Contexte pour l’IA</b></td>
+              <td>Aucune identification : le lecteur est une machine. Le prompt part avec</td></tr>
+          <tr><td>Audit, expertise, formation fournisseur — rien de tout cela</td>
+              <td><b>Autre</b></td>
+              <td>Le générique : séquence avec la parole, sans en-tête officiel</td></tr>
+        </table>
+        <p>On peut en changer ensuite : revenez à l’étape 1, choisissez un autre cas d’usage et
+        régénérez. Les écrans, les annotations et la transcription restent en place.</p>
+      </details>
+      <details>
         <summary>Format : mise en page et papier</summary>
         <p>La <b>mise en page</b> décide comment les écrans se répartissent — automatique, un par page avec la parole
         du passage, ou grille compacte de six par page. Le <b>papier</b> est A4 ou Letter. Les deux se trouvent

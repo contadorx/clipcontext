@@ -214,9 +214,9 @@
      de ler o número. Sem isso, "Passo 3 · 2/3" seria a única pista de que
      aquelas três miniaturas são a mesma ação, e ninguém lê legenda de
      miniatura antes de decidir o que está olhando. */
-  .fixoTag{position:absolute;right:5px;top:5px;z-index:3;font:600 10.5px/1 ui-sans-serif,system-ui;
-    background:var(--panel);color:var(--ink);border:1px solid var(--line);
-    border-radius:99px;padding:4px 7px;letter-spacing:.02em}
+  .fixoTag{position:absolute;right:4px;top:4px;z-index:3;font-size:10px;line-height:1;
+    background:var(--panel);border:1px solid var(--line);
+    border-radius:99px;padding:3px 4px;opacity:.92}
   .thumbs figure.juntoAoAnterior{border-left:3px solid color-mix(in srgb,var(--accent) 40%,transparent);
     border-top-left-radius:0;border-bottom-left-radius:0}
   .thumbs figure.juntoAoAnterior .passo{color:var(--muted);font-weight:500}
@@ -1580,6 +1580,18 @@
       </div>
       <p class="status" id="revResumo"></p>
     </div>
+    <!-- ROSTO E NOME NÃO SÃO TEXTO, e é por isso que este aviso é separado do
+         de baixo. A varredura de dados sensíveis lê o OCR: ela acha CPF,
+         e-mail, telefone. Numa gravação de reunião o que vaza não está escrito
+         em lugar nenhum — são onze quadradinhos de vídeo com o rosto e o nome
+         de quem estava na chamada, e o documento saiu com todos eles.
+
+         Aqui NÃO se detecta rosto. Detectar exigiria um modelo de visão, e um
+         modelo que baixa 6 MB para dizer "tem gente aí" contradiz a promessa
+         desta ferramenta. O que se usa é o que a pessoa JÁ declarou: o cenário
+         escolhido e o canal de áudio do computador. Nos dois casos havia
+         outra pessoa na chamada — e o aviso diz isso, não finge saber mais. -->
+    <p class="note hide" id="pessoasAviso" style="margin-top:12px"></p>
     <p class="note hide" id="sensAviso" style="margin-top:12px"></p>
     <div class="thumbs" id="thumbs"></div>
       <div class="row sbFim"><button class="ghost sm sbOk" data-sb="1" data-i18n="sbOk1"></button></div>
@@ -1846,6 +1858,12 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
           <select id="layout" style="width:auto">
             <option value="auto" data-i18n="layAuto"></option>
             <option value="full" data-i18n="layFull"></option>
+            <!-- Uma por página. Ela existe para o caso em que a tela precisa ser
+                 LIDA — um erro de sistema em letra miúda, uma tabela de valores —
+                 e não só reconhecida. Antes, quem precisava disso ampliava o PDF
+                 no leitor e descobria que a imagem não tinha resolução para
+                 ampliar: ela já estava do tamanho da largura útil. -->
+            <option value="uma" data-i18n="layUma"></option>
             <option value="grid" data-i18n="layGrid"></option>
           </select>
         </span>
@@ -1854,6 +1872,24 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
           <select id="papel" style="width:auto">
             <option value="a4">A4</option>
             <option value="letter" data-i18n="papelCarta"></option>
+          </select>
+        </span>
+        <!-- A CLASSIFICAÇÃO, só no Team.
+
+             Ela sai em TODA página do documento, e não só na capa: quem imprime
+             uma folha do meio de uma evidência confidencial leva uma folha sem
+             marca nenhuma, e é justamente a folha solta que circula.
+
+             Escondida fora do Team porque uma tarja de "Confidencial" que
+             qualquer um pode escrever num documento gratuito não classifica
+             nada — ela só ensina que a palavra não vale. -->
+        <span class="row hide" id="clsRow" style="gap:7px;align-items:center">
+          <label class="status" for="docClass" data-i18n="clsLbl"></label>
+          <select id="docClass" style="width:auto">
+            <option value="" data-i18n="clsN"></option>
+            <option value="Int" data-i18n="clsNInt"></option>
+            <option value="Conf" data-i18n="clsNConf"></option>
+            <option value="Restr" data-i18n="clsNRestr"></option>
           </select>
         </span>
       </div>
@@ -1867,6 +1903,23 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
         <button class="ghost" id="html" data-i18n="htmlBtn"></button>
         <button class="ghost" id="md" data-i18n="mdBtn"></button>
       </div>
+      <!-- O PESO DO HTML, dito ANTES de gerar.
+
+           O achado: um documento real de 119 telas saiu com 8,4 MB de HTML, e
+           o "tamanho estimado" na tela dizia menos — porque ele fala do JPEG, e
+           o HTML carrega o mesmo JPEG em base64, que infla exatamente um terço.
+           A pessoa descobria a diferença quando o e-mail voltava.
+
+           NÃO se troca o formato da imagem para resolver isso, e vale dizer por
+           quê: o documento imprime a impressão digital de cada tela, e ela é do
+           JPEG que o PDF e o Word também levam. Gravar WebP só aqui faria o
+           hash do mesmo pacote apontar para bytes que ninguém tem — e uma
+           evidência que não fecha a própria conta não é evidência.
+
+           O que dá para fazer, e é o que faltava, é dizer o número antes e
+           apontar a saída que já existe para isso: o .zip leva as imagens ao
+           lado, sem base64. -->
+      <p class="note hide" id="htmlPeso" style="margin:7px 0 0"></p>
     </div>
     <div class="saidaGrupo">
       <span class="saidaTit" data-i18n="grEntregar"></span>
@@ -2512,8 +2565,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       perf:'Transcrito no {0}{1}: {2} s de áudio em {3} s — {4}× o tempo real.',
       perfLinhas:' em {0} linhas',
       perfLento:'Mais lento que o próprio vídeo — vale escolher o modelo rápido.',
-      docxBtn:'Word (.docx)', zipBtn:'Zip das figuras', wFrames:'Frames neste documento',
-      ftPromo:'Passo a passo com hora, gerado no navegador — nenhum vídeo saiu do computador',
+      docxBtn:'Word (.docx)', zipBtn:'Zip das figuras', ftPromo:'Passo a passo com hora, gerado no navegador — nenhum vídeo saiu do computador',
       ftCapa:'Documento gerado inteiramente no navegador de quem executou. O vídeo, o áudio e as imagens não passaram por servidor nenhum — nem nosso, nem de terceiros. Ferramenta gratuita, sem exigir cadastro.',
       pkgBuilding:'Montando o arquivo…',
       docxDone:'Documento do Word com {0} frames — pronto para editar.',
@@ -2638,7 +2690,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       avisarBtn:'Avisar um problema ou dar uma ideia', avisarDica:'Problema, ideia ou elogio — vai junto um relatório técnico do seu navegador, que você vê antes de mandar.',
       abaKb:'Como funciona', abaKbDica:'Base de conhecimento: o que cada parte faz, por tema.',
       grFormato:'Formato', fmtLayout:'Layout', fmtPapel:'Papel',
-      fmtConta:'O formato padrão vem da configuração de {0} — trocar aqui vale só para este documento.',
+      fmtConta:'O formato padrão vem da configuração de {0} — trocar aqui vale só para este documento.', htmlPeso:'O HTML vai sair com cerca de {0} MB: ele carrega as imagens dentro do próprio arquivo, em texto, e isso pesa um terço a mais que o PDF. Acima de 10 MB a maioria dos e-mails recusa o anexo — se for mandar por e-mail, use o .zip, que leva as imagens ao lado.',
       grDoc:'O documento', grEntregar:'Entregar em outro sistema', grDados:'Dados e recuperação',
       jsonBtn:'Guardar para recuperar depois (.json)',
       quietN:'{0} frame(s) sem fala foram descartados.',
@@ -2792,7 +2844,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       pEvid:'Identificação', pStart:'Início da gravação', pHash:'SHA-256 da imagem',
       pWhen:'Tempo decorrido', pRelogio:'Hora de relógio', pStep:'{0} de {1}',
       pHashH:'Impressões digitais das imagens',
-      pHashSub:'SHA-256 de cada imagem como ela está neste documento. Serve para conferir depois que a imagem não foi trocada; não é assinatura eletrônica e não atesta conformidade com norma nenhuma.',
+      pHashSub:'SHA-256 de cada imagem como ela está neste documento. Serve para conferir depois que a imagem não foi trocada; não é assinatura eletrônica e não atesta conformidade com norma nenhuma. Para conferir sem instalar nada, abra __SITEDOM__/verificar e solte a imagem lá — a conta é feita no seu navegador, e o arquivo não sai dele.',
       pNoteRel:'A hora de relógio de cada imagem é o início informado da gravação somado ao tempo decorrido. O documento registra o que foi capturado; a trilha de aprovação continua no seu sistema de mudanças.',
       gEvid:'Montar a ata de evidência de teste',
       modelH:'Modelo de saída',
@@ -2814,6 +2866,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       tarjaN:'{0} tarja(s) neste passo — elas são queimadas na imagem que sai no documento.',
       tarjaTirar:'clique para tirar esta tarja',
       htmlBtn:'Página (.html)', mdBtn:'Markdown', csvBtn:'Planilha (.csv)',
+      clsLbl:'Classificação', clsN:'sem classificação', clsNInt:'Interno', clsNConf:'Confidencial', clsNRestr:'Restrito', docEmissor:'Emitido por', pptTelas:'{0} telas', pptCont:'cont.', pptTelaDe:'tela {0} de {1}',
       papelCarta:'Carta', csvPasso:'Passo',
       gdBtn:'Enviar para o Google Docs',
       gdAviso:'Atenção: este é o único botão da ferramenta que faz o seu documento SAIR do computador.\n\nO arquivo do Word é enviado ao Google, que o converte em um documento do Google Docs dentro do seu Drive. Ele sai daqui direto para o Google — não passa por nenhum servidor nosso —, mas passa a estar no Google, sujeito às políticas de lá.\n\nSe a evidência tiver dado sensível, prefira baixar o arquivo.\n\nEnviar mesmo assim?',
@@ -2839,7 +2892,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       sensTarjado1:'1 tarja aplicada. Confira na lente antes de gerar — a tarja é queimada na imagem.',
       sensTarjar:'Tarjar as {0} ocorrências',
       sensTarjado:'{0} tarjas aplicadas. Confira na lente antes de gerar — a tarja é queimada na imagem.',
-      sensNaoAchou:'Nada para tarjar automaticamente',
+      sensNaoAchou:'Nada para tarjar automaticamente', pessoasH:'Tem gente nesta gravação.', pessoas_ata:'Você marcou o cenário “Ata de reunião”.', pessoas_ux:'Você marcou o cenário “Sessão de usabilidade”.', pessoas_canal:'A transcrição tem a voz do outro lado da chamada.', pessoasP:'Numa chamada de vídeo, cada tela guardada leva a fita de participantes — rosto, nome e cargo de quem estava lá. Isso não é texto, então a varredura acima não enxerga. Confira as telas antes de gerar.', pessoasBtn:'Abrir a lente para tarjar as pessoas',
       sensNaoAchouDica:'O padrão foi encontrado no texto corrido, mas não em cima de nenhuma palavra localizável na imagem. Tarje à mão na lente.',
       sensSemCaixa:'Tarjar automaticamente não disponível',
       sensSemCaixaDica:'Esta versão do leitor de texto não devolveu a posição das palavras. Dá para tarjar à mão na lente.',
@@ -2860,14 +2913,14 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       prNota:'A linha imediatamente acima de uma imagem, quando existe, foi escrita à mão por quem executou o teste: é a expectativa ou a observação daquele passo, e não uma descrição do que a imagem mostra.',
       dedupN:'{0} frame(s) quase idênticos foram descartados.',
       dedup0:'Nenhum frame repetido encontrado — todos mostram algo diferente.',
-      pdfBtn:'Gerar PDF', layAuto:'Layout automático',
-      layFull:'Sequência, cada frame com a fala do trecho', layGrid:'Grade compacta, 6 por página',
+      pdfBtn:'Gerar PDF', layAuto:'Automático — o cenário escolhe',
+      layFull:'Para acompanhar o passo a passo — duas telas por página, com a fala', layUma:'Para LER o que está na tela — uma por página, no maior tamanho', layGrid:'Para conferir de relance — grade de 6 por página',
       pdfBuilding:'Montando o PDF…', pdfDone:'PDF gerado', pdfDone2:' — {0} frames, {1} páginas.',
       pTitle:'Análise de vídeo', pDur:'Duração', pRes:'Resolução', pSize:'Tamanho',
-      pFrames:'Frames neste PDF', pTr:'Transcrição', pTrCues:'{0} trechos com tempo',
+      pQuadros:'{0}s neste documento', pArtefato:'Registro de tela', pSemHash:'Sem impressão digital: este documento não foi conferido quadro a quadro.', pTr:'Transcrição', pTrCues:'{0} trechos com tempo',
       pTrPlain:'texto sem marcação de tempo', pTrNone:'não fornecida',
       pNote:'Cada imagem traz o instante exato em que foi capturada. Os tempos referem-se ao início do vídeo.',
-      pFrameOf:'frame {0} de {1}', pNoSpeech:'(sem fala neste trecho)',
+      pFrameOf:'{2} {0} de {1}', pImagem:'imagem', pNoSpeech:'(sem fala neste trecho)',
       pFramesH:'Frames', pFullTr:'Transcrição completa',
       s5:'Prompt para a IA',
       s5sub:'Não basta anexar o PDF: o modelo precisa saber como ele está organizado. Este texto faz isso — e é gerado sozinho, ajustado ao seu vídeo.',
@@ -3094,8 +3147,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       perf:'Transcribed on the {0}{1}: {2} s of audio in {3} s — {4}× real time.',
       perfLinhas:' on {0} threads',
       perfLento:'Slower than the video itself — the fast model is worth a try.',
-      docxBtn:'Word (.docx)', zipBtn:'Zip of the images', wFrames:'Frames in this document',
-      ftPromo:'Time-stamped walkthrough, generated in the browser — no video left the computer',
+      docxBtn:'Word (.docx)', zipBtn:'Zip of the images', ftPromo:'Time-stamped walkthrough, generated in the browser — no video left the computer',
       ftCapa:'This document was generated entirely in the browser of the person who ran it. The video, the audio and the images went through no server — neither ours nor anyone else’s. Free tool, no sign-up.',
       pkgBuilding:'Building the file…',
       docxDone:'Word document with {0} frames — ready to edit.',
@@ -3220,7 +3272,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       avisarBtn:'Report a problem or share an idea', avisarDica:'Problem, idea or praise — a technical report of your browser goes along, and you see it before sending.',
       abaKb:'How it works', abaKbDica:'Knowledge base: what each part does, by topic.',
       grFormato:'Format', fmtLayout:'Layout', fmtPapel:'Paper',
-      fmtConta:"The default format comes from {0}'s settings — changing it here applies to this document only.",
+      fmtConta:"The default format comes from {0}'s settings — changing it here applies to this document only.", htmlPeso:'The HTML will come out at about {0} MB: it carries the images inside the file itself, as text, and that weighs a third more than the PDF. Above 10 MB most mail servers refuse the attachment — if you are sending it by e-mail, use the .zip, which keeps the images alongside.',
       grDoc:'The document', grEntregar:'Deliver to another system', grDados:'Data and recovery',
       jsonBtn:'Save to reopen later (.json)',
       quietN:'{0} frame(s) with no speech were discarded.',
@@ -3368,7 +3420,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       pEvid:'Identification', pStart:'Recording started at', pHash:'Image SHA-256',
       pWhen:'Elapsed', pRelogio:'Clock time', pStep:'{0} of {1}',
       pHashH:'Image fingerprints',
-      pHashSub:'SHA-256 of each image exactly as it appears in this document. It lets you check later that an image was not swapped; it is not an electronic signature and does not certify compliance with any standard.',
+      pHashSub:'SHA-256 of each image exactly as it appears in this document. It lets you check later that an image was not swapped; it is not an electronic signature and does not certify compliance with any standard. To check without installing anything, open __SITEDOM__/verificar and drop the image there — the sum is computed in your browser, and the file never leaves it.',
       pNoteRel:'The clock time of each image is the stated recording start plus the elapsed time. This document records what was captured; the approval trail stays in your change management system.',
       gEvid:'Write the test evidence record',
       modelH:'Output model',
@@ -3390,6 +3442,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       tarjaN:'{0} redaction(s) on this step — they are burned into the image that goes in the document.',
       tarjaTirar:'click to remove this redaction',
       htmlBtn:'Page (.html)', mdBtn:'Markdown', csvBtn:'Spreadsheet (.csv)',
+      clsLbl:'Classification', clsN:'unclassified', clsNInt:'Internal', clsNConf:'Confidential', clsNRestr:'Restricted', docEmissor:'Issued by', pptTelas:'{0} screens', pptCont:'cont.', pptTelaDe:'screen {0} of {1}',
       papelCarta:'Letter', csvPasso:'Step',
       gdBtn:'Send to Google Docs',
       gdAviso:'Heads up: this is the only button in the tool that makes your document LEAVE your computer.\n\nThe Word file is sent to Google, which converts it into a Google Docs document inside your Drive. It goes straight from here to Google — it never touches a server of ours — but from then on it lives at Google, under their policies.\n\nIf the evidence contains sensitive data, download the file instead.\n\nSend anyway?',
@@ -3415,7 +3468,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       sensTarjado1:'1 redaction applied. Check it in the lens before generating — the redaction is burned into the image.',
       sensTarjar:'Redact the {0} occurrences',
       sensTarjado:'{0} redactions applied. Check them in the lens before generating — the redaction is burned into the image.',
-      sensNaoAchou:'Nothing to redact automatically',
+      sensNaoAchou:'Nothing to redact automatically', pessoasH:'There are people in this recording.', pessoas_ata:'You picked the “Meeting minutes” scenario.', pessoas_ux:'You picked the “Usability session” scenario.', pessoas_canal:'The transcript carries the voice from the other end of the call.', pessoasP:'In a video call every captured screen carries the participant strip — face, name and job title of everyone who was there. That is not text, so the scan above cannot see it. Check the screens before you generate.', pessoasBtn:'Open the lens to redact the people',
       sensNaoAchouDica:'The pattern was found in the running text, but not over any word that can be located on the image. Redact by hand in the lens.',
       sensSemCaixa:'Automatic redaction unavailable',
       sensSemCaixaDica:'This version of the text reader did not return word positions. You can still redact by hand in the lens.',
@@ -3436,14 +3489,14 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       prNota:'The line immediately above an image, where present, was written by hand by whoever ran the test: it is the expected result or the observation for that step, not a description of what the image shows.',
       dedupN:'{0} near-identical frame(s) were discarded.',
       dedup0:'No repeated frames found — every one shows something different.',
-      pdfBtn:'Generate PDF', layAuto:'Automatic layout',
-      layFull:'Sequence, each frame with its speech', layGrid:'Compact grid, 6 per page',
+      pdfBtn:'Generate PDF', layAuto:'Automatic — the scenario decides',
+      layFull:'To follow the steps — two screens per page, with the speech', layUma:'To READ what is on the screen — one per page, at the largest size', layGrid:'To scan at a glance — grid of 6 per page',
       pdfBuilding:'Building the PDF…', pdfDone:'PDF generated', pdfDone2:' — {0} frames, {1} pages.',
       pTitle:'Video analysis', pDur:'Duration', pRes:'Resolution', pSize:'Size',
-      pFrames:'Frames in this PDF', pTr:'Transcript', pTrCues:'{0} timestamped segments',
+      pQuadros:'{0}s in this document', pArtefato:'Screen record', pSemHash:'No fingerprint: this document was not checked frame by frame.', pTr:'Transcript', pTrCues:'{0} timestamped segments',
       pTrPlain:'text without timestamps', pTrNone:'not provided',
       pNote:'Each image carries the exact moment it was captured. Times are counted from the start of the video.',
-      pFrameOf:'frame {0} of {1}', pNoSpeech:'(no speech in this interval)',
+      pFrameOf:'{2} {0} of {1}', pImagem:'image', pNoSpeech:'(no speech in this interval)',
       pFramesH:'Frames', pFullTr:'Full transcript',
       s5:'Prompt for the AI',
       s5sub:'Attaching the PDF is not enough: the model needs to know how it is organised. This text does that — generated automatically, tailored to your video.',
@@ -3670,8 +3723,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       perf:'Transcrito en el {0}{1}: {2} s de audio en {3} s — {4}× el tiempo real.',
       perfLinhas:' en {0} líneas',
       perfLento:'Más lento que el propio vídeo — vale la pena elegir el modelo rápido.',
-      docxBtn:'Word (.docx)', zipBtn:'Zip de las imágenes', wFrames:'Fotogramas en este documento',
-      ftPromo:'Paso a paso con hora, generado en el navegador — ningún vídeo salió del equipo',
+      docxBtn:'Word (.docx)', zipBtn:'Zip de las imágenes', ftPromo:'Paso a paso con hora, generado en el navegador — ningún vídeo salió del equipo',
       ftCapa:'Documento generado enteramente en el navegador de quien lo ejecutó. El vídeo, el audio y las imágenes no pasaron por ningún servidor — ni nuestro ni de terceros. Herramienta gratuita, sin registro.',
       pkgBuilding:'Montando el archivo…',
       docxDone:'Documento de Word con {0} fotogramas — listo para editar.',
@@ -3796,7 +3848,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       avisarBtn:'Avisar de un problema o dar una idea', avisarDica:'Problema, idea o elogio — va junto un informe técnico de tu navegador, que ves antes de enviar.',
       abaKb:'Cómo funciona', abaKbDica:'Base de conocimiento: qué hace cada parte, por tema.',
       grFormato:'Formato', fmtLayout:'Diseño', fmtPapel:'Papel',
-      fmtConta:'El formato predeterminado viene de la configuración de {0} — cambiarlo aquí vale solo para este documento.',
+      fmtConta:'El formato predeterminado viene de la configuración de {0} — cambiarlo aquí vale solo para este documento.', htmlPeso:'El HTML saldrá con unos {0} MB: lleva las imágenes dentro del propio archivo, como texto, y eso pesa un tercio más que el PDF. Por encima de 10 MB la mayoría de los correos rechaza el adjunto — si lo vas a enviar por correo, usa el .zip, que lleva las imágenes al lado.',
       grDoc:'El documento', grEntregar:'Entregar a otro sistema', grDados:'Datos y recuperación',
       jsonBtn:'Guardar para recuperar después (.json)',
       quietN:'{0} fotograma(s) sin habla fueron descartados.',
@@ -3944,7 +3996,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       pEvid:'Identificación', pStart:'Inicio de la grabación', pHash:'SHA-256 de la imagen',
       pWhen:'Tiempo transcurrido', pRelogio:'Hora de reloj', pStep:'{0} de {1}',
       pHashH:'Huellas digitales de las imágenes',
-      pHashSub:'SHA-256 de cada imagen tal como aparece en este documento. Sirve para comprobar después que la imagen no fue sustituida; no es firma electrónica ni certifica conformidad con ninguna norma.',
+      pHashSub:'SHA-256 de cada imagen tal como aparece en este documento. Sirve para comprobar después que la imagen no fue sustituida; no es firma electrónica ni certifica conformidad con ninguna norma. Para comprobarlo sin instalar nada, abre __SITEDOM__/verificar y suelta ahí la imagen — la suma se calcula en tu navegador y el archivo no sale de él.',
       pNoteRel:'La hora de reloj de cada imagen es el inicio indicado de la grabación más el tiempo transcurrido. El documento registra lo que se capturó; la traza de aprobación sigue en tu sistema de cambios.',
       gEvid:'Redactar el acta de evidencia de prueba',
       modelH:'Modelo de salida',
@@ -3966,6 +4018,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       tarjaN:'{0} zona(s) tachada(s) en este paso — se queman en la imagen que sale en el documento.',
       tarjaTirar:'haz clic para quitar esta zona',
       htmlBtn:'Página (.html)', mdBtn:'Markdown', csvBtn:'Hoja de cálculo (.csv)',
+      clsLbl:'Clasificación', clsN:'sin clasificación', clsNInt:'Interno', clsNConf:'Confidencial', clsNRestr:'Restringido', docEmissor:'Emitido por', pptTelas:'{0} pantallas', pptCont:'cont.', pptTelaDe:'pantalla {0} de {1}',
       papelCarta:'Carta', csvPasso:'Paso',
       gdBtn:'Enviar a Google Docs',
       gdAviso:'Atención: este es el único botón de la herramienta que hace que tu documento SALGA del ordenador.\n\nEl archivo de Word se envía a Google, que lo convierte en un documento de Google Docs dentro de tu Drive. Va de aquí directo a Google — no pasa por ningún servidor nuestro —, pero a partir de ahí queda en Google, sujeto a sus políticas.\n\nSi la evidencia tiene datos sensibles, descarga el archivo.\n\n¿Enviar de todos modos?',
@@ -3991,7 +4044,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       sensTarjado1:'1 tapado aplicado. Compruébalo en la lupa antes de generar — el tapado se quema en la imagen.',
       sensTarjar:'Tapar las {0} apariciones',
       sensTarjado:'{0} tapados aplicados. Compruébalos en la lupa antes de generar — el tapado se quema en la imagen.',
-      sensNaoAchou:'Nada que tapar automáticamente',
+      sensNaoAchou:'Nada que tapar automáticamente', pessoasH:'Hay personas en esta grabación.', pessoas_ata:'Elegiste el escenario “Acta de reunión”.', pessoas_ux:'Elegiste el escenario “Sesión de usabilidad”.', pessoas_canal:'La transcripción trae la voz del otro lado de la llamada.', pessoasP:'En una videollamada cada pantalla guardada lleva la tira de participantes — cara, nombre y cargo de quien estaba allí. Eso no es texto, así que el análisis de arriba no lo ve. Revisa las pantallas antes de generar.', pessoasBtn:'Abrir la lupa para tapar a las personas',
       sensNaoAchouDica:'El patrón se encontró en el texto corrido, pero no sobre ninguna palabra localizable en la imagen. Tapa a mano en la lupa.',
       sensSemCaixa:'Tapado automático no disponible',
       sensSemCaixaDica:'Esta versión del lector de texto no devolvió la posición de las palabras. Puedes tapar a mano en la lupa.',
@@ -4012,14 +4065,14 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       prNota:'La línea inmediatamente encima de una imagen, cuando existe, la escribió a mano quien ejecutó la prueba: es la expectativa o la observación de ese paso, no una descripción de lo que muestra la imagen.',
       dedupN:'{0} fotograma(s) casi idénticos fueron descartados.',
       dedup0:'No se encontraron fotogramas repetidos — todos muestran algo distinto.',
-      pdfBtn:'Generar PDF', layAuto:'Diseño automático',
-      layFull:'Secuencia, cada fotograma con su habla', layGrid:'Cuadrícula compacta, 6 por página',
+      pdfBtn:'Generar PDF', layAuto:'Automático — lo elige el escenario',
+      layFull:'Para seguir el paso a paso — dos pantallas por página, con el habla', layUma:'Para LEER lo que hay en la pantalla — una por página, en el mayor tamaño', layGrid:'Para revisar de un vistazo — cuadrícula de 6 por página',
       pdfBuilding:'Montando el PDF…', pdfDone:'PDF generado', pdfDone2:' — {0} fotogramas, {1} páginas.',
       pTitle:'Análisis de vídeo', pDur:'Duración', pRes:'Resolución', pSize:'Tamaño',
-      pFrames:'Fotogramas en este PDF', pTr:'Transcripción', pTrCues:'{0} tramos con tiempo',
+      pQuadros:'{0}s en este documento', pArtefato:'Registro de pantalla', pSemHash:'Sin huella digital: este documento no fue comprobado fotograma a fotograma.', pTr:'Transcripción', pTrCues:'{0} tramos con tiempo',
       pTrPlain:'texto sin marcas de tiempo', pTrNone:'no proporcionada',
       pNote:'Cada imagen indica el instante exacto en que fue capturada. Los tiempos se cuentan desde el inicio del vídeo.',
-      pFrameOf:'fotograma {0} de {1}', pNoSpeech:'(sin habla en este tramo)',
+      pFrameOf:'{2} {0} de {1}', pImagem:'imagen', pNoSpeech:'(sin habla en este tramo)',
       pFramesH:'Fotogramas', pFullTr:'Transcripción completa',
       s5:'Prompt para la IA',
       s5sub:'No basta con adjuntar el PDF: el modelo necesita saber cómo está organizado. Este texto hace eso — se genera solo, ajustado a tu vídeo.',
@@ -4245,8 +4298,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       perf:'Transkribiert auf {0}{1}: {2} s Ton in {3} s — {4}× Echtzeit.',
       perfLinhas:' mit {0} Threads',
       perfLento:'Langsamer als das Video selbst — es lohnt sich, das schnelle Modell zu wählen.',
-      docxBtn:'Word (.docx)', zipBtn:'ZIP der Bilder', wFrames:'Screenshots in diesem Dokument',
-      ftPromo:'Schritt für Schritt mit Uhrzeit, im Browser erzeugt — kein Video hat den Computer verlassen',
+      docxBtn:'Word (.docx)', zipBtn:'ZIP der Bilder', ftPromo:'Schritt für Schritt mit Uhrzeit, im Browser erzeugt — kein Video hat den Computer verlassen',
       ftCapa:'Dieses Dokument wurde vollständig im Browser der ausführenden Person erzeugt. Video, Ton und Bilder haben keinen Server durchlaufen — weder unseren noch den eines Dritten. Kostenloses Werkzeug, ohne Registrierung.',
       pkgBuilding:'Die Datei wird erstellt…',
       docxDone:'Word-Dokument mit {0} Screenshots — fertig zum Bearbeiten.',
@@ -4371,7 +4423,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       avisarBtn:'Ein Problem melden oder eine Idee einbringen', avisarDica:'Problem, Idee oder Lob — ein technischer Bericht Ihres Browsers geht mit, den Sie vor dem Senden einsehen.',
       abaKb:'So funktioniert es', abaKbDica:'Wissensdatenbank: was jeder Teil tut, nach Thema.',
       grFormato:'Format', fmtLayout:'Layout', fmtPapel:'Papierformat',
-      fmtConta:'Das Standardformat stammt aus den Einstellungen von {0} — eine Änderung hier gilt nur für dieses Dokument.',
+      fmtConta:'Das Standardformat stammt aus den Einstellungen von {0} — eine Änderung hier gilt nur für dieses Dokument.', htmlPeso:'Die HTML-Datei wird etwa {0} MB groß: Sie trägt die Bilder als Text in der Datei selbst, und das wiegt ein Drittel mehr als das PDF. Über 10 MB lehnen die meisten Mailserver den Anhang ab — wenn Sie sie per E-Mail versenden, nehmen Sie die .zip, die die Bilder daneben legt.',
       grDoc:'Das Dokument', grEntregar:'In ein anderes System übergeben', grDados:'Daten und Wiederherstellung',
       jsonBtn:'Zum späteren Öffnen speichern (.json)',
       quietN:'{0} Screenshot(s) ohne Sprache wurden verworfen.',
@@ -4525,7 +4577,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       pEvid:'Identifikation', pStart:'Beginn der Aufnahme', pHash:'SHA-256 des Bildes',
       pWhen:'Verstrichene Zeit', pRelogio:'Uhrzeit', pStep:'{0} von {1}',
       pHashH:'Prüfsummen der Bilder',
-      pHashSub:'SHA-256 jedes Bildes genau so, wie es in diesem Dokument steht. Damit lässt sich später prüfen, dass das Bild nicht ausgetauscht wurde; es ist keine elektronische Signatur und bescheinigt keine Konformität mit irgendeiner Norm.',
+      pHashSub:'SHA-256 jedes Bildes genau so, wie es in diesem Dokument steht. Damit lässt sich später prüfen, dass das Bild nicht ausgetauscht wurde; es ist keine elektronische Signatur und bescheinigt keine Konformität mit irgendeiner Norm. Zum Prüfen ohne Installation öffnen Sie __SITEDOM__/verificar und legen das Bild dort ab — die Summe wird in Ihrem Browser berechnet, die Datei verlässt ihn nicht.',
       pNoteRel:'Die Uhrzeit jedes Bildes ist der angegebene Beginn der Aufnahme plus die verstrichene Zeit. Das Dokument hält fest, was erfasst wurde; die Freigabekette bleibt in Ihrem Änderungsmanagement.',
       gEvid:'Das Protokoll des Testnachweises erstellen',
       modelH:'Art der Ausgabe',
@@ -4547,6 +4599,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       tarjaN:'{0} Schwärzung(en) in diesem Schritt — sie werden fest in das Bild eingebrannt, das in das Dokument kommt.',
       tarjaTirar:'klicken, um diese Schwärzung zu entfernen',
       htmlBtn:'Seite (.html)', mdBtn:'Markdown', csvBtn:'Tabelle (.csv)',
+      clsLbl:'Einstufung', clsN:'ohne Einstufung', clsNInt:'Intern', clsNConf:'Vertraulich', clsNRestr:'Eingeschränkt', docEmissor:'Ausgestellt von', pptTelas:'{0} Bildschirme', pptCont:'Forts.', pptTelaDe:'Bildschirm {0} von {1}',
       papelCarta:'Letter', csvPasso:'Schritt',
       gdBtn:'An Google Docs senden',
       gdAviso:'Achtung: Dies ist die einzige Schaltfläche des Werkzeugs, mit der Ihr Dokument den Computer VERLÄSST.\n\nDie Word-Datei wird an Google gesendet, das sie in ein Google-Docs-Dokument in Ihrem Drive umwandelt. Sie geht von hier direkt zu Google — sie durchläuft keinen unserer Server —, liegt danach aber bei Google und unterliegt dessen Richtlinien.\n\nWenn der Nachweis sensible Daten enthält, laden Sie die Datei lieber herunter.\n\nTrotzdem senden?',
@@ -4572,7 +4625,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       sensTarjado1:'1 Schwärzung angewendet. Prüfen Sie sie vor dem Erzeugen in der Lupe — die Schwärzung wird fest in das Bild eingebrannt.',
       sensTarjar:'Die {0} Treffer schwärzen',
       sensTarjado:'{0} Schwärzungen angewendet. Prüfen Sie sie vor dem Erzeugen in der Lupe — die Schwärzung wird fest in das Bild eingebrannt.',
-      sensNaoAchou:'Nichts automatisch zu schwärzen',
+      sensNaoAchou:'Nichts automatisch zu schwärzen', pessoasH:'In dieser Aufnahme sind Personen zu sehen.', pessoas_ata:'Sie haben das Szenario „Besprechungsprotokoll“ gewählt.', pessoas_ux:'Sie haben das Szenario „Usability-Sitzung“ gewählt.', pessoas_canal:'Die Transkription enthält die Stimme der Gegenseite.', pessoasP:'In einer Videokonferenz zeigt jede gespeicherte Aufnahme die Teilnehmerleiste — Gesicht, Name und Funktion aller Anwesenden. Das ist kein Text, die Prüfung oben sieht es also nicht. Prüfen Sie die Aufnahmen vor dem Erzeugen.', pessoasBtn:'Lupe öffnen und Personen schwärzen',
       sensNaoAchouDica:'Das Muster wurde im laufenden Text gefunden, aber über keinem im Bild auffindbaren Wort. Schwärzen Sie es von Hand in der Lupe.',
       sensSemCaixa:'Automatisches Schwärzen nicht verfügbar',
       sensSemCaixaDica:'Diese Version der Texterkennung hat die Position der Wörter nicht zurückgegeben. Von Hand in der Lupe schwärzen ist weiterhin möglich.',
@@ -4593,14 +4646,14 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       prNota:'Die Zeile unmittelbar über einem Bild wurde, wo vorhanden, von der Person geschrieben, die den Test ausgeführt hat: Sie ist die Erwartung oder die Beobachtung zu diesem Schritt und keine Beschreibung dessen, was das Bild zeigt.',
       dedupN:'{0} nahezu identische Screenshot(s) wurden verworfen.',
       dedup0:'Keine wiederholten Screenshots gefunden — jeder zeigt etwas anderes.',
-      pdfBtn:'PDF erzeugen', layAuto:'Automatisches Layout',
-      layFull:'Abfolge, jeder Screenshot mit dem Gesprochenen des Abschnitts', layGrid:'Kompaktes Raster, 6 pro Seite',
+      pdfBtn:'PDF erzeugen', layAuto:'Automatisch — das Szenario entscheidet',
+      layFull:'Zum Mitverfolgen der Schritte — zwei Bildschirme pro Seite, mit dem Gesprochenen', layUma:'Zum LESEN des Bildschirminhalts — einer pro Seite, in voller Größe', layGrid:'Zum schnellen Überblick — Raster mit 6 pro Seite',
       pdfBuilding:'Das PDF wird erstellt…', pdfDone:'PDF erzeugt', pdfDone2:' — {0} Screenshots, {1} Seiten.',
       pTitle:'Videoanalyse', pDur:'Dauer', pRes:'Auflösung', pSize:'Größe',
-      pFrames:'Screenshots in diesem PDF', pTr:'Transkription', pTrCues:'{0} Abschnitte mit Zeitmarke',
+      pQuadros:'{0}s in diesem Dokument', pArtefato:'Bildschirmaufzeichnung', pSemHash:'Ohne Fingerabdruck: dieses Dokument wurde nicht Bild für Bild geprüft.', pTr:'Transkription', pTrCues:'{0} Abschnitte mit Zeitmarke',
       pTrPlain:'Text ohne Zeitmarken', pTrNone:'nicht vorhanden',
       pNote:'Jedes Bild trägt den genauen Moment, in dem es erfasst wurde. Die Zeiten beziehen sich auf den Beginn des Videos.',
-      pFrameOf:'Screenshot {0} von {1}', pNoSpeech:'(in diesem Abschnitt wurde nichts gesagt)',
+      pFrameOf:'{2} {0} von {1}', pImagem:'Bild', pNoSpeech:'(in diesem Abschnitt wurde nichts gesagt)',
       pFramesH:'Screenshots', pFullTr:'Vollständige Transkription',
       s5:'Prompt für die KI',
       s5sub:'Es genügt nicht, das PDF anzuhängen: Das Modell muss wissen, wie es aufgebaut ist. Dieser Text leistet das — und er wird automatisch erzeugt, passend zu Ihrem Video.',
@@ -4826,8 +4879,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       perf:'Transcription sur {0}{1} : {2} s d’audio en {3} s — {4}× le temps réel.',
       perfLinhas:' sur {0} threads',
       perfLento:'Plus lent que la vidéo elle-même — mieux vaut choisir le modèle rapide.',
-      docxBtn:'Word (.docx)', zipBtn:'Zip des images', wFrames:'Captures dans ce document',
-      ftPromo:'Mode opératoire horodaté, généré dans le navigateur — aucune vidéo n’a quitté l’ordinateur',
+      docxBtn:'Word (.docx)', zipBtn:'Zip des images', ftPromo:'Mode opératoire horodaté, généré dans le navigateur — aucune vidéo n’a quitté l’ordinateur',
       ftCapa:'Document généré entièrement dans le navigateur de la personne qui l’a exécuté. La vidéo, l’audio et les images ne sont passés par aucun serveur — ni le nôtre, ni celui d’un tiers. Outil gratuit, sans inscription.',
       pkgBuilding:'Construction du fichier…',
       docxDone:'Document Word avec {0} captures — prêt à modifier.',
@@ -4952,7 +5004,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       avisarBtn:'Signaler un problème ou proposer une idée', avisarDica:'Problème, idée ou compliment — un rapport technique de votre navigateur est joint, et vous le voyez avant l’envoi.',
       abaKb:'Comment ça marche', abaKbDica:'Base de connaissances : ce que fait chaque partie, par thème.',
       grFormato:'Format', fmtLayout:'Mise en page', fmtPapel:'Format de papier',
-      fmtConta:'Le format par défaut vient des réglages de {0} — le changer ici ne vaut que pour ce document.',
+      fmtConta:'Le format par défaut vient des réglages de {0} — le changer ici ne vaut que pour ce document.', htmlPeso:'Le HTML fera environ {0} Mo : il porte les images à l’intérieur du fichier lui-même, en texte, ce qui pèse un tiers de plus que le PDF. Au-delà de 10 Mo, la plupart des messageries refusent la pièce jointe — pour un envoi par courriel, utilisez le .zip, qui garde les images à côté.',
       grDoc:'Le document', grEntregar:'Livrer dans un autre système', grDados:'Données et récupération',
       jsonBtn:'Enregistrer pour rouvrir plus tard (.json)',
       quietN:'{0} capture(s) sans parole ont été écartées.',
@@ -5106,7 +5158,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       pEvid:'Identification', pStart:'Début de l’enregistrement', pHash:'SHA-256 de l’image',
       pWhen:'Temps écoulé', pRelogio:'Heure d’horloge', pStep:'{0} sur {1}',
       pHashH:'Empreintes des images',
-      pHashSub:'SHA-256 de chaque image telle qu’elle figure dans ce document. Cela permet de vérifier plus tard qu’une image n’a pas été remplacée ; ce n’est pas une signature électronique et cela n’atteste la conformité à aucune norme.',
+      pHashSub:'SHA-256 de chaque image telle qu’elle figure dans ce document. Cela permet de vérifier plus tard qu’une image n’a pas été remplacée ; ce n’est pas une signature électronique et cela n’atteste la conformité à aucune norme. Pour vérifier sans rien installer, ouvrez __SITEDOM__/verificar et déposez-y l’image — la somme est calculée dans votre navigateur, et le fichier n’en sort pas.',
       pNoteRel:'L’heure d’horloge de chaque image est le début d’enregistrement déclaré plus le temps écoulé. Ce document consigne ce qui a été capturé ; la piste d’approbation reste dans votre système de gestion des changements.',
       gEvid:'Rédiger le compte rendu de preuve de test',
       modelH:'Modèle de document',
@@ -5128,6 +5180,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       tarjaN:'{0} caviardage(s) sur cette étape — ils sont incrustés dans l’image qui sort dans le document.',
       tarjaTirar:'cliquez pour retirer ce caviardage',
       htmlBtn:'Page (.html)', mdBtn:'Markdown', csvBtn:'Tableur (.csv)',
+      clsLbl:'Classification', clsN:'sans classification', clsNInt:'Interne', clsNConf:'Confidentiel', clsNRestr:'Restreint', docEmissor:'Émis par', pptTelas:'{0} écrans', pptCont:'suite', pptTelaDe:'écran {0} sur {1}',
       papelCarta:'Letter', csvPasso:'Étape',
       gdBtn:'Envoyer vers Google Docs',
       gdAviso:'Attention : c’est le seul bouton de l’outil qui fait SORTIR votre document de votre ordinateur.\n\nLe fichier Word est envoyé à Google, qui le convertit en document Google Docs dans votre Drive. Il part d’ici directement chez Google — il ne passe par aucun de nos serveurs —, mais il se retrouve chez Google, soumis aux politiques de Google.\n\nSi la preuve contient des données sensibles, préférez télécharger le fichier.\n\nEnvoyer quand même ?',
@@ -5153,7 +5206,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       sensTarjado1:'1 caviardage appliqué. Vérifiez dans la loupe avant de générer — le caviardage est incrusté dans l’image.',
       sensTarjar:'Caviarder les {0} occurrences',
       sensTarjado:'{0} caviardages appliqués. Vérifiez dans la loupe avant de générer — le caviardage est incrusté dans l’image.',
-      sensNaoAchou:'Rien à caviarder automatiquement',
+      sensNaoAchou:'Rien à caviarder automatiquement', pessoasH:'Il y a des personnes dans cet enregistrement.', pessoas_ata:'Vous avez choisi le scénario « Compte rendu de réunion ».', pessoas_ux:'Vous avez choisi le scénario « Séance d’utilisabilité ».', pessoas_canal:'La transcription contient la voix de l’autre bout de l’appel.', pessoasP:'Dans un appel vidéo, chaque écran capturé porte la bande des participants — visage, nom et fonction de chacun. Ce n’est pas du texte, l’analyse ci-dessus ne le voit donc pas. Vérifiez les écrans avant de générer.', pessoasBtn:'Ouvrir la loupe pour caviarder les personnes',
       sensNaoAchouDica:'Le motif a été trouvé dans le texte courant, mais au-dessus d’aucun mot localisable sur l’image. Caviardez à la main dans la loupe.',
       sensSemCaixa:'Caviardage automatique indisponible',
       sensSemCaixaDica:'Cette version du lecteur de texte n’a pas renvoyé la position des mots. Vous pouvez caviarder à la main dans la loupe.',
@@ -5174,14 +5227,14 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       prNota:'La ligne immédiatement au-dessus d’une image, lorsqu’elle existe, a été écrite à la main par la personne qui a exécuté le test : c’est l’attendu ou l’observation de cette étape, et non une description de ce que montre l’image.',
       dedupN:'{0} capture(s) quasi identiques ont été écartées.',
       dedup0:'Aucune capture répétée — chacune montre quelque chose de différent.',
-      pdfBtn:'Générer le PDF', layAuto:'Mise en page automatique',
-      layFull:'Séquence, chaque capture avec la parole du segment', layGrid:'Grille compacte, 6 par page',
+      pdfBtn:'Générer le PDF', layAuto:'Automatique — le scénario décide',
+      layFull:'Pour suivre les étapes — deux écrans par page, avec la parole', layUma:'Pour LIRE ce qui est à l’écran — un par page, à la plus grande taille', layGrid:'Pour vérifier d’un coup d’œil — grille de 6 par page',
       pdfBuilding:'Construction du PDF…', pdfDone:'PDF généré', pdfDone2:' — {0} captures, {1} pages.',
       pTitle:'Analyse vidéo', pDur:'Durée', pRes:'Résolution', pSize:'Taille',
-      pFrames:'Captures dans ce PDF', pTr:'Transcription', pTrCues:'{0} segments horodatés',
+      pQuadros:'{0}s dans ce document', pArtefato:'Enregistrement d’écran', pSemHash:'Sans empreinte : ce document n’a pas été vérifié image par image.', pTr:'Transcription', pTrCues:'{0} segments horodatés',
       pTrPlain:'texte sans marquage temporel', pTrNone:'non fournie',
       pNote:'Chaque image porte l’instant exact où elle a été capturée. Les temps se comptent à partir du début de la vidéo.',
-      pFrameOf:'capture {0} sur {1}', pNoSpeech:'(aucune parole dans ce segment)',
+      pFrameOf:'{2} {0} sur {1}', pImagem:'image', pNoSpeech:'(aucune parole dans ce segment)',
       pFramesH:'Captures', pFullTr:'Transcription complète',
       s5:'Prompt pour l’IA',
       s5sub:'Joindre le PDF ne suffit pas : le modèle doit savoir comment il est organisé. Ce texte s’en charge — et il est généré tout seul, ajusté à votre vidéo.',
@@ -5529,7 +5582,11 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
         '<a href="' + seg(alvo(pg)) + '">' + seg(tx[chave] || chave) + '</a>').join('') +
       '</div>').join('');
     const fim = $('rodapeFim');
-    if (fim) fim.textContent = '__EMPRESA__ · CNPJ __CNPJ__';
+    /* A versão fica AQUI e no diagnóstico, e em nenhum outro lugar. No rodapé
+       porque é onde se procura versão de qualquer coisa, e porque quem abriu o
+       arquivo offline guardado ano passado precisa poder responder "qual é a
+       sua?" sem abrir o diagnóstico. */
+    if (fim) fim.textContent = '__EMPRESA__ · CNPJ __CNPJ__ · v' + VERSAO;
   }
 
   function applyLang(){
@@ -7057,6 +7114,15 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     guardouTic.set(campo, setTimeout(() => campo.classList.remove('guardou'), 1400));
   }
 
+  /* ---- A VERSÃO DESTE BUILD ----
+     Carimbada pelo `build.py`. Ela existe por causa do arquivo OFFLINE: ele é
+     guardado no computador de quem usa, mandado por e-mail e aberto meses
+     depois, e não tem como se atualizar sozinho. Sem carimbo, "estou com um
+     problema no offline" é uma conversa sem chão — ninguém sabe de qual build
+     se fala nem se o defeito já foi consertado. */
+  const VERSAO = '__VERSAO__';
+  window.__versao = () => VERSAO;
+
   const PIP_CSS = `
     *{box-sizing:border-box;margin:0}
     /* A classe .hide mora no CSS da aba, e a janelinha é OUTRO documento — o
@@ -7101,17 +7167,43 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
        pergunta existe. Repetida durante a gravação inteira ela só cobra
        altura, e altura aqui é tela da pessoa. */
     body.gravando .pe{display:none}
+    /* ---- QUATRO PESOS, E CADA UM DIZ UMA COISA ----
+
+       O DEFEITO, e ele é pior do que estranho: "Parar" usava o azul cheio, e o
+       flash de "marcou" pintava o botão de marcar com O MESMO azul cheio. O
+       botão irreversível da tela ficava idêntico a um botão que acabou de
+       confirmar — na janela de 250 px que fica por cima da gravação, onde a
+       pessoa clica de relance.
+
+         cheio azul     = marcar este passo   (o gesto frequente)
+         contorno       = mais uma tela, pausar, calar (os de apoio)
+         contorno verde = acabei de guardar   (confirmação, e some sozinha)
+         cheio vermelho = PARAR               (o único irreversível)
+
+       Verde para confirmar e vermelho para parar não é decoração: são as duas
+       únicas cores que já querem dizer isso antes de alguém ler o rótulo. */
     button{width:100%;padding:9px;border:0;border-radius:8px;background:#737cf0;
            color:#121419;font:600 14px system-ui,sans-serif;cursor:pointer}
     button:hover{filter:brightness(1.08)}
     button:disabled{opacity:.5;cursor:default}
-    button.sec{background:transparent;color:#e9ebf1;border:1px solid #282c36;
+    button.sec{background:transparent;color:#e9ebf1;border:1px solid #3a4150;
                font-size:12.5px;padding:6px}
+    button.sec:hover:not(:disabled){border-color:#737cf0;color:#a9b2ff}
     button.sec.off{border-color:#ef8484;color:#ef8484}
-    /* O flash de "marcou". Numa janelinha de 240 px não cabe uma mensagem de
-       confirmação ao lado do botão — então o próprio botão confirma. */
-    button.sec.piscou{border-color:#737cf0;color:#121419;background:#737cf0}
-    button.sec.fina.piscou{color:#121419;opacity:1}
+    /* Marcar é o gesto frequente: ele é o cheio. */
+    button#marcar{background:#737cf0;color:#121419;border:0;font-size:13.5px;padding:8px}
+    /* Mais uma tela é o aditivo: contorno, e menor. Dois botões do mesmo peso
+       obrigariam a escolher entre iguais no pior momento possível. */
+    button#maisTela{font-size:11.5px;padding:6px;opacity:.9}
+    button#maisTela:hover:not(:disabled){opacity:1}
+    /* PARAR é o único irreversível da janela: vermelho, e só ele. */
+    button#stop{background:#e03131;color:#fff}
+    button#stop:hover:not(:disabled){background:#f03e3e}
+    /* O flash de "guardei". Numa janelinha de 250 px não cabe uma mensagem de
+       confirmação ao lado do botão — então o próprio botão confirma. Verde, e
+       nunca o azul de antes: confirmar e parar não podem ter a mesma cor. */
+    button.piscou{background:#2f9e44 !important;color:#fff !important;
+                  border-color:#2f9e44 !important;opacity:1 !important}
     .txt.aviso{color:#a9b2ff;font-weight:600}
     .vus{display:flex;gap:6px}
     .vb{flex:1;height:6px;border-radius:3px;background:#282c36;overflow:hidden}
@@ -10251,6 +10343,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     if (tag) { tag.classList.toggle('hide', !ativo);
                if (ativo) tag.textContent = t('licAtiva', licenca.q); }
     $('licTirar').classList.toggle('hide', !ativo);
+    /* A classificação é do Team. Uma tarja de "Confidencial" que qualquer um
+       escreve num documento gratuito não classifica nada — ela só ensina que a
+       palavra não vale. */
+    if ($('clsRow')) $('clsRow').classList.toggle('hide', marcaDoDoc().nivel !== 'time');
     $('licChave').classList.toggle('hide', ativo);
     $('licAtivar').classList.toggle('hide', ativo);
     if (ativo) $('licMsg').innerHTML =
@@ -10870,6 +10966,9 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     out.classList.remove('hide');
     const L = []; const say = s => { L.push(s); out.textContent = L.join('\n'); };
     say('--- diagnóstico ---');
+    /* A PRIMEIRA LINHA, e de propósito: é a que responde "qual versão você está
+       usando" sem ninguém precisar perguntar. */
+    say('versão        : ' + VERSAO + (location.protocol === 'file:' ? '  (offline)' : ''));
     say('endereço      : ' + location.protocol);
     say('navegador     : ' + navigator.userAgent.slice(0, 110));
     say('WebGPU        : ' + (navigator.gpu ? 'disponível' : 'ausente'));
@@ -12117,6 +12216,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
 
   function render(){
     if (typeof pintarSoMarcados === 'function') pintarSoMarcados();
+    try { avisarPessoas(); } catch (e) {}
     const box = $('thumbs');
     /* render() agora se chama a si mesmo ao descartar um quadro; sem guardar o
        foco, o teclado voltaria para o começo da página a cada clique. E isto
@@ -12161,9 +12261,16 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
          e não tem como saber se o que ela protegeu sobreviveu — e conferir
          quadro a quadro é o trabalho que o botão veio evitar. */
       if (f.fixo) {
+        /* SÓ O ALFINETE. Com a palavra junto, o selo ocupava um terço da
+           largura de uma miniatura de 158px e competia com a própria imagem —
+           que é o que a pessoa está tentando olhar. A palavra continua
+           existindo para quem passa o mouse e para o leitor de tela, que são os
+           dois lugares onde ela é lida de verdade. */
         const pin = document.createElement('span');
         pin.className = 'fixoTag';
-        pin.textContent = '📌 ' + t('fixarTag');
+        pin.textContent = '📌';
+        pin.title = t('fixarTag');
+        pin.setAttribute('aria-label', t('fixarTag'));
         fig.appendChild(pin);
       }
 
@@ -12535,6 +12642,17 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     $('nOff').textContent = frames.length - keep.length;
     const bytes = keep.reduce((s, f) => s + pesoDe(f.img), 0) * razaoArquivo + 40000;
     $('size').textContent = (bytes/1048576).toFixed(1);
+    /* O HTML pesa OUTRO número, e ele é derivado deste — nunca contado à parte:
+       o mesmo JPEG, em base64, que são quatro bytes de texto para cada três de
+       binário. O aviso só acende perto do limite de anexo de e-mail, que é onde
+       a diferença deixa de ser curiosidade e vira o e-mail voltando. */
+    const pHtml = $('htmlPeso');
+    if (pHtml) {
+      const mb = bytes * (4 / 3) / 1048576;
+      const grande = keep.length > 0 && mb >= 8;
+      pHtml.classList.toggle('hide', !grande);
+      pHtml.textContent = grande ? t('htmlPeso', mb.toFixed(1)) : '';
+    }
     medirRazaoArquivo(keep[0]);
     pintarSaidas();
     // o botão da fala só faz sentido com transcrição marcada no tempo
@@ -12787,6 +12905,124 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      da imagem, que é o que ela já era: uma frase sobre aquela tela. */
   const tituloDoPasso = p => (p.quadros[0].nota || '').trim();
 
+  /* ================= A IDENTIDADE DO DOCUMENTO =================
+
+     O DEFEITO, visto num documento real de 68 páginas: o título era "Análise de
+     vídeo" e o subtítulo era o nome do arquivo. "Análise de vídeo" é o nome que
+     a MÁQUINA dá ao processo — não é o nome do artefato. Quem recebe por e-mail
+     lê "Análise de vídeo — captura de tela" e não sabe do que se trata.
+
+     A regra agora tem três degraus, e o terceiro é o que faltava:
+       1. o caso de teste, se houver — é o que a pessoa procura na pasta depois;
+       2. o nome do arquivo de vídeo, se ele existir e não for genérico;
+       3. o NOME DO ARTEFATO mais a data — "Registro de tela — 19/08/2026".
+          Um documento sempre pode dizer o que ele é e de quando ele é. */
+  function tituloDoDoc(){
+    const ev = evDados();
+    if (ev.caso) return ev.caso;
+    const arq = (fileName || '').replace(/\.[^.]+$/, '').trim();
+    /* "captura de tela", "gravacao", "video": nomes que o sistema operacional
+       inventa. Eles não dizem nada, e como TÍTULO enganam mais do que ajudam. */
+    const generico = /^(captura|screen|grava|record|video|v[íi]deo|untitled|sem[- ]t[íi]tulo)/i;
+    if (arq && arq.length > 3 && !generico.test(arq)) return arq;
+    return t('pArtefato') + ' — ' + dataCurtaDoDoc();
+  }
+  /* A data do documento: a do início informado da gravação, quando houver — é
+     ela que a evidência afirma —, e a de hoje quando não houver. */
+  function dataCurtaDoDoc(){
+    const ev = evDados();
+    const d = ev.inicio != null ? new Date(ev.inicio) : new Date();
+    try { return d.toLocaleDateString(LANG || 'pt', { day:'2-digit', month:'2-digit', year:'numeric' }); }
+    catch (e) { return d.toISOString().slice(0, 10); }
+  }
+  /* O subtítulo só existe quando há arquivo de verdade E ele não é o título.
+     Repetir o título logo abaixo dele é ruído com cara de informação. */
+  function subtituloDoDoc(){
+    const arq = (fileName || '').trim();
+    if (!arq) return '';
+    /* Compara SEM a extensão: quando o título já saiu do nome do arquivo,
+       "amostra" com "amostra.webm" logo abaixo é a mesma palavra duas vezes
+       com um ponto no meio. */
+    const semExt = arq.replace(/\.[^.]+$/, '');
+    const tit = tituloDoDoc();
+    return (arq === tit || semExt === tit) ? '' : arq;
+  }
+
+  /* ---- A FICHA TÉCNICA, UMA VEZ SÓ ----
+
+     Ela estava escrita duas vezes — no PDF e no Word — e as duas cópias já
+     tinham divergido: uma dizia `pFrames` ("Frames neste PDF") e a outra
+     `wFrames`. Além de a palavra ser inglesa num documento que chama tudo de
+     "Passo", ela é a mesma pergunta respondida por duas listas à mão.
+
+     E LINHA SEM VALOR NÃO ENTRA. "Tamanho: nenhum arquivo guardado" é um campo
+     cujo conteúdo é "isto não existe" — ele ocupa uma linha da identificação
+     para não dizer nada, numa gravação ao vivo, que é o caso mais comum. */
+  function fichaDoDoc(kept, dur, cues, plain){
+    const linhas = [
+      [t('pDur'), fmt(dur)],
+      [t('pRes'), resolucao()],
+      /* O rótulo em vigor, no plural: "119 passos", "119 momentos", "119
+         trechos" — a mesma palavra que o corpo do documento usa. */
+      [t('pQuadros', rotuloUnidade()), String(totalDePassosDe(kept))]
+    ];
+    if (fileSize) linhas.splice(2, 0, [t('pSize'), (fileSize / 1048576).toFixed(1) + ' MB']);
+    linhas.push([t('pTr'), cues.length ? t('pTrCues', cues.length)
+                                       : (plain ? t('pTrPlain') : t('pTrNone'))]);
+    return linhas;
+  }
+  /* Quantos PASSOS, e não quantas imagens: com telas agrupadas os dois números
+     são diferentes, e é o passo que o documento numera. */
+  /* ================= A MARCA DO DOCUMENTO, EM TRÊS NÍVEIS =================
+
+     Antes eram dois — com plano e sem plano — e a marca do cliente entrava em
+     três formatos dos dez. PPTX, Markdown e o índice do .zip saíam sem nada,
+     e ninguém tinha reparado porque cada renderizador perguntava por conta
+     própria se havia logotipo.
+
+     Agora a pergunta é feita UMA vez, e os dez leem a mesma resposta:
+
+       free      — só a nossa marca. É o preço de ser grátis, e está dito na
+                   página de preços.
+       personal  — logotipo e nome do cliente no alto de TODOS os formatos; a
+                   nossa desce para o rodapé.
+       time      — o de personal, mais CLASSIFICAÇÃO (Interno, Confidencial) em
+                   toda página e o EMISSOR — quem gerou, de qual conta. É a
+                   primeira coisa que uma auditoria pergunta, e o documento não
+                   respondia.
+
+     A marca do cliente NUNCA substitui a nossa: ela ocupa o alto, e a nossa
+     desce. O documento diz de quem ele é antes de dizer com o que foi feito. */
+  function marcaDoDoc(){
+    const tem = temTime();
+    /* Time é o plano de mais de um assento. `p` quando o emissor manda o nome
+       do plano; a contagem de assentos quando não manda — e nunca as duas
+       listas à mão dizendo a mesma coisa. */
+    const ehTime = tem && !!(licenca && ((licenca.p && /tim|team/i.test(String(licenca.p))) ||
+                                         (+licenca.n > 1)));
+    const nome = tem ? (marcaCliente.nome || '').trim() : '';
+    const img  = tem ? marcaCliente.img : null;
+    const cls  = (ehTime && $('docClass') && $('docClass').value) || '';
+    return {
+      nivel: !tem ? 'free' : (ehTime ? 'time' : 'personal'),
+      temCliente: !!(nome || img),
+      nome, img,
+      /* A classificação sai em TODA página. Uma tarja de confidencialidade que
+         só aparece na capa não protege nada: quem imprime uma folha do meio
+         leva uma folha sem marca nenhuma. */
+      classificacao: cls ? t('clsN' + cls) : '',
+      /* O emissor é o nome da conta, e não o e-mail de ninguém. Carimbar um
+         e-mail pessoal no rodapé de uma evidência entregue ao cliente é uma
+         decisão de privacidade que não é nossa para tomar. */
+      emissor: ehTime ? ((licenca && licenca.q) || '') : ''
+    };
+  }
+
+  function totalDePassosDe(kept){
+    const r = reguaDePassos();
+    return kept.filter(f => r.abre(f)).length || kept.length;
+  }
+
   /* ================= O ROTEIRO QUE A PESSOA JÁ TEM =================
 
      Uma linha, um passo. Ele não é guardado dentro do documento nem some ao
@@ -12968,6 +13204,11 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     pintarHesitar();
     pintarClipe();
     pintarCanais();
+    /* O aviso de rosto e nome depende do CENÁRIO, e não do texto lido da tela:
+       ele tem que aparecer no instante em que a pessoa diz "isto é uma
+       reunião", e não só depois de uma varredura de OCR que pode nunca
+       acontecer. */
+    try { avisarPessoas(); } catch (e) {}
     if (frames.length) render();           // a legenda da miniatura muda com o modelo
     else buildPrompt();
   };
@@ -13698,7 +13939,62 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     { k:'telefone', re:/(?:\(\d{2}\)\s?9?\d{4}[- ]?\d{4}|\b\d{2}[ -]9?\d{4}[- ]\d{4}\b|\b\d{2}9\d{8}\b)/g }
   ];
 
+  /* ---- ROSTO E NOME NUMA GRAVAÇÃO DE REUNIÃO ----
+
+     O ACHADO, num documento real de 68 páginas: uma reunião de 14:50 com onze
+     participantes virou 119 telas, e em quase todas há a fita de quadradinhos
+     de vídeo — rosto, nome completo e cargo de onze pessoas, num arquivo que
+     depois circula por e-mail. Nada disso é "dado sensível" para a varredura
+     de texto: não está escrito, está desenhado.
+
+     A pergunta que este aviso responde não é "tem rosto na imagem?" — para
+     isso seria preciso um modelo de visão, e baixar um modelo contradiz a
+     promessa. É "houve outra pessoa nesta gravação?", e essa a própria pessoa
+     já respondeu: escolhendo o cenário de reunião ou de sessão com
+     participante, ou gravando o áudio do computador, que numa chamada é a voz
+     dos outros. Um aviso que se baseia no que foi declarado é honesto; um que
+     adivinha rosto e erra é pior do que aviso nenhum.
+
+     E ele não tarja nada sozinho. A tarja é queimada na imagem e não tem
+     desfazer — cobrir automaticamente a fita de participantes apagaria, em
+     algumas gravações, exatamente a prova de quem estava presente. */
+  function motivoDePessoas(){
+    const m = $('modelo').value;
+    if (m === 'ata') return 'ata';
+    if (m === 'usabilidade') return 'ux';
+    const sys = ($('spkSysNome') && $('spkSysNome').value.trim()) || '';
+    const txt = $('tr') ? $('tr').value : '';
+    /* O canal do computador é a voz que não é a de quem grava. Se ela aparece
+       na transcrição, havia gente do outro lado — em qualquer cenário. */
+    if (sys && txt.indexOf(sys) >= 0) return 'canal';
+    return '';
+  }
+
+  function avisarPessoas(){
+    const cx = $('pessoasAviso'); if (!cx) return;
+    const motivo = frames.filter(f => f.keep).length ? motivoDePessoas() : '';
+    if (!motivo) { cx.classList.add('hide'); cx.innerHTML = ''; return; }
+    cx.classList.remove('hide');
+    cx.innerHTML = `<b>${esc(t('pessoasH'))}</b> ${esc(t('pessoas_' + motivo))} ` +
+                   esc(t('pessoasP'));
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'ghost sm'; b.id = 'pessoasTarjar';
+    b.style.marginTop = '10px';
+    b.textContent = t('pessoasBtn');
+    /* Abre a lente no PRIMEIRO quadro mantido, já em modo de tarja: o aviso
+       termina no lugar onde se faz a coisa, e não numa instrução para
+       procurar o botão. */
+    b.onclick = () => {
+      const f = frames.find(x => x.keep); if (!f) return;
+      abrirLente(frames.indexOf(f));
+      setTimeout(() => { try { modoTarja(true); } catch (e) {} }, 120);
+    };
+    cx.appendChild(document.createElement('br'));
+    cx.appendChild(b);
+  }
+
   function varrerSensivel(){
+    avisarPessoas();
     const kept = frames.filter(f => f.keep);
     const achados = {};        // tipo -> lista de números de passo
     kept.forEach((f, i) => {
@@ -15410,7 +15706,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     try {
       await aplicarTarjas(kept);
       const ev = evDados();
-      const titulo = ev.caso || t('pTitle');
+      const titulo = tituloDoDoc();
       /* O identificador precisa ser estável e sem espaço: alguns LMS usam o
          identifier do manifesto como chave e recusam caractere estranho. */
       const id = 'WS-' + (nomeBase() || 'doc').replace(/[^A-Za-z0-9_-]+/g, '-').slice(0, 48);
@@ -16127,12 +16423,68 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   };
 
   /* ---- pareamento imagem/fala, o mesmo critério usado no PDF ---- */
-  function falaDoFrame(kept, i, cues, dur, semPrefixo){
-    const f = kept[i];
-    const nextT = i + 1 < kept.length ? kept[i+1].t : dur + 0.001;
-    return cues.filter(c => c.b > f.t && c.a < nextT)
-               .map(c => (!semPrefixo && c.a < f.t - 0.2 ? '... ' : '') + c.t)
-               .join(' ');
+  /* ================= A FALA DE CADA QUADRO =================
+
+     O DEFEITO, medido num documento real de 119 telas: o Passo 2 reimprimia a
+     frase inteira do Passo 1 com "…" na frente, o Passo 3 a do 2, e assim por
+     diante. Uma frase que atravessa a fronteira entre dois quadros aparecia nos
+     DOIS — e numa gravação em que as telas mudam a cada dois segundos, isso é
+     metade do texto do documento repetido.
+
+     A REGRA AGORA: cada trecho de fala é impresso UMA vez, no quadro em que ele
+     COMEÇA. É a atribuição honesta — "o que foi dito enquanto esta tela estava
+     no ar" —, e ela é a única que soma as partes sem contar nenhuma duas vezes:
+     lendo o documento inteiro de cima a baixo, sai a transcrição completa, na
+     ordem, sem uma linha a mais nem a menos.
+
+     O QUE SE PERDE, e como isso é devolvido: um quadro que cai no meio de uma
+     frase longa ficaria mudo. Para esse caso — e só para ele — sai um rabicho
+     do que estava sendo dito, cortado e marcado com "…", que dá o contexto sem
+     reimprimir a frase que já está três centímetros acima.
+
+     A conta é feita para a LISTA INTEIRA de uma vez, e não quadro a quadro:
+     perguntar "este trecho já saiu antes?" olhando um quadro por vez é a
+     definição do problema que isto conserta. */
+  function falasPorQuadro(kept, cues, dur){
+    const saida = kept.map(() => []);
+    if (!cues.length || !kept.length) return saida.map(() => '');
+    /* De qual quadro é cada trecho: o último cujo instante não passou do começo
+       da fala. Um trecho que começa antes do primeiro quadro é do primeiro. */
+    for (const c of cues) {
+      let dono = 0;
+      for (let k = 0; k < kept.length; k++) { if (kept[k].t <= c.a + 0.2) dono = k; else break; }
+      saida[dono].push(c.t);
+    }
+    /* O rabicho sai UMA VEZ por frase, e não uma vez por quadro mudo. Com telas
+       trocando a cada dois segundos, uma frase de doze segundos deixa cinco
+       quadros mudos — e cinco rabichos iguais em sequência são a mesma
+       repetição que este conserto veio desfazer, só que menor. */
+    const jaRabicho = new Set();
+    return saida.map((partes, i) => {
+      if (partes.length) return partes.join(' ');
+      const f = kept[i];
+      const atravessa = cues.find(c => c.a < f.t && c.b > f.t);
+      if (!atravessa || jaRabicho.has(atravessa)) return '';
+      const t2 = (atravessa.t || '').trim();
+      /* O RABICHO SÓ EXISTE PARA FRASE LONGA. Numa frase curta ele seria a
+         frase inteira de novo, com reticências — exatamente a repetição que
+         este conserto veio desfazer, com um disfarce. Abaixo de 90 caracteres
+         a frase está a três centímetros acima e o leitor não perdeu o fio. */
+      if (t2.length <= 90) return '';
+      jaRabicho.add(atravessa);
+      return '… ' + t2.slice(-70).replace(/^\S*\s/, '') + ' …';
+    });
+  }
+
+  /* A porta antiga, agora servida pela conta de cima. Ela existe porque sete
+     lugares a chamam, e trocar sete chamadas por sete cópias da lógica seria
+     desfazer justamente o que este conserto faz. */
+  let _falasCache = null;
+  function falaDoFrame(kept, i, cues, dur){
+    if (!_falasCache || _falasCache.kept !== kept || _falasCache.cues !== cues) {
+      _falasCache = { kept, cues, lista: falasPorQuadro(kept, cues, dur) };
+    }
+    return _falasCache.lista[i] || '';
   }
 
   /* ================= zip só com as figuras ================= */
@@ -16158,7 +16510,15 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
          que a pessoa estava tentando não entregar. Só entra quando há o que
          contar, para não encher o pacote de quem só queria as figuras. */
       if (ev.algum || kept.some(f => f.nota || f.hash)) {
-        const linhas = ev.linhasCompletas.map(([k, v]) => k + ': ' + v).concat(ev.algum ? [''] : []);
+        /* O índice do .zip é o único documento do pacote que alguém lê antes
+           de abrir as imagens — e ele saía sem dizer de quem era. */
+        const mz = marcaDoDoc();
+        const linhas = []
+          .concat(mz.classificacao ? [mz.classificacao.toUpperCase(), ''] : [])
+          .concat(mz.temCliente && mz.nome ? [mz.nome, ''] : [])
+          .concat(ev.linhasCompletas.map(([k, v]) => k + ': ' + v))
+          .concat(mz.emissor ? [t('docEmissor') + ': ' + mz.emissor] : [])
+          .concat(ev.algum || mz.temCliente ? [''] : []);
         const RP = reguaDePassos();
         kept.forEach((f, i) => {
           const hora = horaDe(f.t);
@@ -16339,12 +16699,70 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
              total: ps.length };
   }
 
+  /* ================= O ÍNDICE, UM SÓ =================
+
+     DOIS DEFEITOS no mesmo lugar, e o segundo é o de sempre.
+
+     1. O índice reimprimia a NARRAÇÃO — a mesma frase que aparece três
+        centímetros abaixo, embaixo da imagem. Um índice que repete o corpo não
+        indexa nada; ele dobra o documento de tamanho e não ajuda ninguém a
+        achar coisa alguma. Quando existe passo com anotação, o índice passa a
+        listar SÓ esses: quem escreveu "conferir o valor do frete" escreveu
+        exatamente a linha que quer encontrar depois. A narração continua sendo
+        a saída quando não há nenhuma anotação — aí ela é tudo o que há.
+
+     2. O PDF tinha uma CÓPIA da conta da fala (`cues.filter(...)`) enquanto o
+        Word chamava `falaDoFrame`. Duas verdades para a mesma pergunta: com a
+        de-duplicação de fala ligada, os dois documentos do mesmo pacote
+        passaram a discordar. Agora os dois leem daqui.
+
+     Os capítulos sobrevivem ao enxugamento: se um capítulo abre num passo sem
+     anotação, o cabeçalho dele entra assim mesmo, antes do próximo passo
+     listado — senão o índice mostraria passos fora do capítulo a que pertencem. */
+  function indiceDoDoc(kept, cues, dur, limite){
+    const ps = listaDePassos();
+    const comNota = ps.filter(p => tituloDoPasso(p));
+    const alvo = comNota.length ? comNota : ps;
+    const caps = capitulos();
+    const lim = limite || 96;
+    const out = [];
+    let capPend = null, k = 0;
+    ps.forEach(p => {
+      const f = p.quadros[0];
+      const i = kept.indexOf(f);
+      while (k < caps.length && caps[k].de <= i) { capPend = caps[k]; k++; }
+      if (!alvo.includes(p)) return;
+      const nota = tituloDoPasso(p);
+      let texto = nota;
+      if (!texto && cues.length) {
+        const fala = falaDoFrame(kept, i, cues, dur, true) || '';
+        texto = fala.length > lim ? fala.slice(0, lim).replace(/\s\S*$/, '') + '…' : fala;
+      }
+      out.push({
+        cap: capPend ? capPend.nome : '',
+        tarefa: capPend ? fmt(capPend.fim - capPend.ini) : '',
+        n: p.n, quadro: f, quando: fmt(f.t), texto: texto || '—'
+      });
+      capPend = null;
+    });
+    return out;
+  }
+
+  /* O espelho do índice, pelo mesmo motivo do `__quadros`: o que o teste
+     precisa afirmar é a LISTA, e conferi-la lendo o PDF comprimido não dá.
+     Ele não muda caminho nenhum — chama a mesma função que os dois
+     documentos chamam, com os mesmos argumentos. */
+  try {
+    window.__indice = () => indiceDoDoc(
+      frames.filter(f => f.keep), parseTranscript($('tr').value).cues, duracaoTotal());
+  } catch (e) {}
+
   async function montarHtml(){
     const ev = evDados();
     const tut = ehTutorial();
     const linhas = await linhasDoDoc();
     const totalPassos = totalDePassos(linhas);
-    const titulo = ev.caso || t('pTitle');
+    const titulo = tituloDoDoc();
     const cab = ev.linhasCompletas.map(([k, v]) =>
       `<tr><th>${esc(k)}</th><td>${esc(v)}</td></tr>`).join('');
     /* A banda da marca é uma só, e o que muda é ONDE ela entra: sem marca de
@@ -16352,7 +16770,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
        marca de cliente o alto é do cliente, e a nossa desce para depois da
        identificação. O alto do documento diz de quem ele é — e no caso grátis
        ele estava vazio, com a plataforma aparecendo só no rodapé. */
-    const temMarcaDoCliente = temTime() && !!(marcaCliente.img || marcaCliente.nome);
+    const mh = marcaDoDoc();
+    const temMarcaDoCliente = mh.temCliente;
     const bandaDaMarca = `<div class="abre">${marcaSvg(46)}` +
       `<div><p class="nome"><b>__MARCAA__</b>__MARCAB__</p>` +
       `<p class="dom"><a href="__SITE__">__SITEDOM__</a> &middot; ${esc(t('ftPromo'))}</p></div></div>`;
@@ -16427,14 +16846,23 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
  .pe .marca b{color:#3A3F9E}
  .pe .marca a{color:#3A3F9E;text-decoration:none;font-weight:500}
  .pe .frase{margin:0;color:#777;font-size:12.5px;line-height:1.5}
- @media print{ body{max-width:none} .passo{break-inside:avoid} }
+ .cls{margin:0 0 14px;font:700 11.5px/1 ui-sans-serif,system-ui;letter-spacing:.09em;
+   text-transform:uppercase;color:#B8501F}
+ @media print{
+   body{max-width:none} .passo{break-inside:avoid}
+   /* A classificação em TODA folha impressa. Na tela ela aparece uma vez, no
+      alto — quem rola vê a página inteira. No papel, a folha solta tirada do
+      meio é justamente a que circula, e ela precisa dizer o que é. */
+   .cls{position:fixed;top:6mm;right:8mm;margin:0}
+ }
 </style></head><body>
+${mh.classificacao ? `<p class="cls">${esc(mh.classificacao.toUpperCase())}</p>` : ''}
 ${temMarcaDoCliente ? `<div class="cliente">` +
   (marcaCliente.img ? `<img src="${marcaCliente.img.url}" alt="">` : '') +
   (marcaCliente.nome ? `<b>${esc(marcaCliente.nome)}</b>` : '') + `</div>` : ''}
 ${temMarcaDoCliente ? '' : bandaDaMarca}
 <h1>${esc(titulo)}</h1>
-<p class="arq">${esc(fileName || t('prNoName'))}</p>
+${subtituloDoDoc() ? `<p class="arq">${esc(subtituloDoDoc())}</p>` : ''}
 ${cab ? `<table class="id">${cab}</table>` : ''}
 <p class="arq">${esc(t('pNote'))}${ev.horaVisivel ? ' ' + esc(t('pNoteRel')) : ''}</p>
 ${temMarcaDoCliente ? bandaDaMarca : ''}
@@ -16452,7 +16880,17 @@ ${marcaSvg(46)}
     const ev = evDados();
     const tut = ehTutorial();
     const linhas = await linhasDoDoc();
-    const out = ['# ' + (ev.caso || t('pTitle')), '', '_' + (fileName || t('prNoName')) + '_', ''];
+    const out = [];
+    /* A marca do cliente ANTES do título, como nos outros formatos: o documento
+       diz de quem ele é antes de dizer o que ele é. O Markdown não tem imagem
+       embutida que preste, então entra o nome — que é o que sobrevive quando
+       alguém cola isto numa wiki. */
+    const mk = marcaDoDoc();
+    if (mk.classificacao) out.push('**' + mk.classificacao.toUpperCase() + '**', '');
+    if (mk.temCliente && mk.nome) out.push('**' + mk.nome + '**', '');
+    out.push('# ' + tituloDoDoc(), '');
+    if (subtituloDoDoc()) out.push('_' + subtituloDoDoc() + '_', '');
+    if (mk.emissor) out.push('_' + t('docEmissor') + ': ' + mk.emissor + '_', '');
     ev.linhasCompletas.forEach(([k, v]) => out.push('- **' + k + ':** ' + v));
     if (ev.linhasCompletas.length) out.push('');
     linhas.forEach(l => {
@@ -16667,55 +17105,130 @@ ${interno}</p:spTree></p:cSld><p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></
     const dur = duracaoTotal();
     const ev = evDados();
     const tut = ehTutorial();
-    const titulo = ev.caso || t('pTitle');
+    const titulo = tituloDoDoc();
 
     const slides = [], relsSlide = [], midias = [];
     const M = 640080;   // margem, ~0,7 cm
 
     // ---- capa
+    /* A MARCA DO CLIENTE FALTAVA AQUI. O PowerPoint é o formato que mais
+       circula em apresentação de resultado — e era justamente ele que saía sem
+       dizer de quem o documento é. Agora ele segue a mesma regra dos outros:
+       classificação no alto, cliente acima do título, a nossa no rodapé. */
+    const mp = marcaDoDoc();
+    const capaTopo = [];
+    if (mp.classificacao)
+      capaTopo.push({ t: mp.classificacao.toUpperCase(), sz: 1100, b: true, cor: 'B8501F' });
+    if (mp.temCliente && mp.nome)
+      capaTopo.push({ t: mp.nome, sz: 1800, b: true, cor: '1F2430' });
     const capa = [
+      capaTopo.length ? pptCaixa(4, 'cli', M, 900000, SL_W - M * 2, 900000, capaTopo) : '',
       pptCaixa(2, 'titulo', M, 2000000, SL_W - M * 2, 1200000,
                [{ t: titulo, sz: 3600, b: true }]),
       pptCaixa(3, 'sub', M, 3300000, SL_W - M * 2, 1800000,
         ev.linhas.map(([k, v]) => ({ t: k + ': ' + v, sz: 1400, cor: '5C6473' }))
+          .concat(mp.emissor ? [{ t: t('docEmissor') + ': ' + mp.emissor, sz: 1300, cor: '5C6473' }] : [])
           .concat([{ t: '__MARCA__ · __SITEDOM__', sz: 1200, cor: '3A3F9E' }]))
     ].join('');
     slides.push(pptSlide(capa));
     relsSlide.push('');
 
-    // ---- um slide por tela; o número do passo vem da mesma régua dos outros
+    /* ---- UM SLIDE POR PASSO, e não um slide por tela.
+
+       O defeito, visto num deck real: 119 quadros viraram 120 slides de uma
+       imagem cada, e quem apresenta passa vinte minutos clicando em "próximo"
+       para mostrar a MESMA tarefa vista de quatro ângulos. Um passo é uma
+       unidade de sentido — as telas dele pertencem ao mesmo slide, lado a lado,
+       porque é assim que quem assiste entende que são a mesma coisa.
+
+       Acima de QUATRO telas o passo continua num slide seguinte: seis imagens
+       num 16:9 ficam do tamanho de um selo, e uma evidência ilegível não é
+       evidência. O slide de continuação repete o título com "(cont.)", para
+       ninguém achar que virou outro passo. */
     const RP = reguaDePassos();
-    kept.forEach((f, i) => {
-      const rid = 'rId9';
-      const nome = 'img' + String(i + 1).padStart(4, '0') + '.jpg';
-      midias.push({ nome: 'ppt/media/' + nome, dados: () => bytesDoArquivo(telaDe(f)) });
+    const idxDe = new Map(); kept.forEach((f, i) => idxDe.set(f, i));
+    const POR_SLIDE = 4;
+    let nImg = 0;
 
-      /* A imagem ocupa o alto do slide, com a proporção dela preservada — uma
-         tela esticada num deck é a marca de quem colou print no PowerPoint às
-         pressas, que é exatamente o trabalho que este botão evita. */
-      const areaW = SL_W - M * 2, areaH = 4400000;
-      const prop = (f.img.w && f.img.h) ? f.img.w / f.img.h : 16 / 9;
-      let iw = areaW, ih = Math.round(areaW / prop);
-      if (ih > areaH) { ih = areaH; iw = Math.round(areaH * prop); }
-      const ix = Math.round((SL_W - iw) / 2), iy = 900000;
+    listaDePassos().forEach(passo => {
+      const tit = tituloDoPasso(passo);
+      const blocos = [];
+      for (let k = 0; k < passo.quadros.length; k += POR_SLIDE)
+        blocos.push(passo.quadros.slice(k, k + POR_SLIDE));
 
-      const fala = cues.length ? falaDoFrame(kept, i, cues, dur, true) : '';
-      const cabec = tut && f.nota
-        ? passoN(RP.num(f)) + '  —  ' + f.nota
-        : passoN(RP.num(f)) + (RP.telas(f) > 1 ? '  ·  ' + (RP.ordem(f)+1) + '/' + RP.telas(f) : '') +
-          (querHora() && horaDe(f.t) ? '   ·   ' + horaDe(f.t) : '   ·   ' + fmt(f.t));
-      const rodape = [];
-      if (!tut && f.nota) rodape.push({ t: f.nota, sz: 1400, b: true });
-      if (fala) rodape.push({ t: fala, sz: 1200, cor: '5C6473' });
+      blocos.forEach((grupo, bi) => {
+        const rels = [];
+        const cabec = (tut && tit ? passoN(passo.n) + '  —  ' + tit : passoN(passo.n)) +
+          (passo.quadros.length > 1 ? '  ·  ' + t('pptTelas', passo.quadros.length) : '') +
+          (bi ? '  ·  ' + t('pptCont') : '') +
+          (bi === 0 && !tut
+            ? (querHora() && horaDe(passo.quadros[0].t)
+                ? '   ·   ' + horaDe(passo.quadros[0].t)
+                : '   ·   ' + fmt(passo.quadros[0].t))
+            : '');
 
-      slides.push(pptSlide(
-        pptCaixa(2, 'cab', M, 300000, SL_W - M * 2, 500000, [{ t: cabec, sz: 1800, b: true }]) +
-        pptImagem(4, rid, ix, iy, iw, ih) +
-        (rodape.length ? pptCaixa(5, 'pe', M, iy + ih + 120000, SL_W - M * 2,
-                                  SL_H - (iy + ih + 120000) - 200000, rodape) : '')
-      ));
-      relsSlide.push(
-        `<Relationship Id="${rid}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../media/${nome}"/>`);
+        /* A grade: uma coluna para uma tela, duas colunas daí em diante. Cada
+           imagem cabe na célula com a PRÓPRIA proporção — a régua é por
+           imagem, nunca a da primeira aplicada às demais. Foi esse atalho que
+           deformou o PDF. */
+        const n = grupo.length;
+        const cols = n <= 1 ? 1 : 2, linhas = Math.ceil(n / cols);
+        const areaW = SL_W - M * 2;
+        const topo = 950000, fundo = 1150000;
+        const areaH = SL_H - topo - fundo;
+        const gap = 180000;
+        const temLegenda = grupo.some(f => !RP.abre(f) && f.nota);
+        const legH = temLegenda ? 260000 : 0;
+        const cellW = Math.floor((areaW - gap * (cols - 1)) / cols);
+        const cellH = Math.floor((areaH - gap * (linhas - 1)) / linhas) - legH;
+
+        let corpo = '';
+        grupo.forEach((f, j) => {
+          nImg++;
+          const rid = 'rId' + (9 + j);
+          const nome = 'img' + String(nImg).padStart(4, '0') + '.jpg';
+          midias.push({ nome: 'ppt/media/' + nome, dados: () => bytesDoArquivo(telaDe(f)) });
+          rels.push(`<Relationship Id="${rid}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../media/${nome}"/>`);
+
+          const lin = Math.floor(j / cols), col = j % cols;
+          const naLinha = Math.min(cols, n - lin * cols);
+          const larguraDaLinha = naLinha * cellW + (naLinha - 1) * gap;
+          const x0 = Math.round((SL_W - larguraDaLinha) / 2);
+          const cx = x0 + col * (cellW + gap);
+          const cy = topo + lin * (cellH + legH + gap);
+
+          const prop = (f.img && f.img.w && f.img.h) ? f.img.w / f.img.h : 16 / 9;
+          let iw = cellW, ih = Math.round(cellW / prop);
+          if (ih > cellH) { ih = cellH; iw = Math.round(cellH * prop); }
+          const ix = cx + Math.round((cellW - iw) / 2);
+          const iy = cy + Math.round((cellH - ih) / 2);
+
+          corpo += pptImagem(10 + j * 2, rid, ix, iy, iw, ih);
+          const leg = !RP.abre(f) && f.nota ? f.nota
+                    : (passo.quadros.length > 1 ? t('pptTelaDe', RP.ordem(f) + 1, passo.quadros.length) : '');
+          if (leg)
+            corpo += pptCaixa(11 + j * 2, 'leg' + j, cx, cy + cellH + 40000, cellW, legH || 240000,
+                              [{ t: leg, sz: 1000, cor: '5C6473', algn: 'ctr' }]);
+        });
+
+        /* O rodapé leva o título do passo (quando não é tutorial, onde ele já
+           está no alto) e a fala do trecho — uma vez só, do passo inteiro. */
+        const rodape = [];
+        if (!tut && tit && bi === 0) rodape.push({ t: tit, sz: 1400, b: true });
+        if (cues.length) {
+          const fala = grupo.map(f => falaDoFrame(kept, idxDe.get(f), cues, dur, true))
+                            .filter(Boolean).join(' ');
+          if (fala) rodape.push({ t: fala, sz: 1200, cor: '5C6473' });
+        }
+
+        slides.push(pptSlide(
+          pptCaixa(2, 'cab', M, 300000, SL_W - M * 2, 500000, [{ t: cabec, sz: 1800, b: true }]) +
+          corpo +
+          (rodape.length ? pptCaixa(5, 'pe', M, SL_H - fundo + 60000, SL_W - M * 2,
+                                    fundo - 200000, rodape) : '')
+        ));
+        relsSlide.push(rels.join(''));
+      });
     });
 
     const n = slides.length;
@@ -16860,9 +17373,27 @@ ${relsSlide[i]}</Relationships>`) });
 
     const corpo = [];
     /* Marca do cliente no topo, como no PDF. A imagem entra como qualquer outra
-       parte do pacote — o mesmo caminho dos frames. */
+       parte do pacote — o mesmo caminho dos frames.
+
+       AQUI HAVIA UMA SEGUNDA VERDADE, e ela sobreviveu à rodada em que os
+       outros cinco formatos foram unificados: a condição era
+       `temTime() && (marcaCliente.img || marcaCliente.nome)`, escrita à mão, em
+       vez de `marcaDoDoc()`. Duas consequências, as duas silenciosas: o Word
+       era o único formato paginado que saía SEM a classificação e SEM o
+       emissor, e a regra de quem tem direito à marca passava a viver em dois
+       lugares — que é exatamente como ela começa a divergir.
+
+       Quem achou foi `testes/matriz.mjs`, varrendo o próprio fonte: a lista dos
+       renderizadores é derivada do arquivo, então um formato que não bebe da
+       fonte única aparece sozinho, sem ninguém precisar lembrar dele. */
+    const mdx = marcaDoDoc();
     const midiaMarca = [], relsMarca = [];
-    if (temTime() && (marcaCliente.img || marcaCliente.nome)) {
+    /* A classificação vem ANTES de tudo, inclusive do cliente: é a primeira
+       coisa que alguém precisa ler numa folha que vaza. */
+    if (mdx.classificacao)
+      corpo.push(par(mdx.classificacao.toUpperCase(),
+                     { b: true, sz: 18, cor: 'B8501F', depois: 60 }));
+    if (mdx.temCliente) {
       if (marcaCliente.img) {
         const altEmu = Math.round(0.42 * EMU_POL);
         const largEmu = Math.round(altEmu * (marcaCliente.img.w / marcaCliente.img.h));
@@ -16881,8 +17412,12 @@ ${relsSlide[i]}</Relationships>`) });
       corpo.push('<w:p><w:pPr><w:pBdr><w:top w:val="single" w:sz="6" w:space="6" w:color="E0E0E0"/></w:pBdr>' +
                  '<w:spacing w:before="0" w:after="160"/></w:pPr></w:p>');
     }
-    corpo.push(par(ev.caso || t('pTitle'), { b: true, sz: 40, depois: 80 }));
-    corpo.push(par(fileName || t('prNoName'), { sz: 22, cor: '5A5A5A', depois: ev.algum ? 200 : 240 }));
+    corpo.push(par(tituloDoDoc(), { b: true, sz: 40, depois: subtituloDoDoc() ? 80 : 200 }));
+    /* Sem arquivo — que é o caso de toda gravação ao vivo — não sai linha
+       nenhuma. "sem nome" embaixo de um título é uma linha para dizer que não
+       há o que dizer. */
+    if (subtituloDoDoc())
+      corpo.push(par(subtituloDoDoc(), { sz: 22, cor: '5A5A5A', depois: ev.algum ? 200 : 240 }));
 
     /* A identificação vem antes dos dados técnicos: quem abre a evidência quer
        saber de que teste ela é, não qual a resolução do vídeo. */
@@ -16892,12 +17427,9 @@ ${relsSlide[i]}</Relationships>`) });
       corpo.push(par('', { sz: 10, depois: 120 }));
     }
 
-    [[t('pDur'), fmt(dur)],
-     [t('pRes'), resolucao()],
-     [t('pSize'), fileSize ? (fileSize/1048576).toFixed(1) + ' MB' : t('pNoFile')],
-     [t('wFrames'), String(kept.length)],
-     [t('pTr'), cues.length ? t('pTrCues', cues.length) : (plain ? t('pTrPlain') : t('pTrNone'))]
-    ].forEach(([k, v]) => corpo.push(par(k + ': ' + v, { sz: 20, depois: 40 })));
+    fichaDoDoc(kept, dur, cues, plain)
+      .concat(mdx.emissor ? [[t('docEmissor'), mdx.emissor]] : [])
+      .forEach(([k, v]) => corpo.push(par(k + ': ' + v, { sz: 20, depois: 40 })));
 
     corpo.push(par(t('pNote'), { sz: 17, cor: '8A8A8A', antes: 180, depois: ev.horaVisivel ? 40 : 240 }));
     if (ev.horaVisivel) corpo.push(par(t('pNoteRel'), { sz: 17, cor: '8A8A8A', depois: 240 }));
@@ -16926,17 +17458,13 @@ ${relsSlide[i]}</Relationships>`) });
     if (kept.length > 2) {
       corpo.push(par(t('pIndex'), { b: true, sz: 26, antes: 240, depois: 40 }));
       corpo.push(par(t('pIndexSub'), { sz: 17, cor: '8A8A8A', depois: 120 }));
-      /* No sumário SÓ os passos, e não uma linha por imagem: um índice que
-         repete "Passo 3" três vezes não é um índice, é a mesma lista de novo. */
-      const RPs = reguaDePassos();
-      kept.filter(f => RPs.abre(f)).forEach((f) => {
-        const i = kept.indexOf(f);
-        const fala = cues.length ? falaDoFrame(kept, i, cues, dur, true) : '';
-        // a anotação do passo manda no índice: quem escreveu a expectativa quer
-        // ver a expectativa no sumário, não o começo da narração
-        const linha = f.nota ||
-          (fala.length > 96 ? fala.slice(0, 96).replace(/\s\S*$/, '') + '…' : fala);
-        corpo.push(par(passoN(RPs.num(f)) + '   ' + fmt(f.t) + '   ' + (linha || '—'),
+      /* Uma linha por PASSO — e só os passos anotados quando houver algum.
+         A régua é `indiceDoDoc`, a mesma que o PDF usa. */
+      indiceDoDoc(kept, cues, dur, 96).forEach(l => {
+        if (l.cap)
+          corpo.push(par(l.cap + (l.tarefa ? '   ·   ' + t('capTempo', l.tarefa) : ''),
+                         { b: true, sz: 19, antes: 140, depois: 40 }));
+        corpo.push(par(passoN(l.n) + '   ' + l.quando + '   ' + l.texto,
                        { sz: 18, depois: 20 }));
       });
     }
@@ -17098,7 +17626,7 @@ ${relsSlide[i]}</Relationships>`) });
     const dur = duracaoTotal();
     const { cues } = parseTranscript($('tr').value);
     const L = [];
-    L.push('h3. ' + (ev.caso || t('pTitle')));
+    L.push('h3. ' + (tituloDoDoc()));
     /* `linhas`, e não `linhasCompletas`: o caso de teste já é o título logo
        acima, e repeti-lo na primeira linha é ruído no que alguém lê primeiro. */
     if (ev.linhas.length) {
@@ -17431,8 +17959,26 @@ ${relsSlide[i]}</Relationships>`) });
        aproximar o papel do rosto. A presença de verdade fica na primeira
        página, onde há espaço e onde a autoria pertence. */
     const FT_X = M + 8.6, FT_Y = PH - 8.4;
+    const mpdf = marcaDoDoc();
     const foot = () => {
       page++;
+      /* ---- A CLASSIFICAÇÃO EM TODA PÁGINA ----
+         Uma tarja de "Confidencial" que só sai na capa não protege nada: a
+         folha que circula é a solta, tirada do meio. Ela vai no ALTO, onde o
+         olho de quem folheia passa primeiro, e em vermelho contido — não é
+         alarme, é etiqueta. */
+      if (mpdf.classificacao) {
+        doc.setFont('helvetica','bold').setFontSize(7.6).setTextColor(184, 80, 31);
+        doc.text(mpdf.classificacao.toUpperCase(), PW - M, 9, { align: 'right' });
+        doc.setTextColor(30);
+      }
+      /* E o nome do cliente no rodapé, à esquerda da nossa marca: o documento
+         é dele, e cada folha solta continua dizendo isso. */
+      if (mpdf.temCliente && mpdf.nome) {
+        doc.setFont('helvetica','normal').setFontSize(7.4).setTextColor(140);
+        doc.text(mpdf.nome, PW - M, PH - 15.5, { align: 'right' });
+        doc.setTextColor(30);
+      }
       marca(M, PH - 12.9, 6.4);
 
       // o texto muda de tamanho conforme o idioma: em espanhol ele é bem mais
@@ -17483,18 +18029,16 @@ ${relsSlide[i]}</Relationships>`) });
       doc.setDrawColor(225).line(M, 28.5, PW - M, 28.5);
       topo = 41;
     } else {
-      marca(M, 14, 11);
-      doc.setFont('helvetica','bold').setFontSize(13).setTextColor(58, 63, 158);
-      doc.text('__MARCAA__', M + 14.5, 21.5);
-      const wa = doc.getTextWidth('__MARCAA__');
-      doc.setTextColor(60);
-      doc.text('__MARCAB__', M + 14.5 + wa, 21.5);
-      const wb = doc.getTextWidth('__MARCAB__');
-      doc.setFont('helvetica','normal').setFontSize(8.8).setTextColor(150);
-      doc.text(SITE_DOM, M + 14.5 + wa + wb + 4, 21.5);
-      doc.setDrawColor(225).line(M, 28.5, PW - M, 28.5);
-      doc.setTextColor(30);
-      topo = 41;
+      /* SEM MARCA DO CLIENTE, A NOSSA APARECE UMA VEZ SÓ NESTA PÁGINA.
+         Antes eram três: este cabeçalho, o bloco de autoria lá embaixo e o
+         rodapé — a mesma marca, três vezes, na primeira folha de um documento
+         de evidência. Propaganda repetida numa capa tira a seriedade do que
+         vem depois, e o que sobra de espaço vai para o que importa: o título e
+         a identificação.
+
+         Quando HÁ marca do cliente o cabeçalho é dele e o bloco de baixo é
+         nosso — aí são coisas diferentes e as duas ficam. */
+      topo = 22;
     }
 
     /* O instante de um passo, no PDF. Um lugar só, porque ele aparece em quatro
@@ -17502,25 +18046,26 @@ ${relsSlide[i]}</Relationships>`) });
        anexada tem que dizer a mesma coisa nos quatro. */
     const quando = f => f.colado ? t('coladoTag') : fmt(f.t);
 
-    const titulo = doc.splitTextToSize(ev.caso || t('pTitle'), CW);
+    const titulo = doc.splitTextToSize(tituloDoDoc(), CW);
     doc.setFont('helvetica','bold').setFontSize(20).setTextColor(30).text(titulo, M, topo);
     let y = topo + titulo.length * 8 + 2;
-    doc.setFont('helvetica','normal').setFontSize(11).setTextColor(90);
-    doc.text(doc.splitTextToSize(fileName, CW), M, y);
-    y += 10;
+    if (subtituloDoDoc()) {
+      doc.setFont('helvetica','normal').setFontSize(11).setTextColor(90);
+      doc.text(doc.splitTextToSize(subtituloDoDoc(), CW), M, y);
+      y += 10;
+    } else { y += 4; }
     doc.setDrawColor(215).line(M, y, PW - M, y);
     y += 10;
 
     // identificação primeiro, dados técnicos depois: quem abre a evidência
     // quer saber de que teste ela é, não qual a resolução do vídeo
-    const info = ev.linhas.concat([
-      [t('pDur'), fmt(dur)],
-      [t('pRes'), resolucao()],
-      [t('pSize'), fileSize ? (fileSize/1048576).toFixed(1) + ' MB' : t('pNoFile')],
-      [t('pFrames'), String(kept.length)],
-      [t('pTr'), cues.length ? t('pTrCues', cues.length)
-                 : (plain ? t('pTrPlain') : t('pTrNone'))]
-    ]);
+    /* O EMISSOR entra na ficha, e não num canto: "quem gerou isto, de qual
+       conta" é a primeira pergunta de uma auditoria, e ela merece a mesma
+       linha que a duração e a resolução. Só no Team — no Personal a conta é de
+       uma pessoa só e o nome já está no alto. */
+    const info = ev.linhas
+      .concat(mpdf.emissor ? [[t('docEmissor'), mpdf.emissor]] : [])
+      .concat(fichaDoDoc(kept, dur, cues, plain));
     info.forEach(([k,v]) => {
       doc.setTextColor(130).setFontSize(10).setFont('helvetica','normal').text(k, M, y);
       doc.setTextColor(30).setFont('helvetica','bold');
@@ -17561,29 +18106,33 @@ ${relsSlide[i]}</Relationships>`) });
       doc.text(doc.splitTextToSize(t('pIndexSub'), CW), M, M + 11);
       let iy = M + 20;
       doc.setFontSize(9.5);
-      /* Só os passos: um índice que repete "Passo 3" três vezes não indexa. */
-      kept.filter(f => RPp.abre(f)).forEach((f) => {
-        const i = kept.indexOf(f);
+      /* A MESMA régua do Word. Aqui havia uma segunda conta da fala, escrita à
+         mão com `cues.filter` — e ela ignorava a de-duplicação, então o índice
+         do PDF dizia uma coisa e o do .docx do mesmo pacote dizia outra. */
+      indiceDoDoc(kept, cues, dur, 88).forEach(l => {
         if (iy > PH - 20) { foot(); doc.addPage(); iy = M + 4; }
-        const nextT = i+1 < kept.length ? kept[i+1].t : dur + 0.001;
-        let resumo = '';
-        if (cues.length) {
-          const fala = cues.filter(c => c.b > f.t && c.a < nextT).map(c => c.t).join(' ');
-          resumo = fala.length > 88 ? fala.slice(0, 88).replace(/\s\S*$/, '') + '…' : fala;
+        if (l.cap) {
+          iy += 3;
+          doc.setFont('helvetica','bold').setTextColor(25)
+             .text(doc.splitTextToSize(l.cap + (l.tarefa ? '   ·   ' + t('capTempo', l.tarefa) : ''), CW)[0], M, iy);
+          doc.setFont('helvetica','normal');
+          iy += 6;
         }
-        // a anotação manda no índice: quem escreveu a expectativa quer vê-la aqui
-        if (f.nota) resumo = f.nota;
-        doc.setTextColor(120).text(passoN(RPp.num(f)), M, iy);
-        doc.setTextColor(120).text(quando(f), M + 20, iy);
-        doc.setTextColor(45).text(doc.splitTextToSize(resumo || '—', CW - 38)[0], M + 38, iy);
+        doc.setTextColor(120).text(passoN(l.n), M, iy);
+        doc.setTextColor(120).text(quando(l.quadro), M + 20, iy);
+        doc.setTextColor(45).text(doc.splitTextToSize(l.texto, CW - 38)[0], M + 38, iy);
         iy += 5.6;
       });
       foot();
     }
 
-    if (layout === 'full') {
+    if (layout === 'full' || layout === 'uma') {
       const tut = ehTutorial();
-      const LH = 4.6, MAXL = 9, MAXIH = 110;
+      /* UMA POR PÁGINA: a imagem pode ocupar quase a folha inteira. Ela existe
+         para a tela que precisa ser LIDA e não só reconhecida — um erro de
+         sistema em letra miúda, uma tabela de valores. */
+      const umaPorPagina = layout === 'uma';
+      const LH = 4.6, MAXL = umaPorPagina ? 14 : 9, MAXIH = umaPorPagina ? 210 : 110;
       /* ---- A MEDIDA É DE CADA IMAGEM, e não do primeiro quadro ----
 
          O DEFEITO, relatado no uso: cortar UMA tela deformava todas as outras.
@@ -17614,9 +18163,16 @@ ${relsSlide[i]}</Relationships>`) });
         let lines = [];
         if (cues.length) {
           doc.setFont('helvetica','normal').setFontSize(9.3);
-          const said = cues.filter(c => c.b > f.t && c.a < nextT)
-            .map(c => (c.a < f.t - 0.2 ? '... ' : '') + c.t).join(' ');
-          lines = doc.splitTextToSize(said || t('pNoSpeech'), CW);
+          /* PELA MESMA PORTA DOS OUTROS FORMATOS. Aqui havia uma CÓPIA da conta
+             antiga — a que reimprimia a frase do quadro anterior com "…" na
+             frente. Ela sobreviveu ao conserto porque nunca chamou a função:
+             era uma segunda lista à mão fazendo a mesma pergunta, e o PDF
+             continuou repetindo a fala enquanto o HTML já não repetia.
+
+             É o defeito que mais custou a este projeto, na sua forma clássica:
+             duas verdades para a mesma coisa, e uma delas envelhece sozinha. */
+          const said = falaDoFrame(kept, i, cues, dur);
+          lines = said ? doc.splitTextToSize(said, CW) : [];
           if (lines.length > MAXL) lines = lines.slice(0, MAXL).concat('[...]');
         }
         /* Onde a anotação entra muda com o modelo. Na evidência ela é a
@@ -17649,7 +18205,18 @@ ${relsSlide[i]}</Relationships>`) });
         const { ih, iw, ix } = medida(telaDe(f));
         const blockH = capH + cabH + notaL.length * 4.8 + (notaL.length ? 1.5 : 0) + ih +
                        (cues.length ? 6 + lines.length * LH : 0) + ocrH + gapFim;
+        /* ---- A SOBRA VAI ENTRE OS BLOCOS, E NÃO NO PÉ DA PÁGINA ----
+
+           Medido num documento real: dois passos por página e 27 mm de branco
+           embaixo, repetidos por sessenta páginas. Um terceiro bloco não cabe —
+           a conta é essa mesmo —, mas o branco todo junto no fim faz cada
+           página parecer cortada, como se o gerador tivesse desistido no meio.
+
+           Distribuir a sobra ENTRE os blocos não ganha espaço nenhum: ganha uma
+           página que parece desenhada. O respiro é limitado a 14 mm para que
+           uma página com um bloco só não vire um bloco boiando. */
         if (yy + blockH > PH - 16) newPage();
+        else if (umaPorPagina && yy > M + 1) newPage();
         if (capTxt) {
           doc.setFont('helvetica','bold').setFontSize(13).setTextColor(58, 63, 158)
              .text(capTxt, M, yy + 4);
@@ -17659,7 +18226,11 @@ ${relsSlide[i]}</Relationships>`) });
         doc.setFont('helvetica','bold').setFontSize(tut ? 11.5 : 11).setTextColor(25)
            .text(cabL, M, yy + 3, { lineHeightFactor: 1.28 });
         doc.setFont('helvetica','normal').setFontSize(8).setTextColor(150)
-           .text(t('pFrameOf', i+1, kept.length), PW - M, yy + 3, { align:'right' });
+           /* "frame 1 de 119" era a única palavra inglesa de um documento que
+              chama tudo de Passo. Agora ela usa o mesmo rótulo do corpo — e
+              conta IMAGENS, que é o que este canto sempre disse: quantas telas
+              existem, não quantos passos. */
+           .text(t('pFrameOf', i+1, kept.length, t('pImagem')), PW - M, yy + 3, { align:'right' });
         yy += cabH;
         if (notaL.length) {
           doc.setFont('helvetica','normal').setFontSize(9.6).setTextColor(35);
@@ -17689,7 +18260,11 @@ ${relsSlide[i]}</Relationships>`) });
           doc.text(oc, M, yy, { lineHeightFactor: 1.3 });
           yy += oc.length * 3.9;
         }
-        yy += gapFim; doc.setTextColor(30);
+        /* Quantos blocos ainda cabem depois deste? Se nenhum, a sobra desta
+           página é distribuída aqui — e não deixada toda no pé. */
+        const cabeMais = (yy + gapFim + blockH) <= PH - 16;
+        yy += gapFim + (cabeMais ? 0 : Math.min(14, Math.max(0, (PH - 16 - yy - gapFim) / 2)));
+        doc.setTextColor(30);
       }
       foot();
     } else {
@@ -17739,6 +18314,16 @@ ${relsSlide[i]}</Relationships>`) });
        hexadecimais embaixo de uma figura são ruído, e na grade de 6 por página
        simplesmente não cabem. Em anexo elas ficam conferíveis em lista, que é
        como alguém realmente verifica hash. */
+    /* SEM IMPRESSÃO DIGITAL, DIGA ISSO. Antes a seção simplesmente não existia
+       — e um anexo ausente é indistinguível de um anexo esquecido. Quem recebe
+       a evidência não tem como saber se as imagens não foram conferidas ou se o
+       gerador falhou; e é justamente essa pessoa que precisa saber. A frase é
+       curta e vai no rodapé da capa, onde ela é lida junto do resto da ficha. */
+    if (!kept.some(f => f.hash)) {
+      doc.setTextColor(150).setFontSize(8.5);
+      doc.text(doc.splitTextToSize(t('pSemHash'), CW), M, PH - 26);
+      doc.setTextColor(30);
+    }
     if (kept.some(f => f.hash)) {
       doc.addPage();
       doc.setFont('helvetica','bold').setFontSize(13).setTextColor(25).text(t('pHashH'), M, M + 4);

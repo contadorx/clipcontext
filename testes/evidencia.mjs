@@ -203,7 +203,16 @@ console.log('\n[8] sem dados de evidência, nada muda');
   const d = await dl;
   await d.saveAs('/tmp/ev-sem.pdf');
   const txt = textoDoPdf('/tmp/ev-sem.pdf');
-  ok('o título continua sendo o genérico', contem(txt, 'Video analysis'));
+  /* O TÍTULO NUNCA É "Video analysis".
+     Esta linha cobrava o contrário até a rodada de layout: ela afirmava o nome
+     que a MÁQUINA dá ao processo. Num documento real de 68 páginas isso saía
+     como "Análise de vídeo — captura de tela", e quem recebia por e-mail não
+     sabia do que se tratava. A regra agora tem três degraus: o caso de teste,
+     o nome do arquivo, e por último o nome do ARTEFATO mais a data. Sem dados
+     de evidência e com `amostra.webm` na mão, o degrau que vale é o segundo. */
+  ok('o título é o nome do arquivo, e não o nome do processo',
+     contem(txt, 'amostra') && !contem(txt, 'Video analysis'),
+     txt.slice(0, 120).replace(/\s+/g, ' '));
   ok('numeração do trecho em inglês', contem(txt, 'Segment 1'));
   ok('nenhuma impressão digital sem pedir', !/[0-9a-f]{64}/.test(txt));
   await pg2.close();

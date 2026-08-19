@@ -119,6 +119,14 @@ console.log('\n[3] o link da base vai para o endereço do idioma');
 
 console.log('\n[4] a base existe nos três idiomas, com os nove temas');
 {
+  /* O NÚMERO VEM DA FONTE, e não escrito aqui à mão.
+     Ele estava assim: `blocos === 44`. Bastou acrescentar um bloco à base para
+     os três idiomas falharem juntos — e o teste apontava para o lugar errado,
+     porque o defeito que ele existe para pegar é UM idioma ficar para trás dos
+     outros, não a base crescer. Contando o português, a afirmação volta a ser
+     a que importa: os idiomas têm a MESMA quantidade de blocos. */
+  const ESPERADO = (fs.readFileSync('/root/walkstamp/src/site/bodies/ajuda.pt.html', 'utf8')
+    .match(/<details>/g) || []).length;
   const ctx = await br.newContext({ viewport: { width: 1200, height: 900 } });
   const pg = await ctx.newPage();
   for (const [u, titulo] of [['/ajuda', 'Base de conhecimento'],
@@ -132,7 +140,7 @@ console.log('\n[4] a base existe nos três idiomas, com os nove temas');
     const temas = await pg.locator('.doc h2').count();
     const blocos = await pg.locator('.faq details').count();
     ok('  nove temas', temas === 9, String(temas));
-    ok('  e os mesmos 44 blocos dos outros idiomas', blocos === 44, String(blocos));
+    ok(`  e os mesmos ${ESPERADO} blocos dos outros idiomas`, blocos === ESPERADO, String(blocos));
     /* Um <details> fechado é conteúdo escondido; escondido do buscador seria
        uma base de conhecimento que ninguém acha. O texto está no HTML. */
     const cru = await pg.content();
