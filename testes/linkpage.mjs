@@ -85,11 +85,12 @@ await pg.waitForTimeout(300);
   ok('e o Personal continua com a identidade',
      /Identificar o documento:<\/b> logotipo e nome do cliente/.test(time),
      (time.match(/Identificar[^<]*/) || ['(não achou)'])[0]);
-  /* "Termos do seu sistema" entrou no cartão pago e saiu do gratuito. A régua
-     olha os DOIS cartões: prometer no pago e continuar entregando no grátis é a
-     mesma contradição, só que na direção que ninguém reclama. */
-  ok('"Termos do seu sistema" está no cartão pago', /Termos do seu sistema/.test(time));
-  ok('e não está no gratuito', !/Termos do seu sistema/.test(gratis));
+  /* O que o cartão pago vende do vocabulário é a lista ficar GRAVADA, e não o
+     acesso: aplicar os termos continua sendo de todo mundo. Prometer no pago o
+     que o produto entrega de graça é a contradição que ninguém reclama — e é
+     por isso que a palavra cobrada aqui é "gravad", e não "termos". */
+  ok('o cartão pago vende os termos GRAVADOS', /gravad/i.test(time),
+     (time.match(/[^<>]*gravad[^<>]*/i) || ['(não achou)'])[0].slice(0, 70));
 }
 
 ok('sem erro de JS', erros.length === 0, erros.join(' | ').slice(0, 200));

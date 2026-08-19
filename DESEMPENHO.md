@@ -1330,3 +1330,51 @@ foram para um grupo próprio.
 O teto real desta máquina são **2 CPUs**: dois testes de cada vez. Quem manda no
 relógio é isso, não o número de arquivos — por isso a resposta foi tirar arquivos
 da pista curta, e não tentar rodar mais em paralelo.
+
+---
+
+## 19/08/2026, décima quarta rodada — cinco ajustes de tela
+
+### 1. O 0% que ficava parado
+
+Entre "cliquei" e a primeira janela transcrita há um vão de dezenas de segundos —
+extrair o áudio, montar o modelo — em que **não existe porcentagem para mostrar**.
+A tela escrevia `0%` e ficava lá. *0% parado lê-se como travado, e não como
+desconhecido*, e neste produto recarregar a página significa perder o trabalho.
+
+O `prog()` passou a ter os mesmos três estados que o `progRec()` do passo 1 já
+tinha — `null` some, `'?'` barra listrada andando, número é largura — e ganhou um
+**relógio da espera**: a linha de status conta os segundos (`— 12 s, aguarde…`).
+Ele sai de cima de quem chegar depois: se o texto na tela deixou de ser o que ele
+escreveu, para sozinho. `espera.mjs` cobra que a barra listrada aparece **antes**
+de haver qualquer porcentagem, e a linha falha com o conserto desligado.
+
+### 2. Letras para as partes, números para os passos
+
+O passo 3 numerava os subpassos 1, 2, 3, 4 — competindo com os passos 1, 2, 3, 4
+da página. Viraram **a, b, c, d**. E o passo 1 ganhou as suas: **a** o cenário de
+uso, **b** já tenho documento. Mesma bolinha, mesma ideia — uma parte de um passo.
+
+### 3. Termos do seu sistema: voltou a ser grátis, e o que se vende é outra coisa
+
+Revertida a trava da rodada anterior. **Aplicar** os termos é de todo mundo — é o
+que faz a transcrição servir para quem trabalha com jargão de sistema, e é essa
+pessoa que traz a ferramenta para dentro da empresa. O que o Personal e o Team
+vendem é a lista ficar **gravada**: sobreviver à visita, à máquina e ao resto da
+equipe. Cobrar pela conveniência é diferente de cobrar pelo acesso.
+
+`features.json` ganhou duas linhas onde havia uma: a aplicação em `fpt`, o
+"gravada" em `pt`. O botão próprio do **tirar hesitações** ficou — ele nasceu do
+conserto errado, mas resolve um problema real: ela morava dentro da caixa de
+vocabulário por vizinhança, e são coisas diferentes.
+
+A marca do cliente e o logotipo continuam **só de plano**.
+
+### 4. A caixa de compartilhar
+
+Ela aparece no momento mais disputado da tela — logo depois de o documento sair,
+competindo com onze botões de formato — e tinha 1px de linha cinza e 4% de tinta.
+Sem cadastro, sem anúncio e sem rastreio, o único canal deste produto é uma
+pessoa contando para outra: a caixa que faz isso acontecer não podia ser a mais
+discreta da página. Contorno na cor da marca, faixa lateral de 5px, tinta ao
+dobro, título de 14,5 para 16,5 e o botão de copiar deixou de ser fantasma.

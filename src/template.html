@@ -354,13 +354,31 @@
   /* O convite fica visualmente separado das saídas: ele não é mais um botão de
      gerar coisa, é outra conversa — e misturado com os onze ele viraria o
      décimo segundo, que ninguém lê. */
-  .compCx{margin-top:22px;padding:16px 18px;border:1px solid var(--line);
-    border-radius:10px;background:color-mix(in srgb,var(--accent) 4%,transparent)}
-  .compTit{margin:0 0 10px;font-size:14.5px;font-weight:600;color:var(--ink)}
-  .compCx .btnLike{display:inline-flex;align-items:center;padding:6px 12px;
+  /* ELE PRECISA SER VISTO. Com 1px de linha cinza e 4% de tinta, esta caixa
+     era indistinguível do resto do cartão — e ela aparece no momento mais
+     disputado da tela, logo depois de o documento sair, competindo com onze
+     botões de formato. Sem cadastro, sem anúncio e sem rastreio, o único canal
+     deste produto é uma pessoa contando para outra: a caixa que faz isso
+     acontecer não podia ser a mais discreta da página.
+
+     Contorno na cor da marca, tinta ao dobro, faixa lateral e título maior — e
+     o botão de copiar deixou de ser fantasma. Não é enfeite: é a diferença
+     entre um convite e um rodapé. */
+  .compCx{margin-top:26px;padding:18px 20px 18px 22px;
+    border:1.5px solid color-mix(in srgb,var(--accent) 45%,var(--line));
+    border-left:5px solid var(--accent);
+    border-radius:10px;background:color-mix(in srgb,var(--accent) 9%,transparent);
+    box-shadow:0 1px 6px color-mix(in srgb,var(--accent) 12%,transparent)}
+  .compTit{margin:0 0 12px;font-size:16.5px;font-weight:650;color:var(--ink);line-height:1.35}
+  .compCx .btnLike{display:inline-flex;align-items:center;padding:7px 13px;
     border:1px solid var(--line);border-radius:8px;background:var(--panel);
     color:var(--ink);text-decoration:none;font:600 13px ui-sans-serif,system-ui;cursor:pointer}
   .compCx .btnLike:hover{border-color:var(--accent);color:var(--accent)}
+  /* O primeiro botão é o gesto principal, e um fantasma ao lado de outros dois
+     fantasmas não diz qual é. */
+  .compCx #compCopiar{background:var(--accent);color:var(--accent-ink);
+    border-color:var(--accent);font-weight:650}
+  .compCx #compCopiar:hover{filter:brightness(1.06)}
   .saidaGrupo{margin-top:16px}
   .saidaTit{display:block;font:600 12px/1 ui-sans-serif,system-ui;letter-spacing:.06em;
     text-transform:uppercase;color:var(--muted);margin-bottom:7px}
@@ -515,6 +533,10 @@
   .cenario{display:flex;flex-wrap:wrap;align-items:center;gap:9px 12px;margin:0 0 20px;
         padding:14px 16px;border:1px solid var(--line);border-radius:10px;background:var(--bg)}
   .cenario label{font-size:14px;font-weight:650;color:var(--ink)}
+  /* A mesma bolinha dos subpassos do passo 3, aqui dentro do passo 1: são a
+     mesma ideia — uma parte de um passo — e duas formas para a mesma ideia
+     fazem a pessoa aprender duas vezes. */
+  .cenario .sbN{margin-right:-4px}
   .cenario select{width:auto;min-width:250px;padding:10px 12px;border:1px solid var(--line);
         border-radius:8px;background:var(--panel);color:var(--ink);font:inherit;font-size:15px;
         font-weight:550}
@@ -807,7 +829,12 @@
          Um <select>, e não cinco cartões clicáveis: cinco cartões empurram o
          botão de gravar para baixo da dobra num notebook, e a primeira coisa
          que a pessoa precisa ver continua sendo o botão de gravar. -->
+    <!-- A LETRA. O passo 1 também tem partes, e elas precisavam de um nome que
+         não fosse um número: "1, 2, 3" dentro do passo 1 competia com os passos
+         1, 2, 3 da página, e a pessoa lia dois sistemas de numeração ao mesmo
+         tempo. Letra para a parte, número para o passo. -->
     <div class="cenario">
+      <i class="sbN">a</i>
       <label for="modelo" data-i18n="cenLbl"></label>
       <!-- A primeira opção é um PEDIDO, e não um cenário.
 
@@ -859,6 +886,7 @@
 
          Continua sem servidor: o arquivo está na máquina de quem usa. -->
     <div class="cenario" id="recupBloco">
+      <i class="sbN">b</i>
       <label for="reabrir" data-i18n="reabrirLbl"></label>
       <button class="ghost" id="reabrir" data-i18n="reabrirBtn"
               style="padding:9px 14px;font-size:14.5px"></button>
@@ -1340,7 +1368,7 @@
          nenhum tranca o outro. -->
 
     <details class="sub" id="sb1" open>
-      <summary><i class="sbN">1</i><span data-i18n="sb1H"></span>
+      <summary><i class="sbN">a</i><span data-i18n="sb1H"></span>
         <b class="sbEst" id="sbEst1"></b></summary>
       <div class="sbCorpo">
     <!-- "Chamar cada quadro/frame de:" — e não "rótulo".
@@ -1488,7 +1516,7 @@
     </details>
 
     <details class="sub" id="sb2" open>
-      <summary><i class="sbN">2</i><span data-i18n="sb2H"></span>
+      <summary><i class="sbN">b</i><span data-i18n="sb2H"></span>
         <b class="sbEst" id="sbEst2"></b></summary>
       <div class="sbCorpo">
     <!-- O texto da fala mora na revisão, e não num passo antes.
@@ -1533,12 +1561,13 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     <!-- Vocabulário do domínio. Fica logo abaixo da transcrição porque é ali que
          o erro aparece, e não num painel de configuração que ninguém abre.
 
-         É do Personal e do Team, e segue a MESMA regra do logotipo do cliente:
-         sem plano a linha não aparece. Mostrar um botão que abre uma caixa
-         dizendo "isto é pago" é pior do que não mostrar — ocupa a mesma altura
-         e entrega uma recusa em vez de uma ferramenta. Onde ele é anunciado é
-         na página de preços, que é onde se decide comprar. -->
-    <div class="row hide" id="vocRow" style="margin-top:10px;align-items:flex-start;gap:8px">
+         APLICAR os termos é de todo mundo, e continua sendo: é o que faz a
+         transcrição servir para quem trabalha com jargão de sistema, e é essa
+         pessoa que traz a ferramenta para dentro da empresa. O que se vende no
+         Personal e no Team é a lista ficar GUARDADA — sobreviver à visita, à
+         máquina e ao resto da equipe. Cobrar pela conveniência é diferente de
+         cobrar pelo acesso. -->
+    <div class="row" id="vocRow" style="margin-top:10px;align-items:flex-start;gap:8px">
       <button class="ghost sm" id="vocModo" data-i18n="vocBtn"></button>
       <span class="status" id="vocMsg"></span>
     </div>
@@ -1629,7 +1658,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     </details>
 
     <details class="sub" id="sb3" open>
-      <summary><i class="sbN">3</i><span data-i18n="sb3H"></span>
+      <summary><i class="sbN">c</i><span data-i18n="sb3H"></span>
         <b class="sbEst" id="sbEst3"></b></summary>
       <div class="sbCorpo">
     <!-- Identificação da evidência. Tudo opcional e tudo em memória: nada
@@ -1714,7 +1743,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     </details>
 
     <details class="sub" id="sb4" open>
-      <summary><i class="sbN">4</i><span data-i18n="sb4H"></span>
+      <summary><i class="sbN">d</i><span data-i18n="sb4H"></span>
         <b class="sbEst" id="sbEst4"></b></summary>
       <div class="sbCorpo">
     <!-- ---- as saídas, agrupadas ----
@@ -2445,6 +2474,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       trPh:'Cole aqui a transcrição, ou arraste um arquivo .srt / .vtt.\n\nReconheço automaticamente:\n  00:00:12,400 --> 00:00:15,900   (SRT / VTT)\n  0:12  texto falado             (colado de um painel de legendas)\n  texto solto sem marcação de tempo\n\nCom marcação de tempo, cada frame sai no PDF junto do que é dito naquele trecho.',
       trCues:'{0} trechos com marcação de tempo', trCues2:' — cada frame sai junto da fala correspondente.',
       trPlain:'Texto sem marcação de tempo — vai entrar no PDF como um bloco no final.',
+      esperaSeg:'— {0} s, aguarde…',
       audioExtract:'Extraindo o áudio do vídeo…', audioFail:'este vídeo parece não ter faixa de áudio, ou o formato do áudio não é suportado pelo navegador',
       noAudio:'este vídeo não tem áudio', modelLoad:'Carregando o modelo…',
       modelDl:'Etapa 1 de 2 — baixando o modelo: {0}% (só na primeira vez)',
@@ -3014,6 +3044,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       trPh:'Paste the transcript here, or drag in a .srt / .vtt file.\n\nRecognised automatically:\n  00:00:12,400 --> 00:00:15,900   (SRT / VTT)\n  0:12  spoken text              (pasted from a caption panel)\n  plain text with no timestamps\n\nWith timestamps, each frame appears in the PDF next to what is said at that point.',
       trCues:'{0} timestamped segments', trCues2:' — each frame will appear next to its matching speech.',
       trPlain:'Text without timestamps — it will go into the PDF as a block at the end.',
+      esperaSeg:'— {0} s, please wait…',
       audioExtract:'Extracting the audio…', audioFail:'this video appears to have no audio track, or the audio format is not supported by the browser',
       noAudio:'this video has no audio', modelLoad:'Loading the model…',
       modelDl:'Step 1 of 2 — downloading the model: {0}% (first time only)',
@@ -3577,6 +3608,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       trPh:'Pega aquí la transcripción, o arrastra un archivo .srt / .vtt.\n\nReconozco automáticamente:\n  00:00:12,400 --> 00:00:15,900   (SRT / VTT)\n  0:12  texto hablado            (copiado de un panel de subtítulos)\n  texto suelto sin marcas de tiempo\n\nCon marcas de tiempo, cada fotograma aparece en el PDF junto a lo que se dice en ese tramo.',
       trCues:'{0} tramos con marca de tiempo', trCues2:' — cada fotograma saldrá junto al habla correspondiente.',
       trPlain:'Texto sin marcas de tiempo — irá al PDF como un bloque al final.',
+      esperaSeg:'— {0} s, espera…',
       audioExtract:'Extrayendo el audio…', audioFail:'este vídeo parece no tener pista de audio, o el formato del audio no es compatible con el navegador',
       noAudio:'este vídeo no tiene audio', modelLoad:'Cargando el modelo…',
       modelDl:'Paso 1 de 2 — descargando el modelo: {0}% (solo la primera vez)',
@@ -4139,6 +4171,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       trPh:'Fügen Sie hier die Transkription ein oder ziehen Sie eine .srt-/.vtt-Datei hierher.\n\nAutomatisch erkannt werden:\n  00:00:12,400 --> 00:00:15,900   (SRT / VTT)\n  0:12  gesprochener Text         (aus einem Untertitelfenster kopiert)\n  reiner Text ohne Zeitmarken\n\nMit Zeitmarken erscheint jeder Screenshot im PDF neben dem, was in diesem Abschnitt gesagt wird.',
       trCues:'{0} Abschnitte mit Zeitmarke', trCues2:' — jeder Screenshot erscheint neben dem, was dort gesagt wird.',
       trPlain:'Text ohne Zeitmarken — er kommt als Block am Ende ins PDF.',
+      esperaSeg:'— {0} s, bitte warten…',
       audioExtract:'Der Ton wird aus dem Video extrahiert…', audioFail:'dieses Video scheint keine Tonspur zu haben, oder das Tonformat wird vom Browser nicht unterstützt',
       noAudio:'dieses Video hat keinen Ton', modelLoad:'Das Modell wird geladen…',
       modelDl:'Schritt 1 von 2 — das Modell wird heruntergeladen: {0} % (nur beim ersten Mal)',
@@ -4707,6 +4740,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       trPh:'Collez ici la transcription, ou déposez un fichier .srt / .vtt.\n\nReconnaissance automatique :\n  00:00:12,400 --> 00:00:15,900   (SRT / VTT)\n  0:12  texte parlé              (collé d’un panneau de sous-titres)\n  texte brut sans marquage temporel\n\nAvec marquage temporel, chaque capture sort dans le PDF à côté de ce qui est dit dans ce segment.',
       trCues:'{0} segments horodatés', trCues2:' — chaque capture sort à côté de la parole correspondante.',
       trPlain:'Texte sans marquage temporel — il entrera dans le PDF comme un bloc à la fin.',
+      esperaSeg:'— {0} s, patientez…',
       audioExtract:'Extraction de l’audio de la vidéo…', audioFail:'cette vidéo semble ne pas avoir de piste audio, ou le format audio n’est pas pris en charge par le navigateur',
       noAudio:'cette vidéo n’a pas d’audio', modelLoad:'Chargement du modèle…',
       modelDl:'Étape 1 sur 2 — téléchargement du modèle : {0} % (seulement la première fois)',
@@ -8925,7 +8959,55 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
 
   /* ================= transcrição automática ================= */
   const st = (m, c) => { $('astatus').innerHTML = c ? `<span class="${c}">${m}</span>` : m; };
-  const prog = p => { $('abarWrap').classList.toggle('hide', p == null); if (p != null) $('abar').style.width = p + '%'; };
+
+  /* ---- o relógio da espera cega ----
+
+     A barra listrada diz "estou trabalhando". Ela NÃO diz há quanto tempo, e é
+     essa a pergunta de quem está esperando: montar o modelo de voz leva de
+     quinze a sessenta segundos numa máquina comum, sem nenhum sinal de vida no
+     meio, e uma tela parada por quarenta segundos é indistinguível de uma tela
+     travada. O segundo que passa é a prova de que não travou.
+
+     E ele SAI DE CIMA de quem chegar depois: o progresso do download escreve na
+     mesma linha, e dois donos para a mesma frase seria a briga de sempre. Se o
+     texto na tela deixou de ser o que este relógio escreveu, ele para sozinho —
+     quem escreveu por último manda. */
+  let tiqueEspera = null, ultimaEspera = '';
+  function esperando(base){
+    pararEspera();
+    const t0 = performance.now();
+    const pinta = () => {
+      if (ultimaEspera && $('astatus').innerHTML !== ultimaEspera) return pararEspera();
+      const s = Math.round((performance.now() - t0) / 1000);
+      st(base + (s >= 2 ? ' ' + t('esperaSeg', s) : ''));
+      ultimaEspera = $('astatus').innerHTML;
+    };
+    pinta();
+    tiqueEspera = setInterval(pinta, 1000);
+  }
+  function pararEspera(){
+    if (tiqueEspera) { clearInterval(tiqueEspera); tiqueEspera = null; }
+    ultimaEspera = '';
+  }
+  /* Três estados, e o mesmo vocabulário do `progRec` do passo 1 — antes esta
+     função tinha só dois, e o que faltava era justamente o do meio:
+
+       prog(null) — some;
+       prog('?')  — aparece LISTRADA, andando. É o "estou trabalhando e ainda
+                    não sei quanto falta". Antes este caso virava `0%` escrito
+                    na tela, e ficava lá parado por quase um minuto enquanto o
+                    modelo montava — a pior das três respostas possíveis, porque
+                    parece travado, e não desconhecido. A diferença entre "não
+                    sei" e "zero" é a diferença entre esperar e recarregar a
+                    página, que neste produto significa perder o trabalho;
+       prog(37)   — aparece com 37% de largura. */
+  const prog = p => {
+    const w = $('abarWrap'), b = $('abar'); if (!w || !b) return;
+    if (p == null) { w.classList.add('hide'); w.classList.remove('indef'); return; }
+    w.classList.remove('hide');
+    w.classList.toggle('indef', p === '?');
+    if (p !== '?') b.style.width = Math.max(0, Math.min(100, p)) + '%';
+  };
 
   /* A barra do passo 1, para o que acontece ANTES de gravar.
 
@@ -9570,7 +9652,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
            e não como desconhecido. São coisas diferentes e merecem telas
            diferentes: aqui vai barra listrada andando e a frase honesta. */
         if (!tt) {
-          prog(null); progRec(null);
+          prog('?'); progRec(null);
           const msg = t('modelDlInicio', mb(l));
           st(msg);
           if ($('recMsg') && !liveOn) $('recMsg').textContent = msg;
@@ -9601,7 +9683,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       }
     };
 
-    if (await modeloEmCache(modelId)) { prog(null); st(t('modelCache')); }
+    if (await modeloEmCache(modelId)) { prog('?'); st(t('modelCache')); }
 
     /* Sem isto o navegador trata o modelo baixado como cache descartável e o
        apaga quando o disco aperta — e o próximo vídeo baixa tudo de novo. */
@@ -9920,16 +10002,18 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     trabalhando(true);
     relogio.audio = 0; relogio.ms = 0;
     try {
-      st(t('audioExtract')); prog(null);
+      esperando(t('audioExtract')); prog('?');
       let data;
       try { data = await decodeTo16k(currentFile); }
       catch (e) { throw new Error(t('audioFail')); }
       if (!data.length) throw new Error(t('noAudio'));
 
       if (!pipeServe(modelId)) {
-        st(await modeloEmCache(modelId) ? t('modelCache') : t('modelLoad'));
-        prog(0); await trocarPipe(modelId);
+        /* O ponto em que a tela ficava em 0% por quase um minuto. */
+        esperando(await modeloEmCache(modelId) ? t('modelCache') : t('modelLoad'));
+        prog('?'); await trocarPipe(modelId);
       }
+      pararEspera();
 
       const SR = 16000, WIN = 30 * SR, total = Math.ceil(data.length / WIN), out = [];
       const inicio = performance.now();
@@ -9987,6 +10071,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
         const falta = (feitos >= 2 && resta > 3) ? t('etaTr', duracao(resta)) : '';
         st(t('transcribing2', pct.toFixed(0), feitos, total, falta));
       }
+      pararEspera();
       $('tr').value = 'WEBVTT\n\n' + out.join('\n\n');
       $('tr').readOnly = false;
       refreshTr(); prog(100);
@@ -9996,6 +10081,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       prog(null);
       st(t('trErr', (e && e.message ? e.message : e)), 'err');
     } finally {
+      /* O relógio da espera para aqui de qualquer jeito: se a transcrição
+         morrer no meio, um contador que continua andando sobre uma mensagem de
+         erro diz que ainda há trabalho onde já não há. */
+      pararEspera();
       $('auto').disabled = false;
       $('auto').textContent = t('autoBtn');
       $('autoDica').textContent = '';
@@ -10081,11 +10170,6 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     $('licTirar').classList.toggle('hide', !ativo);
     $('licChave').classList.toggle('hide', ativo);
     $('licAtivar').classList.toggle('hide', ativo);
-    /* "Termos do seu sistema" segue o logotipo do cliente: é do Personal e do
-       Team. Fica aqui, junto do resto do estado da licença, e não numa segunda
-       função que alguém teria que lembrar de chamar quando a chave entra. */
-    if ($('vocRow')) $('vocRow').classList.toggle('hide', !ativo);
-    if (!ativo && $('vocBox')) $('vocBox').classList.add('hide');
     if (ativo) $('licMsg').innerHTML =
       `<span class="ok">${t('licValida', licenca.q, licenca.n, licenca.a)}</span>` +
       /* A quem esta licença foi dada, escrito onde a pessoa vê. Não impede o

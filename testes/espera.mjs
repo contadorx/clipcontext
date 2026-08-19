@@ -97,6 +97,12 @@ await pg.evaluate(() => {
       if (r.top < innerHeight && r.bottom > 0) marca('textoNaTela');
     }
     if (tr.readOnly) marca('campoTravado');
+    /* A BARRA LISTRADA. Entre "cliquei" e a primeira janela transcrita há um
+       vão de dezenas de segundos — extrair o áudio, montar o modelo — em que
+       não existe porcentagem para mostrar. A tela escrevia 0% e ficava lá: 0%
+       parado lê-se como travado, e não como desconhecido. */
+    const bw = document.getElementById('abarWrap');
+    if (bw && bw.classList.contains('indef')) marca('listrada');
     if (/sem a fala/i.test(document.getElementById('pdfStatus').textContent || '')) marca('avisoSaida');
     const f = document.getElementById('faixa');
     if (f && !f.classList.contains('hide')) marca('faixa');
@@ -157,6 +163,11 @@ ok('o texto enche o campo enquanto a transcrição corre',
 ok('e o campo está na tela enquanto ele enche',
    m.textoNaTela != null && m.fim != null && m.textoNaTela < m.fim,
    m.textoNaTela == null ? 'nunca esteve à vista' : m.textoNaTela + ' ms');
+/* O NÚMERO QUE IMPORTA: antes do primeiro texto. Uma barra listrada que só
+   aparece depois de já haver porcentagem não serviu para nada. */
+ok('antes de haver porcentagem, a barra anda listrada em vez de mostrar 0%',
+   m.listrada != null && m.texto != null && m.listrada <= m.texto,
+   m.listrada == null ? 'nunca apareceu' : m.listrada + ' ms contra ' + m.texto + ' ms do texto');
 ok('o campo fica somente-leitura enquanto enche',
    m.campoTravado != null, String(m.campoTravado));
 ok('e destrava quando ela acaba',

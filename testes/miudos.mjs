@@ -83,13 +83,12 @@ console.log('\n[4] tirar hesitações — desligado por padrão');
 ok('a caixa começa desmarcada', !(await pg.locator('#hesitar').isChecked()));
 await pg.fill('#tr', 'WEBVTT\n\n00:00:00.000 --> 00:00:09.000\nMicrofone: é... eu vou, hã, abrir a tela, tipo, agora');
 await pg.dispatchEvent('#tr','input');
-/* "Termos do seu sistema" virou item do Personal e do Team, e a limpeza de
-   hesitação NÃO foi junto: ela é gratuita, e por isso ganhou botão próprio.
-   Esta é a afirmação que impede o conserto de arrastar uma função grátis para
-   trás de uma trava de plano. */
-ok('sem plano, "Termos do seu sistema" não aparece',
-   !(await pg.locator('#vocRow').isVisible()));
-ok('mas tirar hesitações continua à mão de quem não paga',
+/* APLICAR os termos é de todo mundo — o que se vende é a lista ficar gravada.
+   E a limpeza de hesitação ganhou botão PRÓPRIO: ela morava dentro da caixa de
+   vocabulário por vizinhança, e as duas são coisas diferentes. */
+ok('"Termos do seu sistema" está à mão de quem não paga',
+   await pg.locator('#vocRow').isVisible());
+ok('e tirar hesitações também',
    await pg.locator('#hesitar').isVisible());
 ok('sem marcar, não há botão para apertar',
    !(await pg.locator('#hesAplicar').isVisible()));

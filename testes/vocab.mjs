@@ -51,14 +51,9 @@ await pg.waitForTimeout(300);
 ok('o código veio por extenso', /eme vinte e um ene/.test(await pg.locator('#tr').inputValue()));
 
 console.log('\n[2] listar os termos e corrigir');
-/* "Termos do seu sistema" é do Personal e do Team, e sem chave a linha inteira
-   fica escondida. A TRAVA não é medida aqui — cada afirmação tem um dono só:
-   `licenca.mjs` prova que a chave revela a linha, `miudos.mjs` prova que sem
-   chave ela não aparece. O que este arquivo mede é o MOTOR de substituição, e
-   para chegar até ele a linha é revelada à mão. */
-ok('sem chave, a linha está escondida (a trava mora em licenca.mjs)',
-   !(await pg.locator('#vocRow').isVisible()));
-await pg.evaluate(() => document.getElementById('vocRow').classList.remove('hide'));
+/* Sem chave e sem plano: aplicar os termos é de todo mundo. O que o Personal e
+   o Team vendem é a lista ficar GRAVADA entre visitas — não o acesso. */
+ok('a linha está à mão sem plano nenhum', await pg.locator('#vocRow').isVisible());
 await pg.locator('#vocModo').click();
 await pg.waitForTimeout(150);
 ok('a caixa abriu', await pg.locator('#vocLista').isVisible());

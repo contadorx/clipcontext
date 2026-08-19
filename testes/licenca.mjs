@@ -50,7 +50,6 @@ await pg.waitForTimeout(500);
 
 console.log('[1] sem licença, a feature paga não existe');
 ok('a marca do cliente está escondida', !(await pg.locator('#marcaBox').isVisible()));
-ok('e "Termos do seu sistema" também', !(await pg.locator('#vocRow').isVisible()));
 /* O convite sumiu de propósito: um botão de vender no rodapé de uma ferramenta
    grátis é a terceira coisa que a pessoa lê e a única que não a ajuda a gravar.
    Sem plano, o cabeçalho não mostra nada. */
@@ -87,17 +86,11 @@ ok('diz para quem vale', /Cliente Exemplo/.test(await pg.locator('#licMsg').text
    (await pg.locator('#licMsg').textContent()).slice(0, 80));
 ok('o botão mostra o plano ativo', /Plano Time/.test(await pg.locator('#licTag').textContent()));
 ok('a marca do cliente apareceu', await pg.locator('#marcaBox').isVisible());
-/* A segunda feature de plano, e ela chegou depois: "Termos do seu sistema".
-   Sem esta linha, gatear o vocabulário teria ficado provado só pelo lado
-   negativo — "sem chave não aparece" — e ninguém teria medido se a chave
-   realmente o entrega. */
-ok('e "Termos do seu sistema" também', await pg.locator('#vocRow').isVisible());
 
 console.log('\n[4] sobrevive ao F5, e é reconferida');
 await pg.reload();
 await pg.waitForTimeout(700);
 ok('continua ativa depois de recarregar', await pg.locator('#marcaBox').isVisible());
-ok('com as duas features de plano no lugar', await pg.locator('#vocRow').isVisible());
 const guardado = await pg.evaluate(() => localStorage.getItem('Walkstamp.licenca'));
 ok('guardada no navegador', !!guardado && guardado.startsWith('WS1.'));
 

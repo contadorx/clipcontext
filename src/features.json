@@ -232,12 +232,20 @@
           "fr": "Corriger la parole segment par segment, dans la loupe de la capture"
         },
         {
-          "planos": "pt",
+          "planos": "fpt",
           "pt": "Termos do seu sistema, aplicados de uma vez na transcrição",
           "en": "Your system's terms, applied to the transcript in one go",
           "es": "Términos de tu sistema, aplicados de una vez a la transcripción",
-          "de": "Fachwortliste Ihres Bereichs, auf einmal angewendet",
-          "fr": "Lexique métier de votre domaine, appliqué en une fois"
+          "de": "Begriffe Ihres Systems, auf einmal auf das Transkript angewendet",
+          "fr": "Les termes de votre système, appliqués en une fois à la transcription"
+        },
+        {
+          "planos": "pt",
+          "pt": "… e a lista fica GRAVADA: não se redigita a cada visita",
+          "en": "… and the list is SAVED: no retyping on every visit",
+          "es": "… y la lista queda GUARDADA: no se reescribe en cada visita",
+          "de": "… und die Liste bleibt GESPEICHERT: kein erneutes Tippen bei jedem Besuch",
+          "fr": "… et la liste est CONSERVÉE : plus besoin de la retaper à chaque visite"
         },
         {
           "planos": "fpt",
