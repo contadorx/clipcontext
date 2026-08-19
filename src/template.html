@@ -210,6 +210,13 @@
   @media (prefers-reduced-motion: reduce){ .bar.indef>i{animation:none} }
   .status{font-size:13px;color:var(--muted);min-height:19px}
   .thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:9px;margin-top:16px}
+  /* A tela que continua um passo encosta na anterior: o olho lê o grupo antes
+     de ler o número. Sem isso, "Passo 3 · 2/3" seria a única pista de que
+     aquelas três miniaturas são a mesma ação, e ninguém lê legenda de
+     miniatura antes de decidir o que está olhando. */
+  .thumbs figure.juntoAoAnterior{border-left:3px solid color-mix(in srgb,var(--accent) 40%,transparent);
+    border-top-left-radius:0;border-bottom-left-radius:0}
+  .thumbs figure.juntoAoAnterior .passo{color:var(--muted);font-weight:500}
   /* ---- por que a grade NÃO é virtualizada ----
 
      A proposta era `IntersectionObserver` na `.thumbs`: instanciar o `<figure>`
@@ -301,9 +308,24 @@
   details.sub>summary:focus-visible,
   label.opt:focus-within{outline:2px solid var(--accent);outline-offset:2px;border-radius:10px}
   details.sub>summary:hover{background:#fafaff;border-radius:12px}
-  .sbN{flex:none;width:23px;height:23px;border-radius:50%;background:var(--accent);color:#fff;
-    font:700 12px/23px ui-sans-serif,system-ui;text-align:center;font-style:normal}
-  details.sub.feito .sbN{background:#1f9d55}
+  /* SUBITEM NÃO É PASSO, e a bolinha tem que dizer isso sozinha.
+
+     Cheia da cor da marca, ela era idêntica à bolinha numerada do cabeçalho do
+     cartão — mesma cor, mesmo tamanho, mesmo peso. Duas coisas iguais na tela
+     lêem-se como do mesmo nível, e a letra sozinha não desfazia isso: `a` e `1`
+     competiam pela mesma atenção.
+
+     Agora ela é OCA: fundo lavado, letra na cor da marca, contorno fino. Ela
+     continua sendo obviamente da mesma família — mesma forma, mesmo tamanho —
+     e obviamente um degrau abaixo. É a hierarquia dita pelo peso, que é como
+     ela se diz sem precisar de legenda. */
+  .sbN{flex:none;width:23px;height:23px;border-radius:50%;
+    background:color-mix(in srgb,var(--accent) 14%,var(--panel));
+    color:var(--accent);border:1px solid color-mix(in srgb,var(--accent) 35%,transparent);
+    font:700 12px/21px ui-sans-serif,system-ui;text-align:center;font-style:normal}
+  /* Concluído continua VERDE e CHEIO. Aqui o peso é merecido: terminar um
+     subpasso é uma afirmação, e afirmação lavada não afirma nada. */
+  details.sub.feito .sbN{background:#1f9d55;color:#fff;border-color:#1f9d55}
   details.sub.feito .sbN::after{content:"✓"}
   details.sub.feito .sbN{font-size:0}
   details.sub.feito .sbN::after{font-size:13px}
@@ -895,6 +917,47 @@
       <span class="status" id="reabrirMsg" data-i18n="reabrirDica"></span>
     </div>
 
+    <!-- ---- c. O ROTEIRO QUE A PESSOA JÁ TEM ----
+
+         Isto veio do campo, e é a coisa mais importante que ouvimos: numa
+         implantação com 780 cenários, o documento com os passos escritos JÁ
+         CHEGA PRONTO — uma IA genérica gerou. O que sobrou de humano é tirar o
+         print e encaixar no passo certo.
+
+         Ou seja: gerar mais um documento é competir com um documento que já
+         existe, e obrigar a pessoa a abandonar o roteiro dela. A resposta certa
+         não é "adote o meu"; é "cole o seu aqui".
+
+         Uma linha, um passo. Texto colado, `.txt` ou `.csv` — que é o que sai
+         de qualquer gerador, inclusive de uma planilha de casos de teste. Nada
+         de ler `.docx` por enquanto: o formato mais comum de sair de um gerador
+         é texto, e ler OOXML para chegar ao mesmo lugar seria pagar caro pela
+         mesma coisa.
+
+         Com o roteiro colado, cada "marcar" durante a gravação já vem com o
+         título escrito. É o encaixe, feito na hora em que a tela é capturada —
+         e não depois, adivinhando qual print vai em qual passo. -->
+    <div class="cenario" id="roteiroBloco" style="display:block">
+      <div class="row" style="gap:9px 12px;align-items:center;flex-wrap:wrap">
+        <i class="sbN">c</i>
+        <label for="roteiroAbrir" data-i18n="rotLbl"></label>
+        <button class="ghost" id="roteiroAbrir" data-i18n="rotBtn"
+                style="padding:9px 14px;font-size:14.5px"></button>
+        <input type="file" id="roteiroArq" accept=".txt,.csv,text/plain,text/csv" class="hide">
+        <span class="status" id="roteiroMsg" data-i18n="rotDica"></span>
+      </div>
+      <div class="hide" id="roteiroCx" style="margin-top:10px">
+        <textarea id="roteiroTxt" rows="5" spellcheck="false" data-i18n-ph="rotPh"
+                  style="font:13px/1.6 ui-monospace,Menlo,Consolas,monospace"></textarea>
+        <div class="row" style="margin-top:8px;gap:8px;align-items:center;flex-wrap:wrap">
+          <button class="ghost sm" id="roteiroUsar" data-i18n="rotUsar"></button>
+          <button class="ghost sm" id="roteiroArqBtn" data-i18n="rotArq"></button>
+          <button class="ghost sm hide" id="roteiroTirar" data-i18n="rotTirar"></button>
+          <span class="status" id="roteiroConta"></span>
+        </div>
+      </div>
+    </div>
+
     <!-- ---- a gravação que ficou para trás ----
 
          Este bloco só existe porque uma aba pode morrer. Enquanto se grava, cada
@@ -968,6 +1031,12 @@
           <button class="sm hide" id="recStop" data-i18n="recStopBtn"></button>
           <button class="ghost sm hide" id="recPause" data-i18n="recPauseBtn"></button>
           <button class="ghost sm hide" id="recMark" data-i18n="recMarkBtn"></button>
+          <!-- O segundo botão da marcação. Ele é MENOR e fantasma de propósito:
+               marcar um passo é o gesto de sempre, acrescentar uma tela ao
+               passo em curso é o gesto do caso específico. Se os dois tivessem
+               o mesmo peso, a pessoa teria que decidir entre dois iguais no
+               momento em que ela está olhando para o SAP, e não para nós. -->
+          <button class="ghost sm hide" id="recTela" data-i18n="recTelaBtn"></button>
           <!-- Sem `ghost`. Ele só existe numa situação: a gravação está
                rolando e a janelinha foi fechada — quer dizer, a pessoa acabou
                de perder o relógio, o medidor, o marcar, o pausar e a caixa de
@@ -2285,6 +2354,15 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recAdiantando:'Baixando o modelo de voz agora, para não atrasar a gravação. Pode escolher a tela quando quiser.',
       recPronto:'Modelo pronto. A gravação começa na hora.',
       recPauseBtn:'Pausar', recResumeBtn:'Retomar', recMarkBtn:'Marcar este passo',
+      recTelaBtn:'+ mais uma tela deste passo',
+      recTelaFeita:'Mais uma tela guardada no {0}.',
+      rotLbl:'Já tem o roteiro?', rotBtn:'Colar os passos',
+      rotDica:'uma linha por passo — do documento que você já tem',
+      rotPh:'1. Abrir a ME21N\n2. Preencher o cabecalho do pedido\n3. Lancar o item e salvar',
+      rotUsar:'Usar este roteiro', rotArq:'Abrir .txt ou .csv',
+      rotTirar:'Tirar o roteiro', rotConta:'{0} passos no roteiro.',
+      rotPronto:'{0} passos prontos — cada marcação já sai com o título.',
+      passoTelas:'{0} telas',
       recPipBtn:'Trazer a janelinha de volta',
       recNotaPh:'o que aconteceu aqui', recNotaEsp:'marque um passo para comentar',
       recNotaEm:'comentando a marcação {0}', recNotaOk:'guardado neste passo', recNotaNaPip:'o comentário está na janelinha',
@@ -2855,6 +2933,15 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recAdiantando:'Downloading the speech model now, so it does not delay the recording. Pick your screen whenever you like.',
       recPronto:'Model ready. Recording starts immediately.',
       recPauseBtn:'Pause', recResumeBtn:'Resume', recMarkBtn:'Mark this step',
+      recTelaBtn:'+ one more screen of this step',
+      recTelaFeita:'One more screen saved in {0}.',
+      rotLbl:'Already have the script?', rotBtn:'Paste the steps',
+      rotDica:'one line per step — from the document you already have',
+      rotPh:'1. Open ME21N\n2. Fill in the order header\n3. Enter the item and save',
+      rotUsar:'Use this script', rotArq:'Open .txt or .csv',
+      rotTirar:'Remove the script', rotConta:'{0} steps in the script.',
+      rotPronto:'{0} steps ready — every mark comes with its title.',
+      passoTelas:'{0} screens',
       recPipBtn:'Bring the control window back',
       recNotaPh:'what happened here', recNotaEsp:'mark a step to comment on it',
       recNotaEm:'commenting on mark {0}', recNotaOk:'saved on this step', recNotaNaPip:'the comment box is in the floating window',
@@ -3419,6 +3506,15 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recAdiantando:'Descargando el modelo de voz ahora, para no retrasar la grabación. Elige la pantalla cuando quieras.',
       recPronto:'Modelo listo. La grabación empieza al instante.',
       recPauseBtn:'Pausar', recResumeBtn:'Reanudar', recMarkBtn:'Marcar este paso',
+      recTelaBtn:'+ una pantalla más de este paso',
+      recTelaFeita:'Una pantalla más guardada en {0}.',
+      rotLbl:'¿Ya tienes el guion?', rotBtn:'Pegar los pasos',
+      rotDica:'una línea por paso — del documento que ya tienes',
+      rotPh:'1. Abrir la ME21N\n2. Rellenar la cabecera del pedido\n3. Cargar la posicion y guardar',
+      rotUsar:'Usar este guion', rotArq:'Abrir .txt o .csv',
+      rotTirar:'Quitar el guion', rotConta:'{0} pasos en el guion.',
+      rotPronto:'{0} pasos listos — cada marca ya sale con su título.',
+      passoTelas:'{0} pantallas',
       recPipBtn:'Traer la ventana de control de vuelta',
       recNotaPh:'qué pasó aquí', recNotaEsp:'marca un paso para comentarlo',
       recNotaEm:'comentando la marca {0}', recNotaOk:'guardado en este paso', recNotaNaPip:'el comentario está en la ventanita',
@@ -3982,6 +4078,15 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recAdiantando:'Das Spracherkennungsmodell wird jetzt heruntergeladen, damit es die Aufnahme nicht verzögert. Sie können den Bildschirm jederzeit auswählen.',
       recPronto:'Modell bereit. Die Aufnahme startet sofort.',
       recPauseBtn:'Pause', recResumeBtn:'Fortsetzen', recMarkBtn:'Diesen Schritt markieren',
+      recTelaBtn:'+ noch ein Bildschirm zu diesem Schritt',
+      recTelaFeita:'Noch ein Bildschirm in {0} gespeichert.',
+      rotLbl:'Haben Sie das Skript schon?', rotBtn:'Schritte einfügen',
+      rotDica:'eine Zeile pro Schritt — aus dem Dokument, das Sie schon haben',
+      rotPh:'1. ME21N oeffnen\n2. Bestellkopf ausfuellen\n3. Position erfassen und sichern',
+      rotUsar:'Dieses Skript verwenden', rotArq:'.txt oder .csv öffnen',
+      rotTirar:'Skript entfernen', rotConta:'{0} Schritte im Skript.',
+      rotPronto:'{0} Schritte bereit — jede Markierung kommt mit ihrem Titel.',
+      passoTelas:'{0} Bildschirme',
       recPipBtn:'Steuerungsfenster zurückholen',
       recNotaPh:'was hier passiert ist', recNotaEsp:'markieren Sie einen Schritt, um ihn zu kommentieren',
       recNotaEm:'Kommentar zu Markierung {0}', recNotaOk:'in diesem Schritt gespeichert', recNotaNaPip:'Das Kommentarfeld ist im kleinen Fenster',
@@ -4551,6 +4656,15 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recAdiantando:'Téléchargement du modèle de reconnaissance vocale maintenant, pour ne pas retarder l’enregistrement. Vous pouvez choisir l’écran quand vous voulez.',
       recPronto:'Modèle prêt. L’enregistrement démarre immédiatement.',
       recPauseBtn:'Pause', recResumeBtn:'Reprendre', recMarkBtn:'Marquer cette étape',
+      recTelaBtn:'+ un écran de plus pour cette étape',
+      recTelaFeita:'Un écran de plus enregistré dans {0}.',
+      rotLbl:'Vous avez déjà le script ?', rotBtn:'Coller les étapes',
+      rotDica:'une ligne par étape — du document que vous avez déjà',
+      rotPh:'1. Ouvrir la ME21N\n2. Remplir l en-tete de la commande\n3. Saisir le poste et enregistrer',
+      rotUsar:'Utiliser ce script', rotArq:'Ouvrir .txt ou .csv',
+      rotTirar:'Retirer le script', rotConta:'{0} étapes dans le script.',
+      rotPronto:'{0} étapes prêtes — chaque marque arrive avec son titre.',
+      passoTelas:'{0} écrans',
       recPipBtn:'Rouvrir la fenêtre de contrôle',
       recNotaPh:'ce qui s’est passé ici', recNotaEsp:'marquez une étape pour la commenter',
       recNotaEm:'commentaire de la marque {0}', recNotaOk:'enregistré sur cette étape', recNotaNaPip:'le commentaire est dans la petite fenêtre',
@@ -5493,6 +5607,15 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     });
   }
 
+  /* CUIDADO COM O NOME. `passos()` aqui NÃO devolve os passos do documento —
+     ele repinta o estado dos CARTÕES (aberto, fechado, travado) e as dicas de
+     cada um. Quem procura a lista de passos do documento quer `listaDePassos`.
+
+     Isto não é zelo: eu declarei uma segunda `passos()` neste mesmo arquivo e a
+     última venceu, porque duas declarações de função no mesmo escopo não
+     brigam — a segunda simplesmente apaga a primeira, em silêncio. O passo 4
+     deixou de travar e nenhum erro apareceu no console. Quem pegou foi o
+     `passos.mjs`. */
   function passos(){
     const modo = modoAtual();
     const trancar = (id, aberto) => {
@@ -6865,11 +6988,11 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     if (classe === 'ok' && $('liveStat')) $('liveStat').textContent = msg;
   }
   let pipWin = null, pipTexto = null, pipRelogio = null, pipFrames = null;
-  let pipVm = null, pipVs = null, pipCalar = null, pipMarcar = null, pipPausa = null;
+  let pipVm = null, pipVs = null, pipCalar = null, pipMarcar = null, pipTela = null, pipPausa = null;
   let pipNota = null, pipErroTic = null;
   /* Pausa e marcação vivem fora do bloco da gravação porque a janelinha e o
      cartão precisam alcançá-las, e as duas são recriadas a cada captura. */
-  let pausado = false, alternarPausa = null, marcarAgora = null;
+  let pausado = false, alternarPausa = null, marcarAgora = null, maisUmaTela = null;
 
   /* ---- a caixa que comenta a marcação ----
 
@@ -7091,12 +7214,19 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
                         border-style:dashed;border-color:#3a4150}
     input.nota::placeholder{color:#9aa3b2;opacity:1}
     input.nota.guardou{border-color:#737cf0;box-shadow:0 0 0 2px rgba(115,124,240,.28)}
+    /* O botão da segunda tela é menor: marcar um passo é o gesto de sempre,
+       acrescentar uma tela é o do caso específico. Dois botões do mesmo peso
+       obrigariam a escolher entre iguais no pior momento possível. */
+    button.fina{font-size:11.5px;padding:5px 8px;opacity:.85}
+    button.fina:hover:not(:disabled){opacity:1}
   `;
 
   async function abrirControle(){
     if (!('documentPictureInPicture' in window)) return;
     try {
-      pipWin = await documentPictureInPicture.requestWindow({ width: 250, height: 244 });
+      /* Mais 34px de altura: o botão da segunda tela entrou, e uma janelinha
+         que corta o próprio botão é pior do que não ter o botão. */
+      pipWin = await documentPictureInPicture.requestWindow({ width: 250, height: 278 });
     } catch (e) { pipWin = null; return; }
 
     const d = pipWin.document;
@@ -7107,6 +7237,12 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       '<div class="txt" id="txt"></div>' +
       '<div class="vus"><div class="vb"><i id="vm"></i></div><div class="vb"><i id="vs"></i></div></div>' +
       '<button id="marcar" class="sec" disabled></button>' +
+      /* O SEGUNDO BOTÃO TEM QUE ESTAR AQUI TAMBÉM, e isto não é simetria: quem
+         grava está dentro do sistema que está testando, não na nossa aba.
+         Clicar na página significa alt-tab — e o alt-tab muda a tela que ela
+         ia capturar. Um botão que só existe na página é um botão que não
+         existe durante a gravação. */
+      '<button id="maisTela" class="sec fina" disabled></button>' +
       '<input id="pipNota" class="nota" maxlength="180" autocomplete="off" disabled>' +
       '<button id="pausa" class="sec" disabled></button>' +
       '<button id="calar" class="sec hide"></button>' +
@@ -7120,6 +7256,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     pipVs      = d.getElementById('vs');
     pipCalar   = d.getElementById('calar');
     pipMarcar  = d.getElementById('marcar');
+    pipTela    = d.getElementById('maisTela');
     pipNota    = d.getElementById('pipNota');
     pipPausa   = d.getElementById('pausa');
     pipFrames.textContent = t('pipStop');
@@ -7128,6 +7265,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
        gravação a aba do produto está atrás da tela compartilhada. Os dois
        chamam a mesma função do cartão — nenhuma lógica duplicada. */
     pipMarcar.onclick = () => { if (marcarAgora) marcarAgora(); };
+    if (pipTela) pipTela.onclick = () => { if (maisUmaTela) maisUmaTela(); };
     pipPausa.onclick  = () => { if (alternarPausa) alternarPausa(); };
     /* Os dois campos escrevem no MESMO quadro e se espelham. Um estado por
        janela seria o jeito de a pessoa digitar na janelinha e encontrar o
@@ -7171,7 +7309,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
        destruir uma reunião de uma hora. O botão da aba continua valendo. */
     pipWin.addEventListener('pagehide', () => {
       pipWin = null; pipRelogio = pipTexto = pipFrames = pipVm = pipVs = pipCalar = null;
-      pipMarcar = pipPausa = pipNota = null;
+      pipMarcar = pipTela = pipPausa = pipNota = null;
       /* Fechada por engano, e a gravação continua: some o relógio, o medidor,
          o marcar, o pausar e a caixa de comentário — tudo que existe DURANTE a
          gravação. Sem um jeito de trazer de volta, a única saída era parar e
@@ -7219,6 +7357,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
         pipMarcar.disabled = pausado;
         pipMarcar.textContent = t('recMarkBtn');
         pipMarcar.classList.toggle('piscou', !!aviso);
+      }
+      if (pipTela) {
+        pipTela.disabled = pausado;
+        pipTela.textContent = t('recTelaBtn');
       }
       if (pipPausa)  {
         pipPausa.disabled = false;
@@ -7271,6 +7413,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
                       pipTexto.textContent = (dados && dados.msg) || t('pipErro'); }
       /* Os botões param de convidar: não há o que marcar nem o que pausar. */
       if (pipMarcar) pipMarcar.disabled = true;
+      if (pipTela) pipTela.disabled = true;
       if (pipPausa)  pipPausa.disabled  = true;
       if (pipFrames) pipFrames.disabled = true;
       return;
@@ -7313,7 +7456,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
        campo de um documento morto, e `notaMoraNaJanelinha()` respondia "sim"
        para uma janela que não existe mais: o cartão escondia o campo dele e a
        pessoa ficava sem os dois. */
-    pipMarcar = pipPausa = pipNota = null;
+    pipMarcar = pipTela = pipPausa = pipNota = null;
   }
   let liveAgora = () => 0;
 
@@ -7882,9 +8025,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       $('rec').disabled = false;
       abrindoCaptura = false;
       $('recPause').classList.add('hide'); $('recMark').classList.add('hide');
+      if ($('recTela')) $('recTela').classList.add('hide');
       $('recPip').classList.add('hide');
       esconderNota();
-      pausado = false; alternarPausa = null; marcarAgora = null;
+      pausado = false; alternarPausa = null; marcarAgora = null; maisUmaTela = null;
     };
 
     /* ================= a ordem daqui para baixo é o conserto =================
@@ -8418,7 +8562,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       obsTarefas.observe({ entryTypes: ['longtask'] });
     } catch (e) { /* Firefox e Safari não têm; o resto da gravação não depende */ }
 
-    const capturar = (forcar, marcado) => {
+    /* `junto` é a terceira resposta: uma tela A MAIS do passo em curso, e não
+       um passo novo. Ela viaja até o `frames.push` lá embaixo e é a única
+       diferença entre os dois botões da gravação. */
+    const capturar = (forcar, marcado, junto) => {
       if (!video.videoWidth) { motivosFrame.semVideo++; return false; }
       const teto = limiteAgora();
       if (frames.length >= teto) {
@@ -8590,7 +8737,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       /* Espelho para o teste enxergar por que um quadro entrou ou não. Custa
          uma atribuição e transforma "guardou pouco" em diagnóstico. */
       try { window.__motivos = motivosFrame; } catch (e) {}
-      frames.push({ t: agora(), img, keep: true, sig, manual: !!marcado });
+      frames.push({ t: agora(), img, keep: true, sig, manual: !!marcado,
+                    ...(junto ? { junto: true } : {}) });
       /* E vai para o disco. Depois do `push`, nunca antes: a lista é a verdade,
          e o espelho é o que a segue — nunca o contrário. */
       espelharQuadro(frames[frames.length - 1], frames.length);
@@ -8613,9 +8761,28 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
        Ao retomar, uma captura forçada: depois de uma espera a tela mudou, e é
        exatamente esse estado que a pessoa esperava documentar. */
     pausado = false;
+    /* ---- DOIS BOTÕES, E QUAL DELES É O PADRÃO ----
+
+       A ideia veio do campo: em teste, um passo tem várias telas. "Passo 1 —
+       abrir a tela e logar" são duas.
+
+       O pedido original era "marcar tela" como principal e "passar o passo"
+       como o que fecha. Eu inverti, e o motivo é uma regra e não gosto: QUEM
+       NUNCA TOCAR NO SEGUNDO BOTÃO TEM QUE RECEBER EXATAMENTE O QUE RECEBIA
+       ONTEM. Com "marcar" juntando telas, quem só marca sairia com UM passo
+       gigante de quarenta imagens — o oposto de hoje, e sem ter pedido nada.
+
+       Então o principal continua sendo o de sempre — marcar abre um passo — e o
+       segundo é o aditivo: "mais uma tela", que gruda no passo em curso. O
+       resultado que o campo pediu é o mesmo; o que muda é de que lado a
+       fronteira é declarada, e este lado não quebra ninguém.
+
+       E é o principal que puxa o título do roteiro: quem colou a lista de
+       passos aperta "marcar" e o título já vem escrito. */
     marcarAgora = () => {
       if (!liveOn) return;
       if (capturar(true, true)) {
+        proximoTituloDoRoteiro(frames[frames.length - 1]);
         clipeMarcar(frames[frames.length - 1], agora);
         avisoCurto = t('recMarcado');
         avisoAte = performance.now() + 2600;
@@ -8631,6 +8798,21 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
         controle('gravando', { seg: agora(), frames: frames.length });
       }
     };
+    /* Mais uma tela DESTE passo. Ela não puxa título do roteiro nem zera a
+       caixa de anotação: o título é do passo, e ele já foi escrito na primeira
+       tela. Herdar ou apagar aqui seria repetir ou perder. */
+    maisUmaTela = () => {
+      if (!liveOn) return;
+      if (capturar(true, true, true)) {
+        clipeMarcar(frames[frames.length - 1], agora);
+        avisoCurto = t('recTelaFeita', numeroDoQuadro(frames[frames.length - 1]));
+        avisoAte = performance.now() + 2600;
+        pintarRecMsg();
+        pipAviso = avisoCurto;
+        pipAvisoAte = performance.now() + 2200;
+        controle('gravando', { seg: agora(), frames: frames.length });
+      }
+    };
     alternarPausa = () => {
       if (!liveOn) return;
       pausado = !pausado;
@@ -8638,12 +8820,14 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       $('recPause').textContent = t(pausado ? 'recResumeBtn' : 'recPauseBtn');
       $('recPause').classList.toggle('ghost', !pausado);
       $('recMark').disabled = pausado;
+      if ($('recTela')) $('recTela').disabled = pausado;
       controle('gravando', { seg: agora(), frames: frames.length });
       pintarRecMsg();
       atualizarLive();
     };
     $('recPause').onclick = alternarPausa;
     $('recMark').onclick  = marcarAgora;
+    if ($('recTela')) $('recTela').onclick = maisUmaTela;
     $('recPip').onclick   = async () => {
       await abrirControle();
       /* `abrirControle` desenha a janelinha no estado 'prep'. Aqui a gravação
@@ -8655,12 +8839,14 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     };
     $('recPause').classList.remove('hide'); $('recPause').classList.add('ghost');
     $('recMark').classList.remove('hide');
+    if ($('recTela')) $('recTela').classList.remove('hide');
     /* Aparece já na largada, desligada e dizendo o que espera: uma caixa que só
        surge depois da primeira marcação seria uma caixa que ninguém descobre. */
     apontarNota(null);
     pintarVoltarJanelinha();
     $('recPause').textContent = t('recPauseBtn');
     $('recMark').disabled = false;
+    if ($('recTela')) $('recTela').disabled = false;
 
     /* O `videoWidth` não fica pronto no mesmo instante do play(). Em vez de
        chutar um atraso, tenta por até dois segundos e desiste em silêncio. */
@@ -8810,9 +8996,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       // os controles da gravação somem junto com ela, e a pausa não pode
       // sobreviver para envenenar a próxima captura
       $('recPause').classList.add('hide'); $('recMark').classList.add('hide');
+      if ($('recTela')) $('recTela').classList.add('hide');
       $('recPip').classList.add('hide');
       esconderNota();
-      pausado = false; alternarPausa = null; marcarAgora = null;
+      pausado = false; alternarPausa = null; marcarAgora = null; maisUmaTela = null;
       trabalhando(false);
       abrindoCaptura = false;
 
@@ -12027,11 +12214,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      Qual quadro acabou de mudar de lugar, e como se chama o número dele.
      `numeroDe` conta só os mantidos, que é a mesma conta do documento. */
   let destaqueMov = null;
-  const numeroDe = idx => {
-    let n = 0;
-    for (let k = 0; k <= idx && k < frames.length; k++) if (frames[k].keep) n++;
-    return frames[idx] && frames[idx].keep ? n : 0;
-  };
+  /* O número que a pessoa VÊ, e não a posição no array. Passou a contar passos
+     e não quadros mantidos: com telas agrupadas, o quarto quadro mantido pode
+     ser a segunda tela do passo 3. */
+  const numeroDe = idx => (frames[idx] && frames[idx].keep) ? numeroDoQuadro(frames[idx]) : 0;
 
   function render(){
     if (typeof pintarSoMarcados === 'function') pintarSoMarcados();
@@ -12049,7 +12235,14 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     /* A numeração é sobre os frames MANTIDOS, não sobre a lista: quem descarta
        o terceiro quadro espera que o quarto vire o passo 3. O documento e a
        miniatura precisam contar a mesma história, senão a evidência mente. */
-    let passo = 0;
+    /* O mapa de passos, UMA vez por desenho. Perguntar quadro a quadro seria
+       varrer a lista inteira para cada miniatura — trabalho ao quadrado, e com
+       300 quadros isso se sente no dedo. */
+    const mapa = new Map();
+    const contas = new Map();
+    listaDePassos().forEach(pp => pp.quadros.forEach((q, k) => {
+      mapa.set(q, pp.n); contas.set(q, { k, de: pp.quadros.length });
+    }));
 
     frames.forEach((f, i) => {
       const fig = document.createElement('figure');
@@ -12090,7 +12283,14 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       pintarEm(mini, im0);
       toque.setAttribute('aria-pressed', String(!f.keep));
 
-      const n = f.keep ? ++passo : 0;
+      const n = f.keep ? (mapa.get(f) || 0) : 0;
+      /* A tela que CONTINUA um passo não repete o número: ela diz de qual
+         passo é a segunda, a terceira. Repetir "Passo 3" três vezes seguidas
+         numa fileira lê-se como defeito de numeração — e este projeto já pagou
+         por numeração que parecia defeito. */
+      const cnt = contas.get(f);
+      const seguindo = !!(cnt && cnt.k > 0);
+      if (seguindo) fig.classList.add('juntoAoAnterior');
       const hora = horaCurta(f.t);
       // <figcaption> tem que ser filho direto de <figure>: dentro do botão o
       // documento fica inválido e o leitor de tela lê a legenda como rótulo
@@ -12100,7 +12300,9 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       /* Uma tela colada não tem instante no vídeo, e inventar um seria mentir
          num documento de evidência. Ela mostra a etiqueta no lugar do relógio. */
       cap.innerHTML =
-        `<span class="passo">${n ? passoN(n) : '—'}</span>` +
+        `<span class="passo">${n ? (seguindo ? passoN(n) + ' · ' + (cnt.k + 1) + '/' + cnt.de
+                                                : passoN(n) + (cnt && cnt.de > 1 ? ' · 1/' + cnt.de : ''))
+                                  : '—'}</span>` +
         `<span class="rel">${f.colado ? t('coladoTag') : fmt(f.t) + (f.manual ? ' *' : '')}` +
         (hora && !f.colado ? ' · ' + hora : '') +
         /* O selo do clipe. Sem ele o vídeo existiria e ninguém saberia: nada na
@@ -12616,6 +12818,102 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   /* Substitui o "Passo" de stepN pelo rótulo em vigor. Uma função só, para os
      dezoito lugares que numeram um quadro contarem a mesma história. */
   const passoN = n => rotuloUnidade() + ' ' + n;
+
+  /* ================= O PASSO COM VÁRIAS TELAS =================
+
+     O QUE ESTAVA ERRADO. Um quadro era um passo. Isso não é como teste
+     funciona: "preencher o cabeçalho do pedido" precisa de três telas, e a
+     pessoa tinha que escolher entre dois erros — marcar três quadros, e uma
+     ação virar "Passo 5, Passo 6, Passo 7", cada um pedindo um título que ela
+     não tem; ou marcar um, e perder duas telas de prova.
+
+     O NÍVEL NOVO NÃO TEM PALAVRA NOVA. O rótulo que já existe — Passo, Momento,
+     Trecho, ou o que a empresa chamar — é o do nível de CIMA. O que entra por
+     baixo são as telas daquele passo, e telas de um passo não precisam de
+     substantivo próprio: no documento sai um título e N imagens. Nada de
+     "sub-passo 3.1" em cinco idiomas vezes seis cenários.
+
+     A BANDEIRA É `junto`, E NÃO `novoPasso`. A diferença decide a
+     compatibilidade: sem bandeira nenhuma, cada quadro é um passo — que é
+     exatamente o comportamento de hoje e exatamente o que está guardado em
+     todo `.json` já gerado. Um documento reaberto de antes volta certo sem
+     nenhuma conversão, porque a ausência da bandeira já quer dizer a coisa
+     certa. A bandeira inversa obrigaria a marcar 100% dos quadros existentes.
+
+     E A LISTA DE PASSOS É DERIVADA, nunca guardada. Guardar a lista ao lado
+     dos quadros seria a segunda lista à mão que já custou caro a este projeto:
+     descartar um quadro, mover, colar, reabrir e juntar arquivos teriam que
+     lembrar de mexer nas duas. Aqui o passo é o que se LÊ da sequência. */
+  function listaDePassos(){
+    const kept = frames.filter(f => f.keep);
+    const out = [];
+    kept.forEach((f, i) => {
+      /* O primeiro quadro mantido abre um passo mesmo marcado como `junto`:
+         não há anterior a que se juntar, e um passo zero não existe. */
+      if (!out.length || !f.junto) out.push({ n: out.length + 1, quadros: [f], i });
+      else out[out.length - 1].quadros.push(f);
+    });
+    return out;
+  }
+
+  /* O número do passo a que um quadro pertence. É por aqui que os dez
+     formatos de saída contam a MESMA história: enquanto todos liam `i + 1` do
+     índice na lista, um documento agrupado e uma planilha plana diriam números
+     diferentes para a mesma tela — e uma evidência que se contradiz entre dois
+     arquivos do mesmo pacote não vale nada. */
+  function numeroDoQuadro(f){
+    for (const p of listaDePassos()) if (p.quadros.includes(f)) return p.n;
+    return 0;
+  }
+  /* A primeira tela de um passo é a que carrega o título; as outras são telas
+     dele. Uma pergunta só, para a grade e para os dez renderizadores. */
+  const abrePasso = f => { const p = listaDePassos().find(p => p.quadros.includes(f)); return !!p && p.quadros[0] === f; };
+
+  /* O TÍTULO É DO PASSO, e mora no primeiro quadro dele — e não numa terceira
+     estrutura. A anotação dos demais quadros continua existindo e vira legenda
+     da imagem, que é o que ela já era: uma frase sobre aquela tela. */
+  const tituloDoPasso = p => (p.quadros[0].nota || '').trim();
+
+  /* ================= O ROTEIRO QUE A PESSOA JÁ TEM =================
+
+     Uma linha, um passo. Ele não é guardado dentro do documento nem some ao
+     recarregar: fica em `sessionStorage`, como o vocabulário — é material de
+     trabalho da sessão, não conteúdo da evidência.
+
+     `roteiroPos` NÃO é um segundo lugar onde mora "em que passo estou". Ele é
+     só quantos títulos já foram entregues; quem manda no número do passo
+     continua sendo a lista derivada dos quadros. */
+  const ROT_CHAVE = '__MARCA__.roteiro';
+  let roteiro = [], roteiroPos = 0;
+
+  const lerRoteiro = txt => (txt || '').split(/\r?\n/)
+    .map(l => l.replace(/^\s*(?:passo\s*)?\d+[.)\-:\s]\s*/i, '').trim())
+    .filter(l => l.length > 1).slice(0, 400);
+
+  function pintarRoteiro(){
+    const cx = $('roteiroConta'); if (!cx) return;
+    cx.textContent = roteiro.length ? t('rotConta', roteiro.length) : '';
+    if ($('roteiroTirar')) $('roteiroTirar').classList.toggle('hide', !roteiro.length);
+    if ($('roteiroMsg')) $('roteiroMsg').textContent =
+      roteiro.length ? t('rotPronto', roteiro.length) : t('rotDica');
+  }
+
+  function guardarRoteiro(){
+    try {
+      if (roteiro.length) sessionStorage.setItem(ROT_CHAVE, roteiro.join('\n'));
+      else sessionStorage.removeItem(ROT_CHAVE);
+    } catch (e) {}
+  }
+
+  /* Entrega o próximo título ao quadro que acabou de abrir um passo. Só a ele:
+     uma tela a mais do mesmo passo não consome linha do roteiro, senão os
+     títulos andariam mais rápido que os passos e o documento sairia trocado —
+     que é pior do que sair sem título. */
+  function proximoTituloDoRoteiro(f){
+    if (!f || !roteiro.length || f.nota) return;
+    if (roteiroPos >= roteiro.length) return;
+    f.nota = roteiro[roteiroPos++];
+  }
 
   function pintarRotulo(){
     const el = $('unNome'); if (!el) return;
@@ -13329,6 +13627,57 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      desligado continua desligado, e o botão "jogar fora" do bloco de recuperação
      continua apagando o que está no disco. O que deixou de existir é a pergunta
      antes de cada gravação. */
+  /* ---- o roteiro: ligar a caixa ---- */
+  if ($('roteiroAbrir')) {
+    $('roteiroAbrir').onclick = () => {
+      const cx = $('roteiroCx');
+      cx.classList.toggle('hide');
+      if (!cx.classList.contains('hide')) $('roteiroTxt').focus();
+    };
+    $('roteiroUsar').onclick = () => {
+      roteiro = lerRoteiro($('roteiroTxt').value);
+      roteiroPos = 0;
+      guardarRoteiro();
+      pintarRoteiro();
+      /* Já há quadros na mesa? Então o roteiro se aplica aos passos que existem,
+         em ordem — é o caso de quem gravou primeiro e colou o roteiro depois. E
+         só onde não há título: sobrescrever o que a pessoa escreveu à mão seria
+         apagar trabalho dela com um clique. */
+      const ps = listaDePassos();
+      if (ps.length) {
+        ps.forEach((pp, i) => {
+          if (roteiro[i] && !tituloDoPasso(pp)) pp.quadros[0].nota = roteiro[i];
+        });
+        roteiroPos = Math.min(roteiro.length, ps.length);
+        render();
+      }
+    };
+    $('roteiroArqBtn').onclick = () => $('roteiroArq').click();
+    $('roteiroArq').onchange = async () => {
+      const f = $('roteiroArq').files[0]; if (!f) return;
+      /* Uma planilha de casos exportada em `.csv` traz o passo na primeira
+         coluna e o resultado esperado nas outras. Fica a primeira: o que vira
+         título de passo é o que se FAZ, não o que se espera. */
+      const txt = await f.text();
+      $('roteiroTxt').value = txt.split(/\r?\n/)
+        .map(l => (l.split(/[;\t]|,(?=(?:[^"]*"[^"]*")*[^"]*$)/)[0] || '').replace(/^"|"$/g, ''))
+        .join('\n');
+      $('roteiroCx').classList.remove('hide');
+      $('roteiroUsar').click();
+      $('roteiroArq').value = '';
+    };
+    $('roteiroTirar').onclick = () => {
+      roteiro = []; roteiroPos = 0;
+      $('roteiroTxt').value = '';
+      guardarRoteiro(); pintarRoteiro();
+    };
+    try {
+      const v = sessionStorage.getItem(ROT_CHAVE);
+      if (v) { $('roteiroTxt').value = v; roteiro = lerRoteiro(v); }
+    } catch (e) {}
+    pintarRoteiro();
+  }
+
   /* ---- a gaveta de ajustes do passo 2 ----
      Fechada por padrão, e ela LEMBRA: quem abriu uma vez quase sempre é quem
      mexe sempre (troca o modelo de voz, usa a placa), e fechar de novo a cada
@@ -13812,8 +14161,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   }
 
   function modoMarca(qual){
+    if (qual) soEste('marca');
     mkFerramenta = qual;
-    if (qual) { modoTarja(false); modoCrop(false); }
     $('lenteImgCx').classList.toggle('marcando', !!qual);
     [['mkRet','ret'], ['mkSeta','seta'], ['mkCaneta','caneta']].forEach(([id, k]) => {
       $(id).classList.toggle('ghost', mkFerramenta !== k);
@@ -13843,18 +14192,38 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     await queimarTarjas(f); pintarLente(); render();
   };
 
+  /* ---- UM MODO DE CADA VEZ ----
+
+     O DEFEITO QUE ISTO CONSERTA: "Cortar as bordas" desenhava um retângulo em
+     vez de cortar. O caminho era este — abrir "Apontar na imagem" (que já entra
+     com o retângulo escolhido) e depois clicar em "Cortar as bordas". O botão
+     do corte desligava a tarja e esquecia o destaque, e o `pointerdown` testa
+     `marcando()` PRIMEIRO: o arrasto virava um retângulo desenhado, e o corte
+     nunca acontecia.
+
+     A causa não era o esquecimento, era o desenho: cada botão desligava à mão a
+     lista dos outros dois, e essa lista mora em três lugares que ninguém
+     atualiza junto. Agora existe UM lugar que sabe quem está ligado. Um modo
+     novo amanhã entra aqui e os outros o respeitam sem que ninguém lembre. */
+  function soEste(qual){
+    if (qual !== 'tarja' && tarjando)      modoTarja(false);
+    if (qual !== 'crop'  && cortando)      modoCrop(false);
+    if (qual !== 'marca' && mkFerramenta)  modoMarca(null);
+  }
+
   function modoTarja(on){
+    if (on) soEste('tarja');
     tarjando = on;
-    if (on) modoMarca(null);
     $('lenteImgCx').classList.toggle('tarjando', on);
     $('tarjaModo').textContent = t(on ? 'tarjaFim' : 'tarjaBtn');
     $('tarjaModo').classList.toggle('ghost', !on);
     pintarTarjas();
   }
 
-  $('tarjaModo').onclick = () => { if (cortando) modoCrop(false); modoTarja(!tarjando); };
+  $('tarjaModo').onclick = () => modoTarja(!tarjando);
 
   function modoCrop(on){
+    if (on) soEste('crop');
     cortando = on;
     $('lenteImgCx').classList.toggle('tarjando', on || tarjando);
     $('cropModo').textContent = t(on ? 'cropFim' : 'cropBtn');
@@ -13862,7 +14231,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     if (on) $('tarjaMsg').textContent = t('cropComo');
     else pintarTarjas();
   }
-  $('cropModo').onclick = () => { if (tarjando) modoTarja(false); modoCrop(!cortando); };
+  $('cropModo').onclick = () => modoCrop(!cortando);
   $('cropTirar').onclick = async () => {
     recorte = null;
     $('tarjaMsg').textContent = t('cropIndo');
@@ -14243,7 +14612,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       if (i === lenteI) return;
       const o = document.createElement('option');
       o.value = String(i);
-      o.textContent = passoN(i + 1) + '  ·  ' + (f.colado ? t('coladoTag') : fmt(f.t));
+      o.textContent = passoN(numeroDoQuadro(f)) + '  ·  ' + (f.colado ? t('coladoTag') : fmt(f.t));
       sel.appendChild(o);
     });
     if (!sel.options.length) return;
@@ -14682,6 +15051,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      imagens embutidas em base64. É o mesmo conteúdo do PDF, legível por máquina. */
   $('json').onclick = async () => {
     const kept = frames.filter(f => f.keep);
+    const RPj = reguaDePassos();
     if (semQuadros('movMsg')) return;
     await aplicarTarjas(kept); await calcularHashes(kept);
     /* As imagens do arquivo, uma de cada vez e em JPEG — o mesmo JPEG de sempre,
@@ -14721,7 +15091,17 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       },
       frames: kept.map((f, i) => ({
         indice: i + 1,
-        passo: i + 1,
+        /* `passo` é o NÚMERO DO PASSO, e `indice` é a posição na lista. Eles
+           deixaram de ser a mesma coisa quando um passo passou a poder ter
+           várias telas — e é essa distinção que faz o JSON concordar com o PDF
+           e com a planilha em vez de contar a sua própria história. */
+        passo: RPj.num(f) || (i + 1),
+        telaDoPasso: RPj.telas(f) > 1 ? (RPj.ordem(f) + 1) + '/' + RPj.telas(f) : undefined,
+        /* A BANDEIRA VIAJA. Sem ela, reabrir um documento agrupado devolvia
+           quarenta passos de uma tela — o trabalho de agrupar, perdido no
+           primeiro salvamento. E ela só é escrita quando é verdadeira, para um
+           documento sem agrupamento nenhum continuar byte a byte o que era. */
+        junto: f.junto ? true : undefined,
         segundos: +f.t.toFixed(2),
         tempo: fmt(f.t),
         horaDeRelogio: ev.inicio == null ? null : new Date(msDoFrame(ev.inicio, f.t)).toISOString(),
@@ -15140,6 +15520,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
         hash: f.sha256 || null,
         colado: !!f.telaAnexada,
         tipo: f.tipoDoMomento || '',
+        /* O agrupamento volta. Um arquivo antigo não tem esta chave, e a
+           ausência dela já quer dizer "um quadro, um passo" — que é o que ele
+           era. Nenhuma conversão, nenhuma versão de formato. */
+        ...(f.junto ? { junto: true } : {}),
         /* Reaberto, e não capturado agora. A etiqueta serve para quem revisa
            saber que aquela imagem veio de um documento anterior — e para nós
            não fingirmos que houve uma varredura de vídeo que não houve. */
@@ -15779,10 +16163,12 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
          contar, para não encher o pacote de quem só queria as figuras. */
       if (ev.algum || kept.some(f => f.nota || f.hash)) {
         const linhas = ev.linhasCompletas.map(([k, v]) => k + ': ' + v).concat(ev.algum ? [''] : []);
+        const RP = reguaDePassos();
         kept.forEach((f, i) => {
           const hora = horaDe(f.t);
           linhas.push([String(i + 1).padStart(4, '0') + '-' + fmt(f.t).replace(/:/g, '-') + '.jpg',
-                       passoN(i + 1), fmt(f.t), hora, f.nota || ''].filter(Boolean).join('\t'));
+                       passoN(RP.num(f)) + (RP.telas(f) > 1 ? ' (' + (RP.ordem(f)+1) + '/' + RP.telas(f) + ')' : ''),
+                       fmt(f.t), hora, f.nota || ''].filter(Boolean).join('\t'));
           if (f.hash) linhas.push('\t' + t('pHash') + ': ' + f.hash);
           if (f.clipe) linhas.push('\t' + t('lenteClipe') + ': ' + nomeDoClipe(f, i + 1) +
                                    '  (' + t('lenteClipeNota', fmt(f.clipe.em), String(Math.round(f.clipe.seg))) + ')');
@@ -15887,8 +16273,23 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
        tentando não ter. */
     const imagens = [];
     for (const f of kept) imagens.push(await dataUrlDoArquivo(telaDe(f)));
+    /* O NÚMERO DO PASSO SAI DAQUI, e daqui saem o HTML, o Markdown e a
+       planilha. É o ponto único em que "qual é o passo desta tela" é
+       respondido para os três — e é por isso que eles não podem se
+       contradizer, que era o risco de agrupar num formato e não nos outros:
+       uma evidência em que o PDF diz "Passo 3" e o CSV diz "Passo 5" para a
+       mesma imagem não vale nada. */
+    const mapa = new Map(), ordem = new Map(), quantas = new Map();
+    listaDePassos().forEach(pp => pp.quadros.forEach((q, k) => {
+      mapa.set(q, pp.n); ordem.set(q, k); quantas.set(q, pp.quadros.length);
+    }));
     return kept.map((f, i) => ({
-      passo: i + 1,
+      passo: mapa.get(f) || (i + 1),
+      /* `abre` é quem carrega o título; as demais são telas dele. `daOrdem` e
+         `deTelas` existem para o documento poder dizer "2 de 3" sem recontar. */
+      abre: (ordem.get(f) || 0) === 0,
+      daOrdem: (ordem.get(f) || 0) + 1,
+      deTelas: quantas.get(f) || 1,
       /* `capitulo` vai em TODA linha, e não só na primeira do capítulo: numa
          planilha, o que se faz com essa coluna é agrupar, e agrupar por uma
          coluna preenchida uma vez a cada dez linhas não funciona. Quem precisa
@@ -15920,10 +16321,33 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
 <circle cx="48" cy="48" r="9.5" fill="#fff"/><circle cx="48" cy="48" r="7.6" fill="#3A3F9E"/>
 <path d="M48 43.6V48l3 2" stroke="#fff" stroke-width="1.9" stroke-linecap="round" fill="none"/></svg>`;
 
+  /* "Passo 3 de 12" conta PASSOS, e não imagens. Com telas agrupadas, contar
+     imagens faria o último passo ser o "12 de 40" — um documento que não fecha
+     a própria conta. */
+  const totalDePassos = linhas => linhas.reduce((n, l) => n + (l.abre ? 1 : 0), 0);
+
+  /* A MESMA CONTA, para os formatos que percorrem os quadros com índice em vez
+     de passar pelo `linhasDoDoc` — PDF, Word, PowerPoint, o índice do .zip e a
+     lista da revisão. Sem isto cada um voltaria a numerar pela posição na
+     lista, e o pacote sairia com o PDF dizendo "Passo 3" e a planilha dizendo
+     "Passo 5" para a mesma imagem. Uma evidência que se contradiz entre dois
+     arquivos do mesmo .zip é pior do que uma sem numeração. */
+  function reguaDePassos(){
+    const m = new Map(); const q = new Map(); const o = new Map();
+    const ps = listaDePassos();
+    ps.forEach(pp => pp.quadros.forEach((f, k) => {
+      m.set(f, pp.n); o.set(f, k); q.set(f, pp.quadros.length);
+    }));
+    return { num: f => m.get(f) || 0, ordem: f => o.get(f) || 0,
+             telas: f => q.get(f) || 1, abre: f => (o.get(f) || 0) === 0,
+             total: ps.length };
+  }
+
   async function montarHtml(){
     const ev = evDados();
     const tut = ehTutorial();
     const linhas = await linhasDoDoc();
+    const totalPassos = totalDePassos(linhas);
     const titulo = ev.caso || t('pTitle');
     const cab = ev.linhasCompletas.map(([k, v]) =>
       `<tr><th>${esc(k)}</th><td>${esc(v)}</td></tr>`).join('');
@@ -15938,12 +16362,23 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       `<p class="dom"><a href="__SITE__">__SITEDOM__</a> &middot; ${esc(t('ftPromo'))}</p></div></div>`;
     const blocos = linhas.map(l => `
   ${l.capAbre ? `<h2 class="cap">${esc(l.capitulo)}${l.tarefa ? ` <small>· ${esc(t('capTempo', l.tarefa))}</small>` : ''}</h2>` : ''}
-  <section class="passo">
-    <h2>${esc(tut && l.nota ? passoN(l.passo) + '  —  ' + l.nota
-                            : t('pStep', passoN(l.passo), linhas.length) + '   ·   ' + l.tempo +
-                              (l.hora ? '   ·   ' + l.hora : ''))}</h2>
+  <section class="passo${l.abre ? '' : ' segue'}">
+    ${l.abre
+      ? `<h2>${esc(tut && l.nota ? passoN(l.passo) + '  —  ' + l.nota
+                                 : t('pStep', passoN(l.passo), totalPassos) + '   ·   ' + l.tempo +
+                                   (l.hora ? '   ·   ' + l.hora : ''))}` +
+        (l.deTelas > 1 ? `<small class="telas"> · ${esc(t('passoTelas', l.deTelas))}</small>` : '') +
+        `</h2>` +
+        (!tut && l.nota ? `<p class="nota">${esc(l.nota)}</p>` : '')
+      /* A tela que continua um passo NÃO repete o cabeçalho. Repetir "Passo 3"
+         em três blocos seguidos é o que o agrupamento veio desfazer: o leitor
+         acha que são três ações, que é exatamente a mentira que o modelo antigo
+         contava. Ela leva só o seu relógio, e a sua anotação se tiver uma —
+         que aqui é legenda da imagem, e não título de nada. */
+      : `<p class="segueTit">${esc(l.tempo)}${l.hora ? '  ·  ' + esc(l.hora) : ''}` +
+        `  ·  ${esc(l.daOrdem + '/' + l.deTelas)}</p>` +
+        (l.nota ? `<p class="nota">${esc(l.nota)}</p>` : '')}
     ${l.tipo ? `<p class="tipo">${esc(l.tipo)}</p>` : ''}
-    ${(!tut && l.nota) ? `<p class="nota">${esc(l.nota)}</p>` : ''}
     <img src="${l.img}" alt="${esc(passoN(l.passo))}">
     ${l.fala ? `<p class="fala">${esc(l.fala)}</p>` : ''}
     ${l.ocr ? `<p class="ocr"><b>${esc(t('pOcr'))}</b> ${esc(l.ocr)}</p>` : ''}
@@ -15967,6 +16402,14 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
  table.id td{padding:5px 0;font-weight:600}
  .passo{margin:0 0 34px;padding-top:18px;border-top:1px solid #e6e8ee}
  .passo h2{font-size:16px;margin:0 0 8px}
+ /* A tela que CONTINUA um passo não abre bloco novo: sem linha em cima, colada
+    na anterior e recuada. É o desenho dizendo "isto ainda é a mesma ação" antes
+    de qualquer palavra — que é como alguém lê um documento de evidência: em
+    diagonal, procurando onde uma coisa acaba e a outra começa. */
+ .passo.segue{border-top:0;padding-top:0;margin:0 0 34px 22px;
+   border-left:3px solid #e6e8ee;padding-left:16px}
+ .passo h2 .telas{color:#777;font-weight:400;font-size:13.5px}
+ .segueTit{margin:0 0 8px;color:#777;font-size:13px}
  .passo img{width:100%;display:block;border-radius:6px;border:1px solid #e6e8ee}
  .nota{margin:0 0 10px;font-size:15.5px}
  .tipo{margin:0 0 8px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;
@@ -16027,7 +16470,8 @@ ${marcaSvg(46)}
       }
       out.push((l.capAbre || l.capitulo ? '### ' : '## ') + (tut && l.nota
         ? passoN(l.passo) + ' — ' + l.nota
-        : t('pStep', passoN(l.passo), linhas.length) + ' · ' + l.tempo + (l.hora ? ' · ' + l.hora : '')));
+        : t('pStep', passoN(l.passo), totalDePassos(linhas)) + ' · ' + l.tempo + (l.hora ? ' · ' + l.hora : '')
+          + (l.deTelas > 1 ? ' · ' + t('passoTelas', l.deTelas) : '')));
       out.push('');
       if (l.tipo) { out.push('**' + l.tipo + '**'); out.push(''); }
       if (!tut && l.nota) { out.push(l.nota); out.push(''); }
@@ -16243,7 +16687,8 @@ ${interno}</p:spTree></p:cSld><p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></
     slides.push(pptSlide(capa));
     relsSlide.push('');
 
-    // ---- um slide por passo
+    // ---- um slide por tela; o número do passo vem da mesma régua dos outros
+    const RP = reguaDePassos();
     kept.forEach((f, i) => {
       const rid = 'rId9';
       const nome = 'img' + String(i + 1).padStart(4, '0') + '.jpg';
@@ -16260,8 +16705,9 @@ ${interno}</p:spTree></p:cSld><p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></
 
       const fala = cues.length ? falaDoFrame(kept, i, cues, dur, true) : '';
       const cabec = tut && f.nota
-        ? passoN(i + 1) + '  —  ' + f.nota
-        : passoN(i + 1) + (querHora() && horaDe(f.t) ? '   ·   ' + horaDe(f.t) : '   ·   ' + fmt(f.t));
+        ? passoN(RP.num(f)) + '  —  ' + f.nota
+        : passoN(RP.num(f)) + (RP.telas(f) > 1 ? '  ·  ' + (RP.ordem(f)+1) + '/' + RP.telas(f) : '') +
+          (querHora() && horaDe(f.t) ? '   ·   ' + horaDe(f.t) : '   ·   ' + fmt(f.t));
       const rodape = [];
       if (!tut && f.nota) rodape.push({ t: f.nota, sz: 1400, b: true });
       if (fala) rodape.push({ t: fala, sz: 1200, cor: '5C6473' });
@@ -16484,13 +16930,17 @@ ${relsSlide[i]}</Relationships>`) });
     if (kept.length > 2) {
       corpo.push(par(t('pIndex'), { b: true, sz: 26, antes: 240, depois: 40 }));
       corpo.push(par(t('pIndexSub'), { sz: 17, cor: '8A8A8A', depois: 120 }));
-      kept.forEach((f, i) => {
+      /* No sumário SÓ os passos, e não uma linha por imagem: um índice que
+         repete "Passo 3" três vezes não é um índice, é a mesma lista de novo. */
+      const RPs = reguaDePassos();
+      kept.filter(f => RPs.abre(f)).forEach((f) => {
+        const i = kept.indexOf(f);
         const fala = cues.length ? falaDoFrame(kept, i, cues, dur, true) : '';
         // a anotação do passo manda no índice: quem escreveu a expectativa quer
         // ver a expectativa no sumário, não o começo da narração
         const linha = f.nota ||
           (fala.length > 96 ? fala.slice(0, 96).replace(/\s\S*$/, '') + '…' : fala);
-        corpo.push(par(passoN(i + 1) + '   ' + fmt(f.t) + '   ' + (linha || '—'),
+        corpo.push(par(passoN(RPs.num(f)) + '   ' + fmt(f.t) + '   ' + (linha || '—'),
                        { sz: 18, depois: 20 }));
       });
     }
@@ -16498,6 +16948,7 @@ ${relsSlide[i]}</Relationships>`) });
     const midias = [], rels = [];
     corpo.push(par(t('pFramesH'), { b: true, sz: 26, antes: 320, depois: 120 }));
 
+    const RPd = reguaDePassos();
     kept.forEach((f, i) => {
       const rid = 'rIdImg' + (i + 1);
       const nome = 'frame' + String(i + 1).padStart(4, '0') + '.jpg';
@@ -16514,8 +16965,9 @@ ${relsSlide[i]}</Relationships>`) });
          expectativa e vem numa linha própria acima da imagem. Ver o comentário
          equivalente no PDF. */
       corpo.push(par(tut
-          ? passoN(i + 1) + (f.nota ? '  —  ' + f.nota : '')
-          : t('pStep', passoN(i + 1), kept.length) + '   ·   ' +
+          ? passoN(RPd.num(f)) + (f.nota ? '  —  ' + f.nota : '')
+          : t('pStep', passoN(RPd.num(f)), RPd.total) +
+            (RPd.telas(f) > 1 ? '  ·  ' + (RPd.ordem(f)+1) + '/' + RPd.telas(f) : '') + '   ·   ' +
             (f.colado ? t('coladoTag') : fmt(f.t) + (hora ? '   ·   ' + hora : '')),
         { b: true, sz: 22, antes: 240, depois: 40 }));
       if (!tut && f.nota) corpo.push(par(f.nota, { sz: 21, cor: '1F2430', depois: 60 }));
@@ -16916,6 +17368,10 @@ ${relsSlide[i]}</Relationships>`) });
   $('go').onclick = async () => {
     const kept = frames.filter(f => f.keep);
     if (semQuadros()) return;
+    /* A régua de passos, uma vez por PDF. Ela é a mesma que o Word, o
+       PowerPoint, o HTML e a planilha usam — é o que garante que a mesma
+       imagem receba o mesmo número em todos os arquivos do pacote. */
+    const RPp = reguaDePassos();
     const dur = duracaoTotal();
     const { cues, plain } = parseTranscript($('tr').value);
     const ev = evDados();
@@ -17109,7 +17565,9 @@ ${relsSlide[i]}</Relationships>`) });
       doc.text(doc.splitTextToSize(t('pIndexSub'), CW), M, M + 11);
       let iy = M + 20;
       doc.setFontSize(9.5);
-      kept.forEach((f, i) => {
+      /* Só os passos: um índice que repete "Passo 3" três vezes não indexa. */
+      kept.filter(f => RPp.abre(f)).forEach((f) => {
+        const i = kept.indexOf(f);
         if (iy > PH - 20) { foot(); doc.addPage(); iy = M + 4; }
         const nextT = i+1 < kept.length ? kept[i+1].t : dur + 0.001;
         let resumo = '';
@@ -17119,7 +17577,7 @@ ${relsSlide[i]}</Relationships>`) });
         }
         // a anotação manda no índice: quem escreveu a expectativa quer vê-la aqui
         if (f.nota) resumo = f.nota;
-        doc.setTextColor(120).text(passoN(i + 1), M, iy);
+        doc.setTextColor(120).text(passoN(RPp.num(f)), M, iy);
         doc.setTextColor(120).text(quando(f), M + 20, iy);
         doc.setTextColor(45).text(doc.splitTextToSize(resumo || '—', CW - 38)[0], M + 38, iy);
         iy += 5.6;
@@ -17153,8 +17611,9 @@ ${relsSlide[i]}</Relationships>`) });
            mora embaixo do próprio conteúdo. */
         const hora = horaDe(f.t);
         const cabTxt = tut
-          ? passoN(i+1) + (f.nota ? '  —  ' + f.nota : '')
-          : passoN(i+1) + '   ·   ' + quando(f) + (hora && !f.colado ? '   ·   ' + hora : '');
+          ? passoN(RPp.num(f)) + (f.nota ? '  —  ' + f.nota : '')
+          : passoN(RPp.num(f)) + (RPp.telas(f) > 1 ? '  ·  ' + (RPp.ordem(f)+1) + '/' + RPp.telas(f) : '') +
+            '   ·   ' + quando(f) + (hora && !f.colado ? '   ·   ' + hora : '');
         doc.setFont('helvetica','bold').setFontSize(tut ? 11.5 : 11);
         const cabL = doc.splitTextToSize(cabTxt, CW - 24);   // 24 mm do "frame i de n"
         doc.setFont('helvetica','normal').setFontSize(9.6);
@@ -17237,7 +17696,7 @@ ${relsSlide[i]}</Relationships>`) });
         doc.addImage(linhasPdf[i].img, 'JPEG', x, top, iwG, ihG);
         let cy2 = top + ihG + 4.5;
         doc.setFont('helvetica','bold').setFontSize(8.5).setTextColor(60)
-           .text(passoN(i + 1) + '  ·  ' + quando(f), x, cy2);
+           .text(passoN(RPp.num(f)) + '  ·  ' + quando(f), x, cy2);
         if (hora) {
           cy2 += 3.6;
           doc.setFont('helvetica','normal').setFontSize(7).setTextColor(130).text(hora, x, cy2);
@@ -17269,7 +17728,7 @@ ${relsSlide[i]}</Relationships>`) });
         if (!f.hash) return;
         if (hy > PH - 22) { foot(); doc.addPage(); hy = M + 4; }
         doc.setFont('helvetica','bold').setFontSize(8.6).setTextColor(60)
-           .text(passoN(i + 1) + '  ·  ' + quando(f), M, hy);
+           .text(passoN(RPp.num(f)) + '  ·  ' + quando(f), M, hy);
         hy += 4.2;
         doc.setFont('courier','normal').setFontSize(7.6).setTextColor(95);
         doc.text(doc.splitTextToSize(f.hash, CW), M, hy);

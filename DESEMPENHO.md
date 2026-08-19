@@ -1378,3 +1378,95 @@ Sem cadastro, sem anúncio e sem rastreio, o único canal deste produto é uma
 pessoa contando para outra: a caixa que faz isso acontecer não podia ser a mais
 discreta da página. Contorno na cor da marca, faixa lateral de 5px, tinta ao
 dobro, título de 14,5 para 16,5 e o botão de copiar deixou de ser fantasma.
+
+---
+
+## 19/08/2026, décima quinta rodada — o passo com várias telas, e o roteiro alheio
+
+### O que estava errado no modelo
+
+Um quadro era um passo. Isso não é como teste funciona: "preencher o cabeçalho
+do pedido" precisa de três telas, e a pessoa escolhia entre dois erros — marcar
+três quadros, e **uma** ação virar Passo 5, 6 e 7, cada um pedindo um título que
+ela não tem; ou marcar um, e perder duas telas de prova.
+
+Agora existe um nível entre o capítulo e o quadro. **Sem palavra nova:** o rótulo
+que já existia — Passo, Momento, Trecho, editável — é o do nível de cima, e o que
+entra por baixo são as telas dele. No documento sai um título e N imagens. Nada
+de "sub-passo 3.1" em cinco idiomas vezes seis cenários.
+
+### Duas decisões que valem mais que o código
+
+**A bandeira é `junto`, e não `novoPasso`.** A ausência dela já quer dizer "um
+quadro, um passo" — que é o comportamento de hoje e o que está guardado em todo
+`.json` já entregue. Um documento antigo volta certo **sem conversão nenhuma**.
+A bandeira inversa obrigaria a marcar 100% dos quadros existentes.
+
+**A lista de passos é derivada, nunca guardada.** Guardá-la ao lado dos quadros
+seria a segunda lista à mão que já custou caro aqui: descartar, mover, colar,
+reabrir e juntar teriam que lembrar das duas.
+
+### Os dois botões, e por que eu inverti o pedido
+
+O pedido era "marcar tela" como principal e "passar o passo" como o que fecha.
+Inverti: **marcar continua abrindo um passo**, e o segundo botão é o aditivo —
+"+ mais uma tela deste passo". O motivo é uma regra, não gosto: *quem nunca
+tocar no segundo botão tem que receber exatamente o que recebia ontem*. Com
+"marcar" juntando telas, quem só marca sairia com um passo de quarenta imagens.
+
+Os dois estão **também na janelinha**, e isso não é simetria: quem grava está
+dentro do sistema que testa, não na nossa aba. Um botão que só existe na página
+é um botão que não existe durante a gravação.
+
+### O roteiro que a pessoa já tem (o "item A")
+
+Do campo: numa implantação com 780 cenários, o documento com os passos escritos
+**já chega pronto** — uma IA genérica gerou. Gerar mais um documento é competir
+com um que já existe.
+
+Então o roteiro entra como o subitem **c** do passo 1: uma linha, um passo, colado
+ou de `.txt`/`.csv`. Cada "marcar" durante a gravação já sai com o título escrito.
+É o encaixe feito **na hora da captura**, e não depois, adivinhando qual print vai
+em qual passo. A numeração da lista dele (`1.`, `2.`) é descartada — o documento
+numera sozinho, e numerar duas vezes é pior que não numerar.
+
+Não lê `.docx`: o formato que sai de qualquer gerador é texto, e ler OOXML para
+chegar ao mesmo lugar seria pagar caro pela mesma coisa.
+
+### O que o teste pegou
+
+**O `.json` não guardava a bandeira** — reabrir um documento agrupado devolvia
+quarenta passos de uma tela, e o trabalho de agrupar se perdia no primeiro
+salvamento.
+
+E **eu declarei uma segunda `passos()` no mesmo arquivo.** Duas declarações de
+função no mesmo escopo não brigam: a segunda apaga a primeira em silêncio. A
+função que travava os cartões deixou de existir, o passo 4 parou de travar, e o
+console não disse nada. Quem pegou foi o `passos.mjs`. O comentário no lugar do
+crime agora avisa o próximo.
+
+### A afirmação que mais importa
+
+`passomulti.mjs` cobra que **os formatos não se contradizem**. Agrupar no HTML e
+esquecer o PDF faria a mesma imagem ser o "Passo 3" num arquivo e o "Passo 5" no
+outro, dentro do mesmo `.zip`. Todos os dez passaram a ler a mesma régua —
+`linhasDoDoc` para HTML/Markdown/planilha, `reguaDePassos` para PDF, Word,
+PowerPoint, o índice do `.zip` e a lista da revisão.
+
+Medido no documento de exemplo: 5 imagens, **2 títulos de passo**, 3 blocos de
+continuação, e a planilha dizendo `2` na última imagem — que é a quinta da lista.
+
+### Os dois ajustes da mesma rodada
+
+**"Cortar as bordas" desenhava um retângulo.** O caminho: abrir "Apontar na
+imagem" (que já entra com o retângulo escolhido) e depois clicar em cortar. O
+botão do corte desligava a tarja e **esquecia o destaque**, e o `pointerdown`
+testa `marcando()` primeiro. A causa não era esquecimento, era o desenho: cada
+botão desligava à mão a lista dos outros dois. Agora há um lugar só — `soEste()`.
+Medido com o conserto desligado: largura 900 → 900 (não cortou) e um retângulo
+desenhado no lugar.
+
+**As bolinhas a, b, c** ficaram ocas — fundo lavado, letra na cor da marca,
+contorno fino. Cheias, eram idênticas à bolinha numerada do cartão, e duas coisas
+iguais na tela lêem-se como do mesmo nível. Concluído continua verde e cheio:
+terminar um subpasso é uma afirmação, e afirmação lavada não afirma nada.

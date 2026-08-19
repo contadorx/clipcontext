@@ -152,8 +152,11 @@ console.log('\n[6] "não sei o tamanho" não vira 0%');
   /* O defeito exato: `tt === 0` virava `pct = 0` e a tela escrevia 0%, que se
      lê como travado. Agora esse caso é barra listrada e uma frase própria. */
   const fonte = fs.readFileSync(ROOT + '/app.html', 'utf8');
-  ok('sem tamanho, a barra fica indeterminada',
-     /if \(!tt\) \{\s*\n?\s*prog\(null\); progRec\(null\);/.test(fonte));
+  /* As DUAS barras ficam listradas. Antes `prog(null)` escondia a de cima e só
+     a do passo 1 andava — quem estava olhando para o cartão 2 via uma tela
+     parada. `prog` ganhou o terceiro estado que o `progRec` já tinha. */
+  ok('sem tamanho, as duas barras ficam indeterminadas',
+     /if \(!tt\) \{\s*\n?\s*prog\('\?'\); progRec\(null\);/.test(fonte));
   ok('e a frase é outra, não a de porcentagem',
      /modelDlInicio/.test(fonte));
   ok('a barra indeterminada é listrada e anda', /\.bar\.indef>i\{/.test(fonte));

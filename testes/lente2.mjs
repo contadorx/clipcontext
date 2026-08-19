@@ -204,7 +204,62 @@ console.log('\n[8] o contador da espera é grande');
   ok('e é bem maior que a linha de status', parseFloat(tam) >= 20, tam);
 }
 
-console.log('\n[9] nada disso quebrou o JS');
+/* ---- UM MODO DE CADA VEZ NA LENTE ----
+
+   O DEFEITO: "Cortar as bordas" desenhava um retângulo em vez de cortar. O
+   caminho é este — abrir "Apontar na imagem", que já entra com o retângulo
+   escolhido, e depois clicar em "Cortar as bordas". O botão do corte desligava
+   a tarja e esquecia o destaque, e o `pointerdown` testa `marcando()` PRIMEIRO:
+   o arrasto virava desenho, e o corte não acontecia nunca.
+
+   O NÚMERO QUE IMPORTA aqui é a LARGURA do quadro depois do arrasto. Afirmar
+   "o modo do destaque desligou" mediria a variável, e não o resultado — o que
+   a pessoa reclamou é que a imagem não foi cortada. */
+console.log('\n[9] com o destaque ligado, "Cortar as bordas" corta — não desenha');
+{
+  await pg.locator('#lenteFechar').click().catch(() => {});
+  await pg.waitForTimeout(300);
+  await pg.locator('#thumbs figure .lupa').first().click();
+  await pg.waitForTimeout(500);
+
+  const antes = await pg.evaluate(() => {
+    const q = window.__quadros()[0];
+    return { larg: q.img.w, marcas: (q.marcas || []).length };
+  });
+
+  // exatamente a ordem que produzia o defeito
+  await pg.locator('#mkModo').click();
+  await pg.waitForTimeout(250);
+  ok('o destaque entrou com o retângulo escolhido',
+     !(await pg.locator('#mkRet').evaluate(e => e.classList.contains('ghost')))); 
+  await pg.locator('#cropModo').click();
+  await pg.waitForTimeout(250);
+
+  const cx = await pg.locator('#lenteImg').boundingBox();
+  await pg.mouse.move(cx.x + cx.width * 0.25, cx.y + cx.height * 0.25);
+  await pg.mouse.down();
+  await pg.mouse.move(cx.x + cx.width * 0.75, cx.y + cx.height * 0.75, { steps: 12 });
+  await pg.mouse.up();
+  await pg.waitForTimeout(2500);
+
+  const depois = await pg.evaluate(() => {
+    const q = window.__quadros()[0];
+    return { larg: q.img.w, marcas: (q.marcas || []).length };
+  });
+  console.log('      largura do quadro: ' + antes.larg + ' → ' + depois.larg);
+  ok('a imagem foi mesmo cortada', depois.larg < antes.larg * 0.9,
+     antes.larg + ' → ' + depois.larg);
+  ok('e nenhum retângulo foi desenhado no lugar',
+     depois.marcas === antes.marcas, antes.marcas + ' → ' + depois.marcas);
+  ok('o botão de desfazer o corte apareceu',
+     !(await pg.locator('#cropTirar').evaluate(e => e.classList.contains('hide'))));
+  await pg.locator('#cropTirar').click();
+  await pg.waitForTimeout(2000);
+  await pg.locator('#lenteFechar').click().catch(() => {});
+  await pg.waitForTimeout(300);
+}
+
+console.log('\n[10] nada disso quebrou o JS');
 ok('sem erro de JS', erros.length === 0, erros.join(' | ').slice(0, 170));
 
 await br.close(); srv.close();
