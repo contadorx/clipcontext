@@ -1470,3 +1470,74 @@ desenhado no lugar.
 contorno fino. Cheias, eram idênticas à bolinha numerada do cartão, e duas coisas
 iguais na tela lêem-se como do mesmo nível. Concluído continua verde e cheio:
 terminar um subpasso é uma afirmação, e afirmação lavada não afirma nada.
+
+---
+
+## 19/08/2026, décima sexta rodada — quatro consertos vindos do uso
+
+### 1. "O que aconteceu aqui" saiu
+
+Era a caixa de comentário AO VIVO, no cartão e na janelinha. O relato foi
+direto: confusa, e não ajuda. **Concordo**, e o motivo é o mesmo que separou os
+dois botões de captura — quem grava está olhando para o sistema que testa, não
+para nós. Escrever às cegas, num campo de uma linha, sobre uma imagem que não se
+está vendo, é a pior hora possível para descrever qualquer coisa. E com dois
+botões de captura, *"sobre qual tela eu estou escrevendo"* virou uma pergunta a
+mais no pior momento.
+
+**O que se perde, e vale estar escrito:** anotar no calor do momento. O que fica
+é melhor — na revisão e na lente a anotação é escrita com a imagem grande na
+frente, e o roteiro colado no passo 1 já entrega o título sem ninguém digitar.
+
+Um detalhe que quase escapou: o comentário ao vivo era **quem escrevia a
+anotação no espelho do disco**. Sem substituir isso, anotar quarenta passos na
+revisão e perder a aba levaria as quarenta junto — e é justamente depois de
+parar que a pessoa passa meia hora anotando. Agora o campo da grade e o da lente
+escrevem no espelho.
+
+### 2. O botão errado acendia
+
+Apertar "mais uma tela" acendia o **"marcar"**, e quem apertou concluía que tinha
+clicado errado. A causa: qualquer aviso acendia sempre o primeiro botão. Agora o
+aviso sabe quem o causou. Um retorno visual que mente sobre o próprio gesto é
+pior do que retorno nenhum.
+
+E o rótulo perdeu a duplicação: `+ mais uma tela` → **"Mais uma tela deste
+passo"**.
+
+### 3. Fixar um quadro
+
+Os três botões de limpeza — repetidos, sem fala, só os marcados — jogam quadros
+fora em lote, e não havia como salvar um do lote. O relato é o caso exato:
+"descartar repetidos" levava junto a tela que a pessoa queria, e ela desfazia
+tudo com "manter todos" para recomeçar à mão.
+
+`fixo` é passivo: um quadro fixado **nunca é descartado por uma ação em lote**,
+e continua podendo ser descartado com um clique na própria miniatura. Fixar
+protege do automático, não da pessoa — uma trava que a própria dona não abre é
+armadilha, não proteção.
+
+Dois detalhes que valem: o fixado **não vira a nova referência** do detector de
+repetidos (senão proteger um mexeria no destino dos vizinhos), e ele ganha selo
+na miniatura — sem isso, "manter sempre" seria uma promessa invisível.
+
+Medido: cinco quadros, dois marcados como repetidos, um deles fixado. Depois de
+"descartar repetidos": `[true,true,false,true,true]` — o solto caiu, o fixado
+ficou.
+
+### 4. Cortar só ESTA tela
+
+O recorte era um só para todos os quadros. Um pop-up no canto de uma tela
+obrigava a destruir 39 quadros para consertar 1, e "desfazer o corte" devolvia os
+40 juntos. Agora são dois botões, e a área de um quadro mora **nele**, não no
+recorte geral — cortar uma tela não redefine a área das outras.
+
+Medido: `[900,900,900,900,900]` → `[900,450,900,900,900]`, e desfazer devolve.
+
+### A regressão
+
+Inteira, 108 arquivos. Três falharam, e as três eram expectativas de teste
+desatualizadas pelas decisões já tomadas — `ux.mjs` contava três caixas de opção
+onde agora há duas, `tapado.mjs` esperava o cartão 2 fechado, `espelho.mjs`
+escrevia no campo de comentário que saiu. As três reescritas e verdes; nenhuma
+linha de produto mudou depois da corrida.

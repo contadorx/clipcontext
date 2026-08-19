@@ -169,16 +169,21 @@ let quadros = 0;
   ok('o cabeçalho da sessão está lá',
      s.arquivos.some(a => a.nome === 'sessao.json'));
 
-  /* A anotação escrita DURANTE a gravação é a que só existe naquele instante —
-     é ela que a proposta original de virtualização também ameaçava. */
+  /* A ANOTAÇÃO TAMBÉM VAI PARA O DISCO, e agora ela é escrita na revisão — o
+     campo de comentário ao vivo saiu, porque quem grava está olhando para o
+     sistema que testa e escrever às cegas era a pior hora possível.
+
+     Isso mudou o QUANDO, e não o SE: é justamente depois de parar que a pessoa
+     passa meia hora anotando quarenta passos, e perder a aba nessa meia hora
+     levaria as quarenta junto. Por isso o campo da grade escreve no espelho. */
   await pg.locator('#recMark').click();
   await pg.waitForTimeout(400);
-  await pg.locator('#recNota').fill('o total veio errado aqui');
-  await pg.waitForTimeout(900);
   await pg.locator('#recStop').click();
   await pg.waitForFunction(() => document.getElementById('rec').offsetParent !== null,
                            null, { timeout: 60000 });
   await pg.waitForTimeout(1500);
+  await pg.locator('#thumbs figure input.nota').first().fill('o total veio errado aqui');
+  await pg.waitForTimeout(900);
   ok('sem erro de JavaScript', erros.length === 0, erros.join(' | ').slice(0, 200));
   /* A ABA MORRE AQUI, sem que nenhum documento tenha saído. É o acidente. */
   await pg.close();

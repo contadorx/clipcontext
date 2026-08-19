@@ -1,17 +1,23 @@
-/* O comentário da marcação.
+/* A ANOTAÇÃO DO PASSO — depois da gravação, e não durante.
  *
- * "Marcar este passo" guardava a tela e nada mais. Na revisão, meia hora
- * depois, sobravam sete quadros marcados e nenhum deles dizia POR QUÊ — e o
- * porquê é o que só existe no instante: "aqui o total veio errado" é óbvio na
- * hora e irrecuperável depois.
+ * O QUE MUDOU, E POR QUÊ. Existia uma caixa de comentário AO VIVO, no cartão e
+ * na janelinha, que dizia "o que aconteceu aqui" e comentava a última marcação.
+ * O relato de uso foi direto: confusa, e não ajuda.
  *
- * O que este arquivo cobra é a regra, que é onde uma caixa de texto assim
- * costuma dar errado:
- *   - ela comenta a ÚLTIMA marcação, não a próxima;
- *   - marcar de novo NÃO herda o comentário anterior (repetição num documento
- *     de evidência é pior que silêncio: parece confirmação);
- *   - e o que foi digitado tem que CHEGAR na revisão, que é a única razão de
- *     alguém digitar durante uma gravação.
+ * O motivo é o mesmo que separou os dois botões de captura: quem grava está
+ * olhando para o sistema que testa, não para nós. Escrever às cegas, num campo
+ * de uma linha, sobre uma imagem que não se está vendo, é a pior hora possível
+ * para descrever qualquer coisa — e com dois botões de captura, "sobre qual
+ * tela eu estou escrevendo" virou uma pergunta a mais no pior momento.
+ *
+ * O QUE ESTE ARQUIVO CONTINUA COBRANDO é o que sempre importou e não mudou de
+ * lugar: a anotação escrita CHEGA ao documento entregue. Uma anotação que
+ * aparece na revisão e some no arquivo é pior do que anotação nenhuma — a
+ * pessoa acredita que documentou.
+ *
+ * E cobra a saída da caixa: que ela não existe mais em lugar nenhum, nem no
+ * cartão nem na janelinha. Uma remoção pela metade deixaria um campo órfão
+ * escrevendo num quadro que ninguém mais aponta.
  */
 import { chromium } from 'playwright';
 import http from 'http'; import fs from 'fs';
@@ -54,135 +60,109 @@ await pg.goto('http://localhost:8907/app.html?lang=pt');
 await pg.selectOption('#modelo', 'ia').catch(() => {});
 await pg.waitForTimeout(500);
 
-console.log('[1] antes de gravar, a caixa não existe na tela');
+console.log('[1] a caixa de comentário ao vivo não existe mais');
 {
-  ok('escondida', await pg.locator('#recNotaCx').evaluate(e => e.classList.contains('hide')));
+  /* Pelo DOCUMENTO, e não por uma variável: o que a pessoa encontra na tela é
+     o que existe, e um campo escondido continua sendo um campo. */
+  ok('não há campo de comentário no cartão de gravar',
+     (await pg.locator('#recNota').count()) === 0 &&
+     (await pg.locator('#recNotaCx').count()) === 0);
+  const fonte = fs.readFileSync(ROOT + '/app.html', 'utf8');
+  ok('nem a caixa da janelinha ficou para trás', !/id="pipNota"/.test(fonte));
+  ok('nem as frases dela', !/recNotaPh|recNotaEsp|recNotaEm/.test(fonte));
 }
 
-console.log('\n[2] gravando: a caixa é UMA SÓ, e é a da janelinha');
-/* Sem transcrever e sem contagem: o que este arquivo prova é a caixa, e baixar
-   um modelo de voz de 249 MB para isso seria trocar um teste por uma espera. */
+console.log('\n[2] gravando com os dois botões de captura');
+/* Sem transcrever e sem contagem: o que este arquivo prova é a anotação, e
+   baixar um modelo de voz de 249 MB para isso seria trocar um teste por uma
+   espera. */
 await pg.locator('#recTr').uncheck();
 await pg.evaluate(() => window.__contagem(1));
 await pg.locator('#rec').click();
 await pg.waitForSelector('#recStop:visible', { timeout: 40000 });
 await pg.waitForTimeout(2500);
 
-/* A janelinha é um documento de verdade e o Playwright a vê como uma página à
-   parte. `localhost` é contexto seguro, então o `documentPictureInPicture`
-   existe aqui — e a gravação abre a janelinha sozinha, como no uso real. */
 const janela = () => ctx.pages().find(p => p !== pg) || null;
 const jn = janela();
-
 {
-  /* As duas caixas existiam ao mesmo tempo, espelhadas. Na teoria era
-     conveniente; na prática eram dois campos iguais pedindo para serem
-     digitados, e ninguém sabe qual dos dois vale — no meio de uma gravação,
-     que é quando menos se tem paciência para descobrir. */
   ok('a janelinha abriu', !!jn);
-  ok('o cartão recolheu o campo dele',
-     await pg.locator('#recNota').evaluate(e => e.classList.contains('hide')));
-  ok('e diz para onde ele foi',
-     /janelinha/.test(await pg.locator('#recNotaEst').textContent()),
-     await pg.locator('#recNotaEst').textContent());
-  ok('a caixa da janelinha existe', (await jn.locator('#pipNota').count()) === 1);
-  ok('e nasce desligada, dizendo o que espera',
-     await jn.locator('#pipNota').isDisabled());
-  ok('com o texto certo no lugar do valor',
-     /marque um passo/.test(await jn.locator('#pipNota').getAttribute('placeholder')),
-     await jn.locator('#pipNota').getAttribute('placeholder'));
+  /* OS DOIS BOTÕES TÊM QUE ESTAR NA JANELINHA, e isto não é simetria: quem
+     grava está dentro do sistema que testa. Clicar na página significa
+     alt-tab — e o alt-tab muda a tela que ela ia capturar. */
+  ok('e ela tem os dois botões de captura',
+     (await jn.locator('#marcar').count()) === 1 && (await jn.locator('#maisTela').count()) === 1);
+  ok('o "mais uma tela" não repete o "+" no rótulo',
+     !/^\s*\+/.test(await jn.locator('#maisTela').textContent()),
+     (await jn.locator('#maisTela').textContent()).slice(0, 40));
 }
 
-console.log('\n[3] a primeira marcação liga a caixa da janelinha');
-await jn.locator('#marcar').click();
-await pg.waitForTimeout(1200);
+console.log('\n[3] apertar um botão destaca ELE, e não o outro');
 {
-  ok('ligou', !(await jn.locator('#pipNota').isDisabled()));
-  ok('vazia', (await jn.locator('#pipNota').inputValue()) === '');
-}
-await jn.locator('#pipNota').fill('o total veio errado aqui');
-await pg.waitForTimeout(400);
+  /* O DEFEITO EXATO, relatado no uso: apertar "mais uma tela" acendia o
+     "marcar", e quem apertou concluía que tinha clicado errado. Um retorno
+     visual que mente sobre o próprio gesto é pior do que retorno nenhum. */
+  await jn.locator('#marcar').click();
+  await pg.waitForTimeout(700);
+  ok('marcar acende o marcar',
+     await jn.locator('#marcar').evaluate(e => e.classList.contains('piscou')));
+  ok('e não o de mais uma tela',
+     !(await jn.locator('#maisTela').evaluate(e => e.classList.contains('piscou'))));
 
-console.log('\n[4] Enter confirma — e NÃO para a gravação');
-{
-  /* O ponto mais perigoso da ferramenta para uma tecla solta: "Parar" está a
-     dois centímetros do campo, numa janela de 250px, e parar é irreversível —
-     a reunião não se repete. Antes o Enter não tinha dono. */
-  await jn.locator('#pipNota').press('Enter');
-  await pg.waitForTimeout(500);
-  ok('a gravação continua rolando', await pg.locator('#recStop').isVisible());
-  ok('e o texto continua no campo',
-     (await jn.locator('#pipNota').inputValue()) === 'o total veio errado aqui');
-  ok('a janelinha continua aberta', !!janela());
-  ok('e o campo confirma que guardou',
-     await jn.locator('#pipNota').evaluate(e => e.classList.contains('guardou')));
+  await pg.waitForTimeout(2600);   // o destaque tem prazo; esperar é parte da regra
+  await jn.locator('#maisTela').click();
+  await pg.waitForTimeout(700);
+  ok('mais uma tela acende o de mais uma tela',
+     await jn.locator('#maisTela').evaluate(e => e.classList.contains('piscou')));
+  ok('e NÃO o marcar',
+     !(await jn.locator('#marcar').evaluate(e => e.classList.contains('piscou'))));
 }
 
-console.log('\n[5] a segunda marcação começa em branco — não herda a anterior');
-await pg.waitForTimeout(2200);
-await jn.locator('#marcar').click();
-await pg.waitForTimeout(1200);
-{
-  ok('a caixa zerou', (await jn.locator('#pipNota').inputValue()) === '',
-     await jn.locator('#pipNota').inputValue());
-}
-await jn.locator('#pipNota').fill('e aqui a tela travou');
-await pg.waitForTimeout(400);
-
-console.log('\n[6] fechando a janelinha, o campo VOLTA para o cartão — com o texto');
-{
-  /* O texto nunca morou no campo: mora no quadro. Fechar a janelinha por engano
-     no meio de uma gravação não pode deixar a pessoa sem lugar nenhum para
-     comentar, e muito menos apagar o que ela escreveu. */
-  await jn.close();
-  await pg.waitForTimeout(900);
-  ok('o campo do cartão reapareceu',
-     !(await pg.locator('#recNota').evaluate(e => e.classList.contains('hide')))); 
-  ok('com o texto que foi digitado na janelinha',
-     (await pg.locator('#recNota').inputValue()) === 'e aqui a tela travou',
-     await pg.locator('#recNota').inputValue());
-  ok('e o rótulo voltou a dizer qual marcação é',
-     /marcação 2/.test(await pg.locator('#recNotaEst').textContent()),
-     await pg.locator('#recNotaEst').textContent());
-  ok('e o botão de trazer a janelinha de volta apareceu',
-     await pg.locator('#recPip').isVisible());
-}
-
-console.log('\n[7] parando, os comentários chegam na revisão');
-await pg.locator('#recStop').click();
-await pg.waitForFunction(() => document.getElementById('rec').offsetParent !== null, null, { timeout: 60000 });
+console.log('\n[4] a segunda captura entrou no MESMO passo');
+await pg.waitForTimeout(2400);
+await jn.locator('#marcar').click();          // um passo novo, para haver dois
 await pg.waitForTimeout(1500);
+await pg.locator('#recStop').click();
+await pg.waitForFunction(() => document.getElementById('rec').offsetParent !== null,
+                         null, { timeout: 60000 });
+await pg.waitForTimeout(1800);
 {
-  ok('a caixa sumiu com a gravação',
-     await pg.locator('#recNotaCx').evaluate(e => e.classList.contains('hide')));
-
-  const notas = await pg.locator('#thumbs figure input.nota').evaluateAll(
-    (ns) => ns.map((n) => n.value).filter(Boolean));
-  ok('os dois comentários estão nas anotações dos quadros',
-     notas.includes('o total veio errado aqui') && notas.includes('e aqui a tela travou'),
-     notas.join(' | '));
-  /* A ordem importa: se o segundo comentário caísse no primeiro quadro, o
-     documento diria que a tela travou antes de o total dar errado. */
-  const iA = notas.indexOf('o total veio errado aqui');
-  const iB = notas.indexOf('e aqui a tela travou');
-  ok('e na ordem em que aconteceram', iA >= 0 && iB > iA, `${iA} < ${iB}`);
+  const marcados = await pg.evaluate(() => (window.__quadros() || []).filter(q => q.manual).length);
+  const juntos = await pg.evaluate(() => (window.__quadros() || []).filter(q => q.junto).length);
+  console.log('      marcados: ' + marcados + '   dos quais grudados no passo anterior: ' + juntos);
+  ok('houve três capturas à mão', marcados >= 3, String(marcados));
+  ok('e uma delas grudou no passo anterior', juntos === 1, String(juntos));
 }
 
-console.log('\n[8] o documento leva o comentário junto');
+console.log('\n[5] a anotação é escrita na revisão, com a imagem na frente');
 {
-  /* A prova que importa. Um comentário que aparece na revisão e some no arquivo
-     entregue é pior do que não ter comentário: a pessoa acredita que
-     documentou. Por isso aqui o documento é GERADO e lido, e não inspecionado
-     por dentro. */
+  const campos = pg.locator('#thumbs figure input.nota');
+  const n = await campos.count();
+  ok('há um campo de anotação por miniatura', n > 0, String(n));
+  await campos.first().fill('o total veio errado aqui');
+  await pg.waitForTimeout(250);
+  await campos.nth(n - 1).fill('e aqui a tela travou');
+  await pg.waitForTimeout(400);
+  ok('o que se digita fica no QUADRO, não no campo',
+     await pg.evaluate(() => {
+       const q = window.__quadros() || [];
+       return (q[0].nota === 'o total veio errado aqui') &&
+              (q[q.length - 1].nota === 'e aqui a tela travou');
+     }));
+}
+
+console.log('\n[6] o documento leva a anotação junto');
+{
+  /* A prova que importa, e a única que não mudou de dono. Por isso o documento
+     é GERADO e lido, e não inspecionado por dentro. */
   const dl = pg.waitForEvent('download', { timeout: 60000 });
   await pg.locator('#html').click();
   const d = await dl; await d.saveAs('/tmp/comentario-saida.html');
   const doc = fs.readFileSync('/tmp/comentario-saida.html', 'utf8');
-  ok('o documento cita o primeiro comentário', doc.includes('o total veio errado aqui'));
-  ok('e o segundo', doc.includes('e aqui a tela travou'));
+  ok('o documento cita a primeira anotação', doc.includes('o total veio errado aqui'));
+  ok('e a última', doc.includes('e aqui a tela travou'));
   ok('sem erro de JS em nada disso', erros.length === 0, erros.join(' | ').slice(0, 160));
 }
 
 await br.close(); srv.close();
-console.log(falhas ? `\n${falhas} FALHA(S)` : '\nComentário da marcação: tudo passou.');
+console.log(falhas ? `\n${falhas} FALHA(S)` : '\nAnotação do passo: tudo passou.');
 process.exit(falhas ? 1 : 0);

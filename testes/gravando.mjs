@@ -98,23 +98,24 @@ const jn = ctx.pages().find(p => p !== pg);
 await jn.locator('#marcar').click();
 await pg.waitForTimeout(900);
 {
-  /* Um campo que guarda em silêncio é indistinguível de um campo quebrado, e a
-     diferença entre os dois só apareceria meia hora depois, na revisão. */
-  const antes = (await pg.locator('#recNotaEst').textContent() || '').trim();
-  await jn.locator('#pipNota').fill('o total veio errado');
-  await pg.waitForTimeout(200);
-  /* O contorno do campo é o aviso da janelinha: em 250px não cabe uma segunda
-     linha de texto, e a linha da aba está atrás da tela compartilhada. */
-  ok('o campo da janelinha confirma no contorno',
-     await jn.locator('#pipNota').evaluate(e => e.classList.contains('guardou')));
-  const durante = (await pg.locator('#recNotaEst').textContent() || '').trim();
-  ok('e a aba também registra', /guardado/i.test(durante), durante);
-  ok('o aviso é diferente do rótulo de antes', durante !== antes, `${antes} → ${durante}`);
+  /* A CAIXA DE COMENTÁRIO AO VIVO SAIU — dela e do cartão. Ela dizia "o que
+     aconteceu aqui" e o relato de uso foi que era confusa: quem grava está
+     olhando para o sistema que testa, e escrever às cegas sobre uma imagem que
+     não se está vendo é a pior hora possível para descrever qualquer coisa. A
+     anotação passou para a revisão, com a imagem grande na frente.
 
-  await pg.waitForTimeout(1800);
-  ok('o contorno passa', !(await jn.locator('#pipNota').evaluate(e => e.classList.contains('guardou'))));
-  ok('e o texto continua no campo',
-     (await jn.locator('#pipNota').inputValue()) === 'o total veio errado');
+     O que a janelinha tem agora são os DOIS botões de captura, que é o que ela
+     precisa ter: quem está dentro do SAP não pode voltar à aba para marcar. */
+  ok('a janelinha não tem mais caixa de comentário',
+     (await jn.locator('#pipNota').count()) === 0);
+  ok('e o cartão também não', (await pg.locator('#recNota').count()) === 0);
+  ok('mas ela tem os dois botões de captura',
+     (await jn.locator('#marcar').count()) === 1 && (await jn.locator('#maisTela').count()) === 1);
+  /* O aviso responde ao gesto: marcar acende o marcar. Antes qualquer aviso
+     acendia sempre o primeiro botão, e apertar o segundo fazia o OUTRO mudar
+     de cor — quem apertou concluía que tinha clicado errado. */
+  ok('e marcar destaca o botão que foi apertado',
+     await jn.locator('#marcar').evaluate(e => e.classList.contains('piscou')));
 }
 
 console.log('\n[4] a janelinha tem volta');
@@ -145,9 +146,16 @@ await pg.waitForTimeout(1200);
   ok('houve quadros, apesar do espelho escondido',
      (await pg.locator('#thumbs figure').count()) > 0,
      String(await pg.locator('#thumbs figure').count()));
-  ok('o comentário chegou na revisão',
-     (await pg.locator('#thumbs figure input.nota').evaluateAll((ns) => ns.map((n) => n.value)))
-       .includes('o total veio errado'));
+  /* A anotação é escrita AQUI agora, e não durante a gravação — com a imagem na
+     frente, que é a diferença entre descrever e adivinhar. O que importa
+     continua sendo o mesmo: o que se digita mora no QUADRO, e não no campo. */
+  {
+    const campo = pg.locator('#thumbs figure input.nota').first();
+    await campo.fill('o total veio errado');
+    await pg.waitForTimeout(300);
+    ok('a anotação escrita na revisão mora no quadro',
+       await pg.evaluate(() => (window.__quadros() || [])[0].nota === 'o total veio errado'));
+  }
   ok('o botão de reabrir a janelinha sumiu',
      await pg.locator('#recPip').evaluate((e) => e.classList.contains('hide')));
   ok('sem erro de JS', erros.length === 0, erros.join(' | ').slice(0, 150));

@@ -74,7 +74,7 @@ console.log('\n[2] as ações da imagem dizem o objeto, e não só o verbo');
      gesto faz a pessoa procurar duas vezes. */
   for (const [antes, agora] of [['o verbo solto', 'Tarjar um dado'],
                                 ['Destacar', 'Apontar na imagem'],
-                                ['Recortar', 'Cortar as bordas'],
+                                ['o verbo solto', 'Cortar as bordas (todas)'],
                                 ['Duplicar', 'Duplicar este passo'],
                                 ['Comparar', 'Comparar com outro quadro']]) {
     ok(`"${antes}" virou "${agora}"`, fonte.includes(`'${agora}'`));

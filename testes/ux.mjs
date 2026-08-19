@@ -17,7 +17,11 @@ ok('a frase de atalhos sumiu', (await pg.locator('[data-i18n="atalhos"]').count(
 ok('o microfone não está mais aqui', (await pg.locator('#viaRec #recMic').count()) === 0);
 ok('mas continua existindo, com a transcrição', (await pg.locator('#recMic').count()) === 1);
 ok('e continua ligado por padrão', await pg.locator('#recMic').isChecked());
-ok('as opções são uma por linha', (await pg.locator('#recOpts label.opt').count()) >= 3,
+/* Duas, e não três: "Contar 3 antes de começar" e "Guardar as telas no meu
+   computador" saíram da lista e viraram padrão — nenhuma das duas tinha um lado
+   bom para desligar. O que este teste protege é o LAYOUT (uma por linha), e não
+   quantas sobraram. */
+ok('as opções são uma por linha', (await pg.locator('#recOpts label.opt').count()) >= 2,
    String(await pg.locator('#recOpts label.opt').count()));
 ok('as duas frases longas viraram ajuda', await pg.locator('#recAjudaCx').isHidden());
 /* O que fica ao lado da caixa é a RECOMENDAÇÃO, e não os megabytes.

@@ -207,6 +207,72 @@ console.log('\n[6] reabrir um documento antigo, sem a bandeira, volta como antes
   await p2.close();
 }
 
+// ---------------------------------------------------------------------------
+console.log('\n[7] fixar salva um quadro da limpeza em lote');
+{
+  /* O RELATO DE USO: "descartar repetidos" levava junto a tela que a pessoa
+     queria, e não havia como salvar uma do lote — ela desfazia tudo com
+     "manter todos" e recomeçava à mão.
+
+     O vídeo de amostra tem cinco telas diferentes, então "repetidos" não
+     descarta nada por conta própria. Para medir a REGRA e não o detector, dois
+     quadros recebem a mesma assinatura à mão: um fixado, outro não. */
+  await pg.evaluate(() => {
+    const q = window.__quadros();
+    q.forEach(f => { f.keep = true; });
+    q[2].sig = q[1].sig;        // o 3 vira repetido do 2
+    q[4].sig = q[3].sig;        // o 5 vira repetido do 4
+    q[4].fixo = true;           // …mas este está fixado
+  });
+  await redesenhar();
+  ok('o quadro fixado ganha selo na miniatura',
+     (await pg.locator('#thumbs .fixoTag').count()) === 1,
+     String(await pg.locator('#thumbs .fixoTag').count()));
+
+  await pg.locator('#dedup').click();
+  await pg.waitForTimeout(600);
+  const est = await pg.evaluate(() => (window.__quadros() || []).map(f => !!f.keep));
+  console.log('     mantidos depois de "descartar repetidos": ' + JSON.stringify(est));
+  /* O NÚMERO QUE IMPORTA: o quadro 3, repetido e solto, foi descartado; o 5,
+     repetido e fixado, ficou. Se os dois tivessem sobrevivido, o botão teria
+     parado de funcionar; se os dois tivessem caído, fixar não faz nada. */
+  ok('o repetido solto foi descartado', est[2] === false, JSON.stringify(est));
+  ok('mas o repetido FIXADO sobreviveu', est[4] === true, JSON.stringify(est));
+}
+
+// ---------------------------------------------------------------------------
+console.log('\n[8] cortar só ESTA tela não mexe nas outras');
+{
+  await pg.evaluate(() => { (window.__quadros() || []).forEach(f => { f.keep = true; }); });
+  await redesenhar();
+  const antes = await pg.evaluate(() => (window.__quadros() || []).map(f => f.img.w));
+  await pg.locator('#thumbs figure .lupa').nth(1).click();
+  await pg.waitForSelector('#lente:not(.hide)');
+  await pg.locator('#cropUma').click();
+  await pg.waitForTimeout(250);
+  const cx = await pg.locator('#lenteImg').boundingBox();
+  await pg.mouse.move(cx.x + cx.width * 0.2, cx.y + cx.height * 0.2);
+  await pg.mouse.down();
+  await pg.mouse.move(cx.x + cx.width * 0.7, cx.y + cx.height * 0.7, { steps: 12 });
+  await pg.mouse.up();
+  await pg.waitForTimeout(2500);
+  const depois = await pg.evaluate(() => (window.__quadros() || []).map(f => f.img.w));
+  console.log('     larguras: ' + JSON.stringify(antes) + ' → ' + JSON.stringify(depois));
+  /* Antes o recorte era UM só para todos: consertar um pop-up no canto de uma
+     tela destruía as outras 39, e "desfazer o corte" devolvia as 40 juntas. */
+  ok('a tela escolhida encolheu', depois[1] < antes[1] * 0.9, antes[1] + ' → ' + depois[1]);
+  ok('e as outras continuam inteiras',
+     depois[0] === antes[0] && depois[2] === antes[2] && depois[4] === antes[4],
+     JSON.stringify(depois));
+  await pg.locator('#cropTirar').click();
+  await pg.waitForTimeout(2000);
+  const volta = await pg.evaluate(() => (window.__quadros() || []).map(f => f.img.w));
+  ok('e desfazer devolve a tela cortada ao tamanho original',
+     volta[1] === antes[1], antes[1] + ' → ' + volta[1]);
+  await pg.locator('#lenteFechar').click().catch(() => {});
+  await pg.waitForTimeout(300);
+}
+
 ok('sem erro de JavaScript', erros.length === 0, erros.join(' | ').slice(0, 200));
 
 await br.close(); srv.close();
