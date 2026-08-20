@@ -75,6 +75,18 @@ await pg.waitForTimeout(300);
 ok('o cartão conta os passos', /3 passos/.test(await pg.locator('#roteiroConta').textContent()),
    await pg.locator('#roteiroConta').textContent());
 
+/* ---- E AGORA O CAMINHO DE VERDADE: COLAR E NÃO CLICAR ----
+   A caixa aceitava o texto e ficava com ele. Sem o clique em "Usar este
+   roteiro" nada valia: janelinha sem passo, documento sem título, e nenhum
+   erro para explicar — a lista estava ali, na tela, aparentemente aceita.
+   Aqui a régua faz exatamente o que a pessoa fez. */
+await pg.locator('#roteiroTirar').click();
+await pg.waitForTimeout(200);
+await pg.fill('#roteiroTxt', PASSOS.map((p, i) => (i+1) + '. ' + p).join('\n'));
+await pg.waitForTimeout(150);
+ok('sem clicar em Usar, o roteiro ainda não vale',
+   (await pg.evaluate(() => document.getElementById('roteiroConta').textContent)) === '');
+
 await pg.locator('#recTr').uncheck();
 await pg.evaluate(() => window.__contagem(1));
 await pg.locator('#rec').click();
@@ -106,9 +118,13 @@ else {
   {
     const r = await rot();
     console.log('     ' + r.n + '  |  ' + r.txt + '   (' + r.fonte + 'px)');
-    ok('a linha do roteiro está visível', r.visivel === true);
-    ok('ela numera o passo', /Passo 1 de 3/.test(r.n), r.n);
-    ok('e mostra o texto do passo 1', r.txt === PASSOS[0], r.txt);
+    /* Ninguém clicou em "Usar": foi o começo da gravação que adotou o texto. */
+    ok('o roteiro colado passou a valer ao gravar', r.visivel === true);
+    /* O primeiro quadro — capturado sozinho ao começar — já levou a linha 1.
+       O próximo a FAZER é o 2, e é ele que a janelinha mostra: dizer "Passo 1"
+       aqui seria mandar refazer o que já está gravado. */
+    ok('ela numera o passo', /Passo 2 de 3/.test(r.n), r.n);
+    ok('e mostra o texto do passo 2', r.txt === PASSOS[1], r.txt);
     /* "a primeira informação, com uma fonte um pouco maior" */
     ok('vem ANTES do relógio', r.topo < r.topoRelogio, r.topo + ' vs ' + r.topoRelogio);
     ok('e é maior que o corpo da janelinha', r.fonte > r.fonteCorpo,
@@ -116,7 +132,7 @@ else {
     /* O SEGUINTE, MENOR. Descobrir o próximo passo no instante em que se
        acabou de marcar é ler no pior momento: a pessoa está mudando de tela. */
     console.log('     ' + r.prox + '   (' + r.fonteProx + 'px)');
-    ok('mostra também o passo seguinte', r.prox.includes(PASSOS[1]), r.prox);
+    ok('mostra também o passo seguinte', r.prox.includes(PASSOS[2]), r.prox);
     ok('e ele é MENOR que o passo atual', r.fonteProx < r.fonte,
        r.fonteProx + 'px vs ' + r.fonte + 'px');
   }
@@ -127,22 +143,15 @@ else {
   {
     const r = await rot();
     console.log('     ' + r.n + '  |  ' + r.txt);
-    ok('agora é o passo 2', /Passo 2 de 3/.test(r.n), r.n);
-    ok('com o texto do passo 2', r.txt === PASSOS[1], r.txt);
-    /* O título entregue é o do passo que acabou de ser marcado. */
+    ok('agora é o passo 3', /Passo 3 de 3/.test(r.n), r.n);
+    ok('com o texto do passo 3', r.txt === PASSOS[2], r.txt);
+    /* Os títulos entregues, em ordem, do primeiro quadro em diante. */
     const notas = await pg.evaluate(() => window.__quadros().map(f => f.nota || '').filter(Boolean));
-    ok('e o passo marcado ficou com o título do roteiro', notas[0] === PASSOS[0],
-       JSON.stringify(notas));
-    /* Os dois andam juntos: se só o de cima mudasse, o "a seguir" viraria uma
-       mentira em letra pequena — pior do que não existir. */
-    console.log('     ' + r.prox);
-    ok('e o "a seguir" andou junto', r.prox.includes(PASSOS[2]), r.prox);
-  }
-  await jn.locator('#marcar').click();
-  await jn.waitForTimeout(700);
-  {
-    const r = await rot();
-    console.log('     ' + r.n + '  |  ' + r.txt + '  |  seguinte: ' + JSON.stringify(r.prox));
+    ok('os passos ficaram com os títulos do roteiro, em ordem',
+       notas[0] === PASSOS[0] && notas[1] === PASSOS[1], JSON.stringify(notas));
+    /* No último passo não há seguinte: inventar um travessão ali só gastaria
+       altura de uma janela que fica por cima do trabalho da pessoa. */
+    console.log('     seguinte: ' + JSON.stringify(r.prox));
     ok('no último passo, o "a seguir" some', r.prox === '', r.prox);
   }
   await jn.locator('#marcar').click(); await jn.waitForTimeout(700);
@@ -214,6 +223,23 @@ await pg.waitForTimeout(2500);
   const d = await dl; await d.saveAs('/tmp/rot.docx');
   const doc = lerZip('/tmp/rot.docx')['word/document.xml'].toString('utf8');
   PASSOS.forEach((p, i) => ok('passo ' + (i+1) + ' no documento', doc.includes(p), p));
+  /* ---- E NO CABEÇALHO, JUNTO DO NÚMERO ----
+     "Passo 1 de 3" sozinho obriga a ler o corpo inteiro para saber o que cada
+     passo é. O nome do passo pertence ao cabeçalho, e não a um parágrafo
+     solto abaixo dele — isso valia só no passo a passo, e agora vale em
+     todos os modelos. */
+  const texto = doc.replace(/<[^>]+>/g, '');
+  const total = (texto.match(/Passo \d+ de (\d+)/) || [])[1];
+  console.log('     o documento tem ' + total + ' passos; o roteiro tinha ' + PASSOS.length);
+  /* UMA CONTAGEM SÓ. A janelinha dizia "Passo 1 de 3" e o documento chamava o
+     mesmo passo de "Passo 2 de 4", porque o quadro capturado sozinho no
+     início abria um passo sem título. Quem confere evidência confere pelo
+     número — dois números para a mesma coisa é defeito, não detalhe. */
+  ok('o documento tem um passo por linha do roteiro', total === String(PASSOS.length), total);
+  PASSOS.forEach((p, i) => {
+    const alvo = 'Passo ' + (i+1) + ' de ' + PASSOS.length + '  —  ' + p;
+    ok('o cabeçalho do passo ' + (i+1) + ' traz o nome', texto.includes(alvo), alvo);
+  });
 }
 ok('sem erro de página', erros.length === 0, erros[0]);
 

@@ -88,7 +88,7 @@ const estado = () => pg.evaluate(() => {
   };
 });
 
-console.log('\n[1] antes de haver o que comentar, a caixa não existe');
+console.log('\n[1] a caixa nasce fechada e abre quando há o que comentar');
 {
   const e = await estado();
   ok('a caixa nasce escondida', e.visivel === false);
@@ -100,8 +100,14 @@ await pg.locator('#rec').click();
 await pg.waitForSelector('#recStop:visible', { timeout: 40000 });
 await pg.waitForTimeout(2500);
 {
+  /* MUDOU, e para melhor. O primeiro quadro é capturado sozinho ao começar e
+     abre o passo 1 do documento — quer dizer, já HÁ o que comentar, e a tela
+     inicial não tinha como ser descrita a não ser depois, na grade. A caixa
+     aponta para ele. */
   const e = await estado();
-  ok('e continua escondida com a gravação rolando, antes de marcar', e.visivel === false);
+  ok('com a gravação rolando, ela já aponta para o passo 1', e.visivel === true);
+  ok('e diz que é do Passo 1', /passo 1/i.test(e.rotulo), e.rotulo);
+  ok('vazia, com o botão desligado', e.texto === '' && e.btLigado === false);
 }
 
 console.log('\n[2] marcar um passo abre a caixa, e ela diz sobre o quê');

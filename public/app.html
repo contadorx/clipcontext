@@ -8076,7 +8076,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      depois, e não tem como se atualizar sozinho. Sem carimbo, "estou com um
      problema no offline" é uma conversa sem chão — ninguém sabe de qual build
      se fala nem se o defeito já foi consertado. */
-  const VERSAO = '2026.08.20-41';
+  const VERSAO = '2026.08.20-43';
   window.__versao = () => VERSAO;
 
   const PIP_CSS = `
@@ -9214,6 +9214,9 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   $('rec').onclick = async () => {
     if (!podeGravar) { $('recMsg').innerHTML = `<span class="err">${t('recNo')}</span>`; return; }
     if (!exigirCenario()) return;
+    /* Antes de tudo: o roteiro que está escrito na caixa passa a valer. Depois
+       daqui a janelinha já abre com o passo 1 na frente. */
+    garantirRoteiro();
     /* A trava fecha antes do primeiro await. `liveOn` só liga bem mais adiante,
        depois de permissões e do modelo; sem esta linha, dois cliques rápidos
        abrem duas capturas paralelas e a primeira fica órfã, com os relógios
@@ -10094,7 +10097,25 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
        chutar um atraso, tenta por até dois segundos e desiste em silêncio. */
     (async () => {
       for (let i = 0; i < 20 && liveOn && !frames.length; i++) {
-        if (capturar(true)) return;
+        if (capturar(true)) {
+          /* ---- O PRIMEIRO QUADRO TAMBÉM É UM PASSO DO ROTEIRO ----
+
+             Ele abre o passo 1 do documento, e não recebia título nenhum: a
+             primeira linha do roteiro ia para o primeiro "marcar", que é o
+             passo 2. O resultado é que a janelinha dizia "Passo 1 de 3"
+             enquanto o documento chamava o MESMO passo de "Passo 2 de 4" —
+             dois números para a mesma coisa, e quem confere evidência confere
+             pelo número.
+
+             Com esta linha, linha 1 do roteiro = passo 1 do documento, e a
+             contagem passa a ser uma só. A janelinha já abre mostrando o
+             passo 2, que é de fato o próximo a fazer: o primeiro acabou de
+             ser capturado. */
+          proximoTituloDoRoteiro(frames[0]);
+          anotApontar(frames[0]);
+          controle('gravando', { seg: agora(), frames: frames.length });
+          return;
+        }
         await new Promise(r => setTimeout(r, 100));
       }
     })();
@@ -14795,6 +14816,31 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       roteiro.length ? t('rotPronto', roteiro.length) : t('rotDica');
   }
 
+  /* O ROTEIRO COLADO QUE NINGUÉM MANDOU USAR.
+
+     A caixa aceitava o texto e ficava com ele; sem o clique em "Usar este
+     roteiro", `roteiro` continuava vazio. Quem colou a lista e apertou Gravar
+     via a janelinha sem passo nenhum, os títulos não entravam no documento, e
+     não havia erro em lugar nenhum para explicar — a lista estava ali, na
+     tela, aparentemente aceita. Um campo preenchido que não vale nada é pior
+     do que um campo ausente.
+
+     Então o começo da gravação adota o que está escrito. Não é adivinhação:
+     é o mesmo texto, lido pela mesma função, no único instante em que a
+     resposta ainda serve para alguma coisa. */
+  function garantirRoteiro(){
+    const cx = $('roteiroTxt'); if (!cx) return;
+    const escrito = (cx.value || '').trim();
+    if (!escrito) return;
+    if (roteiro.length && roteiro.join('\n') === lerRoteiro(escrito).join('\n')) return;
+    /* Só adota o que ainda não virou passo: se já há quadros com título, mexer
+       agora reescreveria trabalho feito. */
+    if (roteiroPos > 0) return;
+    roteiro = lerRoteiro(escrito);
+    guardarRoteiro();
+    pintarRoteiro();
+  }
+
   function guardarRoteiro(){
     try {
       if (roteiro.length) sessionStorage.setItem(ROT_CHAVE, roteiro.join('\n'));
@@ -18546,12 +18592,12 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   ${l.capAbre ? `<h2 class="cap">${esc(l.capitulo)}${l.tarefa ? ` <small>· ${esc(t('capTempo', l.tarefa))}</small>` : ''}</h2>` : ''}
   <section class="passo${l.abre ? '' : ' segue'}">
     ${l.abre
-      ? `<h2>${esc(tut && l.nota ? passoN(l.passo) + '  —  ' + l.nota
-                                 : t('pStep', passoN(l.passo), totalPassos) + '   ·   ' + l.tempo +
-                                   (l.hora ? '   ·   ' + l.hora : ''))}` +
+      ? `<h2>${esc(tut ? passoN(l.passo) + (l.nota ? '  —  ' + l.nota : '')
+                        : t('pStep', passoN(l.passo), totalPassos) +
+                          (l.nota ? '  —  ' + l.nota : '') + '   ·   ' + l.tempo +
+                          (l.hora ? '   ·   ' + l.hora : ''))}` +
         (l.deTelas > 1 ? `<small class="telas"> · ${esc(t('passoTelas', l.deTelas))}</small>` : '') +
-        `</h2>` +
-        (!tut && l.nota ? `<p class="nota">${esc(l.nota)}</p>` : '')
+        `</h2>`
       /* A tela que continua um passo NÃO repete o cabeçalho. Repetir "Passo 3"
          em três blocos seguidos é o que o agrupamento veio desfazer: o leitor
          acha que são três ações, que é exatamente a mentira que o modelo antigo
@@ -18669,13 +18715,13 @@ ${marcaSvg(46)}
         out.push('## ' + l.capitulo + (l.tarefa ? '  ·  ' + t('capTempo', l.tarefa) : ''));
         out.push('');
       }
-      out.push((l.capAbre || l.capitulo ? '### ' : '## ') + (tut && l.nota
-        ? passoN(l.passo) + ' — ' + l.nota
-        : t('pStep', passoN(l.passo), totalDePassos(linhas)) + ' · ' + l.tempo + (l.hora ? ' · ' + l.hora : '')
+      out.push((l.capAbre || l.capitulo ? '### ' : '## ') + (tut
+        ? passoN(l.passo) + (l.nota ? ' — ' + l.nota : '')
+        : t('pStep', passoN(l.passo), totalDePassos(linhas)) + (l.nota ? ' — ' + l.nota : '')
+          + ' · ' + l.tempo + (l.hora ? ' · ' + l.hora : '')
           + (l.deTelas > 1 ? ' · ' + t('passoTelas', l.deTelas) : '')));
       out.push('');
       if (l.tipo) { out.push('**' + l.tipo + '**'); out.push(''); }
-      if (!tut && l.nota) { out.push(l.nota); out.push(''); }
       /* A imagem vai embutida em base64 no próprio Markdown: um arquivo só, que
          é o ponto de colar numa wiki sem ter que subir anexo separado. */
       out.push('![' + passoN(l.passo) + '](' + l.img + ')');
@@ -18925,7 +18971,7 @@ ${interno}</p:spTree></p:cSld><p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></
 
       blocos.forEach((grupo, bi) => {
         const rels = [];
-        const cabec = (tut && tit ? passoN(passo.n) + '  —  ' + tit : passoN(passo.n)) +
+        const cabec = (tit ? passoN(passo.n) + '  —  ' + tit : passoN(passo.n)) +
           (passo.quadros.length > 1 ? '  ·  ' + t('pptTelas', passo.quadros.length) : '') +
           (bi ? '  ·  ' + t('pptCont') : '') +
           (bi === 0 && !tut
@@ -19255,13 +19301,24 @@ ${relsSlide[i]}</Relationships>`) });
       /* No passo a passo a anotação é o título do passo; na evidência ela é a
          expectativa e vem numa linha própria acima da imagem. Ver o comentário
          equivalente no PDF. */
+    /* ---- O TÍTULO DO PASSO ENTRA NO CABEÇALHO, EM TODOS OS MODELOS ----
+       Ele entrava só no passo a passo. Nos demais o cabeçalho saía como
+       "Passo 1 de 4 · 00:05 · 15:33:55" — um número e dois relógios — e o
+       nome do passo descia para um parágrafo solto abaixo. Quem lê um
+       documento de evidência lê os cabeçalhos primeiro, para achar o passo
+       que interessa; com só o número ali, era preciso ler o corpo inteiro
+       para saber o que cada passo era.
+       A anotação da tela que CONTINUA um passo fica onde estava: ela é
+       legenda da imagem, não título de nada. */
+      const abreD = RPd.ordem(f) === 0;
       corpo.push(par(tut
           ? passoN(RPd.num(f)) + (f.nota ? '  —  ' + f.nota : '')
           : t('pStep', passoN(RPd.num(f)), RPd.total) +
+            (abreD && f.nota ? '  —  ' + f.nota : '') +
             (RPd.telas(f) > 1 ? '  ·  ' + (RPd.ordem(f)+1) + '/' + RPd.telas(f) : '') + '   ·   ' +
             (f.colado ? t('coladoTag') : fmt(f.t) + (hora ? '   ·   ' + hora : '')),
         { b: true, sz: 22, antes: 240, depois: 40 }));
-      if (!tut && f.nota) corpo.push(par(f.nota, { sz: 21, cor: '1F2430', depois: 60 }));
+      if (!tut && f.nota && !abreD) corpo.push(par(f.nota, { sz: 21, cor: '1F2430', depois: 60 }));
       corpo.push(parImagem(rid, cx, cy, i + 1));
       if (f.hash) corpo.push(par(t('pHash') + ': ' + f.hash, { sz: 13, cor: '9A9A9A', depois: 40 }));
       if (cues.length) {
@@ -19947,14 +20004,16 @@ ${relsSlide[i]}</Relationships>`) });
            resultado. No passo a passo ela é o título do passo, e um título não
            mora embaixo do próprio conteúdo. */
         const hora = horaDe(f.t);
+        const abreP = RPp.ordem(f) === 0;
         const cabTxt = tut
           ? passoN(RPp.num(f)) + (f.nota ? '  —  ' + f.nota : '')
-          : passoN(RPp.num(f)) + (RPp.telas(f) > 1 ? '  ·  ' + (RPp.ordem(f)+1) + '/' + RPp.telas(f) : '') +
+          : passoN(RPp.num(f)) + (abreP && f.nota ? '  —  ' + f.nota : '') +
+            (RPp.telas(f) > 1 ? '  ·  ' + (RPp.ordem(f)+1) + '/' + RPp.telas(f) : '') +
             '   ·   ' + quando(f) + (hora && !f.colado ? '   ·   ' + hora : '');
         doc.setFont('helvetica','bold').setFontSize(tut ? 11.5 : 11);
         const cabL = doc.splitTextToSize(cabTxt, CW - 24);   // 24 mm do "frame i de n"
         doc.setFont('helvetica','normal').setFontSize(9.6);
-        const notaL = (!tut && f.nota) ? doc.splitTextToSize(f.nota, CW) : [];
+        const notaL = (!tut && f.nota && !abreP) ? doc.splitTextToSize(f.nota, CW) : [];
         const ocrH = f.ocr ? 9 + Math.min(6, doc.splitTextToSize(f.ocr, CW).length) * 3.9 : 0;
         /* A folga do fim encolhe quando há anotação. Sem isso o bloco passava de
            281 mm por menos de um milímetro e cada passo virava uma página
