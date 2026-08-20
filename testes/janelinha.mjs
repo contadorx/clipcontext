@@ -53,14 +53,30 @@ console.log(`\n[1] gravando: cabe em ${LARG}×${ALT}`);
     for (const [id, txt] of [['marcar','Marcar este passo'],['pausa','Pausar'],['stop','Parar']]) {
       const b = document.getElementById(id); if (b) { b.textContent = txt; b.disabled = false; }
     }
-    const n = document.getElementById('pipNota');
-    if (n) { n.disabled = false; n.placeholder = 'o que aconteceu aqui'; }
+    /* O bloco da anotação com o texto que ele REALMENTE tem: rótulo cheio,
+       campo com duas linhas escritas, botão rotulado e a confirmação de que
+       salvou. Medi-lo vazio media outra janela — e a janela que transborda é
+       sempre a de quem está usando. */
+    const n = document.getElementById('nota');
+    if (n) { n.disabled = false; n.value = 'Cliquei em Salvar e o sistema devolveu a mensagem 4711.'; }
+    const nl = document.getElementById('notaLbl');
+    if (nl) nl.textContent = 'Tela 2 do Passo 3';
+    const nk = document.getElementById('notaOk');
+    if (nk) { nk.disabled = false; nk.textContent = 'Salvar anotação'; }
+    const nm = document.getElementById('notaMsg');
+    if (nm) nm.textContent = '✓ salvo neste quadro';
   });
   await pg.waitForTimeout(150);
   const m = await medir();
   ok('o conteúdo cabe na altura pedida', m.precisa <= m.cabe + 1, `${m.precisa} de ${m.cabe}`);
   ok('e nada fica para fora', m.vaza.length === 0, m.vaza.join(' '));
-  ok('a janela não é maior que a de antes (258×282)', LARG <= 258 && ALT <= 282, `${LARG}×${ALT}`);
+  /* O TETO. Ele subiu uma vez, de 282 para 300, e o motivo está escrito aqui
+     para que a próxima subida precise de um motivo tão bom quanto: a caixa de
+     anotação deixou de ser um campo de uma linha e passou a ter rótulo, duas
+     linhas de texto, botão e confirmação de que salvou. Os 22px vieram do
+     bloco novo — nenhum botão existente encolheu para pagá-los, que era a
+     alternativa e seria uma degradação silenciosa de tudo o mais. */
+  ok('a janela não passa do teto (250×300)', LARG <= 250 && ALT <= 300, `${LARG}×${ALT}`);
 
   /* O botão de calar nasce escondido, e `.hide` mora no CSS da ABA — a
      janelinha é outro documento. Sem a regra lá dentro ele aparecia como uma
@@ -86,7 +102,7 @@ console.log('\n[2] contando: só o número, e ele é grande');
   });
   ok('o número é enorme', n.fs >= 56, String(n.fs));
   ok('e mesmo assim cabe', m.precisa <= m.cabe + 1, `${m.precisa} de ${m.cabe}`);
-  const escondidos = await pg.evaluate(() => ['.top', '.vus', '.pe', '#pipNota', '#marcar', '#pausa']
+  const escondidos = await pg.evaluate(() => ['.top', '.vus', '.pe', '.notaCx', '#marcar', '#pausa']
     .filter((s) => { const e = document.querySelector(s); return e && e.offsetParent !== null; }));
   ok('e o resto some — é o que deixa o número ser enorme sem a janela crescer',
      escondidos.length === 0, escondidos.join(' '));

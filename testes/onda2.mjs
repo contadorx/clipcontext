@@ -34,24 +34,83 @@ await pg.selectOption('#modelo','evidencia');
 await pg.waitForTimeout(250);
 
 const abrirLente = async (n=0) => {
-  await pg.locator('#thumbs .lupa').nth(n).click({force:true});
+  /* A LUPA VAI PARA A VISTA ANTES DO CLIQUE, e o clique deixa de ser `force`.
+     `force` pula a checagem de visibilidade e manda o ponteiro para o centro do
+     elemento — mesmo que ele esteja fora da janela, onde o clique não chega em
+     ninguém. Quando isso acontecia, a lente simplesmente NÃO ABRIA, e a falha
+     aparecia três linhas depois, no botão de tarjar: "element is not visible".
+     O botão estava certo; a lente é que nunca tinha aberto. */
+  const lupa = pg.locator('#thumbs .lupa').nth(n);
+  await lupa.scrollIntoViewIfNeeded();
+  await lupa.click();
+  /* E a lente ABERTA, de fato, antes de medir se ela parou de se mexer: medir o
+     assentamento de um diálogo fechado dá "parado" na primeira leitura. */
+  await pg.locator('#lenteImg').waitFor({ state: 'visible', timeout: 15000 });
   /* Esperar a lente PARAR de se mexer, e não um tempo fixo.
      Com a máquina carregada — a regressão inteira rodando em paralelo — 350ms
      não bastavam para o diálogo assentar, e o clique seguinte morria em
      "element is not stable". O teste falhava sozinho, nunca o produto: rodado
      isolado, passava sempre. Um teste que só reprova sob carga ensina a suíte
-     a gritar lobo. */
+     a gritar lobo.
+
+     ---- O QUE "ASSENTAR" QUER DIZER, E O QUE FALTAVA ----
+
+     Três coisas se movem quando a lente abre, e esta espera só olhava para uma.
+
+     1. A PÁGINA ROLA até a lente, e rola SUAVE. Duas leituras seguidas no meio
+        de uma rolagem suave podem dar o mesmo número — ela passa devagar por
+        ali —, e a caixa parecia parada estando em trânsito. Numa corrida de
+        cada quatro a lente ficava com `y` negativo, acima da borda de cima: o
+        arrasto saía da janela e não tarjava nada, e o clique morria em
+        "element is not visible". Os dois erros acusavam o PRODUTO.
+     2. A LARGURA da imagem muda quando ela termina de decodificar: o `<img>`
+        sem bytes ocupa a largura do contêiner e encolhe para a proporção real
+        depois. x, y e altura já estavam parados nesse instante.
+     3. E a IMAGEM precisa ter pixels: uma largura estável de um `<img>` vazio é
+        estável e é mentira.
+
+     Agora as três, e DUAS leituras iguais em sequência — não uma. */
   const alvo = pg.locator('#lenteImg');
-  let ant = null;
-  for (let i = 0; i < 40; i++) {
+  let ant = null, iguais = 0;
+  for (let i = 0; i < 60; i++) {
     await pg.waitForTimeout(80);
     const b = await alvo.boundingBox().catch(() => null);
-    if (b && ant && b.x === ant.x && b.y === ant.y && b.height === ant.height) return;
-    ant = b;
+    const est = await pg.evaluate(() => {
+      const e = document.getElementById('lenteImg');
+      return { rolagem: Math.round(scrollY), pronta: !!e && e.complete && e.naturalWidth > 0 };
+    }).catch(() => null);
+    const parado = !!b && !!ant && !!est && est.pronta &&
+      b.x === ant.b.x && b.y === ant.b.y && b.width === ant.b.width && b.height === ant.b.height &&
+      est.rolagem === ant.est.rolagem;
+    iguais = parado ? iguais + 1 : 0;
+    if (iguais >= 2) return;
+    ant = (b && est) ? { b, est } : null;
   }
 };
 const arrastar = async (x1,y1,x2,y2) => {
-  const b = await pg.locator('#lenteImg').boundingBox();
+  /* ---- O PONTO DO ARRASTO TEM QUE ESTAR DENTRO DA JANELA ----
+
+     Este era o defeito, e ele mentia bonito: em uma corrida de cada quatro a
+     lente abria com `y = -232`, acima da borda de cima — a página ainda estava
+     rolando até ela. Duas leituras seguidas nesse trecho dão números iguais,
+     porque a rolagem passa devagar por ali, e a espera de assentamento dava a
+     lente por parada. O arrasto saía fora da janela, `elementFromPoint`
+     devolvia nada, e a régua acusava o PRODUTO de não tarjar.
+
+     Então aqui: leva a lente para dentro da vista e confere que o ponto de
+     partida existe. `mouse.move` fala em coordenadas de janela, e uma
+     coordenada negativa não erra — ela clica no nada, em silêncio. */
+  const lente = pg.locator('#lenteImg');
+  let b = null;
+  for (let i = 0; i < 25; i++) {
+    await lente.scrollIntoViewIfNeeded().catch(() => {});
+    b = await lente.boundingBox();
+    const dentro = await pg.evaluate(([x, y]) =>
+      x >= 0 && y >= 0 && x <= innerWidth && y <= innerHeight,
+      [b.x + b.width * x1, b.y + b.height * y1]);
+    if (dentro) break;
+    await pg.waitForTimeout(120);
+  }
   await pg.mouse.move(b.x+b.width*x1, b.y+b.height*y1);
   await pg.mouse.down();
   await pg.mouse.move(b.x+b.width*x2, b.y+b.height*y2, {steps:8});
@@ -77,6 +136,15 @@ console.log('\n[1] tarjar');
   ok('o modo tarja começa desligado',
      (await pg.locator('#tarjaModo').textContent()).trim() === 'Tarjar um dado',
      (await pg.locator('#tarjaModo').textContent()).trim());
+  /* `force` pelo mesmo motivo da lupa lá em cima: a lente entra com animação, e
+     a "estabilidade" que o Playwright exige é a caixa do elemento parada em
+     dois quadros seguidos. O botão está na tela e com o rótulo certo — a linha
+     acima acabou de lê-lo —, mas o diálogo ainda pode estar assentando, e o
+     clique morria em "element is not visible" uma vez a cada oito corridas.
+     O que se mede aqui é o que o clique FAZ, não se o navegador conseguiu
+     entregá-lo. */
+  await pg.locator('#tarjaModo').waitFor({ state: 'visible', timeout: 15000 });
+  await pg.locator('#tarjaModo').scrollIntoViewIfNeeded().catch(() => {});
   await pg.click('#tarjaModo');
   await pg.waitForTimeout(200);
   ok('e explica como se usa', /Arraste sobre a imagem/.test(await pg.locator('#tarjaMsg').textContent()));
@@ -146,6 +214,12 @@ console.log('\n[4] recortar todos os quadros');
   ok('as imagens ficaram menores', depois < antes, `${antes} → ${depois}`);
   ok('as tarjas foram desfeitas junto', await pg.locator('#lenteTarjas i').count()===0);
 
+  /* O botão de tirar o recorte só NASCE quando há recorte, e quem o revela é o
+     mesmo trabalho que acabou de reescrever três imagens. Clicar assim que a
+     mensagem aparece pegava, de vez em quando, o instante entre a frase e o
+     botão — e o erro que saía era "element is not visible", que se lê como
+     defeito do produto e é impaciência da régua. */
+  await pg.locator('#cropTirar').waitFor({ state: 'visible', timeout: 15000 });
   await pg.click('#cropTirar');
   await pg.waitForFunction(()=>/desfeito/.test(document.getElementById('tarjaMsg').textContent),null,{timeout:15000});
   /* Esperar a imagem CARREGAR, e não só a mensagem aparecer. A miniatura recebe

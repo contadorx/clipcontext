@@ -185,6 +185,38 @@
   /* O de conferir respira mais: ele é a fronteira entre "mexer no monte" e
      "olhar uma por uma", e fica encostado na grade de propósito. */
   .grupoOrg.conferir{margin-top:18px;padding-top:14px;border-top:1px solid var(--line)}
+  /* ---- A CAIXA DE ANOTAÇÃO AO VIVO ----
+     Ela nasce escondida e só aparece depois da primeira captura: um campo
+     pedindo "descreva o passo" antes de existir passo nenhum é uma pergunta
+     sem objeto. A borda do acento é o que a separa do resto do cartão — ela
+     está viva, e o resto do cartão está esperando. */
+  .anotViva{margin-top:12px;padding:11px 13px;border:1px solid var(--accent);
+      border-radius:10px;background:color-mix(in srgb,var(--accent) 4%,var(--panel))}
+  .anotLbl{display:block;font-size:12.5px;font-weight:700;color:var(--accent);
+      margin:0 0 6px}
+  /* Três linhas e não uma: descrever o que aconteceu numa tela não cabe em
+     quarenta caracteres, e um campo de uma linha ENSINA a escrever pouco. */
+  #anotTxt{min-height:74px;font:14px/1.5 ui-sans-serif,system-ui,sans-serif;
+      resize:vertical}
+  /* O botão em três estados, e é ele que responde "salvou?":
+     — DESLIGADO, quando não há nada novo para salvar;
+     — CHEIO, quando há texto novo esperando;
+     — VAZADO e com "✓ Salvo" escrito, depois de guardar.
+
+     Vazado e não verde: este arquivo não tem um verde de marca, e inventar um
+     para um estado só é acrescentar uma cor que ninguém mais usa. A mudança de
+     cheio para vazado é visível de canto de olho, que é como este botão vai ser
+     olhado — a pessoa está de volta ao sistema que testa. */
+  #anotSalvar.salvo{background:transparent;color:var(--accent);
+      border:1px solid var(--accent);font-weight:700}
+  #anotSalvar.salvo:hover{background:color-mix(in srgb,var(--accent) 10%,transparent)}
+  /* DESLIGADO, MAS LEGÍVEL. Ele fica desligado quando salvou — não há mais nada
+     novo para guardar, e é correto —, mas `button:disabled` o apagava para 62%
+     de opacidade. O estado "✓ Salvo" É A CONFIRMAÇÃO: desbotá-lo é apagar
+     justamente a resposta para "ele salvou?". A regra vale só para este caso;
+     o botão sem texto novo continua desbotado, porque ali o cinza é a mensagem. */
+  #anotSalvar.salvo:disabled{opacity:1;cursor:default}
+  .anotViva .status{font-size:12.5px}
   .opcoesVias{margin-top:14px;padding:12px 14px;border:1px dashed var(--line);
     border-radius:10px;background:var(--bg)}
   .trFonte{margin:0 0 14px;padding:12px 14px;border:1px dashed var(--line);
@@ -1206,21 +1238,42 @@
                é a resposta errada para "sumiu tudo". -->
           <button class="sm hide destaque" id="recPip" data-i18n="recPipBtn"></button>
         </div>
-        <!-- A CAIXA DE COMENTÁRIO AO VIVO SAIU DAQUI E DA JANELINHA.
+        <!-- ---- A CAIXA DE ANOTAÇÃO AO VIVO, DE VOLTA ----
 
-             Ela dizia "o que aconteceu aqui" e comentava a última marcação. O
-             relato de uso foi direto: confusa, e não ajuda. Concordo, e o
-             motivo é o mesmo dos dois botões — quem grava está olhando para o
-             sistema que testa, não para nós. Escrever às cegas, num campo de
-             uma linha, sobre uma imagem que não se está vendo, é a pior hora
-             possível para descrever qualquer coisa. E com dois botões de
-             captura, "sobre qual tela eu estou escrevendo" virou uma pergunta a
-             mais no pior momento.
+             Ela já esteve aqui, saiu, e volta — e vale dizer por que das duas
+             vezes, porque o motivo da saída não era falso: "confusa, e não
+             ajuda". Ela era um campo de UMA LINHA, sem dizer sobre qual tela
+             se estava escrevendo, sem botão e sem nenhum sinal de que o texto
+             tinha sido guardado. Com dois botões de captura, "sobre qual tela
+             eu estou escrevendo" virou uma pergunta a mais no pior momento.
 
-             O QUE SE PERDE, e vale estar escrito: anotar no calor do momento.
-             O que fica no lugar é melhor — na revisão e na lente a anotação é
-             escrita com a imagem grande na frente, e o roteiro colado no passo
-             1 já entrega o título de cada passo sem ninguém digitar nada. -->
+             O que perdemos ao tirá-la é o que a traz de volta: anotar no calor
+             do momento. Quem acabou de ver o sistema fazer uma coisa sabe
+             descrevê-la; meia hora depois, olhando quarenta miniaturas, já não.
+
+             As quatro diferenças, e cada uma responde a uma das queixas:
+
+               1. ela DIZ SOBRE O QUÊ. O rótulo nomeia o alvo — "Passo 3" ou
+                  "Tela 2 do passo 3" —, que era a pergunta sem resposta;
+               2. ela é uma CAIXA, e não uma linha: descrever o que aconteceu
+                  não cabe em quarenta caracteres;
+               3. tem BOTÃO, e o botão muda de estado: "Salvar" enquanto há
+                  texto novo, "Salvo ✓" depois. Sem ele, guardar era um ato de
+                  fé;
+               4. e diz, por escrito, que guardou e ONDE guardou.
+
+             O texto não mora no campo: mora no QUADRO (`f.nota`), que é de onde
+             o PDF, o Word, o HTML, o PPTX e o prompt já leem a anotação de cada
+             passo. É por isso que ela sai nos documentos sem nenhum caminho
+             novo — o caminho já existia, faltava a porta. -->
+        <div class="anotViva hide" id="anotCx">
+          <label class="anotLbl" id="anotLbl" for="anotTxt"></label>
+          <textarea id="anotTxt" rows="3" maxlength="600" data-i18n-ph="anotPh"></textarea>
+          <div class="row" style="margin-top:7px;align-items:center;gap:9px">
+            <button class="sm" id="anotSalvar" data-i18n="anotSalvar"></button>
+            <span class="status" id="anotMsg" role="status"></span>
+          </div>
+        </div>
         <span class="status" id="recMsg" data-i18n="recHint"></span>
         <!-- A barra do modelo, AQUI.
 
@@ -2809,6 +2862,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recSemFrames:'Nenhuma tela foi guardada: a imagem não mudou o suficiente durante a captura. A gravação só guarda a tela quando ela muda — se você ficou numa tela só, ou se compartilhou uma janela que o navegador entrega em preto, não há o que guardar. Grave de novo percorrendo as telas que quer documentar.',
       recMicLbl:'Incluir meu microfone',
       recTrLbl:'Transcrever enquanto gravo',
+      anotPh:'O que aconteceu nesta tela? Ex.: cliquei em Salvar e o sistema devolveu a mensagem 4711.', anotSalvar:'Salvar anotação', anotSalvo:'✓ Salvo', anotDoPasso:'Anotação do {0} — descreva o que aconteceu', anotDaTela:'Tela {0} do {1} — descreva o que aconteceu', anotNomeTela:'Tela {0} do {1}', anotFeita:'Anotação salva em: {0}. Ela sai no documento.', anotVazia:'Anotação apagada — este passo sai só com a tela.', anotNaoSalvo:'Escrito, ainda não salvo. Aperte Salvar (ou Ctrl+Enter).', anotCurtoNao:'ainda não salvo', anotCurtoSim:'✓ salvo neste quadro', anotCurtoNao2:'anotação apagada',
       prontaLbl:'Usar transcrição do Google Meet, Zoom ou Teams', prontaOn:'Mais rápido: a reunião já foi transcrita por eles, e o arquivo entra no passo 3 — sem baixar modelo e sem esperar. Vale .docx do Meet, .vtt/.srt do Teams e do Zoom.', prontaOff:'Se a sua reunião já foi transcrita pelo Meet, pelo Teams ou pelo Zoom, marque aqui: é mais rápido do que transcrever de novo, e o texto costuma vir melhor (com o nome de quem falou).', trEnviarH:'Já tem a transcrição? Envie o arquivo.', trEnviarP:'Reconheço .docx do Google Meet (as “Anotações do Gemini”, com a aba de transcrição ou o arquivo inteiro), .vtt e .srt do Teams e do Zoom, e texto colado do painel do Drive. Com marcação de tempo, cada tela sai no documento junto do que foi dito ali.', trDeReuniao:'Google Meet, Teams ou Zoom (.docx, .vtt, .srt)', trDeLegenda:'Arquivo de legenda (.vtt, .srt, .txt)', trDoDrive:'Buscar no Google Drive', trLendo:'Lendo o arquivo…', trLeuCues:'Li o arquivo: {0} trechos com marcação de tempo.', trLeuReuniao:'Li a transcrição da reunião: {0} trechos. A minutagem é por bloco — veja a nota abaixo.', trLeuSemTempo:'Li o arquivo, mas ele não tem marcação de tempo: o texto entra inteiro e as telas não saem pareadas com a fala.', trLerErro:'Não consegui ler este arquivo: {0}', trFormato:'Este formato eu não leio. Do Google Meet use o .docx; do Teams e do Zoom, o .vtt ou o .srt. Um .doc antigo ou um PDF precisam ser salvos como .docx ou .txt antes.', trBlocos:' A minutagem veio por BLOCO, como o Meet e o Teams escrevem: um instante para várias falas. Dentro de cada bloco os trechos são distribuídos pelo tamanho da fala — é estimativa, e serve para parear as telas; para citar o minuto exato, confira no vídeo.',
       recTrOn:'A transcrição sai pronta no fim, junto com os frames. Exige baixar o modelo de ~{0} MB antes de começar — uma vez só, e depois fica guardado no navegador.',
       recTrOff:'Só os frames. Nada é baixado e a gravação começa na hora. Depois dá para colar uma transcrição pronta no passo 2.',
@@ -3393,6 +3447,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recSemFrames:'No screen was kept: the image did not change enough during the capture. Recording only keeps the screen when it changes — if you stayed on a single screen, or shared a window the browser hands over as black, there is nothing to keep. Record again, walking through the screens you want to document.',
       recMicLbl:'Include my microphone',
       recTrLbl:'Transcribe while I record',
+      anotPh:'What happened on this screen? E.g.: clicked Save and the system returned message 4711.', anotSalvar:'Save note', anotSalvo:'✓ Saved', anotDoPasso:'Note for {0} — describe what happened', anotDaTela:'Screen {0} of {1} — describe what happened', anotNomeTela:'Screen {0} of {1}', anotFeita:'Note saved to: {0}. It goes into the document.', anotVazia:'Note cleared — this step goes out with the screen only.', anotNaoSalvo:'Typed, not saved yet. Press Save (or Ctrl+Enter).', anotCurtoNao:'not saved yet', anotCurtoSim:'✓ saved to this frame', anotCurtoNao2:'note cleared',
       prontaLbl:'Use the transcript from Google Meet, Zoom or Teams', prontaOn:'Faster: they already transcribed the meeting, and the file goes in at step 3 — no model download, no waiting. Works with Meet .docx and Teams/Zoom .vtt/.srt.', prontaOff:'If your meeting was already transcribed by Meet, Teams or Zoom, tick this: it is faster than transcribing again, and the text is usually better (it names who spoke).', trEnviarH:'Already have the transcript? Send the file.', trEnviarP:'I read Google Meet .docx (the “Gemini notes”, either the transcript tab or the whole file), Teams and Zoom .vtt and .srt, and text pasted from the Drive panel. With timestamps, each screen goes into the document next to what was said there.', trDeReuniao:'Google Meet, Teams or Zoom (.docx, .vtt, .srt)', trDeLegenda:'Subtitle file (.vtt, .srt, .txt)', trDoDrive:'Find it in Google Drive', trLendo:'Reading the file…', trLeuCues:'Read the file: {0} timestamped stretches.', trLeuReuniao:'Read the meeting transcript: {0} stretches. Timing is per block — see the note below.', trLeuSemTempo:'Read the file, but it has no timestamps: the text goes in whole and the screens will not be paired with the speech.', trLerErro:'I could not read this file: {0}', trFormato:'I do not read this format. From Google Meet use the .docx; from Teams and Zoom, the .vtt or .srt. An old .doc or a PDF has to be saved as .docx or .txt first.', trBlocos:' Timing came per BLOCK, the way Meet and Teams write it: one instant for several turns. Inside each block the stretches are spread by how long each turn is — that is an estimate, good enough to pair the screens; to quote an exact minute, check the video.',
       recTrOn:'The transcript is ready at the end, alongside the frames. It needs the ~{0} MB model downloaded first — once only, and then it stays in your browser.',
       recTrOff:'Frames only. Nothing is downloaded and recording starts right away. You can paste a ready transcript in step 2 afterwards.',
@@ -3971,6 +4026,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recSemFrames:'No se guardó ninguna pantalla: la imagen no cambió lo suficiente durante la captura. La grabación solo guarda la pantalla cuando cambia — si te quedaste en una sola, o compartiste una ventana que el navegador entrega en negro, no hay nada que guardar. Graba de nuevo recorriendo las pantallas que quieres documentar.',
       recMicLbl:'Incluir mi micrófono',
       recTrLbl:'Transcribir mientras grabo',
+      anotPh:'¿Qué pasó en esta pantalla? Ej.: pulsé Guardar y el sistema devolvió el mensaje 4711.', anotSalvar:'Guardar anotación', anotSalvo:'✓ Guardado', anotDoPasso:'Anotación del {0} — describe qué pasó', anotDaTela:'Pantalla {0} del {1} — describe qué pasó', anotNomeTela:'Pantalla {0} del {1}', anotFeita:'Anotación guardada en: {0}. Sale en el documento.', anotVazia:'Anotación borrada — este paso sale solo con la pantalla.', anotNaoSalvo:'Escrito, aún sin guardar. Pulsa Guardar (o Ctrl+Enter).', anotCurtoNao:'aún sin guardar', anotCurtoSim:'✓ guardado en este cuadro', anotCurtoNao2:'anotación borrada',
       prontaLbl:'Usar la transcripción de Google Meet, Zoom o Teams', prontaOn:'Más rápido: ellos ya transcribieron la reunión, y el archivo entra en el paso 3 — sin descargar el modelo y sin esperar. Sirve el .docx de Meet y el .vtt/.srt de Teams y Zoom.', prontaOff:'Si tu reunión ya fue transcrita por Meet, Teams o Zoom, marca aquí: es más rápido que transcribir de nuevo, y el texto suele venir mejor (con el nombre de quien habló).', trEnviarH:'¿Ya tienes la transcripción? Envía el archivo.', trEnviarP:'Leo el .docx de Google Meet (las “Notas de Gemini”, la pestaña de transcripción o el archivo entero), el .vtt y el .srt de Teams y Zoom, y texto pegado del panel de Drive. Con marcas de tiempo, cada pantalla sale en el documento junto a lo que se dijo allí.', trDeReuniao:'Google Meet, Teams o Zoom (.docx, .vtt, .srt)', trDeLegenda:'Archivo de subtítulos (.vtt, .srt, .txt)', trDoDrive:'Buscar en Google Drive', trLendo:'Leyendo el archivo…', trLeuCues:'Leí el archivo: {0} tramos con marca de tiempo.', trLeuReuniao:'Leí la transcripción de la reunión: {0} tramos. La minutación es por bloque — mira la nota de abajo.', trLeuSemTempo:'Leí el archivo, pero no tiene marcas de tiempo: el texto entra entero y las pantallas no salen emparejadas con el habla.', trLerErro:'No pude leer este archivo: {0}', trFormato:'Este formato no lo leo. De Google Meet usa el .docx; de Teams y Zoom, el .vtt o el .srt. Un .doc antiguo o un PDF hay que guardarlos antes como .docx o .txt.', trBlocos:' La minutación vino por BLOQUE, como la escriben Meet y Teams: un instante para varias intervenciones. Dentro de cada bloque los tramos se reparten según el tamaño de cada intervención — es una estimación, sirve para emparejar las pantallas; para citar el minuto exacto, compruébalo en el vídeo.',
       recTrOn:'La transcripción sale lista al final, junto con los fotogramas. Requiere descargar el modelo de ~{0} MB antes de empezar — una sola vez, y luego queda guardado en el navegador.',
       recTrOff:'Solo los fotogramas. No se descarga nada y la grabación empieza al instante. Después puedes pegar una transcripción ya hecha en el paso 2.',
@@ -4548,6 +4604,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recSemFrames:'Es wurde kein Bildschirm gespeichert: Das Bild hat sich während der Aufnahme nicht genug verändert. Die Aufnahme speichert den Bildschirm nur, wenn er sich ändert — wenn Sie auf einem einzigen Bildschirm geblieben sind oder ein Fenster freigegeben haben, das der Browser schwarz ausliefert, gibt es nichts zu speichern. Nehmen Sie erneut auf und gehen Sie die Bildschirme durch, die Sie dokumentieren wollen.',
       recMicLbl:'Mein Mikrofon einbeziehen',
       recTrLbl:'Während der Aufnahme transkribieren',
+      anotPh:'Was ist auf diesem Bildschirm passiert? Z. B.: Auf Speichern geklickt, das System meldete 4711.', anotSalvar:'Notiz speichern', anotSalvo:'✓ Gespeichert', anotDoPasso:'Notiz zu {0} — beschreiben Sie, was passiert ist', anotDaTela:'Bildschirm {0} von {1} — beschreiben Sie, was passiert ist', anotNomeTela:'Bildschirm {0} von {1}', anotFeita:'Notiz gespeichert bei: {0}. Sie erscheint im Dokument.', anotVazia:'Notiz gelöscht — dieser Schritt erscheint nur mit dem Bild.', anotNaoSalvo:'Geschrieben, noch nicht gespeichert. Auf Speichern drücken (oder Strg+Enter).', anotCurtoNao:'noch nicht gespeichert', anotCurtoSim:'✓ in diesem Bild gespeichert', anotCurtoNao2:'Notiz gelöscht',
       prontaLbl:'Transkript aus Google Meet, Zoom oder Teams verwenden', prontaOn:'Schneller: die Besprechung wurde dort bereits transkribiert, und die Datei kommt in Schritt 3 hinein — ohne Modell-Download und ohne Warten. Möglich sind Meet-.docx sowie .vtt/.srt aus Teams und Zoom.', prontaOff:'Wenn Ihre Besprechung bereits von Meet, Teams oder Zoom transkribiert wurde, setzen Sie hier das Häkchen: das ist schneller als erneut zu transkribieren, und der Text ist meist besser (mit dem Namen der sprechenden Person).', trEnviarH:'Transkript schon vorhanden? Datei hochladen.', trEnviarP:'Ich lese Google-Meet-.docx (die „Gemini-Notizen“, den Transkript-Reiter oder die ganze Datei), .vtt und .srt aus Teams und Zoom sowie Text aus dem Drive-Fenster. Mit Zeitmarken erscheint jeder Screenshot im Dokument neben dem, was dort gesagt wurde.', trDeReuniao:'Google Meet, Teams oder Zoom (.docx, .vtt, .srt)', trDeLegenda:'Untertiteldatei (.vtt, .srt, .txt)', trDoDrive:'In Google Drive suchen', trLendo:'Datei wird gelesen…', trLeuCues:'Datei gelesen: {0} Abschnitte mit Zeitmarke.', trLeuReuniao:'Besprechungstranskript gelesen: {0} Abschnitte. Die Zeitangabe ist blockweise — siehe Hinweis unten.', trLeuSemTempo:'Datei gelesen, aber ohne Zeitmarken: der Text kommt vollständig hinein, und die Screenshots werden nicht der Sprache zugeordnet.', trLerErro:'Diese Datei konnte ich nicht lesen: {0}', trFormato:'Dieses Format lese ich nicht. Aus Google Meet nehmen Sie die .docx; aus Teams und Zoom die .vtt oder .srt. Eine alte .doc oder ein PDF müssen vorher als .docx oder .txt gespeichert werden.', trBlocos:' Die Zeitangabe kam BLOCKWEISE, so wie Meet und Teams sie schreiben: ein Zeitpunkt für mehrere Wortbeiträge. Innerhalb eines Blocks werden die Abschnitte nach Länge des Beitrags verteilt — das ist eine Schätzung und reicht, um die Screenshots zuzuordnen; für die exakte Minute prüfen Sie das Video.',
       recTrOn:'Die Transkription ist am Ende fertig, zusammen mit den Screenshots. Dafür muss vorher das Modell von ~{0} MB heruntergeladen werden — nur einmal, danach bleibt es im Browser gespeichert.',
       recTrOff:'Nur die Screenshots. Es wird nichts heruntergeladen und die Aufnahme startet sofort. Eine fertige Transkription können Sie später in Schritt 2 einfügen.',
@@ -5131,6 +5188,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recSemFrames:'Aucun écran n’a été conservé : l’image n’a pas assez changé pendant la capture. L’enregistrement ne conserve l’écran que lorsqu’il change — si vous êtes resté sur un seul écran, ou si vous avez partagé une fenêtre que le navigateur rend en noir, il n’y a rien à conserver. Enregistrez de nouveau en parcourant les écrans que vous voulez documenter.',
       recMicLbl:'Inclure mon microphone',
       recTrLbl:'Transcrire pendant l’enregistrement',
+      anotPh:'Que s’est-il passé sur cet écran ? Ex. : clic sur Enregistrer, le système a renvoyé le message 4711.', anotSalvar:'Enregistrer la note', anotSalvo:'✓ Enregistré', anotDoPasso:'Note de {0} — décrivez ce qui s’est passé', anotDaTela:'Écran {0} de {1} — décrivez ce qui s’est passé', anotNomeTela:'Écran {0} de {1}', anotFeita:'Note enregistrée dans : {0}. Elle part dans le document.', anotVazia:'Note effacée — cette étape ne sortira qu’avec l’écran.', anotNaoSalvo:'Saisi, pas encore enregistré. Appuyez sur Enregistrer (ou Ctrl+Entrée).', anotCurtoNao:'pas encore enregistré', anotCurtoSim:'✓ enregistré sur cette image', anotCurtoNao2:'note effacée',
       prontaLbl:'Utiliser la transcription de Google Meet, Zoom ou Teams', prontaOn:'Plus rapide : la réunion a déjà été transcrite chez eux, et le fichier entre à l’étape 3 — sans téléchargement de modèle et sans attente. Fonctionne avec le .docx de Meet et le .vtt/.srt de Teams et Zoom.', prontaOff:'Si votre réunion a déjà été transcrite par Meet, Teams ou Zoom, cochez ici : c’est plus rapide que de transcrire à nouveau, et le texte est en général meilleur (il nomme qui a parlé).', trEnviarH:'Vous avez déjà la transcription ? Envoyez le fichier.', trEnviarP:'Je lis le .docx de Google Meet (les « notes Gemini », l’onglet transcription ou le fichier entier), le .vtt et le .srt de Teams et Zoom, et le texte collé depuis le panneau Drive. Avec l’horodatage, chaque écran sort dans le document à côté de ce qui a été dit à ce moment-là.', trDeReuniao:'Google Meet, Teams ou Zoom (.docx, .vtt, .srt)', trDeLegenda:'Fichier de sous-titres (.vtt, .srt, .txt)', trDoDrive:'Chercher dans Google Drive', trLendo:'Lecture du fichier…', trLeuCues:'Fichier lu : {0} passages horodatés.', trLeuReuniao:'Transcription de réunion lue : {0} passages. L’horodatage est par bloc — voir la note ci-dessous.', trLeuSemTempo:'Fichier lu, mais sans horodatage : le texte entre en entier et les écrans ne seront pas appariés à la parole.', trLerErro:'Je n’ai pas pu lire ce fichier : {0}', trFormato:'Ce format, je ne le lis pas. Depuis Google Meet, prenez le .docx ; depuis Teams et Zoom, le .vtt ou le .srt. Un ancien .doc ou un PDF doit d’abord être enregistré en .docx ou .txt.', trBlocos:' L’horodatage est venu par BLOC, comme Meet et Teams l’écrivent : un instant pour plusieurs prises de parole. Dans chaque bloc, les passages sont répartis selon la longueur de la prise de parole — c’est une estimation, suffisante pour apparier les écrans ; pour citer la minute exacte, vérifiez dans la vidéo.',
       recTrOn:'La transcription est prête à la fin, en même temps que les captures. Il faut d’abord télécharger le modèle d’environ {0} Mo — une seule fois, ensuite il reste dans le navigateur.',
       recTrOff:'Les captures seules. Rien n’est téléchargé et l’enregistrement démarre immédiatement. Vous pourrez coller une transcription toute prête à l’étape 2.',
@@ -7809,6 +7867,147 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      o campo e deixa uma linha dizendo onde ele foi. Fechou a janelinha, o
      campo volta para o cartão — e volta com o texto, porque o texto nunca
      morou no campo: mora no quadro. */
+  /* ================= A ANOTAÇÃO AO VIVO =================
+
+     Ela comenta o ÚLTIMO quadro capturado, e o texto mora no quadro (`f.nota`)
+     — nunca no campo. É o mesmo lugar de onde a grade, a lente, o PDF, o Word,
+     o HTML, o PPTX e o prompt já leem a anotação de cada passo, e é por isso
+     que o que se escreve aqui sai nos documentos sem nenhum caminho novo.
+
+     Uma consequência que vale saber, e que está no `tituloDoPasso`: a anotação
+     do PRIMEIRO quadro de um passo é o TÍTULO daquele passo; a dos demais é a
+     legenda daquela tela. Ou seja, escrever aqui logo depois de "marcar um
+     passo" nomeia o passo inteiro, e escrever depois de "mais uma tela"
+     descreve aquela tela. O rótulo da caixa diz qual dos dois está
+     acontecendo — era exatamente essa a pergunta sem resposta da versão
+     anterior. */
+  let anotAlvo = null;        // o quadro que a caixa está comentando
+  let anotSujo = false;       // há texto digitado que ainda não foi guardado
+
+  const anotCampos = () => [$('anotTxt'), pipWin && pipWin.document.getElementById('nota')]
+    .filter(Boolean);
+
+  /* Como a caixa se chama agora. `abrePasso` responde se aquele quadro é o
+     primeiro do passo — e é o que separa "título do passo" de "legenda da
+     tela". */
+  function anotRotulo(f){
+    if (!f) return '';
+    const n = numeroDoQuadro(f);
+    const passo = n ? passoN(n) : '';
+    return abrePasso(f) ? t('anotDoPasso', passo)
+                        : t('anotDaTela', ordemNoPasso(f), passo);
+  }
+  /* O nome CURTO do alvo — "Passo 2", "Tela 2 do Passo 2". O rótulo carrega
+     junto o pedido ("descreva o que aconteceu"), que é instrução para quem vai
+     escrever; repeti-lo dentro do aviso de que salvou produzia a frase
+     "salva em: Anotação do Passo 2 — descreva o que aconteceu", que manda
+     descrever o que já foi descrito. */
+  function anotNome(f){
+    if (!f) return '';
+    const n = numeroDoQuadro(f);
+    const passo = n ? passoN(n) : '';
+    return abrePasso(f) ? passo : t('anotNomeTela', ordemNoPasso(f), passo);
+  }
+  /* Qual tela deste passo. Contada na hora e não guardada: quadros são
+     descartados e renumerados o tempo todo, e um número guardado envelhece. */
+  function ordemNoPasso(f){
+    const p = listaDePassos().find(p => p.quadros.includes(f));
+    return p ? p.quadros.indexOf(f) + 1 : 1;
+  }
+
+  function anotPintar(){
+    const cx = $('anotCx'); if (!cx) return;
+    const vivo = !!anotAlvo;
+    cx.classList.toggle('hide', !vivo);
+    if (!vivo) return;
+    $('anotLbl').textContent = anotRotulo(anotAlvo);
+    const bt = $('anotSalvar');
+    /* TRÊS ESTADOS, e o botão é a resposta para "ele salvou?". */
+    bt.disabled = !anotSujo;
+    bt.classList.toggle('salvo', !anotSujo && !!(anotAlvo.nota || '').trim());
+    bt.textContent = (!anotSujo && (anotAlvo.nota || '').trim())
+      ? t('anotSalvo') : t('anotSalvar');
+    if (pipWin) {
+      const b2 = pipWin.document.getElementById('notaOk');
+      if (b2) { b2.disabled = !anotSujo;
+                b2.classList.toggle('salvo', !anotSujo && !!(anotAlvo.nota || '').trim());
+                b2.textContent = (!anotSujo && (anotAlvo.nota || '').trim())
+                  ? t('anotSalvo') : t('anotSalvar'); }
+      /* Na janelinha, o nome CURTO. O pedido "descreva o que aconteceu" já
+         está no placeholder do campo, a dois centímetros dali; repeti-lo no
+         rótulo custa uma segunda linha numa janela de 250px — e a linha sai
+         do fundo, empurrando o botão de PARAR para fora. */
+      const l2 = pipWin.document.getElementById('notaLbl');
+      if (l2) l2.textContent = anotNome(anotAlvo);
+    }
+  }
+
+  /* Guardar. É aqui, e só aqui, que o texto sai do campo e entra no quadro. */
+  function anotGuardar(){
+    if (!anotAlvo) return;
+    const campo = anotCampos()[0];
+    const texto = campo ? campo.value : '';
+    anotAlvo.nota = texto.trim();
+    anotSujo = false;
+    /* No espelho do disco também: perder a aba com quarenta anotações escritas
+       durante a gravação é o estrago que o espelho existe para evitar. */
+    espelharNota(frames.indexOf(anotAlvo) + 1, anotAlvo.nota);
+    anotPintar();
+    const msg = anotAlvo.nota
+      ? t('anotFeita', anotNome(anotAlvo)) : t('anotVazia');
+    if ($('anotMsg')) $('anotMsg').innerHTML = `<span class="ok">${msg}</span>`;
+    /* A janelinha diz a mesma coisa em duas palavras: ali o rótulo do alvo
+       está logo acima, e a frase inteira viraria três linhas. */
+    if (pipWin) { const m = pipWin.document.getElementById('notaMsg');
+                  if (m) m.textContent = anotAlvo.nota ? t('anotCurtoSim') : t('anotCurtoNao2'); }
+    anotCampos().forEach(piscarGuardou);
+    /* A grade repinta: quem olhar para o passo 2 vê a anotação já lá. */
+    if (typeof render === 'function' && frames.length) render();
+  }
+
+  function anotDigitou(){
+    if (!anotAlvo) return;
+    anotSujo = true;
+    const valor = anotCampos()[0] ? anotCampos()[0].value : '';
+    /* Os dois campos — o do cartão e o da janelinha — mostram o mesmo texto.
+       Dois campos com conteúdos diferentes sobre o mesmo quadro é a pior coisa
+       que esta tela poderia fazer. */
+    anotCampos().forEach(c => { if (c.value !== valor) c.value = valor; });
+    if ($('anotMsg')) $('anotMsg').innerHTML = `<span class="nota">${t('anotNaoSalvo')}</span>`;
+    if (pipWin) { const m = pipWin.document.getElementById('notaMsg');
+                  if (m) m.textContent = t('anotCurtoNao'); }
+    anotPintar();
+  }
+
+  /* A caixa passa a comentar um quadro novo.
+
+     ANTES DE TROCAR, GUARDA O QUE ESTAVA ESCRITO. Sem isto, quem digita e
+     aperta "marcar" de novo perde o que escreveu — em silêncio, que é a única
+     forma de perda que este produto não aceita. */
+  function anotApontar(f){
+    if (anotSujo && anotAlvo) anotGuardar();
+    anotAlvo = f || null;
+    anotSujo = false;
+    anotCampos().forEach(c => { c.value = (f && f.nota) || ''; c.disabled = !f; });
+    if ($('anotMsg')) $('anotMsg').textContent = '';
+    if (pipWin) { const m = pipWin.document.getElementById('notaMsg');
+                  if (m) m.textContent = ''; }
+    anotPintar();
+  }
+
+  if ($('anotSalvar')) {
+    $('anotSalvar').onclick = anotGuardar;
+    $('anotTxt').oninput = anotDigitou;
+    /* Ctrl+Enter guarda sem tirar a mão do teclado. Enter sozinho quebra linha:
+       é uma caixa de texto, e roubar o Enter dela seria roubar o parágrafo. */
+    $('anotTxt').onkeydown = e => {
+      if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); anotGuardar(); }
+    };
+    /* Sair do campo guarda também. Ninguém deveria perder texto por ter clicado
+       fora — e durante uma gravação clicar fora é o gesto mais provável. */
+    $('anotTxt').onblur = () => { if (anotSujo) anotGuardar(); };
+  }
+
   /* `piscarGuardou` sobreviveu à saída do comentário ao vivo: o campo de
      anotação da lente ainda o usa para dizer que guardou. */
   const guardouTic = new WeakMap();
@@ -7825,7 +8024,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      depois, e não tem como se atualizar sozinho. Sem carimbo, "estou com um
      problema no offline" é uma conversa sem chão — ninguém sabe de qual build
      se fala nem se o defeito já foi consertado. */
-  const VERSAO = '2026.08.20-24';
+  const VERSAO = '2026.08.20-36';
   window.__versao = () => VERSAO;
 
   const PIP_CSS = `
@@ -7847,7 +8046,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
        botão, e nada que não seja usado durante a gravação. */
     body{font:13px/1.35 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
          background:#121419;color:#e9ebf1;padding:11px;display:flex;
-         flex-direction:column;gap:7px;justify-content:center;height:100vh}
+         flex-direction:column;gap:6px;justify-content:center;height:100vh}
     .top{display:flex;align-items:center;gap:8px}
     .dot{width:10px;height:10px;border-radius:50%;background:#ef8484;flex:none;
          animation:pulsa 1.4s ease-in-out infinite}
@@ -7866,7 +8065,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
        número. Esconder o resto é o que permite esse número ser enorme SEM a
        janela crescer — e crescer é o que ela não pode fazer. */
     body.contando .top,body.contando .vus,body.contando .pe,
-    body.contando input.nota,body.contando button:not(#stop){display:none}
+    body.contando .notaCx,body.contando button:not(#stop){display:none}
     /* "Nada de vídeo é guardado" é uma frase que se lê UMA vez, e a hora de
        lê-la é enquanto a janelinha ainda está preparando — que é quando a
        pergunta existe. Repetida durante a gravação inteira ela só cobra
@@ -7921,8 +8120,25 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     /* A caixa do comentário. Ela precisa existir AQUI e não só no cartão:
        durante a gravação a aba do produto está atrás da tela compartilhada, e
        um campo que a pessoa não vê é um campo que não existe. */
-    input.nota{width:100%;background:#1a1d24;color:#e9ebf1;border:1px solid #282c36;
-               border-radius:6px;padding:6px 8px;font:12.5px system-ui,sans-serif}
+    textarea.nota{width:100%;box-sizing:border-box;background:#1a1d24;color:#e9ebf1;
+               border:1px solid #282c36;border-radius:6px;padding:5px 7px;
+               font:12px/1.4 system-ui,sans-serif;resize:none;min-height:36px}
+    /* Rótulo, campo, botão e confirmação são UMA coisa: embrulhados, eles gastam
+       o respiro do corpo (7px) uma vez em vez de quatro. Vinte pixels numa
+       janela de 282 é a diferença entre caber e transbordar — e transbordar,
+       aqui, é o botão de PARAR saindo pela borda de baixo. */
+    .notaCx{display:flex;flex-direction:column;gap:3px}
+    .notaLbl{display:block;font-size:10.5px;font-weight:700;color:#737cf0;line-height:1.25}
+    /* Igual ao da aba: desligado porque não há nada novo para guardar, mas com
+       opacidade cheia — o estado "salvo" É a confirmação, e desbotá-la é apagar
+       a resposta. */
+    #notaOk.salvo{background:transparent;color:#737cf0;border:1px solid #737cf0}
+    #notaOk.salvo:disabled{opacity:1}
+    /* Vazia ela não ocupa nada; escrita, ocupa uma linha. É o que permite a
+       confirmação existir sem cobrar altura o tempo todo. */
+    .notaRow{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+    .notaRow button{width:auto;flex:none}
+    .notaMsg{font-size:10.5px;line-height:1.3;color:#8ecf9c;flex:1;min-width:0}
     /* NADA DE CRASE AQUI DENTRO. Este bloco é um template literal, e uma crase
        num comentário fecha a string e quebra o script inteiro — a ferramenta
        deixa de abrir e o erro aparece a mil linhas daqui. Já custou dois
@@ -7933,10 +8149,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
        no código e ausente na tela, que é o pior dos dois mundos — quem procura
        não acha, e quem não procura também não. Agora a caixa fica pontilhada
        (o sinal de "ainda não vale") e a frase se lê. */
-    input.nota:disabled{opacity:1;background:#15181e;color:#8a93a3;
+    textarea.nota:disabled{opacity:1;background:#15181e;color:#8a93a3;
                         border-style:dashed;border-color:#3a4150}
-    input.nota::placeholder{color:#9aa3b2;opacity:1}
-    input.nota.guardou{border-color:#737cf0;box-shadow:0 0 0 2px rgba(115,124,240,.28)}
+    textarea.nota::placeholder{color:#9aa3b2;opacity:1}
+    textarea.nota.guardou{border-color:#737cf0;box-shadow:0 0 0 2px rgba(115,124,240,.28)}
     /* O botão da segunda tela é menor: marcar um passo é o gesto de sempre,
        acrescentar uma tela é o do caso específico. Dois botões do mesmo peso
        obrigariam a escolher entre iguais no pior momento possível. */
@@ -7949,7 +8165,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     try {
       /* Mais 34px de altura: o botão da segunda tela entrou, e uma janelinha
          que corta o próprio botão é pior do que não ter o botão. */
-      pipWin = await documentPictureInPicture.requestWindow({ width: 250, height: 278 });
+      pipWin = await documentPictureInPicture.requestWindow({ width: 250, height: 300 });
     } catch (e) { pipWin = null; return; }
 
     const d = pipWin.document;
@@ -7966,6 +8182,25 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
          ia capturar. Um botão que só existe na página é um botão que não
          existe durante a gravação. */
       '<button id="maisTela" class="sec fina" disabled></button>' +
+      /* ---- A CAIXA DE ANOTAÇÃO, AQUI TAMBÉM ----
+         Durante a gravação a aba do produto está ATRÁS da tela compartilhada.
+         Um campo que só existe lá é um campo que não existe — foi o argumento
+         que trouxe o marcar e o pausar para cá, e ele vale igual para o texto.
+         Os dois campos mostram o mesmo conteúdo e chamam a mesma função: o
+         texto mora no quadro, não em nenhum dos dois. */
+      '<div class="notaCx">' +
+        '<label class="notaLbl" id="notaLbl"></label>' +
+        '<textarea id="nota" class="nota" rows="2" maxlength="600" disabled></textarea>' +
+        /* Botão e confirmação NA MESMA LINHA. Empilhados eles custavam 17px de
+           uma janela que já estava no limite — e a confirmação, aqui, tem duas
+           palavras: ela cabe ao lado. A confirmação também NÃO usa a classe
+           .pe: `body.gravando .pe` esconde aquela família durante a gravação,
+           e a gravação é o único momento em que esta frase é escrita. */
+        '<div class="notaRow">' +
+          '<button id="notaOk" class="sec fina" disabled></button>' +
+          '<span class="notaMsg" id="notaMsg"></span>' +
+        '</div>' +
+      '</div>' +
       '<button id="pausa" class="sec" disabled></button>' +
       '<button id="calar" class="sec hide"></button>' +
       '<button id="stop" disabled></button>' +
@@ -7987,6 +8222,23 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
        chamam a mesma função do cartão — nenhuma lógica duplicada. */
     pipMarcar.onclick = () => { if (marcarAgora) marcarAgora(); };
     if (pipTela) pipTela.onclick = () => { if (maisUmaTela) maisUmaTela(); };
+    /* A caixa da janelinha chama as MESMAS funções do cartão. Nenhuma lógica
+       duplicada: o que existe em dois lugares é o campo, não a regra. */
+    {
+      const nt = d.getElementById('nota'), ok = d.getElementById('notaOk');
+      if (nt) {
+        nt.placeholder = t('anotPh');
+        nt.oninput = anotDigitou;
+        nt.onblur = () => { if (anotSujo) anotGuardar(); };
+        nt.onkeydown = e => {
+          if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); anotGuardar(); }
+        };
+      }
+      if (ok) { ok.textContent = t('anotSalvar'); ok.onclick = anotGuardar; }
+      /* A janelinha nasceu no meio de uma gravação: se já há quadro em
+         comentário, ela abre mostrando o texto dele. */
+      anotApontar(anotAlvo);
+    }
     pipPausa.onclick  = () => { if (alternarPausa) alternarPausa(); };
     /* O botão da janelinha não duplica lógica: chama o mesmo `alternarMic` da
        aba, e o rótulo dos dois é repintado pela mesma função. */
@@ -8866,6 +9118,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       if ($('recTela')) $('recTela').classList.add('hide');
       $('recPip').classList.add('hide');
       pausado = false; alternarPausa = null; marcarAgora = null; maisUmaTela = null;
+      /* A gravação acabou: guarda o que estiver escrito e recolhe a caixa.
+         Daqui para a frente quem anota é a grade e a lente, com a imagem
+         grande na frente — que continua sendo o lugar melhor para escrever. */
+      anotApontar(null);
     };
 
     /* ================= a ordem daqui para baixo é o conserto =================
@@ -9628,16 +9884,18 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
         pipAviso = t('pipMarcado', frames.filter(f => f.manual).length);
         pipAvisoDe = 'marcar';
         pipAvisoAte = performance.now() + 2200;
-        /* A caixa passa a comentar ESTE quadro. Zerar o texto é parte da
-           regra: herdar o comentário da marcação anterior encheria o documento
-           de repetição, e repetição num documento de evidência é pior do que
-           silêncio — ela parece confirmação. */
+        /* A caixa passa a comentar ESTE quadro, e o que estava escrito sobre o
+           anterior é guardado antes da troca. Herdar o texto seria encher o
+           documento de repetição, e repetição num documento de evidência é pior
+           que silêncio: ela parece confirmação. */
+        anotApontar(frames[frames.length - 1]);
         controle('gravando', { seg: agora(), frames: frames.length });
       }
     };
-    /* Mais uma tela DESTE passo. Ela não puxa título do roteiro nem zera a
-       caixa de anotação: o título é do passo, e ele já foi escrito na primeira
-       tela. Herdar ou apagar aqui seria repetir ou perder. */
+    /* Mais uma tela DESTE passo. Ela não puxa título do roteiro: o título é do
+       passo e já foi escrito na primeira tela. A caixa passa a comentar a tela
+       nova — e o rótulo dela muda de "Passo 3" para "Tela 2 do passo 3", que é
+       a diferença que a versão antiga não sabia dizer. */
     maisUmaTela = () => {
       if (!liveOn) return;
       if (capturar(true, true, true)) {
@@ -9648,6 +9906,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
         pipAviso = avisoCurto;
         pipAvisoDe = 'tela';
         pipAvisoAte = performance.now() + 2200;
+        anotApontar(frames[frames.length - 1]);
         controle('gravando', { seg: agora(), frames: frames.length });
       }
     };
@@ -9835,6 +10094,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       if ($('recTela')) $('recTela').classList.add('hide');
       $('recPip').classList.add('hide');
       pausado = false; alternarPausa = null; marcarAgora = null; maisUmaTela = null;
+      /* A gravação acabou: guarda o que estiver escrito e recolhe a caixa.
+         Daqui para a frente quem anota é a grade e a lente, com a imagem
+         grande na frente — que continua sendo o lugar melhor para escrever. */
+      anotApontar(null);
       trabalhando(false, 'gravacao');
       abrindoCaptura = false;
 

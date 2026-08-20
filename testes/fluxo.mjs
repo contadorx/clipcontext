@@ -134,7 +134,18 @@ await pg.waitForTimeout(700);
   const presos = ['go', 'docx', 'html', 'md', 'pptx', 'json', 'csv', 'zip'].filter((id) => e[id] !== 'clicavel');
   ok('os oito formatos de sempre ficam clicáveis', presos.length === 0, presos.join(' '));
   const st = (await pg.locator('#pdfStatus').textContent()).trim();
-  ok('e a tela convida em vez de ficar muda', /4/.test(st) && st.length > 15, st.slice(0, 70));
+  /* DUAS FRASES VÁLIDAS, e qual delas aparece depende do relógio da máquina.
+     A esperada é "4 quadros prontos — escolha um formato". Mas se a transcrição
+     ainda estiver correndo, o aviso de que o documento sairia SEM A FALA ganha
+     a linha — e ganha com razão: é a informação que muda a decisão de baixar
+     agora. O `espera.mjs` cobra justamente que esse aviso apareça. Exigir só a
+     primeira aqui era pôr as duas réguas para brigar, e quem perdia era a
+     máquina lenta. O que este bloco afirma é que a linha CONVIDA em vez de
+     ficar muda — e as duas convidam. */
+  const contou = /4/.test(st);
+  const avisou = /fala/i.test(st);
+  ok('e a tela convida em vez de ficar muda', (contou || avisou) && st.length > 15,
+     st.slice(0, 70));
   const dl = pg.waitForEvent('download', { timeout: 30000 });
   await pg.locator('#md').click();
   await dl;

@@ -86,18 +86,44 @@ for (let i = 0; i < 120; i++) {
 /* A janela que importa: a transcrição correndo. `#auto` desabilitado é o
    estado que ela mesma mantém, e ele não depende do `ocupado` que está sendo
    medido — usá-lo como referência é medir uma coisa com a outra. */
+/* ---- E DEPOIS, ATÉ NÃO SOBRAR NINGUÉM ----
+
+   O laço acima para quando a TRANSCRIÇÃO acaba. Numa máquina em que a
+   varredura é a mais lenta das duas, ela ainda está correndo nessa hora — e a
+   afirmação "no fim ninguém fica marcado" lia o fim do LAÇO como se fosse o
+   fim do TRABALHO, e acusava de vazamento uma varredura que só estava
+   trabalhando. Então o laço continua até os dois acabarem de verdade. */
+for (let i = 0; i < 90; i++) {
+  const e = await pg.evaluate(() => ({
+    quem: (window.__trabalhos ? window.__trabalhos() : []).slice().sort(),
+    faixa: !document.getElementById('faixa').classList.contains('hide'),
+    auto: document.getElementById('auto').disabled,
+  }));
+  linha.push(e);
+  if (e.quem.length === 0) break;
+  await pg.waitForTimeout(500);
+}
+
 const correndo = linha.filter(x => x.auto);
 const comAmbos = linha.filter(x => x.quem.length > 1);
-const depoisDaVarredura = correndo.filter(x => !x.quem.includes('varredura'));
+/* A propriedade, vista dos DOIS LADOS: um trabalho que termina não pode apagar
+   o estado do outro. Qual dos dois acaba primeiro depende da máquina, e não do
+   produto — cobrar só um dos lados fazia o arquivo falhar dizendo "a corrida
+   não aconteceu nesta máquina, o teste não afirma nada", que é uma régua
+   avisando que não mediu e reprovando assim mesmo. */
+const soATranscricao = linha.filter(x => x.quem.length === 1 && x.quem[0] === 'transcricao');
+const soAVarredura   = linha.filter(x => x.quem.length === 1 && x.quem[0] === 'varredura');
+const sozinho = soATranscricao.length + soAVarredura.length;
 console.log('\n  amostras ................. ' + linha.length);
 console.log('  transcrição correndo ..... ' + correndo.length);
 console.log('  com os dois trabalhando .. ' + comAmbos.length);
-console.log('  depois da varredura ...... ' + depoisDaVarredura.length);
+console.log('  só a transcrição ......... ' + soATranscricao.length);
+console.log('  só a varredura ........... ' + soAVarredura.length);
 
 ok('os dois trabalhos correram ao mesmo tempo', comAmbos.length > 0,
    'nunca houve dois: ' + JSON.stringify(linha.map(x => x.quem).slice(0, 6)));
-ok('a varredura terminou antes da transcrição', depoisDaVarredura.length > 0,
-   'a corrida não aconteceu nesta máquina — o teste não afirma nada');
+ok('um deles terminou antes, e o outro continuou marcado', sozinho > 0,
+   'os dois começaram e acabaram no mesmo instante — nada a afirmar');
 
 /* AS DUAS AFIRMAÇÕES QUE PEGAM O DEFEITO. Com o booleano de antes, o `false` da
    varredura apagava o estado da transcrição: `quem` ficava vazio e a faixa

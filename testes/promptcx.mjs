@@ -71,14 +71,28 @@ console.log('\n[3] um clique abre, e a caixa é longa');
   ok('e ela é longa, não os 340 px de antes', max > 500, String(Math.round(max)));
 }
 
-console.log('\n[4] abrir uma legenda pronta saiu de cima da caixa');
+/* ---- ESTA SEÇÃO MUDOU DE LADO, E O MOTIVO IMPORTA ----
+
+   Ela cobrava que o botão de abrir uma legenda pronta ficasse DEPOIS da caixa.
+   Fazia sentido enquanto ele era um botão solto: um controle avulso em cima do
+   campo é ruído antes do trabalho.
+
+   Ele deixou de ser um botão solto. Virou o bloco "Enviar arquivo de
+   transcrição", com título, três caminhos (Meet/Teams/Zoom, .vtt/.srt, Drive) e
+   uma frase dizendo que é o caminho mais rápido — porque é: quem já tem a
+   transcrição da reunião não precisa baixar modelo de voz nenhum.
+
+   E um atalho que só aparece depois do caminho longo é um atalho que ninguém
+   pega. Ele vem antes do quadro agora, e a régua cobra isso. */
+console.log('\n[4] o envio de transcrição pronta vem ANTES do quadro');
 {
   const ordem = await pg.evaluate(() => {
     const todos = [...document.querySelectorAll('#trManual *')];
     return { botao: todos.indexOf(document.getElementById('pickVtt')),
              caixa: todos.indexOf(document.getElementById('tr')) };
   });
-  ok('o botão vem DEPOIS da caixa de transcrição', ordem.botao > ordem.caixa, JSON.stringify(ordem));
+  ok('o atalho aparece antes do caminho longo', ordem.botao >= 0 && ordem.botao < ordem.caixa,
+     JSON.stringify(ordem));
   ok('e continua existindo, alcançável pelo teclado',
      await pg.locator('#pickVtt').isEnabled());
   const t = await pg.locator('#trManual').textContent();

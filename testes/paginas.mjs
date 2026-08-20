@@ -133,15 +133,28 @@ console.log('\n[3] navegação e idiomas');
 
 console.log('\n[4] sitemap e robots');
 {
+  /* `/sitemap.xml` virou ÍNDICE quando o blog entrou: as páginas fixas nascem
+     no build e o mapa do blog é lido do banco a cada rastreio, e são duas
+     cadências que não cabem num arquivo só. Então a régua segue o índice em vez
+     de procurar as páginas nele — procurá-las ali passaria a cobrar do índice
+     uma coisa que ele não promete mais. */
   const r1 = await pg.goto('http://localhost:8898/sitemap.xml');
-  const xml = await r1.text();
+  const idx = await r1.text();
   ok('o sitemap existe', r1.status()===200);
+  ok('e ele é um índice, apontando para os dois mapas',
+     /<sitemapindex/.test(idx) &&
+     idx.includes('https://walkstamp.com/sitemap-paginas.xml') &&
+     idx.includes('https://walkstamp.com/sitemap-blog.xml'), idx.slice(0, 120));
+
+  const rp = await pg.goto('http://localhost:8898/sitemap-paginas.xml');
+  const xml = await rp.text();
+  ok('o mapa das páginas existe', rp.status()===200);
   ok('e traz as páginas novas nos três idiomas',
      ['/seguranca','/en/security','/es/seguridad','/substituto-do-steps-recorder',
       '/en/steps-recorder-replacement','/es/alternativa-al-steps-recorder',
       '/comparativo','/en/compare','/es/comparativa']
        .every(u => xml.includes('https://walkstamp.com'+u)));
-  ok('sem endereço do domínio antigo', !/clipcontext/i.test(xml));
+  ok('sem endereço do domínio antigo', !/clipcontext/i.test(xml) && !/clipcontext/i.test(idx));
   const r2 = await pg.goto('http://localhost:8898/robots.txt');
   ok('o robots aponta para o sitemap', (await r2.text()).includes('sitemap.xml'));
 }

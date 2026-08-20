@@ -155,17 +155,26 @@ console.log('\n[5] baixar a transcrição solta saiu, e o plano saiu do rodapé'
   const fonte = fs.readFileSync(ROOT + '/app.html', 'utf8');
   ok('mas a legenda continua sendo montada para o .zip', /function montarLegenda/.test(fonte));
   ok('e a caixa da licença continua existindo para o link', /id="licBox"/.test(fonte));
-  ok('a frase do .vtt não encosta na borda', /data-i18n="subDeOnde" style="flex:1/.test(fonte));
+  /* A frase que explica o .vtt MUDOU DE CASA. Ela era um texto solto ao lado do
+     botão, segurado por `flex:1` para não colar na borda; virou o parágrafo do
+     bloco "Enviar arquivo de transcrição", que tem respiro próprio. A régua
+     cobra o respiro onde ele agora mora — cobrar o `flex:1` de um elemento que
+     não existe mais é cobrar a forma antiga de resolver, e não o problema. */
+  ok('a frase do envio de transcrição não encosta na borda',
+     /\.trFonte\{[^}]*padding:12px 14px/.test(fonte) && /data-i18n="trEnviarP"/.test(fonte));
 }
 
 console.log('\n[6] a caixa da janelinha é legível mesmo desligada');
 {
   const fonte = fs.readFileSync(ROOT + '/app.html', 'utf8');
+  /* O campo virou `textarea`: uma linha só ensinava a escrever pouco, e o que
+     se pede ali não cabe em quarenta caracteres. O que a régua cobra continua
+     idêntico — desligado tem que ser legível —, só mudou a etiqueta. */
   ok('desligada não é quase invisível',
-     !/input\.nota:disabled\{opacity:\.45\}/.test(fonte));
+     !/textarea\.nota:disabled\{opacity:\.45\}/.test(fonte));
   ok('ela fica pontilhada, que é o sinal de "ainda não vale"',
-     /input\.nota:disabled\{[^}]*border-style:dashed/.test(fonte));
-  ok('e a frase dentro dela tem contraste', /input\.nota::placeholder\{color:#9aa3b2/.test(fonte));
+     /textarea\.nota:disabled\{[^}]*border-style:dashed/.test(fonte));
+  ok('e a frase dentro dela tem contraste', /textarea\.nota::placeholder\{color:#9aa3b2/.test(fonte));
   ok('o botão de trazer a janelinha de volta é destacado',
      /class="sm hide destaque" id="recPip"/.test(fonte));
 }
