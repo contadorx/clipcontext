@@ -1569,3 +1569,150 @@ remendava `jsPDF.prototype.addImage` e passava com a lista vazia — o jsPDF
 instala os métodos de desenho na INSTÂNCIA, e o remendo ficava num protótipo que
 ninguém consulta. Um teste que mede nada é pior do que teste nenhum: ele diz que
 está tudo bem.
+
+---
+
+## 19/08/2026, décima sétima rodada — a velocidade do áudio, e onde ela estava mesmo
+
+A queixa voltou: *"ainda estou com muitos problemas na velocidade do áudio"*. A
+décima primeira rodada tinha respondido que o dominante é o modelo e que as
+quatro otimizações propostas já estavam feitas — o que era verdade e não
+resolveu nada para quem espera. Então esta rodada não avaliou propostas: mediu o
+caminho, e o que apareceu foram três coisas, nenhuma delas o modelo.
+
+A régua é nova e entra na regressão: **`testes/plano.mjs`**. Ela grava a própria
+amostra — uma reunião de 150 s em `.webm`/Opus a 48 kHz estéreo, com fala e
+pausa, porque o que precisa estar lá é justamente o que um `sine` do ffmpeg não
+tem — e roda o passo 2 inteiro contra um modelo falsificado que cobra um preço
+fixo por janela. O que ela mede é o **nosso** caminho.
+
+### 1. A peneira de silêncio não pula nada numa reunião
+
+Ela existe desde a terceira proposta da décima primeira rodada e o raciocínio
+está certo: o Whisper processa sempre trinta segundos, com ou sem fala dentro,
+então uma janela muda custa o mesmo que uma cheia e não deve ser mandada.
+
+O que ninguém tinha medido é **quantas vezes ela dispara**. Com uma reunião
+sintética no formato de uma de verdade — frases de 3 a 8 s, pausas de 0,3 a 2 s
+entre elas, uma pausa longa de vez em quando:
+
+| gravação | janelas de 30 s | puladas pela peneira | ao modelo |
+|---|---|---|---|
+| 10 min, 29% parada | 20 | **0** | 20 |
+| 40 min, 28% parada | 80 | **0** | 80 |
+
+Zero. E não é defeito da regra, é do **tamanho do que ela mede**: a peneira
+exige trinta segundos seguidos com menos de 200 ms de voz, e o silêncio de uma
+reunião não vem assim. Ele vem em pedaços de um ou dois segundos, espalhados
+entre as frases. A peneira acerta o caso raro — a gravação esquecida ligada — e
+não toca no caso comum, que é o de todo mundo.
+
+### 2. O que economiza é não mandar o silêncio, e não pular a janela muda
+
+`planoDeJanelas()` junta os trechos com fala e os empacota em janelas cheias. A
+mesma fala, menos janelas. Medido sobre áudio com a fala em posições conhecidas
+(8 min, 54 frases):
+
+| | valor |
+|---|---|
+| janelas retas | 16 |
+| janelas compactadas | **12** — 25% menos inferência |
+| silêncio deixado de fora | 2,3 min |
+| frases perdidas | **0** |
+| erro do mapa de volta | **0,000 ms** |
+
+E no caminho de verdade, com a gravação de 150 s decodificada pelo
+`decodeTo16k`: 5 janelas retas → **4**, com 55,8 s de silêncio fora.
+
+**As duas coisas que a tornam segura**, e que estão no código como estão aqui:
+
+- **nenhuma fala se perde.** Cada trecho leva 0,30 s de margem antes e 0,40 s
+  depois, e dois trechos a menos de 0,60 s de distância continuam juntos — uma
+  pausa curta é parte da frase, e cortar nela entrega ao modelo pedaços sem
+  contexto, que é como nascem as invenções que a `semGagueira` limpa depois. A
+  régua confere frase por frase que o meio de cada uma está dentro de alguma
+  janela;
+- **a minutagem continua sendo a da gravação.** Sem o mapa de volta, os tempos
+  da legenda seriam os do áudio encolhido e a evidência apontaria para o minuto
+  errado — que é um estrago maior do que ser lenta. Na gravação de 150 s o
+  último tempo da legenda sai em **145,8 s**, sobre 94,2 s de áudio compactado.
+
+E ela só entra **quando ganha**: menos de 10% de economia não paga o risco de
+emendar trechos, e aí as janelas seguem inteiras, como sempre foram. Numa
+gravação de fala contínua a compactação simplesmente não acontece.
+
+### 3. O modelo era montado DUAS VEZES
+
+Este é o que mais custava, e não estava na lista de ninguém.
+
+`adiantarModelo()` começa a baixar o modelo no instante em que a caixa
+"transcrever ao vivo" é marcada — o conserto da décima segunda rodada, e ele é
+bom. O clique em Gravar espera essa promessa. **O passo 2 não esperava.** Ele
+perguntava `pipeServe()`, ouvia "não" — porque `pipe` só é atribuído no FIM da
+montagem — e começava uma segunda, do zero, com a primeira ainda correndo.
+
+Medido, com o conserto desligado: **duas montagens vivas ao mesmo tempo**,
+começando com 1,5 s de diferença. Numa máquina de verdade isso é o download
+inteiro duas vezes e dois modelos residentes.
+
+E havia um segundo caminho para o mesmo estrago, mais velho e mais grave, que a
+`testes/modelo.mjs` já pegava **antes desta rodada**: `trocarPipe` era chamado
+de quatro lugares e nada impedia dois deles de correrem juntos. Quando isso
+acontece, cada um chama `soltarPipe()` enquanto `pipe` ainda é nulo, não solta
+nada, monta o seu, e o último a terminar escreve por cima do outro — deixando um
+modelo residente que ninguém mais sabe soltar. O mesmo vazamento que a décima
+primeira rodada fechou, por outra porta.
+
+| `testes/modelo.mjs` | corridas com dois modelos vivos |
+|---|---|
+| antes (na versão publicada) | **1 em 3** |
+| agora | 0 em 7 |
+
+Um defeito de corrida que aparece em parte das vezes e some nas outras é o que
+não se conserta olhando: conserta-se **tirando a corrida do desenho**. Agora a
+montagem em curso é esperada, e não duplicada; um alvo diferente entra na fila
+atrás dela e pergunta de novo, ao chegar a sua vez, se ainda precisa montar.
+
+### 4. A extração do áudio e a montagem do modelo correm juntas
+
+Elas estavam em série: extrair o áudio, e **só então** montar o modelo. Os dois
+são longos — a extração de uma hora de vídeo levou 20,8 s na medição da décima
+primeira rodada, e a montagem vai de segundos (em cache) a um minuto (baixando)
+— e nenhum precisa do outro. Um é o decodificador de áudio do navegador; o outro
+é rede e compilação de WebAssembly. Somá-los era cobrar duas esperas por uma.
+
+É a mesma conta que já valia para a varredura de quadros, que roda junto com a
+transcrição desde a décima segunda rodada: trabalhos que não disputam nada
+correm juntos, e o custo é o maior dos dois, não a soma.
+
+Medido (ms desde o clique em "transcrever a fala"):
+
+| | montagem começa | áudio termina |
+|---|---|---|
+| antes | depois do áudio | — |
+| agora | **565 ms** | 1.889 ms |
+
+O aviso na tela passou a ser o da **montagem** quando ela existe, e não o da
+extração: entre "extraindo o áudio" e "baixando 77 MB", quem espera precisa ver
+o que explica a espera.
+
+### O que NÃO foi feito, e por quê
+
+**Mandar várias janelas ao modelo de uma vez (`batch`).** É a otimização
+seguinte da lista e pode valer bastante no caminho da placa. Não entrou porque
+o ganho depende de uma medição que esta máquina não pode fazer — o modelo não
+sobe aqui — e porque ela custa o que esta rodada mais protegeu: o texto que
+aparece enquanto sai, a troca de modo entre uma janela e outra, e a previsão
+que se corrige a cada janela. Trocar isso por um número que ninguém mediu seria
+a mesma inversão de ordem da décima primeira rodada.
+
+**Desligar `return_timestamps`.** Ele custa tokens de decodificação, e é o que
+faz a legenda ter minutagem por frase em vez de por janela de trinta segundos.
+Numa ferramenta de evidência, essa é a coisa errada de trocar por velocidade.
+
+### O que continua sendo o dominante
+
+O modelo, como na décima primeira rodada. O que mudou é que agora ele é montado
+uma vez em vez de duas, começa a montar enquanto o áudio é extraído, e recebe um
+quarto a menos de janelas numa reunião com pausas. Nada disso o acelera — apenas
+para de pagá-lo mais vezes do que o necessário.

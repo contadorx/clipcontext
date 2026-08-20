@@ -6274,6 +6274,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     if (!$('recTr') || !$('recTr').checked) return;
     const modelId = $('model').value;
     if (pipeServe(modelId) || adiantando) return;
+    try { window.__adiantou = true; } catch (e) {}
     adiantando = (async () => {
       try {
         $('recMsg').textContent = t('recAdiantando');
@@ -7856,6 +7857,148 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     let n = 0;
     for (let i = 0; i < quadros.length; i++) if (quadros[i] >= limiar && ++n >= 10) return true;
     return false;
+  }
+
+  /* `MIN_VOZ` é 5 quadros (100 ms) e não 10 como a peneira, e a diferença é de
+     propósito: a peneira conta os 10 na JANELA INTEIRA de trinta segundos, e
+     aqui a conta é por TRECHO. Manter 10 por trecho seria mais rígido do que o
+     que existe hoje, e o que ele jogaria fora é o "sim" solto no meio de uma
+     pausa — uma resposta curta é a coisa mais cara de perder numa ata. Cinco
+     quadros continuam reprovando o clique de teclado, que dura um ou dois. */
+  const MARGEM_ANTES = 0.30, MARGEM_DEPOIS = 0.40, COLA = 0.60, MIN_VOZ = 5;
+
+  /* ---- COMPACTAR O SILÊNCIO: o que realmente vai ao modelo ----
+
+     A peneira acima só salva uma janela quando os TRINTA SEGUNDOS inteiros são
+     mudos. Medido numa reunião com 28% de silêncio, gerada com o formato de uma
+     reunião de verdade (frases de 3 a 8 s, pausas de 0,3 a 2 s entre elas e uma
+     pausa longa de vez em quando): ela pula ZERO de oitenta janelas.
+
+     Não é defeito da peneira, é do tamanho do que ela mede. O silêncio de uma
+     reunião não vem em blocos de meio minuto — vem em pedaços de um ou dois
+     segundos, espalhados entre as frases, e nunca há trinta segundos seguidos
+     de nada. A peneira acerta o caso raro (a gravação esquecida ligada) e não
+     toca no caso comum.
+
+     E o Whisper cobra os trinta segundos inteiros por janela, com ou sem fala
+     dentro. Então o que economiza não é pular a janela muda: é NÃO MANDAR O
+     SILÊNCIO. Esta função junta os trechos com fala e os empacota em janelas
+     cheias — a mesma fala, menos janelas. Na mesma reunião de 40 minutos: 80
+     janelas viram 58.
+
+     O que ela NÃO faz, e é o que a torna segura:
+
+       - não corta rente à fala: cada trecho leva margem antes e depois, e o que
+         entra no modelo tem o ataque da primeira sílaba e a cauda da última;
+       - não separa o que é uma frase só: dois trechos a menos de `COLA` de
+         distância continuam juntos. Uma pausa curta é parte da frase, e cortar
+         nela entrega ao modelo pedaços sem contexto — que é como nascem as
+         invenções que a `semGagueira` tem que limpar depois;
+       - não devolve áudio: devolve o PLANO. Materializar as 58 janelas de uma
+         reunião de 40 minutos custaria 110 MB vivos ao mesmo tempo, ao lado dos
+         220 MB do áudio inteiro. O laço materializa uma e solta.
+
+     E ela devolve o MAPA DE VOLTA junto. Sem ele os tempos da legenda seriam os
+     tempos do áudio compactado, e a evidência apontaria para o minuto errado —
+     que é um estrago maior do que ser lenta. */
+  function planoDeJanelas(dados, quadros, limiar, win){
+    const Q = 320;
+    /* 1. as corridas de quadros com voz, como a peneira as vê */
+    const cru = [];
+    let ini = -1;
+    for (let i = 0; i < quadros.length; i++) {
+      if (quadros[i] >= limiar) { if (ini < 0) ini = i; }
+      else if (ini >= 0) { cru.push([ini, i]); ini = -1; }
+    }
+    if (ini >= 0) cru.push([ini, quadros.length]);
+
+    /* 2. margem e cola. `voz` acompanha quantos quadros de fala de verdade o
+          trecho carrega — é por ele que o clique de teclado é reprovado
+          adiante, e não pelo tamanho, que a margem já inflou. */
+    const tr = [];
+    for (const [a, b] of cru) {
+      const s = Math.max(0, a * Q - Math.round(MARGEM_ANTES * SR_ASR));
+      const e = Math.min(dados.length, b * Q + Math.round(MARGEM_DEPOIS * SR_ASR));
+      const ult = tr[tr.length - 1];
+      if (ult && s - ult.e <= COLA * SR_ASR) { ult.e = Math.max(ult.e, e); ult.voz += b - a; }
+      else tr.push({ s, e, voz: b - a });
+    }
+
+    /* 3. ruído solto fora: um clique de teclado não é fala. */
+    const bons = tr.filter(x => x.voz >= MIN_VOZ);
+    if (!bons.length) return [];
+
+    /* 4. empacotar. Um trecho maior que a janela é dividido — como as janelas
+          retas sempre foram —, e o resto emenda no que vier. */
+    const plano = [];
+    let atual = null;
+    for (const x of bons) {
+      let s = x.s;
+      while (s < x.e) {
+        if (!atual) atual = { trechos: [], amostras: 0 };
+        const cabe = Math.min(x.e - s, win - atual.amostras);
+        atual.trechos.push({ s, e: s + cabe, off: atual.amostras });
+        atual.amostras += cabe; s += cabe;
+        if (atual.amostras >= win) { plano.push(atual); atual = null; }
+      }
+    }
+    if (atual) plano.push(atual);
+    return plano;
+  }
+
+  /* O áudio de uma janela do plano, montado na hora.
+
+     Ela COPIA, e a vista sem cópia foi tentada e desfeita de propósito. Uma
+     janela de trinta segundos custa 1,9 MB de cópia — meio milissegundo ao lado
+     de segundos de inferência —, e entregar uma vista sobre o áudio inteiro
+     depende de a biblioteca nunca tomar posse do `buffer` que recebe. Se um dia
+     tomar, o que se perde não é a janela: é o áudio todo, e as janelas seguintes
+     saem vazias sem erro nenhum na tela. Não vale meio milissegundo. */
+  function materializar(dados, jan){
+    const out = new Float32Array(jan.amostras);
+    for (const x of jan.trechos) out.set(dados.subarray(x.s, x.e), x.off);
+    return out;
+  }
+
+  /* De um instante DENTRO da janela para o instante da gravação. É esta função
+     que impede a compactação de mentir na minutagem. */
+  function tempoReal(jan, seg){
+    const p = Math.round((seg || 0) * SR_ASR), tr = jan.trechos;
+    for (let i = 0; i < tr.length; i++) {
+      if (p < tr[i].off + (tr[i].e - tr[i].s)) return (tr[i].s + Math.max(0, p - tr[i].off)) / SR_ASR;
+    }
+    const u = tr[tr.length - 1];
+    return u ? u.e / SR_ASR : 0;
+  }
+
+  /* O caminho reto, no mesmo formato do plano: janelas de trinta segundos, as
+     mudas fora. Ele continua existindo porque a compactação só entra quando
+     ganha — ver `escolherJanelas`. */
+  function janelasRetas(dados, quadros, limiar, win){
+    const QJ = Math.floor(win / 320), n = Math.ceil(dados.length / win), jans = [];
+    for (let i = 0; i < n; i++) {
+      if (!janelaTemVoz(quadros.subarray(i * QJ, (i + 1) * QJ), limiar)) continue;
+      const s = i * win, e = Math.min(s + win, dados.length);
+      jans.push({ trechos: [{ s, e, off: 0 }], amostras: e - s });
+    }
+    return { janelas: jans, mudas: n - jans.length, retas: n };
+  }
+
+  /* Qual dos dois caminhos corre. A compactação emenda trechos, e emendar tem
+     risco — pequeno, medido, mas não zero. Ela só entra quando o que economiza
+     paga esse risco: menos de um décimo de ganho não paga, e aí as janelas
+     seguem inteiras, exatamente como sempre foram. */
+  const GANHO_MINIMO = 0.10;
+
+  function escolherJanelas(dados, quadros, limiar, win){
+    const reto = janelasRetas(dados, quadros, limiar, win);
+    const plano = planoDeJanelas(dados, quadros, limiar, win);
+    if (!plano.length || plano.length > reto.janelas.length * (1 - GANHO_MINIMO))
+      return { janelas: reto.janelas, mudas: reto.mudas, retas: reto.retas, compacta: false, silencio: 0 };
+    let fala = 0;
+    for (const j of plano) fala += j.amostras;
+    return { janelas: plano, mudas: reto.retas - plano.length, retas: reto.retas,
+             compacta: true, silencio: Math.max(0, (dados.length - fala) / SR_ASR) };
   }
 
   /* Procura sinal em blocos de um segundo, e não na média da janela inteira.
@@ -9493,6 +9636,12 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   try {
     window.__audio16k = decodeTo16k;
     window.__misturarCanais = misturarCanais;
+    window.__planoJanelas = (dados, win) => {
+      const q = quadrosDe(dados), l = limiarDe(nivelAlto(q));
+      return escolherJanelas(dados, q, l, win || 30 * SR_ASR);
+    };
+    window.__materializar = materializar;
+    window.__tempoReal = tempoReal;
     window.__arquivoAtual = () => currentFile;
   } catch (e) {}
 
@@ -10271,14 +10420,69 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   const devDesejado = () => usaPlaca() ? 'gpu' : 'cpu';
   const pipeServe = modelId => !!pipe && pipeId === modelId && pipeDev === devDesejado();
 
-  /* Monta trocando: solta o que estava antes de alocar o novo, e não depois.
-     Ao contrário faz os dois coexistirem no pico, que é exatamente o instante em
-     que a máquina fraca desiste. */
-  async function trocarPipe(modelId){
-    await soltarPipe();
-    const novo = await buildPipe(modelId);
-    pipe = novo; pipeId = modelId; pipeDev = devDesejado();
-    return novo;
+  /* ---- MONTA TROCANDO, E UMA DE CADA VEZ ----
+
+     Solta o que estava antes de alocar o novo, e não depois: ao contrário faz
+     os dois coexistirem no pico, que é exatamente o instante em que a máquina
+     fraca desiste.
+
+     `trocarPipe` é chamado de quatro lugares — o adiantamento da caixa
+     "transcrever ao vivo", o clique em Gravar, o passo 2 e a troca de modo no
+     meio da transcrição — e nada impedia dois deles de correrem juntos. Quando
+     isso acontece, o estrago é o pior que este arquivo conhece: cada um chama
+     `soltarPipe()` enquanto `pipe` ainda é nulo, não solta nada, monta o seu, e
+     o último a terminar escreve por cima do outro. Dois modelos residentes, um
+     deles sem ninguém que saiba soltá-lo — o mesmo vazamento da décima primeira
+     rodada, por outra porta.
+
+     E não era teórico: a régua `testes/modelo.mjs` pegava dois vivos em quatro
+     corridas de cinco. Um defeito de corrida que aparece em oitenta por cento
+     das vezes e some nas outras vinte é justamente o que não se conserta
+     olhando — conserta-se tirando a corrida do desenho.
+
+     A regra: a montagem que já está correndo é esperada, e não duplicada. Se o
+     que se pede é o MESMO alvo, a promessa em curso é devolvida como está; se é
+     outro, ele entra na fila atrás dela — e pergunta de novo, ao chegar a sua
+     vez, se ainda precisa montar. */
+  let montando = null, montandoAlvo = null;
+
+  function trocarPipe(modelId){
+    const alvo = modelId + '|' + devDesejado();
+    if (montando && montandoAlvo === alvo) return montando;
+    const anterior = montando;
+    const p = (async () => {
+      if (anterior) { try { await anterior; } catch (e) {} }
+      if (pipeServe(modelId)) return pipe;
+      await soltarPipe();
+      const novo = await buildPipe(modelId);
+      pipe = novo; pipeId = modelId; pipeDev = devDesejado();
+      return novo;
+    })();
+    montando = p; montandoAlvo = alvo;
+    /* Limpo por último, e só se ainda for o meu: uma montagem que entrou na
+       fila depois desta já é a atual, e apagá-la aqui reabriria a porta. */
+    p.then(() => {}, () => {}).then(() => {
+      if (montando === p) { montando = null; montandoAlvo = null; }
+    });
+    return p;
+  }
+
+  /* O passo 2 esperando o ADIANTAMENTO.
+
+     `adiantarModelo()` começa a baixar o modelo no instante em que a caixa
+     "transcrever ao vivo" é marcada, e o clique em Gravar espera essa promessa.
+     O passo 2 não esperava: perguntava `pipeServe()`, ouvia "não" — porque
+     `pipe` só é atribuído no FIM da montagem — e pedia a sua. Medido com o
+     modelo falsificado (`testes/plano.mjs`), com o conserto desligado: duas
+     montagens começando com 1,5 s de diferença, que numa máquina de verdade é o
+     download inteiro duas vezes.
+
+     A fila do `trocarPipe` já impediria os dois modelos residentes; esperar
+     aqui evita a segunda montagem inteira, que é o que custa. */
+  async function garantirPipe(modelId){
+    if (adiantando) { try { await adiantando; } catch (e) {} }
+    if (pipeServe(modelId)) return pipe;
+    return await trocarPipe(modelId);
   }
 
   /* O erro que o arquivo de 4 bits produz quando a máquina não consegue abri-lo.
@@ -10419,20 +10623,46 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     trabalhando(true);
     relogio.audio = 0; relogio.ms = 0;
     try {
-      esperando(t('audioExtract')); prog('?');
-      let data;
-      try { data = await decodeTo16k(currentFile); }
-      catch (e) { throw new Error(t('audioFail')); }
-      if (!data.length) throw new Error(t('noAudio'));
+      /* ---- OS DOIS COMEÇAM JUNTOS ----
 
-      if (!pipeServe(modelId)) {
+         Antes: extrair o áudio, e SÓ ENTÃO montar o modelo. Os dois são longos
+         — a extração de uma hora de vídeo leva dezenas de segundos, e a
+         montagem do modelo leva de segundos (em cache) a um minuto (baixando)
+         — e nenhum dos dois precisa do outro. Um é o decodificador de áudio do
+         navegador; o outro é rede e compilação de WebAssembly. Somá-los era
+         cobrar duas esperas por uma.
+
+         É a mesma conta que já valia para a varredura de quadros, logo acima:
+         trabalhos que não disputam nada correm juntos, e o custo é o maior dos
+         dois, não a soma.
+
+         O aviso na tela é o da MONTAGEM quando ela existe, e não o da extração:
+         entre "extraindo o áudio" e "baixando 77 MB", quem espera precisa ver o
+         que explica a espera. */
+      let montagem = null;
+      if (!pipeServe(modelId) || adiantando) {
         /* O ponto em que a tela ficava em 0% por quase um minuto. */
         esperando(await modeloEmCache(modelId) ? t('modelCache') : t('modelLoad'));
-        prog('?'); await trocarPipe(modelId);
+        prog('?');
+        montagem = garantirPipe(modelId);
+      } else {
+        esperando(t('audioExtract')); prog('?');
       }
+      /* Os erros são colhidos abaixo, um de cada vez e na ordem certa. Sem
+         estes dois `catch` o que perder a corrida vira rejeição sem dono e o
+         navegador imprime um aviso que não é sobre nada que a pessoa fez. */
+      const audio = decodeTo16k(currentFile).then(d => ({ d }), e => ({ e }));
+      if (montagem) montagem = montagem.then(() => null, e => e);
+
+      const rAudio = await audio;
+      const eMontagem = montagem ? await montagem : null;
+      if (rAudio.e) throw new Error(t('audioFail'));
+      if (eMontagem) throw eMontagem;
+      const data = rAudio.d;
+      if (!data.length) throw new Error(t('noAudio'));
       pararEspera();
 
-      const SR = 16000, WIN = 30 * SR, total = Math.ceil(data.length / WIN), out = [];
+      const SR = 16000, WIN = 30 * SR, out = [];
       const inicio = performance.now();
       /* DOIS RELÓGIOS, e é a troca de modo que os separa. `inicio` mede o
          trabalho inteiro — é o que a mensagem do fim conta. `inicioModo` mede
@@ -10444,12 +10674,19 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
 
       /* Peneira de silêncio: o Whisper processa SEMPRE 30 segundos, com ou sem
          fala dentro. Uma janela muda custa o mesmo que uma cheia — e ainda
-         convida o modelo a inventar texto sobre nada. */
+         convida o modelo a inventar texto sobre nada.
+
+         `escolherJanelas` decide entre as janelas retas e as compactadas, e
+         devolve as duas no mesmo formato. Ver o comentário longo em
+         `planoDeJanelas`. */
       const quadros = quadrosDe(data);
       const limiar = limiarDe(nivelAlto(quadros));
-      const QJ = Math.floor(WIN / 320);
-      let pulados = 0;
+      const escolha = escolherJanelas(data, quadros, limiar, WIN);
+      const janelas = escolha.janelas, total = janelas.length;
+      const pulados = escolha.mudas;
       let ultimaChave = null;
+      try { window.__ultimoPlano = { compacta: escolha.compacta, total, retas: escolha.retas,
+                                     mudas: escolha.mudas, silencio: escolha.silencio }; } catch (e) {}
 
       for (let i = 0; i < total; i++) {
         /* A TROCA DE MODO ACONTECE AQUI, entre uma janela e a seguinte.
@@ -10468,13 +10705,9 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
           if ($('trocaOferta')) $('trocaOferta').classList.add('hide');
           if ($('trocaBtn')) $('trocaBtn').disabled = false;
         }
-        const off = i * WIN, seg = data.slice(off, Math.min(off + WIN, data.length)), base = off / SR;
-        if (!janelaTemVoz(quadros.subarray(i*QJ, (i+1)*QJ), limiar)) {
-          pulados++;
-          const pc = (i+1) / total * 100;
-          prog(pc); st(t('transcribing2', pc.toFixed(0), i+1, total, ''));
-          continue;
-        }
+        /* As janelas mudas já ficaram de fora na hora de escolher: aqui só
+           chega o que vale a viagem ao modelo. */
+        const jan = janelas[i], seg = materializar(data, jan);
         const opts = { return_timestamps: true, task: tarefaAsr() };
         if (lang) opts.language = lang;
         const r = await transcrever(seg, opts);
@@ -10482,8 +10715,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
           : [{ timestamp: [0, seg.length / SR], text: (r && r.text) || '' }];
         chunks.forEach(c => {
           const t = semGagueira((c.text || '').trim()); if (!t) return;
-          const a = base + (c.timestamp[0] ?? 0);
-          const b = base + (c.timestamp[1] ?? (c.timestamp[0] ?? 0) + 2);
+          /* Pelo mapa de volta, e não por uma soma: com o silêncio compactado,
+             `base + t` apontaria para o minuto errado da gravação. */
+          const a = tempoReal(jan, c.timestamp[0] ?? 0);
+          const b = tempoReal(jan, c.timestamp[1] ?? (c.timestamp[0] ?? 0) + 2);
           /* Mesma repetição do caminho ao vivo, mesma regra. Ver o comentário
              em `bombearAsr`. */
           const ch = chaveFala(t);
