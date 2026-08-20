@@ -117,6 +117,30 @@ await pg.waitForTimeout(700);
      quarenta caracteres. */
   ok('é uma caixa de texto, e não um campo de uma linha', e.linhas >= 3, String(e.linhas));
   ok('o botão nasce desligado: não há nada novo para salvar', e.btLigado === false);
+  /* ---- O APERTO ----
+     Ela mora dentro de um `.row` que é flex. Sem ocupar a linha inteira, ela
+     dividia a largura com os botões de gravação: a caixa encolhia, o campo
+     encolhia junto e o botão de salvar era empurrado para fora da vista pela
+     mensagem ao lado. A régua é geométrica porque a queixa era geométrica. */
+  const g = await pg.evaluate(() => {
+    const r = el => { const b = el.getBoundingClientRect();
+                      return { x:b.x, y:b.y, w:b.width, h:b.height, r:b.right, b:b.bottom }; };
+    return { cx: r(document.getElementById('anotCx')),
+             tx: r(document.getElementById('anotTxt')),
+             bt: r(document.getElementById('anotSalvar')),
+             via: r(document.getElementById('viaRec')) };
+  });
+  console.log('     caixa ' + Math.round(g.cx.w) + 'px  |  campo ' + Math.round(g.tx.w) +
+              'px  |  botão ' + Math.round(g.bt.w) + 'x' + Math.round(g.bt.h));
+  ok('a caixa ocupa a largura do cartão, e não uma fatia dele',
+     g.cx.w > g.via.w * 0.85, Math.round(g.cx.w) + ' de ' + Math.round(g.via.w));
+  ok('o campo de texto acompanha', g.tx.w > 300, String(Math.round(g.tx.w)));
+  ok('o botão tem tamanho de botão', g.bt.w > 90 && g.bt.h > 24,
+     Math.round(g.bt.w) + 'x' + Math.round(g.bt.h));
+  ok('e cabe dentro da caixa, sem transbordar',
+     g.bt.r <= g.cx.r + 1, Math.round(g.bt.r) + ' > ' + Math.round(g.cx.r));
+  /* Clicável DE VERDADE: nada por cima, e dentro da janela. */
+  ok('e o clique chega nele', await pg.locator('#anotSalvar').isVisible());
 }
 
 console.log('\n[3] o botão muda de estado, e a tela diz que guardou');
@@ -191,6 +215,49 @@ await pg.waitForTimeout(2500);
   ok('e a segunda tela', /documento gerado/.test(doc));
   ok('e a terceira', /confirma/.test(doc));
 }
+console.log('\n[6] a janelinha não corta os botões');
+{
+  /* A caixa entrou na janelinha também, e ela tem 250px de largura e altura
+     fixa. Um corpo mais alto do que a janela, centrado, era cortado nas DUAS
+     pontas — e a de baixo é onde ficam PAUSAR e PARAR. */
+  await pg.locator('#rec').click().catch(() => {});
+  await pg.waitForSelector('#recStop:visible', { timeout: 40000 });
+  await pg.waitForTimeout(2500);
+  const jn = ctx.pages().find(x => x !== pg);
+  if (!jn) { ok('a janelinha abriu', false, 'sem janelinha neste navegador'); }
+  else {
+    await jn.locator('#marcar').click();
+    await jn.waitForTimeout(500);
+    const m = await jn.evaluate(() => {
+      /* A janelinha real tem 392px de altura; o navegador de teste entrega a
+         página com a altura do contexto, e nessa altura tudo cabe — a régua
+         mediria sempre verde. Então a altura de verdade é IMPOSTA aqui, e o
+         que se mede é a geometria que a pessoa vê. */
+      const ALT = 392;
+      document.body.style.height = ALT + 'px';
+      document.body.getBoundingClientRect();
+      const alt = ALT;
+      const fim = el => el ? el.getBoundingClientRect().bottom : 0;
+      return { alt, corpo: document.body.scrollHeight,
+               parar: fim(document.getElementById('stop')),
+               pausa: fim(document.getElementById('pausa')),
+               nota: !!document.getElementById('nota'),
+               notaOn: !document.getElementById('nota').disabled };
+    });
+    console.log('     janela ' + m.alt + 'px  |  conteúdo ' + m.corpo +
+                'px  |  PARAR termina em ' + Math.round(m.parar));
+    ok('a caixa de anotação está na janelinha', m.nota);
+    ok('e liga quando há passo marcado', m.notaOn);
+    ok('o conteúdo cabe na janela', m.corpo <= m.alt + 1, m.corpo + ' > ' + m.alt);
+    ok('PARAR está dentro da janela', m.parar > 0 && m.parar <= m.alt + 1,
+       Math.round(m.parar) + ' > ' + m.alt);
+    ok('PAUSAR também', m.pausa > 0 && m.pausa <= m.alt + 1,
+       Math.round(m.pausa) + ' > ' + m.alt);
+  }
+  await pg.locator('#recStop').click().catch(() => {});
+  await pg.waitForTimeout(1200);
+}
+
 ok('sem erro de página', erros.length === 0, erros[0]);
 
 await br.close(); srv.close();

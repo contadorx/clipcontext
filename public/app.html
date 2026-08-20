@@ -173,6 +173,13 @@
      que a maioria vem fazer; o de arquivo continua inteiro ao lado, e não
      escondido atrás de um "ou". */
   .caminhos{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+  /* ENQUANTO SE ANOTA, O CARTÃO DE GRAVAR OCUPA A FILEIRA INTEIRA.
+     Ele é uma coluna de ~280px entre outras, e numa coluna dessas a caixa de
+     anotação nasce com 233px de campo — dá para escrever "ok", não dá para
+     descrever o que aconteceu numa tela. Os outros caminhos continuam ali,
+     embaixo: não escondemos nada, só paramos de dividir a largura com quem
+     não está sendo usado neste instante. */
+  body.anotando .caminhos #viaRec{grid-column:1 / -1}
   /* A linha de opção fica FORA das caixas e ATRAVESSA as três: é o que a faz
      ler como "vale para qualquer caminho" em vez de "é do caminho de cima". */
   /* Grupo de ações com nome. O título é pequeno e o texto ao lado é a razão
@@ -190,8 +197,19 @@
      pedindo "descreva o passo" antes de existir passo nenhum é uma pergunta
      sem objeto. A borda do acento é o que a separa do resto do cartão — ela
      está viva, e o resto do cartão está esperando. */
-  .anotViva{margin-top:12px;padding:11px 13px;border:1px solid var(--accent);
+  /* ELA MORA DENTRO DE UM `.row`, que é flex. Sem `flex-basis:100%` ela vira
+     mais um item da fileira dos botões e divide a largura com eles: a caixa
+     encolhia para uns 200px, o `textarea{width:100%}` obedecia àquela largura
+     e o botão de salvar era espremido para fora da vista pela mensagem ao
+     lado. Ocupar a linha inteira é o que separa "existe no código" de
+     "dá para usar". */
+  .anotViva{flex:1 0 100%;width:100%;box-sizing:border-box;
+      margin-top:12px;padding:11px 13px;border:1px solid var(--accent);
       border-radius:10px;background:color-mix(in srgb,var(--accent) 4%,var(--panel))}
+  /* O botão nunca encolhe; a mensagem é que quebra de linha. O contrário —
+     mensagem inteira e botão espremido — foi o que aconteceu. */
+  .anotViva .row > button{flex:none}
+  #anotMsg{flex:1 1 260px;min-width:0;line-height:1.4}
   .anotLbl{display:block;font-size:12.5px;font-weight:700;color:var(--accent);
       margin:0 0 6px}
   /* Três linhas e não uma: descrever o que aconteceu numa tela não cabe em
@@ -7919,6 +7937,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     const cx = $('anotCx'); if (!cx) return;
     const vivo = !!anotAlvo;
     cx.classList.toggle('hide', !vivo);
+    /* O cartão de gravar deixa de ser uma coluna estreita enquanto há o que
+       escrever. Fica no corpo, e não no cartão, porque o `grid-column` é lido
+       pela GRADE — mudá-lo no filho exige um seletor que venha de fora. */
+    document.body.classList.toggle('anotando', vivo);
     if (!vivo) return;
     $('anotLbl').textContent = anotRotulo(anotAlvo);
     const bt = $('anotSalvar');
@@ -8024,7 +8046,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      depois, e não tem como se atualizar sozinho. Sem carimbo, "estou com um
      problema no offline" é uma conversa sem chão — ninguém sabe de qual build
      se fala nem se o defeito já foi consertado. */
-  const VERSAO = '2026.08.20-36';
+  const VERSAO = '2026.08.20-38';
   window.__versao = () => VERSAO;
 
   const PIP_CSS = `
@@ -8046,7 +8068,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
        botão, e nada que não seja usado durante a gravação. */
     body{font:13px/1.35 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
          background:#121419;color:#e9ebf1;padding:11px;display:flex;
-         flex-direction:column;gap:6px;justify-content:center;height:100vh}
+         flex-direction:column;gap:6px;justify-content:safe center;height:100vh;
+         overflow-y:auto}
     .top{display:flex;align-items:center;gap:8px}
     .dot{width:10px;height:10px;border-radius:50%;background:#ef8484;flex:none;
          animation:pulsa 1.4s ease-in-out infinite}
@@ -8163,9 +8186,14 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   async function abrirControle(){
     if (!('documentPictureInPicture' in window)) return;
     try {
-      /* Mais 34px de altura: o botão da segunda tela entrou, e uma janelinha
-         que corta o próprio botão é pior do que não ter o botão. */
-      pipWin = await documentPictureInPicture.requestWindow({ width: 250, height: 300 });
+      /* A altura acompanha o que entrou. O botão da segunda tela custou 34px;
+         a caixa de anotação (rótulo, campo de duas linhas, botão e
+         confirmação) custou uns 90. Sem esse acerto, o `justify-content:center`
+         do corpo centrava um conteúdo maior do que a janela e cortava as duas
+         pontas — e a ponta de baixo é onde ficam PAUSAR e PARAR. Daí também o
+         `safe` no alinhamento e o `overflow-y` no corpo: se um idioma mais
+         comprido estourar de novo, a janelinha rola em vez de esconder. */
+      pipWin = await documentPictureInPicture.requestWindow({ width: 250, height: 392 });
     } catch (e) { pipWin = null; return; }
 
     const d = pipWin.document;
