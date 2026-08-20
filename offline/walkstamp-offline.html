@@ -3245,7 +3245,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       pipTit:'Walkstamp — gravando',
       pipBaixando:'baixando o modelo · {0}%', pipErro:'O modelo de voz não carregou. Nada foi gravado — veja a aba do Walkstamp.', pipPrep:'preparando…', pipMic:'liberando o microfone', pipModelo:'baixando o modelo',
       pipTela:'escolha a tela', pipStop:'Parar', pipFrames:'{0} frames',
-      pipMarcado:'✓ tela marcada ({0})', pipMarcados:'{0} marcadas',
+      pipMarcado:'✓ tela marcada ({0})', pipMarcados:'{0} marcadas', pipRotN:'Passo {0} de {1}', pipRotProx:'A seguir: {0}', pipRotFim:'Roteiro concluído', pipRotFimP:'Os próximos passos saem sem título do roteiro.',
       pipNoVideo:'nenhum vídeo é guardado',
       lockHint:'Escolha um vídeo no passo 1 para continuar.',
       lockPrevTr:'A transcrição está aqui embaixo, em Transcrição — dá para corrigir e exportar.',
@@ -3830,7 +3830,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       pipTit:'Walkstamp — recording',
       pipBaixando:'downloading the model · {0}%', pipErro:'The speech model did not load. Nothing was recorded — check the Walkstamp tab.', pipPrep:'getting ready…', pipMic:'allowing the microphone', pipModelo:'downloading the model',
       pipTela:'pick the screen', pipStop:'Stop', pipFrames:'{0} frames',
-      pipMarcado:'✓ screen marked ({0})', pipMarcados:'{0} marked',
+      pipMarcado:'✓ screen marked ({0})', pipMarcados:'{0} marked', pipRotN:'Step {0} of {1}', pipRotProx:'Next: {0}', pipRotFim:'Script finished', pipRotFimP:'Further steps go out without a script title.',
       pipNoVideo:'no video is kept',
       lockHint:'Choose a video in step 1 to continue.',
       lockPrevTr:'The transcript is below, under Transcript — you can fix it and export it.',
@@ -4409,7 +4409,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       pipTit:'Walkstamp — grabando',
       pipBaixando:'descargando el modelo · {0}%', pipErro:'El modelo de voz no cargó. No se grabó nada — mira la pestaña de Walkstamp.', pipPrep:'preparando…', pipMic:'permitiendo el micrófono', pipModelo:'descargando el modelo',
       pipTela:'elige la pantalla', pipStop:'Detener', pipFrames:'{0} fotogramas',
-      pipMarcado:'✓ pantalla marcada ({0})', pipMarcados:'{0} marcadas',
+      pipMarcado:'✓ pantalla marcada ({0})', pipMarcados:'{0} marcadas', pipRotN:'Paso {0} de {1}', pipRotProx:'A continuación: {0}', pipRotFim:'Guion terminado', pipRotFimP:'Los próximos pasos salen sin título del guion.',
       pipNoVideo:'no se guarda ningún vídeo',
       lockHint:'Elige un vídeo en el paso 1 para continuar.',
       lockPrevTr:'La transcripción está aquí abajo, en Transcripción — puedes corregirla y exportarla.',
@@ -4987,7 +4987,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       pipTit:'Walkstamp — Aufnahme läuft',
       pipBaixando:'Modell wird geladen · {0}%', pipErro:'Das Sprachmodell wurde nicht geladen. Es wurde nichts aufgenommen — siehe den Walkstamp-Tab.', pipPrep:'wird vorbereitet…', pipMic:'Mikrofon wird freigegeben', pipModelo:'Modell wird heruntergeladen',
       pipTela:'Bildschirm auswählen', pipStop:'Stopp', pipFrames:'{0} Screenshots',
-      pipMarcado:'✓ Bildschirm markiert ({0})', pipMarcados:'{0} markiert',
+      pipMarcado:'✓ Bildschirm markiert ({0})', pipMarcados:'{0} markiert', pipRotN:'Schritt {0} von {1}', pipRotProx:'Als Nächstes: {0}', pipRotFim:'Ablauf beendet', pipRotFimP:'Weitere Schritte erscheinen ohne Titel aus dem Ablauf.',
       pipNoVideo:'es wird kein Video gespeichert',
       lockHint:'Wählen Sie in Schritt 1 ein Video aus, um fortzufahren.',
       lockPrevTr:'Die Transkription steht hier unten im Bereich Transkription — dort können Sie sie korrigieren und exportieren.',
@@ -5571,7 +5571,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       pipTit:'Walkstamp — enregistrement en cours',
       pipBaixando:'téléchargement du modèle · {0}%', pipErro:'Le modèle vocal n’a pas chargé. Rien n’a été enregistré — voyez l’onglet Walkstamp.', pipPrep:'préparation…', pipMic:'autorisation du microphone', pipModelo:'téléchargement du modèle',
       pipTela:'choisissez l’écran', pipStop:'Arrêter', pipFrames:'{0} captures',
-      pipMarcado:'✓ écran marqué ({0})', pipMarcados:'{0} marquées',
+      pipMarcado:'✓ écran marqué ({0})', pipMarcados:'{0} marquées', pipRotN:'Étape {0} sur {1}', pipRotProx:'Ensuite : {0}', pipRotFim:'Script terminé', pipRotFimP:'Les étapes suivantes sortent sans titre du script.',
       pipNoVideo:'aucune vidéo n’est conservée',
       lockHint:'Choisissez une vidéo à l’étape 1 pour continuer.',
       lockPrevTr:'La transcription est juste en dessous, dans Transcription — vous pouvez la corriger et l’exporter.',
@@ -8468,7 +8468,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
      depois, e não tem como se atualizar sozinho. Sem carimbo, "estou com um
      problema no offline" é uma conversa sem chão — ninguém sabe de qual build
      se fala nem se o defeito já foi consertado. */
-  const VERSAO = '2026.08.20-39';
+  const VERSAO = '2026.08.20-41';
   window.__versao = () => VERSAO;
 
   const PIP_CSS = `
@@ -8492,6 +8492,41 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
          background:#121419;color:#e9ebf1;padding:11px;display:flex;
          flex-direction:column;gap:6px;justify-content:safe center;height:100vh;
          overflow-y:auto}
+    /* ---- O ROTEIRO, EM CIMA DE TUDO ----
+       Quem colou a lista de passos está seguindo uma lista, e a janelinha é a
+       unica coisa nossa que fica na frente durante a gravacao. Sem esta linha,
+       a lista existia no cartao -- atras da tela compartilhada, quer dizer, em
+       lugar nenhum -- e a pessoa alternava de janela para lembrar o proximo
+       passo, que e exatamente o gesto que estraga a captura.
+
+       Maior que o resto do corpo de proposito: e a informacao que se le de
+       relance, sem parar o que se esta fazendo. E fica em cima porque e o que
+       se consulta ANTES de agir; o relogio e o medidor sao conferencia. */
+    .rot{border-bottom:1px solid #282c36;padding:0 0 6px;margin:0 0 1px}
+    .rotN{display:block;font:700 11px/1.2 system-ui,sans-serif;color:#737cf0;
+          letter-spacing:.3px;text-transform:uppercase}
+    .rotT{display:block;font:600 14.5px/1.28 system-ui,-apple-system,sans-serif;
+          color:#f2f4f9;margin-top:2px;
+          /* Tres linhas e reticencias: um passo de roteiro pode ter uma frase
+             inteira, e deixa-la crescer sem limite empurraria PARAR para fora
+             da janela -- que foi o defeito que esta rodada acabou de consertar
+             no vizinho de baixo. */
+          display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;
+          overflow:hidden}
+    /* O QUE VEM DEPOIS, menor.
+       Saber so o passo atual obriga a pessoa a descobrir o proximo no momento
+       em que ela acabou de marcar -- e e nesse instante que ela esta mudando
+       de tela, quer dizer, no pior momento para ler. Vendo o seguinte antes,
+       ela ja sabe para onde ir. Menor e apagado de proposito: e informacao de
+       apoio, e disputar tamanho com o passo atual faria a pessoa hesitar entre
+       os dois. */
+    .rotP{display:block;font:500 11.5px/1.25 system-ui,sans-serif;color:#8a93a3;
+          margin-top:3px;
+          display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
+          overflow:hidden}
+    /* Acabou a lista. Nao some: sumir faria a janelinha encolher no meio da
+       gravacao e a pessoa se perguntar o que ela perdeu. */
+    .rot.fim .rotT{color:#949bab;font-weight:500;font-size:12.5px}
     .top{display:flex;align-items:center;gap:8px}
     .dot{width:10px;height:10px;border-radius:50%;background:#ef8484;flex:none;
          animation:pulsa 1.4s ease-in-out infinite}
@@ -8615,13 +8650,22 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
          pontas — e a ponta de baixo é onde ficam PAUSAR e PARAR. Daí também o
          `safe` no alinhamento e o `overflow-y` no corpo: se um idioma mais
          comprido estourar de novo, a janelinha rola em vez de esconder. */
-      pipWin = await documentPictureInPicture.requestWindow({ width: 250, height: 392 });
+      /* Com roteiro a janela e mais alta: a linha do passo custa tres linhas
+         de texto mais a divisoria. Pedir sempre a maior desperdicaria tela de
+         quem nao colou lista nenhuma -- e cada pixel daqui e um pixel a menos
+         do trabalho que a pessoa esta documentando. */
+      pipWin = await documentPictureInPicture.requestWindow(
+        { width: 250, height: roteiro.length ? 486 : 392 });
     } catch (e) { pipWin = null; return; }
 
     const d = pipWin.document;
     d.title = t('pipTit');
     const st = d.createElement('style'); st.textContent = PIP_CSS; d.head.appendChild(st);
     d.body.innerHTML =
+      /* PRIMEIRO de tudo: e o que se le antes de agir. */
+      '<div class="rot hide" id="rot"><span class="rotN" id="rotN"></span>' +
+        '<span class="rotT" id="rotT"></span>' +
+        '<span class="rotP hide" id="rotP"></span></div>' +
       '<div class="top"><span class="dot"></span><span class="rel" id="rel">0:00</span></div>' +
       '<div class="txt" id="txt"></div>' +
       '<div class="vus"><div class="vb"><i id="vm"></i></div><div class="vb"><i id="vs"></i></div></div>' +
@@ -8689,6 +8733,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
          comentário, ela abre mostrando o texto dele. */
       anotApontar(anotAlvo);
     }
+    pintarRotPip();
     pipPausa.onclick  = () => { if (alternarPausa) alternarPausa(); };
     /* O botão da janelinha não duplica lógica: chama o mesmo `alternarMic` da
        aba, e o rótulo dos dois é repintado pela mesma função. */
@@ -8716,6 +8761,10 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
 
   function controle(etapa, dados){
     if (!pipWin) return;
+    /* Aqui em cima, e não dentro de um ramo: `controle` volta cedo em vários
+       estados, e a linha do roteiro vale em todos eles — inclusive na
+       contagem regressiva, que é quando a pessoa está lendo o passo 1. */
+    pintarRotPip();
     /* `semModelo` nao para nada: a gravacao segue e a janelinha passa a dizer
        que a transcricao nao vem. Antes deste estado, um modelo que falhava
        levava a gravacao junto. */
@@ -8820,6 +8869,46 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     if (pipWin) pipWin.document.body.classList.remove('contando', 'gravando');
     if (pipTexto) { pipTexto.classList.remove('contando', 'ruim');
                     pipTexto.textContent = t(rotulos[etapa] || 'pipPrep'); }
+  }
+
+  /* O PASSO DO ROTEIRO NA JANELINHA.
+
+     `roteiroPos` é quantos títulos já foram entregues — então `roteiro[pos]` é
+     o próximo, o que o "marcar" vai consumir. É esse que se mostra: a pessoa
+     lê o que TEM QUE FAZER, faz, e marca. Ao marcar, `proximoTituloDoRoteiro`
+     consome a linha, `pos` anda, e no mesmo instante esta função já pinta a
+     seguinte — o avanço não é um segundo mecanismo, é a consequência.
+
+     Nenhum estado novo: se houvesse um "passo atual" guardado aqui, ele
+     poderia discordar do documento, e um teleprompter que discorda do que foi
+     gravado é pior do que teleprompter nenhum. */
+  function pintarRotPip(){
+    if (!pipWin) return;
+    const cx = pipWin.document.getElementById('rot');
+    if (!cx) return;
+    if (!roteiro.length) { cx.classList.add('hide'); return; }
+    cx.classList.remove('hide');
+    const fim = roteiroPos >= roteiro.length;
+    cx.classList.toggle('fim', fim);
+    const n = pipWin.document.getElementById('rotN');
+    const tx = pipWin.document.getElementById('rotT');
+    const rotulo = fim ? t('pipRotFim') : t('pipRotN', roteiroPos + 1, roteiro.length);
+    const texto  = fim ? t('pipRotFimP') : roteiro[roteiroPos];
+    /* Só escreve se mudou: esta função roda a cada segundo junto com o
+       relógio, e reescrever o mesmo texto sessenta vezes por minuto faria o
+       navegador redesenhar a janelinha à toa por cima da tela gravada. */
+    if (n && n.textContent !== rotulo) n.textContent = rotulo;
+    if (tx && tx.textContent !== texto) tx.textContent = texto;
+    /* E o seguinte, menor. No último passo não há seguinte, e inventar um
+       "—" ali só gastaria altura de uma janela que fica por cima do
+       trabalho da pessoa. */
+    const px = pipWin.document.getElementById('rotP');
+    if (px) {
+      const seguinte = fim ? '' : (roteiro[roteiroPos + 1] || '');
+      px.classList.toggle('hide', !seguinte);
+      const frase = seguinte ? t('pipRotProx', seguinte) : '';
+      if (px.textContent !== frase) px.textContent = frase;
+    }
   }
 
   /* Espelhos da janelinha. Copiam largura e rótulo — não há segundo medidor
