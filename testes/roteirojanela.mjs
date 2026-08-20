@@ -121,11 +121,12 @@ else {
     console.log('     ' + r.n + '  |  ' + r.txt + '   (' + r.fonte + 'px)');
     /* Ninguém clicou em "Usar": foi o começo da gravação que adotou o texto. */
     ok('o roteiro colado passou a valer ao gravar', r.visivel === true);
-    /* O primeiro quadro — capturado sozinho ao começar — já levou a linha 1.
-       O próximo a FAZER é o 2, e é ele que a janelinha mostra: dizer "Passo 1"
-       aqui seria mandar refazer o que já está gravado. */
-    ok('ela numera o passo', /Passo 2 de 3/.test(r.n), r.n);
-    ok('e mostra o texto do passo 2', r.txt === PASSOS[1], r.txt);
+    /* COMEÇA NO 1, E FICA NO 1. Ela chegou a abrir no 2, porque o quadro
+       capturado sozinho ao começar consumia a primeira linha: o número andava
+       sem ninguém ter feito nada. Um contador que anda sozinho não é um
+       roteiro, é um relógio. */
+    ok('ela começa no passo 1', /Passo 1 de 3/.test(r.n), r.n);
+    ok('e mostra o texto do passo 1', r.txt === PASSOS[0], r.txt);
     /* "a primeira informação, com uma fonte um pouco maior" */
     ok('vem ANTES do relógio', r.topo < r.topoRelogio, r.topo + ' vs ' + r.topoRelogio);
     ok('e é maior que o corpo da janelinha', r.fonte > r.fonteCorpo,
@@ -133,7 +134,7 @@ else {
     /* O SEGUINTE, MENOR. Descobrir o próximo passo no instante em que se
        acabou de marcar é ler no pior momento: a pessoa está mudando de tela. */
     console.log('     ' + r.prox + '   (' + r.fonteProx + 'px)');
-    ok('mostra também o passo seguinte', r.prox.includes(PASSOS[2]), r.prox);
+    ok('mostra também o passo seguinte', r.prox.includes(PASSOS[1]), r.prox);
     ok('e ele é MENOR que o passo atual', r.fonteProx < r.fonte,
        r.fonteProx + 'px vs ' + r.fonte + 'px');
   }
@@ -144,15 +145,24 @@ else {
   {
     const r = await rot();
     console.log('     ' + r.n + '  |  ' + r.txt);
-    ok('agora é o passo 3', /Passo 3 de 3/.test(r.n), r.n);
-    ok('com o texto do passo 3', r.txt === PASSOS[2], r.txt);
-    /* Os títulos entregues, em ordem, do primeiro quadro em diante. */
+    ok('agora é o passo 2', /Passo 2 de 3/.test(r.n), r.n);
+    ok('com o texto do passo 2', r.txt === PASSOS[1], r.txt);
+    /* A primeira marcação COMPLETA o passo 1 em vez de abrir o 2: a tela antes
+       da ação e a tela depois dela são as duas telas do mesmo passo. Por isso
+       o título foi para o PRIMEIRO quadro, e não para o que acabou de entrar. */
     const notas = await pg.evaluate(() => window.__quadros().map(f => f.nota || '').filter(Boolean));
-    ok('os passos ficaram com os títulos do roteiro, em ordem',
-       notas[0] === PASSOS[0] && notas[1] === PASSOS[1], JSON.stringify(notas));
+    ok('a linha 1 foi para o primeiro quadro', notas[0] === PASSOS[0], JSON.stringify(notas));
+    ok('e só ela: uma marcação, uma linha', notas.length === 1, JSON.stringify(notas));
+    console.log('     seguinte: ' + JSON.stringify(r.prox));
+    ok('e o "a seguir" andou junto', r.prox.includes(PASSOS[2]), r.prox);
+  }
+  await jn.locator('#marcar').click(); await jn.waitForTimeout(700);
+  {
+    const r = await rot();
+    console.log('     ' + r.n + '  |  ' + r.txt);
+    ok('depois da segunda marcação, o passo 3', /Passo 3 de 3/.test(r.n), r.n);
     /* No último passo não há seguinte: inventar um travessão ali só gastaria
        altura de uma janela que fica por cima do trabalho da pessoa. */
-    console.log('     seguinte: ' + JSON.stringify(r.prox));
     ok('no último passo, o "a seguir" some', r.prox === '', r.prox);
   }
   await jn.locator('#marcar').click(); await jn.waitForTimeout(700);

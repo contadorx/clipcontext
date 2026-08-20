@@ -14,10 +14,12 @@
   :root{
     --bg:#f7f8fa; --panel:#ffffff; --ink:#15171c; --muted:#5c6473;
     --line:#e0e3ea; --accent:#3a3f9e; --accent-ink:#ffffff; --warn:#8a6a12; --err:#b32a3a;
+    --ok:#1e7a35;
   }
   @media (prefers-color-scheme:dark){
     :root{--bg:#121419;--panel:#1a1d24;--ink:#e9ebf1;--muted:#949bab;
-          --line:#282c36;--accent:#737cf0;--accent-ink:#121419;--warn:#d8bd63;--err:#ef8484}
+          --line:#282c36;--accent:#737cf0;--accent-ink:#121419;--warn:#d8bd63;--err:#ef8484;
+          --ok:#68c47d}
   }
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--ink);
@@ -198,6 +200,27 @@
      e o botão de salvar era espremido para fora da vista pela mensagem ao
      lado. Ocupar a linha inteira é o que separa "existe no código" de
      "dá para usar". */
+  /* ---- O PAINEL DE CONCLUSÃO ----
+     Verde, e o único verde grande desta página: aqui não há o que decidir, há
+     o que constatar. O acento normal diria "isto está vivo, mexa"; o que se
+     quer dizer é "acabou". */
+  .fimCx{margin:26px 0 0;padding:20px 22px;border-radius:12px;
+      border:1px solid var(--ok);
+      background:color-mix(in srgb, var(--ok) 6%, var(--panel))}
+  .fimTit{margin:0 0 6px;font-size:19px;font-weight:700;color:var(--ok)}
+  .fimArq{margin:0 0 4px;font:600 15px/1.45 ui-monospace,Menlo,Consolas,monospace;
+      word-break:break-all}
+  .fimResumo{margin:0 0 12px;font-size:14px;color:var(--muted)}
+  .fimLista{margin:0;padding:0;list-style:none;font-size:14px;line-height:1.7}
+  .fimLista li{padding-left:22px;position:relative}
+  .fimLista li::before{position:absolute;left:2px;font-weight:700}
+  .fimLista li.sim::before{content:"✓";color:var(--ok)}
+  /* Pendente NÃO é erro: é um aviso de que existe um gesto a mais disponível.
+     Vermelho aqui faria a pessoa achar que perdeu alguma coisa. */
+  .fimLista li.nao::before{content:"•";color:var(--muted)}
+  .fimLista li.nao{color:var(--muted)}
+  .fimDepois{margin:16px 0 8px;font-size:12.5px;font-weight:700;
+      letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
   .anotViva{flex:1 0 100%;width:100%;box-sizing:border-box;
       margin-top:12px;padding:11px 13px;border:1px solid var(--accent);
       border-radius:10px;background:color-mix(in srgb,var(--accent) 4%,var(--panel))}
@@ -2552,7 +2575,17 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   </div>
 
   <div class="card" id="promptCard">
-    <h2><span class="step">4</span><span data-i18n="s5"></span></h2>
+    <!-- ---- O PROMPT NÃO É UM PASSO ----
+
+         Ele era o "passo 4 de 4" — a numeração dizia que entregar o vídeo a uma
+         IA é um quarto da tarefa, e para a maioria não é tarefa nenhuma. Quem
+         vem gravar uma tela e baixar um documento terminava o trabalho olhando
+         para um passo por fazer.
+
+         O cartão continua inteiro e no mesmo lugar: o que sai é o número. Ele
+         passa a ser oferecido no fim, junto dos outros próximos passos, para
+         quem de fato vai usar. -->
+    <h2><span data-i18n="s5"></span></h2>
     <p class="lockHint hide" id="hintPrompt"></p>
     <div class="dobra"><div>
     <p class="status" style="margin:0 0 14px" data-i18n="s5sub"></p>
@@ -2610,6 +2643,31 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
        o fim da tarefa, e ninguém rola por cima de dezesseis links institucionais
        procurando o botão de recomeçar. Ele é o passo seguinte do trabalho, e o
        lugar dele é onde o trabalho acaba. -->
+  <!-- ---- O FIM DO TRABALHO, DITO POR ESCRITO ----
+
+       O download acontecia e a tela ficava igual: os mesmos botões, o mesmo
+       cartão, como se nada tivesse ocorrido. Quem terminou não tinha como saber
+       que terminou — e, pior, não tinha como saber o que AINDA não estava
+       guardado. Documento baixado e projeto guardado são duas coisas
+       diferentes, e a única que a pessoa via era nenhuma das duas.
+
+       Ele nasce escondido e só existe depois que um documento sai. -->
+  <div class="fimCx hide" id="fimCx">
+    <h3 class="fimTit" id="fimTit"></h3>
+    <p class="fimArq" id="fimArq"></p>
+    <p class="fimResumo" id="fimResumo"></p>
+    <!-- O que está guardado e o que não está. Três linhas, uma vez só. -->
+    <ul class="fimLista" id="fimLista"></ul>
+    <div class="row" style="margin-top:14px">
+      <button class="sm" id="fimDeNovo"></button>
+      <button class="ghost sm" id="fimProjeto"></button>
+    </div>
+    <p class="fimDepois" id="fimDepoisTit"></p>
+    <div class="row" id="fimDepois">
+      <button class="ghost sm" id="fimPrompt"></button>
+    </div>
+  </div>
+
   <div class="entreCards hide" id="novoFluxoCx">
     <button class="sm" id="novoFluxo" data-i18n="novoFluxoBtn"></button>
     <span class="note" data-i18n="novoFluxoNota"></span>
@@ -3100,7 +3158,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       grFormato:'Formato', fmtLayout:'Layout', fmtPapel:'Papel',
       fmtConta:'O formato padrão vem da configuração de {0} — trocar aqui vale só para este documento.', htmlPeso:'O HTML vai sair com cerca de {0} MB: ele carrega as imagens dentro do próprio arquivo, em texto, e isso pesa um terço a mais que o PDF. Acima de 10 MB a maioria dos e-mails recusa o anexo — se for mandar por e-mail, use o .zip, que leva as imagens ao lado.',
       grDoc:'O documento', grEntregar:'Entregar em outro sistema', grDados:'Dados e recuperação',
-      jsonBtn:'Guardar para recuperar depois (.json)',
+      jsonBtn:'Guardar para recuperar depois (.json)', fimTit:'✓ Documento pronto', fimResumo:'{0} telas', fimFalaOk:'{0} trechos de fala', fimFalaNao:'sem fala', fimFalaIndo:'fala ainda sendo transcrita', fimDoc:'Documento baixado.', fimProjSim:'Projeto guardado — dá para reabrir e corrigir depois.', fimProjNao:'Projeto ainda não guardado. Fechar esta aba encerra a possibilidade de reabrir.', fimVideo:'O vídeo nunca saiu deste computador.', fimDeNovo:'Baixar de novo', fimProjBtn:'Guardar projeto para editar depois', fimProjDeNovo:'Guardar projeto de novo', fimDepoisTit:'Próximos passos', fimPromptBtn:'Preparar instrução para uma IA',
       quietN:'{0} frame(s) sem fala foram descartados.',
       quiet0:'Todos os frames têm fala no trecho correspondente.',
       quietAudio:'Analisando o áudio para achar os trechos sem fala…',
@@ -3685,7 +3743,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       grFormato:'Format', fmtLayout:'Layout', fmtPapel:'Paper',
       fmtConta:"The default format comes from {0}'s settings — changing it here applies to this document only.", htmlPeso:'The HTML will come out at about {0} MB: it carries the images inside the file itself, as text, and that weighs a third more than the PDF. Above 10 MB most mail servers refuse the attachment — if you are sending it by e-mail, use the .zip, which keeps the images alongside.',
       grDoc:'The document', grEntregar:'Deliver to another system', grDados:'Data and recovery',
-      jsonBtn:'Save to reopen later (.json)',
+      jsonBtn:'Save to reopen later (.json)', fimTit:'✓ Document ready', fimResumo:'{0} screens', fimFalaOk:'{0} speech segments', fimFalaNao:'no speech', fimFalaIndo:'speech still being transcribed', fimDoc:'Document downloaded.', fimProjSim:'Project saved — you can reopen and fix it later.', fimProjNao:'Project not saved yet. Closing this tab ends the chance to reopen it.', fimVideo:'The video never left this computer.', fimDeNovo:'Download again', fimProjBtn:'Save project to edit later', fimProjDeNovo:'Save project again', fimDepoisTit:'Next steps', fimPromptBtn:'Prepare a prompt for an AI',
       quietN:'{0} frame(s) with no speech were discarded.',
       quiet0:'Every frame has speech in its interval.',
       quietAudio:'Analysing the audio to find the silent stretches…',
@@ -4264,7 +4322,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       grFormato:'Formato', fmtLayout:'Diseño', fmtPapel:'Papel',
       fmtConta:'El formato predeterminado viene de la configuración de {0} — cambiarlo aquí vale solo para este documento.', htmlPeso:'El HTML saldrá con unos {0} MB: lleva las imágenes dentro del propio archivo, como texto, y eso pesa un tercio más que el PDF. Por encima de 10 MB la mayoría de los correos rechaza el adjunto — si lo vas a enviar por correo, usa el .zip, que lleva las imágenes al lado.',
       grDoc:'El documento', grEntregar:'Entregar a otro sistema', grDados:'Datos y recuperación',
-      jsonBtn:'Guardar para recuperar después (.json)',
+      jsonBtn:'Guardar para recuperar después (.json)', fimTit:'✓ Documento listo', fimResumo:'{0} pantallas', fimFalaOk:'{0} fragmentos de voz', fimFalaNao:'sin voz', fimFalaIndo:'la voz aún se está transcribiendo', fimDoc:'Documento descargado.', fimProjSim:'Proyecto guardado — puedes reabrirlo y corregirlo después.', fimProjNao:'Proyecto aún sin guardar. Cerrar esta pestaña termina la posibilidad de reabrirlo.', fimVideo:'El vídeo nunca salió de este ordenador.', fimDeNovo:'Descargar de nuevo', fimProjBtn:'Guardar proyecto para editar después', fimProjDeNovo:'Guardar proyecto otra vez', fimDepoisTit:'Próximos pasos', fimPromptBtn:'Preparar una instrucción para una IA',
       quietN:'{0} fotograma(s) sin habla fueron descartados.',
       quiet0:'Todos los fotogramas tienen habla en su tramo.',
       quietAudio:'Analizando el audio para encontrar los tramos en silencio…',
@@ -4842,7 +4900,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       grFormato:'Format', fmtLayout:'Layout', fmtPapel:'Papierformat',
       fmtConta:'Das Standardformat stammt aus den Einstellungen von {0} — eine Änderung hier gilt nur für dieses Dokument.', htmlPeso:'Die HTML-Datei wird etwa {0} MB groß: Sie trägt die Bilder als Text in der Datei selbst, und das wiegt ein Drittel mehr als das PDF. Über 10 MB lehnen die meisten Mailserver den Anhang ab — wenn Sie sie per E-Mail versenden, nehmen Sie die .zip, die die Bilder daneben legt.',
       grDoc:'Das Dokument', grEntregar:'In ein anderes System übergeben', grDados:'Daten und Wiederherstellung',
-      jsonBtn:'Zum späteren Öffnen speichern (.json)',
+      jsonBtn:'Zum späteren Öffnen speichern (.json)', fimTit:'✓ Dokument fertig', fimResumo:'{0} Bildschirme', fimFalaOk:'{0} Sprachabschnitte', fimFalaNao:'ohne Sprache', fimFalaIndo:'Sprache wird noch transkribiert', fimDoc:'Dokument heruntergeladen.', fimProjSim:'Projekt gesichert — Sie können es später erneut öffnen und korrigieren.', fimProjNao:'Projekt noch nicht gesichert. Wird dieser Tab geschlossen, lässt es sich nicht mehr öffnen.', fimVideo:'Das Video hat diesen Rechner nie verlassen.', fimDeNovo:'Erneut herunterladen', fimProjBtn:'Projekt zum späteren Bearbeiten sichern', fimProjDeNovo:'Projekt erneut sichern', fimDepoisTit:'Nächste Schritte', fimPromptBtn:'Anweisung für eine KI vorbereiten',
       quietN:'{0} Screenshot(s) ohne Sprache wurden verworfen.',
       quiet0:'Alle Screenshots haben Sprache im zugehörigen Abschnitt.',
       quietAudio:'Der Ton wird analysiert, um die Abschnitte ohne Sprache zu finden…',
@@ -5426,7 +5484,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       grFormato:'Format', fmtLayout:'Mise en page', fmtPapel:'Format de papier',
       fmtConta:'Le format par défaut vient des réglages de {0} — le changer ici ne vaut que pour ce document.', htmlPeso:'Le HTML fera environ {0} Mo : il porte les images à l’intérieur du fichier lui-même, en texte, ce qui pèse un tiers de plus que le PDF. Au-delà de 10 Mo, la plupart des messageries refusent la pièce jointe — pour un envoi par courriel, utilisez le .zip, qui garde les images à côté.',
       grDoc:'Le document', grEntregar:'Livrer dans un autre système', grDados:'Données et récupération',
-      jsonBtn:'Enregistrer pour rouvrir plus tard (.json)',
+      jsonBtn:'Enregistrer pour rouvrir plus tard (.json)', fimTit:'✓ Document prêt', fimResumo:'{0} écrans', fimFalaOk:'{0} passages de parole', fimFalaNao:'sans parole', fimFalaIndo:'la parole est encore en transcription', fimDoc:'Document téléchargé.', fimProjSim:'Projet enregistré — vous pourrez le rouvrir et le corriger plus tard.', fimProjNao:'Projet pas encore enregistré. Fermer cet onglet met fin à la possibilité de le rouvrir.', fimVideo:'La vidéo n’a jamais quitté cet ordinateur.', fimDeNovo:'Télécharger à nouveau', fimProjBtn:'Enregistrer le projet pour l’éditer plus tard', fimProjDeNovo:'Enregistrer le projet à nouveau', fimDepoisTit:'Étapes suivantes', fimPromptBtn:'Préparer une instruction pour une IA',
       quietN:'{0} capture(s) sans parole ont été écartées.',
       quiet0:'Toutes les captures ont de la parole dans le segment correspondant.',
       quietAudio:'Analyse de l’audio pour repérer les passages sans parole…',
@@ -5786,7 +5844,12 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
        passa. Pendurar o convite aqui é o que evita catorze lugares para lembrar
        de chamar, e um deles esquecido. A medição pode estar desligada; o
        convite não depende dela, então ele vem antes do `return`. */
-    if (nome === 'baixou_saida') { try { convidarACompartilhar(); } catch (e) {} }
+    if (nome === 'baixou_saida') {
+      try { convidarACompartilhar(); } catch (e) {}
+      /* E o fim do trabalho, dito por escrito. Mesmo argumento do convite: é o
+         único lugar por onde toda saída passa. */
+      try { mostrarFim((extra && extra.p_formato) || ''); } catch (e) {}
+    }
     if (!MEDIR_URL || !MEDIR_KEY || naoQuerMedir()) return;
     try {
       fetch(MEDIR_URL + '/rest/v1/rpc/walkstamp_evento', {
@@ -5883,6 +5946,65 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      Aparece UMA vez por sessão. Um convite que reaparece a cada documento vira
      ruído em quem gera trinta por dia — e ruído é o que se aprende a não ver. */
   let jaConvidou = false;
+  /* ================= O FIM DO TRABALHO ==========================
+
+     Pendurado no `medir('baixou_saida')`, que é o único lugar por onde TODA
+     saída passa — o mesmo argumento que já pendurou o convite ali: catorze
+     lugares para lembrar de chamar, e um deles esquecido.
+
+     O que ele responde, e a tela não respondia: acabou? o que saiu? o que
+     ainda NÃO está guardado? */
+  function mostrarFim(formato){
+    const cx = $('fimCx'); if (!cx) return;
+    /* O projeto recuperável não é documento: ele é o que permite reabrir. Sair
+       com ele não é terminar, é salvar — e anunciar "documento pronto" aqui
+       faria a pessoa achar que já tem o que entregar. Ele muda uma LINHA do
+       checklist, e só. */
+    if (formato === 'json') projetoGuardado = true;
+    if (NAO_E_DOC.has(formato)) {
+      /* Repinta se o painel já estava na tela; não o abre se não estava. */
+      if (!cx.classList.contains('hide')) pintarFim();
+      return;
+    }
+    ultimaSaida = saidaCrua;
+    pintarFim();
+    cx.classList.remove('hide');
+  }
+
+  function pintarFim(){
+    const cx = $('fimCx'); if (!cx) return;
+    const telas = frames.filter(f => f.keep).length;
+    let trechos = 0;
+    try { trechos = parseTranscript($('tr').value).cues.length; } catch (e) {}
+    /* A fala tem TRÊS estados, e não dois. "Sem fala" quando a pessoa mandou
+       transcrever e ainda está rodando seria uma mentira sobre o próprio
+       documento que ela acabou de baixar. */
+    const indo = trabalhos.has('transcricao') || trabalhos.has('varredura');
+    const fala = indo ? t('fimFalaIndo') : trechos ? t('fimFalaOk', trechos) : t('fimFalaNao');
+
+    $('fimTit').textContent = t('fimTit');
+    $('fimArq').textContent = (ultimaSaida && ultimaSaida.nome) || '';
+    $('fimResumo').textContent = t('fimResumo', telas) + ' · ' + fala;
+
+    /* O checklist. Ele existe por causa de UMA confusão real: documento
+       baixado e projeto guardado são coisas diferentes, e quem baixou o PDF
+       acha que guardou tudo. Fechar a aba depois disso perde a possibilidade
+       de reabrir e corrigir uma tela. */
+    const linhas = [
+      { sim: true, txt: t('fimDoc') },
+      { sim: projetoGuardado, txt: projetoGuardado ? t('fimProjSim') : t('fimProjNao') },
+      { sim: true, txt: t('fimVideo') },
+    ];
+    $('fimLista').innerHTML = linhas
+      .map(l => `<li class="${l.sim ? 'sim' : 'nao'}">${esc(l.txt)}</li>`).join('');
+
+    $('fimDeNovo').textContent = t('fimDeNovo');
+    $('fimDeNovo').disabled = !ultimaSaida;
+    $('fimProjeto').textContent = projetoGuardado ? t('fimProjDeNovo') : t('fimProjBtn');
+    $('fimDepoisTit').textContent = t('fimDepoisTit');
+    $('fimPrompt').textContent = t('fimPromptBtn');
+  }
+
   function convidarACompartilhar(){
     if (jaConvidou) return;
     const cx = $('compCx'); if (!cx) return;
@@ -6560,6 +6682,29 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      PERGUNTA antes, e o de cima não precisa: lá em cima não há nada feito para
      perder; aqui há um documento inteiro. Um botão que apaga trinta telas
      conferidas sem perguntar é o botão que ninguém clica duas vezes. */
+  /* ---- os botões do fim ---- */
+  if ($('fimDeNovo')) $('fimDeNovo').onclick = () => {
+    /* SEM REPROCESSAR. O blob que saiu está guardado; montar um PDF de quarenta
+       telas de novo levaria quase um minuto, e quem clicou no lugar errado da
+       caixa de download do navegador não deveria pagar esse minuto. E não
+       passa pelo `medir`: o segundo clique não é um segundo documento
+       produzido, e contá-lo estragaria o número que decide o roadmap. */
+    if (ultimaSaida) entregar(ultimaSaida.blob, ultimaSaida.nome);
+  };
+  if ($('fimProjeto')) $('fimProjeto').onclick = () => {
+    /* O MESMO botão do passo 3, e não uma segunda porta: o `.json` recuperável
+       tem um dono só. Duas funções gerando o mesmo arquivo é como dois formatos
+       divergirem sem ninguém notar. */
+    const b = $('json'); if (b) b.click();
+  };
+  if ($('fimPrompt')) $('fimPrompt').onclick = () => {
+    const cx = $('promptBox');
+    const cartao = $('goal') && $('goal').closest('.card');
+    if (cartao) cartao.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (cx) cx.open = true;
+    if ($('goal')) setTimeout(() => $('goal').focus(), 300);
+  };
+
   if ($('novoFluxo')) $('novoFluxo').onclick = () => {
     if (frames.filter(f => f.keep).length && !confirm(t('novoFluxoConf'))) return;
     medir('novo_fluxo', {});
@@ -10019,8 +10164,29 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
        passos aperta "marcar" e o título já vem escrito. */
     marcarAgora = () => {
       if (!liveOn) return;
-      if (capturar(true, true)) {
-        proximoTituloDoRoteiro(frames[frames.length - 1]);
+      /* ---- O PRIMEIRO "MARCAR" COMPLETA O PASSO 1, NÃO ABRE O 2 ----
+
+         Com roteiro, a pessoa lê "Passo 1", faz a ação e marca. Se essa
+         marcação abrisse um passo novo, o documento sairia com um passo a mais
+         que o roteiro — o quadro automático do começo virava um "Passo 1" sem
+         nome, e a linha 1 do roteiro caía no "Passo 2". Duas contagens para a
+         mesma coisa, e quem confere evidência confere pelo número.
+
+         Então a primeira marcação se JUNTA ao quadro que já estava lá: a tela
+         antes da ação e a tela depois dela são as duas telas do passo 1 — o
+         que, num documento de evidência, é melhor do que uma só.
+
+         Vale uma vez, e só com roteiro: sem lista de passos não há contagem
+         para alinhar, e mudar o comportamento de quem não pediu nada seria
+         resolver um problema criando outro. */
+      const absorve = !!roteiro.length && roteiroPos === 0 &&
+                      frames.some(f => f.keep) && !frames.some(f => f.manual);
+      if (capturar(true, true, absorve)) {
+        /* O título é do PASSO, e mora no primeiro quadro dele — que, quando
+           houve absorção, não é o quadro que acabou de ser capturado. */
+        const novo = frames[frames.length - 1];
+        const dono = listaDePassos().find(p => p.quadros.includes(novo));
+        proximoTituloDoRoteiro(dono ? dono.quadros[0] : novo);
         clipeMarcar(frames[frames.length - 1], agora);
         avisoCurto = t('recMarcado');
         avisoAte = performance.now() + 2600;
@@ -10093,20 +10259,18 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     (async () => {
       for (let i = 0; i < 20 && liveOn && !frames.length; i++) {
         if (capturar(true)) {
-          /* ---- O PRIMEIRO QUADRO TAMBÉM É UM PASSO DO ROTEIRO ----
+          /* ---- E A CAIXA DE ANOTAÇÃO JÁ APONTA PARA ELE ----
 
-             Ele abre o passo 1 do documento, e não recebia título nenhum: a
-             primeira linha do roteiro ia para o primeiro "marcar", que é o
-             passo 2. O resultado é que a janelinha dizia "Passo 1 de 3"
-             enquanto o documento chamava o MESMO passo de "Passo 2 de 4" —
-             dois números para a mesma coisa, e quem confere evidência confere
-             pelo número.
+             Este quadro é capturado sozinho, no instante em que a gravação
+             começa: é a tela ANTES da primeira ação. Ele abre o passo 1 do
+             documento e não tinha como ser descrito a não ser depois, na
+             grade.
 
-             Com esta linha, linha 1 do roteiro = passo 1 do documento, e a
-             contagem passa a ser uma só. A janelinha já abre mostrando o
-             passo 2, que é de fato o próximo a fazer: o primeiro acabou de
-             ser capturado. */
-          proximoTituloDoRoteiro(frames[0]);
+             O que ele NÃO faz é consumir linha do roteiro. Fazê-lo obrigava a
+             janelinha a abrir já no passo 2 — ela mostrava "1" e pulava para
+             "2" sem ninguém ter feito nada, e um contador que anda sozinho
+             não é um roteiro, é um relógio. Quem alinha a contagem com o
+             documento é o `absorve` do "marcar", logo abaixo. */
           anotApontar(frames[0]);
           controle('gravando', { seg: agora(), frames: frames.length });
           return;
@@ -10373,9 +10537,15 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
 
   function baixar(texto, ext){
     const nome = (fileName || 'transcricao').replace(/\.[^.]+$/, '').replace(/\s+/g, '-');
+    const alvo = `${nome}.${ext}`;
+    const blob = new Blob([texto], { type: 'text/plain;charset=utf-8' });
+    /* A outra porta por onde um arquivo sai. Ela também anota, senão "baixar
+       de novo" só funcionaria para metade dos formatos — e um botão que
+       funciona às vezes é pior do que botão nenhum. */
+    saidaCrua = { blob, nome: alvo };
     const a = document.createElement('a');
-    a.href = URL.createObjectURL(new Blob([texto], { type: 'text/plain;charset=utf-8' }));
-    a.download = `${nome}.${ext}`;
+    a.href = URL.createObjectURL(blob);
+    a.download = alvo;
     a.click();
     setTimeout(() => URL.revokeObjectURL(a.href), 4000);
     registrarSaida();
@@ -18227,6 +18397,32 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     caixa.classList.remove('hide');
   }
 
+  /* ---- O QUE SAIU, GUARDADO ----
+
+     Para poder dizer o nome no fim, e para poder BAIXAR DE NOVO sem refazer o
+     documento inteiro. Um PDF de quarenta telas leva quase um minuto para
+     montar; quem clicou no lugar errado da caixa de download do navegador não
+     deveria pagar esse minuto de novo.
+
+     Guarda um só — o último. Segurar o histórico seria segurar dezenas de
+     megabytes de blob numa aba que também tem o vídeo e os quadros. */
+  /* Duas variáveis e não uma, e a régua explicou por quê: `baixar()` e
+     `baixarBlob()` não sabem se o que está saindo é o DOCUMENTO ou outra coisa
+     — o projeto `.json`, o vocabulário, o perfil. Guardando direto, salvar o
+     projeto trocava o nome do documento no painel por `amostra.json`, e o
+     "baixar de novo" passava a entregar o projeto no lugar do PDF.
+
+     Então a porta anota em `saidaCrua`, e só o funil do `medir` — que é quem
+     sabe o formato — promove. */
+  let saidaCrua = null;        // o último arquivo que saiu, seja ele qual for
+  let ultimaSaida = null;      // o último DOCUMENTO
+  let projetoGuardado = false; // o .json recuperável já foi baixado?
+
+  /* O que NÃO é documento. Lista curta e explícita, porque errar para o lado
+     de "é documento" faz o painel anunciar conclusão para quem só guardou o
+     vocabulário. */
+  const NAO_E_DOC = new Set(['json', 'vocabulario', 'jira', 'gdocs']);
+
   function baixarBlob(blob, nome){
     /* Qualquer saída conclui o último subpasso: o passo 3 acaba quando um
        documento existe, e não quando alguém clica em "pronto". */
@@ -18235,6 +18431,15 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
        marca esse caso como feito — com o nome do arquivo e a impressão das
        telas dentro. Quem grava é a conta dela, do outro lado do link. */
     if (casoDoRoteiro) oferecerVoltaDoRoteiro(nome);
+    saidaCrua = { blob, nome };
+    entregar(blob, nome);
+  }
+
+  /* O gesto do navegador, isolado: `baixarBlob` decide e ANOTA, `entregar`
+     entrega. Sem esta separação, "baixar de novo" teria que passar de novo
+     pelo `registrarSaida` e pelo `medir` — e o segundo clique contaria como um
+     segundo documento produzido, estragando o número que decide o roadmap. */
+  function entregar(blob, nome){
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
     a.download = nome;

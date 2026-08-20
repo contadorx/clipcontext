@@ -46,8 +46,13 @@ ok('e explica quando vai servir',
    await pg.locator('#hintPrev').textContent());
 {
   const nums = await pg.locator('.card .step').allTextContents();
-  ok('os quatro passos estão numerados em sequência',
-     JSON.stringify(nums) === JSON.stringify(['1','2','3','4']), nums.join(','));
+  /* TRÊS, e não quatro. O quarto era o prompt para IA — a numeração dizia que
+     entregar o vídeo a uma máquina é um quarto da tarefa, e para a maioria não
+     é tarefa nenhuma: quem vinha gravar uma tela terminava o trabalho olhando
+     para um passo por fazer. O cartão continua na página, oferecido no fim
+     junto dos outros próximos passos; o que saiu foi o número. */
+  ok('os passos estão numerados em sequência, e são três',
+     JSON.stringify(nums) === JSON.stringify(['1','2','3']), nums.join(','));
 }
 ok('o cabeçalho e a dica continuam visíveis',
    await pg.locator('#cardTr h2').isVisible() && await pg.locator('#hintTr').isVisible());

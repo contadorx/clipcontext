@@ -18,9 +18,13 @@ let falhas = 0;
 const ok = (n, c, e) => { console.log((c ? '  ok   ' : '  FALHA') + '  ' + n + (e ? '  → ' + e : '')); if (!c) falhas++; };
 
 /* O tamanho pedido, o CSS e o corpo, tirados do próprio arquivo. */
-const med = app.match(/requestWindow\(\{ width: (\d+), height: (\d+) \}\)/);
+/* A altura passou a depender do roteiro: com lista de passos colada, a
+   janelinha ganha a linha do passo atual e a do seguinte. Então o arquivo
+   declara as DUAS, e a régua mede a menor — a que vale para quem não colou
+   roteiro nenhum, que é o caso comum e o mais apertado por quadro de tela. */
+const med = app.match(/width: (\d+), height: roteiro\.length \? (\d+) : (\d+)/);
 ok('a janelinha declara um tamanho', !!med, med ? med[0] : '(não achei)');
-const [LARG, ALT] = med ? [ +med[1], +med[2] ] : [258, 282];
+const [LARG, ALT, ALT_ROT] = med ? [ +med[1], +med[3], +med[2] ] : [250, 392, 486];
 
 const css = app.slice(app.indexOf('const PIP_CSS = `') + 17).split('`;')[0];
 ok('o CSS dela foi encontrado', css.length > 400, String(css.length));
@@ -71,13 +75,24 @@ console.log(`\n[1] gravando: cabe em ${LARG}×${ALT}`);
   const m = await medir();
   ok('o conteúdo cabe na altura pedida', m.precisa <= m.cabe + 1, `${m.precisa} de ${m.cabe}`);
   ok('e nada fica para fora', m.vaza.length === 0, m.vaza.join(' '));
-  /* O TETO. Ele subiu uma vez, de 282 para 300, e o motivo está escrito aqui
-     para que a próxima subida precise de um motivo tão bom quanto: a caixa de
-     anotação deixou de ser um campo de uma linha e passou a ter rótulo, duas
-     linhas de texto, botão e confirmação de que salvou. Os 22px vieram do
-     bloco novo — nenhum botão existente encolheu para pagá-los, que era a
-     alternativa e seria uma degradação silenciosa de tudo o mais. */
-  ok('a janela não passa do teto (250×300)', LARG <= 250 && ALT <= 300, `${LARG}×${ALT}`);
+  /* O TETO, e o histórico dele — porque a próxima subida precisa de um motivo
+     tão bom quanto os anteriores:
+
+       282 → 300  o segundo botão de marcação;
+       300 → 392  a caixa de anotação ganhou rótulo, campo de duas linhas,
+                  botão e confirmação. Com 300 o corpo tinha `height:100vh` e
+                  `justify-content:center`: o conteúdo maior era cortado nas
+                  DUAS pontas, e a de baixo é onde ficam PAUSAR e PARAR. Não
+                  era estética — era o botão irreversível fora da janela;
+       392 → 486  só quando há roteiro, para a linha do passo atual e a do
+                  seguinte. Sem roteiro a janelinha continua nos 392.
+
+     Cada pixel daqui é um pixel a menos do trabalho que a pessoa está
+     documentando, e ainda aparece nos quadros. A largura nunca subiu. */
+  ok('a largura não passa de 250', LARG <= 250, String(LARG));
+  ok('sem roteiro, a altura fica em 392', ALT <= 392, String(ALT));
+  ok('com roteiro ela sobe, e só até 486', ALT_ROT > ALT && ALT_ROT <= 486,
+     `${ALT} → ${ALT_ROT}`);
 
   /* O botão de calar nasce escondido, e `.hide` mora no CSS da ABA — a
      janelinha é outro documento. Sem a regra lá dentro ele aparecia como uma
