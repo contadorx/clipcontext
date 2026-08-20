@@ -87,7 +87,11 @@ async function medir(rota, rotulo){
 const site = await medir('/', 'PÁGINA PRINCIPAL');
 const app  = await medir('/app?lang=pt', 'FERRAMENTA');
 const conta = await medir('/conta', 'PAINEL DA CONTA');
-const todas = [['site', site], ['ferramenta', app], ['conta', conta]];
+/* O BLOG É A QUARTA CASCA, e foi a última a ser achada — o menu dele não tinha
+   o próprio blog. Faltar justo ali é o pior dos casos: quem está lendo um post
+   não tem como voltar para a lista sem o botão de voltar do navegador. */
+const blog = await medir('/blog', 'BLOG');
+const todas = [['site', site], ['ferramenta', app], ['conta', conta], ['blog', blog]];
 
 console.log('\n  o que este arquivo afirma:');
 
@@ -149,6 +153,60 @@ ok('em alemão, o endereço de preços é o alemão',
 ok('e o rótulo também mudou de idioma',
    (pt.find(l => l.rota === 'precos') || {}).texto !== (dePrecos || {}).texto,
    (pt.find(l => l.rota === 'precos') || {}).texto + ' / ' + (dePrecos || {}).texto);
+
+/* ---- O PLANO SAIU DO CABEÇALHO E FOI PARA A BARRA ----
+
+   A etiqueta do plano era a última peça que fazia o menu da ferramenta ser
+   diferente do das outras telas: um botão a mais, de largura variável (o nome
+   do cliente vai dentro). Uma moldura igual em três telas que ganha uma peça só
+   numa delas volta a ser três molduras.
+
+   Aqui a barra é desenhada com uma resposta de `/api/menu` fingida — ela só
+   existe com sessão, e o que se afirma é o DESENHO, não o login. */
+console.log('\n  o plano, na barra lateral:');
+{
+  /* Contexto próprio, com o service worker BLOQUEADO: a ferramenta registra um
+     SW, e um SW que responde `/api/menu` do cache passa por baixo do `route` do
+     teste — o teste mediria a resposta de verdade achando que mediu a sua. */
+  const ctx2 = await br.newContext({ viewport: { width: 1440, height: 900 },
+                                     serviceWorkers: 'block' });
+  const pg2 = await ctx2.newPage();
+  const erros2 = []; pg2.on('pageerror', e => erros2.push(e.message));
+  await ctx2.route('**/api/menu*', r => r.fulfill({ status:200,
+    headers:{'content-type':'application/json'},
+    body: JSON.stringify({
+      email: 'quem@empresa.com', plano: 'Plano Team', entrar: null, raiz: '/conta',
+      itens: [{ slug:'faturas', rotulo:'Faturas', href:'/conta/faturas', icone:'M4 4h16v16H4z', bloqueado:false, selo:null }],
+      ferramenta: { rotulo:'A ferramenta', href:'/app?lang=pt' } }) }));
+  await pg2.goto(BASE + '/app?lang=pt', { waitUntil:'domcontentloaded' });
+  await pg2.waitForFunction(() => !document.getElementById('barraConta').classList.contains('hide'),
+                            null, { timeout: 20000 });
+  await pg2.waitForTimeout(300);
+  const r = await pg2.evaluate(() => {
+    const bar = document.getElementById('barraConta');
+    const quem = bar.querySelector('.quem');
+    const plano = bar.querySelector('.planoLinha');
+    const dentroDoCabecalho = !!document.querySelector('header .planoLinha, header #licTag');
+    return {
+      email: quem ? quem.textContent.trim() : null,
+      plano: plano ? plano.textContent.trim() : null,
+      /* Embaixo do e-mail, e não em qualquer lugar da barra. */
+      abaixo: !!(quem && plano) &&
+        (quem.compareDocumentPosition(plano) & Node.DOCUMENT_POSITION_FOLLOWING) !== 0,
+      dentroDoCabecalho,
+      itensCabecalho: [...document.querySelectorAll('header nav > a')].length,
+    };
+  });
+  console.log('     ' + r.email + '  →  ' + r.plano);
+  ok('o e-mail continua no topo da barra', r.email === 'quem@empresa.com', String(r.email));
+  ok('o plano aparece na barra', r.plano === 'Plano Team', String(r.plano));
+  ok('e ABAIXO do e-mail', r.abaixo === true);
+  /* A afirmação que protege a moldura: nada de plano volta para o cabeçalho. */
+  ok('e nada de plano ficou no cabeçalho', r.dentroDoCabecalho === false);
+  ok('o cabeçalho continua com os cinco itens do site', r.itensCabecalho === 5, String(r.itensCabecalho));
+  ok('sem erro de página (com barra)', erros2.length === 0, erros2[0]);
+  await pg2.close(); await ctx2.close();
+}
 
 ok('o rodapé tem três colunas nas três telas',
    todas.every(([, r]) => r.colunas === 3), todas.map(([n, r]) => n + '=' + r.colunas).join(' '));

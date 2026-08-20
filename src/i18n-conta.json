@@ -252,7 +252,8 @@
     "chamadoAberto": "Chamado {numero} aberto. Anote o número: é por ele que a gente se acha.",
     "chamadoErro": "Não consegui abrir o chamado agora. Tente de novo em alguns minutos.",
     "chamadoMuitos": "Muitos chamados seguidos deste endereço. Espere alguns minutos.",
-    "chamadoSemTexto": "Escreva o que aconteceu antes de abrir o chamado."
+    "chamadoSemTexto": "Escreva o que aconteceu antes de abrir o chamado.",
+    "menuPlano": "Plano {0}"
   },
   "en": {
     "tituloAba": "Your account",
@@ -506,7 +507,8 @@
     "chamadoAberto": "Ticket {numero} opened. Note the number down: it is how we find each other.",
     "chamadoErro": "I could not open the ticket now. Try again in a few minutes.",
     "chamadoMuitos": "Too many tickets in a row from this address. Wait a few minutes.",
-    "chamadoSemTexto": "Write what happened before opening the ticket."
+    "chamadoSemTexto": "Write what happened before opening the ticket.",
+    "menuPlano": "{0} plan"
   },
   "es": {
     "tituloAba": "Tu cuenta",
@@ -760,7 +762,8 @@
     "chamadoAberto": "Ticket {numero} abierto. Anota el número: es como nos encontramos.",
     "chamadoErro": "No pude abrir el ticket ahora. Inténtalo de nuevo en unos minutos.",
     "chamadoMuitos": "Demasiados tickets seguidos desde esta dirección. Espera unos minutos.",
-    "chamadoSemTexto": "Escribe qué pasó antes de abrir el ticket."
+    "chamadoSemTexto": "Escribe qué pasó antes de abrir el ticket.",
+    "menuPlano": "Plan {0}"
   },
   "de": {
     "tituloAba": "Ihr Konto",
@@ -1014,7 +1017,8 @@
     "chamadoAberto": "Ticket {numero} eröffnet. Notieren Sie die Nummer: darüber finden wir uns wieder.",
     "chamadoErro": "Das Ticket konnte jetzt nicht eröffnet werden. Versuchen Sie es in einigen Minuten erneut.",
     "chamadoMuitos": "Zu viele Tickets hintereinander von dieser Adresse. Warten Sie einige Minuten.",
-    "chamadoSemTexto": "Schreiben Sie, was passiert ist, bevor Sie das Ticket eröffnen."
+    "chamadoSemTexto": "Schreiben Sie, was passiert ist, bevor Sie das Ticket eröffnen.",
+    "menuPlano": "{0}-Plan"
   },
   "fr": {
     "tituloAba": "Votre compte",
@@ -1268,6 +1272,7 @@
     "chamadoAberto": "Ticket {numero} ouvert. Notez le numéro : c’est par lui qu’on se retrouve.",
     "chamadoErro": "Je n’ai pas pu ouvrir le ticket maintenant. Réessayez dans quelques minutes.",
     "chamadoMuitos": "Trop de tickets d’affilée depuis cette adresse. Attendez quelques minutes.",
-    "chamadoSemTexto": "Écrivez ce qui s’est passé avant d’ouvrir le ticket."
+    "chamadoSemTexto": "Écrivez ce qui s’est passé avant d’ouvrir le ticket.",
+    "menuPlano": "Forfait {0}"
   }
 }

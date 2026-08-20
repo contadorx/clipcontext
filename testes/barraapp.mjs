@@ -246,7 +246,18 @@ console.log('\n[7] o endereço não conta nada além do que já está na conta')
      outro. Assim, no dia em que alguem acrescentar `conta` ou `faturas` ao
      payload para economizar um pedido, este teste cai. */
   const campos = Object.keys(j).sort().join(',');
-  ok('a resposta tem exatamente os campos previstos', campos === 'email,entrar,ferramenta,itens,raiz', campos);
+  /* `plano` entrou na lista, e a lista existe justamente para que essa entrada
+     seja uma DECISÃO e não um descuido. Ele é o nome do plano de quem está
+     logado — "Plano Team" — já traduzido e pronto para a tela, e é da mesma
+     classe do `email`: o que a pessoa já lê no primeiro parágrafo da própria
+     conta. Não é o objeto da conta, não é fatura, não é assento. */
+  ok('a resposta tem exatamente os campos previstos',
+     campos === 'email,entrar,ferramenta,itens,plano,raiz', campos);
+  /* E o que ele carrega é o RÓTULO, e não o estado da assinatura: nada de
+     `motivo`, `vence_em` ou `assinante` viaja junto. */
+  ok('o plano vem como rótulo pronto, e nada além',
+     j.plano === null || (typeof j.plano === 'string' && j.plano.length < 40),
+     JSON.stringify(j.plano));
   const campoItem = [...new Set(j.itens.flatMap((i) => Object.keys(i)))].sort().join(',');
   ok('e cada item, so o que a barra desenha',
      campoItem === 'bloqueado,href,icone,rotulo,selo,slug', campoItem);

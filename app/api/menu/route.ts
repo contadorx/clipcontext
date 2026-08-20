@@ -35,7 +35,7 @@
 import { NextResponse } from 'next/server';
 import { emailDaSessao } from '@/lib/supabase/servidor';
 import { contaDe, temChaveDeServico } from '@/lib/supabase/servico';
-import { ehLang, textos, CAMINHO } from '@/lib/conta/textos';
+import { ehLang, preencher, textos, CAMINHO } from '@/lib/conta/textos';
 import { menuDe } from '@/lib/conta/nav';
 
 export const dynamic = 'force-dynamic';
@@ -61,6 +61,11 @@ export async function GET(req: Request) {
    * primeira linha convida a entrar. Nada da conta e lido: sem sessao nao ha o
    * que ler. */
   let tem = { time: false, plano: false, dono: false };
+  /* O NOME DO PLANO, para a barra da ferramenta escrever debaixo do e-mail.
+     Ele vem daqui, e não da licença guardada no navegador: a chave diz o que
+     foi ATIVADO naquela máquina; a conta diz o que a pessoa TEM. Quando os dois
+     discordam — chave velha, plano cancelado —, quem manda é o servidor. */
+  let plano: string | null = null;
   if (email && temChaveDeServico) try {
     const conta = await contaDe(email);
     tem = {
@@ -68,6 +73,10 @@ export async function GET(req: Request) {
       plano: Boolean(conta.plano) && conta.motivo !== 'suspensa',
       dono: Boolean(DONO) && email.trim().toLowerCase() === DONO,
     };
+    /* A MESMA regra do painel (`secoes.tsx`), com as mesmas palavras: duas
+       telas que chamam o mesmo plano de dois nomes é a marca gaguejando. */
+    const tt = textos(lang);
+    plano = conta.plano === 'time' ? tt.planoTeam : conta.plano ? tt.planoPersonal : tt.planoFree;
   } catch {
     /* O banco mudo não apaga a barra: os itens que não dependem de plano
        continuam valendo, e mandar a pessoa para uma tela que explica é melhor
@@ -80,6 +89,10 @@ export async function GET(req: Request) {
       /* `null` deslogado, e a barra troca o nome de quem e por um convite a
          entrar — o mesmo que o painel faz. */
       email: email || null,
+      /* Já pronto para a tela: "Plano Team", e não `{plano:'time'}`. Quem
+         desenha é um arquivo estático que não tem dicionário da conta, e
+         mandá-lo montar a frase seria mandar traduzir de novo do outro lado. */
+      plano: plano ? preencher(t.menuPlano, { 0: plano }) : null,
       entrar: email ? null : t.painelEntrar,
       raiz: CAMINHO[lang],
       itens: menuDe(lang, tem).map((i) => ({

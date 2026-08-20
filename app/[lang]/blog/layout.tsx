@@ -38,6 +38,11 @@ export default async function CascaDoBlog({ children, params }: LayoutProps<'/[l
             <a href={`${home}#como`} className="hide-sm">{t.navHow}</a>
             <a href={rota('comparativo')} className="hide-sm">{t.navComp}</a>
             <a href={rota('precos')} className="hide-xs">{t.navPrice}</a>
+            {/* O Blog no menu do próprio blog. Faltava aqui e nas outras
+                telas — e faltar JUSTO aqui é o pior dos casos: quem está lendo
+                um post não tem como voltar para a lista sem o botão de voltar
+                do navegador. */}
+            <a href={t.blog} className="hide-sm">{t.fBlog}</a>
             <a className="btnTop" href={`/app?lang=${L}`}>{t.navApp}</a>
             {/* O seletor leva para o MESMO lugar no outro idioma — o índice do
                 blog daquele idioma, e não a home. Mandar para a home seria

@@ -81,6 +81,13 @@
 
   .barraConta .quem{font-size:12.5px;color:var(--muted);font-weight:600;
       margin:0 0 12px;padding:0 10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  /* A linha do plano: debaixo do e-mail, no mesmo bloco e com o mesmo recuo.
+     Discreta de propósito — ela informa, não vende — e só existe onde há conta.
+     A cor da marca é o que a separa do e-mail, que é cinza. */
+  .barraConta .planoLinha{display:block;width:auto;margin:-8px 0 12px;padding:0 10px;
+      background:none;border:0;font:inherit;font-size:12.5px;font-weight:700;
+      color:var(--accent);cursor:pointer;text-align:left}
+  .barraConta .planoLinha:hover{text-decoration:underline}
   .barraConta ul{list-style:none;margin:0;padding:0;display:grid;gap:2px}
   .barraConta a{display:flex;align-items:center;gap:10px;padding:8px 10px;
       border-radius:8px;font-size:14px;font-weight:600;color:var(--muted);text-decoration:none}
@@ -108,7 +115,10 @@
        fileira so. Em duas, "Abrir a ferramenta" caia sozinha numa segunda
        linha, como se fosse outra coisa. */
     .barraConta ul{display:flex;gap:6px}
-    .barraConta .quem,.barraConta .risco{display:none}
+    /* Na tela estreita a barra vira uma fileira de atalhos: o e-mail some, e o
+       plano some junto — os dois são identificação, e identificação não cabe
+       numa fileira que precisa caber. */
+    .barraConta .quem,.barraConta .risco,.barraConta .planoLinha{display:none}
     .barraConta a{white-space:nowrap;border:1px solid var(--line)}
   }
   h1{font-size:22px;margin:0 0 4px;letter-spacing:-.01em}
@@ -303,10 +313,6 @@
   label.opt input[type=checkbox]{flex:none}
   /* A etiqueta do plano no cabeçalho. Discreta de propósito: é um estado, não
      um botão de ação — quem já pagou não precisa ser convidado de novo. */
-  .licTag{background:color-mix(in srgb,var(--accent) 12%,transparent);color:var(--accent);
-     border:1px solid color-mix(in srgb,var(--accent) 34%,transparent);border-radius:99px;
-     padding:3px 11px;font-size:12.5px;font-weight:600;cursor:pointer;margin-right:12px}
-  .licTag:hover{background:color-mix(in srgb,var(--accent) 20%,transparent)}
   .optNota{margin-left:auto;font-weight:400;font-size:12.5px;color:var(--muted)}
   /* "recomendado" não é uma nota de rodapé: é uma resposta. Quem lê uma caixa
      marcada e não sabe se desmarca está fazendo uma pergunta, e esta é a
@@ -887,7 +893,18 @@
       <a data-rota="comparativo" data-site="navComp" class="hide-sm"></a>
       <a data-rota="precos" data-site="navPrice" class="hide-xs"></a>
       <a data-rota="blog" data-site="fBlog" class="hide-sm"></a>
-      <button type="button" id="licTag" class="licTag hide"></button>
+      <!-- ---- A ETIQUETA DO PLANO SAIU DAQUI ----
+
+           Ela era a última peça que ainda fazia este menu ser diferente do das
+           outras telas: um botão a mais, de largura variável — o nome do
+           cliente vai dentro —, no meio de um menu que agora é o mesmo em toda
+           parte. Uma moldura igual em três telas que ganha uma peça só numa
+           delas volta a ser três molduras.
+
+           Ela foi para a BARRA LATERAL, embaixo do e-mail: é lá que a pergunta
+           "em nome de quem estou vendo isto" já é respondida, e é lá que o
+           painel da conta também a responde. E lá ela não repete o nome do
+           cliente, porque o e-mail está uma linha acima. -->
       <!-- Botao cheio, como o "Abrir a ferramenta" do cabecalho da conta.
            Era um link de texto cinza, e o mesmo lugar das duas telas tinha dois
            pesos diferentes: na conta, o caminho para a ferramenta saltava; aqui,
@@ -11361,9 +11378,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     const bl = $('licBtn');
     if (bl) { bl.textContent = ativo ? t('licAtiva', licenca.q) : t('licBtn');
               bl.classList.toggle('ok', ativo); }
-    const tag = $('licTag');
-    if (tag) { tag.classList.toggle('hide', !ativo);
-               if (ativo) tag.textContent = t('licAtiva', licenca.q); }
+    pintarPlanoNaBarra();
     $('licTirar').classList.toggle('hide', !ativo);
     /* A classificação é do Team. Uma tarja de "Confidencial" que qualquer um
        escreve num documento gratuito não classifica nada — ela só ensina que a
@@ -11411,15 +11426,6 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   }
 
   if ($('licBtn')) $('licBtn').onclick = () => $('licBox').classList.toggle('hide');
-  /* A etiqueta abre a mesma caixa: trocar a chave, sair, ver o cliente. É o
-     único caminho que sobrou de dentro da ferramenta, e ele só existe para
-     quem já tem plano — que é exatamente quem precisa dele. */
-  if ($('licTag')) $('licTag').onclick = () => {
-    $('licBox').classList.toggle('hide');
-    if (!$('licBox').classList.contains('hide')) {
-      try { $('licBox').scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) {}
-    }
-  };
 
   /* ================= a sessão, aqui dentro =================
 
@@ -11500,10 +11506,47 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
        quem ainda nao tem conta — que e quem a estrategia quer alcancar. */
     const topo = d.email
       ? `<p class="quem" title="${seg1(d.email)}">${seg1(d.email)}</p>`
+        /* O PLANO, uma linha abaixo do e-mail. Só o nome — "Plano Team" —
+           porque quem é já está escrito em cima; repetir o cliente aqui seria
+           dizer duas vezes a mesma coisa no espaço mais estreito da tela.
+
+           É um BOTÃO e não um texto: clicar abre a caixa da licença, que é onde
+           se troca a chave e se vê o nome do cliente. Era o que a etiqueta do
+           cabeçalho fazia, e o caminho não podia sumir junto com ela. */
+        + (d.plano ? `<button type="button" class="planoLinha" id="planoLinha">${seg1(d.plano)}</button>` : '')
       : `<p class="quem"><a href="${seg1(d.raiz || '/conta')}">${seg1(d.entrar || '')}</a></p>`;
     cx.innerHTML = topo + `<ul>${linhas}</ul>` + aqui;
     cx.classList.remove('hide');
     document.body.classList.add('comBarra');
+    planoDoServidor = d.plano || null;
+    ligarPlanoNaBarra();
+    pintarPlanoNaBarra();
+  }
+
+  /* ---- O PLANO NA BARRA, com DUAS fontes e uma regra de desempate ----
+
+     O servidor sabe o que a CONTA tem; a licença guardada sabe o que foi
+     ATIVADO nesta máquina. Elas podem discordar — uma chave de Time colada num
+     navegador cuja conta ainda não virou Time é o caso normal do primeiro dia.
+
+     A regra: o que está ATIVO aqui ganha, porque é ele que decide o que a
+     ferramenta libera NESTA tela. Dizer "Plano Free" ao lado de recursos de
+     Time destravados seria a tela contradizendo a si mesma. */
+  let planoDoServidor = null;
+  function pintarPlanoNaBarra(){
+    const el = $('planoLinha');
+    if (!el) return;
+    const texto = temTime() ? t('licAtiva', licenca.q) : planoDoServidor;
+    el.textContent = texto || '';
+    el.classList.toggle('hide', !texto);
+  }
+  function ligarPlanoNaBarra(){
+    const el = $('planoLinha');
+    if (!el || !$('licBox')) return;
+    el.onclick = () => {
+      $('licBox').classList.remove('hide');
+      try { $('licBox').scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) {}
+    };
   }
   montarBarraDaConta();
 
