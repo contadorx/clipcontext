@@ -1,5 +1,6 @@
 import fs from 'fs';
-const s = fs.readFileSync('/root/walkstamp/src/template.html','utf8');
+import { RAIZ_WS } from './_caminhos.mjs';
+const s = fs.readFileSync(`${RAIZ_WS}/src/template.html`,'utf8');
 const i = s.indexOf('const I18N = {');
 // acha o fim do objeto contando chaves
 let d=0, j=s.indexOf('{', i), fim=j;

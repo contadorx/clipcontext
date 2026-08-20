@@ -8,15 +8,16 @@
 import { chromium } from 'playwright';
 import fs from 'fs';
 
+import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
 const SITE = 'http://localhost:8802';
-const rotas = JSON.parse(fs.readFileSync('/root/walkstamp/src/rotas.json','utf8'));
+const rotas = JSON.parse(fs.readFileSync(`${RAIZ_WS}/src/rotas.json`,'utf8'));
 const { idiomas, slugs } = rotas;
 const pre = (L) => (L === 'pt' ? '' : '/' + L);
 
 let falhas = 0;
 const ok = (n, c, e) => { console.log((c ? '  ok   ' : '  FALHA') + '  ' + n + (e ? '  → ' + e : '')); if (!c) falhas++; };
 
-const br = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
+const br = await chromium.launch({ executablePath: CHROME_WS });
 const pg = await (await br.newContext({ viewport: { width: 1200, height: 900 } })).newPage();
 
 console.log('[1] os cinco idiomas estão declarados');
@@ -90,7 +91,7 @@ console.log('\n[5] o rodapé e o hreflang não ficaram para trás');
   /* O português sai como `pt-BR`, com região, porque é o que ele é. */
   for (const L of idiomas)
     ok(`  hreflang ${L}`, alt.includes(L === 'pt' ? 'pt-BR' : L), alt.join(' '));
-  const mapa = fs.readFileSync('/root/walkstamp/public/sitemap-paginas.xml', 'utf8');
+  const mapa = fs.readFileSync(`${RAIZ_WS}/public/sitemap-paginas.xml`, 'utf8');
   for (const u of ['/de/hilfe', '/fr/aide', '/de/preise', '/fr/tarifs'])
     ok(`  o sitemap conhece ${u}`, mapa.includes(u));
 }

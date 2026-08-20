@@ -25,10 +25,11 @@
 import { chromium } from 'playwright';
 import { spawn, execSync } from 'child_process';
 
+import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
 const P = 8831;
 const BASE = `http://localhost:${P}`;
-const RAIZ = process.env.RAIZ || '/root/walkstamp';
-const CHROME = process.env.CHROME || '/opt/pw-browsers/chromium-1194/chrome-linux/chrome';
+const RAIZ = process.env.RAIZ || `${RAIZ_WS}`;
+const CHROME = process.env.CHROME || CHROME_WS;
 
 let falhas = 0;
 const ok = (n, c, e) => { console.log((c ? '  ok   ' : '  FALHA') + '  ' + n + (e ? '  → ' + e : '')); if (!c) falhas++; };

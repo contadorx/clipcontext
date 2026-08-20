@@ -27,7 +27,8 @@ import { chromium } from 'playwright';
 import http from 'http';
 import fs from 'fs';
 
-const RAIZ = '/root/walkstamp';
+import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+const RAIZ = `${RAIZ_WS}`;
 /* A AMOSTRA LONGA NÃO É UM DETALHE AQUI. Este arquivo mede o que acontece
    DURANTE a espera, e a amostra curta não tem durante: a transcrição inteira
    cabe entre duas leituras do vigia, e as afirmações caem por falta de amostra.
@@ -73,7 +74,7 @@ export async function pipeline(t, m, o){
 }`;
 
 const br = await chromium.launch({
-  executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome',
+  executablePath: CHROME_WS,
 });
 const ctx = await br.newContext({ viewport: { width: 1250, height: 900 } });
 const pg = await ctx.newPage();

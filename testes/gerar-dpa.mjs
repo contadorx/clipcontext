@@ -22,7 +22,8 @@ import { chromium } from 'playwright';
 import fs from 'fs';
 import path from 'path';
 
-const RAIZ = '/root/walkstamp';
+import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+const RAIZ = `${RAIZ_WS}`;
 const FONTE = path.join(RAIZ, 'src', 'site', 'dpa.pt.html');
 const SAIDA = path.join(RAIZ, 'public', 'dpa-walkstamp.pdf');
 
@@ -57,7 +58,7 @@ fs.mkdirSync(path.dirname(tmp), { recursive: true });
 fs.writeFileSync(tmp, html, 'utf8');
 
 const br = await chromium.launch({
-  executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome',
+  executablePath: CHROME_WS,
 });
 const pg = await (await br.newContext()).newPage();
 await pg.goto('file://' + tmp, { waitUntil: 'load' });

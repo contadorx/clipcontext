@@ -21,6 +21,7 @@
  */
 import { chromium } from 'playwright';
 
+import { CHROME_WS } from './_caminhos.mjs';
 const BASE = 'http://localhost:8802';
 /* `?lang=pt` na home, e não `/` puro. A home em português É a raiz, e a raiz
  * roda o detector de idioma: num navegador configurado em inglês — que é o
@@ -45,7 +46,7 @@ const ok = (n, c, e) => {
 };
 
 const br = await chromium.launch({
-  executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome',
+  executablePath: CHROME_WS,
 });
 const ctx = await br.newContext({ viewport: { width: 1200, height: 900 } });
 const pg = await ctx.newPage();

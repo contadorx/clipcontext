@@ -17,7 +17,9 @@
 # `memoria.mjs` e `pesagem.mjs` são réguas. Eles medem, e medir é o que se faz
 # ao MUDAR a mecânica — não a cada ajuste de tela. Continuam obrigatórios no
 # `rodar.sh`, que é o portão da entrega.
-cd /root/walkstamp || exit 1
+# A raiz vem de onde ESTE arquivo está, e não escrita por extenso: a suíte
+# inteira deixou de depender de uma máquina só.
+cd "$(dirname "$(cd "$(dirname "$0")" && pwd)")" || exit 1
 GRUPO="$1"; shift
 
 case "$GRUPO" in

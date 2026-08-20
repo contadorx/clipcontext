@@ -25,7 +25,8 @@ import http from 'http';
 import fs from 'fs';
 import { execSync } from 'child_process';
 
-const RAIZ = '/root/walkstamp';
+import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+const RAIZ = `${RAIZ_WS}`;
 const html = fs.readFileSync(RAIZ + '/public/app.html', 'utf8');
 const jspdf = fs.readFileSync(RAIZ + '/vendor/jspdf.umd.min.js', 'utf8');
 const srv = http.createServer((q, r) => {
@@ -43,7 +44,7 @@ const ok = (n, c, e) => {
 };
 
 const br = await chromium.launch({
-  executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome',
+  executablePath: CHROME_WS,
 });
 const ctx = await br.newContext({ acceptDownloads: true, viewport: { width: 1250, height: 980 } });
 const pg = await ctx.newPage();

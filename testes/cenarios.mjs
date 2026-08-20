@@ -2,18 +2,19 @@
 import { chromium } from 'playwright';
 import http from 'http'; import fs from 'fs';
 import { criarProxy, exigirNext } from './proxy.mjs';
+import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
 await exigirNext();
 
-const ROOT = '/root/walkstamp/public';
+const ROOT = `${RAIZ_WS}/public`;
 const tipos = { '.css':'text/css', '.svg':'image/svg+xml', '.js':'text/javascript', '.ico':'image/x-icon' };
-const jspdf = fs.readFileSync('/root/walkstamp/vendor/jspdf.umd.min.js', 'utf8');
+const jspdf = fs.readFileSync(`${RAIZ_WS}/vendor/jspdf.umd.min.js`, 'utf8');
 /* O site virou Next.js: as páginas não existem mais como arquivo em public/.
    O servidorzinho estático daqui virou um encaminhador para o Next — mesma
    porta, mesmas URLs no teste, e quem responde é o produto de verdade. */
 const srv = criarProxy();
 await new Promise(r => srv.listen(8921, r));
 
-const br = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
+const br = await chromium.launch({ executablePath: CHROME_WS });
 let falhas = 0;
 const ok = (n, c, extra) => { console.log((c ? '  ok   ' : '  FALHA') + '  ' + n + (extra ? '  → ' + extra : '')); if (!c) falhas++; };
 const ctx = await br.newContext({ acceptDownloads: true, locale: 'pt-BR', viewport: { width: 1250, height: 950 } });

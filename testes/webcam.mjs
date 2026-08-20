@@ -6,12 +6,13 @@
    entra na detecção de mudança. */
 import { chromium } from 'playwright';
 import http from 'http'; import fs from 'fs';
-const html = fs.readFileSync('/root/walkstamp/public/app.html','utf8');
-const jspdf = fs.readFileSync('/root/walkstamp/vendor/jspdf.umd.min.js','utf8');
+import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+const html = fs.readFileSync(`${RAIZ_WS}/public/app.html`,'utf8');
+const jspdf = fs.readFileSync(`${RAIZ_WS}/vendor/jspdf.umd.min.js`,'utf8');
 const srv = http.createServer((q,r)=>{ if(q.url.startsWith('/_vercel/')){r.writeHead(200,{'Content-Type':'text/javascript'});return r.end('')} r.writeHead(200,{'Content-Type':'text/html'}); r.end(html); });
 await new Promise(r=>srv.listen(8938,r));
 const br = await chromium.launch({
-  executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome',
+  executablePath:CHROME_WS,
   args:['--use-fake-ui-for-media-stream','--use-fake-device-for-media-stream',
         '--auto-select-desktop-capture-source=Entire screen','--allow-http-screen-capture']
 });
@@ -181,7 +182,7 @@ console.log('\n[4] o rosto NÃO entra na detecção de mudança');
   console.log('     ' + baseQuadros + ' sem webcam · ' + quadros + ' com webcam');
   ok('o número de quadros não disparou com o rosto ligado',
      quadros <= baseQuadros * 1.6 + 3, baseQuadros + ' → ' + quadros);
-  const fonte = fs.readFileSync('/root/walkstamp/public/app.html','utf8');
+  const fonte = fs.readFileSync(`${RAIZ_WS}/public/app.html`,'utf8');
   ok('e a assinatura continua sendo tirada da tela, não da composição',
      /sigX\.drawImage\(video, 0, 0, 32, 18\)/.test(fonte));
   ok('enquanto o quadro exportado leva o rosto por cima',

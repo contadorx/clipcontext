@@ -18,10 +18,11 @@
 import fs from 'fs';
 import path from 'path';
 
+import { RAIZ_WS } from './_caminhos.mjs';
 let falhas = 0;
 const ok = (n, c, e) => { console.log((c ? '  ok   ' : '  FALHA') + '  ' + n + (e ? '  → ' + e : '')); if (!c) falhas++; };
 
-const RAIZ = '/root/walkstamp';
+const RAIZ = `${RAIZ_WS}`;
 
 /* As marcas que já estiveram aqui, e as que não podem entrar. Não é uma lista
    de empresas proibidas — é a lista do que a gente já errou uma vez, mais os

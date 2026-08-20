@@ -19,6 +19,7 @@ import { chromium } from 'playwright';
 import { spawn, execSync } from 'child_process';
 import http from 'http';
 
+import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
 const P = 8823, B = 8824;
 const BASE = `http://localhost:${P}`;
 const QUEM = 'quem@teste-chamado.example';
@@ -58,7 +59,7 @@ matarPorta();
 await new Promise(r => setTimeout(r, 500));
 
 const next = spawn('npx', ['next', 'start', '-p', String(P)], {
-  cwd: process.env.RAIZ || '/root/walkstamp', stdio: 'ignore',
+  cwd: process.env.RAIZ || `${RAIZ_WS}`, stdio: 'ignore',
   env: { ...process.env, SUPABASE_URL: `http://localhost:${B}`,
          SUPABASE_SERVICE_ROLE_KEY: 'chave_de_mentira',
          WALKSTAMP_SUPA_TESTE: `http://localhost:${B}` },
@@ -69,7 +70,7 @@ for (let i = 0; i < 60; i++) {
   await new Promise(r => setTimeout(r, 500));
 }
 
-const br = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
+const br = await chromium.launch({ executablePath: CHROME_WS });
 const b64 = o => Buffer.from(JSON.stringify(o)).toString('base64url');
 const ctx = await br.newContext({ viewport: { width: 1200, height: 1400 } });
 {

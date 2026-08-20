@@ -9,10 +9,14 @@
    O que falta ser conferido, e como: `stripe listen --forward-to
    <URL>/functions/v1/walkstamp-stripe` com a Stripe CLI, uma vez, com o segredo
    configurado. Do outro lado, a função do banco já está provada. */
-import { assinaturaConfere } from '/root/walkstamp/supabase/functions/walkstamp-stripe/assinatura.mjs';
 import crypto from 'crypto';
 import fs from 'fs';
+import { RAIZ_WS } from './_caminhos.mjs';
 
+/* Import DINÂMICO: o endereço de um `import` estático precisa ser literal, e
+   este é calculado — a raiz agora é descoberta, não escrita à mão. */
+const { assinaturaConfere } =
+  await import(`file://${RAIZ_WS}/supabase/functions/walkstamp-stripe/assinatura.mjs`);
 let falhas = 0;
 const ok = (n,c,e)=>{console.log((c?'  ok   ':'  FALHA')+'  '+n+(e?'  → '+e:''));if(!c)falhas++};
 
@@ -76,7 +80,7 @@ console.log('\n[5] a comparação não vaza pelo tempo');
      vontade. Comparar com === entregaria, caractere a caractere, o começo
      certo da assinatura. */
   const fonte = fs.readFileSync(
-    '/root/walkstamp/supabase/functions/walkstamp-stripe/assinatura.mjs','utf8');
+    `${RAIZ_WS}/supabase/functions/walkstamp-stripe/assinatura.mjs`,'utf8');
   /* O comentário do próprio arquivo CITA `meu === v1` para explicar por que
      não se usa — então a asserção tem que olhar o retorno, não o texto. */
   ok('a comparação é de tempo constante',
@@ -92,7 +96,7 @@ console.log('\n[5] a comparação não vaza pelo tempo');
 console.log('\n[6] a Edge Function usa este módulo, e não uma cópia');
 {
   const fonte = fs.readFileSync(
-    '/root/walkstamp/supabase/functions/walkstamp-stripe/index.ts','utf8');
+    `${RAIZ_WS}/supabase/functions/walkstamp-stripe/index.ts`,'utf8');
   ok('o index importa assinatura.mjs',
      /import \{ assinaturaConfere \} from "\.\/assinatura\.mjs"/.test(fonte));
   ok('sem segredo, responde 503 e não processa', /sem segredo", \{ status: 503 \}/.test(fonte));

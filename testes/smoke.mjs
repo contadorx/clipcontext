@@ -1,6 +1,7 @@
 import { chromium } from 'playwright';
 import http from 'http'; import fs from 'fs';
-const ROOT='/root/walkstamp/public';
+import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+const ROOT=`${RAIZ_WS}/public`;
 const puro=fs.readFileSync(ROOT+'/app.html','utf8');
 /* O build publicado passou a sair COM as credenciais do Drive, então o teste
    inverteu: a variante "desligado" é produzida esvaziando as constantes, e a
@@ -19,11 +20,11 @@ const srv=http.createServer((q,r)=>{
   // o service worker precisa chegar como JavaScript
   if (q.url.split('?')[0] === '/sw.js') {
     r.writeHead(200, {'Content-Type':'text/javascript'});
-    return r.end(fs.readFileSync('/root/walkstamp/public/sw.js'));
+    return r.end(fs.readFileSync(`${RAIZ_WS}/public/sw.js`));
   }
   r.writeHead(200,{'Content-Type':'text/html'});r.end(atual)});
 await new Promise(r=>srv.listen(8896,r));
-const br=await chromium.launch({executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome'});
+const br=await chromium.launch({executablePath:CHROME_WS});
 let falhas=0;
 const ok=(nome,cond)=>{ console.log((cond?'  ok   ':'  FALHA')+'  '+nome); if(!cond) falhas++; };
 

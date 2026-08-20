@@ -26,6 +26,7 @@ import { spawn, execFileSync } from 'child_process';
 import http from 'http';
 import fs from 'fs';
 
+import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
 const PORTA_NEXT = 8807;
 const PORTA_BANCO = 8808;
 const BASE = `http://localhost:${PORTA_NEXT}`;
@@ -151,7 +152,7 @@ await new Promise((r) => banco.listen(PORTA_BANCO, r));
 /* -------------------------------------------------------------- o Next real */
 
 const next = spawn('npx', ['next', 'start', '-p', String(PORTA_NEXT)], {
-  cwd: '/root/walkstamp',
+  cwd: `${RAIZ_WS}`,
   env: { ...process.env,
     SUPABASE_URL: `http://localhost:${PORTA_BANCO}`,
     SUPABASE_SERVICE_ROLE_KEY: 'chave_de_servico_de_mentira',
@@ -173,7 +174,7 @@ for (let i = 0; i < 60; i++) {
   await new Promise((r) => setTimeout(r, 500));
 }
 
-const br = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
+const br = await chromium.launch({ executablePath: CHROME_WS });
 
 /* O cookie de sessão que o `@supabase/ssr` lê. O conteúdo não precisa ser um
    JWT válido: quem valida é o `/auth/v1/user`, e ele é o nosso. */
@@ -465,7 +466,7 @@ print(json.dumps({'cab': linhas[0], 'corpo': linhas[1:]}, ensure_ascii=False))
 
 console.log('\n[10] a ferramenta não guarda mais roteiro nenhum');
 {
-  const app = fs.readFileSync('/root/walkstamp/public/app.html', 'utf8');
+  const app = fs.readFileSync(`${RAIZ_WS}/public/app.html`, 'utf8');
   for (const morto of ['rotBloco', 'abrirRoteiro', 'juntarRoteiros', 'marcarCasoDoRoteiro',
                        'xlsxParaLinhas', 'montarXlsx', 'ROTEIRO_CHAVE']) {
     ok(`"${morto}" saiu do app.html`, !app.includes(morto));
@@ -549,7 +550,7 @@ console.log('\n[12] o recibo: viaja no link, e não leva imagem nenhuma');
      ferramenta manda o que diz mandar. */
   const app = await ctx.newPage();
   const erros = []; app.on('pageerror', (e) => erros.push(e.message));
-  const jspdf = fs.readFileSync('/root/walkstamp/vendor/jspdf.umd.min.js', 'utf8');
+  const jspdf = fs.readFileSync(`${RAIZ_WS}/vendor/jspdf.umd.min.js`, 'utf8');
   await app.route('**/jspdf**', (r) => r.fulfill({ status: 200, headers: { 'content-type': 'text/javascript' }, body: jspdf }));
   await app.route('**/rpc/**', (r) => r.fulfill({ status: 200, body: 'null' }));
   await app.goto(`${BASE}/app?lang=pt&modelo=evidencia&caso=CT-01&sistema=Portal&chamado=NAT-1234&rot=11`);
@@ -737,15 +738,15 @@ console.log('\n[15] o que o site promete continua verdade');
 {
   /* A frase mais forte do site é a da página de segurança, e ela é a primeira
      coisa que uma feature nova torna mentira sem ninguém perceber. */
-  const seg = fs.readFileSync('/root/walkstamp/src/site/bodies/seguranca.pt.html', 'utf8');
+  const seg = fs.readFileSync(`${RAIZ_WS}/src/site/bodies/seguranca.pt.html`, 'utf8');
   ok('a página de segurança não diz mais "não há conta"', !/não há conta/.test(seg));
   ok('e explica a exceção do anexo', /única exceção/i.test(seg) && /\.json/.test(seg));
   ok('mantendo o que continua verdade: vídeo e áudio nunca saem',
      /vídeo e o áudio continuam nunca saindo/.test(seg));
-  const pol = fs.readFileSync('/root/walkstamp/src/site/bodies/privacidade.pt.html', 'utf8');
+  const pol = fs.readFileSync(`${RAIZ_WS}/src/site/bodies/privacidade.pt.html`, 'utf8');
   ok('a política descreve o recibo', /recibo/i.test(pol));
   ok('e o anexo, com o botão de apagar', /apagar anexo/i.test(pol));
-  const pre = fs.readFileSync('/root/walkstamp/src/site/bodies/precos.pt.html', 'utf8');
+  const pre = fs.readFileSync(`${RAIZ_WS}/src/site/bodies/precos.pt.html`, 'utf8');
   ok('a página de preços não promete mais o que deixou de ser verdade',
      !/não recebemos vídeo, áudio nem documento em/.test(pre));
 }

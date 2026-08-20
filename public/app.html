@@ -8076,7 +8076,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      depois, e não tem como se atualizar sozinho. Sem carimbo, "estou com um
      problema no offline" é uma conversa sem chão — ninguém sabe de qual build
      se fala nem se o defeito já foi consertado. */
-  const VERSAO = '2026.08.20-43';
+  const VERSAO = '2026.08.20-48';
   window.__versao = () => VERSAO;
 
   const PIP_CSS = `
@@ -11005,6 +11005,17 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   const MOTOR_CHAVE = 'Walkstamp.semQ4';
   const semQ4 = () => { try { return sessionStorage.getItem(MOTOR_CHAVE) === '1'; } catch (e) { return false; } };
   const marcarSemQ4 = () => { try { sessionStorage.setItem(MOTOR_CHAVE, '1'); } catch (e) {} };
+  /* A PLACA JÁ REPROVOU NESTA SESSÃO.
+
+     O último degrau da escada é um resgate pela placa de vídeo — "só entra
+     quando a alternativa é ficar sem transcrição". A regra é boa, e vira uma
+     armadilha quando a escada foi chamada JUSTAMENTE porque a placa acabou de
+     estourar na inferência: o resgate devolveria a pessoa ao motor que a
+     trouxe até aqui. Uma lembrança de sessão, como a do q4, fecha essa porta —
+     e só essa. */
+  const PLACA_CHAVE = 'Walkstamp.placaCaiu';
+  const placaCaiu = () => { try { return sessionStorage.getItem(PLACA_CHAVE) === '1'; } catch (e) { return false; } };
+  const marcarPlacaCaiu = () => { try { sessionStorage.setItem(PLACA_CHAVE, '1'); } catch (e) {} };
 
   /* O que aconteceu em cada degrau da última montagem. É isto que o
      diagnóstico imprime — antes ele só dizia que a rede estava boa, o que numa
@@ -11300,7 +11311,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       /* ~206 MB: resgate pela placa de vídeo, se a máquina tiver e a pessoa não
          tiver marcado. Último de todos: só entra quando a alternativa é ficar
          sem transcrição. */
-      if (a === 0 && !usaPlaca() && navigator.gpu) tentativas.push({ motor: 'placa de vídeo', caro: 206,
+      if (a === 0 && !usaPlaca() && !placaCaiu() && navigator.gpu) tentativas.push({ motor: 'placa de vídeo', caro: 206,
         opcoes: { device:'webgpu', dtype:{ encoder_model:'fp32', decoder_model_merged:'fp32' } } });
 
       for (let i = 0; i < tentativas.length; i++) {
@@ -11541,6 +11552,22 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   async function transcrever(dados, opts){
     const seg = dados.length / 16000;
     const t0 = performance.now();
+    /* ---- A CONTAGEM COBRE A INFERÊNCIA, E SÓ ELA ----
+
+       `usandoPipe` existe para que ninguém solte a sessão por baixo de uma
+       inferência em curso: `soltarPipe()` espera enquanto ele for maior que
+       zero. Só que a queda da placa é tratada AQUI DENTRO, no `catch`, e o
+       decremento morava no `finally` — quer dizer, depois. A recuperação
+       chamava `soltarPipe()` estando ela mesma contada como ativa, e a função
+       esperava por si própria: 600 ciclos de 100 ms, um minuto parado, na
+       máquina que acabou de falhar e no instante mais caro do fluxo, logo
+       depois do download.
+
+       Uma inferência que estourou TERMINOU — com erro, mas terminou. Encerrar
+       a contagem ao entrar no `catch` é o que diz isso; a bandeira garante que
+       o `finally` não desconte duas vezes. */
+    let contada = true;
+    const encerrarConta = () => { if (contada) { contada = false; usandoPipe--; } };
     usandoPipe++;
     try {
       const r = await pipe(dados, opts);
@@ -11549,24 +11576,52 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     } catch (e) {
       const msg = (e && e.message) || String(e);
       if (!(motorEmUso === 'placa de vídeo' && ERRO_SESSAO.test(msg) && libMod)) throw e;
+      encerrarConta();
       st(t('motorQuebrou'));
-      /* SOLTA A PLACA ANTES de montar o processador. Sem esta linha os dois
-         modelos ficavam residentes ao mesmo tempo — e isto acontece justamente
-         na máquina que acabou de falhar por não dar conta. */
       const idAntes = pipeId;
-      await soltarPipe();
-      pipe = await libMod.pipeline('automatic-speech-recognition', idAntes, { dtype:'q8' });
-      pipeId = idAntes; pipeDev = 'cpu';
-      motorEmUso = 'processador';
       /* Não tentar de novo nesta sessão — e marcar como DECIDIDO, senão a
          próxima repintura devolve o padrão "marcada" por cima da placa que
-         acabou de falhar, e a queda vira um laço. */
+         acabou de falhar, e a queda vira um laço. Isto vem ANTES da troca de
+         propósito: é `$('gpu').checked` que o `devDesejado()` lê, então
+         desmarcar aqui é o que faz a montagem seguinte nascer de processador
+         em vez de repetir o caminho quebrado. */
       if ($('gpu')) { $('gpu').checked = false; $('gpu').dataset.mao = '1'; }
+      marcarPlacaCaiu();
+      /* ---- E ESQUECER A COMBINAÇÃO LEMBRADA ----
+
+         O atalho do `buildPipe` guarda a combinação que MONTOU — e a queda que
+         estamos tratando acontece na INFERÊNCIA, bem depois. Quer dizer: a
+         máquina lembrava de um caminho que sobe e morre, e toda recuperação
+         seguia o atalho de volta para ele. A régua flagrou isto na fita:
+         `soltou webgpu` e, no passo seguinte, `montou webgpu` de novo — a
+         placa desmarcada não adiantava nada, porque a escada de degraus nem
+         chegava a correr.
+
+         Montar não é funcionar. Uma memória que só sabe da montagem tem que
+         ser apagada quando o que falha é o uso. */
+      esquecerMotor();
+      /* ---- PELA PORTA ÚNICA, E NÃO POR UMA SEGUNDA ----
+
+         Antes, a recuperação montava o pipeline à mão, com `{ dtype:'q8' }` e
+         SEM `device:'wasm'` — e o comentário do `buildPipe` explica há muito
+         por que isso não pode faltar: sem ele a biblioteca pode escolher a
+         placa sozinha quando ela existe, e o degrau "de processador" corre
+         pelo mesmo caminho que acabou de falhar. Além do device, esse atalho
+         pulava a fila de montagem, a escada de degraus por custo de download,
+         o modelo reserva, as opções de threads e o diagnóstico.
+
+         `trocarPipe` já solta o velho antes de alocar o novo e já enfileira —
+         é a mesma porta por onde passam os outros quatro chamadores. Aqui não
+         havia nada a inventar: havia uma porta a usar. */
+      await trocarPipe(idAntes);
       const t1 = performance.now();
-      const r = await pipe(dados, opts);           // o MESMO pedido, uma vez só
-      relogio.audio += seg; relogio.ms += performance.now() - t1;
-      return r;
-    } finally { usandoPipe--; }
+      contada = true; usandoPipe++;
+      try {
+        const r = await pipe(dados, opts);         // o MESMO pedido, uma vez só
+        relogio.audio += seg; relogio.ms += performance.now() - t1;
+        return r;
+      } finally { encerrarConta(); }
+    } finally { encerrarConta(); }
   }
   /* Ligado só pelo botão "Ambos". Sem ele, "Só transcrever" varria os frames
      por conta própria e a escolha da pessoa virava enfeite. */

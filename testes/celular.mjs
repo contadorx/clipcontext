@@ -21,13 +21,14 @@
  */
 import { chromium, devices } from 'playwright';
 
+import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
 let falhas = 0;
 const ok = (n, c, e) => { console.log((c ? '  ok   ' : '  FALHA') + '  ' + n + (e ? '  → ' + e : '')); if (!c) falhas++; };
 
-const APP = 'file:///root/walkstamp/public/app.html';
+const APP = `file://${RAIZ_WS}/public/app.html`;
 const IDIOMAS = ['pt', 'en', 'es', 'de', 'fr'];
 
-const br = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
+const br = await chromium.launch({ executablePath: CHROME_WS });
 
 /** Um celular de verdade: sem captura de tela e sem placa de vídeo. */
 async function celular(perfil, lang) {

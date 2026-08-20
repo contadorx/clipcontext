@@ -4,7 +4,9 @@
 #
 # O site virou Next.js. Sete testes deixaram de ler `public/` e passaram a falar
 # com um Next de verdade na 8802 — por isso ele sobe aqui, uma vez, antes de tudo.
-cd /root/walkstamp || exit 1
+# A raiz vem de onde ESTE arquivo está, e não escrita por extenso: a suíte
+# inteira deixou de depender de uma máquina só.
+cd "$(dirname "$(cd "$(dirname "$0")" && pwd)")" || exit 1
 echo "montando a ferramenta e o site…"
 python3 build.py > /tmp/build.log 2>&1 || { echo "build.py falhou:"; cat /tmp/build.log; exit 1; }
 npx next build > /tmp/nextbuild.log 2>&1 || { echo "next build falhou:"; tail -20 /tmp/nextbuild.log; exit 1; }
@@ -32,7 +34,7 @@ TESTES="smoke.mjs saidas.mjs passos.mjs evidencia.mjs modelos.mjs cenarios.mjs
          venda.mjs vitrine.mjs fluxo.mjs roteiro.mjs faxina.mjs formato.mjs comentario.mjs
          travado.mjs promptcx.mjs cabec.mjs ajuda.mjs cinco.mjs appidioma.mjs gravando.mjs janelinha.mjs marca.mjs figuras.mjs dobrafig.mjs
          compartilhar.mjs contradicao.mjs negocio.mjs celular.mjs barraapp.mjs paridade.mjs teto.mjs ritmo.mjs rolar.mjs isca.mjs blog.mjs cenario1.mjs organiza.mjs acabamento.mjs convite.mjs email.mjs tourvid.mjs semmarca.mjs lente2.mjs
-         memoria.mjs pesagem.mjs espelho.mjs grade.mjs varredura.mjs audio.mjs plano.mjs faixa.mjs reuniao.mjs diagchamado.mjs modelo.mjs espera.mjs passomulti.mjs pessoas.mjs matriz.mjs espera2.mjs anotacao.mjs roteirojanela.mjs chaves.mjs"
+         memoria.mjs pesagem.mjs espelho.mjs grade.mjs varredura.mjs audio.mjs plano.mjs faixa.mjs reuniao.mjs diagchamado.mjs modelo.mjs espera.mjs passomulti.mjs pessoas.mjs matriz.mjs espera2.mjs anotacao.mjs roteirojanela.mjs quedaplaca.mjs chaves.mjs"
 falhou=""
 for t in $TESTES; do
   [ -f "$t" ] || { echo "??  $t não existe"; continue; }

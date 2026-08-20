@@ -22,6 +22,7 @@
 import { chromium } from 'playwright';
 import fs from 'fs';
 
+import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
 const BASE = 'http://localhost:8802';
 
 /* Os endereços saem do `rotas.json`, e NÃO de uma lista escrita aqui.
@@ -34,7 +35,7 @@ const BASE = 'http://localhost:8802';
  *
  * É a mesma armadilha que apagou o hreflang do alemão e do francês: lista
  * escrita à mão ao lado de uma lista de verdade. */
-const ROTAS = JSON.parse(fs.readFileSync('/root/walkstamp/src/rotas.json', 'utf8'));
+const ROTAS = JSON.parse(fs.readFileSync(`${RAIZ_WS}/src/rotas.json`, 'utf8'));
 const endereco = (pagina, L) =>
   (L === 'pt' ? '' : '/' + L) + '/' + ROTAS.slugs[pagina][L];
 const PAGINAS = ROTAS.idiomas.map(L => [L, endereco('termos', L), endereco('seguranca', L)]);
@@ -79,7 +80,7 @@ const ok = (n, c, e) => {
 };
 
 const br = await chromium.launch({
-  executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome',
+  executablePath: CHROME_WS,
 });
 const pg = await (await br.newContext()).newPage();
 

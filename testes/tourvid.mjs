@@ -18,9 +18,10 @@
  */
 import fs from 'fs';
 
+import { RAIZ_WS } from './_caminhos.mjs';
 const BASE = 'http://localhost:8802';
-const DEMO = '/root/walkstamp/public/demo';
-const ROTAS = JSON.parse(fs.readFileSync('/root/walkstamp/src/rotas.json', 'utf8'));
+const DEMO = `${RAIZ_WS}/public/demo`;
+const ROTAS = JSON.parse(fs.readFileSync(`${RAIZ_WS}/src/rotas.json`, 'utf8'));
 
 let falhas = 0;
 const ok = (n, c, e) => { console.log((c ? '  ok   ' : '  FALHA') + '  ' + n + (e ? '  → ' + e : '')); if (!c) falhas++; };
@@ -40,11 +41,11 @@ console.log('\n[2] a lista de quem tem tour é DERIVADA do disco');
   /* Escrita à mão, ela ficou meses dizendo ['pt','en','es'] depois de o vídeo
      alemão existir — e ninguém viu, porque um vídeo em inglês numa página
      alemã não quebra nada, só decepciona. */
-  const site = fs.readFileSync('/root/walkstamp/lib/site.ts', 'utf8');
+  const site = fs.readFileSync(`${RAIZ_WS}/lib/site.ts`, 'utf8');
   ok('o site não tem a lista escrita à mão',
      !/\['pt', 'en', 'es'\]\.includes\(lang\)/.test(site));
   ok('ele lê o que o build.py apurou', /rotas\.demoLangs/.test(site));
-  const build = fs.readFileSync('/root/walkstamp/build.py', 'utf8');
+  const build = fs.readFileSync(`${RAIZ_WS}/build.py`, 'utf8');
   ok('e o build.py apura olhando o disco',
      /com_tour = \[L for L in IDIOMAS if \(root \/ "public" \/ "demo"/.test(build));
   ok('os cinco entraram no rotas.json',

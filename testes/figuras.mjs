@@ -10,8 +10,9 @@
 import { chromium } from 'playwright';
 import fs from 'fs';
 
+import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
 const SITE = 'http://localhost:8802';
-const rotas = JSON.parse(fs.readFileSync('/root/walkstamp/src/rotas.json','utf8'));
+const rotas = JSON.parse(fs.readFileSync(`${RAIZ_WS}/src/rotas.json`,'utf8'));
 const { idiomas, slugs } = rotas;
 const pre = (L) => (L === 'pt' ? '' : '/' + L);
 const CASOS = ['casoEv','casoIn','casoAta','casoUx','casoIa'];
@@ -19,7 +20,7 @@ const CASOS = ['casoEv','casoIn','casoAta','casoUx','casoIa'];
 let falhas = 0;
 const ok = (n,c,e) => { console.log((c?'  ok   ':'  FALHA')+'  '+n+(e?'  → '+e:'')); if(!c) falhas++; };
 
-const br = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
+const br = await chromium.launch({ executablePath: CHROME_WS });
 const pg = await (await br.newContext({ viewport: { width: 1200, height: 1000 } })).newPage();
 
 console.log('[1] toda página de caso de uso tem a figura, nos cinco idiomas');

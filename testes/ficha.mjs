@@ -1,15 +1,16 @@
 import { chromium } from 'playwright';
 import http from 'http'; import fs from 'fs';
 import { criarProxy, exigirNext } from './proxy.mjs';
+import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
 await exigirNext();
-const ROOT='/root/walkstamp/public';
+const ROOT=`${RAIZ_WS}/public`;
 const tipos={'.css':'text/css','.js':'text/javascript','.svg':'image/svg+xml'};
 /* O site virou Next.js: as páginas não existem mais como arquivo em public/.
    O servidorzinho estático daqui virou um encaminhador para o Next — mesma
    porta, mesmas URLs no teste, e quem responde é o produto de verdade. */
 const srv = criarProxy();
 await new Promise(r=>srv.listen(8961,r));
-const br=await chromium.launch({executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome'});
+const br=await chromium.launch({executablePath:CHROME_WS});
 let falhas=0; const ok=(n,c,e)=>{console.log((c?'  ok   ':'  FALHA')+'  '+n+(e?'  → '+e:''));if(!c)falhas++};
 const ctx=await br.newContext({viewport:{width:1200,height:900}});
 const pg=await ctx.newPage(); const erros=[]; pg.on('pageerror',e=>erros.push(e.message));

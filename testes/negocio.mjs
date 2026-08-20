@@ -22,6 +22,7 @@ import { spawn, execSync } from 'child_process';
 import http from 'http';
 import fs from 'fs';
 
+import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
 const P = 8823, B = 8824;
 const BASE = `http://localhost:${P}`;
 const DONO = 'dono@walkstamp.example';
@@ -31,7 +32,7 @@ const ok = (n, c, e) => { console.log((c ? '  ok   ' : '  FALHA') + '  ' + n + (
 
 /* As abas e os endereços saem do `rotas.json`, e não escritos aqui: um teste
    com a lista própria passa a aprovar exatamente o erro que deveria pegar. */
-const rotas = JSON.parse(fs.readFileSync('/root/walkstamp/src/rotas.json', 'utf8'));
+const rotas = JSON.parse(fs.readFileSync(`${RAIZ_WS}/src/rotas.json`, 'utf8'));
 const ABAS = rotas.abasNegocio;
 const SUB = rotas.subConta;
 const CONTA_EM = { pt: '/conta', en: '/en/account', es: '/es/cuenta', de: '/de/konto', fr: '/fr/compte' };
@@ -142,7 +143,7 @@ matarPorta();
 await new Promise((r) => setTimeout(r, 500));
 
 const next = spawn('npx', ['next', 'start', '-p', String(P)], {
-  cwd: '/root/walkstamp', stdio: 'ignore',
+  cwd: `${RAIZ_WS}`, stdio: 'ignore',
   env: { ...process.env,
     SUPABASE_URL: `http://localhost:${B}`,
     SUPABASE_SERVICE_ROLE_KEY: 'chave_de_mentira',
@@ -155,7 +156,7 @@ for (let i = 0; i < 60; i++) {
   await new Promise((r) => setTimeout(r, 500));
 }
 
-const br = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
+const br = await chromium.launch({ executablePath: CHROME_WS });
 const b64 = (o) => Buffer.from(JSON.stringify(o)).toString('base64url');
 
 /** Um contexto já logado como `email`. Trocar de pessoa é trocar de contexto:

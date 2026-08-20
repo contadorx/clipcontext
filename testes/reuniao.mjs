@@ -29,8 +29,9 @@ import { chromium } from 'playwright';
 import http from 'http'; import fs from 'fs'; import path from 'path';
 import zlib from 'zlib';
 
+import { CHROME_WS } from './_caminhos.mjs';
 const RAIZ = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..', 'public');
-const CHROME = process.env.CHROME || '/opt/pw-browsers/chromium-1194/chrome-linux/chrome';
+const CHROME = process.env.CHROME || CHROME_WS;
 const T = {'.html':'text/html','.css':'text/css','.js':'text/javascript','.png':'image/png',
            '.svg':'image/svg+xml','.ico':'image/x-icon','.webmanifest':'application/json','.webm':'video/webm'};
 const srv = http.createServer((q, r) => {

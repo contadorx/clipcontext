@@ -2,16 +2,17 @@ import { chromium } from 'playwright';
 import http from 'http'; import fs from 'fs'; import path from 'path';
 import { execFileSync } from 'child_process';
 import { ALVO, exigirNext } from './proxy.mjs';
+import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
 await exigirNext();
 
-const ROOT = '/root/walkstamp/public';
+const ROOT = `${RAIZ_WS}/public`;
 /* As paletas saem de `brand/paletas.py`, que é onde elas são decididas e onde
    o contraste WCAG é conferido. Antes saíam de um `/tmp/paletas.json` escrito à
    mão: ele não viajava no zip (o teste morria com ENOENT em máquina nova) e,
    pior, não acompanhava mudança de cor nenhuma — repintava com o que estava
    guardado de antes. Uma lista à mão ao lado da lista de verdade. */
 const PAL = JSON.parse(execFileSync('python3',
-  ['/root/walkstamp/brand/paletas.py', '--json'], { encoding: 'utf8', maxBuffer: 1 << 24 }));
+  [`${RAIZ_WS}/brand/paletas.py`, '--json'], { encoding: 'utf8', maxBuffer: 1 << 24 }));
 
 // troca as variáveis de cor e a cor do logotipo inline / favicon
 function pintar(html, p) {
@@ -67,7 +68,7 @@ const srv = http.createServer((q, r) => {
 });
 await new Promise(r => srv.listen(8881, r));
 
-const br = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
+const br = await chromium.launch({ executablePath: CHROME_WS });
 
 for (const chave of Object.keys(PAL)) {
   atual = chave;

@@ -17,7 +17,8 @@
 import { chromium } from 'playwright';
 import http from 'http'; import fs from 'fs'; import path from 'path';
 
-const ROOT = '/root/walkstamp/public';
+import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+const ROOT = `${RAIZ_WS}/public`;
 const T = { '.html': 'text/html', '.css': 'text/css', '.js': 'text/javascript',
             '.svg': 'image/svg+xml', '.webm': 'video/webm', '.mp4': 'video/mp4',
             '.jpg': 'image/jpeg', '.vtt': 'text/vtt', '.png': 'image/png' };
@@ -30,14 +31,14 @@ const srv = http.createServer((q, r) => {
 });
 await new Promise((r) => srv.listen(8975, r));
 
-const br = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
+const br = await chromium.launch({ executablePath: CHROME_WS });
 let falhas = 0;
 const ok = (n, c, e) => { console.log((c ? '  ok   ' : '  FALHA') + '  ' + n + (e ? '  → ' + e : '')); if (!c) falhas++; };
 
 const ctx = await br.newContext({ acceptDownloads: true, viewport: { width: 1300, height: 1000 } });
 const pg = await ctx.newPage();
 const erros = []; pg.on('pageerror', (e) => erros.push(e.message));
-const jspdf = fs.readFileSync('/root/walkstamp/vendor/jspdf.umd.min.js', 'utf8');
+const jspdf = fs.readFileSync(`${RAIZ_WS}/vendor/jspdf.umd.min.js`, 'utf8');
 await pg.route('**/jspdf**', (r) => r.fulfill({ status: 200, headers: { 'content-type': 'text/javascript' }, body: jspdf }));
 await pg.route('**/rpc/**', (r) => r.fulfill({ status: 200, body: 'null' }));
 await pg.goto('http://localhost:8975/app.html?lang=pt');

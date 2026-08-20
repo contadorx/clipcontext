@@ -12,6 +12,7 @@ import { chromium } from 'playwright';
 import { spawn, execSync } from 'child_process';
 import http from 'http';
 
+import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
 const P = 8841, B = 8842;
 const BASE = `http://localhost:${P}`;
 let falhas = 0;
@@ -40,7 +41,7 @@ await new Promise((r) => banco.listen(B, r));
 try { execSync(`fuser -k ${P}/tcp 2>/dev/null`); } catch {}
 await new Promise((r) => setTimeout(r, 500));
 const next = spawn('npx', ['next', 'start', '-p', String(P)], {
-  cwd: '/root/walkstamp', stdio: 'ignore',
+  cwd: `${RAIZ_WS}`, stdio: 'ignore',
   env: { ...process.env, SUPABASE_URL: `http://localhost:${B}`, SUPABASE_SERVICE_ROLE_KEY: 'x',
          WALKSTAMP_SUPA_TESTE: `http://localhost:${B}` },
 });
@@ -49,7 +50,7 @@ for (let i = 0; i < 60; i++) {
   try { const r = await fetch(`${BASE}/conta`); if (r.ok) break; } catch {}
   await new Promise((r) => setTimeout(r, 500));
 }
-const br = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
+const br = await chromium.launch({ executablePath: CHROME_WS });
 const b64 = (o) => Buffer.from(JSON.stringify(o)).toString('base64url');
 async function ctxDe(email) {
   const ctx = await br.newContext({ viewport: { width: 1340, height: 1100 } });

@@ -23,7 +23,8 @@ import { chromium } from 'playwright';
 import http from 'http';
 import fs from 'fs';
 
-const RAIZ = '/root/walkstamp';
+import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+const RAIZ = `${RAIZ_WS}`;
 const html = fs.readFileSync(RAIZ + '/public/app.html', 'utf8');
 const arg = (n, p) => {
   const i = process.argv.indexOf('--' + n);
@@ -46,7 +47,7 @@ const ok = (n, c, e) => {
 };
 
 const br = await chromium.launch({
-  executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome',
+  executablePath: CHROME_WS,
   args: ['--enable-precise-memory-info', '--js-flags=--expose-gc'],
 });
 const ctx = await br.newContext({ viewport: { width: 1250, height: 980 } });

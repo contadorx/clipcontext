@@ -29,7 +29,8 @@ import { chromium } from 'playwright';
 import http from 'http';
 import fs from 'fs';
 
-const RAIZ = '/root/walkstamp';
+import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+const RAIZ = `${RAIZ_WS}`;
 const html = fs.readFileSync(RAIZ + '/public/app.html', 'utf8');
 const srv = http.createServer((q, r) => {
   if (q.url.startsWith('/_vercel/')) {
@@ -46,7 +47,7 @@ const ok = (n, c, e) => {
 };
 
 const br = await chromium.launch({
-  executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome',
+  executablePath: CHROME_WS,
   args: ['--use-fake-device-for-media-stream', '--use-fake-ui-for-media-stream',
          '--auto-accept-this-tab-capture', '--allow-http-screen-capture'],
 });

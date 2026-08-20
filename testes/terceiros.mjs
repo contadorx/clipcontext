@@ -35,7 +35,8 @@
 import fs from 'fs';
 import path from 'path';
 
-const RAIZ = '/root/walkstamp';
+import { RAIZ_WS } from './_caminhos.mjs';
+const RAIZ = `${RAIZ_WS}`;
 let falhas = 0;
 const ok = (n, c, e) => {
   console.log((c ? '  ok   ' : '  FALHA') + '  ' + n + (e ? '  → ' + e : ''));

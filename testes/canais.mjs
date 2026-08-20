@@ -1,11 +1,12 @@
 /* O nome dos dois canais de áudio. */
 import { chromium } from 'playwright';
 import http from 'http'; import fs from 'fs';
-const html = fs.readFileSync('/root/walkstamp/public/app.html','utf8');
-const jspdf = fs.readFileSync('/root/walkstamp/vendor/jspdf.umd.min.js','utf8');
+import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+const html = fs.readFileSync(`${RAIZ_WS}/public/app.html`,'utf8');
+const jspdf = fs.readFileSync(`${RAIZ_WS}/vendor/jspdf.umd.min.js`,'utf8');
 const srv = http.createServer((q,r)=>{ if(q.url.startsWith('/_vercel/')){r.writeHead(200,{'Content-Type':'text/javascript'});return r.end('')} r.writeHead(200,{'Content-Type':'text/html'}); r.end(html); });
 await new Promise(r=>srv.listen(8933,r));
-const br = await chromium.launch({ executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
+const br = await chromium.launch({ executablePath:CHROME_WS });
 let falhas = 0;
 const ok = (n,c,e2)=>{console.log((c?'  ok   ':'  FALHA')+'  '+n+(e2?'  → '+e2:''));if(!c)falhas++};
 const ctx = await br.newContext({ viewport:{width:1300,height:1000} });
@@ -71,7 +72,7 @@ console.log('\n[5] o nome escolhido é o que a transcrição usa');
 {
   /* A prova de que o campo não é decoração: é `nomeDoCanal` que a captura
      chama, e ele devolve o que está escrito. */
-  const fonte = fs.readFileSync('/root/walkstamp/public/app.html','utf8');
+  const fonte = fs.readFileSync(`${RAIZ_WS}/public/app.html`,'utf8');
   ok('a captura pergunta o nome ao campo, e não a uma constante',
      /abrirCanal\(ctx, telaStream, nomeDoCanal\('sys'\)/.test(fonte) &&
      /abrirCanal\(ctx, micStream,  nomeDoCanal\('mic'\)/.test(fonte));

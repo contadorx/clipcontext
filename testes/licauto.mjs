@@ -7,7 +7,7 @@ import { chromium } from 'playwright';
 import http from 'http'; import fs from 'fs';
 import { execSync } from 'child_process';
 
-const ROOT = '/root/walkstamp/public';
+const ROOT = `${RAIZ_WS}/public`;
 const html = fs.readFileSync(ROOT + '/app.html', 'utf8');
 const srv = http.createServer((q, r) => {
   if (q.url.startsWith('/_vercel/')) { r.writeHead(200,{'Content-Type':'text/javascript'}); return r.end('') }
@@ -24,20 +24,21 @@ await new Promise(r => srv.listen(8920, r));
  * inteiro. Sai com 0: uma esteira vermelha por uma ausência esperada é uma
  * esteira que se aprende a ignorar. */
 import { existsSync } from 'fs';
-if (!existsSync('/root/walkstamp/emitir-licenca.py')) {
+import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+if (!existsSync(`${RAIZ_WS}/emitir-licenca.py`)) {
   console.log('  pulado  emitir-licenca.py não está neste pacote (ele guarda as chaves privadas).');
   console.log('          Rode este teste na máquina onde o emissor vive.');
   process.exit(0);
 }
 
-const emissor = '/root/walkstamp/emitir-licenca.py';
+const emissor = `${RAIZ_WS}/emitir-licenca.py`;
 const auto = (email, assentos, dias, cliente) =>
   execSync(`python3 ${emissor} --auto "${email}" ${assentos} ${dias}` + (cliente ? ` "${cliente}"` : ''),
            { encoding: 'utf8' }).trim();
 const mestra = execSync(`python3 ${emissor} "Cliente Exemplo — QA" 40 2030-01-01`, { encoding: 'utf8' })
   .split('\n').find(l => l.trim().startsWith('WS1.')).trim();
 
-const br = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
+const br = await chromium.launch({ executablePath: CHROME_WS });
 let falhas = 0;
 const ok = (n, c, extra) => { console.log((c ? '  ok   ' : '  FALHA') + '  ' + n + (extra ? '  → ' + extra : '')); if (!c) falhas++; };
 /* Aba limpa a cada vez, de propósito: uma licença boa fica guardada no

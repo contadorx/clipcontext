@@ -7,9 +7,10 @@
 import { chromium } from 'playwright';
 import http from 'http'; import fs from 'fs'; import path from 'path';
 import { criarProxy, exigirNext } from './proxy.mjs';
+import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
 await exigirNext();
 
-const ROOT = '/root/walkstamp/public';
+const ROOT = `${RAIZ_WS}/public`;
 const T = {'.html':'text/html','.css':'text/css','.js':'text/javascript','.svg':'image/svg+xml',
   '.ico':'image/x-icon','.png':'image/png','.jpg':'image/jpeg','.mp4':'video/mp4','.webm':'video/webm','.vtt':'text/vtt'};
 /* O site virou Next.js: as páginas não existem mais como arquivo em public/.
@@ -18,7 +19,7 @@ const T = {'.html':'text/html','.css':'text/css','.js':'text/javascript','.svg':
 const srv = criarProxy();
 await new Promise(r => srv.listen(8877, r));
 
-const br = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
+const br = await chromium.launch({ executablePath: CHROME_WS });
 let falhas = 0;
 const ok = (n, c, e) => { console.log((c ? '  ok   ' : '  FALHA') + '  ' + n + (e ? '  → ' + e : '')); if (!c) falhas++; };
 
@@ -110,7 +111,7 @@ for (const [k, rot] of [['dnt','Do Not Track'], ['gpc','Global Privacy Control']
 
 console.log('\n[M3] o arquivo offline é mudo');
 {
-  const off = fs.readFileSync('/root/walkstamp/offline/walkstamp-offline.html', 'utf8');
+  const off = fs.readFileSync(`${RAIZ_WS}/offline/walkstamp-offline.html`, 'utf8');
   ok('sem endereço do Supabase no arquivo', !/supabase/i.test(off));
   ok('sem snippet do Vercel no arquivo', !/_vercel\/insights/.test(off));
 
@@ -119,7 +120,7 @@ console.log('\n[M3] o arquivo offline é mudo');
   const externos = [];
   pg.on('request', r => { if (!r.url().startsWith('file:')) externos.push(r.url()); });
   const erros = []; pg.on('pageerror', e => erros.push(e.message));
-  await pg.goto('file:///root/walkstamp/offline/walkstamp-offline.html');
+  await pg.goto(`file://${RAIZ_WS}/offline/walkstamp-offline.html`);
   await pg.waitForTimeout(900);
   ok('abrindo o arquivo, nenhum pedido sai da máquina', externos.length === 0, externos.join(' | ').slice(0,160));
   ok('e ele funciona: a interface montou', await pg.locator('#drop').isVisible());

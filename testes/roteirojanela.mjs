@@ -18,8 +18,9 @@
 import { chromium } from 'playwright';
 import http from 'http'; import fs from 'fs'; import path from 'path';
 
+import { CHROME_WS } from './_caminhos.mjs';
 const RAIZ = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..', 'public');
-const CHROME = process.env.CHROME || '/opt/pw-browsers/chromium-1194/chrome-linux/chrome';
+const CHROME = process.env.CHROME || CHROME_WS;
 const html = fs.readFileSync(RAIZ + '/app.html', 'utf8');
 const srv = http.createServer((q, r) => {
   const u = q.url.split('?')[0];

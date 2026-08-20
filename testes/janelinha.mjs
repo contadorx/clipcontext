@@ -12,7 +12,8 @@
 import { chromium } from 'playwright';
 import fs from 'fs';
 
-const app = fs.readFileSync('/root/walkstamp/public/app.html', 'utf8');
+import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+const app = fs.readFileSync(`${RAIZ_WS}/public/app.html`, 'utf8');
 let falhas = 0;
 const ok = (n, c, e) => { console.log((c ? '  ok   ' : '  FALHA') + '  ' + n + (e ? '  → ' + e : '')); if (!c) falhas++; };
 
@@ -30,7 +31,7 @@ const corpo = (corpoSrc.slice(0, corpoSrc.indexOf(';\n')).match(/'([^']*)'/g) ||
   .map((x) => x.slice(1, -1)).join('');
 ok('e o corpo também', /class="top"/.test(corpo) && /id="stop"/.test(corpo), corpo.slice(0, 60));
 
-const br = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
+const br = await chromium.launch({ executablePath: CHROME_WS });
 const pg = await (await br.newContext({ viewport: { width: LARG, height: ALT } })).newPage();
 await pg.setContent(`<!doctype html><html><head><meta charset="utf-8"><style>${css}</style></head>` +
                     `<body>${corpo}</body></html>`);

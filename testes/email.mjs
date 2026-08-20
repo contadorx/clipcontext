@@ -15,6 +15,7 @@ import { chromium } from 'playwright';
 import { spawn, execSync } from 'child_process';
 import http from 'http';
 
+import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
 const P = 8853, B = 8854, E = 8855;
 const BASE = `http://localhost:${P}`;
 const DONO = 'dono@email.example';
@@ -79,7 +80,7 @@ await new Promise((r) => banco.listen(B, r));
 function subir(env) {
   try { execSync(`fuser -k ${P}/tcp 2>/dev/null`); } catch {}
   const n = spawn('npx', ['next', 'start', '-p', String(P)], {
-    cwd: '/root/walkstamp', stdio: 'ignore',
+    cwd: `${RAIZ_WS}`, stdio: 'ignore',
     env: { ...process.env, SUPABASE_URL: `http://localhost:${B}`,
            SUPABASE_SERVICE_ROLE_KEY: 'x', WALKSTAMP_SUPA_TESTE: `http://localhost:${B}`,
            WALKSTAMP_DONO: DONO, CONVITE_SAL: 'sal-de-teste', ...env },
@@ -93,7 +94,7 @@ async function esperar() {
   }
 }
 let proc;
-const br = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
+const br = await chromium.launch({ executablePath: CHROME_WS });
 process.on('exit', () => { try { proc && proc.kill('SIGKILL'); } catch {} banco.close(); brevo.close(); });
 
 console.log('[1] sem chave do Brevo, o convite RECUSA — e não finge');

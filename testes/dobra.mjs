@@ -1,7 +1,8 @@
 /* Cartões colapsados: fecham quando o passo não chegou, abrem quando destrava. */
 import { chromium } from 'playwright';
 import http from 'http'; import fs from 'fs'; import path from 'path';
-const ROOT='/root/walkstamp/public';
+import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+const ROOT=`${RAIZ_WS}/public`;
 const T={'.html':'text/html','.css':'text/css','.js':'text/javascript','.webm':'video/webm','.png':'image/png','.svg':'image/svg+xml','.ico':'image/x-icon'};
 const srv=http.createServer((q,r)=>{
   if(q.url.startsWith('/_vercel/')){r.writeHead(200,{'Content-Type':'text/javascript'});return r.end('')}
@@ -9,7 +10,7 @@ const srv=http.createServer((q,r)=>{
   if(!fs.existsSync(f)){r.writeHead(404);return r.end()}
   r.writeHead(200,{'Content-Type':T[path.extname(f)]||'application/octet-stream'});r.end(fs.readFileSync(f));});
 await new Promise(r=>srv.listen(8878,r));
-const br=await chromium.launch({executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome'});
+const br=await chromium.launch({executablePath:CHROME_WS});
 let falhas=0; const ok=(n,c,e)=>{console.log((c?'  ok   ':'  FALHA')+'  '+n+(e?'  → '+e:''));if(!c)falhas++};
 const pg=await br.newPage({viewport:{width:1000,height:900}});
 const erros=[]; pg.on('pageerror',e=>erros.push(e.message));

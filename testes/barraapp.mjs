@@ -24,6 +24,7 @@ import { chromium } from 'playwright';
 import { spawn, execSync } from 'child_process';
 import http from 'http';
 
+import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
 const P = 8829, B = 8830;
 const BASE = `http://localhost:${P}`;
 const DONO = 'dono@barra.example';
@@ -60,7 +61,7 @@ try { execSync(`fuser -k ${P}/tcp 2>/dev/null`); } catch {}
 await new Promise((r) => setTimeout(r, 500));
 
 const next = spawn('npx', ['next', 'start', '-p', String(P)], {
-  cwd: '/root/walkstamp', stdio: 'ignore',
+  cwd: `${RAIZ_WS}`, stdio: 'ignore',
   env: { ...process.env, SUPABASE_URL: `http://localhost:${B}`,
          SUPABASE_SERVICE_ROLE_KEY: 'x', WALKSTAMP_SUPA_TESTE: `http://localhost:${B}`,
          WALKSTAMP_DONO: DONO },
@@ -71,7 +72,7 @@ for (let i = 0; i < 60; i++) {
   await new Promise((r) => setTimeout(r, 500));
 }
 
-const br = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
+const br = await chromium.launch({ executablePath: CHROME_WS });
 const b64 = (o) => Buffer.from(JSON.stringify(o)).toString('base64url');
 
 async function comoSendo(email) {
@@ -220,7 +221,7 @@ console.log('\n[6] do arquivo local não há a quem perguntar — e nem tenta');
   const pedidos = [];
   pg.on('request', (r) => pedidos.push(r.url()));
   pg.on('pageerror', (e) => erros.push(e.message));
-  await pg.goto('file:///root/walkstamp/public/app.html?lang=pt', { waitUntil: 'load' });
+  await pg.goto(`file://${RAIZ_WS}/public/app.html?lang=pt`, { waitUntil: 'load' });
   await pg.waitForTimeout(1200);
   ok('nenhuma barra no arquivo offline', await pg.locator('#barraConta.hide').count() === 1);
   ok('e nenhum pedido ao /api/menu', !pedidos.some((u) => u.includes('/api/menu')),

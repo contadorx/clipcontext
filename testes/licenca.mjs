@@ -2,9 +2,9 @@ import { chromium } from 'playwright';
 import http from 'http'; import fs from 'fs';
 import { execSync } from 'child_process';
 
-const ROOT = '/root/walkstamp/public';
+const ROOT = `${RAIZ_WS}/public`;
 const html = fs.readFileSync(ROOT + '/app.html', 'utf8');
-const jspdf = fs.readFileSync('/root/walkstamp/vendor/jspdf.umd.min.js', 'utf8');
+const jspdf = fs.readFileSync(`${RAIZ_WS}/vendor/jspdf.umd.min.js`, 'utf8');
 const srv = http.createServer((q, r) => {
   const u = q.url.split('?')[0];
   if (u.startsWith('/_vercel/')) { r.writeHead(200,{'Content-Type':'text/javascript'}); return r.end('') }
@@ -12,7 +12,7 @@ const srv = http.createServer((q, r) => {
 });
 await new Promise(r => srv.listen(8909, r));
 
-const br = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
+const br = await chromium.launch({ executablePath: CHROME_WS });
 let falhas = 0;
 const ok = (n, c, extra) => { console.log((c ? '  ok   ' : '  FALHA') + '  ' + n + (extra ? '  → ' + extra : '')); if (!c) falhas++; };
 
@@ -25,14 +25,15 @@ const ok = (n, c, extra) => { console.log((c ? '  ok   ' : '  FALHA') + '  ' + n
  * inteiro. Sai com 0: uma esteira vermelha por uma ausência esperada é uma
  * esteira que se aprende a ignorar. */
 import { existsSync } from 'fs';
-if (!existsSync('/root/walkstamp/emitir-licenca.py')) {
+import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+if (!existsSync(`${RAIZ_WS}/emitir-licenca.py`)) {
   console.log('  pulado  emitir-licenca.py não está neste pacote (ele guarda as chaves privadas).');
   console.log('          Rode este teste na máquina onde o emissor vive.');
   process.exit(0);
 }
 
 const emitir = (quem, n, ate) => execSync(
-  `cd /root/walkstamp && python3 emitir-licenca.py ${JSON.stringify(quem)} ${n} ${ate}`,
+  `cd ${RAIZ_WS} && python3 emitir-licenca.py ${JSON.stringify(quem)} ${n} ${ate}`,
   { encoding: 'utf8' }).match(/^WS1\.[^\s]+$/m)[0];
 
 const VALIDA  = emitir('Cliente Exemplo — QA', 5, '2099-01-01');
@@ -115,7 +116,7 @@ await pg.waitForSelector('#prevCard:not(.hide)', { timeout: 40000 });
 await pg.waitForTimeout(600);
 
 await pg.fill('#mcNome', 'Cliente Exemplo S.A.');
-await pg.setInputFiles('#mcFile', '/root/walkstamp/public/apple-touch-icon.png');
+await pg.setInputFiles('#mcFile', `${RAIZ_WS}/public/apple-touch-icon.png`);
 await pg.waitForTimeout(500);
 ok('a prévia do logotipo aparece', await pg.locator('#mcPrev').isVisible());
 

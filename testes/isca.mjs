@@ -19,6 +19,7 @@ import { spawn, execSync } from 'child_process';
 import http from 'http';
 import fs from 'fs';
 
+import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
 const P = 8833, B = 8834;
 const BASE = `http://localhost:${P}`;
 const DONO = 'dono@isca.example';
@@ -26,7 +27,7 @@ const DONO = 'dono@isca.example';
 let falhas = 0;
 const ok = (n, c, e) => { console.log((c ? '  ok   ' : '  FALHA') + '  ' + n + (e ? '  → ' + e : '')); if (!c) falhas++; };
 
-const rotas = JSON.parse(fs.readFileSync('/root/walkstamp/src/rotas.json', 'utf8'));
+const rotas = JSON.parse(fs.readFileSync(`${RAIZ_WS}/src/rotas.json`, 'utf8'));
 const SUB = rotas.subConta;
 const PRECOS = rotas.slugs.precos;
 
@@ -59,7 +60,7 @@ await new Promise((r) => banco.listen(B, r));
 try { execSync(`fuser -k ${P}/tcp 2>/dev/null`); } catch {}
 await new Promise((r) => setTimeout(r, 500));
 const next = spawn('npx', ['next', 'start', '-p', String(P)], {
-  cwd: '/root/walkstamp', stdio: 'ignore',
+  cwd: `${RAIZ_WS}`, stdio: 'ignore',
   env: { ...process.env, SUPABASE_URL: `http://localhost:${B}`,
          SUPABASE_SERVICE_ROLE_KEY: 'x', WALKSTAMP_SUPA_TESTE: `http://localhost:${B}`,
          WALKSTAMP_DONO: DONO },
@@ -70,7 +71,7 @@ for (let i = 0; i < 60; i++) {
   await new Promise((r) => setTimeout(r, 500));
 }
 
-const br = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
+const br = await chromium.launch({ executablePath: CHROME_WS });
 const b64 = (o) => Buffer.from(JSON.stringify(o)).toString('base64url');
 async function ctxDe(email) {
   const ctx = await br.newContext({ viewport: { width: 1300, height: 1100 } });

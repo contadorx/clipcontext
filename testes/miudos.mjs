@@ -1,11 +1,12 @@
 /* Ambiente, tipo do momento, contagem regressiva e hesitações. */
 import { chromium } from 'playwright';
 import http from 'http'; import fs from 'fs';
-const html = fs.readFileSync('/root/walkstamp/public/app.html','utf8');
-const jspdf = fs.readFileSync('/root/walkstamp/vendor/jspdf.umd.min.js','utf8');
+import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+const html = fs.readFileSync(`${RAIZ_WS}/public/app.html`,'utf8');
+const jspdf = fs.readFileSync(`${RAIZ_WS}/vendor/jspdf.umd.min.js`,'utf8');
 const srv = http.createServer((q,r)=>{ if(q.url.startsWith('/_vercel/')){r.writeHead(200,{'Content-Type':'text/javascript'});return r.end('')} r.writeHead(200,{'Content-Type':'text/html'}); r.end(html); });
 await new Promise(r=>srv.listen(8925,r));
-const br = await chromium.launch({ executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
+const br = await chromium.launch({ executablePath:CHROME_WS });
 let falhas = 0;
 const ok = (n,c,e2)=>{console.log((c?'  ok   ':'  FALHA')+'  '+n+(e2?'  → '+e2:''));if(!c)falhas++};
 const ctx = await br.newContext({ acceptDownloads:true, viewport:{width:1250,height:980} });
@@ -66,7 +67,7 @@ ok('e o prompt manda usar a classificação',
 
 console.log('\n[3] a contagem regressiva — sempre, e sem caixa para desligar');
 {
-  const fonte = fs.readFileSync('/root/walkstamp/public/app.html','utf8');
+  const fonte = fs.readFileSync(`${RAIZ_WS}/public/app.html`,'utf8');
   /* A caixa saiu: ela existia só para oferecer o jeito de estragar o primeiro
      quadro da própria gravação — sem os três segundos, o primeiro quadro é
      quase sempre o seletor de tela do navegador que a pessoa acabou de fechar. */

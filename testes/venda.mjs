@@ -18,6 +18,7 @@ import crypto from 'crypto';
 import http from 'http';
 import fs from 'fs';
 
+import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
 const SEGREDO = 'whsec_um_segredo_de_teste';
 const PORTA_NEXT = 8803;
 const PORTA_BANCO = 8804;
@@ -42,7 +43,7 @@ const banco = http.createServer((q, r) => {
 await new Promise((r) => banco.listen(PORTA_BANCO, r));
 
 const next = spawn('npx', ['next', 'start', '-p', String(PORTA_NEXT)], {
-  cwd: '/root/walkstamp',
+  cwd: `${RAIZ_WS}`,
   env: { ...process.env,
     STRIPE_SECRET_KEY: 'sk_test_de_mentira',
     STRIPE_WEBHOOK_SECRET: SEGREDO,
@@ -176,7 +177,7 @@ console.log('\n[6] o que a Stripe manda e não nos interessa não vira nada');
 
 /* --------------------------------------------------- a área do cliente */
 console.log('\n[7] a conta é oferecida, nunca exigida');
-const br = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
+const br = await chromium.launch({ executablePath: CHROME_WS });
 {
   const pg = await (await br.newContext()).newPage();
   const erros = []; pg.on('pageerror', (e) => erros.push(e.message));
@@ -272,7 +273,7 @@ console.log('\n[11] o endereço interno não é um segundo endereço público');
 
 console.log('\n[12] o dicionário da conta não tem buraco');
 {
-  const d = JSON.parse(fs.readFileSync('/root/walkstamp/src/i18n-conta.json', 'utf8'));
+  const d = JSON.parse(fs.readFileSync(`${RAIZ_WS}/src/i18n-conta.json`, 'utf8'));
   const base = Object.keys(d.pt);
   for (const L of ['en', 'es']) {
     const faltam = base.filter((k) => !(k in d[L]));
