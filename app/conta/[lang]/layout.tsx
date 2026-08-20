@@ -65,7 +65,7 @@ export default async function LayoutDaConta({ children, params }: LayoutProps<'/
               <a href={rota('precos')} className="hide-xs">{s3.navPrice}</a>
               <a href={s3.blog} className="hide-sm">{s3.fBlog}</a>
               <a className="btnTop" href={`/app?lang=${lang}`}>{t.abrirFerramenta}</a>
-              <span style={{ display: 'inline-flex', gap: 9, borderLeft: '1px solid var(--line)', paddingLeft: 16 }}>
+              <span style={{ display: 'inline-flex', gap: 9, borderLeft: '1px solid var(--line)', paddingLeft: 12 }}>
                 {IDIOMAS_CONTA.map((L) => (
                   <a key={L} href={CAMINHO[L]}
                      style={L === lang ? { color: 'var(--ink)', fontWeight: 600 } : undefined}>

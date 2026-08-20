@@ -47,7 +47,7 @@ export default async function CascaDoBlog({ children, params }: LayoutProps<'/[l
             {/* O seletor leva para o MESMO lugar no outro idioma — o índice do
                 blog daquele idioma, e não a home. Mandar para a home seria
                 perder a página em que a pessoa estava para trocar de língua. */}
-            <span style={{ display: 'inline-flex', gap: 9, borderLeft: '1px solid var(--line)', paddingLeft: 16 }}>
+            <span style={{ display: 'inline-flex', gap: 9, borderLeft: '1px solid var(--line)', paddingLeft: 12 }}>
               {IDIOMAS.map((L2) => (
                 <a key={L2} href={enderecoBlog(L2)}
                    style={L2 === L ? { color: 'var(--ink)', fontWeight: 600 } : undefined}>

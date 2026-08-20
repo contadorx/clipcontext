@@ -76,6 +76,18 @@ async function medir(rota, rotulo){
       /* O botão de ação muda de destino conforme a tela — na ferramenta ele
          leva à conta, nas outras à ferramenta. É a única diferença legítima. */
       acao: (q('header nav a.btnTop') || q('header nav a.btnTopo') || {}).textContent || '',
+      /* O BOTÃO, medido e não olhado. Ele dizia ser cópia do do site e tinha
+         quatro diferenças — forro, peso, corpo e a cor da tinta. Comparar as
+         REGRAS de CSS não pegaria: são dois arquivos, e o que importa é o que
+         sai na tela. */
+      botao: (() => {
+        const b = q('header nav a.btnTop') || q('header nav a.btnTopo');
+        if (!b) return null;
+        const c = getComputedStyle(b), r = b.getBoundingClientRect();
+        return { alt: Math.round(r.height), corpo: c.fontSize, peso: c.fontWeight,
+                 forro: c.paddingTop + ' ' + c.paddingLeft, raio: c.borderRadius,
+                 tinta: c.color, fundo: c.backgroundColor };
+      })(),
     };
   });
   console.log(`\n${rotulo}`);
@@ -206,6 +218,44 @@ console.log('\n  o plano, na barra lateral:');
   ok('o cabeçalho continua com os cinco itens do site', r.itensCabecalho === 5, String(r.itensCabecalho));
   ok('sem erro de página (com barra)', erros2.length === 0, erros2[0]);
   await pg2.close(); await ctx2.close();
+}
+
+/* ---- O BOTÃO DE AÇÃO É O MESMO BOTÃO ----
+   Ele é o único item do menu cujo DESTINO muda com a tela. A aparência não pode
+   mudar junto: um botão menor e mais gordo numa das telas é a moldura
+   desalinhada de novo, no único elemento que salta à vista. */
+console.log('\n  o botão de ação, medido:');
+for (const [nome, r] of todas) {
+  console.log('     ' + nome.padEnd(11) + JSON.stringify(r.botao));
+}
+for (const chave of ['alt', 'corpo', 'peso', 'forro', 'raio', 'tinta', 'fundo']) {
+  const vs = todas.map(([n, r]) => [n, r.botao && r.botao[chave]]);
+  const um = vs[0][1];
+  ok('o botão tem o mesmo ' + chave + ' nas quatro telas',
+     vs.every(([, v]) => v === um), vs.map(([n, v]) => n + '=' + v).join('  '));
+}
+
+/* ---- E O MENU TEM QUE CABER, EM TODOS OS IDIOMAS ----
+   Ele transbordava a moldura em português, espanhol e francês depois de o Blog
+   entrar — e transbordar é o desalinhamento voltando por outra porta: o menu
+   terminava 31 px à direita da borda na conta e no blog. O espanhol é o pior
+   caso e é ele que decide a largura. */
+console.log('\n  o menu cabe? (o que precisa contra o que cabe)');
+for (const rota of ['/', '/es', '/fr', '/de', '/conta', '/blog', '/app?lang=pt']) {
+  await pg.goto(BASE + rota, { waitUntil: 'domcontentloaded' });
+  await pg.waitForTimeout(500);
+  const s2 = await pg.evaluate(() => {
+    const w = document.querySelector('header .wrap');
+    const nav = document.querySelector('header nav');
+    const b = document.querySelector('header .brand');
+    const cabe = w.getBoundingClientRect().width - 44 - b.getBoundingClientRect().width - 16;
+    return { sobra: Math.round(cabe - nav.scrollWidth),
+             fim: Math.round(nav.getBoundingClientRect().right),
+             borda: Math.round(w.getBoundingClientRect().right - 22) };
+  });
+  console.log('     ' + rota.padEnd(14) + 'sobra ' + String(s2.sobra).padStart(4) + ' px');
+  ok('o menu cabe em ' + rota, s2.sobra >= 0, s2.sobra + ' px de falta');
+  ok('e não passa da borda em ' + rota, s2.fim <= s2.borda + 1, s2.fim + ' > ' + s2.borda);
 }
 
 ok('o rodapé tem três colunas nas três telas',

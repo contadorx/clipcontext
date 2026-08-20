@@ -154,7 +154,7 @@ function seletor(lang: Lang, pagina: string): string {
     return `<a href="${href}"${atual}>${L.toUpperCase()}</a>`;
   });
   return '<span style="display:inline-flex;gap:9px;border-left:1px solid var(--line);' +
-    'padding-left:16px">' + itens.join('') + '</span>';
+    'padding-left:12px">' + itens.join('') + '</span>';
 }
 
 /* ------------------------------------------------ a tabela de funcionalidades */

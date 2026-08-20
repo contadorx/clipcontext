@@ -656,7 +656,12 @@ def build_site(root: pathlib.Path) -> None:
         for k, v in t.items():
             html = html.replace("{{" + k + "}}", str(v))
 
-        faltando = set(re.findall(r"\{\{(\w+)\}\}", html))
+        # `- chaves_do_render()` como na verificação das páginas internas, vinte
+        # linhas abaixo. Sem isto, a home acusava `jsonld` — que é escrito pelo
+        # `lib/site.ts` na hora de renderizar, e não pelo dicionário — e o build
+        # PARAVA. As duas verificações fazem a mesma pergunta e precisavam já
+        # estar fazendo do mesmo jeito; a de baixo já subtraía, a de cima não.
+        faltando = set(re.findall(r"\{\{(\w+)\}\}", html)) - chaves_do_render()
         if faltando:
             print(f"AVISO: chaves sem tradução em {lang}: {sorted(faltando)}", file=sys.stderr)
             return 1

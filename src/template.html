@@ -27,12 +27,48 @@
   /* O rodape da ferramenta. As mesmas tres colunas do site — mesmas medidas,
      mesmos rotulos, mesma ordem —, e por isso as regras aqui sao copia das de
      la: a ferramenta e um arquivo so e nao pode baixar o `site.css`. */
-  /* O botao do cabecalho, igual ao `.btnTop` do site. Copiado e nao importado
-     pelo motivo de sempre: a ferramenta e um arquivo so. */
-  .btnTopo{display:inline-block;background:var(--accent);color:#fff !important;
-      border-radius:8px;padding:7px 14px;font-weight:650;font-size:13.5px;
-      text-decoration:none;margin-right:12px}
-  .btnTopo:hover{filter:brightness(1.08)}
+  /* O botão do cabeçalho, igual ao `.btnTop` do site. Copiado e não importado
+     pelo motivo de sempre: a ferramenta é um arquivo só e não baixa o
+     `site.css`.
+
+     ---- E "IGUAL" TINHA QUATRO DIFERENÇAS ----
+
+     Ele dizia ser cópia e não era: 7px de forro contra 9, peso 650 contra 600,
+     corpo de 13,5 contra 14,5 e uma margem à direita que o `gap` do menu já
+     dava. O resultado era o único botão do cabeçalho menor e mais gordo do que
+     o das outras telas — a última peça fora de lugar de uma moldura que já
+     estava alinhada em tudo o mais.
+
+     A quarta diferença era a pior, e não se via de dia: `color:#fff !important`
+     em vez de `var(--accent-ink)`. No tema escuro o acento clareia e a tinta
+     dele passa a ser ESCURA — o site escreve `#121419` sobre `#737cf0`, e a
+     ferramenta insistia em branco sobre a mesma cor. Menos contraste, no tema
+     em que ele já é mais difícil, por um `!important` que ninguém revisaria.
+
+     Os números daqui para baixo são os de `public/site.css`, incluindo as duas
+     quebras de tela. */
+  /* `.topoNav a.btnTopo`, e NÃO `.btnTopo`.
+
+     Medido depois de igualar os números: a tinta do botão saía
+     `rgb(92,100,115)` — o cinza de `--muted` —, e não a de `--accent-ink`.
+     A causa é a regra de cima: `.topoNav > a` pesa mais que `.btnTopo` sozinha,
+     e um botão de fundo cheio com texto cinza é o pior contraste da tela.
+
+     É o mesmo desenho do site, que já escreve `nav a.btnTop` pelo mesmo motivo,
+     e é a terceira vez nesta semana que um seletor mais fraco perde para um
+     mais genérico escrito antes. */
+  /* `transition` nomeada: `.15s` para tudo anima também o `outline` do anel
+     de foco, e o `:focus-visible` lá de cima escreve `transition:none` de
+     propósito — a regra do botão, mais específica, ganhava dela. O
+     `testes/a11y.mjs` lia `0px` de contorno aqui, medindo no meio da
+     animação. Um anel que só existe depois de 150 ms é um anel que quem
+     navega de teclado não vê. */
+  .topoNav a.btnTopo{background:var(--accent);color:var(--accent-ink);font-weight:600;
+      padding:9px 16px;border-radius:8px;text-decoration:none;flex:none;
+      line-height:24px;transition:background .15s, filter .15s}
+  .topoNav a.btnTopo:hover{color:var(--accent-ink);filter:brightness(1.08)}
+  @media (max-width:560px){ .topoNav a.btnTopo{padding:7px 12px;font-size:13px} }
+  @media (max-width:430px){ .topoNav a.btnTopo{padding:7px 10px} }
   .rodapeApp{border-top:1px solid var(--line);margin-top:40px;padding:34px 0 30px;background:var(--panel)}
   /* A medida do rodapé sai do `--maxTopo`, junto com a do cabeçalho: eles são
      a moldura da página, e uma moldura com dois tamanhos não é moldura. */
@@ -741,7 +777,9 @@
      A conta já resolvia assim — cabeçalho de 940 sobre um corpo de 1220 — e é
      esse o padrão que passa a valer nas três telas. `--maxTopo` existe para ser
      UM número: mudá-lo aqui sem mudar o do site é o que produziu os 84 px. */
-  :root{ --maxTopo:940px; --padTopo:22px }
+  /* O MESMO número do `public/site.css`. Ver o comentário de lá: o menu com
+     o Blog não cabia em 940 e transbordava em português, espanhol e francês. */
+  :root{ --maxTopo:1000px; --padTopo:22px }
   header.topo .wrap, .rodapeApp .wrap{max-width:var(--maxTopo);padding-left:var(--padTopo);
     padding-right:var(--padTopo);display:block}
   header.topo .wrap{padding-top:0;padding-bottom:0}
@@ -749,15 +787,16 @@
     height:62px}
   @media (max-width:560px){ .topbar{height:56px;gap:10px} }
   /* O menu do topo, com os mesmos números do site: 20 de vão, 14,5 de corpo. */
-  .topoNav{display:flex;gap:20px;align-items:center}
-  .topoNav > a{color:var(--muted);text-decoration:none;font-size:14.5px;cursor:pointer}
+  .topoNav{display:flex;gap:16px;align-items:center}
+  .topoNav > a{color:var(--muted);text-decoration:none;font-size:14.5px;cursor:pointer;
+      white-space:nowrap}
   .topoNav > a:hover{color:var(--ink)}
   /* As MESMAS quebras do site, na mesma ordem: o menu encolhe igual nas duas
      telas. Escritas aqui porque este arquivo não carrega o `site.css` — ele
      abre de `file://` no pacote offline, onde folha externa nenhuma existe. */
   @media (max-width:620px){ .topoNav .hide-sm{display:none} }
   @media (max-width:430px){ .topoNav .hide-xs{display:none} }
-  @media (max-width:560px){ .topoNav{gap:13px} .topoNav > a{font-size:13.5px} }
+  @media (max-width:560px){ .topoNav{gap:12px} .topoNav > a{font-size:13.5px} }
   /* O miolo perdeu o respiro que o cabeçalho ocupava; devolve aqui. */
   header.topo + .wrap{padding-top:26px}
   .topbar .back{color:var(--muted);text-decoration:none;font-size:13.5px}
@@ -783,7 +822,7 @@
   /* Siglas em vez de caixa de seleção, como na home: três letras ocupam menos
      que um <select> de "Português" e ficam iguais nos dois lugares. */
   .idiomas{display:inline-flex;gap:9px;align-items:center;
-      border-left:1px solid var(--line);padding-left:16px}
+      border-left:1px solid var(--line);padding-left:12px}
   .idiomas a{color:var(--muted);text-decoration:none;font-size:14px;cursor:pointer}
   .idiomas a:hover{color:var(--ink)}
   .idiomas a.atual{color:var(--ink);font-weight:600}

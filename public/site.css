@@ -6,6 +6,10 @@
      o mesmo da ferramenta, para as duas telas terem o mesmo vermelho. */
   --err:#b32a3a;
   --max:940px;
+  /* A moldura — cabeçalho e rodapé — é MAIS LARGA que a coluna de texto, e isso
+     é de propósito: o texto quer linha curta, o menu quer espaço. O que os dois
+     não podem é discordar entre páginas. Ver o comentário do `header`. */
+  --maxTopo:1000px;
 }
 @media (prefers-color-scheme:dark){
   :root{--err:#ef8484;
@@ -20,8 +24,33 @@ body{margin:0;background:var(--bg);color:var(--ink);
 .wrap{max-width:var(--max);margin:0 auto;padding:0 22px}
 
 /* topo */
+/* ---- A MOLDURA CRESCEU 60 px, E O MOTIVO ESTÁ MEDIDO ----
+
+   Com o Blog no menu, a fileira deixou de caber em 940. Medido a 1440 de
+   largura, o que o menu PRECISA contra o que CABE:
+
+       inglês      634 / 686    sobra  52
+       alemão      642 / 686    sobra  44
+       francês     689 / 686    falta   3
+       português   717 / 686    falta  31
+       espanhol    735 / 686    falta  49
+
+   Faltar significa transbordar: o menu passava da borda direita da moldura, e
+   era por isso que ele terminava em x=1199 na conta e no blog contra x=1168 na
+   home — o desalinhamento voltando por outra porta, quatro dias depois.
+
+   Duas saídas: tirar um item do menu, ou dar espaço. Tirar um item é decisão de
+   produto e não de layout — e o item que sobraria para tirar seria justamente o
+   Blog, que acabou de entrar. Então: 1000 de moldura e os vãos mais apertados
+   (20→16 no menu, 16→12 no bloco de idiomas). O pior caso, o espanhol, passa a
+   sobrar 53 px.
+
+   O que NÃO muda: as quatro telas continuam com a MESMA moldura, e o logo
+   continua começando no mesmo x nas quatro. Ele só anda 30 px para fora, junto,
+   que é o que preserva a única coisa que importava aqui. */
 header{border-bottom:1px solid var(--line);position:sticky;top:0;z-index:9;
        background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(9px)}
+header .wrap, footer .wrap{max-width:var(--maxTopo)}
 header .wrap{display:flex;align-items:center;justify-content:space-between;height:62px;gap:16px}
 /* A palavra pesa mais que o desenho. O símbolo já ficou grande numa rodada
    anterior; o nome continuou em 19px, e é ele que a pessoa lê, repete e digita
@@ -34,13 +63,36 @@ header .wrap{display:flex;align-items:center;justify-content:space-between;heigh
 @media (max-width:560px){ .brand img{width:32px;height:32px} .brand{font-size:21px} }
 @media (max-width:430px){ .brand img{width:29px;height:29px} .brand{font-size:19px} }
 .brand b{font-weight:700;color:var(--accent)}
-nav{display:flex;gap:20px;align-items:center}
-nav a{color:var(--muted);text-decoration:none;font-size:14.5px}
+nav{display:flex;gap:16px;align-items:center}
+/* `nowrap` porque o menu cresceu. Com quatro itens antes do botão, a fileira
+   chega perto do limite dos 940 — e a primeira coisa que cede é o botão, que
+   encolhe e quebra "Abrir a ferramenta" em duas linhas. Medido a 1440: 66 px de
+   altura contra 42 na home em inglês, onde o texto é mais curto. Um botão que
+   muda de altura conforme o idioma é a moldura desalinhada por tradução. */
+nav a{color:var(--muted);text-decoration:none;font-size:14.5px;white-space:nowrap}
 nav a:hover{color:var(--ink)}
 /* A ação principal do cabeçalho vira botão: no meio de três links cinzas,
    "Abrir a ferramenta" era o único que importava e o que menos aparecia. */
+/* A ALTURA NÃO PODE VIR DO `line-height` HERDADO. O site é 16/1.65 e a
+   ferramenta é outro número: o mesmo botão saía com 42 px de um lado e 40 do
+   outro, e a diferença não estava em nada escrito no botão. 24 px é o que o
+   1,65 do site já dava — o valor não muda, ele só deixa de ser herdado. */
+/* `transition` NOMEADA, e não `.15s` para tudo.
+
+   `transition:.15s` anima TODA propriedade que mudar — inclusive o `outline`
+   do anel de foco. O `:focus-visible` desta folha escreve `transition:none`
+   justamente para o anel não aparecer desbotando, e a regra do botão, sendo
+   mais específica, ganhava dela: o anel entrava em 150 ms.
+
+   Não é só estética. `testes/a11y.mjs` anda vinte paradas de Tab e lê o
+   contorno de cada uma — e lia `0px` neste botão, porque media no meio da
+   animação. Um anel que só existe depois de 150 ms é um anel que quem navega
+   por teclado rápido não vê.
+
+   O que muda no hover é o fundo e o brilho; são esses os dois nomeados. */
 nav a.btnTop{background:var(--accent);color:var(--accent-ink);font-weight:600;
-    padding:9px 16px;border-radius:8px;transition:.15s}
+    padding:9px 16px;border-radius:8px;flex:none;line-height:24px;
+    transition:background .15s, filter .15s}
 nav a.btnTop:hover{color:var(--accent-ink);filter:brightness(1.08)}
 @media (max-width:560px){ nav a.btnTop{padding:7px 12px;font-size:13px} }
 @media (max-width:620px){ nav a.hide-sm{display:none} }
