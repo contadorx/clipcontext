@@ -7905,6 +7905,32 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   const anotCampos = () => [$('anotTxt'), pipWin && pipWin.document.getElementById('nota')]
     .filter(Boolean);
 
+  /* DE ONDE VEM O TEXTO — e este era o defeito que impedia de escrever.
+
+     Havia dois campos e a regra lia SEMPRE o primeiro, o do cartão. Só que
+     durante a gravação o cartão está atrás da tela compartilhada: quem digita
+     está na JANELINHA. A cada tecla, o código lia o campo da aba (vazio) e o
+     copiava por cima do campo da janelinha — apagando a tecla no instante em
+     que ela era digitada. O botão acendia, a mensagem dizia "ainda não salvo",
+     e o que se salvava era o vazio. Escrever era literalmente impossível no
+     único lugar onde se podia escrever.
+
+     A fonte é o campo em que se digitou: o alvo do evento, ou o que está com o
+     foco, ou — só então — o do cartão. */
+  let anotUltimo = null;      // o campo em que se digitou por último
+  function anotFonte(e){
+    const campos = anotCampos();
+    const alvo = e && e.target;
+    if (alvo && campos.indexOf(alvo) !== -1) return alvo;
+    /* O foco pode estar no outro documento: a janelinha é outra janela, e o
+       `activeElement` da aba não sabe nada sobre ela. */
+    const focos = [document.activeElement, pipWin && pipWin.document.activeElement];
+    for (const f of focos) if (f && campos.indexOf(f) !== -1) return f;
+    if (anotUltimo && anotUltimo.isConnected && campos.indexOf(anotUltimo) !== -1)
+      return anotUltimo;
+    return campos[0] || null;
+  }
+
   /* Como a caixa se chama agora. `abrePasso` responde se aquele quadro é o
      primeiro do passo — e é o que separa "título do passo" de "legenda da
      tela". */
@@ -7967,7 +7993,9 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   /* Guardar. É aqui, e só aqui, que o texto sai do campo e entra no quadro. */
   function anotGuardar(){
     if (!anotAlvo) return;
-    const campo = anotCampos()[0];
+    /* Pela mesma fonte de sempre. Ler o campo do cartão aqui salvaria vazio
+       toda vez que a pessoa tivesse escrito na janelinha. */
+    const campo = anotFonte();
     const texto = campo ? campo.value : '';
     anotAlvo.nota = texto.trim();
     anotSujo = false;
@@ -7987,10 +8015,12 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     if (typeof render === 'function' && frames.length) render();
   }
 
-  function anotDigitou(){
+  function anotDigitou(e){
     if (!anotAlvo) return;
     anotSujo = true;
-    const valor = anotCampos()[0] ? anotCampos()[0].value : '';
+    const fonte = anotFonte(e);
+    anotUltimo = fonte;
+    const valor = fonte ? fonte.value : '';
     /* Os dois campos — o do cartão e o da janelinha — mostram o mesmo texto.
        Dois campos com conteúdos diferentes sobre o mesmo quadro é a pior coisa
        que esta tela poderia fazer. */
@@ -8046,7 +8076,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      depois, e não tem como se atualizar sozinho. Sem carimbo, "estou com um
      problema no offline" é uma conversa sem chão — ninguém sabe de qual build
      se fala nem se o defeito já foi consertado. */
-  const VERSAO = '2026.08.20-38';
+  const VERSAO = '2026.08.20-39';
   window.__versao = () => VERSAO;
 
   const PIP_CSS = `

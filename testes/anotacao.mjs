@@ -253,6 +253,27 @@ console.log('\n[6] a janelinha não corta os botões');
        Math.round(m.parar) + ' > ' + m.alt);
     ok('PAUSAR também', m.pausa > 0 && m.pausa <= m.alt + 1,
        Math.round(m.pausa) + ' > ' + m.alt);
+
+    /* ---- DIGITAR NA JANELINHA, COM TECLADO DE VERDADE ----
+       Aqui morava o defeito que impedia de escrever: a regra lia SEMPRE o
+       campo do cartão, e durante a gravação o cartão está atrás da tela
+       compartilhada. Cada tecla digitada na janelinha era sobrescrita pelo
+       vazio do outro campo — o botão acendia, dizia "ainda não salvo", e
+       salvava nada. `fill()` não pegaria: ele atribui o valor de uma vez, e o
+       defeito estava no caminho de UMA TECLA. */
+    await jn.locator('#nota').click();
+    await jn.keyboard.type('digitado na janelinha 9182');
+    await jn.waitForTimeout(250);
+    const v = await jn.evaluate(() => document.getElementById('nota').value);
+    ok('o que se digita na janelinha FICA no campo', v === 'digitado na janelinha 9182', v);
+    await jn.locator('#notaOk').click();
+    await jn.waitForTimeout(400);
+    const gv = await pg.evaluate(() => window.__quadros().map(f => f.nota || '').filter(Boolean));
+    ok('e chega ao quadro ao salvar', gv.some(x => /janelinha 9182/.test(x)), JSON.stringify(gv));
+    /* Os dois campos contam a mesma história: dois textos diferentes sobre o
+       mesmo quadro seria pior do que não ter o segundo campo. */
+    const naAba = await pg.evaluate(() => document.getElementById('anotTxt').value);
+    ok('e o campo do cartão mostra o mesmo texto', /janelinha 9182/.test(naAba), naAba);
   }
   await pg.locator('#recStop').click().catch(() => {});
   await pg.waitForTimeout(1200);
