@@ -16,7 +16,8 @@ import { clienteDoServidor, emailDaSessao } from '@/lib/supabase/servidor';
 import { contaDe, rpc } from '@/lib/supabase/servico';
 import { PLANOS, ehPlano, stripe, temStripe } from '@/lib/stripe';
 import { marca } from '@/lib/marca';
-import { CAMINHO, type Lang, ehLang, textos } from '@/lib/conta/textos';
+import { CAMINHO, type Lang, ehLang, preencher, textos } from '@/lib/conta/textos';
+import { enderecoDoItem } from '@/lib/conta/nav';
 import { type Chave, emitirChave } from '@/lib/conta/licenca';
 
 /** O idioma vem do formulário de propósito: ele decide só em que língua a
@@ -28,6 +29,12 @@ function idioma(form: FormData): Lang {
 
 const volta = (lang: Lang, par: string, valor: string) =>
   redirect(`${CAMINHO[lang]}?${par}=${encodeURIComponent(valor)}`);
+
+/* A resposta volta para a TELA DE CHAMADOS, e não para a raiz da conta. Mandar
+   quem acabou de abrir um chamado para outra página é fazê-la procurar o
+   número que ela precisa anotar. */
+const voltaChamados = (lang: Lang, par: string, valor: string) =>
+  redirect(`${enderecoDoItem('chamados', lang)}?${par}=${encodeURIComponent(valor)}`);
 
 /** Traduz a recusa que veio do banco. Um `nao_admin` cru na tela não é um
  *  recado, é um vazamento de nome de variável. */
@@ -194,6 +201,44 @@ export async function apagarModelo(form: FormData) {
     p_id: Number(form.get('id')) || 0,
     p_nome: null, p_escopo: null, p_dados: null, p_apagar: true,
   });
+}
+
+/* ------------------------------------------------------------- chamados */
+
+/** Abrir um chamado daqui, e não "no rodapé da ferramenta".
+ *
+ *  O e-mail vem da SESSÃO, como em todo o resto deste arquivo — e aqui isso
+ *  vale o dobro: na ferramenta o e-mail é digitado, e um chamado com o e-mail
+ *  errado é um chamado que nunca chega de volta a quem o abriu.
+ *
+ *  O relatório vem do formulário porque ele é do NAVEGADOR de quem está lá: o
+ *  servidor não tem como saber se aquela máquina tem WebGPU. Ele é opcional e
+ *  a pessoa o vê antes de mandar; o que ele não pode é decidir quem é ela. */
+export async function abrirChamado(form: FormData) {
+  const lang = idioma(form);
+  const t = textos(lang);
+  const email = await emailDaSessao();
+  if (!email) return voltaChamados(lang, 'erro', t.erroEntrePrimeiro);
+
+  const texto = String(form.get('texto') || '').trim();
+  if (!texto) return voltaChamados(lang, 'erro', t.chamadoSemTexto);
+  /* O relatório é cortado no servidor, e não confiado ao tamanho do campo: ele
+     chega de um formulário, e um formulário é o que qualquer um pode montar. */
+  const diag = String(form.get('diag') || '').trim().slice(0, 20000) || null;
+
+  let numero: string | null;
+  try {
+    numero = await rpc<string>('walkstamp_recado', {
+      p_tipo: 'problema', p_texto: texto.slice(0, 2000), p_email: email,
+      p_idioma: lang, p_cenario: null, p_origem: 'conta', p_diag: diag,
+    });
+  } catch {
+    return voltaChamados(lang, 'erro', t.chamadoErro);
+  }
+  if (!numero || numero === 'vazio' || numero === 'muitos') {
+    return voltaChamados(lang, 'erro', numero === 'muitos' ? t.chamadoMuitos : t.chamadoErro);
+  }
+  return voltaChamados(lang, 'feito', preencher(t.chamadoAberto, { numero }));
 }
 
 export async function configurar(form: FormData) {

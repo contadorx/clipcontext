@@ -2441,6 +2441,19 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       <button class="ghost sm hide" id="sair" data-i18n="sairBtn"></button>
       <span class="status" id="entrarMsg"></span>
     </div>
+    <!-- ---- O DIAGNÓSTICO, ONDE OS CHAMADOS MORAM ----
+
+         Ele tinha deixado de ser um botão e virado só o anexo do recado. A
+         intenção estava certa — ninguém quer ler uma lista de capacidades do
+         navegador —, mas quem procura o diagnóstico procura ONDE ESTÃO OS
+         CHAMADOS, e ali não havia nada. Agora há: coletar, ver, e abrir um
+         chamado levando o relatório junto, sem digitar de novo. -->
+    <div class="row hide" id="meusFerr" style="margin:0 0 10px;align-items:center;flex-wrap:wrap">
+      <button class="ghost sm" type="button" id="meusDiag" data-i18n="diagBtn"></button>
+      <button class="ghost sm hide" type="button" id="meusChamar" data-i18n="diagChamado"></button>
+      <span class="status" id="meusDiagMsg"></span>
+    </div>
+    <pre id="meusDiagOut" class="hide"></pre>
     <div class="hide" id="meusChamados" style="margin:0 0 12px"></div>
     <div class="row">
       <a class="btn sm" id="licPedir" href="https://walkstamp.com/time" target="_blank" rel="noopener"
@@ -2759,6 +2772,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       mBase:'Recomendado — rápido', mSmall:'Mais preciso — bem mais lento',
       mTurbo:'Máxima precisão — download grande, muito lento',
       autoDetect:'Detectar sozinho', diagBtn:'Diagnóstico',
+      diagChamado:'Abrir chamado com este relatório', diagIndo:'Montando o relatório…', diagFalhou:'Não consegui montar o relatório aqui.', fbDiagEspera:'Terminando de montar o relatório antes de enviar…',
       openSub:'Abrir uma legenda pronta', orDrag:'ou arraste o arquivo sobre o campo acima, ou cole o texto',
       subDeOnde:'.vtt ou .srt de uma reunião já transcrita pelo Teams, Meet ou Zoom — assim não precisa baixar o modelo de voz. Também dá para arrastar sobre a caixa, ou simplesmente colar.',
       trPh:'Cole aqui a transcrição, ou arraste um arquivo .srt / .vtt.\n\nReconheço automaticamente:\n  00:00:12,400 --> 00:00:15,900   (SRT / VTT)\n  0:12  texto falado             (colado de um painel de legendas)\n  texto solto sem marcação de tempo\n\nCom marcação de tempo, cada frame sai no PDF junto do que é dito naquele trecho.',
@@ -3341,6 +3355,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       mBase:'Recommended — fast', mSmall:'More accurate — much slower',
       mTurbo:'Highest accuracy — large download, very slow',
       autoDetect:'Detect automatically', diagBtn:'Diagnostics',
+      diagChamado:'Open a ticket with this report', diagIndo:'Building the report…', diagFalhou:'I could not build the report here.', fbDiagEspera:'Finishing the report before sending…',
       openSub:'Open an existing transcript', orDrag:'or drag the file onto the box above, or paste the text',
       subDeOnde:'.vtt or .srt from a meeting already transcribed by Teams, Meet or Zoom — that way there is no speech model to download. You can also drag it onto the box, or just paste.',
       trPh:'Paste the transcript here, or drag in a .srt / .vtt file.\n\nRecognised automatically:\n  00:00:12,400 --> 00:00:15,900   (SRT / VTT)\n  0:12  spoken text              (pasted from a caption panel)\n  plain text with no timestamps\n\nWith timestamps, each frame appears in the PDF next to what is said at that point.',
@@ -3917,6 +3932,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       mBase:'Recomendado — rápido', mSmall:'Más preciso — bastante más lento',
       mTurbo:'Máxima precisión — descarga grande, muy lento',
       autoDetect:'Detectar automáticamente', diagBtn:'Diagnóstico',
+      diagChamado:'Abrir un ticket con este informe', diagIndo:'Preparando el informe…', diagFalhou:'No pude preparar el informe aquí.', fbDiagEspera:'Terminando el informe antes de enviar…',
       openSub:'Abrir una transcripción ya hecha', orDrag:'o arrastra el archivo sobre el campo de arriba, o pega el texto',
       subDeOnde:'.vtt o .srt de una reunión ya transcrita por Teams, Meet o Zoom — así no hay que descargar el modelo de voz. También puedes arrastrarlo sobre la caja, o simplemente pegar.',
       trPh:'Pega aquí la transcripción, o arrastra un archivo .srt / .vtt.\n\nReconozco automáticamente:\n  00:00:12,400 --> 00:00:15,900   (SRT / VTT)\n  0:12  texto hablado            (copiado de un panel de subtítulos)\n  texto suelto sin marcas de tiempo\n\nCon marcas de tiempo, cada fotograma aparece en el PDF junto a lo que se dice en ese tramo.',
@@ -4492,6 +4508,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       mBase:'Empfohlen — schnell', mSmall:'Genauer — deutlich langsamer',
       mTurbo:'Höchste Genauigkeit — großer Download, sehr langsam',
       autoDetect:'Automatisch erkennen', diagBtn:'Diagnose',
+      diagChamado:'Ticket mit diesem Bericht eröffnen', diagIndo:'Bericht wird erstellt…', diagFalhou:'Der Bericht konnte hier nicht erstellt werden.', fbDiagEspera:'Bericht wird vor dem Senden fertiggestellt…',
       openSub:'Fertige Untertiteldatei öffnen', orDrag:'oder ziehen Sie die Datei auf das Feld oben, oder fügen Sie den Text ein',
       subDeOnde:'.vtt oder .srt aus einer Besprechung, die Teams, Meet oder Zoom bereits transkribiert hat — so muss kein Spracherkennungsmodell heruntergeladen werden. Sie können die Datei auch auf das Feld ziehen oder den Text einfach einfügen.',
       trPh:'Fügen Sie hier die Transkription ein oder ziehen Sie eine .srt-/.vtt-Datei hierher.\n\nAutomatisch erkannt werden:\n  00:00:12,400 --> 00:00:15,900   (SRT / VTT)\n  0:12  gesprochener Text         (aus einem Untertitelfenster kopiert)\n  reiner Text ohne Zeitmarken\n\nMit Zeitmarken erscheint jeder Screenshot im PDF neben dem, was in diesem Abschnitt gesagt wird.',
@@ -5073,6 +5090,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       mBase:'Recommandé — rapide', mSmall:'Plus précis — bien plus lent',
       mTurbo:'Précision maximale — téléchargement volumineux, très lent',
       autoDetect:'Détecter automatiquement', diagBtn:'Diagnostic',
+      diagChamado:'Ouvrir un ticket avec ce rapport', diagIndo:'Préparation du rapport…', diagFalhou:'Je n’ai pas pu préparer le rapport ici.', fbDiagEspera:'Finalisation du rapport avant l’envoi…',
       openSub:'Ouvrir un fichier de sous-titres', orDrag:'ou déposez le fichier sur le champ ci-dessus, ou collez le texte',
       subDeOnde:'.vtt ou .srt d’une réunion déjà transcrite par Teams, Meet ou Zoom — ainsi, aucun modèle de reconnaissance vocale à télécharger. Vous pouvez aussi le déposer sur la zone, ou simplement coller.',
       trPh:'Collez ici la transcription, ou déposez un fichier .srt / .vtt.\n\nReconnaissance automatique :\n  00:00:12,400 --> 00:00:15,900   (SRT / VTT)\n  0:12  texte parlé              (collé d’un panneau de sous-titres)\n  texte brut sans marquage temporel\n\nAvec marquage temporel, chaque capture sort dans le PDF à côté de ce qui est dit dans ce segment.',
@@ -7310,7 +7328,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      depois, e não tem como se atualizar sozinho. Sem carimbo, "estou com um
      problema no offline" é uma conversa sem chão — ninguém sabe de qual build
      se fala nem se o defeito já foi consertado. */
-  const VERSAO = '2026.08.20-1';
+  const VERSAO = '2026.08.20-3';
   window.__versao = () => VERSAO;
 
   const PIP_CSS = `
@@ -11040,6 +11058,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     $('sair').classList.toggle('hide', !dentro);
     $('entrarMsg').textContent = dentro ? t('entrarComo', sessao.email) : '';
     $('meusChamados').classList.toggle('hide', !dentro);
+    if ($('meusFerr')) $('meusFerr').classList.toggle('hide', !dentro);
     if (dentro) carregarMeus();
   }
 
@@ -11675,9 +11694,77 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     st(t('diagDone'), 'ok');
   }
 
-  /* O botão de Diagnóstico não existe mais como botão: ele virou o anexo do
-     recado. O que continua existindo é o coletor, chamado pelo aviso de erro
-     (que abre o painel na tela) e pelo modal do recado. */
+  /* ---- UM RELATÓRIO SÓ, COM DONO E COM IDADE ----
+
+     O coletor é chamado de três lugares — o aviso de erro da gravação, o botão
+     do painel de chamados e o modal do recado — e o que ele produz é o MESMO
+     relatório. Guardá-lo aqui resolve dois problemas de uma vez.
+
+     O primeiro é o que fez o WS-0005 chegar com `diagnostico = "…"`, um
+     caractere: a coleta é assíncrona (leva 1 s com a rede boa e passa de 10 s
+     quando ela está ruim, que é justamente a máquina de quem está reclamando),
+     e o botão Enviar não esperava por ela. Quem descrevia o problema rápido e
+     apertava enviar mandava o texto de espera no lugar do relatório — e o
+     chamado chegava aqui sem a única parte que a pessoa não sabe escrever.
+     Medido no banco: dos dois chamados abertos pela ferramenta, NENHUM trazia
+     relatório de verdade.
+
+     O segundo é o desperdício ao contrário: coletar de novo um relatório que
+     acabou de ser feito. `IDADE_DIAG` é curta de propósito — um relatório de
+     dois minutos atrás descreve outra máquina se a gravação aconteceu no meio,
+     e um relatório velho é pior que nenhum, porque parece atual. */
+  const IDADE_DIAG = 90000;
+  let diagTexto0 = '', diagEm = 0, diagIndo = null;
+
+  /* Devolve o relatório, reaproveitando o que ainda vale. `forcar` é para o
+     botão: quem aperta Diagnóstico está pedindo a foto de AGORA. */
+  function relatorio(forcar){
+    if (!forcar && diagTexto0 && (performance.now() - diagEm) < IDADE_DIAG)
+      return Promise.resolve(diagTexto0);
+    if (diagIndo) return diagIndo;
+    diagIndo = (async () => {
+      const alvo = document.createElement('pre');
+      await coletarDiag(alvo);
+      diagTexto0 = alvo.textContent || '';
+      diagEm = performance.now();
+      return diagTexto0;
+    })().finally(() => { diagIndo = null; });
+    return diagIndo;
+  }
+
+  /* ---- o botão, de volta, e no painel de chamados ----
+
+     Ele mostra o relatório ali mesmo, para ler e copiar, e só então oferece
+     abrir o chamado — que é o gesto seguinte de quem acabou de ver um problema
+     descrito em quarenta linhas que ele não saberia escrever. */
+  if ($('meusDiag')) {
+    $('meusDiag').onclick = async () => {
+      $('meusDiag').disabled = true;
+      $('meusDiagMsg').textContent = t('diagIndo');
+      $('meusChamar').classList.add('hide');
+      try {
+        /* Escrito NO ELEMENTO da tela enquanto sai, e não só no fim: o coletor
+           pinta linha a linha, e ver o relatório crescendo é a diferença entre
+           esperar e achar que travou — o mesmo motivo do texto parcial da
+           transcrição. */
+        const alvo = $('meusDiagOut');
+        alvo.textContent = '';
+        await coletarDiag(alvo);
+        diagTexto0 = alvo.textContent || '';
+        diagEm = performance.now();
+        $('meusDiagMsg').innerHTML = `<span class="ok">${t('diagDone')}</span>`;
+        $('meusChamar').classList.remove('hide');
+      } catch (e) {
+        $('meusDiagMsg').innerHTML = `<span class="err">${t('diagFalhou')}</span>`;
+      } finally { $('meusDiag').disabled = false; }
+    };
+    /* Abrir o chamado JÁ COM o relatório: ele acabou de ser coletado, então o
+       modal o reaproveita em vez de refazer a espera inteira na frente de quem
+       já esperou uma vez. E entra como "problema", que é o que se está
+       fazendo — perguntar o tipo depois de apertar "abrir chamado" seria
+       perguntar o que a pessoa acabou de responder. */
+    $('meusChamar').onclick = () => { fbTipo = 'problema'; fbAbrir(true); };
+  }
 
   /* ---- o recado: ideia, elogio ou problema ----
      O diagnóstico vai ANEXADO, e marcado por padrão. Quem tem um problema quer
@@ -11685,6 +11772,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      precisamos, e pedi-la de quem já está irritado é pedir errado. Quem não
      quiser mandar, desmarca — e ela fica visível antes de sair. */
   let fbTipo = 'problema';
+  let fbDiagPronto = null;
   const fbAbrir = async (abrir) => {
     $('fbModal').classList.toggle('hide', !abrir);
     if (!abrir) return;
@@ -11694,9 +11782,14 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
        defeito silencioso: quem gravava, batia num problema e abria o recado
        mandava o diagnóstico de ANTES da gravação — justamente sem a parte que
        explicaria o problema. */
-    $('fbDiagOut').textContent = '…';
-    try { $('fbDiagOut').textContent = await diagTexto(); }
-    catch (e) { $('fbDiagOut').textContent = '(não consegui coletar)'; }
+    $('fbDiagOut').textContent = t('diagIndo');
+    /* A PROMESSA fica guardada, e é ela que o Enviar espera. Sem isto o campo
+       ainda dizia "montando o relatório…" quando o recado partia, e era esse
+       texto que viajava no lugar do relatório. */
+    fbDiagPronto = relatorio(false)
+      .then(txt => { $('fbDiagOut').textContent = txt; return txt; })
+      .catch(() => { $('fbDiagOut').textContent = t('diagFalhou'); return ''; });
+    await fbDiagPronto;
   };
   function pintarFbTipo(){
     document.querySelectorAll('.fbTipo').forEach(b2 =>
@@ -11719,6 +11812,16 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
         return;
       }
       $('fbEnviar').disabled = true;
+      /* ---- ESPERAR O RELATÓRIO, E DIZER QUE ESTÁ ESPERANDO ----
+         O clique é atendido na hora; o que não pode é partir sem o anexo que a
+         caixa marcada promete. Quem não quiser esperar desmarca a caixa e o
+         recado sai imediatamente — a espera é o preço de uma promessa, não uma
+         trava. */
+      let diag = null;
+      if ($('fbDiag').checked) {
+        $('fbMsg').textContent = t('fbDiagEspera');
+        try { diag = await (fbDiagPronto || relatorio(false)); } catch (e) { diag = null; }
+      }
       $('fbMsg').textContent = t('fbIndo');
       try {
         const r = await fetch(MEDIR_URL + '/rest/v1/rpc/walkstamp_recado', {
@@ -11729,9 +11832,11 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
             p_tipo: fbTipo, p_texto: txt,
             p_email: ($('fbEmail').value || '').trim() || null,
             p_idioma: LANG, p_cenario: $('modelo').value, p_origem: 'app',
-            /* O diagnóstico só vai se a caixa estiver marcada — e ela está
-               visível, com o conteúdo aberto, antes de alguém apertar enviar. */
-            p_diag: $('fbDiag').checked ? ($('fbDiagOut').textContent || null) : null
+            /* O diagnóstico só vai se a caixa estiver marcada — e vai o TEXTO
+               COLETADO, não o que estiver no elemento da tela. Ler a tela foi o
+               defeito: enquanto a coleta corria, o que estava lá era a mensagem
+               de espera, e era ela que chegava ao banco. */
+            p_diag: diag || null
           })
         });
         const resp = (await r.json().catch(() => null));
@@ -11756,11 +11861,6 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     };
   }
 
-  const diagTexto = async () => {
-    const alvo = document.createElement('pre');
-    await coletarDiag(alvo);
-    return alvo.textContent || '';
-  };
 
   /* ================= extração de frames ================= */
   function seek(t){

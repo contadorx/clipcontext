@@ -1716,3 +1716,76 @@ O modelo, como na décima primeira rodada. O que mudou é que agora ele é monta
 uma vez em vez de duas, começa a montar enquanto o áudio é extraído, e recebe um
 quarto a menos de janelas numa reunião com pausas. Nada disso o acelera — apenas
 para de pagá-lo mais vezes do que o necessário.
+
+---
+
+## 20/08/2026, décima sétima rodada — o diagnóstico que não chegava
+
+O relato: *"o botão de diagnóstico, ou ele na abertura de um problema, não está
+ativo"*. Ele estava — tinha deixado de ser botão e virado o anexo do recado, o
+que foi uma boa decisão e continua sendo. O que **não** estava ativo era o
+anexo, e isso não se via na tela: via-se no banco.
+
+### O defeito, medido em produção
+
+A coleta é assíncrona. Com a rede boa ela leva **1 s**; com a rede ruim — que é
+a máquina de quem está reclamando — passou de **10 s** na medição. Durante essa
+janela, o campo do relatório mostra a mensagem de espera, dentro de um
+`<details>` fechado, com a caixa "mandar o relatório técnico" já marcada.
+
+E o botão Enviar **não esperava a coleta**: ele lia o elemento da tela e
+mandava o que estivesse lá. Quem descrevia o problema depressa e apertava
+enviar mandava o texto de espera no lugar do relatório.
+
+No banco de produção, `walkstamp.recado`:
+
+| origem | recados | com relatório de verdade | menor relatório |
+|---|---|---|---|
+| app | 2 | **0** | 1 caractere |
+| site | 3 | 2 | 0 |
+
+O chamado **WS-0005** chegou com `diagnostico = "…"`. Um caractere — a
+reticência da mensagem "montando o relatório…". Dos dois chamados abertos pela
+ferramenta, nenhum trouxe a única parte que quem abre o chamado não sabe
+escrever.
+
+Medido com o conserto desligado, na régua `testes/diagchamado.mjs`: o recado
+partia em **59 ms** levando 21 caracteres — `Montando o relatório…`. Com o
+conserto: espera **10,3 s** e leva **1.969 caracteres**, o relatório inteiro.
+
+**A espera é o preço de uma promessa, e não uma trava.** Com a caixa
+desmarcada, o recado sai em 53 ms e sem relatório nenhum — medido na mesma
+régua, porque um conserto que faz todo mundo esperar por causa de uma caixa que
+alguns desmarcam seria trocar um defeito por outro.
+
+### O botão, de volta — e onde ele foi procurado
+
+Ele voltou a existir em dois lugares, e nos dois pelo mesmo motivo: **é onde os
+chamados moram** que se procura o diagnóstico.
+
+**Na ferramenta**, no painel "meus chamados": coleta, mostra o relatório ali
+para ler e copiar, e só então oferece *abrir chamado com este relatório* — que
+reaproveita o que acabou de ser coletado em vez de refazer a espera na frente
+de quem já esperou uma vez.
+
+**No painel da conta** (`/conta/chamados`), que até aqui só LISTAVA e mandava a
+pessoa "abrir um no rodapé da ferramenta". Agora abre. O formulário vem antes
+da lista — quem chega ali com um problema quer contar o problema, e a lista
+nasce vazia justamente para quem mais precisa do formulário.
+
+Uma diferença que está escrita na tela, e não escondida: o relatório do painel
+descreve **o navegador daquela página** — versão, placa de vídeo, espaço em
+disco e se o modelo de voz é alcançável dali. Quadros na memória, degraus do
+modelo e ritmo da transcrição vivem dentro da ferramenta e não existem ali. É
+por isso que o botão está nos dois lugares, e não só no mais novo.
+
+E o e-mail do chamado aberto pelo painel vem **da sessão**, nunca do
+formulário. Na ferramenta ele é digitado, e um chamado com o e-mail errado é um
+chamado que nunca volta para quem o abriu.
+
+### Um relatório guardado, com idade
+
+O coletor é chamado de três lugares e produz o mesmo relatório. Ele agora fica
+guardado por **90 segundos** — curto de propósito: um relatório de dois minutos
+atrás descreve outra máquina se uma gravação aconteceu no meio, e um relatório
+velho é pior que nenhum, porque parece atual.
