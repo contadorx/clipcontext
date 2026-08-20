@@ -33,7 +33,9 @@
       text-decoration:none;margin-right:12px}
   .btnTopo:hover{filter:brightness(1.08)}
   .rodapeApp{border-top:1px solid var(--line);margin-top:40px;padding:34px 0 30px;background:var(--panel)}
-  .rodapeApp .wrap{padding:0 20px;max-width:1240px}
+  /* A medida do rodapé sai do `--maxTopo`, junto com a do cabeçalho: eles são
+     a moldura da página, e uma moldura com dois tamanhos não é moldura. */
+  .rodapeApp .wrap{padding-top:0;padding-bottom:0}
   .rodapeApp .rodapeCols{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:26px}
   .rodapeApp .rodapeCols h3{font-size:12px;text-transform:uppercase;letter-spacing:.07em;
       color:var(--muted);margin:0 0 10px}
@@ -42,7 +44,9 @@
   .rodapeApp .rodapeCols a:hover{color:var(--accent)}
   .rodapeApp .rodapeFim{margin-top:26px;padding-top:18px;border-top:1px solid var(--line);
       font-size:12.5px;color:var(--muted)}
-  body.comBarra .rodapeApp .wrap{max-width:1240px}
+  /* `body.comBarra` alargava o rodapé para acompanhar o corpo. Ele não
+     acompanha mais: o rodapé é a moldura, e a moldura não muda com o conteúdo
+     de dentro nem com a barra da conta estar ligada. */
 
   /* ---------------------------------------------- a barra da conta
 
@@ -56,9 +60,9 @@
      estava dentro dela cai na segunda, sem precisar embrulhar catorze mil
      linhas de HTML num `<div>` novo. A barra ocupa a primeira e se estica por
      todas as linhas. */
-  body.comBarra .wrap{display:grid;grid-template-columns:206px minmax(0,1fr);
+  body.comBarra .wrap.corpo{display:grid;grid-template-columns:206px minmax(0,1fr);
       column-gap:30px;row-gap:0;align-items:start;max-width:1240px}
-  body.comBarra .wrap > *{grid-column:2}
+  body.comBarra .wrap.corpo > *{grid-column:2}
   /* `span 99`, e nao `1 / -1`.
      
      `-1` aponta para a ultima linha do grid EXPLICITO, e este grid nao declara
@@ -71,7 +75,7 @@
      ZERO: com vao entre linhas, noventa e nove linhas vazias virariam tres mil
      pixels de nada. O espacamento entre os cartoes continua vindo das margens
      deles, como sempre veio -- esta `.wrap` era fluxo normal ate agora. */
-  body.comBarra .wrap > .barraConta{grid-column:1;grid-row:1/span 99;
+  body.comBarra .wrap.corpo > .barraConta{grid-column:1;grid-row:1/span 99;
       position:sticky;top:78px;align-self:start}
 
   .barraConta .quem{font-size:12.5px;color:var(--muted);font-weight:600;
@@ -95,9 +99,9 @@
     /* Numa tela estreita a barra vira uma fileira no alto: uma coluna de 206px
        ao lado do trabalho não cabe, e escondê-la aqui seria tirar da pessoa o
        único caminho para a conta justamente onde o cabeçalho já é apertado. */
-    body.comBarra .wrap{grid-template-columns:1fr;column-gap:0;row-gap:0}
-    body.comBarra .wrap > *{grid-column:1}
-    body.comBarra .wrap > .barraConta{grid-column:1;grid-row:auto;position:static;
+    body.comBarra .wrap.corpo{grid-template-columns:1fr;column-gap:0;row-gap:0}
+    body.comBarra .wrap.corpo > *{grid-column:1}
+    body.comBarra .wrap.corpo > .barraConta{grid-column:1;grid-row:auto;position:static;
         display:flex;gap:6px;overflow-x:auto;margin:0 0 18px;padding-bottom:2px}
     /* As duas listas -- os itens da conta e a propria ferramenta -- viram uma
        fileira so. Em duas, "Abrir a ferramenta" caia sozinha numa segunda
@@ -717,10 +721,36 @@
      desfoque de 9px e uma borda de 1px embaixo. */
   header.topo{border-bottom:1px solid var(--line);position:sticky;top:0;z-index:30;
     background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(9px)}
+  /* ---- O CABEÇALHO TEM A MEDIDA DO SITE, E NÃO A DO CORPO DESTA PÁGINA ----
+
+     Medido a 1440 de largura, antes: o logo da página principal começava em
+     x=272, o da conta em x=272, e o da ferramenta em **x=356** — 84 px à
+     direita dos outros dois. O corpo da ferramenta é largo (1240) porque ele
+     tem grade de miniaturas; o corpo do site é estreito (940) porque ele tem
+     texto corrido. Isso é legítimo. O que não é legítimo é o cabeçalho seguir o
+     corpo: quem pula da home para a ferramenta vê a marca dar um passo para o
+     lado, e é a mesma marca.
+
+     A conta já resolvia assim — cabeçalho de 940 sobre um corpo de 1220 — e é
+     esse o padrão que passa a valer nas três telas. `--maxTopo` existe para ser
+     UM número: mudá-lo aqui sem mudar o do site é o que produziu os 84 px. */
+  :root{ --maxTopo:940px; --padTopo:22px }
+  header.topo .wrap, .rodapeApp .wrap{max-width:var(--maxTopo);padding-left:var(--padTopo);
+    padding-right:var(--padTopo);display:block}
   header.topo .wrap{padding-top:0;padding-bottom:0}
   .topbar{display:flex;justify-content:space-between;align-items:center;gap:14px;
     height:62px}
   @media (max-width:560px){ .topbar{height:56px;gap:10px} }
+  /* O menu do topo, com os mesmos números do site: 20 de vão, 14,5 de corpo. */
+  .topoNav{display:flex;gap:20px;align-items:center}
+  .topoNav > a{color:var(--muted);text-decoration:none;font-size:14.5px;cursor:pointer}
+  .topoNav > a:hover{color:var(--ink)}
+  /* As MESMAS quebras do site, na mesma ordem: o menu encolhe igual nas duas
+     telas. Escritas aqui porque este arquivo não carrega o `site.css` — ele
+     abre de `file://` no pacote offline, onde folha externa nenhuma existe. */
+  @media (max-width:620px){ .topoNav .hide-sm{display:none} }
+  @media (max-width:430px){ .topoNav .hide-xs{display:none} }
+  @media (max-width:560px){ .topoNav{gap:13px} .topoNav > a{font-size:13.5px} }
   /* O miolo perdeu o respiro que o cabeçalho ocupava; devolve aqui. */
   header.topo + .wrap{padding-top:26px}
   .topbar .back{color:var(--muted);text-decoration:none;font-size:13.5px}
@@ -818,7 +848,7 @@
       </svg>
       <span aria-hidden="true">Walk<b>stamp</b></span>
     </a>
-    <nav class="idiomas" id="idiomas" aria-label="Language">
+    <nav class="topoNav" id="idiomas" aria-label="Language">
       <!-- A conta ficava escondida dentro do "Ativar o plano Time", no rodapé,
            atrás de dois cliques e de uma palavra que fala de licença. Quem
            procurava a própria conta não achava — e com razão: não estava onde
@@ -836,6 +866,26 @@
 
            Clicar abre a mesma caixa de antes: trocar a chave, sair, ver o
            nome do cliente. Para quem não tem plano, não há nada aqui. -->
+      <!-- ---- OS MESMOS ITENS DO SITE, E DAQUI PARA A FRENTE UM MENU SÓ ----
+
+           O cabeçalho da ferramenta tinha a marca e as siglas de idioma, e mais
+           nada. Quem entrava aqui perdia o caminho de volta para tudo — preços,
+           comparativo, blog — e o único jeito de sair era o rodapé ou o botão
+           de voltar do navegador. Duas telas da mesma marca, com dois menus
+           diferentes, ensinam que se saiu do produto.
+
+           Os RÓTULOS não estão escritos aqui: vêm do dicionário do SITE, pelo
+           `build.py`, como os do rodapé já vinham. Os ENDEREÇOS vêm do
+           `ROTAS_SITE`, e trocam de idioma junto com a página. Escrever
+           qualquer um dos dois à mão aqui seria a segunda lista ao lado da
+           lista de verdade — o defeito que este arquivo já pagou quatro vezes.
+
+           `hide-sm` e `hide-xs` são as MESMAS classes do site: o menu encolhe
+           na mesma ordem nas duas telas, e não em ordens diferentes. -->
+      <a data-rota="home" data-site="navHow" class="hide-sm" id="navHow"></a>
+      <a data-rota="comparativo" data-site="navComp" class="hide-sm"></a>
+      <a data-rota="precos" data-site="navPrice" class="hide-xs"></a>
+      <a data-rota="blog" data-site="fBlog" class="hide-sm"></a>
       <button type="button" id="licTag" class="licTag hide"></button>
       <!-- Botao cheio, como o "Abrir a ferramenta" do cabecalho da conta.
            Era um link de texto cinza, e o mesmo lugar das duas telas tinha dois
@@ -845,17 +895,31 @@
       <!-- As siglas ficam escritas aqui, uma a uma, e não geradas do `LANGS`:
            a ferramenta abre de `file://` no pacote offline, e um cabeçalho que
            só existe depois que o JavaScript roda é um cabeçalho que pisca. -->
-      <a href="?lang=pt" data-l="pt">PT</a>
-      <a href="?lang=en" data-l="en">EN</a>
-      <a href="?lang=es" data-l="es">ES</a>
-      <a href="?lang=de" data-l="de">DE</a>
-      <a href="?lang=fr" data-l="fr">FR</a>
+      <span class="idiomas">
+        <a href="?lang=pt" data-l="pt">PT</a>
+        <a href="?lang=en" data-l="en">EN</a>
+        <a href="?lang=es" data-l="es">ES</a>
+        <a href="?lang=de" data-l="de">DE</a>
+        <a href="?lang=fr" data-l="fr">FR</a>
+      </span>
     </nav>
   </div>
   </div>
 </header>
 
-<div class="wrap">
+<!-- `corpo` NÃO é enfeite, e a falta dele custou o alinhamento de três telas.
+
+     `body.comBarra .wrap` foi escrita para ESTA `.wrap` — a do trabalho, que
+     vira grade de duas colunas quando a barra da conta liga. Mas `.wrap` é
+     também a do cabeçalho e a do rodapé, e um seletor de classe nua alcança
+     tudo o que ainda não foi escrito. O resultado, medido a 1440 de largura: o
+     cabeçalho da ferramenta virava grade, o `.topbar` caía na segunda coluna e
+     a marca começava em x=508 — contra x=272 na home e na conta. E o rodapé
+     esticava para 1240 enquanto o do site tinha 940.
+
+     É a mesma lição que o `.painelMenu` do site já tinha aprendido com o `nav`
+     nu: um seletor sem dono é um defeito esperando a próxima tela existir. -->
+<div class="wrap corpo">
   <!-- A BARRA DA CONTA.
 
        Ela nasce vazia e escondida, e só existe se o `/api/menu` responder — o
@@ -6206,10 +6270,10 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
      que se escreve a mao a cada pagina nova e uma tabela que fica para tras:
      era exatamente o que estava acontecendo, com o resto do site apontando
      para o portugues em qualquer idioma. */
-  const ROTAS_SITE = {"precos": {"pt": "/precos", "en": "/en/precos", "es": "/es/precos", "de": "/de/preise", "fr": "/fr/tarifs"}, "privacidade": {"pt": "/privacidade", "en": "/en/privacidade", "es": "/es/privacidade", "de": "/de/privacidade", "fr": "/fr/privacidade"}, "termos": {"pt": "/termos", "en": "/en/termos", "es": "/es/termos", "de": "/de/termos", "fr": "/fr/termos"}, "seguranca": {"pt": "/seguranca", "en": "/en/security", "es": "/es/seguridad", "de": "/de/informationssicherheit", "fr": "/fr/securite-de-l-information"}, "verificar": {"pt": "/verificar", "en": "/en/verify", "es": "/es/verificar", "de": "/de/pruefen", "fr": "/fr/verifier"}, "comparativo": {"pt": "/comparativo", "en": "/en/compare", "es": "/es/comparativa", "de": "/de/vergleich", "fr": "/fr/comparatif"}, "link": {"pt": "/link", "en": "/en/link", "es": "/es/link", "de": "/de/link", "fr": "/fr/link"}, "time": {"pt": "/time", "en": "/en/team", "es": "/es/equipo", "de": "/de/team", "fr": "/fr/equipe"}, "ajuda": {"pt": "/ajuda", "en": "/en/help", "es": "/es/ayuda", "de": "/de/hilfe", "fr": "/fr/aide"}, "casoEv": {"pt": "/evidencia-de-teste", "en": "/en/test-evidence", "es": "/es/evidencia-de-prueba", "de": "/de/testnachweis", "fr": "/fr/preuve-de-test"}, "casoIn": {"pt": "/instrucao-de-trabalho", "en": "/en/work-instruction", "es": "/es/instruccion-de-trabajo", "de": "/de/arbeitsanweisung", "fr": "/fr/mode-operatoire"}, "casoAta": {"pt": "/ata-de-reuniao", "en": "/en/meeting-minutes", "es": "/es/acta-de-reunion", "de": "/de/besprechungsprotokoll", "fr": "/fr/compte-rendu-de-reunion"}, "casoIa": {"pt": "/contexto-para-ia", "en": "/en/context-for-ai", "es": "/es/contexto-para-ia", "de": "/de/kontext-fuer-ki", "fr": "/fr/contexte-pour-ia"}, "casoUx": {"pt": "/teste-de-usabilidade", "en": "/en/usability-test", "es": "/es/prueba-de-usabilidad", "de": "/de/usability-test", "fr": "/fr/test-d-utilisabilite"}, "steps": {"pt": "/substituto-do-steps-recorder", "en": "/en/steps-recorder-replacement", "es": "/es/alternativa-al-steps-recorder", "de": "/de/steps-recorder-ersatz", "fr": "/fr/alternative-au-steps-recorder"}, "blog": {"pt": "/blog", "en": "/en/blog", "es": "/es/blog", "de": "/de/blog", "fr": "/fr/blog"}, "conta": {"pt": "/conta", "en": "/en/account", "es": "/es/cuenta", "de": "/de/konto", "fr": "/fr/compte"}};
+  const ROTAS_SITE = {"precos": {"pt": "/precos", "en": "/en/precos", "es": "/es/precos", "de": "/de/preise", "fr": "/fr/tarifs"}, "privacidade": {"pt": "/privacidade", "en": "/en/privacidade", "es": "/es/privacidade", "de": "/de/privacidade", "fr": "/fr/privacidade"}, "termos": {"pt": "/termos", "en": "/en/termos", "es": "/es/termos", "de": "/de/termos", "fr": "/fr/termos"}, "seguranca": {"pt": "/seguranca", "en": "/en/security", "es": "/es/seguridad", "de": "/de/informationssicherheit", "fr": "/fr/securite-de-l-information"}, "verificar": {"pt": "/verificar", "en": "/en/verify", "es": "/es/verificar", "de": "/de/pruefen", "fr": "/fr/verifier"}, "comparativo": {"pt": "/comparativo", "en": "/en/compare", "es": "/es/comparativa", "de": "/de/vergleich", "fr": "/fr/comparatif"}, "link": {"pt": "/link", "en": "/en/link", "es": "/es/link", "de": "/de/link", "fr": "/fr/link"}, "time": {"pt": "/time", "en": "/en/team", "es": "/es/equipo", "de": "/de/team", "fr": "/fr/equipe"}, "ajuda": {"pt": "/ajuda", "en": "/en/help", "es": "/es/ayuda", "de": "/de/hilfe", "fr": "/fr/aide"}, "casoEv": {"pt": "/evidencia-de-teste", "en": "/en/test-evidence", "es": "/es/evidencia-de-prueba", "de": "/de/testnachweis", "fr": "/fr/preuve-de-test"}, "casoIn": {"pt": "/instrucao-de-trabalho", "en": "/en/work-instruction", "es": "/es/instruccion-de-trabajo", "de": "/de/arbeitsanweisung", "fr": "/fr/mode-operatoire"}, "casoAta": {"pt": "/ata-de-reuniao", "en": "/en/meeting-minutes", "es": "/es/acta-de-reunion", "de": "/de/besprechungsprotokoll", "fr": "/fr/compte-rendu-de-reunion"}, "casoIa": {"pt": "/contexto-para-ia", "en": "/en/context-for-ai", "es": "/es/contexto-para-ia", "de": "/de/kontext-fuer-ki", "fr": "/fr/contexte-pour-ia"}, "casoUx": {"pt": "/teste-de-usabilidade", "en": "/en/usability-test", "es": "/es/prueba-de-usabilidad", "de": "/de/usability-test", "fr": "/fr/test-d-utilisabilite"}, "steps": {"pt": "/substituto-do-steps-recorder", "en": "/en/steps-recorder-replacement", "es": "/es/alternativa-al-steps-recorder", "de": "/de/steps-recorder-ersatz", "fr": "/fr/alternative-au-steps-recorder"}, "blog": {"pt": "/blog", "en": "/en/blog", "es": "/es/blog", "de": "/de/blog", "fr": "/fr/blog"}, "home": {"pt": "/", "en": "/en", "es": "/es", "de": "/de", "fr": "/fr"}, "conta": {"pt": "/conta", "en": "/en/account", "es": "/es/cuenta", "de": "/de/konto", "fr": "/fr/compte"}};
   /* Os rotulos do rodape, tambem do `build.py`, do dicionario do SITE: as duas
      telas dizem as mesmas palavras porque leem a mesma fonte. */
-  const RODAPE_TXT = {"pt": {"fColProduto": "Produto", "fColCasos": "Casos de uso", "fColConfianca": "Confiança", "navApp": "Abrir a ferramenta", "navPrice": "Preços", "fAjuda": "Base de conhecimento", "fBlog": "Blog", "fComp": "Comparativo", "fConta": "Sua conta", "casoEvT": "Evidência de teste", "casoInT": "Instrução de trabalho", "casoAtaT": "Ata de reunião", "casoUxT": "Teste de usabilidade", "casoIaT": "Contexto para IA", "fSec": "Segurança", "fVerif": "Conferir evidência", "fPriv": "Privacidade", "fTerms": "Termos", "fPsr": "Substituto do Steps Recorder"}, "en": {"fColProduto": "Product", "fColCasos": "Use cases", "fColConfianca": "Trust", "navApp": "Open the tool", "navPrice": "Pricing", "fAjuda": "Knowledge base", "fBlog": "Blog", "fComp": "Compare", "fConta": "Your account", "casoEvT": "Test evidence", "casoInT": "Work instruction", "casoAtaT": "Meeting minutes", "casoUxT": "Usability test", "casoIaT": "Context for AI", "fSec": "Security", "fVerif": "Check evidence", "fPriv": "Privacy", "fTerms": "Terms", "fPsr": "Steps Recorder replacement"}, "es": {"fColProduto": "Producto", "fColCasos": "Casos de uso", "fColConfianca": "Confianza", "navApp": "Abrir la herramienta", "navPrice": "Precios", "fAjuda": "Base de conocimiento", "fBlog": "Blog", "fComp": "Comparativa", "fConta": "Tu cuenta", "casoEvT": "Evidencia de prueba", "casoInT": "Instrucción de trabajo", "casoAtaT": "Acta de reunión", "casoUxT": "Prueba de usabilidad", "casoIaT": "Contexto para IA", "fSec": "Seguridad", "fVerif": "Comprobar evidencia", "fPriv": "Privacidad", "fTerms": "Términos", "fPsr": "Alternativa al Steps Recorder"}, "de": {"fColProduto": "Produkt", "fColCasos": "Anwendungsfälle", "fColConfianca": "Vertrauen", "navApp": "Tool öffnen", "navPrice": "Preise", "fAjuda": "Wissensdatenbank", "fBlog": "Blog", "fComp": "Vergleich", "fConta": "Ihr Konto", "casoEvT": "Testnachweis", "casoInT": "Arbeitsanweisung", "casoAtaT": "Besprechungsprotokoll", "casoUxT": "Usability-Test", "casoIaT": "Kontext für KI", "fSec": "Sicherheit", "fVerif": "Nachweis prüfen", "fPriv": "Datenschutz", "fTerms": "Nutzungsbedingungen", "fPsr": "Ersatz für Steps Recorder"}, "fr": {"fColProduto": "Produit", "fColCasos": "Cas d’usage", "fColConfianca": "Confiance", "navApp": "Ouvrir l’outil", "navPrice": "Tarifs", "fAjuda": "Base de connaissances", "fBlog": "Blog", "fComp": "Comparatif", "fConta": "Votre compte", "casoEvT": "Preuve de test", "casoInT": "Mode opératoire", "casoAtaT": "Compte rendu de réunion", "casoUxT": "Test d’utilisabilité", "casoIaT": "Contexte pour l’IA", "fSec": "Sécurité", "fVerif": "Vérifier une preuve", "fPriv": "Confidentialité", "fTerms": "Conditions d’utilisation", "fPsr": "Remplaçant de Steps Recorder"}};
+  const RODAPE_TXT = {"pt": {"fColProduto": "Produto", "fColCasos": "Casos de uso", "fColConfianca": "Confiança", "navHow": "Como funciona", "navComp": "Comparativo", "navApp": "Abrir a ferramenta", "navPrice": "Preços", "fAjuda": "Base de conhecimento", "fBlog": "Blog", "fComp": "Comparativo", "fConta": "Sua conta", "casoEvT": "Evidência de teste", "casoInT": "Instrução de trabalho", "casoAtaT": "Ata de reunião", "casoUxT": "Teste de usabilidade", "casoIaT": "Contexto para IA", "fSec": "Segurança", "fVerif": "Conferir evidência", "fPriv": "Privacidade", "fTerms": "Termos", "fPsr": "Substituto do Steps Recorder"}, "en": {"fColProduto": "Product", "fColCasos": "Use cases", "fColConfianca": "Trust", "navHow": "How it works", "navComp": "Compare", "navApp": "Open the tool", "navPrice": "Pricing", "fAjuda": "Knowledge base", "fBlog": "Blog", "fComp": "Compare", "fConta": "Your account", "casoEvT": "Test evidence", "casoInT": "Work instruction", "casoAtaT": "Meeting minutes", "casoUxT": "Usability test", "casoIaT": "Context for AI", "fSec": "Security", "fVerif": "Check evidence", "fPriv": "Privacy", "fTerms": "Terms", "fPsr": "Steps Recorder replacement"}, "es": {"fColProduto": "Producto", "fColCasos": "Casos de uso", "fColConfianca": "Confianza", "navHow": "Cómo funciona", "navComp": "Comparativa", "navApp": "Abrir la herramienta", "navPrice": "Precios", "fAjuda": "Base de conocimiento", "fBlog": "Blog", "fComp": "Comparativa", "fConta": "Tu cuenta", "casoEvT": "Evidencia de prueba", "casoInT": "Instrucción de trabajo", "casoAtaT": "Acta de reunión", "casoUxT": "Prueba de usabilidad", "casoIaT": "Contexto para IA", "fSec": "Seguridad", "fVerif": "Comprobar evidencia", "fPriv": "Privacidad", "fTerms": "Términos", "fPsr": "Alternativa al Steps Recorder"}, "de": {"fColProduto": "Produkt", "fColCasos": "Anwendungsfälle", "fColConfianca": "Vertrauen", "navHow": "So funktioniert es", "navComp": "Vergleich", "navApp": "Tool öffnen", "navPrice": "Preise", "fAjuda": "Wissensdatenbank", "fBlog": "Blog", "fComp": "Vergleich", "fConta": "Ihr Konto", "casoEvT": "Testnachweis", "casoInT": "Arbeitsanweisung", "casoAtaT": "Besprechungsprotokoll", "casoUxT": "Usability-Test", "casoIaT": "Kontext für KI", "fSec": "Sicherheit", "fVerif": "Nachweis prüfen", "fPriv": "Datenschutz", "fTerms": "Nutzungsbedingungen", "fPsr": "Ersatz für Steps Recorder"}, "fr": {"fColProduto": "Produit", "fColCasos": "Cas d’usage", "fColConfianca": "Confiance", "navHow": "Comment ça marche", "navComp": "Comparatif", "navApp": "Ouvrir l’outil", "navPrice": "Tarifs", "fAjuda": "Base de connaissances", "fBlog": "Blog", "fComp": "Comparatif", "fConta": "Votre compte", "casoEvT": "Preuve de test", "casoInT": "Mode opératoire", "casoAtaT": "Compte rendu de réunion", "casoUxT": "Test d’utilisabilité", "casoIaT": "Contexte pour l’IA", "fSec": "Sécurité", "fVerif": "Vérifier une preuve", "fPriv": "Confidentialité", "fTerms": "Conditions d’utilisation", "fPsr": "Remplaçant de Steps Recorder"}};
 
 
   /* O rodape, montado a cada troca de idioma.
@@ -6262,6 +6326,20 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     document.querySelectorAll('[data-i18n]').forEach(el => {
       el.textContent = t(el.getAttribute('data-i18n'));
     });
+    /* `data-site` lê o dicionário do SITE, e não o da ferramenta. São dois
+       dicionários porque são dois produtos de tradução — mas as palavras do
+       menu pertencem ao site, e é de lá que elas têm que vir. */
+    if (typeof RODAPE_TXT !== 'undefined') {
+      const tx = RODAPE_TXT[LANG] || RODAPE_TXT.pt || {};
+      document.querySelectorAll('[data-site]').forEach(el => {
+        const k = el.getAttribute('data-site');
+        if (tx[k]) el.textContent = tx[k];
+      });
+    }
+    /* "Como funciona" é uma âncora DENTRO da home, e não uma página. O
+       `data-rota` monta o endereço da home no idioma certo; a âncora entra
+       aqui, depois, porque ela é a mesma nos cinco. */
+    if ($('navHow')) $('navHow').href = $('navHow').href.replace(/#como$/, '') + '#como';
     pintarRodape();
     /* Campos de texto não têm textContent para traduzir — têm placeholder. */
     document.querySelectorAll('[data-i18n-ph]').forEach(el => {
@@ -8083,7 +8161,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
      depois, e não tem como se atualizar sozinho. Sem carimbo, "estou com um
      problema no offline" é uma conversa sem chão — ninguém sabe de qual build
      se fala nem se o defeito já foi consertado. */
-  const VERSAO = '2026.08.20-7';
+  const VERSAO = '2026.08.20-10';
   window.__versao = () => VERSAO;
 
   const PIP_CSS = `

@@ -1324,13 +1324,23 @@ def main() -> int:
     for pg, sl in SLUGS.items():
         rotas_app[pg] = {L: (("" if L == "pt" else "/" + L) + "/" + sl[L]) for L in IDIOMAS}
     rotas_app["blog"] = {L: (("" if L == "pt" else "/" + L) + "/blog") for L in IDIOMAS}
+    # A home não tem slug — ela É a raiz do idioma —, e por isso ficava de fora
+    # da tabela. O cabeçalho da ferramenta precisa dela: "Como funciona" é uma
+    # âncora dentro da home, e sem esta linha o link nascia vazio.
+    rotas_app["home"] = {L: ("/" if L == "pt" else "/" + L) for L in IDIOMAS}
     rotas_app["conta"] = dict(CAMINHO_CONTA)
     src = src.replace("__ROTAS_SITE__", json.dumps(rotas_app, ensure_ascii=False))
 
     # Os rótulos do rodapé saem do dicionário do SITE, para as duas telas
     # dizerem as mesmas palavras. Só as chaves usadas — mandar o dicionário
     # inteiro seriam dezenas de KB dentro de um arquivo que já tem 900.
+    # `navHow`, `navComp` e `navPrice` entraram aqui pelo mesmo motivo que o
+    # rodapé entrou: o CABEÇALHO da ferramenta também passou a ser o do site, e
+    # as palavras dele não podem ser uma segunda tradução escrita à mão dentro
+    # do template. Um menu que diz "Preços" no site e "Planos" na ferramenta é
+    # a mesma marca falando duas línguas.
     CHAVES_RODAPE = ["fColProduto", "fColCasos", "fColConfianca",
+                     "navHow", "navComp",
                      "navApp", "navPrice", "fAjuda", "fBlog", "fComp", "fConta",
                      "casoEvT", "casoInT", "casoAtaT", "casoUxT", "casoIaT",
                      "fSec", "fVerif", "fPriv", "fTerms", "fPsr"]

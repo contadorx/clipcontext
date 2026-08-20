@@ -1894,3 +1894,81 @@ pode ser levado a desmarcar a transcrição automática por engano. Marcar não 
 nada sozinho — leva ao passo 3, onde o arquivo entra — e **desliga a outra
 caixa**, porque baixar 206 MB para não usar é o desperdício que esta opção
 existe para evitar.
+
+---
+
+## 20/08/2026, décima nona rodada — uma moldura só, e a regra que a quebrava
+
+O relato: *"o menu da ferramenta fica deslocado dos demais, ele aloca o logo um
+pouco mais para a direita… a ideia é que o cabeçalho e o rodapé não tenham
+alteração independente da página"*.
+
+### O número, antes
+
+Medido a 1440 de largura, nas três telas:
+
+| | logo em x | cabeçalho | rodapé | menu |
+|---|---|---|---|---|
+| página principal | 272 | 940 | 940 | Como funciona · Comparativo · Preços · **[Ferramenta]** |
+| painel da conta | 272 | 940 | 940 | **[Abrir a ferramenta]** |
+| **ferramenta** | **356** | **1240** | **1240** | **[Minha conta]** |
+
+84 pixels de diferença, e três menus diferentes na mesma marca.
+
+### A causa não estava no cabeçalho da ferramenta
+
+Estava numa regra escrita para outra coisa:
+
+```css
+body.comBarra .wrap{display:grid;grid-template-columns:206px minmax(0,1fr);…;max-width:1240px}
+```
+
+Ela monta a grade de duas colunas da barra da conta, e foi escrita pensando na
+`.wrap` do trabalho. Mas `.wrap` é também a do cabeçalho **e** a do rodapé. Um
+seletor de classe nua alcança tudo o que ainda não foi escrito — e o efeito era
+mais fundo do que uma largura: o cabeçalho virava GRADE, o `.topbar` caía na
+segunda coluna, e a marca começava em x=508 depois que a largura foi corrigida.
+
+É a mesma lição que o `.painelMenu` do site já tinha aprendido com o `nav` nu, e
+a terceira vez que este projeto a paga. A `.wrap` do corpo ganhou nome — `.wrap
+.corpo` — e a grade passou a falar só com ela.
+
+### O que passou a valer
+
+`--maxTopo` é UM número, e ele vale para o cabeçalho e para o rodapé das três
+telas. O corpo continua com a medida de cada uma — 940 no site, que tem texto
+corrido; 1240 na ferramenta, que tem grade de miniaturas; 1220 na conta, que tem
+tabela. Isso é legítimo: **é a moldura que não pode mudar, não o quadro.** A
+conta já resolvia assim, com cabeçalho de 940 sobre corpo de 1220.
+
+Medido depois, pela régua nova `testes/cabecalho.mjs`:
+
+| | logo em x | nav termina em | cabeçalho | rodapé |
+|---|---|---|---|---|
+| página principal | 272 | 1168 | 940 | 940 |
+| ferramenta | 272 | 1168 | 940 | 940 |
+| painel da conta | 272 | 1168 | 940 | 940 |
+
+### O menu, um só — e o Blog nele
+
+As três telas passaram a ter os mesmos quatro itens, na mesma ordem e com as
+mesmas quebras (`hide-sm`, `hide-xs`): **Como funciona · Comparativo · Preços ·
+Blog**, e então o botão de ação — o único item cujo destino depende de onde a
+pessoa está (no site e na conta ele leva à ferramenta; na ferramenta, à conta).
+
+O **Blog** entrou, e antes do botão: ele existia só no rodapé, que é onde se
+procura o que já se sabe que existe. Um blog no rodapé não é lido por quem ainda
+não sabe que há o que ler. E vem antes da ação porque o botão é o fim do
+caminho — o que vem depois dele não é lido.
+
+Na ferramenta, os rótulos vêm do dicionário do **site** e os endereços do
+`ROTAS_SITE`, pelo mesmo caminho que o rodapé já usava. Conferido em alemão, que
+é o caso que pega o defeito: `Preise → /de/preise`, `Vergleich → /de/vergleich`.
+Escritos à mão lá dentro, seriam a enésima cópia — e a cópia que existia tinha
+quatro das dezesseis páginas, todas apontando para o português.
+
+### Por que uma régua nova
+
+Nenhum teste de conteúdo pega isto: cada página, sozinha, estava perfeita. O
+defeito só existe na COMPARAÇÃO entre elas, e por isso a régua abre as três na
+mesma janela e mede a mesma coisa nas três.
