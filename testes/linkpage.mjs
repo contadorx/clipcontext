@@ -28,7 +28,7 @@ for (const [u, marca] of [['/link','Um link pronto'], ['/en/link','A ready-made 
      (await pg.locator('h1').textContent()).slice(0, 40));
 }
 {
-  const sm = fs.readFileSync(ROOT + '/sitemap.xml', 'utf8');
+  const sm = fs.readFileSync(ROOT + '/sitemap-paginas.xml', 'utf8');
   ok('as três versões estão no sitemap',
      sm.includes('/link<') && sm.includes('/en/link<') && sm.includes('/es/link<'));
 }

@@ -253,6 +253,100 @@ export const quantasFeatures = features.grupos.reduce((n, g) => n + g.itens.leng
  *  uma tarde de erros de digitação. O React aqui é a casca — `<html>`, `<head>`
  *  e as tags de script; o conteúdo continua sendo conteúdo.
  */
+/* ---- OS DADOS ESTRUTURADOS DAS PÁGINAS FIXAS ----
+ *
+ * Eles não mudam ONDE a página aparece; mudam COMO ela aparece — é o único
+ * item desta rodada que mexe na cara do resultado, e não só na posição.
+ *
+ * Três formatos, um por natureza de página:
+ *
+ *   `SoftwareApplication` na home — é o que a ferramenta É, e é o que permite
+ *     ao resultado mostrar categoria e preço. `price: 0` não é marketing: a
+ *     ferramenta no navegador é gratuita, e declarar isso onde o buscador lê é
+ *     a mesma frase que a página já diz.
+ *
+ *   `FAQPage` na base de conhecimento — e ele é LIDO DO CORPO, pergunta por
+ *     pergunta. Escrever as perguntas de novo aqui seria a segunda lista ao lado
+ *     da lista de verdade, e a divergência seria invisível: a página diria uma
+ *     coisa e o buscador leria outra. Pior que isso, marcação de FAQ que não
+ *     corresponde ao texto visível é motivo de punição — e com razão.
+ *
+ *   `BreadcrumbList` nas demais — a trilha que faz o resultado mostrar o
+ *     caminho em vez do endereço cru.
+ *
+ * `Organization` viaja em todas, como publicador: é o que amarra as páginas a
+ * uma entidade só em vez de a um punhado de endereços soltos.
+ */
+function faqDoCorpo(corpo: string): Array<{ q: string; a: string }> {
+  const limpo = (h: string) => h
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"')
+    .replace(/&#39;|&apos;/g, "'")
+    .replace(/\s+/g, ' ').trim();
+  const fora: Array<{ q: string; a: string }> = [];
+  const re = /<details\b[^>]*>([\s\S]*?)<\/details>/gi;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(corpo))) {
+    const dentro = m[1];
+    const s2 = dentro.match(/<summary\b[^>]*>([\s\S]*?)<\/summary>/i);
+    if (!s2) continue;
+    const q = limpo(s2[1]);
+    const a = limpo(dentro.slice((s2.index || 0) + s2[0].length));
+    /* Resposta curta demais não é resposta — e uma entrada de FAQ sem conteúdo
+       é exatamente o tipo de marcação vazia que não deve existir. */
+    if (q.length > 3 && a.length > 25) fora.push({ q, a });
+  }
+  return fora;
+}
+
+function dadosEstruturados(pagina: string, lang: Lang, t: Dicionario, corpo: string): string {
+  const site = marca.site;
+  const url = site + endereco(pagina, lang);
+  const org = {
+    '@type': 'Organization', name: marca.marca, url: site,
+    logo: { '@type': 'ImageObject', url: `${site}/logo.svg` },
+    legalName: marca.empresa, email: marca.contato,
+  };
+  const blocos: unknown[] = [];
+
+  if (pagina === 'home') {
+    blocos.push({
+      '@context': 'https://schema.org', '@type': 'SoftwareApplication',
+      name: marca.marca, url: site, inLanguage: lang,
+      applicationCategory: 'BusinessApplication',
+      operatingSystem: 'Web browser',
+      description: String(t.docDesc || t.metaDesc || ''),
+      offers: { '@type': 'Offer', price: '0', priceCurrency: 'BRL' },
+      publisher: org,
+    });
+  } else {
+    const faq = pagina === 'ajuda' ? faqDoCorpo(corpo) : [];
+    if (faq.length) {
+      blocos.push({
+        '@context': 'https://schema.org', '@type': 'FAQPage', inLanguage: lang,
+        mainEntity: faq.map((f) => ({
+          '@type': 'Question', name: f.q,
+          acceptedAnswer: { '@type': 'Answer', text: f.a },
+        })),
+      });
+    }
+    blocos.push({
+      '@context': 'https://schema.org', '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: marca.marca, item: site + endereco('home', lang) },
+        { '@type': 'ListItem', position: 2, name: String(t.docTitle || pagina).split(' — ')[0], item: url },
+      ],
+    });
+  }
+  blocos.push({ '@context': 'https://schema.org', ...org });
+
+  return blocos.map((b) =>
+    '<script type="application/ld+json">' +
+    JSON.stringify(b).replace(/</g, '\\u003c').replace(/>/g, '\\u003e') +
+    '</script>').join('\n');
+}
+
 export function paginaHtml(pagina: string, lang: Lang): string {
   const t = tokens(lang);
   t.selfPath = endereco(pagina, lang);
@@ -312,6 +406,9 @@ export function paginaHtml(pagina: string, lang: Lang): string {
     t.body = trocar(ler(`site/bodies/${pagina}.${lang}.html`), t);
     bruto = ler('site/doc.html');
   }
+  /* Depois do corpo, porque o FAQ é LIDO dele. Antes do `trocar`, porque é ele
+     que troca o `{{jsonld}}` pelo bloco. */
+  t.jsonld = dadosEstruturados(pagina, lang, t, String(t.body || ''));
 
   const inteiro = trocar(bruto, t);
   const sobrando = [...new Set([...inteiro.matchAll(/\{\{(\w+)\}\}/g)].map((m) => m[1]))];

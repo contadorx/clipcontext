@@ -122,7 +122,7 @@ console.log('\n[4] as cinco páginas existem nos três idiomas');
     const h1 = await pg.locator('h1').textContent();
     ok(u, r.status() === 200 && h1.includes(marca), h1.slice(0, 40));
   }
-  const sm = fs.readFileSync(ROOT + '/sitemap.xml', 'utf8');
+  const sm = fs.readFileSync(ROOT + '/sitemap-paginas.xml', 'utf8');
   ok('as quinze estão no sitemap',
      paginas.every(([u]) => sm.includes(u + '<')));
   await pg.close();

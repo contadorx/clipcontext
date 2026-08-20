@@ -90,7 +90,7 @@ console.log('\n[5] o rodapé e o hreflang não ficaram para trás');
   /* O português sai como `pt-BR`, com região, porque é o que ele é. */
   for (const L of idiomas)
     ok(`  hreflang ${L}`, alt.includes(L === 'pt' ? 'pt-BR' : L), alt.join(' '));
-  const mapa = fs.readFileSync('/root/walkstamp/public/sitemap.xml', 'utf8');
+  const mapa = fs.readFileSync('/root/walkstamp/public/sitemap-paginas.xml', 'utf8');
   for (const u of ['/de/hilfe', '/fr/aide', '/de/preise', '/fr/tarifs'])
     ok(`  o sitemap conhece ${u}`, mapa.includes(u));
 }

@@ -714,9 +714,30 @@ def build_site(root: pathlib.Path) -> None:
             if sobrando:
                 print(f"AVISO: chaves sem valor em {pagina}.{lang}: {sorted(sobrando)}", file=sys.stderr)
 
-    # sitemap e robots: a página do Steps Recorder só serve se for encontrada,
-    # e um site sem mapa deixa o buscador adivinhar. As alternativas de idioma
-    # vão declaradas em cada URL, senão as três versões competem entre si.
+    # ---- O MAPA DAS PÁGINAS FIXAS ----
+    #
+    # A página do Steps Recorder só serve se for encontrada, e um site sem mapa
+    # deixa o buscador adivinhar. As alternativas de idioma vão declaradas em
+    # cada URL, senão as cinco versões competem entre si.
+    #
+    # ELE MUDOU DE NOME: era `sitemap.xml`, e virou `sitemap-paginas.xml`.
+    #
+    # O motivo é o blog. Um post publicado hoje precisa entrar no mapa hoje, e
+    # este arquivo só é escrito quando alguém faz um deploy — um post publicado
+    # pelo painel ficava fora do mapa até a próxima subida de código, que pode
+    # ser semanas. Então `/sitemap.xml` passou a ser um ÍNDICE servido pelo
+    # Next, apontando para dois mapas: este, que é fixo e nasce aqui, e o do
+    # blog, que é lido do banco a cada rastreio.
+    #
+    # Um arquivo em `public/` chamado `sitemap.xml` sombrearia a rota — no Next
+    # o estático ganha —, e por isso o nome mudou em vez de o índice ter outro.
+    # E ele continua sendo um arquivo em disco de propósito: quatro testes o
+    # leem sem subir servidor nenhum, e ler do disco é o que os mantém rápidos.
+    #
+    # `lastmod` entrou junto: sem ele o rastreador não tem como priorizar o que
+    # mudou, e reprocessa quarenta e cinco páginas iguais toda vez. A data é a
+    # do BUILD, que é literalmente quando estas páginas mudaram pela última vez.
+    hoje = _dt.datetime.now(_dt.timezone.utc).strftime("%Y-%m-%d")
     urls = []
     for pagina in ["home"] + list(SLUGS):
         for lang in IDIOMAS:
@@ -724,15 +745,22 @@ def build_site(root: pathlib.Path) -> None:
                 f'\n    <xhtml:link rel="alternate" hreflang="{L if L != "pt" else "pt-BR"}" '
                 f'href="{SITE}{paginas[L][pagina]}"/>'
                 for L in IDIOMAS)
-            urls.append(f'  <url>\n    <loc>{SITE}{paginas[lang][pagina]}</loc>{alt}\n'
+            urls.append(f'  <url>\n    <loc>{SITE}{paginas[lang][pagina]}</loc>\n'
+                        f'    <lastmod>{hoje}</lastmod>{alt}\n'
                         f'    <xhtml:link rel="alternate" hreflang="x-default" href="{SITE}{paginas["en"][pagina]}"/>\n'
                         f'  </url>')
     sitemap = ('<?xml version="1.0" encoding="UTF-8"?>\n'
                '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" '
                'xmlns:xhtml="http://www.w3.org/1999/xhtml">\n'
                + "\n".join(urls) + "\n</urlset>\n")
-    (root / "public" / "sitemap.xml").write_text(sitemap, encoding="utf-8")
-    print(f"public/sitemap.xml  {len(sitemap)/1024:.1f} KB")
+    (root / "public" / "sitemap-paginas.xml").write_text(sitemap, encoding="utf-8")
+    # O nome antigo sai do disco: enquanto ele existir, o Next serve o estático
+    # e o índice nunca é alcançado — um defeito que não dá erro, só deixa o blog
+    # fora do mapa em silêncio.
+    antigo = root / "public" / "sitemap.xml"
+    if antigo.exists():
+        antigo.unlink()
+    print(f"public/sitemap-paginas.xml  {len(sitemap)/1024:.1f} KB")
 
     # ---- PWA ----
     # "Instalar sem instalar": o atalho vai para a área de trabalho sem que a TI

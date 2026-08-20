@@ -1972,3 +1972,108 @@ quatro das dezesseis páginas, todas apontando para o português.
 Nenhum teste de conteúdo pega isto: cada página, sozinha, estava perfeita. O
 defeito só existe na COMPARAÇÃO entre elas, e por isso a régua abre as três na
 mesma janela e mede a mesma coisa nas três.
+
+---
+
+## 20/08/2026, vigésima rodada — os nove itens de ranqueamento
+
+Uma lista pronta, por retorno sobre esforço. O que segue é o que cada um era
+antes, o que virou, e o que foi medido — porque **nada disto aparece na tela**,
+e é por isso que tudo aqui ganhou régua: quando quebra, ninguém vê. O sintoma
+chega meses depois como "o post não indexou", sem nada na página que indique o
+quê.
+
+### 1 e 3. O sitemap: os posts não estavam lá, e nada tinha `lastmod`
+
+`/sitemap.xml` era um arquivo escrito pelo `build.py`. Isso bastava enquanto o
+site fosse só páginas fixas — elas mudam no deploy, e o arquivo nasce no deploy.
+O blog quebrou a conta: **um post publicado pelo painel ficava fora do mapa até
+a próxima subida de código**, que pode ser semanas.
+
+Agora `/sitemap.xml` é um **índice** e aponta para dois mapas com cadências
+diferentes: `sitemap-paginas.xml`, que continua nascendo no build e sendo lido
+do disco por quatro testes; e `sitemap-blog.xml`, lido do banco a cada rastreio.
+
+O `lastmod` do post é o **`atualizado_em`**, e não o `publicado_em`: a pergunta
+que ele responde é "mudou?", não "nasceu quando?". As páginas fixas levam a data
+do build, que é literalmente quando elas mudaram.
+
+Um detalhe que não dá erro e estraga tudo: um arquivo `public/sitemap.xml`
+**sombreia** a rota — no Next o estático ganha. Por isso o nome mudou em vez de
+o índice ter outro, e o `build.py` apaga o antigo se ele existir.
+
+### 2. Dados estruturados — o único item que muda COMO o resultado aparece
+
+| onde | o quê |
+|---|---|
+| home | `SoftwareApplication` + `Organization` |
+| base de conhecimento | `FAQPage` com **45 perguntas** + trilha |
+| post | `Article` + `Organization` (publicador) + `BreadcrumbList` |
+| autor | `ProfilePage` |
+| demais páginas | `BreadcrumbList` + `Organization` |
+
+O FAQ é **lido do corpo da página**, pergunta por pergunta, dos `<details>` que
+já estavam lá. Escrevê-lo de novo seria a segunda lista ao lado da lista de
+verdade — e aqui a divergência seria pior que invisível: marcação de FAQ que não
+corresponde ao texto visível é motivo de punição, e com razão. A régua confere
+que a primeira pergunta do JSON-LD está mesmo escrita na página.
+
+### 4. Todo rastreio batia no Supabase — e a primeira correção trouxe outro defeito
+
+O item pedia trocar `force-dynamic` por `revalidate`. A primeira versão fez
+exatamente isso, e o `testes/blog.mjs` caiu: com `revalidate`, o Next monta a
+página **no build**, e num build sem banco — uma prévia, um deploy com o
+Supabase fora do ar — o blog nasce **vazio** e serve 200 com uma lista que não
+existe por cinco minutos. Um índice vazio servido a um rastreador é pior que um
+índice lento: ele ensina que não há nada ali.
+
+O que custava não era montar a página; era a **consulta**. Então o cache mudou
+de lugar: `fetchCache: 'default-cache'` guarda a LEITURA por cinco minutos, e a
+página continua sendo montada a cada pedido, sempre com o que existe agora.
+
+Medido em `testes/seo.mjs`: **três visitas seguidas → 0 consultas ao banco.**
+
+E publicar revalida os endereços públicos — com uma armadilha achada no
+caminho: `revalidatePath('/blog')` **não limpa nada**. O endereço público é
+`/blog`, mas por dentro a rota é `/pt/blog`, e o `revalidatePath` fala com o
+roteador, que só conhece o de dentro. Em silêncio, como sempre.
+
+### 5. O artigo linkava o próprio blog e o rodapé
+
+`ligarTermos` acrescenta, ao corpo já convertido, **um link por página de
+caso** — na primeira vez que o termo aparece e só ali. Quatro travas, e cada uma
+existe por um motivo: uma vez por destino (cinco links iguais valem menos que
+um, e são padrão de manipulação); nunca dentro de `<a>`, `<code>` ou `<pre>`;
+nunca dentro de etiqueta (casar `alt="ata de reunião"` quebraria a imagem); e o
+termo mais longo primeiro, senão "teste" venceria dentro de "evidência de
+teste".
+
+Um defeito meu, achado antes de sair: comparar sem acento com
+`normalize('NFD')` muda o TAMANHO da string, e o índice achado apontava para o
+lugar errado no texto original — a âncora sairia cortando palavra no meio, num
+idioma com acento a cada duas linhas. `planificar()` troca caractere a caractere
+e só quando a troca cabe em um; a igualdade de comprimento virou trava.
+
+### 6 a 9. Feed, Open Graph, etiquetas e autor
+
+**RSS por idioma**, com `dc:creator`, `category` e `rel="self"`. Um feed
+misturado é um feed que se cancela: quem assina o alemão não quer português. O
+corpo vai como **resumo**, e não inteiro — mandar o artigo completo faz o leitor
+de feed virar o destino final.
+
+**`modifiedTime` e `author`** no Open Graph, e **`x-default`** no `hreflang` do
+post — apontando para o inglês *quando ele existe*, e para o próprio post quando
+não: mandar para um idioma que aquele post não tem repetiria o 404 que o resto
+do `hreflang` evita.
+
+**`/blog/tag/...` e `/blog/autor/...`.** O modelo guardava `tags: string[]` e
+`autor` desde sempre, e nenhum dos dois virava nada. A chave é normalizada —
+"Evidência" e "evidencia" são a mesma etiqueta, e duas páginas para a mesma
+coisa competiriam entre si, que é o defeito que o `canonical` existe para
+evitar, criado por nós. E **etiqueta sem posts sai do índice**: uma página fina
+que responde 200 e não tem conteúdo enche o site de endereços que não servem a
+ninguém.
+
+Um detalhe que fazia as duas responderem 404: a ponte `/blog/:slug` casa com UM
+segmento, e `/blog/tag/evidencia` tem dois. Uma página que existe por dentro e
+não tem ponte é uma página que não existe.

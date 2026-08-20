@@ -18,7 +18,9 @@ export const temChaveDeServico = Boolean(URL_BASE && CHAVE);
 
 /** Chama uma função do banco com a chave de serviço. Lança se faltar segredo —
  *  em silêncio, isto viraria uma tela vazia que ninguém sabe explicar. */
-export async function rpc<T = unknown>(nome: string, args: Record<string, unknown>): Promise<T> {
+export async function rpc<T = unknown>(
+  nome: string, args: Record<string, unknown>, segundos?: number,
+): Promise<T> {
   if (!temChaveDeServico) {
     throw new Error(
       'falta SUPABASE_SERVICE_ROLE_KEY (e SUPABASE_URL) no ambiente — ' +
@@ -33,7 +35,20 @@ export async function rpc<T = unknown>(nome: string, args: Record<string, unknow
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(args),
-    cache: 'no-store',
+    /* ---- `no-store` É O PADRÃO, E CONTINUA SENDO ----
+
+       Quase tudo que passa por aqui é da CONTA de alguém: fatura, chamado,
+       assento. Uma resposta dessas guardada em cache é a fatura de uma pessoa
+       servida a outra, e por isso o padrão não pode ser outro.
+
+       `segundos` é a exceção, e ela tem um dono: o BLOG. Ele é público, igual
+       para todo mundo e lido por rastreador — e, com `no-store`, uma leitura de
+       banco por visita de robô, sem nada em troca. Pior: no Next, um `fetch`
+       com `no-store` torna a página inteira dinâmica, e foi isso que manteve o
+       `force-dynamic` de pé mesmo depois de trocado por `revalidate`.
+
+       Quem passa `segundos` está afirmando que aquela resposta é pública. */
+    ...(segundos ? { next: { revalidate: segundos } } : { cache: 'no-store' as const }),
   });
   if (!r.ok) throw new Error(`${nome}: ${r.status} ${(await r.text()).slice(0, 300)}`);
   return (await r.json()) as T;

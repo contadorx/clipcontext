@@ -27,7 +27,7 @@ console.log('[1] a página existe nos três idiomas e está no mapa');
     ok(u + ' abre', (await pg.locator('h1').textContent()).includes(marca),
        (await pg.locator('h1').textContent()).slice(0, 45));
   }
-  const sm = fs.readFileSync(ROOT + '/sitemap.xml', 'utf8');
+  const sm = fs.readFileSync(ROOT + '/sitemap-paginas.xml', 'utf8');
   ok('as três versões estão no sitemap',
      sm.includes('/time<') && sm.includes('/en/team<') && sm.includes('/es/equipo<'));
   await pg.close();

@@ -22,7 +22,7 @@ TESTES="smoke.mjs saidas.mjs passos.mjs evidencia.mjs modelos.mjs cenarios.mjs
          juntos.mjs reabrir.mjs trocar.mjs scorm.mjs pptx.mjs miudos.mjs miudos2.mjs
          ignorar.mjs tarjaauto.mjs revisao.mjs multiidioma.mjs
          clipe.mjs canais.mjs capitulos.mjs comparar.mjs
-         juntar.mjs webcam.mjs portal.mjs chamadoconta.mjs cabecalho.mjs stripehook.mjs ux.mjs ficha.mjs sessao.mjs
+         juntar.mjs webcam.mjs portal.mjs chamadoconta.mjs cabecalho.mjs seo.mjs stripehook.mjs ux.mjs ficha.mjs sessao.mjs
          onda1.mjs onda2.mjs onda4.mjs
          destaque.mjs tapado.mjs marcados.mjs traducao.mjs vocab.mjs jira.mjs
          idiomas.mjs paginas.mjs linkpage.mjs timepag.mjs licenca.mjs liclink.mjs

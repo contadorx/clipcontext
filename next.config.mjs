@@ -75,6 +75,8 @@ const config = {
     // o buscador dividindo a força dela entre as duas.
     r.push({ source: '/pt', destination: '/', permanent: true });
     r.push({ source: '/pt/blog', destination: '/blog', permanent: true });
+    r.push({ source: '/pt/blog/tag/:tag', destination: '/blog/tag/:tag', permanent: true });
+    r.push({ source: '/pt/blog/autor/:autor', destination: '/blog/autor/:autor', permanent: true });
     r.push({ source: '/pt/blog/:slug', destination: '/blog/:slug', permanent: true });
     for (const pg of paginas) {
       r.push({ source: `/pt/${slugs[pg].pt}`, destination: publico(pg, 'pt'), permanent: true });
@@ -109,6 +111,12 @@ const config = {
        ponte, porque o endereço público é `/blog` e por dentro ele mora em
        `/pt/blog`. O `:slug` cobre o post. */
     depois.push({ source: '/blog', destination: '/pt/blog' });
+    /* Etiqueta e autor ANTES do `:slug`: eles têm dois segmentos, e `:slug` só
+       casa com um — sem estas duas linhas, `/blog/tag/evidencia` não casa com
+       nada e responde 404. Uma página que existe por dentro e não tem ponte é
+       uma página que não existe. */
+    depois.push({ source: '/blog/tag/:tag', destination: '/pt/blog/tag/:tag' });
+    depois.push({ source: '/blog/autor/:autor', destination: '/pt/blog/autor/:autor' });
     depois.push({ source: '/blog/:slug', destination: '/pt/blog/:slug' });
 
     // A ferramenta é um arquivo estático em `public/app.html` e continua sendo.
