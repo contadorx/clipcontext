@@ -137,6 +137,9 @@
   .grupoOrg.conferir{margin-top:18px;padding-top:14px;border-top:1px solid var(--line)}
   .opcoesVias{margin-top:14px;padding:12px 14px;border:1px dashed var(--line);
     border-radius:10px;background:var(--bg)}
+  .trFonte{margin:0 0 14px;padding:12px 14px;border:1px dashed var(--line);
+    border-radius:10px;background:var(--bg)}
+  .trFonte b{font-size:14.5px}
   .caminhos .via{border:1px solid var(--line);border-radius:10px;padding:16px;background:var(--bg)}
   .caminhos #viaRec{border:2px solid var(--accent);
       background:color-mix(in srgb,var(--accent) 5%,transparent)}
@@ -1253,6 +1256,24 @@
       <label class="opt"><input type="checkbox" id="recTr" checked><span data-i18n="recTrLbl"></span>
         <b class="optNota rec" id="optTr" data-i18n="recomendado"></b></label>
       <p class="note" id="recTrNote" style="margin:6px 0 0"></p>
+      <!-- ---- O CAMINHO CURTO, DITO ANTES DA ESPERA ----
+
+           Quem sai de uma reunião do Meet, do Teams ou do Zoom já tem a
+           transcrição pronta — feita no servidor deles, sem custo nenhum aqui.
+           Trazê-la é instantâneo; transcrever de novo custa 206 MB de download
+           e minutos de máquina para produzir um texto PIOR (o modelo daqui é o
+           `base`, e não sabe quem falou).
+
+           Ela nasce DESMARCADA, e "recomendado" ao lado não é contradição: a
+           recomendação é para quem tem o arquivo, e quem não tem não deve ser
+           levado a desmarcar a transcrição automática por engano. Marcar aqui
+           não faz nada sozinho — leva ao passo 3, onde o arquivo entra —, e é
+           por isso que ela desliga a outra caixa em vez de disputar com ela:
+           baixar o modelo para não usá-lo é o desperdício que esta opção
+           existe para evitar. -->
+      <label class="opt"><input type="checkbox" id="usarPronta"><span data-i18n="prontaLbl"></span>
+        <b class="optNota rec" data-i18n="recomendado"></b></label>
+      <p class="note" id="prontaNote" style="margin:6px 0 0"></p>
     </div>
     <div class="hide" id="liveBox" style="margin-top:12px">
       <div class="vus" id="vuBox">
@@ -1752,15 +1773,43 @@
     <details class="ev" id="trBox" open>
       <summary><span data-i18n="trBoxH"></span> <span class="sub" id="trBoxSub"></span></summary>
     <div id="trManual">
-    <!-- Abrir uma legenda pronta saiu DAQUI, de cima.
-         Era a primeira coisa que se via numa caixa cujo trabalho é mostrar o
-         RESULTADO da transcrição — um convite a procurar arquivo antes de saber
-         que a ferramenta transcreve sozinha. Continua existindo, e continua
-         alcançável pelo teclado, mas agora embaixo, junto das outras operações
-         de arquivo, e dizendo de onde essa legenda costuma vir: de uma reunião
-         que já foi transcrita pelo Teams, pelo Meet ou pelo Zoom. Esse é o dono
-         real deste botão — não quem manda vídeo e áudio junto. -->
+    <!-- Abrir uma legenda pronta já morou aqui em cima, depois desceu para
+         baixo do quadro, e agora está aqui de novo — com um motivo diferente do
+         da primeira vez. Antes era "a primeira coisa que se vê numa caixa cujo
+         trabalho é mostrar o resultado". Continua sendo verdade para quem chega
+         com vídeo. Mas quem chega com a reunião JÁ TRANSCRITA não tem o que
+         esperar, e para essa pessoa o quadro vazio é uma instrução errada. O
+         desempate é o custo: descobrir tarde custa 206 MB e minutos; descobrir
+         cedo custa uma linha lida a mais. -->
     <input type="file" id="vttFile" accept=".vtt,.srt,.txt,text/plain">
+    <input type="file" id="reuniaoFile" accept=".docx,.txt,.vtt,.srt,text/plain">
+
+    <!-- ---- A TRANSCRIÇÃO QUE JÁ EXISTE, E VEM ANTES DO QUADRO ----
+
+         Abrir uma legenda pronta era um botão pequeno EMBAIXO do quadro de
+         texto, com uma frase ao lado. Quem chega com a reunião já transcrita
+         pelo Meet, pelo Teams ou pelo Zoom não encontra: lê o quadro vazio,
+         conclui que precisa transcrever aqui, e paga 206 MB de download e
+         minutos de máquina por um texto que já estava pronto no Drive.
+
+         Por isso ele subiu, e por isso são DOIS caminhos com nome próprio. Um
+         botão que diz "abrir legenda" não conta a quem trabalha com reunião que
+         o arquivo dela serve; um que diz "Google Meet, Teams ou Zoom" conta.
+
+         O leitor é o MESMO nos dois: o formato é reconhecido pelo conteúdo, e
+         não pelo botão. O que muda é o filtro do seletor de arquivos — que é o
+         que faz a pessoa encontrar o arquivo dela na pasta. -->
+    <div class="trFonte" id="trFonte">
+      <b data-i18n="trEnviarH"></b>
+      <div class="row" style="margin-top:8px;gap:9px;flex-wrap:wrap">
+        <button class="ghost sm" type="button" id="pickReuniao" data-i18n="trDeReuniao"></button>
+        <button class="ghost sm" type="button" id="pickVtt" data-i18n="trDeLegenda"></button>
+        <button class="ghost sm hide" type="button" id="pickDrive" data-i18n="trDoDrive"></button>
+      </div>
+      <p class="note" data-i18n="trEnviarP" style="margin:8px 0 0"></p>
+      <span class="status" id="trFonteMsg" style="display:block;margin-top:6px"></span>
+    </div>
+
     <textarea id="tr" placeholder="Cole aqui a transcrição do Google Drive, ou arraste um arquivo .srt / .vtt.
 
 Reconheço automaticamente:
@@ -1770,14 +1819,9 @@ Reconheço automaticamente:
 
 Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trecho."></textarea>
     <div class="status" id="trInfo" style="margin-top:8px"></div>
-    <!-- `align-items:center` e uma margem à direita: a frase é longa, quebra
-         em duas linhas e encostava na borda do cartão. Texto colado na borda
-         se lê pior do que texto menor. -->
-    <div class="row" style="margin-top:8px;align-items:center;gap:10px">
-      <button class="ghost sm" id="pickVtt" data-i18n="openSub"></button>
-      <span class="status" data-i18n="subDeOnde" style="flex:1;min-width:200px;
-            max-width:620px;padding-right:6px;line-height:1.55"></span>
-    </div>
+    <!-- O botão de abrir legenda subiu para `#trFonte`, acima do quadro: ali
+         ele é encontrado por quem chega com a reunião já transcrita, que é o
+         dono real dele. -->
     <!-- Vocabulário do domínio. Fica logo abaixo da transcrição porque é ali que
          o erro aparece, e não num painel de configuração que ninguém abre.
 
@@ -2361,6 +2405,30 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     </div></div><!-- /dobra -->
   </div>
 
+  <!-- ---- COMEÇAR OUTRO, DEPOIS DE TERMINAR ESTE ----
+
+       Existe um "Recomeçar" lá em cima, entre o passo 1 e o 2 — e ele está no
+       lugar certo para quem DESISTE no meio. Mas quem terminou não desistiu:
+       gerou o documento, e agora tem a segunda gravação da fila esperando. Essa
+       pessoa chegava ao fim da página e não tinha para onde ir; subia rolando
+       procurando o botão de desistir.
+
+       Só aparece quando existe documento: um "começar outro" numa tela vazia
+       oferece sair de onde ninguém entrou ainda.
+
+       ---- E ELE MORA AQUI, DEPOIS DO PASSO 4 ----
+
+       Estava DEPOIS DO RODAPÉ do site — abaixo dos links de preços, termos e
+       privacidade, fora da coluna de trabalho. Quem termina o documento para de
+       ler no fim do passo 4; o que vem depois do rodapé é o fim da PÁGINA, não
+       o fim da tarefa, e ninguém rola por cima de dezesseis links institucionais
+       procurando o botão de recomeçar. Ele é o passo seguinte do trabalho, e o
+       lugar dele é onde o trabalho acaba. -->
+  <div class="entreCards hide" id="novoFluxoCx">
+    <button class="sm" id="novoFluxo" data-i18n="novoFluxoBtn"></button>
+    <span class="note" data-i18n="novoFluxoNota"></span>
+  </div>
+
   <p class="status" style="text-align:center;margin-top:26px">
     <span data-i18n="supportLine"></span>
   </p>
@@ -2472,20 +2540,6 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     <p class="status" data-i18n="licNota" style="max-width:640px"></p>
   </div>
 
-  <!-- ---- COMEÇAR OUTRO, DEPOIS DE TERMINAR ESTE ----
-
-       Existe um "Recomeçar" lá em cima, entre o passo 1 e o 2 — e ele está no
-       lugar certo para quem DESISTE no meio. Mas quem terminou não desistiu:
-       gerou o documento, e agora tem a segunda gravação da fila esperando. Essa
-       pessoa chegava ao fim da página e não tinha para onde ir; subia rolando
-       procurando o botão de desistir.
-
-       Só aparece quando existe documento: um "começar outro" numa tela vazia
-       oferece sair de onde ninguém entrou ainda. -->
-  <div class="entreCards hide" id="novoFluxoCx">
-    <button class="sm" id="novoFluxo" data-i18n="novoFluxoBtn"></button>
-    <span class="note" data-i18n="novoFluxoNota"></span>
-  </div>
 
 
   <div class="lente hide" id="fbModal" role="dialog" aria-modal="true" aria-labelledby="fbTit">
@@ -2635,6 +2689,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recSemFrames:'Nenhuma tela foi guardada: a imagem não mudou o suficiente durante a captura. A gravação só guarda a tela quando ela muda — se você ficou numa tela só, ou se compartilhou uma janela que o navegador entrega em preto, não há o que guardar. Grave de novo percorrendo as telas que quer documentar.',
       recMicLbl:'Incluir meu microfone',
       recTrLbl:'Transcrever enquanto gravo',
+      prontaLbl:'Usar transcrição do Google Meet, Zoom ou Teams', prontaOn:'Mais rápido: a reunião já foi transcrita por eles, e o arquivo entra no passo 3 — sem baixar modelo e sem esperar. Vale .docx do Meet, .vtt/.srt do Teams e do Zoom.', prontaOff:'Se a sua reunião já foi transcrita pelo Meet, pelo Teams ou pelo Zoom, marque aqui: é mais rápido do que transcrever de novo, e o texto costuma vir melhor (com o nome de quem falou).', trEnviarH:'Já tem a transcrição? Envie o arquivo.', trEnviarP:'Reconheço .docx do Google Meet (as “Anotações do Gemini”, com a aba de transcrição ou o arquivo inteiro), .vtt e .srt do Teams e do Zoom, e texto colado do painel do Drive. Com marcação de tempo, cada tela sai no documento junto do que foi dito ali.', trDeReuniao:'Google Meet, Teams ou Zoom (.docx, .vtt, .srt)', trDeLegenda:'Arquivo de legenda (.vtt, .srt, .txt)', trDoDrive:'Buscar no Google Drive', trLendo:'Lendo o arquivo…', trLeuCues:'Li o arquivo: {0} trechos com marcação de tempo.', trLeuReuniao:'Li a transcrição da reunião: {0} trechos. A minutagem é por bloco — veja a nota abaixo.', trLeuSemTempo:'Li o arquivo, mas ele não tem marcação de tempo: o texto entra inteiro e as telas não saem pareadas com a fala.', trLerErro:'Não consegui ler este arquivo: {0}', trFormato:'Este formato eu não leio. Do Google Meet use o .docx; do Teams e do Zoom, o .vtt ou o .srt. Um .doc antigo ou um PDF precisam ser salvos como .docx ou .txt antes.', trBlocos:' A minutagem veio por BLOCO, como o Meet e o Teams escrevem: um instante para várias falas. Dentro de cada bloco os trechos são distribuídos pelo tamanho da fala — é estimativa, e serve para parear as telas; para citar o minuto exato, confira no vídeo.',
       recTrOn:'A transcrição sai pronta no fim, junto com os frames. Exige baixar o modelo de ~{0} MB antes de começar — uma vez só, e depois fica guardado no navegador.',
       recTrOff:'Só os frames. Nada é baixado e a gravação começa na hora. Depois dá para colar uma transcrição pronta no passo 2.',
       recWarn:'Nada de vídeo é guardado: durante a gravação a ferramenta separa os frames que importam e transcreve os dois canais de áudio — o seu microfone e o som do computador — em separado. A transcrição divide a máquina com a captura; em computador modesto a tela pode perder alguma troca.',
@@ -3218,6 +3273,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recSemFrames:'No screen was kept: the image did not change enough during the capture. Recording only keeps the screen when it changes — if you stayed on a single screen, or shared a window the browser hands over as black, there is nothing to keep. Record again, walking through the screens you want to document.',
       recMicLbl:'Include my microphone',
       recTrLbl:'Transcribe while I record',
+      prontaLbl:'Use the transcript from Google Meet, Zoom or Teams', prontaOn:'Faster: they already transcribed the meeting, and the file goes in at step 3 — no model download, no waiting. Works with Meet .docx and Teams/Zoom .vtt/.srt.', prontaOff:'If your meeting was already transcribed by Meet, Teams or Zoom, tick this: it is faster than transcribing again, and the text is usually better (it names who spoke).', trEnviarH:'Already have the transcript? Send the file.', trEnviarP:'I read Google Meet .docx (the “Gemini notes”, either the transcript tab or the whole file), Teams and Zoom .vtt and .srt, and text pasted from the Drive panel. With timestamps, each screen goes into the document next to what was said there.', trDeReuniao:'Google Meet, Teams or Zoom (.docx, .vtt, .srt)', trDeLegenda:'Subtitle file (.vtt, .srt, .txt)', trDoDrive:'Find it in Google Drive', trLendo:'Reading the file…', trLeuCues:'Read the file: {0} timestamped stretches.', trLeuReuniao:'Read the meeting transcript: {0} stretches. Timing is per block — see the note below.', trLeuSemTempo:'Read the file, but it has no timestamps: the text goes in whole and the screens will not be paired with the speech.', trLerErro:'I could not read this file: {0}', trFormato:'I do not read this format. From Google Meet use the .docx; from Teams and Zoom, the .vtt or .srt. An old .doc or a PDF has to be saved as .docx or .txt first.', trBlocos:' Timing came per BLOCK, the way Meet and Teams write it: one instant for several turns. Inside each block the stretches are spread by how long each turn is — that is an estimate, good enough to pair the screens; to quote an exact minute, check the video.',
       recTrOn:'The transcript is ready at the end, alongside the frames. It needs the ~{0} MB model downloaded first — once only, and then it stays in your browser.',
       recTrOff:'Frames only. Nothing is downloaded and recording starts right away. You can paste a ready transcript in step 2 afterwards.',
       recWarn:'No video is kept: while recording, the tool pulls out the frames that matter and transcribes the two audio channels separately — your microphone and the computer sound. Transcription shares the machine with the capture; on a modest computer the screen may miss a change.',
@@ -3795,6 +3851,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recSemFrames:'No se guardó ninguna pantalla: la imagen no cambió lo suficiente durante la captura. La grabación solo guarda la pantalla cuando cambia — si te quedaste en una sola, o compartiste una ventana que el navegador entrega en negro, no hay nada que guardar. Graba de nuevo recorriendo las pantallas que quieres documentar.',
       recMicLbl:'Incluir mi micrófono',
       recTrLbl:'Transcribir mientras grabo',
+      prontaLbl:'Usar la transcripción de Google Meet, Zoom o Teams', prontaOn:'Más rápido: ellos ya transcribieron la reunión, y el archivo entra en el paso 3 — sin descargar el modelo y sin esperar. Sirve el .docx de Meet y el .vtt/.srt de Teams y Zoom.', prontaOff:'Si tu reunión ya fue transcrita por Meet, Teams o Zoom, marca aquí: es más rápido que transcribir de nuevo, y el texto suele venir mejor (con el nombre de quien habló).', trEnviarH:'¿Ya tienes la transcripción? Envía el archivo.', trEnviarP:'Leo el .docx de Google Meet (las “Notas de Gemini”, la pestaña de transcripción o el archivo entero), el .vtt y el .srt de Teams y Zoom, y texto pegado del panel de Drive. Con marcas de tiempo, cada pantalla sale en el documento junto a lo que se dijo allí.', trDeReuniao:'Google Meet, Teams o Zoom (.docx, .vtt, .srt)', trDeLegenda:'Archivo de subtítulos (.vtt, .srt, .txt)', trDoDrive:'Buscar en Google Drive', trLendo:'Leyendo el archivo…', trLeuCues:'Leí el archivo: {0} tramos con marca de tiempo.', trLeuReuniao:'Leí la transcripción de la reunión: {0} tramos. La minutación es por bloque — mira la nota de abajo.', trLeuSemTempo:'Leí el archivo, pero no tiene marcas de tiempo: el texto entra entero y las pantallas no salen emparejadas con el habla.', trLerErro:'No pude leer este archivo: {0}', trFormato:'Este formato no lo leo. De Google Meet usa el .docx; de Teams y Zoom, el .vtt o el .srt. Un .doc antiguo o un PDF hay que guardarlos antes como .docx o .txt.', trBlocos:' La minutación vino por BLOQUE, como la escriben Meet y Teams: un instante para varias intervenciones. Dentro de cada bloque los tramos se reparten según el tamaño de cada intervención — es una estimación, sirve para emparejar las pantallas; para citar el minuto exacto, compruébalo en el vídeo.',
       recTrOn:'La transcripción sale lista al final, junto con los fotogramas. Requiere descargar el modelo de ~{0} MB antes de empezar — una sola vez, y luego queda guardado en el navegador.',
       recTrOff:'Solo los fotogramas. No se descarga nada y la grabación empieza al instante. Después puedes pegar una transcripción ya hecha en el paso 2.',
       recWarn:'No se guarda vídeo: durante la grabación la herramienta separa los fotogramas que importan y transcribe los dos canales de audio por separado — tu micrófono y el sonido del ordenador. La transcripción comparte la máquina con la captura; en un ordenador modesto la pantalla puede perder algún cambio.',
@@ -4371,6 +4428,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recSemFrames:'Es wurde kein Bildschirm gespeichert: Das Bild hat sich während der Aufnahme nicht genug verändert. Die Aufnahme speichert den Bildschirm nur, wenn er sich ändert — wenn Sie auf einem einzigen Bildschirm geblieben sind oder ein Fenster freigegeben haben, das der Browser schwarz ausliefert, gibt es nichts zu speichern. Nehmen Sie erneut auf und gehen Sie die Bildschirme durch, die Sie dokumentieren wollen.',
       recMicLbl:'Mein Mikrofon einbeziehen',
       recTrLbl:'Während der Aufnahme transkribieren',
+      prontaLbl:'Transkript aus Google Meet, Zoom oder Teams verwenden', prontaOn:'Schneller: die Besprechung wurde dort bereits transkribiert, und die Datei kommt in Schritt 3 hinein — ohne Modell-Download und ohne Warten. Möglich sind Meet-.docx sowie .vtt/.srt aus Teams und Zoom.', prontaOff:'Wenn Ihre Besprechung bereits von Meet, Teams oder Zoom transkribiert wurde, setzen Sie hier das Häkchen: das ist schneller als erneut zu transkribieren, und der Text ist meist besser (mit dem Namen der sprechenden Person).', trEnviarH:'Transkript schon vorhanden? Datei hochladen.', trEnviarP:'Ich lese Google-Meet-.docx (die „Gemini-Notizen“, den Transkript-Reiter oder die ganze Datei), .vtt und .srt aus Teams und Zoom sowie Text aus dem Drive-Fenster. Mit Zeitmarken erscheint jeder Screenshot im Dokument neben dem, was dort gesagt wurde.', trDeReuniao:'Google Meet, Teams oder Zoom (.docx, .vtt, .srt)', trDeLegenda:'Untertiteldatei (.vtt, .srt, .txt)', trDoDrive:'In Google Drive suchen', trLendo:'Datei wird gelesen…', trLeuCues:'Datei gelesen: {0} Abschnitte mit Zeitmarke.', trLeuReuniao:'Besprechungstranskript gelesen: {0} Abschnitte. Die Zeitangabe ist blockweise — siehe Hinweis unten.', trLeuSemTempo:'Datei gelesen, aber ohne Zeitmarken: der Text kommt vollständig hinein, und die Screenshots werden nicht der Sprache zugeordnet.', trLerErro:'Diese Datei konnte ich nicht lesen: {0}', trFormato:'Dieses Format lese ich nicht. Aus Google Meet nehmen Sie die .docx; aus Teams und Zoom die .vtt oder .srt. Eine alte .doc oder ein PDF müssen vorher als .docx oder .txt gespeichert werden.', trBlocos:' Die Zeitangabe kam BLOCKWEISE, so wie Meet und Teams sie schreiben: ein Zeitpunkt für mehrere Wortbeiträge. Innerhalb eines Blocks werden die Abschnitte nach Länge des Beitrags verteilt — das ist eine Schätzung und reicht, um die Screenshots zuzuordnen; für die exakte Minute prüfen Sie das Video.',
       recTrOn:'Die Transkription ist am Ende fertig, zusammen mit den Screenshots. Dafür muss vorher das Modell von ~{0} MB heruntergeladen werden — nur einmal, danach bleibt es im Browser gespeichert.',
       recTrOff:'Nur die Screenshots. Es wird nichts heruntergeladen und die Aufnahme startet sofort. Eine fertige Transkription können Sie später in Schritt 2 einfügen.',
       recWarn:'Es wird kein Video gespeichert: Während der Aufnahme trennt das Werkzeug die Screenshots heraus, die zählen, und transkribiert die beiden Tonspuren — Ihr Mikrofon und den Computerton — getrennt. Die Transkription teilt sich den Rechner mit der Aufnahme; auf einem schwächeren Computer kann ein Bildwechsel verloren gehen.',
@@ -4953,6 +5011,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recSemFrames:'Aucun écran n’a été conservé : l’image n’a pas assez changé pendant la capture. L’enregistrement ne conserve l’écran que lorsqu’il change — si vous êtes resté sur un seul écran, ou si vous avez partagé une fenêtre que le navigateur rend en noir, il n’y a rien à conserver. Enregistrez de nouveau en parcourant les écrans que vous voulez documenter.',
       recMicLbl:'Inclure mon microphone',
       recTrLbl:'Transcrire pendant l’enregistrement',
+      prontaLbl:'Utiliser la transcription de Google Meet, Zoom ou Teams', prontaOn:'Plus rapide : la réunion a déjà été transcrite chez eux, et le fichier entre à l’étape 3 — sans téléchargement de modèle et sans attente. Fonctionne avec le .docx de Meet et le .vtt/.srt de Teams et Zoom.', prontaOff:'Si votre réunion a déjà été transcrite par Meet, Teams ou Zoom, cochez ici : c’est plus rapide que de transcrire à nouveau, et le texte est en général meilleur (il nomme qui a parlé).', trEnviarH:'Vous avez déjà la transcription ? Envoyez le fichier.', trEnviarP:'Je lis le .docx de Google Meet (les « notes Gemini », l’onglet transcription ou le fichier entier), le .vtt et le .srt de Teams et Zoom, et le texte collé depuis le panneau Drive. Avec l’horodatage, chaque écran sort dans le document à côté de ce qui a été dit à ce moment-là.', trDeReuniao:'Google Meet, Teams ou Zoom (.docx, .vtt, .srt)', trDeLegenda:'Fichier de sous-titres (.vtt, .srt, .txt)', trDoDrive:'Chercher dans Google Drive', trLendo:'Lecture du fichier…', trLeuCues:'Fichier lu : {0} passages horodatés.', trLeuReuniao:'Transcription de réunion lue : {0} passages. L’horodatage est par bloc — voir la note ci-dessous.', trLeuSemTempo:'Fichier lu, mais sans horodatage : le texte entre en entier et les écrans ne seront pas appariés à la parole.', trLerErro:'Je n’ai pas pu lire ce fichier : {0}', trFormato:'Ce format, je ne le lis pas. Depuis Google Meet, prenez le .docx ; depuis Teams et Zoom, le .vtt ou le .srt. Un ancien .doc ou un PDF doit d’abord être enregistré en .docx ou .txt.', trBlocos:' L’horodatage est venu par BLOC, comme Meet et Teams l’écrivent : un instant pour plusieurs prises de parole. Dans chaque bloc, les passages sont répartis selon la longueur de la prise de parole — c’est une estimation, suffisante pour apparier les écrans ; pour citer la minute exacte, vérifiez dans la vidéo.',
       recTrOn:'La transcription est prête à la fin, en même temps que les captures. Il faut d’abord télécharger le modèle d’environ {0} Mo — une seule fois, ensuite il reste dans le navigateur.',
       recTrOff:'Les captures seules. Rien n’est téléchargé et l’enregistrement démarre immédiatement. Vous pourrez coller une transcription toute prête à l’étape 2.',
       recWarn:'Aucune vidéo n’est conservée : pendant l’enregistrement, l’outil isole les captures qui comptent et transcrit séparément les deux canaux audio — votre microphone et le son de l’ordinateur. La transcription partage la machine avec la capture ; sur un ordinateur modeste, l’écran peut rater un changement.',
@@ -5555,11 +5614,36 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   /* "A pessoa pediu a fala ao abrir este vídeo." Vive fora do `load` porque
      quem a consome é o fim da varredura, que acontece muito depois. */
   let falaPedida = false;
-  function trabalhando(v){
-    ocupado = v;
-    $('keepOpen').classList.toggle('hide', !v);
-    if ($('esperaDica')) $('esperaDica').classList.toggle('hide', !v);
+  /* ---- QUEM ESTÁ TRABALHANDO, e não SE alguém está ----
+
+     `ocupado` era um booleano, e isso bastava enquanto houvesse um trabalho por
+     vez. Não há mais: a varredura dos quadros corre JUNTO da transcrição de
+     propósito — elas não disputam nada —, e a montagem do modelo começa junto
+     da extração do áudio.
+
+     Com um booleano, o primeiro a terminar apaga o estado do outro. O sintoma é
+     exatamente o que foi relatado: **a faixa de progresso aparece e some
+     sozinha**, no meio de uma transcrição que continua correndo. Numa varredura
+     de dez segundos ao lado de uma transcrição de quarenta minutos, a faixa
+     vive dez segundos.
+
+     E o estrago maior não é a faixa: é o `beforeunload`. Com `ocupado` falso, a
+     aba fecha SEM AVISAR durante a transcrição — que é a única coisa nesta
+     ferramenta que não dá para refazer sem pagar o tempo de novo.
+
+     Um CONJUNTO de nomes resolve os dois e é idempotente: ligar duas vezes é
+     ligar uma, e desligar quem não estava ligado não faz nada. É mais seguro
+     que um contador, onde um `false` sem par derruba o trabalho alheio. */
+  const trabalhos = new Set();
+  function trabalhando(v, quem){
+    const nome = quem || 'geral';
+    if (v) trabalhos.add(nome); else trabalhos.delete(nome);
+    ocupado = trabalhos.size > 0;
+    $('keepOpen').classList.toggle('hide', !ocupado);
+    if ($('esperaDica')) $('esperaDica').classList.toggle('hide', !ocupado);
   }
+  /* Para a régua: qual trabalho está correndo agora, e não só quantos. */
+  try { window.__trabalhos = () => [...trabalhos]; } catch (e) {}
   /* A SESSÃO NOVA, numa aba.
      Quem tem cinco gravações para documentar não pode ficar refém da primeira.
      A aba nova é uma sessão independente — nada é compartilhado entre elas,
@@ -6314,7 +6398,22 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     })();
   }
 
-  if ($('recTr')) $('recTr').onchange = () => { notaTr(); adiantarModelo(); };
+  if ($('recTr')) $('recTr').onchange = () => {
+    /* Marcar "transcrever enquanto gravo" desliga "eu já tenho a transcrição":
+       as duas juntas descrevem uma pessoa que vai baixar 206 MB para não usar. */
+    if ($('recTr').checked && $('usarPronta')) $('usarPronta').checked = false;
+    notaTr(); adiantarModelo();
+  };
+  if ($('usarPronta')) $('usarPronta').onchange = () => {
+    if ($('usarPronta').checked && $('recTr')) {
+      $('recTr').checked = false;
+      /* `dataset.mao` porque a escolha foi DA PESSOA: sem ele a próxima
+         repintura devolveria o padrão marcado por cima do que ela decidiu. É o
+         mesmo mecanismo da caixa da placa de vídeo. */
+      $('recTr').dataset.mao = '1';
+    }
+    notaTr();
+  };
   if ($('model')) $('model').addEventListener('change', () => {
     // trocar de modelo com a caixa marcada recomeça o adiantamento
     if ($('recTr') && $('recTr').checked) adiantarModelo();
@@ -6619,6 +6718,112 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
 
   $('driveStop').onclick = () => { if (driveAbort) driveAbort.abort(); };
 
+  /* ---- A TRANSCRIÇÃO QUE ESTÁ NO DRIVE ----
+
+     O Meet guarda a transcrição como DOCUMENTO DO GOOGLE, e não como arquivo:
+     quem quer trazê-la tem que abrir o Drive, baixar como .docx e voltar. São
+     três passos fora daqui para um arquivo que já é da pessoa.
+
+     Duas diferenças em relação ao caminho do vídeo, e as duas importam:
+
+       - a vista do seletor é de DOCUMENTOS, e não de vídeos. A mesma vista de
+         vídeo não mostraria o arquivo que se procura;
+       - um documento do Google não tem bytes para baixar. `alt=media` responde
+         403 nele — o que existe é `/export`, que converte na hora. Para um
+         .docx de verdade guardado no Drive, o caminho continua sendo `alt=media`.
+
+     O escopo continua sendo `drive.file`: só o arquivo escolhido no seletor, e
+     nada mais da conta de ninguém. */
+  const MIME_DOC_GOOGLE = 'application/vnd.google-apps.document';
+
+  function abrirSeletorDoc(token){
+    return new Promise((res, rej) => {
+      let respondeu = false;
+      const limite = setTimeout(() => { if (!respondeu) rej(new Error(t('drivePicker'))); }, 90000);
+      const terminar = v => { respondeu = true; clearTimeout(limite); res(v); };
+      const view = new google.picker.DocsView(google.picker.ViewId.DOCS)
+        .setIncludeFolders(true)
+        .setSelectFolderEnabled(false)
+        .setMimeTypes([MIME_DOC_GOOGLE,
+                       'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                       'text/plain'].join(','));
+      const b = new google.picker.PickerBuilder()
+        .setAppId(GOOGLE_APP_ID).setOAuthToken(token).setDeveloperKey(GOOGLE_API_KEY)
+        .setOrigin(location.protocol + '//' + location.host)
+        .addView(view);
+      if (google.picker.Feature && google.picker.Feature.SUPPORT_DRIVES)
+        b.enableFeature(google.picker.Feature.SUPPORT_DRIVES);
+      b.setCallback(d => {
+        const acao = d[google.picker.Response.ACTION];
+        if (acao === google.picker.Action.PICKED) terminar(d[google.picker.Response.DOCUMENTS][0]);
+        else if (acao === google.picker.Action.CANCEL) terminar(null);
+      });
+      b.build().setVisible(true);
+    });
+  }
+
+  async function baixarDocDoDrive(doc, token){
+    const google2 = doc.mimeType === MIME_DOC_GOOGLE;
+    /* Documento do Google exporta como TEXTO, e não como .docx: o texto já é o
+       que o `parseTranscript` lê, e pular a volta pelo zip é uma peça a menos
+       para quebrar. */
+    const url = google2
+      ? 'https://www.googleapis.com/drive/v3/files/' + encodeURIComponent(doc.id) +
+        '/export?mimeType=text%2Fplain&supportsAllDrives=true'
+      : 'https://www.googleapis.com/drive/v3/files/' + encodeURIComponent(doc.id) +
+        '?alt=media&supportsAllDrives=true';
+    const r = await fetch(url, { headers: { Authorization: 'Bearer ' + token } });
+    if (r.status === 401) { driveToken = null; throw new Error(t('driveExpired')); }
+    if (r.status === 403 || r.status === 404) throw new Error(t('driveNoScope'));
+    if (!r.ok) throw new Error(t('driveErr') + ' (HTTP ' + r.status + ')');
+    if (google2) return { texto: await r.text() };
+    const blob = await r.blob();
+    return { arquivo: new File([blob], doc.name || 'transcricao.docx',
+                               { type: doc.mimeType || 'application/octet-stream' }) };
+  }
+
+  if ($('pickDrive')) {
+    /* O botão só aparece onde o Drive existe. `DRIVE_ON` é a MESMA condição
+       que decide o caminho do vídeo — as três chaves e um endereço http. Uma
+       segunda regra aqui seria a segunda lista ao lado da lista de verdade, e
+       um dia elas discordariam sobre se o Drive está ligado. */
+    if (DRIVE_ON) $('pickDrive').classList.remove('hide');
+    $('pickDrive').onclick = async () => {
+      const msg = (m, c) => { $('trFonteMsg').innerHTML = c ? `<span class="${c}">${m}</span>` : m; };
+      $('pickDrive').disabled = true;
+      try {
+        msg(t('driveAuth'));
+        await Promise.all([
+          carregarScript('https://accounts.google.com/gsi/client'),
+          carregarScript('https://apis.google.com/js/api.js')
+        ]);
+        if (!driveToken) driveToken = await pedirToken(false);
+        msg(t('driveOpening'));
+        await new Promise((res, rej) => gapi.load('picker', { callback: res, onerror: rej }));
+        const doc = await abrirSeletorDoc(driveToken);
+        if (!doc) return msg('');
+        msg(t('trLendo'));
+        const r = await baixarDocDoDrive(doc, driveToken);
+        if (r.texto) {
+          $('tr').value = r.texto;
+          refreshTr();
+          const { cues, fonte } = parseTranscript(r.texto);
+          msg(cues.length ? t(fonte === 'blocos' ? 'trLeuReuniao' : 'trLeuCues', cues.length)
+                          : t('trLeuSemTempo'), cues.length ? 'ok' : '');
+          medir('transcricao_arquivo', { p_formato: 'drive:' + fonte });
+          if (cues.length && frames.length) render();
+        } else {
+          /* Um .docx de verdade guardado no Drive passa pelo MESMO leitor do
+             botão de arquivo. Um segundo caminho de leitura seria a segunda
+             lista ao lado da lista de verdade. */
+          await readSub(r.arquivo);
+        }
+      } catch (e) {
+        msg(t('trLerErro', (e && e.message) || e), 'err');
+      } finally { $('pickDrive').disabled = false; }
+    };
+  }
+
   $('drive').onclick = async () => {
     if (capturando()) return;
     $('drive').disabled = true;
@@ -6639,7 +6844,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
 
       if (Number(doc.sizeBytes) > 1610612736) driveAviso = t('driveBig', tamanho(doc.sizeBytes));
       $('driveStop').classList.remove('hide');
-      trabalhando(true); travei = true;
+      trabalhando(true, 'drive'); travei = true;
 
       const blob = await baixarDoDrive(doc, driveToken);
       if (!blob.size) throw new Error(t('driveErr') + ' (0 bytes)');
@@ -6669,7 +6874,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       $('drive').disabled = false;
       $('driveStop').classList.add('hide');
       driveAbort = null;
-      if (travei) trabalhando(false);
+      if (travei) trabalhando(false, 'drive');
     }
   };
 
@@ -6678,6 +6883,138 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     const p = s.trim().replace(',', '.').split(':').map(parseFloat);
     return p.length === 3 ? p[0]*3600 + p[1]*60 + p[2]
          : p.length === 2 ? p[0]*60 + p[1] : p[0];
+  }
+
+  /* ---- A TRANSCRIÇÃO DE REUNIÃO: Google Meet, Teams, Zoom ----
+
+     O Meet — e o "Anotações do Gemini" que sai dele — não escreve um tempo por
+     fala. Escreve um tempo por BLOCO, sozinho na linha, e embaixo dele as falas
+     com o nome de quem falou:
+
+         00:02:04
+
+         LUCINELIA GONCALVES DA SILVA: na nas reuniões…
+         LEANDRO OLIVEIRA: Tá bom. Tira aí do
+
+         00:03:25
+
+     O parser pedia tempo e texto NA MESMA LINHA. Diante deste arquivo ele
+     achava zero marcações e caía no caminho "texto solto" — e é por isso que
+     uma transcrição de reunião perfeitamente boa entrava SEM MINUTAGEM, e
+     nenhum quadro saía pareado com o que foi dito ali. O sintoma não é um erro
+     na tela: é um documento em que a fala não acompanha as telas, que é
+     justamente o que esta ferramenta existe para fazer.
+
+     ---- O TEMPO DENTRO DO BLOCO É ESTIMADO, E ISSO É DITO NA TELA ----
+
+     Um bloco carrega um instante só e várias falas. Distribuí-las pelo TAMANHO
+     do texto é a aproximação honesta — quem fala mais ocupa mais tempo — e é
+     melhor que dar a todas o mesmo instante, que empilharia seis falas no mesmo
+     segundo e teria cara de precisão. Inventar precisão sem avisar é o que esta
+     ferramenta não faz: `trBlocos` diz, ao lado do texto, que a minutagem veio
+     por bloco.
+
+     Dois blocos são o mínimo para acreditar no formato. Com um só, o que existe
+     é um texto solto com uma data em cima — e tratá-lo como transcrição
+     minutada seria adivinhar. */
+  const SO_TEMPO = /^\s*((?:\d{1,3}:)?\d{1,2}:\d{2})\s*$/;
+
+  function parseBlocos(txt){
+    const blocos = [];
+    let atual = null;
+    for (const l of txt.split('\n')) {
+      const mt = l.match(SO_TEMPO);
+      if (mt) { atual = { a: toSec(mt[1]), falas: [] }; blocos.push(atual); continue; }
+      const corpo = l.replace(/\s+/g, ' ').trim();
+      /* Antes do primeiro tempo vem o cabeçalho do arquivo — a data e o nome da
+         reunião. Ele não é fala, e não tem onde ser pendurado. */
+      if (!corpo || !atual) continue;
+      atual.falas.push(corpo);
+    }
+    const cheios = blocos.filter(b => b.falas.length);
+    if (cheios.length < 2) return [];
+    const cues = [];
+    for (let i = 0; i < cheios.length; i++) {
+      const b = cheios[i];
+      /* O fim do bloco é o começo do seguinte. No último, uma estimativa por
+         tamanho: ~14 caracteres por segundo é a fala corrida em português. */
+      const fim = i + 1 < cheios.length ? cheios[i + 1].a
+                : b.a + Math.max(10, b.falas.join(' ').length / 14);
+      const total = b.falas.reduce((n, f) => n + f.length, 0) || 1;
+      let t0 = b.a;
+      for (const f of b.falas) {
+        const dur = Math.max(0.4, (fim - b.a) * (f.length / total));
+        cues.push({ a: t0, b: t0 + dur, t: f });
+        t0 += dur;
+      }
+    }
+    return cues;
+  }
+
+  /* ---- LER UM .docx NO NAVEGADOR, SEM BIBLIOTECA ----
+
+     O Meet entrega a transcrição como documento do Google, e quem baixa recebe
+     um `.docx`. Pedir "converta para txt antes" é empurrar trabalho para quem
+     veio pedir ajuda.
+
+     Um `.docx` é um `.zip` com um XML dentro, e o navegador já sabe as duas
+     partes: `DecompressionStream('deflate-raw')` é o mesmo algoritmo do zip, e
+     o índice do arquivo são vinte linhas de leitura. Uma biblioteca aqui seria
+     mais um endereço de CDN para cair — e este arquivo funciona de `file://`,
+     onde CDN nenhum existe. */
+  async function lerDocx(file){
+    const buf = new Uint8Array(await file.arrayBuffer());
+    const dv = new DataView(buf.buffer, buf.byteOffset, buf.byteLength);
+    /* O fim do índice central, procurado de trás para frente: o comentário do
+       zip pode ter até 64 KB, e a assinatura é o único jeito de achar o começo. */
+    let eocd = -1;
+    for (let i = buf.length - 22; i >= 0 && i > buf.length - 66000; i--) {
+      if (dv.getUint32(i, true) === 0x06054b50) { eocd = i; break; }
+    }
+    if (eocd < 0) throw new Error('zip');
+    const n = dv.getUint16(eocd + 10, true);
+    let p = dv.getUint32(eocd + 16, true);
+    const td = new TextDecoder();
+    for (let k = 0; k < n && p + 46 < buf.length; k++) {
+      if (dv.getUint32(p, true) !== 0x02014b50) break;
+      const metodo = dv.getUint16(p + 10, true);
+      const comp = dv.getUint32(p + 20, true);
+      const nomeLen = dv.getUint16(p + 28, true);
+      const extraLen = dv.getUint16(p + 30, true);
+      const comLen = dv.getUint16(p + 32, true);
+      const desloc = dv.getUint32(p + 42, true);
+      const nome = td.decode(buf.subarray(p + 46, p + 46 + nomeLen));
+      if (nome === 'word/document.xml') {
+        /* O cabeçalho local tem o SEU tamanho de nome e de extra, e eles podem
+           não ser os do índice — ler os do índice aqui é o erro clássico. */
+        const nl = dv.getUint16(desloc + 26, true), el = dv.getUint16(desloc + 28, true);
+        const ini = desloc + 30 + nl + el;
+        const cru = buf.subarray(ini, ini + comp);
+        if (metodo === 0) return td.decode(cru);
+        if (typeof DecompressionStream !== 'function') throw new Error('sem DecompressionStream');
+        const fluxo = new Blob([cru]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
+        return await new Response(fluxo).text();
+      }
+      p += 46 + nomeLen + extraLen + comLen;
+    }
+    throw new Error('sem word/document.xml');
+  }
+
+  /* O XML do Word para texto. Um parágrafo por linha, que é a unidade que o
+     `parseBlocos` lê — e é o que o Meet escreve: o tempo é um parágrafo, cada
+     fala é outro. */
+  function textoDeDocx(xml){
+    return xml
+      .replace(/<w:tab\/>/g, '\t')
+      .replace(/<w:br\s*\/>/g, '\n')
+      .replace(/<\/w:p>/g, '\n')
+      .replace(/<[^>]+>/g, '')
+      .replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+      .replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&apos;/g, "'")
+      .replace(/&amp;/g, '&')
+      .replace(/\r/g, '')
+      .split('\n').map(l => l.trim()).join('\n')
+      .trim();
   }
 
   function parseTranscript(raw){
@@ -6696,6 +7033,13 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
         if (body) cues.push({ a: toSec(m[1]), b: toSec(m[2]), t: body });
       });
     }
+    let fonte = cues.length ? 'vtt' : '';
+    /* O formato de reunião vem ANTES do "tempo e texto na mesma linha": ele é
+       mais específico, e o outro nunca casaria com um tempo sozinho na linha. */
+    if (!cues.length) {
+      const b = parseBlocos(txt);
+      if (b.length) { cues.push(...b); fonte = 'blocos'; }
+    }
     if (!cues.length) {
       txt.split('\n').forEach(line => {
         const m = line.match(/^\s*((?:\d{1,3}:)?\d{1,2}:\d{2})\s+(.+)$/);
@@ -6703,9 +7047,11 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       });
       for (let i = 0; i < cues.length; i++)
         cues[i].b = i+1 < cues.length ? cues[i+1].a : cues[i].a + 10;
+      if (cues.length) fonte = 'linhas';
     }
     cues.sort((x,y) => x.a - y.a);
-    return { cues, plain: cues.length ? cues.map(c => c.t).join(' ') : txt };
+    return { cues, fonte: fonte || 'texto',
+             plain: cues.length ? cues.map(c => c.t).join(' ') : txt };
   }
 
   function refreshTr(){
@@ -6717,10 +7063,15 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
        muda. Sem esta linha o botão dizia "Descartar sem fala" sem número até
        alguém mexer nos quadros. */
     if (typeof pintarFiltros === 'function' && frames.length) pintarFiltros();
-    const { cues } = parseTranscript($('tr').value);
+    const { cues, fonte } = parseTranscript($('tr').value);
     const n = $('tr').value.trim().length;
+    /* A minutagem por BLOCO é dita, e não escondida. Ela é a do Meet e a do
+       Teams: um instante por bloco, várias falas dentro. Os trechos são
+       distribuídos pelo tamanho da fala, o que é estimativa — e uma estimativa
+       que se apresenta como medida é a única coisa aqui pior que não ter. */
     $('trInfo').innerHTML = !n ? '' : cues.length
-      ? `<span class="ok">${t('trCues', cues.length)}</span>${t('trCues2')}`
+      ? `<span class="ok">${t('trCues', cues.length)}</span>` +
+        (fonte === 'blocos' ? t('trBlocos') : t('trCues2'))
       : t('trPlain');
     /* `expRow` foi removida com os botões de baixar a legenda solta. A linha
        fica aqui, guardada, para o dia em que alguém procurar por onde a
@@ -6738,6 +7089,18 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     if (typeof passos === 'function') passos();
   }
   $('tr').oninput = refreshTr;
+  /* Espelhos para a régua. A MESMA análise que o documento consome — medir uma
+     cópia dela no teste mediria a cópia. `falaEm` responde a pergunta que o
+     pareamento faz de verdade: o que estava sendo dito neste segundo. */
+  try {
+    window.__cues = () => parseTranscript($('tr').value).cues;
+    window.__falaEm = seg => {
+      const { cues } = parseTranscript($('tr').value);
+      const c = cues.find(x => seg >= x.a && seg < x.b) ||
+                cues.filter(x => x.a <= seg).pop();
+      return c ? c.t : '';
+    };
+  } catch (e) {}
   if ($('trBox')) $('trBox').addEventListener('toggle', () => { $('trBox').dataset.mexido = '1'; });
 
   /* ================= tradução no aparelho =================
@@ -7328,7 +7691,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      depois, e não tem como se atualizar sozinho. Sem carimbo, "estou com um
      problema no offline" é uma conversa sem chão — ninguém sabe de qual build
      se fala nem se o defeito já foi consertado. */
-  const VERSAO = '2026.08.20-3';
+  const VERSAO = '2026.08.20-7';
   window.__versao = () => VERSAO;
 
   const PIP_CSS = `
@@ -8839,7 +9202,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     abrindoCaptura = false;
     controle('gravando', { seg: 0, frames: 0 });
     passos();
-    trabalhando(true);
+    trabalhando(true, 'gravacao');
     $('rec').classList.add('hide'); $('recStop').classList.remove('hide');
     pintarRecMsg = () => {
       const extra = (performance.now() < avisoAte && avisoCurto) ? avisoCurto : '';
@@ -9338,7 +9701,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       if ($('recTela')) $('recTela').classList.add('hide');
       $('recPip').classList.add('hide');
       pausado = false; alternarPausa = null; marcarAgora = null; maisUmaTela = null;
-      trabalhando(false);
+      trabalhando(false, 'gravacao');
       abrindoCaptura = false;
 
       /* A barra e a linha de status do cartão 2 são da transcrição AO VIVO, que
@@ -9467,13 +9830,51 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      que pertencem. Quando escrevi esta frase pela primeira vez ela era falsa: o
      .zip não os levava. O `vitrine.mjs` pegou, e aí eles passaram a ir. */
 
-  function readSub(f){
-    const r = new FileReader();
-    r.onload = () => { $('tr').value = r.result; refreshTr(); };
-    r.readAsText(f, 'utf-8');
+  /* ---- UM LEITOR SÓ, PARA OS DOIS BOTÕES E PARA O ARRASTAR ----
+
+     O formato é reconhecido pelo CONTEÚDO, e não pelo botão que abriu o
+     seletor. Um `.docx` do Meet aberto pelo botão da legenda funciona, e um
+     `.vtt` do Zoom aberto pelo botão da reunião funciona — porque quem sabe
+     qual é qual é o `parseTranscript`, e não a pessoa. Os dois botões existem
+     para a pessoa ENCONTRAR o arquivo dela, com o filtro certo no seletor, e
+     para dizer que este caminho existe. */
+  async function readSub(f){
+    if (!f) return;
+    const msg = (m, c) => { const el = $('trFonteMsg'); if (el) el.innerHTML = c ? `<span class="${c}">${m}</span>` : m; };
+    const nome = (f.name || '').toLowerCase();
+    try {
+      let txt;
+      if (/\.docx$/.test(nome)) {
+        msg(t('trLendo'));
+        txt = textoDeDocx(await lerDocx(f));
+      } else if (/\.(doc|pdf|rtf|odt)$/.test(nome)) {
+        /* O `.doc` antigo e o PDF NÃO são lidos, e dizer isso é melhor que
+           abrir um arquivo binário no quadro de texto — que é o que acontecia:
+           o `FileReader` lia qualquer coisa e enchia a tela de lixo. */
+        return msg(t('trFormato'), 'err');
+      } else {
+        txt = await f.text();
+      }
+      $('tr').value = txt;
+      refreshTr();
+      const { cues, fonte } = parseTranscript(txt);
+      /* O relato de sucesso diz o NÚMERO e a FONTE. "Abri o arquivo" não
+         responde a pergunta que a pessoa tem, que é se a minutagem veio junto —
+         é dela que depende cada quadro sair pareado com o que foi dito. */
+      msg(cues.length ? t(fonte === 'blocos' ? 'trLeuReuniao' : 'trLeuCues', cues.length)
+                      : t('trLeuSemTempo'), cues.length ? 'ok' : '');
+      medir('transcricao_arquivo', { p_formato: fonte });
+      if (cues.length && frames.length) render();
+    } catch (e) {
+      msg(t('trLerErro', (e && e.message) || e), 'err');
+    }
   }
   $('pickVtt').onclick = () => $('vttFile').click();
   $('vttFile').onchange = e => { const f = e.target.files[0]; if (f) readSub(f); };
+  if ($('pickReuniao')) {
+    $('pickReuniao').onclick = () => $('reuniaoFile').click();
+    $('reuniaoFile').onchange = e => { const f = e.target.files[0]; if (f) readSub(f); };
+  }
   ['dragenter','dragover'].forEach(e => $('tr').addEventListener(e, ev => {
     ev.preventDefault(); $('tr').classList.add('over');
   }));
@@ -9787,6 +10188,9 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     const el = $('recTrNote'); if (!el) return;
     const querTr = $('recTr') && $('recTr').checked;
     el.textContent = querTr ? t('recTrOn', tamanhoModelo()) : t('recTrOff');
+    const pn = $('prontaNote');
+    if (pn) pn.textContent = ($('usarPronta') && $('usarPronta').checked)
+      ? t('prontaOn') : t('prontaOff');
   }
 
   const tamanhoModelo = () => {
@@ -10643,7 +11047,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     transcrevendoPct = 0;
     $('auto').textContent = t('autoIndo');
     $('autoDica').textContent = t('autoEspere');
-    trabalhando(true);
+    trabalhando(true, 'transcricao');
     relogio.audio = 0; relogio.ms = 0;
     try {
       /* ---- OS DOIS COMEÇAM JUNTOS ----
@@ -10806,7 +11210,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       prog(null);
       pintarSaidas();
       sincAmbos();
-      trabalhando(false);
+      trabalhando(false, 'transcricao');
     }
   };
 
@@ -12700,7 +13104,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     sincAmbos();
     $('go').disabled = $('docx').disabled = $('zip').disabled = true; emUso.add('zip');
     $('cancel').classList.remove('hide');
-    trabalhando(true);
+    trabalhando(true, 'varredura');
     $('barWrap').classList.remove('hide');
     /* A grade some no MESMO gesto em que a lista é esvaziada. Sem o `render()`
        aqui, as miniaturas da varredura anterior ficavam na tela durante todo o
@@ -12819,7 +13223,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     /* A barra cheia ficava no lugar depois de terminar — uma faixa azul de
        100% que não quer dizer mais nada, logo abaixo dos botões. */
     $('barWrap').classList.add('hide');
-    trabalhando(false);
+    trabalhando(false, 'varredura');
     stop = false;
     render();
     passos();
@@ -16050,7 +16454,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     if (semQuadros('movMsg')) return;
     $('ocr').disabled = true;
     ocrParar = false;
-    trabalhando(true);
+    trabalhando(true, 'ocr');
     let worker = null;
     try {
       if (!window.Tesseract) {
@@ -16108,7 +16512,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       $('ocr').disabled = false;
       $('ocrStop').classList.add('hide');
       prog(null);
-      trabalhando(false);
+      trabalhando(false, 'ocr');
     }
   };
 
@@ -16705,7 +17109,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     if (escolhidos.length > 1) return juntarVarios(escolhidos);
     const file = escolhidos[0];
     $('reabrirMsg').textContent = t('reabrirLendo');
-    trabalhando(true);
+    trabalhando(true, 'reabrir');
     try {
       const novos = /\.zip$/i.test(file.name)
         ? await reabrirZip(await file.arrayBuffer())
@@ -16727,7 +17131,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     } catch (err) {
       $('reabrirMsg').innerHTML =
         `<span class="err">${t('reabrirErro', (err && err.message) || err)}</span>`;
-    } finally { trabalhando(false); }
+    } finally { trabalhando(false, 'reabrir'); }
   };
 
   /* ---- consolidar N sessões num documento ----
@@ -16747,7 +17151,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      consequência do que a pessoa selecionou — que é como ela já pensava. */
   async function juntarVarios(arqs){
     $('reabrirMsg').textContent = t('reabrirLendo');
-    trabalhando(true);
+    trabalhando(true, 'reabrir');
     const juntos = [], cues = [], nomes = [];
     let desloc = 0, pulados = 0;
     try {
@@ -16820,7 +17224,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     } catch (err) {
       $('reabrirMsg').innerHTML =
         `<span class="err">${t('reabrirErro', (err && err.message) || err)}</span>`;
-    } finally { trabalhando(false); }
+    } finally { trabalhando(false, 'reabrir'); }
   };
 
   /* ================= prompt para a IA ================= */

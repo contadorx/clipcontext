@@ -1789,3 +1789,108 @@ O coletor é chamado de três lugares e produz o mesmo relatório. Ele agora fic
 guardado por **90 segundos** — curto de propósito: um relatório de dois minutos
 atrás descreve outra máquina se uma gravação aconteceu no meio, e um relatório
 velho é pior que nenhum, porque parece atual.
+
+---
+
+## 20/08/2026, décima oitava rodada — a transcrição que já existe, e a faixa que piscava
+
+Quatro pedidos vindos do uso, e um deles muda o custo do produto inteiro.
+
+### 1. A transcrição do Meet não entrava — e o defeito era o parser, não a falta de botão
+
+Quem sai de uma reunião do Google Meet, do Teams ou do Zoom **já tem a
+transcrição pronta**, feita no servidor deles, sem custo nenhum aqui.
+Transcrever de novo custa 206 MB de download e minutos de máquina para produzir
+um texto **pior** — o modelo daqui é o `base` e não sabe quem falou.
+
+O caminho existia: havia um botão "abrir legenda pronta". Ele não funcionava
+para reunião, e não por causa do botão. O Meet — e as "Anotações do Gemini" que
+saem dele — escreve **um tempo por BLOCO**, sozinho na linha, com as falas
+embaixo:
+
+```
+00:02:04
+
+LUCINELIA GONCALVES DA SILVA: na nas reuniões…
+LEANDRO OLIVEIRA: Tá bom. Tira aí do
+```
+
+O `parseTranscript` pedia tempo e texto **na mesma linha**. Diante deste arquivo
+ele achava zero marcações e caía no caminho "texto solto". O sintoma não é um
+erro na tela: é um documento em que **a fala não acompanha as telas** — que é
+exatamente o que esta ferramenta existe para fazer.
+
+Medido contra os dois arquivos reais de uma reunião de quarenta minutos:
+
+| | antes | agora |
+|---|---|---|
+| trechos com minutagem | **0** | **521** |
+| primeiro / último | — | 00:02:04 → 00:40:52 |
+| fora de ordem | — | 0 |
+
+E os dois arquivos dão o mesmo resultado — a aba de transcrição sozinha e o
+arquivo inteiro com Resumo, Decisões e Próximas etapas. O cabeçalho e as
+seções de notas ficam de fora sozinhos, porque vêm **antes do primeiro tempo** e
+não há onde pendurá-los.
+
+**O `.docx` é lido no navegador, sem biblioteca.** Um `.docx` é um `.zip` com um
+XML dentro, e o navegador já sabe as duas partes: `DecompressionStream
+('deflate-raw')` é o mesmo algoritmo do zip, e o índice são vinte linhas de
+leitura. Uma biblioteca aqui seria mais um endereço de CDN para cair — e este
+arquivo funciona de `file://`, onde CDN nenhum existe.
+
+**A minutagem por bloco é ESTIMADA, e a tela diz isso.** Um bloco carrega um
+instante e várias falas; elas são distribuídas pelo tamanho do texto — quem
+fala mais ocupa mais tempo. É melhor que empilhar seis falas no mesmo segundo,
+que teria cara de precisão. Uma estimativa que se apresenta como medida é a
+única coisa aqui pior do que não ter minutagem.
+
+O botão subiu para **antes do quadro de texto**, com nome próprio: quem chega
+com a reunião já transcrita lia o quadro vazio, concluía que precisava
+transcrever aqui, e pagava os 206 MB por um texto que já estava pronto.
+
+### 2. A faixa aparecia e sumia sozinha
+
+O relato: *"a faixa avisando que a transcrição está sendo realizada some,
+aparece e some"*.
+
+A causa não estava na faixa. `ocupado` era um **booleano**, e isso bastava
+enquanto houvesse um trabalho por vez. Não há mais: a varredura dos quadros
+corre junto da transcrição de propósito, e a montagem do modelo começa junto da
+extração do áudio. **O primeiro a terminar apagava o estado do outro.** Numa
+varredura de dez segundos ao lado de uma transcrição de quarenta minutos, a
+faixa vivia dez segundos.
+
+O estrago maior não é a faixa: é o `beforeunload`. Com `ocupado` falso, **a aba
+fecha sem avisar** no meio da transcrição — a única coisa nesta ferramenta que
+não dá para refazer sem pagar o tempo de novo.
+
+Medido em `testes/faixa.mjs`, com o booleano de antes:
+
+| | amostras com a transcrição correndo | e a faixa fora da tela |
+|---|---|---|
+| antes | 33 | **8** |
+| agora | 33 | 0 |
+
+Um **conjunto de nomes** no lugar do booleano. É idempotente — ligar duas vezes
+é ligar uma, desligar quem não estava ligado não faz nada — e por isso é mais
+seguro que um contador, onde um `false` sem par derruba o trabalho alheio.
+
+### 3. "Começar outro documento" morava depois do rodapé
+
+Abaixo dos links de preços, termos e privacidade, fora da coluna de trabalho.
+Quem termina o documento para de ler no fim do passo 4; o que vem depois do
+rodapé é o fim da **página**, não o fim da tarefa, e ninguém rola por cima de
+dezesseis links institucionais procurando o botão de recomeçar. Agora ele fica
+logo depois do passo 4.
+
+### 4. A opção que conta o caminho curto antes da espera
+
+No passo 1, ao lado de "transcrever enquanto gravo", entrou **"usar transcrição
+do Google Meet, Zoom ou Teams"** — recomendada e **desmarcada**.
+
+Não é contradição: a recomendação é para quem tem o arquivo, e quem não tem não
+pode ser levado a desmarcar a transcrição automática por engano. Marcar não faz
+nada sozinho — leva ao passo 3, onde o arquivo entra — e **desliga a outra
+caixa**, porque baixar 206 MB para não usar é o desperdício que esta opção
+existe para evitar.
