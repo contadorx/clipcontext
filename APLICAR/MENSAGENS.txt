@@ -91,3 +91,46 @@ produção.
 Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
 Claude-Session: https://claude.ai/code/session_01KKUzdavSjgaKWWZZWnUbu6
 
+=== 1a53f66 A figura do blog não subia: dois tetos que não se falavam
+RELATO, de produção: enviar a figura de um post devolvia "This page couldn't
+load — a server error occurred". Sem mensagem, sem pista, e dependendo do
+arquivo: as figuras pequenas subiam.
+
+A causa não estava no código do upload. Estava entre ele e o framework.
+
+O produto permite 8 MB (`TETO_FIGURA`), o formulário aceita 8 MB, e a ação tem
+até a frase pronta para recusar acima disso — "a figura passou de 8 MB, exporte
+menor". Só que uma Server Action do Next tem teto PRÓPRIO, e o padrão dele é
+1 MB. Conferido na fonte da versão instalada (16.3.1),
+`app-render/action-handler.js`: sem `bodySizeLimit`, o valor é `1024 * 1024`, e
+passar dele lança um 413 ANTES de a ação rodar.
+
+Ou seja: toda figura entre 1 MB e 8 MB morria no framework, e a recusa educada
+que o produto escreveu nunca chegou a ser possível de ver. Restava o erro
+genérico do Next, que não diz o que houve nem o que fazer.
+
+  - `next.config.mjs` passa a declarar `experimental.serverActions.bodySizeLimit`
+    — 9 MB, que é o teto do produto mais folga: o corpo multipart carrega também
+    `lang`, `chave` e `alt`, e o teto vale para o corpo inteiro. A chave está em
+    `experimental`, que é onde o Next 16 lê; fora dali seria ignorada em
+    silêncio, e o conserto não consertaria nada. `next build` roda sem aviso de
+    config.
+
+DE QUEBRA, no mesmo caminho: o `redirect` do Next funciona LANÇANDO um
+`NEXT_REDIRECT`, e o `enviarFigura` tinha um dentro de um `try` com `catch` — o
+próprio `catch` o apanhava e o transformava noutro desvio. Uma recusa limpa do
+banco chegava à tela como `erro=Error: NEXT_REDIRECT;replace;/conta/…`, que não
+diz nada a ninguém. O resultado agora sai do `try` como valor e o desvio
+acontece fora dele, que é o padrão que as outras seis ações deste arquivo já
+usavam.
+
+Régua: `testes/figura.mjs`, 9 afirmações, sem subir servidor — ela lê os dois
+arquivos do disco e compara os números, que é justamente o que faltava.
+Verificado que ela REPROVA com o conserto desfeito: 4 falhas, a primeira
+nomeando o padrão de 1 MB. Ela cobra também a outra dupla que pode divergir — o
+`accept` do formulário e a tabela de tipos do servidor — e que o redirect não
+volte para dentro do try.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01KKUzdavSjgaKWWZZWnUbu6
+

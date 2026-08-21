@@ -1,7 +1,7 @@
 From f0857badb7cd3bdc372841490178283da59fb4ff Mon Sep 17 00:00:00 2001
 From: Claude <noreply@anthropic.com>
 Date: Fri, 21 Aug 2026 13:46:25 +0000
-Subject: [PATCH 1/2] =?UTF-8?q?Conserta=20a=20caixa=20do=20roteiro,=20o=20?=
+Subject: [PATCH 1/3] =?UTF-8?q?Conserta=20a=20caixa=20do=20roteiro,=20o=20?=
  =?UTF-8?q?=C3=ADndice=20que=20omitia=20passos,=20e=20a=20esteira=20que=20?=
  =?UTF-8?q?mentia?=
 MIME-Version: 1.0
@@ -456,7 +456,7 @@ index 04855dc..6e5e135 100644
 From 8a5dc388dd3e456ba9d4a46508ade118268f720d Mon Sep 17 00:00:00 2001
 From: Claude <noreply@anthropic.com>
 Date: Fri, 21 Aug 2026 13:49:51 +0000
-Subject: [PATCH 2/2] =?UTF-8?q?Tira=20do=20reposit=C3=B3rio=20o=20que=20n?=
+Subject: [PATCH 2/3] =?UTF-8?q?Tira=20do=20reposit=C3=B3rio=20o=20que=20n?=
  =?UTF-8?q?=C3=A3o=20=C3=A9=20produto:=20`=5Fcommit/`=20e=20o=20sitemap.xm?=
  =?UTF-8?q?l=20antigo?=
 MIME-Version: 1.0
@@ -505,6 +505,285 @@ index af8b229..2928a8c 100644
 @@ -1 +1 @@
 -2026-08-21 20
 +2026-08-21 22
+-- 
+2.43.0
+
+
+From 1a53f6686e4fa1bfeeada1245c6f267d55633f5d Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Fri, 21 Aug 2026 16:22:59 +0000
+Subject: [PATCH 3/3] =?UTF-8?q?A=20figura=20do=20blog=20n=C3=A3o=20subia:?=
+ =?UTF-8?q?=20dois=20tetos=20que=20n=C3=A3o=20se=20falavam?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+RELATO, de produção: enviar a figura de um post devolvia "This page couldn't
+load — a server error occurred". Sem mensagem, sem pista, e dependendo do
+arquivo: as figuras pequenas subiam.
+
+A causa não estava no código do upload. Estava entre ele e o framework.
+
+O produto permite 8 MB (`TETO_FIGURA`), o formulário aceita 8 MB, e a ação tem
+até a frase pronta para recusar acima disso — "a figura passou de 8 MB, exporte
+menor". Só que uma Server Action do Next tem teto PRÓPRIO, e o padrão dele é
+1 MB. Conferido na fonte da versão instalada (16.3.1),
+`app-render/action-handler.js`: sem `bodySizeLimit`, o valor é `1024 * 1024`, e
+passar dele lança um 413 ANTES de a ação rodar.
+
+Ou seja: toda figura entre 1 MB e 8 MB morria no framework, e a recusa educada
+que o produto escreveu nunca chegou a ser possível de ver. Restava o erro
+genérico do Next, que não diz o que houve nem o que fazer.
+
+  - `next.config.mjs` passa a declarar `experimental.serverActions.bodySizeLimit`
+    — 9 MB, que é o teto do produto mais folga: o corpo multipart carrega também
+    `lang`, `chave` e `alt`, e o teto vale para o corpo inteiro. A chave está em
+    `experimental`, que é onde o Next 16 lê; fora dali seria ignorada em
+    silêncio, e o conserto não consertaria nada. `next build` roda sem aviso de
+    config.
+
+DE QUEBRA, no mesmo caminho: o `redirect` do Next funciona LANÇANDO um
+`NEXT_REDIRECT`, e o `enviarFigura` tinha um dentro de um `try` com `catch` — o
+próprio `catch` o apanhava e o transformava noutro desvio. Uma recusa limpa do
+banco chegava à tela como `erro=Error: NEXT_REDIRECT;replace;/conta/…`, que não
+diz nada a ninguém. O resultado agora sai do `try` como valor e o desvio
+acontece fora dele, que é o padrão que as outras seis ações deste arquivo já
+usavam.
+
+Régua: `testes/figura.mjs`, 9 afirmações, sem subir servidor — ela lê os dois
+arquivos do disco e compara os números, que é justamente o que faltava.
+Verificado que ela REPROVA com o conserto desfeito: 4 falhas, a primeira
+nomeando o padrão de 1 MB. Ela cobra também a outra dupla que pode divergir — o
+`accept` do formulário e a tabela de tipos do servidor — e que o redirect não
+volte para dentro do try.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01KKUzdavSjgaKWWZZWnUbu6
+---
+ app/conta/[lang]/negocio/acoes.ts |  15 ++++-
+ next.config.mjs                   |  26 ++++++++
+ src/.build                        |   2 +-
+ testes/figura.mjs                 | 107 ++++++++++++++++++++++++++++++
+ testes/rapido.sh                  |   2 +-
+ testes/rodar.sh                   |   2 +-
+ 6 files changed, 149 insertions(+), 5 deletions(-)
+ create mode 100644 testes/figura.mjs
+
+diff --git a/app/conta/[lang]/negocio/acoes.ts b/app/conta/[lang]/negocio/acoes.ts
+index 5bceeb9..c3d4310 100644
+--- a/app/conta/[lang]/negocio/acoes.ts
++++ b/app/conta/[lang]/negocio/acoes.ts
+@@ -198,13 +198,24 @@ export async function enviarFigura(form: FormData) {
+   /* O caminho leva o instante: uma figura trocada não pode reaproveitar o
+      endereço da anterior, senão o cache de um ano serve a imagem velha. */
+   const caminho = `${chave}/${Date.now()}.${ext}`;
++  /* O `redirect` do Next FUNCIONA LANÇANDO — ele joga um `NEXT_REDIRECT` que o
++     framework pega lá em cima. Então um `redirect` dentro de um `try` com
++     `catch` é apanhado pelo próprio `catch`: a recusa limpa do banco
++     ("endereco_repetido") virava `erro=Error: NEXT_REDIRECT;replace;/conta/...`
++     na tela, que não diz nada a ninguém.
++
++     Por isso o resultado sai do `try` como VALOR, e o desvio acontece depois,
++     fora dele. O `catch` volta a cobrir só o que ele existe para cobrir: a
++     falha de rede ou de disco ao subir o arquivo. */
++  let falhou = '';
+   try {
+     const url = await subirFigura(caminho, await f.arrayBuffer(), f.type);
+     const r = await figuraAdd(chave, caminho, url, String(form.get('alt') || '').trim());
+-    if (r.erro) redirect(`${volta}&erro=${r.erro}`);
++    if (r.erro) falhou = String(r.erro);
+   } catch (e) {
+-    redirect(`${volta}&erro=${encodeURIComponent(String(e).slice(0, 120))}`);
++    falhou = encodeURIComponent(String(e).slice(0, 120));
+   }
++  if (falhou) redirect(`${volta}&erro=${falhou}`);
+   revalidatePath(base);
+   /* A figura vira CAPA do post, e a capa aparece na lista e na prévia de
+      quem compartilha: mexer nela é mexer no que já está no ar. */
+diff --git a/next.config.mjs b/next.config.mjs
+index bfb3958..0c0afdb 100644
+--- a/next.config.mjs
++++ b/next.config.mjs
+@@ -49,7 +49,33 @@ const publico = (pg, L) => (pg === 'home' ? PREFIXO[L] || '/' : PREFIXO[L] + '/'
+ /** E onde ela mora dentro do `app/`. */
+ const interno = (pg, L) => (pg === 'home' ? `/${L}` : `/${L}/${slugs[pg][L]}`);
+ 
++/* ---- O TETO DA FIGURA DO BLOG, DITO ONDE O NEXT LÊ ----
++
++   O DEFEITO, relatado de produção: subir a figura de um post devolvia "This
++   page couldn't load — a server error occurred". Sem mensagem, sem pista, e
++   dependendo do arquivo: figuras pequenas subiam.
++
++   A causa são DOIS TETOS que não se falavam. O produto permite 8 MB
++   (`TETO_FIGURA`, em `lib/supabase/figura.ts`), o formulário aceita 8 MB e a
++   ação tem até a frase pronta para recusar acima disso. Só que uma Server
++   Action do Next tem teto PRÓPRIO, e o padrão dele é 1 MB — conferido na fonte
++   da versão instalada, `app-render/action-handler.js`: sem `bodySizeLimit`, o
++   valor é `1024 * 1024`, e passar dele lança um 413 ANTES de a ação rodar.
++
++   Quer dizer: toda figura entre 1 MB e 8 MB morria no framework, e a recusa
++   educada que o produto escreveu ("a figura passou de 8 MB, exporte menor")
++   nunca chegava a ser possível de ver. O erro genérico do Next era tudo o que
++   sobrava.
++
++   O número aqui é o do produto mais uma folga: o corpo multipart carrega
++   também `lang`, `chave` e `alt`, e o teto vale para o corpo inteiro, não só
++   para o arquivo. `testes/figura.mjs` compara os dois números a cada rodada —
++   dois tetos em dois arquivos voltam a divergir na primeira distração, e a
++   régua é mais barata que descobrir de novo por relato. */
+ const config = {
++  experimental: {
++    serverActions: { bodySizeLimit: '9mb' },
++  },
+   // Os cabeçalhos vinham do vercel.json. Vieram para cá porque agora valem
+   // também em desenvolvimento e nos testes — um cabeçalho que só existe em
+   // produção é um cabeçalho que ninguém testa.
+diff --git a/src/.build b/src/.build
+index 2928a8c..8f88cdb 100644
+--- a/src/.build
++++ b/src/.build
+@@ -1 +1 @@
+-2026-08-21 22
++2026-08-21 23
+diff --git a/testes/figura.mjs b/testes/figura.mjs
+new file mode 100644
+index 0000000..875aa3d
+--- /dev/null
++++ b/testes/figura.mjs
+@@ -0,0 +1,107 @@
++/* A FIGURA DO BLOG — dois tetos que não se falavam.
++ *
++ * O RELATO, de produção: subir a figura de um post devolvia "This page couldn't
++ * load — a server error occurred". Sem mensagem, sem pista, e dependendo do
++ * arquivo: as pequenas subiam.
++ *
++ * A causa eram DOIS TETOS em dois arquivos. O produto permite 8 MB
++ * (`TETO_FIGURA`), o formulário aceita 8 MB, e a ação tem até a frase pronta
++ * para recusar acima disso. Só que uma Server Action do Next tem teto PRÓPRIO,
++ * e o padrão é 1 MB — sem `bodySizeLimit` no `next.config.mjs`, tudo entre
++ * 1 MB e 8 MB morre com um 413 ANTES de a ação rodar, e o erro genérico do
++ * framework é tudo o que sobra na tela.
++ *
++ * Este arquivo não sobe servidor: ele lê os dois arquivos do disco e compara os
++ * números, que é o que estava faltando. Dois tetos em dois lugares voltam a
++ * divergir na primeira distração — e descobrir isso por relato custa uma
++ * publicação travada e uma tarde.
++ *
++ *   node testes/figura.mjs
++ */
++import fs from 'fs';
++import { RAIZ_WS } from './_caminhos.mjs';
++
++let falhas = 0;
++const ok = (n, c, e) => {
++  console.log((c ? '  ok   ' : '  FALHA') + '  ' + n + (e ? '  → ' + e : ''));
++  if (!c) falhas++;
++};
++
++const cfg = fs.readFileSync(`${RAIZ_WS}/next.config.mjs`, 'utf8');
++const lib = fs.readFileSync(`${RAIZ_WS}/lib/supabase/figura.ts`, 'utf8');
++const acoes = fs.readFileSync(`${RAIZ_WS}/app/conta/[lang]/negocio/acoes.ts`, 'utf8');
++const pagina = fs.readFileSync(`${RAIZ_WS}/app/conta/[lang]/negocio/blog/page.tsx`, 'utf8');
++
++/* "9mb", "8 MB", "1048576" — o Next aceita as três formas. */
++const emBytes = (v) => {
++  const m = String(v).trim().match(/^(\d+(?:\.\d+)?)\s*(b|kb|mb|gb)?$/i);
++  if (!m) return NaN;
++  const mult = { b: 1, kb: 1024, mb: 1024 ** 2, gb: 1024 ** 3 };
++  return parseFloat(m[1]) * (m[2] ? mult[m[2].toLowerCase()] : 1);
++};
++
++console.log('[1] o teto do produto e o teto do Next se conhecem');
++{
++  const mLib = lib.match(/TETO_FIGURA\s*=\s*([\d*\s]+);/);
++  const teto = mLib ? Function('return ' + mLib[1])() : NaN;
++  const mCfg = cfg.match(/bodySizeLimit:\s*['"]([^'"]+)['"]/);
++  const limite = mCfg ? emBytes(mCfg[1]) : NaN;
++  console.log('     produto: ' + (teto / 1048576).toFixed(0) + ' MB   ' +
++              'Next: ' + (isFinite(limite) ? (limite / 1048576).toFixed(0) + ' MB' : '(não declarado)'));
++
++  ok('o produto declara um teto de figura', isFinite(teto) && teto > 0, String(teto));
++  /* SEM ESTA LINHA o padrão do Next vale, e ele é 1 MB — conferido na fonte da
++     versão instalada, `app-render/action-handler.js`. */
++  ok('o next.config declara bodySizeLimit', isFinite(limite),
++     mCfg ? mCfg[1] : '(ausente — o padrão de 1 MB volta a valer)');
++  /* O NÚMERO QUE IMPORTA: o teto do framework não pode ser MENOR que o do
++     produto, senão a recusa educada da ação nunca chega a ser possível de ver. */
++  ok('e ele não é menor que o teto do produto', limite >= teto,
++     (limite / 1048576).toFixed(1) + ' MB vs ' + (teto / 1048576).toFixed(1) + ' MB');
++  /* O corpo multipart leva também `lang`, `chave` e `alt`, e o teto vale para o
++     corpo inteiro — não só para o arquivo. Sem folga, uma figura de exatamente
++     8 MB estoura por causa do texto ao lado dela. */
++  ok('com folga para os outros campos do formulário', limite > teto,
++     ((limite - teto) / 1024).toFixed(0) + ' KB de folga');
++  /* No `experimental`, que é onde o Next 16 lê. Fora dali a chave é ignorada em
++     silêncio, e o conserto não conserta nada. */
++  ok('e está dentro de `experimental.serverActions`',
++     /experimental:\s*\{[\s\S]{0,200}?serverActions:\s*\{[^}]*bodySizeLimit/.test(cfg));
++}
++
++console.log('\n[2] o que o formulário aceita é o que a ação sabe guardar');
++{
++  /* A outra dupla que pode divergir: o `accept` do input e a tabela de tipos do
++     servidor. Divergindo, a pessoa escolhe um arquivo que o navegador aprova e
++     recebe "erro=tipo" depois de esperar o upload inteiro. */
++  const mAccept = pagina.match(/accept="([^"]+)"/);
++  const doForm = mAccept ? mAccept[1].split(',').map((s) => s.trim()).sort() : [];
++  const doServidor = [...lib.matchAll(/'(image\/[\w+.-]+)':/g)].map((m) => m[1]).sort();
++  console.log('     formulário: ' + doForm.join(' '));
++  console.log('     servidor  : ' + doServidor.join(' '));
++  ok('as duas listas de tipos são a mesma',
++     doForm.join(',') === doServidor.join(','),
++     JSON.stringify({ form: doForm, servidor: doServidor }));
++}
++
++console.log('\n[3] o redirect não volta para dentro do try');
++{
++  /* O `redirect` do Next funciona LANÇANDO um `NEXT_REDIRECT`. Dentro de um
++     `try` com `catch`, ele é apanhado pelo próprio `catch` — e a recusa limpa
++     do banco virava `erro=Error: NEXT_REDIRECT;replace;/conta/...` na tela.
++     O resto deste arquivo já usa o padrão certo: guarda o resultado numa
++     variável, sai do `try`, e só então desvia. */
++  const corpo = acoes.slice(acoes.indexOf('export async function enviarFigura'));
++  const fim = corpo.indexOf('\nexport async function', 1);
++  const fn = fim > 0 ? corpo.slice(0, fim) : corpo;
++  const ini = fn.indexOf('try {');
++  const cat = fn.indexOf('} catch', ini);
++  const dentro = ini >= 0 && cat > ini ? fn.slice(ini, cat) : '';
++  const linhas = dentro.split('\n').filter((l) => /\bredirect\(/.test(l) && !/^\s*(\*|\/\/)/.test(l));
++  ok('nenhum redirect dentro do try de enviarFigura', linhas.length === 0,
++     JSON.stringify(linhas.map((l) => l.trim().slice(0, 60))));
++  ok('e o desvio acontece depois dele', /if \(falhou\) redirect\(/.test(fn));
++}
++
++console.log(falhas ? '\n' + falhas + ' FALHA(S)' : '\nTodas as verificações passaram.');
++process.exit(falhas ? 1 : 0);
+diff --git a/testes/rapido.sh b/testes/rapido.sh
+index cea12c7..791ca2a 100644
+--- a/testes/rapido.sh
++++ b/testes/rapido.sh
+@@ -36,7 +36,7 @@ GRUPO="$1"; shift
+ case "$GRUPO" in
+   app)  TESTES="smoke.mjs saidas.mjs passos.mjs dobra.mjs travado.mjs gravando.mjs
+                 janelinha.mjs comentario.mjs marcados.mjs revisao.mjs marca.mjs
+-                formato.mjs promptcx.mjs appidioma.mjs compartilhar.mjs celular.mjs teto.mjs rolar.mjs cenario1.mjs organiza.mjs acabamento.mjs lente2.mjs traducao.mjs passomulti.mjs pessoas.mjs matriz.mjs espera2.mjs conclusao.mjs parar.mjs entrada.mjs indice.mjs" ; SITE=0 ;;
++                formato.mjs promptcx.mjs appidioma.mjs compartilhar.mjs celular.mjs teto.mjs rolar.mjs cenario1.mjs organiza.mjs acabamento.mjs lente2.mjs traducao.mjs passomulti.mjs pessoas.mjs matriz.mjs espera2.mjs conclusao.mjs parar.mjs entrada.mjs indice.mjs figura.mjs" ; SITE=0 ;;
+   medir) TESTES="memoria.mjs pesagem.mjs espelho.mjs modelo.mjs espera.mjs ritmo.mjs" ; SITE=0 ;;
+   site) TESTES="cinco.mjs ajuda.mjs vitrine.mjs venda.mjs paginas.mjs idiomas.mjs figuras.mjs dobrafig.mjs
+                 linkpage.mjs legal.mjs contradicao.mjs negocio.mjs isca.mjs blog.mjs convite.mjs email.mjs tourvid.mjs semmarca.mjs
+diff --git a/testes/rodar.sh b/testes/rodar.sh
+index 6e5e135..1a82e67 100644
+--- a/testes/rodar.sh
++++ b/testes/rodar.sh
+@@ -34,7 +34,7 @@ TESTES="smoke.mjs saidas.mjs passos.mjs evidencia.mjs modelos.mjs cenarios.mjs
+          venda.mjs vitrine.mjs fluxo.mjs roteiro.mjs faxina.mjs formato.mjs comentario.mjs
+          travado.mjs promptcx.mjs cabec.mjs ajuda.mjs cinco.mjs appidioma.mjs gravando.mjs janelinha.mjs marca.mjs figuras.mjs dobrafig.mjs
+          compartilhar.mjs contradicao.mjs negocio.mjs celular.mjs barraapp.mjs paridade.mjs teto.mjs ritmo.mjs rolar.mjs isca.mjs blog.mjs cenario1.mjs organiza.mjs acabamento.mjs convite.mjs email.mjs tourvid.mjs semmarca.mjs lente2.mjs
+-         memoria.mjs pesagem.mjs espelho.mjs grade.mjs varredura.mjs audio.mjs plano.mjs faixa.mjs reuniao.mjs diagchamado.mjs modelo.mjs espera.mjs passomulti.mjs pessoas.mjs matriz.mjs espera2.mjs anotacao.mjs roteirojanela.mjs quedaplaca.mjs conclusao.mjs parar.mjs entrada.mjs indice.mjs chaves.mjs"
++         memoria.mjs pesagem.mjs espelho.mjs grade.mjs varredura.mjs audio.mjs plano.mjs faixa.mjs reuniao.mjs diagchamado.mjs modelo.mjs espera.mjs passomulti.mjs pessoas.mjs matriz.mjs espera2.mjs anotacao.mjs roteirojanela.mjs quedaplaca.mjs conclusao.mjs parar.mjs entrada.mjs indice.mjs figura.mjs chaves.mjs"
+ falhou=""
+ for t in $TESTES; do
+   [ -f "$t" ] || { echo "??  $t não existe"; continue; }
 -- 
 2.43.0
 

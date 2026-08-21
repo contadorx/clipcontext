@@ -198,13 +198,24 @@ export async function enviarFigura(form: FormData) {
   /* O caminho leva o instante: uma figura trocada não pode reaproveitar o
      endereço da anterior, senão o cache de um ano serve a imagem velha. */
   const caminho = `${chave}/${Date.now()}.${ext}`;
+  /* O `redirect` do Next FUNCIONA LANÇANDO — ele joga um `NEXT_REDIRECT` que o
+     framework pega lá em cima. Então um `redirect` dentro de um `try` com
+     `catch` é apanhado pelo próprio `catch`: a recusa limpa do banco
+     ("endereco_repetido") virava `erro=Error: NEXT_REDIRECT;replace;/conta/...`
+     na tela, que não diz nada a ninguém.
+
+     Por isso o resultado sai do `try` como VALOR, e o desvio acontece depois,
+     fora dele. O `catch` volta a cobrir só o que ele existe para cobrir: a
+     falha de rede ou de disco ao subir o arquivo. */
+  let falhou = '';
   try {
     const url = await subirFigura(caminho, await f.arrayBuffer(), f.type);
     const r = await figuraAdd(chave, caminho, url, String(form.get('alt') || '').trim());
-    if (r.erro) redirect(`${volta}&erro=${r.erro}`);
+    if (r.erro) falhou = String(r.erro);
   } catch (e) {
-    redirect(`${volta}&erro=${encodeURIComponent(String(e).slice(0, 120))}`);
+    falhou = encodeURIComponent(String(e).slice(0, 120));
   }
+  if (falhou) redirect(`${volta}&erro=${falhou}`);
   revalidatePath(base);
   /* A figura vira CAPA do post, e a capa aparece na lista e na prévia de
      quem compartilha: mexer nela é mexer no que já está no ar. */

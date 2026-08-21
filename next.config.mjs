@@ -49,7 +49,33 @@ const publico = (pg, L) => (pg === 'home' ? PREFIXO[L] || '/' : PREFIXO[L] + '/'
 /** E onde ela mora dentro do `app/`. */
 const interno = (pg, L) => (pg === 'home' ? `/${L}` : `/${L}/${slugs[pg][L]}`);
 
+/* ---- O TETO DA FIGURA DO BLOG, DITO ONDE O NEXT LÊ ----
+
+   O DEFEITO, relatado de produção: subir a figura de um post devolvia "This
+   page couldn't load — a server error occurred". Sem mensagem, sem pista, e
+   dependendo do arquivo: figuras pequenas subiam.
+
+   A causa são DOIS TETOS que não se falavam. O produto permite 8 MB
+   (`TETO_FIGURA`, em `lib/supabase/figura.ts`), o formulário aceita 8 MB e a
+   ação tem até a frase pronta para recusar acima disso. Só que uma Server
+   Action do Next tem teto PRÓPRIO, e o padrão dele é 1 MB — conferido na fonte
+   da versão instalada, `app-render/action-handler.js`: sem `bodySizeLimit`, o
+   valor é `1024 * 1024`, e passar dele lança um 413 ANTES de a ação rodar.
+
+   Quer dizer: toda figura entre 1 MB e 8 MB morria no framework, e a recusa
+   educada que o produto escreveu ("a figura passou de 8 MB, exporte menor")
+   nunca chegava a ser possível de ver. O erro genérico do Next era tudo o que
+   sobrava.
+
+   O número aqui é o do produto mais uma folga: o corpo multipart carrega
+   também `lang`, `chave` e `alt`, e o teto vale para o corpo inteiro, não só
+   para o arquivo. `testes/figura.mjs` compara os dois números a cada rodada —
+   dois tetos em dois arquivos voltam a divergir na primeira distração, e a
+   régua é mais barata que descobrir de novo por relato. */
 const config = {
+  experimental: {
+    serverActions: { bodySizeLimit: '9mb' },
+  },
   // Os cabeçalhos vinham do vercel.json. Vieram para cá porque agora valem
   // também em desenvolvimento e nos testes — um cabeçalho que só existe em
   // produção é um cabeçalho que ninguém testa.

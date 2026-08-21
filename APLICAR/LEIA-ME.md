@@ -1,37 +1,33 @@
 # Como aplicar estas correções
 
-Elas saem de `285d4a5`, que é o `main` que está em produção agora. São dois
-commits:
+Saem de `285d4a5`, o `main` que está em produção. São três commits:
 
-| commit | o quê |
-|---|---|
-| `f0857ba` | a caixa do roteiro, o índice que omitia passos, a esteira que mentia |
-| `8a5dc38` | tira do repositório `_commit/` e o `public/sitemap.xml` antigo |
+| commit | o quê | urgência |
+|---|---|---|
+| `f0857ba` | caixa do roteiro, índice que omitia passos, esteira que mentia | normal |
+| `8a5dc38` | tira `_commit/` e o `public/sitemap.xml` antigo | **alta** — SEO do blog |
+| `1a53f66` | a figura do blog não subia: teto do Next em 1 MB | **alta** — bloqueia publicar |
 
-**O segundo tem efeito em produção e é o mais urgente.** Ver o fim deste
-arquivo.
+Os dois últimos são de produção e não esperam.
 
 ---
 
 ## Caminho A — o bundle (recomendado)
-
-Traz os dois commits com mensagem e autoria, e sai direto do `main` atual.
 
 ```bash
 cd <sua cópia do clipcontext>
 git fetch origin main
 git fetch /caminho/para/APLICAR/correcoes.bundle \
     claude/ux-build-continuation-2hs0b2:correcoes
-git log --oneline main..correcoes     # tem que dar 2 linhas
+git log --oneline main..correcoes     # tem que dar 3 linhas
 git checkout main && git merge correcoes
 git push origin main
 ```
 
-## Caminho B — o patch só da fonte
+## Caminho B — o patch da fonte
 
-Use se preferir aplicar à mão. Ele toca só `src/` e `testes/` — os arquivos
-gerados (`public/app.html`, `offline/`) saem do `build.py`, e as duas remoções
-você faz com dois comandos.
+Toca `src/`, `testes/`, `lib/`, `app/` e o `next.config.mjs`. Os artefatos
+(`public/app.html`, `offline/`) saem do `build.py`.
 
 ```bash
 cd <sua cópia do clipcontext>
@@ -45,36 +41,39 @@ git push origin main
 
 ---
 
-## Por que o `public/sitemap.xml` precisa sair
+## O da figura precisa de DEPLOY, não só de merge
 
-Não é limpeza. O `build.py` apaga esse arquivo de propósito, e o comentário
-dele diz por quê: `/sitemap.xml` deixou de ser um arquivo e virou um **índice
-servido pelo Next**, apontando para dois mapas — o das páginas, que é fixo, e
-o do **blog**, que é lido do banco a cada rastreio.
+`next.config.mjs` só é lido quando o servidor sobe. Enquanto o deploy não sair,
+a figura acima de 1 MB continua devolvendo "a server error occurred".
 
-Um arquivo estático chamado `sitemap.xml` dentro de `public/` sombreia essa
-rota, porque no Next o estático ganha. Com ele no repositório, o próximo deploy
-serve o mapa velho e congelado, e **todo post publicado pelo painel fica fora
-do sitemap** — em silêncio, sem erro nenhum, até alguém reparar.
+**Enquanto isso, o contorno é exportar a figura abaixo de 1 MB.** Um post bem
+servido raramente precisa de mais que 300 KB, então na prática quase nada muda
+— o teto de 8 MB existe para o dia em que alguém arrastar um PNG cru de captura
+4K.
 
-Ele voltou porque aplicar a árvore à mão não carrega deleções: copiar por cima
-acrescenta e substitui, nunca apaga. Rodar `python3 build.py` depois de aplicar
-resolve sozinho — é a linha que faltou da última vez.
+Depois do deploy, dá para conferir sem adivinhar: uma figura de ~2 MB tem que
+subir. Se ainda falhar, o teto não pegou — confira se a chave ficou dentro de
+`experimental`, que é onde o Next 16 lê.
 
-## E a pasta `_commit/`
+## O do sitemap precisa de `build.py`
 
-Eram os andaimes que eu mandei junto do zip (guia, mensagens, dois bundles) e
-o `git add -A` varreu para dentro do repositório. Andaime, não produto. Neste
-pacote eles vêm numa pasta `APLICAR/` **fora** da árvore do projeto, para o
-acidente não se repetir.
+`public/sitemap.xml` voltou ao repositório na aplicação manual anterior. O
+`build.py` apaga esse arquivo de propósito: `/sitemap.xml` é um **índice
+servido pelo Next**, que aponta para o mapa das páginas e para o do **blog**,
+lido do banco a cada rastreio. Um estático com esse nome sombreia a rota — no
+Next o estático ganha — e todo post publicado pelo painel fica fora do sitemap,
+em silêncio.
+
+Aplicar árvore por cima nunca apaga nada; por isso ele voltou. Rodar
+`python3 build.py` depois de aplicar resolve sozinho.
 
 ## Antes de rodar a régua
 
 ```bash
 bash testes/preparar.sh      # gera as amostras de vídeo
-bash testes/rapido.sh app    # agora termina inteira verde: 31 arquivos
+bash testes/rapido.sh app    # termina inteira verde: 32 arquivos
 ```
 
-`barraapp`, `paridade` e `roteiro` saíram do grupo `app` e foram para o `site`,
-que sobe o Next antes — era por isso que a pista curta acabava em vermelho toda
-vez sem haver defeito nenhum.
+`figura.mjs` é a régua nova do upload — ela não sobe servidor: lê o
+`next.config.mjs` e o `lib/supabase/figura.ts` do disco e compara os dois tetos.
+Era exatamente isso que faltava para o defeito não ter acontecido.
