@@ -1,67 +1,48 @@
-# Como aplicar
+# O que fazer com este zip
 
-Saem de `285d4a5`, o `main` em produção. Seis commits:
+O zip é a **árvore inteira, pronta**: a do `walkstampbuild8_1.zip` mais o A0
+aplicado e construído. `public/app.html` e `offline/walkstamp-offline.html` já
+saíram do `build.py`; não precisa rodar nada para ver funcionando.
 
-| commit | o quê | urgência |
-|---|---|---|
-| `f0857ba` | caixa do roteiro, índice que omitia passos, esteira que mentia | normal |
-| `8a5dc38` | tira `_commit/` e o `public/sitemap.xml` antigo | **alta** — SEO do blog |
-| `1a53f66` | figura do blog não subia (teto do Next em 1 MB) | **alta** — bloqueia publicar |
-| `d7b3260` | Build 8: resumo da conferência e o desfazer que faltava | normal |
-| `d75c452` | Build 8: a perna curta — fala e identificação viram painéis | normal |
-| `082a091` | contagem do LEIA-ME | normal |
+## Se você só quer subir
 
-## Caminho A — o bundle
+Copie por cima da sua cópia e suba. Os gerados já estão certos.
 
-```bash
-cd <sua cópia do clipcontext>
-git fetch origin main
-git fetch /caminho/para/APLICAR/correcoes.bundle \
-    claude/ux-build-continuation-2hs0b2:correcoes
-git log --oneline main..correcoes     # tem que dar 6 linhas
-git checkout main && git merge correcoes
-git push origin main
-```
+## Se você prefere o patch (revisável, 22 arquivos)
 
-## Caminho B — o patch da fonte
+Está em `APLICAR/A0-saida-recomendada.patch`:
 
 ```bash
-git checkout -b correcoes main
-git am /caminho/para/APLICAR/correcoes-so-fonte.patch
-git rm -r _commit
-python3 build.py      # regenera os artefatos E apaga o public/sitemap.xml
-git add -A && git commit -m "correcoes"
-git push origin main
+git apply --check APLICAR/A0-saida-recomendada.patch   # confere sem escrever
+git apply         APLICAR/A0-saida-recomendada.patch
 ```
 
-## Dois que precisam de mais que o merge
+O `--check` só passa se a sua árvore for a do `walkstampbuild8_1.zip`. Se
+reclamar, me diga o que ele disse.
 
-**A figura do blog precisa de DEPLOY.** O `next.config.mjs` só é lido quando o
-servidor sobe. Até lá, o contorno é exportar a figura abaixo de 1 MB. Depois do
-deploy, uma figura de ~2 MB tem que subir.
+## O que este build acrescenta
 
-**O sitemap precisa do `build.py`.** Aplicar árvore por cima nunca apaga nada, e
-foi por isso que o `public/sitemap.xml` voltou. Enquanto ele existir, o estático
-sombreia a rota `/sitemap.xml` e todo post do blog fica fora do mapa.
+Antes do catálogo de formatos aparece **Recomendado para o seu caso** — o
+formato que o cenário pede, o segundo como alternativa, e uma linha dizendo o
+porquê. Os outros onze ficam atrás de **Ver todos os formatos**, a um clique,
+com o estado lembrado.
 
-## Uma mudança na régua que vale conhecer
+O botão recomendado **clica o botão que já existe**: qualquer trava, aviso ou
+confirmação do original continua valendo, e nenhuma lógica de geração foi
+duplicada.
 
-Cinquenta arquivos passaram a importar o Chromium de `testes/_navegador.mjs`, e
-não de `playwright`. Ele é o mesmo navegador com uma linha a mais: abre os
-painéis recolhidos do passo 3, porque o Playwright recusa dirigir um elemento
-dentro de um `<details>` fechado.
+## Duas coisas que continuam com você
 
-**Teste novo que dirige `#tr`, `#evBox` ou algo dentro daqueles painéis:
-importe de `./_navegador.mjs`. Teste sobre a tela como ela abre: importe de
-`playwright`.** Está escrito também no `testes/LEIA-ME.md`.
+- **sitemap** — precisa do `build.py` depois de aplicar os seis commits do
+  `correcoes.bundle` (não deste zip);
+- **figura do blog** — precisa de deploy; até lá, exportar abaixo de 1 MB.
 
-## A régua
+## Uma amostra que faltava na régua
+
+`parar.mjs` acusava `ENOENT /tmp/fala-longa.webm`. Não era defeito: é a amostra
+do vídeo longo, que o `amostras.py` só gera com `--longo`. Depois de gerada, a
+régua passa — o build 4 está verde.
 
 ```bash
-bash testes/preparar.sh      # gera as amostras de vídeo
-bash testes/rapido.sh app    # 34 arquivos, termina inteira verde
+python3 testes/amostras.py --longo
 ```
-
-Fora da pista curta, três falham só por falta de ambiente neste container e não
-por defeito: `capitulos` (sem `pdftotext`), `verificador` e os que falam com o
-Next (`rapido.sh site` e `rodar.sh` sobem o servidor antes).

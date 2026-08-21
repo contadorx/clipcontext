@@ -1,5 +1,5 @@
 /* Comparar dois quadros: sobreposição, piscada e diferença calculada. */
-import { chromium } from 'playwright';
+import { chromium } from './_navegador.mjs';   // abre os painéis e a gaveta das saídas
 import http from 'http'; import fs from 'fs';
 import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
 const html = fs.readFileSync(`${RAIZ_WS}/public/app.html`,'utf8');

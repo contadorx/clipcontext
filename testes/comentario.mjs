@@ -19,7 +19,7 @@
  * cartão nem na janelinha. Uma remoção pela metade deixaria um campo órfão
  * escrevendo num quadro que ninguém mais aponta.
  */
-import { chromium } from 'playwright';
+import { chromium } from './_navegador.mjs';   // abre os painéis e a gaveta das saídas
 import http from 'http'; import fs from 'fs';
 
 import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';

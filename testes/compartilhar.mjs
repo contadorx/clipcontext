@@ -8,7 +8,7 @@
  * compartilha é o ENDEREÇO DA FERRAMENTA. O documento não sai desta máquina, e
  * é a promessa que o produto inteiro vende.
  */
-import { chromium } from 'playwright';
+import { chromium } from './_navegador.mjs';   // abre os painéis e a gaveta das saídas
 import http from 'http'; import fs from 'fs';
 
 import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';

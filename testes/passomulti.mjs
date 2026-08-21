@@ -20,7 +20,7 @@
  *
  *   node testes/passomulti.mjs
  */
-import { chromium } from 'playwright';
+import { chromium } from './_navegador.mjs';   // abre os painéis e a gaveta das saídas
 import http from 'http';
 import fs from 'fs';
 import { execSync } from 'child_process';

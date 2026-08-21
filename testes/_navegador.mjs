@@ -19,7 +19,7 @@
  * sai com um `addInitScript` que abre os painéis antes de a página carregar.
  *
  * O QUE ISTO NÃO PODE VIRAR: um jeito de a régua não ver a tela que a pessoa
- * vê. Ele abre painéis, e mais nada — não mexe em estado, não preenche campo,
+ * vê. Ele abre painéis e a gaveta das saídas, e mais nada — não mexe em estado, não preenche campo,
  * não muda o produto. E o estado recolhido continua sendo cobrado, em
  * `testes/perna.mjs`, que importa o Playwright direto justamente para
  * enxergá-lo. Um atalho que apagasse a única régua do próprio atalho seria o
@@ -32,6 +32,18 @@ import { chromium as verdadeiro } from 'playwright';
 function abrirPaineis(){
   const abre = () => {
     document.querySelectorAll('details.sub').forEach((d) => { d.open = true; });
+    /* E a gaveta das saídas, pelo mesmo argumento e no mesmo lugar. Onze
+       botões com o mesmo peso eram onze decisões; agora a recomendação
+       responde e o catálogo fica atrás de um clique. Trinta e nove arquivos
+       desta régua clicam em `#pptx`, `#zip`, `#papel` — e um botão dentro de
+       um `hide` não tem caixa, então `click()` recusa.
+
+       Ela abre pelo BOTÃO da pessoa, e não mexendo na classe à mão: assim o
+       `aria-expanded` e a memória em `localStorage` andam junto, e a régua não
+       vê um estado que a tela nunca produz. */
+    const cx = document.getElementById('saidasTodas');
+    const bt = document.getElementById('recTodos');
+    if (cx && bt && cx.classList.contains('hide')) bt.click();
   };
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', abre);

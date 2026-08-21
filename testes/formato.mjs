@@ -193,8 +193,15 @@ console.log('\n[7] o formato vem ANTES dos botões que produzem o arquivo');
      ordem.pos.papel < ordem.pos.go && ordem.pos.layout < ordem.pos.go, JSON.stringify(ordem.pos));
   ok('e os dados de recuperação vêm por último',
      ordem.pos.json > ordem.pos.docx && ordem.pos.zip > ordem.pos.json, JSON.stringify(ordem.pos));
-  ok('as seções estão nomeadas, formato primeiro',
-     ordem.tit.length === 4 && /formato/i.test(ordem.tit[0]) && /recupera/i.test(ordem.tit[3]),
+  /* CINCO agora, e a primeira é a recomendação. Onze botões com o mesmo peso
+     eram onze decisões cobradas de quem só queria entregar o trabalho; a
+     recomendação responde a pergunta e o catálogo fica atrás dela, recolhido.
+     Dentro do catálogo a ordem antiga continua valendo: forma primeiro,
+     recuperação por último. */
+  ok('a recomendação abre a seção',
+     ordem.tit.length === 5 && /recomendado/i.test(ordem.tit[0]), ordem.tit.join(' | '));
+  ok('e o catálogo mantém a ordem: formato primeiro, recuperação por último',
+     /formato/i.test(ordem.tit[1]) && /recupera/i.test(ordem.tit[4]),
      ordem.tit.join(' | '));
   await ctx.close();
 }

@@ -25,7 +25,7 @@
  * E uma sexta, que é a razão de o índice ser append-only: um travamento deixa a
  * última linha pela metade. Uma linha quebrada se joga fora; o resto volta.
  */
-import { chromium } from 'playwright';
+import { chromium } from './_navegador.mjs';   // abre os painéis e a gaveta das saídas
 import http from 'http';
 import fs from 'fs';
 

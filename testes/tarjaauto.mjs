@@ -4,7 +4,7 @@
    OCR entra pela porta pública que existe para isso: um documento reaberto, com
    `textoNaTela` e `palavrasNaTela` — exatamente os campos que o próprio produto
    grava quando o leitor roda de verdade. */
-import { chromium } from 'playwright';
+import { chromium } from './_navegador.mjs';   // abre os painéis e a gaveta das saídas
 import http from 'http'; import fs from 'fs';
 import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
 const html = fs.readFileSync(`${RAIZ_WS}/public/app.html`,'utf8');
