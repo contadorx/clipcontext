@@ -1,0 +1,93 @@
+=== 6c06c9d Build 4 — parar sem perder
+A interface convidava a deixar a transcrição rodando ("pode deixar em segundo
+plano") e não oferecia jeito nenhum de encerrar ficando com o que já saiu. As
+duas saídas eram esperar até o fim ou fechar a aba, e fechar a aba perde tudo.
+Numa reunião de quarenta minutos em que os dez primeiros já respondem a
+pergunta, isso custava meia hora de espera por nada.
+
+O botão de parar existia, e era da varredura. Ele não aparecia durante a
+transcrição — e o pouco que aparecia era pior do que nada: os dois trabalhos
+correm juntos de propósito, e a varredura, ao terminar, escondia o botão à mão
+por cima de um trabalho que continuava correndo.
+
+  - "Parar e ficar com o que já está pronto" entre um trecho e o seguinte. O
+    pedido não promete cortar a inferência em curso, porque não dá: o rótulo
+    passa a dizer "parando após este trecho", e o botão trava para não convidar
+    ao segundo clique;
+  - o botão passa a ser DERIVADO de quem está trabalhando, pelo mesmo argumento
+    que já tinha tirado o `ocupado` de booleano. Ninguém mais o mostra ou
+    esconde à mão;
+  - o que falta é dito em minutos de gravação — "o documento sai sem o fim da
+    gravação: cerca de 3 min" —, calculado pelo mapa de volta do silêncio
+    compactado, e não por regra de três sobre a contagem de janelas;
+  - o painel de conclusão ganha um quarto estado de fala: uma transcrição que a
+    pessoa interrompeu não é "fala completa" com um número na frente. Carregar
+    uma legenda de fora desfaz a marca;
+  - a linha de estado sai de uma frase só ("Etapa 2 de 2 — transcrevendo: 46%
+    (bloco 12 de 26) — faltam ~7 min") para cinco lugares com pesos diferentes:
+    etapa, progresso, previsão, motor recolhido e ação. O `#astatus` continua
+    sendo um elemento só, com o texto inteiro no textContent, porque é dele que
+    a faixa fixa se descreve;
+  - leitor de tela: `#astatus` não é região viva, de propósito. Uma região
+    própria, invisível, recebe só começo, mudança relevante (troca de modo,
+    pedido de parada, quartos do caminho), erro e fim — e nunca a mesma frase
+    duas vezes.
+
+Régua: `testes/parar.mjs`, 33 afirmações. A biblioteca falsificada estaciona a
+inferência quando o teste manda, em vez de contar milissegundos: dá para provar
+que NENHUM trecho novo entrou depois do pedido, e não só que houve poucos.
+Amostra nova de cinco minutos (`/tmp/fala-longa.webm`) porque a janela do
+Whisper é de trinta segundos — num vídeo de dez segundos não existe "o trecho
+seguinte" para parar antes dele.
+
+Chaves novas escritas nos cinco idiomas; `chaves.mjs` verde.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01KKUzdavSjgaKWWZZWnUbu6
+
+=== 2ef1502 Build 7 — a entrada
+O passo 1 pedia que TODA pessoa passasse os olhos por quatro coisas antes de
+chegar ao botão de gravar: o cenário, "já tem um documento?", "você já tem a
+lista de passos?" e três cartões do mesmo tamanho — gravar, arquivo, Drive.
+Duas dessas perguntas não são de quem chega, e o terceiro cartão não era uma
+terceira tarefa.
+
+  - o Drive volta a ser ORIGEM dentro de "usar um arquivo". Três cartões iguais
+    leem-se como três tarefas, e "abrir do Drive" é o mesmo trabalho com o
+    arquivo vindo de outro lugar. Ele já morou lá e falhou uma vez: o defeito
+    era a ausência de sinalização — um botão solto no fim de um cartão não se
+    anuncia —, e não a posição. Agora há régua e uma linha que diz "ou, se o
+    vídeo estiver no Drive". A história das três versões está no comentário,
+    junto do que fazer se o relato antigo voltar;
+  - o roteiro só aparece nos cenários com passos para roteirizar (evidência,
+    tutorial, usabilidade) e sempre depois do tipo de documento. Numa ata
+    ninguém roteiriza uma reunião: a caixa era pergunta sem resposta possível,
+    fixa no caminho de quem só queria gravar;
+  - e ele não some levando junto o que a pessoa escreveu: com roteiro carregado
+    ou texto colado, o bloco fica em qualquer cenário. Esconder bloco vazio é
+    limpeza; esconder bloco com trabalho dentro é perda silenciosa;
+  - as letras das partes deixam de ser digitadas no HTML e passam a ser escritas
+    pelo que está na tela. Com "a" e "c" fixos, esconder o do meio deixava um
+    buraco — e sequência com buraco manda procurar o que falta;
+  - "abrir projeto" sai da sequência numerada e vira uma linha embaixo dos
+    caminhos. Não saiu do produto nem ficou mais longe: mesmo botão, mesmo
+    arquivo, um clique. E passa a se chamar "projeto Walkstamp", não
+    "documento" — o vocabulário que o build 3 fixou, com a extensão embaixo;
+  - tamanho do download e placa de vídeo descem para uma linha de consequência
+    sob o modelo. Eram três decisões enfileiradas para uma pergunta só, duas
+    delas em vocabulário de máquina. A caixa da placa continua clicável: quem
+    tem uma que não dá conta precisa poder desmarcá-la.
+
+A recuperação de captura interrompida NÃO desceu junto — é exceção urgente e
+continua aparecendo como aviso contextual, no instante em que existe.
+
+Régua: `testes/entrada.mjs`, 43 afirmações, incluindo a que cobra a sinalização
+do Drive — sem ela este build repetiria um erro que o projeto já pagou — e a
+que prova que nenhum controle sumiu: esconder complexidade, nunca capacidade.
+
+Três chaves do cartão do Drive saíram, uma de linha entrou; os rótulos de
+reabrir mudaram nos cinco idiomas. `chaves.mjs` verde.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01KKUzdavSjgaKWWZZWnUbu6
+

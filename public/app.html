@@ -279,6 +279,31 @@
   .caminhos .comoGravar{margin:0 0 8px;font-size:13px;line-height:1.55;color:var(--muted)}
   .caminhos .comoGravar.aviso{margin:0;padding-top:8px;border-top:1px solid var(--line)}
   .caminhos .drop{padding:22px 16px}
+  /* ---- A SEGUNDA ORIGEM DO MESMO DESTINO ----
+
+     O Drive era um cartão irmão; aqui ele é uma alternativa dentro do cartão
+     do arquivo. A regra separadora não é enfeite: ela diz "acabou o caminho
+     principal, começa a alternativa" sem precisar de um título que competisse
+     com o `h3` do cartão. */
+  .deOutraOrigem{margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
+  .deOutraOrigem .ou{display:block;font-size:12.5px;color:var(--muted);margin-bottom:8px}
+  .deOutraOrigem .row{margin:0}
+  /* ---- O PREÇO DA ESCOLHA DE CIMA ----
+
+     Indentada e menor: ela não é uma linha de opções, é o que a opção acima
+     custa. A borda à esquerda faz a ligação visual com o controle de que ela
+     depende — sem ela, é só mais uma fileira de caixas. */
+  .consequencia{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;
+        margin:8px 0 0;padding:0 0 0 11px;border-left:2px solid var(--line)}
+  .consequencia .status{margin:0}
+  /* ---- QUEM VOLTA, E NÃO QUEM CHEGA ----
+
+     Uma linha, e não uma caixa: ela é a porta de quem já usou a ferramenta, e
+     essa pessoa não precisa que a página insista. Fica embaixo dos caminhos
+     porque é lá que se procura o que não é o caminho. */
+  .voltando{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;
+        margin:14px 0 0;font-size:13.5px;color:var(--muted)}
+  .voltando .status{flex-basis:100%;margin:0}
   .drop{border:2px dashed var(--line);border-radius:10px;padding:36px 20px;text-align:center;cursor:pointer;transition:.15s}
   .drop:hover,.drop.over{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 6%,transparent)}
   .drop strong{display:block;font-size:16px;margin-bottom:4px}
@@ -1108,8 +1133,13 @@
          não fosse um número: "1, 2, 3" dentro do passo 1 competia com os passos
          1, 2, 3 da página, e a pessoa lia dois sistemas de numeração ao mesmo
          tempo. Letra para a parte, número para o passo. -->
-    <div class="cenario">
-      <i class="sbN">a</i>
+    <div class="cenario" id="cenarioBloco">
+      <!-- A letra é ESCRITA, e não digitada aqui. Com o roteiro aparecendo só
+           em alguns cenários, "a" e "c" fixos deixavam um buraco no meio da
+           sequência sempre que o "b" não estava na tela — e uma sequência com
+           buraco faz procurar o que falta. `pintarPartes()` numera o que está
+           visível, na ordem em que está. -->
+      <i class="sbN"></i>
       <label for="modelo" data-i18n="cenLbl"></label>
       <!-- A primeira opção é um PEDIDO, e não um cenário.
 
@@ -1147,30 +1177,6 @@
       <p class="status" id="cenDica"></p>
     </div>
 
-    <!-- ---- recuperar um documento anterior ----
-
-         A terceira porta, e ela subiu para junto do cenário porque é uma
-         ESCOLHA de entrada, no mesmo nível de gravar e de enviar vídeo — não um
-         rodapé do cartão. Sem ela, "gerei o PDF e o passo 12 está errado" se
-         resolvia regravando os quarenta.
-
-         Um botão só, que aceita um arquivo ou vários: dois botões obrigavam a
-         pessoa a saber, ANTES de escolher, se ia juntar sessões ou abrir uma —
-         e a diferença é o número de arquivos que ela seleciona, não uma
-         decisão à parte. Com dois ou mais, cada arquivo vira um capítulo.
-
-         Continua sem servidor: o arquivo está na máquina de quem usa. -->
-    <div class="cenario" id="recupBloco">
-      <i class="sbN">b</i>
-      <label for="reabrir" data-i18n="reabrirLbl"></label>
-      <span class="opc" data-i18n="opcional"></span>
-      <button class="ghost" id="reabrir" data-i18n="reabrirBtn"
-              style="padding:9px 14px;font-size:14.5px"></button>
-      <input type="file" id="reabrirArq" multiple
-             accept=".json,.zip,application/json,application/zip" class="hide">
-      <span class="status" id="reabrirMsg" data-i18n="reabrirDica"></span>
-    </div>
-
     <!-- ---- c. O ROTEIRO QUE A PESSOA JÁ TEM ----
 
          Isto veio do campo, e é a coisa mais importante que ouvimos: numa
@@ -1191,9 +1197,20 @@
          Com o roteiro colado, cada "marcar" durante a gravação já vem com o
          título escrito. É o encaixe, feito na hora em que a tela é capturada —
          e não depois, adivinhando qual print vai em qual passo. -->
-    <div class="cenario" id="roteiroBloco" style="display:block">
+    <!-- ELE SÓ APARECE ONDE AJUDA, e depois do tipo de documento.
+
+         Estava fixo, para os seis cenários. Numa ata de reunião não existe
+         "lista de passos" — ninguém roteiriza uma reunião —, e num contexto
+         genérico para IA também não; nesses dois a caixa era uma pergunta sem
+         resposta possível, no caminho de quem só queria gravar. `pintarPartes()`
+         decide, olhando o `#modelo`.
+
+         E ele fica DEPOIS do cenário porque é complemento dele, não fonte: só
+         faz sentido perguntar "você já tem os passos escritos?" depois de saber
+         que o documento é de passos. -->
+    <div class="cenario hide" id="roteiroBloco">
       <div class="row" style="gap:9px 12px;align-items:center;flex-wrap:wrap">
-        <i class="sbN">c</i>
+        <i class="sbN"></i>
         <label for="roteiroAbrir" data-i18n="rotLbl"></label>
         <span class="opc" data-i18n="opcional"></span>
         <button class="ghost" id="roteiroAbrir" data-i18n="rotBtn"
@@ -1438,14 +1455,32 @@
         </div>
       </div>
 
-      <!-- ---- TRÊS CAMINHOS, e não dois com um enxerto ----
+      <!-- ---- DOIS CAMINHOS, E O DRIVE DENTRO DE UM DELES ----
 
-           O Drive era uma FILEIRA DENTRO do caminho do arquivo: mesma caixa,
-           mesmo título "Usar um arquivo", um botão a mais lá embaixo. Quem
-           chega com o vídeo no Drive lia "usar um arquivo", não se reconhecia,
-           e não descia até o botão. São duas origens diferentes com o mesmo
-           destino, e origem diferente merece caixa própria — a grade já
-           acomoda três, porque ela é `auto-fit`. -->
+           ISTO JÁ FOI E VOLTOU, e vale contar as três versões, porque a do meio
+           tinha razão sobre uma coisa e errou sobre outra.
+
+           1. O Drive era uma FILEIRA no fim deste cartão: mesma caixa, mesmo
+              título "Usar um arquivo", um botão a mais lá embaixo, sem nada que
+              dissesse que ele estava ali. Quem chegava com o vídeo no Drive lia
+              "usar um arquivo", não se reconhecia, e não descia até o botão.
+           2. Virou CARTÃO próprio, e o problema de descoberta acabou — a grade
+              é `auto-fit` e acomodava três. O preço veio depois, e é o que a
+              proposta de UX foi cobrar: três cartões do mesmo tamanho leem-se
+              como três TAREFAS, e a pessoa que chegou para gravar passa a
+              escolher entre três coisas em vez de fazer a que veio fazer.
+              "Abrir do Drive" não é uma tarefa diferente de "usar um arquivo":
+              é o mesmo trabalho com o arquivo vindo de outro lugar.
+           3. Voltou para dentro — mas NÃO como na versão 1. O defeito de lá era
+              a ausência de sinalização, e não a posição: um botão solto no fim
+              de um cartão não se anuncia. Agora há uma régua separando, e uma
+              linha que diz em palavras "ou, se o vídeo estiver no Drive". É o
+              aviso que faltava na primeira vez, na posição que a segunda
+              provou custar caro.
+
+           Se o relato da versão 1 voltar — gente com vídeo no Drive que não
+           acha o caminho —, a resposta não é promover o cartão de novo: é
+           medir se a régua e a frase estão sendo vistas. -->
       <div class="via" id="viaArq">
         <span class="vtag alt" data-i18n="viaArqTag"></span>
         <h3 data-i18n="viaArqH"></h3>
@@ -1459,17 +1494,29 @@
           <button class="ghost sm" id="demo" data-i18n="demoBtn"></button>
         </div>
         <span class="status" id="demoMsg" data-i18n="demoHint"></span>
-      </div>
 
-      <div class="via hide" id="viaDrive">
-        <span class="vtag alt" data-i18n="viaDriveTag"></span>
-        <h3 data-i18n="viaDriveH"></h3>
-        <p data-i18n="viaDriveP"></p>
-        <div class="row" id="driveRow" style="margin-top:12px">
-          <button class="ghost sm" id="drive" data-i18n="driveBtn"></button>
-          <button class="ghost sm hide" id="driveStop" data-i18n="stopBtn"></button>
+        <!-- ---- O DRIVE É UMA ORIGEM, E NÃO UMA TERCEIRA TAREFA ----
+
+             Ele era um cartão irmão, do mesmo tamanho, ao lado de "gravar a
+             tela" e "usar um arquivo". A grade `auto-fit` acomodava três, e foi
+             por isso que ele virou o terceiro: coube. Mas quem olha três
+             cartões iguais lê três tarefas e escolhe uma — e "abrir do Drive"
+             não é uma tarefa diferente de "usar um arquivo". É o MESMO
+             trabalho, com o arquivo vindo de outro lugar.
+
+             Aqui dentro ele é o que sempre foi: a segunda origem do mesmo
+             destino, embaixo da zona de arraste, com o peso de uma alternativa.
+             O `#viaDrive` continua sendo o elemento que aparece ou não conforme
+             as credenciais existirem — o mesmo id, o mesmo interruptor, uma
+             linha em vez de um cartão. -->
+        <div class="deOutraOrigem hide" id="viaDrive">
+          <span class="ou" data-i18n="viaDriveOu"></span>
+          <div class="row" id="driveRow">
+            <button class="ghost sm" id="drive" data-i18n="driveBtn"></button>
+            <button class="ghost sm hide" id="driveStop" data-i18n="stopBtn"></button>
+          </div>
+          <span class="status" id="driveMsg" data-i18n="driveHint"></span>
         </div>
-        <span class="status" id="driveMsg" data-i18n="driveHint"></span>
       </div>
     </div>
 
@@ -1509,6 +1556,30 @@
         <b class="optNota rec" data-i18n="recomendado"></b></label>
       <p class="note" id="prontaNote" style="margin:6px 0 0"></p>
     </div>
+
+    <!-- ---- CONTINUAR NÃO É COMEÇAR ----
+
+         Ela era a parte "b" do passo 1, uma caixa do mesmo tamanho e do mesmo
+         peso do cenário e do roteiro — quer dizer, a página pedia que TODO
+         mundo passasse os olhos por "já tem um documento?" antes de chegar ao
+         botão de gravar. E a resposta é não para quase todo mundo: é a porta
+         de quem VOLTA, e quem volta já sabe que ela existe.
+
+         Agora é uma linha, embaixo dos caminhos, com o peso de uma pergunta e
+         não o de uma tarefa. Não saiu do produto e não ficou mais longe: é o
+         mesmo botão, o mesmo arquivo, um clique. O que mudou é que ela parou
+         de disputar a atenção de quem chegou para gravar.
+
+         A recuperação de uma captura interrompida NÃO desceu junto: ela é
+         exceção urgente — um trabalho que a pessoa achava perdido — e continua
+         aparecendo lá em cima, como aviso, no instante em que existe. -->
+    <p class="voltando" id="recupBloco">
+      <span data-i18n="reabrirLbl"></span>
+      <button class="ghost sm" id="reabrir" data-i18n="reabrirBtn"></button>
+      <input type="file" id="reabrirArq" multiple
+             accept=".json,.zip,application/json,application/zip" class="hide">
+      <span class="status" id="reabrirMsg" data-i18n="reabrirDica"></span>
+    </p>
     <div class="hide" id="liveBox" style="margin-top:12px">
       <div class="vus" id="vuBox">
         <div class="vu"><span data-i18n="vuMic"></span><div class="vuBar"><i id="vuMic"></i></div></div>
@@ -1679,14 +1750,12 @@
           <option value="onnx-community/whisper-small" data-i18n="mSmall"></option>
           <option value="onnx-community/whisper-large-v3-turbo" data-i18n="mTurbo"></option>
         </select>
-        <span class="status" id="modelSize"></span>
         <select id="lang" style="width:auto">
           <option value="pt">Português</option>
           <option value="en">English</option>
           <option value="es">Español</option>
           <option value="" data-i18n="autoDetect"></option>
         </select>
-        <label class="chk"><input type="checkbox" id="gpu"><span data-i18n="gpuLbl"></span></label>
         <!-- O microfone é uma ENTRADA de transcrição, então mora com as outras.
              No cartão de gravar ele era a quinta caixa de uma fileira e fazia
              a pessoa decidir sobre áudio antes de pensar em áudio. O padrão
@@ -1695,6 +1764,23 @@
         <button class="ghost sm" id="limparModelo" data-i18n="limparBtn"
                 style="margin-left:auto"></button>
       </div>
+      <!-- ---- O TAMANHO E O MOTOR SÃO CONSEQUÊNCIA, E NÃO UMA SEGUNDA ESCOLHA ----
+
+           Os três rótulos do modelo já falam por intenção — "recomendado —
+           rápido", "mais preciso — bem mais lento" —, e ao lado deles, na mesma
+           fileira e com o mesmo peso, estavam "baixa ~206 MB" e uma caixa
+           "usar a placa de vídeo". Três decisões enfileiradas para uma pergunta
+           só, e duas delas em vocabulário de máquina.
+
+           São a MESMA decisão vista de outro ângulo: escolher "mais preciso" é
+           escolher baixar mais e esperar mais; a placa é o que muda a conta do
+           esperar. Aqui embaixo, indentadas sob o modelo, elas leem como o que
+           são — o preço da escolha de cima. A caixa continua clicável, porque
+           quem tem uma placa que não dá conta precisa poder desmarcá-la. -->
+      <p class="consequencia">
+        <span class="status" id="modelSize"></span>
+        <label class="chk"><input type="checkbox" id="gpu"><span data-i18n="gpuLbl"></span></label>
+      </p>
       <!-- O nome dos dois canais. Ele esteve, por uma hora, dentro do modal do
            clipe — errado: renomear canal é coisa de quem transcreve, não de
            quem guarda vídeo, e lá dentro sumia para quem nunca liga o clipe.
@@ -2916,7 +3002,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       viaRecP:'Você faz o percurso na tela e fala o que está fazendo. Nada de vídeo é guardado: saem só as telas que mudaram e a sua narração transcrita.',
       viaRecPclipe:'Você faz o percurso na tela e fala o que está fazendo. A gravação inteira é descartada: saem as telas que mudaram, a sua narração transcrita, e um clipe curto de cada momento que você marcar.',
       recWarnClipe:'A gravação inteira é descartada — só ficam os clipes dos momentos que você marcar. Durante a captura a ferramenta separa os frames que importam e transcreve os dois canais de áudio em separado. A transcrição divide a máquina com a captura; em computador modesto a tela pode perder alguma troca.',
-      viaArqTag:'Já tenho o vídeo', viaArqH:'Usar um arquivo', viaDriveTag:'Está no Drive', viaDriveH:'Abrir do Google Drive', viaDriveP:'O arquivo vai do Drive direto para o seu navegador. Pedimos a permissão mais restrita que existe: só os arquivos que você escolher na janela do Google.',
+      viaArqTag:'Já tenho o vídeo', viaArqH:'Usar um arquivo', viaDriveOu:'Ou, se o vídeo estiver no Google Drive:',
       viaArqP:'Uma gravação que você já fez, de reunião ou de tela. O arquivo é lido pelo navegador e não sai do seu computador.',
       s1:'Vídeo', drop1:'Escolher ou arrastar o vídeo aqui',
       drop2:'MP4 / MOV / WebM — o tamanho do arquivo não importa',
@@ -3348,8 +3434,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       revForaBtn:'Não existe mais — descartar',
       revSairBtn:'Parar a revisão',
       revFim:'Revisão concluída: {0} confirmados, {1} com imagem nova, {2} descartados.',
-      reabrirLbl:'Já tem um documento?',
-      reabrirBtn:'Abrir um documento gerado antes',
+      reabrirLbl:'Já começou antes?',
+      reabrirBtn:'Abrir projeto Walkstamp',
       resetNota:'joga fora o que está na tela e começa do zero',
       reabrirDica:'para corrigir um passo sem regravar — aceita o .json e o .zip que saíram daqui',
       espTit:'Uma gravação ficou aqui.',
@@ -3521,7 +3607,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       viaRecP:'You walk through the screen and say what you are doing. No video is kept: what comes out are the screens that changed and your narration, transcribed.',
       viaRecPclipe:'You walk through the screen and say what you are doing. The whole recording is discarded: what comes out are the screens that changed, your narration transcribed, and a short clip of each moment you mark.',
       recWarnClipe:'The whole recording is discarded — only the clips of the moments you mark are kept. While capturing, the tool pulls out the frames that matter and transcribes the two audio channels separately. Transcription shares the machine with the capture; on a modest computer the screen may miss a change.',
-      viaArqTag:'I already have the video', viaArqH:'Use a file', viaDriveTag:'It is on Drive', viaDriveH:'Open from Google Drive', viaDriveP:'The file goes from Drive straight to your browser. We ask for the narrowest permission there is: only the files you pick in the Google window.',
+      viaArqTag:'I already have the video', viaArqH:'Use a file', viaDriveOu:'Or, if the video is on Google Drive:',
       viaArqP:'A recording you already made, of a meeting or of a screen. The file is read by the browser and never leaves your computer.',
       s1:'Video', drop1:'Choose or drag your video here',
       drop2:'MP4 / MOV / WebM — file size does not matter',
@@ -3941,8 +4027,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       revForaBtn:'It is gone — discard',
       revSairBtn:'Stop the review',
       revFim:'Review done: {0} confirmed, {1} with a new image, {2} discarded.',
-      reabrirLbl:'Already have a document?',
-      reabrirBtn:'Open a document made earlier',
+      reabrirLbl:'Started this before?',
+      reabrirBtn:'Open Walkstamp project',
       resetNota:'throws away what is on screen and starts from zero',
       reabrirDica:'to fix one step without re-recording — takes the .json and the .zip that came out of here',
       espTit:'A recording was left here.',
@@ -4114,7 +4200,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       viaRecP:'Haces el recorrido en la pantalla y dices lo que estás haciendo. No se guarda vídeo: salen solo las pantallas que cambiaron y tu narración transcrita.',
       viaRecPclipe:'Haces el recorrido en la pantalla y dices lo que estás haciendo. La grabación entera se descarta: salen las pantallas que cambiaron, tu narración transcrita y un clip corto de cada momento que marques.',
       recWarnClipe:'La grabación entera se descarta — solo quedan los clips de los momentos que marques. Durante la captura la herramienta separa los fotogramas que importan y transcribe los dos canales de audio por separado. La transcripción comparte la máquina con la captura; en un ordenador modesto la pantalla puede perder algún cambio.',
-      viaArqTag:'Ya tengo el vídeo', viaArqH:'Usar un archivo', viaDriveTag:'Está en Drive', viaDriveH:'Abrir desde Google Drive', viaDriveP:'El archivo va de Drive directo a tu navegador. Pedimos el permiso más restringido que existe: solo los archivos que elijas en la ventana de Google.',
+      viaArqTag:'Ya tengo el vídeo', viaArqH:'Usar un archivo', viaDriveOu:'O, si el vídeo está en Google Drive:',
       viaArqP:'Una grabación que ya hiciste, de una reunión o de pantalla. El archivo lo lee el navegador y no sale de tu equipo.',
       s1:'Vídeo', drop1:'Elige o arrastra tu vídeo aquí',
       drop2:'MP4 / MOV / WebM — el tamaño del archivo no importa',
@@ -4534,8 +4620,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       revForaBtn:'Ya no existe — descartar',
       revSairBtn:'Parar la revisión',
       revFim:'Revisión terminada: {0} confirmados, {1} con imagen nueva, {2} descartados.',
-      reabrirLbl:'¿Ya tienes un documento?',
-      reabrirBtn:'Abrir un documento hecho antes',
+      reabrirLbl:'¿Empezaste antes?',
+      reabrirBtn:'Abrir proyecto Walkstamp',
       resetNota:'tira lo que está en pantalla y empieza de cero',
       reabrirDica:'para corregir un paso sin volver a grabar — acepta el .json y el .zip que salieron de aquí',
       espTit:'Quedó una grabación aquí.',
@@ -4706,7 +4792,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       viaRecP:'Sie gehen den Ablauf am Bildschirm durch und sprechen dabei, was Sie tun. Es wird kein Video gespeichert: Heraus kommen nur die Bildschirme, die sich geändert haben, und Ihr gesprochener Kommentar als Transkription.',
       viaRecPclipe:'Sie gehen den Ablauf am Bildschirm durch und sprechen dabei, was Sie tun. Die gesamte Aufnahme wird verworfen: Heraus kommen die Bildschirme, die sich geändert haben, Ihr gesprochener Kommentar als Transkription und ein kurzer Clip zu jedem Moment, den Sie markieren.',
       recWarnClipe:'Die gesamte Aufnahme wird verworfen — erhalten bleiben nur die Clips der Momente, die Sie markieren. Während der Aufnahme trennt das Werkzeug die Screenshots heraus, die zählen, und transkribiert die beiden Tonspuren getrennt. Die Transkription teilt sich den Rechner mit der Aufnahme; auf einem schwächeren Computer kann ein Bildwechsel verloren gehen.',
-      viaArqTag:'Ich habe das Video bereits', viaArqH:'Datei verwenden', viaDriveTag:'Liegt in Drive', viaDriveH:'Aus Google Drive öffnen', viaDriveP:'Die Datei geht von Drive direkt in Ihren Browser. Wir fragen die engste mögliche Berechtigung ab: nur die Dateien, die Sie im Google-Fenster auswählen.',
+      viaArqTag:'Ich habe das Video bereits', viaArqH:'Datei verwenden', viaDriveOu:'Oder, wenn das Video in Google Drive liegt:',
       viaArqP:'Eine Aufnahme, die Sie bereits erstellt haben — von einer Besprechung oder vom Bildschirm. Die Datei wird vom Browser gelesen und verlässt Ihren Computer nicht.',
       s1:'Video', drop1:'Video auswählen oder hierher ziehen',
       drop2:'MP4 / MOV / WebM — die Dateigröße spielt keine Rolle',
@@ -5132,8 +5218,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       revForaBtn:'Gibt es nicht mehr — verwerfen',
       revSairBtn:'Prüfung beenden',
       revFim:'Prüfung abgeschlossen: {0} bestätigt, {1} mit neuem Bild, {2} verworfen.',
-      reabrirLbl:'Sie haben schon ein Dokument?',
-      reabrirBtn:'Ein zuvor erzeugtes Dokument öffnen',
+      reabrirLbl:'Schon einmal angefangen?',
+      reabrirBtn:'Walkstamp-Projekt öffnen',
       resetNota:'verwirft, was auf dem Bildschirm steht, und beginnt bei null',
       reabrirDica:'um einen Schritt zu korrigieren, ohne neu aufzunehmen — nimmt die .json und die .zip, die hier entstanden sind',
       espTit:'Hier ist eine Aufnahme liegen geblieben.',
@@ -5304,7 +5390,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       viaRecP:'Vous parcourez l’écran et dites ce que vous faites. Aucune vidéo n’est conservée : il ne sort que les écrans qui ont changé et votre narration transcrite.',
       viaRecPclipe:'Vous parcourez l’écran et dites ce que vous faites. L’enregistrement entier est jeté : il en sort les écrans qui ont changé, votre narration transcrite, et un clip court de chaque moment que vous marquez.',
       recWarnClipe:'L’enregistrement entier est jeté — seuls restent les clips des moments que vous marquez. Pendant la capture, l’outil isole les captures qui comptent et transcrit séparément les deux canaux audio. La transcription partage la machine avec la capture ; sur un ordinateur modeste, l’écran peut rater un changement.',
-      viaArqTag:'J’ai déjà la vidéo', viaArqH:'Utiliser un fichier', viaDriveTag:'C’est sur Drive', viaDriveH:'Ouvrir depuis Google Drive', viaDriveP:'Le fichier va de Drive directement à votre navigateur. Nous demandons la permission la plus étroite qui soit : seuls les fichiers que vous choisissez dans la fenêtre Google.',
+      viaArqTag:'J’ai déjà la vidéo', viaArqH:'Utiliser un fichier', viaDriveOu:'Ou, si la vidéo est sur Google Drive :',
       viaArqP:'Un enregistrement que vous avez déjà fait, de réunion ou d’écran. Le fichier est lu par le navigateur et ne quitte pas votre ordinateur.',
       s1:'Vidéo', drop1:'Choisir la vidéo ou la déposer ici',
       drop2:'MP4 / MOV / WebM — la taille du fichier n’a pas d’importance',
@@ -5730,8 +5816,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       revForaBtn:'N’existe plus — écarter',
       revSairBtn:'Arrêter la révision',
       revFim:'Révision terminée : {0} confirmées, {1} avec une nouvelle image, {2} écartées.',
-      reabrirLbl:'Vous avez déjà un document ?',
-      reabrirBtn:'Ouvrir un document généré auparavant',
+      reabrirLbl:'Vous aviez déjà commencé ?',
+      reabrirBtn:'Ouvrir un projet Walkstamp',
       resetNota:'jette ce qui est à l’écran et repart de zéro',
       reabrirDica:'pour corriger une étape sans réenregistrer — accepte le .json et le .zip sortis d’ici',
       espTit:'Un enregistrement est resté ici.',
@@ -6412,6 +6498,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     $('goalFree').placeholder = t('freePh');
     $('sensV').textContent = t('sens')[+$('sens').value];
     dicaModelo(); pintarBloco(); pintarObjetivos(); pintarRotulo(); pintarScorm();
+    /* As letras do passo 1 não mudam com o idioma, mas a visibilidade do
+       roteiro precisa ser decidida uma vez ao abrir — e é por aqui que todo
+       carregamento passa. */
+    if (typeof pintarPartes === 'function') { try { pintarPartes(); } catch (e) {} }
     /* Também na troca de idioma: o nome sugerido dos canais é palavra
        traduzida, e deixá-la em português numa página em inglês é o tipo de
        resto que faz a pessoa duvidar do resto da tradução. */
@@ -8415,7 +8505,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      depois, e não tem como se atualizar sozinho. Sem carimbo, "estou com um
      problema no offline" é uma conversa sem chão — ninguém sabe de qual build
      se fala nem se o defeito já foi consertado. */
-  const VERSAO = '2026.08.21-10';
+  const VERSAO = '2026.08.21-14';
   window.__versao = () => VERSAO;
 
   const PIP_CSS = `
@@ -15397,6 +15487,57 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     if ($('roteiroTirar')) $('roteiroTirar').classList.toggle('hide', !roteiro.length);
     if ($('roteiroMsg')) $('roteiroMsg').textContent =
       roteiro.length ? t('rotPronto', roteiro.length) : t('rotDica');
+    /* Um roteiro que acabou de entrar precisa da caixa na tela, mesmo num
+       cenário que normalmente não a mostra: ver `pintarPartes`. */
+    pintarPartes();
+  }
+
+  /* ---- QUAIS CENÁRIOS TÊM PASSOS PARA ROTEIRIZAR ----
+
+     A pergunta do roteiro é "você já tem a lista de passos escrita?". Ela só
+     tem resposta possível onde existe uma lista de passos: uma evidência de
+     teste tem, um tutorial tem, uma sessão de usabilidade tem (o roteiro de
+     tarefas). Uma ATA não tem — ninguém roteiriza uma reunião antes dela — e
+     um contexto genérico para IA também não.
+
+     Nesses dois a caixa era uma pergunta sem resposta, fixa no caminho de quem
+     só queria apertar Gravar. Ela não sumiu do produto: aparece no instante em
+     que o cenário passa a ser um que a usa. */
+  const CENARIOS_COM_ROTEIRO = new Set(['evidencia', 'tutorial', 'usabilidade']);
+
+  /* ---- AS PARTES DO PASSO 1, NUMERADAS PELO QUE ESTÁ NA TELA ----
+
+     As letras eram digitadas no HTML: "a" no cenário, "b" no recuperar, "c" no
+     roteiro. Com o recuperar fora da sequência e o roteiro aparecendo só às
+     vezes, isso deixaria "a" e "c" na tela com um buraco no meio — e uma
+     sequência com buraco manda procurar o que falta, que é o oposto do que
+     esconder um bloco deveria conseguir.
+
+     Aqui elas são escritas, na ordem em que os blocos estão e contando só os
+     que estão visíveis. Um bloco a mais amanhã entra na conta sozinho. */
+  function pintarPartes(){
+    const cx = $('cardVideo'); if (!cx) return;
+    const rot = $('roteiroBloco');
+    if (rot) {
+      const cen = $('modelo') ? $('modelo').value : '';
+      /* O TEXTO DA PESSOA MANDA MAIS QUE O CENÁRIO. Quem colou uma lista e
+         depois trocou o cenário veria a caixa — e o que ela escreveu dentro —
+         desaparecer da tela. Esconder um bloco vazio é limpeza; esconder um
+         bloco com o trabalho de alguém dentro é perda. */
+      let temTexto = false;
+      try { temTexto = roteiro.length > 0; } catch (e) {}
+      if (!temTexto && $('roteiroTxt')) temTexto = !!$('roteiroTxt').value.trim();
+      rot.classList.toggle('hide', !(temTexto || CENARIOS_COM_ROTEIRO.has(cen)));
+    }
+    /* Só os blocos que pedem letra, e só os que estão na tela. */
+    let n = 0;
+    cx.querySelectorAll('.cenario > .sbN, .cenario .row > .sbN').forEach(el => {
+      const bloco = el.closest('.cenario');
+      if (!bloco || bloco.classList.contains('hide') || bloco.offsetParent === null) {
+        el.textContent = ''; return;
+      }
+      el.textContent = String.fromCharCode(97 + n++);
+    });
   }
 
   /* O ROTEIRO COLADO QUE NINGUÉM MANDOU USAR.
@@ -15586,6 +15727,9 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
        reunião", e não só depois de uma varredura de OCR que pode nunca
        acontecer. */
     try { avisarPessoas(); } catch (e) {}
+    /* O roteiro entra ou sai AQUI: ele é complemento do cenário, e o cenário
+       acabou de mudar. */
+    pintarPartes();
     if (frames.length) render();           // a legenda da miniatura muda com o modelo
     else buildPrompt();
   };

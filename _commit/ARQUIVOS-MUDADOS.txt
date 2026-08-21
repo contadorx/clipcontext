@@ -1,12 +1,13 @@
- offline/walkstamp-offline.html | 390 +++++++++++++++++++++-
- public/app.html                | 390 +++++++++++++++++++++-
+ offline/walkstamp-offline.html | 658 ++++++++++++++++++++++++++++++++-----
+ public/app.html                | 658 ++++++++++++++++++++++++++++++++-----
  public/sitemap-paginas.xml     | 160 ++++-----
  public/sitemap.xml             | 723 -----------------------------------------
  src/.build                     |   2 +-
- src/template.html              | 388 +++++++++++++++++++++-
+ src/template.html              | 656 ++++++++++++++++++++++++++++++++-----
  testes/LEIA-ME.md              |  25 +-
  testes/amostras.py             |  16 +
+ testes/entrada.mjs             | 273 ++++++++++++++++
  testes/parar.mjs               | 419 ++++++++++++++++++++++++
  testes/rapido.sh               |   2 +-
  testes/rodar.sh                |   2 +-
- 11 files changed, 1656 insertions(+), 861 deletions(-)
+ 12 files changed, 2547 insertions(+), 1047 deletions(-)

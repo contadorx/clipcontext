@@ -1,36 +1,38 @@
-# Como pôr este build no git
+# Como pôr estes builds no git
 
-O commit já existe — ele só não pôde ser enviado daqui: esta sessão tem acesso
-**somente leitura** ao `contadorx/clipcontext`, e o `git push` e a API do GitHub
-respondem 403. Então ele viaja neste zip, de dois jeitos. Escolha um.
+Os commits já existem — eles só não puderam ser enviados daqui: esta sessão tem
+acesso **somente leitura** ao `contadorx/clipcontext`, e tanto o `git push`
+quanto a API do GitHub respondem 403. Então eles viajam neste zip, de dois
+jeitos. Escolha um.
 
-Commit: `6c06c9d` · branch `claude/ux-build-continuation-2hs0b2` · base `f505ea8`
-(que é o `main` de onde ele saiu).
+| commit | build |
+|---|---|
+| `6c06c9d` | Build 4 — parar sem perder |
+| `2ef1502` | Build 7 — a entrada |
+
+Branch `claude/ux-build-continuation-2hs0b2`, saindo de `f505ea8` (o `main`).
 
 ---
 
-## Caminho A — trazer o commit inteiro (recomendado)
+## Caminho A — trazer os dois commits inteiros (recomendado)
 
-Preserva a mensagem, a autoria e o pai certo. Você não recommita nada: só puxa.
-
-Na sua cópia do repositório, com o `main` em `f505ea8` (ou mais novo, desde que
-ele contenha esse commit):
+Preserva mensagens, autoria e a ordem. Você não recommita nada: só puxa.
 
 ```bash
 cd <sua cópia do clipcontext>
-git fetch /caminho/para/_commit/build4.bundle \
+git fetch /caminho/para/_commit/builds-4-e-7.bundle \
     claude/ux-build-continuation-2hs0b2:claude/ux-build-continuation-2hs0b2
 git push -u origin claude/ux-build-continuation-2hs0b2
 ```
 
-Se o `git fetch` reclamar que falta o `f505ea8`, é porque a sua cópia está atrás:
-`git fetch origin main` primeiro.
+Se o `git fetch` reclamar que falta o `f505ea8`, é porque a sua cópia está
+atrás: `git fetch origin main` primeiro.
 
 Conferir antes de enviar:
 
 ```bash
-git log --oneline main..claude/ux-build-continuation-2hs0b2   # tem que dar 1 linha
-git diff --stat main..claude/ux-build-continuation-2hs0b2     # e 11 arquivos
+git log --oneline main..claude/ux-build-continuation-2hs0b2   # tem que dar 2 linhas
+git diff --stat main..claude/ux-build-continuation-2hs0b2     # e 12 arquivos
 ```
 
 ---
@@ -38,14 +40,15 @@ git diff --stat main..claude/ux-build-continuation-2hs0b2     # e 11 arquivos
 ## Caminho B — commitar a árvore à mão
 
 Use se preferir não mexer com bundle. O zip traz a árvore inteira do projeto,
-já com o build aplicado; o que falta é o commit.
+já com os dois builds aplicados. O que se perde aqui é a separação: vira **um**
+commit, e não dois.
 
 ```bash
 cd <sua cópia do clipcontext>
 git checkout -b claude/ux-build-continuation-2hs0b2 origin/main
 # copie por cima o conteúdo do zip (tudo menos a pasta _commit/)
 git add -A
-git commit -F /caminho/para/_commit/MENSAGEM-DO-COMMIT.txt
+git commit          # as duas mensagens estão em _commit/MENSAGENS-DOS-COMMITS.txt
 git push -u origin claude/ux-build-continuation-2hs0b2
 ```
 
@@ -62,7 +65,7 @@ que é o que o `testes/naovai.txt` manda ficar de fora. Os dois últimos guardam
 chaves privadas e nunca viajam no pacote. Confira você também, não confie:
 
 ```bash
-unzip -l walkstamp-build4.zip | grep -cE 'emitir-licenca|PLANO-TIME|node_modules|/\.next/|\.env'
+unzip -l walkstamp-builds-4-e-7.zip | grep -cE 'emitir-licenca|PLANO-TIME|node_modules|/\.next/|\.env'
 ```
 
 Tem que dar zero.
@@ -76,6 +79,11 @@ bash testes/preparar.sh          # confere o que falta e gera as amostras
 bash testes/rapido.sh app        # a esteira curta da ferramenta
 ```
 
-`parar.mjs`, a régua deste build, precisa de `/tmp/fala-longa.webm` — cinco
-minutos de vídeo, que o `preparar.sh` gera junto com os outros. Sem ffmpeg no
-caminho ele avisa, e o teste cai com `ENOENT`.
+`parar.mjs` precisa de `/tmp/fala-longa.webm` — cinco minutos de vídeo, que o
+`preparar.sh` gera junto com os outros. Sem ffmpeg no caminho ele avisa, e o
+teste cai com `ENOENT`.
+
+**Três testes do grupo `app` não passam sem o site de pé** (`barraapp`,
+`paridade` e `roteiro`): eles falam com o Next em `localhost`, e o
+`rapido.sh app` sobe a esteira com `SITE=0`. Isso é anterior a estes builds —
+para rodá-los, use `bash testes/rodar.sh`, que levanta o Next antes.
