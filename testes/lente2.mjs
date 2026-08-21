@@ -18,7 +18,7 @@
  * 6. O CENÁRIO DO EXEMPLO. Quem clica em "usar vídeo de exemplo" está pedindo
  *    para VER a ferramenta funcionar, não para responder um formulário.
  */
-import { chromium } from 'playwright';
+import { chromium } from './_navegador.mjs';
 import http from 'http'; import fs from 'fs';
 
 import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';

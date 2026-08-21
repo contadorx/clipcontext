@@ -16,7 +16,7 @@
  * 3. A REVISÃO QUE ACABAVA SOZINHA. Confirmava-se o último quadro e a caixa
  *    sumia. Do lado de cá é um fechamento; do lado de lá parece que deu errado.
  */
-import { chromium } from 'playwright';
+import { chromium } from './_navegador.mjs';
 import http from 'http'; import fs from 'fs';
 
 import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';

@@ -1,7 +1,7 @@
 From f0857badb7cd3bdc372841490178283da59fb4ff Mon Sep 17 00:00:00 2001
 From: Claude <noreply@anthropic.com>
 Date: Fri, 21 Aug 2026 13:46:25 +0000
-Subject: [PATCH 1/4] =?UTF-8?q?Conserta=20a=20caixa=20do=20roteiro,=20o=20?=
+Subject: [PATCH 1/6] =?UTF-8?q?Conserta=20a=20caixa=20do=20roteiro,=20o=20?=
  =?UTF-8?q?=C3=ADndice=20que=20omitia=20passos,=20e=20a=20esteira=20que=20?=
  =?UTF-8?q?mentia?=
 MIME-Version: 1.0
@@ -456,7 +456,7 @@ index 04855dc..6e5e135 100644
 From 8a5dc388dd3e456ba9d4a46508ade118268f720d Mon Sep 17 00:00:00 2001
 From: Claude <noreply@anthropic.com>
 Date: Fri, 21 Aug 2026 13:49:51 +0000
-Subject: [PATCH 2/4] =?UTF-8?q?Tira=20do=20reposit=C3=B3rio=20o=20que=20n?=
+Subject: [PATCH 2/6] =?UTF-8?q?Tira=20do=20reposit=C3=B3rio=20o=20que=20n?=
  =?UTF-8?q?=C3=A3o=20=C3=A9=20produto:=20`=5Fcommit/`=20e=20o=20sitemap.xm?=
  =?UTF-8?q?l=20antigo?=
 MIME-Version: 1.0
@@ -512,7 +512,7 @@ index af8b229..2928a8c 100644
 From 1a53f6686e4fa1bfeeada1245c6f267d55633f5d Mon Sep 17 00:00:00 2001
 From: Claude <noreply@anthropic.com>
 Date: Fri, 21 Aug 2026 16:22:59 +0000
-Subject: [PATCH 3/4] =?UTF-8?q?A=20figura=20do=20blog=20n=C3=A3o=20subia:?=
+Subject: [PATCH 3/6] =?UTF-8?q?A=20figura=20do=20blog=20n=C3=A3o=20subia:?=
  =?UTF-8?q?=20dois=20tetos=20que=20n=C3=A3o=20se=20falavam?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -791,7 +791,7 @@ index 6e5e135..1a82e67 100644
 From d7b3260e86561aa1a62550eb42efb64c35c12f88 Mon Sep 17 00:00:00 2001
 From: Claude <noreply@anthropic.com>
 Date: Fri, 21 Aug 2026 16:48:26 +0000
-Subject: [PATCH 4/4] =?UTF-8?q?Build=208=20(1/2)=20=E2=80=94=20o=20resumo?=
+Subject: [PATCH 4/6] =?UTF-8?q?Build=208=20(1/2)=20=E2=80=94=20o=20resumo?=
  =?UTF-8?q?=20da=20confer=C3=AAncia,=20e=20o=20desfazer=20que=20faltava?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -1563,6 +1563,1094 @@ index 1a82e67..ff25c28 100644
  falhou=""
  for t in $TESTES; do
    [ -f "$t" ] || { echo "??  $t não existe"; continue; }
+-- 
+2.43.0
+
+
+From d75c452b90486ad65011483cca5afd75fb07e03e Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Fri, 21 Aug 2026 17:24:58 +0000
+Subject: [PATCH 5/6] =?UTF-8?q?Build=208=20(2/2)=20=E2=80=94=20a=20perna?=
+ =?UTF-8?q?=20curta:=20a=20fala=20e=20a=20identifica=C3=A7=C3=A3o=20viram?=
+ =?UTF-8?q?=20pain=C3=A9is?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+A etapa que se chama "conferir" abria com sete blocos para rolar antes de
+conferir qualquer coisa: a grade, os sete botões de lote, a transcrição inteira
+num campo de texto, o vocabulário, as hesitações, a tradução e os campos de
+identificação. Os quatro painéis do passo 3 nasciam todos abertos.
+
+Dois deles passam a nascer recolhidos:
+
+  - A FALA, porque ela é estado do material e não tarefa. Quase sempre está
+    certa, e quem precisa mexer sabe que precisa;
+  - a IDENTIFICAÇÃO, porque num cenário genérico não há o que preencher — e um
+    bloco aberto e vazio no meio do caminho é uma pendência que não existe.
+
+A grade e o gerar continuam abertos: são o trabalho e a saída da etapa.
+
+Recolhido não é escondido. A linha do título já dizia o que há dentro — "118
+trechos", "3 campos preenchidos", "opcional, em branco" — e é ela que torna a
+decisão de abrir informada. Medido: a etapa recolhida tem 1649 px contra 2828
+px aberta, 42% menor.
+
+---- O QUE ISTO CUSTOU NA RÉGUA, E COMO FOI PAGO ----
+
+Cinquenta arquivos dirigem controles que moram dentro desses painéis. Para o
+Playwright, um elemento dentro de um `<details>` fechado não tem caixa, e
+`fill()` recusa com "element is not visible" — medido antes de decidir: seis
+arquivos caindo só na pista curta, todos por isso e nenhum por defeito do
+produto.
+
+A alternativa era cinquenta edições, cada uma num ponto diferente do arquivo, e
+cinquenta chances de errar uma. Em vez disso o ponto de entrada virou um só:
+`testes/_navegador.mjs` é o Chromium de sempre com um `addInitScript` que abre
+os `details.sub`. Uma substituição uniforme de import, greppável e reversível.
+
+O atalho tem coleira. Ele abre painéis e mais nada — e `testes/perna.mjs`, que
+importa o Playwright DIRETO para poder ver a tela como ela abre, cobra as duas
+coisas: que os painéis nasçam recolhidos, e que o atalho não toque em estado
+nenhum (cenário por escolher, sem telas, resumo escondido). Um atalho que
+apagasse a única régua do próprio atalho seria o atalho se autoaprovando.
+
+Régua nova: `testes/perna.mjs`, 15 afirmações, incluindo a medição em pixels —
+sem ela "a etapa ficou mais curta" é opinião, e o dia em que alguém devolver um
+painel para aberto por engano ninguém percebe.
+
+Falta do build 8: o cartão da grade com `Editar`.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01KKUzdavSjgaKWWZZWnUbu6
+---
+ src/.build             |   2 +-
+ src/template.html      |  21 +++++-
+ testes/LEIA-ME.md      |  24 +++++-
+ testes/_medir.mjs      |   2 +-
+ testes/_navegador.mjs  |  66 +++++++++++++++++
+ testes/_pdf.mjs        |   2 +-
+ testes/acabamento.mjs  |   2 +-
+ testes/capitulos.mjs   |   2 +-
+ testes/cenarios.mjs    |   2 +-
+ testes/clipe.mjs       |   2 +-
+ testes/curta.mjs       |   2 +-
+ testes/espera.mjs      |   2 +-
+ testes/evidencia.mjs   |   2 +-
+ testes/fluxo.mjs       |   2 +-
+ testes/formato.mjs     |   2 +-
+ testes/hostil.mjs      |   2 +-
+ testes/jira.mjs        |   2 +-
+ testes/juntar.mjs      |   2 +-
+ testes/juntos.mjs      |   2 +-
+ testes/lente2.mjs      |   2 +-
+ testes/licauto.mjs     |   2 +-
+ testes/licenca.mjs     |   2 +-
+ testes/liclink.mjs     |   2 +-
+ testes/linkpage.mjs    |   2 +-
+ testes/matriz.mjs      |   2 +-
+ testes/medicao.mjs     |   2 +-
+ testes/memoria.mjs     |   2 +-
+ testes/miudos.mjs      |   2 +-
+ testes/miudos2.mjs     |   2 +-
+ testes/modelos.mjs     |   2 +-
+ testes/multiidioma.mjs |   2 +-
+ testes/onda1.mjs       |   2 +-
+ testes/onda4.mjs       |   2 +-
+ testes/organiza.mjs    |   2 +-
+ testes/parar.mjs       |   2 +-
+ testes/passos.mjs      |   2 +-
+ testes/pdfev.mjs       |   2 +-
+ testes/perna.mjs       | 163 +++++++++++++++++++++++++++++++++++++++++
+ testes/pessoas.mjs     |   2 +-
+ testes/plano.mjs       |   2 +-
+ testes/portal.mjs      |   2 +-
+ testes/pptx.mjs        |   2 +-
+ testes/promptcx.mjs    |   2 +-
+ testes/rapido.sh       |   2 +-
+ testes/reabrir.mjs     |   2 +-
+ testes/repetido.mjs    |   2 +-
+ testes/reuniao.mjs     |   2 +-
+ testes/rodada.mjs      |   2 +-
+ testes/rodar.sh        |   2 +-
+ testes/roteiro.mjs     |   2 +-
+ testes/saidas.mjs      |   2 +-
+ testes/scorm.mjs       |   2 +-
+ testes/sessao.mjs      |   2 +-
+ testes/traducao.mjs    |   2 +-
+ testes/ux.mjs          |   2 +-
+ testes/verificador.mjs |   2 +-
+ testes/vocab.mjs       |   2 +-
+ 57 files changed, 324 insertions(+), 56 deletions(-)
+ create mode 100644 testes/_navegador.mjs
+ create mode 100644 testes/perna.mjs
+
+diff --git a/src/.build b/src/.build
+index b5318fc..2a00d61 100644
+--- a/src/.build
++++ b/src/.build
+@@ -1 +1 @@
+-2026-08-21 29
++2026-08-21 32
+diff --git a/src/template.html b/src/template.html
+index 3d5e5b2..4ee5c48 100644
+--- a/src/template.html
++++ b/src/template.html
+@@ -2169,7 +2169,20 @@
+       </div>
+     </details>
+ 
+-    <details class="sub" id="sb2" open>
++    <!-- ---- A FALA VIRA PAINEL, E A PERNA ENCURTA ----
++
++         Os quatro painéis do passo 3 nasciam ABERTOS, e a etapa de conferir
++         abria com tudo ao mesmo tempo: a grade, os sete botões, a transcrição
++         inteira num campo de texto, o vocabulário, as hesitações, a tradução e
++         os campos de identificação. Uma etapa que se chama "conferir" pedindo
++         que a pessoa role por sete blocos antes de conferir qualquer coisa.
++
++         A fala é ESTADO do material, e não uma tarefa a fazer: quase sempre ela
++         está certa, e quem precisa mexer sabe que precisa. Recolhida, ela diz o
++         que importa na própria linha do título — "118 trechos" — e abre num
++         clique. Nada foi escondido; foi recolhido, e o `<summary>` conta o que
++         tem dentro antes de a pessoa decidir entrar. -->
++    <details class="sub" id="sb2">
+       <summary><i class="sbN">b</i><span data-i18n="sb2H"></span>
+         <b class="sbEst" id="sbEst2"></b></summary>
+       <div class="sbCorpo">
+@@ -2334,7 +2347,11 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
+       </div>
+     </details>
+ 
+-    <details class="sub" id="sb3" open>
++    <!-- Identificar deixa de ser subetapa permanente pelo mesmo argumento: num
++         cenário genérico não há o que preencher, e um bloco aberto e vazio no
++         meio do caminho é uma pendência que não existe. A linha do título diz
++         quantos campos já foram preenchidos. -->
++    <details class="sub" id="sb3">
+       <summary><i class="sbN">c</i><span data-i18n="sb3H"></span>
+         <b class="sbEst" id="sbEst3"></b></summary>
+       <div class="sbCorpo">
+diff --git a/testes/LEIA-ME.md b/testes/LEIA-ME.md
+index e8fef3f..a8f16f0 100644
+--- a/testes/LEIA-ME.md
++++ b/testes/LEIA-ME.md
+@@ -1,6 +1,6 @@
+ # A regressão
+ 
+-129 arquivos que afirmam coisas sobre o produto. Cada um roda sozinho com
++133 arquivos que afirmam coisas sobre o produto. Cada um roda sozinho com
+ `node <arquivo>.mjs` e sai com código 1 se alguma afirmação cair.
+ 
+ ## Primeiro uso, depois de abrir o zip
+@@ -33,6 +33,28 @@ python3 testes/amostras.py --longo    # 1 hora de vídeo, ~1 min, 8 MB
+ Ele alimenta `varredura.mjs`, que mede a varredura do passo 2 em material de
+ verdade. Sem ele, o teste **pula dizendo isso** em vez de falhar.
+ 
++## O navegador da régua, e por que ele não é o do Playwright
++
++Cinquenta arquivos importam o Chromium de `_navegador.mjs`, e não de
++`playwright`. A diferença é uma linha: ele abre os `<details class="sub">`
++antes de a página carregar.
++
++Existe porque dois painéis do passo 3 — a fala e a identificação — nascem
++RECOLHIDOS, e para o Playwright um elemento dentro de um `<details>` fechado
++não é invisível por opinião: ele não tem caixa, e `fill()` recusa com "element
++is not visible". Sem o atalho seriam cinquenta edições, uma por arquivo, cada
++uma num ponto diferente — e cinquenta chances de errar uma.
++
++Ele abre painéis e mais nada: não mexe em estado, não preenche campo, não muda
++o produto. E o estado recolhido continua cobrado por `perna.mjs`, que importa o
++Playwright DIRETO justamente para enxergá-lo — inclusive uma afirmação de que o
++atalho não toca em mais nada. Um atalho que apagasse a própria régua seria o
++atalho se autoaprovando.
++
++**Se você escrever um teste novo que dirige `#tr`, `#evBox` ou qualquer coisa
++dentro daqueles painéis, importe de `./_navegador.mjs`.** Se o teste for sobre a
++tela como ela abre, importe de `playwright`.
++
+ ## O que NÃO roda a partir do zip
+ 
+ Três testes de licença (`licenca`, `liclink`, `licauto`) e um bloco do
+diff --git a/testes/_medir.mjs b/testes/_medir.mjs
+index 2c5469f..e0b7f13 100644
+--- a/testes/_medir.mjs
++++ b/testes/_medir.mjs
+@@ -1,4 +1,4 @@
+-import { chromium } from 'playwright';
++import { chromium } from './_navegador.mjs';
+ import http from 'http'; import fs from 'fs';
+ const RAIZ='/root/walkstamp';
+ const html = fs.readFileSync(RAIZ+'/public/app.html','utf8');
+diff --git a/testes/_navegador.mjs b/testes/_navegador.mjs
+new file mode 100644
+index 0000000..a172abc
+--- /dev/null
++++ b/testes/_navegador.mjs
+@@ -0,0 +1,66 @@
++/* O NAVEGADOR DA RÉGUA — o Chromium de sempre, com uma diferença só.
++ *
++ * O passo 3 tem quatro painéis, e dois deles passaram a nascer RECOLHIDOS: a
++ * fala e a identificação. É o que a proposta de UX pede — a etapa de conferir
++ * abre curta, com o resumo e a grade, e o que quase ninguém mexe fica a um
++ * clique, com o estado dito na linha do título ("118 trechos", "3 campos
++ * preenchidos"). Nada foi escondido: foi recolhido, que é outra coisa.
++ *
++ * Só que trinta e três arquivos desta régua DIRIGEM controles que moram lá
++ * dentro — `#tr`, `#evBox`, `#hesitar`, `#multiBox`. Para o Playwright, um
++ * elemento dentro de um `<details>` fechado não é invisível por opinião: ele
++ * não tem caixa, e `fill()` recusa com "element is not visible". Medido: seis
++ * arquivos caindo só na pista curta, todos por esse motivo e nenhum por
++ * defeito do produto.
++ *
++ * A resposta poderia ser trinta e três edições, uma por arquivo, cada uma num
++ * ponto diferente — e trinta e três chances de errar uma. Em vez disso, o
++ * ponto de entrada é um só: os arquivos importam o Chromium DAQUI, e daqui ele
++ * sai com um `addInitScript` que abre os painéis antes de a página carregar.
++ *
++ * O QUE ISTO NÃO PODE VIRAR: um jeito de a régua não ver a tela que a pessoa
++ * vê. Ele abre painéis, e mais nada — não mexe em estado, não preenche campo,
++ * não muda o produto. E o estado recolhido continua sendo cobrado, em
++ * `testes/perna.mjs`, que importa o Playwright direto justamente para
++ * enxergá-lo. Um atalho que apagasse a única régua do próprio atalho seria o
++ * atalho se autoaprovando.
++ */
++import { chromium as verdadeiro } from 'playwright';
++
++/* Roda dentro da página, a cada navegação. `DOMContentLoaded` porque o
++   `addInitScript` executa antes de existir corpo nenhum para consultar. */
++function abrirPaineis(){
++  const abre = () => {
++    document.querySelectorAll('details.sub').forEach((d) => { d.open = true; });
++  };
++  if (document.readyState === 'loading') {
++    document.addEventListener('DOMContentLoaded', abre);
++  } else {
++    abre();
++  }
++}
++
++/* `Object.create` e não espalhamento: o `chromium` é um objeto com métodos no
++   protótipo (`connect`, `executablePath`, `launchServer`), e espalhar deixaria
++   um objeto pelado que só tem `launch`. */
++export const chromium = Object.create(verdadeiro);
++
++chromium.launch = async function (opcoes) {
++  const br = await verdadeiro.launch(opcoes);
++  const contextoOriginal = br.newContext.bind(br);
++  const paginaOriginal = br.newPage.bind(br);
++  br.newContext = async (o) => {
++    const ctx = await contextoOriginal(o);
++    await ctx.addInitScript(abrirPaineis);
++    return ctx;
++  };
++  /* `newPage` cria um contexto por dentro, e não passa pelo `newContext`
++     remendado acima — por isso os dois. Aplicar duas vezes não faz mal: abrir
++     um painel já aberto é abrir um painel já aberto. */
++  br.newPage = async (o) => {
++    const pg = await paginaOriginal(o);
++    await pg.addInitScript(abrirPaineis);
++    return pg;
++  };
++  return br;
++};
+diff --git a/testes/_pdf.mjs b/testes/_pdf.mjs
+index 2da2e3c..d8426ed 100644
+--- a/testes/_pdf.mjs
++++ b/testes/_pdf.mjs
+@@ -1,4 +1,4 @@
+-import { chromium } from 'playwright';
++import { chromium } from './_navegador.mjs';
+ import http from 'http'; import fs from 'fs';
+ const RAIZ='/root/walkstamp';
+ const html = fs.readFileSync(RAIZ+'/public/app.html','utf8');
+diff --git a/testes/acabamento.mjs b/testes/acabamento.mjs
+index f0ee02c..654ee21 100644
+--- a/testes/acabamento.mjs
++++ b/testes/acabamento.mjs
+@@ -16,7 +16,7 @@
+  * 3. A REVISÃO QUE ACABAVA SOZINHA. Confirmava-se o último quadro e a caixa
+  *    sumia. Do lado de cá é um fechamento; do lado de lá parece que deu errado.
+  */
+-import { chromium } from 'playwright';
++import { chromium } from './_navegador.mjs';
+ import http from 'http'; import fs from 'fs';
+ 
+ import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+diff --git a/testes/capitulos.mjs b/testes/capitulos.mjs
+index 0c4f2b0..df0b4f0 100644
+--- a/testes/capitulos.mjs
++++ b/testes/capitulos.mjs
+@@ -1,5 +1,5 @@
+ /* Vários casos numa gravação, e o tempo gasto em cada um. */
+-import { chromium } from 'playwright';
++import { chromium } from './_navegador.mjs';
+ import http from 'http'; import fs from 'fs';
+ import { execSync } from 'child_process';
+ import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+diff --git a/testes/cenarios.mjs b/testes/cenarios.mjs
+index ebb6f0f..82535b7 100644
+--- a/testes/cenarios.mjs
++++ b/testes/cenarios.mjs
+@@ -1,5 +1,5 @@
+ /* O cenário no passo 1, o quinto cenário, e as cinco páginas de caso de uso. */
+-import { chromium } from 'playwright';
++import { chromium } from './_navegador.mjs';
+ import http from 'http'; import fs from 'fs';
+ import { criarProxy, exigirNext } from './proxy.mjs';
+ import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+diff --git a/testes/clipe.mjs b/testes/clipe.mjs
+index 31167cf..652d175 100644
+--- a/testes/clipe.mjs
++++ b/testes/clipe.mjs
+@@ -4,7 +4,7 @@
+    `--auto-select-desktop-capture-source`, então a captura ao vivo roda de
+    verdade — MediaRecorder incluído. As janelas são encurtadas por dentro da
+    página para o teste não durar um minuto por marca. */
+-import { chromium } from 'playwright';
++import { chromium } from './_navegador.mjs';
+ import http from 'http'; import fs from 'fs';
+ import { execSync } from 'child_process';
+ import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+diff --git a/testes/curta.mjs b/testes/curta.mjs
+index 49f0c5e..d8bd312 100644
+--- a/testes/curta.mjs
++++ b/testes/curta.mjs
+@@ -1,5 +1,5 @@
+ /* Gravar e parar quase imediatamente — o relato: some o vídeo e não sobra nada. */
+-import { chromium } from 'playwright';
++import { chromium } from './_navegador.mjs';
+ import http from 'http'; import fs from 'fs'; import path from 'path';
+ import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+ const ROOT=`${RAIZ_WS}/public`;
+diff --git a/testes/espera.mjs b/testes/espera.mjs
+index 43946b7..3c18d73 100644
+--- a/testes/espera.mjs
++++ b/testes/espera.mjs
+@@ -23,7 +23,7 @@
+  * A biblioteca do modelo é falsificada — o Whisper não sobe nesta máquina, e o
+  * que está sendo medido aqui é a tela, não a inferência.
+  */
+-import { chromium } from 'playwright';
++import { chromium } from './_navegador.mjs';
+ import http from 'http';
+ import fs from 'fs';
+ 
+diff --git a/testes/evidencia.mjs b/testes/evidencia.mjs
+index be89db2..fe38203 100644
+--- a/testes/evidencia.mjs
++++ b/testes/evidencia.mjs
+@@ -1,7 +1,7 @@
+ /* Evidência de teste: hora de relógio, cabeçalho de identificação, numeração de
+    passo, anotação por frame e a impressão digital opcional. O que se verifica
+    aqui é o que um auditor abriria: o PDF, o .docx, o .zip e o .json. */
+-import { chromium } from 'playwright';
++import { chromium } from './_navegador.mjs';
+ import http from 'http'; import fs from 'fs'; import zlib from 'zlib';
+ 
+ import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+diff --git a/testes/fluxo.mjs b/testes/fluxo.mjs
+index c981027..5fa3455 100644
+--- a/testes/fluxo.mjs
++++ b/testes/fluxo.mjs
+@@ -14,7 +14,7 @@
+  *   3. nenhuma bolinha de "feito" fica verde por uma coisa que a pessoa não fez;
+  *   4. nenhuma bolinha continua verde depois que o que ela afirmava sumiu.
+  */
+-import { chromium } from 'playwright';
++import { chromium } from './_navegador.mjs';
+ import http from 'http'; import fs from 'fs'; import path from 'path';
+ 
+ import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+diff --git a/testes/formato.mjs b/testes/formato.mjs
+index 93c29c1..2c69d61 100644
+--- a/testes/formato.mjs
++++ b/testes/formato.mjs
+@@ -8,7 +8,7 @@
+  * nada. Sem a segunda, o padrão do time vira camisa de força — e ele chega pela
+  * rede, ou seja, DEPOIS de a tela já estar aberta e possivelmente já mexida.
+  */
+-import { chromium } from 'playwright';
++import { chromium } from './_navegador.mjs';
+ import http from 'http'; import fs from 'fs'; import path from 'path';
+ 
+ import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+diff --git a/testes/hostil.mjs b/testes/hostil.mjs
+index 8460e1a..54aa97d 100644
+--- a/testes/hostil.mjs
++++ b/testes/hostil.mjs
+@@ -1,4 +1,4 @@
+-import { chromium } from 'playwright';
++import { chromium } from './_navegador.mjs';
+ import http from 'http'; import fs from 'fs';
+ import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+ const html=fs.readFileSync(`${RAIZ_WS}/public/app.html`,'utf8');
+diff --git a/testes/jira.mjs b/testes/jira.mjs
+index 33d405d..ab2802c 100644
+--- a/testes/jira.mjs
++++ b/testes/jira.mjs
+@@ -1,4 +1,4 @@
+-import { chromium } from 'playwright';
++import { chromium } from './_navegador.mjs';
+ import http from 'http'; import fs from 'fs';
+ 
+ import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+diff --git a/testes/juntar.mjs b/testes/juntar.mjs
+index 89957d8..e8d4bba 100644
+--- a/testes/juntar.mjs
++++ b/testes/juntar.mjs
+@@ -1,5 +1,5 @@
+ /* Consolidar N sessões num documento só. */
+-import { chromium } from 'playwright';
++import { chromium } from './_navegador.mjs';
+ import http from 'http'; import fs from 'fs';
+ import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+ const html = fs.readFileSync(`${RAIZ_WS}/public/app.html`,'utf8');
+diff --git a/testes/juntos.mjs b/testes/juntos.mjs
+index 4222bcf..e037965 100644
+--- a/testes/juntos.mjs
++++ b/testes/juntos.mjs
+@@ -1,6 +1,6 @@
+ /* Passos 2 e 3 viraram um só, opcional, com três botões — e o texto da fala
+    desceu para a revisão. */
+-import { chromium } from 'playwright';
++import { chromium } from './_navegador.mjs';
+ import http from 'http'; import fs from 'fs';
+ 
+ import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+diff --git a/testes/lente2.mjs b/testes/lente2.mjs
+index cc1bd76..ff30170 100644
+--- a/testes/lente2.mjs
++++ b/testes/lente2.mjs
+@@ -18,7 +18,7 @@
+  * 6. O CENÁRIO DO EXEMPLO. Quem clica em "usar vídeo de exemplo" está pedindo
+  *    para VER a ferramenta funcionar, não para responder um formulário.
+  */
+-import { chromium } from 'playwright';
++import { chromium } from './_navegador.mjs';
+ import http from 'http'; import fs from 'fs';
+ 
+ import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+diff --git a/testes/licauto.mjs b/testes/licauto.mjs
+index dab04dc..e571852 100644
+--- a/testes/licauto.mjs
++++ b/testes/licauto.mjs
+@@ -3,7 +3,7 @@
+    A regra que só existe no servidor não é regra, é intenção: se aquele projeto
+    vazar, o que se pode fabricar com a chave dele tem que continuar limitado
+    pelo que ESTE código aceita. É isso que se prova aqui. */
+-import { chromium } from 'playwright';
++import { chromium } from './_navegador.mjs';
+ import http from 'http'; import fs from 'fs';
+ import { execSync } from 'child_process';
+ 
+diff --git a/testes/licenca.mjs b/testes/licenca.mjs
+index f325829..7edda7c 100644
+--- a/testes/licenca.mjs
++++ b/testes/licenca.mjs
+@@ -1,4 +1,4 @@
+-import { chromium } from 'playwright';
++import { chromium } from './_navegador.mjs';
+ import http from 'http'; import fs from 'fs';
+ import { execSync } from 'child_process';
+ 
+diff --git a/testes/liclink.mjs b/testes/liclink.mjs
+index 9e47738..18b5153 100644
+--- a/testes/liclink.mjs
++++ b/testes/liclink.mjs
+@@ -1,5 +1,5 @@
+ /* O plano Time entra por LINK, e não por chave digitada. */
+-import { chromium } from 'playwright';
++import { chromium } from './_navegador.mjs';
+ import http from 'http'; import fs from 'fs';
+ import { execSync } from 'child_process';
+ import { criarProxy, exigirNext } from './proxy.mjs';
+diff --git a/testes/linkpage.mjs b/testes/linkpage.mjs
+index c617997..6823c6a 100644
+--- a/testes/linkpage.mjs
++++ b/testes/linkpage.mjs
+@@ -1,4 +1,4 @@
+-import { chromium } from 'playwright';
++import { chromium } from './_navegador.mjs';
+ import http from 'http'; import fs from 'fs';
+ import { criarProxy, exigirNext } from './proxy.mjs';
+ import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+diff --git a/testes/matriz.mjs b/testes/matriz.mjs
+index c830e8d..0dd7b51 100644
+--- a/testes/matriz.mjs
++++ b/testes/matriz.mjs
+@@ -26,7 +26,7 @@
+  *
+  *   node testes/matriz.mjs
+  */
+-import { chromium } from 'playwright';
++import { chromium } from './_navegador.mjs';
+ import http from 'http';
+ import fs from 'fs';
+ 
+diff --git a/testes/medicao.mjs b/testes/medicao.mjs
+index c369a42..f82b5df 100644
+--- a/testes/medicao.mjs
++++ b/testes/medicao.mjs
+@@ -4,7 +4,7 @@
+      2. Do Not Track ser respeitado;
+      3. nenhum dado do vídeo escapar junto com os marcos;
+      4. o formulário de e-mail funcionar e falhar de forma legível. */
+-import { chromium } from 'playwright';
++import { chromium } from './_navegador.mjs';
+ import http from 'http'; import fs from 'fs'; import path from 'path';
+ import { criarProxy, exigirNext } from './proxy.mjs';
+ import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+diff --git a/testes/memoria.mjs b/testes/memoria.mjs
+index 7900014..1053e8e 100644
+--- a/testes/memoria.mjs
++++ b/testes/memoria.mjs
+@@ -31,7 +31,7 @@
+  * E, no fim, `file://`: a ferramenta é vendida como um arquivo que abre sem
+  * servidor, e uma URL de blob é o tipo de coisa que morre lá primeiro.
+  */
+-import { chromium } from 'playwright';
++import { chromium } from './_navegador.mjs';
+ import http from 'http';
+ import fs from 'fs';
+ import { execSync } from 'child_process';
+diff --git a/testes/miudos.mjs b/testes/miudos.mjs
+index ed6e8ac..ea0b49d 100644
+--- a/testes/miudos.mjs
++++ b/testes/miudos.mjs
+@@ -1,5 +1,5 @@
+ /* Ambiente, tipo do momento, contagem regressiva e hesitações. */
+-import { chromium } from 'playwright';
++import { chromium } from './_navegador.mjs';
+ import http from 'http'; import fs from 'fs';
+ import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+ const html = fs.readFileSync(`${RAIZ_WS}/public/app.html`,'utf8');
+diff --git a/testes/miudos2.mjs b/testes/miudos2.mjs
+index 1bb785b..4cc6298 100644
+--- a/testes/miudos2.mjs
++++ b/testes/miudos2.mjs
+@@ -1,5 +1,5 @@
+ /* EV-001, auto-parar, atalhos e o cabeçalho de procedimento. */
+-import { chromium } from 'playwright';
++import { chromium } from './_navegador.mjs';
+ import http from 'http'; import fs from 'fs';
+ import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+ const html = fs.readFileSync(`${RAIZ_WS}/public/app.html`,'utf8');
+diff --git a/testes/modelos.mjs b/testes/modelos.mjs
+index bbc44e6..04497ab 100644
+--- a/testes/modelos.mjs
++++ b/testes/modelos.mjs
+@@ -1,6 +1,6 @@
+ /* Modelo de saída: uma escolha só que acerta layout, prompt, nome do arquivo e
+    os dados da evidência. Mais o botão que transforma a fala em anotação. */
+-import { chromium } from 'playwright';
++import { chromium } from './_navegador.mjs';
+ import http from 'http'; import fs from 'fs'; import zlib from 'zlib';
+ 
+ import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+diff --git a/testes/multiidioma.mjs b/testes/multiidioma.mjs
+index 5c3fe83..d731b80 100644
+--- a/testes/multiidioma.mjs
++++ b/testes/multiidioma.mjs
+@@ -2,7 +2,7 @@
+    O tradutor embutido do navegador é falsificado — o Chromium do teste não traz
+    o modelo — e o que se prova é a mecânica: traduzir, gerar, e DEVOLVER o
+    estado original no fim. */
+-import { chromium } from 'playwright';
++import { chromium } from './_navegador.mjs';
+ import http from 'http'; import fs from 'fs';
+ import { execSync } from 'child_process';
+ import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+diff --git a/testes/onda1.mjs b/testes/onda1.mjs
+index fde5ae6..a127640 100644
+--- a/testes/onda1.mjs
++++ b/testes/onda1.mjs
+@@ -1,5 +1,5 @@
+ /* Onda 1: perfil na aba, fuso no documento, e a lente de um passo. */
+-import { chromium } from 'playwright';
++import { chromium } from './_navegador.mjs';
+ import http from 'http'; import fs from 'fs'; import zlib from 'zlib';
+ import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+ const ROOT=`${RAIZ_WS}/public`;
+diff --git a/testes/onda4.mjs b/testes/onda4.mjs
+index 54cee44..5db119b 100644
+--- a/testes/onda4.mjs
++++ b/testes/onda4.mjs
+@@ -1,5 +1,5 @@
+ /* Onda 4: as saídas novas, o papel, o perfil em arquivo e o PWA. */
+-import { chromium } from 'playwright';
++import { chromium } from './_navegador.mjs';
+ import http from 'http'; import fs from 'fs'; import path from 'path';
+ import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+ const ROOT=`${RAIZ_WS}/public`;
+diff --git a/testes/organiza.mjs b/testes/organiza.mjs
+index 2c4e010..7a18f14 100644
+--- a/testes/organiza.mjs
++++ b/testes/organiza.mjs
+@@ -15,7 +15,7 @@
+  *   - e a janelinha avisa quando o modelo falha, porque é para ela que a
+  *     pessoa está olhando enquanto a aba está atrás da tela compartilhada.
+  */
+-import { chromium } from 'playwright';
++import { chromium } from './_navegador.mjs';
+ import http from 'http'; import fs from 'fs';
+ 
+ import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+diff --git a/testes/parar.mjs b/testes/parar.mjs
+index aa03b1b..185a584 100644
+--- a/testes/parar.mjs
++++ b/testes/parar.mjs
+@@ -31,7 +31,7 @@
+  *
+  *   node testes/parar.mjs
+  */
+-import { chromium } from 'playwright';
++import { chromium } from './_navegador.mjs';
+ import http from 'http'; import fs from 'fs';
+ import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+ 
+diff --git a/testes/passos.mjs b/testes/passos.mjs
+index c093dae..6104fa5 100644
+--- a/testes/passos.mjs
++++ b/testes/passos.mjs
+@@ -1,5 +1,5 @@
+ /* Passo a passo, ordem das permissões e a janelinha de controle. */
+-import { chromium } from 'playwright';
++import { chromium } from './_navegador.mjs';
+ import http from 'http'; import fs from 'fs'; import path from 'path';
+ import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+ const ROOT=`${RAIZ_WS}/public`;
+diff --git a/testes/pdfev.mjs b/testes/pdfev.mjs
+index a68aaf0..2ff06ef 100644
+--- a/testes/pdfev.mjs
++++ b/testes/pdfev.mjs
+@@ -1,4 +1,4 @@
+-import { chromium } from 'playwright';
++import { chromium } from './_navegador.mjs';
+ import http from 'http'; import fs from 'fs';
+ import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+ const ROOT=`${RAIZ_WS}/public`;
+diff --git a/testes/perna.mjs b/testes/perna.mjs
+new file mode 100644
+index 0000000..37b8019
+--- /dev/null
++++ b/testes/perna.mjs
+@@ -0,0 +1,163 @@
++/* A PERNA CURTA — a etapa de conferir abre curta, e não com tudo aberto.
++ *
++ * Os quatro painéis do passo 3 nasciam ABERTOS. A etapa que se chama "conferir"
++ * abria com a grade, os sete botões de lote, a transcrição inteira num campo de
++ * texto, o vocabulário, as hesitações, a tradução e os campos de identificação
++ * — sete blocos para rolar antes de conferir qualquer coisa.
++ *
++ * Agora dois deles nascem RECOLHIDOS: a fala, que é estado do material e não
++ * tarefa, e a identificação, que num cenário genérico não tem o que preencher.
++ * Recolhido não é escondido: a linha do título diz o que tem dentro — "118
++ * trechos", "3 campos preenchidos" — antes de a pessoa decidir entrar.
++ *
++ * ESTE ARQUIVO IMPORTA O PLAYWRIGHT DIRETO, de propósito. Os outros cinquenta
++ * importam de `_navegador.mjs`, que abre os painéis para conseguir dirigir os
++ * controles que moram lá dentro. Se este também importasse de lá, o atalho
++ * apagaria a única régua do próprio atalho — e o estado que a pessoa vê ao
++ * abrir a página não teria ninguém olhando por ele.
++ *
++ * O que este arquivo cobra:
++ *
++ *   1. a fala e a identificação nascem recolhidas; a grade e o gerar, não;
++ *   2. o que está dentro delas continua EXISTINDO e alcançável num clique;
++ *   3. a linha do título conta o que há dentro, para a decisão de abrir ser
++ *      informada;
++ *   4. e a etapa encolheu de verdade — medido em pixels, não em opinião.
++ *
++ *   node testes/perna.mjs
++ */
++import { chromium } from 'playwright';
++import http from 'http'; import fs from 'fs';
++import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
++
++const html = fs.readFileSync(RAIZ_WS + '/public/app.html', 'utf8');
++const srv = http.createServer((q, r) => {
++  if (q.url.startsWith('/_vercel/')) {
++    r.writeHead(200, { 'Content-Type': 'text/javascript' }); return r.end('');
++  }
++  r.writeHead(200, { 'Content-Type': 'text/html' }); r.end(html);
++});
++await new Promise(r => srv.listen(8959, r));
++
++let falhas = 0;
++const ok = (n, c, e) => {
++  console.log((c ? '  ok   ' : '  FALHA') + '  ' + n + (e ? '  → ' + e : ''));
++  if (!c) falhas++;
++};
++
++const br = await chromium.launch({ executablePath: CHROME_WS });
++const ctx = await br.newContext({ viewport: { width: 1250, height: 980 } });
++const pg = await ctx.newPage();
++const erros = []; pg.on('pageerror', e => erros.push(e.message));
++await pg.goto('http://localhost:8959/app.html?lang=pt');
++await pg.selectOption('#modelo', 'evidencia').catch(() => {});
++await pg.setInputFiles('#file', '/tmp/amostra.webm');
++await pg.waitForFunction(() => document.querySelectorAll('#thumbs figure').length >= 3,
++                         null, { timeout: 90000 });
++await pg.waitForTimeout(900);
++
++const paineis = () => pg.evaluate(() => [1, 2, 3, 4].map((n) => {
++  const d = document.getElementById('sb' + n);
++  return { n, aberto: !!(d && d.open),
++           estado: ((document.getElementById('sbEst' + n) || {}).textContent || '').trim() };
++}));
++
++console.log('[1] a etapa abre curta');
++{
++  const p = await paineis();
++  p.forEach(x => console.log('     sb' + x.n + '  ' + (x.aberto ? 'aberto  ' : 'recolhido') +
++                             '   "' + x.estado + '"'));
++  /* A grade é o trabalho desta etapa: ela abre. */
++  ok('a grade abre', p[0].aberto === true);
++  /* A fala é ESTADO do material, e quase sempre está certa. */
++  ok('a fala nasce recolhida', p[1].aberto === false);
++  /* Num cenário genérico não há o que preencher — e um bloco aberto e vazio é
++     uma pendência que não existe. */
++  ok('a identificação nasce recolhida', p[2].aberto === false);
++  /* Gerar é a saída da etapa: ela não se esconde. */
++  ok('e o gerar continua aberto', p[3].aberto === true);
++}
++
++console.log('\n[2] recolhido não é escondido: a linha do título conta o que há dentro');
++{
++  const p = await paineis();
++  /* Sem isto, decidir se vale abrir exigiria abrir — que é o clique que
++     recolher existe para poupar. */
++  ok('a fala diz o que tem dentro', p[1].estado.length > 0, p[1].estado);
++  ok('a identificação também', p[2].estado.length > 0, p[2].estado);
++}
++
++console.log('\n[3] o que está dentro continua alcançável, a um clique');
++{
++  /* Esconder complexidade, nunca esconder capacidade. */
++  const antes = await pg.locator('#tr').isVisible();
++  ok('a transcrição começa fora da vista', antes === false);
++  await pg.locator('#sb2 > summary').click();
++  await pg.waitForTimeout(300);
++  ok('um clique no título a traz', await pg.locator('#tr').isVisible() === true);
++  await pg.locator('#sb3 > summary').click();
++  await pg.waitForTimeout(300);
++  ok('e o mesmo vale para a identificação',
++     await pg.locator('#evBox').isVisible() === true);
++  /* E ela continua servindo: recolher não pode ter deixado o campo inerte. */
++  await pg.fill('#tr', 'WEBVTT\n\n00:00:00.000 --> 00:00:04.000\nabri o portal');
++  await pg.waitForTimeout(400);
++  ok('e o campo continua funcionando',
++     (await pg.locator('#tr').inputValue()).includes('abri o portal'));
++}
++
++console.log('\n[4] a perna encolheu — em pixels');
++{
++  const medir = () => pg.evaluate(() => {
++    const c = document.getElementById('prevCard');
++    return Math.round(c.getBoundingClientRect().height);
++  });
++  await pg.evaluate(() => { document.getElementById('sb2').open = false;
++                            document.getElementById('sb3').open = false; });
++  await pg.waitForTimeout(300);
++  const curta = await medir();
++  await pg.evaluate(() => { document.getElementById('sb2').open = true;
++                            document.getElementById('sb3').open = true; });
++  await pg.waitForTimeout(300);
++  const longa = await medir();
++  console.log('     recolhida: ' + curta + ' px   aberta: ' + longa + ' px   ' +
++              '(' + Math.round((1 - curta / longa) * 100) + '% menor)');
++  /* O NÚMERO QUE IMPORTA. Sem ele, "a etapa ficou mais curta" é opinião — e o
++     dia em que alguém devolver um painel para aberto por engano, ninguém
++     percebe. */
++  ok('a etapa recolhida é bem menor que a aberta', curta < longa * 0.8,
++     curta + ' px vs ' + longa + ' px');
++}
++
++console.log('\n[5] o atalho da régua abre painéis, e mais nada');
++{
++  /* `_navegador.mjs` existe para os outros cinquenta arquivos conseguirem
++     dirigir o que mora dentro dos painéis. Ele não pode virar um jeito de a
++     régua ver uma tela que a pessoa não vê — então ele abre `details.sub`, e o
++     resto da página tem de sair idêntico. */
++  const { chromium: comAtalho } = await import('./_navegador.mjs');
++  const br2 = await comAtalho.launch({ executablePath: CHROME_WS });
++  const pg2 = await br2.newPage({ viewport: { width: 1250, height: 980 } });
++  await pg2.goto('http://localhost:8959/app.html?lang=pt');
++  await pg2.waitForTimeout(700);
++  const comEle = await pg2.evaluate(() => ({
++    abertos: [1, 2, 3, 4].map(n => !!document.getElementById('sb' + n).open),
++    cenario: document.getElementById('modelo').value,
++    telas: document.querySelectorAll('#thumbs figure').length,
++    resumo: document.getElementById('resumoRev').classList.contains('hide'),
++  }));
++  console.log('     com o atalho: ' + JSON.stringify(comEle));
++  ok('ele abre os quatro painéis', comEle.abertos.every(Boolean));
++  /* E não mexe em mais nada: cenário por escolher, sem telas, resumo escondido
++     — exatamente o que uma página recém-aberta mostra. */
++  ok('e não toca em estado nenhum',
++     comEle.cenario === '' && comEle.telas === 0 && comEle.resumo === true,
++     JSON.stringify(comEle));
++  await br2.close();
++}
++
++console.log(erros.length ? '\nerros de JS: ' + erros.join(' | ') : '\nsem erro de JS');
++if (erros.length) falhas++;
++await br.close(); srv.close();
++console.log(falhas ? '\n' + falhas + ' FALHA(S)' : '\nTodas as verificações passaram.');
++process.exit(falhas ? 1 : 0);
+diff --git a/testes/pessoas.mjs b/testes/pessoas.mjs
+index 0e40a7e..b0695d2 100644
+--- a/testes/pessoas.mjs
++++ b/testes/pessoas.mjs
+@@ -23,7 +23,7 @@
+  *
+  *   node testes/pessoas.mjs
+  */
+-import { chromium } from 'playwright';
++import { chromium } from './_navegador.mjs';
+ import http from 'http';
+ import fs from 'fs';
+ 
+diff --git a/testes/plano.mjs b/testes/plano.mjs
+index e02333f..901e1da 100644
+--- a/testes/plano.mjs
++++ b/testes/plano.mjs
+@@ -17,7 +17,7 @@
+  *
+  *   node testes/plano.mjs
+  */
+-import { chromium } from 'playwright';
++import { chromium } from './_navegador.mjs';
+ import http from 'http'; import fs from 'fs'; import path from 'path';
+ 
+ import { CHROME_WS } from './_caminhos.mjs';
+diff --git a/testes/portal.mjs b/testes/portal.mjs
+index a5b9173..89f7c41 100644
+--- a/testes/portal.mjs
++++ b/testes/portal.mjs
+@@ -16,7 +16,7 @@
+  * `fora_do_cliente`, `nao_a_si`). Elas moram no Postgres e são provadas lá —
+  * uma página que "esconde o botão" não é controle de acesso.
+  */
+-import { chromium } from 'playwright';
++import { chromium } from './_navegador.mjs';
+ import { spawn, execSync } from 'child_process';
+ import http from 'http';
+ import fs from 'fs';
+diff --git a/testes/pptx.mjs b/testes/pptx.mjs
+index 5187d70..96af8d7 100644
+--- a/testes/pptx.mjs
++++ b/testes/pptx.mjs
+@@ -3,7 +3,7 @@
+    Um .pptx só existe se o pacote OOXML estiver completo — falta o theme1.xml e o
+    PowerPoint recusa o arquivo inteiro com "precisa ser reparado". Por isso o
+    teste confere a lista de peças antes de olhar o conteúdo. */
+-import { chromium } from 'playwright';
++import { chromium } from './_navegador.mjs';
+ import http from 'http'; import fs from 'fs';
+ import { execSync } from 'child_process';
+ import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+diff --git a/testes/promptcx.mjs b/testes/promptcx.mjs
+index c5b4d26..7868365 100644
+--- a/testes/promptcx.mjs
++++ b/testes/promptcx.mjs
+@@ -4,7 +4,7 @@
+  * cartão devia ser o que ela faz, e não o resultado bruto que ela vai colar em
+  * outro lugar sem ler.
+  */
+-import { chromium } from 'playwright';
++import { chromium } from './_navegador.mjs';
+ import http from 'http'; import fs from 'fs';
+ 
+ import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+diff --git a/testes/rapido.sh b/testes/rapido.sh
+index 6f94eb8..3a93332 100644
+--- a/testes/rapido.sh
++++ b/testes/rapido.sh
+@@ -36,7 +36,7 @@ GRUPO="$1"; shift
+ case "$GRUPO" in
+   app)  TESTES="smoke.mjs saidas.mjs passos.mjs dobra.mjs travado.mjs gravando.mjs
+                 janelinha.mjs comentario.mjs marcados.mjs revisao.mjs marca.mjs
+-                formato.mjs promptcx.mjs appidioma.mjs compartilhar.mjs celular.mjs teto.mjs rolar.mjs cenario1.mjs organiza.mjs acabamento.mjs lente2.mjs traducao.mjs passomulti.mjs pessoas.mjs matriz.mjs espera2.mjs conclusao.mjs parar.mjs entrada.mjs indice.mjs figura.mjs resumo.mjs" ; SITE=0 ;;
++                formato.mjs promptcx.mjs appidioma.mjs compartilhar.mjs celular.mjs teto.mjs rolar.mjs cenario1.mjs organiza.mjs acabamento.mjs lente2.mjs traducao.mjs passomulti.mjs pessoas.mjs matriz.mjs espera2.mjs conclusao.mjs parar.mjs entrada.mjs indice.mjs figura.mjs resumo.mjs perna.mjs" ; SITE=0 ;;
+   medir) TESTES="memoria.mjs pesagem.mjs espelho.mjs modelo.mjs espera.mjs ritmo.mjs" ; SITE=0 ;;
+   site) TESTES="cinco.mjs ajuda.mjs vitrine.mjs venda.mjs paginas.mjs idiomas.mjs figuras.mjs dobrafig.mjs
+                 linkpage.mjs legal.mjs contradicao.mjs negocio.mjs isca.mjs blog.mjs convite.mjs email.mjs tourvid.mjs semmarca.mjs
+diff --git a/testes/reabrir.mjs b/testes/reabrir.mjs
+index bac14ac..6b4908c 100644
+--- a/testes/reabrir.mjs
++++ b/testes/reabrir.mjs
+@@ -1,5 +1,5 @@
+ /* Reabrir um documento: o .json e o .zip que a própria ferramenta gerou. */
+-import { chromium } from 'playwright';
++import { chromium } from './_navegador.mjs';
+ import http from 'http'; import fs from 'fs';
+ 
+ import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+diff --git a/testes/repetido.mjs b/testes/repetido.mjs
+index 9c682e3..6adb3b7 100644
+--- a/testes/repetido.mjs
++++ b/testes/repetido.mjs
+@@ -1,4 +1,4 @@
+-import { chromium } from 'playwright';
++import { chromium } from './_navegador.mjs';
+ import http from 'http'; import fs from 'fs';
+ 
+ import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+diff --git a/testes/reuniao.mjs b/testes/reuniao.mjs
+index 0e21302..7e9e435 100644
+--- a/testes/reuniao.mjs
++++ b/testes/reuniao.mjs
+@@ -25,7 +25,7 @@
+  *
+  *   node testes/reuniao.mjs
+  */
+-import { chromium } from 'playwright';
++import { chromium } from './_navegador.mjs';
+ import http from 'http'; import fs from 'fs'; import path from 'path';
+ import zlib from 'zlib';
+ 
+diff --git a/testes/rodada.mjs b/testes/rodada.mjs
+index 8ca6d16..30479fc 100644
+--- a/testes/rodada.mjs
++++ b/testes/rodada.mjs
+@@ -1,4 +1,4 @@
+-import { chromium } from 'playwright';
++import { chromium } from './_navegador.mjs';
+ import http from 'http'; import fs from 'fs';
+ 
+ import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+diff --git a/testes/rodar.sh b/testes/rodar.sh
+index ff25c28..5f82d77 100644
+--- a/testes/rodar.sh
++++ b/testes/rodar.sh
+@@ -34,7 +34,7 @@ TESTES="smoke.mjs saidas.mjs passos.mjs evidencia.mjs modelos.mjs cenarios.mjs
+          venda.mjs vitrine.mjs fluxo.mjs roteiro.mjs faxina.mjs formato.mjs comentario.mjs
+          travado.mjs promptcx.mjs cabec.mjs ajuda.mjs cinco.mjs appidioma.mjs gravando.mjs janelinha.mjs marca.mjs figuras.mjs dobrafig.mjs
+          compartilhar.mjs contradicao.mjs negocio.mjs celular.mjs barraapp.mjs paridade.mjs teto.mjs ritmo.mjs rolar.mjs isca.mjs blog.mjs cenario1.mjs organiza.mjs acabamento.mjs convite.mjs email.mjs tourvid.mjs semmarca.mjs lente2.mjs
+-         memoria.mjs pesagem.mjs espelho.mjs grade.mjs varredura.mjs audio.mjs plano.mjs faixa.mjs reuniao.mjs diagchamado.mjs modelo.mjs espera.mjs passomulti.mjs pessoas.mjs matriz.mjs espera2.mjs anotacao.mjs roteirojanela.mjs quedaplaca.mjs conclusao.mjs parar.mjs entrada.mjs indice.mjs figura.mjs resumo.mjs chaves.mjs"
++         memoria.mjs pesagem.mjs espelho.mjs grade.mjs varredura.mjs audio.mjs plano.mjs faixa.mjs reuniao.mjs diagchamado.mjs modelo.mjs espera.mjs passomulti.mjs pessoas.mjs matriz.mjs espera2.mjs anotacao.mjs roteirojanela.mjs quedaplaca.mjs conclusao.mjs parar.mjs entrada.mjs indice.mjs figura.mjs resumo.mjs perna.mjs chaves.mjs"
+ falhou=""
+ for t in $TESTES; do
+   [ -f "$t" ] || { echo "??  $t não existe"; continue; }
+diff --git a/testes/roteiro.mjs b/testes/roteiro.mjs
+index e9d88da..229d429 100644
+--- a/testes/roteiro.mjs
++++ b/testes/roteiro.mjs
+@@ -21,7 +21,7 @@
+  * `roteiro_de_casos_na_conta` — uma página que "esconde o botão" não é
+  * controle de acesso.
+  */
+-import { chromium } from 'playwright';
++import { chromium } from './_navegador.mjs';
+ import { spawn, execFileSync } from 'child_process';
+ import http from 'http';
+ import fs from 'fs';
+diff --git a/testes/saidas.mjs b/testes/saidas.mjs
+index 401361e..e92d2f8 100644
+--- a/testes/saidas.mjs
++++ b/testes/saidas.mjs
+@@ -1,4 +1,4 @@
+-import { chromium } from 'playwright';
++import { chromium } from './_navegador.mjs';
+ import http from 'http'; import fs from 'fs';
+ 
+ import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+diff --git a/testes/scorm.mjs b/testes/scorm.mjs
+index ace0fe2..6699eeb 100644
+--- a/testes/scorm.mjs
++++ b/testes/scorm.mjs
+@@ -1,5 +1,5 @@
+ /* O pacote SCORM: manifesto, conteúdo e o aviso de conclusão. */
+-import { chromium } from 'playwright';
++import { chromium } from './_navegador.mjs';
+ import http from 'http'; import fs from 'fs';
+ import { execSync } from 'child_process';
+ import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+diff --git a/testes/sessao.mjs b/testes/sessao.mjs
+index ace7629..c099c43 100644
+--- a/testes/sessao.mjs
++++ b/testes/sessao.mjs
+@@ -4,7 +4,7 @@
+    requisito**. Se o servidor não responder, tudo o que a ferramenta fazia
+    continua funcionando. É isso que este teste cobra com mais peso — mais até
+    que a lista de chamados. */
+-import { chromium } from 'playwright';
++import { chromium } from './_navegador.mjs';
+ import http from 'http'; import fs from 'fs';
+ import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+ const html = fs.readFileSync(`${RAIZ_WS}/public/app.html`,'utf8');
+diff --git a/testes/traducao.mjs b/testes/traducao.mjs
+index 2a655e8..23b860a 100644
+--- a/testes/traducao.mjs
++++ b/testes/traducao.mjs
+@@ -1,6 +1,6 @@
+ /* Tradução: o tradutor embutido do navegador (falsificado aqui, porque o
+    Chromium do teste não traz o modelo) e a rota do Whisper para inglês. */
+-import { chromium } from 'playwright';
++import { chromium } from './_navegador.mjs';
+ import http from 'http'; import fs from 'fs';
+ import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+ const html=fs.readFileSync(`${RAIZ_WS}/public/app.html`,'utf8');
+diff --git a/testes/ux.mjs b/testes/ux.mjs
+index c166837..0f2dda2 100644
+--- a/testes/ux.mjs
++++ b/testes/ux.mjs
+@@ -1,4 +1,4 @@
+-import { chromium } from 'playwright';
++import { chromium } from './_navegador.mjs';
+ import http from 'http'; import fs from 'fs';
+ import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+ const html = fs.readFileSync(`${RAIZ_WS}/public/app.html`,'utf8');
+diff --git a/testes/verificador.mjs b/testes/verificador.mjs
+index edc75a7..341f4ab 100644
+--- a/testes/verificador.mjs
++++ b/testes/verificador.mjs
+@@ -1,5 +1,5 @@
+ /* O verificador: um pacote íntegro passa, um pacote adulterado é pego. */
+-import { chromium } from 'playwright';
++import { chromium } from './_navegador.mjs';
+ import http from 'http'; import fs from 'fs'; import path from 'path';
+ import { criarProxy, exigirNext } from './proxy.mjs';
+ import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+diff --git a/testes/vocab.mjs b/testes/vocab.mjs
+index a1b9408..d6f21dd 100644
+--- a/testes/vocab.mjs
++++ b/testes/vocab.mjs
+@@ -1,4 +1,4 @@
+-import { chromium } from 'playwright';
++import { chromium } from './_navegador.mjs';
+ import http from 'http'; import fs from 'fs';
+ 
+ import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+-- 
+2.43.0
+
+
+From 082a091fa109996be5d81afcbfc06a7c274ed48b Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Fri, 21 Aug 2026 17:25:11 +0000
+Subject: [PATCH 6/6] A contagem do LEIA-ME acompanha os arquivos: 135
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01KKUzdavSjgaKWWZZWnUbu6
+---
+ testes/LEIA-ME.md | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/testes/LEIA-ME.md b/testes/LEIA-ME.md
+index a8f16f0..301d270 100644
+--- a/testes/LEIA-ME.md
++++ b/testes/LEIA-ME.md
+@@ -1,6 +1,6 @@
+ # A regressão
+ 
+-133 arquivos que afirmam coisas sobre o produto. Cada um roda sozinho com
++135 arquivos que afirmam coisas sobre o produto. Cada um roda sozinho com
+ `node <arquivo>.mjs` e sai com código 1 se alguma afirmação cair.
+ 
+ ## Primeiro uso, depois de abrir o zip
 -- 
 2.43.0
 

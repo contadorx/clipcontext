@@ -4,7 +4,7 @@
    `--auto-select-desktop-capture-source`, então a captura ao vivo roda de
    verdade — MediaRecorder incluído. As janelas são encurtadas por dentro da
    página para o teste não durar um minuto por marca. */
-import { chromium } from 'playwright';
+import { chromium } from './_navegador.mjs';
 import http from 'http'; import fs from 'fs';
 import { execSync } from 'child_process';
 import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';

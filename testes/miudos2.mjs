@@ -1,5 +1,5 @@
 /* EV-001, auto-parar, atalhos e o cabeçalho de procedimento. */
-import { chromium } from 'playwright';
+import { chromium } from './_navegador.mjs';
 import http from 'http'; import fs from 'fs';
 import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
 const html = fs.readFileSync(`${RAIZ_WS}/public/app.html`,'utf8');

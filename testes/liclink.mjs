@@ -1,5 +1,5 @@
 /* O plano Time entra por LINK, e não por chave digitada. */
-import { chromium } from 'playwright';
+import { chromium } from './_navegador.mjs';
 import http from 'http'; import fs from 'fs';
 import { execSync } from 'child_process';
 import { criarProxy, exigirNext } from './proxy.mjs';

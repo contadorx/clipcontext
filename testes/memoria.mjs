@@ -31,7 +31,7 @@
  * E, no fim, `file://`: a ferramenta é vendida como um arquivo que abre sem
  * servidor, e uma URL de blob é o tipo de coisa que morre lá primeiro.
  */
-import { chromium } from 'playwright';
+import { chromium } from './_navegador.mjs';
 import http from 'http';
 import fs from 'fs';
 import { execSync } from 'child_process';

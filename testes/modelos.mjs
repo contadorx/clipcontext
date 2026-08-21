@@ -1,6 +1,6 @@
 /* Modelo de saída: uma escolha só que acerta layout, prompt, nome do arquivo e
    os dados da evidência. Mais o botão que transforma a fala em anotação. */
-import { chromium } from 'playwright';
+import { chromium } from './_navegador.mjs';
 import http from 'http'; import fs from 'fs'; import zlib from 'zlib';
 
 import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';

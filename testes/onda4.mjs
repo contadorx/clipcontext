@@ -1,5 +1,5 @@
 /* Onda 4: as saídas novas, o papel, o perfil em arquivo e o PWA. */
-import { chromium } from 'playwright';
+import { chromium } from './_navegador.mjs';
 import http from 'http'; import fs from 'fs'; import path from 'path';
 import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
 const ROOT=`${RAIZ_WS}/public`;

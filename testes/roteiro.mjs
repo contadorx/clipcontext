@@ -21,7 +21,7 @@
  * `roteiro_de_casos_na_conta` — uma página que "esconde o botão" não é
  * controle de acesso.
  */
-import { chromium } from 'playwright';
+import { chromium } from './_navegador.mjs';
 import { spawn, execFileSync } from 'child_process';
 import http from 'http';
 import fs from 'fs';

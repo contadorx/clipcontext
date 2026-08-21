@@ -8,7 +8,7 @@
  * nada. Sem a segunda, o padrão do time vira camisa de força — e ele chega pela
  * rede, ou seja, DEPOIS de a tela já estar aberta e possivelmente já mexida.
  */
-import { chromium } from 'playwright';
+import { chromium } from './_navegador.mjs';
 import http from 'http'; import fs from 'fs'; import path from 'path';
 
 import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';

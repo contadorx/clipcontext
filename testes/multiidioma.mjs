@@ -2,7 +2,7 @@
    O tradutor embutido do navegador é falsificado — o Chromium do teste não traz
    o modelo — e o que se prova é a mecânica: traduzir, gerar, e DEVOLVER o
    estado original no fim. */
-import { chromium } from 'playwright';
+import { chromium } from './_navegador.mjs';
 import http from 'http'; import fs from 'fs';
 import { execSync } from 'child_process';
 import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';

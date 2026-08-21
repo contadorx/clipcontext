@@ -4,7 +4,7 @@
  * cartão devia ser o que ela faz, e não o resultado bruto que ela vai colar em
  * outro lugar sem ler.
  */
-import { chromium } from 'playwright';
+import { chromium } from './_navegador.mjs';
 import http from 'http'; import fs from 'fs';
 
 import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';

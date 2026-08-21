@@ -185,3 +185,55 @@ e a identificação progressiva.
 Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
 Claude-Session: https://claude.ai/code/session_01KKUzdavSjgaKWWZZWnUbu6
 
+=== d75c452 Build 8 (2/2) — a perna curta: a fala e a identificação viram painéis
+A etapa que se chama "conferir" abria com sete blocos para rolar antes de
+conferir qualquer coisa: a grade, os sete botões de lote, a transcrição inteira
+num campo de texto, o vocabulário, as hesitações, a tradução e os campos de
+identificação. Os quatro painéis do passo 3 nasciam todos abertos.
+
+Dois deles passam a nascer recolhidos:
+
+  - A FALA, porque ela é estado do material e não tarefa. Quase sempre está
+    certa, e quem precisa mexer sabe que precisa;
+  - a IDENTIFICAÇÃO, porque num cenário genérico não há o que preencher — e um
+    bloco aberto e vazio no meio do caminho é uma pendência que não existe.
+
+A grade e o gerar continuam abertos: são o trabalho e a saída da etapa.
+
+Recolhido não é escondido. A linha do título já dizia o que há dentro — "118
+trechos", "3 campos preenchidos", "opcional, em branco" — e é ela que torna a
+decisão de abrir informada. Medido: a etapa recolhida tem 1649 px contra 2828
+px aberta, 42% menor.
+
+---- O QUE ISTO CUSTOU NA RÉGUA, E COMO FOI PAGO ----
+
+Cinquenta arquivos dirigem controles que moram dentro desses painéis. Para o
+Playwright, um elemento dentro de um `<details>` fechado não tem caixa, e
+`fill()` recusa com "element is not visible" — medido antes de decidir: seis
+arquivos caindo só na pista curta, todos por isso e nenhum por defeito do
+produto.
+
+A alternativa era cinquenta edições, cada uma num ponto diferente do arquivo, e
+cinquenta chances de errar uma. Em vez disso o ponto de entrada virou um só:
+`testes/_navegador.mjs` é o Chromium de sempre com um `addInitScript` que abre
+os `details.sub`. Uma substituição uniforme de import, greppável e reversível.
+
+O atalho tem coleira. Ele abre painéis e mais nada — e `testes/perna.mjs`, que
+importa o Playwright DIRETO para poder ver a tela como ela abre, cobra as duas
+coisas: que os painéis nasçam recolhidos, e que o atalho não toque em estado
+nenhum (cenário por escolher, sem telas, resumo escondido). Um atalho que
+apagasse a única régua do próprio atalho seria o atalho se autoaprovando.
+
+Régua nova: `testes/perna.mjs`, 15 afirmações, incluindo a medição em pixels —
+sem ela "a etapa ficou mais curta" é opinião, e o dia em que alguém devolver um
+painel para aberto por engano ninguém percebe.
+
+Falta do build 8: o cartão da grade com `Editar`.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01KKUzdavSjgaKWWZZWnUbu6
+
+=== 082a091 A contagem do LEIA-ME acompanha os arquivos: 135
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01KKUzdavSjgaKWWZZWnUbu6
+

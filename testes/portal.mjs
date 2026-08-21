@@ -16,7 +16,7 @@
  * `fora_do_cliente`, `nao_a_si`). Elas moram no Postgres e são provadas lá —
  * uma página que "esconde o botão" não é controle de acesso.
  */
-import { chromium } from 'playwright';
+import { chromium } from './_navegador.mjs';
 import { spawn, execSync } from 'child_process';
 import http from 'http';
 import fs from 'fs';

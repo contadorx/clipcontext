@@ -2168,7 +2168,20 @@
       </div>
     </details>
 
-    <details class="sub" id="sb2" open>
+    <!-- ---- A FALA VIRA PAINEL, E A PERNA ENCURTA ----
+
+         Os quatro painéis do passo 3 nasciam ABERTOS, e a etapa de conferir
+         abria com tudo ao mesmo tempo: a grade, os sete botões, a transcrição
+         inteira num campo de texto, o vocabulário, as hesitações, a tradução e
+         os campos de identificação. Uma etapa que se chama "conferir" pedindo
+         que a pessoa role por sete blocos antes de conferir qualquer coisa.
+
+         A fala é ESTADO do material, e não uma tarefa a fazer: quase sempre ela
+         está certa, e quem precisa mexer sabe que precisa. Recolhida, ela diz o
+         que importa na própria linha do título — "118 trechos" — e abre num
+         clique. Nada foi escondido; foi recolhido, e o `<summary>` conta o que
+         tem dentro antes de a pessoa decidir entrar. -->
+    <details class="sub" id="sb2">
       <summary><i class="sbN">b</i><span data-i18n="sb2H"></span>
         <b class="sbEst" id="sbEst2"></b></summary>
       <div class="sbCorpo">
@@ -2333,7 +2346,11 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       </div>
     </details>
 
-    <details class="sub" id="sb3" open>
+    <!-- Identificar deixa de ser subetapa permanente pelo mesmo argumento: num
+         cenário genérico não há o que preencher, e um bloco aberto e vazio no
+         meio do caminho é uma pendência que não existe. A linha do título diz
+         quantos campos já foram preenchidos. -->
+    <details class="sub" id="sb3">
       <summary><i class="sbN">c</i><span data-i18n="sb3H"></span>
         <b class="sbEst" id="sbEst3"></b></summary>
       <div class="sbCorpo">
@@ -9012,7 +9029,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
      depois, e não tem como se atualizar sozinho. Sem carimbo, "estou com um
      problema no offline" é uma conversa sem chão — ninguém sabe de qual build
      se fala nem se o defeito já foi consertado. */
-  const VERSAO = '2026.08.21-29';
+  const VERSAO = '2026.08.21-32';
   window.__versao = () => VERSAO;
 
   const PIP_CSS = `

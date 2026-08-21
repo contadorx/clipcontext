@@ -1,5 +1,5 @@
 /* Reabrir um documento: o .json e o .zip que a própria ferramenta gerou. */
-import { chromium } from 'playwright';
+import { chromium } from './_navegador.mjs';
 import http from 'http'; import fs from 'fs';
 
 import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';

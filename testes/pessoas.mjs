@@ -23,7 +23,7 @@
  *
  *   node testes/pessoas.mjs
  */
-import { chromium } from 'playwright';
+import { chromium } from './_navegador.mjs';
 import http from 'http';
 import fs from 'fs';
 

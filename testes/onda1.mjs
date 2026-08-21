@@ -1,5 +1,5 @@
 /* Onda 1: perfil na aba, fuso no documento, e a lente de um passo. */
-import { chromium } from 'playwright';
+import { chromium } from './_navegador.mjs';
 import http from 'http'; import fs from 'fs'; import zlib from 'zlib';
 import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
 const ROOT=`${RAIZ_WS}/public`;

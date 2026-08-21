@@ -1,5 +1,5 @@
 /* O pacote SCORM: manifesto, conteúdo e o aviso de conclusão. */
-import { chromium } from 'playwright';
+import { chromium } from './_navegador.mjs';
 import http from 'http'; import fs from 'fs';
 import { execSync } from 'child_process';
 import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';

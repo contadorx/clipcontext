@@ -4,7 +4,7 @@
      2. Do Not Track ser respeitado;
      3. nenhum dado do vídeo escapar junto com os marcos;
      4. o formulário de e-mail funcionar e falhar de forma legível. */
-import { chromium } from 'playwright';
+import { chromium } from './_navegador.mjs';
 import http from 'http'; import fs from 'fs'; import path from 'path';
 import { criarProxy, exigirNext } from './proxy.mjs';
 import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';

@@ -3,7 +3,7 @@
    Um .pptx só existe se o pacote OOXML estiver completo — falta o theme1.xml e o
    PowerPoint recusa o arquivo inteiro com "precisa ser reparado". Por isso o
    teste confere a lista de peças antes de olhar o conteúdo. */
-import { chromium } from 'playwright';
+import { chromium } from './_navegador.mjs';
 import http from 'http'; import fs from 'fs';
 import { execSync } from 'child_process';
 import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';

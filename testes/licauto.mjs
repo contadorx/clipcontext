@@ -3,7 +3,7 @@
    A regra que só existe no servidor não é regra, é intenção: se aquele projeto
    vazar, o que se pode fabricar com a chave dele tem que continuar limitado
    pelo que ESTE código aceita. É isso que se prova aqui. */
-import { chromium } from 'playwright';
+import { chromium } from './_navegador.mjs';
 import http from 'http'; import fs from 'fs';
 import { execSync } from 'child_process';
 

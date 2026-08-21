@@ -25,7 +25,7 @@
  *
  *   node testes/reuniao.mjs
  */
-import { chromium } from 'playwright';
+import { chromium } from './_navegador.mjs';
 import http from 'http'; import fs from 'fs'; import path from 'path';
 import zlib from 'zlib';
 

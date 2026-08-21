@@ -14,7 +14,7 @@
  *   3. nenhuma bolinha de "feito" fica verde por uma coisa que a pessoa não fez;
  *   4. nenhuma bolinha continua verde depois que o que ela afirmava sumiu.
  */
-import { chromium } from 'playwright';
+import { chromium } from './_navegador.mjs';
 import http from 'http'; import fs from 'fs'; import path from 'path';
 
 import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';

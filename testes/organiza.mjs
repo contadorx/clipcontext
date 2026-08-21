@@ -15,7 +15,7 @@
  *   - e a janelinha avisa quando o modelo falha, porque é para ela que a
  *     pessoa está olhando enquanto a aba está atrás da tela compartilhada.
  */
-import { chromium } from 'playwright';
+import { chromium } from './_navegador.mjs';
 import http from 'http'; import fs from 'fs';
 
 import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';

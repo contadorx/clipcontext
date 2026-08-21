@@ -23,7 +23,7 @@
  * A biblioteca do modelo é falsificada — o Whisper não sobe nesta máquina, e o
  * que está sendo medido aqui é a tela, não a inferência.
  */
-import { chromium } from 'playwright';
+import { chromium } from './_navegador.mjs';
 import http from 'http';
 import fs from 'fs';
 

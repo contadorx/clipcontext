@@ -1,4 +1,4 @@
-import { chromium } from 'playwright';
+import { chromium } from './_navegador.mjs';
 import http from 'http'; import fs from 'fs';
 import { criarProxy, exigirNext } from './proxy.mjs';
 import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';

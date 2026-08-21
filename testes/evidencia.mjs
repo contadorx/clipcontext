@@ -1,7 +1,7 @@
 /* Evidência de teste: hora de relógio, cabeçalho de identificação, numeração de
    passo, anotação por frame e a impressão digital opcional. O que se verifica
    aqui é o que um auditor abriria: o PDF, o .docx, o .zip e o .json. */
-import { chromium } from 'playwright';
+import { chromium } from './_navegador.mjs';
 import http from 'http'; import fs from 'fs'; import zlib from 'zlib';
 
 import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';

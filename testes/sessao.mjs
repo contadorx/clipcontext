@@ -4,7 +4,7 @@
    requisito**. Se o servidor não responder, tudo o que a ferramenta fazia
    continua funcionando. É isso que este teste cobra com mais peso — mais até
    que a lista de chamados. */
-import { chromium } from 'playwright';
+import { chromium } from './_navegador.mjs';
 import http from 'http'; import fs from 'fs';
 import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
 const html = fs.readFileSync(`${RAIZ_WS}/public/app.html`,'utf8');
