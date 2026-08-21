@@ -1,7 +1,7 @@
 From f0857badb7cd3bdc372841490178283da59fb4ff Mon Sep 17 00:00:00 2001
 From: Claude <noreply@anthropic.com>
 Date: Fri, 21 Aug 2026 13:46:25 +0000
-Subject: [PATCH 1/3] =?UTF-8?q?Conserta=20a=20caixa=20do=20roteiro,=20o=20?=
+Subject: [PATCH 1/4] =?UTF-8?q?Conserta=20a=20caixa=20do=20roteiro,=20o=20?=
  =?UTF-8?q?=C3=ADndice=20que=20omitia=20passos,=20e=20a=20esteira=20que=20?=
  =?UTF-8?q?mentia?=
 MIME-Version: 1.0
@@ -456,7 +456,7 @@ index 04855dc..6e5e135 100644
 From 8a5dc388dd3e456ba9d4a46508ade118268f720d Mon Sep 17 00:00:00 2001
 From: Claude <noreply@anthropic.com>
 Date: Fri, 21 Aug 2026 13:49:51 +0000
-Subject: [PATCH 2/3] =?UTF-8?q?Tira=20do=20reposit=C3=B3rio=20o=20que=20n?=
+Subject: [PATCH 2/4] =?UTF-8?q?Tira=20do=20reposit=C3=B3rio=20o=20que=20n?=
  =?UTF-8?q?=C3=A3o=20=C3=A9=20produto:=20`=5Fcommit/`=20e=20o=20sitemap.xm?=
  =?UTF-8?q?l=20antigo?=
 MIME-Version: 1.0
@@ -512,7 +512,7 @@ index af8b229..2928a8c 100644
 From 1a53f6686e4fa1bfeeada1245c6f267d55633f5d Mon Sep 17 00:00:00 2001
 From: Claude <noreply@anthropic.com>
 Date: Fri, 21 Aug 2026 16:22:59 +0000
-Subject: [PATCH 3/3] =?UTF-8?q?A=20figura=20do=20blog=20n=C3=A3o=20subia:?=
+Subject: [PATCH 3/4] =?UTF-8?q?A=20figura=20do=20blog=20n=C3=A3o=20subia:?=
  =?UTF-8?q?=20dois=20tetos=20que=20n=C3=A3o=20se=20falavam?=
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -781,6 +781,785 @@ index 6e5e135..1a82e67 100644
           compartilhar.mjs contradicao.mjs negocio.mjs celular.mjs barraapp.mjs paridade.mjs teto.mjs ritmo.mjs rolar.mjs isca.mjs blog.mjs cenario1.mjs organiza.mjs acabamento.mjs convite.mjs email.mjs tourvid.mjs semmarca.mjs lente2.mjs
 -         memoria.mjs pesagem.mjs espelho.mjs grade.mjs varredura.mjs audio.mjs plano.mjs faixa.mjs reuniao.mjs diagchamado.mjs modelo.mjs espera.mjs passomulti.mjs pessoas.mjs matriz.mjs espera2.mjs anotacao.mjs roteirojanela.mjs quedaplaca.mjs conclusao.mjs parar.mjs entrada.mjs indice.mjs chaves.mjs"
 +         memoria.mjs pesagem.mjs espelho.mjs grade.mjs varredura.mjs audio.mjs plano.mjs faixa.mjs reuniao.mjs diagchamado.mjs modelo.mjs espera.mjs passomulti.mjs pessoas.mjs matriz.mjs espera2.mjs anotacao.mjs roteirojanela.mjs quedaplaca.mjs conclusao.mjs parar.mjs entrada.mjs indice.mjs figura.mjs chaves.mjs"
+ falhou=""
+ for t in $TESTES; do
+   [ -f "$t" ] || { echo "??  $t não existe"; continue; }
+-- 
+2.43.0
+
+
+From d7b3260e86561aa1a62550eb42efb64c35c12f88 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Fri, 21 Aug 2026 16:48:26 +0000
+Subject: [PATCH 4/4] =?UTF-8?q?Build=208=20(1/2)=20=E2=80=94=20o=20resumo?=
+ =?UTF-8?q?=20da=20confer=C3=AAncia,=20e=20o=20desfazer=20que=20faltava?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+A etapa de conferir abria com dezoito miniaturas e sete botões do mesmo peso. A
+primeira pergunta de quem chega — "o que eu tenho aqui, e preciso mexer?" — só
+era respondida olhando, uma tela de cada vez, que é justamente o trabalho que
+esta etapa existe para encurtar.
+
+  - RESUMO antes da grade: quantas telas, quantas com fala, e uma ação
+    recomendada. Nada aqui é capacidade nova — é a mesma limpeza que os botões
+    já faziam, recomendada em vez de listada. Os sete botões continuam logo
+    abaixo, no mesmo lugar, para quem discorda;
+
+  - a CONSEQUÊNCIA vem antes, em números — "tira 2 telas da conferência (2
+    repetidas)" — e some quando não há nada a limpar, junto com o botão: um
+    botão que não faz nada é pior que um botão a menos, e esta tela já tinha
+    aprendido isso nos filtros;
+
+  - e o DESFAZER vem depois. Este é o que doía: NENHUMA ação em lote tinha
+    volta. Quem clicava em "descartar repetidos" e se arrependia tinha duas
+    saídas, e as duas são piores que o problema — "manter todas", que devolve
+    também o que a pessoa havia descartado à mão, e recarregar a página, que
+    nesta ferramenta perde a sessão inteira. A proposta de UX proíbe a segunda
+    com todas as letras.
+
+    O desfazer alcança os QUATRO botões de lote, e não só a limpeza
+    recomendada: um desfazer guardado que a pessoa não tem como alcançar é o
+    mesmo que desfazer nenhum. Ele guarda os objetos dos quadros, e não
+    posições — entre o clique e o arrependimento pode entrar uma tela nova.
+
+UM DEFEITO ACHADO NO CAMINHO, e ele estava no ar: `contarRepetidos` e o
+`#dedup` tinham a mesma regra escrita duas vezes e já discordavam — a ação
+pulava o quadro FIXADO e o contador não. O botão prometia "descartar 3
+repetidos", tirava 2, e a diferença era exatamente a tela que a pessoa fixou
+para proteger: o número errado aparecia justo para quem tomou o cuidado de
+proteger alguma coisa. O mesmo valia para o `#mute` e o `contarSemFala`.
+
+Agora quem responde é uma função só, que devolve a LISTA: contar é ler o
+tamanho dela, agir é percorrê-la, prever é a mesma coisa que agir sem escrever.
+A conta da janela de fala, que estava copiada em três lugares, virou
+`temFalaNoQuadro`.
+
+Régua: `testes/resumo.mjs`, 21 afirmações — entre elas a que fecha o defeito
+acima (o que o botão promete é o que sai) e a que separa desfazer de "manter
+todas": o que a limpeza tirou volta, e o que EU tinha descartado à mão continua
+fora.
+
+Falta do build 8: o cartão da grade com `Editar`, a fala como painel contextual
+e a identificação progressiva.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01KKUzdavSjgaKWWZZWnUbu6
+---
+ src/.build        |   2 +-
+ src/template.html | 330 ++++++++++++++++++++++++++++++++++++++++++----
+ testes/rapido.sh  |   2 +-
+ testes/resumo.mjs | 216 ++++++++++++++++++++++++++++++
+ testes/rodar.sh   |   2 +-
+ 5 files changed, 522 insertions(+), 30 deletions(-)
+ create mode 100644 testes/resumo.mjs
+
+diff --git a/src/.build b/src/.build
+index 8f88cdb..b5318fc 100644
+--- a/src/.build
++++ b/src/.build
+@@ -1 +1 @@
+-2026-08-21 23
++2026-08-21 29
+diff --git a/src/template.html b/src/template.html
+index a73f11f..3d5e5b2 100644
+--- a/src/template.html
++++ b/src/template.html
+@@ -394,6 +394,18 @@
+      lia "Transcrevendo10%faltam ~7 min" — três fatos colados numa palavra só,
+      exatamente na barra que existe para ser lida de relance. */
+   .trSep{opacity:.5}
++  /* ---- O RESUMO DA CONFERÊNCIA ----
++     Ele abre a etapa, então tem peso de abertura: fundo próprio e uma borda que
++     o separa do que vem depois. Os números são grandes o bastante para se ler
++     de relance — é a única coisa nesta tela que se lê de relance. */
++  .resumoRev{margin:0 0 18px;padding:16px 18px;border:1px solid var(--line);
++        border-radius:10px;background:var(--bg)}
++  .resumoTit{margin:0;font-size:16px;font-weight:650;color:var(--ink)}
++  .resumoConta{margin:6px 0 0;font-size:14px;color:var(--muted)}
++  .resumoConta b{color:var(--ink);font-variant-numeric:tabular-nums}
++  .resumoRev .note{margin:10px 0 0}
++  .resumoRev .status{margin:10px 0 0}
++  #faxinaDesfazer{margin-left:10px}
+   .thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:9px;margin-top:16px}
+   /* A tela que continua um passo encosta na anterior: o olho lê o grupo antes
+      de ler o número. Sem isso, "Passo 3 · 2/3" seria a única pista de que
+@@ -1934,6 +1946,38 @@
+       <summary><i class="sbN">a</i><span data-i18n="sb1H"></span>
+         <b class="sbEst" id="sbEst1"></b></summary>
+       <div class="sbCorpo">
++    <!-- ---- O RESUMO VEM ANTES DA GRADE ----
++
++         A conferência abria com dezoito miniaturas e sete botões, e a primeira
++         pergunta de quem chega — "o que eu tenho aqui, e preciso mexer?" — não
++         era respondida em lugar nenhum. Ela era respondida OLHANDO, uma tela de
++         cada vez, que é o trabalho que esta etapa existe para encurtar.
++
++         Três números e uma ação recomendada respondem antes: quantas telas,
++         quantas com fala, e quantas dá para tirar sem pensar. Quem concorda
++         clica uma vez; quem discorda continua com os sete botões logo abaixo,
++         que não saíram do lugar.
++
++         A CONSEQUÊNCIA VEM ANTES e o DESFAZER vem depois — os dois, e não um
++         dos dois. Dizer o que vai acontecer sem oferecer volta é pedir fé;
++         oferecer volta sem dizer o que vai acontecer é pedir que a pessoa
++         descubra clicando. -->
++    <div class="resumoRev hide" id="resumoRev">
++      <p class="resumoTit" id="resumoTit"></p>
++      <p class="resumoConta" id="resumoConta"></p>
++      <div class="row" style="margin-top:10px">
++        <button class="destaque" id="faxina"></button>
++        <!-- Ele não é um segundo "revisar": delega no `#revisar` que já existe
++             lá embaixo, junto da grade. Dois botões para a mesma coisa é a
++             segunda verdade de sempre. -->
++        <button class="ghost" id="resumoRevisar"></button>
++      </div>
++      <p class="note" id="faxinaVai"></p>
++      <p class="status ok hide" id="faxinaMsg" role="status">
++        <span id="faxinaMsgTxt"></span>
++        <button type="button" class="ghost sm hide" id="faxinaDesfazer"></button>
++      </p>
++    </div>
+     <!-- "Chamar cada quadro/frame de:" — e não "rótulo".
+          O rótulo é o que a coisa É para nós; o nome dela na cabeça de quem usa
+          é a pergunta que o campo responde. Um campo chamado "rótulo" ao lado de
+@@ -3174,6 +3218,19 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
+       licPorLink:'Plano Time ativado pelo link. A chave foi guardada neste navegador e tirada do endereço.',
+       licLinkRuim:'O link trazia uma chave que não confere: {0}',
+       keepMarked:'Manter só as marcadas ({0})',
++      /* ---- O RESUMO DA CONFERÊNCIA, E A LIMPEZA RECOMENDADA ----
++         A consequência é dita ANTES, em números, e o desfazer existe DEPOIS.
++         Os dois, e não um dos dois. */
++      revResumoTit:'Seu material está pronto para conferência',
++      revResumoTelas:'{0} telas', revResumoComFala:'{0} com fala',
++      revResumoRevisar:'Revisar tela por tela',
++      faxinaBtn:'Aplicar limpeza recomendada',
++      faxinaRepet:'{0} repetidas', faxinaSemFala:'{0} sem fala',
++      faxinaVai:'Tira {0} telas da conferência ({1}). Nada é apagado — dá para desfazer, e as fixadas ficam.',
++      faxinaNada:'Nada a limpar: nenhuma tela parece repetida ou sem fala.',
++      faxinaFeito:'Tirei {0} telas.', faxinaDesfazerBtn:'Desfazer',
++      faxinaDesfeito:'Desfeito — as telas voltaram.',
++      faxinaPodeDesfazer:'Mudou o que está incluído.',
+       keepMarkedN:'Mantidas as {0} telas que você marcou; {1} descartada(s).',
+       autoJaFeito:'já transcrito ao vivo',
+       autoJaFeitoDica:'A transcrição foi feita durante a gravação. Como nenhum áudio é guardado, não há o que transcrever de novo — mas o texto abaixo é seu e pode ser corrigido.',
+@@ -3779,6 +3836,16 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
+       licPorLink:'Team plan activated by the link. The key was stored in this browser and removed from the address.',
+       licLinkRuim:'The link carried a key that does not check out: {0}',
+       keepMarked:'Keep only the marked ones ({0})',
++      revResumoTit:'Your material is ready for review',
++      revResumoTelas:'{0} screens', revResumoComFala:'{0} with speech',
++      revResumoRevisar:'Review screen by screen',
++      faxinaBtn:'Apply recommended cleanup',
++      faxinaRepet:'{0} repeated', faxinaSemFala:'{0} with no speech',
++      faxinaVai:'Takes {0} screens out of the review ({1}). Nothing is deleted — you can undo, and pinned ones stay.',
++      faxinaNada:'Nothing to clean up: no screen looks repeated or silent.',
++      faxinaFeito:'Took out {0} screens.', faxinaDesfazerBtn:'Undo',
++      faxinaDesfeito:'Undone — the screens are back.',
++      faxinaPodeDesfazer:'What is included has changed.',
+       keepMarkedN:'Kept the {0} screens you marked; {1} discarded.',
+       autoJaFeito:'already transcribed live',
+       autoJaFeitoDica:'The transcript was made during the recording. Since no audio is stored, there is nothing to transcribe again — but the text below is yours and can be corrected.',
+@@ -4372,6 +4439,16 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
+       licPorLink:'Plan Equipo activado por el enlace. La clave se guardó en este navegador y se quitó de la dirección.',
+       licLinkRuim:'El enlace traía una clave que no cuadra: {0}',
+       keepMarked:'Mantener solo las marcadas ({0})',
++      revResumoTit:'Tu material está listo para la revisión',
++      revResumoTelas:'{0} pantallas', revResumoComFala:'{0} con voz',
++      revResumoRevisar:'Revisar pantalla por pantalla',
++      faxinaBtn:'Aplicar la limpieza recomendada',
++      faxinaRepet:'{0} repetidas', faxinaSemFala:'{0} sin voz',
++      faxinaVai:'Saca {0} pantallas de la revisión ({1}). No se borra nada — puedes deshacer, y las fijadas se quedan.',
++      faxinaNada:'Nada que limpiar: ninguna pantalla parece repetida ni sin voz.',
++      faxinaFeito:'Saqué {0} pantallas.', faxinaDesfazerBtn:'Deshacer',
++      faxinaDesfeito:'Deshecho — las pantallas volvieron.',
++      faxinaPodeDesfazer:'Cambió lo que está incluido.',
+       keepMarkedN:'Mantenidas las {0} pantallas que marcaste; {1} descartada(s).',
+       autoJaFeito:'ya transcrito en vivo',
+       autoJaFeitoDica:'La transcripción se hizo durante la grabación. Como no se guarda audio, no hay nada que transcribir de nuevo — pero el texto de abajo es tuyo y se puede corregir.',
+@@ -4964,6 +5041,16 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
+       licPorLink:'Team-Plan über den Link aktiviert. Der Schlüssel wurde in diesem Browser gespeichert und aus der Adresse entfernt.',
+       licLinkRuim:'Der Link enthielt einen Schlüssel, der nicht stimmt: {0}',
+       keepMarked:'Nur die markierten behalten ({0})',
++      revResumoTit:'Ihr Material ist bereit zur Durchsicht',
++      revResumoTelas:'{0} Bildschirme', revResumoComFala:'{0} mit Sprache',
++      revResumoRevisar:'Bildschirm für Bildschirm durchgehen',
++      faxinaBtn:'Empfohlene Bereinigung anwenden',
++      faxinaRepet:'{0} doppelte', faxinaSemFala:'{0} ohne Sprache',
++      faxinaVai:'Nimmt {0} Bildschirme aus der Durchsicht ({1}). Nichts wird gelöscht — Sie können es rückgängig machen, und angeheftete bleiben.',
++      faxinaNada:'Nichts zu bereinigen: kein Bildschirm wirkt doppelt oder stumm.',
++      faxinaFeito:'{0} Bildschirme herausgenommen.', faxinaDesfazerBtn:'Rückgängig',
++      faxinaDesfeito:'Rückgängig gemacht — die Bildschirme sind wieder da.',
++      faxinaPodeDesfazer:'Was enthalten ist, hat sich geändert.',
+       keepMarkedN:'Die {0} von Ihnen markierten Bildschirme wurden behalten; {1} verworfen.',
+       autoJaFeito:'bereits live transkribiert',
+       autoJaFeitoDica:'Die Transkription entstand während der Aufnahme. Da kein Ton gespeichert wird, gibt es nichts erneut zu transkribieren — der Text unten gehört aber Ihnen und kann korrigiert werden.',
+@@ -5562,6 +5649,16 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
+       licPorLink:'Offre Équipe activée par le lien. La clé a été enregistrée dans ce navigateur et retirée de l’adresse.',
+       licLinkRuim:'Le lien contenait une clé non valide : {0}',
+       keepMarked:'Garder seulement les marquées ({0})',
++      revResumoTit:'Votre matériel est prêt pour la relecture',
++      revResumoTelas:'{0} écrans', revResumoComFala:'{0} avec parole',
++      revResumoRevisar:'Relire écran par écran',
++      faxinaBtn:'Appliquer le nettoyage recommandé',
++      faxinaRepet:'{0} en double', faxinaSemFala:'{0} sans parole',
++      faxinaVai:'Retire {0} écrans de la relecture ({1}). Rien n’est supprimé — vous pouvez annuler, et les écrans épinglés restent.',
++      faxinaNada:'Rien à nettoyer : aucun écran ne semble en double ni muet.',
++      faxinaFeito:'{0} écrans retirés.', faxinaDesfazerBtn:'Annuler',
++      faxinaDesfeito:'Annulé — les écrans sont revenus.',
++      faxinaPodeDesfazer:'Ce qui est inclus a changé.',
+       keepMarkedN:'{0} écrans marqués gardés ; {1} écarté(s).',
+       autoJaFeito:'déjà transcrit en direct',
+       autoJaFeitoDica:'La transcription a été faite pendant l’enregistrement. Comme aucun audio n’est conservé, il n’y a rien à retranscrire — mais le texte ci-dessous est à vous et peut être corrigé.',
+@@ -6512,6 +6609,9 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
+        roteiro precisa ser decidida uma vez ao abrir — e é por aqui que todo
+        carregamento passa. */
+     if (typeof pintarPartes === 'function') { try { pintarPartes(); } catch (e) {} }
++    /* O resumo da conferência também: sem telas o `render()` não roda, e sem
++       ele os dois botões do resumo ficariam mudos esperando para aparecer. */
++    if (typeof pintarResumoRev === 'function') { try { pintarResumoRev(); } catch (e) {} }
+     /* Também na troca de idioma: o nome sugerido dos canais é palavra
+        traduzida, e deixá-la em português numa página em inglês é o tipo de
+        resto que faz a pessoa duvidar do resto da tradução. */
+@@ -14551,6 +14651,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
+ 
+   function render(){
+     if (typeof pintarSoMarcados === 'function') pintarSoMarcados();
++    /* O resumo é feito dos mesmos números dos filtros, e envelhece junto
++       deles: descartar uma tela à mão muda o que a limpeza recomendada
++       ainda tem para fazer. */
++    if (typeof pintarResumoRev === 'function') pintarResumoRev();
+     try { avisarPessoas(); } catch (e) {}
+     const box = $('thumbs');
+     /* render() agora se chama a si mesmo ao descartar um quadro; sem guardar o
+@@ -17617,7 +17721,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
+     }
+   });
+ 
+-  $('allOn').onclick = () => { frames.forEach(f => f.keep = true); filtroAtivo = 'todos'; render(); };
++  $('allOn').onclick = () => {
++    guardarParaDesfazer('todos');
++    frames.forEach(f => f.keep = true); filtroAtivo = 'todos'; render();
++  };
+ 
+   /* "Manter só as marcadas". Quem apertou "marcar" durante a gravação já disse
+      quais telas importam — e depois tinha que descartar as outras uma a uma. O
+@@ -17629,28 +17736,105 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
+      decidir: a pessoa clica para descobrir e desfaz. Com o número na cara ela
+      decide antes — e o botão some quando não há nada a fazer, porque botão que
+      não faz nada é pior que botão a menos. */
+-  function contarRepetidos(){
+-    let prev = null, n = 0;
++  /* ---- QUAIS QUADROS, E NÃO QUANTOS ----
++
++     `contarRepetidos` e o `#dedup` tinham a MESMA regra escrita duas vezes, e
++     já discordavam: a ação pulava o quadro FIXADO e o contador não. O botão
++     prometia "descartar 3 repetidos", tirava 2, e a diferença era exatamente a
++     tela que a pessoa tinha fixado para proteger — quer dizer, o número errado
++     aparecia justo para quem já tinha tomado o cuidado de proteger alguma
++     coisa. O mesmo valia para o `mute` e o `contarSemFala`.
++
++     Agora quem responde é uma função só, e ela devolve a LISTA. Contar é ler o
++     tamanho dela; agir é percorrê-la; prever é a mesma coisa que agir, sem
++     escrever. Três perguntas, uma verdade. */
++  function repetidosAgora(){
++    const fora = []; let prev = null;
+     frames.forEach(f => {
+-      if (!f.sig || !f.keep) return;
+-      if (prev && diff(prev, f.sig) < 4) n++;
++      if (!f.sig) return;
++      /* O fixado não é descartado — e também não vira a nova referência de
++         comparação, senão fixar um quadro mudaria QUAIS outros são
++         considerados repetidos, e a proteção de um mexeria no destino dos
++         vizinhos. Fixar protege quem foi fixado, e mais ninguém. */
++      if (f.fixo) return;
++      if (prev && diff(prev, f.sig) < 4) { if (f.keep) fora.push(f); }
+       else prev = f.sig;
+     });
+-    return n;
++    return fora;
+   }
+-  function contarSemFala(){
++  const contarRepetidos = () => repetidosAgora().length;
++
++  /* A janela de um quadro é (o instante dele, o instante do seguinte]. Três
++     lugares faziam essa conta à mão, e uma conta repetida três vezes é uma
++     conta que um dia sai diferente em um dos três. */
++  function temFalaNoQuadro(i, cues, dur){
++    const f = frames[i]; if (!f) return false;
++    const fim = i + 1 < frames.length ? frames[i + 1].t : dur + 0.001;
++    return cues.some(c => c.b > f.t && c.a < fim);
++  }
++
++  /* `null` quando não há transcrição: sem ela não dá para saber o que é mudo, e
++     devolver zero seria afirmar que todas têm fala. */
++  function semFalaAgora(){
+     const { cues } = parseTranscript($('tr').value);
+-    if (!cues.length) return null;              // sem transcrição não há como saber
++    if (!cues.length) return null;
+     const dur = duracaoTotal();
+-    let n = 0;
++    const fora = [];
+     frames.forEach((f, i) => {
+-      if (!f.keep) return;
+-      const b2 = i + 1 < frames.length ? frames[i+1].t : dur + 0.001;
+-      if (!cues.some(c => c.b > f.t && c.a < b2)) n++;
++      if (!f.keep || f.fixo) return;
++      if (!temFalaNoQuadro(i, cues, dur)) fora.push(f);
+     });
++    return fora;
++  }
++  function contarSemFala(){
++    const l = semFalaAgora();
++    return l ? l.length : null;
++  }
++  /* Para o resumo, e não para a limpeza: aqui o fixado CONTA, porque a pergunta
++     é "quanto do meu material tem fala", e não "o que dá para tirar". */
++  function contarComFala(){
++    const { cues } = parseTranscript($('tr').value);
++    if (!cues.length) return null;
++    const dur = duracaoTotal();
++    let n = 0;
++    frames.forEach((f, i) => { if (f.keep && temFalaNoQuadro(i, cues, dur)) n++; });
+     return n;
+   }
+ 
++  /* ---- DESFAZER, NO MESMO LUGAR ----
++
++     Nenhuma ação em lote tinha desfazer. Quem clicava em "descartar repetidos"
++     e se arrependia tinha "manter todas" — que não é desfazer: ela também
++     devolve o que a pessoa havia descartado à mão antes, e isso é perder
++     trabalho para consertar um clique. O outro caminho era recarregar a página,
++     que nesta ferramenta significa perder a sessão inteira.
++
++     A memória guarda os OBJETOS dos quadros, e não posições: entre o clique e o
++     arrependimento pode entrar uma tela nova, e um índice guardado apontaria
++     para o vizinho. Guarda uma vez só — desfazer é para o último gesto, não um
++     histórico. */
++  let desfazerLote = null;
++  /* `msg` é o que a linha do desfazer diz. Ela é do GESTO, e não da faxina: o
++     desfazer nasceu junto do botão de limpeza recomendada, mas os quatro botões
++     de lote guardam memória do mesmo jeito — e um desfazer guardado que a
++     pessoa não tem como alcançar é o mesmo que desfazer nenhum. */
++  function guardarParaDesfazer(rotulo, msg){
++    desfazerLote = { rotulo, msg: msg || '',
++                     antes: frames.map(f => ({ f, keep: f.keep })), filtro: filtroAtivo };
++  }
++  function esquecerDesfazer(){ desfazerLote = null; }
++  function desfazerAOperacao(){
++    if (!desfazerLote) return;
++    const memoria = desfazerLote;
++    desfazerLote = null;
++    memoria.antes.forEach(({ f, keep }) => { if (frames.includes(f)) f.keep = keep; });
++    filtroAtivo = memoria.filtro;
++    /* Escrito ANTES do `render()`, porque é ele que pinta a linha — e com
++       `desfazerLote` já nulo, o pintor deixaria a mensagem antiga na tela. */
++    if ($('faxinaMsgTxt')) $('faxinaMsgTxt').textContent = t('faxinaDesfeito');
++    render();
++  }
++
+   /* O filtro em vigor fica marcado. Sem isso a tela não guarda memória do que já
+      foi feito, e "descartar repetidos" clicado duas vezes parece não ter
+      funcionado nenhuma das duas. */
+@@ -17672,6 +17856,101 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
+       });
+   }
+   const pintarSoMarcados = pintarFiltros;
++
++  /* ---- O RESUMO, E O QUE ELE PROMETE ----
++
++     Ele responde três perguntas com números que já existiam espalhados pela
++     tela, e oferece UMA ação: tirar de uma vez o que os dois botões de limpeza
++     tirariam em dois cliques. Nada aqui é capacidade nova — é a mesma limpeza,
++     recomendada em vez de listada.
++
++     O que ele NÃO faz: prometer sem dizer o quanto. Quando não há nada a
++     limpar, o botão some em vez de ficar cinza — um botão que não faz nada é
++     pior que um botão a menos, e esta tela já aprendeu isso nos filtros. */
++  function planoDaFaxina(){
++    const rep = repetidosAgora();
++    const mudas = semFalaAgora() || [];
++    /* Um quadro pode ser repetido E mudo; ele sai uma vez só, e é contado uma
++       vez só — senão a promessa ("tirar 6") não bate com o resultado (5). */
++    const todos = [];
++    [...rep, ...mudas].forEach(f => { if (!todos.includes(f)) todos.push(f); });
++    return { rep, mudas, todos };
++  }
++
++  function pintarResumoRev(){
++    const cx = $('resumoRev'); if (!cx) return;
++    /* Os RÓTULOS são escritos sempre, mesmo com o painel escondido: eles vêm do
++       idioma, e não do material. Escrevendo-os só quando há telas, trocar de
++       idioma antes de gravar deixaria dois botões mudos esperando para aparecer
++       — e eles aparecem no meio de um gesto, quando ninguém está olhando para
++       eles com paciência. */
++    $('resumoTit').textContent = t('revResumoTit');
++    $('faxina').textContent = t('faxinaBtn');
++    $('resumoRevisar').textContent = t('revResumoRevisar');
++    if ($('faxinaDesfazer')) $('faxinaDesfazer').textContent = t('faxinaDesfazerBtn');
++
++    const kept = frames.filter(f => f.keep);
++    /* Sem material não há o que resumir, e um resumo de zero telas na tela de
++       quem ainda não gravou é ruído. */
++    cx.classList.toggle('hide', kept.length === 0);
++    if (!kept.length) return;
++
++    const comFala = contarComFala();
++    const partes = [t('revResumoTelas', kept.length)];
++    if (comFala != null) partes.push(t('revResumoComFala', comFala));
++    $('resumoConta').innerHTML = partes.map(p => `<b>${esc(p)}</b>`).join(' · ');
++
++    const p = planoDaFaxina();
++    $('faxina').classList.toggle('hide', p.todos.length === 0);
++    /* A CONSEQUÊNCIA, em números, antes do clique. */
++    if (p.todos.length) {
++      const quais = [];
++      if (p.rep.length) quais.push(t('faxinaRepet', p.rep.length));
++      if (p.mudas.length) quais.push(t('faxinaSemFala', p.mudas.length));
++      $('faxinaVai').textContent = t('faxinaVai', p.todos.length, quais.join(', '));
++    } else {
++      $('faxinaVai').textContent = t('faxinaNada');
++    }
++    /* ---- A LINHA DO DESFAZER ----
++
++       Ela aparece sempre que HÁ o que desfazer — não só depois da limpeza
++       recomendada. Os quatro botões de lote logo abaixo mudam o que está
++       incluído do mesmo jeito, e antes disto o único caminho de volta era
++       "manter todas" (que devolve também o que a pessoa tinha descartado à
++       mão) ou recarregar a página (que perde a sessão). Os dois são pior que
++       o problema.
++
++       Depois de desfazer, a linha fica dizendo que desfez, e o botão sai: um
++       botão de desfazer que continua ali depois de desfeito convida ao segundo
++       clique, e o segundo clique não tem o que fazer. */
++    const d = $('faxinaDesfazer'), m = $('faxinaMsg'), mt = $('faxinaMsgTxt');
++    if (d && m && mt) {
++      if (desfazerLote) {
++        mt.textContent = desfazerLote.msg || t('faxinaPodeDesfazer');
++        m.classList.remove('hide');
++        d.classList.remove('hide');
++      } else {
++        d.classList.add('hide');
++        if (!mt.textContent) m.classList.add('hide');
++      }
++    }
++  }
++
++  if ($('faxina')) $('faxina').onclick = () => {
++    const p = planoDaFaxina();
++    if (!p.todos.length) return;
++    guardarParaDesfazer('faxina', t('faxinaFeito', p.todos.length));
++    p.todos.forEach(f => { f.keep = false; });
++    filtroAtivo = null;
++    render();                                  // o `pintarResumoRev` mostra a linha
++    medir('faxina_recomendada', { p_telas: String(p.todos.length) });
++  };
++  if ($('faxinaDesfazer')) $('faxinaDesfazer').onclick = () => desfazerAOperacao();
++  /* Delegado, e não uma cópia: é o mesmo botão de sempre, que mora junto da
++     grade porque é lá que ele age. */
++  if ($('resumoRevisar')) $('resumoRevisar').onclick = () => {
++    const b = $('revisar'); if (b) b.click();
++  };
+   /* ---- O QUADRO FIXADO ----
+ 
+      Os três botões de limpeza — repetidos, sem fala, só os marcados — jogam
+@@ -17686,26 +17965,22 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
+   $('soMarcados').onclick = () => {
+     const n = frames.filter(f => f.manual).length;
+     if (!n) return;
++    guardarParaDesfazer('marcados');
+     frames.forEach(f => { f.keep = !!f.manual || !!f.fixo; });
+     filtroAtivo = 'marcados';
+     render();
+     $('status').textContent = t('keepMarkedN', n, frames.length - n);
+   };
++  /* A lista vem do `repetidosAgora()`, que é a mesma que dá o número no rótulo
++     do botão. Enquanto eram dois laços, o rótulo prometia um número e a ação
++     entregava outro. */
+   $('dedup').onclick = () => {
+-    let prev = null, n = 0;
+-    frames.forEach(f => {
+-      if (!f.sig) return;
+-      /* O fixado não é descartado — e também não vira a nova referência de
+-         comparação, senão fixar um quadro mudaria QUAIS outros são
+-         considerados repetidos, e a proteção de um mexeria no destino dos
+-         vizinhos. Fixar protege quem foi fixado, e mais ninguém. */
+-      if (f.fixo) return;
+-      if (prev && diff(prev, f.sig) < 4) { f.keep = false; n++; }
+-      else prev = f.sig;
+-    });
++    const fora = repetidosAgora();
++    if (fora.length) guardarParaDesfazer('repetidos');
++    fora.forEach(f => { f.keep = false; });
+     filtroAtivo = 'repetidos';
+     render();
+-    $('status').textContent = n ? tr('dedupN', n) : tr('dedup0');
++    $('status').textContent = fora.length ? tr('dedupN', fora.length) : tr('dedup0');
+   };
+ 
+   /* Descarta os frames cujo trecho não tem fala.
+@@ -17750,11 +18025,12 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
+       return;
+     }
+ 
+-    let n = 0;
+-    frames.forEach((f, i) => { if (!temFala[i] && f.keep && !f.fixo) { f.keep = false; n++; } });
++    const fora = frames.filter((f, i) => !temFala[i] && f.keep && !f.fixo);
++    if (fora.length) guardarParaDesfazer('semfala');
++    fora.forEach(f => { f.keep = false; });
+     filtroAtivo = 'semfala';
+     render();
+-    $('status').textContent = n ? t('quietN', n) : t('quiet0');
++    $('status').textContent = fora.length ? t('quietN', fora.length) : t('quiet0');
+   };
+ 
+   /* ================= ler o texto da tela (OCR) =================
+diff --git a/testes/rapido.sh b/testes/rapido.sh
+index 791ca2a..6f94eb8 100644
+--- a/testes/rapido.sh
++++ b/testes/rapido.sh
+@@ -36,7 +36,7 @@ GRUPO="$1"; shift
+ case "$GRUPO" in
+   app)  TESTES="smoke.mjs saidas.mjs passos.mjs dobra.mjs travado.mjs gravando.mjs
+                 janelinha.mjs comentario.mjs marcados.mjs revisao.mjs marca.mjs
+-                formato.mjs promptcx.mjs appidioma.mjs compartilhar.mjs celular.mjs teto.mjs rolar.mjs cenario1.mjs organiza.mjs acabamento.mjs lente2.mjs traducao.mjs passomulti.mjs pessoas.mjs matriz.mjs espera2.mjs conclusao.mjs parar.mjs entrada.mjs indice.mjs figura.mjs" ; SITE=0 ;;
++                formato.mjs promptcx.mjs appidioma.mjs compartilhar.mjs celular.mjs teto.mjs rolar.mjs cenario1.mjs organiza.mjs acabamento.mjs lente2.mjs traducao.mjs passomulti.mjs pessoas.mjs matriz.mjs espera2.mjs conclusao.mjs parar.mjs entrada.mjs indice.mjs figura.mjs resumo.mjs" ; SITE=0 ;;
+   medir) TESTES="memoria.mjs pesagem.mjs espelho.mjs modelo.mjs espera.mjs ritmo.mjs" ; SITE=0 ;;
+   site) TESTES="cinco.mjs ajuda.mjs vitrine.mjs venda.mjs paginas.mjs idiomas.mjs figuras.mjs dobrafig.mjs
+                 linkpage.mjs legal.mjs contradicao.mjs negocio.mjs isca.mjs blog.mjs convite.mjs email.mjs tourvid.mjs semmarca.mjs
+diff --git a/testes/resumo.mjs b/testes/resumo.mjs
+new file mode 100644
+index 0000000..daf3d21
+--- /dev/null
++++ b/testes/resumo.mjs
+@@ -0,0 +1,216 @@
++/* A CONFERÊNCIA ABRIA SEM RESUMO, E LIMPAVA SEM VOLTA.
++ *
++ * Duas coisas, e a segunda é a que doía.
++ *
++ * 1. A etapa abria com dezoito miniaturas e sete botões do mesmo peso. A
++ *    primeira pergunta de quem chega — "o que eu tenho aqui, e preciso mexer?"
++ *    — só era respondida olhando, uma tela de cada vez, que é justamente o
++ *    trabalho que esta etapa existe para encurtar.
++ *
++ * 2. NENHUMA ação em lote tinha desfazer. Quem clicava em "descartar
++ *    repetidos" e se arrependia tinha duas saídas, e as duas são piores que o
++ *    problema: "manter todas", que devolve também o que a pessoa havia
++ *    descartado à mão, e recarregar a página, que nesta ferramenta perde a
++ *    sessão inteira. A proposta de UX proíbe a segunda com todas as letras —
++ *    "recarregar página não pode ser apresentado como método normal de
++ *    desfazer".
++ *
++ * E um defeito achado no caminho: `contarRepetidos` e o `#dedup` tinham a
++ * mesma regra escrita duas vezes e já discordavam — a ação pulava o quadro
++ * FIXADO e o contador não. O botão prometia "descartar 3 repetidos", tirava 2,
++ * e a diferença era exatamente a tela que a pessoa fixou para proteger.
++ *
++ * O que este arquivo cobra:
++ *
++ *   1. o resumo abre a etapa e conta o material;
++ *   2. a limpeza recomendada diz a CONSEQUÊNCIA antes, em números;
++ *   3. e some quando não há nada a limpar — botão que não faz nada é pior que
++ *      botão a menos;
++ *   4. desfazer devolve exatamente o que havia antes, e só o que havia antes;
++ *   5. o desfazer alcança também os quatro botões de lote, e não só a faxina;
++ *   6. a tela fixada não é levada pela limpeza NEM contada na promessa.
++ *
++ *   node testes/resumo.mjs
++ */
++import { chromium } from 'playwright';
++import http from 'http'; import fs from 'fs';
++import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
++
++const html = fs.readFileSync(RAIZ_WS + '/public/app.html', 'utf8');
++const srv = http.createServer((q, r) => {
++  if (q.url.startsWith('/_vercel/')) {
++    r.writeHead(200, { 'Content-Type': 'text/javascript' }); return r.end('');
++  }
++  r.writeHead(200, { 'Content-Type': 'text/html' }); r.end(html);
++});
++await new Promise(r => srv.listen(8955, r));
++
++let falhas = 0;
++const ok = (n, c, e) => {
++  console.log((c ? '  ok   ' : '  FALHA') + '  ' + n + (e ? '  → ' + e : ''));
++  if (!c) falhas++;
++};
++
++const br = await chromium.launch({ executablePath: CHROME_WS });
++const ctx = await br.newContext({ viewport: { width: 1250, height: 980 } });
++const pg = await ctx.newPage();
++const erros = []; pg.on('pageerror', e => erros.push(e.message));
++await pg.goto('http://localhost:8955/app.html?lang=pt');
++await pg.selectOption('#modelo', 'evidencia').catch(() => {});
++await pg.setInputFiles('#file', '/tmp/amostra.webm');
++await pg.waitForFunction(() => document.querySelectorAll('#thumbs figure').length >= 3,
++                         null, { timeout: 90000 });
++await pg.waitForTimeout(900);
++
++const ler = () => pg.evaluate(() => ({
++  visivel: !document.getElementById('resumoRev').classList.contains('hide'),
++  tit: (document.getElementById('resumoTit').textContent || '').trim(),
++  conta: (document.getElementById('resumoConta').textContent || '').trim(),
++  faxinaVisivel: !document.getElementById('faxina').classList.contains('hide'),
++  vai: (document.getElementById('faxinaVai').textContent || '').trim(),
++  linhaMsg: document.getElementById('faxinaMsg').classList.contains('hide')
++    ? '' : (document.getElementById('faxinaMsgTxt').textContent || '').trim(),
++  desfazerVisivel: !document.getElementById('faxinaDesfazer').classList.contains('hide'),
++  mantidos: window.__quadros().filter(f => f.keep).length,
++  rotuloDedup: (document.getElementById('dedup').textContent || '').trim(),
++}));
++
++/* Repetidos de mentira: a assinatura de um quadro copiada do vizinho é
++   exatamente o que o detector chama de repetido, e não depende do vídeo. */
++const forjarRepetidos = () => pg.evaluate(() => {
++  const q = window.__quadros();
++  for (let i = 1; i < q.length; i += 2) q[i].sig = q[i - 1].sig;
++  q.forEach(f => { f.keep = true; f.fixo = false; });
++});
++
++console.log('[1] o resumo abre a etapa');
++{
++  const r = await ler();
++  console.log('     ' + r.tit + '  |  ' + r.conta);
++  ok('está na tela', r.visivel === true);
++  ok('e diz de que ele fala', /conferência|conferencia/i.test(r.tit), r.tit);
++  ok('contando o material', /\d+ telas/.test(r.conta), r.conta);
++}
++
++console.log('\n[2] sem nada a limpar, o botão não fica ali cinza');
++{
++  /* Assinaturas BEM distantes: o `diff` compara célula a célula e o limiar é 4,
++     então [0,0,0] e [1,1,1] ainda seriam "a mesma tela". */
++  await pg.evaluate(() => {
++    const q = window.__quadros();
++    q.forEach((f, i) => { f.sig = [i * 90, i * 90, i * 90]; f.fixo = false; });
++  });
++  await pg.locator('#allOn').click(); await pg.waitForTimeout(400);
++  const r = await ler();
++  console.log('     ' + r.vai);
++  ok('o botão da limpeza some', r.faxinaVisivel === false);
++  ok('e a linha diz por quê', /nada a limpar/i.test(r.vai), r.vai);
++}
++
++console.log('\n[3] a consequência vem ANTES, em números');
++{
++  await forjarRepetidos();
++  await pg.locator('#allOn').click(); await pg.waitForTimeout(400);
++  const r = await ler();
++  console.log('     ' + r.vai);
++  ok('o botão aparece', r.faxinaVisivel === true);
++  /* "Pode sair incompleto" não deixa ninguém decidir nada. Um número, sim. */
++  ok('a frase diz quantas telas saem', /\d+ telas/.test(r.vai), r.vai);
++  ok('e de que tipo elas são', /repetidas/i.test(r.vai), r.vai);
++  /* Sem isto a pessoa não sabe se está apagando ou escondendo — e a diferença
++     é a única coisa que importa antes de um clique em lote. */
++  ok('e promete que nada é apagado', /desfazer/i.test(r.vai), r.vai);
++}
++
++console.log('\n[4] desfazer devolve o que havia, e só o que havia');
++let antes = 0;
++{
++  antes = (await ler()).mantidos;
++  /* Uma tela descartada À MÃO antes da limpeza: ela tem de continuar
++     descartada depois do desfazer. "Manter todas" devolveria essa também — e é
++     por isso que "manter todas" não é desfazer. */
++  await pg.evaluate(() => { const q = window.__quadros(); q[q.length - 1].keep = false; });
++  await pg.locator('#dedup').click(); await pg.waitForTimeout(300);
++  await pg.locator('#faxinaDesfazer').click(); await pg.waitForTimeout(400);
++  const r = await ler();
++  const ultima = await pg.evaluate(() => {
++    const q = window.__quadros(); return q[q.length - 1].keep;
++  });
++  console.log('     mantidos depois de desfazer: ' + r.mantidos + '   (antes da limpeza: ' + (antes - 1) + ')');
++  ok('o que a limpeza tirou voltou', r.mantidos === antes - 1,
++     r.mantidos + ' vs ' + (antes - 1));
++  ok('e o que EU tinha descartado continua fora', ultima === false);
++  ok('a linha diz que desfez', /desfeito/i.test(r.linhaMsg), r.linhaMsg);
++  ok('e o botão de desfazer sai', r.desfazerVisivel === false);
++}
++
++console.log('\n[5] o desfazer alcança os botões de lote, e não só a faxina');
++{
++  /* Eles guardavam memória e não ofereciam volta: um desfazer que a pessoa não
++     tem como alcançar é o mesmo que desfazer nenhum. */
++  for (const botao of ['dedup', 'allOn', 'soMarcados']) {
++    const existe = await pg.locator('#' + botao).count()
++      && !(await pg.locator('#' + botao).evaluate(e => e.classList.contains('hide')));
++    if (!existe) { console.log('     (' + botao + ' não está na tela neste estado)'); continue; }
++    await pg.locator('#' + botao).click(); await pg.waitForTimeout(300);
++    const r = await ler();
++    ok('depois de ' + botao + ', dá para desfazer', r.desfazerVisivel === true,
++       r.linhaMsg);
++  }
++}
++
++console.log('\n[6] a tela fixada não é levada, nem prometida');
++{
++  await forjarRepetidos();
++  await pg.locator('#allOn').click(); await pg.waitForTimeout(300);
++  const semFixo = await ler();
++  /* Fixa justamente uma das que seriam descartadas. */
++  await pg.evaluate(() => {
++    const q = window.__quadros();
++    for (let i = 1; i < q.length; i += 2) { q[i].fixo = true; break; }
++  });
++  await pg.locator('#allOn').click(); await pg.waitForTimeout(300);
++  const comFixo = await ler();
++  console.log('     sem fixar: ' + semFixo.rotuloDedup + '   |   fixando uma: ' + comFixo.rotuloDedup);
++  /* O NÚMERO QUE IMPORTA. O contador não pulava o fixado e a ação pulava: o
++     botão prometia um a mais do que entregava, e o extra era exatamente a tela
++     que a pessoa protegeu. */
++  ok('a promessa do botão encolhe junto', comFixo.rotuloDedup !== semFixo.rotuloDedup,
++     comFixo.rotuloDedup);
++  const mantidosAntes = comFixo.mantidos;
++  await pg.locator('#dedup').click(); await pg.waitForTimeout(400);
++  const fixaFicou = await pg.evaluate(() => {
++    const q = window.__quadros(); const f = q.find(x => x.fixo); return f ? f.keep : null;
++  });
++  const depois = await ler();
++  ok('a fixada continua incluída depois da limpeza', fixaFicou === true);
++  /* E a conta bate: o que o rótulo prometeu é o que saiu. */
++  const prometido = parseInt((comFixo.rotuloDedup.match(/\d+/) || [0])[0], 10);
++  ok('o que o botão prometeu é o que saiu',
++     mantidosAntes - depois.mantidos === prometido,
++     (mantidosAntes - depois.mantidos) + ' saíram, ' + prometido + ' prometidos');
++}
++
++console.log('\n[7] os cinco idiomas, sem chave crua');
++{
++  for (const L of ['pt', 'en', 'es', 'de', 'fr']) {
++    const p2 = await ctx.newPage();
++    await p2.goto('http://localhost:8955/app.html?lang=' + L);
++    await p2.waitForTimeout(500);
++    const v = await p2.evaluate(() => ({
++      faxina: (document.getElementById('faxina').textContent || '').trim(),
++      revisar: (document.getElementById('resumoRevisar').textContent || '').trim(),
++      cru: /\b(faxinaBtn|revResumoTit|faxinaVai|faxinaDesfazerBtn)\b/.test(document.body.innerText),
++    }));
++    ok(L + ': os rótulos estão traduzidos', v.faxina.length > 0 && v.revisar.length > 0,
++       v.faxina + ' | ' + v.revisar);
++    ok(L + ': nenhuma chave crua', v.cru === false);
++    await p2.close();
++  }
++}
++
++console.log(erros.length ? '\nerros de JS: ' + erros.join(' | ') : '\nsem erro de JS');
++if (erros.length) falhas++;
++await br.close(); srv.close();
++console.log(falhas ? '\n' + falhas + ' FALHA(S)' : '\nTodas as verificações passaram.');
++process.exit(falhas ? 1 : 0);
+diff --git a/testes/rodar.sh b/testes/rodar.sh
+index 1a82e67..ff25c28 100644
+--- a/testes/rodar.sh
++++ b/testes/rodar.sh
+@@ -34,7 +34,7 @@ TESTES="smoke.mjs saidas.mjs passos.mjs evidencia.mjs modelos.mjs cenarios.mjs
+          venda.mjs vitrine.mjs fluxo.mjs roteiro.mjs faxina.mjs formato.mjs comentario.mjs
+          travado.mjs promptcx.mjs cabec.mjs ajuda.mjs cinco.mjs appidioma.mjs gravando.mjs janelinha.mjs marca.mjs figuras.mjs dobrafig.mjs
+          compartilhar.mjs contradicao.mjs negocio.mjs celular.mjs barraapp.mjs paridade.mjs teto.mjs ritmo.mjs rolar.mjs isca.mjs blog.mjs cenario1.mjs organiza.mjs acabamento.mjs convite.mjs email.mjs tourvid.mjs semmarca.mjs lente2.mjs
+-         memoria.mjs pesagem.mjs espelho.mjs grade.mjs varredura.mjs audio.mjs plano.mjs faixa.mjs reuniao.mjs diagchamado.mjs modelo.mjs espera.mjs passomulti.mjs pessoas.mjs matriz.mjs espera2.mjs anotacao.mjs roteirojanela.mjs quedaplaca.mjs conclusao.mjs parar.mjs entrada.mjs indice.mjs figura.mjs chaves.mjs"
++         memoria.mjs pesagem.mjs espelho.mjs grade.mjs varredura.mjs audio.mjs plano.mjs faixa.mjs reuniao.mjs diagchamado.mjs modelo.mjs espera.mjs passomulti.mjs pessoas.mjs matriz.mjs espera2.mjs anotacao.mjs roteirojanela.mjs quedaplaca.mjs conclusao.mjs parar.mjs entrada.mjs indice.mjs figura.mjs resumo.mjs chaves.mjs"
  falhou=""
  for t in $TESTES; do
    [ -f "$t" ] || { echo "??  $t não existe"; continue; }

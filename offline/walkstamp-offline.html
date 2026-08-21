@@ -393,6 +393,18 @@
      lia "Transcrevendo10%faltam ~7 min" — três fatos colados numa palavra só,
      exatamente na barra que existe para ser lida de relance. */
   .trSep{opacity:.5}
+  /* ---- O RESUMO DA CONFERÊNCIA ----
+     Ele abre a etapa, então tem peso de abertura: fundo próprio e uma borda que
+     o separa do que vem depois. Os números são grandes o bastante para se ler
+     de relance — é a única coisa nesta tela que se lê de relance. */
+  .resumoRev{margin:0 0 18px;padding:16px 18px;border:1px solid var(--line);
+        border-radius:10px;background:var(--bg)}
+  .resumoTit{margin:0;font-size:16px;font-weight:650;color:var(--ink)}
+  .resumoConta{margin:6px 0 0;font-size:14px;color:var(--muted)}
+  .resumoConta b{color:var(--ink);font-variant-numeric:tabular-nums}
+  .resumoRev .note{margin:10px 0 0}
+  .resumoRev .status{margin:10px 0 0}
+  #faxinaDesfazer{margin-left:10px}
   .thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:9px;margin-top:16px}
   /* A tela que continua um passo encosta na anterior: o olho lê o grupo antes
      de ler o número. Sem isso, "Passo 3 · 2/3" seria a única pista de que
@@ -1933,6 +1945,38 @@
       <summary><i class="sbN">a</i><span data-i18n="sb1H"></span>
         <b class="sbEst" id="sbEst1"></b></summary>
       <div class="sbCorpo">
+    <!-- ---- O RESUMO VEM ANTES DA GRADE ----
+
+         A conferência abria com dezoito miniaturas e sete botões, e a primeira
+         pergunta de quem chega — "o que eu tenho aqui, e preciso mexer?" — não
+         era respondida em lugar nenhum. Ela era respondida OLHANDO, uma tela de
+         cada vez, que é o trabalho que esta etapa existe para encurtar.
+
+         Três números e uma ação recomendada respondem antes: quantas telas,
+         quantas com fala, e quantas dá para tirar sem pensar. Quem concorda
+         clica uma vez; quem discorda continua com os sete botões logo abaixo,
+         que não saíram do lugar.
+
+         A CONSEQUÊNCIA VEM ANTES e o DESFAZER vem depois — os dois, e não um
+         dos dois. Dizer o que vai acontecer sem oferecer volta é pedir fé;
+         oferecer volta sem dizer o que vai acontecer é pedir que a pessoa
+         descubra clicando. -->
+    <div class="resumoRev hide" id="resumoRev">
+      <p class="resumoTit" id="resumoTit"></p>
+      <p class="resumoConta" id="resumoConta"></p>
+      <div class="row" style="margin-top:10px">
+        <button class="destaque" id="faxina"></button>
+        <!-- Ele não é um segundo "revisar": delega no `#revisar` que já existe
+             lá embaixo, junto da grade. Dois botões para a mesma coisa é a
+             segunda verdade de sempre. -->
+        <button class="ghost" id="resumoRevisar"></button>
+      </div>
+      <p class="note" id="faxinaVai"></p>
+      <p class="status ok hide" id="faxinaMsg" role="status">
+        <span id="faxinaMsgTxt"></span>
+        <button type="button" class="ghost sm hide" id="faxinaDesfazer"></button>
+      </p>
+    </div>
     <!-- "Chamar cada quadro/frame de:" — e não "rótulo".
          O rótulo é o que a coisa É para nós; o nome dela na cabeça de quem usa
          é a pergunta que o campo responde. Um campo chamado "rótulo" ao lado de
@@ -3571,6 +3615,19 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       licPorLink:'Plano Time ativado pelo link. A chave foi guardada neste navegador e tirada do endereço.',
       licLinkRuim:'O link trazia uma chave que não confere: {0}',
       keepMarked:'Manter só as marcadas ({0})',
+      /* ---- O RESUMO DA CONFERÊNCIA, E A LIMPEZA RECOMENDADA ----
+         A consequência é dita ANTES, em números, e o desfazer existe DEPOIS.
+         Os dois, e não um dos dois. */
+      revResumoTit:'Seu material está pronto para conferência',
+      revResumoTelas:'{0} telas', revResumoComFala:'{0} com fala',
+      revResumoRevisar:'Revisar tela por tela',
+      faxinaBtn:'Aplicar limpeza recomendada',
+      faxinaRepet:'{0} repetidas', faxinaSemFala:'{0} sem fala',
+      faxinaVai:'Tira {0} telas da conferência ({1}). Nada é apagado — dá para desfazer, e as fixadas ficam.',
+      faxinaNada:'Nada a limpar: nenhuma tela parece repetida ou sem fala.',
+      faxinaFeito:'Tirei {0} telas.', faxinaDesfazerBtn:'Desfazer',
+      faxinaDesfeito:'Desfeito — as telas voltaram.',
+      faxinaPodeDesfazer:'Mudou o que está incluído.',
       keepMarkedN:'Mantidas as {0} telas que você marcou; {1} descartada(s).',
       autoJaFeito:'já transcrito ao vivo',
       autoJaFeitoDica:'A transcrição foi feita durante a gravação. Como nenhum áudio é guardado, não há o que transcrever de novo — mas o texto abaixo é seu e pode ser corrigido.',
@@ -4176,6 +4233,16 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       licPorLink:'Team plan activated by the link. The key was stored in this browser and removed from the address.',
       licLinkRuim:'The link carried a key that does not check out: {0}',
       keepMarked:'Keep only the marked ones ({0})',
+      revResumoTit:'Your material is ready for review',
+      revResumoTelas:'{0} screens', revResumoComFala:'{0} with speech',
+      revResumoRevisar:'Review screen by screen',
+      faxinaBtn:'Apply recommended cleanup',
+      faxinaRepet:'{0} repeated', faxinaSemFala:'{0} with no speech',
+      faxinaVai:'Takes {0} screens out of the review ({1}). Nothing is deleted — you can undo, and pinned ones stay.',
+      faxinaNada:'Nothing to clean up: no screen looks repeated or silent.',
+      faxinaFeito:'Took out {0} screens.', faxinaDesfazerBtn:'Undo',
+      faxinaDesfeito:'Undone — the screens are back.',
+      faxinaPodeDesfazer:'What is included has changed.',
       keepMarkedN:'Kept the {0} screens you marked; {1} discarded.',
       autoJaFeito:'already transcribed live',
       autoJaFeitoDica:'The transcript was made during the recording. Since no audio is stored, there is nothing to transcribe again — but the text below is yours and can be corrected.',
@@ -4769,6 +4836,16 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       licPorLink:'Plan Equipo activado por el enlace. La clave se guardó en este navegador y se quitó de la dirección.',
       licLinkRuim:'El enlace traía una clave que no cuadra: {0}',
       keepMarked:'Mantener solo las marcadas ({0})',
+      revResumoTit:'Tu material está listo para la revisión',
+      revResumoTelas:'{0} pantallas', revResumoComFala:'{0} con voz',
+      revResumoRevisar:'Revisar pantalla por pantalla',
+      faxinaBtn:'Aplicar la limpieza recomendada',
+      faxinaRepet:'{0} repetidas', faxinaSemFala:'{0} sin voz',
+      faxinaVai:'Saca {0} pantallas de la revisión ({1}). No se borra nada — puedes deshacer, y las fijadas se quedan.',
+      faxinaNada:'Nada que limpiar: ninguna pantalla parece repetida ni sin voz.',
+      faxinaFeito:'Saqué {0} pantallas.', faxinaDesfazerBtn:'Deshacer',
+      faxinaDesfeito:'Deshecho — las pantallas volvieron.',
+      faxinaPodeDesfazer:'Cambió lo que está incluido.',
       keepMarkedN:'Mantenidas las {0} pantallas que marcaste; {1} descartada(s).',
       autoJaFeito:'ya transcrito en vivo',
       autoJaFeitoDica:'La transcripción se hizo durante la grabación. Como no se guarda audio, no hay nada que transcribir de nuevo — pero el texto de abajo es tuyo y se puede corregir.',
@@ -5361,6 +5438,16 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       licPorLink:'Team-Plan über den Link aktiviert. Der Schlüssel wurde in diesem Browser gespeichert und aus der Adresse entfernt.',
       licLinkRuim:'Der Link enthielt einen Schlüssel, der nicht stimmt: {0}',
       keepMarked:'Nur die markierten behalten ({0})',
+      revResumoTit:'Ihr Material ist bereit zur Durchsicht',
+      revResumoTelas:'{0} Bildschirme', revResumoComFala:'{0} mit Sprache',
+      revResumoRevisar:'Bildschirm für Bildschirm durchgehen',
+      faxinaBtn:'Empfohlene Bereinigung anwenden',
+      faxinaRepet:'{0} doppelte', faxinaSemFala:'{0} ohne Sprache',
+      faxinaVai:'Nimmt {0} Bildschirme aus der Durchsicht ({1}). Nichts wird gelöscht — Sie können es rückgängig machen, und angeheftete bleiben.',
+      faxinaNada:'Nichts zu bereinigen: kein Bildschirm wirkt doppelt oder stumm.',
+      faxinaFeito:'{0} Bildschirme herausgenommen.', faxinaDesfazerBtn:'Rückgängig',
+      faxinaDesfeito:'Rückgängig gemacht — die Bildschirme sind wieder da.',
+      faxinaPodeDesfazer:'Was enthalten ist, hat sich geändert.',
       keepMarkedN:'Die {0} von Ihnen markierten Bildschirme wurden behalten; {1} verworfen.',
       autoJaFeito:'bereits live transkribiert',
       autoJaFeitoDica:'Die Transkription entstand während der Aufnahme. Da kein Ton gespeichert wird, gibt es nichts erneut zu transkribieren — der Text unten gehört aber Ihnen und kann korrigiert werden.',
@@ -5959,6 +6046,16 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       licPorLink:'Offre Équipe activée par le lien. La clé a été enregistrée dans ce navigateur et retirée de l’adresse.',
       licLinkRuim:'Le lien contenait une clé non valide : {0}',
       keepMarked:'Garder seulement les marquées ({0})',
+      revResumoTit:'Votre matériel est prêt pour la relecture',
+      revResumoTelas:'{0} écrans', revResumoComFala:'{0} avec parole',
+      revResumoRevisar:'Relire écran par écran',
+      faxinaBtn:'Appliquer le nettoyage recommandé',
+      faxinaRepet:'{0} en double', faxinaSemFala:'{0} sans parole',
+      faxinaVai:'Retire {0} écrans de la relecture ({1}). Rien n’est supprimé — vous pouvez annuler, et les écrans épinglés restent.',
+      faxinaNada:'Rien à nettoyer : aucun écran ne semble en double ni muet.',
+      faxinaFeito:'{0} écrans retirés.', faxinaDesfazerBtn:'Annuler',
+      faxinaDesfeito:'Annulé — les écrans sont revenus.',
+      faxinaPodeDesfazer:'Ce qui est inclus a changé.',
       keepMarkedN:'{0} écrans marqués gardés ; {1} écarté(s).',
       autoJaFeito:'déjà transcrit en direct',
       autoJaFeitoDica:'La transcription a été faite pendant l’enregistrement. Comme aucun audio n’est conservé, il n’y a rien à retranscrire — mais le texte ci-dessous est à vous et peut être corrigé.',
@@ -6909,6 +7006,9 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
        roteiro precisa ser decidida uma vez ao abrir — e é por aqui que todo
        carregamento passa. */
     if (typeof pintarPartes === 'function') { try { pintarPartes(); } catch (e) {} }
+    /* O resumo da conferência também: sem telas o `render()` não roda, e sem
+       ele os dois botões do resumo ficariam mudos esperando para aparecer. */
+    if (typeof pintarResumoRev === 'function') { try { pintarResumoRev(); } catch (e) {} }
     /* Também na troca de idioma: o nome sugerido dos canais é palavra
        traduzida, e deixá-la em português numa página em inglês é o tipo de
        resto que faz a pessoa duvidar do resto da tradução. */
@@ -8912,7 +9012,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
      depois, e não tem como se atualizar sozinho. Sem carimbo, "estou com um
      problema no offline" é uma conversa sem chão — ninguém sabe de qual build
      se fala nem se o defeito já foi consertado. */
-  const VERSAO = '2026.08.21-23';
+  const VERSAO = '2026.08.21-29';
   window.__versao = () => VERSAO;
 
   const PIP_CSS = `
@@ -14948,6 +15048,10 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
 
   function render(){
     if (typeof pintarSoMarcados === 'function') pintarSoMarcados();
+    /* O resumo é feito dos mesmos números dos filtros, e envelhece junto
+       deles: descartar uma tela à mão muda o que a limpeza recomendada
+       ainda tem para fazer. */
+    if (typeof pintarResumoRev === 'function') pintarResumoRev();
     try { avisarPessoas(); } catch (e) {}
     const box = $('thumbs');
     /* render() agora se chama a si mesmo ao descartar um quadro; sem guardar o
@@ -18014,7 +18118,10 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     }
   });
 
-  $('allOn').onclick = () => { frames.forEach(f => f.keep = true); filtroAtivo = 'todos'; render(); };
+  $('allOn').onclick = () => {
+    guardarParaDesfazer('todos');
+    frames.forEach(f => f.keep = true); filtroAtivo = 'todos'; render();
+  };
 
   /* "Manter só as marcadas". Quem apertou "marcar" durante a gravação já disse
      quais telas importam — e depois tinha que descartar as outras uma a uma. O
@@ -18026,26 +18133,103 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
      decidir: a pessoa clica para descobrir e desfaz. Com o número na cara ela
      decide antes — e o botão some quando não há nada a fazer, porque botão que
      não faz nada é pior que botão a menos. */
-  function contarRepetidos(){
-    let prev = null, n = 0;
+  /* ---- QUAIS QUADROS, E NÃO QUANTOS ----
+
+     `contarRepetidos` e o `#dedup` tinham a MESMA regra escrita duas vezes, e
+     já discordavam: a ação pulava o quadro FIXADO e o contador não. O botão
+     prometia "descartar 3 repetidos", tirava 2, e a diferença era exatamente a
+     tela que a pessoa tinha fixado para proteger — quer dizer, o número errado
+     aparecia justo para quem já tinha tomado o cuidado de proteger alguma
+     coisa. O mesmo valia para o `mute` e o `contarSemFala`.
+
+     Agora quem responde é uma função só, e ela devolve a LISTA. Contar é ler o
+     tamanho dela; agir é percorrê-la; prever é a mesma coisa que agir, sem
+     escrever. Três perguntas, uma verdade. */
+  function repetidosAgora(){
+    const fora = []; let prev = null;
     frames.forEach(f => {
-      if (!f.sig || !f.keep) return;
-      if (prev && diff(prev, f.sig) < 4) n++;
+      if (!f.sig) return;
+      /* O fixado não é descartado — e também não vira a nova referência de
+         comparação, senão fixar um quadro mudaria QUAIS outros são
+         considerados repetidos, e a proteção de um mexeria no destino dos
+         vizinhos. Fixar protege quem foi fixado, e mais ninguém. */
+      if (f.fixo) return;
+      if (prev && diff(prev, f.sig) < 4) { if (f.keep) fora.push(f); }
       else prev = f.sig;
     });
-    return n;
+    return fora;
+  }
+  const contarRepetidos = () => repetidosAgora().length;
+
+  /* A janela de um quadro é (o instante dele, o instante do seguinte]. Três
+     lugares faziam essa conta à mão, e uma conta repetida três vezes é uma
+     conta que um dia sai diferente em um dos três. */
+  function temFalaNoQuadro(i, cues, dur){
+    const f = frames[i]; if (!f) return false;
+    const fim = i + 1 < frames.length ? frames[i + 1].t : dur + 0.001;
+    return cues.some(c => c.b > f.t && c.a < fim);
+  }
+
+  /* `null` quando não há transcrição: sem ela não dá para saber o que é mudo, e
+     devolver zero seria afirmar que todas têm fala. */
+  function semFalaAgora(){
+    const { cues } = parseTranscript($('tr').value);
+    if (!cues.length) return null;
+    const dur = duracaoTotal();
+    const fora = [];
+    frames.forEach((f, i) => {
+      if (!f.keep || f.fixo) return;
+      if (!temFalaNoQuadro(i, cues, dur)) fora.push(f);
+    });
+    return fora;
   }
   function contarSemFala(){
+    const l = semFalaAgora();
+    return l ? l.length : null;
+  }
+  /* Para o resumo, e não para a limpeza: aqui o fixado CONTA, porque a pergunta
+     é "quanto do meu material tem fala", e não "o que dá para tirar". */
+  function contarComFala(){
     const { cues } = parseTranscript($('tr').value);
-    if (!cues.length) return null;              // sem transcrição não há como saber
+    if (!cues.length) return null;
     const dur = duracaoTotal();
     let n = 0;
-    frames.forEach((f, i) => {
-      if (!f.keep) return;
-      const b2 = i + 1 < frames.length ? frames[i+1].t : dur + 0.001;
-      if (!cues.some(c => c.b > f.t && c.a < b2)) n++;
-    });
+    frames.forEach((f, i) => { if (f.keep && temFalaNoQuadro(i, cues, dur)) n++; });
     return n;
+  }
+
+  /* ---- DESFAZER, NO MESMO LUGAR ----
+
+     Nenhuma ação em lote tinha desfazer. Quem clicava em "descartar repetidos"
+     e se arrependia tinha "manter todas" — que não é desfazer: ela também
+     devolve o que a pessoa havia descartado à mão antes, e isso é perder
+     trabalho para consertar um clique. O outro caminho era recarregar a página,
+     que nesta ferramenta significa perder a sessão inteira.
+
+     A memória guarda os OBJETOS dos quadros, e não posições: entre o clique e o
+     arrependimento pode entrar uma tela nova, e um índice guardado apontaria
+     para o vizinho. Guarda uma vez só — desfazer é para o último gesto, não um
+     histórico. */
+  let desfazerLote = null;
+  /* `msg` é o que a linha do desfazer diz. Ela é do GESTO, e não da faxina: o
+     desfazer nasceu junto do botão de limpeza recomendada, mas os quatro botões
+     de lote guardam memória do mesmo jeito — e um desfazer guardado que a
+     pessoa não tem como alcançar é o mesmo que desfazer nenhum. */
+  function guardarParaDesfazer(rotulo, msg){
+    desfazerLote = { rotulo, msg: msg || '',
+                     antes: frames.map(f => ({ f, keep: f.keep })), filtro: filtroAtivo };
+  }
+  function esquecerDesfazer(){ desfazerLote = null; }
+  function desfazerAOperacao(){
+    if (!desfazerLote) return;
+    const memoria = desfazerLote;
+    desfazerLote = null;
+    memoria.antes.forEach(({ f, keep }) => { if (frames.includes(f)) f.keep = keep; });
+    filtroAtivo = memoria.filtro;
+    /* Escrito ANTES do `render()`, porque é ele que pinta a linha — e com
+       `desfazerLote` já nulo, o pintor deixaria a mensagem antiga na tela. */
+    if ($('faxinaMsgTxt')) $('faxinaMsgTxt').textContent = t('faxinaDesfeito');
+    render();
   }
 
   /* O filtro em vigor fica marcado. Sem isso a tela não guarda memória do que já
@@ -18069,6 +18253,101 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       });
   }
   const pintarSoMarcados = pintarFiltros;
+
+  /* ---- O RESUMO, E O QUE ELE PROMETE ----
+
+     Ele responde três perguntas com números que já existiam espalhados pela
+     tela, e oferece UMA ação: tirar de uma vez o que os dois botões de limpeza
+     tirariam em dois cliques. Nada aqui é capacidade nova — é a mesma limpeza,
+     recomendada em vez de listada.
+
+     O que ele NÃO faz: prometer sem dizer o quanto. Quando não há nada a
+     limpar, o botão some em vez de ficar cinza — um botão que não faz nada é
+     pior que um botão a menos, e esta tela já aprendeu isso nos filtros. */
+  function planoDaFaxina(){
+    const rep = repetidosAgora();
+    const mudas = semFalaAgora() || [];
+    /* Um quadro pode ser repetido E mudo; ele sai uma vez só, e é contado uma
+       vez só — senão a promessa ("tirar 6") não bate com o resultado (5). */
+    const todos = [];
+    [...rep, ...mudas].forEach(f => { if (!todos.includes(f)) todos.push(f); });
+    return { rep, mudas, todos };
+  }
+
+  function pintarResumoRev(){
+    const cx = $('resumoRev'); if (!cx) return;
+    /* Os RÓTULOS são escritos sempre, mesmo com o painel escondido: eles vêm do
+       idioma, e não do material. Escrevendo-os só quando há telas, trocar de
+       idioma antes de gravar deixaria dois botões mudos esperando para aparecer
+       — e eles aparecem no meio de um gesto, quando ninguém está olhando para
+       eles com paciência. */
+    $('resumoTit').textContent = t('revResumoTit');
+    $('faxina').textContent = t('faxinaBtn');
+    $('resumoRevisar').textContent = t('revResumoRevisar');
+    if ($('faxinaDesfazer')) $('faxinaDesfazer').textContent = t('faxinaDesfazerBtn');
+
+    const kept = frames.filter(f => f.keep);
+    /* Sem material não há o que resumir, e um resumo de zero telas na tela de
+       quem ainda não gravou é ruído. */
+    cx.classList.toggle('hide', kept.length === 0);
+    if (!kept.length) return;
+
+    const comFala = contarComFala();
+    const partes = [t('revResumoTelas', kept.length)];
+    if (comFala != null) partes.push(t('revResumoComFala', comFala));
+    $('resumoConta').innerHTML = partes.map(p => `<b>${esc(p)}</b>`).join(' · ');
+
+    const p = planoDaFaxina();
+    $('faxina').classList.toggle('hide', p.todos.length === 0);
+    /* A CONSEQUÊNCIA, em números, antes do clique. */
+    if (p.todos.length) {
+      const quais = [];
+      if (p.rep.length) quais.push(t('faxinaRepet', p.rep.length));
+      if (p.mudas.length) quais.push(t('faxinaSemFala', p.mudas.length));
+      $('faxinaVai').textContent = t('faxinaVai', p.todos.length, quais.join(', '));
+    } else {
+      $('faxinaVai').textContent = t('faxinaNada');
+    }
+    /* ---- A LINHA DO DESFAZER ----
+
+       Ela aparece sempre que HÁ o que desfazer — não só depois da limpeza
+       recomendada. Os quatro botões de lote logo abaixo mudam o que está
+       incluído do mesmo jeito, e antes disto o único caminho de volta era
+       "manter todas" (que devolve também o que a pessoa tinha descartado à
+       mão) ou recarregar a página (que perde a sessão). Os dois são pior que
+       o problema.
+
+       Depois de desfazer, a linha fica dizendo que desfez, e o botão sai: um
+       botão de desfazer que continua ali depois de desfeito convida ao segundo
+       clique, e o segundo clique não tem o que fazer. */
+    const d = $('faxinaDesfazer'), m = $('faxinaMsg'), mt = $('faxinaMsgTxt');
+    if (d && m && mt) {
+      if (desfazerLote) {
+        mt.textContent = desfazerLote.msg || t('faxinaPodeDesfazer');
+        m.classList.remove('hide');
+        d.classList.remove('hide');
+      } else {
+        d.classList.add('hide');
+        if (!mt.textContent) m.classList.add('hide');
+      }
+    }
+  }
+
+  if ($('faxina')) $('faxina').onclick = () => {
+    const p = planoDaFaxina();
+    if (!p.todos.length) return;
+    guardarParaDesfazer('faxina', t('faxinaFeito', p.todos.length));
+    p.todos.forEach(f => { f.keep = false; });
+    filtroAtivo = null;
+    render();                                  // o `pintarResumoRev` mostra a linha
+    medir('faxina_recomendada', { p_telas: String(p.todos.length) });
+  };
+  if ($('faxinaDesfazer')) $('faxinaDesfazer').onclick = () => desfazerAOperacao();
+  /* Delegado, e não uma cópia: é o mesmo botão de sempre, que mora junto da
+     grade porque é lá que ele age. */
+  if ($('resumoRevisar')) $('resumoRevisar').onclick = () => {
+    const b = $('revisar'); if (b) b.click();
+  };
   /* ---- O QUADRO FIXADO ----
 
      Os três botões de limpeza — repetidos, sem fala, só os marcados — jogam
@@ -18083,26 +18362,22 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
   $('soMarcados').onclick = () => {
     const n = frames.filter(f => f.manual).length;
     if (!n) return;
+    guardarParaDesfazer('marcados');
     frames.forEach(f => { f.keep = !!f.manual || !!f.fixo; });
     filtroAtivo = 'marcados';
     render();
     $('status').textContent = t('keepMarkedN', n, frames.length - n);
   };
+  /* A lista vem do `repetidosAgora()`, que é a mesma que dá o número no rótulo
+     do botão. Enquanto eram dois laços, o rótulo prometia um número e a ação
+     entregava outro. */
   $('dedup').onclick = () => {
-    let prev = null, n = 0;
-    frames.forEach(f => {
-      if (!f.sig) return;
-      /* O fixado não é descartado — e também não vira a nova referência de
-         comparação, senão fixar um quadro mudaria QUAIS outros são
-         considerados repetidos, e a proteção de um mexeria no destino dos
-         vizinhos. Fixar protege quem foi fixado, e mais ninguém. */
-      if (f.fixo) return;
-      if (prev && diff(prev, f.sig) < 4) { f.keep = false; n++; }
-      else prev = f.sig;
-    });
+    const fora = repetidosAgora();
+    if (fora.length) guardarParaDesfazer('repetidos');
+    fora.forEach(f => { f.keep = false; });
     filtroAtivo = 'repetidos';
     render();
-    $('status').textContent = n ? tr('dedupN', n) : tr('dedup0');
+    $('status').textContent = fora.length ? tr('dedupN', fora.length) : tr('dedup0');
   };
 
   /* Descarta os frames cujo trecho não tem fala.
@@ -18147,11 +18422,12 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       return;
     }
 
-    let n = 0;
-    frames.forEach((f, i) => { if (!temFala[i] && f.keep && !f.fixo) { f.keep = false; n++; } });
+    const fora = frames.filter((f, i) => !temFala[i] && f.keep && !f.fixo);
+    if (fora.length) guardarParaDesfazer('semfala');
+    fora.forEach(f => { f.keep = false; });
     filtroAtivo = 'semfala';
     render();
-    $('status').textContent = n ? t('quietN', n) : t('quiet0');
+    $('status').textContent = fora.length ? t('quietN', fora.length) : t('quiet0');
   };
 
   /* ================= ler o texto da tela (OCR) =================
