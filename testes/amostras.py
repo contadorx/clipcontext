@@ -237,6 +237,22 @@ def main():
         escrever(caminho, montar(), audio, dur)
         feitos.append(caminho)
 
+    # CINCO MINUTOS DE FALA, e nao dez segundos.
+    #
+    # `parar.mjs` cobra o botao que para a transcricao ENTRE um trecho e o
+    # seguinte — e para isso e preciso haver um seguinte. A janela do Whisper e
+    # de 30 segundos: a amostra de dez da UMA janela, e num video de uma janela
+    # a unica coisa que da para provar sobre parar entre janelas e que o teste
+    # nao provou nada.
+    #
+    # Sai barato porque e escrito como o video longo: um PNG por cena, com o
+    # `-framerate 1/N` esticando cada um pelos seus trinta segundos. Dez
+    # imagens, 300 segundos, dez janelas de transcricao.
+    longa = '/tmp/fala-longa.webm'
+    if not os.path.exists(longa) or forcar:
+        escrever_longo(longa, longo(640, 360, 5, 30), 30, 300)
+        feitos.append(longa)
+
     # o nome hostil e uma copia: o que o teste `hostil.mjs` exercita e o nome do
     # arquivo atravessando a ferramenta, nao o conteudo
     hostil = '/tmp/a&b <c> "d".webm'

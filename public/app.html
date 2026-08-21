@@ -354,6 +354,26 @@
   @keyframes corre{from{background-position:0 0}to{background-position:-48px 0}}
   @media (prefers-reduced-motion: reduce){ .bar.indef>i{animation:none} }
   .status{font-size:13px;color:var(--muted);min-height:19px}
+  /* ---- A LINHA DA TRANSCRIÇÃO, EM TRÊS PESOS ----
+
+     Etapa, progresso e previsão respondem perguntas diferentes e por isso não
+     podem ter o mesmo peso: quem olha de relance quer o número, quem chega
+     agora quer o nome do que está acontecendo, e quem está decidindo se
+     espera quer a previsão. Tudo em cinza de 13px é uma frase só com espaços
+     dentro.
+
+     O número é tabular de propósito: sem isso ele muda de largura a cada
+     ponto percentual e a frase inteira dança na tela durante quarenta
+     minutos. */
+  .trEtapa{color:var(--ink);font-weight:600}
+  .trPct{font-variant-numeric:tabular-nums;color:var(--ink)}
+  /* O ponto separador é TEXTO, e não um `::before`.
+
+     A faixa fixa se descreve pelo `textContent` do `#astatus`, e conteúdo de
+     pseudo-elemento não entra no `textContent`: com o ponto no CSS, a faixa
+     lia "Transcrevendo10%faltam ~7 min" — três fatos colados numa palavra só,
+     exatamente na barra que existe para ser lida de relance. */
+  .trSep{opacity:.5}
   .thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:9px;margin-top:16px}
   /* A tela que continua um passo encosta na anterior: o olho lê o grupo antes
      de ler o número. Sem isso, "Passo 3 · 2/3" seria a única pista de que
@@ -1553,7 +1573,46 @@
       <button class="ghost hide" id="cancel" data-i18n="stopBtn"></button>
     </div>
     <div class="bar hide" id="abarWrap"><i id="abar"></i></div>
+    <!-- ---- A LINHA DE ESTADO PARTIDA EM CINCO ----
+
+         Ela dizia tudo de uma vez: "Etapa 2 de 2 — transcrevendo: 46% (bloco
+         12 de 26) — faltam ~7 min". São quatro fatos de naturezas diferentes
+         numa frase só, e o mais técnico deles — em que motor isto está
+         correndo — no meio dos outros três. Quem espera quarenta minutos lê
+         essa linha dezenas de vezes e reencontra a informação que quer a cada
+         leitura.
+
+         Agora são cinco lugares, com pesos diferentes: ETAPA (o que está
+         acontecendo), PROGRESSO (quanto já foi), PREVISÃO (quanto falta),
+         MOTOR (recolhido, porque quase ninguém precisa) e AÇÃO — que é o
+         `#cancel` logo acima, o mesmo botão de sempre.
+
+         `#astatus` continua sendo UM elemento e continua tendo o texto inteiro
+         no `textContent`: a faixa fixa o lê para se descrever, e um segundo
+         lugar onde mora a mesma frase seria uma segunda verdade a manter. O
+         que mudou é que agora ele tem partes com nome. -->
     <div class="status" id="astatus"></div>
+    <!-- O MOTOR, RECOLHIDO. Ele responde "por que está demorando" — e essa é
+         uma pergunta que se faz uma vez, não a cada olhada na tela. Fica
+         fechado, e o que estiver aberto continua aberto na janela seguinte:
+         quem abriu quer acompanhar. -->
+    <p class="note hide" id="trMotorLinha">
+      <button type="button" class="ghost sm" id="trMotorBtn"
+              aria-expanded="false" aria-controls="trMotorCx"></button>
+      <span id="trMotorCx" class="hide" style="margin-left:8px"></span>
+    </p>
+    <!-- ---- O QUE O LEITOR DE TELA OUVE ----
+
+         `#astatus` NÃO é região viva, e isto é deliberado: ele muda a cada
+         trecho — dezenas de vezes numa transcrição longa — e um leitor de tela
+         lendo "47%… 48%… 49%" em voz alta não informa, atropela. Quem usa
+         leitor perderia o controle que estava usando a cada ponto percentual.
+
+         Esta região aqui é a que fala, e ela só recebe quatro classes de
+         notícia: começou, mudou de verdade (troca de modo, pedido de parada,
+         cada quarto do caminho), deu erro, acabou. É a mesma régua da proposta
+         de UX — anúncio em início, mudança relevante, erro e conclusão. -->
+    <p class="soLeitor" id="trFala" role="status" aria-live="polite"></p>
     <div class="status" id="autoDica"></div>
     <p class="note hide" id="keepOpen" data-i18n="keepOpen"></p>
     <!-- O QUE FAZER DURANTE A ESPERA.
@@ -3095,6 +3154,26 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       erroSessao:'O arquivo comprimido do modelo não abre neste computador. Já tentei as versões alternativas, e nenhuma subiu. Rode o diagnóstico, ou grave só os frames e escreva as anotações à mão.',
       transcribing2:'Etapa 2 de 2 — transcrevendo: {0}% (bloco {1} de {2}){3}',
       etaTr:' — faltam ~{0}',
+      /* ---- PARAR SEM PERDER, e a linha de estado partida em cinco ----
+         A linha dizia tudo de uma vez: "Etapa 2 de 2 — transcrevendo: 46%
+         (bloco 12 de 26) — faltam ~7 min". Quatro fatos numa frase só, e o
+         motor — a coisa que quase ninguém precisa saber — no meio deles.
+         Agora são cinco lugares: ETAPA, PROGRESSO, PREVISÃO, MOTOR (recolhido)
+         e AÇÃO. */
+      trEtapaFala:'Transcrevendo', trPct:'{0}%', trFalta:'faltam ~{0}',
+      trMotorVer:'Detalhes', trMotorGpu:'Na placa de vídeo', trMotorCpu:'No processador',
+      trMotorLinha:'{0} · {1} · trecho {2} de {3}',
+      trPararBtn:'Parar e ficar com o que já está pronto', trParando:'Parando após este trecho…',
+      trParouOk:'Parei a seu pedido — {0} trechos de fala ficaram guardados.',
+      trParouFalta:' O documento sai sem o fim da gravação: cerca de {0}.',
+      trParouFim:' A gravação já estava no fim: não falta fala nenhuma.',
+      avisoTrParcial:'Fala parcial: {0} trechos. Parei quando você pediu.',
+      fimFalaParcial:'{0} trechos de fala — parcial, você parou antes do fim',
+      trDizIni:'Transcrição começada. Avisamos aqui quando terminar.', trDizMeio:'Transcrição em {0}%.',
+      trDizTroca:'Modo trocado. A transcrição continua de onde estava.',
+      trDizParando:'Vou parar depois deste trecho e guardar o que já saiu.',
+      trDizParou:'Transcrição parada a seu pedido. {0} trechos guardados.',
+      trDizFim:'Transcrição concluída: {0} trechos.', trDizErro:'A transcrição falhou.',
       keepOpen:'Processando. Não feche esta aba.', esperaDica:'Avisamos no título da aba quando terminar. Para outro vídeo, abra uma nova sessão:', esperaNova:'Nova sessão', esperaNovaDica:'Cada sessão usa a mesma máquina: duas ao mesmo tempo ficam mais lentas.',
       leaveWarn:'O processamento ainda está em andamento. Se sair agora, perde o que já foi feito.', noGpu:'WebGPU indisponível — usando o processador, vai demorar mais.',
       transcribing:'Transcrevendo… bloco {0} de {1}', trDone:'Transcrição pronta — {0} trechos.',
@@ -3680,6 +3759,20 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       erroSessao:'The compressed model file will not open on this computer. I already tried the alternative builds and none came up. Run the diagnostics, or record the frames only and write the notes by hand.',
       transcribing2:'Step 2 of 2 — transcribing: {0}% (chunk {1} of {2}){3}',
       etaTr:' — about {0} left',
+      trEtapaFala:'Transcribing', trPct:'{0}%', trFalta:'about {0} left',
+      trMotorVer:'Details', trMotorGpu:'On the graphics card', trMotorCpu:'On the processor',
+      trMotorLinha:'{0} · {1} · chunk {2} of {3}',
+      trPararBtn:'Stop and keep what is already done', trParando:'Stopping after this chunk…',
+      trParouOk:'Stopped at your request — {0} speech segments were kept.',
+      trParouFalta:' The document will be missing the end of the recording: about {0}.',
+      trParouFim:' The recording was already at its end: no speech is missing.',
+      avisoTrParcial:'Partial speech: {0} segments. Stopped when you asked.',
+      fimFalaParcial:'{0} speech segments — partial, you stopped before the end',
+      trDizIni:'Transcription started. We will say here when it is done.', trDizMeio:'Transcription at {0}%.',
+      trDizTroca:'Mode switched. Transcription carries on from where it was.',
+      trDizParando:'I will stop after this chunk and keep what is already out.',
+      trDizParou:'Transcription stopped at your request. {0} segments kept.',
+      trDizFim:'Transcription done: {0} segments.', trDizErro:'The transcription failed.',
       keepOpen:'Processing. Do not close this tab.', esperaDica:'We flag the tab title when it is done. For another video, open a new session:', esperaNova:'New session', esperaNovaDica:'Each session uses the same machine: two at once both run slower.',
       leaveWarn:'Processing is still running. If you leave now, you lose what has been done.', noGpu:'WebGPU unavailable — using the CPU, this will be slower.',
       transcribing:'Transcribing… chunk {0} of {1}', trDone:'Transcript ready — {0} segments.',
@@ -4259,6 +4352,20 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       erroSessao:'El archivo comprimido del modelo no abre en este equipo. Ya probé las versiones alternativas y ninguna arrancó. Ejecuta el diagnóstico, o graba solo los fotogramas y escribe las anotaciones a mano.',
       transcribing2:'Paso 2 de 2 — transcribiendo: {0}% (bloque {1} de {2}){3}',
       etaTr:' — faltan ~{0}',
+      trEtapaFala:'Transcribiendo', trPct:'{0}%', trFalta:'faltan ~{0}',
+      trMotorVer:'Detalles', trMotorGpu:'En la tarjeta gráfica', trMotorCpu:'En el procesador',
+      trMotorLinha:'{0} · {1} · bloque {2} de {3}',
+      trPararBtn:'Parar y quedarme con lo que ya está listo', trParando:'Parando después de este bloque…',
+      trParouOk:'Paré a petición tuya — se guardaron {0} fragmentos de voz.',
+      trParouFalta:' Al documento le faltará el final de la grabación: unos {0}.',
+      trParouFim:' La grabación ya estaba en el final: no falta nada de voz.',
+      avisoTrParcial:'Voz parcial: {0} fragmentos. Paré cuando lo pediste.',
+      fimFalaParcial:'{0} fragmentos de voz — parcial, paraste antes del final',
+      trDizIni:'La transcripción empezó. Avisamos aquí cuando termine.', trDizMeio:'Transcripción al {0}%.',
+      trDizTroca:'Modo cambiado. La transcripción sigue desde donde estaba.',
+      trDizParando:'Voy a parar después de este bloque y guardar lo que ya salió.',
+      trDizParou:'Transcripción parada a petición tuya. {0} fragmentos guardados.',
+      trDizFim:'Transcripción terminada: {0} fragmentos.', trDizErro:'La transcripción falló.',
       keepOpen:'Procesando. No cierres esta pestaña.', esperaDica:'Avisamos en el título de la pestaña al terminar. Para otro vídeo, abre una nueva sesión:', esperaNova:'Nueva sesión', esperaNovaDica:'Cada sesión usa la misma máquina: dos a la vez van más lentas.',
       leaveWarn:'El procesamiento sigue en curso. Si sales ahora, pierdes lo que ya se hizo.', noGpu:'WebGPU no disponible — usando el procesador, será más lento.',
       transcribing:'Transcribiendo… bloque {0} de {1}', trDone:'Transcripción lista — {0} tramos.',
@@ -4837,6 +4944,20 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       erroSessao:'Die komprimierte Modelldatei lässt sich auf diesem Computer nicht öffnen. Die alternativen Versionen wurden bereits versucht, keine ist gestartet. Führen Sie die Diagnose aus, oder nehmen Sie nur die Screenshots auf und schreiben Sie die Notizen von Hand.',
       transcribing2:'Schritt 2 von 2 — wird transkribiert: {0} % (Block {1} von {2}){3}',
       etaTr:' — noch ca. {0}',
+      trEtapaFala:'Wird transkribiert', trPct:'{0} %', trFalta:'noch ca. {0}',
+      trMotorVer:'Details', trMotorGpu:'Auf der Grafikkarte', trMotorCpu:'Auf dem Prozessor',
+      trMotorLinha:'{0} · {1} · Block {2} von {3}',
+      trPararBtn:'Anhalten und das Fertige behalten', trParando:'Wird nach diesem Block angehalten…',
+      trParouOk:'Auf Ihren Wunsch angehalten — {0} Sprachabschnitte wurden gesichert.',
+      trParouFalta:' Im Dokument fehlt das Ende der Aufnahme: etwa {0}.',
+      trParouFim:' Die Aufnahme war schon am Ende: Es fehlt keine Sprache.',
+      avisoTrParcial:'Sprache unvollständig: {0} Abschnitte. Auf Ihren Wunsch angehalten.',
+      fimFalaParcial:'{0} Sprachabschnitte — unvollständig, Sie haben vorher angehalten',
+      trDizIni:'Transkription gestartet. Wir melden es hier, wenn sie fertig ist.', trDizMeio:'Transkription bei {0} %.',
+      trDizTroca:'Modus gewechselt. Die Transkription läuft an derselben Stelle weiter.',
+      trDizParando:'Ich halte nach diesem Block an und sichere das bereits Fertige.',
+      trDizParou:'Transkription auf Ihren Wunsch angehalten. {0} Abschnitte gesichert.',
+      trDizFim:'Transkription fertig: {0} Abschnitte.', trDizErro:'Die Transkription ist fehlgeschlagen.',
       keepOpen:'Wird verarbeitet. Diesen Tab nicht schließen.', esperaDica:'Wir melden es im Tab-Titel. Für ein weiteres Video eine neue Sitzung öffnen:', esperaNova:'Neue Sitzung', esperaNovaDica:'Jede Sitzung nutzt dieselbe Maschine: zwei gleichzeitig laufen langsamer.',
       leaveWarn:'Die Verarbeitung läuft noch. Wenn Sie jetzt gehen, geht das bereits Erledigte verloren.', noGpu:'WebGPU nicht verfügbar — es wird der Prozessor verwendet, das dauert länger.',
       transcribing:'Wird transkribiert… Block {0} von {1}', trDone:'Transkription fertig — {0} Abschnitte.',
@@ -5421,6 +5542,20 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       erroSessao:'Le fichier compressé du modèle ne s’ouvre pas sur cet ordinateur. Les versions alternatives ont déjà été essayées, aucune n’a démarré. Lancez le diagnostic, ou enregistrez les captures seules et saisissez les notes à la main.',
       transcribing2:'Étape 2 sur 2 — transcription : {0} % (bloc {1} sur {2}){3}',
       etaTr:' — il reste ~{0}',
+      trEtapaFala:'Transcription en cours', trPct:'{0} %', trFalta:'il reste ~{0}',
+      trMotorVer:'Détails', trMotorGpu:'Sur la carte graphique', trMotorCpu:'Sur le processeur',
+      trMotorLinha:'{0} · {1} · bloc {2} sur {3}',
+      trPararBtn:'Arrêter et garder ce qui est déjà prêt', trParando:'Arrêt après ce bloc…',
+      trParouOk:'Arrêté à votre demande — {0} passages de parole ont été gardés.',
+      trParouFalta:' Le document n’aura pas la fin de l’enregistrement : environ {0}.',
+      trParouFim:' L’enregistrement était déjà à sa fin : aucune parole ne manque.',
+      avisoTrParcial:'Parole partielle : {0} passages. Arrêté quand vous l’avez demandé.',
+      fimFalaParcial:'{0} passages de parole — partiel, vous avez arrêté avant la fin',
+      trDizIni:'Transcription démarrée. Nous le dirons ici quand ce sera fini.', trDizMeio:'Transcription à {0} %.',
+      trDizTroca:'Mode changé. La transcription reprend là où elle en était.',
+      trDizParando:'Je vais m’arrêter après ce bloc et garder ce qui est déjà sorti.',
+      trDizParou:'Transcription arrêtée à votre demande. {0} passages gardés.',
+      trDizFim:'Transcription terminée : {0} passages.', trDizErro:'La transcription a échoué.',
       keepOpen:'Traitement en cours. Ne fermez pas cet onglet.', esperaDica:'Nous le signalons dans le titre de l’onglet. Pour une autre vidéo, ouvrez une nouvelle session :', esperaNova:'Nouvelle session', esperaNovaDica:'Chaque session utilise la même machine : deux à la fois sont plus lentes.',
       leaveWarn:'Le traitement est encore en cours. Si vous partez maintenant, vous perdez ce qui a déjà été fait.', noGpu:'WebGPU indisponible — utilisation du processeur, ce sera plus long.',
       transcribing:'Transcription… bloc {0} sur {1}', trDone:'Transcription prête — {0} segments.',
@@ -5873,6 +6008,14 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   /* "A pessoa pediu a fala ao abrir este vídeo." Vive fora do `load` porque
      quem a consome é o fim da varredura, que acontece muito depois. */
   let falaPedida = false;
+  /* "A fala que está no campo acabou porque a pessoa mandou parar."
+
+     Sem isto, o painel de conclusão contaria os trechos e diria "fala
+     completa" sobre uma transcrição que parou aos doze minutos de quarenta —
+     e essa é exatamente a perda silenciosa que o botão de parar existe para
+     não causar. Quem para de propósito sabe que parou; quem abre o documento
+     três dias depois, não. */
+  let falaParcial = false;
   /* ---- QUEM ESTÁ TRABALHANDO, e não SE alguém está ----
 
      `ocupado` era um booleano, e isso bastava enquanto houvesse um trabalho por
@@ -5900,6 +6043,46 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     ocupado = trabalhos.size > 0;
     $('keepOpen').classList.toggle('hide', !ocupado);
     if ($('esperaDica')) $('esperaDica').classList.toggle('hide', !ocupado);
+    /* O botão de parar é DERIVADO daqui, pela mesma razão que `ocupado` deixou
+       de ser booleano. Ele era mostrado e escondido à mão pela varredura — e a
+       varredura corre JUNTO da transcrição de propósito. Numa varredura de dez
+       segundos ao lado de uma transcrição de quarenta minutos, quem terminava
+       primeiro escondia o botão de parar do outro: a transcrição seguia
+       correndo por quarenta minutos sem nenhum jeito de pará-la, que é
+       exatamente o defeito que este build veio consertar.
+
+       Quem está trabalhando manda no botão; ninguém mais o esconde. */
+    pintarParar();
+  }
+
+  /* ---- PARAR SEM PERDER ----
+
+     A interface convidava a deixar rodando — "pode deixar em segundo plano" —
+     e não oferecia jeito nenhum de encerrar ficando com o que já saiu. As duas
+     saídas eram esperar até o fim ou fechar a aba, e fechar a aba perde tudo.
+     Numa reunião de quarenta minutos em que os dez primeiros já respondem a
+     pergunta, isso custa meia hora de espera por nada.
+
+     `pararPedido` é um PEDIDO, e não um abort: a inferência que está correndo
+     termina. Prometer interromper o trecho corrente seria mentira — o modelo
+     não tem por onde ser cortado no meio — e uma promessa que não se cumpre
+     numa tela de espera é o que faz a pessoa clicar quatro vezes. O rótulo diz
+     a verdade: "parando após este trecho". */
+  let pararPedido = false;
+
+  /* Um botão de parar, derivado de quem está trabalhando. O rótulo é o da
+     transcrição quando ela corre, porque é ela que guarda o parcial — e é a
+     espera longa, a que alguém quer encurtar. */
+  function pintarParar(){
+    const c = $('cancel'); if (!c) return;
+    const fala = trabalhos.has('transcricao');
+    const telas = trabalhos.has('varredura');
+    c.classList.toggle('hide', !(fala || telas));
+    c.textContent = pararPedido ? t('trParando') : fala ? t('trPararBtn') : t('stopBtn');
+    c.disabled = pararPedido;
+    /* A faixa fixa copia este rótulo. Repintá-la aqui evita que ela fique
+       dizendo "Parar" enquanto o botão do cartão já diz "parando". */
+    if (typeof pintarFaixa === 'function') { try { pintarFaixa(); } catch (e) {} }
   }
   /* Para a régua: qual trabalho está correndo agora, e não só quantos. */
   try { window.__trabalhos = () => [...trabalhos]; } catch (e) {}
@@ -5981,11 +6164,18 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     const telas = frames.filter(f => f.keep).length;
     let trechos = 0;
     try { trechos = parseTranscript($('tr').value).cues.length; } catch (e) {}
-    /* A fala tem TRÊS estados, e não dois. "Sem fala" quando a pessoa mandou
+    /* A fala tem QUATRO estados, e não dois. "Sem fala" quando a pessoa mandou
        transcrever e ainda está rodando seria uma mentira sobre o próprio
-       documento que ela acabou de baixar. */
+       documento que ela acabou de baixar — e "{n} trechos de fala", seco,
+       sobre uma transcrição que ela mesma interrompeu seria a mesma mentira
+       com um número na frente. O documento saiu sem o fim da gravação; o
+       painel que declara o fim do trabalho é o lugar onde isso tem de estar
+       escrito. */
     const indo = trabalhos.has('transcricao') || trabalhos.has('varredura');
-    const fala = indo ? t('fimFalaIndo') : trechos ? t('fimFalaOk', trechos) : t('fimFalaNao');
+    const fala = indo ? t('fimFalaIndo')
+               : !trechos ? t('fimFalaNao')
+               : falaParcial ? t('fimFalaParcial', trechos)
+               : t('fimFalaOk', trechos);
 
     $('fimTit').textContent = t('fimTit');
     $('fimArq').textContent = (ultimaSaida && ultimaSaida.nome) || '';
@@ -6214,6 +6404,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       if (!el.getAttribute('aria-label')) el.setAttribute('aria-label', el.title);
     });
     pintarAuto();
+    /* O rótulo do parar deixou de vir do `data-i18n`: ele tem dois textos e um
+       terceiro estado. Sem esta linha, trocar de idioma no meio de uma
+       transcrição o devolveria para "Parar", que é o rótulo da varredura. */
+    pintarParar();
     $('tr').placeholder = t('trPh');
     $('goalFree').placeholder = t('freePh');
     $('sensV').textContent = t('sens')[+$('sens').value];
@@ -8221,7 +8415,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      depois, e não tem como se atualizar sozinho. Sem carimbo, "estou com um
      problema no offline" é uma conversa sem chão — ninguém sabe de qual build
      se fala nem se o defeito já foi consertado. */
-  const VERSAO = '2026.08.20-57';
+  const VERSAO = '2026.08.21-10';
   window.__versao = () => VERSAO;
 
   const PIP_CSS = `
@@ -10598,6 +10792,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
          é dela que depende cada quadro sair pareado com o que foi dito. */
       msg(cues.length ? t(fonte === 'blocos' ? 'trLeuReuniao' : 'trLeuCues', cues.length)
                       : t('trLeuSemTempo'), cues.length ? 'ok' : '');
+      /* Este texto não é o nosso parcial: veio de fora e substituiu tudo. Uma
+         legenda inteira da reunião carregada depois de uma parada continuaria
+         marcada como "parcial, você parou antes do fim" — e não é. */
+      falaParcial = false;
       medir('transcricao_arquivo', { p_formato: fonte });
       if (cues.length && frames.length) render();
     } catch (e) {
@@ -10620,6 +10818,82 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
 
   /* ================= transcrição automática ================= */
   const st = (m, c) => { $('astatus').innerHTML = c ? `<span class="${c}">${m}</span>` : m; };
+
+  /* ---- A LINHA DE ESTADO, EM CINCO PARTES ----
+
+     `st()` escreve uma frase. Isto escreve as partes com nome: ETAPA (o que
+     está acontecendo), PROGRESSO (quanto já foi) e PREVISÃO (quanto falta) no
+     `#astatus`, MOTOR na gaveta logo abaixo, e a AÇÃO no botão de parar, que é
+     o `#cancel` de sempre.
+
+     Continua sendo UM elemento com o texto inteiro dentro: a faixa fixa lê o
+     `textContent` do `#astatus` para se descrever, e um segundo lugar com a
+     mesma frase seria uma segunda verdade para manter — este projeto já sabe o
+     preço disso. */
+  function stTr(pct, feitos, total, restaSeg){
+    const partes = [`<span class="trEtapa">${esc(t('trEtapaFala'))}</span>`,
+                    `<span class="trPct">${esc(t('trPct', pct.toFixed(0)))}</span>`];
+    if (restaSeg) partes.push(`<span class="trEta">${esc(t('trFalta', duracao(restaSeg)))}</span>`);
+    /* Separador de verdade entre as partes, e não margem de CSS: quem lê o
+       `textContent` — a faixa fixa, e um leitor de tela que caia aqui — tem de
+       receber três fatos separados, e não uma palavra só. */
+    $('astatus').innerHTML = partes.join('<span class="trSep"> · </span>');
+    pintarMotorTr(feitos, total);
+  }
+
+  /* O MOTOR, RECOLHIDO. É a resposta para "por que está demorando" — uma
+     pergunta que se faz uma vez, e não a cada olhada na tela. A gaveta guarda
+     o que a pessoa escolheu: quem abriu quer acompanhar, e fechá-la a cada
+     trecho seria arrancar da mão dela o que ela acabou de abrir. */
+  let motorAberto = false;
+  function pintarMotorTr(feitos, total){
+    const linha = $('trMotorLinha'); if (!linha) return;
+    linha.classList.remove('hide');
+    $('trMotorBtn').textContent = t('trMotorVer');
+    $('trMotorBtn').setAttribute('aria-expanded', motorAberto ? 'true' : 'false');
+    const naPlaca = !!($('gpu') && $('gpu').checked);
+    const modelo = ($('model') && $('model').selectedOptions[0]
+                    && $('model').selectedOptions[0].textContent.trim()) || '';
+    $('trMotorCx').textContent =
+      t('trMotorLinha', t(naPlaca ? 'trMotorGpu' : 'trMotorCpu'), modelo, feitos, total);
+    $('trMotorCx').classList.toggle('hide', !motorAberto);
+  }
+  function esconderMotorTr(){
+    if ($('trMotorLinha')) $('trMotorLinha').classList.add('hide');
+  }
+  if ($('trMotorBtn')) $('trMotorBtn').onclick = () => {
+    motorAberto = !motorAberto;
+    $('trMotorBtn').setAttribute('aria-expanded', motorAberto ? 'true' : 'false');
+    $('trMotorCx').classList.toggle('hide', !motorAberto);
+  };
+
+  /* ---- O QUE O LEITOR DE TELA OUVE, E O QUE ELE NÃO OUVE ----
+
+     `#astatus` não é região viva de propósito: ele muda a cada trecho, e um
+     leitor lendo "47%… 48%… 49%" em voz alta durante quarenta minutos não
+     informa — atropela o que a pessoa está fazendo em outro lugar da tela.
+
+     Esta função é o único canal falado da transcrição, e ela só recebe quatro
+     classes de notícia: começou, mudou de verdade (troca de modo, pedido de
+     parada, cada quarto do caminho), deu erro, acabou. E ela nunca repete a
+     mesma frase: um `role="status"` reescrito com o mesmo texto é anunciado de
+     novo em alguns leitores, e "transcrição em 50%" duas vezes seguidas soa
+     como se algo tivesse acontecido. */
+  let ultimaFalada = '';
+  function dizerFala(txt){
+    const el = $('trFala'); if (!el || !txt || txt === ultimaFalada) return;
+    ultimaFalada = txt;
+    el.textContent = txt;
+  }
+  /* Os quartos do caminho, e só eles. `quartoDito` volta a zero a cada
+     transcrição para que a segunda também seja anunciada. */
+  let quartoDito = 0;
+  function dizerProgresso(pct){
+    const q = Math.floor(pct / 25);
+    if (q <= quartoDito || q >= 4) return;
+    quartoDito = q;
+    dizerFala(t('trDizMeio', String(q * 25)));
+  }
 
   /* ---- o relógio da espera cega ----
 
@@ -11837,7 +12111,14 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     transcrevendoPct = 0;
     $('auto').textContent = t('autoIndo');
     $('autoDica').textContent = t('autoEspere');
+    /* O pedido de parada é DESTA transcrição. Sem zerar aqui, um pedido feito
+       na anterior mataria a próxima no primeiro trecho — e a pessoa veria a
+       ferramenta desistir sozinha de um trabalho que ela acabou de mandar
+       começar. `quartoDito` volta junto, para que a segunda transcrição
+       também seja anunciada de quarto em quarto. */
+    pararPedido = false; quartoDito = 0; falaParcial = false;
     trabalhando(true, 'transcricao');
+    dizerFala(t('trDizIni'));
     relogio.audio = 0; relogio.ms = 0;
     try {
       /* ---- OS DOIS COMEÇAM JUNTOS ----
@@ -11902,6 +12183,11 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       const janelas = escolha.janelas, total = janelas.length;
       const pulados = escolha.mudas;
       let ultimaChave = null;
+      /* Em que trecho a pessoa mandou parar. `null` é "foi até o fim", e é o
+         que separa uma transcrição completa de uma parcial em todo o resto da
+         tela — o texto do fim, o aviso na aba e a linha da fala no painel de
+         conclusão. */
+      let parouNoMeio = null;
       try { window.__ultimoPlano = { compacta: escolha.compacta, total, retas: escolha.retas,
                                      mudas: escolha.mudas, silencio: escolha.silencio }; } catch (e) {}
 
@@ -11921,7 +12207,16 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
           feitosNoModo = 0; inicioModo = performance.now();
           if ($('trocaOferta')) $('trocaOferta').classList.add('hide');
           if ($('trocaBtn')) $('trocaBtn').disabled = false;
+          dizerFala(t('trDizTroca'));
         }
+        /* ---- AQUI É ONDE SE PARA ----
+
+           Entre um trecho e o seguinte, no mesmo lugar em que a troca de modo
+           acontece e pela mesma razão: cortar uma inferência no meio não é
+           possível, e fingir que é seria uma promessa que a tela não cumpre.
+           O que já foi transcrito está em `out` e continua valendo — parar
+           aqui é ficar com ele, que é o nome do botão. */
+        if (pararPedido) { parouNoMeio = i; break; }
         /* As janelas mudas já ficaram de fora na hora de escolher: aqui só
            chega o que vale a viagem ao modelo. */
         const jan = janelas[i], seg = materializar(data, jan);
@@ -11961,24 +12256,55 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
         prog(pct);
         // previsão a partir do ritmo medido NESTE MODO, não de estimativa fixa
         const resta = (performance.now() - inicioModo) / feitosNoModo * (total - feitos) / 1000;
-        const falta = (feitosNoModo >= 2 && resta > 3) ? t('etaTr', duracao(resta)) : '';
+        const sabePrever = feitosNoModo >= 2 && resta > 3;
         if (feitosNoModo >= 2) oferecerTroca(resta);
-        st(t('transcribing2', pct.toFixed(0), feitos, total, falta));
+        /* Cinco lugares em vez de uma frase só: ver `stTr`. A previsão entra
+           zerada enquanto o ritmo ainda não foi medido duas vezes neste modo —
+           uma previsão feita sobre uma amostra só é chute, e chute sobre
+           espera é o que faz alguém desistir de uma coisa que ia ser rápida. */
+        stTr(pct, feitos, total, sabePrever ? resta : 0);
+        dizerProgresso(pct);
       }
       pararEspera();
       if ($('trocaOferta')) $('trocaOferta').classList.add('hide');
       $('tr').value = 'WEBVTT\n\n' + out.join('\n\n');
       $('tr').readOnly = false;
       refreshTr(); prog(100);
-      st(t('trDone', out.length) + (pulados ? ' ' + t('trPulou', pulados) : '') +
-         contarDesempenho(), 'ok');
-      /* O aviso sai daqui, do caminho de SUCESSO, e não do `finally`: um
-         "pronto" piscando na aba depois de a transcrição morrer no meio manda
-         a pessoa voltar correndo para ler um erro. */
-      avisarPronto(t('avisoAbaTr'), t('avisoTr', out.length, duracao((performance.now() - inicio) / 1000)));
+      if (parouNoMeio == null) {
+        st(t('trDone', out.length) + (pulados ? ' ' + t('trPulou', pulados) : '') +
+           contarDesempenho(), 'ok');
+        dizerFala(t('trDizFim', String(out.length)));
+        /* O aviso sai daqui, do caminho de SUCESSO, e não do `finally`: um
+           "pronto" piscando na aba depois de a transcrição morrer no meio manda
+           a pessoa voltar correndo para ler um erro. */
+        avisarPronto(t('avisoAbaTr'), t('avisoTr', out.length, duracao((performance.now() - inicio) / 1000)));
+      } else {
+        /* ---- O QUE FALTA, EM MINUTOS DE GRAVAÇÃO ----
+
+           "Pode sair incompleto" não é informação: não dá para decidir nada com
+           ela. O que decide é quanto de gravação ficou de fora, e este número é
+           exato — `tempoReal` devolve o instante da gravação em que o primeiro
+           trecho não transcrito começa, com o silêncio compactado já desfeito.
+           A conta pela contagem de janelas erraria justamente nos áudios em que
+           a compactação trabalhou mais.
+
+           Se a parada caiu no último trecho, não falta nada, e dizer que falta
+           seria inventar uma perda para assustar quem não perdeu nada. */
+        falaParcial = true;
+        const ateOnde = tempoReal(janelas[parouNoMeio], 0);
+        const inteiro = data.length / SR;
+        const resto = Math.max(0, inteiro - ateOnde);
+        st(t('trParouOk', out.length) +
+           (resto > 20 ? t('trParouFalta', duracao(resto)) : t('trParouFim')) +
+           (pulados ? ' ' + t('trPulou', pulados) : ''), 'ok');
+        dizerFala(t('trDizParou', String(out.length)));
+        avisarPronto(t('avisoAbaTr'), t('avisoTrParcial', out.length));
+        medir('parou_fala', { p_pct: String(Math.round(parouNoMeio / total * 100)) });
+      }
     } catch (e) {
       prog(null);
       st(t('trErr', (e && e.message ? e.message : e)), 'err');
+      dizerFala(t('trDizErro'));
     } finally {
       /* O relógio da espera para aqui de qualquer jeito: se a transcrição
          morrer no meio, um contador que continua andando sobre uma mensagem de
@@ -12000,6 +12326,13 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       prog(null);
       pintarSaidas();
       sincAmbos();
+      /* A gaveta do motor é da transcrição: sem trabalho correndo ela fala de
+         um motor que não está fazendo nada. O que a pessoa escolheu — aberta
+         ou fechada — fica em `motorAberto` e volta assim na próxima. */
+      esconderMotorTr();
+      /* O pedido morre com o trabalho que ele pediu para parar. Deixá-lo de pé
+         travaria o botão da próxima transcrição em "parando". */
+      pararPedido = false;
       trabalhando(false, 'transcricao');
     }
   };
@@ -13919,7 +14252,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     $('extract').disabled = true;
     sincAmbos();
     $('go').disabled = $('docx').disabled = $('zip').disabled = true; emUso.add('zip');
-    $('cancel').classList.remove('hide');
+    /* O botão de parar não é mais mostrado daqui. Ele é derivado de quem está
+       trabalhando (`pintarParar`), e mostrá-lo à mão era metade do defeito:
+       a outra metade era escondê-lo à mão no fim, por cima de uma transcrição
+       que continuava correndo. */
     trabalhando(true, 'varredura');
     $('barWrap').classList.remove('hide');
     /* A grade some no MESMO gesto em que a lista é esvaziada. Sem o `render()`
@@ -14035,10 +14371,12 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       avisoFaixa + parou + (limited ? `<span class="err">${limited}</span>` : '');
     $('extract').disabled = false;
     $('go').disabled = $('docx').disabled = emUso.delete('zip'); $('zip').disabled = false;
-    $('cancel').classList.add('hide');
     /* A barra cheia ficava no lugar depois de terminar — uma faixa azul de
        100% que não quer dizer mais nada, logo abaixo dos botões. */
     $('barWrap').classList.add('hide');
+    /* E o parar sai daqui pelo mesmo caminho por onde entrou: `trabalhando`
+       decide, olhando quem ainda está de pé. Com a transcrição correndo ao
+       lado, ele FICA — era este o botão que sumia no meio da espera longa. */
     trabalhando(false, 'varredura');
     stop = false;
     render();
@@ -14076,9 +14414,29 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     setTimeout(() => { if (!$('auto').disabled) $('auto').click(); }, 120);
   }
 
+  /* ---- UM BOTÃO DE PARAR, E ELE NÃO PROMETE O QUE NÃO PODE ----
+
+     Ele já era o único — a faixa fixa delega para cá em vez de ter um segundo
+     — e agora atende os dois trabalhos, porque os dois correm juntos. Parar
+     com a transcrição em curso para as duas coisas: é o que a pessoa quer
+     dizer quando aperta um botão escrito "parar e ficar com o que já está
+     pronto", e uma varredura que continuasse sozinha depois disso seria uma
+     surpresa.
+
+     A varredura para no meio, e pode: ela é interrompível de verdade, e o
+     próximo quadro é só o próximo salto no vídeo. A transcrição NÃO para no
+     meio, e por isso o rótulo muda para "parando após este trecho" em vez de
+     sumir: uma inferência que já foi despachada ao modelo não tem por onde ser
+     cortada, e uma tela que promete o corte deixa a pessoa clicando de novo. */
   $('cancel').onclick = () => {
-    stop = true;
-    $('status').textContent = tr('stopping');
+    if (pararPedido) return;                       // um pedido basta
+    stop = true;                                   // a varredura para no próximo salto
+    if (trabalhos.has('varredura')) $('status').textContent = tr('stopping');
+    if (trabalhos.has('transcricao')) {
+      pararPedido = true;
+      dizerFala(t('trDizParando'));
+    }
+    pintarParar();
   };
 
   /* ================= revisão =================
