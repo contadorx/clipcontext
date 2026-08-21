@@ -40,12 +40,12 @@ await pg.waitForTimeout(300);
 }
 
 console.log('\n[2] tipo do momento, só na sessão de pesquisa');
-await pg.locator('#thumbs figure').nth(0).locator('.lupa').click();
+await pg.locator('#thumbs figure').nth(0).locator('.editar').click();
 await pg.waitForSelector('#lente:not(.hide)');
 ok('escondido na evidência', await pg.locator('#lenteTipoCx').evaluate(e=>e.classList.contains('hide')));
 await pg.locator('#lenteFechar').click(); await pg.waitForTimeout(200);
 await pg.selectOption('#modelo','usabilidade'); await pg.waitForTimeout(300);
-await pg.locator('#thumbs figure').nth(0).locator('.lupa').click();
+await pg.locator('#thumbs figure').nth(0).locator('.editar').click();
 await pg.waitForSelector('#lente:not(.hide)');
 ok('aparece na sessão', !(await pg.locator('#lenteTipoCx').evaluate(e=>e.classList.contains('hide'))));
 await pg.selectOption('#lenteTipo','friccao');

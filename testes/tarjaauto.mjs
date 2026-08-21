@@ -83,7 +83,7 @@ ok('a mensagem confirma quantas foram aplicadas',
 ok('e o botão trava para não tarjar duas vezes', await pg.locator('#tarjarTudo').isDisabled());
 
 console.log('\n[3] a tarja está mesmo no quadro, e queima na exportação');
-await pg.locator('#thumbs figure').nth(0).locator('.lupa').click();
+await pg.locator('#thumbs figure').nth(0).locator('.editar').click();
 await pg.waitForSelector('#lente:not(.hide)');
 await pg.waitForTimeout(300);
 ok('a lente mostra a tarja do passo 1', (await pg.locator('#lenteTarjas > *').count()) >= 1,

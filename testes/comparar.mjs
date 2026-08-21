@@ -22,7 +22,7 @@ await pg.waitForFunction(()=>document.querySelectorAll('#thumbs figure').length>
 await pg.waitForTimeout(500);
 
 console.log('[1] a comparação abre na lente');
-await pg.locator('#thumbs figure').nth(2).locator('.lupa').click();
+await pg.locator('#thumbs figure').nth(2).locator('.editar').click();
 await pg.waitForSelector('#lente:not(.hide)');
 await pg.waitForTimeout(300);
 ok('o botão existe', await pg.locator('#comparar').isVisible());
@@ -103,7 +103,7 @@ console.log('\n[4] comparar um quadro com ele mesmo dá zero');
     return null;
   });
   ok('a duplicata existe e é idêntica', !!par, JSON.stringify(par));
-  await pg.locator('#thumbs figure').nth(par[0]).locator('.lupa').click();
+  await pg.locator('#thumbs figure').nth(par[0]).locator('.editar').click();
   await pg.waitForSelector('#lente:not(.hide)');
   await pg.waitForTimeout(300);
   await pg.locator('#comparar').click();
@@ -133,7 +133,7 @@ ok('fechar a lente tira a camada', (await pg.locator('#cmpCamada').count()) === 
   ok('e as imagens continuam lá', (md.match(/!\[/g)||[]).length >= 4,
      String((md.match(/!\[/g)||[]).length));
 }
-await pg.locator('#thumbs figure').nth(0).locator('.lupa').click();
+await pg.locator('#thumbs figure').nth(0).locator('.editar').click();
 await pg.waitForSelector('#lente:not(.hide)');
 await pg.waitForTimeout(300);
 ok('e reabrir a lente noutro quadro começa sem comparação', await pg.locator('#cmpBox').isHidden());

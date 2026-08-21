@@ -1,48 +1,83 @@
-# O que fazer com este zip
+# APLICAR — o que há nesta pasta
 
-O zip é a **árvore inteira, pronta**: a do `walkstampbuild8_1.zip` mais o A0
-aplicado e construído. `public/app.html` e `offline/walkstamp-offline.html` já
-saíram do `build.py`; não precisa rodar nada para ver funcionando.
+A árvore deste zip **já está construída**: `public/app.html` e
+`offline/walkstamp-offline.html` estão gerados. Para subir o site, não é preciso
+rodar `build.py`.
 
-## Se você só quer subir
+Base: `285d4a5` (o `main` de produção) + os seis commits do `correcoes.bundle`
+= a árvore do `walkstampbuild8_1.zip`. Sobre ela, três commits novos.
 
-Copie por cima da sua cópia e suba. Os gerados já estão certos.
+## Os três commits
 
-## Se você prefere o patch (revisável, 22 arquivos)
+**A0 — a saída recomendada chega à linhagem.** Em vez de sete formatos com o
+mesmo peso, a ferramenta olha o cenário e propõe um; os outros ficam recolhidos
+atrás de "ver todos os formatos".
 
-Está em `APLICAR/A0-saida-recomendada.patch`:
+**A1 — o cartão da grade.** O que faltava do build 8:
 
-```bash
-git apply --check APLICAR/A0-saida-recomendada.patch   # confere sem escrever
-git apply         APLICAR/A0-saida-recomendada.patch
-```
+- a lente — tarja, recorte, comparação, troca de imagem, clipe, fala editável —
+  só abria por um `⤢` invisível até o mouse passar por cima da miniatura. **Num
+  aparelho de toque não existe `:hover`**: metade da ferramenta era
+  inalcançável. Agora é um botão **`Editar`**, sempre visível, no pé do cartão;
+- a seta de mover desabilitada era `opacity:0 !important` — nas pontas, "não há
+  para onde" era silêncio. Agora fica apagada, não sumida;
+- o cartão passa a mostrar **a primeira linha da fala**, pela mesma conta que o
+  documento usa.
 
-O `--check` só passa se a sua árvore for a do `walkstampbuild8_1.zip`. Se
-reclamar, me diga o que ele disse.
+A anotação continua no cartão: anotar é o trabalho desta etapa, e um trabalho
+que exige abrir um diálogo por quadro é um trabalho que ninguém faz quarenta
+vezes.
 
-## O que este build acrescenta
+**B3 — o banco passa a caber no Git.** Eram zero `.sql` contra mais de vinte
+RPCs. Agora são **42 migrações versionadas**, e um comando prova que elas
+reconstroem a produção. Leia `supabase/LEIA-ME.md` — é lá que está a história
+inteira, inclusive as quatro coisas que a comparação encontrou.
 
-Antes do catálogo de formatos aparece **Recomendado para o seu caso** — o
-formato que o cenário pede, o segundo como alternativa, e uma linha dizendo o
-porquê. Os outros onze ficam atrás de **Ver todos os formatos**, a um clique,
-com o estado lembrado.
+## Os arquivos
 
-O botão recomendado **clica o botão que já existe**: qualquer trava, aviso ou
-confirmação do original continua valendo, e nenhuma lógica de geração foi
-duplicada.
+| arquivo | o que é |
+|---|---|
+| `A0-A1-B3.bundle` | os três commits, para aplicar por Git sobre `d5db0f7` |
+| `A0-saida-recomendada.patch` | o A0 em diff legível |
+| `A1-cartao-da-grade.patch` | o A1 em diff legível (fonte e régua) |
+| `B3-banco-versionado.patch` | o B3 em diff legível |
+| `correcoes.bundle`, `correcoes-so-fonte.patch` | os seis commits originais do zip |
+| `ARQUIVOS.txt`, `MENSAGENS.txt` | o inventário original |
 
-## Duas coisas que continuam com você
+Aplicar por Git:
 
-- **sitemap** — precisa do `build.py` depois de aplicar os seis commits do
-  `correcoes.bundle` (não deste zip);
-- **figura do blog** — precisa de deploy; até lá, exportar abaixo de 1 MB.
+    git fetch /caminho/para/A0-A1-B3.bundle
+    git merge FETCH_HEAD
 
-## Uma amostra que faltava na régua
+## As réguas
 
-`parar.mjs` acusava `ENOENT /tmp/fala-longa.webm`. Não era defeito: é a amostra
-do vídeo longo, que o `amostras.py` só gera com `--longo`. Depois de gerada, a
-régua passa — o build 4 está verde.
+**A ferramenta.** `testes/cartao.mjs` é nova e entra no grupo `app` do
+`rapido.sh`. Verde nesta árvore: os 35 do grupo `app` — incluindo `perna.mjs` e
+`celular.mjs` —, mais `capitulos`, `clipe`, `comparar`, `destaque`, `memoria`,
+`miudos`, `onda1`, `onda2`, `pptx`, `rodada`, `tarjaauto`, `trocar`, `webcam` e
+`grade`. `chaves.mjs`: 934 chaves, ordem igual nos cinco idiomas.
 
-```bash
-python3 testes/amostras.py --longo
-```
+`testes/parar.mjs` precisa de `python3 testes/amostras.py --longo` uma vez,
+senão dá ENOENT em `/tmp/fala-longa.webm`. Não é defeito: a amostra é grande
+demais para viajar no pacote.
+
+**O banco.** Precisa de um Postgres 15+ local:
+
+    PGHOST=/var/run/postgresql sh supabase/testes/prova.sh
+    sh supabase/conferir.sh
+
+O primeiro reconstrói o esquema do zero e roda 40 afirmações de comportamento;
+o segundo confere as 38 migrações recuperadas contra o md5 do que a base diz que
+aplicou.
+
+## O que ainda precisa de você
+
+- **`supabase db push`** — as quatro migrações novas do B3 não foram aplicadas.
+  Três são no-op de esquema; só a `…203200` mexe em dado (apaga os dois chamados
+  de teste da produção). Detalhe em `supabase/LEIA-ME.md`;
+- **sitemap** — precisa do `build.py` depois de aplicar;
+- **figura do blog** — precisa de deploy; até lá, exportar abaixo de 1 MB;
+- **a branch remota velha** `claude/ux-build-continuation-2hs0b2`, parada em
+  `f505ea8`: apagá-la faz o contador de commits parar de mentir;
+- **proteção de senha vazada** no Supabase Auth está desligada. É um botão do
+  painel; o produto entra por link mágico, então o impacto é pequeno.

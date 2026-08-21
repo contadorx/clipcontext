@@ -101,7 +101,7 @@ console.log('\n[4] o tamanho da lente');
 {
   await pg.locator('#allOn').click();
   await pg.waitForTimeout(200);
-  await pg.locator('#thumbs figure').first().locator('.lupa').click();
+  await pg.locator('#thumbs figure').first().locator('.editar').click();
   await pg.waitForSelector('#lente:not(.hide)');
   const larg = async () => (await pg.locator('.lenteCx').boundingBox()).width;
   const m = await larg();

@@ -1,5 +1,11 @@
 /* Onda 2: tarjar, aviso de dado sensível e recortar. */
-import { chromium } from 'playwright';
+/* Do `_navegador.mjs`, e não do Playwright cru. Este arquivo baixa `#zip` e
+   `#pptx`, que desde o A0 moram dentro da gaveta "ver todos os formatos" — um
+   botão dentro de um `hide` não tem caixa, e `click()` recusa. Era o único
+   arquivo de importação crua que dirigia o conteúdo da gaveta; `perna.mjs` e
+   `saidarec.mjs` continuam crus de propósito, porque o estado recolhido é
+   exatamente o que eles existem para ver. */
+import { chromium } from './_navegador.mjs';
 import http from 'http'; import fs from 'fs'; import zlib from 'zlib';
 import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
 const ROOT=`${RAIZ_WS}/public`;
@@ -41,9 +47,9 @@ const abrirLente = async (n=0) => {
      ninguém. Quando isso acontecia, a lente simplesmente NÃO ABRIA, e a falha
      aparecia três linhas depois, no botão de tarjar: "element is not visible".
      O botão estava certo; a lente é que nunca tinha aberto. */
-  const lupa = pg.locator('#thumbs .lupa').nth(n);
-  await lupa.scrollIntoViewIfNeeded();
-  await lupa.click();
+  const abrir = pg.locator('#thumbs .editar').nth(n);
+  await abrir.scrollIntoViewIfNeeded();
+  await abrir.click();
   /* E a lente ABERTA, de fato, antes de medir se ela parou de se mexer: medir o
      assentamento de um diálogo fechado dá "parado" na primeira leitura. */
   await pg.locator('#lenteImg').waitFor({ state: 'visible', timeout: 15000 });
@@ -137,7 +143,7 @@ console.log('\n[1] tarjar');
   ok('o modo tarja começa desligado',
      (await pg.locator('#tarjaModo').textContent()).trim() === 'Tarjar um dado',
      (await pg.locator('#tarjaModo').textContent()).trim());
-  /* `force` pelo mesmo motivo da lupa lá em cima: a lente entra com animação, e
+  /* `force` pelo mesmo motivo do Editar lá em cima: a lente entra com animação, e
      a "estabilidade" que o Playwright exige é a caixa do elemento parada em
      dois quadros seguidos. O botão está na tela e com o rótulo certo — a linha
      acima acabou de lê-lo —, mas o diálogo ainda pode estar assentando, e o

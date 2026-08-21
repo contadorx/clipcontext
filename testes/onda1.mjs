@@ -82,7 +82,7 @@ console.log('\n[1] perfil da aba');
 console.log('\n[2] a lente de um passo');
 await prep();
 {
-  await pg.locator('#thumbs .lupa').first().click({force:true});
+  await pg.locator('#thumbs .editar').first().click({force:true});
   await pg.waitForTimeout(300);
   ok('a lente abre', !(await pg.locator('#lente').getAttribute('class')).includes('hide'));
   ok('mostra a imagem grande', await pg.locator('#lenteImg').isVisible());

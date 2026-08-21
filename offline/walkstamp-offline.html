@@ -459,10 +459,8 @@
   .thumbs .toque:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
   /* `height:auto` com os atributos `width`/`height` no `<img>`: é assim que o
      navegador reserva a caixa CERTA antes de a imagem chegar. Sem isso a
-     miniatura tem altura zero até carregar, a fileira inteira encolhe e salta
-     quando as imagens entram — e, pior, os botões que ficam por cima dela
-     (a lupa, as setas de mover) se empilham uns sobre os outros num quadro de
-     altura zero. */
+     miniatura tem altura zero até carregar, e a fileira inteira encolhe e salta
+     quando as imagens entram. */
   .thumbs img{width:100%;height:auto;display:block}
   .thumbs figcaption{font:11px ui-monospace,Menlo,monospace;color:var(--muted);padding:4px 0 5px;text-align:center}
   .thumbs figcaption .passo{display:block;color:var(--ink);font-weight:700;font-size:11.5px}
@@ -635,26 +633,61 @@
   .thumbs .nota::placeholder{color:var(--muted);opacity:.8}
   .thumbs .nota:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
   .thumbs figure.off .nota{pointer-events:none}
-  /* Ampliar: 158 px é bom para escolher, péssimo para conferir. O botão fica
-     escondido até o mouse ou o foco chegarem na miniatura, para não competir
-     com a imagem — mas existe sempre no DOM, para o teclado alcançar. */
-  .thumbs .lupa{position:absolute;top:5px;right:5px;z-index:2;border:0;cursor:pointer;
-      width:26px;height:26px;border-radius:6px;padding:0;line-height:1;font-size:14px;
-      background:color-mix(in srgb,var(--panel) 86%,transparent);color:var(--ink);
-      opacity:0;transition:opacity .12s}
-  .thumbs figure:hover .lupa,.thumbs .lupa:focus-visible{opacity:1}
-  .thumbs figure.off .lupa{display:none}
-  /* As setas de mover. Mesmo desenho da lupa, nas laterais, e aparecem só no
-     foco ou no passar do mouse — a miniatura é para olhar a tela, não a
-     ferramenta. */
-  .thumbs .mover{position:absolute;top:50%;transform:translateY(-50%);z-index:2;border:0;
-      cursor:pointer;width:19px;height:26px;border-radius:5px;padding:0;line-height:1;
-      font-size:13px;background:color-mix(in srgb,var(--panel) 88%,transparent);
-      color:var(--ink);opacity:0;transition:opacity .12s}
-  .thumbs .mover.esq{left:3px}
-  .thumbs .mover.dir{right:3px}
-  .thumbs figure:hover .mover,.thumbs .mover:focus-visible{opacity:1}
-  .thumbs .mover:disabled{opacity:0 !important;pointer-events:none}
+  /* ---- A FILEIRA DE AÇÕES DO CARTÃO ----
+
+     Eram três botões flutuando POR CIMA da imagem, com `opacity:0` até o mouse
+     chegar. Três defeitos, e o terceiro é o grave:
+
+     1. num aparelho de toque não existe `:hover`. A lente — onde moram tarja,
+        recorte, comparação, troca de imagem, clipe e a fala — ficava
+        inalcançável, e nada na tela dizia que ela existe;
+     2. a seta desabilitada era `opacity:0 !important`. Nas pontas da fileira o
+        controle não ficava apagado: ele sumia, e quem está no primeiro quadro
+        conclui que a ferramenta não move quadros;
+     3. o botão se chamava "Ampliar" e desenhava uma lupa. Quem procura onde
+        tapar um CPF não procura dentro de uma lupa — procura em `Editar`.
+
+     Agora é uma fileira de verdade, sempre visível, no pé do cartão, com o nome
+     do lugar escrito por extenso. O custo é ~24 px de altura por cartão; o que
+     ele compra é a única porta para metade das funções da ferramenta. */
+  .thumbs .acoes{display:flex;gap:4px;align-items:center;justify-content:center;
+      padding:5px 5px 6px;border-top:1px solid var(--line)}
+  .thumbs .acoes button{border:1px solid var(--line);background:var(--panel);
+      color:var(--ink);cursor:pointer;border-radius:6px;padding:0;line-height:1;
+      font-family:inherit}
+  .thumbs .editar{flex:1;min-width:0;height:24px;font-size:11px;font-weight:600;
+      overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .thumbs .editar:hover{border-color:var(--accent);color:var(--accent)}
+  .thumbs .mover{width:24px;height:24px;font-size:13px;flex:0 0 auto}
+  .thumbs .mover:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}
+  /* Desabilitada, e VISÍVEL. Ver o controle apagado responde "não há para onde
+     mover"; não ver controle nenhum responde "isto não existe". */
+  .thumbs .mover:disabled{opacity:.32;cursor:default}
+  .thumbs .acoes button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+  /* Um quadro descartado não tem o que editar nem para onde ir. A fileira fica
+     no lugar, vazia: escondê-la mudaria a altura do cartão e desalinharia a
+     grade a cada descarte — o mesmo motivo pelo qual a legenda mantém o traço
+     no lugar do número. */
+  .thumbs figure.off .acoes{visibility:hidden}
+  /* ---- A PRIMEIRA LINHA DA FALA ----
+
+     O essencial que faltava no cartão. Numa gravação de quarenta telas de
+     sistema as imagens são quase idênticas — mesma janela, mesmo menu — e o
+     instante não distingue nada: `04:12` e `04:31` são o mesmo nada. O que
+     distingue é o que estava sendo dito ali. Duas linhas no máximo; o texto
+     inteiro, editável, continua em `Editar`. */
+  .thumbs figcaption .fala{display:-webkit-box;-webkit-line-clamp:2;
+      -webkit-box-orient:vertical;overflow:hidden;margin-top:4px;text-align:left;
+      /* Padding próprio: a legenda não tem nenhum na horizontal, e nunca
+         precisou — número e relógio são curtos e centrados. Uma frase alinhada
+         à esquerda sem isto encosta na borda do cartão. */
+      padding:0 6px;
+      /* E a fonte do texto, não a monoespaçada da legenda. O relógio e o
+         número são medidas e ganham monoespaçada de propósito; isto é uma
+         frase que alguém falou, e prosa em monoespaçada de 10px lê-se como
+         log de sistema. */
+      font:italic 400 10.5px/1.35 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+      color:var(--muted)}
   /* O quadro que acabou de mudar de lugar.
 
      Numa gravação de sistema as telas são quase idênticas — mesma janela,
@@ -2800,8 +2833,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
         <!-- A volta para a revisão, e o fim dela.
 
              A lente é aberta de dois lugares: da miniatura, onde ela é só uma
-             lupa, e de DENTRO da revisão quadro a quadro, onde ela é o meio de
-             consertar a imagem daquele passo. No segundo caso a pessoa está no
+             `Editar` de uma miniatura, e de DENTRO da revisão quadro a quadro,
+             onde ela é o meio de consertar a imagem daquele passo. No segundo caso a pessoa está no
              meio de um percurso, e a lente não sabia disso: fechar a levava de
              volta para uma revisão que continuava aberta, sem dizer que
              continuava — e no último quadro não havia como terminar sem sair da
@@ -3918,7 +3951,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       capTempo:'{0} nesta tarefa', capCol:'Tarefa', capTempoCol:'Tempo na tarefa',
       capResumo:'{0} tarefa(s) nesta gravação:',
       capPacote:'Um documento por tarefa', capPacoteOk:'{0} documentos, um por tarefa, no mesmo .zip.',
-      capPacoteNao:'Marque onde começa cada tarefa (na lupa de um passo) para separar a gravação em documentos.',
+      capPacoteNao:'Marque onde começa cada tarefa (em Editar, num passo) para separar a gravação em documentos.',
       clipeBaixar:'Baixar o clipe',
       clipeNome:'momento',
       clipeSelo:'clipe',
@@ -4016,7 +4049,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       falaNota:'Usar a fala como anotação',
       evPerfil:'O sistema e quem executou ficam guardados enquanto esta aba estiver aberta, para você não redigitar a cada caso. Fechou a aba, some.',
       evLimpar:'Esquecer', evSalvar:'Salvar perfil', evAbrir:'Abrir perfil',
-      ampliar:'Ampliar este passo', fecharBtn:'Fechar',
+      editarBtn:'Editar', editarTit:'Editar este passo — tarjar, recortar, comparar, trocar a imagem, clipe e fala', fecharBtn:'Fechar',
       lenteRevVolta:'Voltar para a revisão', lenteRevFim:'Finalizar a revisão', demoCenario:'Escolhemos “Evidência de teste” para o exemplo — troque no passo 1 se o seu caso for outro.', lenteAcoes:'O que dá para fazer com esta imagem', lenteNotaResta:'{0} caracteres restantes — ela vira o título deste passo no documento.', tarjaBtn:'Tarjar um dado', tarjaFim:'Terminar de tarjar', tarjaLimpar:'Tirar as tarjas',
       tarjaComo:'Arraste sobre a imagem para cobrir. Clique numa tarja para tirá-la.',
       tarjaN:'{0} tarja(s) neste passo — elas são queimadas na imagem que sai no documento.',
@@ -4045,13 +4078,13 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       cropFeito:'{0} quadros recortados. As tarjas foram desfeitas — refaça-as sobre a imagem nova.',
       cropSaiu:'Recorte desfeito: os quadros voltaram ao tamanho original.',
       sensTarjar1:'Tarjar a ocorrência encontrada',
-      sensTarjado1:'1 tarja aplicada. Confira na lente antes de gerar — a tarja é queimada na imagem.',
+      sensTarjado1:'1 tarja aplicada. Confira em Editar antes de gerar — a tarja é queimada na imagem.',
       sensTarjar:'Tarjar as {0} ocorrências',
-      sensTarjado:'{0} tarjas aplicadas. Confira na lente antes de gerar — a tarja é queimada na imagem.',
-      sensNaoAchou:'Nada para tarjar automaticamente', trocaPlaca:'Faltam ~{0}. A placa de vídeo desta máquina não está sendo usada.', trocaModelo:'Faltam ~{0}. O modo rápido é bem mais veloz, com menos acerto em nome próprio e sigla.', trocaBtn:'Acelerar', trocaIndo:'Trocando — o que já saiu fica.', avisoAbaTr:'Transcrição pronta', avisoTr:'Transcrição pronta — {0} trechos em {1}.', avisoFechar:'Entendi', pessoasH:'Tem gente nesta gravação.', pessoas_ata:'Você marcou o cenário “Ata de reunião”.', pessoas_ux:'Você marcou o cenário “Sessão de usabilidade”.', pessoas_canal:'A transcrição tem a voz do outro lado da chamada.', pessoasP:'Numa chamada de vídeo, cada tela guardada leva a fita de participantes — rosto, nome e cargo de quem estava lá. Isso não é texto, então a varredura acima não enxerga. Confira as telas antes de gerar.', pessoasBtn:'Abrir a lente para tarjar as pessoas',
-      sensNaoAchouDica:'O padrão foi encontrado no texto corrido, mas não em cima de nenhuma palavra localizável na imagem. Tarje à mão na lente.',
+      sensTarjado:'{0} tarjas aplicadas. Confira em Editar antes de gerar — a tarja é queimada na imagem.',
+      sensNaoAchou:'Nada para tarjar automaticamente', trocaPlaca:'Faltam ~{0}. A placa de vídeo desta máquina não está sendo usada.', trocaModelo:'Faltam ~{0}. O modo rápido é bem mais veloz, com menos acerto em nome próprio e sigla.', trocaBtn:'Acelerar', trocaIndo:'Trocando — o que já saiu fica.', avisoAbaTr:'Transcrição pronta', avisoTr:'Transcrição pronta — {0} trechos em {1}.', avisoFechar:'Entendi', pessoasH:'Tem gente nesta gravação.', pessoas_ata:'Você marcou o cenário “Ata de reunião”.', pessoas_ux:'Você marcou o cenário “Sessão de usabilidade”.', pessoas_canal:'A transcrição tem a voz do outro lado da chamada.', pessoasP:'Numa chamada de vídeo, cada tela guardada leva a fita de participantes — rosto, nome e cargo de quem estava lá. Isso não é texto, então a varredura acima não enxerga. Confira as telas antes de gerar.', pessoasBtn:'Abrir Editar para tarjar as pessoas',
+      sensNaoAchouDica:'O padrão foi encontrado no texto corrido, mas não em cima de nenhuma palavra localizável na imagem. Tarje à mão em Editar.',
       sensSemCaixa:'Tarjar automaticamente não disponível',
-      sensSemCaixaDica:'Esta versão do leitor de texto não devolveu a posição das palavras. Dá para tarjar à mão na lente.',
+      sensSemCaixaDica:'Esta versão do leitor de texto não devolveu a posição das palavras. Dá para tarjar à mão em Editar.',
       sensH:'Dado pessoal visível.',
       sensP:'A leitura da tela encontrou {0}. Confira e, se for o caso, cubra com o botão Tarjar dentro de cada passo — nada disso é enviado a lugar nenhum, mas o documento que você baixar vai com o que está na imagem.',
       sensPassos:'passos {0}',
@@ -4521,7 +4554,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       capTempo:'{0} on this task', capCol:'Task', capTempoCol:'Time on task',
       capResumo:'{0} task(s) in this recording:',
       capPacote:'One document per task', capPacoteOk:'{0} documents, one per task, in the same .zip.',
-      capPacoteNao:'Mark where each task starts (in a step\u2019s magnifier) to split the recording into documents.',
+      capPacoteNao:'Mark where each task starts (in a step\u2019s Edit) to split the recording into documents.',
       clipeBaixar:'Download the clip',
       clipeNome:'moment',
       clipeSelo:'clip',
@@ -4619,7 +4652,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       falaNota:'Use the speech as the note',
       evPerfil:'The system and who ran it are kept while this tab stays open, so you do not retype them for every case. Close the tab and they are gone.',
       evLimpar:'Forget', evSalvar:'Save profile', evAbrir:'Open profile',
-      ampliar:'Enlarge this step', fecharBtn:'Close',
+      editarBtn:'Edit', editarTit:'Edit this step — redact, crop, compare, replace the image, clip and speech', fecharBtn:'Close',
       lenteRevVolta:'Back to the review', lenteRevFim:'Finish the review', demoCenario:'We picked “Test evidence” for the example — change it in step 1 if your case is another.', lenteAcoes:'What you can do with this image', lenteNotaResta:'{0} characters left — it becomes the title of this step in the document.', tarjaBtn:'Hide a detail', tarjaFim:'Done redacting', tarjaLimpar:'Remove the bars',
       tarjaComo:'Drag over the image to cover it. Click a box to remove it.',
       tarjaN:'{0} redaction(s) on this step — they are burned into the image that goes in the document.',
@@ -4648,13 +4681,13 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       cropFeito:'{0} frames cropped. Redactions were undone — redraw them on the new image.',
       cropSaiu:'Crop undone: the frames are back to their original size.',
       sensTarjar1:'Redact the one occurrence',
-      sensTarjado1:'1 redaction applied. Check it in the lens before generating — the redaction is burned into the image.',
+      sensTarjado1:'1 redaction applied. Check it in Edit before generating — the redaction is burned into the image.',
       sensTarjar:'Redact the {0} occurrences',
-      sensTarjado:'{0} redactions applied. Check them in the lens before generating — the redaction is burned into the image.',
-      sensNaoAchou:'Nothing to redact automatically', trocaPlaca:'~{0} left. This machine has a graphics card that is not being used.', trocaModelo:'~{0} left. Fast mode is much quicker, with less accuracy on proper nouns and acronyms.', trocaBtn:'Speed up', trocaIndo:'Switching — what is done stays.', avisoAbaTr:'Transcript ready', avisoTr:'Transcript ready — {0} segments in {1}.', avisoFechar:'Got it', pessoasH:'There are people in this recording.', pessoas_ata:'You picked the “Meeting minutes” scenario.', pessoas_ux:'You picked the “Usability session” scenario.', pessoas_canal:'The transcript carries the voice from the other end of the call.', pessoasP:'In a video call every captured screen carries the participant strip — face, name and job title of everyone who was there. That is not text, so the scan above cannot see it. Check the screens before you generate.', pessoasBtn:'Open the lens to redact the people',
-      sensNaoAchouDica:'The pattern was found in the running text, but not over any word that can be located on the image. Redact by hand in the lens.',
+      sensTarjado:'{0} redactions applied. Check them in Edit before generating — the redaction is burned into the image.',
+      sensNaoAchou:'Nothing to redact automatically', trocaPlaca:'~{0} left. This machine has a graphics card that is not being used.', trocaModelo:'~{0} left. Fast mode is much quicker, with less accuracy on proper nouns and acronyms.', trocaBtn:'Speed up', trocaIndo:'Switching — what is done stays.', avisoAbaTr:'Transcript ready', avisoTr:'Transcript ready — {0} segments in {1}.', avisoFechar:'Got it', pessoasH:'There are people in this recording.', pessoas_ata:'You picked the “Meeting minutes” scenario.', pessoas_ux:'You picked the “Usability session” scenario.', pessoas_canal:'The transcript carries the voice from the other end of the call.', pessoasP:'In a video call every captured screen carries the participant strip — face, name and job title of everyone who was there. That is not text, so the scan above cannot see it. Check the screens before you generate.', pessoasBtn:'Open Edit to redact the people',
+      sensNaoAchouDica:'The pattern was found in the running text, but not over any word that can be located on the image. Redact by hand in Edit.',
       sensSemCaixa:'Automatic redaction unavailable',
-      sensSemCaixaDica:'This version of the text reader did not return word positions. You can still redact by hand in the lens.',
+      sensSemCaixaDica:'This version of the text reader did not return word positions. You can still redact by hand in Edit.',
       sensH:'Personal data on screen.',
       sensP:'Reading the screens found {0}. Check them and, if needed, cover them with the Redact button inside each step — none of this is sent anywhere, but the document you download carries whatever is in the image.',
       sensPassos:'steps {0}',
@@ -5124,7 +5157,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       capTempo:'{0} en esta tarea', capCol:'Tarea', capTempoCol:'Tiempo en la tarea',
       capResumo:'{0} tarea(s) en esta grabación:',
       capPacote:'Un documento por tarea', capPacoteOk:'{0} documentos, uno por tarea, en el mismo .zip.',
-      capPacoteNao:'Marca dónde empieza cada tarea (en la lupa de un paso) para separar la grabación en documentos.',
+      capPacoteNao:'Marca dónde empieza cada tarea (en Editar, en un paso) para separar la grabación en documentos.',
       clipeBaixar:'Descargar el clip',
       clipeNome:'momento',
       clipeSelo:'clip',
@@ -5222,7 +5255,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       falaNota:'Usar el habla como anotación',
       evPerfil:'El sistema y quién lo ejecutó se guardan mientras esta pestaña siga abierta, para no reescribirlos en cada caso. Cierras la pestaña y desaparecen.',
       evLimpar:'Olvidar', evSalvar:'Guardar perfil', evAbrir:'Abrir perfil',
-      ampliar:'Ampliar este paso', fecharBtn:'Cerrar',
+      editarBtn:'Editar', editarTit:'Editar este paso — tapar, recortar, comparar, cambiar la imagen, clip y habla', fecharBtn:'Cerrar',
       lenteRevVolta:'Volver a la revisión', lenteRevFim:'Finalizar la revisión', demoCenario:'Elegimos “Evidencia de prueba” para el ejemplo — cámbialo en el paso 1 si tu caso es otro.', lenteAcoes:'Lo que puedes hacer con esta imagen', lenteNotaResta:'Quedan {0} caracteres — se convierte en el título de este paso en el documento.', tarjaBtn:'Tapar un dato', tarjaFim:'Terminar de tachar', tarjaLimpar:'Quitar las franjas',
       tarjaComo:'Arrastra sobre la imagen para cubrir. Haz clic en una zona para quitarla.',
       tarjaN:'{0} zona(s) tachada(s) en este paso — se queman en la imagen que sale en el documento.',
@@ -5251,13 +5284,13 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       cropFeito:'{0} fotogramas recortados. Las zonas tachadas se deshicieron — vuelve a marcarlas sobre la imagen nueva.',
       cropSaiu:'Recorte deshecho: los fotogramas volvieron a su tamaño original.',
       sensTarjar1:'Tapar la aparición encontrada',
-      sensTarjado1:'1 tapado aplicado. Compruébalo en la lupa antes de generar — el tapado se quema en la imagen.',
+      sensTarjado1:'1 tapado aplicado. Compruébalo en Editar antes de generar — el tapado se quema en la imagen.',
       sensTarjar:'Tapar las {0} apariciones',
-      sensTarjado:'{0} tapados aplicados. Compruébalos en la lupa antes de generar — el tapado se quema en la imagen.',
-      sensNaoAchou:'Nada que tapar automáticamente', trocaPlaca:'Faltan ~{0}. La tarjeta gráfica de este equipo no se está usando.', trocaModelo:'Faltan ~{0}. El modo rápido es mucho más veloz, con menos acierto en nombres propios y siglas.', trocaBtn:'Acelerar', trocaIndo:'Cambiando — lo hecho se mantiene.', avisoAbaTr:'Transcripción lista', avisoTr:'Transcripción lista — {0} tramos en {1}.', avisoFechar:'Entendido', pessoasH:'Hay personas en esta grabación.', pessoas_ata:'Elegiste el escenario “Acta de reunión”.', pessoas_ux:'Elegiste el escenario “Sesión de usabilidad”.', pessoas_canal:'La transcripción trae la voz del otro lado de la llamada.', pessoasP:'En una videollamada cada pantalla guardada lleva la tira de participantes — cara, nombre y cargo de quien estaba allí. Eso no es texto, así que el análisis de arriba no lo ve. Revisa las pantallas antes de generar.', pessoasBtn:'Abrir la lupa para tapar a las personas',
-      sensNaoAchouDica:'El patrón se encontró en el texto corrido, pero no sobre ninguna palabra localizable en la imagen. Tapa a mano en la lupa.',
+      sensTarjado:'{0} tapados aplicados. Compruébalos en Editar antes de generar — el tapado se quema en la imagen.',
+      sensNaoAchou:'Nada que tapar automáticamente', trocaPlaca:'Faltan ~{0}. La tarjeta gráfica de este equipo no se está usando.', trocaModelo:'Faltan ~{0}. El modo rápido es mucho más veloz, con menos acierto en nombres propios y siglas.', trocaBtn:'Acelerar', trocaIndo:'Cambiando — lo hecho se mantiene.', avisoAbaTr:'Transcripción lista', avisoTr:'Transcripción lista — {0} tramos en {1}.', avisoFechar:'Entendido', pessoasH:'Hay personas en esta grabación.', pessoas_ata:'Elegiste el escenario “Acta de reunión”.', pessoas_ux:'Elegiste el escenario “Sesión de usabilidad”.', pessoas_canal:'La transcripción trae la voz del otro lado de la llamada.', pessoasP:'En una videollamada cada pantalla guardada lleva la tira de participantes — cara, nombre y cargo de quien estaba allí. Eso no es texto, así que el análisis de arriba no lo ve. Revisa las pantallas antes de generar.', pessoasBtn:'Abrir Editar para tapar a las personas',
+      sensNaoAchouDica:'El patrón se encontró en el texto corrido, pero no sobre ninguna palabra localizable en la imagen. Tapa a mano en Editar.',
       sensSemCaixa:'Tapado automático no disponible',
-      sensSemCaixaDica:'Esta versión del lector de texto no devolvió la posición de las palabras. Puedes tapar a mano en la lupa.',
+      sensSemCaixaDica:'Esta versión del lector de texto no devolvió la posición de las palabras. Puedes tapar a mano en Editar.',
       sensH:'Dato personal visible.',
       sensP:'La lectura de las pantallas encontró {0}. Compruébalo y, si procede, cúbrelo con el botón Tachar dentro de cada paso — nada de esto se envía a ningún sitio, pero el documento que descargues lleva lo que esté en la imagen.',
       sensPassos:'pasos {0}',
@@ -5732,7 +5765,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       capTempo:'{0} in dieser Aufgabe', capCol:'Aufgabe', capTempoCol:'Zeit in der Aufgabe',
       capResumo:'{0} Aufgabe(n) in dieser Aufnahme:',
       capPacote:'Ein Dokument je Aufgabe', capPacoteOk:'{0} Dokumente, eines je Aufgabe, in derselben .zip.',
-      capPacoteNao:'Markieren Sie in der Lupe eines Schritts, wo jede Aufgabe beginnt, um die Aufnahme in Dokumente aufzuteilen.',
+      capPacoteNao:'Markieren Sie unter „Bearbeiten“ eines Schritts, wo jede Aufgabe beginnt, um die Aufnahme in Dokumente aufzuteilen.',
       clipeBaixar:'Clip herunterladen',
       clipeNome:'moment',
       clipeSelo:'clip',
@@ -5830,7 +5863,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       falaNota:'Das Gesprochene als Notiz verwenden',
       evPerfil:'System und ausführende Person bleiben gespeichert, solange dieser Tab geöffnet ist, damit Sie sie nicht bei jedem Fall neu eintippen müssen. Wenn Sie den Tab schließen, sind sie weg.',
       evLimpar:'Vergessen', evSalvar:'Profil speichern', evAbrir:'Profil öffnen',
-      ampliar:'Diesen Schritt vergrößern', fecharBtn:'Schließen',
+      editarBtn:'Bearbeiten', editarTit:'Diesen Schritt bearbeiten — schwärzen, zuschneiden, vergleichen, Bild ersetzen, Clip und Sprache', fecharBtn:'Schließen',
       lenteRevVolta:'Zurück zur Prüfung', lenteRevFim:'Prüfung abschließen', demoCenario:'Für das Beispiel haben wir „Testnachweis“ gewählt — ändern Sie es in Schritt 1, wenn Ihr Fall ein anderer ist.', lenteAcoes:'Was Sie mit diesem Bild tun können', lenteNotaResta:'Noch {0} Zeichen — sie wird zur Überschrift dieses Schritts im Dokument.', tarjaBtn:'Etwas schwärzen', tarjaFim:'Schwärzen beenden', tarjaLimpar:'Schwärzungen entfernen',
       tarjaComo:'Ziehen Sie über das Bild, um es abzudecken. Klicken Sie auf eine Schwärzung, um sie zu entfernen.',
       tarjaN:'{0} Schwärzung(en) in diesem Schritt — sie werden fest in das Bild eingebrannt, das in das Dokument kommt.',
@@ -5859,13 +5892,13 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       cropFeito:'{0} Screenshots zugeschnitten. Die Schwärzungen wurden aufgehoben — setzen Sie sie auf dem neuen Bild erneut.',
       cropSaiu:'Zuschnitt aufgehoben: Die Screenshots haben wieder ihre ursprüngliche Größe.',
       sensTarjar1:'Den gefundenen Treffer schwärzen',
-      sensTarjado1:'1 Schwärzung angewendet. Prüfen Sie sie vor dem Erzeugen in der Lupe — die Schwärzung wird fest in das Bild eingebrannt.',
+      sensTarjado1:'1 Schwärzung angewendet. Prüfen Sie sie vor dem Erzeugen unter „Bearbeiten“ — die Schwärzung wird fest in das Bild eingebrannt.',
       sensTarjar:'Die {0} Treffer schwärzen',
-      sensTarjado:'{0} Schwärzungen angewendet. Prüfen Sie sie vor dem Erzeugen in der Lupe — die Schwärzung wird fest in das Bild eingebrannt.',
-      sensNaoAchou:'Nichts automatisch zu schwärzen', trocaPlaca:'Noch ~{0}. Die Grafikkarte dieses Rechners wird nicht genutzt.', trocaModelo:'Noch ~{0}. Der schnelle Modus ist deutlich flotter, dafür ungenauer bei Eigennamen und Abkürzungen.', trocaBtn:'Beschleunigen', trocaIndo:'Wechsel — Fertiges bleibt.', avisoAbaTr:'Transkription fertig', avisoTr:'Transkription fertig — {0} Abschnitte in {1}.', avisoFechar:'Verstanden', pessoasH:'In dieser Aufnahme sind Personen zu sehen.', pessoas_ata:'Sie haben das Szenario „Besprechungsprotokoll“ gewählt.', pessoas_ux:'Sie haben das Szenario „Usability-Sitzung“ gewählt.', pessoas_canal:'Die Transkription enthält die Stimme der Gegenseite.', pessoasP:'In einer Videokonferenz zeigt jede gespeicherte Aufnahme die Teilnehmerleiste — Gesicht, Name und Funktion aller Anwesenden. Das ist kein Text, die Prüfung oben sieht es also nicht. Prüfen Sie die Aufnahmen vor dem Erzeugen.', pessoasBtn:'Lupe öffnen und Personen schwärzen',
-      sensNaoAchouDica:'Das Muster wurde im laufenden Text gefunden, aber über keinem im Bild auffindbaren Wort. Schwärzen Sie es von Hand in der Lupe.',
+      sensTarjado:'{0} Schwärzungen angewendet. Prüfen Sie sie vor dem Erzeugen unter „Bearbeiten“ — die Schwärzung wird fest in das Bild eingebrannt.',
+      sensNaoAchou:'Nichts automatisch zu schwärzen', trocaPlaca:'Noch ~{0}. Die Grafikkarte dieses Rechners wird nicht genutzt.', trocaModelo:'Noch ~{0}. Der schnelle Modus ist deutlich flotter, dafür ungenauer bei Eigennamen und Abkürzungen.', trocaBtn:'Beschleunigen', trocaIndo:'Wechsel — Fertiges bleibt.', avisoAbaTr:'Transkription fertig', avisoTr:'Transkription fertig — {0} Abschnitte in {1}.', avisoFechar:'Verstanden', pessoasH:'In dieser Aufnahme sind Personen zu sehen.', pessoas_ata:'Sie haben das Szenario „Besprechungsprotokoll“ gewählt.', pessoas_ux:'Sie haben das Szenario „Usability-Sitzung“ gewählt.', pessoas_canal:'Die Transkription enthält die Stimme der Gegenseite.', pessoasP:'In einer Videokonferenz zeigt jede gespeicherte Aufnahme die Teilnehmerleiste — Gesicht, Name und Funktion aller Anwesenden. Das ist kein Text, die Prüfung oben sieht es also nicht. Prüfen Sie die Aufnahmen vor dem Erzeugen.', pessoasBtn:'„Bearbeiten“ öffnen und Personen schwärzen',
+      sensNaoAchouDica:'Das Muster wurde im laufenden Text gefunden, aber über keinem im Bild auffindbaren Wort. Schwärzen Sie es von Hand unter „Bearbeiten“.',
       sensSemCaixa:'Automatisches Schwärzen nicht verfügbar',
-      sensSemCaixaDica:'Diese Version der Texterkennung hat die Position der Wörter nicht zurückgegeben. Von Hand in der Lupe schwärzen ist weiterhin möglich.',
+      sensSemCaixaDica:'Diese Version der Texterkennung hat die Position der Wörter nicht zurückgegeben. Von Hand unter „Bearbeiten“ schwärzen ist weiterhin möglich.',
       sensH:'Personenbezogene Daten sichtbar.',
       sensP:'Beim Lesen des Bildschirms wurde {0} gefunden. Prüfen Sie das und decken Sie es gegebenenfalls mit der Schaltfläche Schwärzen innerhalb jedes Schritts ab — nichts davon wird irgendwohin gesendet, aber das Dokument, das Sie herunterladen, enthält das, was im Bild steht.',
       sensPassos:'Schritte {0}',
@@ -6340,7 +6373,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       capTempo:'{0} sur cette tâche', capCol:'Tâche', capTempoCol:'Temps sur la tâche',
       capResumo:'{0} tâche(s) dans cet enregistrement :',
       capPacote:'Un document par tâche', capPacoteOk:'{0} documents, un par tâche, dans le même .zip.',
-      capPacoteNao:'Marquez le début de chaque tâche (dans la loupe d’une étape) pour découper l’enregistrement en documents.',
+      capPacoteNao:'Marquez le début de chaque tâche (dans Modifier, sur une étape) pour découper l’enregistrement en documents.',
       clipeBaixar:'Télécharger le clip',
       clipeNome:'moment',
       clipeSelo:'clip',
@@ -6438,7 +6471,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       falaNota:'Utiliser la parole comme note',
       evPerfil:'Le système et l’exécutant restent conservés tant que cet onglet est ouvert, pour ne pas les ressaisir à chaque cas. Onglet fermé, ils disparaissent.',
       evLimpar:'Oublier', evSalvar:'Enregistrer le profil', evAbrir:'Ouvrir le profil',
-      ampliar:'Agrandir cette étape', fecharBtn:'Fermer',
+      editarBtn:'Modifier', editarTit:'Modifier cette étape — masquer, rogner, comparer, remplacer l’image, clip et parole', fecharBtn:'Fermer',
       lenteRevVolta:'Retour à la vérification', lenteRevFim:'Terminer la vérification', demoCenario:'Nous avons choisi « Preuve de test » pour l’exemple — changez-le à l’étape 1 si votre cas est autre.', lenteAcoes:'Ce que vous pouvez faire avec cette image', lenteNotaResta:'{0} caractères restants — elle devient le titre de cette étape dans le document.', tarjaBtn:'Masquer une donnée', tarjaFim:'Terminer le caviardage', tarjaLimpar:'Retirer les bandeaux',
       tarjaComo:'Faites glisser sur l’image pour couvrir. Cliquez sur un caviardage pour le retirer.',
       tarjaN:'{0} caviardage(s) sur cette étape — ils sont incrustés dans l’image qui sort dans le document.',
@@ -6467,13 +6500,13 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       cropFeito:'{0} captures rognées. Les caviardages ont été défaits — refaites-les sur la nouvelle image.',
       cropSaiu:'Rognage annulé : les captures ont retrouvé leur taille d’origine.',
       sensTarjar1:'Caviarder l’occurrence trouvée',
-      sensTarjado1:'1 caviardage appliqué. Vérifiez dans la loupe avant de générer — le caviardage est incrusté dans l’image.',
+      sensTarjado1:'1 caviardage appliqué. Vérifiez dans Modifier avant de générer — le caviardage est incrusté dans l’image.',
       sensTarjar:'Caviarder les {0} occurrences',
-      sensTarjado:'{0} caviardages appliqués. Vérifiez dans la loupe avant de générer — le caviardage est incrusté dans l’image.',
-      sensNaoAchou:'Rien à caviarder automatiquement', trocaPlaca:'Reste ~{0}. La carte graphique de cette machine n’est pas utilisée.', trocaModelo:'Reste ~{0}. Le mode rapide est bien plus vif, moins juste sur les noms propres et les sigles.', trocaBtn:'Accélérer', trocaIndo:'Changement — l’acquis reste.', avisoAbaTr:'Transcription prête', avisoTr:'Transcription prête — {0} segments en {1}.', avisoFechar:'Compris', pessoasH:'Il y a des personnes dans cet enregistrement.', pessoas_ata:'Vous avez choisi le scénario « Compte rendu de réunion ».', pessoas_ux:'Vous avez choisi le scénario « Séance d’utilisabilité ».', pessoas_canal:'La transcription contient la voix de l’autre bout de l’appel.', pessoasP:'Dans un appel vidéo, chaque écran capturé porte la bande des participants — visage, nom et fonction de chacun. Ce n’est pas du texte, l’analyse ci-dessus ne le voit donc pas. Vérifiez les écrans avant de générer.', pessoasBtn:'Ouvrir la loupe pour caviarder les personnes',
-      sensNaoAchouDica:'Le motif a été trouvé dans le texte courant, mais au-dessus d’aucun mot localisable sur l’image. Caviardez à la main dans la loupe.',
+      sensTarjado:'{0} caviardages appliqués. Vérifiez dans Modifier avant de générer — le caviardage est incrusté dans l’image.',
+      sensNaoAchou:'Rien à caviarder automatiquement', trocaPlaca:'Reste ~{0}. La carte graphique de cette machine n’est pas utilisée.', trocaModelo:'Reste ~{0}. Le mode rapide est bien plus vif, moins juste sur les noms propres et les sigles.', trocaBtn:'Accélérer', trocaIndo:'Changement — l’acquis reste.', avisoAbaTr:'Transcription prête', avisoTr:'Transcription prête — {0} segments en {1}.', avisoFechar:'Compris', pessoasH:'Il y a des personnes dans cet enregistrement.', pessoas_ata:'Vous avez choisi le scénario « Compte rendu de réunion ».', pessoas_ux:'Vous avez choisi le scénario « Séance d’utilisabilité ».', pessoas_canal:'La transcription contient la voix de l’autre bout de l’appel.', pessoasP:'Dans un appel vidéo, chaque écran capturé porte la bande des participants — visage, nom et fonction de chacun. Ce n’est pas du texte, l’analyse ci-dessus ne le voit donc pas. Vérifiez les écrans avant de générer.', pessoasBtn:'Ouvrir Modifier pour caviarder les personnes',
+      sensNaoAchouDica:'Le motif a été trouvé dans le texte courant, mais au-dessus d’aucun mot localisable sur l’image. Caviardez à la main dans Modifier.',
       sensSemCaixa:'Caviardage automatique indisponible',
-      sensSemCaixaDica:'Cette version du lecteur de texte n’a pas renvoyé la position des mots. Vous pouvez caviarder à la main dans la loupe.',
+      sensSemCaixaDica:'Cette version du lecteur de texte n’a pas renvoyé la position des mots. Vous pouvez caviarder à la main dans Modifier.',
       sensH:'Données personnelles visibles.',
       sensP:'La lecture de l’écran a repéré : {0}. Vérifiez et, le cas échéant, couvrez avec le bouton Caviarder dans chaque étape — rien de tout cela n’est envoyé nulle part, mais le document que vous téléchargez emporte ce qui est dans l’image.',
       sensPassos:'étapes {0}',
@@ -8359,7 +8392,25 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       if (n && !cx.dataset.mexido) cx.open = true;
     }
     if (typeof passos === 'function') passos();
+    /* E a GRADE, porque desde agora cada cartão mostra a primeira linha da fala
+       daquele quadro. Sem esta linha, colar uma transcrição deixava quarenta
+       cartões mudos com o texto na tela logo ao lado — e a pessoa concluía que
+       a ferramenta não pareou nada.
+
+       Com atraso, e coalescido: `refreshTr` roda a cada tecla digitada dentro
+       da caixa da transcrição, e `render()` reconstrói a grade inteira.
+       Redesenhar trezentas miniaturas por tecla seria trocar um defeito por
+       outro. O caso real é colar de uma vez; quem edita letra a letra ali
+       dentro espera parar de digitar.
+
+       O foco não corre risco: `render()` só o devolve para `.nota` e `.toque`,
+       e quem está digitando aqui está fora do `#thumbs`. */
+    if (frames.length) {
+      clearTimeout(repintarGrade);
+      repintarGrade = setTimeout(() => { if (frames.length) render(); }, 180);
+    }
   }
+  let repintarGrade = 0;
   $('tr').oninput = refreshTr;
   /* Espelhos para a régua. A MESMA análise que o documento consome — medir uma
      cópia dela no teste mediria a cópia. `falaEm` responde a pergunta que o
@@ -9138,7 +9189,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
      depois, e não tem como se atualizar sozinho. Sem carimbo, "estou com um
      problema no offline" é uma conversa sem chão — ninguém sabe de qual build
      se fala nem se o defeito já foi consertado. */
-  const VERSAO = '2026.08.21-35';
+  const VERSAO = '2026.08.21-45';
   window.__versao = () => VERSAO;
 
   const PIP_CSS = `
@@ -14348,7 +14399,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
      `render()` da lista velha dispara uma —, todas as recém-nascidas seriam
      revogadas por ainda não estarem em lugar nenhum. O navegador não avisa: ele
      entrega `<img>` com `naturalWidth` zero, a miniatura fica com altura zero, e
-     o que se vê na tela é a lupa embaixo da seta de mover.
+     o cartão colapsa numa tira de legenda com uma fileira de botões embaixo.
 
      Uma imagem só pode ser recolhida depois de ter chegado à lista pelo menos
      uma vez. Antes disso ela está a caminho. */
@@ -15176,6 +15227,25 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
      ser a segunda tela do passo 3. */
   const numeroDe = idx => (frames[idx] && frames[idx].keep) ? numeroDoQuadro(frames[idx]) : 0;
 
+  /* ---- O PARSE DA TRANSCRIÇÃO, MEMORIZADO ----
+
+     Desde agora cada cartão da grade mostra a primeira linha da fala daquele
+     quadro, e `render()` roda a cada tecla digitada numa anotação. Sem isto,
+     numa gravação de quarenta minutos, seria reparsear alguns megabytes de VTT
+     por tecla.
+
+     O que fica guardado é SÓ o parse, e não o pareamento. O parse depende do
+     texto da transcrição; o pareamento depende também de quais quadros seguem
+     mantidos e em que ordem. Guardar o pareamento pelo texto faria o cartão 1
+     continuar mudo depois de o quadro 2 ser descartado — a fala do meio
+     evaporando da tela sem nada avisar. */
+  let cuesMemo = { src: null, cues: [] };
+  function cuesLidas(){
+    const src = $('tr') ? $('tr').value : '';
+    if (cuesMemo.src !== src) cuesMemo = { src, cues: parseTranscript(src).cues };
+    return cuesMemo.cues;
+  }
+
   function render(){
     if (typeof pintarSoMarcados === 'function') pintarSoMarcados();
     /* O resumo é feito dos mesmos números dos filtros, e envelhece junto
@@ -15205,6 +15275,16 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     listaDePassos().forEach(pp => pp.quadros.forEach((q, k) => {
       mapa.set(q, pp.n); contas.set(q, { k, de: pp.quadros.length });
     }));
+    /* A fala de cada cartão sai da MESMA conta que o documento usa —
+       `falasPorQuadro`, a que dá a cada trecho um dono só e ainda devolve o
+       rabicho de quem caiu no meio de uma frase longa. Escrever aqui uma
+       janela própria daria dois pareamentos diferentes para a mesma gravação:
+       o cartão dizendo uma coisa e o PDF outra sobre o mesmo quadro. Num
+       documento de evidência isso é a ferramenta se contradizendo. */
+    const mantidos = frames.filter(x => x.keep);
+    const falasK = falasPorQuadro(mantidos, cuesLidas(), duracaoTotal());
+    const falas = new Map();
+    mantidos.forEach((q, k) => { if (falasK[k]) falas.set(q, falasK[k]); });
 
     frames.forEach((f, i) => {
       const fig = document.createElement('figure');
@@ -15288,7 +15368,12 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
            fileira distingue o momento que tem quinze segundos guardados do que
            só tem uma foto. */
         (f.clipe ? ` · <b class="selo">▶ ${t('clipeSelo')}</b>` : '') + `</span>` +
-        ((f.cap || '').trim() ? `<span class="capSelo">${esc(f.cap.trim())}</span>` : '');
+        ((f.cap || '').trim() ? `<span class="capSelo">${esc(f.cap.trim())}</span>` : '') +
+        /* 160 caracteres bastam para as duas linhas que o cartão mostra;
+           guardar no DOM a fala inteira de um quadro de dois minutos só
+           engordaria a árvore com texto que o `line-clamp` esconde. */
+        (falas.get(f) ? `<span class="fala" title="${esc(t('lenteFala'))}">${
+           esc(falas.get(f).length > 160 ? falas.get(f).slice(0, 159) + '…' : falas.get(f))}</span>` : '');
       toque.setAttribute('aria-label',
         (n ? passoN(n) + ' · ' : '') + fmt(f.t) + ' — ' + t('offTag'));
 
@@ -15329,16 +15414,19 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       };
       toque.onclick = alterna;
 
-      /* Ampliar. Fica fora do <button> que descarta: dois botões irmãos, cada um
-         com um trabalho, em vez de um clique que precisa adivinhar a intenção. */
-      const lupa = document.createElement('button');
-      lupa.type = 'button';
-      lupa.className = 'lupa';
-      lupa.dataset.i = i;
-      lupa.textContent = '⤢';
-      lupa.title = t('ampliar');
-      lupa.setAttribute('aria-label', t('ampliar') + ' — ' + (n ? passoN(n) : fmt(f.t)));
-      lupa.onclick = e => { e.stopPropagation(); abrirLente(i); };
+      /* `Editar`. Fica fora do <button> que descarta: dois botões irmãos, cada
+         um com um trabalho, em vez de um clique que precisa adivinhar a
+         intenção. O que mudou foi o nome e o lugar — de um `⤢` escondido no
+         canto da imagem para uma palavra no pé do cartão. O `title` lista o que
+         há atrás da porta, que é a informação que faltava. */
+      const editar = document.createElement('button');
+      editar.type = 'button';
+      editar.className = 'editar';
+      editar.dataset.i = i;
+      editar.textContent = t('editarBtn');
+      editar.title = t('editarTit');
+      editar.setAttribute('aria-label', t('editarTit') + ' — ' + (n ? passoN(n) : fmt(f.t)));
+      editar.onclick = e => { e.stopPropagation(); abrirLente(i); };
 
       /* Mover o passo de lugar.
 
@@ -15347,6 +15435,10 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
          distinguir arrasto de clique nesse aperto quebra os dois. Setas
          funcionam com teclado, com toque e com leitor de tela, e ninguém precisa
          adivinhar o gesto.
+
+         Elas saíram de cima da imagem e foram para a fileira de ações, ao lado
+         de `Editar`: eram invisíveis sem mouse, e nas pontas eram invisíveis
+         com mouse também.
 
          Em teste exploratório a ordem sai errada o tempo todo — a pessoa volta
          numa tela, confere outra coisa, segue. Sem isto a saída era regravar. */
@@ -15380,11 +15472,17 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       };
 
       fig.appendChild(toque);
-      fig.appendChild(lupa);
-      fig.appendChild(mover(-1, 'moverEsq'));
-      fig.appendChild(mover(1, 'moverDir'));
       fig.appendChild(cap);
       fig.appendChild(campo);
+      /* A ordem do DOM é a ordem do teclado: ver a tela, ler a legenda,
+         escrever a anotação — que é o trabalho desta etapa — e só então as
+         ações sobre o cartão. */
+      const acoes = document.createElement('div');
+      acoes.className = 'acoes';
+      acoes.appendChild(mover(-1, 'moverEsq'));
+      acoes.appendChild(editar);
+      acoes.appendChild(mover(1, 'moverDir'));
+      fig.appendChild(acoes);
       if (destaqueMov === i) fig.classList.add('moveu');
       box.appendChild(fig);
     });
@@ -17898,7 +17996,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
   /* O botão de voltar para a revisão, dentro da lente.
 
      Ele só existe quando a lente foi aberta DE DENTRO da revisão quadro a
-     quadro. Aberta pela lupa de uma miniatura, a lente é só uma lupa e não há
+     quadro. Aberta pelo `Editar` de uma miniatura, ela é só uma lente e não há
      percurso nenhum a que voltar — um botão dizendo "finalizar a revisão" ali
      seria uma porta para um lugar onde a pessoa não está. */
   function pintarLenteRevisao(){
@@ -17930,7 +18028,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     lenteI = -1;
     // o foco volta para a miniatura de onde saiu; sem isso o teclado recomeça no topo
     if (lenteVoltar && document.contains(lenteVoltar)) lenteVoltar.focus();
-    else { const b = $('thumbs').querySelector('.lupa'); if (b) b.focus(); }
+    else { const b = $('thumbs').querySelector('.editar'); if (b) b.focus(); }
     lenteVoltar = null;
     /* Se a lente foi aberta DE DENTRO da revisão assistida, é para lá que a
        pessoa volta — e a imagem que ela vê ali tem que ser a imagem que ela

@@ -124,7 +124,7 @@ console.log('\n[6] a tarja é queimada no slide, como nas outras saídas');
 {
   /* Se o PowerPoint recebesse a imagem original e a tarja só como um retângulo
      por cima, qualquer um arrastaria o retângulo e leria o dado. */
-  await pg.locator('#thumbs figure').nth(1).locator('.lupa').click();
+  await pg.locator('#thumbs figure').nth(1).locator('.editar').click();
   await pg.waitForSelector('#lente:not(.hide)');
   await pg.waitForTimeout(400);
   await pg.locator('#tarjaModo').click();

@@ -127,7 +127,7 @@ console.log('\n[3] o clipe toca na lente');
     return f.findIndex(x => x.querySelector('.selo'));
   });
   ok('há um quadro com clipe', i >= 0, String(i));
-  await pg.locator('#thumbs figure').nth(i).locator('.lupa').click();
+  await pg.locator('#thumbs figure').nth(i).locator('.editar').click();
   await pg.waitForSelector('#lente:not(.hide)');
   await pg.waitForTimeout(900);
   ok('a caixa do clipe apareceu', await pg.locator('#lenteClipeCx').isVisible());
@@ -184,7 +184,7 @@ console.log('\n[4b] reabrir o pacote traz o clipe de volta');
      String(await pg.locator('#thumbs .selo').count()));
   const i = await pg.evaluate(() => [...document.querySelectorAll('#thumbs figure')]
                                      .findIndex(x => x.querySelector('.selo')));
-  await pg.locator('#thumbs figure').nth(i).locator('.lupa').click();
+  await pg.locator('#thumbs figure').nth(i).locator('.editar').click();
   await pg.waitForSelector('#lente:not(.hide)');
   await pg.waitForTimeout(900);
   const w = await pg.evaluate(()=>document.getElementById('lenteClipe').videoWidth);

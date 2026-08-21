@@ -33,7 +33,7 @@ await pg.waitForSelector('#prevCard:not(.hide)', { timeout: 40000 });
 await pg.waitForTimeout(600);
 
 console.log('[1] abrir a lente e as ferramentas de destaque');
-await pg.locator('#thumbs figure').first().locator('.lupa').click();
+await pg.locator('#thumbs figure').first().locator('.editar').click();
 await pg.waitForSelector('#lente:not(.hide)', { timeout: 10000 });
 ok('a barra de destaque começa escondida', !(await pg.locator('#mkBox').isVisible()));
 await pg.locator('#mkModo').click();

@@ -286,7 +286,7 @@ console.log('\n[4] gravar de novo não dobra a conta de blobs');
   ok('e as de agora continuam vivas — soltar demais seria pior', depois >= 4, String(depois));
 
   /* Trocar a imagem de um passo: a antiga não tem para onde voltar. */
-  await pg.locator('#thumbs figure').first().locator('.lupa').click();
+  await pg.locator('#thumbs figure').first().locator('.editar').click();
   await pg.waitForSelector('#lente:not(.hide)');
   await pg.setInputFiles('#trocarArq', RAIZ + '/public/apple-touch-icon.png');
   await pg.waitForTimeout(900);

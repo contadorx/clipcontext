@@ -94,7 +94,7 @@ await pg.waitForFunction(() => document.querySelectorAll('#thumbs figure').lengt
 await pg.waitForTimeout(500);
 
 console.log('\n[3] o campo da anotação cabe o que se escreve nele');
-await pg.locator('#thumbs figure .lupa').first().click();
+await pg.locator('#thumbs figure .editar').first().click();
 await pg.waitForTimeout(500);
 {
   const cx = await pg.locator('#lenteNota').evaluate(e => ({
@@ -113,11 +113,11 @@ await pg.waitForTimeout(500);
 await pg.locator('#lenteFechar').click();
 await pg.waitForTimeout(400);
 
-console.log('\n[4] a lente aberta pela lupa NÃO fala em revisão');
+console.log('\n[4] a lente aberta pelo Editar NÃO fala em revisão');
 {
   /* Um botão dizendo "finalizar a revisão" numa lente aberta pela miniatura
      seria uma porta para um lugar onde a pessoa não está. */
-  await pg.locator('#thumbs figure .lupa').first().click();
+  await pg.locator('#thumbs figure .editar').first().click();
   await pg.waitForTimeout(400);
   ok('o botão de voltar para a revisão está escondido',
      await pg.locator('#lenteRev').evaluate(e => e.classList.contains('hide')));
@@ -220,7 +220,7 @@ console.log('\n[9] com o destaque ligado, "Cortar as bordas" corta — não dese
 {
   await pg.locator('#lenteFechar').click().catch(() => {});
   await pg.waitForTimeout(300);
-  await pg.locator('#thumbs figure .lupa').first().click();
+  await pg.locator('#thumbs figure .editar').first().click();
   await pg.waitForTimeout(500);
 
   const antes = await pg.evaluate(() => {

@@ -372,7 +372,7 @@ console.log('\n[8] cortar só ESTA tela não mexe nas outras');
   await pg.evaluate(() => { (window.__quadros() || []).forEach(f => { f.keep = true; }); });
   await redesenhar();
   const antes = await pg.evaluate(() => (window.__quadros() || []).map(f => f.img.w));
-  await pg.locator('#thumbs figure .lupa').nth(1).click();
+  await pg.locator('#thumbs figure .editar').nth(1).click();
   await pg.waitForSelector('#lente:not(.hide)');
   await pg.locator('#cropUma').click();
   await pg.waitForTimeout(250);
@@ -439,7 +439,7 @@ console.log('\n[9] cortar UMA tela não deforma as outras no PDF');
   });
 
   // corta SÓ a primeira, que é o caso do relato
-  await pg.locator('#thumbs figure .lupa').first().click();
+  await pg.locator('#thumbs figure .editar').first().click();
   await pg.waitForSelector('#lente:not(.hide)');
   await pg.locator('#cropUma').click();
   await pg.waitForTimeout(250);

@@ -195,7 +195,7 @@ console.log('\n[5] o clipe do momento também leva o rosto');
      String(await pg.locator('#thumbs .selo').count()));
   const i = await pg.evaluate(() => [...document.querySelectorAll('#thumbs figure')]
                                      .findIndex(x => x.querySelector('.selo')));
-  await pg.locator('#thumbs figure').nth(i).locator('.lupa').click();
+  await pg.locator('#thumbs figure').nth(i).locator('.editar').click();
   await pg.waitForSelector('#lente:not(.hide)');
   await pg.waitForTimeout(1200);
   const r = await pg.evaluate(async () => {

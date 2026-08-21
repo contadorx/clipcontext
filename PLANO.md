@@ -1,223 +1,202 @@
-# Sequência de builds — Walkstamp
+# O que falta — Walkstamp
 
-**Aberto em:** 20/08/2026
-**Origem:** a auditoria de usabilidade e código e a proposta de redesenho de UX, medidas
-contra o código em 20/08.
+**Atualizado em:** 21/08/2026 — depois do A0, do A1 e do B3
+**Origem:** a auditoria de código, a proposta de redesenho de UX e a avaliação das
+features pagas, medidas contra o código.
 
-Cada build abaixo é **entregável sozinho**: sai com zip, régua verde e um ganho que a pessoa
-percebe. Nenhum depende do seguinte. A ordem é por (risco removido × valor) ÷ custo — e não
-pela ordem em que os documentos os listaram.
-
----
-
-## As três decisões que moldam a sequência
-
-**1. Português primeiro, com queda para o português.** Sete dias de uso real:
-
-| idioma | abriu | carregou vídeo | baixou documento |
-|---|---:|---:|---:|
-| pt | 361 | 153 | **71** |
-| en | 48 | 3 | **0** |
-| es | 7 | 0 | **0** |
-| de | 0 | 0 | **0** |
-| fr | 0 | 0 | **0** |
-
-91% dos eventos são pt, dois idiomas não têm um único registro, e nenhum documento saiu fora
-do português. Chave nova nasce escrita em pt e **copiada** para os outros quatro: `chaves.mjs`
-continua verde, nenhuma tela mostra vazio, e traduzir depois é trocar string — não caçar o que
-falta. Isso tira quase todo o custo "×5 idiomas" das estimativas.
-
-Vale só para a ferramenta (`I18N` no `src/template.html`). No site, `build.py` faz `return 1`
-se faltar chave em qualquer idioma — lá não existe pt-first.
-
-**2. O aditivo vem antes do reflow.** Builds 1 a 6 criam estado novo sem mexer na hierarquia da
-página; 7 a 9 remexem. Isso importa porque **69 dos 125 testes afirmam visibilidade ou ordem** e
-são eles que cobram o reflow. Fazer o aditivo primeiro entrega valor sem pagar essa conta, e dá
-dados para decidir se o reflow ainda é o gargalo.
-
-**3. Régua rasa é pior que régua nenhuma.** A régua da anotação passou verde com o recurso
-completamente quebrado, porque usava `fill()` — que atribui o valor de uma vez — e o defeito
-morava no caminho de uma tecla. Congelar afirmações de **layout** durante o reflow é legítimo;
-congelar as que carregam trabalho (texto → `f.nota` → documento, "não perdi o que escrevi",
-"o download saiu completo") nunca é.
+> **Tudo abaixo foi medido** contra a árvore do `walkstampbuild8_1.zip`, que é o `main`
+> de produção (`285d4a5`) mais os seis commits do `APLICAR/correcoes.bundle`.
 
 ---
 
-## Build 1 — A régua roda, e a placa não trava (1,5 d)
+## Onde estamos
 
-O único com urgência de defeito.
+| Build | Estado |
+|---|---|
+| 1 — a régua roda, e a placa não trava | **feito** |
+| 2 — o documento tem fim | **feito** |
+| 3 — a saída certa primeiro | **feito**: transportado no A0 |
+| 4 — parar sem perder | **feito**, e melhor do que eu tinha feito |
+| 7 — a entrada | **feito**, já no `main` |
+| 8 — a conferência | **feito**: o menu `Editar` da grade fechou o build |
+| 5, 6, 9, 10 | por fazer |
 
-- **P0 — o fallback da GPU espera por si mesmo.** `usandoPipe++` fica antes do `try`, o
-  `finally { usandoPipe-- }` só roda depois do `catch`, e o `catch` chama `soltarPipe()`, que
-  espera `usandoPipe > 0` por até 600 × 100 ms. Um minuto parado na máquina que acabou de
-  falhar. Além disso o pipeline de recuperação nasce com `{ dtype:'q8' }` e **sem
-  `device:'wasm'`** — pode voltar ao backend que quebrou.
-- **A suíte não roda fora desta máquina.** `preparar.sh` procura `/root/cc/walkstamp`; os testes
-  carregam `/root/walkstamp`. Ele substitui zero arquivos. 117 testes com caminho absoluto, 118
-  com o Chromium fixo.
+A perna da etapa de conferir caiu de **2828 px para 1649 px — 42% menor** — recolhendo a
+fala e a identificação, que são estado do material e não tarefa.
 
-**Régua:** teste que simula erro na *primeira* inferência e cobra (a) sem espera artificial,
-(b) um pipeline vivo, (c) o mesmo trecho refeito, (d) `device === 'wasm'`. Mais `preparar.sh`
-derivando a raiz de `import.meta.url` e o Playwright resolvendo o navegador.
+### A correção do relato: o build 3 nunca chegou
 
----
+Medido na árvore do zip:
 
-## Build 2 — O documento tem fim (2,5–4 d)
+```
+recPrim       0        saidasTodas   0
+```
 
-Hoje o download acontece e a tela fica igual, com os mesmos botões, como se nada tivesse
-ocorrido. E o **prompt para IA é o passo 4 de 4** — a numeração diz que ele é um quarto da
-tarefa, e para a maioria não é tarefa nenhuma.
+A saída recomendada e a gaveta "ver todos os formatos" **não existem na linhagem de
+produção**. Elas foram feitas, testadas e comitadas numa cópia que nunca foi aplicada —
+`2229ff8`, com `saidarec.mjs` e as 39 adaptações de teste que a gaveta cobrou: 45
+arquivos, 1030 linhas. Não é um build a fazer; é um **transporte**.
 
-- estado de conclusão depois de baixar: o que saiu, quantas telas, se a fala estava completa;
-- distinguir `documento baixado` de `projeto guardado`, uma vez só, sem sermão;
-- baixar de novo sem reprocessar;
-- prompt sai da numeração e vira "próximos passos" da conclusão.
+### E o build 4 deles é melhor que o meu
 
-**Aditivo.** Cria tela nova, não move as existentes.
+Medido: `role="status"` 8×, `trMotorCx` (o motor recolhido, que o plano pedia) 5×,
+"após este trecho" 3×, e existe `testes/parar.mjs`. O meu — `trLinha`/`trPct`/`trEta`,
+inacabado e sem régua verde — deve ser **descartado**, não portado.
 
----
-
-## Build 3 — A saída certa primeiro (2–3 d)
-
-Sete formatos com o mesmo peso viram sete decisões. A ferramenta já sabe o cenário (`#modelo`).
-
-- formato recomendado por cenário, com os demais recolhidos em "ver todos";
-- layout e papel só depois de escolher um formato que os use;
-- vocabulário da interface unificado — *etapa*, *tela*, *passo do procedimento*,
-  *projeto Walkstamp*, *documento* (pt-first, copiado para os quatro).
+Falta um detalhe pequeno no deles: a consequência medida. `sem cerca de` dá **0**. O
+plano pedia "a fala está em 62%; o documento ficará sem aproximadamente 16 minutos
+finais" — hoje a tela diz que parou, mas não diz o quanto ficou de fora.
 
 ---
 
-## Build 4 — Parar sem perder (4–6 d)
+## A fila do que falta
 
-A interface diz que dá para deixar rodando, mas não há como parar e ficar com o que já saiu —
-fechar a aba perde o trabalho.
+A ordem respeita o que você pediu: **terminar o UX do app primeiro**. Depois vem o que
+trava a venda, e por último o motor e a dívida. Uma exceção argumentada está no fim
+desta seção.
 
-- "Parar e ficar com o que já está pronto" entre janelas de transcrição;
-- não prometer abortar a inferência corrente: dizer "parando após este trecho";
-- separar, no `#astatus`, **etapa** (`Transcrevendo no processador`), **progresso** (`46%`),
-  **previsão** (`faltam ~7 min`), **motor** (recolhido) e **ação**;
-- leitor de tela anunciando só início, mudança relevante, erro e fim.
+### Trilha A — terminar o UX (13–17 d, só o A2)
+
+**A0. Transportar o build 3 e fechar o 4 — FEITO**
+
+`2229ff8` aplicado sobre a linhagem: a saída recomendada por cenário, com o catálogo
+recolhido. `recPrim` e `saidasTodas` davam zero na árvore do zip; agora dão 11 no
+`app.html`.
+
+**A1. O menu `Editar` da grade — FEITO**
+
+O que faltava do build 8, e não era o que a proposta descrevia. Medido, o cartão não
+tinha tarja nem recorte à vista — eles já moravam na lente. O defeito era outro:
+
+- a lente só abria por um `⤢` com `opacity:0` até o mouse passar por cima. **Num aparelho
+  de toque não existe `:hover`** — metade da ferramenta era inalcançável. Agora é um botão
+  `Editar`, sempre visível, com o `title` listando o que há atrás da porta;
+- a seta de mover desabilitada era `opacity:0 !important`: nas pontas, "não há para onde"
+  era silêncio. Agora fica apagada, não sumida;
+- o cartão passou a mostrar **a primeira linha da fala**, pela mesma conta que o documento
+  usa — cartão e PDF não contam duas histórias sobre o mesmo quadro.
+
+A anotação **continua no cartão**, contra a proposta: anotar é o trabalho desta etapa, e
+um trabalho que exige abrir um diálogo por quadro é um trabalho que ninguém faz quarenta
+vezes.
+
+Régua: `testes/cartao.mjs`, no grupo `app`.
+
+**A2. As três etapas — build 9 (13–17 d)**
+
+O reflow de verdade: `Entrada → Conferir → Baixar`, uma ação primária por etapa, a frase
+"próxima ação" abaixo. É aqui que os 69 testes de visibilidade cobram.
+
+Vai junto o **vocabulário unificado**, que foi adiado do build 3 exatamente para cá:
+49 "frame", 46 "quadro" e 24 "trecho" só no dicionário português, mais 14 chaves que
+chamam as *fases da ferramenta* de "passo" — a mesma palavra que o documento usa para os
+passos do procedimento. Fazer o rename antes do reflow seria fazê-lo duas vezes.
+
+E a acessibilidade: foco e rolagem nas transições, `aria-current="step"`, teclado
+completo, zoom 200%, NVDA + Chrome e VoiceOver + Safari.
+
+Ao fim, **descongelar** as réguas de layout e reescrevê-las contra a hierarquia final.
+
+### Trilha B — o que trava a venda (4,5–7,5 d)
+
+**B1. Verdade única entre página, catálogo e código (1–2 d)**
+
+Medido: `src/features.json` tem **zero** itens marcados `breve`; `precos.pt.html` diz
+"breve" **cinco vezes**. Ou o produto deixa de vender algo que já funciona, ou promete
+como pronto algo que não passou por produção. Os dois são problema de release, não de
+texto. Cards, tabela e feature flags devem nascer da mesma fonte.
+
+**B2. Webhook único (1–2 d)**
+
+Medido: existem os dois — `app/api/stripe/webhook/route.ts` e
+`supabase/functions/walkstamp-stripe/index.ts`. O repositório não diz qual URL está
+configurada na Stripe. Eleger uma autoridade, desativar a outra, testar com a Stripe CLI,
+e tornar idempotência por `event.id` e replay observáveis.
+
+**B3. Banco versionado — FEITO**
+
+Eram zero `.sql` contra mais de vinte RPCs. Agora são **42 migrações versionadas** em
+`supabase/migrations/`, e `supabase/testes/prova.sh` reconstrói o esquema do zero e
+compara com a produção: **as oito categorias batem** — colunas, funções, índices,
+restrições, RLS, sequências, permissões e baldes.
+
+As 38 primeiras saíram **verbatim** de `supabase_migrations.schema_migrations`, cada uma
+conferida por md5 contra o que a base diz que aplicou. As quatro últimas são o que a
+comparação encontrou de fora do Git:
+
+- **três objetos que ninguém versionou** — `negocio_nps()`, `negocio_painel_base()` e o
+  `negocio_painel()` reescrito, feitos à mão no editor do painel. Se a base tivesse sido
+  perdida, o painel voltaria sem o NPS e ninguém saberia dizer o que faltou;
+- **sete tabelas sem RLS** — `cliente`, `config`, `emissao`, `fatura`, `modelo_doc`,
+  `recado`, `usuario`. Não é porta aberta (`anon` não tem USAGE no esquema `walkstamp`),
+  é a segunda tranca;
+- **dois chamados de mentira na produção**, sobra de uma migração de prova. Um deles está
+  marcado como respondido e entra no tempo médio que a **página pública** mostra;
+- **treze funções sem `search_path` fixo**, que é o que o linter do Supabase apontava.
+
+Vai junto `seed.sql`, `config.toml` e uma prova de comportamento com 40 afirmações — a
+licença, os assentos, o chamado, o roteiro, a cobrança, o blog, o painel, o expurgo e a
+parede que separa o navegador das tabelas. Ver `supabase/LEIA-ME.md`.
+
+As quatro novas ainda **não foram aplicadas**: falta um `supabase db push`, e só a da
+limpeza mexe em dado.
+
+**B4. Um estado por plano no funil (0,5 d)**
+
+Hoje a página oferece "Começar os 14 dias", "Falar" e um campo para avisar "quando o
+plano pago sair", tudo junto. Escolher um por plano: *Testar agora*, *Pedir acesso*,
+*Entrar na lista*.
+
+**B5. Reposicionar o Personal em torno do roteiro (2–3 d)**
+
+A página vende identidade visual; o valor econômico real é a orquestração de casos.
+"Colocar logotipo" se compara com editar um Word. "Importar 40 casos, executar cada um
+pelo link, e receber status, executor, data, hash e arquivo de volta" substitui um
+processo inteiro. Marca própria continua no pago — como prova visível do plano, não como
+a justificativa.
+
+### Trilha C — motor e dívida (22,5–32,5 d)
+
+**C1. Build 5 — medir antes de otimizar (3,5–4,5 d).** `performance.mark()` em cada
+fronteira, amostras versionadas, cold e warm cache. E a pergunta aberta: inglês abre 48
+vezes e converte zero.
+
+**C2. Build 6 — menos árvore, menos download (3–4 d).** Classificar o erro e saltar
+direto para o fallback pertinente; fixar versões; avisar antes de um fallback de 73 MB.
+
+**C3. Build 10 — a dívida (16–24 d).** Máquina de estados do motor ASR, modularizar a
+fonte, medir o pico de memória, medir WER antes de tocar na compactação de silêncio.
 
 ---
 
-## Build 5 — Medir antes de otimizar (3,5–4,5 d)
+## Fora da fila, com você
 
-Sem isto, trocar janela, modelo ou runtime é palpite. Estende o `medir()` que já existe (9
-eventos, com opt-out) em vez de construir telemetria nova.
-
-- `performance.mark()` em cada fronteira: leitura, decodificação, cache/download, sessão ONNX,
-  primeiro texto, inferência total, fallback, áudio enviado ÷ áudio original;
-- amostras versionadas de 1, 10 e 40 min, cold e warm cache, CPU 1/4 threads e GPU, saída JSON;
-- **e a pergunta aberta:** inglês abre 48 vezes e converte zero. Funil quebrado ou robôs?
-  Meia hora de consulta responde, e muda a prioridade de traduzir.
+- **sitemap** — precisa do `build.py` depois de aplicar;
+- **figura do blog** — precisa de deploy; até lá, exportar abaixo de 1 MB;
+- **a branch remota velha** `claude/ux-build-continuation-2hs0b2`, parada em `f505ea8`:
+  apagá-la faz o contador de commits parar de mentir, e ela não tem nada que já não
+  esteja no `main`.
 
 ---
 
-## Build 6 — Menos árvore, menos download (3–4 d)
+## O total
 
-Numa máquina sem combinação lembrada, o `buildPipe()` percorre ambientes, runtimes, quantização,
-repositório reserva, cache limpo e fp32 — algumas falhas custam 73–200 MB extras. Há ainda uma
-URL sem versão (`@huggingface/transformers`).
-
-- classificar o erro (rede, arquivo, operador, memória, worker/COEP, backend) e saltar direto
-  para o fallback pertinente;
-- fixar todas as versões, com manifesto testado de biblioteca ↔ runtime ↔ modelo;
-- avisar antes de um fallback caro: "a alternativa baixa mais 73 MB";
-- nunca limpar cache sozinho sem evidência de corrupção.
-
----
-
-## Build 7 — A entrada (1,5–2,5 d)
-
-Primeiro toque no reflow, e o mais barato dele.
-
-- gravar / escolher vídeo / abrir projeto deixam de ter o mesmo peso;
-- Drive vira origem dentro de "escolher vídeo", não terceira tarefa;
-- roteiro aparece **depois** do tipo de documento e só nos cenários em que ajuda;
-- opções de gravação recolhidas; modelo expresso por intenção (rápido / mais preciso), com
-  tamanho e motor como consequência abaixo.
-
----
-
-## Build 8 — A conferência (7–11 d)
-
-- resumo automático antes da grade: quantas telas, quantas com fala, quantas repetidas;
-- limpeza recomendada como ação primária, com consequência antes e **desfazer** depois — e
-  nunca descartando o que foi marcado à mão;
-- cartão da grade com o essencial; anotação, tarja, recorte, comparação e clipe dentro de
-  `Editar`;
-- fala como painel contextual: transcrição, vocabulário, hesitações e tradução moram lá dentro;
-- identificação progressiva: só o campo que falta para o cabeçalho, na hora de gerar.
-
----
-
-## Build 9 — As três etapas (13–17 d)
-
-O reflow de verdade: `Entrada → Conferir → Baixar`, com uma ação primária por etapa e a frase
-"próxima ação" abaixo. É aqui que os 69 testes de visibilidade cobram, e é por isso que ele vem
-depois de tudo que entrega valor sem mexer na página.
-
-- controlador de etapas com estado **derivado** dos dados que já existem — não um segundo lugar
-  onde mora a verdade;
-- `hidden`/classes para revelar painéis, sem duplicar controle nem inventar id novo;
-- mover elemento no DOM só quando a ordem de foco exigir;
-- acessibilidade: foco e rolagem nas transições, `aria-current="step"`, teclado completo, zoom
-  200%, NVDA + Chrome e VoiceOver + Safari.
-
-Ao fim, **descongelar** as réguas de layout e reescrevê-las contra a hierarquia definitiva.
-
----
-
-## Build 10 — A dívida que sustenta o resto (16–24 d)
-
-Nada aqui o usuário vê. Tudo aqui decide o custo dos próximos anos.
-
-- **máquina de estados do motor ASR** (`idle`, `loading`, `ready`, `inferring`, `switching`,
-  `disposing`, `failed`) com fila e dono explícito da sessão. O P0 do build 1 é sintoma disto:
-  dez variáveis globais cooperando por convenção;
-- **modularizar a fonte** — o artefato continua sendo um HTML só; o `build.py` concatena. Começar
-  pelo motor ASR e pelos parsers, com funções puras e teste sem navegador;
-- **memória**: `decodeTo16k()` carrega arquivo comprimido, buffer decodificado e `Float32Array`
-  ao mesmo tempo. Medir o pico por duração antes de redesenhar; só então WebCodecs em blocos;
-- **qualidade da compactação de silêncio**: medir WER/CER com voz baixa, ruído e microfone
-  distante, com e sem compactação, antes de tocar em margens — e nunca adicionar VAD neural só
-  para ter VAD.
-
----
-
-## O total, e como ler
-
-| Trecho | Dias | O que você tem no fim |
+| Trilha | Dias | O que você tem no fim |
 |---|---:|---|
-| Builds 1–4 | **10–15** | nada trava, o documento tem fim, a saída certa vem primeiro, dá para parar sem perder |
-| Builds 5–6 | **6,5–8,5** | você mede antes de otimizar, e o pior caso da rede encolhe |
-| Builds 7–9 | **22–31** | o redesenho de UX inteiro, com acessibilidade validada |
-| Build 10 | **16–24** | a dívida paga; as próximas mudanças ficam baratas |
-| **Total** | **54–78** | |
-
-Os documentos originais somavam 20–28 dias só para a parte de UX. A diferença é honesta: são os
-69 testes de visibilidade, os cinco idiomas (que o pt-first quase zera) e o backlog de código
-que a proposta de UX não contava.
-
-**Se for para parar em algum lugar, pare depois do build 4.** Dez a quinze dias, quatro dos
-cinco maiores ganhos das duas listas, e nenhuma linha do reflow.
+| A — terminar o UX | **13–17** | o redesenho inteiro, com acessibilidade validada |
+| B — destravar a venda | **4,5–7,5** | uma verdade só e cobrança auditável (o banco já é reconstruível) |
+| C — motor e dívida | **22,5–32,5** | você mede antes de otimizar; as próximas mudanças ficam baratas |
+| **Total** | **40–57** | |
 
 ---
-
-## O que sai do caminho principal, e não do produto
-
-Reabrir e consolidar projetos como bloco fixo · detalhes de modelo e runtime · webcam e clipe ·
-controles finos do detector · OCR e ações raras em lote · tradução múltipla · Jira, Google Docs
-e SCORM · layout e papel antes do formato · "JSON" como termo primário · prompt como quarta
-etapa · diagnóstico técnico sem erro presente.
-
-Nenhum deles é removido. Todos continuam a no máximo dois cliques.
 
 ## O que não fazer
 
-Aumentar threads além de quatro sem medir captura concorrente · trocar o modelo padrão antes de
-comparar tempo e qualidade em áudio representativo · VAD neural só para ter VAD · virtualizar a
-grade para resolver lentidão de transcrição · backend ou GPU remota, que contradiz a proposta
-local · remover os fallbacks (eles ficam mais seletivos, não desaparecem) · converter o artefato
-final em bundle com dependências: modularizar a **fonte** preserva o HTML único.
+Aumentar threads além de quatro sem medir captura concorrente · trocar o modelo padrão
+antes de comparar tempo e qualidade em áudio representativo · VAD neural só para ter VAD ·
+virtualizar a grade para resolver lentidão de transcrição · **transcrição na nuvem como
+fallback automático** — ela toca a promessa mais sensível do produto e só pode existir
+como escolha explícita, com preço, região e retenção à vista · API genérica de frames +
+transcrição, que vira commodity: a defensável é a de **evidência estruturada** · remover
+os fallbacks (eles ficam seletivos, não desaparecem) · converter o artefato final em
+bundle: modularizar a **fonte** preserva o HTML único.

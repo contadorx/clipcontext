@@ -23,7 +23,7 @@ await pg.waitForTimeout(400);
 
 console.log('[1] trocar a imagem do passo 2');
 await pg.locator('#thumbs figure').nth(1).locator('input.nota').fill('acesse a transacao');
-await pg.locator('#thumbs figure').nth(1).locator('.lupa').click();
+await pg.locator('#thumbs figure').nth(1).locator('.editar').click();
 await pg.waitForSelector('#lente:not(.hide)');
 const antes = await pg.locator('#lenteImg').getAttribute('src');
 ok('o botão existe na lente', await pg.locator('#trocarImg').isVisible());

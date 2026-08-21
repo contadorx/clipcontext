@@ -26,7 +26,7 @@ for (let i=0;i<6;i++)
 await pg.waitForTimeout(300);
 
 const marcar = async (i, nome) => {
-  await pg.locator('#thumbs figure').nth(i).locator('.lupa').click();
+  await pg.locator('#thumbs figure').nth(i).locator('.editar').click();
   await pg.waitForSelector('#lente:not(.hide)');
   await pg.waitForTimeout(250);
   await pg.fill('#lenteCap', nome);
