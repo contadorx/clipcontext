@@ -1,4 +1,4 @@
-From 3595520da0a1c2f1a420292438481243aa0bddaf Mon Sep 17 00:00:00 2001
+From 8662c32fbdf16183e5f25cee9ca75ad057a1a0e1 Mon Sep 17 00:00:00 2001
 From: Claude <noreply@anthropic.com>
 Date: Fri, 21 Aug 2026 21:56:49 +0000
 Subject: [PATCH] B3: o banco passa a caber no Git, e uma prova diz que cabe
@@ -77,6 +77,7 @@ antiga movida para SEQUENCIA-DE-BUILDS.md, que e de onde ela veio.
 Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
 Claude-Session: https://claude.ai/code/session_01SLmPMaXsHaVpudHTw6nJDS
 ---
+ .gitignore                                    |  10 +
  PLANO.md                                      | 299 ++++++++---------
  SEQUENCIA-DE-BUILDS.md                        | 223 +++++++++++++
  supabase/LEIA-ME.md                           | 169 ++++++++++
@@ -132,7 +133,7 @@ Claude-Session: https://claude.ai/code/session_01SLmPMaXsHaVpudHTw6nJDS
  supabase/testes/impressao.sql                 |  92 ++++++
  supabase/testes/prova.sh                      |  48 +++
  supabase/testes/reconstruir.sh                |  32 ++
- 55 files changed, 4445 insertions(+), 160 deletions(-)
+ 56 files changed, 4455 insertions(+), 160 deletions(-)
  create mode 100644 SEQUENCIA-DE-BUILDS.md
  create mode 100644 supabase/LEIA-ME.md
  create mode 100644 supabase/MANIFESTO.md5
@@ -188,6 +189,24 @@ Claude-Session: https://claude.ai/code/session_01SLmPMaXsHaVpudHTw6nJDS
  create mode 100755 supabase/testes/prova.sh
  create mode 100755 supabase/testes/reconstruir.sh
 
+diff --git a/.gitignore b/.gitignore
+index b07bc19..9eaaf2a 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -87,3 +87,13 @@ next-env.d.ts
+ # Gerados pelo build.py para o Next ler
+ src/marca.json
+ src/rotas.json
++
++# ---------------------------------------------------------------------------
++# Rascunho da CLI do Supabase
++# ---------------------------------------------------------------------------
++# Desde que `supabase/` virou um diretório de verdade — com `config.toml` e
++# `migrations/` —, a CLI passa a deixar rascunho ali dentro: `.temp/` guarda a
++# versão dela e o token da sessão, `.branches/` guarda o estado do banco local.
++# Nada disso é fonte, e o token não pode entrar num repositório público.
++supabase/.temp/
++supabase/.branches/
 diff --git a/PLANO.md b/PLANO.md
 index dcce7fd..50b76b7 100644
 --- a/PLANO.md

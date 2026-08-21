@@ -8,7 +8,13 @@
  * marca de cliente configurada, é a dela; sem, é a nossa. Nunca as duas
  * disputando o mesmo lugar, e nunca vazio.
  */
-import { chromium } from 'playwright';
+/* Do `_navegador.mjs`, e nao do Playwright cru. Este arquivo baixa `#html` e
+   `#go`, que desde o A0 moram dentro da gaveta "ver todos os formatos" — e um
+   botao dentro de um `hide` nao tem caixa, entao `click()` recusa.
+
+   Ele passou despercebido na primeira varredura porque chama o id por
+   VARIAVEL — `baixar('html', ...)` —, e a busca por `#html` nao o alcancou. */
+import { chromium } from './_navegador.mjs';
 import http from 'http'; import fs from 'fs';
 
 import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';

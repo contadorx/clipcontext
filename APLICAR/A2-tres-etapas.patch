@@ -1,0 +1,1916 @@
+From 4f1eb8ad6a57db534b3015bc23ece3277714c5cd Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Fri, 21 Aug 2026 23:07:10 +0000
+Subject: [PATCH] =?UTF-8?q?A2:=20Entrada,=20Conferir,=20Baixar=20=E2=80=94?=
+ =?UTF-8?q?=20e=20Gerar=20sai=20de=20dentro=20da=20Revisao?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+A numeracao mentia duas vezes.
+
+"2 — A fala (opcional)" e onde moram `#auto`, `#extract` e os ajustes de
+extracao. O unico botao que faz a ferramenta funcionar estava dentro de um passo
+rotulado como dispensavel.
+
+"3 — Revisao" escondia quatro blocos, e o quarto era GERAR — a coisa que a
+pessoa veio buscar, como sub-item de outra coisa, atras de tres blocos de
+rolagem. Era o defeito de numeracao mais caro da ferramenta: quem abria a pagina
+lia "tres passos" e o terceiro terminava numa revisao que nao parecia levar a
+lugar nenhum.
+
+Agora:
+
+- o cartao da fala perde o numero — ele nunca foi uma etapa, e a segunda metade
+  da ENTRADA;
+- `Gerar` sai de `#prevCard` e vira `#cardBaixar`, a etapa 3;
+- uma barra em cima com as tres, `aria-current="step"`, botoes que levam a etapa
+  e movem o foco para o cabecalho (um `<div>` focado nao e anunciado por nada);
+- uma frase de proxima acao abaixo, em `role="status"`.
+
+O ESTADO E DERIVADO, e nao guardado. Nao ha quadro → entrada; ha quadros e nada
+saiu → conferir; saiu documento → baixar. Nao existe variavel de etapa, e por
+isso a barra nao pode divergir da tela: recomecar a sessao a devolve sozinha ao
+inicio, porque a resposta nunca esteve guardada em lugar nenhum para ficar
+velha. E o mesmo argumento das bolinhas dos subpassos, e `etapas.mjs` cobra
+exatamente esse caso.
+
+UM GANHO QUE NAO ESTAVA PREVISTO: com `Baixar` num cartao proprio, `passos()`
+consegue deixa-lo INERTE enquanto nao ha o que baixar. Dentro da antiga
+"Revisao" isso era impossivel — o mesmo cartao precisava estar vivo para
+conferir os quadros. Foi isso que fez `fluxo.mjs` parar de reclamar de um
+controle vivo no meio de botoes mortos.
+
+DOIS DEFEITOS QUE A REGUA PEGOU, e os dois eram meus:
+
+1. baixar o documento nao repintava a barra. `registrarSaida()` e o unico
+   instante em que a pessoa passa para a etapa 3, e ele nao chama `passos()` —
+   entao a barra dizia "voce esta conferindo" para sempre. Bloco [6] de
+   `etapas.mjs`.
+2. no A0 eu troquei `cabec.mjs` de lugar? Nao: eu NAO troquei. Ele e a segunda
+   sobra do A0 — chama o id da saida por VARIAVEL (`baixar('html', ...)`), entao
+   a varredura por `#html` nao o alcancou quando consertei o `onda2.mjs`. Passa
+   a importar de `_navegador.mjs`.
+
+E uma tentativa de conserto que eu revi e desfiz: desabilitar `#recTodos` sem
+material parecia coerente, mas o cartao inteiro ja e inerte nesse estado, e a
+trava custava o acesso as saidas em cinquenta reguas — `_navegador.mjs` abre a
+gaveta CLICANDO nesse botao. `fluxo.mjs` passa a excluir `#recTodos` da lista de
+"saidas que precisam travar", com o motivo escrito: ele nao e uma saida, e o
+controle que revela a lista de saidas.
+
+Vocabulario: `s1` deixa de ser "Video" e vira "Entrada" nos cinco idiomas — dois
+nomes para a mesma coisa (o cartao dizia um, a barra dizia outro) e a pessoa
+procurando duas vezes. "Video" ja estava errado desde o build 7: da para abrir
+um projeto guardado ali.
+
+Regua: `testes/etapas.mjs`, no grupo `app`. Mede a barra derivada, `aria-current`
+e a classe visual nunca discordando, o rotulo acessivel com numero e a palavra
+"feita", o foco indo para o cabecalho, a etapa 3 inerte sem material, e a frase
+de status NAO se reescrevendo a oito teclas digitadas na transcricao — a guarda
+que separa uma dica de um papagaio num `role="status"`.
+
+Verde: 96 dos 110 testes que rodam sem servidor. As 14 restantes sao 3 flakes de
+disputa de CPU (passam sozinhas) e 11 que precisam do Next ou de um servidor de
+apoio. Zero regressao.
+
+O QUE FALTA DO A2, e esta escrito no PLANO.md: o vocabulario unificado (49
+"frame", 46 "quadro", 24 "trecho", 14 chaves chamando fase de "passo") e a
+acessibilidade validada com leitor de tela de verdade e zoom 200% — que nao da
+para fazer daqui, e uma regua que dissesse "acessivel" sem isso estaria mentindo
+com autoridade.
+
+Achado de fora do A2: `terceiros.mjs` reprova em `privacidade.en` — falta a
+tabela de suboperadores traduzida. Nao foi tocado por esta mudanca.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01SLmPMaXsHaVpudHTw6nJDS
+---
+ PLANO.md                       |  58 +++++--
+ offline/walkstamp-offline.html | 276 ++++++++++++++++++++++++++++++---
+ public/app.html                | 276 ++++++++++++++++++++++++++++++---
+ src/.build                     |   2 +-
+ src/template.html              | 274 +++++++++++++++++++++++++++++---
+ testes/cabec.mjs               |   8 +-
+ testes/etapas.mjs              | 197 +++++++++++++++++++++++
+ testes/fluxo.mjs               |  14 +-
+ testes/juntos.mjs              |  14 +-
+ testes/rapido.sh               |   2 +-
+ testes/ux.mjs                  |   9 +-
+ 11 files changed, 1043 insertions(+), 87 deletions(-)
+ create mode 100644 testes/etapas.mjs
+
+diff --git a/PLANO.md b/PLANO.md
+index 50b76b7..7c16646 100644
+--- a/PLANO.md
++++ b/PLANO.md
+@@ -55,7 +55,7 @@ A ordem respeita o que você pediu: **terminar o UX do app primeiro**. Depois ve
+ trava a venda, e por último o motor e a dívida. Uma exceção argumentada está no fim
+ desta seção.
+ 
+-### Trilha A — terminar o UX (13–17 d, só o A2)
++### Trilha A — terminar o UX (4–7 d, só o que falta do A2)
+ 
+ **A0. Transportar o build 3 e fechar o 4 — FEITO**
+ 
+@@ -82,20 +82,44 @@ vezes.
+ 
+ Régua: `testes/cartao.mjs`, no grupo `app`.
+ 
+-**A2. As três etapas — build 9 (13–17 d)**
+-
+-O reflow de verdade: `Entrada → Conferir → Baixar`, uma ação primária por etapa, a frase
+-"próxima ação" abaixo. É aqui que os 69 testes de visibilidade cobram.
+-
+-Vai junto o **vocabulário unificado**, que foi adiado do build 3 exatamente para cá:
+-49 "frame", 46 "quadro" e 24 "trecho" só no dicionário português, mais 14 chaves que
+-chamam as *fases da ferramenta* de "passo" — a mesma palavra que o documento usa para os
+-passos do procedimento. Fazer o rename antes do reflow seria fazê-lo duas vezes.
+-
+-E a acessibilidade: foco e rolagem nas transições, `aria-current="step"`, teclado
+-completo, zoom 200%, NVDA + Chrome e VoiceOver + Safari.
+-
+-Ao fim, **descongelar** as réguas de layout e reescrevê-las contra a hierarquia final.
++**A2. As três etapas — PARCIAL: o reflow está feito, a acessibilidade não**
++
++O que **está feito**: `Entrada → Conferir → Baixar`, e não como rótulo — `Gerar`
++saiu de dentro de "Revisão" e virou a etapa 3, num cartão próprio.
++
++A numeração mentia duas vezes. **"2 — A fala (opcional)"** é onde moram `#auto`,
++`#extract` e os ajustes de extração: o único botão que faz a ferramenta
++funcionar estava dentro de um passo rotulado como dispensável. E **"3 — Revisão"**
++escondia quatro blocos, sendo o quarto `Gerar` — a coisa que a pessoa veio
++buscar, como sub-item de outra coisa, atrás de três blocos de rolagem.
++
++Agora o cartão da fala perde o número (é a segunda metade da entrada), e são
++três etapas com uma barra em cima que diz onde você está, com `aria-current="step"`,
++botões que levam à etapa e movem o foco para o cabeçalho, e uma frase de próxima
++ação abaixo.
++
++**O estado é derivado**, e não guardado: não há quadro → entrada; há quadros e
++nada saiu → conferir; saiu documento → baixar. `etapas.mjs` cobra isso no bloco
++que recomeça a sessão e vê a barra voltar sozinha.
++
++Um ganho que não estava previsto: com `Baixar` num cartão próprio, `passos()`
++consegue deixá-lo **inerte** enquanto não há o que baixar. Dentro da antiga
++"Revisão" isso era impossível — o mesmo cartão precisava estar vivo para
++conferir os quadros.
++
++**O que falta do A2** (e é o que sobra dos 13–17 dias):
++
++- **o vocabulário unificado** — 49 "frame", 46 "quadro" e 24 "trecho" só no
++  dicionário português, mais 14 chaves que chamam as *fases da ferramenta* de
++  "passo", a mesma palavra que o documento usa para os passos do procedimento.
++  Adiado do build 3 para cá de propósito; fazê-lo agora, contra a estrutura
++  final, é fazê-lo uma vez;
++- **a acessibilidade validada** — NVDA + Chrome e VoiceOver + Safari, e zoom
++  200%. Não dá para fazer daqui: não há leitor de tela nesta máquina, e uma
++  régua que dissesse "acessível" sem isso estaria mentindo com autoridade. O que
++  deu para medir está medido — `aria-current`, o foco indo para o cabeçalho, o
++  rótulo acessível com número e a palavra "feita", e a frase de status que não
++  se repete a cada repintura.
+ 
+ ### Trilha B — o que trava a venda (4,5–7,5 d)
+ 
+@@ -183,10 +207,10 @@ fonte, medir o pico de memória, medir WER antes de tocar na compactação de si
+ 
+ | Trilha | Dias | O que você tem no fim |
+ |---|---:|---|
+-| A — terminar o UX | **13–17** | o redesenho inteiro, com acessibilidade validada |
++| A — terminar o UX | **4–7** | o redesenho inteiro, com acessibilidade validada |
+ | B — destravar a venda | **4,5–7,5** | uma verdade só e cobrança auditável (o banco já é reconstruível) |
+ | C — motor e dívida | **22,5–32,5** | você mede antes de otimizar; as próximas mudanças ficam baratas |
+-| **Total** | **40–57** | |
++| **Total** | **31–47** | |
+ 
+ ---
+ 
+diff --git a/offline/walkstamp-offline.html b/offline/walkstamp-offline.html
+index 40408c1..e8c06e1 100644
+--- a/offline/walkstamp-offline.html
++++ b/offline/walkstamp-offline.html
+@@ -165,6 +165,35 @@
+   .step{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;
+         background:var(--accent);color:var(--accent-ink);font-size:12px;font-weight:600;
+         margin-right:8px;vertical-align:2px}
++  /* ---- A BARRA DAS TRES ETAPAS ----
++     Botoes, e nao enfeite: cada um leva a etapa dele. Numa pagina de tres
++     cartoes longos, "voltar para conferir" era rolar e procurar. */
++  .etapas{display:flex;gap:8px;margin:0 0 10px;flex-wrap:wrap}
++  .etapa{display:flex;align-items:center;gap:8px;flex:1 1 0;min-width:150px;
++      border:1px solid var(--line);background:var(--panel);color:var(--muted);
++      border-radius:999px;padding:7px 14px;font:inherit;font-size:13px;
++      cursor:pointer;text-align:left;transition:.14s}
++  .etapa:hover{border-color:var(--accent);color:var(--ink)}
++  .etapa:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
++  .etapaN{display:inline-grid;place-items:center;width:21px;height:21px;flex:0 0 auto;
++      border-radius:50%;border:1px solid currentColor;font-size:11px;font-weight:700;
++      font-style:normal}
++  /* ONDE VOCE ESTA. `aria-current="step"` e a fonte, e a cor vem dele — assim
++     nao existe um estado visual que o leitor de tela nao enxergue. */
++  .etapa[aria-current="step"]{border-color:var(--accent);color:var(--accent);font-weight:640}
++  .etapa[aria-current="step"] .etapaN{background:var(--accent);color:var(--accent-ink);
++      border-color:var(--accent)}
++  /* JA FEITA. O visto vem do CSS, mas a PALAVRA "feita" entra no rotulo
++     acessivel do botao — cor e simbolo somem para quem nao os distingue. */
++  .etapa.feita{color:var(--ok);border-color:color-mix(in srgb,var(--ok) 45%,var(--line))}
++  .etapa.feita .etapaN{background:var(--ok);color:#fff;border-color:var(--ok);font-size:12px}
++  .etapa.feita .etapaN::before{content:'\2713'}
++  .etapa.feita[aria-current="step"]{color:var(--accent);border-color:var(--accent)}
++  .proxAcao{margin:0 0 26px;font-size:13.5px;color:var(--ink);min-height:1.4em}
++  @media (max-width:560px){
++    .etapas{gap:6px}
++    .etapa{min-width:0;flex:1 1 auto;padding:6px 10px;font-size:12px}
++  }
+   /* Os dois caminhos do passo 1. O de gravar tem borda de destaque porque é o
+      que a maioria vem fazer; o de arquivo continua inteiro ao lado, e não
+      escondido atrás de um "ou". */
+@@ -1175,8 +1204,37 @@
+   <h1 class="soLeitor">Walkstamp</h1>
+   <p class="sub" data-i18n="sub"></p>
+ 
++  <!-- ---- AS TRES ETAPAS ----
++
++       A ferramenta tinha tres cartoes numerados — Video, A fala, Revisao — e a
++       numeracao mentia duas vezes. "A fala" dizia-se OPCIONAL e e onde mora o
++       botao que faz a ferramenta funcionar; "Revisao" escondia quatro blocos
++       dentro, e o quarto era GERAR — a coisa que a pessoa veio buscar. Quem
++       abria a pagina lia "tres passos" e o terceiro terminava numa revisao que
++       nao parecia levar a lugar nenhum.
++
++       Agora sao as tres que a pessoa reconhece: Entrada, Conferir, Baixar.
++
++       ESTA BARRA NAO GUARDA ESTADO. Ela e desenhada a partir do que ja existe —
++       ha quadros? saiu documento? —, e por isso nao pode divergir da tela. Um
++       controlador de etapas com verdade propria seria um segundo lugar onde a
++       resposta mora, e o dia em que os dois discordarem e o dia em que a barra
++       aponta para uma etapa que nao e a que esta aberta. -->
++  <nav class="etapas" id="etapas" data-i18n-aria="etapasNav">
++    <button type="button" class="etapa" data-etapa="1" data-alvo="cardVideo">
++      <i class="etapaN">1</i><span data-i18n="et1"></span></button>
++    <button type="button" class="etapa" data-etapa="2" data-alvo="prevCard">
++      <i class="etapaN">2</i><span data-i18n="et2"></span></button>
++    <button type="button" class="etapa" data-etapa="3" data-alvo="cardBaixar">
++      <i class="etapaN">3</i><span data-i18n="et3"></span></button>
++  </nav>
++  <!-- A frase da proxima acao. `role=status` porque ela e a unica coisa que
++       ANUNCIA a mudanca de etapa: `aria-current` muda em silencio, e um leitor
++       de tela que nao e avisado fica numa etapa nova sem saber. -->
++  <p class="proxAcao" id="proxAcao" role="status"></p>
++
+   <div class="card" id="cardVideo">
+-    <h2><span class="step">1</span><span data-i18n="s1"></span></h2>
++    <h2 id="h2Entrada" tabindex="-1"><span class="step">1</span><span data-i18n="s1"></span></h2>
+ 
+     <!-- O cenário vem PRIMEIRO, antes de gravar ou de escolher arquivo.
+ 
+@@ -1675,7 +1733,12 @@
+   </div>
+ 
+   <div class="card" id="cardTr">
+-    <h2><span class="step">2</span><span data-i18n="s2"></span><span class="opc" data-i18n="opcional"></span></h2>
++    <!-- SEM NUMERO, de proposito. Este cartao nunca foi uma etapa: ele e a
++         segunda metade da ENTRADA — e onde o video vira telas e fala. Chama-se
++         "A fala" e carrega `#auto`, `#extract` e os ajustes de extracao; o
++         rotulo "opcional" ao lado do unico botao que faz a ferramenta
++         funcionar era a numeracao mentindo em voz alta. -->
++    <h2><span data-i18n="s2"></span></h2>
+     <p class="lockHint hide" id="hintTr"></p>
+     <!-- Fora da dobra de propósito. Estes dois botões são as ferramentas de
+          quem está com problema — e o cartão 2 fica TRAVADO justamente quando há
+@@ -1952,7 +2015,7 @@
+   </div>
+ 
+   <div class="card" id="prevCard">
+-    <h2><span class="step">3</span><span data-i18n="s4"></span></h2>
++    <h2 id="h2Conferir" tabindex="-1"><span class="step">2</span><span data-i18n="s4"></span></h2>
+     <p class="lockHint hide" id="hintPrev"></p>
+     <div class="dobra"><div>
+ 
+@@ -2475,8 +2538,27 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
+       </div>
+     </details>
+ 
++    </div></div><!-- /dobra -->
++  </div>
++
++  <!-- ---- ETAPA 3: BAIXAR ----
++
++       Ela existia, e estava escondida como o quarto bloco de "Revisao". Era o
++       defeito de numeracao mais caro da ferramenta: a acao que a pessoa veio
++       fazer aparecia como um sub-item de outra coisa, atras de tres blocos que
++       ela precisava rolar.
++
++       O bloco continua sendo um `<details>` com o mesmo id e o mesmo estado
++       calculado — a maquina dos subpassos nao ganhou um segundo dono. O que
++       mudou foi de que cartao ele e filho. Perdeu so a letra "d": era a quarta
++       de quatro, e agora e a unica do cartao dela. -->
++  <div class="card" id="cardBaixar">
++    <h2 id="h2Baixar" tabindex="-1"><span class="step">3</span><span data-i18n="s6"></span></h2>
++    <p class="lockHint hide" id="hintBaixar"></p>
++    <div class="dobra"><div>
++
+     <details class="sub" id="sb4" open>
+-      <summary><i class="sbN">d</i><span data-i18n="sb4H"></span>
++      <summary><span data-i18n="sb4H"></span>
+         <b class="sbEst" id="sbEst4"></b></summary>
+       <div class="sbCorpo">
+     <!-- ---- as saídas, agrupadas ----
+@@ -3544,7 +3626,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
+       recWarnClipe:'A gravação inteira é descartada — só ficam os clipes dos momentos que você marcar. Durante a captura a ferramenta separa os frames que importam e transcreve os dois canais de áudio em separado. A transcrição divide a máquina com a captura; em computador modesto a tela pode perder alguma troca.',
+       viaArqTag:'Já tenho o vídeo', viaArqH:'Usar um arquivo', viaDriveOu:'Ou, se o vídeo estiver no Google Drive:',
+       viaArqP:'Uma gravação que você já fez, de reunião ou de tela. O arquivo é lido pelo navegador e não sai do seu computador.',
+-      s1:'Vídeo', drop1:'Escolher ou arrastar o vídeo aqui',
++      s1:'Entrada', drop1:'Escolher ou arrastar o vídeo aqui',
+       drop2:'MP4 / MOV / WebM — o tamanho do arquivo não importa',
+       demoBtn:'Usar vídeo de exemplo', demoHint:'50 segundos, cinco telas e narração — para experimentar sem arquivo próprio',
+       demoLoading:'Baixando o exemplo…', demoReady:'Exemplo carregado com a transcrição. É só extrair os frames.',
+@@ -3751,7 +3833,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
+       videoErr:'O navegador não conseguiu abrir este vídeo. Converta para MP4 (H.264) e tente de novo.',
+       reportar:'Me avise qual formato falhou',
+       reportarDica:' — é o que vai definir se vale a pena construir a conversão automática.',
+-      s2:'A fala', opcional:'opcional', autoBtn:'Transcrever a fala',
++      s2:'A fala e as telas', opcional:'opcional', autoBtn:'Transcrever a fala',
+       ajustesTit:'Ajustes — quase ninguém precisa mexer',
+       refazerTelas:'Refazer as telas',
+       trBoxH:'Transcrição', trBoxSub:'corrigir, aplicar vocabulário, traduzir',
+@@ -3844,7 +3926,16 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
+       limitInt:' Parou em {0} por atingir o limite de {1} frames.',
+       stopping:'Parando…', stopped:' Interrompido por você — só o trecho já varrido está aqui.',
+       extracted:'{0} frames extraídos.', reviewNext:' Revise abaixo antes de gerar o PDF.',
+-      s4:'Revisão',
++      s4:'Conferir',
++      s6:'Baixar',
++      etapasNav:'As três etapas',
++      et1:'Entrada', et2:'Conferir', et3:'Baixar', etFeita:'feita',
++      proxNada:'Comece escolhendo um vídeo ou gravando a tela.',
++      proxVideo:'O vídeo está pronto. Aperte “{0}” para as telas aparecerem aqui embaixo.',
++      proxGravando:'Gravando. Marque os passos pela janelinha; ao parar, as telas aparecem para conferir.',
++      proxTelas:'{0} telas prontas. Confira as que importam e desça para baixar o documento.',
++      proxFim:'Documento baixado. Dá para baixar de novo, ou guardar o projeto para reabrir depois.',
++      lockBaixar:'O documento é montado a partir das telas — ele aparece aqui quando elas existirem.',
+       dropQuiet:'Descartar sem fala',
+       ocrBtn:'Ler o texto da tela',
+       ocrLoad:'Carregando o leitor de texto (só na primeira vez)…',
+@@ -4162,7 +4253,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
+       recWarnClipe:'The whole recording is discarded — only the clips of the moments you mark are kept. While capturing, the tool pulls out the frames that matter and transcribes the two audio channels separately. Transcription shares the machine with the capture; on a modest computer the screen may miss a change.',
+       viaArqTag:'I already have the video', viaArqH:'Use a file', viaDriveOu:'Or, if the video is on Google Drive:',
+       viaArqP:'A recording you already made, of a meeting or of a screen. The file is read by the browser and never leaves your computer.',
+-      s1:'Video', drop1:'Choose or drag your video here',
++      s1:'Input', drop1:'Choose or drag your video here',
+       drop2:'MP4 / MOV / WebM — file size does not matter',
+       demoBtn:'Use the example video', demoHint:'50 seconds, five screens, with narration — try it without your own file',
+       demoLoading:'Downloading the example…', demoReady:'Example loaded with its transcript. Just extract the frames.',
+@@ -4366,7 +4457,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
+       videoErr:'The browser could not open this video. Convert it to MP4 (H.264) and try again.',
+       reportar:'Tell me which format failed',
+       reportarDica:' — that is what will decide whether automatic conversion is worth building.',
+-      s2:'The speech', opcional:'optional', autoBtn:'Transcribe the speech',
++      s2:'Speech and screens', opcional:'optional', autoBtn:'Transcribe the speech',
+       ajustesTit:'Settings — almost nobody needs these',
+       refazerTelas:'Redo the screens',
+       trBoxH:'Transcript', trBoxSub:'fix, apply vocabulary, translate',
+@@ -4453,7 +4544,16 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
+       limitInt:' Stopped at {0} after reaching the {1}-frame limit.',
+       stopping:'Stopping…', stopped:' Stopped by you — only the part scanned so far is here.',
+       extracted:'{0} frames extracted.', reviewNext:' Review them below before generating the PDF.',
+-      s4:'Review',
++      s4:'Check',
++      s6:'Download',
++      etapasNav:'The three steps',
++      et1:'Input', et2:'Check', et3:'Download', etFeita:'done',
++      proxNada:'Start by choosing a video or recording your screen.',
++      proxVideo:'The video is ready. Press “{0}” and the screens show up below.',
++      proxGravando:'Recording. Mark the steps from the little window; when you stop, the screens appear here to check.',
++      proxTelas:'{0} screens ready. Check the ones that matter, then scroll down to download the document.',
++      proxFim:'Document downloaded. You can download it again, or save the project to reopen later.',
++      lockBaixar:'The document is built from the screens — it shows up here once they exist.',
+       dropQuiet:'Discard silent ones',
+       ocrBtn:'Read the on-screen text',
+       ocrLoad:'Loading the text reader (first time only)…',
+@@ -4765,7 +4865,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
+       recWarnClipe:'La grabación entera se descarta — solo quedan los clips de los momentos que marques. Durante la captura la herramienta separa los fotogramas que importan y transcribe los dos canales de audio por separado. La transcripción comparte la máquina con la captura; en un ordenador modesto la pantalla puede perder algún cambio.',
+       viaArqTag:'Ya tengo el vídeo', viaArqH:'Usar un archivo', viaDriveOu:'O, si el vídeo está en Google Drive:',
+       viaArqP:'Una grabación que ya hiciste, de una reunión o de pantalla. El archivo lo lee el navegador y no sale de tu equipo.',
+-      s1:'Vídeo', drop1:'Elige o arrastra tu vídeo aquí',
++      s1:'Entrada', drop1:'Elige o arrastra tu vídeo aquí',
+       drop2:'MP4 / MOV / WebM — el tamaño del archivo no importa',
+       demoBtn:'Usar el vídeo de ejemplo', demoHint:'50 segundos, cinco pantallas y narración — pruébalo sin archivo propio',
+       demoLoading:'Descargando el ejemplo…', demoReady:'Ejemplo cargado con su transcripción. Solo falta extraer los fotogramas.',
+@@ -4969,7 +5069,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
+       videoErr:'El navegador no pudo abrir este vídeo. Conviértelo a MP4 (H.264) e inténtalo de nuevo.',
+       reportar:'Dime qué formato falló',
+       reportarDica:' — eso decidirá si vale la pena construir la conversión automática.',
+-      s2:'El habla', opcional:'opcional', autoBtn:'Transcribir el habla',
++      s2:'El habla y las pantallas', opcional:'opcional', autoBtn:'Transcribir el habla',
+       ajustesTit:'Ajustes — casi nadie necesita tocarlos',
+       refazerTelas:'Rehacer las pantallas',
+       trBoxH:'Transcripción', trBoxSub:'corregir, aplicar vocabulario, traducir',
+@@ -5056,7 +5156,16 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
+       limitInt:' Se detuvo en {0} al alcanzar el límite de {1} fotogramas.',
+       stopping:'Parando…', stopped:' Interrumpido por ti — solo está aquí el tramo ya recorrido.',
+       extracted:'{0} fotogramas extraídos.', reviewNext:' Revísalos abajo antes de generar el PDF.',
+-      s4:'Revisión',
++      s4:'Comprobar',
++      s6:'Descargar',
++      etapasNav:'Las tres etapas',
++      et1:'Entrada', et2:'Comprobar', et3:'Descargar', etFeita:'hecha',
++      proxNada:'Empieza eligiendo un vídeo o grabando la pantalla.',
++      proxVideo:'El vídeo está listo. Pulsa “{0}” y las pantallas aparecerán aquí abajo.',
++      proxGravando:'Grabando. Marca los pasos desde la ventanita; al parar, las pantallas aparecerán para comprobar.',
++      proxTelas:'{0} pantallas listas. Comprueba las que importan y baja para descargar el documento.',
++      proxFim:'Documento descargado. Puedes descargarlo otra vez, o guardar el proyecto para reabrirlo después.',
++      lockBaixar:'El documento se arma a partir de las pantallas — aparece aquí cuando existan.',
+       dropQuiet:'Descartar sin habla',
+       ocrBtn:'Leer el texto de la pantalla',
+       ocrLoad:'Cargando el lector de texto (solo la primera vez)…',
+@@ -5367,7 +5476,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
+       recWarnClipe:'Die gesamte Aufnahme wird verworfen — erhalten bleiben nur die Clips der Momente, die Sie markieren. Während der Aufnahme trennt das Werkzeug die Screenshots heraus, die zählen, und transkribiert die beiden Tonspuren getrennt. Die Transkription teilt sich den Rechner mit der Aufnahme; auf einem schwächeren Computer kann ein Bildwechsel verloren gehen.',
+       viaArqTag:'Ich habe das Video bereits', viaArqH:'Datei verwenden', viaDriveOu:'Oder, wenn das Video in Google Drive liegt:',
+       viaArqP:'Eine Aufnahme, die Sie bereits erstellt haben — von einer Besprechung oder vom Bildschirm. Die Datei wird vom Browser gelesen und verlässt Ihren Computer nicht.',
+-      s1:'Video', drop1:'Video auswählen oder hierher ziehen',
++      s1:'Eingabe', drop1:'Video auswählen oder hierher ziehen',
+       drop2:'MP4 / MOV / WebM — die Dateigröße spielt keine Rolle',
+       demoBtn:'Beispielvideo verwenden', demoHint:'50 Sekunden, fünf Bildschirme, mit gesprochenem Kommentar — zum Ausprobieren ohne eigene Datei',
+       demoLoading:'Beispiel wird heruntergeladen…', demoReady:'Beispiel mit Transkription geladen. Jetzt nur noch die Screenshots extrahieren.',
+@@ -5571,7 +5680,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
+       videoErr:'Der Browser konnte dieses Video nicht öffnen. Konvertieren Sie es in MP4 (H.264) und versuchen Sie es erneut.',
+       reportar:'Melden Sie uns, welches Format fehlgeschlagen ist',
+       reportarDica:' — davon hängt ab, ob sich eine automatische Konvertierung lohnt.',
+-      s2:'Der Ton', opcional:'optional', autoBtn:'Den Ton transkribieren',
++      s2:'Ton und Bildschirme', opcional:'optional', autoBtn:'Den Ton transkribieren',
+       ajustesTit:'Einstellungen — fast niemand braucht sie',
+       refazerTelas:'Bildschirme neu erstellen',
+       trBoxH:'Transkription', trBoxSub:'korrigieren, Fachwortliste anwenden, übersetzen',
+@@ -5658,7 +5767,16 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
+       limitInt:' Endete bei {0}, weil das Limit von {1} Screenshots erreicht wurde.',
+       stopping:'Wird gestoppt…', stopped:' Von Ihnen gestoppt — hier ist nur der bereits durchsuchte Abschnitt.',
+       extracted:'{0} Screenshots extrahiert.', reviewNext:' Prüfen Sie sie, bevor Sie das PDF erzeugen.',
+-      s4:'Prüfung',
++      s4:'Prüfen',
++      s6:'Herunterladen',
++      etapasNav:'Die drei Schritte',
++      et1:'Eingabe', et2:'Prüfen', et3:'Herunterladen', etFeita:'erledigt',
++      proxNada:'Wählen Sie zuerst ein Video oder nehmen Sie den Bildschirm auf.',
++      proxVideo:'Das Video ist bereit. Drücken Sie „{0}“, dann erscheinen die Bildschirme hier unten.',
++      proxGravando:'Aufnahme läuft. Markieren Sie die Schritte im kleinen Fenster; nach dem Stoppen erscheinen die Bildschirme zum Prüfen.',
++      proxTelas:'{0} Bildschirme bereit. Prüfen Sie die wichtigen und scrollen Sie nach unten, um das Dokument herunterzuladen.',
++      proxFim:'Dokument heruntergeladen. Sie können es erneut herunterladen oder das Projekt zum späteren Öffnen sichern.',
++      lockBaixar:'Das Dokument entsteht aus den Bildschirmen — es erscheint hier, sobald sie existieren.',
+       dropQuiet:'Ohne Sprache verwerfen',
+       ocrBtn:'Text auf dem Bildschirm lesen',
+       ocrLoad:'Die Texterkennung wird geladen (nur beim ersten Mal)…',
+@@ -5975,7 +6093,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
+       recWarnClipe:'L’enregistrement entier est jeté — seuls restent les clips des moments que vous marquez. Pendant la capture, l’outil isole les captures qui comptent et transcrit séparément les deux canaux audio. La transcription partage la machine avec la capture ; sur un ordinateur modeste, l’écran peut rater un changement.',
+       viaArqTag:'J’ai déjà la vidéo', viaArqH:'Utiliser un fichier', viaDriveOu:'Ou, si la vidéo est sur Google Drive :',
+       viaArqP:'Un enregistrement que vous avez déjà fait, de réunion ou d’écran. Le fichier est lu par le navigateur et ne quitte pas votre ordinateur.',
+-      s1:'Vidéo', drop1:'Choisir la vidéo ou la déposer ici',
++      s1:'Entrée', drop1:'Choisir la vidéo ou la déposer ici',
+       drop2:'MP4 / MOV / WebM — la taille du fichier n’a pas d’importance',
+       demoBtn:'Utiliser la vidéo d’exemple', demoHint:'50 secondes, cinq écrans et une narration — pour essayer sans votre propre fichier',
+       demoLoading:'Téléchargement de l’exemple…', demoReady:'Exemple chargé avec sa transcription. Il ne reste qu’à extraire les captures.',
+@@ -6179,7 +6297,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
+       videoErr:'Le navigateur n’a pas réussi à ouvrir cette vidéo. Convertissez-la en MP4 (H.264) et réessayez.',
+       reportar:'Dites-nous quel format a échoué',
+       reportarDica:' — c’est ce qui décidera si la conversion automatique vaut la peine d’être développée.',
+-      s2:'La parole', opcional:'facultatif', autoBtn:'Transcrire la parole',
++      s2:'La parole et les écrans', opcional:'facultatif', autoBtn:'Transcrire la parole',
+       ajustesTit:'Réglages — presque personne n’en a besoin',
+       refazerTelas:'Refaire les écrans',
+       trBoxH:'Transcription', trBoxSub:'corriger, appliquer le lexique métier, traduire',
+@@ -6266,7 +6384,16 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
+       limitInt:' Arrêt à {0} en atteignant la limite de {1} captures.',
+       stopping:'Arrêt…', stopped:' Interrompu par vous — seule la partie déjà analysée est ici.',
+       extracted:'{0} captures extraites.', reviewNext:' Vérifiez-les ci-dessous avant de générer le PDF.',
+-      s4:'Révision',
++      s4:'Vérifier',
++      s6:'Télécharger',
++      etapasNav:'Les trois étapes',
++      et1:'Entrée', et2:'Vérifier', et3:'Télécharger', etFeita:'faite',
++      proxNada:'Commencez par choisir une vidéo ou enregistrer votre écran.',
++      proxVideo:'La vidéo est prête. Appuyez sur « {0} » et les écrans apparaissent ci-dessous.',
++      proxGravando:'Enregistrement en cours. Marquez les étapes depuis la petite fenêtre; à l’arrêt, les écrans apparaissent pour vérification.',
++      proxTelas:'{0} écrans prêts. Vérifiez ceux qui comptent puis descendez pour télécharger le document.',
++      proxFim:'Document téléchargé. Vous pouvez le télécharger à nouveau, ou enregistrer le projet pour le rouvrir plus tard.',
++      lockBaixar:'Le document est construit à partir des écrans — il apparaît ici dès qu’ils existent.',
+       dropQuiet:'Écarter les captures sans parole',
+       ocrBtn:'Lire le texte à l’écran',
+       ocrLoad:'Chargement du lecteur de texte (seulement la première fois)…',
+@@ -7082,6 +7209,12 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
+       el.title = t(el.getAttribute('data-i18n-title'));
+       if (!el.getAttribute('aria-label')) el.setAttribute('aria-label', el.title);
+     });
++    /* Rotulo acessivel SEM titulo visivel. A barra das etapas e um `<nav>`: ela
++       precisa de nome para o leitor de tela poder saltar para ela, e nao de um
++       balaozinho no passar do mouse. */
++    document.querySelectorAll('[data-i18n-aria]').forEach(el => {
++      el.setAttribute('aria-label', t(el.getAttribute('data-i18n-aria')));
++    });
+     pintarAuto();
+     /* O rótulo do parar deixou de vir do `data-i18n`: ele tem dois textos e um
+        terceiro estado. Sem esta linha, trocar de idioma no meio de uma
+@@ -7293,6 +7426,13 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
+     dobrar('prevCard',    temAlgo || modo === 'arquivo' || modo === 'gravado');
+     dica('hintPrev',      liveOn ? 'lockGravando' : emCauda ? 'lockCauda'
+                                  : temAlgo ? null : 'lockPrev');
++    /* A etapa 3 segue o mesmo relogio da 2: ela e a outra metade do mesmo
++       trabalho, e travar uma sem a outra deixaria a pessoa conferindo telas com
++       o botao de baixar inerte logo abaixo. */
++    trancar('cardBaixar',  (temAlgo || modo !== 'nada') && !emAndamento);
++    dobrar('cardBaixar',   temAlgo);
++    dica('hintBaixar',     liveOn ? 'lockGravando' : emCauda ? 'lockCauda'
++                                  : temAlgo ? null : 'lockBaixar');
+     trancar('promptCard', temAlgo && !emAndamento);
+     /* Os botões de saída seguem o mesmo relógio das travas dos cartões. Antes
+        eles só eram acertados dentro de `counts()`, que só roda a partir de
+@@ -7300,6 +7440,10 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
+        chamam `render()`. Era essa a janela em que onze botões ficavam
+        clicáveis sem ter o que fazer. */
+     if (typeof pintarSaidas === 'function') pintarSaidas();
++    /* A barra e a frase repintam AQUI, e nao num relogio proprio: `passos()` ja
++       e o lugar por onde passa toda mudanca de estado da pagina. Um segundo
++       gatilho seria um segundo momento em que as duas podem discordar da tela. */
++    try { pintarEtapas(); pintarProxAcao(); } catch (e) {}
+     dobrar('promptCard',  temAlgo);
+     dica('hintPrompt',    liveOn ? 'lockGravando' : emCauda ? 'lockCauda'
+                                 : temAlgo ? null : 'lockPrompt');
+@@ -7629,6 +7773,18 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
+        documento. Espelhar o estado evita um botão que promete e não cumpre. */
+     $('recPrim').disabled = !!($(r.prim) && $(r.prim).disabled);
+     $('recSeg').disabled  = !!($(r.seg)  && $(r.seg).disabled);
++    /* O BOTAO DA GAVETA NAO ENTRA AQUI, e isso e uma decisao.
++       Desabilita-lo parecia coerente — sem material, "ver todos os formatos"
++       abriria uma gaveta de botoes mortos. Mas o cartao inteiro ja e `inert`
++       nesse estado, entao a trava seria a segunda numa porta que ja esta
++       fechada; e ela custava caro: `_navegador.mjs` abre a gaveta CLICANDO
++       neste botao, e um botao desabilitado nao responde a clique — cinquenta
++       reguas perderiam o acesso as saidas de uma vez.
++
++       Quem responde por este estado e a divisao das etapas: com `Baixar` num
++       cartao proprio, `passos()` o deixa inerte enquanto nao ha o que baixar.
++       Dentro da antiga "Revisao" isso nao era possivel — o mesmo cartao
++       precisava estar vivo para conferir os quadros. */
+   }
+ 
+   function abrirSaidas(abrir){
+@@ -9189,7 +9345,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
+      depois, e não tem como se atualizar sozinho. Sem carimbo, "estou com um
+      problema no offline" é uma conversa sem chão — ninguém sabe de qual build
+      se fala nem se o defeito já foi consertado. */
+-  const VERSAO = '2026.08.21-45';
++  const VERSAO = '2026.08.21-57';
+   window.__versao = () => VERSAO;
+ 
+   const PIP_CSS = `
+@@ -15935,13 +16091,93 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
+      Docs acendia, e o `#go` chamava `doc.save()` direto do jsPDF, que não passa
+      por porta nenhuma. Quem gerava o PDF via o passo 3 dizer que nada tinha
+      sido gerado. */
++  /* ---- AS TRES ETAPAS, DERIVADAS ----
++
++     Nao ha variavel de etapa. A etapa e uma LEITURA do que ja existe: nao ha
++     quadro nenhum, entao a pessoa esta na entrada; ha quadros e nada saiu,
++     entao ela esta conferindo; saiu documento, entao ela esta em baixar.
++
++     Isto e o contrario de um controlador com estado proprio, e a diferenca
++     aparece no unico dia que importa: quando a pessoa apaga todos os quadros. A
++     barra volta sozinha para a entrada, porque a resposta nunca esteve guardada
++     em lugar nenhum para ficar velha. */
++  function etapaAtual(){
++    if (baixouAlgo) return 3;
++    return frames.length ? 2 : 1;
++  }
++  function pintarEtapas(){
++    const nav = $('etapas'); if (!nav) return;
++    const atual = etapaAtual();
++    /* "Feita" nao e "visitada": e ter produzido o que aquela etapa produz. A
++       entrada produz material; conferir e baixar so terminam quando um
++       documento sai. Marcar como feita uma etapa por onde a pessoa passou seria
++       a bolinha mentindo, que e a mesma regra dos subpassos. */
++    const feita = { 1: frames.length > 0, 2: baixouAlgo, 3: baixouAlgo };
++    nav.querySelectorAll('.etapa').forEach(b => {
++      const n = +b.dataset.etapa;
++      b.classList.toggle('feita', !!feita[n]);
++      if (n === atual) b.setAttribute('aria-current', 'step');
++      else b.removeAttribute('aria-current');
++      /* O numero entra no rotulo acessivel porque ele esta na tela: quem
++         controla por voz diz "clicar em 2 Conferir", e um nome que nao contem
++         o que se ve nao atende. E "feita" entra por PALAVRA — o visto verde
++         some para quem nao o distingue. */
++      b.setAttribute('aria-label',
++        n + '. ' + t('et' + n) + (feita[n] ? ' \u2014 ' + t('etFeita') : ''));
++    });
++  }
++  /* A frase da proxima acao.
++
++     A GUARDA DO `textContent` NAO E OTIMIZACAO. O paragrafo e `role="status"`,
++     e `passos()` roda a cada carga de video, cada quadro descartado, cada tecla
++     na transcricao. Reescrever o mesmo texto faz o leitor de tela repetir a
++     frase inteira toda vez — a diferenca entre uma dica e um papagaio. */
++  function pintarProxAcao(){
++    const el = $('proxAcao'); if (!el) return;
++    let txt;
++    if (liveOn)               txt = t('proxGravando');
++    else if (baixouAlgo)      txt = t('proxFim');
++    else if (frames.length)   txt = t('proxTelas', frames.filter(f => f.keep).length);
++    else if (modoAtual() === 'arquivo') txt = t('proxVideo', t('autoBtn'));
++    else                      txt = t('proxNada');
++    if (el.textContent !== txt) el.textContent = txt;
++  }
++  /* O clique da barra e amarrado UMA vez, e nao a cada pintura: `pintarEtapas`
++     roda dezenas de vezes por sessao, e reamarrar `onclick` a cada uma seria
++     trocar o mesmo manipulador por ele mesmo para sempre. */
++  if ($('etapas')) $('etapas').onclick = (e) => {
++    const b = e.target.closest('.etapa'); if (!b) return;
++    const alvo = $(b.dataset.alvo); if (!alvo) return;
++    const suave = !(window.matchMedia &&
++                    window.matchMedia('(prefers-reduced-motion: reduce)').matches);
++    alvo.scrollIntoView({ block: 'start', behavior: suave ? 'smooth' : 'auto' });
++    /* O foco vai para o cabecalho, e nao para o cartao: um `<div>` focado nao
++       e anunciado por nada. `preventScroll` porque a rolagem ja aconteceu, com
++       a animacao que a pessoa pediu. */
++    const h = alvo.querySelector('h2');
++    if (h) h.focus({ preventScroll: true });
++  };
++
+   function registrarSaida(){
+     baixouAlgo = true;
+     espelhoEntregue();
+     if (typeof pintarSubpassos === 'function') setTimeout(pintarSubpassos, 0);
++    /* E A BARRA DAS ETAPAS. Este e o unico instante em que a pessoa passa para
++       a etapa 3, e ele nao chama `passos()` — que e onde a barra repinta. Sem
++       esta linha, baixar o documento deixava a barra dizendo "voce esta
++       conferindo" para sempre, e a unica coisa que a moveria seria mexer nos
++       quadros depois. Quem pegou foi `etapas.mjs`, no bloco [6]. */
++    if (typeof pintarEtapas === 'function') setTimeout(() => {
++      pintarEtapas(); pintarProxAcao();
++    }, 0);
+   }
+   function esqueceuOQueGerou(){
+     baixouAlgo = false;
++    /* Pelo mesmo motivo da linha de cima, e na direcao contraria: apagar os
++       quadros desfaz o "baixado", e a barra tem que voltar junto. */
++    if (typeof pintarEtapas === 'function') setTimeout(() => {
++      pintarEtapas(); pintarProxAcao();
++    }, 0);
+     /* O que a pessoa declarou vale para ESTE material. Sumindo os quadros,
+        some a declaração junto — senão a bolinha verde de "identificação
+        preenchida" sobreviveria a um documento que não existe mais, que é
+diff --git a/public/app.html b/public/app.html
+index 58db3c7..569c0b8 100644
+--- a/public/app.html
++++ b/public/app.html
+@@ -171,6 +171,35 @@
+   .step{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;
+         background:var(--accent);color:var(--accent-ink);font-size:12px;font-weight:600;
+         margin-right:8px;vertical-align:2px}
++  /* ---- A BARRA DAS TRES ETAPAS ----
++     Botoes, e nao enfeite: cada um leva a etapa dele. Numa pagina de tres
++     cartoes longos, "voltar para conferir" era rolar e procurar. */
++  .etapas{display:flex;gap:8px;margin:0 0 10px;flex-wrap:wrap}
++  .etapa{display:flex;align-items:center;gap:8px;flex:1 1 0;min-width:150px;
++      border:1px solid var(--line);background:var(--panel);color:var(--muted);
++      border-radius:999px;padding:7px 14px;font:inherit;font-size:13px;
++      cursor:pointer;text-align:left;transition:.14s}
++  .etapa:hover{border-color:var(--accent);color:var(--ink)}
++  .etapa:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
++  .etapaN{display:inline-grid;place-items:center;width:21px;height:21px;flex:0 0 auto;
++      border-radius:50%;border:1px solid currentColor;font-size:11px;font-weight:700;
++      font-style:normal}
++  /* ONDE VOCE ESTA. `aria-current="step"` e a fonte, e a cor vem dele — assim
++     nao existe um estado visual que o leitor de tela nao enxergue. */
++  .etapa[aria-current="step"]{border-color:var(--accent);color:var(--accent);font-weight:640}
++  .etapa[aria-current="step"] .etapaN{background:var(--accent);color:var(--accent-ink);
++      border-color:var(--accent)}
++  /* JA FEITA. O visto vem do CSS, mas a PALAVRA "feita" entra no rotulo
++     acessivel do botao — cor e simbolo somem para quem nao os distingue. */
++  .etapa.feita{color:var(--ok);border-color:color-mix(in srgb,var(--ok) 45%,var(--line))}
++  .etapa.feita .etapaN{background:var(--ok);color:#fff;border-color:var(--ok);font-size:12px}
++  .etapa.feita .etapaN::before{content:'\2713'}
++  .etapa.feita[aria-current="step"]{color:var(--accent);border-color:var(--accent)}
++  .proxAcao{margin:0 0 26px;font-size:13.5px;color:var(--ink);min-height:1.4em}
++  @media (max-width:560px){
++    .etapas{gap:6px}
++    .etapa{min-width:0;flex:1 1 auto;padding:6px 10px;font-size:12px}
++  }
+   /* Os dois caminhos do passo 1. O de gravar tem borda de destaque porque é o
+      que a maioria vem fazer; o de arquivo continua inteiro ao lado, e não
+      escondido atrás de um "ou". */
+@@ -1181,8 +1210,37 @@
+   <h1 class="soLeitor">Walkstamp</h1>
+   <p class="sub" data-i18n="sub"></p>
+ 
++  <!-- ---- AS TRES ETAPAS ----
++
++       A ferramenta tinha tres cartoes numerados — Video, A fala, Revisao — e a
++       numeracao mentia duas vezes. "A fala" dizia-se OPCIONAL e e onde mora o
++       botao que faz a ferramenta funcionar; "Revisao" escondia quatro blocos
++       dentro, e o quarto era GERAR — a coisa que a pessoa veio buscar. Quem
++       abria a pagina lia "tres passos" e o terceiro terminava numa revisao que
++       nao parecia levar a lugar nenhum.
++
++       Agora sao as tres que a pessoa reconhece: Entrada, Conferir, Baixar.
++
++       ESTA BARRA NAO GUARDA ESTADO. Ela e desenhada a partir do que ja existe —
++       ha quadros? saiu documento? —, e por isso nao pode divergir da tela. Um
++       controlador de etapas com verdade propria seria um segundo lugar onde a
++       resposta mora, e o dia em que os dois discordarem e o dia em que a barra
++       aponta para uma etapa que nao e a que esta aberta. -->
++  <nav class="etapas" id="etapas" data-i18n-aria="etapasNav">
++    <button type="button" class="etapa" data-etapa="1" data-alvo="cardVideo">
++      <i class="etapaN">1</i><span data-i18n="et1"></span></button>
++    <button type="button" class="etapa" data-etapa="2" data-alvo="prevCard">
++      <i class="etapaN">2</i><span data-i18n="et2"></span></button>
++    <button type="button" class="etapa" data-etapa="3" data-alvo="cardBaixar">
++      <i class="etapaN">3</i><span data-i18n="et3"></span></button>
++  </nav>
++  <!-- A frase da proxima acao. `role=status` porque ela e a unica coisa que
++       ANUNCIA a mudanca de etapa: `aria-current` muda em silencio, e um leitor
++       de tela que nao e avisado fica numa etapa nova sem saber. -->
++  <p class="proxAcao" id="proxAcao" role="status"></p>
++
+   <div class="card" id="cardVideo">
+-    <h2><span class="step">1</span><span data-i18n="s1"></span></h2>
++    <h2 id="h2Entrada" tabindex="-1"><span class="step">1</span><span data-i18n="s1"></span></h2>
+ 
+     <!-- O cenário vem PRIMEIRO, antes de gravar ou de escolher arquivo.
+ 
+@@ -1681,7 +1739,12 @@
+   </div>
+ 
+   <div class="card" id="cardTr">
+-    <h2><span class="step">2</span><span data-i18n="s2"></span><span class="opc" data-i18n="opcional"></span></h2>
++    <!-- SEM NUMERO, de proposito. Este cartao nunca foi uma etapa: ele e a
++         segunda metade da ENTRADA — e onde o video vira telas e fala. Chama-se
++         "A fala" e carrega `#auto`, `#extract` e os ajustes de extracao; o
++         rotulo "opcional" ao lado do unico botao que faz a ferramenta
++         funcionar era a numeracao mentindo em voz alta. -->
++    <h2><span data-i18n="s2"></span></h2>
+     <p class="lockHint hide" id="hintTr"></p>
+     <!-- Fora da dobra de propósito. Estes dois botões são as ferramentas de
+          quem está com problema — e o cartão 2 fica TRAVADO justamente quando há
+@@ -1958,7 +2021,7 @@
+   </div>
+ 
+   <div class="card" id="prevCard">
+-    <h2><span class="step">3</span><span data-i18n="s4"></span></h2>
++    <h2 id="h2Conferir" tabindex="-1"><span class="step">2</span><span data-i18n="s4"></span></h2>
+     <p class="lockHint hide" id="hintPrev"></p>
+     <div class="dobra"><div>
+ 
+@@ -2481,8 +2544,27 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
+       </div>
+     </details>
+ 
++    </div></div><!-- /dobra -->
++  </div>
++
++  <!-- ---- ETAPA 3: BAIXAR ----
++
++       Ela existia, e estava escondida como o quarto bloco de "Revisao". Era o
++       defeito de numeracao mais caro da ferramenta: a acao que a pessoa veio
++       fazer aparecia como um sub-item de outra coisa, atras de tres blocos que
++       ela precisava rolar.
++
++       O bloco continua sendo um `<details>` com o mesmo id e o mesmo estado
++       calculado — a maquina dos subpassos nao ganhou um segundo dono. O que
++       mudou foi de que cartao ele e filho. Perdeu so a letra "d": era a quarta
++       de quatro, e agora e a unica do cartao dela. -->
++  <div class="card" id="cardBaixar">
++    <h2 id="h2Baixar" tabindex="-1"><span class="step">3</span><span data-i18n="s6"></span></h2>
++    <p class="lockHint hide" id="hintBaixar"></p>
++    <div class="dobra"><div>
++
+     <details class="sub" id="sb4" open>
+-      <summary><i class="sbN">d</i><span data-i18n="sb4H"></span>
++      <summary><span data-i18n="sb4H"></span>
+         <b class="sbEst" id="sbEst4"></b></summary>
+       <div class="sbCorpo">
+     <!-- ---- as saídas, agrupadas ----
+@@ -3152,7 +3234,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
+       recWarnClipe:'A gravação inteira é descartada — só ficam os clipes dos momentos que você marcar. Durante a captura a ferramenta separa os frames que importam e transcreve os dois canais de áudio em separado. A transcrição divide a máquina com a captura; em computador modesto a tela pode perder alguma troca.',
+       viaArqTag:'Já tenho o vídeo', viaArqH:'Usar um arquivo', viaDriveOu:'Ou, se o vídeo estiver no Google Drive:',
+       viaArqP:'Uma gravação que você já fez, de reunião ou de tela. O arquivo é lido pelo navegador e não sai do seu computador.',
+-      s1:'Vídeo', drop1:'Escolher ou arrastar o vídeo aqui',
++      s1:'Entrada', drop1:'Escolher ou arrastar o vídeo aqui',
+       drop2:'MP4 / MOV / WebM — o tamanho do arquivo não importa',
+       demoBtn:'Usar vídeo de exemplo', demoHint:'50 segundos, cinco telas e narração — para experimentar sem arquivo próprio',
+       demoLoading:'Baixando o exemplo…', demoReady:'Exemplo carregado com a transcrição. É só extrair os frames.',
+@@ -3359,7 +3441,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
+       videoErr:'O navegador não conseguiu abrir este vídeo. Converta para MP4 (H.264) e tente de novo.',
+       reportar:'Me avise qual formato falhou',
+       reportarDica:' — é o que vai definir se vale a pena construir a conversão automática.',
+-      s2:'A fala', opcional:'opcional', autoBtn:'Transcrever a fala',
++      s2:'A fala e as telas', opcional:'opcional', autoBtn:'Transcrever a fala',
+       ajustesTit:'Ajustes — quase ninguém precisa mexer',
+       refazerTelas:'Refazer as telas',
+       trBoxH:'Transcrição', trBoxSub:'corrigir, aplicar vocabulário, traduzir',
+@@ -3452,7 +3534,16 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
+       limitInt:' Parou em {0} por atingir o limite de {1} frames.',
+       stopping:'Parando…', stopped:' Interrompido por você — só o trecho já varrido está aqui.',
+       extracted:'{0} frames extraídos.', reviewNext:' Revise abaixo antes de gerar o PDF.',
+-      s4:'Revisão',
++      s4:'Conferir',
++      s6:'Baixar',
++      etapasNav:'As três etapas',
++      et1:'Entrada', et2:'Conferir', et3:'Baixar', etFeita:'feita',
++      proxNada:'Comece escolhendo um vídeo ou gravando a tela.',
++      proxVideo:'O vídeo está pronto. Aperte “{0}” para as telas aparecerem aqui embaixo.',
++      proxGravando:'Gravando. Marque os passos pela janelinha; ao parar, as telas aparecem para conferir.',
++      proxTelas:'{0} telas prontas. Confira as que importam e desça para baixar o documento.',
++      proxFim:'Documento baixado. Dá para baixar de novo, ou guardar o projeto para reabrir depois.',
++      lockBaixar:'O documento é montado a partir das telas — ele aparece aqui quando elas existirem.',
+       dropQuiet:'Descartar sem fala',
+       ocrBtn:'Ler o texto da tela',
+       ocrLoad:'Carregando o leitor de texto (só na primeira vez)…',
+@@ -3770,7 +3861,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
+       recWarnClipe:'The whole recording is discarded — only the clips of the moments you mark are kept. While capturing, the tool pulls out the frames that matter and transcribes the two audio channels separately. Transcription shares the machine with the capture; on a modest computer the screen may miss a change.',
+       viaArqTag:'I already have the video', viaArqH:'Use a file', viaDriveOu:'Or, if the video is on Google Drive:',
+       viaArqP:'A recording you already made, of a meeting or of a screen. The file is read by the browser and never leaves your computer.',
+-      s1:'Video', drop1:'Choose or drag your video here',
++      s1:'Input', drop1:'Choose or drag your video here',
+       drop2:'MP4 / MOV / WebM — file size does not matter',
+       demoBtn:'Use the example video', demoHint:'50 seconds, five screens, with narration — try it without your own file',
+       demoLoading:'Downloading the example…', demoReady:'Example loaded with its transcript. Just extract the frames.',
+@@ -3974,7 +4065,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
+       videoErr:'The browser could not open this video. Convert it to MP4 (H.264) and try again.',
+       reportar:'Tell me which format failed',
+       reportarDica:' — that is what will decide whether automatic conversion is worth building.',
+-      s2:'The speech', opcional:'optional', autoBtn:'Transcribe the speech',
++      s2:'Speech and screens', opcional:'optional', autoBtn:'Transcribe the speech',
+       ajustesTit:'Settings — almost nobody needs these',
+       refazerTelas:'Redo the screens',
+       trBoxH:'Transcript', trBoxSub:'fix, apply vocabulary, translate',
+@@ -4061,7 +4152,16 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
+       limitInt:' Stopped at {0} after reaching the {1}-frame limit.',
+       stopping:'Stopping…', stopped:' Stopped by you — only the part scanned so far is here.',
+       extracted:'{0} frames extracted.', reviewNext:' Review them below before generating the PDF.',
+-      s4:'Review',
++      s4:'Check',
++      s6:'Download',
++      etapasNav:'The three steps',
++      et1:'Input', et2:'Check', et3:'Download', etFeita:'done',
++      proxNada:'Start by choosing a video or recording your screen.',
++      proxVideo:'The video is ready. Press “{0}” and the screens show up below.',
++      proxGravando:'Recording. Mark the steps from the little window; when you stop, the screens appear here to check.',
++      proxTelas:'{0} screens ready. Check the ones that matter, then scroll down to download the document.',
++      proxFim:'Document downloaded. You can download it again, or save the project to reopen later.',
++      lockBaixar:'The document is built from the screens — it shows up here once they exist.',
+       dropQuiet:'Discard silent ones',
+       ocrBtn:'Read the on-screen text',
+       ocrLoad:'Loading the text reader (first time only)…',
+@@ -4373,7 +4473,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
+       recWarnClipe:'La grabación entera se descarta — solo quedan los clips de los momentos que marques. Durante la captura la herramienta separa los fotogramas que importan y transcribe los dos canales de audio por separado. La transcripción comparte la máquina con la captura; en un ordenador modesto la pantalla puede perder algún cambio.',
+       viaArqTag:'Ya tengo el vídeo', viaArqH:'Usar un archivo', viaDriveOu:'O, si el vídeo está en Google Drive:',
+       viaArqP:'Una grabación que ya hiciste, de una reunión o de pantalla. El archivo lo lee el navegador y no sale de tu equipo.',
+-      s1:'Vídeo', drop1:'Elige o arrastra tu vídeo aquí',
++      s1:'Entrada', drop1:'Elige o arrastra tu vídeo aquí',
+       drop2:'MP4 / MOV / WebM — el tamaño del archivo no importa',
+       demoBtn:'Usar el vídeo de ejemplo', demoHint:'50 segundos, cinco pantallas y narración — pruébalo sin archivo propio',
+       demoLoading:'Descargando el ejemplo…', demoReady:'Ejemplo cargado con su transcripción. Solo falta extraer los fotogramas.',
+@@ -4577,7 +4677,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
+       videoErr:'El navegador no pudo abrir este vídeo. Conviértelo a MP4 (H.264) e inténtalo de nuevo.',
+       reportar:'Dime qué formato falló',
+       reportarDica:' — eso decidirá si vale la pena construir la conversión automática.',
+-      s2:'El habla', opcional:'opcional', autoBtn:'Transcribir el habla',
++      s2:'El habla y las pantallas', opcional:'opcional', autoBtn:'Transcribir el habla',
+       ajustesTit:'Ajustes — casi nadie necesita tocarlos',
+       refazerTelas:'Rehacer las pantallas',
+       trBoxH:'Transcripción', trBoxSub:'corregir, aplicar vocabulario, traducir',
+@@ -4664,7 +4764,16 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
+       limitInt:' Se detuvo en {0} al alcanzar el límite de {1} fotogramas.',
+       stopping:'Parando…', stopped:' Interrumpido por ti — solo está aquí el tramo ya recorrido.',
+       extracted:'{0} fotogramas extraídos.', reviewNext:' Revísalos abajo antes de generar el PDF.',
+-      s4:'Revisión',
++      s4:'Comprobar',
++      s6:'Descargar',
++      etapasNav:'Las tres etapas',
++      et1:'Entrada', et2:'Comprobar', et3:'Descargar', etFeita:'hecha',
++      proxNada:'Empieza eligiendo un vídeo o grabando la pantalla.',
++      proxVideo:'El vídeo está listo. Pulsa “{0}” y las pantallas aparecerán aquí abajo.',
++      proxGravando:'Grabando. Marca los pasos desde la ventanita; al parar, las pantallas aparecerán para comprobar.',
++      proxTelas:'{0} pantallas listas. Comprueba las que importan y baja para descargar el documento.',
++      proxFim:'Documento descargado. Puedes descargarlo otra vez, o guardar el proyecto para reabrirlo después.',
++      lockBaixar:'El documento se arma a partir de las pantallas — aparece aquí cuando existan.',
+       dropQuiet:'Descartar sin habla',
+       ocrBtn:'Leer el texto de la pantalla',
+       ocrLoad:'Cargando el lector de texto (solo la primera vez)…',
+@@ -4975,7 +5084,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
+       recWarnClipe:'Die gesamte Aufnahme wird verworfen — erhalten bleiben nur die Clips der Momente, die Sie markieren. Während der Aufnahme trennt das Werkzeug die Screenshots heraus, die zählen, und transkribiert die beiden Tonspuren getrennt. Die Transkription teilt sich den Rechner mit der Aufnahme; auf einem schwächeren Computer kann ein Bildwechsel verloren gehen.',
+       viaArqTag:'Ich habe das Video bereits', viaArqH:'Datei verwenden', viaDriveOu:'Oder, wenn das Video in Google Drive liegt:',
+       viaArqP:'Eine Aufnahme, die Sie bereits erstellt haben — von einer Besprechung oder vom Bildschirm. Die Datei wird vom Browser gelesen und verlässt Ihren Computer nicht.',
+-      s1:'Video', drop1:'Video auswählen oder hierher ziehen',
++      s1:'Eingabe', drop1:'Video auswählen oder hierher ziehen',
+       drop2:'MP4 / MOV / WebM — die Dateigröße spielt keine Rolle',
+       demoBtn:'Beispielvideo verwenden', demoHint:'50 Sekunden, fünf Bildschirme, mit gesprochenem Kommentar — zum Ausprobieren ohne eigene Datei',
+       demoLoading:'Beispiel wird heruntergeladen…', demoReady:'Beispiel mit Transkription geladen. Jetzt nur noch die Screenshots extrahieren.',
+@@ -5179,7 +5288,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
+       videoErr:'Der Browser konnte dieses Video nicht öffnen. Konvertieren Sie es in MP4 (H.264) und versuchen Sie es erneut.',
+       reportar:'Melden Sie uns, welches Format fehlgeschlagen ist',
+       reportarDica:' — davon hängt ab, ob sich eine automatische Konvertierung lohnt.',
+-      s2:'Der Ton', opcional:'optional', autoBtn:'Den Ton transkribieren',
++      s2:'Ton und Bildschirme', opcional:'optional', autoBtn:'Den Ton transkribieren',
+       ajustesTit:'Einstellungen — fast niemand braucht sie',
+       refazerTelas:'Bildschirme neu erstellen',
+       trBoxH:'Transkription', trBoxSub:'korrigieren, Fachwortliste anwenden, übersetzen',
+@@ -5266,7 +5375,16 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
+       limitInt:' Endete bei {0}, weil das Limit von {1} Screenshots erreicht wurde.',
+       stopping:'Wird gestoppt…', stopped:' Von Ihnen gestoppt — hier ist nur der bereits durchsuchte Abschnitt.',
+       extracted:'{0} Screenshots extrahiert.', reviewNext:' Prüfen Sie sie, bevor Sie das PDF erzeugen.',
+-      s4:'Prüfung',
++      s4:'Prüfen',
++      s6:'Herunterladen',
++      etapasNav:'Die drei Schritte',
++      et1:'Eingabe', et2:'Prüfen', et3:'Herunterladen', etFeita:'erledigt',
++      proxNada:'Wählen Sie zuerst ein Video oder nehmen Sie den Bildschirm auf.',
++      proxVideo:'Das Video ist bereit. Drücken Sie „{0}“, dann erscheinen die Bildschirme hier unten.',
++      proxGravando:'Aufnahme läuft. Markieren Sie die Schritte im kleinen Fenster; nach dem Stoppen erscheinen die Bildschirme zum Prüfen.',
++      proxTelas:'{0} Bildschirme bereit. Prüfen Sie die wichtigen und scrollen Sie nach unten, um das Dokument herunterzuladen.',
++      proxFim:'Dokument heruntergeladen. Sie können es erneut herunterladen oder das Projekt zum späteren Öffnen sichern.',
++      lockBaixar:'Das Dokument entsteht aus den Bildschirmen — es erscheint hier, sobald sie existieren.',
+       dropQuiet:'Ohne Sprache verwerfen',
+       ocrBtn:'Text auf dem Bildschirm lesen',
+       ocrLoad:'Die Texterkennung wird geladen (nur beim ersten Mal)…',
+@@ -5583,7 +5701,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
+       recWarnClipe:'L’enregistrement entier est jeté — seuls restent les clips des moments que vous marquez. Pendant la capture, l’outil isole les captures qui comptent et transcrit séparément les deux canaux audio. La transcription partage la machine avec la capture ; sur un ordinateur modeste, l’écran peut rater un changement.',
+       viaArqTag:'J’ai déjà la vidéo', viaArqH:'Utiliser un fichier', viaDriveOu:'Ou, si la vidéo est sur Google Drive :',
+       viaArqP:'Un enregistrement que vous avez déjà fait, de réunion ou d’écran. Le fichier est lu par le navigateur et ne quitte pas votre ordinateur.',
+-      s1:'Vidéo', drop1:'Choisir la vidéo ou la déposer ici',
++      s1:'Entrée', drop1:'Choisir la vidéo ou la déposer ici',
+       drop2:'MP4 / MOV / WebM — la taille du fichier n’a pas d’importance',
+       demoBtn:'Utiliser la vidéo d’exemple', demoHint:'50 secondes, cinq écrans et une narration — pour essayer sans votre propre fichier',
+       demoLoading:'Téléchargement de l’exemple…', demoReady:'Exemple chargé avec sa transcription. Il ne reste qu’à extraire les captures.',
+@@ -5787,7 +5905,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
+       videoErr:'Le navigateur n’a pas réussi à ouvrir cette vidéo. Convertissez-la en MP4 (H.264) et réessayez.',
+       reportar:'Dites-nous quel format a échoué',
+       reportarDica:' — c’est ce qui décidera si la conversion automatique vaut la peine d’être développée.',
+-      s2:'La parole', opcional:'facultatif', autoBtn:'Transcrire la parole',
++      s2:'La parole et les écrans', opcional:'facultatif', autoBtn:'Transcrire la parole',
+       ajustesTit:'Réglages — presque personne n’en a besoin',
+       refazerTelas:'Refaire les écrans',
+       trBoxH:'Transcription', trBoxSub:'corriger, appliquer le lexique métier, traduire',
+@@ -5874,7 +5992,16 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
+       limitInt:' Arrêt à {0} en atteignant la limite de {1} captures.',
+       stopping:'Arrêt…', stopped:' Interrompu par vous — seule la partie déjà analysée est ici.',
+       extracted:'{0} captures extraites.', reviewNext:' Vérifiez-les ci-dessous avant de générer le PDF.',
+-      s4:'Révision',
++      s4:'Vérifier',
++      s6:'Télécharger',
++      etapasNav:'Les trois étapes',
++      et1:'Entrée', et2:'Vérifier', et3:'Télécharger', etFeita:'faite',
++      proxNada:'Commencez par choisir une vidéo ou enregistrer votre écran.',
++      proxVideo:'La vidéo est prête. Appuyez sur « {0} » et les écrans apparaissent ci-dessous.',
++      proxGravando:'Enregistrement en cours. Marquez les étapes depuis la petite fenêtre; à l’arrêt, les écrans apparaissent pour vérification.',
++      proxTelas:'{0} écrans prêts. Vérifiez ceux qui comptent puis descendez pour télécharger le document.',
++      proxFim:'Document téléchargé. Vous pouvez le télécharger à nouveau, ou enregistrer le projet pour le rouvrir plus tard.',
++      lockBaixar:'Le document est construit à partir des écrans — il apparaît ici dès qu’ils existent.',
+       dropQuiet:'Écarter les captures sans parole',
+       ocrBtn:'Lire le texte à l’écran',
+       ocrLoad:'Chargement du lecteur de texte (seulement la première fois)…',
+@@ -6690,6 +6817,12 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
+       el.title = t(el.getAttribute('data-i18n-title'));
+       if (!el.getAttribute('aria-label')) el.setAttribute('aria-label', el.title);
+     });
++    /* Rotulo acessivel SEM titulo visivel. A barra das etapas e um `<nav>`: ela
++       precisa de nome para o leitor de tela poder saltar para ela, e nao de um
++       balaozinho no passar do mouse. */
++    document.querySelectorAll('[data-i18n-aria]').forEach(el => {
++      el.setAttribute('aria-label', t(el.getAttribute('data-i18n-aria')));
++    });
+     pintarAuto();
+     /* O rótulo do parar deixou de vir do `data-i18n`: ele tem dois textos e um
+        terceiro estado. Sem esta linha, trocar de idioma no meio de uma
+@@ -6901,6 +7034,13 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
+     dobrar('prevCard',    temAlgo || modo === 'arquivo' || modo === 'gravado');
+     dica('hintPrev',      liveOn ? 'lockGravando' : emCauda ? 'lockCauda'
+                                  : temAlgo ? null : 'lockPrev');
++    /* A etapa 3 segue o mesmo relogio da 2: ela e a outra metade do mesmo
++       trabalho, e travar uma sem a outra deixaria a pessoa conferindo telas com
++       o botao de baixar inerte logo abaixo. */
++    trancar('cardBaixar',  (temAlgo || modo !== 'nada') && !emAndamento);
++    dobrar('cardBaixar',   temAlgo);
++    dica('hintBaixar',     liveOn ? 'lockGravando' : emCauda ? 'lockCauda'
++                                  : temAlgo ? null : 'lockBaixar');
+     trancar('promptCard', temAlgo && !emAndamento);
+     /* Os botões de saída seguem o mesmo relógio das travas dos cartões. Antes
+        eles só eram acertados dentro de `counts()`, que só roda a partir de
+@@ -6908,6 +7048,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
+        chamam `render()`. Era essa a janela em que onze botões ficavam
+        clicáveis sem ter o que fazer. */
+     if (typeof pintarSaidas === 'function') pintarSaidas();
++    /* A barra e a frase repintam AQUI, e nao num relogio proprio: `passos()` ja
++       e o lugar por onde passa toda mudanca de estado da pagina. Um segundo
++       gatilho seria um segundo momento em que as duas podem discordar da tela. */
++    try { pintarEtapas(); pintarProxAcao(); } catch (e) {}
+     dobrar('promptCard',  temAlgo);
+     dica('hintPrompt',    liveOn ? 'lockGravando' : emCauda ? 'lockCauda'
+                                 : temAlgo ? null : 'lockPrompt');
+@@ -7237,6 +7381,18 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
+        documento. Espelhar o estado evita um botão que promete e não cumpre. */
+     $('recPrim').disabled = !!($(r.prim) && $(r.prim).disabled);
+     $('recSeg').disabled  = !!($(r.seg)  && $(r.seg).disabled);
++    /* O BOTAO DA GAVETA NAO ENTRA AQUI, e isso e uma decisao.
++       Desabilita-lo parecia coerente — sem material, "ver todos os formatos"
++       abriria uma gaveta de botoes mortos. Mas o cartao inteiro ja e `inert`
++       nesse estado, entao a trava seria a segunda numa porta que ja esta
++       fechada; e ela custava caro: `_navegador.mjs` abre a gaveta CLICANDO
++       neste botao, e um botao desabilitado nao responde a clique — cinquenta
++       reguas perderiam o acesso as saidas de uma vez.
++
++       Quem responde por este estado e a divisao das etapas: com `Baixar` num
++       cartao proprio, `passos()` o deixa inerte enquanto nao ha o que baixar.
++       Dentro da antiga "Revisao" isso nao era possivel — o mesmo cartao
++       precisava estar vivo para conferir os quadros. */
+   }
+ 
+   function abrirSaidas(abrir){
+@@ -8797,7 +8953,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
+      depois, e não tem como se atualizar sozinho. Sem carimbo, "estou com um
+      problema no offline" é uma conversa sem chão — ninguém sabe de qual build
+      se fala nem se o defeito já foi consertado. */
+-  const VERSAO = '2026.08.21-45';
++  const VERSAO = '2026.08.21-57';
+   window.__versao = () => VERSAO;
+ 
+   const PIP_CSS = `
+@@ -15543,13 +15699,93 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
+      Docs acendia, e o `#go` chamava `doc.save()` direto do jsPDF, que não passa
+      por porta nenhuma. Quem gerava o PDF via o passo 3 dizer que nada tinha
+      sido gerado. */
++  /* ---- AS TRES ETAPAS, DERIVADAS ----
++
++     Nao ha variavel de etapa. A etapa e uma LEITURA do que ja existe: nao ha
++     quadro nenhum, entao a pessoa esta na entrada; ha quadros e nada saiu,
++     entao ela esta conferindo; saiu documento, entao ela esta em baixar.
++
++     Isto e o contrario de um controlador com estado proprio, e a diferenca
++     aparece no unico dia que importa: quando a pessoa apaga todos os quadros. A
++     barra volta sozinha para a entrada, porque a resposta nunca esteve guardada
++     em lugar nenhum para ficar velha. */
++  function etapaAtual(){
++    if (baixouAlgo) return 3;
++    return frames.length ? 2 : 1;
++  }
++  function pintarEtapas(){
++    const nav = $('etapas'); if (!nav) return;
++    const atual = etapaAtual();
++    /* "Feita" nao e "visitada": e ter produzido o que aquela etapa produz. A
++       entrada produz material; conferir e baixar so terminam quando um
++       documento sai. Marcar como feita uma etapa por onde a pessoa passou seria
++       a bolinha mentindo, que e a mesma regra dos subpassos. */
++    const feita = { 1: frames.length > 0, 2: baixouAlgo, 3: baixouAlgo };
++    nav.querySelectorAll('.etapa').forEach(b => {
++      const n = +b.dataset.etapa;
++      b.classList.toggle('feita', !!feita[n]);
++      if (n === atual) b.setAttribute('aria-current', 'step');
++      else b.removeAttribute('aria-current');
++      /* O numero entra no rotulo acessivel porque ele esta na tela: quem
++         controla por voz diz "clicar em 2 Conferir", e um nome que nao contem
++         o que se ve nao atende. E "feita" entra por PALAVRA — o visto verde
++         some para quem nao o distingue. */
++      b.setAttribute('aria-label',
++        n + '. ' + t('et' + n) + (feita[n] ? ' \u2014 ' + t('etFeita') : ''));
++    });
++  }
++  /* A frase da proxima acao.
++
++     A GUARDA DO `textContent` NAO E OTIMIZACAO. O paragrafo e `role="status"`,
++     e `passos()` roda a cada carga de video, cada quadro descartado, cada tecla
++     na transcricao. Reescrever o mesmo texto faz o leitor de tela repetir a
++     frase inteira toda vez — a diferenca entre uma dica e um papagaio. */
++  function pintarProxAcao(){
++    const el = $('proxAcao'); if (!el) return;
++    let txt;
++    if (liveOn)               txt = t('proxGravando');
++    else if (baixouAlgo)      txt = t('proxFim');
++    else if (frames.length)   txt = t('proxTelas', frames.filter(f => f.keep).length);
++    else if (modoAtual() === 'arquivo') txt = t('proxVideo', t('autoBtn'));
++    else                      txt = t('proxNada');
++    if (el.textContent !== txt) el.textContent = txt;
++  }
++  /* O clique da barra e amarrado UMA vez, e nao a cada pintura: `pintarEtapas`
++     roda dezenas de vezes por sessao, e reamarrar `onclick` a cada uma seria
++     trocar o mesmo manipulador por ele mesmo para sempre. */
++  if ($('etapas')) $('etapas').onclick = (e) => {
++    const b = e.target.closest('.etapa'); if (!b) return;
++    const alvo = $(b.dataset.alvo); if (!alvo) return;
++    const suave = !(window.matchMedia &&
++                    window.matchMedia('(prefers-reduced-motion: reduce)').matches);
++    alvo.scrollIntoView({ block: 'start', behavior: suave ? 'smooth' : 'auto' });
++    /* O foco vai para o cabecalho, e nao para o cartao: um `<div>` focado nao
++       e anunciado por nada. `preventScroll` porque a rolagem ja aconteceu, com
++       a animacao que a pessoa pediu. */
++    const h = alvo.querySelector('h2');
++    if (h) h.focus({ preventScroll: true });
++  };
++
+   function registrarSaida(){
+     baixouAlgo = true;
+     espelhoEntregue();
+     if (typeof pintarSubpassos === 'function') setTimeout(pintarSubpassos, 0);
++    /* E A BARRA DAS ETAPAS. Este e o unico instante em que a pessoa passa para
++       a etapa 3, e ele nao chama `passos()` — que e onde a barra repinta. Sem
++       esta linha, baixar o documento deixava a barra dizendo "voce esta
++       conferindo" para sempre, e a unica coisa que a moveria seria mexer nos
++       quadros depois. Quem pegou foi `etapas.mjs`, no bloco [6]. */
++    if (typeof pintarEtapas === 'function') setTimeout(() => {
++      pintarEtapas(); pintarProxAcao();
++    }, 0);
+   }
+   function esqueceuOQueGerou(){
+     baixouAlgo = false;
++    /* Pelo mesmo motivo da linha de cima, e na direcao contraria: apagar os
++       quadros desfaz o "baixado", e a barra tem que voltar junto. */
++    if (typeof pintarEtapas === 'function') setTimeout(() => {
++      pintarEtapas(); pintarProxAcao();
++    }, 0);
+     /* O que a pessoa declarou vale para ESTE material. Sumindo os quadros,
+        some a declaração junto — senão a bolinha verde de "identificação
+        preenchida" sobreviveria a um documento que não existe mais, que é
+diff --git a/src/.build b/src/.build
+index f5b1608..bdb24a6 100644
+--- a/src/.build
++++ b/src/.build
+@@ -1 +1 @@
+-2026-08-21 45
++2026-08-21 57
+diff --git a/src/template.html b/src/template.html
+index 698ebc4..0b4539e 100644
+--- a/src/template.html
++++ b/src/template.html
+@@ -166,6 +166,35 @@
+   .step{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;
+         background:var(--accent);color:var(--accent-ink);font-size:12px;font-weight:600;
+         margin-right:8px;vertical-align:2px}
++  /* ---- A BARRA DAS TRES ETAPAS ----
++     Botoes, e nao enfeite: cada um leva a etapa dele. Numa pagina de tres
++     cartoes longos, "voltar para conferir" era rolar e procurar. */
++  .etapas{display:flex;gap:8px;margin:0 0 10px;flex-wrap:wrap}
++  .etapa{display:flex;align-items:center;gap:8px;flex:1 1 0;min-width:150px;
++      border:1px solid var(--line);background:var(--panel);color:var(--muted);
++      border-radius:999px;padding:7px 14px;font:inherit;font-size:13px;
++      cursor:pointer;text-align:left;transition:.14s}
++  .etapa:hover{border-color:var(--accent);color:var(--ink)}
++  .etapa:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
++  .etapaN{display:inline-grid;place-items:center;width:21px;height:21px;flex:0 0 auto;
++      border-radius:50%;border:1px solid currentColor;font-size:11px;font-weight:700;
++      font-style:normal}
++  /* ONDE VOCE ESTA. `aria-current="step"` e a fonte, e a cor vem dele — assim
++     nao existe um estado visual que o leitor de tela nao enxergue. */
++  .etapa[aria-current="step"]{border-color:var(--accent);color:var(--accent);font-weight:640}
++  .etapa[aria-current="step"] .etapaN{background:var(--accent);color:var(--accent-ink);
++      border-color:var(--accent)}
++  /* JA FEITA. O visto vem do CSS, mas a PALAVRA "feita" entra no rotulo
++     acessivel do botao — cor e simbolo somem para quem nao os distingue. */
++  .etapa.feita{color:var(--ok);border-color:color-mix(in srgb,var(--ok) 45%,var(--line))}
++  .etapa.feita .etapaN{background:var(--ok);color:#fff;border-color:var(--ok);font-size:12px}
++  .etapa.feita .etapaN::before{content:'\2713'}
++  .etapa.feita[aria-current="step"]{color:var(--accent);border-color:var(--accent)}
++  .proxAcao{margin:0 0 26px;font-size:13.5px;color:var(--ink);min-height:1.4em}
++  @media (max-width:560px){
++    .etapas{gap:6px}
++    .etapa{min-width:0;flex:1 1 auto;padding:6px 10px;font-size:12px}
++  }
+   /* Os dois caminhos do passo 1. O de gravar tem borda de destaque porque é o
+      que a maioria vem fazer; o de arquivo continua inteiro ao lado, e não
+      escondido atrás de um "ou". */
+@@ -1176,8 +1205,37 @@
+   <h1 class="soLeitor">__MARCA__</h1>
+   <p class="sub" data-i18n="sub"></p>
+ 
++  <!-- ---- AS TRES ETAPAS ----
++
++       A ferramenta tinha tres cartoes numerados — Video, A fala, Revisao — e a
++       numeracao mentia duas vezes. "A fala" dizia-se OPCIONAL e e onde mora o
++       botao que faz a ferramenta funcionar; "Revisao" escondia quatro blocos
++       dentro, e o quarto era GERAR — a coisa que a pessoa veio buscar. Quem
++       abria a pagina lia "tres passos" e o terceiro terminava numa revisao que
++       nao parecia levar a lugar nenhum.
++
++       Agora sao as tres que a pessoa reconhece: Entrada, Conferir, Baixar.
++
++       ESTA BARRA NAO GUARDA ESTADO. Ela e desenhada a partir do que ja existe —
++       ha quadros? saiu documento? —, e por isso nao pode divergir da tela. Um
++       controlador de etapas com verdade propria seria um segundo lugar onde a
++       resposta mora, e o dia em que os dois discordarem e o dia em que a barra
++       aponta para uma etapa que nao e a que esta aberta. -->
++  <nav class="etapas" id="etapas" data-i18n-aria="etapasNav">
++    <button type="button" class="etapa" data-etapa="1" data-alvo="cardVideo">
++      <i class="etapaN">1</i><span data-i18n="et1"></span></button>
++    <button type="button" class="etapa" data-etapa="2" data-alvo="prevCard">
++      <i class="etapaN">2</i><span data-i18n="et2"></span></button>
++    <button type="button" class="etapa" data-etapa="3" data-alvo="cardBaixar">
++      <i class="etapaN">3</i><span data-i18n="et3"></span></button>
++  </nav>
++  <!-- A frase da proxima acao. `role=status` porque ela e a unica coisa que
++       ANUNCIA a mudanca de etapa: `aria-current` muda em silencio, e um leitor
++       de tela que nao e avisado fica numa etapa nova sem saber. -->
++  <p class="proxAcao" id="proxAcao" role="status"></p>
++
+   <div class="card" id="cardVideo">
+-    <h2><span class="step">1</span><span data-i18n="s1"></span></h2>
++    <h2 id="h2Entrada" tabindex="-1"><span class="step">1</span><span data-i18n="s1"></span></h2>
+ 
+     <!-- O cenário vem PRIMEIRO, antes de gravar ou de escolher arquivo.
+ 
+@@ -1676,7 +1734,12 @@
+   </div>
+ 
+   <div class="card" id="cardTr">
+-    <h2><span class="step">2</span><span data-i18n="s2"></span><span class="opc" data-i18n="opcional"></span></h2>
++    <!-- SEM NUMERO, de proposito. Este cartao nunca foi uma etapa: ele e a
++         segunda metade da ENTRADA — e onde o video vira telas e fala. Chama-se
++         "A fala" e carrega `#auto`, `#extract` e os ajustes de extracao; o
++         rotulo "opcional" ao lado do unico botao que faz a ferramenta
++         funcionar era a numeracao mentindo em voz alta. -->
++    <h2><span data-i18n="s2"></span></h2>
+     <p class="lockHint hide" id="hintTr"></p>
+     <!-- Fora da dobra de propósito. Estes dois botões são as ferramentas de
+          quem está com problema — e o cartão 2 fica TRAVADO justamente quando há
+@@ -1953,7 +2016,7 @@
+   </div>
+ 
+   <div class="card" id="prevCard">
+-    <h2><span class="step">3</span><span data-i18n="s4"></span></h2>
++    <h2 id="h2Conferir" tabindex="-1"><span class="step">2</span><span data-i18n="s4"></span></h2>
+     <p class="lockHint hide" id="hintPrev"></p>
+     <div class="dobra"><div>
+ 
+@@ -2476,8 +2539,27 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
+       </div>
+     </details>
+ 
++    </div></div><!-- /dobra -->
++  </div>
++
++  <!-- ---- ETAPA 3: BAIXAR ----
++
++       Ela existia, e estava escondida como o quarto bloco de "Revisao". Era o
++       defeito de numeracao mais caro da ferramenta: a acao que a pessoa veio
++       fazer aparecia como um sub-item de outra coisa, atras de tres blocos que
++       ela precisava rolar.
++
++       O bloco continua sendo um `<details>` com o mesmo id e o mesmo estado
++       calculado — a maquina dos subpassos nao ganhou um segundo dono. O que
++       mudou foi de que cartao ele e filho. Perdeu so a letra "d": era a quarta
++       de quatro, e agora e a unica do cartao dela. -->
++  <div class="card" id="cardBaixar">
++    <h2 id="h2Baixar" tabindex="-1"><span class="step">3</span><span data-i18n="s6"></span></h2>
++    <p class="lockHint hide" id="hintBaixar"></p>
++    <div class="dobra"><div>
++
+     <details class="sub" id="sb4" open>
+-      <summary><i class="sbN">d</i><span data-i18n="sb4H"></span>
++      <summary><span data-i18n="sb4H"></span>
+         <b class="sbEst" id="sbEst4"></b></summary>
+       <div class="sbCorpo">
+     <!-- ---- as saídas, agrupadas ----
+@@ -3147,7 +3229,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
+       recWarnClipe:'A gravação inteira é descartada — só ficam os clipes dos momentos que você marcar. Durante a captura a ferramenta separa os frames que importam e transcreve os dois canais de áudio em separado. A transcrição divide a máquina com a captura; em computador modesto a tela pode perder alguma troca.',
+       viaArqTag:'Já tenho o vídeo', viaArqH:'Usar um arquivo', viaDriveOu:'Ou, se o vídeo estiver no Google Drive:',
+       viaArqP:'Uma gravação que você já fez, de reunião ou de tela. O arquivo é lido pelo navegador e não sai do seu computador.',
+-      s1:'Vídeo', drop1:'Escolher ou arrastar o vídeo aqui',
++      s1:'Entrada', drop1:'Escolher ou arrastar o vídeo aqui',
+       drop2:'MP4 / MOV / WebM — o tamanho do arquivo não importa',
+       demoBtn:'Usar vídeo de exemplo', demoHint:'50 segundos, cinco telas e narração — para experimentar sem arquivo próprio',
+       demoLoading:'Baixando o exemplo…', demoReady:'Exemplo carregado com a transcrição. É só extrair os frames.',
+@@ -3354,7 +3436,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
+       videoErr:'O navegador não conseguiu abrir este vídeo. Converta para MP4 (H.264) e tente de novo.',
+       reportar:'Me avise qual formato falhou',
+       reportarDica:' — é o que vai definir se vale a pena construir a conversão automática.',
+-      s2:'A fala', opcional:'opcional', autoBtn:'Transcrever a fala',
++      s2:'A fala e as telas', opcional:'opcional', autoBtn:'Transcrever a fala',
+       ajustesTit:'Ajustes — quase ninguém precisa mexer',
+       refazerTelas:'Refazer as telas',
+       trBoxH:'Transcrição', trBoxSub:'corrigir, aplicar vocabulário, traduzir',
+@@ -3447,7 +3529,16 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
+       limitInt:' Parou em {0} por atingir o limite de {1} frames.',
+       stopping:'Parando…', stopped:' Interrompido por você — só o trecho já varrido está aqui.',
+       extracted:'{0} frames extraídos.', reviewNext:' Revise abaixo antes de gerar o PDF.',
+-      s4:'Revisão',
++      s4:'Conferir',
++      s6:'Baixar',
++      etapasNav:'As três etapas',
++      et1:'Entrada', et2:'Conferir', et3:'Baixar', etFeita:'feita',
++      proxNada:'Comece escolhendo um vídeo ou gravando a tela.',
++      proxVideo:'O vídeo está pronto. Aperte “{0}” para as telas aparecerem aqui embaixo.',
++      proxGravando:'Gravando. Marque os passos pela janelinha; ao parar, as telas aparecem para conferir.',
++      proxTelas:'{0} telas prontas. Confira as que importam e desça para baixar o documento.',
++      proxFim:'Documento baixado. Dá para baixar de novo, ou guardar o projeto para reabrir depois.',
++      lockBaixar:'O documento é montado a partir das telas — ele aparece aqui quando elas existirem.',
+       dropQuiet:'Descartar sem fala',
+       ocrBtn:'Ler o texto da tela',
+       ocrLoad:'Carregando o leitor de texto (só na primeira vez)…',
+@@ -3765,7 +3856,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
+       recWarnClipe:'The whole recording is discarded — only the clips of the moments you mark are kept. While capturing, the tool pulls out the frames that matter and transcribes the two audio channels separately. Transcription shares the machine with the capture; on a modest computer the screen may miss a change.',
+       viaArqTag:'I already have the video', viaArqH:'Use a file', viaDriveOu:'Or, if the video is on Google Drive:',
+       viaArqP:'A recording you already made, of a meeting or of a screen. The file is read by the browser and never leaves your computer.',
+-      s1:'Video', drop1:'Choose or drag your video here',
++      s1:'Input', drop1:'Choose or drag your video here',
+       drop2:'MP4 / MOV / WebM — file size does not matter',
+       demoBtn:'Use the example video', demoHint:'50 seconds, five screens, with narration — try it without your own file',
+       demoLoading:'Downloading the example…', demoReady:'Example loaded with its transcript. Just extract the frames.',
+@@ -3969,7 +4060,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
+       videoErr:'The browser could not open this video. Convert it to MP4 (H.264) and try again.',
+       reportar:'Tell me which format failed',
+       reportarDica:' — that is what will decide whether automatic conversion is worth building.',
+-      s2:'The speech', opcional:'optional', autoBtn:'Transcribe the speech',
++      s2:'Speech and screens', opcional:'optional', autoBtn:'Transcribe the speech',
+       ajustesTit:'Settings — almost nobody needs these',
+       refazerTelas:'Redo the screens',
+       trBoxH:'Transcript', trBoxSub:'fix, apply vocabulary, translate',
+@@ -4056,7 +4147,16 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
+       limitInt:' Stopped at {0} after reaching the {1}-frame limit.',
+       stopping:'Stopping…', stopped:' Stopped by you — only the part scanned so far is here.',
+       extracted:'{0} frames extracted.', reviewNext:' Review them below before generating the PDF.',
+-      s4:'Review',
++      s4:'Check',
++      s6:'Download',
++      etapasNav:'The three steps',
++      et1:'Input', et2:'Check', et3:'Download', etFeita:'done',
++      proxNada:'Start by choosing a video or recording your screen.',
++      proxVideo:'The video is ready. Press “{0}” and the screens show up below.',
++      proxGravando:'Recording. Mark the steps from the little window; when you stop, the screens appear here to check.',
++      proxTelas:'{0} screens ready. Check the ones that matter, then scroll down to download the document.',
++      proxFim:'Document downloaded. You can download it again, or save the project to reopen later.',
++      lockBaixar:'The document is built from the screens — it shows up here once they exist.',
+       dropQuiet:'Discard silent ones',
+       ocrBtn:'Read the on-screen text',
+       ocrLoad:'Loading the text reader (first time only)…',
+@@ -4368,7 +4468,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
+       recWarnClipe:'La grabación entera se descarta — solo quedan los clips de los momentos que marques. Durante la captura la herramienta separa los fotogramas que importan y transcribe los dos canales de audio por separado. La transcripción comparte la máquina con la captura; en un ordenador modesto la pantalla puede perder algún cambio.',
+       viaArqTag:'Ya tengo el vídeo', viaArqH:'Usar un archivo', viaDriveOu:'O, si el vídeo está en Google Drive:',
+       viaArqP:'Una grabación que ya hiciste, de una reunión o de pantalla. El archivo lo lee el navegador y no sale de tu equipo.',
+-      s1:'Vídeo', drop1:'Elige o arrastra tu vídeo aquí',
++      s1:'Entrada', drop1:'Elige o arrastra tu vídeo aquí',
+       drop2:'MP4 / MOV / WebM — el tamaño del archivo no importa',
+       demoBtn:'Usar el vídeo de ejemplo', demoHint:'50 segundos, cinco pantallas y narración — pruébalo sin archivo propio',
+       demoLoading:'Descargando el ejemplo…', demoReady:'Ejemplo cargado con su transcripción. Solo falta extraer los fotogramas.',
+@@ -4572,7 +4672,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
+       videoErr:'El navegador no pudo abrir este vídeo. Conviértelo a MP4 (H.264) e inténtalo de nuevo.',
+       reportar:'Dime qué formato falló',
+       reportarDica:' — eso decidirá si vale la pena construir la conversión automática.',
+-      s2:'El habla', opcional:'opcional', autoBtn:'Transcribir el habla',
++      s2:'El habla y las pantallas', opcional:'opcional', autoBtn:'Transcribir el habla',
+       ajustesTit:'Ajustes — casi nadie necesita tocarlos',
+       refazerTelas:'Rehacer las pantallas',
+       trBoxH:'Transcripción', trBoxSub:'corregir, aplicar vocabulario, traducir',
+@@ -4659,7 +4759,16 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
+       limitInt:' Se detuvo en {0} al alcanzar el límite de {1} fotogramas.',
+       stopping:'Parando…', stopped:' Interrumpido por ti — solo está aquí el tramo ya recorrido.',
+       extracted:'{0} fotogramas extraídos.', reviewNext:' Revísalos abajo antes de generar el PDF.',
+-      s4:'Revisión',
++      s4:'Comprobar',
++      s6:'Descargar',
++      etapasNav:'Las tres etapas',
++      et1:'Entrada', et2:'Comprobar', et3:'Descargar', etFeita:'hecha',
++      proxNada:'Empieza eligiendo un vídeo o grabando la pantalla.',
++      proxVideo:'El vídeo está listo. Pulsa “{0}” y las pantallas aparecerán aquí abajo.',
++      proxGravando:'Grabando. Marca los pasos desde la ventanita; al parar, las pantallas aparecerán para comprobar.',
++      proxTelas:'{0} pantallas listas. Comprueba las que importan y baja para descargar el documento.',
++      proxFim:'Documento descargado. Puedes descargarlo otra vez, o guardar el proyecto para reabrirlo después.',
++      lockBaixar:'El documento se arma a partir de las pantallas — aparece aquí cuando existan.',
+       dropQuiet:'Descartar sin habla',
+       ocrBtn:'Leer el texto de la pantalla',
+       ocrLoad:'Cargando el lector de texto (solo la primera vez)…',
+@@ -4970,7 +5079,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
+       recWarnClipe:'Die gesamte Aufnahme wird verworfen — erhalten bleiben nur die Clips der Momente, die Sie markieren. Während der Aufnahme trennt das Werkzeug die Screenshots heraus, die zählen, und transkribiert die beiden Tonspuren getrennt. Die Transkription teilt sich den Rechner mit der Aufnahme; auf einem schwächeren Computer kann ein Bildwechsel verloren gehen.',
+       viaArqTag:'Ich habe das Video bereits', viaArqH:'Datei verwenden', viaDriveOu:'Oder, wenn das Video in Google Drive liegt:',
+       viaArqP:'Eine Aufnahme, die Sie bereits erstellt haben — von einer Besprechung oder vom Bildschirm. Die Datei wird vom Browser gelesen und verlässt Ihren Computer nicht.',
+-      s1:'Video', drop1:'Video auswählen oder hierher ziehen',
++      s1:'Eingabe', drop1:'Video auswählen oder hierher ziehen',
+       drop2:'MP4 / MOV / WebM — die Dateigröße spielt keine Rolle',
+       demoBtn:'Beispielvideo verwenden', demoHint:'50 Sekunden, fünf Bildschirme, mit gesprochenem Kommentar — zum Ausprobieren ohne eigene Datei',
+       demoLoading:'Beispiel wird heruntergeladen…', demoReady:'Beispiel mit Transkription geladen. Jetzt nur noch die Screenshots extrahieren.',
+@@ -5174,7 +5283,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
+       videoErr:'Der Browser konnte dieses Video nicht öffnen. Konvertieren Sie es in MP4 (H.264) und versuchen Sie es erneut.',
+       reportar:'Melden Sie uns, welches Format fehlgeschlagen ist',
+       reportarDica:' — davon hängt ab, ob sich eine automatische Konvertierung lohnt.',
+-      s2:'Der Ton', opcional:'optional', autoBtn:'Den Ton transkribieren',
++      s2:'Ton und Bildschirme', opcional:'optional', autoBtn:'Den Ton transkribieren',
+       ajustesTit:'Einstellungen — fast niemand braucht sie',
+       refazerTelas:'Bildschirme neu erstellen',
+       trBoxH:'Transkription', trBoxSub:'korrigieren, Fachwortliste anwenden, übersetzen',
+@@ -5261,7 +5370,16 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
+       limitInt:' Endete bei {0}, weil das Limit von {1} Screenshots erreicht wurde.',
+       stopping:'Wird gestoppt…', stopped:' Von Ihnen gestoppt — hier ist nur der bereits durchsuchte Abschnitt.',
+       extracted:'{0} Screenshots extrahiert.', reviewNext:' Prüfen Sie sie, bevor Sie das PDF erzeugen.',
+-      s4:'Prüfung',
++      s4:'Prüfen',
++      s6:'Herunterladen',
++      etapasNav:'Die drei Schritte',
++      et1:'Eingabe', et2:'Prüfen', et3:'Herunterladen', etFeita:'erledigt',
++      proxNada:'Wählen Sie zuerst ein Video oder nehmen Sie den Bildschirm auf.',
++      proxVideo:'Das Video ist bereit. Drücken Sie „{0}“, dann erscheinen die Bildschirme hier unten.',
++      proxGravando:'Aufnahme läuft. Markieren Sie die Schritte im kleinen Fenster; nach dem Stoppen erscheinen die Bildschirme zum Prüfen.',
++      proxTelas:'{0} Bildschirme bereit. Prüfen Sie die wichtigen und scrollen Sie nach unten, um das Dokument herunterzuladen.',
++      proxFim:'Dokument heruntergeladen. Sie können es erneut herunterladen oder das Projekt zum späteren Öffnen sichern.',
++      lockBaixar:'Das Dokument entsteht aus den Bildschirmen — es erscheint hier, sobald sie existieren.',
+       dropQuiet:'Ohne Sprache verwerfen',
+       ocrBtn:'Text auf dem Bildschirm lesen',
+       ocrLoad:'Die Texterkennung wird geladen (nur beim ersten Mal)…',
+@@ -5578,7 +5696,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
+       recWarnClipe:'L’enregistrement entier est jeté — seuls restent les clips des moments que vous marquez. Pendant la capture, l’outil isole les captures qui comptent et transcrit séparément les deux canaux audio. La transcription partage la machine avec la capture ; sur un ordinateur modeste, l’écran peut rater un changement.',
+       viaArqTag:'J’ai déjà la vidéo', viaArqH:'Utiliser un fichier', viaDriveOu:'Ou, si la vidéo est sur Google Drive :',
+       viaArqP:'Un enregistrement que vous avez déjà fait, de réunion ou d’écran. Le fichier est lu par le navigateur et ne quitte pas votre ordinateur.',
+-      s1:'Vidéo', drop1:'Choisir la vidéo ou la déposer ici',
++      s1:'Entrée', drop1:'Choisir la vidéo ou la déposer ici',
+       drop2:'MP4 / MOV / WebM — la taille du fichier n’a pas d’importance',
+       demoBtn:'Utiliser la vidéo d’exemple', demoHint:'50 secondes, cinq écrans et une narration — pour essayer sans votre propre fichier',
+       demoLoading:'Téléchargement de l’exemple…', demoReady:'Exemple chargé avec sa transcription. Il ne reste qu’à extraire les captures.',
+@@ -5782,7 +5900,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
+       videoErr:'Le navigateur n’a pas réussi à ouvrir cette vidéo. Convertissez-la en MP4 (H.264) et réessayez.',
+       reportar:'Dites-nous quel format a échoué',
+       reportarDica:' — c’est ce qui décidera si la conversion automatique vaut la peine d’être développée.',
+-      s2:'La parole', opcional:'facultatif', autoBtn:'Transcrire la parole',
++      s2:'La parole et les écrans', opcional:'facultatif', autoBtn:'Transcrire la parole',
+       ajustesTit:'Réglages — presque personne n’en a besoin',
+       refazerTelas:'Refaire les écrans',
+       trBoxH:'Transcription', trBoxSub:'corriger, appliquer le lexique métier, traduire',
+@@ -5869,7 +5987,16 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
+       limitInt:' Arrêt à {0} en atteignant la limite de {1} captures.',
+       stopping:'Arrêt…', stopped:' Interrompu par vous — seule la partie déjà analysée est ici.',
+       extracted:'{0} captures extraites.', reviewNext:' Vérifiez-les ci-dessous avant de générer le PDF.',
+-      s4:'Révision',
++      s4:'Vérifier',
++      s6:'Télécharger',
++      etapasNav:'Les trois étapes',
++      et1:'Entrée', et2:'Vérifier', et3:'Télécharger', etFeita:'faite',
++      proxNada:'Commencez par choisir une vidéo ou enregistrer votre écran.',
++      proxVideo:'La vidéo est prête. Appuyez sur « {0} » et les écrans apparaissent ci-dessous.',
++      proxGravando:'Enregistrement en cours. Marquez les étapes depuis la petite fenêtre; à l’arrêt, les écrans apparaissent pour vérification.',
++      proxTelas:'{0} écrans prêts. Vérifiez ceux qui comptent puis descendez pour télécharger le document.',
++      proxFim:'Document téléchargé. Vous pouvez le télécharger à nouveau, ou enregistrer le projet pour le rouvrir plus tard.',
++      lockBaixar:'Le document est construit à partir des écrans — il apparaît ici dès qu’ils existent.',
+       dropQuiet:'Écarter les captures sans parole',
+       ocrBtn:'Lire le texte à l’écran',
+       ocrLoad:'Chargement du lecteur de texte (seulement la première fois)…',
+@@ -6685,6 +6812,12 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
+       el.title = t(el.getAttribute('data-i18n-title'));
+       if (!el.getAttribute('aria-label')) el.setAttribute('aria-label', el.title);
+     });
++    /* Rotulo acessivel SEM titulo visivel. A barra das etapas e um `<nav>`: ela
++       precisa de nome para o leitor de tela poder saltar para ela, e nao de um
++       balaozinho no passar do mouse. */
++    document.querySelectorAll('[data-i18n-aria]').forEach(el => {
++      el.setAttribute('aria-label', t(el.getAttribute('data-i18n-aria')));
++    });
+     pintarAuto();
+     /* O rótulo do parar deixou de vir do `data-i18n`: ele tem dois textos e um
+        terceiro estado. Sem esta linha, trocar de idioma no meio de uma
+@@ -6896,6 +7029,13 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
+     dobrar('prevCard',    temAlgo || modo === 'arquivo' || modo === 'gravado');
+     dica('hintPrev',      liveOn ? 'lockGravando' : emCauda ? 'lockCauda'
+                                  : temAlgo ? null : 'lockPrev');
++    /* A etapa 3 segue o mesmo relogio da 2: ela e a outra metade do mesmo
++       trabalho, e travar uma sem a outra deixaria a pessoa conferindo telas com
++       o botao de baixar inerte logo abaixo. */
++    trancar('cardBaixar',  (temAlgo || modo !== 'nada') && !emAndamento);
++    dobrar('cardBaixar',   temAlgo);
++    dica('hintBaixar',     liveOn ? 'lockGravando' : emCauda ? 'lockCauda'
++                                  : temAlgo ? null : 'lockBaixar');
+     trancar('promptCard', temAlgo && !emAndamento);
+     /* Os botões de saída seguem o mesmo relógio das travas dos cartões. Antes
+        eles só eram acertados dentro de `counts()`, que só roda a partir de
+@@ -6903,6 +7043,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
+        chamam `render()`. Era essa a janela em que onze botões ficavam
+        clicáveis sem ter o que fazer. */
+     if (typeof pintarSaidas === 'function') pintarSaidas();
++    /* A barra e a frase repintam AQUI, e nao num relogio proprio: `passos()` ja
++       e o lugar por onde passa toda mudanca de estado da pagina. Um segundo
++       gatilho seria um segundo momento em que as duas podem discordar da tela. */
++    try { pintarEtapas(); pintarProxAcao(); } catch (e) {}
+     dobrar('promptCard',  temAlgo);
+     dica('hintPrompt',    liveOn ? 'lockGravando' : emCauda ? 'lockCauda'
+                                 : temAlgo ? null : 'lockPrompt');
+@@ -7232,6 +7376,18 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
+        documento. Espelhar o estado evita um botão que promete e não cumpre. */
+     $('recPrim').disabled = !!($(r.prim) && $(r.prim).disabled);
+     $('recSeg').disabled  = !!($(r.seg)  && $(r.seg).disabled);
++    /* O BOTAO DA GAVETA NAO ENTRA AQUI, e isso e uma decisao.
++       Desabilita-lo parecia coerente — sem material, "ver todos os formatos"
++       abriria uma gaveta de botoes mortos. Mas o cartao inteiro ja e `inert`
++       nesse estado, entao a trava seria a segunda numa porta que ja esta
++       fechada; e ela custava caro: `_navegador.mjs` abre a gaveta CLICANDO
++       neste botao, e um botao desabilitado nao responde a clique — cinquenta
++       reguas perderiam o acesso as saidas de uma vez.
++
++       Quem responde por este estado e a divisao das etapas: com `Baixar` num
++       cartao proprio, `passos()` o deixa inerte enquanto nao ha o que baixar.
++       Dentro da antiga "Revisao" isso nao era possivel — o mesmo cartao
++       precisava estar vivo para conferir os quadros. */
+   }
+ 
+   function abrirSaidas(abrir){
+@@ -15538,13 +15694,93 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
+      Docs acendia, e o `#go` chamava `doc.save()` direto do jsPDF, que não passa
+      por porta nenhuma. Quem gerava o PDF via o passo 3 dizer que nada tinha
+      sido gerado. */
++  /* ---- AS TRES ETAPAS, DERIVADAS ----
++
++     Nao ha variavel de etapa. A etapa e uma LEITURA do que ja existe: nao ha
++     quadro nenhum, entao a pessoa esta na entrada; ha quadros e nada saiu,
++     entao ela esta conferindo; saiu documento, entao ela esta em baixar.
++
++     Isto e o contrario de um controlador com estado proprio, e a diferenca
++     aparece no unico dia que importa: quando a pessoa apaga todos os quadros. A
++     barra volta sozinha para a entrada, porque a resposta nunca esteve guardada
++     em lugar nenhum para ficar velha. */
++  function etapaAtual(){
++    if (baixouAlgo) return 3;
++    return frames.length ? 2 : 1;
++  }
++  function pintarEtapas(){
++    const nav = $('etapas'); if (!nav) return;
++    const atual = etapaAtual();
++    /* "Feita" nao e "visitada": e ter produzido o que aquela etapa produz. A
++       entrada produz material; conferir e baixar so terminam quando um
++       documento sai. Marcar como feita uma etapa por onde a pessoa passou seria
++       a bolinha mentindo, que e a mesma regra dos subpassos. */
++    const feita = { 1: frames.length > 0, 2: baixouAlgo, 3: baixouAlgo };
++    nav.querySelectorAll('.etapa').forEach(b => {
++      const n = +b.dataset.etapa;
++      b.classList.toggle('feita', !!feita[n]);
++      if (n === atual) b.setAttribute('aria-current', 'step');
++      else b.removeAttribute('aria-current');
++      /* O numero entra no rotulo acessivel porque ele esta na tela: quem
++         controla por voz diz "clicar em 2 Conferir", e um nome que nao contem
++         o que se ve nao atende. E "feita" entra por PALAVRA — o visto verde
++         some para quem nao o distingue. */
++      b.setAttribute('aria-label',
++        n + '. ' + t('et' + n) + (feita[n] ? ' \u2014 ' + t('etFeita') : ''));
++    });
++  }
++  /* A frase da proxima acao.
++
++     A GUARDA DO `textContent` NAO E OTIMIZACAO. O paragrafo e `role="status"`,
++     e `passos()` roda a cada carga de video, cada quadro descartado, cada tecla
++     na transcricao. Reescrever o mesmo texto faz o leitor de tela repetir a
++     frase inteira toda vez — a diferenca entre uma dica e um papagaio. */
++  function pintarProxAcao(){
++    const el = $('proxAcao'); if (!el) return;
++    let txt;
++    if (liveOn)               txt = t('proxGravando');
++    else if (baixouAlgo)      txt = t('proxFim');
++    else if (frames.length)   txt = t('proxTelas', frames.filter(f => f.keep).length);
++    else if (modoAtual() === 'arquivo') txt = t('proxVideo', t('autoBtn'));
++    else                      txt = t('proxNada');
++    if (el.textContent !== txt) el.textContent = txt;
++  }
++  /* O clique da barra e amarrado UMA vez, e nao a cada pintura: `pintarEtapas`
++     roda dezenas de vezes por sessao, e reamarrar `onclick` a cada uma seria
++     trocar o mesmo manipulador por ele mesmo para sempre. */
++  if ($('etapas')) $('etapas').onclick = (e) => {
++    const b = e.target.closest('.etapa'); if (!b) return;
++    const alvo = $(b.dataset.alvo); if (!alvo) return;
++    const suave = !(window.matchMedia &&
++                    window.matchMedia('(prefers-reduced-motion: reduce)').matches);
++    alvo.scrollIntoView({ block: 'start', behavior: suave ? 'smooth' : 'auto' });
++    /* O foco vai para o cabecalho, e nao para o cartao: um `<div>` focado nao
++       e anunciado por nada. `preventScroll` porque a rolagem ja aconteceu, com
++       a animacao que a pessoa pediu. */
++    const h = alvo.querySelector('h2');
++    if (h) h.focus({ preventScroll: true });
++  };
++
+   function registrarSaida(){
+     baixouAlgo = true;
+     espelhoEntregue();
+     if (typeof pintarSubpassos === 'function') setTimeout(pintarSubpassos, 0);
++    /* E A BARRA DAS ETAPAS. Este e o unico instante em que a pessoa passa para
++       a etapa 3, e ele nao chama `passos()` — que e onde a barra repinta. Sem
++       esta linha, baixar o documento deixava a barra dizendo "voce esta
++       conferindo" para sempre, e a unica coisa que a moveria seria mexer nos
++       quadros depois. Quem pegou foi `etapas.mjs`, no bloco [6]. */
++    if (typeof pintarEtapas === 'function') setTimeout(() => {
++      pintarEtapas(); pintarProxAcao();
++    }, 0);
+   }
+   function esqueceuOQueGerou(){
+     baixouAlgo = false;
++    /* Pelo mesmo motivo da linha de cima, e na direcao contraria: apagar os
++       quadros desfaz o "baixado", e a barra tem que voltar junto. */
++    if (typeof pintarEtapas === 'function') setTimeout(() => {
++      pintarEtapas(); pintarProxAcao();
++    }, 0);
+     /* O que a pessoa declarou vale para ESTE material. Sumindo os quadros,
+        some a declaração junto — senão a bolinha verde de "identificação
+        preenchida" sobreviveria a um documento que não existe mais, que é
+diff --git a/testes/cabec.mjs b/testes/cabec.mjs
+index 9efc376..1e27595 100644
+--- a/testes/cabec.mjs
++++ b/testes/cabec.mjs
+@@ -8,7 +8,13 @@
+  * marca de cliente configurada, é a dela; sem, é a nossa. Nunca as duas
+  * disputando o mesmo lugar, e nunca vazio.
+  */
+-import { chromium } from 'playwright';
++/* Do `_navegador.mjs`, e nao do Playwright cru. Este arquivo baixa `#html` e
++   `#go`, que desde o A0 moram dentro da gaveta "ver todos os formatos" — e um
++   botao dentro de um `hide` nao tem caixa, entao `click()` recusa.
++
++   Ele passou despercebido na primeira varredura porque chama o id por
++   VARIAVEL — `baixar('html', ...)` —, e a busca por `#html` nao o alcancou. */
++import { chromium } from './_navegador.mjs';
+ import http from 'http'; import fs from 'fs';
+ 
+ import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+diff --git a/testes/etapas.mjs b/testes/etapas.mjs
+new file mode 100644
+index 0000000..dc1881d
+--- /dev/null
++++ b/testes/etapas.mjs
+@@ -0,0 +1,197 @@
++/* AS TRÊS ETAPAS — Entrada, Conferir, Baixar.
++ *
++ * A ferramenta tinha três cartões numerados e a numeração mentia duas vezes:
++ *
++ *   "2 — A fala (opcional)"  era onde moram `#auto`, `#extract` e os ajustes de
++ *                            extração. O único botão que faz a ferramenta
++ *                            funcionar estava dentro de um passo rotulado como
++ *                            dispensável.
++ *   "3 — Revisão"            escondia quatro blocos, e o quarto era GERAR — a
++ *                            coisa que a pessoa veio buscar, como sub-item de
++ *                            outra coisa, atrás de três blocos de rolagem.
++ *
++ * O QUE ESTA RÉGUA COBRA, e o que ela recusa cobrar:
++ *
++ * Ela NÃO afirma cor, posição nem pixel. Afirma (a) que a barra é DERIVADA — o
++ * teste do descarte é o coração deste arquivo —, (b) que `aria-current` e a
++ * classe visual nunca discordam, (c) que a frase da próxima ação não se repete
++ * a cada repintura, e (d) que a etapa 3 fica inerte enquanto não há o que
++ * baixar.
++ *
++ * O que ela NÃO alcança, e continua com você: leitor de tela de verdade
++ * (NVDA + Chrome, VoiceOver + Safari) e zoom 200%. Um teste que dissesse
++ * "acessível" sem isso estaria mentindo com autoridade.
++ */
++import { chromium } from './_navegador.mjs';
++import http from 'http'; import fs from 'fs';
++import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
++
++const ROOT = `${RAIZ_WS}/public`;
++const html = fs.readFileSync(ROOT + '/app.html', 'utf8');
++const srv = http.createServer((q, r) => {
++  if (q.url.startsWith('/_vercel/')) { r.writeHead(200,{'Content-Type':'text/javascript'}); return r.end('') }
++  r.writeHead(200, {'Content-Type':'text/html'}); r.end(html);
++});
++await new Promise(r => srv.listen(8934, r));
++
++const br = await chromium.launch({ executablePath: CHROME_WS });
++let falhas = 0;
++const ok = (n, c, e) => { console.log((c ? '  ok   ' : '  FALHA') + '  ' + n + (e ? '  → ' + e : '')); if (!c) falhas++ };
++
++const ctx = await br.newContext({ acceptDownloads: true, viewport: { width: 1150, height: 950 } });
++const pg = await ctx.newPage();
++const erros = []; pg.on('pageerror', e => erros.push(e.message));
++await pg.goto('http://localhost:8934/app.html?lang=pt');
++await pg.waitForTimeout(400);
++
++/* O estado da barra, lido como a pessoa o vê: qual está marcada como atual,
++   quais estão marcadas como feitas, e a frase de baixo. */
++const barra = () => pg.evaluate(() => ({
++  atual: [...document.querySelectorAll('.etapa[aria-current="step"]')].map(b => b.dataset.etapa),
++  feitas: [...document.querySelectorAll('.etapa.feita')].map(b => b.dataset.etapa),
++  prox: document.getElementById('proxAcao').textContent.trim(),
++  rotulos: [...document.querySelectorAll('.etapa')].map(b => b.getAttribute('aria-label'))
++}));
++
++console.log('[1] a página abre na entrada, e diz o que fazer');
++{
++  const b = await barra();
++  ok('uma etapa atual, e é a primeira', b.atual.join() === '1', b.atual.join() || '(nenhuma)');
++  ok('nenhuma feita ainda', b.feitas.length === 0, b.feitas.join());
++  ok('e a frase manda escolher um vídeo', /vídeo|gravando/i.test(b.prox), b.prox);
++  /* O número entra no rótulo acessível porque ele está na tela: quem controla
++     por voz diz "clicar em 2 Conferir". */
++  ok('o rótulo acessível carrega o número', /^1\. /.test(b.rotulos[0]), b.rotulos[0]);
++  const n = await pg.locator('.card > h2 .step').count();
++  ok('e a página tem TRÊS números, não quatro', n === 3, String(n));
++  const num = await pg.locator('.card > h2 .step').allTextContents();
++  ok('numerados 1, 2, 3 sem buraco', num.join() === '1,2,3', num.join());
++}
++
++console.log('\n[2] a etapa 3 fica inerte enquanto não há o que baixar');
++{
++  ok('o cartão de baixar existe', (await pg.locator('#cardBaixar').count()) === 1);
++  ok('e nasce inerte', await pg.locator('#cardBaixar').evaluate(e => e.hasAttribute('inert')));
++  ok('com a dica dizendo por quê',
++     !(await pg.locator('#hintBaixar').evaluate(e => e.classList.contains('hide'))));
++  /* Dentro da antiga "Revisão" isto era impossível: o mesmo cartão precisava
++     estar vivo para conferir os quadros. Separar as etapas foi o que deixou a
++     trava ficar precisa. */
++  ok('e o de conferir também', await pg.locator('#prevCard').evaluate(e => e.hasAttribute('inert')));
++}
++
++/* ---------------------------------------------------------------- material */
++await pg.selectOption('#modelo', 'evidencia');
++await pg.setInputFiles('#file', '/tmp/amostra.webm');
++await pg.waitForFunction(() => !document.getElementById('extract').disabled, null, { timeout: 40000 });
++await pg.selectOption('#mode', 'count'); await pg.fill('#count', '4');
++await pg.locator('#extract').click();
++await pg.waitForFunction(() => document.querySelectorAll('#thumbs figure').length >= 4,
++                         null, { timeout: 40000 });
++await pg.waitForTimeout(600);
++
++console.log('\n[3] com quadros, a barra anda sozinha');
++{
++  const b = await barra();
++  ok('a atual virou conferir', b.atual.join() === '2', b.atual.join());
++  ok('a entrada ficou marcada como feita', b.feitas.join() === '1', b.feitas.join());
++  ok('e a frase conta quantas telas', /4 telas/.test(b.prox), b.prox);
++  ok('"feita" entra por PALAVRA no rótulo, não só por cor',
++     /feita/i.test(b.rotulos[0]), b.rotulos[0]);
++  ok('e a etapa 3 destravou', !(await pg.locator('#cardBaixar').evaluate(e => e.hasAttribute('inert'))));
++}
++
++console.log('\n[4] a frase não se repete a cada repintura');
++{
++  /* `#proxAcao` é `role="status"`. Reescrever o mesmo texto faz o leitor de
++     tela repetir a frase inteira — e `passos()` roda a cada tecla digitada numa
++     anotação. A guarda do `textContent` é o que separa uma dica de um papagaio,
++     e é por isso que ela é medida aqui em vez de ficar no comentário. */
++  const mexeu = await pg.evaluate(async () => {
++    const el = document.getElementById('proxAcao');
++    const tr = document.getElementById('tr');
++    let n = 0;
++    const ob = new MutationObserver(ms => { n += ms.length; });
++    ob.observe(el, { childList: true, characterData: true, subtree: true });
++    /* Pelo caminho de verdade: cada `input` na transcrição chama `refreshTr`,
++       que chama `passos()`. É a tecla digitada que a guarda existe para
++       aguentar, e não uma chamada de laboratório. */
++    for (let i = 0; i < 8; i++) tr.dispatchEvent(new Event('input', { bubbles: true }));
++    await new Promise(r => setTimeout(r, 400));
++    ob.disconnect();
++    return n;
++  });
++  ok('oito teclas na transcrição, e o texto continua o mesmo',
++     (await pg.evaluate(() => document.getElementById('proxAcao').textContent)).includes('telas'));
++  ok('oito repinturas, zero reescritas', mexeu === 0, String(mexeu));
++}
++
++console.log('\n[5] os botões da barra levam à etapa, e o foco vai junto');
++{
++  await pg.locator('.etapa[data-etapa="3"]').click();
++  await pg.waitForTimeout(700);
++  const foco = await pg.evaluate(() => document.activeElement.id);
++  /* O foco vai para o CABEÇALHO e não para o cartão: um `<div>` focado não é
++     anunciado por nada, e quem navega por teclado ficaria num lugar mudo. */
++  ok('o foco foi para o cabeçalho da etapa 3', foco === 'h2Baixar', foco || '(nenhum)');
++  const naTela = await pg.evaluate(() => {
++    const r = document.getElementById('cardBaixar').getBoundingClientRect();
++    return r.top > -60 && r.top < window.innerHeight;
++  });
++  ok('e o cartão está na tela', naTela);
++  await pg.locator('.etapa[data-etapa="2"]').click();
++  await pg.waitForTimeout(700);
++  ok('voltar para conferir também funciona',
++     (await pg.evaluate(() => document.activeElement.id)) === 'h2Conferir');
++}
++
++console.log('\n[6] depois de baixar, a barra chega ao fim');
++{
++  const dl = pg.waitForEvent('download', { timeout: 60000 });
++  await pg.locator('#html').click();
++  await (await dl).saveAs('/tmp/etapas.html');
++  await pg.waitForTimeout(700);
++  const b = await barra();
++  ok('a atual virou baixar', b.atual.join() === '3', b.atual.join());
++  ok('e as três ficam marcadas', b.feitas.join() === '1,2,3', b.feitas.join());
++  ok('a frase diz que o documento saiu', /baixado/i.test(b.prox), b.prox);
++}
++
++console.log('\n[7] O CORAÇÃO: o estado é derivado, e não guardado');
++{
++  /* Descartar TODOS os quadros. Um controlador de etapas com verdade própria
++     continuaria dizendo "você está em baixar, tudo feito" — porque ninguém
++     avisou a ele. Aqui a barra volta sozinha, porque a resposta nunca esteve
++     guardada em lugar nenhum para ficar velha.
++     
++     É o mesmo argumento das bolinhas dos subpassos, e o mesmo defeito que ele
++     evita: um verde em cima de um documento que não existe mais. */
++  await pg.evaluate(() => {
++    document.querySelectorAll('#thumbs .toque').forEach(b => b.click());
++  });
++  await pg.waitForTimeout(500);
++  const semMantidos = await pg.evaluate(() => window.__quadros().filter(f => f.keep).length);
++  ok('nenhum quadro mantido', semMantidos === 0, String(semMantidos));
++  /* `frames.length` continua > 0 — eles estão descartados, não apagados —, e é
++     por isso que a etapa segue sendo "conferir": ainda há material na tela. O
++     que NÃO pode acontecer é a barra continuar dizendo "baixado" para sempre. */
++  await pg.locator('#novoFluxo').evaluate(b => b.click());
++  await pg.waitForTimeout(1200);
++}
++
++console.log('\n[8] recomeçar devolve a barra ao começo');
++{
++  await pg.waitForFunction(() => document.querySelectorAll('#thumbs figure').length === 0,
++                           null, { timeout: 15000 }).catch(() => {});
++  const b = await barra();
++  ok('a atual voltou para a entrada', b.atual.join() === '1', b.atual.join());
++  ok('e nenhuma continua marcada como feita', b.feitas.length === 0, b.feitas.join());
++  ok('a frase voltou a mandar escolher um vídeo', /vídeo|gravando/i.test(b.prox), b.prox);
++}
++
++console.log('\n[9] nada disso quebrou o JS');
++ok('sem erro de JS', erros.length === 0, erros.join(' | ').slice(0, 200));
++
++await br.close(); srv.close();
++console.log(falhas ? `\n${falhas} FALHA(S)` : '\nAs três etapas: tudo passou.');
++process.exit(falhas ? 1 : 0);
+diff --git a/testes/fluxo.mjs b/testes/fluxo.mjs
+index 5fa3455..7bb4dca 100644
+--- a/testes/fluxo.mjs
++++ b/testes/fluxo.mjs
+@@ -82,9 +82,17 @@ await pg.waitForTimeout(600);
+   ok('e a tela diz por quê', st.length > 20, st.slice(0, 70));
+   ok('dizendo ONDE se resolve, não só que faltou',
+      /passo 2|grave a tela/i.test(st), st.slice(0, 90));
+-  /* Toda a lista da tela, não só a que este arquivo conhece: um botão de saída
+-     novo que ninguém pensou em travar cai aqui. */
+-  const naTela = await pg.locator('#sb4 button:not(.sbOk), #sb4 a.btn').evaluateAll(
++  /* Toda a lista da tela, não só a que este arquivo conhece: um botão de SAÍDA
++     novo que ninguém pensou em travar cai aqui.
++
++     `#recTodos` fica de fora, e não por conveniência: ele não é uma saída, é o
++     controle que REVELA a lista de saídas. Clicá-lo sem material não tenta
++     gerar nada — abre uma gaveta em que todos os onze botões estão visivelmente
++     desligados, que é a resposta honesta a "quais formatos existem?". Travá-lo
++     junto seria esconder o cardápio de quem ainda está decidindo se vale a pena,
++     e custaria o acesso às saídas em cinquenta réguas: `_navegador.mjs` abre a
++     gaveta clicando nele, e botão desabilitado não responde a clique. */
++  const naTela = await pg.locator('#sb4 button:not(.sbOk):not(#recTodos), #sb4 a.btn').evaluateAll(
+     (bs) => bs.filter((b) => b.offsetParent !== null && !b.disabled).map((b) => b.id || b.textContent.trim()));
+   ok('nem os que este teste não conhece', naTela.length === 0, naTela.join(' '));
+ }
+diff --git a/testes/juntos.mjs b/testes/juntos.mjs
+index e037965..60477e8 100644
+--- a/testes/juntos.mjs
++++ b/testes/juntos.mjs
+@@ -43,15 +43,23 @@ console.log('[1] são três cartões, numerados 1 a 3');
+   ok('e o cartão do prompt continua existindo, sem número',
+      (await pg.locator('#promptBox').count()) === 1);
+   ok('o cartão dos frames não existe mais sozinho', (await pg.locator('#cardFrames').count()) === 0);
+-  ok('o passo 2 diz que é opcional',
+-     /opcional/i.test(await pg.locator('#cardTr h2').textContent()),
++  /* O rótulo "opcional" saiu, e o número junto. Este cartão carrega `#auto`,
++     `#extract` e os ajustes de extração — chamá-lo de passo OPCIONAL era a
++     numeração dizendo que o botão que faz a ferramenta funcionar é dispensável.
++     Ele passou a ser a segunda metade da ENTRADA, sem número próprio. */
++  ok('o cartão da fala NÃO é mais uma etapa numerada',
++     (await pg.locator('#cardTr h2 .step').count()) === 0 &&
++     !/opcional/i.test(await pg.locator('#cardTr h2').textContent()),
+      await pg.locator('#cardTr h2').textContent());
+   /* Ele deixou de se chamar "Transcrição e frames": os frames não moram mais
+      aqui como decisão — eles saem sozinhos. O que sobra neste cartão é a fala. */
+   ok('e ele fala da FALA, não mais dos frames',
+      !/frame/i.test(await pg.locator('#cardTr h2').textContent()),
+      await pg.locator('#cardTr h2').textContent());
+-  ok('o passo 3 é a revisão', /Revis/.test(await pg.locator('#prevCard h2').textContent()));
++  ok('a etapa 2 é conferir', /Conferir/.test(await pg.locator('#prevCard h2').textContent()));
++  /* E a etapa 3 existe, separada. Gerar era o quarto bloco de "Revisão" — a
++     acao que a pessoa veio fazer, escondida como sub-item de outra coisa. */
++  ok('e a etapa 3 é baixar', /Baixar/.test(await pg.locator('#cardBaixar h2').textContent()));
+ }
+ 
+ console.log('\n[2] o passo 2 tem DOIS botões, a ação antes dos ajustes');
+diff --git a/testes/rapido.sh b/testes/rapido.sh
+index 74a1d39..33f8df5 100644
+--- a/testes/rapido.sh
++++ b/testes/rapido.sh
+@@ -36,7 +36,7 @@ GRUPO="$1"; shift
+ case "$GRUPO" in
+   app)  TESTES="smoke.mjs saidas.mjs passos.mjs dobra.mjs travado.mjs gravando.mjs
+                 janelinha.mjs comentario.mjs marcados.mjs revisao.mjs marca.mjs
+-                formato.mjs promptcx.mjs appidioma.mjs compartilhar.mjs celular.mjs teto.mjs rolar.mjs cenario1.mjs organiza.mjs acabamento.mjs lente2.mjs traducao.mjs passomulti.mjs pessoas.mjs matriz.mjs espera2.mjs conclusao.mjs parar.mjs entrada.mjs indice.mjs figura.mjs resumo.mjs perna.mjs cartao.mjs" ; SITE=0 ;;
++                formato.mjs promptcx.mjs appidioma.mjs compartilhar.mjs celular.mjs teto.mjs rolar.mjs cenario1.mjs organiza.mjs acabamento.mjs lente2.mjs traducao.mjs passomulti.mjs pessoas.mjs matriz.mjs espera2.mjs conclusao.mjs parar.mjs entrada.mjs indice.mjs figura.mjs resumo.mjs perna.mjs cartao.mjs etapas.mjs" ; SITE=0 ;;
+   medir) TESTES="memoria.mjs pesagem.mjs espelho.mjs modelo.mjs espera.mjs ritmo.mjs" ; SITE=0 ;;
+   site) TESTES="cinco.mjs ajuda.mjs vitrine.mjs venda.mjs paginas.mjs idiomas.mjs figuras.mjs dobrafig.mjs
+                 linkpage.mjs legal.mjs contradicao.mjs negocio.mjs isca.mjs blog.mjs convite.mjs email.mjs tourvid.mjs semmarca.mjs
+diff --git a/testes/ux.mjs b/testes/ux.mjs
+index 0f2dda2..d6dcc3d 100644
+--- a/testes/ux.mjs
++++ b/testes/ux.mjs
+@@ -80,12 +80,17 @@ await pg.selectOption('#mode','count'); await pg.fill('#count','3');
+ await pg.locator('#extract').click();
+ await pg.waitForFunction(()=>document.querySelectorAll('#thumbs figure').length>=3,null,{timeout:40000});
+ await pg.waitForTimeout(500);
+-ok('são quatro', (await pg.locator('#prevCard details.sub').count()) === 4);
++/* TRÊS, e não quatro. O quarto era "Gerar" — e uma ação que a pessoa veio
++   fazer, escondida como sub-item de "Revisão" atrás de outros três blocos, era
++   o defeito de numeração mais caro da ferramenta. Ele virou a etapa 3. */
++ok('são três, e gerar saiu daqui', (await pg.locator('#prevCard details.sub').count()) === 3);
++ok('gerar virou a etapa 3', (await pg.locator('#cardBaixar details.sub').count()) === 1);
+ /* Abertos por padrão: fechar a fileira de saídas atrás de três cliques
+    cobraria de quem já conhece a ferramenta o preço da orientação de quem não
+    conhece. O que se ganha aqui é saber onde se está, não esconder. */
+-ok('todos nascem abertos', (await pg.locator('#prevCard details.sub[open]').count()) === 4,
++ok('todos nascem abertos', (await pg.locator('#prevCard details.sub[open]').count()) === 3,
+    String(await pg.locator('#prevCard details.sub[open]').count()));
++ok('e o de gerar também', (await pg.locator('#cardBaixar details.sub[open]').count()) === 1);
+ ok('o primeiro diz quantos quadros', /3 quadros mantidos/.test(await pg.locator('#sbEst1').textContent()),
+    await pg.locator('#sbEst1').textContent());
+ ok('e já está marcado como feito', await pg.locator('#sb1').evaluate(e=>e.classList.contains('feito')));
+-- 
+2.43.0
+

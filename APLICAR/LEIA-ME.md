@@ -5,9 +5,9 @@ A árvore deste zip **já está construída**: `public/app.html` e
 rodar `build.py`.
 
 Base: `285d4a5` (o `main` de produção) + os seis commits do `correcoes.bundle`
-= a árvore do `walkstampbuild8_1.zip`. Sobre ela, três commits novos.
+= a árvore do `walkstampbuild8_1.zip`. Sobre ela, quatro commits novos.
 
-## Os três commits
+## Os quatro commits
 
 **A0 — a saída recomendada chega à linhagem.** Em vez de sete formatos com o
 mesmo peso, a ferramenta olha o cenário e propõe um; os outros ficam recolhidos
@@ -28,6 +28,24 @@ A anotação continua no cartão: anotar é o trabalho desta etapa, e um trabalh
 que exige abrir um diálogo por quadro é um trabalho que ninguém faz quarenta
 vezes.
 
+**A2 — as três etapas, e `Gerar` sai de dentro da `Revisão`.** A numeração
+mentia duas vezes: **"2 — A fala (opcional)"** é onde moram `#auto`, `#extract`
+e os ajustes de extração — o único botão que faz a ferramenta funcionar estava
+num passo rotulado como dispensável; e **"3 — Revisão"** escondia quatro blocos,
+sendo o quarto `Gerar`, a coisa que a pessoa veio buscar, atrás de três blocos
+de rolagem.
+
+Agora: `Entrada → Conferir → Baixar`, com uma barra em cima que diz onde você
+está (`aria-current="step"`), botões que levam à etapa e movem o foco para o
+cabeçalho, e uma frase de próxima ação abaixo. **O estado é derivado**, não
+guardado — recomeçar a sessão devolve a barra ao início sozinha.
+
+Ganho não previsto: com `Baixar` num cartão próprio, ele fica **inerte**
+enquanto não há o que baixar. Dentro da antiga "Revisão" isso era impossível.
+
+O que **falta** do A2 está no `PLANO.md`: o vocabulário unificado e a validação
+com leitor de tela de verdade.
+
 **B3 — o banco passa a caber no Git.** Eram zero `.sql` contra mais de vinte
 RPCs. Agora são **42 migrações versionadas**, e um comando prova que elas
 reconstroem a produção. Leia `supabase/LEIA-ME.md` — é lá que está a história
@@ -37,25 +55,31 @@ inteira, inclusive as quatro coisas que a comparação encontrou.
 
 | arquivo | o que é |
 |---|---|
-| `A0-A1-B3.bundle` | os três commits, para aplicar por Git sobre `d5db0f7` |
+| `A0-A1-B3-A2.bundle` | os quatro commits, para aplicar por Git sobre `d5db0f7` |
 | `A0-saida-recomendada.patch` | o A0 em diff legível |
 | `A1-cartao-da-grade.patch` | o A1 em diff legível (fonte e régua) |
 | `B3-banco-versionado.patch` | o B3 em diff legível |
+| `A2-tres-etapas.patch` | o A2 em diff legível |
 | `correcoes.bundle`, `correcoes-so-fonte.patch` | os seis commits originais do zip |
 | `ARQUIVOS.txt`, `MENSAGENS.txt` | o inventário original |
 
 Aplicar por Git:
 
-    git fetch /caminho/para/A0-A1-B3.bundle
+    git fetch /caminho/para/A0-A1-B3-A2.bundle
     git merge FETCH_HEAD
 
 ## As réguas
 
-**A ferramenta.** `testes/cartao.mjs` é nova e entra no grupo `app` do
-`rapido.sh`. Verde nesta árvore: os 35 do grupo `app` — incluindo `perna.mjs` e
-`celular.mjs` —, mais `capitulos`, `clipe`, `comparar`, `destaque`, `memoria`,
-`miudos`, `onda1`, `onda2`, `pptx`, `rodada`, `tarjaauto`, `trocar`, `webcam` e
-`grade`. `chaves.mjs`: 934 chaves, ordem igual nos cinco idiomas.
+**A ferramenta.** `testes/cartao.mjs` (A1) e `testes/etapas.mjs` (A2) são novas
+e entram no grupo `app` do `rapido.sh`.
+
+Varredura completa desta árvore: **96 dos 110** testes que rodam sem servidor
+passam. As 14 restantes são **3 flakes de disputa de CPU** — `espera2`, `juntar`
+e `parar` passam sozinhas — e **11 que precisam do Next ou de um servidor de
+apoio** (`ficha`, `liclink`, `medicao`, `timepag`, `verificador`, `cabecalho`,
+`chamadoconta`, `faxina`, `portal`, `seo` e `preview`). Nenhuma regressão.
+
+`chaves.mjs`: 946 chaves, ordem igual nos cinco idiomas.
 
 `testes/parar.mjs` precisa de `python3 testes/amostras.py --longo` uma vez,
 senão dá ENOENT em `/tmp/fala-longa.webm`. Não é defeito: a amostra é grande
@@ -80,4 +104,7 @@ aplicou.
 - **a branch remota velha** `claude/ux-build-continuation-2hs0b2`, parada em
   `f505ea8`: apagá-la faz o contador de commits parar de mentir;
 - **proteção de senha vazada** no Supabase Auth está desligada. É um botão do
-  painel; o produto entra por link mágico, então o impacto é pequeno.
+  painel; o produto entra por link mágico, então o impacto é pequeno;
+- **`terceiros.mjs` reprova** — `privacidade.en` está sem a tabela de
+  suboperadores traduzida (`<table id="suboperadores">`). É conteúdo do site,
+  não foi tocado por nenhum destes quatro commits, e precisa de tradução.

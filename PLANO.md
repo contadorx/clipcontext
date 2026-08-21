@@ -55,7 +55,7 @@ A ordem respeita o que você pediu: **terminar o UX do app primeiro**. Depois ve
 trava a venda, e por último o motor e a dívida. Uma exceção argumentada está no fim
 desta seção.
 
-### Trilha A — terminar o UX (13–17 d, só o A2)
+### Trilha A — terminar o UX (4–7 d, só o que falta do A2)
 
 **A0. Transportar o build 3 e fechar o 4 — FEITO**
 
@@ -82,20 +82,44 @@ vezes.
 
 Régua: `testes/cartao.mjs`, no grupo `app`.
 
-**A2. As três etapas — build 9 (13–17 d)**
+**A2. As três etapas — PARCIAL: o reflow está feito, a acessibilidade não**
 
-O reflow de verdade: `Entrada → Conferir → Baixar`, uma ação primária por etapa, a frase
-"próxima ação" abaixo. É aqui que os 69 testes de visibilidade cobram.
+O que **está feito**: `Entrada → Conferir → Baixar`, e não como rótulo — `Gerar`
+saiu de dentro de "Revisão" e virou a etapa 3, num cartão próprio.
 
-Vai junto o **vocabulário unificado**, que foi adiado do build 3 exatamente para cá:
-49 "frame", 46 "quadro" e 24 "trecho" só no dicionário português, mais 14 chaves que
-chamam as *fases da ferramenta* de "passo" — a mesma palavra que o documento usa para os
-passos do procedimento. Fazer o rename antes do reflow seria fazê-lo duas vezes.
+A numeração mentia duas vezes. **"2 — A fala (opcional)"** é onde moram `#auto`,
+`#extract` e os ajustes de extração: o único botão que faz a ferramenta
+funcionar estava dentro de um passo rotulado como dispensável. E **"3 — Revisão"**
+escondia quatro blocos, sendo o quarto `Gerar` — a coisa que a pessoa veio
+buscar, como sub-item de outra coisa, atrás de três blocos de rolagem.
 
-E a acessibilidade: foco e rolagem nas transições, `aria-current="step"`, teclado
-completo, zoom 200%, NVDA + Chrome e VoiceOver + Safari.
+Agora o cartão da fala perde o número (é a segunda metade da entrada), e são
+três etapas com uma barra em cima que diz onde você está, com `aria-current="step"`,
+botões que levam à etapa e movem o foco para o cabeçalho, e uma frase de próxima
+ação abaixo.
 
-Ao fim, **descongelar** as réguas de layout e reescrevê-las contra a hierarquia final.
+**O estado é derivado**, e não guardado: não há quadro → entrada; há quadros e
+nada saiu → conferir; saiu documento → baixar. `etapas.mjs` cobra isso no bloco
+que recomeça a sessão e vê a barra voltar sozinha.
+
+Um ganho que não estava previsto: com `Baixar` num cartão próprio, `passos()`
+consegue deixá-lo **inerte** enquanto não há o que baixar. Dentro da antiga
+"Revisão" isso era impossível — o mesmo cartão precisava estar vivo para
+conferir os quadros.
+
+**O que falta do A2** (e é o que sobra dos 13–17 dias):
+
+- **o vocabulário unificado** — 49 "frame", 46 "quadro" e 24 "trecho" só no
+  dicionário português, mais 14 chaves que chamam as *fases da ferramenta* de
+  "passo", a mesma palavra que o documento usa para os passos do procedimento.
+  Adiado do build 3 para cá de propósito; fazê-lo agora, contra a estrutura
+  final, é fazê-lo uma vez;
+- **a acessibilidade validada** — NVDA + Chrome e VoiceOver + Safari, e zoom
+  200%. Não dá para fazer daqui: não há leitor de tela nesta máquina, e uma
+  régua que dissesse "acessível" sem isso estaria mentindo com autoridade. O que
+  deu para medir está medido — `aria-current`, o foco indo para o cabeçalho, o
+  rótulo acessível com número e a palavra "feita", e a frase de status que não
+  se repete a cada repintura.
 
 ### Trilha B — o que trava a venda (4,5–7,5 d)
 
@@ -183,10 +207,10 @@ fonte, medir o pico de memória, medir WER antes de tocar na compactação de si
 
 | Trilha | Dias | O que você tem no fim |
 |---|---:|---|
-| A — terminar o UX | **13–17** | o redesenho inteiro, com acessibilidade validada |
+| A — terminar o UX | **4–7** | o redesenho inteiro, com acessibilidade validada |
 | B — destravar a venda | **4,5–7,5** | uma verdade só e cobrança auditável (o banco já é reconstruível) |
 | C — motor e dívida | **22,5–32,5** | você mede antes de otimizar; as próximas mudanças ficam baratas |
-| **Total** | **40–57** | |
+| **Total** | **31–47** | |
 
 ---
 

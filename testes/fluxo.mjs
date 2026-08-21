@@ -82,9 +82,17 @@ await pg.waitForTimeout(600);
   ok('e a tela diz por quê', st.length > 20, st.slice(0, 70));
   ok('dizendo ONDE se resolve, não só que faltou',
      /passo 2|grave a tela/i.test(st), st.slice(0, 90));
-  /* Toda a lista da tela, não só a que este arquivo conhece: um botão de saída
-     novo que ninguém pensou em travar cai aqui. */
-  const naTela = await pg.locator('#sb4 button:not(.sbOk), #sb4 a.btn').evaluateAll(
+  /* Toda a lista da tela, não só a que este arquivo conhece: um botão de SAÍDA
+     novo que ninguém pensou em travar cai aqui.
+
+     `#recTodos` fica de fora, e não por conveniência: ele não é uma saída, é o
+     controle que REVELA a lista de saídas. Clicá-lo sem material não tenta
+     gerar nada — abre uma gaveta em que todos os onze botões estão visivelmente
+     desligados, que é a resposta honesta a "quais formatos existem?". Travá-lo
+     junto seria esconder o cardápio de quem ainda está decidindo se vale a pena,
+     e custaria o acesso às saídas em cinquenta réguas: `_navegador.mjs` abre a
+     gaveta clicando nele, e botão desabilitado não responde a clique. */
+  const naTela = await pg.locator('#sb4 button:not(.sbOk):not(#recTodos), #sb4 a.btn').evaluateAll(
     (bs) => bs.filter((b) => b.offsetParent !== null && !b.disabled).map((b) => b.id || b.textContent.trim()));
   ok('nem os que este teste não conhece', naTela.length === 0, naTela.join(' '));
 }

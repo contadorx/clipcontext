@@ -171,6 +171,35 @@
   .step{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;
         background:var(--accent);color:var(--accent-ink);font-size:12px;font-weight:600;
         margin-right:8px;vertical-align:2px}
+  /* ---- A BARRA DAS TRES ETAPAS ----
+     Botoes, e nao enfeite: cada um leva a etapa dele. Numa pagina de tres
+     cartoes longos, "voltar para conferir" era rolar e procurar. */
+  .etapas{display:flex;gap:8px;margin:0 0 10px;flex-wrap:wrap}
+  .etapa{display:flex;align-items:center;gap:8px;flex:1 1 0;min-width:150px;
+      border:1px solid var(--line);background:var(--panel);color:var(--muted);
+      border-radius:999px;padding:7px 14px;font:inherit;font-size:13px;
+      cursor:pointer;text-align:left;transition:.14s}
+  .etapa:hover{border-color:var(--accent);color:var(--ink)}
+  .etapa:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .etapaN{display:inline-grid;place-items:center;width:21px;height:21px;flex:0 0 auto;
+      border-radius:50%;border:1px solid currentColor;font-size:11px;font-weight:700;
+      font-style:normal}
+  /* ONDE VOCE ESTA. `aria-current="step"` e a fonte, e a cor vem dele — assim
+     nao existe um estado visual que o leitor de tela nao enxergue. */
+  .etapa[aria-current="step"]{border-color:var(--accent);color:var(--accent);font-weight:640}
+  .etapa[aria-current="step"] .etapaN{background:var(--accent);color:var(--accent-ink);
+      border-color:var(--accent)}
+  /* JA FEITA. O visto vem do CSS, mas a PALAVRA "feita" entra no rotulo
+     acessivel do botao — cor e simbolo somem para quem nao os distingue. */
+  .etapa.feita{color:var(--ok);border-color:color-mix(in srgb,var(--ok) 45%,var(--line))}
+  .etapa.feita .etapaN{background:var(--ok);color:#fff;border-color:var(--ok);font-size:12px}
+  .etapa.feita .etapaN::before{content:'\2713'}
+  .etapa.feita[aria-current="step"]{color:var(--accent);border-color:var(--accent)}
+  .proxAcao{margin:0 0 26px;font-size:13.5px;color:var(--ink);min-height:1.4em}
+  @media (max-width:560px){
+    .etapas{gap:6px}
+    .etapa{min-width:0;flex:1 1 auto;padding:6px 10px;font-size:12px}
+  }
   /* Os dois caminhos do passo 1. O de gravar tem borda de destaque porque é o
      que a maioria vem fazer; o de arquivo continua inteiro ao lado, e não
      escondido atrás de um "ou". */
@@ -1181,8 +1210,37 @@
   <h1 class="soLeitor">Walkstamp</h1>
   <p class="sub" data-i18n="sub"></p>
 
+  <!-- ---- AS TRES ETAPAS ----
+
+       A ferramenta tinha tres cartoes numerados — Video, A fala, Revisao — e a
+       numeracao mentia duas vezes. "A fala" dizia-se OPCIONAL e e onde mora o
+       botao que faz a ferramenta funcionar; "Revisao" escondia quatro blocos
+       dentro, e o quarto era GERAR — a coisa que a pessoa veio buscar. Quem
+       abria a pagina lia "tres passos" e o terceiro terminava numa revisao que
+       nao parecia levar a lugar nenhum.
+
+       Agora sao as tres que a pessoa reconhece: Entrada, Conferir, Baixar.
+
+       ESTA BARRA NAO GUARDA ESTADO. Ela e desenhada a partir do que ja existe —
+       ha quadros? saiu documento? —, e por isso nao pode divergir da tela. Um
+       controlador de etapas com verdade propria seria um segundo lugar onde a
+       resposta mora, e o dia em que os dois discordarem e o dia em que a barra
+       aponta para uma etapa que nao e a que esta aberta. -->
+  <nav class="etapas" id="etapas" data-i18n-aria="etapasNav">
+    <button type="button" class="etapa" data-etapa="1" data-alvo="cardVideo">
+      <i class="etapaN">1</i><span data-i18n="et1"></span></button>
+    <button type="button" class="etapa" data-etapa="2" data-alvo="prevCard">
+      <i class="etapaN">2</i><span data-i18n="et2"></span></button>
+    <button type="button" class="etapa" data-etapa="3" data-alvo="cardBaixar">
+      <i class="etapaN">3</i><span data-i18n="et3"></span></button>
+  </nav>
+  <!-- A frase da proxima acao. `role=status` porque ela e a unica coisa que
+       ANUNCIA a mudanca de etapa: `aria-current` muda em silencio, e um leitor
+       de tela que nao e avisado fica numa etapa nova sem saber. -->
+  <p class="proxAcao" id="proxAcao" role="status"></p>
+
   <div class="card" id="cardVideo">
-    <h2><span class="step">1</span><span data-i18n="s1"></span></h2>
+    <h2 id="h2Entrada" tabindex="-1"><span class="step">1</span><span data-i18n="s1"></span></h2>
 
     <!-- O cenário vem PRIMEIRO, antes de gravar ou de escolher arquivo.
 
@@ -1681,7 +1739,12 @@
   </div>
 
   <div class="card" id="cardTr">
-    <h2><span class="step">2</span><span data-i18n="s2"></span><span class="opc" data-i18n="opcional"></span></h2>
+    <!-- SEM NUMERO, de proposito. Este cartao nunca foi uma etapa: ele e a
+         segunda metade da ENTRADA — e onde o video vira telas e fala. Chama-se
+         "A fala" e carrega `#auto`, `#extract` e os ajustes de extracao; o
+         rotulo "opcional" ao lado do unico botao que faz a ferramenta
+         funcionar era a numeracao mentindo em voz alta. -->
+    <h2><span data-i18n="s2"></span></h2>
     <p class="lockHint hide" id="hintTr"></p>
     <!-- Fora da dobra de propósito. Estes dois botões são as ferramentas de
          quem está com problema — e o cartão 2 fica TRAVADO justamente quando há
@@ -1958,7 +2021,7 @@
   </div>
 
   <div class="card" id="prevCard">
-    <h2><span class="step">3</span><span data-i18n="s4"></span></h2>
+    <h2 id="h2Conferir" tabindex="-1"><span class="step">2</span><span data-i18n="s4"></span></h2>
     <p class="lockHint hide" id="hintPrev"></p>
     <div class="dobra"><div>
 
@@ -2481,8 +2544,27 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       </div>
     </details>
 
+    </div></div><!-- /dobra -->
+  </div>
+
+  <!-- ---- ETAPA 3: BAIXAR ----
+
+       Ela existia, e estava escondida como o quarto bloco de "Revisao". Era o
+       defeito de numeracao mais caro da ferramenta: a acao que a pessoa veio
+       fazer aparecia como um sub-item de outra coisa, atras de tres blocos que
+       ela precisava rolar.
+
+       O bloco continua sendo um `<details>` com o mesmo id e o mesmo estado
+       calculado — a maquina dos subpassos nao ganhou um segundo dono. O que
+       mudou foi de que cartao ele e filho. Perdeu so a letra "d": era a quarta
+       de quatro, e agora e a unica do cartao dela. -->
+  <div class="card" id="cardBaixar">
+    <h2 id="h2Baixar" tabindex="-1"><span class="step">3</span><span data-i18n="s6"></span></h2>
+    <p class="lockHint hide" id="hintBaixar"></p>
+    <div class="dobra"><div>
+
     <details class="sub" id="sb4" open>
-      <summary><i class="sbN">d</i><span data-i18n="sb4H"></span>
+      <summary><span data-i18n="sb4H"></span>
         <b class="sbEst" id="sbEst4"></b></summary>
       <div class="sbCorpo">
     <!-- ---- as saídas, agrupadas ----
@@ -3152,7 +3234,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recWarnClipe:'A gravação inteira é descartada — só ficam os clipes dos momentos que você marcar. Durante a captura a ferramenta separa os frames que importam e transcreve os dois canais de áudio em separado. A transcrição divide a máquina com a captura; em computador modesto a tela pode perder alguma troca.',
       viaArqTag:'Já tenho o vídeo', viaArqH:'Usar um arquivo', viaDriveOu:'Ou, se o vídeo estiver no Google Drive:',
       viaArqP:'Uma gravação que você já fez, de reunião ou de tela. O arquivo é lido pelo navegador e não sai do seu computador.',
-      s1:'Vídeo', drop1:'Escolher ou arrastar o vídeo aqui',
+      s1:'Entrada', drop1:'Escolher ou arrastar o vídeo aqui',
       drop2:'MP4 / MOV / WebM — o tamanho do arquivo não importa',
       demoBtn:'Usar vídeo de exemplo', demoHint:'50 segundos, cinco telas e narração — para experimentar sem arquivo próprio',
       demoLoading:'Baixando o exemplo…', demoReady:'Exemplo carregado com a transcrição. É só extrair os frames.',
@@ -3359,7 +3441,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       videoErr:'O navegador não conseguiu abrir este vídeo. Converta para MP4 (H.264) e tente de novo.',
       reportar:'Me avise qual formato falhou',
       reportarDica:' — é o que vai definir se vale a pena construir a conversão automática.',
-      s2:'A fala', opcional:'opcional', autoBtn:'Transcrever a fala',
+      s2:'A fala e as telas', opcional:'opcional', autoBtn:'Transcrever a fala',
       ajustesTit:'Ajustes — quase ninguém precisa mexer',
       refazerTelas:'Refazer as telas',
       trBoxH:'Transcrição', trBoxSub:'corrigir, aplicar vocabulário, traduzir',
@@ -3452,7 +3534,16 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       limitInt:' Parou em {0} por atingir o limite de {1} frames.',
       stopping:'Parando…', stopped:' Interrompido por você — só o trecho já varrido está aqui.',
       extracted:'{0} frames extraídos.', reviewNext:' Revise abaixo antes de gerar o PDF.',
-      s4:'Revisão',
+      s4:'Conferir',
+      s6:'Baixar',
+      etapasNav:'As três etapas',
+      et1:'Entrada', et2:'Conferir', et3:'Baixar', etFeita:'feita',
+      proxNada:'Comece escolhendo um vídeo ou gravando a tela.',
+      proxVideo:'O vídeo está pronto. Aperte “{0}” para as telas aparecerem aqui embaixo.',
+      proxGravando:'Gravando. Marque os passos pela janelinha; ao parar, as telas aparecem para conferir.',
+      proxTelas:'{0} telas prontas. Confira as que importam e desça para baixar o documento.',
+      proxFim:'Documento baixado. Dá para baixar de novo, ou guardar o projeto para reabrir depois.',
+      lockBaixar:'O documento é montado a partir das telas — ele aparece aqui quando elas existirem.',
       dropQuiet:'Descartar sem fala',
       ocrBtn:'Ler o texto da tela',
       ocrLoad:'Carregando o leitor de texto (só na primeira vez)…',
@@ -3770,7 +3861,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recWarnClipe:'The whole recording is discarded — only the clips of the moments you mark are kept. While capturing, the tool pulls out the frames that matter and transcribes the two audio channels separately. Transcription shares the machine with the capture; on a modest computer the screen may miss a change.',
       viaArqTag:'I already have the video', viaArqH:'Use a file', viaDriveOu:'Or, if the video is on Google Drive:',
       viaArqP:'A recording you already made, of a meeting or of a screen. The file is read by the browser and never leaves your computer.',
-      s1:'Video', drop1:'Choose or drag your video here',
+      s1:'Input', drop1:'Choose or drag your video here',
       drop2:'MP4 / MOV / WebM — file size does not matter',
       demoBtn:'Use the example video', demoHint:'50 seconds, five screens, with narration — try it without your own file',
       demoLoading:'Downloading the example…', demoReady:'Example loaded with its transcript. Just extract the frames.',
@@ -3974,7 +4065,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       videoErr:'The browser could not open this video. Convert it to MP4 (H.264) and try again.',
       reportar:'Tell me which format failed',
       reportarDica:' — that is what will decide whether automatic conversion is worth building.',
-      s2:'The speech', opcional:'optional', autoBtn:'Transcribe the speech',
+      s2:'Speech and screens', opcional:'optional', autoBtn:'Transcribe the speech',
       ajustesTit:'Settings — almost nobody needs these',
       refazerTelas:'Redo the screens',
       trBoxH:'Transcript', trBoxSub:'fix, apply vocabulary, translate',
@@ -4061,7 +4152,16 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       limitInt:' Stopped at {0} after reaching the {1}-frame limit.',
       stopping:'Stopping…', stopped:' Stopped by you — only the part scanned so far is here.',
       extracted:'{0} frames extracted.', reviewNext:' Review them below before generating the PDF.',
-      s4:'Review',
+      s4:'Check',
+      s6:'Download',
+      etapasNav:'The three steps',
+      et1:'Input', et2:'Check', et3:'Download', etFeita:'done',
+      proxNada:'Start by choosing a video or recording your screen.',
+      proxVideo:'The video is ready. Press “{0}” and the screens show up below.',
+      proxGravando:'Recording. Mark the steps from the little window; when you stop, the screens appear here to check.',
+      proxTelas:'{0} screens ready. Check the ones that matter, then scroll down to download the document.',
+      proxFim:'Document downloaded. You can download it again, or save the project to reopen later.',
+      lockBaixar:'The document is built from the screens — it shows up here once they exist.',
       dropQuiet:'Discard silent ones',
       ocrBtn:'Read the on-screen text',
       ocrLoad:'Loading the text reader (first time only)…',
@@ -4373,7 +4473,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recWarnClipe:'La grabación entera se descarta — solo quedan los clips de los momentos que marques. Durante la captura la herramienta separa los fotogramas que importan y transcribe los dos canales de audio por separado. La transcripción comparte la máquina con la captura; en un ordenador modesto la pantalla puede perder algún cambio.',
       viaArqTag:'Ya tengo el vídeo', viaArqH:'Usar un archivo', viaDriveOu:'O, si el vídeo está en Google Drive:',
       viaArqP:'Una grabación que ya hiciste, de una reunión o de pantalla. El archivo lo lee el navegador y no sale de tu equipo.',
-      s1:'Vídeo', drop1:'Elige o arrastra tu vídeo aquí',
+      s1:'Entrada', drop1:'Elige o arrastra tu vídeo aquí',
       drop2:'MP4 / MOV / WebM — el tamaño del archivo no importa',
       demoBtn:'Usar el vídeo de ejemplo', demoHint:'50 segundos, cinco pantallas y narración — pruébalo sin archivo propio',
       demoLoading:'Descargando el ejemplo…', demoReady:'Ejemplo cargado con su transcripción. Solo falta extraer los fotogramas.',
@@ -4577,7 +4677,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       videoErr:'El navegador no pudo abrir este vídeo. Conviértelo a MP4 (H.264) e inténtalo de nuevo.',
       reportar:'Dime qué formato falló',
       reportarDica:' — eso decidirá si vale la pena construir la conversión automática.',
-      s2:'El habla', opcional:'opcional', autoBtn:'Transcribir el habla',
+      s2:'El habla y las pantallas', opcional:'opcional', autoBtn:'Transcribir el habla',
       ajustesTit:'Ajustes — casi nadie necesita tocarlos',
       refazerTelas:'Rehacer las pantallas',
       trBoxH:'Transcripción', trBoxSub:'corregir, aplicar vocabulario, traducir',
@@ -4664,7 +4764,16 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       limitInt:' Se detuvo en {0} al alcanzar el límite de {1} fotogramas.',
       stopping:'Parando…', stopped:' Interrumpido por ti — solo está aquí el tramo ya recorrido.',
       extracted:'{0} fotogramas extraídos.', reviewNext:' Revísalos abajo antes de generar el PDF.',
-      s4:'Revisión',
+      s4:'Comprobar',
+      s6:'Descargar',
+      etapasNav:'Las tres etapas',
+      et1:'Entrada', et2:'Comprobar', et3:'Descargar', etFeita:'hecha',
+      proxNada:'Empieza eligiendo un vídeo o grabando la pantalla.',
+      proxVideo:'El vídeo está listo. Pulsa “{0}” y las pantallas aparecerán aquí abajo.',
+      proxGravando:'Grabando. Marca los pasos desde la ventanita; al parar, las pantallas aparecerán para comprobar.',
+      proxTelas:'{0} pantallas listas. Comprueba las que importan y baja para descargar el documento.',
+      proxFim:'Documento descargado. Puedes descargarlo otra vez, o guardar el proyecto para reabrirlo después.',
+      lockBaixar:'El documento se arma a partir de las pantallas — aparece aquí cuando existan.',
       dropQuiet:'Descartar sin habla',
       ocrBtn:'Leer el texto de la pantalla',
       ocrLoad:'Cargando el lector de texto (solo la primera vez)…',
@@ -4975,7 +5084,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recWarnClipe:'Die gesamte Aufnahme wird verworfen — erhalten bleiben nur die Clips der Momente, die Sie markieren. Während der Aufnahme trennt das Werkzeug die Screenshots heraus, die zählen, und transkribiert die beiden Tonspuren getrennt. Die Transkription teilt sich den Rechner mit der Aufnahme; auf einem schwächeren Computer kann ein Bildwechsel verloren gehen.',
       viaArqTag:'Ich habe das Video bereits', viaArqH:'Datei verwenden', viaDriveOu:'Oder, wenn das Video in Google Drive liegt:',
       viaArqP:'Eine Aufnahme, die Sie bereits erstellt haben — von einer Besprechung oder vom Bildschirm. Die Datei wird vom Browser gelesen und verlässt Ihren Computer nicht.',
-      s1:'Video', drop1:'Video auswählen oder hierher ziehen',
+      s1:'Eingabe', drop1:'Video auswählen oder hierher ziehen',
       drop2:'MP4 / MOV / WebM — die Dateigröße spielt keine Rolle',
       demoBtn:'Beispielvideo verwenden', demoHint:'50 Sekunden, fünf Bildschirme, mit gesprochenem Kommentar — zum Ausprobieren ohne eigene Datei',
       demoLoading:'Beispiel wird heruntergeladen…', demoReady:'Beispiel mit Transkription geladen. Jetzt nur noch die Screenshots extrahieren.',
@@ -5179,7 +5288,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       videoErr:'Der Browser konnte dieses Video nicht öffnen. Konvertieren Sie es in MP4 (H.264) und versuchen Sie es erneut.',
       reportar:'Melden Sie uns, welches Format fehlgeschlagen ist',
       reportarDica:' — davon hängt ab, ob sich eine automatische Konvertierung lohnt.',
-      s2:'Der Ton', opcional:'optional', autoBtn:'Den Ton transkribieren',
+      s2:'Ton und Bildschirme', opcional:'optional', autoBtn:'Den Ton transkribieren',
       ajustesTit:'Einstellungen — fast niemand braucht sie',
       refazerTelas:'Bildschirme neu erstellen',
       trBoxH:'Transkription', trBoxSub:'korrigieren, Fachwortliste anwenden, übersetzen',
@@ -5266,7 +5375,16 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       limitInt:' Endete bei {0}, weil das Limit von {1} Screenshots erreicht wurde.',
       stopping:'Wird gestoppt…', stopped:' Von Ihnen gestoppt — hier ist nur der bereits durchsuchte Abschnitt.',
       extracted:'{0} Screenshots extrahiert.', reviewNext:' Prüfen Sie sie, bevor Sie das PDF erzeugen.',
-      s4:'Prüfung',
+      s4:'Prüfen',
+      s6:'Herunterladen',
+      etapasNav:'Die drei Schritte',
+      et1:'Eingabe', et2:'Prüfen', et3:'Herunterladen', etFeita:'erledigt',
+      proxNada:'Wählen Sie zuerst ein Video oder nehmen Sie den Bildschirm auf.',
+      proxVideo:'Das Video ist bereit. Drücken Sie „{0}“, dann erscheinen die Bildschirme hier unten.',
+      proxGravando:'Aufnahme läuft. Markieren Sie die Schritte im kleinen Fenster; nach dem Stoppen erscheinen die Bildschirme zum Prüfen.',
+      proxTelas:'{0} Bildschirme bereit. Prüfen Sie die wichtigen und scrollen Sie nach unten, um das Dokument herunterzuladen.',
+      proxFim:'Dokument heruntergeladen. Sie können es erneut herunterladen oder das Projekt zum späteren Öffnen sichern.',
+      lockBaixar:'Das Dokument entsteht aus den Bildschirmen — es erscheint hier, sobald sie existieren.',
       dropQuiet:'Ohne Sprache verwerfen',
       ocrBtn:'Text auf dem Bildschirm lesen',
       ocrLoad:'Die Texterkennung wird geladen (nur beim ersten Mal)…',
@@ -5583,7 +5701,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recWarnClipe:'L’enregistrement entier est jeté — seuls restent les clips des moments que vous marquez. Pendant la capture, l’outil isole les captures qui comptent et transcrit séparément les deux canaux audio. La transcription partage la machine avec la capture ; sur un ordinateur modeste, l’écran peut rater un changement.',
       viaArqTag:'J’ai déjà la vidéo', viaArqH:'Utiliser un fichier', viaDriveOu:'Ou, si la vidéo est sur Google Drive :',
       viaArqP:'Un enregistrement que vous avez déjà fait, de réunion ou d’écran. Le fichier est lu par le navigateur et ne quitte pas votre ordinateur.',
-      s1:'Vidéo', drop1:'Choisir la vidéo ou la déposer ici',
+      s1:'Entrée', drop1:'Choisir la vidéo ou la déposer ici',
       drop2:'MP4 / MOV / WebM — la taille du fichier n’a pas d’importance',
       demoBtn:'Utiliser la vidéo d’exemple', demoHint:'50 secondes, cinq écrans et une narration — pour essayer sans votre propre fichier',
       demoLoading:'Téléchargement de l’exemple…', demoReady:'Exemple chargé avec sa transcription. Il ne reste qu’à extraire les captures.',
@@ -5787,7 +5905,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       videoErr:'Le navigateur n’a pas réussi à ouvrir cette vidéo. Convertissez-la en MP4 (H.264) et réessayez.',
       reportar:'Dites-nous quel format a échoué',
       reportarDica:' — c’est ce qui décidera si la conversion automatique vaut la peine d’être développée.',
-      s2:'La parole', opcional:'facultatif', autoBtn:'Transcrire la parole',
+      s2:'La parole et les écrans', opcional:'facultatif', autoBtn:'Transcrire la parole',
       ajustesTit:'Réglages — presque personne n’en a besoin',
       refazerTelas:'Refaire les écrans',
       trBoxH:'Transcription', trBoxSub:'corriger, appliquer le lexique métier, traduire',
@@ -5874,7 +5992,16 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       limitInt:' Arrêt à {0} en atteignant la limite de {1} captures.',
       stopping:'Arrêt…', stopped:' Interrompu par vous — seule la partie déjà analysée est ici.',
       extracted:'{0} captures extraites.', reviewNext:' Vérifiez-les ci-dessous avant de générer le PDF.',
-      s4:'Révision',
+      s4:'Vérifier',
+      s6:'Télécharger',
+      etapasNav:'Les trois étapes',
+      et1:'Entrée', et2:'Vérifier', et3:'Télécharger', etFeita:'faite',
+      proxNada:'Commencez par choisir une vidéo ou enregistrer votre écran.',
+      proxVideo:'La vidéo est prête. Appuyez sur « {0} » et les écrans apparaissent ci-dessous.',
+      proxGravando:'Enregistrement en cours. Marquez les étapes depuis la petite fenêtre; à l’arrêt, les écrans apparaissent pour vérification.',
+      proxTelas:'{0} écrans prêts. Vérifiez ceux qui comptent puis descendez pour télécharger le document.',
+      proxFim:'Document téléchargé. Vous pouvez le télécharger à nouveau, ou enregistrer le projet pour le rouvrir plus tard.',
+      lockBaixar:'Le document est construit à partir des écrans — il apparaît ici dès qu’ils existent.',
       dropQuiet:'Écarter les captures sans parole',
       ocrBtn:'Lire le texte à l’écran',
       ocrLoad:'Chargement du lecteur de texte (seulement la première fois)…',
@@ -6690,6 +6817,12 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       el.title = t(el.getAttribute('data-i18n-title'));
       if (!el.getAttribute('aria-label')) el.setAttribute('aria-label', el.title);
     });
+    /* Rotulo acessivel SEM titulo visivel. A barra das etapas e um `<nav>`: ela
+       precisa de nome para o leitor de tela poder saltar para ela, e nao de um
+       balaozinho no passar do mouse. */
+    document.querySelectorAll('[data-i18n-aria]').forEach(el => {
+      el.setAttribute('aria-label', t(el.getAttribute('data-i18n-aria')));
+    });
     pintarAuto();
     /* O rótulo do parar deixou de vir do `data-i18n`: ele tem dois textos e um
        terceiro estado. Sem esta linha, trocar de idioma no meio de uma
@@ -6901,6 +7034,13 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     dobrar('prevCard',    temAlgo || modo === 'arquivo' || modo === 'gravado');
     dica('hintPrev',      liveOn ? 'lockGravando' : emCauda ? 'lockCauda'
                                  : temAlgo ? null : 'lockPrev');
+    /* A etapa 3 segue o mesmo relogio da 2: ela e a outra metade do mesmo
+       trabalho, e travar uma sem a outra deixaria a pessoa conferindo telas com
+       o botao de baixar inerte logo abaixo. */
+    trancar('cardBaixar',  (temAlgo || modo !== 'nada') && !emAndamento);
+    dobrar('cardBaixar',   temAlgo);
+    dica('hintBaixar',     liveOn ? 'lockGravando' : emCauda ? 'lockCauda'
+                                  : temAlgo ? null : 'lockBaixar');
     trancar('promptCard', temAlgo && !emAndamento);
     /* Os botões de saída seguem o mesmo relógio das travas dos cartões. Antes
        eles só eram acertados dentro de `counts()`, que só roda a partir de
@@ -6908,6 +7048,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
        chamam `render()`. Era essa a janela em que onze botões ficavam
        clicáveis sem ter o que fazer. */
     if (typeof pintarSaidas === 'function') pintarSaidas();
+    /* A barra e a frase repintam AQUI, e nao num relogio proprio: `passos()` ja
+       e o lugar por onde passa toda mudanca de estado da pagina. Um segundo
+       gatilho seria um segundo momento em que as duas podem discordar da tela. */
+    try { pintarEtapas(); pintarProxAcao(); } catch (e) {}
     dobrar('promptCard',  temAlgo);
     dica('hintPrompt',    liveOn ? 'lockGravando' : emCauda ? 'lockCauda'
                                 : temAlgo ? null : 'lockPrompt');
@@ -7237,6 +7381,18 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
        documento. Espelhar o estado evita um botão que promete e não cumpre. */
     $('recPrim').disabled = !!($(r.prim) && $(r.prim).disabled);
     $('recSeg').disabled  = !!($(r.seg)  && $(r.seg).disabled);
+    /* O BOTAO DA GAVETA NAO ENTRA AQUI, e isso e uma decisao.
+       Desabilita-lo parecia coerente — sem material, "ver todos os formatos"
+       abriria uma gaveta de botoes mortos. Mas o cartao inteiro ja e `inert`
+       nesse estado, entao a trava seria a segunda numa porta que ja esta
+       fechada; e ela custava caro: `_navegador.mjs` abre a gaveta CLICANDO
+       neste botao, e um botao desabilitado nao responde a clique — cinquenta
+       reguas perderiam o acesso as saidas de uma vez.
+
+       Quem responde por este estado e a divisao das etapas: com `Baixar` num
+       cartao proprio, `passos()` o deixa inerte enquanto nao ha o que baixar.
+       Dentro da antiga "Revisao" isso nao era possivel — o mesmo cartao
+       precisava estar vivo para conferir os quadros. */
   }
 
   function abrirSaidas(abrir){
@@ -8797,7 +8953,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      depois, e não tem como se atualizar sozinho. Sem carimbo, "estou com um
      problema no offline" é uma conversa sem chão — ninguém sabe de qual build
      se fala nem se o defeito já foi consertado. */
-  const VERSAO = '2026.08.21-45';
+  const VERSAO = '2026.08.21-58';
   window.__versao = () => VERSAO;
 
   const PIP_CSS = `
@@ -15543,13 +15699,93 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      Docs acendia, e o `#go` chamava `doc.save()` direto do jsPDF, que não passa
      por porta nenhuma. Quem gerava o PDF via o passo 3 dizer que nada tinha
      sido gerado. */
+  /* ---- AS TRES ETAPAS, DERIVADAS ----
+
+     Nao ha variavel de etapa. A etapa e uma LEITURA do que ja existe: nao ha
+     quadro nenhum, entao a pessoa esta na entrada; ha quadros e nada saiu,
+     entao ela esta conferindo; saiu documento, entao ela esta em baixar.
+
+     Isto e o contrario de um controlador com estado proprio, e a diferenca
+     aparece no unico dia que importa: quando a pessoa apaga todos os quadros. A
+     barra volta sozinha para a entrada, porque a resposta nunca esteve guardada
+     em lugar nenhum para ficar velha. */
+  function etapaAtual(){
+    if (baixouAlgo) return 3;
+    return frames.length ? 2 : 1;
+  }
+  function pintarEtapas(){
+    const nav = $('etapas'); if (!nav) return;
+    const atual = etapaAtual();
+    /* "Feita" nao e "visitada": e ter produzido o que aquela etapa produz. A
+       entrada produz material; conferir e baixar so terminam quando um
+       documento sai. Marcar como feita uma etapa por onde a pessoa passou seria
+       a bolinha mentindo, que e a mesma regra dos subpassos. */
+    const feita = { 1: frames.length > 0, 2: baixouAlgo, 3: baixouAlgo };
+    nav.querySelectorAll('.etapa').forEach(b => {
+      const n = +b.dataset.etapa;
+      b.classList.toggle('feita', !!feita[n]);
+      if (n === atual) b.setAttribute('aria-current', 'step');
+      else b.removeAttribute('aria-current');
+      /* O numero entra no rotulo acessivel porque ele esta na tela: quem
+         controla por voz diz "clicar em 2 Conferir", e um nome que nao contem
+         o que se ve nao atende. E "feita" entra por PALAVRA — o visto verde
+         some para quem nao o distingue. */
+      b.setAttribute('aria-label',
+        n + '. ' + t('et' + n) + (feita[n] ? ' \u2014 ' + t('etFeita') : ''));
+    });
+  }
+  /* A frase da proxima acao.
+
+     A GUARDA DO `textContent` NAO E OTIMIZACAO. O paragrafo e `role="status"`,
+     e `passos()` roda a cada carga de video, cada quadro descartado, cada tecla
+     na transcricao. Reescrever o mesmo texto faz o leitor de tela repetir a
+     frase inteira toda vez — a diferenca entre uma dica e um papagaio. */
+  function pintarProxAcao(){
+    const el = $('proxAcao'); if (!el) return;
+    let txt;
+    if (liveOn)               txt = t('proxGravando');
+    else if (baixouAlgo)      txt = t('proxFim');
+    else if (frames.length)   txt = t('proxTelas', frames.filter(f => f.keep).length);
+    else if (modoAtual() === 'arquivo') txt = t('proxVideo', t('autoBtn'));
+    else                      txt = t('proxNada');
+    if (el.textContent !== txt) el.textContent = txt;
+  }
+  /* O clique da barra e amarrado UMA vez, e nao a cada pintura: `pintarEtapas`
+     roda dezenas de vezes por sessao, e reamarrar `onclick` a cada uma seria
+     trocar o mesmo manipulador por ele mesmo para sempre. */
+  if ($('etapas')) $('etapas').onclick = (e) => {
+    const b = e.target.closest('.etapa'); if (!b) return;
+    const alvo = $(b.dataset.alvo); if (!alvo) return;
+    const suave = !(window.matchMedia &&
+                    window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    alvo.scrollIntoView({ block: 'start', behavior: suave ? 'smooth' : 'auto' });
+    /* O foco vai para o cabecalho, e nao para o cartao: um `<div>` focado nao
+       e anunciado por nada. `preventScroll` porque a rolagem ja aconteceu, com
+       a animacao que a pessoa pediu. */
+    const h = alvo.querySelector('h2');
+    if (h) h.focus({ preventScroll: true });
+  };
+
   function registrarSaida(){
     baixouAlgo = true;
     espelhoEntregue();
     if (typeof pintarSubpassos === 'function') setTimeout(pintarSubpassos, 0);
+    /* E A BARRA DAS ETAPAS. Este e o unico instante em que a pessoa passa para
+       a etapa 3, e ele nao chama `passos()` — que e onde a barra repinta. Sem
+       esta linha, baixar o documento deixava a barra dizendo "voce esta
+       conferindo" para sempre, e a unica coisa que a moveria seria mexer nos
+       quadros depois. Quem pegou foi `etapas.mjs`, no bloco [6]. */
+    if (typeof pintarEtapas === 'function') setTimeout(() => {
+      pintarEtapas(); pintarProxAcao();
+    }, 0);
   }
   function esqueceuOQueGerou(){
     baixouAlgo = false;
+    /* Pelo mesmo motivo da linha de cima, e na direcao contraria: apagar os
+       quadros desfaz o "baixado", e a barra tem que voltar junto. */
+    if (typeof pintarEtapas === 'function') setTimeout(() => {
+      pintarEtapas(); pintarProxAcao();
+    }, 0);
     /* O que a pessoa declarou vale para ESTE material. Sumindo os quadros,
        some a declaração junto — senão a bolinha verde de "identificação
        preenchida" sobreviveria a um documento que não existe mais, que é

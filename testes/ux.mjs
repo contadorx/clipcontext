@@ -80,12 +80,17 @@ await pg.selectOption('#mode','count'); await pg.fill('#count','3');
 await pg.locator('#extract').click();
 await pg.waitForFunction(()=>document.querySelectorAll('#thumbs figure').length>=3,null,{timeout:40000});
 await pg.waitForTimeout(500);
-ok('são quatro', (await pg.locator('#prevCard details.sub').count()) === 4);
+/* TRÊS, e não quatro. O quarto era "Gerar" — e uma ação que a pessoa veio
+   fazer, escondida como sub-item de "Revisão" atrás de outros três blocos, era
+   o defeito de numeração mais caro da ferramenta. Ele virou a etapa 3. */
+ok('são três, e gerar saiu daqui', (await pg.locator('#prevCard details.sub').count()) === 3);
+ok('gerar virou a etapa 3', (await pg.locator('#cardBaixar details.sub').count()) === 1);
 /* Abertos por padrão: fechar a fileira de saídas atrás de três cliques
    cobraria de quem já conhece a ferramenta o preço da orientação de quem não
    conhece. O que se ganha aqui é saber onde se está, não esconder. */
-ok('todos nascem abertos', (await pg.locator('#prevCard details.sub[open]').count()) === 4,
+ok('todos nascem abertos', (await pg.locator('#prevCard details.sub[open]').count()) === 3,
    String(await pg.locator('#prevCard details.sub[open]').count()));
+ok('e o de gerar também', (await pg.locator('#cardBaixar details.sub[open]').count()) === 1);
 ok('o primeiro diz quantos quadros', /3 quadros mantidos/.test(await pg.locator('#sbEst1').textContent()),
    await pg.locator('#sbEst1').textContent());
 ok('e já está marcado como feito', await pg.locator('#sb1').evaluate(e=>e.classList.contains('feito')));

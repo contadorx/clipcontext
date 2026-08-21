@@ -43,15 +43,23 @@ console.log('[1] são três cartões, numerados 1 a 3');
   ok('e o cartão do prompt continua existindo, sem número',
      (await pg.locator('#promptBox').count()) === 1);
   ok('o cartão dos frames não existe mais sozinho', (await pg.locator('#cardFrames').count()) === 0);
-  ok('o passo 2 diz que é opcional',
-     /opcional/i.test(await pg.locator('#cardTr h2').textContent()),
+  /* O rótulo "opcional" saiu, e o número junto. Este cartão carrega `#auto`,
+     `#extract` e os ajustes de extração — chamá-lo de passo OPCIONAL era a
+     numeração dizendo que o botão que faz a ferramenta funcionar é dispensável.
+     Ele passou a ser a segunda metade da ENTRADA, sem número próprio. */
+  ok('o cartão da fala NÃO é mais uma etapa numerada',
+     (await pg.locator('#cardTr h2 .step').count()) === 0 &&
+     !/opcional/i.test(await pg.locator('#cardTr h2').textContent()),
      await pg.locator('#cardTr h2').textContent());
   /* Ele deixou de se chamar "Transcrição e frames": os frames não moram mais
      aqui como decisão — eles saem sozinhos. O que sobra neste cartão é a fala. */
   ok('e ele fala da FALA, não mais dos frames',
      !/frame/i.test(await pg.locator('#cardTr h2').textContent()),
      await pg.locator('#cardTr h2').textContent());
-  ok('o passo 3 é a revisão', /Revis/.test(await pg.locator('#prevCard h2').textContent()));
+  ok('a etapa 2 é conferir', /Conferir/.test(await pg.locator('#prevCard h2').textContent()));
+  /* E a etapa 3 existe, separada. Gerar era o quarto bloco de "Revisão" — a
+     acao que a pessoa veio fazer, escondida como sub-item de outra coisa. */
+  ok('e a etapa 3 é baixar', /Baixar/.test(await pg.locator('#cardBaixar h2').textContent()));
 }
 
 console.log('\n[2] o passo 2 tem DOIS botões, a ação antes dos ajustes');
