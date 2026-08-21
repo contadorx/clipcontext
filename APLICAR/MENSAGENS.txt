@@ -1,0 +1,93 @@
+=== f0857ba Conserta a caixa do roteiro, o índice que omitia passos, e a esteira que mentia
+Quatro coisas, duas delas vindas de produção.
+
+1. A CAIXA DO ROTEIRO ENCOLHEU — e fui eu, no build 7.
+
+   O bloco carregava um `style="display:block"` que parecia sobra de outra
+   época. Não era: era o que vencia o `display:flex` do `.cenario`. Sem ele, a
+   gaveta virou item de flex ao lado da fileira do título e encolheu para o
+   tamanho do conteúdo. Medido: a caixa onde se cola uma lista de quarenta
+   passos foi de 884 px para 319 px.
+
+   Volta como `flex-basis:100%`, que é como o resto do arquivo resolve "este
+   filho ocupa a linha toda" — e no CSS, com o motivo escrito, para o próximo
+   que for limpar ler antes de apagar.
+
+2. O ÍNDICE OMITIA PASSOS, e discordava do próprio documento.
+
+   Relato: "o passo 1, que não tem ação por botão, não fica no índice". A causa
+   não era o passo 1: o enxugamento do índice enxugava o PASSO em vez do TEXTO.
+   Bastava um passo ter nome para todos os sem nome saírem da lista — e há um
+   sem nome quase sempre, o quadro automático do começo, que ninguém marcou e
+   que, sem roteiro, não recebe título.
+
+   Medido: quatro passos no documento, três linhas no índice, começando no
+   Passo 2, com o corpo mostrando o Passo 1 do mesmo jeito. Um índice que omite
+   parte do documento é pior que índice nenhum — índice nenhum manda rolar; um
+   incompleto responde a pergunta errada com cara de certo.
+
+   O conserto separa as duas coisas que estavam grudadas. O que a regra queria
+   evitar era a NARRAÇÃO repetida, e só ela continua de fora: havendo títulos de
+   verdade, o passo sem título entra com o travessão. Nenhum passo sai da lista.
+
+   `passomulti.mjs` cobrava a implementação ("só o anotado entra") e não a
+   intenção que o próprio comentário dele declara. A afirmação nova é mais
+   apertada: cobra que a linha exista E que o texto dela não seja a narração.
+
+3. A ESTEIRA CURTA NÃO PODIA FICAR VERDE.
+
+   `barraapp` e `paridade` moravam no grupo `app`, que roda com SITE=0 — sem
+   servidor nenhum de pé. Ali nunca puderam passar: a pista terminava em
+   "2 FALHOU" em toda execução, por motivo que não era defeito do produto. E o
+   `chaves.mjs` já tinha escrito o preço disso: "um aviso que não reprova é um
+   aviso que se aprende a rolar para baixo". Foram para o grupo `site`, junto
+   com `roteiro`, que tem a mesma dependência.
+
+4. DUAS RÉGUAS AFIRMAVAM O CONTRÁRIO UMA DA OUTRA.
+
+   `juntos.mjs` cobrava quatro cartões numerados; `conclusao.mjs` cobra três e
+   que nenhum é o 4. O build 2 tirou o prompt da numeração e atualizou uma das
+   duas. A suíte guardava duas verdades sobre o mesmo fato.
+
+Régua nova: `testes/indice.mjs`, 12 afirmações — quatro cenários de nomeação e
+a que fecha o caso, que é o índice e o documento contarem o mesmo número de
+passos.
+
+Com isto, `rapido.sh app` termina inteira verde: 31 arquivos, nenhuma falha.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01KKUzdavSjgaKWWZZWnUbu6
+
+=== 8a5dc38 Tira do repositório o que não é produto: `_commit/` e o sitemap.xml antigo
+Duas sobras da aplicação manual dos builds 4 e 7, e a segunda tem efeito em
+produção.
+
+1. `_commit/` — seis arquivos de ANDAIME, não de produto: o guia de como
+   commitar, as mensagens dos commits e dois bundles de git (82 KB de binário).
+   Eles existiam para atravessar do zip até aqui, e o `git add -A` os varreu
+   junto. Cumprida a viagem, saem.
+
+   A culpa é do empacotamento: pôr a pasta na raiz do zip a deixou no caminho
+   de um `git add -A`. Nos próximos zips ela vai com um nome que não se confunde
+   com fonte, ou fora da árvore.
+
+2. `public/sitemap.xml` — e este não é cosmético.
+
+   O `build.py` apaga esse arquivo de propósito, e escreve por quê: `/sitemap.xml`
+   deixou de ser um arquivo e passou a ser um ÍNDICE servido pelo Next, que
+   aponta para dois mapas — o das páginas, fixo, e o do BLOG, lido do banco a
+   cada rastreio. Um arquivo estático com esse nome em `public/` sombreia a
+   rota, porque no Next o estático ganha.
+
+   Com ele de volta no repositório, o próximo deploy serviria o mapa velho e
+   congelado: todo post publicado pelo painel ficaria fora do sitemap, em
+   silêncio, até alguém reparar. É o defeito que o comentário do `build.py`
+   descreve palavra por palavra — "não dá erro, só deixa o blog fora do mapa".
+
+   A aplicação manual da árvore não carrega deleções: copiar por cima acrescenta
+   e substitui, nunca apaga. Rodar `python3 build.py` depois de aplicar já
+   resolveria — ele apaga o arquivo sozinho.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01KKUzdavSjgaKWWZZWnUbu6
+

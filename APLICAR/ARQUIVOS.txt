@@ -1,0 +1,17 @@
+ _commit/ARQUIVOS-MUDADOS.txt      |  13 -
+ _commit/COMO-COMMITAR.md          |  89 -----
+ _commit/MENSAGEM-DO-COMMIT.txt    |  48 ---
+ _commit/MENSAGENS-DOS-COMMITS.txt |  93 -----
+ _commit/build4.bundle             | Bin 30770 -> 0 bytes
+ _commit/builds-4-e-7.bundle       | Bin 51795 -> 0 bytes
+ offline/walkstamp-offline.html    |  54 ++-
+ public/app.html                   |  54 ++-
+ public/sitemap.xml                | 723 --------------------------------------
+ src/.build                        |   2 +-
+ src/template.html                 |  52 ++-
+ testes/indice.mjs                 | 147 ++++++++
+ testes/juntos.mjs                 |  15 +-
+ testes/passomulti.mjs             |  36 +-
+ testes/rapido.sh                  |  16 +-
+ testes/rodar.sh                   |   2 +-
+ 16 files changed, 344 insertions(+), 1000 deletions(-)

@@ -252,9 +252,29 @@ console.log('\n[5c] o índice lista passos anotados, e não repete a narração'
      JSON.stringify(linhas));
 
   /* O CASO QUE SEPARA AS DUAS RÉGUAS, e sem ele o bloco acima passaria com o
-     defeito ligado: aqui SÓ O PRIMEIRO passo tem anotação. Um índice enxuto
-     lista uma linha; o índice antigo listava duas, e a segunda era o começo da
-     narração que já aparece embaixo da imagem. */
+     defeito ligado: aqui SÓ O PRIMEIRO passo tem anotação. O índice antigo
+     listava duas linhas, e a segunda era o começo da narração que já aparece
+     embaixo da imagem.
+
+     ---- ESTA AFIRMAÇÃO MUDOU, e vale dizer por quê ----
+
+     Ela dizia "só o anotado entra", e passou muito tempo verde afirmando o
+     comportamento errado. O que ela QUERIA garantir está no comentário acima e
+     no título do bloco: **o índice não repete a narração**. O que ela cobrava,
+     porém, era a implementação que por acaso conseguia isso — DERRUBAR A LINHA
+     do passo sem nome.
+
+     As duas coisas se separaram em produção. O quadro automático do começo da
+     gravação não é marcado por ninguém e, sem roteiro, não recebe título; os
+     passos seguintes, marcados no botão, recebem. Bastava isso para o passo 1
+     sumir do índice: quatro passos no documento e três linhas no índice,
+     começando no Passo 2, com o corpo do documento mostrando o Passo 1 do
+     mesmo jeito. O índice e o documento discordavam sobre quantos passos
+     existem — e quem confere uma evidência confere pelo índice.
+
+     A afirmação nova cobra as DUAS coisas, e por isso é mais apertada que a
+     antiga: a linha do passo sem nome existe, E o texto dela não é a narração.
+     Ver `testes/indice.mjs` para os quatro cenários completos. */
   const misto = await pg.evaluate(() => {
     const q = window.__quadros();
     const guardada = q[3].nota;
@@ -264,8 +284,14 @@ console.log('\n[5c] o índice lista passos anotados, e não repete a narração'
     return r;
   });
   console.log('     com só um passo anotado: ' + JSON.stringify(misto));
-  ok('com um passo anotado e outro não, só o anotado entra',
-     misto.length === 1 && misto[0] === '1|Abrir a ME21N', JSON.stringify(misto));
+  ok('nenhum passo sai do índice por não ter nome', misto.length === 2,
+     JSON.stringify(misto));
+  ok('o anotado entra com a anotação', misto[0] === '1|Abrir a ME21N',
+     JSON.stringify(misto));
+  /* O QUE A RÉGUA ANTIGA GUARDAVA, e continua guardado: o passo sem nome entra
+     com o travessão, e não com a fala que já está três centímetros abaixo. */
+  ok('e o sem nome entra com o travessão, não com a narração repetida',
+     misto[1] === '2|—', JSON.stringify(misto));
 
   /* A OUTRA METADE: sem nenhuma anotação o índice não pode ficar vazio — aí a
      narração é tudo o que há, e ele volta a listar todos os passos. */

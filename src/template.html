@@ -756,6 +756,21 @@
         border-radius:8px;background:var(--panel);color:var(--ink);font:inherit;font-size:15px;
         font-weight:550}
   .cenario .status{flex-basis:100%;margin:0}
+  /* ---- A CAIXA DO ROTEIRO OCUPA A LARGURA INTEIRA ----
+
+     E ISTO NÃO É ENFEITE — foi um defeito de produção. O bloco do roteiro
+     carregava um `style="display:block"` no HTML que parecia sobra de outra
+     época; ele não era. Era o que vencia o `display:flex` daqui de cima. Sem
+     ele, a gaveta do roteiro virou um item de flex ao lado da fileira do
+     título e encolheu para o tamanho do próprio conteúdo: a caixa onde se cola
+     uma lista de quarenta passos passou de 884 px para 319 px, medidos.
+
+     `flex-basis:100%` é como o resto deste arquivo resolve "este filho ocupa a
+     linha toda" — a linha de cima, do `.status`, faz o mesmo. Fica no CSS, e
+     não como estilo embutido, porque aqui cabe o motivo: quem for limpar isto
+     um dia lê antes de apagar. */
+  #roteiroCx{flex-basis:100%}
+  #roteiroBloco > .row{flex-basis:100%}
   /* O título que separa o que se FAZ do que se afina. Discreto de propósito:
      ele não é um passo, é uma gaveta que quase ninguém abre. */
   .ajustesTit{display:flex;align-items:center;gap:8px;width:100%;
@@ -19286,13 +19301,37 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
         de-duplicação de fala ligada, os dois documentos do mesmo pacote
         passaram a discordar. Agora os dois leem daqui.
 
-     Os capítulos sobrevivem ao enxugamento: se um capítulo abre num passo sem
-     anotação, o cabeçalho dele entra assim mesmo, antes do próximo passo
-     listado — senão o índice mostraria passos fora do capítulo a que pertencem. */
+     3. E O TERCEIRO, que veio de produção: o enxugamento não enxugava o texto,
+        ENXUGAVA O PASSO. `alvo` filtrava a lista, e o `forEach` saía fora em
+        quem não estivesse nela — então bastava UM passo ter nome para todos os
+        sem nome desaparecerem do índice.
+
+        O caso real é o primeiro passo. O quadro automático do começo da
+        gravação não foi marcado por ninguém: sem roteiro, ele não recebe
+        título. Os passos seguintes, marcados no botão, recebem. Resultado
+        medido: quatro passos no documento e TRÊS linhas no índice, começando no
+        Passo 2. O corpo do documento continuava mostrando o Passo 1 — quer
+        dizer, o índice e o documento discordavam sobre quantos passos existem,
+        e quem lê um índice para conferir uma evidência conta pelo índice.
+
+        Um índice que omite parte do documento é pior do que índice nenhum:
+        índice nenhum manda a pessoa rolar; um índice incompleto responde a
+        pergunta errada com cara de certo.
+
+        O conserto separa as duas coisas que estavam grudadas. O que a regra
+        queria evitar era a NARRAÇÃO repetida — e é só ela que fica de fora
+        agora: havendo títulos de verdade, o passo sem título entra na lista
+        com o travessão, e não com a fala que já está três centímetros abaixo.
+        Nenhum passo sai da lista, em nenhum caso.
+
+     Os capítulos vêm de graça com isso: com todo passo listado, cada cabeçalho
+     de capítulo cai no passo em que o capítulo abre, sem precisar ser adiado
+     até o próximo passo que sobreviveu ao filtro. */
   function indiceDoDoc(kept, cues, dur, limite){
     const ps = listaDePassos();
-    const comNota = ps.filter(p => tituloDoPasso(p));
-    const alvo = comNota.length ? comNota : ps;
+    /* Existe título de verdade em algum passo? É isto, e só isto, que decide se
+       a narração pode servir de texto — nunca mais quem entra na lista. */
+    const temTitulos = ps.some(p => tituloDoPasso(p));
     const caps = capitulos();
     const lim = limite || 96;
     const out = [];
@@ -19301,10 +19340,9 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       const f = p.quadros[0];
       const i = kept.indexOf(f);
       while (k < caps.length && caps[k].de <= i) { capPend = caps[k]; k++; }
-      if (!alvo.includes(p)) return;
       const nota = tituloDoPasso(p);
       let texto = nota;
-      if (!texto && cues.length) {
+      if (!texto && !temTitulos && cues.length) {
         const fala = falaDoFrame(kept, i, cues, dur, true) || '';
         texto = fala.length > lim ? fala.slice(0, lim).replace(/\s\S*$/, '') + '…' : fala;
       }
