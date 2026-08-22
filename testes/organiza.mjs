@@ -135,7 +135,11 @@ console.log('\n[4] no passo 3, o resultado vem DEPOIS da ação');
   ok('e não é o mesmo botão do recomeçar do meio', iReset > 0 && iReset < iPrompt,
      `${iReset} < ${iPrompt}`);
   const lbl = (await pg.locator('label[for="unNome"]').textContent() || '').trim();
-  ok('o campo diz o que se escreve nele', /quadro\/frame/i.test(lbl), lbl);
+  /* Era `/quadro\/frame/`: o rótulo mostrava os DOIS termos, porque a
+     ferramenta falava os dois. Com uma palavra só, a barra perdeu a razão
+     de existir — e o campo continua sendo a pergunta "como VOCÊ chama
+     isto?", que é o que ele sempre respondeu. */
+  ok('o campo diz o que se escreve nele', /cada quadro de/i.test(lbl), lbl);
   /* O botão passou a dizer QUANTAS e a usar a palavra do cenário — a mesma
      que `rotuloUnidade()` dá aos outros dezoito lugares. Antes ele dizia
      "Revisar quadro a quadro", fixo; numa ata, a tela inteira falava em

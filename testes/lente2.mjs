@@ -63,7 +63,7 @@ console.log('[1] o exemplo escolhe o cenário — e DIZ que escolheu');
               (await pg.locator('#demoMsg').textContent() || '');
   const fonte = fs.readFileSync(ROOT + '/app.html', 'utf8');
   ok('e existe a frase que avisa', /demoCenario/.test(fonte));
-  ok('com a instrução de onde trocar', /troque no passo 1/.test(fonte));
+  ok('com a instrução de onde trocar', /troque na etapa 1/.test(fonte));
 }
 
 console.log('\n[2] as ações da imagem dizem o objeto, e não só o verbo');

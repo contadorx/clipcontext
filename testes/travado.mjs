@@ -65,7 +65,7 @@ console.log('[1] antes de qualquer coisa, 3 e 4 já estão travados — e dizend
 {
   ok('a revisão está travada', await travado('prevCard'));
   ok('o prompt também', await travado('promptCard'));
-  ok('e a dica é a de "escolha um vídeo"', /passo 2/.test(await dica('hintPrev')),
+  ok('e a dica é a de "escolha um vídeo"', /etapa 2/.test(await dica('hintPrev')),
      (await dica('hintPrev')).slice(0, 70));
 }
 

@@ -55,7 +55,7 @@ A ordem respeita o que você pediu: **terminar o UX do app primeiro**. Depois ve
 trava a venda, e por último o motor e a dívida. Uma exceção argumentada está no fim
 desta seção.
 
-### Trilha A — terminar o UX (4–7 d, só o que falta do A2)
+### Trilha A — terminar o UX (1–2 d: só a validação com leitor de tela)
 
 **A0. Transportar o build 3 e fechar o 4 — FEITO**
 
@@ -82,44 +82,51 @@ vezes.
 
 Régua: `testes/cartao.mjs`, no grupo `app`.
 
-**A2. As três etapas — PARCIAL: o reflow está feito, a acessibilidade não**
+**A2. As três etapas — FEITO, menos a validação com leitor de tela**
 
-O que **está feito**: `Entrada → Conferir → Baixar`, e não como rótulo — `Gerar`
-saiu de dentro de "Revisão" e virou a etapa 3, num cartão próprio.
+`Entrada → Conferir → Baixar`, e não como rótulo: `Gerar` saiu de dentro de
+"Revisão" e virou a etapa 3, num cartão próprio.
 
 A numeração mentia duas vezes. **"2 — A fala (opcional)"** é onde moram `#auto`,
 `#extract` e os ajustes de extração: o único botão que faz a ferramenta
 funcionar estava dentro de um passo rotulado como dispensável. E **"3 — Revisão"**
 escondia quatro blocos, sendo o quarto `Gerar` — a coisa que a pessoa veio
-buscar, como sub-item de outra coisa, atrás de três blocos de rolagem.
+buscar, atrás de três blocos de rolagem.
 
-Agora o cartão da fala perde o número (é a segunda metade da entrada), e são
-três etapas com uma barra em cima que diz onde você está, com `aria-current="step"`,
-botões que levam à etapa e movem o foco para o cabeçalho, e uma frase de próxima
-ação abaixo.
+Agora o cartão da fala perde o número (é a segunda metade da entrada), e são três
+etapas com uma barra que diz onde você está (`aria-current="step"`), botões que
+levam à etapa, uma frase de próxima ação em `role="status"`, e **a travessia**:
+cruzar uma fronteira trabalhando leva a pessoa até a etapa nova — só para
+frente, nunca durante a captura, e sem tirar o cursor de quem está escrevendo.
 
-**O estado é derivado**, e não guardado: não há quadro → entrada; há quadros e
-nada saiu → conferir; saiu documento → baixar. `etapas.mjs` cobra isso no bloco
-que recomeça a sessão e vê a barra voltar sozinha.
+**O estado é derivado**, não guardado: não há quadro → entrada; há quadros e nada
+saiu → conferir; saiu documento → baixar. `etapas.mjs` cobra isso recomeçando a
+sessão e vendo a barra voltar sozinha.
 
-Um ganho que não estava previsto: com `Baixar` num cartão próprio, `passos()`
-consegue deixá-lo **inerte** enquanto não há o que baixar. Dentro da antiga
-"Revisão" isso era impossível — o mesmo cartão precisava estar vivo para
-conferir os quadros.
+Ganho não previsto: com `Baixar` num cartão próprio, `passos()` consegue
+deixá-lo **inerte** enquanto não há o que baixar. Dentro da antiga "Revisão"
+isso era impossível.
 
-**O que falta do A2** (e é o que sobra dos 13–17 dias):
+**O vocabulário unificado**, que estava adiado desde o build 3, também está
+feito — e medir mudou o escopo:
 
-- **o vocabulário unificado** — 49 "frame", 46 "quadro" e 24 "trecho" só no
-  dicionário português, mais 14 chaves que chamam as *fases da ferramenta* de
-  "passo", a mesma palavra que o documento usa para os passos do procedimento.
-  Adiado do build 3 para cá de propósito; fazê-lo agora, contra a estrutura
-  final, é fazê-lo uma vez;
-- **a acessibilidade validada** — NVDA + Chrome e VoiceOver + Safari, e zoom
-  200%. Não dá para fazer daqui: não há leitor de tela nesta máquina, e uma
-  régua que dissesse "acessível" sem isso estaria mentindo com autoridade. O que
-  deu para medir está medido — `aria-current`, o foco indo para o cabeçalho, o
-  rótulo acessível com número e a palavra "feita", e a frase de status que não
-  se repete a cada repintura.
+| | antes | agora |
+|---|---|---|
+| `frame` vs `quadro` em pt | 43 vs 44 | **uma palavra: quadro** |
+| `passo 1/2/3` (fase da ferramenta) | 14 chaves em pt, 14 em es | **etapa**, com a concordância certa |
+| `trecho` | 32 | **fica** — é trecho de *fala*, conceito diferente |
+| en, es, de, fr | já consistentes | intocados |
+
+Só o português estava dividido: em inglês "frame" *é* a palavra nativa, e
+espanhol, alemão e francês já usavam a deles. `chaves.mjs` ganhou a guarda que
+reprova se qualquer uma voltar.
+
+**O que falta**, e não dá para fazer daqui: **NVDA + Chrome, VoiceOver + Safari
+e zoom 200%**. Não há leitor de tela nesta máquina, e uma régua que dissesse
+"acessível" sem isso estaria mentindo com autoridade. O que deu para medir está
+medido — `aria-current`, o foco indo para o cabeçalho, o rótulo acessível com
+número e a palavra "feita", a frase de status que não se repete, e as duas
+guardas da travessia.
 
 ### Trilha B — o que trava a venda (4,5–7,5 d)
 
@@ -207,10 +214,10 @@ fonte, medir o pico de memória, medir WER antes de tocar na compactação de si
 
 | Trilha | Dias | O que você tem no fim |
 |---|---:|---|
-| A — terminar o UX | **4–7** | o redesenho inteiro, com acessibilidade validada |
+| A — terminar o UX | **1–2** | o redesenho inteiro, com acessibilidade validada |
 | B — destravar a venda | **4,5–7,5** | uma verdade só e cobrança auditável (o banco já é reconstruível) |
 | C — motor e dívida | **22,5–32,5** | você mede antes de otimizar; as próximas mudanças ficam baratas |
-| **Total** | **31–47** | |
+| **Total** | **28–42** | |
 
 ---
 

@@ -71,7 +71,7 @@ console.log('\n[B] documento do Word');
   const d = await dl;
   await d.saveAs('/tmp/analise.docx');
   ok('nome do arquivo', /^analise-.*\.docx$/.test(d.suggestedFilename()), d.suggestedFilename());
-  ok('mensagem de conclusão', /Word com 4 frames/.test(await pg.locator('#pdfStatus').textContent()));
+  ok('mensagem de conclusão', /Word com 4 quadros/.test(await pg.locator('#pdfStatus').textContent()));
 }
 
 console.log('\n[C] o PDF continua funcionando');

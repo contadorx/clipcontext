@@ -76,13 +76,13 @@ for (const [rot, espera, semTr, semImagem] of [['parar em 200 ms', 200, false, f
     // caso teórico: getDisplayMedia sempre devolve trilha de vídeo. O que importa
     // é falhar sem deixar a pessoa presa.
     ok('falha sem travar: o botão Gravar continua disponível', e.recOk);
-    ok('e a dica volta ao começo', /passo 1/.test(e.hintTr), e.hintTr);
+    ok('e a dica volta ao começo', /etapa 1/.test(e.hintTr), e.hintTr);
   } else {
     ok('sobra pelo menos um frame (era zero)', e.frames >= 1, e.frames + ' frames');
     ok('o cartão de revisão aparece', !e.prevHide);
     ok('a mensagem final é de conclusão', /Pronto:/.test(e.recMsg), e.recMsg.slice(0,60));
     ok('a dica do passo 2 combina com o que aconteceu',
-       semTr ? /só de frames/.test(e.hintTr) : /ao vivo/.test(e.hintTr), e.hintTr);
+       semTr ? /só de quadros/.test(e.hintTr) : /ao vivo/.test(e.hintTr), e.hintTr);
     ok('o botão Gravar continua disponível', e.recOk);
   }
   if (erros.length) ok('sem erro de JS', false, erros.join(' | ').slice(0,160));

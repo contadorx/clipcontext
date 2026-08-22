@@ -42,7 +42,7 @@ ok('passo 4 (prompt) fechado', await fechado('promptCard'));
 ok('o passo 3 EXISTE na tela (a numeração não pula)',
    await pg.locator('#prevCard').isVisible());
 ok('e explica quando vai servir',
-   /depois do passo 2/.test(await pg.locator('#hintPrev').textContent()),
+   /depois da etapa 2/.test(await pg.locator('#hintPrev').textContent()),
    await pg.locator('#hintPrev').textContent());
 {
   const nums = await pg.locator('.card .step').allTextContents();

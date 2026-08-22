@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Vídeo → PDF (frames + transcrição)</title>
+<title>Vídeo → PDF (quadros + transcrição)</title>
 <link rel="icon" href="/favicon.ico?v=3" sizes="any">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'> <rect width='64' height='64' rx='14' fill='%233A3F9E'/> <rect x='12' y='13' width='40' height='22' rx='3' fill='%23fff'/> <rect x='12' y='41' width='40' height='5' rx='2.5' fill='%23fff'/> <rect x='12' y='50' width='26' height='5' rx='2.5' fill='%23fff' opacity='.62'/> </svg>" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=3">
@@ -2080,7 +2080,7 @@
         <button type="button" class="ghost sm hide" id="faxinaDesfazer"></button>
       </p>
     </div>
-    <!-- "Chamar cada quadro/frame de:" — e não "rótulo".
+    <!-- "Chamar cada quadro de:" — e não "rótulo".
          O rótulo é o que a coisa É para nós; o nome dela na cabeça de quem usa
          é a pergunta que o campo responde. Um campo chamado "rótulo" ao lado de
          uma caixa vazia não diz o que escrever nela. -->
@@ -3615,7 +3615,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       docTitle:'Walkstamp — transforme vídeo em contexto para IA',
       supportLine:'Gratuita, sem anúncio e sem exigir cadastro — nada do que você processa sai deste computador. ',
       pesSeg:'Segurança da informação', pesComp:'Comparativo', pesPrecos:'Preços',
-      sub:'Transforme um vídeo em um PDF com os frames que importam e a transcrição sincronizada — pronto para entregar a uma IA. Tudo roda no seu navegador: o vídeo não sai do seu computador.',
+      sub:'Transforme um vídeo em um PDF com os quadros que importam e a transcrição sincronizada — pronto para entregar a uma IA. Tudo roda no seu navegador: o vídeo não sai do seu computador.',
       viaSemTag:'Neste aparelho não dá', viaSemH:'Grave pelo próprio aparelho',
       viaSemP:'Este navegador não permite gravar a tela — e em celular e tablet nenhum permite, nem Chrome nem Safari. Mas o seu aparelho já tem um gravador de tela, e ele grava a tela com o microfone junto.',
       viaSemComo:'iPhone e iPad: Central de Controle → Gravação de Tela. Android: puxe os atalhos rápidos → Gravador de tela. Depois traga o arquivo em “Usar um arquivo”, nesta mesma página.',
@@ -3623,13 +3623,13 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       viaRecTag:'Comece por aqui', viaRecH:'Gravar a tela agora',
       viaRecP:'Você faz o percurso na tela e fala o que está fazendo. Nada de vídeo é guardado: saem só as telas que mudaram e a sua narração transcrita.',
       viaRecPclipe:'Você faz o percurso na tela e fala o que está fazendo. A gravação inteira é descartada: saem as telas que mudaram, a sua narração transcrita, e um clipe curto de cada momento que você marcar.',
-      recWarnClipe:'A gravação inteira é descartada — só ficam os clipes dos momentos que você marcar. Durante a captura a ferramenta separa os frames que importam e transcreve os dois canais de áudio em separado. A transcrição divide a máquina com a captura; em computador modesto a tela pode perder alguma troca.',
+      recWarnClipe:'A gravação inteira é descartada — só ficam os clipes dos momentos que você marcar. Durante a captura a ferramenta separa os quadros que importam e transcreve os dois canais de áudio em separado. A transcrição divide a máquina com a captura; em computador modesto a tela pode perder alguma troca.',
       viaArqTag:'Já tenho o vídeo', viaArqH:'Usar um arquivo', viaDriveOu:'Ou, se o vídeo estiver no Google Drive:',
       viaArqP:'Uma gravação que você já fez, de reunião ou de tela. O arquivo é lido pelo navegador e não sai do seu computador.',
       s1:'Entrada', drop1:'Escolher ou arrastar o vídeo aqui',
       drop2:'MP4 / MOV / WebM — o tamanho do arquivo não importa',
       demoBtn:'Usar vídeo de exemplo', demoHint:'50 segundos, cinco telas e narração — para experimentar sem arquivo próprio',
-      demoLoading:'Baixando o exemplo…', demoReady:'Exemplo carregado com a transcrição. É só extrair os frames.',
+      demoLoading:'Baixando o exemplo…', demoReady:'Exemplo carregado com a transcrição. É só extrair os quadros.',
       demoErr:'Não consegui baixar o exemplo. Escolha um vídeo do seu computador.',
       driveBtn:'Abrir do Google Drive',
       driveHint:'O arquivo vai do Drive direto para o seu navegador — não passa por servidor nosso',
@@ -3677,56 +3677,56 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       recAskTela:'Agora escolha a tela ou a janela para compartilhar.',
       pipTit:'Walkstamp — gravando',
       pipBaixando:'baixando o modelo · {0}%', pipErro:'O modelo de voz não carregou. Nada foi gravado — veja a aba do Walkstamp.', pipPrep:'preparando…', pipMic:'liberando o microfone', pipModelo:'baixando o modelo',
-      pipTela:'escolha a tela', pipStop:'Parar', pipFrames:'{0} frames',
+      pipTela:'escolha a tela', pipStop:'Parar', pipFrames:'{0} quadros',
       pipMarcado:'✓ tela marcada ({0})', pipMarcados:'{0} marcadas', pipRotN:'Passo {0} de {1}', pipRotProx:'A seguir: {0}', pipRotFim:'Roteiro concluído', pipRotFimP:'Os próximos passos saem sem título do roteiro.',
       pipNoVideo:'nenhum vídeo é guardado',
-      lockHint:'Escolha um vídeo no passo 1 para continuar.',
+      lockHint:'Escolha um vídeo na etapa 1 para continuar.',
       lockPrevTr:'A transcrição está aqui embaixo, em Transcrição — dá para corrigir e exportar.',
-      lockPrev:'Os frames aparecem aqui depois do passo 2 — é onde você descarta os que não servem, corrige a transcrição e gera o documento.',
-      lockPrompt:'O texto para a IA é montado depois que os frames existirem.',
+      lockPrev:'Os quadros aparecem aqui depois da etapa 2 — é onde você descarta os que não servem, corrige a transcrição e gera o documento.',
+      lockPrompt:'O texto para a IA é montado depois que os quadros existirem.',
       lockGravando:'Gravando. Este passo abre quando você parar — mexer nos quadros enquanto eles ainda estão sendo guardados é o jeito de perder um.',
-      lockCauda:'Aguarde: a transcrição e os quadros ainda estão sendo fechados. Se não quiser esperar, use o "Pular" no passo 1.',
-      lockRec:'Gravando. Os frames e a transcrição estão saindo sozinhos — clique em Parar quando terminar.',
+      lockCauda:'Aguarde: a transcrição e os quadros ainda estão sendo fechados. Se não quiser esperar, use o "Pular" na etapa 1.',
+      lockRec:'Gravando. Os quadros e a transcrição estão saindo sozinhos — clique em Parar quando terminar.',
       lockTrRec:'A transcrição está sendo feita ao vivo, enquanto você grava.',
-      lockTrNone:'Esta gravação foi só de frames. Se você tiver a transcrição da reunião, cole ou arraste aqui embaixo — ela entra no PDF pareada com as telas.',
+      lockTrNone:'Esta gravação foi só de quadros. Se você tiver a transcrição da reunião, cole ou arraste aqui embaixo — ela entra no PDF pareada com as telas.',
       lockTrDone:'Feita ao vivo durante a gravação. Não há áudio guardado para transcrever de novo — mas o texto abaixo é seu: dá para corrigir e exportar.',
-      lockDone:'A gravação já trouxe os frames. Como nenhum vídeo é guardado, não há o que varrer de novo — para começar outra, use o passo 1.',
+      lockDone:'A gravação já trouxe os quadros. Como nenhum vídeo é guardado, não há o que varrer de novo — para começar outra, use a etapa 1.',
       recNoSpeech:'Não saiu nenhuma fala porque não havia áudio nenhum nesta captura.',
       recSoSilencio:'Havia áudio, mas nada de fala foi reconhecido — verifique se o som estava mesmo tocando e se o microfone não estava fechado.',
       recJanela:'Você compartilhou uma JANELA, e o navegador só entrega o som do computador quando se compartilha uma ABA ou a TELA INTEIRA. Grave de novo escolhendo a aba da reunião, ou marque a caixa de compartilhar áudio na tela inteira.',
       recHint:'o navegador vai perguntar qual tela ou janela compartilhar',
       recRun:'Gravando… {0} — clique em Parar quando terminar.',
-      recDone:'Gravação de {0} pronta e carregada. Pode extrair os frames.',
+      recDone:'Gravação de {0} pronta e carregada. Pode extrair os quadros.',
       recDeny:'Você cancelou, ou o navegador não deu permissão para capturar a tela.',
       recNo:'Este navegador não permite gravar a tela. Use Chrome ou Edge no computador.',
       recCurta:'A gravação durou menos de dois segundos e não deu tempo de capturar nada. Clique em Gravar a tela de novo e deixe rodar até aparecer o que você quer registrar.',
       recEmpty:'A gravação saiu vazia. Tente de novo escolhendo uma janela ou a tela inteira.',
-      recSemFramesN:'sem imagem do vídeo: {0} · falha ao ler a tela: {1} · mudança abaixo do limiar: {2} · maior mudança vista: {3} · limiar: {4} (escala 0–255) — o Diagnóstico, no passo 2, mostra isto e mais um pouco',
+      recSemFramesN:'sem imagem do vídeo: {0} · falha ao ler a tela: {1} · mudança abaixo do limiar: {2} · maior mudança vista: {3} · limiar: {4} (escala 0–255) — o Diagnóstico, na etapa 2, mostra isto e mais um pouco',
       recSemFrames:'Nenhuma tela foi guardada: a imagem não mudou o suficiente durante a captura. A gravação só guarda a tela quando ela muda — se você ficou numa tela só, ou se compartilhou uma janela que o navegador entrega em preto, não há o que guardar. Grave de novo percorrendo as telas que quer documentar.',
       recMicLbl:'Incluir meu microfone',
       recTrLbl:'Transcrever enquanto gravo',
       anotPh:'O que aconteceu nesta tela? Ex.: cliquei em Salvar e o sistema devolveu a mensagem 4711.', anotSalvar:'Salvar anotação', anotSalvo:'✓ Salvo', anotDoPasso:'Anotação do {0} — descreva o que aconteceu', anotDaTela:'Tela {0} do {1} — descreva o que aconteceu', anotNomeTela:'Tela {0} do {1}', anotFeita:'Anotação salva em: {0}. Ela sai no documento.', anotVazia:'Anotação apagada — este passo sai só com a tela.', anotNaoSalvo:'Escrito, ainda não salvo. Aperte Salvar (ou Ctrl+Enter).', anotCurtoNao:'ainda não salvo', anotCurtoSim:'✓ salvo neste quadro', anotCurtoNao2:'anotação apagada',
-      prontaLbl:'Usar transcrição do Google Meet, Zoom ou Teams', prontaOn:'Mais rápido: a reunião já foi transcrita por eles, e o arquivo entra no passo 3 — sem baixar modelo e sem esperar. Vale .docx do Meet, .vtt/.srt do Teams e do Zoom.', prontaOff:'Se a sua reunião já foi transcrita pelo Meet, pelo Teams ou pelo Zoom, marque aqui: é mais rápido do que transcrever de novo, e o texto costuma vir melhor (com o nome de quem falou).', trEnviarH:'Já tem a transcrição? Envie o arquivo.', trEnviarP:'Reconheço .docx do Google Meet (as “Anotações do Gemini”, com a aba de transcrição ou o arquivo inteiro), .vtt e .srt do Teams e do Zoom, e texto colado do painel do Drive. Com marcação de tempo, cada tela sai no documento junto do que foi dito ali.', trDeReuniao:'Google Meet, Teams ou Zoom (.docx, .vtt, .srt)', trDeLegenda:'Arquivo de legenda (.vtt, .srt, .txt)', trDoDrive:'Buscar no Google Drive', trLendo:'Lendo o arquivo…', trLeuCues:'Li o arquivo: {0} trechos com marcação de tempo.', trLeuReuniao:'Li a transcrição da reunião: {0} trechos. A minutagem é por bloco — veja a nota abaixo.', trLeuSemTempo:'Li o arquivo, mas ele não tem marcação de tempo: o texto entra inteiro e as telas não saem pareadas com a fala.', trLerErro:'Não consegui ler este arquivo: {0}', trFormato:'Este formato eu não leio. Do Google Meet use o .docx; do Teams e do Zoom, o .vtt ou o .srt. Um .doc antigo ou um PDF precisam ser salvos como .docx ou .txt antes.', trBlocos:' A minutagem veio por BLOCO, como o Meet e o Teams escrevem: um instante para várias falas. Dentro de cada bloco os trechos são distribuídos pelo tamanho da fala — é estimativa, e serve para parear as telas; para citar o minuto exato, confira no vídeo.',
-      recTrOn:'A transcrição sai pronta no fim, junto com os frames. Exige baixar o modelo de ~{0} MB antes de começar — uma vez só, e depois fica guardado no navegador.',
-      recTrOff:'Só os frames. Nada é baixado e a gravação começa na hora. Depois dá para colar uma transcrição pronta no passo 2.',
-      recWarn:'Nada de vídeo é guardado: durante a gravação a ferramenta separa os frames que importam e transcreve os dois canais de áudio — o seu microfone e o som do computador — em separado. A transcrição divide a máquina com a captura; em computador modesto a tela pode perder alguma troca.',
+      prontaLbl:'Usar transcrição do Google Meet, Zoom ou Teams', prontaOn:'Mais rápido: a reunião já foi transcrita por eles, e o arquivo entra na etapa 3 — sem baixar modelo e sem esperar. Vale .docx do Meet, .vtt/.srt do Teams e do Zoom.', prontaOff:'Se a sua reunião já foi transcrita pelo Meet, pelo Teams ou pelo Zoom, marque aqui: é mais rápido do que transcrever de novo, e o texto costuma vir melhor (com o nome de quem falou).', trEnviarH:'Já tem a transcrição? Envie o arquivo.', trEnviarP:'Reconheço .docx do Google Meet (as “Anotações do Gemini”, com a aba de transcrição ou o arquivo inteiro), .vtt e .srt do Teams e do Zoom, e texto colado do painel do Drive. Com marcação de tempo, cada tela sai no documento junto do que foi dito ali.', trDeReuniao:'Google Meet, Teams ou Zoom (.docx, .vtt, .srt)', trDeLegenda:'Arquivo de legenda (.vtt, .srt, .txt)', trDoDrive:'Buscar no Google Drive', trLendo:'Lendo o arquivo…', trLeuCues:'Li o arquivo: {0} trechos com marcação de tempo.', trLeuReuniao:'Li a transcrição da reunião: {0} trechos. A minutagem é por bloco — veja a nota abaixo.', trLeuSemTempo:'Li o arquivo, mas ele não tem marcação de tempo: o texto entra inteiro e as telas não saem pareadas com a fala.', trLerErro:'Não consegui ler este arquivo: {0}', trFormato:'Este formato eu não leio. Do Google Meet use o .docx; do Teams e do Zoom, o .vtt ou o .srt. Um .doc antigo ou um PDF precisam ser salvos como .docx ou .txt antes.', trBlocos:' A minutagem veio por BLOCO, como o Meet e o Teams escrevem: um instante para várias falas. Dentro de cada bloco os trechos são distribuídos pelo tamanho da fala — é estimativa, e serve para parear as telas; para citar o minuto exato, confira no vídeo.',
+      recTrOn:'A transcrição sai pronta no fim, junto com os quadros. Exige baixar o modelo de ~{0} MB antes de começar — uma vez só, e depois fica guardado no navegador.',
+      recTrOff:'Só os quadros. Nada é baixado e a gravação começa na hora. Depois dá para colar uma transcrição pronta na etapa 2.',
+      recWarn:'Nada de vídeo é guardado: durante a gravação a ferramenta separa os quadros que importam e transcreve os dois canais de áudio — o seu microfone e o som do computador — em separado. A transcrição divide a máquina com a captura; em computador modesto a tela pode perder alguma troca.',
       recPrep:'Preparando o modelo de transcrição…',
-      recNoModel:'Não consegui carregar o modelo: vou guardar os frames sem transcrever.',
+      recNoModel:'Não consegui carregar o modelo: vou guardar os quadros sem transcrever.',
       linhasCairam:'O runtime não pôde usar várias linhas neste navegador — tentando de novo com uma só.',
       recTrChegou:'O modelo de voz chegou — a transcrição começou, inclusive do que já foi gravado.',
-      recTeto:'Cheguei no limite de {0} quadros e PAREI de guardar imagem — a gravação e o áudio continuam. Aumente o "Limite de frames" no passo 3 e volto a guardar na hora.',
+      recTeto:'Cheguei no limite de {0} quadros e PAREI de guardar imagem — a gravação e o áudio continuam. Aumente o "Limite de quadros" na etapa 3 e volto a guardar na hora.',
       recMaisFrames:'Aumentar para {0}',
       recTetoVoltou:'Limite aumentado — voltei a guardar os quadros.',
-      recTetoPerto:'{0} de {1} quadros. Perto do limite — dá para aumentar o "Limite de frames" no passo 3 agora, sem parar a gravação.',
-      recTrCaiu:'Não consegui baixar o modelo de voz. A gravação CONTINUA e os quadros estão sendo guardados — só a transcrição não vem. Dá para transcrever depois, no passo 2.',
+      recTetoPerto:'{0} de {1} quadros. Perto do limite — dá para aumentar o "Limite de quadros" na etapa 3 agora, sem parar a gravação.',
+      recTrCaiu:'Não consegui baixar o modelo de voz. A gravação CONTINUA e os quadros estão sendo guardados — só a transcrição não vem. Dá para transcrever depois, na etapa 2.',
       recMicNo:'Sem microfone: só o som do computador será transcrito.',
       recSysNo:'Você não marcou “compartilhar áudio”: só o microfone será transcrito.',
-      recNoAudio:'Não consegui abrir os canais de áudio; a gravação segue só com os frames.',
-      recStat:'{0} frames guardados · {1}',
+      recNoAudio:'Não consegui abrir os canais de áudio; a gravação segue só com os quadros.',
+      recStat:'{0} quadros guardados · {1}',
       recQueue:'transcrevendo ({0} na fila)',
       recIdle:'transcrição em dia',
       recTail:'Terminando de transcrever o que faltou…', recTailSeg:'há {0}',
-      recDone2:'Pronto: {0} de captura, {1} frames e {2} falas.',
+      recDone2:'Pronto: {0} de captura, {1} quadros e {2} falas.',
       spkMic:'Microfone', spkSys:'Computador',
       spkModer:'Moderador', spkPart:'Participante',
       spkLblMic:'Chame o microfone de', spkLblSys:'e o som do computador de',
@@ -3735,7 +3735,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       modelLimpando:'Apagando o modelo guardado e baixando de novo…',
       trocandoMotor:'Trocando a versão do motor e tentando de novo…',
       trAoVivoFim:'Transcrição feita ao vivo: {0} trechos. O texto está aqui embaixo e pode ser corrigido.',
-      extraJunto:'Varrendo os frames ao mesmo tempo que a transcrição — os dois usam partes diferentes da máquina, então ir junto é mais rápido do que um depois do outro.',
+      extraJunto:'Varrendo os quadros ao mesmo tempo que a transcrição — os dois usam partes diferentes da máquina, então ir junto é mais rápido do que um depois do outro.',
       urlPreenchido:'{0} campo(s) vieram preenchidos pelo link que você abriu. Confira antes de gerar — dá para corrigir tudo aqui.',
       addTelaBtn:'Anexar uma tela',
       addTelaFeito:'Tela anexada como passo {0}. Use as setas na miniatura para movê-la de lugar.',
@@ -3818,10 +3818,10 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       docxBtn:'Word (.docx)', zipBtn:'Zip das figuras', ftPromo:'Passo a passo com hora, gerado no navegador — nenhum vídeo saiu do computador',
       ftCapa:'Documento gerado inteiramente no navegador de quem executou. O vídeo, o áudio e as imagens não passaram por servidor nenhum — nem nosso, nem de terceiros. Ferramenta gratuita, sem exigir cadastro.',
       pkgBuilding:'Montando o arquivo…',
-      docxDone:'Documento do Word com {0} frames — pronto para editar.',
+      docxDone:'Documento do Word com {0} quadros — pronto para editar.',
       zipDone:'{0} imagens no zip, sem mais nada junto.',
       pkgErr:'Não consegui montar o arquivo. [{0}]',
-      recAudioNo:'Sem áudio nenhum: nada será transcrito, só os frames serão guardados.',
+      recAudioNo:'Sem áudio nenhum: nada será transcrito, só os quadros serão guardados.',
       recEnded:'O compartilhamento foi encerrado antes de a gravação começar.',
       recBusy:'Termine a captura antes de carregar outro vídeo.',
       recSkip:'Não esperar',
@@ -3860,8 +3860,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       diagChamado:'Abrir chamado com este relatório', diagIndo:'Montando o relatório…', diagFalhou:'Não consegui montar o relatório aqui.', fbDiagEspera:'Terminando de montar o relatório antes de enviar…',
       openSub:'Abrir uma legenda pronta', orDrag:'ou arraste o arquivo sobre o campo acima, ou cole o texto',
       subDeOnde:'.vtt ou .srt de uma reunião já transcrita pelo Teams, Meet ou Zoom — assim não precisa baixar o modelo de voz. Também dá para arrastar sobre a caixa, ou simplesmente colar.',
-      trPh:'Cole aqui a transcrição, ou arraste um arquivo .srt / .vtt.\n\nReconheço automaticamente:\n  00:00:12,400 --> 00:00:15,900   (SRT / VTT)\n  0:12  texto falado             (colado de um painel de legendas)\n  texto solto sem marcação de tempo\n\nCom marcação de tempo, cada frame sai no PDF junto do que é dito naquele trecho.',
-      trCues:'{0} trechos com marcação de tempo', trCues2:' — cada frame sai junto da fala correspondente.',
+      trPh:'Cole aqui a transcrição, ou arraste um arquivo .srt / .vtt.\n\nReconheço automaticamente:\n  00:00:12,400 --> 00:00:15,900   (SRT / VTT)\n  0:12  texto falado             (colado de um painel de legendas)\n  texto solto sem marcação de tempo\n\nCom marcação de tempo, cada quadro sai no PDF junto do que é dito naquele trecho.',
+      trCues:'{0} trechos com marcação de tempo', trCues2:' — cada quadro sai junto da fala correspondente.',
       trPlain:'Texto sem marcação de tempo — vai entrar no PDF como um bloco no final.',
       esperaSeg:'— {0} s, aguarde…',
       audioExtract:'Extraindo o áudio do vídeo…', audioFail:'este vídeo parece não ter faixa de áudio, ou o formato do áudio não é suportado pelo navegador',
@@ -3872,7 +3872,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       modelDl2:'Baixando o modelo de voz: {0}% — {1} de {2} MB. É uma vez só: depois ele fica guardado no seu navegador e a próxima transcrição começa na hora.',
       modelCache:'O modelo já está guardado neste navegador. Abrindo — não há download.',
       ocrSemCdn:'Não consegui alcançar a biblioteca de leitura de texto em nenhum dos endereços. Se a rede da empresa bloqueia CDN público, este recurso não vai funcionar aqui — o resto da ferramenta funciona igual.',
-      erroSessao:'O arquivo comprimido do modelo não abre neste computador. Já tentei as versões alternativas, e nenhuma subiu. Rode o diagnóstico, ou grave só os frames e escreva as anotações à mão.',
+      erroSessao:'O arquivo comprimido do modelo não abre neste computador. Já tentei as versões alternativas, e nenhuma subiu. Rode o diagnóstico, ou grave só os quadros e escreva as anotações à mão.',
       transcribing2:'Etapa 2 de 2 — transcrevendo: {0}% (bloco {1} de {2}){3}',
       etaTr:' — faltam ~{0}',
       /* ---- PARAR SEM PERDER, e a linha de estado partida em cinco ----
@@ -3900,14 +3900,14 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       transcribing:'Transcrevendo… bloco {0} de {1}', trDone:'Transcrição pronta — {0} trechos.',
       trErr:'Não consegui transcrever aqui: {0} — clique em Diagnóstico para ver em qual etapa trava.',
       diagDone:'Diagnóstico pronto. Selecione o bloco acima, copie e envie.',
-      s3:'Escolha dos frames', lCrit:'Critério', mScene:'Quando a imagem muda (recomendado)',
+      s3:'Escolha dos quadros', lCrit:'Critério', mScene:'Quando a imagem muda (recomendado)',
       mCount:'Quantidade fixa, espalhados', mInt:'A cada N segundos',
-      lSens:'Sensibilidade', lCount:'Quantos frames', lInt:'Intervalo (segundos)',
+      lSens:'Sensibilidade', lCount:'Quantos quadros', lInt:'Intervalo (segundos)',
       lRitmo:'Ritmo dos quadros',
       ritmoTudo:'Cada mudança vira quadro',
       ritmoEquilibrado:'Equilibrado — espera a tela parar',
       ritmoReuniao:'Reunião — ignora câmeras e vídeo',
-      lMax:'Limite de frames', lQual:'Qualidade da imagem',
+      lMax:'Limite de quadros', lQual:'Qualidade da imagem',
       lIgnorar:'Ignorar na detecção', ign0:'nada — a tela inteira conta',
       ign1:'a barra de baixo (relógio do Windows)', ign2:'a barra de cima (macOS)', ign3:'as duas barras',
       expLabel:'Baixar a transcrição:',
@@ -3916,16 +3916,16 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       faixa:'Trecho analisado: {0} a {1}.',
       qLow:'Leve', qMid:'Equilibrada', qHigh:'Alta',
       sens:['','muito baixa','baixa','baixa+','média-','média','média+','alta','alta+','muito alta'],
-      extractBtn:'Só extrair frames', stopBtn:'Parar', resetBtn:'Recomeçar', novoFluxoBtn:'Começar outro documento', novoFluxoNota:'Volta ao passo 1, com a tela limpa.', novoFluxoConf:'Começar outro documento? As telas e a fala desta sessão saem da tela — se ainda não gerou o arquivo, gere antes.',
+      extractBtn:'Só extrair quadros', stopBtn:'Parar', resetBtn:'Recomeçar', novoFluxoBtn:'Começar outro documento', novoFluxoNota:'Volta à etapa 1, com a tela limpa.', novoFluxoConf:'Começar outro documento? As telas e a fala desta sessão saem da tela — se ainda não gerou o arquivo, gere antes.',
       noteB:'Se o vídeo não abrir:', noteT:'o navegador não decodifica alguns formatos (HEVC, certos MKV). Nesse caso, converta para MP4 / H.264.',
       noDur:'Duração do vídeo indisponível.',
-      scanning:'Procurando mudanças de imagem… {0} de {1} — {2} frame(s) guardado(s)',
+      scanning:'Procurando mudanças de imagem… {0} de {1} — {2} quadro(s) guardado(s)',
       eta:' — faltam ~{0}', etaS:'{0}s', etaM:'{0} min',
       extracting:'Extraindo… {0} de {1}',
-      limitScene:' A varredura parou em {0} por atingir o limite de {1} frames — o fim do vídeo não foi coberto.',
-      limitInt:' Parou em {0} por atingir o limite de {1} frames.',
+      limitScene:' A varredura parou em {0} por atingir o limite de {1} quadros — o fim do vídeo não foi coberto.',
+      limitInt:' Parou em {0} por atingir o limite de {1} quadros.',
       stopping:'Parando…', stopped:' Interrompido por você — só o trecho já varrido está aqui.',
-      extracted:'{0} frames extraídos.', reviewNext:' Revise abaixo antes de gerar o PDF.',
+      extracted:'{0} quadros extraídos.', reviewNext:' Revise abaixo antes de gerar o PDF.',
       s4:'Conferir',
       s6:'Baixar',
       etapasNav:'As três etapas',
@@ -3940,7 +3940,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       ocrBtn:'Ler o texto da tela',
       ocrLoad:'Carregando o leitor de texto (só na primeira vez)…',
       ocrRun:'Lendo o texto das imagens: {0}% ({1} de {2}){3}',
-      ocrDone:'Texto lido em {0} de {1} frames. Vai junto no PDF e no JSON.',
+      ocrDone:'Texto lido em {0} de {1} quadros. Vai junto no PDF e no JSON.',
       ocrNone:'Nenhum texto legível foi encontrado nas imagens.',
       ocrErr:'Não consegui carregar o leitor de texto: {0}',
       ocrStopped:' Interrompido — só o que já foi lido entra no PDF.',
@@ -3973,8 +3973,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       fmtConta:'O formato padrão vem da configuração de {0} — trocar aqui vale só para este documento.', htmlPeso:'O HTML vai sair com cerca de {0} MB: ele carrega as imagens dentro do próprio arquivo, em texto, e isso pesa um terço a mais que o PDF. Acima de 10 MB a maioria dos e-mails recusa o anexo — se for mandar por e-mail, use o .zip, que leva as imagens ao lado.',
       grDoc:'O documento', grEntregar:'Entregar em outro sistema', grDados:'Dados e recuperação',
       jsonBtn:'Guardar para recuperar depois (.json)', recTit:'Recomendado para o seu caso', recTodosBtn:'Ver todos os formatos', recMenos:'Recolher os outros formatos', recPor_go:'PDF: ninguém edita depois, e todo mundo abre. É o que se anexa a um chamado.', recPor_docx:'Word: dá para continuar escrevendo em cima — o texto ainda vai crescer.', fimTit:'✓ Documento pronto', fimResumo:'{0} telas', fimFalaOk:'{0} trechos de fala', fimFalaNao:'sem fala', fimFalaIndo:'fala ainda sendo transcrita', fimDoc:'Documento baixado.', fimProjSim:'Projeto guardado — dá para reabrir e corrigir depois.', fimProjNao:'Projeto ainda não guardado. Fechar esta aba encerra a possibilidade de reabrir.', fimVideo:'O vídeo nunca saiu deste computador.', fimDeNovo:'Baixar de novo', fimProjBtn:'Guardar projeto para editar depois', fimProjDeNovo:'Guardar projeto de novo', fimDepoisTit:'Próximos passos', fimPromptBtn:'Preparar instrução para uma IA',
-      quietN:'{0} frame(s) sem fala foram descartados.',
-      quiet0:'Todos os frames têm fala no trecho correspondente.',
+      quietN:'{0} quadro(s) sem fala foram descartados.',
+      quiet0:'Todos os quadros têm fala no trecho correspondente.',
       quietAudio:'Analisando o áudio para achar os trechos sem fala…',
       quietNone:'Não há transcrição nem áudio utilizável para identificar silêncio.',
       pIndex:'Índice do vídeo', pIndexSub:'Cada linha é um instante em que a imagem mudou.', tKeep:'mantidos', tOff:'descartados', offTag:'descartado', keepAll:'Manter todos', dropDup:'Descartar repetidos',
@@ -3983,7 +3983,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       dropDupN:'Descartar repetidos ({0})',
       dropQuietN:'Descartar sem fala ({0})',
       lenteTam:'tamanho',
-      unLbl:'Chamar cada quadro/frame de:',
+      unLbl:'Chamar cada quadro de:',
       unPasso:'Passo', unMomento:'Momento', unIa:'Trecho',
       recCountCancel:'Cancelado antes de começar. Nada foi gravado.',
       recAutoLbl:'Parar sozinho depois de', recAutoMinLbl:'minutos',
@@ -4026,7 +4026,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
          eles estarem desligados — e diz onde os quadros nascem, porque botão
          desligado sem explicação é beco sem saída. O segundo é a única frase
          de "o que fazer agora" que o fim do fluxo tinha. */
-      saidaSemQuadros:'Ainda não há quadro nenhum para gerar. Os quadros saem no passo 2 — extraia do vídeo, ou grave a tela, que já extrai enquanto grava.',
+      saidaSemQuadros:'Ainda não há quadro nenhum para gerar. Os quadros saem na etapa 2 — extraia do vídeo, ou grave a tela, que já extrai enquanto grava.',
       saidaPronta:'{0} quadros prontos. Escolha um formato — dá para baixar mais de um.',
       saidaSemFala:'A transcrição está em {0}% — um documento gerado agora sai sem a fala que ainda falta.',
       sbE3:'{0} campos preenchidos', sbE3v:'opcional, em branco',
@@ -4129,10 +4129,10 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       gEvid:'Montar a ata de evidência de teste',
       modelH:'Modelo de saída',
       mEscolha:'— escolha o cenário de uso —',
-      cenAssumido:'Nenhum cenário escolhido — usei “Outro (documento genérico)”. Dá para trocar depois, no passo 1.',
+      cenAssumido:'Nenhum cenário escolhido — usei “Outro (documento genérico)”. Dá para trocar depois, na etapa 1.',
       cenFalta:'Escolha primeiro o cenário de uso, ali em cima. Ele decide o formato do documento inteiro.',
       cenPorQue:'O cenário decide o cabeçalho, a hora de relógio, o nome de cada passo e o prompt. Escolha antes de gravar.',
-      mOutro:'Outro (documento genérico)', recomendado:'recomendado', unPh:'passo, tela, momento…', orgTit:'Organize os quadros/frames', orgComo:'Clique numa imagem para descartar ou trazer de volta; o campo abaixo dela é a sua anotação. Os botões fazem isso em lote, e a revisão passa por todos, um a um.', mIa:'Contexto para IA', mEv:'Evidência de teste', mTut:'Passo a passo', mAta:'Ata de reunião',
+      mOutro:'Outro (documento genérico)', recomendado:'recomendado', unPh:'passo, tela, momento…', orgTit:'Organize os quadros', orgComo:'Clique numa imagem para descartar ou trazer de volta; o campo abaixo dela é a sua anotação. Os botões fazem isso em lote, e a revisão passa por todos, um a um.', mIa:'Contexto para IA', mEv:'Evidência de teste', mTut:'Passo a passo', mAta:'Ata de reunião',
       mOutroH:'O formato neutro: sequência de quadros com a fala de cada trecho, sem cabeçalho de ofício nenhum. É o que serve quando o seu caso não é nenhum dos cinco acima — e é honesto sobre isso.', mIaH:'Sequência com a fala de cada trecho, para o modelo entender o vídeo inteiro. É o documento genérico.',
       mEvH:'Um passo por bloco, com a hora de relógio e a sua anotação acima da imagem. Preencha os dados da evidência mais abaixo.',
       mTutH:'Um passo por bloco, com a sua anotação como título e a fala como descrição. Sem hora de relógio.',
@@ -4141,7 +4141,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       evPerfil:'O sistema e quem executou ficam guardados enquanto esta aba estiver aberta, para você não redigitar a cada caso. Fechou a aba, some.',
       evLimpar:'Esquecer', evSalvar:'Salvar perfil', evAbrir:'Abrir perfil',
       editarBtn:'Editar', editarTit:'Editar este passo — tarjar, recortar, comparar, trocar a imagem, clipe e fala', fecharBtn:'Fechar',
-      lenteRevVolta:'Voltar para a revisão', lenteRevFim:'Finalizar a revisão', demoCenario:'Escolhemos “Evidência de teste” para o exemplo — troque no passo 1 se o seu caso for outro.', lenteAcoes:'O que dá para fazer com esta imagem', lenteNotaResta:'{0} caracteres restantes — ela vira o título deste passo no documento.', tarjaBtn:'Tarjar um dado', tarjaFim:'Terminar de tarjar', tarjaLimpar:'Tirar as tarjas',
+      lenteRevVolta:'Voltar para a revisão', lenteRevFim:'Finalizar a revisão', demoCenario:'Escolhemos “Evidência de teste” para o exemplo — troque na etapa 1 se o seu caso for outro.', lenteAcoes:'O que dá para fazer com esta imagem', lenteNotaResta:'{0} caracteres restantes — ela vira o título deste passo no documento.', tarjaBtn:'Tarjar um dado', tarjaFim:'Terminar de tarjar', tarjaLimpar:'Tirar as tarjas',
       tarjaComo:'Arraste sobre a imagem para cobrir. Clique numa tarja para tirá-la.',
       tarjaN:'{0} tarja(s) neste passo — elas são queimadas na imagem que sai no documento.',
       tarjaTirar:'clique para tirar esta tarja',
@@ -4191,21 +4191,21 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       prStep:'Cada imagem é um passo numerado, na ordem em que aconteceu.',
       prClock:'Junto do número do passo está a hora de relógio em que a tela foi capturada, no formato AAAA-MM-DD hh:mm:ss.',
       prNota:'A linha imediatamente acima de uma imagem, quando existe, foi escrita à mão por quem executou o teste: é a expectativa ou a observação daquele passo, e não uma descrição do que a imagem mostra.',
-      dedupN:'{0} frame(s) quase idênticos foram descartados.',
-      dedup0:'Nenhum frame repetido encontrado — todos mostram algo diferente.',
+      dedupN:'{0} quadro(s) quase idênticos foram descartados.',
+      dedup0:'Nenhum quadro repetido encontrado — todos mostram algo diferente.',
       pdfBtn:'Gerar PDF', layAuto:'Automático — o cenário escolhe',
       layFull:'Para acompanhar o passo a passo — duas telas por página, com a fala', layUma:'Para LER o que está na tela — uma por página, no maior tamanho', layGrid:'Para conferir de relance — grade de 6 por página',
-      pdfBuilding:'Montando o PDF…', pdfDone:'PDF gerado', pdfDone2:' — {0} frames, {1} páginas.',
+      pdfBuilding:'Montando o PDF…', pdfDone:'PDF gerado', pdfDone2:' — {0} quadros, {1} páginas.',
       pTitle:'Análise de vídeo', pDur:'Duração', pRes:'Resolução', pSize:'Tamanho',
       pQuadros:'{0}s neste documento', pArtefato:'Registro de tela', pSemHash:'Sem impressão digital: este documento não foi conferido quadro a quadro.', pTr:'Transcrição', pTrCues:'{0} trechos com tempo',
       pTrPlain:'texto sem marcação de tempo', pTrNone:'não fornecida',
       pNote:'Cada imagem traz o instante exato em que foi capturada. Os tempos referem-se ao início do vídeo.',
       pFrameOf:'{2} {0} de {1}', pImagem:'imagem', pNoSpeech:'(sem fala neste trecho)',
-      pFramesH:'Frames', pFullTr:'Transcrição completa',
+      pFramesH:'Quadros', pFullTr:'Transcrição completa',
       s5:'Prompt para a IA',
       s5sub:'Não basta anexar o PDF: o modelo precisa saber como ele está organizado. Este texto faz isso — e é gerado sozinho, ajustado ao seu vídeo.',
       s5note:'Anexe o PDF na conversa e cole este texto junto. Ele explica ao modelo como o documento está organizado — sem isso, ele costuma ignorar os instantes e misturar o que viu com o que foi falado.',
-      promptPh:'Escolha um vídeo e extraia os frames — o prompt aparece aqui pronto,\njá com o nome do arquivo, a duração, a quantidade de imagens e\na informação de haver ou não transcrição.',
+      promptPh:'Escolha um vídeo e extraia os quadros — o prompt aparece aqui pronto,\njá com o nome do arquivo, a duração, a quantidade de imagens e\na informação de haver ou não transcrição.',
       gSum:'Resumir o conteúdo', gSteps:'Transformar em passo a passo', gMinutes:'Produzir uma ata de reunião',
       gReview:'Apontar erros e inconsistências', gFree:'Escrever meu próprio pedido',
       freePh:'O que você quer que a IA faça com este vídeo?',
@@ -4919,17 +4919,17 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       pipTela:'elige la pantalla', pipStop:'Detener', pipFrames:'{0} fotogramas',
       pipMarcado:'✓ pantalla marcada ({0})', pipMarcados:'{0} marcadas', pipRotN:'Paso {0} de {1}', pipRotProx:'A continuación: {0}', pipRotFim:'Guion terminado', pipRotFimP:'Los próximos pasos salen sin título del guion.',
       pipNoVideo:'no se guarda ningún vídeo',
-      lockHint:'Elige un vídeo en el paso 1 para continuar.',
+      lockHint:'Elige un vídeo en la etapa 1 para continuar.',
       lockPrevTr:'La transcripción está aquí abajo, en Transcripción — puedes corregirla y exportarla.',
-      lockPrev:'Los fotogramas aparecen aquí después del paso 2 — es donde descartas los que no sirven, corriges la transcripción y generas el documento.',
+      lockPrev:'Los fotogramas aparecen aquí después de la etapa 2 — es donde descartas los que no sirven, corriges la transcripción y generas el documento.',
       lockPrompt:'El texto para la IA se arma cuando existan los fotogramas.',
       lockGravando:'Grabando. Este paso se abre cuando pares — tocar los fotogramas mientras se están guardando es la forma de perder uno.',
-      lockCauda:'Espera: la transcripción y los fotogramas todavía se están cerrando. Si no quieres esperar, usa "Saltar" en el paso 1.',
+      lockCauda:'Espera: la transcripción y los fotogramas todavía se están cerrando. Si no quieres esperar, usa "Saltar" en la etapa 1.',
       lockRec:'Grabando. Los fotogramas y la transcripción salen solos — pulsa Detener cuando termines.',
       lockTrRec:'La transcripción se está haciendo en vivo, mientras grabas.',
       lockTrNone:'Esta grabación fue solo de fotogramas. Si tienes la transcripción de la reunión, pégala o arrástrala aquí abajo — entra en el PDF junto a las pantallas.',
       lockTrDone:'Hecha en vivo durante la grabación. No hay audio guardado para transcribir de nuevo — pero el texto de abajo es tuyo: puedes corregirlo y exportarlo.',
-      lockDone:'La grabación ya trajo los fotogramas. Como no se guarda ningún vídeo, no hay nada que recorrer de nuevo — para empezar otra, usa el paso 1.',
+      lockDone:'La grabación ya trajo los fotogramas. Como no se guarda ningún vídeo, no hay nada que recorrer de nuevo — para empezar otra, usa la etapa 1.',
       recNoSpeech:'No salió ninguna intervención porque no había audio alguno en esta captura.',
       recSoSilencio:'Había audio, pero no se reconoció ninguna intervención — comprueba que el sonido estaba sonando y que el micrófono no estaba cerrado.',
       recJanela:'Compartiste una VENTANA, y el navegador solo entrega el sonido del ordenador cuando compartes una PESTAÑA o la PANTALLA COMPLETA. Graba de nuevo eligiendo la pestaña de la reunión, o marca la casilla de compartir audio en la pantalla completa.',
@@ -4940,24 +4940,24 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       recNo:'Este navegador no permite grabar la pantalla. Usa Chrome o Edge en un ordenador.',
       recCurta:'La grabación duró menos de dos segundos y no dio tiempo de capturar nada. Pulsa Grabar la pantalla otra vez y déjala correr hasta que aparezca lo que quieres registrar.',
       recEmpty:'La grabación salió vacía. Inténtalo de nuevo eligiendo una ventana o la pantalla completa.',
-      recSemFramesN:'sin imagen de vídeo: {0} · fallo al leer la pantalla: {1} · cambio por debajo del umbral: {2} · mayor cambio visto: {3} · umbral: {4} (escala 0–255) — el Diagnóstico, en el paso 2, muestra esto y algo más',
+      recSemFramesN:'sin imagen de vídeo: {0} · fallo al leer la pantalla: {1} · cambio por debajo del umbral: {2} · mayor cambio visto: {3} · umbral: {4} (escala 0–255) — el Diagnóstico, en la etapa 2, muestra esto y algo más',
       recSemFrames:'No se guardó ninguna pantalla: la imagen no cambió lo suficiente durante la captura. La grabación solo guarda la pantalla cuando cambia — si te quedaste en una sola, o compartiste una ventana que el navegador entrega en negro, no hay nada que guardar. Graba de nuevo recorriendo las pantallas que quieres documentar.',
       recMicLbl:'Incluir mi micrófono',
       recTrLbl:'Transcribir mientras grabo',
       anotPh:'¿Qué pasó en esta pantalla? Ej.: pulsé Guardar y el sistema devolvió el mensaje 4711.', anotSalvar:'Guardar anotación', anotSalvo:'✓ Guardado', anotDoPasso:'Anotación del {0} — describe qué pasó', anotDaTela:'Pantalla {0} del {1} — describe qué pasó', anotNomeTela:'Pantalla {0} del {1}', anotFeita:'Anotación guardada en: {0}. Sale en el documento.', anotVazia:'Anotación borrada — este paso sale solo con la pantalla.', anotNaoSalvo:'Escrito, aún sin guardar. Pulsa Guardar (o Ctrl+Enter).', anotCurtoNao:'aún sin guardar', anotCurtoSim:'✓ guardado en este cuadro', anotCurtoNao2:'anotación borrada',
-      prontaLbl:'Usar la transcripción de Google Meet, Zoom o Teams', prontaOn:'Más rápido: ellos ya transcribieron la reunión, y el archivo entra en el paso 3 — sin descargar el modelo y sin esperar. Sirve el .docx de Meet y el .vtt/.srt de Teams y Zoom.', prontaOff:'Si tu reunión ya fue transcrita por Meet, Teams o Zoom, marca aquí: es más rápido que transcribir de nuevo, y el texto suele venir mejor (con el nombre de quien habló).', trEnviarH:'¿Ya tienes la transcripción? Envía el archivo.', trEnviarP:'Leo el .docx de Google Meet (las “Notas de Gemini”, la pestaña de transcripción o el archivo entero), el .vtt y el .srt de Teams y Zoom, y texto pegado del panel de Drive. Con marcas de tiempo, cada pantalla sale en el documento junto a lo que se dijo allí.', trDeReuniao:'Google Meet, Teams o Zoom (.docx, .vtt, .srt)', trDeLegenda:'Archivo de subtítulos (.vtt, .srt, .txt)', trDoDrive:'Buscar en Google Drive', trLendo:'Leyendo el archivo…', trLeuCues:'Leí el archivo: {0} tramos con marca de tiempo.', trLeuReuniao:'Leí la transcripción de la reunión: {0} tramos. La minutación es por bloque — mira la nota de abajo.', trLeuSemTempo:'Leí el archivo, pero no tiene marcas de tiempo: el texto entra entero y las pantallas no salen emparejadas con el habla.', trLerErro:'No pude leer este archivo: {0}', trFormato:'Este formato no lo leo. De Google Meet usa el .docx; de Teams y Zoom, el .vtt o el .srt. Un .doc antiguo o un PDF hay que guardarlos antes como .docx o .txt.', trBlocos:' La minutación vino por BLOQUE, como la escriben Meet y Teams: un instante para varias intervenciones. Dentro de cada bloque los tramos se reparten según el tamaño de cada intervención — es una estimación, sirve para emparejar las pantallas; para citar el minuto exacto, compruébalo en el vídeo.',
+      prontaLbl:'Usar la transcripción de Google Meet, Zoom o Teams', prontaOn:'Más rápido: ellos ya transcribieron la reunión, y el archivo entra en la etapa 3 — sin descargar el modelo y sin esperar. Sirve el .docx de Meet y el .vtt/.srt de Teams y Zoom.', prontaOff:'Si tu reunión ya fue transcrita por Meet, Teams o Zoom, marca aquí: es más rápido que transcribir de nuevo, y el texto suele venir mejor (con el nombre de quien habló).', trEnviarH:'¿Ya tienes la transcripción? Envía el archivo.', trEnviarP:'Leo el .docx de Google Meet (las “Notas de Gemini”, la pestaña de transcripción o el archivo entero), el .vtt y el .srt de Teams y Zoom, y texto pegado del panel de Drive. Con marcas de tiempo, cada pantalla sale en el documento junto a lo que se dijo allí.', trDeReuniao:'Google Meet, Teams o Zoom (.docx, .vtt, .srt)', trDeLegenda:'Archivo de subtítulos (.vtt, .srt, .txt)', trDoDrive:'Buscar en Google Drive', trLendo:'Leyendo el archivo…', trLeuCues:'Leí el archivo: {0} tramos con marca de tiempo.', trLeuReuniao:'Leí la transcripción de la reunión: {0} tramos. La minutación es por bloque — mira la nota de abajo.', trLeuSemTempo:'Leí el archivo, pero no tiene marcas de tiempo: el texto entra entero y las pantallas no salen emparejadas con el habla.', trLerErro:'No pude leer este archivo: {0}', trFormato:'Este formato no lo leo. De Google Meet usa el .docx; de Teams y Zoom, el .vtt o el .srt. Un .doc antiguo o un PDF hay que guardarlos antes como .docx o .txt.', trBlocos:' La minutación vino por BLOQUE, como la escriben Meet y Teams: un instante para varias intervenciones. Dentro de cada bloque los tramos se reparten según el tamaño de cada intervención — es una estimación, sirve para emparejar las pantallas; para citar el minuto exacto, compruébalo en el vídeo.',
       recTrOn:'La transcripción sale lista al final, junto con los fotogramas. Requiere descargar el modelo de ~{0} MB antes de empezar — una sola vez, y luego queda guardado en el navegador.',
-      recTrOff:'Solo los fotogramas. No se descarga nada y la grabación empieza al instante. Después puedes pegar una transcripción ya hecha en el paso 2.',
+      recTrOff:'Solo los fotogramas. No se descarga nada y la grabación empieza al instante. Después puedes pegar una transcripción ya hecha en la etapa 2.',
       recWarn:'No se guarda vídeo: durante la grabación la herramienta separa los fotogramas que importan y transcribe los dos canales de audio por separado — tu micrófono y el sonido del ordenador. La transcripción comparte la máquina con la captura; en un ordenador modesto la pantalla puede perder algún cambio.',
       recPrep:'Preparando el modelo de transcripción…',
       recNoModel:'No pude cargar el modelo: guardaré los fotogramas sin transcribir.',
       linhasCairam:'El runtime no pudo usar varios hilos en este navegador — probando de nuevo con uno solo.',
       recTrChegou:'El modelo de voz llegó — la transcripción empezó, incluso de lo ya grabado.',
-      recTeto:'Llegué al límite de {0} fotogramas y DEJÉ de guardar imagen — la grabación y el audio siguen. Sube el "Límite de fotogramas" en el paso 3 y vuelvo a guardar al instante.',
+      recTeto:'Llegué al límite de {0} fotogramas y DEJÉ de guardar imagen — la grabación y el audio siguen. Sube el "Límite de fotogramas" en la etapa 3 y vuelvo a guardar al instante.',
       recMaisFrames:'Subir a {0}',
       recTetoVoltou:'Límite aumentado — vuelvo a guardar los fotogramas.',
-      recTetoPerto:'{0} de {1} fotogramas. Cerca del límite — puedes subir el "Límite de fotogramas" en el paso 3 ahora, sin parar la grabación.',
-      recTrCaiu:'No pude descargar el modelo de voz. La grabación CONTINÚA y los fotogramas se están guardando — solo falta la transcripción. Puedes transcribir después, en el paso 2.',
+      recTetoPerto:'{0} de {1} fotogramas. Cerca del límite — puedes subir el "Límite de fotogramas" en la etapa 3 ahora, sin parar la grabación.',
+      recTrCaiu:'No pude descargar el modelo de voz. La grabación CONTINÚA y los fotogramas se están guardando — solo falta la transcripción. Puedes transcribir después, en la etapa 2.',
       recMicNo:'Sin micrófono: solo se transcribirá el sonido del ordenador.',
       recSysNo:'No marcaste “compartir audio”: solo se transcribirá el micrófono.',
       recNoAudio:'No pude abrir los canales de audio; la grabación sigue solo con los fotogramas.',
@@ -5146,7 +5146,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       faixa:'Tramo analizado: {0} a {1}.',
       qLow:'Ligera', qMid:'Equilibrada', qHigh:'Alta',
       sens:['','muy baja','baja','baja+','media-','media','media+','alta','alta+','muy alta'],
-      extractBtn:'Solo fotogramas', stopBtn:'Parar', resetBtn:'Empezar de nuevo', novoFluxoBtn:'Empezar otro documento', novoFluxoNota:'Vuelve al paso 1, con la pantalla limpia.', novoFluxoConf:'¿Empezar otro documento? Las pantallas y el habla de esta sesión se borran — si aún no generaste el archivo, hazlo antes.',
+      extractBtn:'Solo fotogramas', stopBtn:'Parar', resetBtn:'Empezar de nuevo', novoFluxoBtn:'Empezar otro documento', novoFluxoNota:'Vuelve a la etapa 1, con la pantalla limpia.', novoFluxoConf:'¿Empezar otro documento? Las pantallas y el habla de esta sesión se borran — si aún no generaste el archivo, hazlo antes.',
       noteB:'Si el vídeo no se abre:', noteT:'el navegador no decodifica algunos formatos (HEVC, ciertos MKV). En ese caso, conviértelo a MP4 / H.264.',
       noDur:'Duración del vídeo no disponible.',
       scanning:'Buscando cambios de imagen… {0} de {1} — {2} fotograma(s) guardado(s)',
@@ -5250,7 +5250,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       rotVoltaNota:'Lleva el recibo: la ficha del caso y la huella de los {0} fotogramas. Ninguna imagen va — para guardar el archivo completo, descarga el JSON y adjúntalo allí.',
       rotVoltaNotaSem:'Lleva el nombre del archivo y la huella del conjunto. Ninguna imagen va.',
       revJaAberta:'La revisión ya está abierta aquí abajo.',
-      saidaSemQuadros:'Todavía no hay ningún fotograma para generar. Los fotogramas salen en el paso 2 — extráelos del vídeo, o graba la pantalla, que ya extrae mientras graba.',
+      saidaSemQuadros:'Todavía no hay ningún fotograma para generar. Los fotogramas salen en la etapa 2 — extráelos del vídeo, o graba la pantalla, que ya extrae mientras graba.',
       saidaPronta:'{0} fotogramas listos. Elige un formato — puedes descargar más de uno.',
       saidaSemFala:'La transcripción va por {0}% — un documento generado ahora sale sin el habla que aún falta.',
       sbE3:'{0} campos rellenados', sbE3v:'opcional, en blanco',
@@ -5353,7 +5353,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       gEvid:'Redactar el acta de evidencia de prueba',
       modelH:'Modelo de salida',
       mEscolha:'— elige el escenario de uso —',
-      cenAssumido:'Ningún escenario elegido — usé “Otro (documento genérico)”. Puedes cambiarlo después, en el paso 1.',
+      cenAssumido:'Ningún escenario elegido — usé “Otro (documento genérico)”. Puedes cambiarlo después, en la etapa 1.',
       cenFalta:'Elige primero el escenario de uso, ahí arriba. Decide el formato de todo el documento.',
       cenPorQue:'El escenario decide el encabezado, la hora de reloj, el nombre de cada paso y el prompt. Elige antes de grabar.',
       mOutro:'Otro (documento genérico)', recomendado:'recomendado', unPh:'paso, pantalla, momento…', orgTit:'Organiza los fotogramas', orgComo:'Haz clic en una imagen para descartarla o recuperarla; el campo de abajo es tu anotación. Los botones lo hacen en lote, y la revisión pasa por todos, uno a uno.', mIa:'Contexto para IA', mEv:'Evidencia de prueba', mTut:'Paso a paso', mAta:'Acta de reunión',
@@ -5365,7 +5365,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       evPerfil:'El sistema y quién lo ejecutó se guardan mientras esta pestaña siga abierta, para no reescribirlos en cada caso. Cierras la pestaña y desaparecen.',
       evLimpar:'Olvidar', evSalvar:'Guardar perfil', evAbrir:'Abrir perfil',
       editarBtn:'Editar', editarTit:'Editar este paso — tapar, recortar, comparar, cambiar la imagen, clip y habla', fecharBtn:'Cerrar',
-      lenteRevVolta:'Volver a la revisión', lenteRevFim:'Finalizar la revisión', demoCenario:'Elegimos “Evidencia de prueba” para el ejemplo — cámbialo en el paso 1 si tu caso es otro.', lenteAcoes:'Lo que puedes hacer con esta imagen', lenteNotaResta:'Quedan {0} caracteres — se convierte en el título de este paso en el documento.', tarjaBtn:'Tapar un dato', tarjaFim:'Terminar de tachar', tarjaLimpar:'Quitar las franjas',
+      lenteRevVolta:'Volver a la revisión', lenteRevFim:'Finalizar la revisión', demoCenario:'Elegimos “Evidencia de prueba” para el ejemplo — cámbialo en la etapa 1 si tu caso es otro.', lenteAcoes:'Lo que puedes hacer con esta imagen', lenteNotaResta:'Quedan {0} caracteres — se convierte en el título de este paso en el documento.', tarjaBtn:'Tapar un dato', tarjaFim:'Terminar de tachar', tarjaLimpar:'Quitar las franjas',
       tarjaComo:'Arrastra sobre la imagen para cubrir. Haz clic en una zona para quitarla.',
       tarjaN:'{0} zona(s) tachada(s) en este paso — se queman en la imagen que sale en el documento.',
       tarjaTirar:'haz clic para quitar esta zona',
@@ -9345,7 +9345,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
      depois, e não tem como se atualizar sozinho. Sem carimbo, "estou com um
      problema no offline" é uma conversa sem chão — ninguém sabe de qual build
      se fala nem se o defeito já foi consertado. */
-  const VERSAO = '2026.08.21-58';
+  const VERSAO = '2026.08.22-1';
   window.__versao = () => VERSAO;
 
   const PIP_CSS = `
@@ -15821,7 +15821,25 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
      para lugar nenhum" custa mais confiança do que compra atenção. Som também
      não — um bipe disparando quarenta minutos depois, numa aba esquecida, toca
      no meio da reunião de outra pessoa. */
-  const TITULO_ORIG = document.title;
+  /* O TITULO PARA ONDE VOLTAR — uma FUNCAO, e nao uma fotografia.
+   *
+   * Era `const TITULO_ORIG = document.title`, tirada no instante em que este
+   * trecho do script e lido. E ela fotografava a coisa errada: a `<title>` do
+   * HTML diz "Video -> PDF (quadros + transcricao)", enquanto o titulo de
+   * verdade — o que a pessoa ve — vem de `t('docTitle')`, que e
+   * "Walkstamp — transforme video em contexto para IA". Sao textos diferentes,
+   * e sempre foram.
+   *
+   * O resultado: depois de piscar uma vez, a aba ficava com o titulo do
+   * ARQUIVO em vez do titulo do PRODUTO, para sempre. E como dependia de quem
+   * corre primeiro — esta linha ou a pintura do idioma —, as vezes acertava.
+   * Era essa a intermitencia de `espera2.mjs`, e eu a tinha anotado como
+   * "flake" duas vezes.
+   *
+   * Sendo funcao, ela tambem acerta a troca de idioma no meio do piscar: parar
+   * de piscar devolve o titulo NA LINGUA DE AGORA, e nao na de quando a pagina
+   * abriu. */
+  const tituloOriginal = () => t('docTitle');
   const ICONE_PRONTO = "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'>" +
     "<rect width='64' height='64' rx='14' fill='%232F9E44'/>" +
     "<path d='M17 33l10 10 20-22' fill='none' stroke='%23fff' stroke-width='8'" +
@@ -15832,7 +15850,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
 
   function pararPisca(){
     if (piscaTimer) { clearInterval(piscaTimer); piscaTimer = null; }
-    document.title = TITULO_ORIG;
+    document.title = tituloOriginal();
     const ic = iconeDaAba();
     if (ic && ic.dataset.orig) { ic.href = ic.dataset.orig; delete ic.dataset.orig; }
   }
@@ -15856,7 +15874,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     piscaEstado = false;
     piscaTimer = setInterval(() => {
       piscaEstado = !piscaEstado;
-      document.title = piscaEstado ? '✓ ' + curto : TITULO_ORIG;
+      document.title = piscaEstado ? '✓ ' + curto : tituloOriginal();
     }, 1200);
     pintarFaixa();
   }
@@ -16105,6 +16123,13 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     if (baixouAlgo) return 3;
     return frames.length ? 2 : 1;
   }
+  /* A ETAPA ANTERIOR, para saber quando houve TRAVESSIA.
+
+     Ela existe para uma coisa só: a barra mudava e a pagina ficava onde estava.
+     Quem terminava de extrair as telas via o "2 Conferir" acender la em cima e
+     continuava olhando para o cartao da entrada — a barra virou um letreiro
+     informando sobre uma etapa que ninguem levou a pessoa ate. */
+  let etapaAnterior = null;
   function pintarEtapas(){
     const nav = $('etapas'); if (!nav) return;
     const atual = etapaAtual();
@@ -16125,6 +16150,41 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       b.setAttribute('aria-label',
         n + '. ' + t('et' + n) + (feita[n] ? ' \u2014 ' + t('etFeita') : ''));
     });
+    /* ---- A TRAVESSIA ----
+
+       SO PARA FRENTE, e nunca durante a captura. As duas restricoes sao o que
+       separa "a pagina te acompanha" de "a pagina te arranca de onde voce
+       estava":
+
+       - PARA TRAS nao leva. Descartar o ultimo quadro devolve a barra para a
+         entrada, e rolar a pagina para cima nesse instante puniria a pessoa por
+         ter apagado alguma coisa.
+       - DURANTE A GRAVACAO nao leva. Os quadros entram um a um; a primeira
+         chegada cruzaria a fronteira 1 -> 2 e a tela saltaria no meio da
+         gravacao, justamente quando quem grava esta olhando para outra janela.
+
+       E na PRIMEIRA pintura nao leva, porque `etapaAnterior` nasce nulo: abrir
+       a pagina nao e travessia. */
+    if (etapaAnterior !== null && atual > etapaAnterior && !liveOn && !emCauda) {
+      levarAEtapa(atual);
+    }
+    etapaAnterior = atual;
+  }
+  const CARTAO_DA_ETAPA = ['cardVideo', 'prevCard', 'cardBaixar'];
+  function levarAEtapa(n){
+    const alvo = $(CARTAO_DA_ETAPA[n - 1]); if (!alvo) return;
+    const suave = !(window.matchMedia &&
+                    window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    alvo.scrollIntoView({ block: 'start', behavior: suave ? 'smooth' : 'auto' });
+    /* O FOCO SO VAI SE NINGUEM ESTIVER ESCREVENDO. Rolar a pagina de quem
+       digita ja e limite; tirar o cursor do campo no meio de uma frase seria
+       perder texto na cara da pessoa. A rolagem acontece de qualquer jeito —
+       ela e reversivel com um gesto, o foco perdido nao e. */
+    const escrevendo = document.activeElement &&
+      /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName);
+    if (escrevendo) return;
+    const h = alvo.querySelector('h2');
+    if (h) h.focus({ preventScroll: true });
   }
   /* A frase da proxima acao.
 

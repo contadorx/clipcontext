@@ -72,7 +72,7 @@ console.log('\n[P1] estado inicial: só o passo 1 está aberto');
   ok('mas Recomeçar continua ao alcance',
      await pg.evaluate(() => !document.getElementById('reset').closest('[inert]')));
   ok('e a dica explica o que destrava',
-     /passo 1/.test(await pg.locator('#cardTr .lockHint').textContent()),
+     /etapa 1/.test(await pg.locator('#cardTr .lockHint').textContent()),
      await pg.locator('#cardTr .lockHint').textContent());
   ok('o bloco travado fica cinza',
      parseFloat(await pg.locator('#promptCard').evaluate(e=>getComputedStyle(e).opacity)) < .6);
@@ -146,10 +146,10 @@ console.log('\n[P3] ordem das permissões: microfone ANTES da tela');
    mensagem porque ela é promessa do produto, dita na página e na política, e
    não informação de resultado. O que sobra é o que se faz alguma coisa com. */
 ok('a mensagem final diz o que saiu, e só',
-   /Pronto: \d\d:\d\d de captura, \d+ frames e \d+ falas\./.test(msg) && !/tempo real/.test(msg), msg);
+   /Pronto: \d\d:\d\d de captura, \d+ quadros e \d+ falas\./.test(msg) && !/tempo real/.test(msg), msg);
   ok('depois de gravar, "transcrever" fica travado (não morto)',
      await pg.locator('#trAuto').getAttribute('inert') !== null);
-  ok('e a tela explica por quê', /ao vivo|só de frames/.test(await pg.locator('#hintTr').textContent()),
+  ok('e a tela explica por quê', /ao vivo|só de quadros/.test(await pg.locator('#hintTr').textContent()),
      (await pg.locator('#hintTr').textContent()).slice(0,60));
   ok('o texto da transcrição continua editável',
      await pg.locator('#trManual').getAttribute('inert') === null);

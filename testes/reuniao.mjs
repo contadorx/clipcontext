@@ -141,7 +141,7 @@ const dep = await pg.evaluate(() => ({ recTr: document.getElementById('recTr').c
 /* Baixar 206 MB para não usar é o desperdício que esta opção existe para
    evitar: marcar uma desliga a outra. */
 ok('marcar desliga "transcrever enquanto gravo"', op.recTr === true && dep.recTr === false);
-ok('e a nota muda para explicar o caminho', /passo 3/i.test(dep.nota), dep.nota.slice(0, 70));
+ok('e a nota muda para explicar o caminho', /etapa 3/i.test(dep.nota), dep.nota.slice(0, 70));
 
 // ------------------------------------- 2. o .docx do Meet, lido no navegador
 console.log('\n[2] o .docx da reunião');

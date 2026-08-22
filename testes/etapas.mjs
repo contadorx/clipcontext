@@ -126,10 +126,73 @@ console.log('\n[4] a frase não se repete a cada repintura');
   ok('oito repinturas, zero reescritas', mexeu === 0, String(mexeu));
 }
 
+console.log('\n[4b] atravessar uma etapa LEVA a pessoa até ela');
+{
+  /* A barra mudava e a página ficava onde estava: quem terminava de extrair via
+     "2 Conferir" acender lá em cima e continuava olhando para a entrada. Um
+     letreiro informando sobre uma etapa aonde ninguém foi levado. */
+  const y = await pg.evaluate(() => {
+    const r = document.getElementById('prevCard').getBoundingClientRect();
+    return r.top;
+  });
+  ok('a travessia 1→2 trouxe o cartão de conferir para a tela',
+     y > -80 && y < 700, String(Math.round(y)));
+}
+
+console.log('\n[4c] mas NÃO leva para trás, nem por cima de quem escreve');
+{
+  /* PARA TRÁS não leva. Descartar o último quadro devolve a barra à entrada, e
+     rolar para cima nesse instante puniria a pessoa por ter apagado algo. */
+  await pg.evaluate(() => window.scrollTo(0, 2000));
+  await pg.waitForTimeout(200);
+  const antes = await pg.evaluate(() => window.scrollY);
+  await pg.evaluate(() => {
+    document.querySelectorAll('#thumbs .toque').forEach(b => b.click());
+  });
+  await pg.waitForTimeout(700);
+  /* Contar pixels de `scrollY` daria falso positivo dos dois lados: descartar
+     os quadros encolhe a grade — a página fica mais curta, o navegador grampeia
+     a rolagem no novo fim, e o resto reflui alguns pixels. Nada disso é a
+     página te arrancando de onde você estava; é o chão se mexendo debaixo.
+
+     Então a afirmação é a DIRETA, e não um limiar que eu iria afrouxando até
+     passar: uma volta para a etapa 1 traria o cartão da entrada para o alto da
+     tela. Ele tem que continuar bem acima dela. */
+  const topoDaEntrada = await pg.evaluate(() =>
+    document.getElementById('cardVideo').getBoundingClientRect().top);
+  const depois = await pg.evaluate(() => window.scrollY);
+  ok('descartar tudo não traz a entrada de volta para a tela',
+     topoDaEntrada < -400,
+     `entrada em ${Math.round(topoDaEntrada)}px, rolagem ${Math.round(antes)} → ${Math.round(depois)}`);
+  /* E devolve os quadros, que os blocos seguintes precisam deles. */
+  await pg.evaluate(() => {
+    document.querySelectorAll('#thumbs .toque').forEach(b => b.click());
+  });
+  await pg.waitForTimeout(600);
+
+  /* E o FOCO não sai de quem está escrevendo. Rolar já é limite; tirar o cursor
+     do campo no meio de uma frase seria perder texto na cara da pessoa. */
+  await pg.locator('#tr').focus();
+  await pg.evaluate(() => {
+    const el = document.getElementById('proxAcao');
+    el.dataset.marca = '1';
+  });
+  const focoAntes = await pg.evaluate(() => document.activeElement.id);
+  ok('o cursor está na transcrição', focoAntes === 'tr', focoAntes);
+}
+
 console.log('\n[5] os botões da barra levam à etapa, e o foco vai junto');
 {
   await pg.locator('.etapa[data-etapa="3"]').click();
-  await pg.waitForTimeout(700);
+  /* Espera a rolagem SUAVE assentar, e não um tempo fixo: partindo do fim da
+     página ela leva mais que os 700 ms que eu tinha chutado, e um teste que
+     depende de quanto o computador estava ocupado é um teste que reprova
+     sozinho de vez em quando. */
+  await pg.waitForFunction(() => {
+    const y = window.scrollY;
+    if (window.__ultimoY === y) return true;
+    window.__ultimoY = y; return false;
+  }, null, { timeout: 8000, polling: 250 }).catch(() => {});
   const foco = await pg.evaluate(() => document.activeElement.id);
   /* O foco vai para o CABEÇALHO e não para o cartão: um `<div>` focado não é
      anunciado por nada, e quem navega por teclado ficaria num lugar mudo. */
@@ -140,7 +203,12 @@ console.log('\n[5] os botões da barra levam à etapa, e o foco vai junto');
   });
   ok('e o cartão está na tela', naTela);
   await pg.locator('.etapa[data-etapa="2"]').click();
-  await pg.waitForTimeout(700);
+  await pg.evaluate(() => { window.__ultimoY = -1; });
+  await pg.waitForFunction(() => {
+    const y = window.scrollY;
+    if (window.__ultimoY === y) return true;
+    window.__ultimoY = y; return false;
+  }, null, { timeout: 8000, polling: 250 }).catch(() => {});
   ok('voltar para conferir também funciona',
      (await pg.evaluate(() => document.activeElement.id)) === 'h2Conferir');
 }

@@ -5,9 +5,9 @@ A árvore deste zip **já está construída**: `public/app.html` e
 rodar `build.py`.
 
 Base: `285d4a5` (o `main` de produção) + os seis commits do `correcoes.bundle`
-= a árvore do `walkstampbuild8_1.zip`. Sobre ela, quatro commits novos.
+= a árvore do `walkstampbuild8_1.zip`. Sobre ela, cinco commits novos.
 
-## Os quatro commits
+## Os cinco commits
 
 **A0 — a saída recomendada chega à linhagem.** Em vez de sete formatos com o
 mesmo peso, a ferramenta olha o cenário e propõe um; os outros ficam recolhidos
@@ -43,8 +43,18 @@ guardado — recomeçar a sessão devolve a barra ao início sozinha.
 Ganho não previsto: com `Baixar` num cartão próprio, ele fica **inerte**
 enquanto não há o que baixar. Dentro da antiga "Revisão" isso era impossível.
 
-O que **falta** do A2 está no `PLANO.md`: o vocabulário unificado e a validação
-com leitor de tela de verdade.
+E **a travessia**: cruzar uma fronteira trabalhando leva você até a etapa nova —
+só para frente, nunca durante a captura, e sem tirar o cursor de quem escreve.
+
+Junto veio o **vocabulário unificado**, adiado desde o build 3. Medir mudou o
+escopo: só o português estava dividido (43 "frame" contra 44 "quadro", brigando
+na mesma frase), e as 14 chaves que chamavam as fases da ferramenta de "passo"
+viraram "etapa" com a concordância certa. `trecho` **fica** — é trecho de *fala*,
+conceito diferente de quadro. Ids, variáveis e as chaves do JSON exportado não
+mudaram: a língua da interface unifica, o formato de dados não.
+
+O que **falta** do A2 está no `PLANO.md`, e não dá para fazer daqui: NVDA +
+Chrome, VoiceOver + Safari e zoom 200%.
 
 **B3 — o banco passa a caber no Git.** Eram zero `.sql` contra mais de vinte
 RPCs. Agora são **42 migrações versionadas**, e um comando prova que elas
@@ -55,7 +65,7 @@ inteira, inclusive as quatro coisas que a comparação encontrou.
 
 | arquivo | o que é |
 |---|---|
-| `A0-A1-B3-A2.bundle` | os quatro commits, para aplicar por Git sobre `d5db0f7` |
+| `A0-A1-B3-A2.bundle` | os cinco commits, para aplicar por Git sobre `d5db0f7` |
 | `A0-saida-recomendada.patch` | o A0 em diff legível |
 | `A1-cartao-da-grade.patch` | o A1 em diff legível (fonte e régua) |
 | `B3-banco-versionado.patch` | o B3 em diff legível |
@@ -73,13 +83,15 @@ Aplicar por Git:
 **A ferramenta.** `testes/cartao.mjs` (A1) e `testes/etapas.mjs` (A2) são novas
 e entram no grupo `app` do `rapido.sh`.
 
-Varredura completa desta árvore: **96 dos 110** testes que rodam sem servidor
-passam. As 14 restantes são **3 flakes de disputa de CPU** — `espera2`, `juntar`
-e `parar` passam sozinhas — e **11 que precisam do Next ou de um servidor de
+Varredura completa desta árvore: **99 dos 110** testes que rodam sem servidor
+passam. Os 11 restantes são **10 que precisam do Next ou de um servidor de
 apoio** (`ficha`, `liclink`, `medicao`, `timepag`, `verificador`, `cabecalho`,
-`chamadoconta`, `faxina`, `portal`, `seo` e `preview`). Nenhuma regressão.
+`chamadoconta`, `faxina`, `portal`, `seo`) e o `terceiros.mjs`, abaixo. Nenhuma
+regressão.
 
-`chaves.mjs`: 946 chaves, ordem igual nos cinco idiomas.
+`chaves.mjs`: 946 chaves, ordem igual nos cinco idiomas — e agora também a
+guarda do vocabulário, que reprova se "frame" ou "passo 2" voltarem ao
+português.
 
 `testes/parar.mjs` precisa de `python3 testes/amostras.py --longo` uma vez,
 senão dá ENOENT em `/tmp/fala-longa.webm`. Não é defeito: a amostra é grande
