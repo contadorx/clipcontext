@@ -75,6 +75,77 @@ for (const { lang, re, porque } of PROIBIDAS) {
     mau++;
   }
 }
-if (!mau) console.log('vocabulário: uma palavra por coisa nos cinco.');
+/* ---- OS ABSOLUTOS DE PRIVACIDADE ----
+
+   "Não há conta, não há banco de dados, não há rastreamento" foi verdade e
+   deixou de ser: existe conta nos planos pagos, existe banco, e existe uma
+   medição de três marcos. A frase continuou no site depois que as três coisas
+   passaram a existir — e uma promessa dessas, lida por quem avalia fornecedor,
+   custa mais do que ela alguma vez rendeu.
+
+   O conserto não é apagar o absoluto: é dizer SOBRE O QUÊ ele é absoluto. "Não
+   existe servidor QUE RECEBA O SEU VÍDEO" continua sendo a frase mais forte da
+   página, e é verdadeira. O que esta trava proíbe é o absoluto solto.
+
+   Ela olha `i18n-site.json`, e não o `template.html`: é o site que faz a
+   promessa comercial. */
+const SITE = JSON.parse(fs.readFileSync(`${RAIZ_WS}/src/i18n-site.json`, 'utf8'));
+/* A conta ENTRA pela forma enumerada, e não pela palavra: "para usar não é
+   preciso conta" é verdade e continua valendo; "não há conta," no meio de uma
+   lista de três negações é o absoluto que ficou falso. Banco de dados e
+   rastreamento não têm forma legítima — os dois existem. */
+const ABSOLUTOS = [
+  { lang: 'pt', re: /não há banco de dados|não há rastreamento|não (há|existe) conta,/i },
+  { lang: 'en', re: /no database|no tracking|there is no account,/i },
+  { lang: 'es', re: /no hay base de datos|no hay rastreo|no hay cuenta,/i },
+  { lang: 'de', re: /keine Datenbank|kein Tracking|gibt kein Konto/i },
+  { lang: 'fr', re: /pas de base de données|pas de suivi|il n’y a pas de compte/i },
+];
+for (const { lang, re } of ABSOLUTOS) {
+  const achadas = Object.entries(SITE[lang] || {})
+    .filter(([, v]) => typeof v === 'string' && re.test(v))
+    .map(([k]) => k);
+  if (achadas.length) {
+    console.log(`${lang}: ${achadas.length} absoluto(s) sem escopo — ${re}`);
+    console.log('   ' + achadas.slice(0, 12).join(', ') +
+                '\n   diga SOBRE O QUÊ: "servidor que receba o seu vídeo", e não "servidor".');
+    mau++;
+  }
+}
+/* ---- NOME DE CONCORRENTE NA COPY ----
+
+   A página afirmava que o Claude e o ChatGPT recusam vídeo e descrevia como o
+   Gemini amostra o arquivo. Era verdade quando foi escrito. Capacidade de
+   modelo muda em semanas, e uma afirmação nominal sem data, link e teste
+   reproduzível envelhece sozinha — e quando ela envelhece, leva junto a
+   credibilidade do resto da página, que é a parte cara.
+
+   O argumento não dependia dos nomes: vídeo cru é pesado, difícil de citar e
+   nem sempre aceito pelo destino. A frase passou a dizer isso, e continua
+   trazendo o número que a torna memorizável (3.600 quadros).
+
+   Se um dia valer a pena voltar a nomear, a regra é ter ao lado uma página
+   datada com protocolo, arquivo, configuração e data da última revalidação —
+   e então esta trava sai junto com a decisão, de propósito. */
+/* UMA EXCECAO, E ELA E DE CLASSE DIFERENTE. `a6` responde "com qual IA isto
+   funciona?" e lista os modelos que ACEITAM anexo e leem imagem. Uma lista de
+   compatibilidade envelhece por FALTA — um modelo novo entra —, e faltar um
+   nome nao desmente nada. Uma afirmacao de limitacao envelhece virando MENTIRA,
+   e e essa que custa a pagina inteira. */
+const PERMITIDAS = new Set(['a6']);
+const CONCORRENTES = /\b(Claude|ChatGPT|Gemini|Copilot)\b/;
+for (const lang of ['pt', 'en', 'es', 'de', 'fr']) {
+  const achadas = Object.entries(SITE[lang] || {})
+    .filter(([k, v]) => typeof v === 'string' && CONCORRENTES.test(v) && !PERMITIDAS.has(k))
+    .map(([k]) => k);
+  if (achadas.length) {
+    console.log(`${lang}: ${achadas.length} chave(s) nomeiam um modelo de terceiro`);
+    console.log('   ' + achadas.join(', ') +
+                '\n   ou vira formulação durável, ou ganha uma página datada com protocolo.');
+    mau++;
+  }
+}
+
+if (!mau) console.log('vocabulário: uma palavra por coisa nos cinco, e nenhum absoluto solto.');
 
 process.exit(mau?1:0);

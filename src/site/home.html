@@ -62,7 +62,14 @@
         <p class="eyebrow">{{eyebrow}}</p>
         <h1>{{h1}}</h1>
         <p class="lead">{{lead}}</p>
-        <p><a class="btn" href="{{app}}">{{cta}}</a></p>
+        <!-- DOIS CAMINHOS, E NAO UM.
+             O CTA unico otimizava ativacao gratuita: quem chega com uma
+             planilha de casos na mao — que e quem paga — nao tinha para onde
+             ir sem rolar a pagina inteira ate os precos. O primeiro continua
+             sendo o de menor atrito; o segundo leva ao trabalho que vira
+             plano. -->
+        <p class="ctas"><a class="btn" href="{{app}}">{{cta}}</a>
+        <a class="btn ghost" href="{{precos}}">{{cta2}}</a></p>
         <p class="small muted" style="margin-top:16px">{{ctaSub}}</p>
       </div>
       {{figuraDobra}}

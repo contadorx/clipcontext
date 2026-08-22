@@ -172,7 +172,16 @@ console.log('\n[7] preços: três planos, três moedas, mesma altura');
   ok('e a lista de cada um é curta', itens.every(n => n <= 6), itens.join('/'));
   ok('nenhum cartão é muito mais longo que o outro',
      Math.max(...itens) - Math.min(...itens) <= 1, itens.join('/'));
-  ok('o que não existe está marcado', (await pg.locator('.plan .soon').count()) > 0);
+  /* INVERTIDO, E DE PROPOSITO. Esta linha cobrava que o futuro estivesse
+     marcado DENTRO do cartao — e marcar era, na epoca, a coisa honesta a fazer.
+     Continua sendo honesto dizer; mudou o lugar. Um "em breve" no meio das
+     balas do plano obriga quem decide a separar, linha a linha, o que ja se
+     compra do que foi prometido, na hora em que ele esta com o cartao na mao.
+     Agora o cartao so promete o que existe, e o resto mora na caixa do roteiro
+     logo abaixo — dito com todas as letras, e fora da conta. */
+  ok('nenhum cartão promete futuro', (await pg.locator('.plan .soon').count()) === 0);
+  ok('e o que não existe está dito na caixa do roteiro',
+     (await pg.locator('.roteiroFuturo .soon').count()) > 0);
   await pg.close();
 }
 

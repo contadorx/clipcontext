@@ -198,10 +198,22 @@ console.log('\n[M5] quando o banco recusa, e quando a rede cai');
 
 console.log('\n[M6] a manchete nova, nos três idiomas');
 {
+  /* A MANCHETE MUDOU DE CATEGORIA, e esta lista mudou junto.
+   *
+   * "Você percorre a tela. Ele carimba cada passo." tem personalidade e não é
+   * pesquisável: quem faz QA não lê ali "caso de teste", "evidência" nem
+   * "planilha", e o lead abria dois produtos com o mesmo peso. A manchete passou
+   * a dizer o trabalho — executar os casos e organizar a prova —, e "gravação
+   * vira documento" virou o mecanismo, que é o que ele sempre foi.
+   *
+   * O que continua cobrado aqui: os 3.600 quadros (o número concreto que faz a
+   * comparação ser memorizável) e os dois casos de uso, que desceram na
+   * hierarquia mas não sumiram. E a voz antiga sobrevive como subtítulo mais
+   * abaixo — o que esta lista NÃO cobra é ela na manchete. */
   const esperado = {
-    '/':   ['Você percorre a tela', 'carimba cada passo', '3.600', 'Evidência de teste', 'Contexto para IA'],
-    '/en': ['You walk the screen', 'stamps every step', '3,600', 'Test evidence', 'Context for AI'],
-    '/es': ['Tú recorres la pantalla', 'sella cada paso', '3.600', 'Evidencia de prueba', 'Contexto para IA'],
+    '/':   ['Execute os casos', 'organiza a prova', 'roteiro de casos', '3.600', 'Evidência de teste', 'Contexto para IA'],
+    '/en': ['Run the cases', 'organises the proof', 'case script', '3,600', 'Test evidence', 'Context for AI'],
+    '/es': ['Ejecuta los casos', 'organiza la prueba', 'guion de casos', '3.600', 'Evidencia de prueba', 'Contexto para IA'],
   };
   for (const [rota, termos] of Object.entries(esperado)) {
     const ctx = await br.newContext(); const pg = await ctx.newPage();

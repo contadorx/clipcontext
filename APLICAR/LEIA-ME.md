@@ -5,9 +5,9 @@ A árvore deste zip **já está construída**: `public/app.html` e
 rodar `build.py`.
 
 Base: `285d4a5` (o `main` de produção) + os seis commits do `correcoes.bundle`
-= a árvore do `walkstampbuild8_1.zip`. Sobre ela, quinze commits novos.
+= a árvore do `walkstampbuild8_1.zip`. Sobre ela, dezesseis commits novos.
 
-## Os quinze commits
+## Os dezesseis commits
 
 **A0 — a saída recomendada chega à linhagem.** Em vez de sete formatos com o
 mesmo peso, a ferramenta olha o cenário e propõe um; os outros ficam recolhidos
@@ -211,11 +211,61 @@ Um diário com buracos não responde "quem tratou o quê". Mas `ok` para um even
 que ninguém tratou é pior que silêncio: lê-se como "tratei". O webhook passou a
 registrar **`ignorado`**, e o teste cobra precisão em vez de silêncio.
 
+**D0 — a página parou de argumentar contra o próprio cartão.** Cinco dos sete
+itens do D0 da Trilha D, nos cinco idiomas, cada um com a trava que impede a
+volta.
+
+**A home escolheu um comprador.** O H1 era *"Você percorre a tela. Ele carimba
+cada passo."* — tem personalidade e não é pesquisável: quem faz QA não lê ali
+"caso de teste", "evidência" nem "planilha", e o lead abria dois produtos com o
+mesmo peso. Agora é **"Execute os casos. O Walkstamp organiza a prova."**, e o
+lead abre pela planilha e fecha pelo roteiro devolvido com situação, data e
+executor. A voz antiga sobrevive como subtítulo mais abaixo — ela é boa, só não
+é categoria.
+
+E a primeira dobra ganhou **dois caminhos**. O CTA único otimizava ativação
+gratuita: quem chega com uma planilha na mão — que é quem paga — não tinha para
+onde ir sem rolar a página inteira. O segundo aponta para os preços e **não
+promete o trial**: enquanto ninguém confirmar que os 14 dias estão de pé em
+produção, o hero não vende o que talvez não entregue.
+
+**A abertura de preços contradizia o próprio cartão.** Ela dizia que o pago é
+*"a identidade do documento e a administração de uma equipe"* — texto anterior
+ao B5, que passou a vender o Personal pela rodada de casos. A página comparava
+R$ 149/ano com "PDF com logotipo" no primeiro parágrafo, e quem lia ia embora
+antes da bala que fala da planilha. Agora o H1 é **"Um caso avulso é grátis. O
+trabalho repetido e coordenado vira plano."**
+
+**Os absolutos de privacidade eram falsos.** *"Não há conta, não há banco de
+dados, não há rastreamento"* foi verdade e deixou de ser: existe conta nos planos
+pagos, existe banco, e existe a medição de três marcos. O conserto não foi apagar
+o absoluto — foi dizer **sobre o quê** ele é absoluto. *"Não existe servidor que
+receba o seu vídeo"* continua sendo a frase mais forte da página, e é verdadeira.
+
+**O último "em breve" saiu do cartão** para uma caixa do roteiro abaixo dos
+planos, fora da decisão de compra.
+
+**As afirmações sobre Claude, ChatGPT e Gemini viraram formulação durável.** Uma
+afirmação nominal de *limitação* envelhece virando mentira e leva junto a
+credibilidade do resto. A lista de *compatibilidade* continua nomeando os três:
+ela envelhece por falta, e faltar um nome não desmente nada. **Reversível** — se
+você quiser a comparação nominal de volta, ela custa uma página datada com
+protocolo, e a trava sai junto com a decisão.
+
+Duas travas **mudaram de lado**, e vale saber por quê. `cenarios.mjs` cobrava que
+o futuro estivesse marcado *dentro* do cartão — e marcar era a coisa honesta na
+época; continua honesto dizer, mudou o lugar. `linkpage.mjs` cobrava que o cartão
+pago vendesse os termos *gravados*; a preocupação original (não vender no pago o
+que é de graça) continua de pé pelo avesso.
+
+Faltam do D0 **a demonstração do fluxo pago** e **os eventos de intenção paga**.
+A Trilha D caiu de 12–15 para 5,5–7 dias.
+
 ## Os arquivos
 
 | arquivo | o que é |
 |---|---|
-| `tudo.bundle` | os quinze commits, para aplicar por Git sobre `d5db0f7` — é um bundle de **intervalo** (`d5db0f7..HEAD`), então ele precisa que você já tenha esse commit; foi assim que ele saiu de 22 MB para 314 KB e o pacote coube no limite de envio |
+| `tudo.bundle` | os dezesseis commits, para aplicar por Git sobre `d5db0f7` — é um bundle de **intervalo** (`d5db0f7..HEAD`), então ele precisa que você já tenha esse commit; foi assim que ele saiu de 22 MB para 314 KB e o pacote coube no limite de envio |
 | `A0-saida-recomendada.patch` | o A0 em diff legível |
 | `A1-cartao-da-grade.patch` | o A1 em diff legível (fonte e régua) |
 | `B3-banco-versionado.patch` | o B3 em diff legível |
@@ -227,6 +277,7 @@ registrar **`ignorado`**, e o teste cobra precisão em vez de silêncio.
 | `C1-medir-antes-de-otimizar.patch` | o C1 em diff legível |
 | `D-roadmap-da-venda.patch` | a análise da venda e a Trilha D do `PLANO.md` |
 | `reguas-que-liam-a-tela-errada.patch` | `linkpage.mjs` e `modelos.mjs` |
+| `D0-a-pagina-vende-um-trabalho.patch` | o D0 em diff legível |
 | `stripe-ignorado-e-validacao.patch` | o diário da Stripe e o roteiro do leitor de tela |
 | `correcoes.bundle`, `correcoes-so-fonte.patch` | os seis commits originais do zip |
 | `ARQUIVOS.txt`, `MENSAGENS.txt` | o inventário original |

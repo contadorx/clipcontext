@@ -322,7 +322,7 @@ sair em `.xlsx`, e a primeira bala do Personal tem que falar da planilha nos cin
 idiomas. Provado nas duas direções — tirar `rotColImp` do export reprova, e o
 logotipo voltar a liderar reprova.
 
-### Trilha D — posicionamento e venda (12–15 d) — **prioridade sobre a C**
+### Trilha D — posicionamento e venda (5,5–7 d restantes) — **prioridade sobre a C**
 
 A fonte é a **análise da página, da copy e da venda** de 22/08, que está inteira
 em `ANALISE-DA-VENDA.md`. O veredito dela cabe numa frase: a página é forte como
@@ -347,32 +347,72 @@ itens do P0 dela já estão feitos, e vale não refazer:
 
 **O que sobrou do P0 é o que segue.**
 
-#### D0 — antes de comprar tráfego (6,5–8 d)
+#### D0 — antes de comprar tráfego: **cinco dos sete feitos**
 
-1. **A home escolhe um comprador (1,5–2 d).** Hoje o H1 é
+Feitos nesta rodada — **1, 2, 3, 4 e 5** —, os cinco nos cinco idiomas, cada um
+com a trava que impede a volta:
+
+1. **A home escolheu um comprador — FEITO.** O H1 era
    *"Você percorre a tela. Ele carimba cada passo."* — tem personalidade e não é
    pesquisável: quem faz QA não lê ali "caso de teste", "evidência" nem
    "planilha". E o lead abre dois produtos com o mesmo peso (provar o teste /
    entregar a uma IA), que têm compradores e disposições a pagar diferentes.
-   Reescrever olho, H1, lead e o par de CTAs **nos cinco idiomas**, mantendo a
-   voz como subtítulo. A categoria passa a ser *execução e comprovação de casos
-   de teste*; "gravação → documento" vira o mecanismo, não a categoria.
-2. **A abertura de preços contradiz o próprio cartão (1 d).** Ela ainda diz que
+   Agora o olho diz *"Evidência de teste sem Print Screen e Word"*, o H1 diz
+   **"Execute os casos. O Walkstamp organiza a prova."**, e o lead abre pela
+   planilha e fecha pelo roteiro devolvido com situação, data e executor. A
+   categoria passou a ser *execução e comprovação de casos de teste*; "gravação
+   → documento" virou o mecanismo, que é o que sempre foi.
+
+   E a primeira dobra ganhou **dois caminhos**: o botão de sempre, de menor
+   atrito, e um segundo — *"Ver como funciona o roteiro de casos"* — para quem
+   chega com a planilha na mão e antes tinha de rolar a página inteira. Ele
+   aponta para os preços e **não promete o trial**: enquanto você não confirmar
+   que os 14 dias estão de pé em produção, o hero não vende o que não pode
+   entregar. Trava: `medicao.mjs` [M6] passou a cobrar a manchete nova nos três
+   idiomas que ele varre.
+2. **A abertura de preços parou de contradizer o cartão — FEITO.** Ela dizia que
    o pago é *"a identidade do documento e a administração de uma equipe"* —
    escrita antes do B5, que passou a vender o Personal pelo roteiro. Do jeito
-   que está, a própria página compara R$ 149/ano com "PDF com logotipo". Trocar
-   por caso avulso / roteiro individual / execução coordenada, nos cinco idiomas.
-3. **Os absolutos de privacidade (0,5 d).** "Não existe servidor", "não há
-   conta", "não há banco" valem para o **vídeo** e deixaram de valer para a
-   **conta**. Separar as quatro coisas — arquivo local, site, conta paga,
-   telemetria — em uma frase só, e propagar para a política.
-4. **O último "em breve" sai do cartão (0,5 d).** Sobrou um (`termosGuardados`),
-   dentro das balas do Personal. A regra da análise é boa e vira trava no
-   `planos.mjs`: o que está no conjunto principal do plano tem que estar
-   utilizável; futuro vai para caixa separada.
-5. **As afirmações sobre Claude, ChatGPT e Gemini (0,5 d).** Capacidade de
-   modelo muda em semanas; a frase envelhece e leva o resto junto. Ou vira
-   formulação durável, ou vira página datada com protocolo e revalidação.
+   que estava, a própria página comparava R$ 149/ano com "PDF com logotipo".
+   Agora o H1 é **"Um caso avulso é grátis. O trabalho repetido e coordenado
+   vira plano."** e o lead nomeia os três trabalhos. A promessa do gratuito
+   continua inteira, uma linha abaixo. Trava: `planos.mjs` [8] — a abertura tem
+   de nomear Free, Personal e Team, e não pode voltar a vender identidade e
+   administração. Provada nas duas direções.
+3. **Os absolutos de privacidade — FEITO.** *"Não há conta, não há banco de
+   dados, não há rastreamento"* foi verdade e deixou de ser: existe conta nos
+   planos pagos, existe banco, e existe a medição de três marcos. A frase ficou
+   no ar depois que as três coisas passaram a existir — e uma promessa dessas,
+   lida por quem avalia fornecedor, custa mais do que alguma vez rendeu.
+
+   O conserto não foi apagar o absoluto, foi **dizer sobre o quê** ele é
+   absoluto: *"não existe servidor que receba o seu vídeo"* continua sendo a
+   frase mais forte da página, e é verdadeira. Cinco chaves reescritas nos cinco
+   idiomas. Trava: `chaves.mjs` passou a reprovar o absoluto solto — banco e
+   rastreamento não têm forma legítima, e a conta entra pela forma enumerada.
+4. **O último "em breve" saiu do cartão — FEITO.** Sobrava um
+   (`termosGuardados`), dentro das balas do Personal. Um item marcado assim no
+   meio do plano obriga quem decide a separar, linha a linha, o que já se compra
+   do que foi prometido — trabalho passado para quem está com o cartão na mão.
+
+   Ele foi para uma **caixa do roteiro** abaixo dos cartões, dita com todas as
+   letras e fora da conta. Travas: `planos.mjs` [9] proíbe selo dentro de
+   qualquer cartão, e `cenarios.mjs` teve a asserção **invertida** — ela cobrava
+   que o futuro estivesse marcado dentro do cartão, e agora cobra que não
+   esteja, e que a caixa exista.
+5. **As afirmações sobre Claude, ChatGPT e Gemini — FEITO, e reversível.**
+   Capacidade de modelo muda em semanas; uma afirmação nominal de limitação
+   envelhece virando mentira, e leva junto a credibilidade do resto da página.
+
+   O argumento nunca dependeu dos nomes: vídeo cru é pesado, difícil de citar e
+   nem sempre aceito pelo destino. A frase passou a dizer isso, com os 3.600
+   quadros que a tornam memorizável. **A lista de compatibilidade continua
+   nomeando os três** — ela é de outra classe: envelhece por falta, não por
+   mentira. Trava: `chaves.mjs` proíbe o nome fora dessa lista. Se você quiser a
+   comparação nominal de volta, ela custa uma página datada com protocolo e
+   revalidação — e a trava sai junto com a decisão.
+**Faltam dois, 2,5–3,5 d:**
+
 6. **A demonstração do fluxo pago (1,5–2 d).** O tour mostra gravação →
    documento, que é o Free. Falta planilha → casos → evidência → planilha
    devolvida, que é o que se compra.
@@ -488,9 +528,9 @@ fonte, medir o pico de memória, medir WER antes de tocar na compactação de si
 |---|---:|---|
 | A — terminar o UX | **1–2** | o redesenho inteiro, com acessibilidade validada |
 | B — destravar a venda | **feita** | uma verdade só, cobrança auditável, banco reconstruível |
-| D — posicionamento e venda | **12–15** | a página passa a vender um trabalho, e não uma ferramenta |
+| D — posicionamento e venda | **5,5–7** | D0 quase feita: a página já vende um trabalho. Faltam a demo do fluxo pago, os eventos de intenção paga e a D1 |
 | C — motor e dívida | **19–28** | C1 feita: você já mede. Faltam C2 e C3 |
-| **Total** | **32–45** | |
+| **Total** | **25,5–37** | |
 
 A ordem é **A → D0 → D1 → C2 → C3**. A D vem antes da C pelo mesmo motivo que a
 C1 veio antes da C2: acelerar um motor que ninguém contratou acelera a coisa

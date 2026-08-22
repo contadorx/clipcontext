@@ -94,12 +94,23 @@ await pg.waitForTimeout(300);
   ok('e o Personal continua com a identidade',
      /data-f="modeloProprio"[^>]*>[^<]*[Ll]ogotipo/.test(time),
      (time.match(/data-f="modeloProprio"[^<]*/) || ['(não achou)'])[0]);
-  /* O que o cartão pago vende do vocabulário é a lista ficar GRAVADA, e não o
-     acesso: aplicar os termos continua sendo de todo mundo. Prometer no pago o
-     que o produto entrega de graça é a contradição que ninguém reclama — e é
-     por isso que a palavra cobrada aqui é "gravad", e não "termos". */
-  ok('o cartão pago vende os termos GRAVADOS', /gravad/i.test(time),
-     (time.match(/[^<>]*gravad[^<>]*/i) || ['(não achou)'])[0].slice(0, 70));
+  /* OS TERMOS GRAVADOS SAIRAM DO CARTAO — e a preocupação original continua de
+     pé, só que pelo avesso.
+     
+     Ela era: o cartão pago não pode vender o que o produto entrega de graça
+     (aplicar os termos é de todo mundo; o que seria pago é a lista ficar
+     GRAVADA). Só que guardar ainda não existe, e um "em breve" no meio das
+     balas do plano obriga quem decide a separar o que já se compra do que foi
+     prometido. Ele foi para a caixa do roteiro, abaixo dos cartões.
+     
+     Então o que se cobra aqui agora é o par: o cartão pago não fala de termos,
+     e a caixa do roteiro fala. `planos.mjs` [9] cobra a regra geral; esta linha
+     cobra este item, que é o que este arquivo veio olhar. */
+  ok('o cartão pago não vende mais o vocabulário', !/gravad|termos/i.test(time),
+     (time.match(/[^<>]*(gravad|termos)[^<>]*/i) || ['(limpo)'])[0].slice(0, 70));
+  const futuro = await pg.locator('.roteiroFuturo').innerHTML().catch(() => '');
+  ok('e a caixa do roteiro é quem fala dos termos gravados', /gravad/i.test(futuro),
+     (futuro.match(/[^<>]*gravad[^<>]*/i) || ['(não achou)'])[0].slice(0, 70));
 }
 
 ok('sem erro de JS', erros.length === 0, erros.join(' | ').slice(0, 200));

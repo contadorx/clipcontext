@@ -173,5 +173,68 @@ console.log('\n[7] o que o Personal PROMETE é o que a planilha DEVOLVE');
   }
 }
 
+
+console.log('\n[8] a ABERTURA da página diz o mesmo que os cartões');
+{
+  /* A CONTRADIÇÃO PRINCIPAL, e ela sobreviveu a dois builds.
+   *
+   * O B5 reescreveu o cartão do Personal em torno da rodada de casos. A
+   * abertura da página continuou dizendo, em cinco idiomas, que o que se paga é
+   * "a identidade do documento e a administração de uma equipe" — texto
+   * anterior. A página passou a argumentar contra o próprio cartão: quem lê o
+   * primeiro parágrafo compara R$ 149/ano com "PDF com logotipo" e vai embora
+   * antes de chegar na bala que fala da planilha.
+   *
+   * Isso é o que uma régua não pega quando ela só olha os cartões. Aqui a
+   * abertura tem que nomear os TRÊS TRABALHOS — caso avulso, roteiro
+   * individual, execução coordenada —, que é a promessa que os cartões
+   * entregam logo abaixo. */
+  const NOMES = { free: /free/i, personal: /personal/i, team: /team/i };
+  const IDENTIDADE = {
+    pt: /o que é pago é a .{0,20}identidade/i,
+    en: /what you pay for is the .{0,20}identity/i,
+    es: /lo que se paga es la .{0,20}identidad/i,
+    de: /bezahlt werden die .{0,20}identität/i,
+    fr: /ce qui est payant.{0,30}identité/i,
+  };
+  for (const L of IDIOMAS) {
+    const html = fs.readFileSync(`${RAIZ_WS}/src/site/bodies/precos.${L}.html`, 'utf8');
+    /* Só a abertura: do começo até o primeiro cartão. O nome dos planos
+       aparece nos cartões de qualquer jeito, e olhar a página inteira faria
+       esta afirmação passar sem que a abertura dissesse nada. */
+    const abertura = html.slice(0, html.indexOf('data-plano='));
+    for (const [plano, re] of Object.entries(NOMES)) {
+      ok(`${L}: a abertura nomeia o ${plano}`, re.test(abertura),
+         abertura.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').slice(0, 90));
+    }
+    ok(`${L}: e não volta a vender identidade e administração`,
+       !IDENTIDADE[L].test(abertura),
+       (abertura.match(IDENTIDADE[L]) || [''])[0]);
+  }
+}
+
+console.log('\n[9] nenhum "em breve" DENTRO de um cartão de plano');
+{
+  /* A REGRA, e por que ela vale a pena.
+   *
+   * Um item marcado "em breve" no meio das balas do plano obriga quem decide a
+   * separar, linha a linha, o que já se compra do que foi prometido. Isso não é
+   * transparência: é trabalho passado para quem está pagando, na hora em que
+   * ele está com o cartão na mão.
+   *
+   * A separação é de lugar, e não de redação: o que está no cartão está
+   * utilizável no ambiente vendido; o que ainda não existe mora na caixa do
+   * roteiro, abaixo dos cartões e fora da conta. O selo continua permitido —
+   * na caixa, e no rodapé que o explica. */
+  for (const L of IDIOMAS) {
+    const html = fs.readFileSync(`${RAIZ_WS}/src/site/bodies/precos.${L}.html`, 'utf8');
+    const cartoes = html.slice(html.indexOf('data-plano='), html.indexOf('roteiroFuturo'));
+    const dentro = (cartoes.match(/class="soon"/g) || []).length;
+    ok(`${L}: os cartões só prometem o que já existe`, dentro === 0, dentro + ' selo(s)');
+    ok(`${L}: e a caixa do roteiro existe para receber o resto`,
+       html.includes('roteiroFuturo'));
+  }
+}
+
 console.log(falhas ? `\n${falhas} FALHA(S)` : '\nCartões e catálogo: uma verdade só.');
 process.exit(falhas ? 1 : 0);
