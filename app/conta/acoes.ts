@@ -19,6 +19,7 @@ import { marca } from '@/lib/marca';
 import { CAMINHO, type Lang, ehLang, preencher, textos } from '@/lib/conta/textos';
 import { enderecoDoItem } from '@/lib/conta/nav';
 import { type Chave, emitirChave } from '@/lib/conta/licenca';
+import { medirConta } from '@/lib/conta/medir';
 
 /** O idioma vem do formulário de propósito: ele decide só em que língua a
  *  resposta é escrita, e não dá acesso a nada. */
@@ -112,6 +113,14 @@ export async function comprar(form: FormData) {
     cancel_url: `${marca.site}${CAMINHO[lang]}?cancelou=1`,
     locale: lang === 'pt' ? 'pt-BR' : lang,
   });
+  /* ANTES do `redirect`, e nao depois: o `redirect` do Next funciona lancando
+     uma excecao — nada escrito abaixo dele roda. Medir depois seria escrever
+     uma linha que nunca executa e achar que o funil esta ligado.
+
+     E o marco e "comecou", nao "pagou": quem paga e a Stripe, e quem sabe disso
+     e o webhook. O que este mede e a INTENCAO — e a distancia entre ela e o
+     pagamento e justamente o numero que faltava. */
+  await medirConta('comecou_pagamento', { lang, plano });
   redirect(sessao.url!);
 }
 
@@ -144,8 +153,16 @@ export async function emitirLicenca(_antes: Chave | null, form: FormData): Promi
   const lang = idioma(form);
   const email = await emailDaSessao();
   if (!email) return { erro: 'sem_sessao' };
-  void lang;
-  return emitirChave();
+  const chave = await emitirChave();
+  /* A MESMA PORTA SERVE AOS DOIS, e por isso a conta e consultada aqui: esta
+     acao emite a chave do teste de 14 dias E a de quem ja assinou. Contar as
+     duas como "comecou o teste" faria o numero crescer justamente com quem ja
+     pagou — que e o contrario do que ele existe para responder. */
+  if (!chave.erro && chave.link) {
+    const conta = await contaDe(email).catch(() => null);
+    if (!conta?.assinante) await medirConta('comecou_teste', { lang });
+  }
+  return chave;
 }
 
 /* -------------------------------------------------------------------- time */

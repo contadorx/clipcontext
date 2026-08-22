@@ -322,7 +322,7 @@ sair em `.xlsx`, e a primeira bala do Personal tem que falar da planilha nos cin
 idiomas. Provado nas duas direções — tirar `rotColImp` do export reprova, e o
 logotipo voltar a liderar reprova.
 
-### Trilha D — posicionamento e venda (5,5–7 d restantes) — **prioridade sobre a C**
+### Trilha D — posicionamento e venda (4–5,5 d restantes) — **prioridade sobre a C**
 
 A fonte é a **análise da página, da copy e da venda** de 22/08, que está inteira
 em `ANALISE-DA-VENDA.md`. O veredito dela cabe numa frase: a página é forte como
@@ -347,9 +347,9 @@ itens do P0 dela já estão feitos, e vale não refazer:
 
 **O que sobrou do P0 é o que segue.**
 
-#### D0 — antes de comprar tráfego: **cinco dos sete feitos**
+#### D0 — antes de comprar tráfego: **seis dos sete feitos**
 
-Feitos nesta rodada — **1, 2, 3, 4 e 5** —, os cinco nos cinco idiomas, cada um
+Feitos — **1, 2, 3, 4, 5 e 7**. Os cinco primeiros nos cinco idiomas, cada um
 com a trava que impede a volta:
 
 1. **A home escolheu um comprador — FEITO.** O H1 era
@@ -411,16 +411,54 @@ com a trava que impede a volta:
    mentira. Trava: `chaves.mjs` proíbe o nome fora dessa lista. Se você quiser a
    comparação nominal de volta, ela custa uma página datada com protocolo e
    revalidação — e a trava sai junto com a decisão.
-**Faltam dois, 2,5–3,5 d:**
+**Falta um, 1,5–2 d:**
 
 6. **A demonstração do fluxo pago (1,5–2 d).** O tour mostra gravação →
    documento, que é o Free. Falta planilha → casos → evidência → planilha
    devolvida, que é o que se compra.
-7. **Os eventos que faltam no funil (1–1,5 d).** A C1 já limpou a medida — a
-   esteira parou de contar como gente — e o evento de ativação existe
-   (`baixou_saida`). Faltam os de intenção paga: roteiro importado, caso
-   concluído, trial iniciado, checkout iniciado. Sem conteúdo do cliente, como
-   os três de hoje.
+7. **O funil jogava fora oito de onze eventos — FEITO no banco; falta ligar os
+   quatro novos na conta.** A C1 tinha tirado a esteira de dentro da medida.
+   Medindo de novo apareceu coisa pior: o produto chama `medir()` com **onze**
+   nomes e a tabela aceitava **três**. Os outros oito morriam calados — uns
+   batendo no `check` do nome (a função captura `check_violation` de propósito,
+   para uma medição recusada não virar erro na tela), outros mandando
+   parâmetros que a função não tem (`p_de`, `p_para`, `p_pct`, `p_via`,
+   `p_telas`), e o `baixou_saida` em `pptx`, `html`, `md`, `csv`, `gdocs`,
+   `jira` ou `vocabulario` batendo no `check` do formato e levando a linha
+   inteira junto.
+
+   E **`idioma` aceitava três dos cinco idiomas do site**: alemão e francês
+   foram descartados desde sempre. O "de e fr têm zero eventos" não era
+   tráfego — era o banco jogando fora.
+
+   A migração `20260822050000` faz o banco aceitar o que o produto já mandava,
+   com vocabulário fechado em cada campo, e abre os quatro de intenção paga
+   (`importou_roteiro`, `concluiu_caso`, `comecou_teste`, `comecou_pagamento`).
+   Os dois eventos que queriam contagem exata passaram a mandar **faixa**.
+
+   Travas: `testes/funil.mjs`, estático e sem banco — ele lê o vocabulário da
+   migração e as chamadas do `template.html` e reprova quando os dois deixam de
+   bater, inclusive o conjunto declarado de cada expressão dinâmica; e
+   `10-fumaca.sql` [10], que prova o comportamento.
+
+   **E os quatro estão ligados.** A área da conta não media nada — um evento
+   declarado no banco e nunca disparado é pior que nenhum, porque o zero parece
+   resposta. `importou_roteiro` e `concluiu_caso` saem do roteiro (o segundo só
+   quando o caso é concluído, nunca quando é desfeito: contar conserto como
+   valor entregue inflaria o único número que diz se o roteiro está sendo
+   usado); `comecou_pagamento` sai do checkout, **antes** do `redirect`, que no
+   Next funciona lançando — medir depois seria uma linha que nunca executa; e
+   `comecou_teste` só conta quem **não** é assinante, porque a mesma porta emite
+   a chave do teste e a de quem já paga.
+
+   E a medição do servidor **respeita Do Not Track**. `navigator.doNotTrack` não
+   existe do lado de cá, e a saída preguiçosa seria dizer que DNT é coisa de
+   navegador — mas o cabeçalho vem em toda requisição, inclusive na que dispara
+   a ação. Quem desligou o rastreamento desligou o rastreamento, e não "o
+   rastreamento feito por JavaScript".
+
+   Com isto o item 7 fecha. Falta do D0 só o item 6, a demonstração do fluxo
+   pago.
 
 #### D1 — para levantar conversão (5,5–6,5 d)
 
@@ -528,9 +566,9 @@ fonte, medir o pico de memória, medir WER antes de tocar na compactação de si
 |---|---:|---|
 | A — terminar o UX | **1–2** | o redesenho inteiro, com acessibilidade validada |
 | B — destravar a venda | **feita** | uma verdade só, cobrança auditável, banco reconstruível |
-| D — posicionamento e venda | **5,5–7** | D0 quase feita: a página já vende um trabalho. Faltam a demo do fluxo pago, os eventos de intenção paga e a D1 |
+| D — posicionamento e venda | **4–5,5** | D0 quase feita: a página vende um trabalho e o funil mede. Faltam a demo do fluxo pago e a D1 |
 | C — motor e dívida | **19–28** | C1 feita: você já mede. Faltam C2 e C3 |
-| **Total** | **25,5–37** | |
+| **Total** | **24–35,5** | |
 
 A ordem é **A → D0 → D1 → C2 → C3**. A D vem antes da C pelo mesmo motivo que a
 C1 veio antes da C2: acelerar um motor que ninguém contratou acelera a coisa

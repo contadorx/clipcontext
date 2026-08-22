@@ -28,12 +28,17 @@ echo "[1] reconstruindo do zero"
 sh "$AQUI/reconstruir.sh" "$BANCO" | sed 's/^/     /'
 
 echo "[2] conferindo a impressao digital do esquema"
-psql -F'  ' -A -t -f "$AQUI/impressao.sql" "$BANCO" > /tmp/impressao-obtida.txt
-if diff -u "$AQUI/esperado.txt" /tmp/impressao-obtida.txt > /tmp/impressao.diff; then
+# `/tmp` escrito a mao nao serve: esta prova roda como o usuario do Postgres, e
+# um `/tmp/impressao.diff` que sobrou de outra execucao, de outro dono, faz a
+# prova falhar por permissao e relatar "O ESQUEMA MUDOU" — que e um diagnostico
+# falso, e o pior tipo: ele manda mexer no esquema.
+: "${TMPDIR:=/tmp}"
+psql -F'  ' -A -t -f "$AQUI/impressao.sql" "$BANCO" > "$TMPDIR/impressao-obtida.txt"
+if diff -u "$AQUI/esperado.txt" "$TMPDIR/impressao-obtida.txt" > "$TMPDIR/impressao.diff"; then
   sed 's/^/     ok   /' "$AQUI/esperado.txt"
 else
   echo "     O ESQUEMA MUDOU. esperado a esquerda, obtido a direita:"
-  sed 's/^/     /' /tmp/impressao.diff
+  sed 's/^/     /' "$TMPDIR/impressao.diff"
   echo
   echo "     Se a mudanca for de proposito, regenere a expectativa:"
   echo "       psql -F'  ' -A -t -f $AQUI/impressao.sql $BANCO > $AQUI/esperado.txt"
@@ -41,8 +46,24 @@ else
 fi
 
 echo "[3] provando o comportamento das funcoes"
-psql -q -v ON_ERROR_STOP=1 -f "$AQUI/10-fumaca.sql" "$BANCO" 2>&1 \
-  | sed 's/^psql:[^ ]* NOTICE:  //' | sed 's/^/     /'
+# O CANO ENGOLIA O VEREDITO.
+#
+# Isto era `psql ... | sed | sed`, e em `sh` o `$?` de um cano e o do ULTIMO
+# comando — o `sed`, que sempre da zero. Com `set -e` ligado e tudo. O efeito
+# medido: uma afirmacao de comportamento reprovando, o ERROR aparecendo na
+# tela, e o script terminando com "Prova do banco: passou." e codigo 0.
+#
+# Um portao que imprime o erro e devolve sucesso e pior que portao nenhum: a
+# esteira fica verde e quem le aprende a nao ler. E o mesmo defeito do
+# `build.py | head`, no lugar onde ele custa mais.
+if psql -q -v ON_ERROR_STOP=1 -f "$AQUI/10-fumaca.sql" "$BANCO" > "$TMPDIR/fumaca.log" 2>&1; then
+  sed 's/^psql:[^ ]* NOTICE:  //' "$TMPDIR/fumaca.log" | sed 's/^/     /'
+else
+  sed 's/^psql:[^ ]* NOTICE:  //' "$TMPDIR/fumaca.log" | sed 's/^/     /'
+  echo
+  echo "Prova do banco: REPROVOU no comportamento das funcoes."
+  exit 1
+fi
 
 echo
 echo "Prova do banco: passou."

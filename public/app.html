@@ -6503,6 +6503,16 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   }
   const naoMedirDaqui = () => origemDeDesenvolvimento() && window.__medirDaqui !== true;
 
+  /* ---- FAIXA, E NAO NUMERO ----
+   *
+   * Dois eventos queriam mandar uma contagem: quantos por cento da fala foram
+   * transcritos antes da parada, e quantas telas a faxina encontrou. Numero
+   * exato nao ajuda a decidir nada que a faixa nao ajude — e numero exato,
+   * somado a hora do evento, e um tracinho a mais no desenho de quem esta do
+   * outro lado. A faixa responde a mesma pergunta e nao desenha ninguem. */
+  const faixaPct = (n) => n < 25 ? '0-24' : n < 50 ? '25-49' : n < 75 ? '50-74' : '75-100';
+  const faixaConta = (n) => n <= 3 ? '1-3' : n <= 10 ? '4-10' : n <= 30 ? '11-30' : '31+';
+
   function medir(nome, extra){
     /* Um documento saiu — e este é o único lugar do arquivo por onde TODA saída
        passa. Pendurar o convite aqui é o que evita catorze lugares para lembrar
@@ -6618,7 +6628,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      tempo, terminam nas duas somadas, e o modelo é baixado outra vez. */
   if ($('novaSessao')) {
     $('novaSessao').onclick = () => {
-      medir('nova_sessao', { p_de: 'espera' });
+      medir('nova_sessao', { p_origem: 'espera' });
       window.open(location.pathname + location.search, '_blank', 'noopener');
     };
   }
@@ -7536,7 +7546,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
 
   if ($('novoFluxo')) $('novoFluxo').onclick = () => {
     if (frames.filter(f => f.keep).length && !confirm(t('novoFluxoConf'))) return;
-    medir('novo_fluxo', {});
+    medir('novo_fluxo');
     location.reload();
   };
   /* Ele acompanha a existência de documento, pela mesma conta do placar. */
@@ -7999,7 +8009,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
           const { cues, fonte } = parseTranscript(r.texto);
           msg(cues.length ? t(fonte === 'blocos' ? 'trLeuReuniao' : 'trLeuCues', cues.length)
                           : t('trLeuSemTempo'), cues.length ? 'ok' : '');
-          medir('transcricao_arquivo', { p_formato: 'drive:' + fonte });
+          medir('transcricao_arquivo', { p_origem: 'drive', p_formato: fonte || 'sem_tempo' });
           if (cues.length && frames.length) render();
         } else {
           /* Um .docx de verdade guardado no Drive passa pelo MESMO leitor do
@@ -9073,7 +9083,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      depois, e não tem como se atualizar sozinho. Sem carimbo, "estou com um
      problema no offline" é uma conversa sem chão — ninguém sabe de qual build
      se fala nem se o defeito já foi consertado. */
-  const VERSAO = '2026.08.22-28';
+  const VERSAO = '2026.08.22-29';
   window.__versao = () => VERSAO;
 
   const PIP_CSS = `
@@ -11454,7 +11464,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
          legenda inteira da reunião carregada depois de uma parada continuaria
          marcada como "parcial, você parou antes do fim" — e não é. */
       falaParcial = false;
-      medir('transcricao_arquivo', { p_formato: fonte });
+      medir('transcricao_arquivo', { p_origem: 'arquivo', p_formato: fonte || 'sem_tempo' });
       if (cues.length && frames.length) render();
     } catch (e) {
       msg(t('trLerErro', (e && e.message) || e), 'err');
@@ -12802,7 +12812,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       mostrarTamanho();
       $('trocaBtn').disabled = true;
       $('trocaTxt').textContent = t('trocaIndo');
-      medir('trocou_modo', { p_para: alvo.rotulo });
+      medir('trocou_modo', { p_origem: alvo.rotulo });
     };
   }
 
@@ -13116,7 +13126,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
            (pulados ? ' ' + t('trPulou', pulados) : ''), 'ok');
         dizerFala(t('trDizParou', String(out.length)));
         avisarPronto(t('avisoAbaTr'), t('avisoTrParcial', out.length));
-        medir('parou_fala', { p_pct: String(Math.round(parouNoMeio / total * 100)) });
+        medir('parou_fala', { p_faixa: faixaPct(Math.round(parouNoMeio / total * 100)) });
       }
     } catch (e) {
       prog(null);
@@ -13757,7 +13767,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     if (r.erro) { $('licMsg').innerHTML = `<span class="err">${r.erro}</span>`; return; }
     licenca = r.dados;
     try { localStorage.setItem(LIC_CHAVE, $('licChave').value.trim()); } catch (e) {}
-    medir('ativou_licenca', {});
+    medir('ativou_licenca');
     pintarLicenca();
   };
 
@@ -13799,7 +13809,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     if (r.dados) {
       licenca = r.dados;
       try { localStorage.setItem(LIC_CHAVE, chave.trim()); } catch (e) {}
-      medir('ativou_licenca', { p_via: 'link' });
+      medir('ativou_licenca', { p_origem: 'link' });
     }
     /* Tira do endereço em qualquer caso — inclusive quando a chave é ruim.
        Deixar uma chave inválida na barra não conserta nada e ainda a espalha. */
@@ -14227,7 +14237,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
         const temEmail = !!($('fbEmail').value || '').trim();
         $('fbMsg').innerHTML = `<span class="ok">${t('fbFeito', resp)}</span>` +
           (temEmail ? '' : ` <span class="err">${t('fbSemEmail')}</span>`);
-        medir('recado', { p_formato: fbTipo });
+        medir('recado', { p_origem: fbTipo });
       } catch (e) {
         $('fbEnviar').disabled = false;
         $('fbMsg').innerHTML = `<span class="err">${t('fbErro', CONTATO)}</span>`;
@@ -18840,7 +18850,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     p.todos.forEach(f => { f.keep = false; });
     filtroAtivo = null;
     render();                                  // o `pintarResumoRev` mostra a linha
-    medir('faxina_recomendada', { p_telas: String(p.todos.length) });
+    medir('faxina_recomendada', { p_faixa: faixaConta(p.todos.length) });
   };
   if ($('faxinaDesfazer')) $('faxinaDesfazer').onclick = () => desfazerAOperacao();
   /* Delegado, e não uma cópia: é o mesmo botão de sempre, que mora junto da

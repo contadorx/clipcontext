@@ -10,6 +10,10 @@ set -e
 AQUI=$(cd "$(dirname "$0")" && pwd)
 BANCO=${1:-walkstamp_prova}
 : "${PGHOST:=/tmp/pgsock}" "${PGPORT:=5433}" "${PGUSER:=postgres}"
+# Mesmo motivo do `prova.sh`: um log em `/tmp` de outro dono para a
+# reconstrucao com "Permission denied", e o relato vira "PAROU na primeira
+# migracao" — que manda procurar defeito no SQL onde nao ha.
+: "${TMPDIR:=/tmp}"
 export PGHOST PGPORT PGUSER
 
 psql -q -Atc "drop database if exists $BANCO" postgres
@@ -20,8 +24,8 @@ psql -q -v ON_ERROR_STOP=1 -f "$AQUI/00-ambiente.sql" "$BANCO" >/dev/null
 n=0
 for f in "$AQUI"/../migrations/*.sql; do
   n=$((n+1))
-  if ! psql -q -v ON_ERROR_STOP=1 -f "$f" "$BANCO" >/tmp/mig.log 2>&1; then
-    echo "PAROU em $(basename "$f")"; tail -12 /tmp/mig.log; exit 1
+  if ! psql -q -v ON_ERROR_STOP=1 -f "$f" "$BANCO" >"$TMPDIR/mig.log" 2>&1; then
+    echo "PAROU em $(basename "$f")"; tail -12 "$TMPDIR/mig.log"; exit 1
   fi
   # E anota, como o `supabase db push` anotaria.
   ver=$(basename "$f" .sql | cut -d_ -f1)

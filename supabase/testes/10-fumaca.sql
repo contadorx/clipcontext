@@ -249,8 +249,14 @@ begin
 
   /* As SEIS que o navegador PODE chamar, e so elas. Esta lista e uma decisao
      de produto, e mudar o tamanho dela sem passar por aqui e o jeito de abrir
-     uma porta sem ninguem notar. */
-  select string_agg(p.proname, ', ' order by p.proname) into aberto
+     uma porta sem ninguem notar.
+     
+     Por NOME, e com `distinct`: a lista e de PORTAS. A contagem de
+     assinaturas vem logo abaixo, separada — e ela existe porque uma sobrecarga
+     aqui nao e detalhe: duas versoes da mesma funcao com parametros opcionais
+     fazem uma chamada de tres argumentos nao resolver para nenhuma, e o
+     PostgREST devolve ambiguidade em vez de gravar. */
+  select string_agg(distinct p.proname, ', ' order by p.proname) into aberto
     from pg_proc p join pg_namespace n on n.oid = p.pronamespace
    where n.nspname = 'public' and p.proname like 'walkstamp\_%'
      and (has_function_privilege('anon', p.oid, 'execute')
@@ -259,6 +265,64 @@ begin
     aberto = 'walkstamp_chamado_resposta, walkstamp_chamado_tempo, walkstamp_chamado_ver, '
           || 'walkstamp_evento, walkstamp_interesse, walkstamp_recado',
     'e o navegador chama exatamente as seis funcoes publicas');
+
+  /* NENHUMA sobrecarga, e esta afirmacao custou uma reprovacao para existir.
+     Duas versoes da mesma funcao publica, ambas com parametros opcionais, fazem
+     uma chamada de tres argumentos nao resolver para nenhuma — e quem chama e o
+     PostgREST, que responde ambiguidade em vez de gravar. Seis portas, seis
+     assinaturas. */
+  perform pg_temp.confere(
+    (select count(*) from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+      where n.nspname = 'public' and p.proname like 'walkstamp\_%'
+        and (has_function_privilege('anon', p.oid, 'execute')
+          or has_function_privilege('authenticated', p.oid, 'execute'))) = 6,
+    'e nenhuma delas tem sobrecarga: seis nomes, seis assinaturas');
+end $$;
+
+\echo '[10] a medicao aceita o que o produto manda'
+do $$
+declare n bigint;
+begin
+  /* O DEFEITO QUE ESTE BLOCO GUARDA. A tabela aceitava tres nomes de evento e
+     tres idiomas; o produto mandava onze nomes e cinco idiomas. Os outros
+     morriam calados — a funcao captura `check_violation` de proposito, para uma
+     medicao recusada nao virar erro na tela de ninguem, e o preco disso e que
+     ninguem nunca soube. `de` e `fr` tinham zero eventos desde sempre, e a
+     leitura obvia ("ninguem acessa em alemao") estava errada. */
+  delete from walkstamp.evento where nome in ('parou_fala','importou_roteiro','baixou_saida');
+
+  perform public.walkstamp_evento('abriu_ferramenta', null, 'de');
+  perform public.walkstamp_evento('abriu_ferramenta', null, 'fr');
+  select count(*) into n from walkstamp.evento where idioma in ('de','fr');
+  perform pg_temp.confere(n = 2, 'alemao e frances entram — antes eram descartados');
+
+  perform public.walkstamp_evento('baixou_saida', 'pptx', 'pt');
+  perform public.walkstamp_evento('baixou_saida', 'gdocs', 'pt');
+  select count(*) into n from walkstamp.evento
+   where nome = 'baixou_saida' and formato in ('pptx','gdocs');
+  perform pg_temp.confere(n = 2, 'e os formatos que a ferramenta oferece de verdade');
+
+  perform public.walkstamp_evento('parou_fala', null, 'pt', null, '25-49');
+  select count(*) into n from walkstamp.evento where nome='parou_fala' and faixa='25-49';
+  perform pg_temp.confere(n = 1, 'a parada da fala entra, e com FAIXA, nao com numero');
+
+  perform public.walkstamp_evento('importou_roteiro', null, 'pt', 'conta', null, 'personal');
+  select count(*) into n from walkstamp.evento
+   where nome='importou_roteiro' and origem='conta' and plano='personal';
+  perform pg_temp.confere(n = 1, 'e a intencao paga tem onde cair');
+
+  /* E o vocabulario continua FECHADO. Se qualquer texto entrasse, o campo
+     viraria um lugar onde alguem um dia poe um nome de arquivo. */
+  select count(*) into n from walkstamp.evento;
+  perform public.walkstamp_evento('espionou_o_usuario', null, 'pt');
+  perform public.walkstamp_evento('abriu_ferramenta', null, 'tlh');
+  perform public.walkstamp_evento('parou_fala', null, 'pt', null, '37');
+  perform pg_temp.confere((select count(*) from walkstamp.evento) = n,
+    'nome, idioma e faixa fora da lista continuam sendo descartados em silencio');
+
+  delete from walkstamp.evento
+   where nome in ('parou_fala','importou_roteiro') or idioma in ('de','fr')
+      or formato in ('pptx','gdocs');
 end $$;
 
 \echo ''

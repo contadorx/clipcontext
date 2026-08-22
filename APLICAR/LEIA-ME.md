@@ -5,9 +5,9 @@ A árvore deste zip **já está construída**: `public/app.html` e
 rodar `build.py`.
 
 Base: `285d4a5` (o `main` de produção) + os seis commits do `correcoes.bundle`
-= a árvore do `walkstampbuild8_1.zip`. Sobre ela, dezesseis commits novos.
+= a árvore do `walkstampbuild8_1.zip`. Sobre ela, dezoito commits novos.
 
-## Os dezesseis commits
+## Os dezoito commits
 
 **A0 — a saída recomendada chega à linhagem.** Em vez de sete formatos com o
 mesmo peso, a ferramenta olha o cenário e propõe um; os outros ficam recolhidos
@@ -203,6 +203,72 @@ escreve "3 quadros prontos" nela — numa máquina ocupada, **depois** do clique
 apagando a mensagem que o teste veio conferir. Fotografar um campo de último
 escritor virou esperar o texto aparecer.
 
+**D0 — a página parou de argumentar contra o próprio cartão.** Cinco itens da
+análise da venda, nos cinco idiomas, cada um com a trava que impede a volta.
+
+O H1 era *"Você percorre a tela. Ele carimba cada passo."* — tem personalidade e
+não é pesquisável: quem faz QA não lê ali "caso de teste", "evidência" nem
+"planilha". Agora é **"Execute os casos. O Walkstamp organiza a prova."**, e a
+primeira dobra ganhou um **segundo caminho** para quem chega com a planilha na
+mão. Ele aponta para os preços e **não promete o trial** — enquanto ninguém
+confirmar que os 14 dias estão de pé em produção, o hero não vende o que talvez
+não entregue.
+
+A abertura de preços dizia que o pago é *"a identidade do documento e a
+administração de uma equipe"*, texto anterior ao B5: a página comparava
+R$ 149/ano com "PDF com logotipo" no primeiro parágrafo. Virou **"Um caso avulso
+é grátis. O trabalho repetido e coordenado vira plano."**
+
+*"Não há conta, não há banco de dados, não há rastreamento"* foi verdade e
+deixou de ser — existe conta nos planos pagos, existe banco, existe a medição. O
+conserto não foi apagar o absoluto: foi dizer **sobre o quê** ele é absoluto.
+*"Não existe servidor que receba o seu vídeo"* continua sendo a frase mais forte
+da página, e é verdadeira.
+
+O último "em breve" saiu do cartão para uma caixa de roteiro, fora da decisão de
+compra. E as afirmações sobre Claude, ChatGPT e Gemini viraram formulação
+durável: uma afirmação nominal de **limitação** envelhece virando mentira. A
+lista de **compatibilidade** continua nomeando os três — ela envelhece por
+falta, e faltar um nome não desmente nada.
+
+**O funil jogava fora oito de onze eventos, e dois de cinco idiomas.** Esta é a
+maior descoberta do pacote, e ela nunca deu erro em lugar nenhum.
+
+O produto chama `medir()` com **onze** nomes de evento. A tabela aceitava
+**três**. Quatro batiam no `check` do nome e a função os engolia — de propósito,
+para uma medição recusada não virar erro na tela de ninguém. Quatro nem
+chegavam: mandavam parâmetros que a função não tem (`p_de`, `p_para`, `p_pct`,
+`p_via`, `p_telas`), e o PostgREST responde que a função não existe. E o
+`baixou_saida` em `pptx`, `html`, `md`, `csv`, `gdocs`, `jira` ou `vocabulario`
+batia no `check` do formato e levava a linha inteira.
+
+E **`idioma` aceitava `pt`, `en` e `es`**. O site tem cinco. Todo evento em
+alemão e francês foi descartado desde sempre — o zero daqueles dois idiomas não
+era tráfego, era o banco.
+
+A migração faz o banco aceitar o que o produto já mandava, com vocabulário
+fechado em cada campo, e abre os quatro eventos de intenção paga. Os dois que
+queriam contagem exata passaram a mandar **faixa**.
+
+Dois defeitos apareceram no próprio portão do banco, e os dois são do B3:
+`prova.sh` **engolia o veredito** (`psql | sed | sed` — o `$?` de um cano é o do
+último comando, então uma afirmação reprovando terminava em *"Prova do banco:
+passou."* e código 0), e os dois scripts escreviam em `/tmp` cravado, o que faz
+a prova relatar *"O ESQUEMA MUDOU"* por permissão. Agora respeitam `TMPDIR`.
+
+**Os quatro eventos de intenção paga.** A área da conta não media nada — e um
+evento declarado e nunca disparado é pior que nenhum, porque o zero parece
+resposta. `importou_roteiro` e `concluiu_caso` saem do roteiro; o segundo só
+quando o caso é **concluído**, nunca quando é desfeito. `comecou_pagamento` sai
+do checkout **antes** do `redirect`, que no Next funciona lançando — medir
+depois seria uma linha que nunca executa. `comecou_teste` só conta quem **não**
+é assinante, porque a mesma porta emite a chave do teste e a de quem já paga.
+
+E a medição do servidor **respeita Do Not Track**: `navigator.doNotTrack` não
+existe do lado de cá, mas o cabeçalho vem em toda requisição, inclusive na que
+dispara a ação. Quem desligou o rastreamento desligou o rastreamento, e não "o
+rastreamento feito por JavaScript".
+
 **E o diário da Stripe dizia "ok" para o que ignorou.** `venda.mjs` cobrava que
 um evento que não interessa não tocasse o banco. Antes do B2 era assim; o B2 pôs
 o diário de auditoria — foi ele que revelou que um dos dois webhooks nunca
@@ -265,7 +331,7 @@ A Trilha D caiu de 12–15 para 5,5–7 dias.
 
 | arquivo | o que é |
 |---|---|
-| `tudo.bundle` | os dezesseis commits, para aplicar por Git sobre `d5db0f7` — é um bundle de **intervalo** (`d5db0f7..HEAD`), então ele precisa que você já tenha esse commit; foi assim que ele saiu de 22 MB para 314 KB e o pacote coube no limite de envio |
+| `tudo.bundle` | os dezoito commits, para aplicar por Git sobre `d5db0f7` — é um bundle de **intervalo** (`d5db0f7..HEAD`), então ele precisa que você já tenha esse commit; foi assim que ele saiu de 22 MB para 314 KB e o pacote coube no limite de envio |
 | `A0-saida-recomendada.patch` | o A0 em diff legível |
 | `A1-cartao-da-grade.patch` | o A1 em diff legível (fonte e régua) |
 | `B3-banco-versionado.patch` | o B3 em diff legível |
@@ -278,7 +344,10 @@ A Trilha D caiu de 12–15 para 5,5–7 dias.
 | `D-roadmap-da-venda.patch` | a análise da venda e a Trilha D do `PLANO.md` |
 | `reguas-que-liam-a-tela-errada.patch` | `linkpage.mjs` e `modelos.mjs` |
 | `D0-a-pagina-vende-um-trabalho.patch` | o D0 em diff legível |
-| `stripe-ignorado-e-validacao.patch` | o diário da Stripe e o roteiro do leitor de tela |
+| `stripe-ignorado.patch` | o diário da Stripe e o roteiro do leitor de tela |
+| `D0-a-pagina-vende-um-trabalho.patch` | a home, os preços, a privacidade e os concorrentes |
+| `funil-jogava-fora-oito-de-onze.patch` | a migração da medição e o `funil.mjs` |
+| `eventos-de-intencao-paga.patch` | os quatro marcos do lado pago, na área da conta |
 | `correcoes.bundle`, `correcoes-so-fonte.patch` | os seis commits originais do zip |
 | `ARQUIVOS.txt`, `MENSAGENS.txt` | o inventário original |
 
@@ -289,74 +358,67 @@ Aplicar por Git:
 
 ## As réguas
 
-**A ferramenta.** `testes/cartao.mjs` (A1), `testes/etapas.mjs` (A2) e
-`testes/marcos.mjs` (C1) são novas e entram no grupo `app` do `rapido.sh` — e
-agora também no `rodar.sh`, onde as duas primeiras faltavam.
+**A ferramenta.** `testes/cartao.mjs` (A1), `testes/etapas.mjs` (A2),
+`testes/marcos.mjs` (C1) e `testes/funil.mjs` (D0) são novos e entram no grupo
+`app` do `rapido.sh` e no `rodar.sh`.
 
-**A régua de desempenho** não entra na regressão, e é de propósito: ela mede, e
-medir se faz ao mudar a mecânica, não a cada ajuste de tela.
+**A regressão completa rodou com o Next de pé** — a primeira vez nesta linhagem.
+Isso alcançou os dez arquivos que precisam de servidor e que as pistas curtas
+nunca tocam (`medicao`, `ficha`, `liclink`, `timepag`, `verificador`,
+`cabecalho`, `chamadoconta`, `faxina`, `portal`, `seo`), e **todos passaram**.
+Ela apontou quatro falhas, e é honesto dizer que duas eram minhas e estavam
+escondidas justamente por essa lacuna:
 
-    python3 testes/amostras.py --medida        # 1, 10 e 40 min, com sha256
-    node testes/regua.mjs --amostras=1min,10min --cache=frio,quente
-
-**Ela precisa de rede** (`cdn.jsdelivr.net` e `huggingface.co`). Sem rede a
-escada falha inteira, e isso não é defeito dela: o JSON sai com `modelo.desistiu`
-e a lista de degraus tentados, que é a medição legítima de uma máquina que não
-monta o modelo. Quem afere a régua sem rede nenhuma é o `marcos.mjs`.
-
-**A regressão completa rodou pela primeira vez nesta máquina** — com o Next de
-pé, o que alcançou os dez arquivos que precisam de servidor e que nunca tinham
-rodado (`medicao`, `ficha`, `liclink`, `timepag`, `verificador`, `cabecalho`,
-`chamadoconta`, `faxina`, `portal`, `seo`). **Todos passaram**, inclusive o
-bloco novo `[M1b] a régua não conta como gente`.
-
-Ela apontou quatro falhas, e as quatro foram investigadas:
-
-| teste | de quem | estado |
+| arquivo | o que era | estado |
 |---|---|---|
-| `linkpage.mjs` | minha, do B5 | corrigido — cobra pela alça `data-f`, não pela prosa |
-| `modelos.mjs` | de ninguém: corrida na própria régua | corrigido — espera o texto em vez de fotografá-lo |
-| `venda.mjs` | minha, do B2 | corrigido no produto — o diário diz `ignorado`, não `ok` |
-| `semmarca.mjs` | **da árvore base** | **decisão sua**, abaixo |
+| `linkpage.mjs` | minha, do B5: cobrava a frase inteira do item de identidade, e o B5 reescreveu o cartão | corrigida — cobra pela **alça** `data-f`, não pela prosa |
+| `venda.mjs` | minha, do B2: cobrava "banco intocado", e o B2 pôs o diário de auditoria | corrigida — o webhook diz `ignorado`, e o teste cobra precisão |
+| `modelos.mjs` | não era minha: `#pdfStatus` é uma linha com vários donos, e o fim da varredura apaga a mensagem | corrigida — espera o texto em vez de fotografar |
+| `semmarca.mjs` | **não é minha, e continua aberta**: `DEMO-NATURA.md` veio no commit base `d5db0f7` e nenhum destes commits o tocou | **sua** — ver abaixo |
 
-Depois das correções, os três rerodaram verdes. Uma armadilha que custou meia
-hora e vale registrar: um `next-server` órfão de uma execução anterior segurava
-a porta 8803, o `venda.mjs` não conseguia subir o dele e falava com o servidor
-**velho** — o teste reprovava uma correção que estava certa. Se ele reprovar sem
-explicação, `pkill -f next-server` antes de acreditar.
+Depois das correções, os arquivos afetados foram rodados um a um e estão verdes:
+`funil`, `marcos`, `etapas`, `cartao`, `planos`, `chaves`, `cenarios`,
+`linkpage`, `medicao`, `venda`, `contradicao`, `legal`, `isca`, `vitrine`,
+`cinco`, `paginas`, `seo`, `idiomas`, `traducao`, `negocio`, `blog`, `dobra`,
+`ficha`, `sessao`, `chamadoconta`, `conclusao`, `parar`, `smoke`, `saidas`.
+`tsc --noEmit` e `next build` limpos.
 
-**`semmarca.mjs` é sua.** Ele proíbe a palavra `Natura` em qualquer arquivo da
-árvore — o comentário dele explica: *"exemplos de SQL com o domínio de e-mail e
-o CNPJ de verdade da companhia, num repositório que constrói o site publicado.
-Isso não se desfaz depois de publicado."* Quem viola é `DEMO-NATURA.md`, que
-entrou no commit base `d5db0f7` e que **nenhum destes commits tocou**. Não mexi:
-mover ou apagar um documento de negócio com o nome de um cliente real é decisão
-sua. A correção é de uma linha — o guarda pula uma pasta `demo/` de propósito, e
-ela não existe: `git mv DEMO-NATURA.md demo/`. Se ele também não deve viajar no
-zip, `demo/*` entra no `testes/naovai.txt` no mesmo movimento.
+`chaves.mjs`: 956 chaves, ordem igual nos cinco idiomas, a guarda do vocabulário
+— e agora também a dos **absolutos de privacidade** e a de **nome de modelo de
+terceiro** fora da lista de compatibilidade.
 
-`chaves.mjs`: 946 chaves, ordem igual nos cinco idiomas — e agora também a
-guarda do vocabulário, que reprova se "frame" ou "passo 2" voltarem ao
-português.
-
-`testes/parar.mjs` precisa de `python3 testes/amostras.py --longo` uma vez,
-senão dá ENOENT em `/tmp/fala-longa.webm`. Não é defeito: a amostra é grande
-demais para viajar no pacote.
+`testes/parar.mjs` precisa de `python3 testes/amostras.py --longo` uma vez, e a
+régua de desempenho precisa de `python3 testes/amostras.py --medida`. Nenhuma
+das duas amostras viaja no pacote: são grandes demais.
 
 **O banco.** Precisa de um Postgres 15+ local:
 
     PGHOST=/var/run/postgresql sh supabase/testes/prova.sh
     sh supabase/conferir.sh
 
-O primeiro reconstrói o esquema do zero e roda 40 afirmações de comportamento;
-o segundo confere as 38 migrações recuperadas contra o md5 do que a base diz que
-aplicou.
+O primeiro reconstrói o esquema do zero — **44 migrações** agora — e roda as
+afirmações de comportamento; o segundo confere as 38 migrações recuperadas
+contra o md5 do que a base diz que aplicou. E o `prova.sh` finalmente **reprova
+de verdade**: até esta rodada ele imprimia o erro e saía com código 0.
 
 ## O que ainda precisa de você
 
-- **`supabase db push`** — as quatro migrações novas do B3 não foram aplicadas.
-  Três são no-op de esquema; só a `…203200` mexe em dado (apaga os dois chamados
-  de teste da produção). Detalhe em `supabase/LEIA-ME.md`;
+- **`supabase db push`** — **seis migrações novas** esperando, e uma delas é
+  urgente: a `20260822050000` é a que faz o funil parar de jogar fora oito dos
+  onze eventos e dois dos cinco idiomas. Enquanto ela não subir, alemão e
+  francês continuam invisíveis e os quatro eventos de intenção paga que o código
+  já dispara são descartados no banco. Das outras cinco (do B3), quatro são
+  no-op de esquema e só a `…203200` mexe em dado — apaga os dois chamados de
+  teste que estavam entrando na média pública de tempo de resposta. Detalhe em
+  `supabase/LEIA-ME.md`;
+- **decidir três coisas do D0**, que são suas e não minhas:
+  **(a)** o trial de 14 dias está de pé em produção? Se estiver, o CTA
+  secundário do hero pode virar "Testar o roteiro por 14 dias" — hoje ele diz
+  "Ver como funciona o roteiro de casos", que não promete nada que talvez não
+  entregue; **(b)** a comparação nominal com Claude, ChatGPT e Gemini fica fora
+  (como está) ou volta com uma página datada, com protocolo e revalidação?;
+  **(c)** moeda: BRL, USD e EUR juntos, ou detectar a localidade? — a primária
+  já segue o idioma, então isto é menor do que a análise supunha;
 - **sitemap** — precisa do `build.py` depois de aplicar;
 - **figura do blog** — precisa de deploy; até lá, exportar abaixo de 1 MB;
 - **a branch remota velha** `claude/ux-build-continuation-2hs0b2`, parada em
@@ -377,4 +439,8 @@ aplicou.
   "o inglês converte?" melhor que qualquer releitura dos 447 eventos anteriores;
 - **`terceiros.mjs` reprova** — `privacidade.en` está sem a tabela de
   suboperadores traduzida (`<table id="suboperadores">`). É conteúdo do site,
-  não foi tocado por nenhum destes quatro commits, e precisa de tradução.
+  não foi tocado por nenhum destes commits, e precisa de tradução;
+- **a demonstração do fluxo pago** — é o único item que falta do D0, e ele
+  precisa de você: um vídeo de 60 a 90 segundos de planilha → casos →
+  evidência → planilha devolvida, mais a planilha de entrada e o pacote de saída
+  para baixar. O tour de hoje mostra gravação → documento, que é o Free.
