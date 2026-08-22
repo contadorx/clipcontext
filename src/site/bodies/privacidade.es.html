@@ -149,6 +149,47 @@
     <p>Estos terceros tienen sus propias políticas y pueden registrar datos técnicos de la conexión, como la
     dirección IP, igual que ocurre al visitar cualquier sitio web.</p>
 
+    
+    <p>La tabla siguiente es la que pide una evaluación de proveedores: quién más toca el dato, qué recibe y bajo qué salvaguarda.</p>
+    <table class="legal" id="suboperadores">
+      <tr><th>Tercero</th><th>Función</th><th>Dato que recibe</th><th>País</th><th>Salvaguarda</th></tr>
+      <tr><td><b>Supabase</b></td>
+          <td>Base de datos y almacenamiento del adjunto de la sesión</td>
+          <td>Correo de la lista de aviso, hitos de uso y todo el contenido de la cuenta de pago. <b>Nunca</b> vídeo, audio ni transcripción</td>
+          <td>Brasil (región de São Paulo)</td>
+          <td>Contrato de tratamiento del proveedor; datos en reposo en territorio brasileño</td></tr>
+      <tr><td><b>Vercel</b></td>
+          <td>Alojamiento del sitio y recuento de visitas</td>
+          <td>Registros técnicos de acceso y el recuento de visitas, sin cookie y sin identificador</td>
+          <td>Red global</td>
+          <td>Cláusulas contractuales tipo del proveedor (art. 33, II de la LGPD)</td></tr>
+      <tr><td><b>Stripe</b></td>
+          <td>Cobro de la suscripción</td>
+          <td>Nombre, correo y datos de pago de quien contrata. <b>No recibimos el número de la tarjeta</b> — va directo a Stripe</td>
+          <td>Estados Unidos y Unión Europea</td>
+          <td>Cláusulas contractuales tipo; certificación PCI-DSS del proveedor</td></tr>
+      <tr><td><b>Brevo</b></td>
+          <td>Envío del enlace de acceso a la cuenta y de la invitación por correo</td>
+          <td>La dirección de correo del destinatario y el texto del mensaje</td>
+          <td>Unión Europea (Francia)</td>
+          <td>Cláusulas contractuales tipo; país con nivel de protección adecuado</td></tr>
+      <tr><td><b>jsDelivr</b></td>
+          <td>Entrega de las bibliotecas de generación de PDF y de transcripción</td>
+          <td>Solo la petición del archivo de la biblioteca</td>
+          <td>Red global</td>
+          <td>No recibe dato de cuenta ni contenido; conexión siempre cifrada</td></tr>
+      <tr><td><b>Hugging Face</b></td>
+          <td>De donde se descarga el modelo de transcripción, y solo si activas la transcripción</td>
+          <td>Solo la petición del modelo. <b>Nunca tu audio</b></td>
+          <td>Estados Unidos</td>
+          <td>No recibe dato de cuenta ni contenido; conexión siempre cifrada</td></tr>
+      <tr><td><b>Google<br><span class="small muted">no es suboperador nuestro</span></b></td>
+          <td>Abrir un vídeo de tu Drive y el botón <b>Enviar a Google Docs</b> — <b>solo si haces clic</b></td>
+          <td>Al abrir: nada más allá de la petición del archivo que elijas. Al enviar a Docs: <b>el documento generado</b>, que va de tu navegador directo a tu cuenta de Google</td>
+          <td>Según tu cuenta de Google</td>
+          <td>Permiso mínimo (<code>drive.file</code>), restringido a los archivos que selecciones. El envío pide confirmación explícita</td></tr>
+    </table>
+
     <h2>Grabación de pantalla y micrófono</h2>
     <p>Al usar la grabación, el navegador pide tu permiso para capturar la pantalla y, si marcas la opción,
     el micrófono. La imagen y los dos canales de audio se procesan en tu propio ordenador: los fotogramas se

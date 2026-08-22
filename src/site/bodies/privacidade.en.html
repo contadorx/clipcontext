@@ -146,6 +146,47 @@
     <p>These third parties have their own policies and may record technical connection data, such as your IP
     address, in the same way that happens when you visit any website.</p>
 
+    
+    <p>The table below is the one a vendor security review asks for: who else touches the data, what they receive, and under which safeguard.</p>
+    <table class="legal" id="suboperadores">
+      <tr><th>Third party</th><th>Role</th><th>Data it receives</th><th>Country</th><th>Safeguard</th></tr>
+      <tr><td><b>Supabase</b></td>
+          <td>Database and storage for the session attachment</td>
+          <td>Notification-list e-mail, usage milestones, and all paid-account content. <b>Never</b> video, audio or transcripts</td>
+          <td>Brazil (São Paulo region)</td>
+          <td>Vendor data-processing agreement; data at rest within Brazil</td></tr>
+      <tr><td><b>Vercel</b></td>
+          <td>Site hosting and page-view count</td>
+          <td>Technical access logs and the page-view count, with no cookie and no identifier</td>
+          <td>Global network</td>
+          <td>Vendor standard contractual clauses (LGPD art. 33, II)</td></tr>
+      <tr><td><b>Stripe</b></td>
+          <td>Subscription billing</td>
+          <td>Name, e-mail and payment details of whoever subscribes. <b>We never receive the card number</b> — it goes straight to Stripe</td>
+          <td>United States and European Union</td>
+          <td>Standard contractual clauses; vendor PCI-DSS certification</td></tr>
+      <tr><td><b>Brevo</b></td>
+          <td>Sending the account sign-in link and the e-mail invitation</td>
+          <td>The recipient e-mail address and the message text</td>
+          <td>European Union (France)</td>
+          <td>Standard contractual clauses; country with an adequate level of protection</td></tr>
+      <tr><td><b>jsDelivr</b></td>
+          <td>Delivery of the PDF-generation and transcription libraries</td>
+          <td>Only the request for the library file</td>
+          <td>Global network</td>
+          <td>Receives no account data and no content; connection always encrypted</td></tr>
+      <tr><td><b>Hugging Face</b></td>
+          <td>Where the transcription model is downloaded from, and only if you trigger transcription</td>
+          <td>Only the request for the model. <b>Never your audio</b></td>
+          <td>United States</td>
+          <td>Receives no account data and no content; connection always encrypted</td></tr>
+      <tr><td><b>Google<br><span class="small muted">not a sub-processor of ours</span></b></td>
+          <td>Opening a video from your Drive, and the <b>Send to Google Docs</b> button — <b>only if you click it</b></td>
+          <td>On opening: nothing beyond the request for the file you choose. On sending to Docs: <b>the generated document</b>, which goes from your browser straight to your Google account</td>
+          <td>As per your Google account</td>
+          <td>Minimum permission (<code>drive.file</code>), restricted to the files you select. Sending asks for explicit confirmation</td></tr>
+    </table>
+
     <h2>Screen and microphone recording</h2>
     <p>When you use the recording feature, the browser asks your permission to capture the screen and, if you
     tick the option, the microphone. The image and both audio channels are processed on your own computer:

@@ -509,6 +509,36 @@ porta dos fundos, numa seção que nenhuma régua olhava).
 **Falta um:** o exemplo reproduzível com planilha, vídeo e saídas para baixar
 (1,5–2 d) — e ele precisa de material seu.
 
+#### D3 — a parede da avaliação de fornecedor (2,5–3 d restantes) — **na frente da D2**
+
+Veio de uma observação sua: *"a questão sempre foi a política de privacidade das
+empresas, e isso permitir não esbarrar nessa parede"*. A análise inteira está em
+`A-PAREDE-DA-AVALIACAO.md`; o resumo é que a página vende **uma postura** ("nada
+sai do seu computador") quando o que o comprador precisa comprar é **um atalho**
+("você não precisa abrir um processo de avaliação para usar isto"). É a mesma
+verdade; a segunda tira seis semanas do caminho.
+
+E há um buraco caro, hoje catalogado como falha de teste: **os dois artefatos
+feitos para o revisor de segurança — a tabela de suboperadores e o DPA — existem
+só em português**, enquanto o produto vende em cinco idiomas. É o ponto mais
+avançado do funil que existe, e é onde outra pessoa (segurança, jurídico, DPO)
+entra no fluxo lendo.
+
+1. ~~traduzir a tabela de suboperadores para os quatro idiomas~~ — **FEITA**.
+   Sete linhas por idioma: quem é, o que faz, que dado recebe, em que país e sob
+   qual salvaguarda. O `terceiros.mjs` passou a verde pela primeira vez desde
+   que a tabela existe — ele varre o **código** atrás de terceiros e exige que
+   todos apareçam na tabela dos cinco idiomas, então a régua acompanha o
+   produto e não a redação;
+2. o DPA nos cinco idiomas (1–1,5 d);
+3. a página *"avaliação de fornecedor em uma tela"* (1 d), escrita para quem
+   preenche questionário — incluindo a resposta à pergunta de certificação, que
+   é boa e incomum: não há o que certificar no caminho do dado porque o dado não
+   percorre caminho nenhum;
+4. reposicionar "sem cadastro" na home (0,5 d): de conveniência para *"não há
+   fornecedor recebendo nada"*;
+5. os trinta segundos com a rede desligada — depende de você gravar.
+
 #### D2 — depois de três pilotos (não estimável ainda)
 
 Prova social real com nome, cargo e autorização; números só com amostra, contexto
@@ -524,7 +554,7 @@ número, e essa é a regra que mantém a página crível.
   uma página datada e revalidação periódica.
 - **Moeda:** BRL, USD e EUR juntos, ou detectar a localidade?
 
-### Trilha C — motor e dívida (12–18 d)
+### Trilha C — motor e dívida (8–12 d)
 
 #### C1. Build 5 — medir antes de otimizar: **FEITA**
 
@@ -670,7 +700,29 @@ palavras espalhadas e perder um parágrafo têm o mesmo tamanho na conta e
 consequências opostas, e é a segunda que importa aqui. `wer.mjs` afere o
 instrumento com casos de resposta conhecida.
 
-**Faltam dois:** a máquina de estados do motor ASR · modularizar a fonte.
+**A máquina de estados do motor: feita, e ela fechou uma porta que ainda
+estava aberta.**
+
+O estado do motor morava em **sete variáveis** que podiam se contradizer —
+`pipe`, `montando`, `usandoPipe`, `adiantando`, `trocaPedida`, `ultimoErroModelo`
+e o meio-termo de soltar. Cada proteção contra concorrência foi escrita
+separado (a fila do `trocarPipe`, o laço de drenagem do `soltarPipe`), e cada uma
+resolve o seu caso sem que exista um lugar que diga **onde a coisa está**.
+
+Agora há um nome só — `ocioso`, `montando`, `pronto`, `inferindo`, `soltando`,
+`caido` —, e ele é **derivado**, não guardado: um campo `estado` escrito à mão
+seria a oitava variável a se contradizer com as outras sete, e a primeira a ficar
+para trás num caminho de erro. Mesma decisão da barra de etapas.
+
+**A porta que estava aberta:** `soltando` era o único estado sem nome. Entre
+`pipe = null` e o `dispose()` terminar há uma janela em que o motor não está
+pronto, não está montando e não está inferindo — e uma montagem que começasse ali
+alocaria o modelo novo com o velho ainda residente. É o vazamento da décima
+primeira rodada pela porta que tinha sobrado: a fila do `trocarPipe` cobria
+montagem contra montagem, e essa janela ficava de fora. `garantirPipe` passou a
+esperar quem está soltando.
+
+**Falta um:** modularizar a fonte.
 
 ---
 
@@ -690,11 +742,11 @@ instrumento com casos de resposta conhecida.
 |---|---:|---|
 | A — terminar o UX | **1–2** | o redesenho inteiro, com acessibilidade validada |
 | B — destravar a venda | **feita** | uma verdade só, cobrança auditável, banco reconstruível |
-| D — posicionamento e venda | **3–4** | a página vende um trabalho, o funil mede, e a home apresenta os planos. Faltam a demo do fluxo pago e quatro itens da D1 |
-| C — motor e dívida | **12–18** | C1 e C2 feitas; da C3, o pico de memória e o WER estão medíveis |
-| **Total** | **16–24** | |
+| D — posicionamento e venda | **5,5–7** | treze dos quinze itens feitos; da D3, a tabela de suboperadores já está nos cinco idiomas |
+| C — motor e dívida | **8–12** | C1 e C2 feitas; da C3 falta só modularizar a fonte |
+| **Total** | **14,5–21** | |
 
-A ordem é **A → D0 → D1 → C2 → C3**. A D vem antes da C pelo mesmo motivo que a
+A ordem era **A → D0 → D1 → C2 → C3**; a D e a C1/C2 estão feitas, e a C3 está em curso. A D vem antes da C pelo mesmo motivo que a
 C1 veio antes da C2: acelerar um motor que ninguém contratou acelera a coisa
 errada.
 

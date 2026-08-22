@@ -5,9 +5,9 @@ A árvore deste zip **já está construída**: `public/app.html` e
 rodar `build.py`.
 
 Base: `285d4a5` (o `main` de produção) + os seis commits do `correcoes.bundle`
-= a árvore do `walkstampbuild8_1.zip`. Sobre ela, vinte e seis commits novos.
+= a árvore do `walkstampbuild8_1.zip`. Sobre ela, trinta e um commits novos.
 
-## Os vinte e seis commits
+## Os trinta e um commits
 
 **A0 — a saída recomendada chega à linhagem.** Em vez de sete formatos com o
 mesmo peso, a ferramenta olha o cenário e propõe um; os outros ficam recolhidos
@@ -417,11 +417,38 @@ dos outros erros: trocar trinta palavras espalhadas e perder um parágrafo têm 
 mesmo tamanho na conta e consequências opostas. `testes/wer.mjs` afere o
 instrumento com casos de resposta conhecida.
 
+**A máquina de estados do motor**, e a porta que ainda estava aberta. O estado
+morava em **sete variáveis** que podiam se contradizer, e cada proteção contra
+concorrência foi escrita separado — sem que existisse um lugar dizendo onde a
+coisa está. Agora há um nome só (`ocioso`, `montando`, `pronto`, `inferindo`,
+`soltando`, `caido`), **derivado** e não guardado: um oitavo campo escrito à mão
+seria o primeiro a ficar para trás num caminho de erro.
+
+`soltando` era o único estado sem nome, e não por descuido: entre `pipe = null` e
+o `dispose()` terminar há uma janela em que o motor não está pronto, nem
+montando, nem inferindo — e uma montagem que começasse ali alocaria o novo com o
+velho ainda residente. É o vazamento da décima primeira rodada pela porta que
+tinha sobrado. `garantirPipe` passou a esperar quem está soltando.
+
+**A parede da avaliação de fornecedor** — a análise está em
+`A-PAREDE-DA-AVALIACAO.md`, e ela reordenou a fila. A tese: para este comprador o
+obstáculo não é preço nem recurso, é a revisão de segurança. Hoje a página vende
+**uma postura** (*"nada sai do seu computador"*); o que o comprador precisa
+comprar é **um atalho** (*"você não precisa abrir um processo de avaliação para
+usar isto"*). É a mesma verdade, e a segunda tira seis semanas do caminho.
+
+O primeiro item já está feito: **a tabela de suboperadores existe nos cinco
+idiomas**. Ela estava catalogada como falha de teste conhecida, o que fazia
+parecer manutenção — mas é o ponto mais avançado do funil que existe, e o único
+momento em que outra pessoa (segurança, jurídico, DPO) entra no fluxo, lendo.
+Sete linhas por idioma, com as cinco colunas que o questionário pede.
+`terceiros.mjs` passou a verde pela primeira vez desde que a tabela existe.
+
 ## Os arquivos
 
 | arquivo | o que é |
 |---|---|
-| `tudo.bundle` | os vinte e seis commits, para aplicar por Git sobre `d5db0f7` — é um bundle de **intervalo** (`d5db0f7..HEAD`), então ele precisa que você já tenha esse commit; foi assim que ele saiu de 22 MB para 314 KB e o pacote coube no limite de envio |
+| `tudo.bundle` | os trinta e um commits, para aplicar por Git sobre `d5db0f7` — é um bundle de **intervalo** (`d5db0f7..HEAD`), então ele precisa que você já tenha esse commit; foi assim que ele saiu de 22 MB para 314 KB e o pacote coube no limite de envio |
 | `A0-saida-recomendada.patch` | o A0 em diff legível |
 | `A1-cartao-da-grade.patch` | o A1 em diff legível (fonte e régua) |
 | `B3-banco-versionado.patch` | o B3 em diff legível |
@@ -446,6 +473,9 @@ instrumento com casos de resposta conhecida.
 | `C2-a-escada-esperta.patch` | a escada de fallback pula o que não adianta |
 | `C3-pico-de-memoria.patch` | o pico de memória passou a ter número e lugar |
 | `C3-wer.patch` | o WER, que é o portão da compactação de silêncio |
+| `C3-maquina-de-estados.patch` | o motor tem um nome só para onde ele está |
+| `D3-a-parede.patch` | a análise da avaliação de fornecedor |
+| `D3-suboperadores-nos-cinco.patch` | a tabela que o revisor lê, nos cinco idiomas |
 | `correcoes.bundle`, `correcoes-so-fonte.patch` | os seis commits originais do zip |
 | `ARQUIVOS.txt`, `MENSAGENS.txt` | o inventário original |
 

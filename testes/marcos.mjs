@@ -260,6 +260,37 @@ console.log('[6b] o pico de memoria, e onde ele acontece');
   }
 }
 
+console.log('[6c] o motor tem um nome so para onde ele esta');
+{
+  /* O estado do motor morava em SETE variaveis que podiam se contradizer, e
+     cada protecao contra concorrencia foi escrita separado. Agora ha um nome
+     so, DERIVADO das mesmas variaveis — guardar um oitavo campo seria criar
+     mais uma coisa para ficar para tras num caminho de erro.
+
+     O que esta afirmacao guarda: que o caminho gravado seja de estados que
+     existem, que ele passe pelos que TEM que acontecer numa transcricao, e que
+     nunca haja duas transicoes seguidas para o mesmo lugar — repeticao ali
+     significa que alguem passou a marcar em vez de derivar. */
+  const NOMES = ['ocioso', 'montando', 'pronto', 'inferindo', 'soltando', 'caido'];
+  const trans = M.marcos.filter((x) => x.nome === 'asr.estado');
+  ok('o caminho do motor foi gravado', trans.length >= 2, trans.length + ' transições');
+  ok('e so com estados que existem',
+     trans.every((x) => NOMES.includes(x.para) && (x.de === null || NOMES.includes(x.de))),
+     JSON.stringify(trans.map((x) => x.de + '->' + x.para)));
+  ok('nenhuma transicao para o mesmo lugar',
+     trans.every((x) => x.de !== x.para),
+     JSON.stringify(trans.map((x) => x.de + '->' + x.para)));
+  const passou = new Set(trans.map((x) => x.para));
+  ok('uma transcricao passa por montando, pronto e inferindo',
+     passou.has('montando') && passou.has('inferindo'),
+     [...passou].join(', '));
+  /* E o `de` de cada transicao e o `para` da anterior: um caminho com buraco
+     significa que alguem mudou o motor sem passar pelo nome. */
+  ok('o caminho nao tem buraco',
+     trans.every((x, i) => i === 0 || x.de === trans[i - 1].para),
+     JSON.stringify(trans.map((x) => x.de + '->' + x.para)));
+}
+
 console.log('[7] sem erro de JS');
 ok('a corrida fria', frio.erros.length === 0, frio.erros.join(' | '));
 ok('a corrida quente', quente.erros.length === 0, quente.erros.join(' | '));

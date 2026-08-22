@@ -149,6 +149,47 @@
     <p>Ces tiers ont leurs propres politiques et peuvent enregistrer des données techniques de connexion, comme l’adresse
     IP, de la même façon que cela se produit en visitant n’importe quel site.</p>
 
+    
+    <p>Le tableau ci-dessous est celui que demande une évaluation fournisseur : qui d’autre touche la donnée, ce qu’il reçoit et sous quelle garantie.</p>
+    <table class="legal" id="suboperadores">
+      <tr><th>Tiers</th><th>Rôle</th><th>Données reçues</th><th>Pays</th><th>Garantie</th></tr>
+      <tr><td><b>Supabase</b></td>
+          <td>Base de données et stockage de la pièce jointe de session</td>
+          <td>E-mail de la liste de notification, jalons d’usage et tout le contenu du compte payant. <b>Jamais</b> de vidéo, d’audio ni de transcription</td>
+          <td>Brésil (région de São Paulo)</td>
+          <td>Contrat de sous-traitance du fournisseur ; données au repos au Brésil</td></tr>
+      <tr><td><b>Vercel</b></td>
+          <td>Hébergement du site et décompte des visites</td>
+          <td>Journaux techniques d’accès et le décompte des visites, sans cookie et sans identifiant</td>
+          <td>Réseau mondial</td>
+          <td>Clauses contractuelles types du fournisseur (art. 33, II de la LGPD)</td></tr>
+      <tr><td><b>Stripe</b></td>
+          <td>Facturation de l’abonnement</td>
+          <td>Nom, e-mail et données de paiement de la personne qui souscrit. <b>Nous ne recevons pas le numéro de carte</b> — il va directement à Stripe</td>
+          <td>États-Unis et Union européenne</td>
+          <td>Clauses contractuelles types ; certification PCI-DSS du fournisseur</td></tr>
+      <tr><td><b>Brevo</b></td>
+          <td>Envoi du lien d’accès au compte et de l’invitation par e-mail</td>
+          <td>L’adresse e-mail du destinataire et le texte du message</td>
+          <td>Union européenne (France)</td>
+          <td>Clauses contractuelles types ; pays au niveau de protection adéquat</td></tr>
+      <tr><td><b>jsDelivr</b></td>
+          <td>Livraison des bibliothèques de génération de PDF et de transcription</td>
+          <td>Uniquement la requête du fichier de la bibliothèque</td>
+          <td>Réseau mondial</td>
+          <td>Ne reçoit aucune donnée de compte ni contenu ; connexion toujours chiffrée</td></tr>
+      <tr><td><b>Hugging Face</b></td>
+          <td>D’où le modèle de transcription est téléchargé, et seulement si vous déclenchez la transcription</td>
+          <td>Uniquement la requête du modèle. <b>Jamais votre audio</b></td>
+          <td>États-Unis</td>
+          <td>Ne reçoit aucune donnée de compte ni contenu ; connexion toujours chiffrée</td></tr>
+      <tr><td><b>Google<br><span class="small muted">n’est pas notre sous-traitant</span></b></td>
+          <td>Ouvrir une vidéo de votre Drive et le bouton <b>Envoyer vers Google Docs</b> — <b>seulement si vous cliquez</b></td>
+          <td>À l’ouverture : rien de plus que la requête du fichier que vous choisissez. À l’envoi vers Docs : <b>le document généré</b>, qui va de votre navigateur directement vers votre compte Google</td>
+          <td>Selon votre compte Google</td>
+          <td>Permission minimale (<code>drive.file</code>), limitée aux fichiers que vous sélectionnez. L’envoi demande une confirmation explicite</td></tr>
+    </table>
+
     <h2>Enregistrement d’écran et microphone</h2>
     <p>En utilisant l’enregistrement, le navigateur demande votre autorisation pour capturer l’écran et, si vous cochez l’option,
     le microphone. L’image et les deux canaux audio sont traités sur votre propre ordinateur : les captures

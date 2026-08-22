@@ -9106,7 +9106,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      depois, e não tem como se atualizar sozinho. Sem carimbo, "estou com um
      problema no offline" é uma conversa sem chão — ninguém sabe de qual build
      se fala nem se o defeito já foi consertado. */
-  const VERSAO = '2026.08.22-40';
+  const VERSAO = '2026.08.22-43';
   window.__versao = () => VERSAO;
 
   const PIP_CSS = `
@@ -12759,10 +12759,65 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      coisa correta, e é curto: o que se espera é UMA janela de 20 segundos. */
   let usandoPipe = 0;
 
+  /* ---- ONDE O MOTOR ESTA, DITO POR UM NOME SO ----
+   *
+   * O estado do motor morava em sete variaveis que podiam se contradizer:
+   * `pipe`, `montando`, `usandoPipe`, `adiantando`, `trocaPedida`,
+   * `ultimoErroModelo` e o meio-termo de soltar. Cada protecao contra
+   * concorrencia foi escrita separado — a fila do `trocarPipe`, o laco de
+   * drenagem do `soltarPipe` —, e cada uma resolve o seu caso sem que exista um
+   * lugar que diga onde a coisa esta.
+   *
+   * ELE E DERIVADO, e nao guardado. Um campo `estado = 'inferindo'` escrito a
+   * mao seria a oitava variavel a se contradizer com as outras sete, e a
+   * primeira a ficar para tras num caminho de erro. A mesma decisao da barra de
+   * etapas: quem deriva nao dessincroniza.
+   *
+   * `soltando` e a unica peca nova, e ela existe porque era o unico estado sem
+   * nome: entre `pipe = null` e o `dispose()` terminar ha uma janela em que o
+   * motor nao esta pronto, nao esta montando e nao esta inferindo — e uma
+   * montagem que comecasse ali alocaria o novo com o velho ainda vivo. */
+  let soltando = null;
+
+  const ESTADOS_ASR = ['ocioso', 'montando', 'pronto', 'inferindo', 'soltando', 'caido'];
+  function estadoAsr(){
+    if (soltando)          return 'soltando';
+    if (montando)          return 'montando';
+    if (usandoPipe > 0)    return 'inferindo';
+    if (pipe)              return 'pronto';
+    if (ultimoErroModelo)  return 'caido';
+    return 'ocioso';
+  }
+
+  /* A transicao entra na regua so quando MUDA. Marcar a cada consulta encheria
+     a medicao de repeticao — e o que se quer ver e o caminho, nao a frequencia
+     com que alguem perguntou. */
+  let estadoAnterior = null;
+  function anotarEstado(){
+    const agora = estadoAsr();
+    if (agora === estadoAnterior) return agora;
+    marco('asr.estado', { de: estadoAnterior, para: agora });
+    estadoAnterior = agora;
+    return agora;
+  }
+  try { window.__estadoAsr = () => estadoAsr(); } catch (e) {}
+
   async function soltarPipe(){
     const velho = pipe;
     pipe = null; pipeId = null; pipeDev = null;
     if (!velho) return false;
+    let pronto;
+    soltando = new Promise((r) => { pronto = r; });
+    anotarEstado();
+    try {
+      return await soltarDeVerdade(velho);
+    } finally {
+      soltando = null; pronto();
+      anotarEstado();
+    }
+  }
+
+  async function soltarDeVerdade(velho){
     for (let i = 0; usandoPipe > 0 && i < 600; i++) {
       await new Promise(r => setTimeout(r, 100));
     }
@@ -12821,10 +12876,12 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       return novo;
     })();
     montando = p; montandoAlvo = alvo;
+    anotarEstado();
     /* Limpo por último, e só se ainda for o meu: uma montagem que entrou na
        fila depois desta já é a atual, e apagá-la aqui reabriria a porta. */
     p.then(() => {}, () => {}).then(() => {
       if (montando === p) { montando = null; montandoAlvo = null; }
+      anotarEstado();
     });
     return p;
   }
@@ -12842,6 +12899,12 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      A fila do `trocarPipe` já impediria os dois modelos residentes; esperar
      aqui evita a segunda montagem inteira, que é o que custa. */
   async function garantirPipe(modelId){
+    /* ESPERAR QUEM ESTA SOLTANDO, e nao so quem esta montando. A fila do
+       `trocarPipe` cobria montagem contra montagem; a janela entre `pipe = null`
+       e o `dispose()` terminar ficava de fora — e uma montagem que comecasse ali
+       alocaria o modelo novo com o velho ainda residente. E o mesmo vazamento da
+       decima primeira rodada, pela porta que tinha sobrado. */
+    if (soltando) { try { await soltando; } catch (e) {} }
     if (adiantando) { try { await adiantando; } catch (e) {} }
     if (pipeServe(modelId)) return pipe;
     return await trocarPipe(modelId);
@@ -12985,8 +13048,11 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
        a contagem ao entrar no `catch` é o que diz isso; a bandeira garante que
        o `finally` não desconte duas vezes. */
     let contada = true;
-    const encerrarConta = () => { if (contada) { contada = false; usandoPipe--; } };
+    const encerrarConta = () => {
+      if (contada) { contada = false; usandoPipe--; anotarEstado(); }
+    };
     usandoPipe++;
+    anotarEstado();
     try {
       const r = await pipe(dados, opts);
       relogio.audio += seg; relogio.ms += performance.now() - t0;
