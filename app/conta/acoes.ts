@@ -99,7 +99,12 @@ export async function comprar(form: FormData) {
     return volta(lang, 'erro', t.erroJaAssinante);
   }
 
-  const quantidade = Math.max(1, Math.min(500, Number(form.get('assentos') || PLANOS[plano].assentos)));
+  /* O piso é o do plano, não `1`. Com `Math.max(1, …)` o formulário podia
+     mandar `assentos=1` e a Stripe cobrava um assento de um plano que se
+     anuncia a partir de três — o preço da página e o do checkout eram
+     regras diferentes sobre a mesma compra. */
+  const minimo = PLANOS[plano].assentos;
+  const quantidade = Math.max(minimo, Math.min(500, Number(form.get('assentos') || minimo)));
   const sessao = await stripe().checkout.sessions.create({
     mode: 'subscription',
     line_items: [{ price: PLANOS[plano].preco(), quantity: plano === 'time' ? quantidade : 1 }],

@@ -135,8 +135,15 @@ const SEM_LOGIN = {
   de: /ohne login|ohne registrierung/i,
   fr: /sans identifiant|sans inscription/i,
 };
+/* OS CARTÕES MUDARAM DE CASA, E A RÉGUA SEGUE O CONTEÚDO.
+   Eles eram escritos à mão dentro dos cinco corpos. Agora saem de uma constante
+   nomeada no `build.py` e chegam pelo `src/precos.json` — foi essa a mudança
+   que fez tirar um benefício custar uma edição em vez de cinco. Ler o corpo
+   aqui passaria a não achar nada e a aprovar por vazio, que é o pior jeito de
+   uma trava morrer. */
+const PRECOS = JSON.parse(fs.readFileSync(`${RAIZ_WS}/src/precos.json`, 'utf8'));
 for (const lg of LINGUAS) {
-  const html = fs.readFileSync(`${RAIZ_WS}/src/site/bodies/precos.${lg}.html`, 'utf8');
+  const html = PRECOS[lg].cartoes;
   const i = html.indexOf('data-plano="team"');
   ok(`precos.${lg}: o cartão Team existe`, i > 0);
   const cartao = html.slice(i, html.indexOf('</div>', html.indexOf('</ul>', i)));
@@ -152,16 +159,18 @@ for (const lg of LINGUAS) {
    línguas diferentes — e ninguém que fala uma delas percebe. A forma (quais
    células são o travessão) é a parte verificável sem reler prosa. */
 const forma = (lg) => {
-  const html = fs.readFileSync(`${RAIZ_WS}/src/site/bodies/precos.${lg}.html`, 'utf8');
-  const i = html.indexOf('class="legal cmpPlanos"');
-  if (i < 0) return null;
-  const tab = html.slice(i, html.indexOf('</table>', i));
+  const tab = PRECOS[lg]?.comparacao;
+  if (!tab) return null;
   return [...tab.matchAll(/<tr><th scope="row">.*?<\/tr>/g)]
-    .map((m) => [...m[0].matchAll(/<td( class="nao")?/g)]
-      .map((c) => (c[1] ? '—' : 'x')).join(''));
+    .map((m) => [...m[0].matchAll(/<td class="(sim|nao)"|<td>/g)]
+      .map((c) => (c[1] === 'nao' ? '—' : c[1] === 'sim' ? 'x' : 'p')).join(''));
 };
 const base5 = forma('pt');
-ok('a comparação curta existe na página de preços', !!base5 && base5.length >= 5,
+/* CINCO, E EXATAMENTE CINCO. Era `>= 5`, e com isso uma sexta linha entrava
+   sem reprovar nada — foi assim que a comparação "de cinco linhas" estava com
+   seis quando esta rodada começou. Ela decide a compra: cada linha a mais é
+   atenção a menos para as que importam. */
+ok('a comparação curta tem exatamente cinco linhas', !!base5 && base5.length === 5,
    base5 ? `${base5.length} linhas` : 'não achei a tabela');
 if (base5) {
   ok('  e toda linha tem os três planos', base5.every((l) => l.length === 3),

@@ -1,0 +1,281 @@
+From 9bbff32dfc290820ad7d22df58662379796e6e33 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Sat, 22 Aug 2026 12:55:27 +0000
+Subject: [PATCH 1/2] =?UTF-8?q?A=20analise=202=20leu=20o=20codigo=20atual?=
+ =?UTF-8?q?=20=E2=80=94=20e=20em=20cinco=20P0=20ela=20erra=20sobre=20o=20p?=
+ =?UTF-8?q?resente?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Correcao de premissa, e ela e do Leandro: o codigo ja estava publicado quando a
+analise foi escrita. Eu tinha registrado o contrario — que ela olhava o site de
+ANTES das trilhas B e D, e que por isso parte dos P0 dela "ja nao existia".
+
+A diferenca nao e academica. "Ja foi feito depois dela" e "ela erra sobre o
+presente" pedem coisas diferentes: a primeira nao pede nada, a segunda pede
+conferencia. Conferi os cinco no codigo de agora:
+
+  - "o plano parece disponivel e indisponivel ao mesmo tempo": ha um estado so
+    — selo "teste de 14 dias" e CTA "Testar o Personal por 14 dias". A unica
+    lista de espera da pagina e a do Pro/API, que nao e plano;
+  - "cartoes dizem em breve, catalogo diz que existe": as tres balas com
+    `data-f` batem com o catalogo — `modeloProprio` e `padraoDoTime` prontos,
+    `termosGuardados` em construcao dos dois lados;
+  - "o site vende identidade, o codigo pago entrega orquestracao": o Personal
+    abre com "a rodada inteira, e nao um documento avulso"; o logotipo e a
+    QUARTA bala;
+  - "RPCs pagas sem migracao no Git": 44 migracoes versionadas, quatro delas
+    com as RPCs pagas;
+  - "dois webhooks Stripe": a Edge Function e uma lapide 410 que aponta para
+    `/api/stripe/webhook`, com o porque escrito dentro do arquivo.
+
+Nenhum dos cinco se sustenta contra o codigo.
+
+ISSO NAO INVALIDA A ANALISE. Nos que sobraram ela estava certa — inclusive em
+dois que eu mesmo tinha dado por feitos sem conferir (o "sem login" no cartao
+Team e a secao do Pro/API), e nos tres que ela achou de primeira: o clipe, a
+revisao assistida e o minimo de assentos do Team.
+
+O que isso ensina sobre como ler a proxima: ela e FORTE no que se ve lendo a
+pagina e FRACA no que exige rastrear ate a implementacao. As tres negacoes que
+ela achou estavam escritas na pagina. Os cinco P0 acima exigiam abrir o
+`features.json`, o `lib/stripe.ts` e a Edge Function — e e ai que ela erra, nas
+duas direcoes: julgou pronto o que nao esta (a entrada por dominio) e julgou
+quebrado o que funciona (o padrao do time, o modelo persistente).
+
+Nenhuma linha de produto mudou neste commit: e cabecalho de procedencia da
+ANALISE-DA-VENDA-2.md e a moldura da Trilha E no PLANO.md.
+---
+ ANALISE-DA-VENDA-2.md | 35 ++++++++++++++++++++++++++++++-----
+ PLANO.md              | 43 ++++++++++++++++++++++++++++++++-----------
+ 2 files changed, 62 insertions(+), 16 deletions(-)
+
+diff --git a/ANALISE-DA-VENDA-2.md b/ANALISE-DA-VENDA-2.md
+index 8db5b80..38b10d0 100644
+--- a/ANALISE-DA-VENDA-2.md
++++ b/ANALISE-DA-VENDA-2.md
+@@ -2,11 +2,36 @@
+ 
+ > **De onde veio.** Este documento foi escrito por você e colado aqui em
+ > 22/08/2026, e está **na íntegra e sem edição** a partir do título abaixo.
+-> Ele foi escrito olhando o site como ele estava **antes** das trilhas B e D
+-> desta semana, e por isso parte dos P0 que ele levanta já não existe. O que
+-> ficou de pé, o que já foi feito e o que virou tarefa está separado no
+-> `PLANO.md`, na **Trilha E** — e não aqui dentro, para este arquivo
+-> continuar sendo o que ele é: o texto original, para conferência.
++>
++> **Correção de procedência.** A primeira versão deste cabeçalho dizia que ele
++> tinha sido escrito contra o site de *antes* das trilhas B e D, e que por isso
++> parte dos P0 dele já não existia. **Isso estava errado, e a correção veio de
++> você:** o código já estava publicado. Então a análise leu o estado atual — ela
++> mesma diz, na seção de método, que a URL pública respondeu 401/403 e que a
++> leitura usou as fontes canônicas (`src/site/home.html`, `src/i18n-site.json`,
++> `src/site/bodies/`).
++>
++> Isso muda o que significa cada item conferido. Reconferi os cinco P0 que eu
++> tinha creditado às trilhas B e D, um por um, no código de agora:
++>
++> | O que a análise aponta | O que o código mostra |
++> |---|---|
++> | plano parece disponível e indisponível ao mesmo tempo | um estado só: selo "teste de 14 dias" e CTA "Testar o Personal por 14 dias" |
++> | cartões dizem "em breve", catálogo diz que existe | as três balas com `data-f` batem com o catálogo |
++> | site vende identidade, código pago entrega orquestração | o Personal abre com "a rodada inteira"; o logotipo é a quarta bala |
++> | RPCs pagas sem migração no Git | 44 migrações versionadas, quatro delas com as RPCs pagas |
++> | dois webhooks Stripe | a Edge Function é uma lápide 410 que aponta para a rota do Next |
++>
++> Ou seja: **nesses cinco a análise descreve um estado que o código não tem.**
++> Não são itens "já feitos depois dela" — são itens em que ela erra sobre o
++> presente. O que não a invalida: nos que sobraram ela estava certa, e dois
++> deles eu mesmo tinha dado por feitos sem conferir (o "sem login" no cartão
++> Team e a seção do Pro/API), além dos três que ela achou de primeira — o clipe,
++> a revisão assistida e o mínimo de assentos do Team.
++>
++> O que ficou de pé, o que foi feito e o que virou tarefa está no `PLANO.md`, na
++> **Trilha E** — e não aqui dentro, para este arquivo continuar sendo o que ele
++> é: o texto original, para conferência.
+ >
+ > A leitura crítica dele está em `ANALISE-DA-VENDA.md` (a primeira versão) e
+ > em `A-PAREDE-DA-AVALIACAO.md` (a parede da avaliação de fornecedor).
+diff --git a/PLANO.md b/PLANO.md
+index c408f3f..c17a4fe 100644
+--- a/PLANO.md
++++ b/PLANO.md
+@@ -575,20 +575,41 @@ Cloud acelera** — é o mesmo que a D1 já escreveu nos cartões (`plFreeD`,
+ `plPersD`, `plTimeD`), nos cinco idiomas. Nesse ponto as duas análises
+ convergiram sem combinar, o que é um sinal razoável de que o arco está certo.
+ 
+-#### O que a v2 pede e as trilhas B e D já entregaram
++#### Cinco P0 em que a v2 descreve um estado que o código não tem
+ 
+-A v2 foi escrita contra o site de **antes** dos builds B1–B5 e D0–D1. Seis dos
+-seus P0/P1 já não existem, e vale não refazer:
++**Correção de premissa, e ela é sua.** Eu tinha escrito aqui que a v2 foi escrita
++contra o site de *antes* dos builds B e D, e que por isso parte dos P0 dela já
++não existia. Você corrigiu: o código já estava publicado. Então a análise leu o
++estado atual — ela mesma diz, no método, que a URL pública respondeu 401/403 e
++que a leitura usou as fontes canônicas do repositório.
+ 
+-| O que a v2 aponta | Onde já foi resolvido |
+-|---|---|
+-| P0 — o plano parece disponível e indisponível ao mesmo tempo | **B4**: uma verdade só sobre o trial |
+-| P0 — cartões dizem "em breve", catálogo diz que existe | **B1**: `breve` virou a fonte única, e o cartão lê dela |
+-| P0 — o site vende identidade, o código pago entrega orquestração | **B5**: a manchete passou a ser o roteiro, não o logotipo |
+-| P0 — RPCs pagas sem migração no Git | **B3** + as seis migrações aplicadas em produção em 22/08 |
+-| P0 — dois webhooks Stripe aparentes | **B2**: um só, no Next, com idempotência por evento |
++A diferença não é acadêmica. "Já foi feito depois dela" e "ela erra sobre o
++presente" pedem coisas diferentes de mim: a primeira não pede nada, a segunda
++pede conferência. Conferi os cinco, um por um, no código de agora:
+ 
+-Dois que eu quase dei por feito sem conferir — e os dois estavam de pé: o P1 do **"sem login"**. A minha
++| O que a v2 aponta | O que o código mostra |
++|---|---|
++| P0 — o plano parece disponível e indisponível ao mesmo tempo | um estado só: selo "teste de 14 dias" e CTA "Testar o Personal por 14 dias". A única lista de espera da página é a do Pro/API, que não é plano |
++| P0 — cartões dizem "em breve", catálogo diz que existe | as três balas com `data-f` batem com o catálogo: `modeloProprio` e `padraoDoTime` prontos, `termosGuardados` em construção dos dois lados |
++| P0 — o site vende identidade, o código pago entrega orquestração | o Personal abre com *"a rodada inteira, e não um documento avulso"*; o logotipo é a **quarta** bala |
++| P0 — RPCs pagas sem migração no Git | 44 migrações versionadas, quatro delas com as RPCs pagas |
++| P0 — dois webhooks Stripe aparentes | a Edge Function é uma **lápide 410** que aponta para `/api/stripe/webhook`, com o porquê escrito no arquivo |
++
++Nenhum dos cinco se sustenta contra o código. Isso **não invalida a análise** —
++nos que sobraram ela estava certa, inclusive em dois que eu mesmo tinha dado por
++feitos sem conferir (o "sem login" no cartão Team e a seção do Pro/API), e nos
++três que ela achou de primeira: o clipe, a revisão assistida e o mínimo de
++assentos do Team.
++
++O que isso ensina sobre como ler a próxima: **ela é forte no que se vê lendo a
++página e fraca no que exige rastrear até a implementação.** As três negações que
++ela achou estavam escritas na página. Os cinco P0 acima exigiam abrir o
++`features.json`, o `lib/stripe.ts` e a Edge Function — e é aí que ela erra, nas
++duas direções: julgou pronto o que não está (a entrada por domínio) e julgou
++quebrado o que funciona (o padrão do time, o modelo persistente).
++
++E dois que eu quase dei por feito sem conferir — nestes ela estava certa, e o
++defeito estava de pé: o P1 do **"sem login"**. A minha
+ primeira leitura desta tabela dizia que a D1 tinha resolvido, porque "sem
+ cadastro" tinha ficado só no cartão Free. Não tinha: o cartão **Team** da página
+ de preços terminava, nos cinco idiomas, em *"sem login e sem exigir cadastro
+-- 
+2.43.0
+
+
+From fe7bf6c97ff0ac52a0ff17a09f17bacbbfcdcced Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Sat, 22 Aug 2026 18:28:58 +0000
+Subject: [PATCH 2/2] =?UTF-8?q?A=20estimativa=20da=20C3=20era=20chute=20?=
+ =?UTF-8?q?=E2=80=94=20o=20arquivo=20ja=20esta=20desacoplado,=20so=20nao?=
+ =?UTF-8?q?=20esta=20separado?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Eu vinha repetindo 8 a 12 dias para modularizar o `template.html`, e nunca tinha
+medido. Medi.
+
+357 funcoes no topo do fechamento e 107 variaveis mutaveis. Eu tratava as 107
+como o problema — elas nao sao. A mais compartilhada de todas, `LANG`, e tocada
+por 14 funcoes de 357.
+
+  - 199 de 358 funcoes (55%) nao tocam estado mutavel NENHUM;
+  - 100 tocam exatamente uma;
+  - so 11 tocam quatro ou mais;
+  - 38 componentes conexas, a maior com 86 funcoes.
+
+E as 86 nem sao um no: elas ficam ligadas por sete variaveis de CONTEXTO —
+`LANG`, `licenca`, `sessao`, `marcaCliente`, `roteiro`, `api`, `baixouAlgo` —
+que nao sao acoplamento, sao o ambiente. Tratando as sete como ambiente, a maior
+componente cai de 86 para 41 e as funcoes livres sobem para 232 (64%).
+
+E o grupo de 41 que sobra — `pipWin`, `espelho`, `liveOn`, `pipe`, `motorEmUso`,
+`degraus` — e a captura ao vivo. Nao e emaranhado: e um subsistema coeso, que
+deveria ser um modulo.
+
+O arquivo ja esta desacoplado; ele so nao esta separado.
+
+O total revisto (9 a 12 dias) bate com o chute antigo por coincidencia. O que
+muda e o FORMATO DO RISCO: em vez de duas semanas antes de saber se funcionou,
+sao seis fatias entregaveis, cada uma com a suite verde no fim, e qualquer uma
+pode ser a ultima.
+---
+ PLANO.md | 66 +++++++++++++++++++++++++++++++++++++++++++++++++++++++-
+ 1 file changed, 65 insertions(+), 1 deletion(-)
+
+diff --git a/PLANO.md b/PLANO.md
+index c17a4fe..13a85b6 100644
+--- a/PLANO.md
++++ b/PLANO.md
+@@ -1022,7 +1022,71 @@ primeira rodada pela porta que tinha sobrado: a fila do `trocarPipe` cobria
+ montagem contra montagem, e essa janela ficava de fora. `garantirPipe` passou a
+ esperar quem está soltando.
+ 
+-**Falta um:** modularizar a fonte.
++**Falta um:** modularizar a fonte — e a estimativa de **8 a 12 dias que estava
++aqui era chute meu, herdado e nunca conferido**. Medi o arquivo, e ele é bem
++melhor do que eu vinha dizendo.
++
++### O que a medição mostrou
++
++357 funções no nível de cima do fechamento, e **107 variáveis mutáveis**
++compartilhadas. Eu tratava as 107 como o problema. Elas não são: a mais
++compartilhada de todas, `LANG`, é tocada por **14 funções de 357**.
++
++| | |
++|---|---|
++| funções que não tocam estado mutável nenhum | **199 de 358 (55%)** |
++| funções que tocam exatamente **uma** | 100 |
++| funções que tocam quatro ou mais | **11** |
++| componentes conexas (funções ligadas por estado) | **38** |
++| a maior delas | 86 funções (24%) |
++
++E as 86 nem são um nó de verdade. Elas ficam ligadas por **sete variáveis de
++contexto** — `LANG`, `licenca`, `sessao`, `marcaCliente`, `roteiro`, `api`,
++`baixouAlgo` —, que não são acoplamento: são o ambiente que o aplicativo inteiro
++enxerga. Tratando as sete como contexto e recontando:
++
++| | com tudo | tratando o ambiente como ambiente |
++|---|---:|---:|
++| maior componente | 86 | **41** |
++| funções livres de estado | 199 (55%) | **232 (64%)** |
++| grupos | 38 | 42 |
++
++E o maior grupo restante — 41 funções costuradas por `pipWin`, `espelho`,
++`liveOn`, `pipe`, `motorEmUso`, `degraus` — **é a captura ao vivo**. Isso não é
++um emaranhado: é um subsistema coeso, que *deveria* ser um módulo.
++
++### O que isso muda
++
++O arquivo **já está desacoplado — ele só não está separado.** A forma que existe
++lá dentro é: dois terços de funções livres, uns quarenta grupos pequenos de 2 a
++15 funções, e um subsistema real. Não é uma bola de barro que precisa ser
++desfeita ao longo de duas semanas; é uma estante já organizada dentro de uma
++caixa só.
++
++A consequência prática é que o trabalho **não precisa ser feito de uma vez**, que
++era a premissa por trás dos 8 a 12 dias. Cada grupo pequeno sai sozinho, com a
++suíte inteira rodando entre um e outro. O único pedaço que pede fôlego é a
++captura ao vivo, e ela pede porque é um subsistema — não porque está bagunçada.
++
++### A estimativa revista
++
++| Fatia | O que sai | Dias |
++|---|---|---:|
++| o dicionário | 3.105 linhas de dado puro, para `src/i18n-app.json` | 1 |
++| o contexto | as 7 variáveis de ambiente num módulo, lidas por todos | 1 |
++| os grupos pequenos | ~40 módulos de 2 a 15 funções, um a um | 3–4 |
++| as funções livres | 232 funções sem estado, agrupadas por assunto | 1–2 |
++| a captura ao vivo | o subsistema de 41 funções, com prova de comportamento | 2–3 |
++| CSS e HTML | 1.127 e 2.006 linhas, por painel | 1 |
++| **Total** | | **9–12** |
++
++O total bate com o chute antigo, e isso é coincidência sem importância. **O que
++muda é o formato do risco**: em vez de 8 a 12 dias antes de saber se funcionou,
++são seis fatias entregáveis, cada uma com a suíte verde no fim, e qualquer uma
++delas pode ser a última se você decidir que já chega.
++
++Nenhuma delas toca o entregável: o `build.py` continua concatenando, e o arquivo
++que o cliente baixa continua sendo um arquivo.
+ 
+ ---
+ 
+-- 
+2.43.0
+

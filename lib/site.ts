@@ -11,6 +11,7 @@
  */
 import fs from 'node:fs';
 import FIGURAS from '@/src/figuras.json';
+import PRECOS from '@/src/precos.json';
 import path from 'node:path';
 
 /* Tudo o que se lê daqui mora em `src/`, e o caminho é montado com esse prefixo
@@ -260,7 +261,7 @@ export function tabelaDePlanos(lang: Lang, t: Dicionario): string {
   }).join('');
 
   return `<p class="small muted tpRegra">${preencherTexto(t.tpResumo, [quantasFeatures, gratis, pagas])}</p>` +
-    `<div class="listaF" aria-label="${escapar(t.tpLegenda)}">${blocos}</div>`;
+    `<div class="listaF" aria-label="${escapar(t.tpListaRot)}">${blocos}</div>`;
 }
 
 /** `{0}`, `{1}`… trocados por números. Existe para o resumo acima da lista sair
@@ -442,6 +443,41 @@ export function paginaHtml(pagina: string, lang: Lang): string {
     t.figura = ((FIGURAS as Record<string, string>)[pagina] ?? '')
       .replace('__ALT__', String(t.figAlt ?? ''))
       .replace('__LEG__', String(t.figLegenda ?? ''));
+    /* OS DOIS BLOCOS GERADOS DA PÁGINA DE PREÇOS.
+       Cartões e comparação curta saem de constantes nomeadas no `build.py` e
+       chegam aqui como dado, pelo `precos.json` — o mesmo caminho das figuras.
+       Escritos à mão dentro dos cinco corpos, tirar uma linha da comparação
+       custaria cinco edições, e a quinta seria esquecida.
+
+       O `trocar` roda ANTES de o bloco entrar no corpo porque os CTAs trazem
+       `{{app}}` e `{{conta}}` dentro. Se ele entrasse cru, os endereços
+       dependeriam da ordem em que as chaves saem do dicionário — e a guarda de
+       chave sobrando derrubaria o build, ou pior, não derrubaria. */
+    if (pagina === 'precos') {
+      const bl = (PRECOS as Record<string, Record<string, string>>)[lang];
+      t.cartoesPlanos = trocar(bl?.cartoes ?? '', t);
+      t.comparacaoCurta = bl?.comparacao ?? '';
+      /* Preço e mínimo como token: a calculadora e o texto de cobrança
+         precisam do número na moeda do idioma, e cada cópia à mão num corpo
+         traduzido é uma chance de o alemão anunciar um preço que não existe.
+
+         UM POR LINHA, e não num laço sobre uma lista de nomes. O `build.py`
+         descobre as chaves que o Next escreve lendo `t.<nome> =` daqui — é
+         assim que ele evita manter uma segunda lista dos mesmos nomes. Um laço
+         é invisível para essa leitura, e o build volta a acusar chave sem
+         valor em cinco idiomas a cada vez, que é o aviso falso que esconde o
+         verdadeiro. */
+      t.precoPersonal = bl?.precoPersonal ?? '';
+      t.precoTeam = bl?.precoTeam ?? '';
+      t.precoTeamMin = bl?.precoTeamMin ?? '';
+      t.personalNum = bl?.personalNum ?? '';
+      t.teamNum = bl?.teamNum ?? '';
+      t.teamMinimo = bl?.teamMinimo ?? '';
+      t.minimoFrase = bl?.minimoFrase ?? '';
+      t.figuraRodada = ((FIGURAS as Record<string, string>).rodada ?? '')
+        .replace('__ALT__', String(t.rodadaAlt ?? ''))
+        .replace('__LEG__', String(t.rodadaLeg ?? ''));
+    }
     t.body = trocar(ler(`site/bodies/${pagina}.${lang}.html`), t);
     bruto = ler('site/doc.html');
   }

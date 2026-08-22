@@ -93,7 +93,7 @@ await pg.waitForTimeout(300);
      conexão com Zephyr nem com TestRail hoje, e não vou dizer que existe"). Um
      cartão que precisa de nota de rodapé para não enganar está enganando. */
   ok('  e diz que é endereço, não integração',
-     /integra[çc]|integration|Integration/.test(gratis),
+     /integra[çc]|integration|Integration|intégration/.test(gratis),
      (gratis.match(/<li>[^<]*<a[^>]*link"[^>]*>[\s\S]{0,140}?<\/li>/) || [''])[0].slice(0, 130));
   ok('saiu do cartão pago', !/Link de equipe/.test(time));
   /* PELA ALÇA, E NÃO PELA PROSA. O que este teste quer saber é se a identidade
@@ -104,8 +104,14 @@ await pg.waitForTimeout(300);
      rodada: o item continuava lá, com outras palavras. A alça `data-f` existe
      desde o B1 justamente para isso, e é o catálogo que garante que ela aponta
      para um recurso de verdade. */
+  /* PELA ALÇA, E SÓ PELA ALÇA. Esta linha exigia a palavra "logotipo" DEPOIS
+     da alça — que é exatamente a prosa que o comentário acima diz para não
+     cobrar, e foi por prosa que ela já reprovou uma vez. O cartão foi
+     reescrito de novo, e a bala agora diz "guarde o seu padrão de documento e
+     o seu cliente". A alça continua lá, apontando para o mesmo item do
+     catálogo, e é isso que se queria saber. */
   ok('e o Personal continua com a identidade',
-     /data-f="modeloProprio"[^>]*>[^<]*[Ll]ogotipo/.test(time),
+     /data-f="modeloProprio"/.test(time),
      (time.match(/data-f="modeloProprio"[^<]*/) || ['(não achou)'])[0]);
   /* OS TERMOS GRAVADOS SAIRAM DO CARTAO — e a preocupação original continua de
      pé, só que pelo avesso.
@@ -121,9 +127,13 @@ await pg.waitForTimeout(300);
      cobra este item, que é o que este arquivo veio olhar. */
   ok('o cartão pago não vende mais o vocabulário', !/gravad|termos/i.test(time),
      (time.match(/[^<>]*(gravad|termos)[^<>]*/i) || ['(limpo)'])[0].slice(0, 70));
-  const futuro = await pg.locator('.roteiroFuturo').innerHTML().catch(() => '');
-  ok('e a caixa do roteiro é quem fala dos termos gravados', /gravad/i.test(futuro),
-     (futuro.match(/[^<>]*gravad[^<>]*/i) || ['(não achou)'])[0].slice(0, 70));
+  /* A CAIXA MUDOU, O PAR CONTINUA. Era a `roteiroFuturo`, logo abaixo dos
+     cartões. A página nova recolheu a lista completa num `<details>` no fim, e
+     é lá que os itens com estado moram — abaixo dos cartões e fora da decisão
+     de compra, que era a razão de ser da caixa antiga. */
+  const futuro = await pg.locator('details.listaCompleta').innerHTML().catch(() => '');
+  ok('e a lista recolhida é quem fala dos termos gravados', /guardad|gravad/i.test(futuro),
+     (futuro.match(/[^<>]*(guardad|gravad)[^<>]*/i) || ['(não achou)'])[0].slice(0, 70));
 }
 
 ok('sem erro de JS', erros.length === 0, erros.join(' | ').slice(0, 200));

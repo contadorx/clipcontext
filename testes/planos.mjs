@@ -20,12 +20,37 @@
  * navegador e sem servidor. Um portão de release que precisa de `next start`
  * é um portão que se aprende a pular.
  */
+/* ---------------------------------------------------------------------------
+ * ONDE OS CARTOES MORAM AGORA, e por que esta regua mudou de fonte.
+ *
+ * Ate a rodada que refez a pagina, os cartoes eram escritos a mao dentro dos
+ * cinco `precos.<lang>.html`, e era exatamente disso que este arquivo nasceu:
+ * duas listas, duas fontes, e o alemao dizendo uma coisa que o portugues nao
+ * dizia. Agora eles saem de uma constante nomeada no `build.py` (`CARTOES`) e
+ * chegam pelo `src/precos.json`.
+ *
+ * A regua segue o conteudo. Continuar lendo o corpo faria ela nao achar cartao
+ * nenhum e APROVAR POR VAZIO — que e o pior jeito de um portao morrer: ele
+ * continua verde e para de olhar.
+ *
+ * Tres afirmacoes deste arquivo cobravam estruturas que a rodada removeu de
+ * proposito, e estao reescritas no lugar, cada uma dizendo o que substituiu:
+ * a secao de lista de espera do Pro/API, a caixa `roteiroFuturo`, e a abertura
+ * que nomeava Free/Personal/Team.
+ * ------------------------------------------------------------------------ */
 import fs from 'fs';
 import { RAIZ_WS } from './_caminhos.mjs';
 
 const IDIOMAS = ['pt', 'en', 'es', 'de', 'fr'];
 const cat = JSON.parse(fs.readFileSync(`${RAIZ_WS}/src/features.json`, 'utf8'));
 const dic = JSON.parse(fs.readFileSync(`${RAIZ_WS}/src/i18n-site.json`, 'utf8'));
+const PRECOS = JSON.parse(fs.readFileSync(`${RAIZ_WS}/src/precos.json`, 'utf8'));
+/* Os cartoes de um idioma, como HTML. Uma funcao so, para que trocar de
+   fonte outra vez seja uma linha e nao uma cacada. */
+const cartoesDe = (L) => PRECOS[L].cartoes;
+/* O corpo continua existindo, e continua sendo lido: e nele que moram o
+   hero, as provas, o FAQ e a lista recolhida. */
+const corpoDe = (L) => fs.readFileSync(`${RAIZ_WS}/src/site/bodies/precos.${L}.html`, 'utf8');
 
 let falhas = 0;
 const ok = (n, c, e) => { console.log((c ? '  ok   ' : '  FALHA') + '  ' + n + (e ? '  → ' + e : '')); if (!c) falhas++ };
@@ -48,7 +73,7 @@ console.log('[1] o catálogo é a fonte, e ele se descreve');
 console.log('\n[2] cada cartão aponta para um item que existe');
 const marcados = {};
 for (const L of IDIOMAS) {
-  const html = fs.readFileSync(`${RAIZ_WS}/src/site/bodies/precos.${L}.html`, 'utf8');
+  const html = cartoesDe(L);
   /* Todo `<li>` do cartão que carrega alça, com o que vem dentro dele. */
   const bullets = [...html.matchAll(/<li data-f="([^"]+)">([\s\S]*?)<\/li>/g)]
     .map((m) => ({ id: m[1], dentro: m[2] }));
@@ -100,12 +125,20 @@ console.log('\n[5] e nada fora dos cartões promete futuro por conta própria');
   /* O rodapé da página explica o que o selo quer dizer, e é o único `soon` que
      pode existir sem alça. Qualquer outro é uma promessa que ninguém registrou
      no catálogo — que é exatamente como as três de 16/08 ficaram esquecidas. */
+  /* MUDOU DE FORMA, E A REGRA FICOU MAIS SIMPLES.
+     Antes o corpo trazia selos escritos a mao e a conta era "todos == com alca
+     + 1", sendo o +1 o do rodape que explica. Agora NENHUM selo e escrito a
+     mao: os dos cartoes sairiam de `CARTOES` e nao existem, e os da lista
+     completa nascem de `tabelaDePlanos()` a partir do estado do catalogo. A
+     legenda que os explica e o token `{{tpLegenda}}`.
+     Entao a regra e: zero selo a mao, nos cinco corpos e nos cinco cartoes. */
   for (const L of IDIOMAS) {
-    const html = fs.readFileSync(`${RAIZ_WS}/src/site/bodies/precos.${L}.html`, 'utf8');
-    const todos = (html.match(/class="soon"/g) || []).length;
-    const comAlca = marcados[L].filter((b) => /class="soon"/.test(b.dentro)).length;
-    ok(`${L}: todo selo tem alça, menos o da explicação`,
-       todos === comAlca + 1, `${todos} selo(s), ${comAlca} com alça`);
+    const noCorpo = (corpoDe(L).match(/class="soon"|class="beta"|class="descoberta"/g) || []).length;
+    ok(`${L}: nenhum selo escrito à mão no corpo`, noCorpo === 0, `${noCorpo} selo(s)`);
+    const noCartao = (cartoesDe(L).match(/class="soon"|class="beta"|class="descoberta"/g) || []).length;
+    ok(`  nem nos cartões`, noCartao === 0, `${noCartao} selo(s)`);
+    ok(`  e a legenda que explica os selos está na página`,
+       corpoDe(L).includes('{{tpLegenda}}'));
   }
 }
 
@@ -120,7 +153,7 @@ console.log('\n[6] UM ESTADO POR PLANO, e a lista espera o que não existe');
      entregue. O mesmo defeito do B1, no outro sentido — lá ela escondia o que
      existia, aqui ela promete o que já existe. */
   for (const L of IDIOMAS) {
-    const html = fs.readFileSync(`${RAIZ_WS}/src/site/bodies/precos.${L}.html`, 'utf8');
+    const html = cartoesDe(L);
 
     const planos = [...html.matchAll(/<div class="plan[^"]*" data-plano="([^"]+)"/g)].map((m) => m[1]);
     ok(`${L}: os três planos têm identidade`, planos.join() === 'free,personal,team', planos.join());
@@ -136,12 +169,18 @@ console.log('\n[6] UM ESTADO POR PLANO, e a lista espera o que não existe');
     ok(`${L}: uma ação primária em cada`, botoes.length === 3 && botoes.every((n) => n === 1),
        botoes.join('/'));
 
-    /* E O QUE A LISTA ESPERA NÃO PODE SER O QUE A PÁGINA VENDE. É a afirmação
-       estrutural do defeito: `data-espera` nomeia o que ainda não saiu, e se
-       um dia ele coincidir com um plano que tem preço na tela, isto reprova. */
-    const espera = (html.match(/<section id="lista" data-espera="([^"]+)"/) || [])[1];
-    ok(`${L}: a lista diz o que está esperando`, !!espera, espera || '(nada)');
-    ok(`${L}: e não é algo que a página já vende`, !planos.includes(espera), `${espera} vs ${planos.join()}`);
+    /* A LISTA DE ESPERA SAIU DA PÁGINA, E A REGRA VIROU O INVERSO.
+       Ela existia para o Pro e a API, e a afirmação de cima cobrava que o que
+       ela esperava não fosse o que a página já vendia — a contradição de pedir
+       e-mail para avisar de um plano com preço na tela.
+       A página agora vende dois planos disponíveis e não pede e-mail nenhum.
+       Pedir de novo é reabrir a contradição pela porta dos fundos, e é isso
+       que esta afirmação passa a impedir. */
+    const corpo = corpoDe(L);
+    ok(`${L}: nenhuma seção de lista de espera entre os planos`,
+       !/data-espera=/.test(corpo), (corpo.match(/data-espera="[^"]*"/) || [''])[0]);
+    ok(`  e nenhum campo de e-mail na página`,
+       !/type="email"/.test(corpo), (corpo.match(/type="email"[^>]*/) || [''])[0]);
   }
 }
 
@@ -169,12 +208,19 @@ console.log('\n[7] o que o Personal PROMETE é o que a planilha DEVOLVE');
   /* E o cartão continua liderando pelo roteiro. A primeira bala é a que a
      pessoa lê; se ela voltar a ser o logotipo, o reposicionamento se desfez
      sem ninguém mexer numa linha de código. */
+  /* A primeira bala é a que a pessoa lê. Se ela voltar a ser o logotipo, o
+     reposicionamento se desfez sem ninguém mexer numa linha de código.
+     A palavra mudou — o cartão agora diz "importe a planilha de casos de
+     teste", e não a extensão do arquivo —, então a régua pergunta pela
+     PLANILHA, em cada língua, e não por `xlsx`. */
+  const PLANILHA = { pt: /planilha/i, en: /spreadsheet/i, es: /planilla/i,
+                     de: /tabelle/i, fr: /tableur/i };
   for (const L of IDIOMAS) {
-    const html = fs.readFileSync(`${RAIZ_WS}/src/site/bodies/precos.${L}.html`, 'utf8');
+    const html = cartoesDe(L);
     const card = html.slice(html.indexOf('data-plano="personal"'));
     const primeira = (card.match(/<li[^>]*>([\s\S]*?)<\/li>/) || [])[1] || '';
     ok(`${L}: a primeira bala do Personal é a rodada de casos`,
-       /xlsx|csv|Excel/i.test(primeira), primeira.replace(/<[^>]*>/g, '').slice(0, 70));
+       PLANILHA[L].test(primeira), primeira.replace(/<[^>]*>/g, '').slice(0, 70));
   }
 }
 
@@ -194,7 +240,18 @@ console.log('\n[8] a ABERTURA da página diz o mesmo que os cartões');
    * abertura tem que nomear os TRÊS TRABALHOS — caso avulso, roteiro
    * individual, execução coordenada —, que é a promessa que os cartões
    * entregam logo abaixo. */
-  const NOMES = { free: /free/i, personal: /personal/i, team: /team/i };
+  /* A ABERTURA MUDOU DE FORMA, E A PERGUNTA ACOMPANHOU.
+     Ela nomeava Free, Personal e Team. A página nova lidera pelo RESULTADO —
+     o nome do plano desceu para o subtítulo do cartão, que é a inversão que
+     sustenta a rodada inteira. Cobrar os três nomes na abertura seria cobrar
+     de volta o arranjo que a rodada desfez.
+     O que a abertura precisa continuar respondendo é o que ela sempre
+     precisou, e é o critério de aceite do hero: o que é grátis, e por que
+     alguém paga. As duas coisas, na mesma abertura, em cada língua. */
+  const GRATIS = { pt: /gr[áa]tis|gratuit/i, en: /free/i, es: /grat/i,
+                   de: /kostenlos|gratis/i, fr: /gratuit/i };
+  const PAGA = { pt: /paga|pagar/i, en: /\bpay\b/i, es: /paga|pagar/i,
+                 de: /zahl/i, fr: /payez|payer|payant/i };
   const IDENTIDADE = {
     pt: /o que é pago é a .{0,20}identidade/i,
     en: /what you pay for is the .{0,20}identity/i,
@@ -203,15 +260,14 @@ console.log('\n[8] a ABERTURA da página diz o mesmo que os cartões');
     fr: /ce qui est payant.{0,30}identité/i,
   };
   for (const L of IDIOMAS) {
-    const html = fs.readFileSync(`${RAIZ_WS}/src/site/bodies/precos.${L}.html`, 'utf8');
-    /* Só a abertura: do começo até o primeiro cartão. O nome dos planos
-       aparece nos cartões de qualquer jeito, e olhar a página inteira faria
-       esta afirmação passar sem que a abertura dissesse nada. */
-    const abertura = html.slice(0, html.indexOf('data-plano='));
-    for (const [plano, re] of Object.entries(NOMES)) {
-      ok(`${L}: a abertura nomeia o ${plano}`, re.test(abertura),
-         abertura.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').slice(0, 90));
-    }
+    const html = corpoDe(L);
+    /* Só a abertura: do começo até o bloco dos cartões. Olhar a página inteira
+       faria esta afirmação passar sem que a abertura dissesse nada. */
+    const abertura = html.slice(0, html.indexOf('{{cartoesPlanos}}'));
+    const limpo = abertura.replace(/<!--[\s\S]*?-->/g, ' ')
+      .replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ');
+    ok(`${L}: a abertura diz o que é grátis`, GRATIS[L].test(limpo), limpo.slice(0, 90));
+    ok(`${L}: e por que alguém paga`, PAGA[L].test(limpo), limpo.slice(0, 90));
     ok(`${L}: e não volta a vender identidade e administração`,
        !IDENTIDADE[L].test(abertura),
        (abertura.match(IDENTIDADE[L]) || [''])[0]);
@@ -231,13 +287,24 @@ console.log('\n[9] nenhum "em breve" DENTRO de um cartão de plano');
    * utilizável no ambiente vendido; o que ainda não existe mora na caixa do
    * roteiro, abaixo dos cartões e fora da conta. O selo continua permitido —
    * na caixa, e no rodapé que o explica. */
+  /* A SEPARAÇÃO CONTINUA, E MUDOU DE CAIXA.
+     Era a `roteiroFuturo`, um bloco logo abaixo dos cartões. A página nova
+     recolheu a lista completa num `<details>` no fim, e é lá que os itens com
+     estado moram — abaixo dos cartões e fora da decisão de compra, que era a
+     razão da caixa antiga. A regra de lugar é a mesma; o container é outro. */
   for (const L of IDIOMAS) {
-    const html = fs.readFileSync(`${RAIZ_WS}/src/site/bodies/precos.${L}.html`, 'utf8');
-    const cartoes = html.slice(html.indexOf('data-plano='), html.indexOf('roteiroFuturo'));
-    const dentro = (cartoes.match(/class="soon"/g) || []).length;
+    const dentro = (cartoesDe(L).match(/class="soon"|class="beta"|class="descoberta"/g) || []).length;
     ok(`${L}: os cartões só prometem o que já existe`, dentro === 0, dentro + ' selo(s)');
-    ok(`${L}: e a caixa do roteiro existe para receber o resto`,
-       html.includes('roteiroFuturo'));
+    ok(`${L}: e a lista recolhida existe para receber o resto`,
+       /<details class="listaCompleta"/.test(corpoDe(L)));
+    /* E o que o cartão aponta por alça tem de estar em produção — é a trava
+       que impede um benefício de vender uma funcionalidade que o catálogo diz
+       que ainda não existe. */
+    const estadoDe = (i) => i.estado || 'producao';
+    const prometidas = marcados[L].filter((b) => estadoDe(porId.get(b.id)) !== 'producao');
+    ok(`${L}: nenhum benefício aponta para o que não está em produção`,
+       prometidas.length === 0,
+       prometidas.map((b) => `${b.id}=${estadoDe(porId.get(b.id))}`).join(' '));
   }
 }
 

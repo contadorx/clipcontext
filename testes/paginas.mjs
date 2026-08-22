@@ -90,16 +90,24 @@ console.log('\n[2c] o nome antigo não aparece fora do aviso histórico');
     const txt = await pg.locator('body').innerText();
     ok(`${rota} sem ClipContext`, !/clipcontext/i.test(txt));
   }
-  // o bloco de apoio saiu da home e da ferramenta: ficou só na página de preços
-  await pg.goto('http://localhost:8898/');
-  await pg.waitForTimeout(400);
-  ok('a home não pede apoio', await pg.locator('#support').count() === 0);
+  /* O BLOCO DE APOIO SAIU DO SITE INTEIRO, e a regra virou o inverso.
+     Ele já tinha saído da home e da ferramenta e vivia só na página de preços.
+     Saiu de lá também: a página vende dois planos com preço e checkout, e um
+     botão de "pague um café" ao lado de uma assinatura de R$ 349 por
+     pessoa/ano é a página se desculpando por cobrar — quem está com o cartão
+     na mão para para decidir entre comprar e doar.
+     O que se cobra agora é que ele não volte por nenhuma porta. */
+  for (const rota of ['/', '/precos', '/en/precos', '/de/preise', '/comparativo']) {
+    await pg.goto('http://localhost:8898' + rota);
+    await pg.waitForTimeout(400);
+    ok(`${rota} não pede apoio`, (await pg.locator('#support').count()) === 0);
+  }
   await pg.goto('http://localhost:8898/precos');
-  await pg.waitForTimeout(500);
-  const apoio = await pg.locator('#support').innerText().catch(()=> '');
-  // o idioma do bloco segue o navegador do teste (en); o que importa é o nome
-  ok('o apoio da página de preços diz Walkstamp',
-     /Walkstamp (é gratuito|is free|es gratuito)/.test(apoio), apoio.slice(0,60));
+  await pg.waitForTimeout(400);
+  const txtP = await pg.locator('body').innerText();
+  ok('e a página de preços não fala em doação nem em Pix',
+     !/\bpix\b|doa[çc][ãa]o|donate|café|coffee/i.test(txtP),
+     (txtP.match(/[^\n]*(pix|doa[çc]|donate|café|coffee)[^\n]*/i) || ['(limpo)'])[0].slice(0, 70));
 }
 
 console.log('\n[2d] o cabeçalho tem a ação como botão');

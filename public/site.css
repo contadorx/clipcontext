@@ -707,3 +707,102 @@ ol.passosRodada li::marker{color:var(--accent);font-weight:600}
 }
 .fts .beta{color:var(--accent);border-color:color-mix(in srgb,var(--accent) 38%,transparent)}
 .fts .descoberta{color:var(--muted)}
+
+/* ===========================================================================
+   A PÁGINA DE PREÇOS REFEITA — os blocos que passaram a existir nesta rodada.
+
+   A página vendia quantidade de recurso: uma lista de noventa e quatro itens
+   com vistos, aberta, no meio do caminho. Passa a vender resultado, e a lista
+   vira prova secundária, recolhida no fim. O que muda aqui é o peso visual de
+   cada coisa, na ordem em que a decisão acontece.
+   =========================================================================== */
+
+/* O hero não tem botão: o primeiro CTA é o do cartão do Free. Sem um botão para
+   competir, o h1 pode ser maior sem gritar. */
+.doc h1.precoH1{font-size:clamp(27px,3.2vw,38px);letter-spacing:-.02em;max-width:22ch}
+.doc .privHero{margin-top:10px;max-width:62ch}
+
+/* O NOME DO PLANO É O SUBTÍTULO, e o resultado é o título. É a inversão que
+   sustenta a página inteira: ninguém compra "Personal", compra parar de refazer
+   quarenta vezes a mesma coisa à mão. Por isso o h3 é o resultado e isto aqui,
+   menor e apagado, é que carrega Free/Personal/Team. */
+.plan .planoNome{margin:4px 0 0;font-size:13.5px;color:var(--muted);font-weight:600;
+      text-transform:uppercase;letter-spacing:.05em}
+
+/* O MÍNIMO ANDA COLADO NO PREÇO POR PESSOA.
+   Preço por assento sozinho é uma promessa de "a partir de 65" que o checkout
+   desmente na linha seguinte. O total mínimo ao lado é o que evita a surpresa. */
+.plan .minimo{margin:6px 0 0;font-size:13.5px;color:var(--accent);font-weight:600}
+.plan .minimoTotal{margin:2px 0 0;font-size:14px;color:var(--muted);font-weight:550}
+.doc .cobranca{margin-top:16px;max-width:70ch}
+
+/* A COMPARAÇÃO CURTA. Cinco linhas, e o sinal precisa ser legível antes da
+   palavra: quem decide passa o olho pela coluna, não lê a linha. */
+.doc h2.cmpH{margin-top:52px}
+/* A caixa que rola, e o motivo de ela existir: quatro colunas mais um rótulo
+   de linha por extenso não cabem em 380 px. Sem esta caixa a tabela empurrava o
+   DOCUMENTO para o lado — a página inteira andava na horizontal e o hero saía
+   da tela junto. Em inglês cabia por sorte; as outras quatro escrevem mais. */
+/* A caixa fica como rede de segurança, mas a tabela não tem largura mínima:
+   ela quebra a linha do rótulo em vez de empurrar o documento para o lado. */
+.cmpEnvolve{overflow-x:auto;margin:18px 0 0}
+table.cmpCurta{width:100%;border-collapse:collapse;font-size:15px}
+table.cmpCurta th,table.cmpCurta td{border-bottom:1px solid var(--line);padding:11px 10px;text-align:left}
+table.cmpCurta thead th{font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+table.cmpCurta th:not(:first-child),table.cmpCurta td:not(:first-child){text-align:center;width:16%}
+table.cmpCurta tbody th{font-weight:550}
+/* `--err` para o "não", e ele existe: já houve meses em que a variável não
+   estava declarada e a célula do "não" ficava da cor do texto — a tabela
+   inteira parecia dizer que sim. */
+table.cmpCurta td.sim{color:var(--accent);font-weight:700;font-size:17px}
+table.cmpCurta td.nao{color:var(--err);font-weight:700;font-size:17px}
+
+/* A figura de quatro estados, no lugar do vídeo que apontava para arquivos que
+   não existem. Ela rola dentro da própria caixa: a 380 px de largura, forçar
+   904 px de desenho na página daria rolagem lateral no documento inteiro. */
+/* SEM `min-width`, e isso é uma regra do projeto e não uma preferência:
+   `vitrine.mjs` cobra que NADA fique pendurado para fora da tela — nem o que
+   rola por dentro. Uma tabela com 560 px de largura mínima já tinha ensinado
+   isso. Então a figura encolhe junto com a coluna; num telefone ela vira uma
+   tira pequena, e os quatro estados continuam ditos no parágrafo acima dela. */
+.figRodada{margin:20px 0 0}
+.figRodada svg{display:block;width:100%;height:auto}
+.figRodada figcaption{margin-top:10px;font-size:14px;color:var(--muted);max-width:62ch}
+
+/* A CALCULADORA. `hidden` no HTML; o script a destrava. Sem JS ela não aparece,
+   em vez de aparecer com quatro campos que não somam nada. */
+.roi{margin-top:52px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:24px}
+.roi[hidden]{display:none}
+.roiCampos{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;margin:18px 0 0}
+.roiCampos p{margin:0;display:flex;flex-direction:column;gap:6px}
+.roiCampos label{font-size:13.5px;color:var(--muted);font-weight:550}
+.roiCampos input{font:inherit;font-size:16px;padding:9px 11px;border:1px solid var(--line);
+      border-radius:9px;background:var(--bg);color:var(--ink);width:100%;box-sizing:border-box}
+.roiCampos input:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.roiSaida{list-style:none;padding:0;margin:20px 0 0;display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px}
+.roiSaida li{display:flex;flex-direction:column;gap:3px}
+.roiSaida span{font-size:13px;color:var(--muted)}
+.roiSaida b{font-size:21px;font-weight:680;letter-spacing:-.01em}
+.roi .roiNota{margin:16px 0 0;max-width:62ch}
+
+/* A LISTA COMPLETA, RECOLHIDA. Nasce aberta — <details> fechado esconde o texto
+   do Ctrl+F e do buscador, e esta lista é a página inteira em palavras. Quem
+   fecha no telefone é o script. */
+.listaCompleta{margin-top:18px;border:1px solid var(--line);border-radius:14px;padding:0 20px}
+.listaCompleta>summary{cursor:pointer;padding:16px 0;font-weight:620;font-size:15.5px;list-style-position:inside}
+.listaCompleta>summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+.listaCompleta[open]>summary{border-bottom:1px solid var(--line);margin-bottom:14px}
+
+/* O FAQ de compra. `dl` e não uma pilha de h3: são pares pergunta/resposta, e
+   um leitor de tela que anuncia "lista de definições, 6 itens" já dá o mapa. */
+.faqCompra{margin:18px 0 0;display:grid;gap:16px}
+.faqCompra dt{font-weight:620;font-size:15.5px}
+.faqCompra dd{margin:5px 0 0;color:var(--muted);max-width:74ch}
+
+/* No telefone, aperta o respiro da tabela antes de deixar rolar: rolagem que
+   existe mas não precisa ser usada é melhor do que rolagem obrigatória. */
+@media (max-width:520px){
+  table.cmpCurta th,table.cmpCurta td{padding:9px 5px;font-size:14px}
+  table.cmpCurta thead th{font-size:11.5px;letter-spacing:.03em}
+}

@@ -1,216 +1,134 @@
 <section style="padding-top:66px">
   <div class="wrap">
-    <h1 style="font-size:30px">Un caso suelto es gratis.<br>El trabajo repetido y coordinado se vuelve plan.</h1>
-    <p class="lead">Usa <b>Free</b> para convertir cualquier grabación en evidencia, sin registro. Elige
-    <b>Personal</b> cuando tengas un guion de casos para ejecutar y devolver. Elige <b>Team</b> cuando
-    varias personas necesiten repartirse los casos y entregar con el mismo formato.</p>
 
-    <p class="lead">La herramienta que corre en tu navegador es gratuita y va a seguir siéndolo — no nos
-    cuesta nada, porque no hay servidor procesando tus vídeos. La <b>calidad de la evidencia nunca queda
-    detrás de un pago</b>.</p>
+    <!-- 1. HERO.
+         Sem botão aqui de propósito: o primeiro CTA da página é o do cartão do
+         Free, logo abaixo. Um botão no hero competiria com os três que decidem. -->
+    <h1 class="precoH1">La evidencia es gratis. Usted paga por repetir, coordinar y estandarizar.</h1>
+    <p class="lead">Grabe o abra un vídeo y genere la evidencia completa en su computadora. Cuando haya una planilla entera o un equipo ejecutando, Walkstamp reparte los casos y devuelve situación, ejecutor y comprobantes.</p>
+    <p class="small muted privHero">El vídeo, el audio y la transcripción no salen de su computadora — en el plan de pago igual que en el gratuito.</p>
 
-    <!-- A tira dos formatos, a mesma da home. A página de preços falava de
-         planos e nunca dizia o que SAI — e o que sai é o que se compra. -->
-    <div class="saidas">
-      <span class="saida"><b>PDF</b></span>
-      <span class="saida"><b>DOCX</b> Word</span>
-      <span class="saida"><b>PPTX</b> PowerPoint</span>
-      <span class="saida"><b>HTML</b></span>
-      <span class="saida"><b>MD</b> Markdown</span>
-      <span class="saida"><b>SCORM</b></span>
-      <span class="saida"><b>CSV</b></span>
-      <span class="saida"><b>JSON</b></span>
-      <span class="saida"><b>ZIP</b></span>
-      <span class="saida"><b>VTT</b></span>
-      <span class="saida"><b>SRT</b></span>
-      <span class="saida"><b>Google&nbsp;Docs</b></span>
-      <span class="saida"><b>Jira</b></span>
-    </div>
+    <!-- 2. OS TRÊS CARTÕES, POR RESULTADO.
+         Gerados em `build.py` (CARTOES) e entregues por `src/precos.json`. O
+         título de cada um é o resultado; o nome do plano é o subtítulo. Tirar um
+         benefício é apagar uma entrada lá, e ele some nos cinco idiomas. -->
+    {{cartoesPlanos}}
+    <p class="small muted cobranca">Cobro anual en las dos suscripciones. Se renueva sola al final de cada año y usted cancela cuando quiera en su cuenta: el acceso sigue hasta el final del periodo ya pagado.</p>
 
-    <!-- A PROVA DE PRIVACIDADE, ANTES DOS CARTOES.
-         Ela estava depois da tabela de noventa e tres linhas — ou seja,
-         depois do ponto a que quem faz avaliacao de fornecedor chega. E a
-         primeira coisa que essa pessoa procura, e a unica que decide se o
-         resto da pagina vale ser lido. -->
-    <p class="small muted" style="margin-top:24px"><b>Sigue sin servidor, también en el pago.</b> La clave se
-    comprueba dentro de tu navegador y funciona sin conexión — <b>no recibimos tu vídeo ni tu audio en
-    ningún plan</b>. En los planes de pago hay una única cosa que puedes elegir guardar en tu cuenta: el
-    archivo completo de una sesión, adjuntado por ti a un caso del guion, y borrable cuando quieras.
-    <a href="{{seguranca}}">Cómo funciona por dentro</a>.</p>
+    <!-- 3. A COMPARAÇÃO CURTA — cinco linhas, e só cinco. -->
+    <h2 class="cmpH">En cinco líneas</h2>
+    <p class="lead">La tabla completa está al final de la página y es honesta. Estas cinco líneas son la diferencia que decide.</p>
+    {{comparacaoCurta}}
 
-    <div class="plans tres">
+    <!-- 4. A DEMONSTRAÇÃO DA RODADA, em quatro estados.
+         Aqui havia um <video> apontando para /demo/rodada.* — quinze arquivos
+         que não existem no repositório. A figura nasce no build, no mesmo lugar
+         que desenha as outras, e não pode dar 404. -->
+    <h2>La ronda, de principio a fin</h2>
+    <p class="lead">Entra una planilla de casos, los casos se reparten entre las personas, cada ejecución genera la evidencia en la computadora de quien ejecuta, y la planilla vuelve con sus columnas originales intactas.</p>
+    {{figuraRodada}}
 
-      <div class="plan" data-plano="free">
-        <span class="badge">disponible ya</span>
-        <h3 style="margin-top:14px">Free</h3>
-        <div class="price">US$ 0<span> / para siempre</span></div>
-        <p class="moedas">R$ 0 &middot; € 0</p>
-        <p class="small muted" style="margin:0">Sin registro, sin tarjeta, sin límite de uso.</p>
-        <ul>
-          <li>Grabar la pantalla o usar un vídeo, de cualquier tamaño</li>
-          <li>Fotogramas por cambio de escena y transcripción en tu dispositivo</li>
-          <li>PDF, Word, HTML, Markdown, hoja de cálculo, ZIP y JSON</li>
-          <li>Tapar, recortar, destacar y el aviso de dato sensible</li>
-          <li><a href="/es/link">Enlace preconfigurado</a> para pegar en Zephyr, Jira, Xray o TestRail — es una dirección, no una integración</li>
-          <li>Reabrir el documento después para corregir un paso — y paquete SCORM para el LMS</li>
-        </ul>
-        <a class="btn" href="/app?lang=es">Crear una evidencia ahora</a>
-        <p class="pe">Todo lo que hace que tu evidencia sea aceptada está aquí.</p>
+    <!-- 5. A CALCULADORA.
+         `hidden` no HTML e destravada pelo script. Sem JS, o bloco inteiro não
+         aparece — que é melhor do que quatro campos mortos que não somam nada.
+         Nenhum número sai daqui: não há fetch, não há evento, não há form. -->
+    <div class="roi" id="roi" hidden data-plano="{{personalNum}}" data-moeda="{{precoPersonal}}">
+      <h2>Cuánto cuesta hacerlo a mano</h2>
+      <p class="lead">Los cuatro números son suyos y se quedan en su navegador. No se envía nada, ni siquiera mientras escribe.</p>
+      <div class="roiCampos">
+        <p><label for="roiCasos">Casos por ronda</label><input id="roiCasos" type="number" min="0" step="1" value="40" inputmode="numeric"></p>
+        <p><label for="roiMin">Minutos de trabajo manual por caso</label><input id="roiMin" type="number" min="0" step="1" value="12" inputmode="numeric"></p>
+        <p><label for="roiRodadas">Rondas por mes</label><input id="roiRodadas" type="number" min="0" step="1" value="2" inputmode="numeric"></p>
+        <p><label for="roiHora">Costo por hora</label><input id="roiHora" type="number" min="0" step="1" value="60" inputmode="numeric"></p>
       </div>
-
-      <div class="plan hi" data-plano="personal">
-        <span class="badge">prueba de 14 días</span>
-        <h3 style="margin-top:14px">Personal</h3>
-        <div class="price">US$ 29<span> / año</span></div>
-        <p class="moedas">R$ 149 &middot; € 27</p>
-        <p class="small muted" style="margin:0">Para cuando son cuarenta casos, y no uno.</p>
-        <ul>
-          <li><b>La ronda entera, y no un documento suelto.</b> Sube la hoja — .xlsx, .csv o pegada desde Excel — y cada caso se convierte en un enlace que abre la herramienta ya rellenada.</li>
-          <li><b>Y vuelve en .xlsx</b>, con situación, cuándo, quién lo ejecutó, el archivo generado y la huella de las pantallas.</li>
-          <li>Recibo por caso: la ficha y la huella de cada pantalla — sin que ninguna imagen salga de tu equipo.</li>
-          <li data-f="modeloProprio">Logotipo y nombre del cliente en el PDF, el Word y el HTML, con tu portada y tus campos — y el perfil vuelve en cualquier equipo</li>
-          <li>Todo lo del Free</li>
-        </ul>
-        <a class="btn" href="{{conta}}">Probar Personal 14 días</a>
-        <p class="pe">Al instante, sin tarjeta. O <a href="mailto:{{contato}}?subject=Walkstamp%20Personal">escríbeme</a>.</p>
-      </div>
-
-      <div class="plan" data-plano="team">
-        <span class="badge">desde 5 personas</span>
-        <h3 style="margin-top:14px">Team</h3>
-        <div class="price">US$ 69<span> / persona / año</span></div>
-        <p class="moedas">R$ 349 &middot; € 65</p>
-        <p class="small muted" style="margin:0">Para el equipo que necesita el mismo documento en manos de todos.</p>
-        <ul>
-          <li><b>Reparte la ronda y acompáñala:</b> asigna cada caso a una persona y mira quién terminó qué — con fecha, archivo y huella digital, y la hoja vuelve con todo eso dentro.</li>
-          <li>Se activa por enlace: quien coordina manda una dirección, nadie escribe claves</li>
-          <li data-f="padraoDoTime">Perfil de equipo enviado a todos</li>
-          <li>Panel de asientos: invitar, bloquear y elegir el plazo, de 1 a 90 días</li>
-          <li>Todo lo del Personal</li>
-        </ul>
-        <a class="btn ghost" href="{{time}}">Recibir el enlace de Team</a>
-        <p class="pe">Quien graba no inicia sesión: la licencia va en el enlace y se comprueba en su propio equipo. La cuenta es de quien coordina — ahí están los asientos, las facturas y los tickets de soporte.</p>
-      </div>
-
-    </div>
-
-
-    <!-- A lista completa. O dado mora em src/features.json e a tabela é montada
-         no build: sessenta e poucas linhas em três idiomas, escritas à mão,
-         seriam 195 chances de a versão em espanhol prometer o que a portuguesa
-         não promete. -->
-
-
-    <!-- A DEMONSTRACAO CENTRAL.
-         O tour da home mostra a ferramenta gratuita. O que o plano vende e a
-         RODADA, e rodada nao cabe em texto: sao quatro telas, duas pessoas e
-         uma planilha que volta diferente do que entrou. Este video percorre o
-         produto de verdade — quem o gera e o `estudio/gravar-roteiro.mjs`, e
-         ele quebra na hora de gravar se a tela mudar. -->
-    <h2 style="margin-top:52px">La ronda entera, en 47 segundos</h2>
-    <p class="lead">Es lo que compra el plan, y es difícil de explicar en texto: entra una hoja de cuarenta casos, cada persona recibe los suyos ya rellenados, la ejecución genera la evidencia en el equipo de quien ejecuta, y la hoja vuelve con situación, fecha, ejecutor y huella digital.</p>
-    <ol class="passosRodada">
-        <li>Entra la hoja de casos</li>
-        <li>Cada caso se vuelve un enlace que abre la herramienta rellenada</li>
-        <li>La ejecución genera la evidencia, en el equipo de quien ejecuta</li>
-        <li>El caso vuelve cerrado, con fecha, ejecutor y huella digital</li>
-    </ol>
-    <figure class="tour" style="margin-top:18px">
-      <video poster="/demo/rodada.{{rodadaLang}}.jpg" controls muted playsinline preload="none"
-             aria-label="La pantalla de control de una ronda: la hoja de casos, el caso abriendo la herramienta ya rellenada, y el caso volviendo cerrado">
-        <source src="/demo/rodada.{{rodadaLang}}.webm" type="video/webm">
-        <source src="/demo/rodada.{{rodadaLang}}.mp4" type="video/mp4">
-        <img src="/demo/rodada.{{rodadaLang}}.jpg" alt="La pantalla de control de una ronda: la hoja de casos, el caso abriendo la herramienta ya rellenada, y el caso volviendo cerrado" style="width:100%">
-      </video>
-      <figcaption>Grabado recorriendo el producto de verdad. El vídeo no sale de tu equipo en ninguno de estos pasos — lo que viaja a la cuenta es el nombre del archivo, la fecha y la huella de las pantallas.</figcaption>
-    </figure>
-
-    <!-- A COMPARACAO CURTA, e o motivo de ela vir ANTES da lista completa.
-         Noventa e tres linhas honestas descrevem o produto e nao decidem a
-         compra: quem esta escolhendo precisa de cinco. A lista completa
-         continua logo abaixo, para quem quiser conferir linha a linha. -->
-    <h2 style="margin-top:52px">En cinco líneas, y no en noventa y tres</h2>
-    <p class="lead">La tabla completa está justo debajo y es honesta — pero noventa y tres líneas esconden la diferencia que decide. Estas cinco son la diferencia.</p>
-    <table class="legal cmpPlanos">
-      <caption class="soLeitor">Qué cambia de un plan al siguiente</caption>
-      <thead>
-        <tr><th scope="col">Lo que puedes hacer</th><th scope="col">Free</th><th scope="col">Personal</th><th scope="col">Team</th></tr>
-      </thead>
-      <tbody>
-          <tr><th scope="row">Crear la evidencia y entregarla</th><td data-rot="Free">sí</td><td data-rot="Personal">sí</td><td data-rot="Team">sí</td></tr>
-          <tr><th scope="row">Ejecutar una hoja de casos</th><td class="nao" data-rot="Free">—</td><td data-rot="Personal">la tuya</td><td data-rot="Team">la del equipo</td></tr>
-          <tr><th scope="row">Devolver la hoja rellenada</th><td class="nao" data-rot="Free">—</td><td data-rot="Personal">sí</td><td data-rot="Team">sí</td></tr>
-          <tr><th scope="row">Guardar tu propio formato de documento</th><td class="nao" data-rot="Free">—</td><td data-rot="Personal">sí</td><td data-rot="Team">sí</td></tr>
-          <tr><th scope="row">Asignar los casos y ver quién terminó</th><td class="nao" data-rot="Free">—</td><td class="nao" data-rot="Personal">—</td><td data-rot="Team">sí</td></tr>
-          <tr><th scope="row">Imponer el mismo formato a todos</th><td class="nao" data-rot="Free">—</td><td class="nao" data-rot="Personal">—</td><td data-rot="Team">sí</td></tr>
-      </tbody>
-    </table>
-
-    <h2 style="margin-top:52px">{{tpH}}</h2>
-    <p class="lead">{{tpP}}</p>
-    {{tabelaPlanos}}
-
-    <!-- A LEGENDA DOS SELOS.
-         Um selo que a pessoa nao entende e ruido — e "beta" numa tabela de
-         preco, sem explicacao, e a palavra que faz a avaliacao de fornecedor
-         parar e perguntar. A legenda responde antes de perguntarem. -->
-    <p class="small muted" style="margin-top:12px;max-width:70ch">{{tpLegenda}}</p>
-
-    <!-- A CAIXA DO QUE AINDA NAO EXISTE.
-         Um item marcado "em breve" DENTRO do conjunto principal do plano
-         obriga quem decide a separar, linha a linha, o que ja se compra do
-         que foi prometido. Isso nao e transparencia: e trabalho passado para
-         quem esta pagando. O que esta no cartao esta utilizavel; o resto mora
-         aqui, fora da conta. -->
-    <div class="roteiroFuturo" style="margin-top:22px">
-      <p class="small muted" style="margin:0"><b>En la hoja de ruta, y fuera de la decisión de compra.</b> Esto todavía no existe. Está aquí porque es lo que viene a continuación — y no porque el precio ya lo incluya. Nada de las tarjetas de arriba depende de esto.</p>
-      <ul class="small muted" style="margin:6px 0 0">
-        <li data-f="termosGuardados"><b>Los términos de tu sistema quedan guardados</b> — la lista sobrevive a la visita y a la máquina, en vez de reescribirse. Aplicarlos ya es gratis; guardarlos es de aquí <span class="soon">pronto</span></li>
+      <ul class="roiSaida" aria-live="polite">
+        <li><span>Horas por mes</span> <b id="roiHoras">—</b></li>
+        <li><span>Costo mensual estimado</span> <b id="roiCusto">—</b></li>
+        <li><span>Al año</span> <b id="roiAno">—</b></li>
+        <li><span>El Personal cuesta</span> <b id="roiVs">{{precoPersonal}}</b></li>
       </ul>
+      <p class="small muted roiNota">Una estimación. Vale lo que valen sus cuatro números — y ninguno de ellos sale de esta página.</p>
     </div>
 
-    <p class="small muted" style="margin-top:14px"><b>Pro y API</b> — convertir formatos que el navegador
-    rechaza (HEVC, MKV, ProRes), transcribir en el servidor, procesar por lotes, o una dirección que devuelva
-    fotogramas y transcripción para que tu producto la consuma. Nada de eso existe todavía, y es lo que viene
-    después. <a href="mailto:{{contato}}?subject=Walkstamp%20API">Cuéntame tu caso</a> — así decido el orden.</p>
+    <!-- 6. AS PROVAS: o que sai, onde fica, o que abre, e o que NÃO fazemos. -->
+    <h2>Qué sale, y dónde queda cada cosa</h2>
+    <p class="lead">Un documento de evidencia sale en estos formatos, y todos ellos nacen en su computadora:</p>
+    <div class="saidas"><span class="saida"><b>PDF</b></span><span class="saida"><b>DOCX</b> Word</span><span class="saida"><b>PPTX</b> PowerPoint</span><span class="saida"><b>HTML</b></span><span class="saida"><b>MD</b> Markdown</span><span class="saida"><b>SCORM</b></span><span class="saida"><b>CSV</b></span><span class="saida"><b>JSON</b></span><span class="saida"><b>ZIP</b></span><span class="saida"><b>VTT</b></span><span class="saida"><b>SRT</b></span><span class="saida"><b>Google&nbsp;Docs</b></span><span class="saida"><b>Jira</b></span></div>
+    <p class="small muted"><b>En su computadora:</b> el vídeo, el audio, la transcripción y la generación del documento. <b>En el servidor:</b> su cuenta, los asientos y la factura. Esa es la línea, y no se mueve en el plan de pago.</p>
+    <p class="small muted">Los archivos abren en Word, en PowerPoint, en el navegador y en su LMS. El enlace preconfigurado se pega en Jira, Zephyr, Xray o TestRail — <b>es una dirección, no una integración automática</b>.</p>
+    <p class="small muted">La licencia se verifica dentro de su computadora y funciona sin internet. Eso es ventaja y limitación a la vez: revocar un asiento respeta el plazo de 1 a 90 días que eligió quien administra.</p>
 
-    <p class="small muted" style="margin-top:24px">Dos honestidades sobre esta página. Lo que está marcado
-    <span class="soon">pronto</span> aún no existe: está listado porque es lo que voy a construir, y quien
-    entre ahora ayuda a decidir el orden y conserva el precio de esta página para siempre. Y el <b>plan
-    gratuito no va a perder funciones</b> cuando los de pago crezcan — la línea de corte es fija: la
-    privacidad y la calidad de la evidencia nunca quedan detrás de un pago.</p>
+    <!-- 7. A LISTA COMPLETA, RECOLHIDA.
+         `open` no HTML, e o script fecha no telefone. A ordem é essa e não a
+         inversa por um motivo de indexação: <details> fechado esconde o texto
+         do Ctrl+F e do buscador, e esta lista é a página inteira em palavras.
+         Nascendo aberta, o conteúdo é indexável mesmo se o script não rodar; o
+         telefone, onde noventa e quatro linhas seriam uma parede de rolagem,
+         recebe a versão fechada. O número acima dela é contado, não digitado. -->
+    <h2>{{tpH}}</h2>
+    <p class="lead">{{tpP}}</p>
+    <details class="listaCompleta" id="listaF" open>
+      <summary>Ver todas las funcionalidades</summary>
+      {{tabelaPlanos}}
+      <p class="small muted">{{tpLegenda}}</p>
+    </details>
+
+    <!-- 8. AS PERGUNTAS DE COMPRA. Seis, resposta curta, e nenhuma promete
+         prazo de suporte. -->
+    <h2>Preguntas de quien está comprando</h2>
+    <dl class="faqCompra">
+      <dt>¿Necesito tarjeta para usar el Free?</dt>
+      <dd>No. Ni tarjeta ni cuenta.</dd>
+      <dt>¿Qué pasa si cancelo?</dt>
+      <dd>El acceso sigue hasta el final del periodo ya pagado. Después el Free sigue funcionando, y usted exporta sus modelos y sus guiones.</dd>
+      <dt>¿Ustedes reciben mi vídeo?</dt>
+      <dd>No, en ningún plan. El vídeo, el audio y la transcripción se procesan en su computadora y no se envían a ninguna parte.</dd>
+      <dt>¿Cómo funciona la factura?</dt>
+      <dd>Quien cobra es Stripe. La factura llega después del pago, y el enlace aparece en su cuenta cuando existe.</dd>
+      <dt>¿Puedo comprar 3 asientos y crecer después?</dt>
+      <dd>Sí. La cantidad de asientos es ajustable en su cuenta en cualquier momento.</dd>
+      <dt>¿La licencia funciona sin internet?</dt>
+      <dd>Funciona. Se verifica en su computadora. A cambio, revocar un asiento respeta el plazo de 1 a 90 días que eligió quien administra.</dd>
+    </dl>
+
   </div>
 </section>
 
-
-
-<section id="support"></section>
-
-<section>
-  <div class="wrap">
-    <h2>Por qué el plan gratuito no tiene trampa</h2>
-    <p class="lead" style="margin-bottom:0">La pregunta es justa: una herramienta gratuita suele cobrar en
-    otro sitio — datos, anuncios, o un límite que aparece en el peor momento. Aquí el motivo es más simple: tu
-    vídeo lo procesa tu propio ordenador, así que el coste de atenderte es casi cero. No hay nada que
-    subvencionar, y por eso no hay nada que recuperar después.</p>
-  </div>
-</section>
-
-<!-- A LISTA DE ESPERA DO PRO/API, DEPOIS E NAO ANTES.
-     Ela ficava entre os planos e o fim da pagina, ocupando o lugar
-     nobre com algo que nao se compra: a propria secao diz que "nada
-     disso existe ainda". O texto e honesto e a lista ja tem gente
-     inscrita, entao ela nao sai — desce. Quem chegou para decidir
-     entre tres planos decide primeiro. -->
-<section id="lista" data-espera="proapi">
-  <div class="wrap">
-    <h2>¿Quieres que te avise del Pro y de la API?</h2>
-    <p class="lead">El plan de pago <b>ya está disponible</b> — lo que todavía no existe es el Pro y la API, descritos arriba. Deja un correo y te aviso cuando salgan. Un mensaje, no una newsletter.</p>
-    <form class="lista" id="listaForm" data-url="{{supaUrl}}" data-key="{{supaKey}}" novalidate>
-      <input type="email" id="listaEmail" autocomplete="email" placeholder="tu@correo.com" aria-label="Tu correo">
-      <button class="btn" type="submit" id="listaBtn">Avísame cuando salgan</button>
-    </form>
-    <p class="small muted listaMsg" id="listaMsg" role="status"></p>
-    <p class="small muted" style="max-width:640px">La promesa de esta herramienta es que <b>tu vídeo no sale de tu máquina</b>, y sigue en pie: este campo no tiene ninguna relación con lo que procesas aquí — el navegador no manda vídeo, audio ni transcripción a ninguna parte. El correo queda en una base mía, no se vende, no va a ninguna lista de terceros y desaparece el día que lo pidas. ¿Prefieres no dejarlo? Sin problema — la herramienta no cambia por eso.</p>
-  </div>
-</section>
+<script>
+/* Os dois comportamentos desta página, e nada mais.
+   Sem rede: nenhum fetch, nenhum XHR, nenhuma imagem remota. O que se digita
+   na calculadora não sai do navegador — não há para onde sair. */
+(function () {
+  var b = document.getElementById('roi');
+  if (b) {
+    /* Só agora o bloco aparece: se este script não carregar, a pessoa não vê
+       quatro campos que não respondem. */
+    b.hidden = false;
+    var campos = ['roiCasos', 'roiMin', 'roiRodadas', 'roiHora'].map(function (i) {
+      return document.getElementById(i);
+    });
+    var horas = document.getElementById('roiHoras');
+    var custo = document.getElementById('roiCusto');
+    var ano = document.getElementById('roiAno');
+    var moeda = (b.getAttribute('data-moeda') || '').replace(/[\d.,\s]+$/, '').trim();
+    var num = function (e) {
+      var v = Number(e && e.value);
+      return isFinite(v) && v > 0 ? v : 0;
+    };
+    var conta = function () {
+      var h = num(campos[0]) * num(campos[1]) * num(campos[2]) / 60;
+      var c = h * num(campos[3]);
+      horas.textContent = h.toFixed(1);
+      custo.textContent = moeda + ' ' + Math.round(c).toLocaleString();
+      ano.textContent = moeda + ' ' + Math.round(c * 12).toLocaleString();
+    };
+    campos.forEach(function (e) { if (e) e.addEventListener('input', conta); });
+    conta();
+  }
+  /* A lista completa nasce aberta (indexável) e fecha no telefone. */
+  var d = document.getElementById('listaF');
+  if (d && window.matchMedia && window.matchMedia('(max-width: 720px)').matches) {
+    d.open = false;
+  }
+})();
+</script>
