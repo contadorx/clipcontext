@@ -140,5 +140,38 @@ console.log('\n[6] UM ESTADO POR PLANO, e a lista espera o que não existe');
   }
 }
 
+console.log('\n[7] o que o Personal PROMETE é o que a planilha DEVOLVE');
+{
+  /* O cartão do Personal parou de vender identidade visual e passou a vender a
+     rodada de casos: "suba a planilha, cada caso vira um link, e ela volta em
+     .xlsx com situação, quando, quem executou, o arquivo e a impressão".
+     "Colocar logotipo" se compara com editar um Word; isto substitui um
+     processo.
+     
+     A promessa e a entrega moram em arquivos diferentes, então elas podem
+     divergir em silêncio: tirar uma coluna do export não faz a página parar de
+     prometê-la. Esta afirmação amarra as duas. */
+  const rota = fs.readFileSync(`${RAIZ_WS}/app/conta/planilha/route.ts`, 'utf8');
+  const cab = (rota.match(/const cab = \[([\s\S]*?)\]/) || [])[1] || '';
+  const colunas = [...cab.matchAll(/t\.(rot[A-Za-z]+)/g)].map((m) => m[1]);
+  /* As cinco que o cartão nomeia, uma a uma. Um `every` sobre a lista inteira
+     diria "sim" com quatro delas presentes e a quinta trocada por outra. */
+  for (const c of ['rotColSit', 'rotColQuando', 'rotColQuem', 'rotColArq', 'rotColImp']) {
+    ok(`a planilha devolve ${c}`, colunas.includes(c), colunas.join(' '));
+  }
+  ok('e sai em .xlsx, como o cartão diz', /montarXlsx/.test(rota));
+
+  /* E o cartão continua liderando pelo roteiro. A primeira bala é a que a
+     pessoa lê; se ela voltar a ser o logotipo, o reposicionamento se desfez
+     sem ninguém mexer numa linha de código. */
+  for (const L of IDIOMAS) {
+    const html = fs.readFileSync(`${RAIZ_WS}/src/site/bodies/precos.${L}.html`, 'utf8');
+    const card = html.slice(html.indexOf('data-plano="personal"'));
+    const primeira = (card.match(/<li[^>]*>([\s\S]*?)<\/li>/) || [])[1] || '';
+    ok(`${L}: a primeira bala do Personal é a rodada de casos`,
+       /xlsx|csv|Excel/i.test(primeira), primeira.replace(/<[^>]*>/g, '').slice(0, 70));
+  }
+}
+
 console.log(falhas ? `\n${falhas} FALHA(S)` : '\nCartões e catálogo: uma verdade só.');
 process.exit(falhas ? 1 : 0);

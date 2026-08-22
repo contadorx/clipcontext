@@ -5,9 +5,9 @@ A árvore deste zip **já está construída**: `public/app.html` e
 rodar `build.py`.
 
 Base: `285d4a5` (o `main` de produção) + os seis commits do `correcoes.bundle`
-= a árvore do `walkstampbuild8_1.zip`. Sobre ela, nove commits novos.
+= a árvore do `walkstampbuild8_1.zip`. Sobre ela, dez commits novos.
 
-## Os nove commits
+## Os dez commits
 
 **A0 — a saída recomendada chega à linhagem.** Em vez de sete formatos com o
 mesmo peso, a ferramenta olha o cenário e propõe um; os outros ficam recolhidos
@@ -112,11 +112,28 @@ fala, e diz em voz alta que o plano pago já está no ar.
 A trava é estrutural — `data-plano` nos cartões, `data-espera` na seção — porque
 casar frases em cinco idiomas envelhece na primeira reescrita de copy.
 
+**B5 — o Personal vendia logotipo; agora vende a rodada.** A chamada era "para
+quem entrega documento com o próprio nome"; a primeira bala era o logotipo; o
+roteiro vinha em segundo, numa linha. Agora o cartão lidera pelas duas metades da
+tese, e cada frase foi conferida contra o arquivo que a sustenta:
+
+| o cartão promete | onde vive |
+|---|---|
+| suba a planilha (.xlsx, .csv, colada do Excel) | `roteiro_salvar()` |
+| cada caso vira um link que abre a ferramenta preenchida | o `caso=` no `template.html` |
+| volta em .xlsx com situação, quando, quem, arquivo e impressão | `app/conta/planilha/route.ts` |
+| recibo por caso, sem imagem sair | `roteiro_caso.recibo` |
+
+A marca continua no pago — como prova visível do plano, não como a justificativa.
+`planos.mjs` amarra promessa a entrega: tirar uma coluna do export reprova.
+
+**Com isto a trilha B fecha inteira.**
+
 ## Os arquivos
 
 | arquivo | o que é |
 |---|---|
-| `tudo.bundle` | os nove commits, para aplicar por Git sobre `d5db0f7` |
+| `tudo.bundle` | os dez commits, para aplicar por Git sobre `d5db0f7` |
 | `A0-saida-recomendada.patch` | o A0 em diff legível |
 | `A1-cartao-da-grade.patch` | o A1 em diff legível (fonte e régua) |
 | `B3-banco-versionado.patch` | o B3 em diff legível |
@@ -124,6 +141,7 @@ casar frases em cinco idiomas envelhece na primeira reescrita de copy.
 | `B1-uma-verdade-so.patch` | o B1 em diff legível |
 | `barra-e-B2.patch` | a barra grudada e o B2, em diff legível |
 | `B4-um-estado-por-plano.patch` | o B4 em diff legível |
+| `B5-personal-em-torno-do-roteiro.patch` | o B5 em diff legível |
 | `correcoes.bundle`, `correcoes-so-fonte.patch` | os seis commits originais do zip |
 | `ARQUIVOS.txt`, `MENSAGENS.txt` | o inventário original |
 

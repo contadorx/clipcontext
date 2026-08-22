@@ -140,7 +140,7 @@ medido — `aria-current`, o foco indo para o cabeçalho, o rótulo acessível c
 número e a palavra "feita", a frase de status que não se repete, e as duas
 guardas da travessia.
 
-### Trilha B — o que trava a venda (2–3 d)
+### Trilha B — o que trava a venda: **FEITA**
 
 **B1. Verdade única entre página, catálogo e código — FEITO**
 
@@ -291,13 +291,36 @@ o que a lista espera **não pode ser algo que a página vende** — mais uma aç
 primária por cartão. Provado nas duas direções: apontar a lista para `personal`
 reprova, e um segundo botão num cartão reprova.
 
-**B5. Reposicionar o Personal em torno do roteiro (2–3 d)**
+**B5. Reposicionar o Personal em torno do roteiro — FEITO**
 
-A página vende identidade visual; o valor econômico real é a orquestração de casos.
-"Colocar logotipo" se compara com editar um Word. "Importar 40 casos, executar cada um
-pelo link, e receber status, executor, data, hash e arquivo de volta" substitui um
-processo inteiro. Marca própria continua no pago — como prova visível do plano, não como
-a justificativa.
+O cartão liderava pela identidade visual. A chamada era *"Para quem entrega
+documento com o próprio nome — ou com o do cliente"*, a primeira bala era o
+logotipo, e o roteiro vinha em segundo, numa linha: *"suba a planilha, execute um
+a um, e ela volta preenchida"*.
+
+"Colocar logotipo" se compara com editar um Word. O que substitui um processo
+está medido no código, e agora está escrito no cartão:
+
+| o cartão promete | onde isso vive |
+|---|---|
+| suba a planilha (.xlsx, .csv, colada do Excel) | `roteiro_salvar()`, `Importar.tsx` |
+| cada caso vira um link que abre a ferramenta preenchida | o `caso=` no `template.html` |
+| volta em .xlsx com situação, quando, quem, arquivo e impressão | `app/conta/planilha/route.ts` — as 11 colunas |
+| recibo por caso, sem imagem sair | `roteiro_caso.recibo`, do build de 16/08 |
+
+A marca **continua no pago**, na quarta bala, junto com o modelo e o perfil — como
+prova visível do plano, e não como a justificativa dele.
+
+Uma restrição real do `cenarios.mjs` moldou o resultado: cartões de no máximo
+seis balas, e no máximo uma de diferença entre eles. Os três seguem **6/6/5** —
+a identidade e o perfil dividem uma linha para o roteiro caber com as duas metades
+da tese.
+
+**A trava** entrou no `planos.mjs` e amarra promessa a entrega: as cinco colunas
+que o cartão nomeia têm que existir no `cab` da rota da planilha, o export tem que
+sair em `.xlsx`, e a primeira bala do Personal tem que falar da planilha nos cinco
+idiomas. Provado nas duas direções — tirar `rotColImp` do export reprova, e o
+logotipo voltar a liderar reprova.
 
 ### Trilha C — motor e dívida (22,5–32,5 d)
 
@@ -328,9 +351,9 @@ fonte, medir o pico de memória, medir WER antes de tocar na compactação de si
 | Trilha | Dias | O que você tem no fim |
 |---|---:|---|
 | A — terminar o UX | **1–2** | o redesenho inteiro, com acessibilidade validada |
-| B — destravar a venda | **2–3** | uma verdade só e cobrança auditável (o banco já é reconstruível) |
+| B — destravar a venda | **feita** | uma verdade só, cobrança auditável, banco reconstruível |
 | C — motor e dívida | **22,5–32,5** | você mede antes de otimizar; as próximas mudanças ficam baratas |
-| **Total** | **25,5–37,5** | |
+| **Total** | **23,5–34,5** | |
 
 ---
 
