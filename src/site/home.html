@@ -87,6 +87,32 @@
   </div>
 </section>
 
+<!-- ANTES E DEPOIS, e nao mais uma lista de recursos.
+
+     A home explicava bem o MECANISMO e nunca dizia que TRABALHO ela substitui.
+     Um recurso se compara com outro recurso; um fluxo se compara com a
+     segunda-feira de quem executa uma rodada de casos. As quatro linhas abaixo
+     sao o dia dessa pessoa, na ordem em que ele acontece — e cada uma delas
+     aponta para uma peca que ja existe no produto, e nao para uma promessa. -->
+<section id="antesdepois">
+  <div class="wrap">
+    <h2>{{adH}}</h2>
+    <p class="lead">{{adP}}</p>
+    <table class="antesDepois">
+      <caption class="soLeitor">{{adH}}</caption>
+      <thead>
+        <tr><th scope="col">{{adAntes}}</th><th scope="col">{{adDepois}}</th></tr>
+      </thead>
+      <tbody>
+        <tr><td data-rot="{{adAntes}}">{{ad1A}}</td><td data-rot="{{adDepois}}">{{ad1D}}</td></tr>
+        <tr><td data-rot="{{adAntes}}">{{ad2A}}</td><td data-rot="{{adDepois}}">{{ad2D}}</td></tr>
+        <tr><td data-rot="{{adAntes}}">{{ad3A}}</td><td data-rot="{{adDepois}}">{{ad3D}}</td></tr>
+        <tr><td data-rot="{{adAntes}}">{{ad4A}}</td><td data-rot="{{adDepois}}">{{ad4D}}</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
 <section>
   <div class="wrap">
     <h2>{{whyH}}</h2>
@@ -104,21 +130,32 @@
   <div class="wrap">
     <h2>{{saidasH}}</h2>
     <p class="lead" style="margin-bottom:0">{{saidasP}}</p>
+    <!-- QUATRO NA FRENTE, E NAO TREZE.
+         Treze fichas logo na primeira rolagem faziam a pagina parecer um
+         CONVERSOR DE ARQUIVO, que e a categoria errada: quem decide comprar
+         quer saber se a entrega dele cabe, e nao quantos formatos existem. Os
+         quatro sao os da entrega de evidencia; o resto continua inteiro, a um
+         clique, para quem veio justamente conferir se o seu esta na lista. -->
     <div class="saidas">
       <span class="saida"><b>PDF</b></span>
       <span class="saida"><b>DOCX</b> Word</span>
-      <span class="saida"><b>PPTX</b> PowerPoint</span>
-      <span class="saida"><b>HTML</b></span>
-      <span class="saida"><b>MD</b> Markdown</span>
-      <span class="saida"><b>SCORM</b></span>
-      <span class="saida"><b>CSV</b></span>
-      <span class="saida"><b>JSON</b></span>
-      <span class="saida"><b>ZIP</b></span>
-      <span class="saida"><b>VTT</b></span>
-      <span class="saida"><b>SRT</b></span>
-      <span class="saida"><b>Google&nbsp;Docs</b></span>
+      <span class="saida"><b>CSV</b> {{saidasPlan}}</span>
       <span class="saida"><b>Jira</b></span>
     </div>
+    <details class="maisSaidas">
+      <summary>{{saidasTodas}}</summary>
+      <div class="saidas">
+        <span class="saida"><b>PPTX</b> PowerPoint</span>
+        <span class="saida"><b>HTML</b></span>
+        <span class="saida"><b>MD</b> Markdown</span>
+        <span class="saida"><b>SCORM</b></span>
+        <span class="saida"><b>JSON</b></span>
+        <span class="saida"><b>ZIP</b></span>
+        <span class="saida"><b>VTT</b></span>
+        <span class="saida"><b>SRT</b></span>
+        <span class="saida"><b>Google&nbsp;Docs</b></span>
+      </div>
+    </details>
   </div>
 </section>
 
@@ -205,6 +242,25 @@
   </div>
 </section>
 
+<!-- OS TRES PLANOS, PELO TRABALHO.
+     A home empurrava so para o Free, e o Personal so aparecia na pagina de
+     precos — quem chega com uma planilha de casos na mao tinha que adivinhar
+     que existe um plano para isso. Aqui eles sao descritos pelo TRABALHO que
+     cada um faz, e nao por lista de recurso: a lista completa e o lugar de
+     comparar, e ele fica a um clique. -->
+<section id="planos">
+  <div class="wrap">
+    <h2>{{plH}}</h2>
+    <p class="lead">{{plP}}</p>
+    <div class="cards" style="margin-top:26px">
+      <div class="card"><h3>{{plFreeT}}</h3><p>{{plFreeD}}</p></div>
+      <div class="card"><h3>{{plPersT}}</h3><p>{{plPersD}}</p></div>
+      <div class="card"><h3>{{plTimeT}}</h3><p>{{plTimeD}}</p></div>
+    </div>
+    <p class="small muted" style="margin-top:18px"><a href="{{precos}}" style="color:var(--accent)">{{plVer}}</a></p>
+  </div>
+</section>
+
 <section>
   <div class="wrap">
     <h2>{{faqH}}</h2>
@@ -216,6 +272,19 @@
       <details><summary>{{q5}}</summary><p>{{a5}}</p></details>
       <details><summary>{{q6}}</summary><p>{{a6}}</p></details>
       <details><summary>{{q7}}</summary><p>{{a7}}</p></details>
+      <!-- AS SEIS COMERCIAIS.
+           As sete acima respondem "isto funciona?". Quem esta decidindo pagar
+           tem outras seis, e elas nao estavam em lugar nenhum do site — a
+           pessoa tinha que escrever perguntando, e a maioria nao escreve.
+           Cada resposta aqui foi conferida no codigo antes de ser escrita, e
+           uma delas mudou por causa disso: nao ha integracao com Zephyr nem
+           TestRail, so o resumo para colar no Jira. -->
+      <details><summary>{{qc1}}</summary><p>{{ac1}}</p></details>
+      <details><summary>{{qc2}}</summary><p>{{ac2}}</p></details>
+      <details><summary>{{qc3}}</summary><p>{{ac3}}</p></details>
+      <details><summary>{{qc4}}</summary><p>{{ac4}}</p></details>
+      <details><summary>{{qc5}}</summary><p>{{ac5}}</p></details>
+      <details><summary>{{qc6}}</summary><p>{{ac6}}</p></details>
     </div>
   </div>
 </section>

@@ -1,0 +1,404 @@
+From 21573ad36e11e31f5b761e9b4efdfb7647023a36 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Sat, 22 Aug 2026 08:15:53 +0000
+Subject: [PATCH] A home apresenta os tres planos, e para de parecer um
+ conversor
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Dois defeitos da mesma pagina, e eles se anulavam.
+
+A HOME EMPURRAVA SO PARA O FREE. O Personal so aparecia na pagina de precos —
+quem chega com uma planilha de casos na mao, que e exatamente quem paga, tinha
+que adivinhar que existe um plano para isso. Agora os tres aparecem antes do
+FAQ, descritos pelo TRABALHO que fazem e nao por lista de recurso: caso avulso,
+roteiro individual, execucao coordenada. A comparacao completa fica a um clique,
+que e o lugar dela.
+
+E TREZE FICHAS DE FORMATO na primeira rolagem faziam a pagina parecer um
+CONVERSOR DE ARQUIVO. E a categoria errada, e e justamente a que nao se vende:
+quem decide comprar quer saber se a entrega dele cabe, nao quantos formatos
+existem. Ficaram quatro na frente — PDF, DOCX, CSV e Jira, os da entrega de
+evidencia — e os outros nove atras de "ver todas as saidas". NENHUM SUMIU: quem
+veio conferir se o seu esta na lista continua achando, a um clique.
+
+TRAVA: `planos.mjs` [11]. Ele cobra o resumo, que ele venha antes do FAQ, que
+leve aos precos, e as onze frases nos cinco idiomas. Conta as fichas dos DOIS
+lados e exige que a soma continue treze — esconder formato de quem veio conferir
+seria trocar um defeito por outro. E cobra que o Personal do resumo fale da
+planilha e nao da marca: um resumo que voltasse a vender logotipo desfaria o B5
+pela porta dos fundos, numa secao que nenhuma regua olhava.
+
+O corte dos formatos e por CONTAGEM e nao por lista escrita no teste: qual
+formato entra na frente e decisao de produto e pode mudar; que sejam poucos e a
+regra.
+
+UMA HORA PERDIDA, E VALE ESCREVER POR QUE. Verifiquei a pagina cinco vezes
+contra um servidor que estava servindo build velho. `kill` nos processos que o
+`pgrep -af "next start"` mostra mata os involucros do npm e do sh — o
+`next-server` de verdade sobrevive, o `next start` novo falha com porta em uso, e
+o `curl` bate no antigo sem nenhum erro na tela. Cheguei a apagar o `.next`
+inteiro atras de um cache que nao existia. O que resolve e matar pelo nome
+`next-server`, e o sintoma de que se esta olhando build velho e o mais enganoso
+possivel: a pagina responde 200 e parece certa.
+
+planos, chaves, cenarios, a11y, seo, medicao, dobra e vitrine verdes.
+---
+ PLANO.md                       | 37 ++++++++++++++++-------
+ offline/walkstamp-offline.html |  2 +-
+ public/app.html                |  2 +-
+ public/site.css                | 10 +++++++
+ src/.build                     |  2 +-
+ src/i18n-site.json             | 55 ++++++++++++++++++++++++++++++++++
+ src/site/home.html             | 50 ++++++++++++++++++++++++-------
+ testes/planos.mjs              | 49 ++++++++++++++++++++++++++++++
+ 8 files changed, 184 insertions(+), 23 deletions(-)
+
+diff --git a/PLANO.md b/PLANO.md
+index a3d4b47..02c75ee 100644
+--- a/PLANO.md
++++ b/PLANO.md
+@@ -322,7 +322,7 @@ sair em `.xlsx`, e a primeira bala do Personal tem que falar da planilha nos cin
+ idiomas. Provado nas duas direções — tirar `rotColImp` do export reprova, e o
+ logotipo voltar a liderar reprova.
+ 
+-### Trilha D — posicionamento e venda (4–5,5 d restantes) — **prioridade sobre a C**
++### Trilha D — posicionamento e venda (5–6,5 d restantes) — **prioridade sobre a C**
+ 
+ A fonte é a **análise da página, da copy e da venda** de 22/08, que está inteira
+ em `ANALISE-DA-VENDA.md`. O veredito dela cabe numa frase: a página é forte como
+@@ -460,14 +460,31 @@ com a trava que impede a volta:
+    Com isto o item 7 fecha. Falta do D0 só o item 6, a demonstração do fluxo
+    pago.
+ 
+-#### D1 — para levantar conversão (5,5–6,5 d)
++#### D1 — para levantar conversão: **três dos sete feitos** (3,5–4,5 d restantes)
+ 
+-Antes/depois logo abaixo do hero (0,5 d) · exemplo reproduzível com planilha,
+-vídeo e saídas para baixar (1,5–2 d) · resumo dos planos na home antes do FAQ
+-(0,5 d) · quatro formatos cedo e o resto atrás de "ver todas as saídas" (0,5 d) ·
+-FAQ comercial — o que fica na conta, cancelamento, NFS-e, cobrança por pessoa
+-(1 d) · onboarding do roteiro com planilha de exemplo, para não abrir tela vazia
+-(1–1,5 d) · a ponte do primeiro documento para o Personal (0,5 d).
++**Feitos:**
++
++- **antes e depois, logo abaixo do hero.** A home explicava o mecanismo e nunca
++  dizia de qual trabalho ela toma o lugar. Quatro linhas, na ordem em que o dia
++  acontece, cada uma apontando para uma peça que já existe. É tabela de verdade
++  com `scope="col"`, porque o valor está na linha;
++- **resumo dos planos na home, antes do FAQ.** A home empurrava só para o Free —
++  o Personal só aparecia na página de preços, então quem chega com uma planilha
++  na mão tinha de adivinhar que existe um plano para isso. Os três descritos
++  pelo **trabalho** que fazem;
++- **quatro formatos na frente, o resto a um clique.** Treze fichas na primeira
++  rolagem faziam a página parecer um conversor de arquivo — a categoria errada.
++  Nenhum sumiu: os treze continuam na página, e a régua conta os dois lados.
++
++Travas: `planos.mjs` [10] e [11] — as doze frases do antes/depois e as onze do
++resumo nos cinco idiomas, a contagem de fichas dos dois lados, e o Personal do
++resumo obrigado a falar da planilha e não da marca (senão o B5 se desfaria pela
++porta dos fundos, numa seção que nenhuma régua olhava).
++
++**Faltam quatro:** exemplo reproduzível com planilha, vídeo e saídas para baixar
++(1,5–2 d) · FAQ comercial — o que fica na conta, cancelamento, NFS-e, cobrança
++por pessoa (1 d) · onboarding do roteiro com planilha de exemplo, para não abrir
++tela vazia (1–1,5 d) · a ponte do primeiro documento para o Personal (0,5 d).
+ 
+ #### D2 — depois de três pilotos (não estimável ainda)
+ 
+@@ -566,9 +583,9 @@ fonte, medir o pico de memória, medir WER antes de tocar na compactação de si
+ |---|---:|---|
+ | A — terminar o UX | **1–2** | o redesenho inteiro, com acessibilidade validada |
+ | B — destravar a venda | **feita** | uma verdade só, cobrança auditável, banco reconstruível |
+-| D — posicionamento e venda | **4–5,5** | D0 quase feita: a página vende um trabalho e o funil mede. Faltam a demo do fluxo pago e a D1 |
++| D — posicionamento e venda | **5–6,5** | a página vende um trabalho, o funil mede, e a home apresenta os planos. Faltam a demo do fluxo pago e quatro itens da D1 |
+ | C — motor e dívida | **19–28** | C1 feita: você já mede. Faltam C2 e C3 |
+-| **Total** | **24–35,5** | |
++| **Total** | **25–36,5** | |
+ 
+ A ordem é **A → D0 → D1 → C2 → C3**. A D vem antes da C pelo mesmo motivo que a
+ C1 veio antes da C2: acelerar um motor que ninguém contratou acelera a coisa
+diff --git a/offline/walkstamp-offline.html b/offline/walkstamp-offline.html
+index da417ad..55bd923 100644
+--- a/offline/walkstamp-offline.html
++++ b/offline/walkstamp-offline.html
+@@ -9480,7 +9480,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
+      depois, e não tem como se atualizar sozinho. Sem carimbo, "estou com um
+      problema no offline" é uma conversa sem chão — ninguém sabe de qual build
+      se fala nem se o defeito já foi consertado. */
+-  const VERSAO = '2026.08.22-30';
++  const VERSAO = '2026.08.22-31';
+   window.__versao = () => VERSAO;
+ 
+   const PIP_CSS = `
+diff --git a/public/app.html b/public/app.html
+index 6cc88a7..2730b1c 100644
+--- a/public/app.html
++++ b/public/app.html
+@@ -9083,7 +9083,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
+      depois, e não tem como se atualizar sozinho. Sem carimbo, "estou com um
+      problema no offline" é uma conversa sem chão — ninguém sabe de qual build
+      se fala nem se o defeito já foi consertado. */
+-  const VERSAO = '2026.08.22-30';
++  const VERSAO = '2026.08.22-31';
+   window.__versao = () => VERSAO;
+ 
+   const PIP_CSS = `
+diff --git a/public/site.css b/public/site.css
+index 3be9e78..59d2301 100644
+--- a/public/site.css
++++ b/public/site.css
+@@ -323,6 +323,16 @@ footer a:hover{color:var(--ink)}
+ }
+ 
+ .saidas{display:flex;flex-wrap:wrap;gap:9px;margin:24px 0 6px}
++/* O resto dos formatos, a um clique. `summary` com aparencia de link porque e
++   isso que ele e — nao um botao de acao, e sim "mostre o resto da lista". */
++.maisSaidas{margin-top:6px}
++.maisSaidas > summary{cursor:pointer;font-size:14px;color:var(--accent);
++      display:inline-block;padding:4px 0;list-style:none}
++.maisSaidas > summary::-webkit-details-marker{display:none}
++.maisSaidas > summary::before{content:"+ ";font-weight:600}
++.maisSaidas[open] > summary::before{content:"\2212 "}
++.maisSaidas > summary:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:3px}
++.maisSaidas .saidas{margin-top:10px}
+ .saida{display:inline-flex;align-items:center;gap:7px;background:var(--panel);
+       border:1px solid var(--line);border-radius:999px;padding:8px 15px;
+       font-size:14px;color:var(--ink);font-weight:520}
+diff --git a/src/.build b/src/.build
+index 0a10037..a377dcb 100644
+--- a/src/.build
++++ b/src/.build
+@@ -1 +1 @@
+-2026-08-22 30
++2026-08-22 31
+diff --git a/src/i18n-site.json b/src/i18n-site.json
+index ab8f475..6f66962 100644
+--- a/src/i18n-site.json
++++ b/src/i18n-site.json
+@@ -122,6 +122,17 @@
+     "tpLegenda": "Funcionalidades por plano",
+     "saidasH": "Um documento, no formato que a sua rotina pede",
+     "saidasP": "A mesma gravação sai em qualquer um destes. Você escolhe no fim, e pode baixar mais de um.",
++    "saidasPlan": "planilha",
++    "saidasTodas": "Ver todas as saídas",
++    "plH": "Um caso avulso é grátis. O trabalho repetido vira plano.",
++    "plP": "Os três se distinguem pelo trabalho que fazem, e não por lista de recurso.",
++    "plFreeT": "Free — caso avulso",
++    "plFreeD": "Transforme qualquer gravação em evidência, sem cadastro e sem limite de tamanho.",
++    "plPersT": "Personal — roteiro individual",
++    "plPersD": "Suba a planilha de casos, abra cada um preenchido e devolva o roteiro com situação, data e executor.",
++    "plTimeT": "Team — execução coordenada",
++    "plTimeD": "Divida a rodada entre várias pessoas, acompanhe quem concluiu o quê e entregue no mesmo padrão.",
++    "plVer": "Ver os preços e a comparação completa →",
+     "tpSoNo": "só no",
+     "tpResumo": "São {0} funcionalidades. {1} delas estão no plano gratuito e não têm marca nenhuma abaixo; as {2} pagas vêm marcadas com o plano. Cada grupo abre e fecha.",
+     "fAjuda": "Base de conhecimento",
+@@ -256,6 +267,17 @@
+     "tpLegenda": "Features by plan",
+     "saidasH": "One document, in whatever format your routine asks for",
+     "saidasP": "The same recording comes out as any of these. You choose at the end, and you can download more than one.",
++    "saidasPlan": "spreadsheet",
++    "saidasTodas": "See every output",
++    "plH": "A single case is free. Repeated work becomes a plan.",
++    "plP": "The three are told apart by the work they do, not by a feature list.",
++    "plFreeT": "Free — one-off case",
++    "plFreeD": "Turn any recording into evidence, with no sign-up and no size limit.",
++    "plPersT": "Personal — your own script",
++    "plPersD": "Upload the spreadsheet of cases, open each one filled in, and hand the script back with status, date and who ran it.",
++    "plTimeT": "Team — coordinated runs",
++    "plTimeD": "Split the round across people, follow who finished what, and deliver in the same format.",
++    "plVer": "See pricing and the full comparison →",
+     "tpSoNo": "only on",
+     "tpResumo": "{0} features in all. {1} of them are on the free plan and carry no mark below; the {2} paid ones are marked with their plan. Each group folds open and shut.",
+     "fAjuda": "Knowledge base",
+@@ -390,6 +412,17 @@
+     "tpLegenda": "Funcionalidades por plan",
+     "saidasH": "Un documento, en el formato que tu rutina pida",
+     "saidasP": "La misma grabación sale en cualquiera de estos. Eliges al final, y puedes descargar más de uno.",
++    "saidasPlan": "hoja",
++    "saidasTodas": "Ver todas las salidas",
++    "plH": "Un caso suelto es gratis. El trabajo repetido se vuelve plan.",
++    "plP": "Los tres se distinguen por el trabajo que hacen, y no por una lista de funciones.",
++    "plFreeT": "Free — caso suelto",
++    "plFreeD": "Convierte cualquier grabación en evidencia, sin registro y sin límite de tamaño.",
++    "plPersT": "Personal — guion individual",
++    "plPersD": "Sube la hoja de casos, abre cada uno rellenado y devuelve el guion con situación, fecha y ejecutor.",
++    "plTimeT": "Team — ejecución coordinada",
++    "plTimeD": "Reparte la ronda entre varias personas, mira quién terminó qué y entrega con el mismo formato.",
++    "plVer": "Ver precios y la comparación completa →",
+     "tpSoNo": "solo en",
+     "tpResumo": "Son {0} funcionalidades. {1} de ellas están en el plan gratuito y no llevan ninguna marca abajo; las {2} de pago vienen marcadas con su plan. Cada grupo se abre y se cierra.",
+     "fAjuda": "Base de conocimiento",
+@@ -524,6 +557,17 @@
+     "tpLegenda": "Funktionen nach Plan",
+     "saidasH": "Ein Dokument, in dem Format, das Ihr Arbeitsalltag verlangt",
+     "saidasP": "Dieselbe Aufnahme kommt in jedem dieser Formate heraus. Sie wählen am Ende, und Sie können mehr als eines herunterladen.",
++    "saidasPlan": "Tabelle",
++    "saidasTodas": "Alle Ausgaben ansehen",
++    "plH": "Ein einzelner Fall ist kostenlos. Wiederholte Arbeit wird zum Plan.",
++    "plP": "Die drei unterscheiden sich durch die Arbeit, die sie erledigen — nicht durch eine Funktionsliste.",
++    "plFreeT": "Free — Einzelfall",
++    "plFreeD": "Machen Sie aus jeder Aufnahme einen Nachweis, ohne Anmeldung und ohne Größenbeschränkung.",
++    "plPersT": "Personal — eigene Fallliste",
++    "plPersD": "Laden Sie die Fallliste hoch, öffnen Sie jeden Fall ausgefüllt und geben Sie die Liste mit Status, Datum und ausführender Person zurück.",
++    "plTimeT": "Team — koordinierte Runden",
++    "plTimeD": "Teilen Sie die Runde auf mehrere Personen auf, sehen Sie, wer was erledigt hat, und liefern Sie im selben Format ab.",
++    "plVer": "Preise und den vollständigen Vergleich ansehen →",
+     "tpSoNo": "nur im",
+     "tpResumo": "Es sind {0} Funktionen. {1} davon sind im kostenlosen Plan und tragen unten keine Markierung; die {2} kostenpflichtigen sind mit ihrem Plan markiert. Jede Gruppe lässt sich auf- und zuklappen.",
+     "fAjuda": "Wissensdatenbank",
+@@ -658,6 +702,17 @@
+     "tpLegenda": "Fonctionnalités par offre",
+     "saidasH": "Un document, dans le format que votre routine exige",
+     "saidasP": "Le même enregistrement sort dans n’importe lequel de ces formats. Vous choisissez à la fin et vous pouvez en télécharger plusieurs.",
++    "saidasPlan": "tableur",
++    "saidasTodas": "Voir toutes les sorties",
++    "plH": "Un cas isolé est gratuit. Le travail répété devient un forfait.",
++    "plP": "Les trois se distinguent par le travail qu’ils font, et non par une liste de fonctions.",
++    "plFreeT": "Free — cas isolé",
++    "plFreeD": "Transformez n’importe quel enregistrement en preuve, sans inscription et sans limite de taille.",
++    "plPersT": "Personal — votre liste de cas",
++    "plPersD": "Chargez le tableur de cas, ouvrez chacun déjà rempli et rendez la liste avec statut, date et exécutant.",
++    "plTimeT": "Team — exécution coordonnée",
++    "plTimeD": "Répartissez la série entre plusieurs personnes, suivez qui a terminé quoi et livrez au même format.",
++    "plVer": "Voir les tarifs et la comparaison complète →",
+     "tpSoNo": "seulement dans",
+     "tpResumo": "Il y a {0} fonctionnalités. {1} d’entre elles sont dans l’offre gratuite et ne portent aucune marque en dessous ; les {2} payantes sont marquées avec leur offre. Chaque groupe se déplie et se replie.",
+     "fAjuda": "Base de connaissances",
+diff --git a/src/site/home.html b/src/site/home.html
+index be6dbac..8ea319c 100644
+--- a/src/site/home.html
++++ b/src/site/home.html
+@@ -130,21 +130,32 @@
+   <div class="wrap">
+     <h2>{{saidasH}}</h2>
+     <p class="lead" style="margin-bottom:0">{{saidasP}}</p>
++    <!-- QUATRO NA FRENTE, E NAO TREZE.
++         Treze fichas logo na primeira rolagem faziam a pagina parecer um
++         CONVERSOR DE ARQUIVO, que e a categoria errada: quem decide comprar
++         quer saber se a entrega dele cabe, e nao quantos formatos existem. Os
++         quatro sao os da entrega de evidencia; o resto continua inteiro, a um
++         clique, para quem veio justamente conferir se o seu esta na lista. -->
+     <div class="saidas">
+       <span class="saida"><b>PDF</b></span>
+       <span class="saida"><b>DOCX</b> Word</span>
+-      <span class="saida"><b>PPTX</b> PowerPoint</span>
+-      <span class="saida"><b>HTML</b></span>
+-      <span class="saida"><b>MD</b> Markdown</span>
+-      <span class="saida"><b>SCORM</b></span>
+-      <span class="saida"><b>CSV</b></span>
+-      <span class="saida"><b>JSON</b></span>
+-      <span class="saida"><b>ZIP</b></span>
+-      <span class="saida"><b>VTT</b></span>
+-      <span class="saida"><b>SRT</b></span>
+-      <span class="saida"><b>Google&nbsp;Docs</b></span>
++      <span class="saida"><b>CSV</b> {{saidasPlan}}</span>
+       <span class="saida"><b>Jira</b></span>
+     </div>
++    <details class="maisSaidas">
++      <summary>{{saidasTodas}}</summary>
++      <div class="saidas">
++        <span class="saida"><b>PPTX</b> PowerPoint</span>
++        <span class="saida"><b>HTML</b></span>
++        <span class="saida"><b>MD</b> Markdown</span>
++        <span class="saida"><b>SCORM</b></span>
++        <span class="saida"><b>JSON</b></span>
++        <span class="saida"><b>ZIP</b></span>
++        <span class="saida"><b>VTT</b></span>
++        <span class="saida"><b>SRT</b></span>
++        <span class="saida"><b>Google&nbsp;Docs</b></span>
++      </div>
++    </details>
+   </div>
+ </section>
+ 
+@@ -231,6 +242,25 @@
+   </div>
+ </section>
+ 
++<!-- OS TRES PLANOS, PELO TRABALHO.
++     A home empurrava so para o Free, e o Personal so aparecia na pagina de
++     precos — quem chega com uma planilha de casos na mao tinha que adivinhar
++     que existe um plano para isso. Aqui eles sao descritos pelo TRABALHO que
++     cada um faz, e nao por lista de recurso: a lista completa e o lugar de
++     comparar, e ele fica a um clique. -->
++<section id="planos">
++  <div class="wrap">
++    <h2>{{plH}}</h2>
++    <p class="lead">{{plP}}</p>
++    <div class="cards" style="margin-top:26px">
++      <div class="card"><h3>{{plFreeT}}</h3><p>{{plFreeD}}</p></div>
++      <div class="card"><h3>{{plPersT}}</h3><p>{{plPersD}}</p></div>
++      <div class="card"><h3>{{plTimeT}}</h3><p>{{plTimeD}}</p></div>
++    </div>
++    <p class="small muted" style="margin-top:18px"><a href="{{precos}}" style="color:var(--accent)">{{plVer}}</a></p>
++  </div>
++</section>
++
+ <section>
+   <div class="wrap">
+     <h2>{{faqH}}</h2>
+diff --git a/testes/planos.mjs b/testes/planos.mjs
+index d742b71..f748ca3 100644
+--- a/testes/planos.mjs
++++ b/testes/planos.mjs
+@@ -271,5 +271,54 @@ console.log('\n[10] a home diz que TRABALHO ela substitui, e não só o mecanism
+   }
+ }
+ 
++console.log('\n[11] a home apresenta os três planos, e mostra quatro formatos');
++{
++  /* DOIS DEFEITOS DA MESMA PAGINA, e eles se anulavam.
++   *
++   * A home empurrava so para o Free: o Personal so aparecia na pagina de
++   * precos, entao quem chega com uma planilha de casos na mao tinha que
++   * adivinhar que existe um plano para isso. E logo na primeira rolagem havia
++   * TREZE fichas de formato, que fazem a pagina parecer um conversor de arquivo
++   * — a categoria errada, e justamente a que nao se vende.
++   *
++   * Agora os tres planos aparecem descritos pelo TRABALHO que fazem, e os
++   * formatos entram quatro na frente com o resto a um clique. A regua cobra os
++   * dois nos cinco idiomas, e cobra que o resto continue INTEIRO: esconder
++   * formato de quem veio conferir se o dele cabe seria trocar um defeito
++   * por outro. */
++  const home = fs.readFileSync(`${RAIZ_WS}/src/site/home.html`, 'utf8');
++  ok('a home tem o resumo dos planos', /id="planos"/.test(home));
++  ok('e ele vem antes do FAQ', home.indexOf('id="planos"') < home.indexOf('{{faqH}}'));
++  ok('e leva à página de preços', /id="planos"[\s\S]{0,900}\{\{precos\}\}/.test(home));
++
++  /* Quatro na tira de cima. O corte e por CONTAGEM, e nao por lista escrita
++     aqui: qual formato entra na frente e decisao de produto e pode mudar; que
++     sejam poucos e a regra. */
++  const primeira = home.slice(home.indexOf('<div class="saidas">'), home.indexOf('<details class="maisSaidas">'));
++  const naFrente = (primeira.match(/class="saida"/g) || []).length;
++  ok('a primeira tira mostra quatro formatos', naFrente === 4, String(naFrente));
++  const dentro = home.slice(home.indexOf('<details class="maisSaidas">'));
++  const escondidos = (dentro.slice(0, dentro.indexOf('</details>')).match(/class="saida"/g) || []).length;
++  ok('e nenhum formato sumiu: os treze continuam na página',
++     naFrente + escondidos === 13, `${naFrente} + ${escondidos}`);
++
++  const site = JSON.parse(fs.readFileSync(`${RAIZ_WS}/src/i18n-site.json`, 'utf8'));
++  const CHAVES = ['plH', 'plP', 'plFreeT', 'plFreeD', 'plPersT', 'plPersD',
++                  'plTimeT', 'plTimeD', 'plVer', 'saidasTodas', 'saidasPlan'];
++  for (const L of IDIOMAS) {
++    const faltando = CHAVES.filter((k) => !String((site[L] || {})[k] || '').trim());
++    ok(`${L}: as frases do resumo e do "ver todas" existem`, faltando.length === 0,
++       faltando.join(', '));
++  }
++  /* E o Personal continua sendo descrito pela RODADA, aqui como no cartao: um
++     resumo que voltasse a falar de logotipo desfaria o B5 pela porta dos
++     fundos, numa secao que nenhuma regua olhava. */
++  for (const L of IDIOMAS) {
++    ok(`${L}: o Personal do resumo fala da planilha, e não da marca`,
++       /xlsx|planilha|spreadsheet|hoja|tabelle|tableur|guion|script|fallliste/i.test(site[L].plPersD),
++       site[L].plPersD.slice(0, 64));
++  }
++}
++
+ console.log(falhas ? `\n${falhas} FALHA(S)` : '\nCartões e catálogo: uma verdade só.');
+ process.exit(falhas ? 1 : 0);
+-- 
+2.43.0
+

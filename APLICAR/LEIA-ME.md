@@ -5,9 +5,9 @@ A árvore deste zip **já está construída**: `public/app.html` e
 rodar `build.py`.
 
 Base: `285d4a5` (o `main` de produção) + os seis commits do `correcoes.bundle`
-= a árvore do `walkstampbuild8_1.zip`. Sobre ela, dezoito commits novos.
+= a árvore do `walkstampbuild8_1.zip`. Sobre ela, vinte e cinco commits novos.
 
-## Os dezoito commits
+## Os vinte e cinco commits
 
 **A0 — a saída recomendada chega à linhagem.** Em vez de sete formatos com o
 mesmo peso, a ferramenta olha o cenário e propõe um; os outros ficam recolhidos
@@ -327,11 +327,84 @@ que é de graça) continua de pé pelo avesso.
 Faltam do D0 **a demonstração do fluxo pago** e **os eventos de intenção paga**.
 A Trilha D caiu de 12–15 para 5,5–7 dias.
 
+**A D1 — a home passou a vender um trabalho.** Três seções novas, nos cinco
+idiomas, e cada uma corrige um defeito diferente da mesma página.
+
+**Antes e depois**, logo abaixo da primeira dobra. A home explicava bem o
+mecanismo e nunca dizia de qual trabalho ela toma o lugar. Quatro linhas, na
+ordem em que o dia acontece — abrir o caso e recopiar os campos, Print Screen a
+cada passo, renomear arquivo, atualizar a planilha —, e cada uma aponta para uma
+peça que **já existe** no produto. É tabela de verdade com `scope="col"`, porque
+o valor está na linha.
+
+**O resumo dos três planos**, antes do FAQ. A home empurrava só para o Free: o
+Personal só aparecia na página de preços, então quem chega com uma planilha de
+casos na mão — que é exatamente quem paga — tinha de adivinhar que existe um
+plano para isso. **E treze fichas de formato** na primeira rolagem faziam a
+página parecer um conversor de arquivo, que é a categoria errada. Ficaram quatro
+na frente; os outros nove a um clique, e nenhum sumiu.
+
+**O FAQ comercial** — e aqui uma resposta mudou por causa da conferência. A
+análise pedia *"como Jira, Zephyr e TestRail entram no fluxo?"*. Fui procurar:
+`zephyr` e `testrail` não aparecem uma única vez no produto. Só o Jira existe, e
+mesmo ele não é integração — é um resumo pronto para colar no comentário do
+chamado. Escrever que integramos teria sido exatamente o defeito que o B1
+consertou, desta vez posto por mim. A resposta diz o que existe e nega os outros
+dois; a régua obriga a continuar negando.
+
+**E a ponte**, no painel de conclusão — o único instante em que a pessoa já
+provou que a ferramenta serve: ela tem o documento na mão e o trabalho acabou.
+É uma linha com um link, e não um botão; uma oferta com peso igual aos de baixar
+transformaria o *"pronto"* num *"agora pague"*. Ela não muda com o plano de
+propósito — ler o plano no navegador daria a frase errada em toda a janela entre
+o pagamento e o `/api/menu` responder, e o endereço resolve o estado sozinho.
+
+**E a tela do roteiro não abre mais vazia.** Quem acabou de assinar chegava numa
+tela que pede uma planilha — e arrumar uma planilha no meio do expediente é o
+tipo de tarefa que fica para depois e nunca acontece, então o primeiro caso
+concluído nunca saía. *"Ver com um exemplo"* carrega quatro casos e mostra a
+leitura, o palpite das colunas e a conferência, **pelo mesmo caminho** da
+planilha real: sem endpoint próprio, sem dado fabricado no servidor e sem tabela
+desenhada no cliente.
+
+O prazo do cancelamento na página é **lido da migração do expurgo**, e não
+escrito no teste: se um dia os 90 dias mudarem no banco, a página é obrigada a
+mudar junto.
+
+**C2 — a escada parou de descer inteira quando já sabia que não adiantava.** Ela
+percorria degrau por degrau qualquer que fosse o motivo da queda. Isso custa
+tempo e banda — e num caso custa a última chance: numa máquina sem memória,
+subir para o degrau de 200 MB é garantir que ela morra com o arquivo maior na
+mão, depois de ter baixado tudo.
+
+Cada queda passou a ser classificada por sintoma: **memória** para de subir,
+**rede** e **404** pulam os degraus do mesmo repositório, **runtime quebrado**
+encerra a escada daquele ambiente. O que não casa com nenhum padrão desce como
+sempre desceu — não saber a causa não pode virar motivo para tentar menos.
+Medido na régua: **11 degraus pulados e 1.438 MB poupados** numa única montagem.
+
+Das versões, metade: `TJS_BASES` começa num `@3` **flutuante**, e agora a versão
+que subiu entra na medição. Fixar exige conferir no CDN quais versões existem, e
+o proxy deste contêiner bloqueia o jsdelivr — está escrito no plano.
+
+**C3 — o pico de memória passou a ter número e lugar.** Proteger a máquina que
+fica sem memória não é o mesmo que entender: a pergunta que decide o que
+otimizar é se o pico é a leitura do arquivo, o buffer de áudio ou a sessão do
+modelo. A amostragem mora **dentro do `marco()`** — as fronteiras que a régua já
+marca são os instantes em que o pico pode ter mudado —, e a medida diz `null`
+onde o navegador não conta, nunca zero.
+
+Primeira leitura, com a ressalva na frente: numa amostra de 10 s **sem sessão de
+modelo alocada**, o pico ficou em `audio.decodificado`. O buffer de áudio cresce
+linear com a duração (~64 KB/s, 40 min ≈ 154 MB) e a sessão é fixa — se isso se
+confirmar com modelo de verdade, a compactação de silêncio ataca o **pico**, e
+não só o tempo.
+
 ## Os arquivos
 
 | arquivo | o que é |
 |---|---|
-| `tudo.bundle` | os dezoito commits, para aplicar por Git sobre `d5db0f7` — é um bundle de **intervalo** (`d5db0f7..HEAD`), então ele precisa que você já tenha esse commit; foi assim que ele saiu de 22 MB para 314 KB e o pacote coube no limite de envio |
+| `tudo.bundle` | os vinte e cinco commits, para aplicar por Git sobre `d5db0f7` — é um bundle de **intervalo** (`d5db0f7..HEAD`), então ele precisa que você já tenha esse commit; foi assim que ele saiu de 22 MB para 314 KB e o pacote coube no limite de envio |
 | `A0-saida-recomendada.patch` | o A0 em diff legível |
 | `A1-cartao-da-grade.patch` | o A1 em diff legível (fonte e régua) |
 | `B3-banco-versionado.patch` | o B3 em diff legível |
@@ -348,6 +421,13 @@ A Trilha D caiu de 12–15 para 5,5–7 dias.
 | `D0-a-pagina-vende-um-trabalho.patch` | a home, os preços, a privacidade e os concorrentes |
 | `funil-jogava-fora-oito-de-onze.patch` | a migração da medição e o `funil.mjs` |
 | `eventos-de-intencao-paga.patch` | os quatro marcos do lado pago, na área da conta |
+| `D1-antes-e-depois.patch` | a seção que diz que trabalho a ferramenta substitui |
+| `D1-planos-na-home.patch` | o resumo dos três planos, e quatro formatos na frente |
+| `D1-faq-comercial.patch` | as seis perguntas de quem está decidindo pagar |
+| `D1-a-ponte.patch` | a ponte do primeiro documento para a rodada |
+| `D1-onboarding-do-roteiro.patch` | a tela do roteiro não abre mais vazia |
+| `C2-a-escada-esperta.patch` | a escada de fallback pula o que não adianta |
+| `C3-pico-de-memoria.patch` | o pico de memória passou a ter número e lugar |
 | `correcoes.bundle`, `correcoes-so-fonte.patch` | os seis commits originais do zip |
 | `ARQUIVOS.txt`, `MENSAGENS.txt` | o inventário original |
 

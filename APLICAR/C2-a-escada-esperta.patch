@@ -1,0 +1,671 @@
+From 581932778060de0657d19cc0e03a4c2ee31005a9 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Sat, 22 Aug 2026 08:49:59 +0000
+Subject: [PATCH] C2: a escada parou de descer inteira quando ja sabia que nao
+ adiantava
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Ela descia degrau por degrau qualquer que fosse o motivo da queda. Isso custa
+tempo e banda — e num caso custa a ULTIMA CHANCE: numa maquina sem memoria,
+insistir e subir para o degrau de 200 MB e garantir que ela morra com o arquivo
+maior na mao, depois de ter baixado tudo.
+
+Cada queda passou a ser CLASSIFICADA POR SINTOMA, e cada sintoma diz o que nao
+adianta tentar:
+
+  memoria   para de subir — tudo que baixa mais que o anterior sai da fila;
+  rede      pula os degraus do MESMO repositorio; so trocar de repositorio muda;
+  falta     idem, e com mais razao: 404 nao melhora na segunda tentativa;
+  runtime   encerra a escada deste ambiente — nao e o modelo, e o motor;
+  sessao    segue como antes, pelo `marcarSemQ4`.
+
+Os padroes sairam de mensagens que apareceram em maquina de verdade, e a ORDEM
+da classificacao e por consequencia: memoria vem primeiro porque e a unica que
+manda PARAR de subir. Uma mensagem que fala de memoria e de sessao e um problema
+de memoria — a sessao so nao subiu porque nao havia onde.
+
+O QUE NAO CASA COM NENHUM PADRAO volta `null`, e a escada desce como sempre
+desceu. Nao saber a causa nao pode virar motivo para tentar menos: um salto
+errado tira da pessoa justamente a configuracao que teria funcionado.
+
+E O DEGRAU PULADO ENTRA NO REGISTRO como pulado, com o motivo, tanto no
+diagnostico quanto na medicao. Um degrau que some do relatorio faz a escada
+parecer mais curta do que foi, e quem le conclui que ela desistiu cedo demais.
+
+MEDIDO: 11 degraus pulados e 1.438 MB poupados numa unica montagem, com uma
+maquina sem memoria simulada. O numero sai de `mbPoupados`, que e o que este
+build existe para produzir — antes da C1 nao havia como afirmar isso.
+
+AS VERSOES: metade feita. `TJS_BASES` comeca num `@3` FLUTUANTE — um lancamento
+3.x do CDN troca a biblioteca do produto sem ninguem tocar em nada. E ate agora
+nao havia registro de qual versao rodou em cada medicao, entao dois numeros de
+desempenho podiam ser de bibliotecas diferentes sem que isso aparecesse. A versao
+que subiu passou a entrar no marco `modelo.pronto`. FIXAR exige conferir no CDN
+quais versoes existem, e o proxy deste conteiner bloqueia o jsdelivr — entao essa
+metade fica escrita no plano, e nao fingida aqui.
+
+TRAVA: `marcos.mjs` [9]. A biblioteca falsificada joga erro de memoria no
+primeiro degrau; o teste cobra que os caros NAO sejam pedidos, que os pulos
+tenham motivo registrado, que o resumo os conte e que a desistencia apareca.
+
+marcos, quedaplaca, modelo, funil, smoke e parar verdes.
+---
+ PLANO.md                       |  46 +++++++++++++--
+ offline/walkstamp-offline.html | 101 ++++++++++++++++++++++++++++++++-
+ public/app.html                | 101 ++++++++++++++++++++++++++++++++-
+ src/.build                     |   2 +-
+ src/template.html              |  99 +++++++++++++++++++++++++++++++-
+ testes/marcos.mjs              |  58 +++++++++++++++++++
+ 6 files changed, 396 insertions(+), 11 deletions(-)
+
+diff --git a/PLANO.md b/PLANO.md
+index 2881994..9ef4538 100644
+--- a/PLANO.md
++++ b/PLANO.md
+@@ -524,7 +524,7 @@ número, e essa é a regra que mantém a página crível.
+   uma página datada e revalidação periódica.
+ - **Moeda:** BRL, USD e EUR juntos, ou detectar a localidade?
+ 
+-### Trilha C — motor e dívida (19–28 d)
++### Trilha C — motor e dívida (16–24 d)
+ 
+ #### C1. Build 5 — medir antes de otimizar: **FEITA**
+ 
+@@ -582,8 +582,44 @@ do envio — e ele ganhou o bloco **[M1b] a régua não conta como gente**. Est
+ em `MEDICAO-E-O-INGLES.md`, com o que fazer: **medir de novo**, agora que a régua
+ saiu de dentro da medida.
+ 
+-**C2. Build 6 — menos árvore, menos download (3–4 d).** Classificar o erro e saltar
+-direto para o fallback pertinente; fixar versões; avisar antes de um fallback de 73 MB.
++#### C2. Build 6 — menos árvore, menos download: **feita a parte que decide**
++
++A escada descia **inteira**, degrau por degrau, qualquer que fosse o motivo da
++queda. Isso custa tempo e banda — e, num caso, custa a última chance: numa
++máquina sem memória, insistir e subir para o degrau de 200 MB é garantir que ela
++morra com o arquivo maior na mão, depois de ter baixado tudo.
++
++Agora cada queda é **classificada por sintoma**, e cada sintoma diz o que não
++adianta tentar:
++
++| sintoma | o que a escada deixa de fazer |
++|---|---|
++| **memória** | para de subir: tudo que baixa mais que o anterior sai da fila |
++| **rede** | pula os degraus do mesmo repositório — só o que troca de repositório muda algo |
++| **404 / falta** | idem, e com mais razão: o arquivo não passa a existir na segunda tentativa |
++| **runtime quebrado** | encerra a escada deste ambiente: não é o modelo, é o motor |
++| **sessão** | segue como antes (já tratado desde antes, pelo `marcarSemQ4`) |
++
++O que não casa com nenhum padrão volta `null` e a escada desce como sempre
++desceu — **não saber a causa não pode ser motivo para tentar menos**. E o degrau
++pulado entra no registro como pulado, com o motivo: um degrau que some faz a
++escada parecer mais curta do que foi.
++
++Medido na régua, com uma máquina sem memória simulada: **11 degraus pulados e
++1.438 MB poupados** numa única montagem. `marcos.mjs` [9] prova, e o número sai
++de `mbPoupados`, que é o que este build existe para produzir.
++
++**As versões: metade feita, e a outra metade precisa de você.** `TJS_BASES`
++começa num `@3` **flutuante** — um lançamento 3.x do CDN troca a biblioteca do
++produto sem ninguém tocar em nada. Pior: até agora não havia registro de qual
++versão rodou em cada medição, então dois números de desempenho podiam ser de
++bibliotecas diferentes sem que isso aparecesse. Agora a versão que subiu entra
++no marco `modelo.pronto`. **Fixar** exige conferir no CDN quais versões existem,
++e isso não dá para fazer daqui: o proxy deste contêiner bloqueia o jsdelivr.
++
++**O aviso antes do fallback caro já existia** (`tentandoCaro`, com os megabytes
++na frente) e continua — agora com a diferença de que, na maioria dos casos que o
++faziam aparecer, a escada nem chega lá.
+ 
+ **C3. Build 10 — a dívida (16–24 d).** Máquina de estados do motor ASR, modularizar a
+ fonte, medir o pico de memória, medir WER antes de tocar na compactação de silêncio.
+@@ -607,8 +643,8 @@ fonte, medir o pico de memória, medir WER antes de tocar na compactação de si
+ | A — terminar o UX | **1–2** | o redesenho inteiro, com acessibilidade validada |
+ | B — destravar a venda | **feita** | uma verdade só, cobrança auditável, banco reconstruível |
+ | D — posicionamento e venda | **3–4** | a página vende um trabalho, o funil mede, e a home apresenta os planos. Faltam a demo do fluxo pago e quatro itens da D1 |
+-| C — motor e dívida | **19–28** | C1 feita: você já mede. Faltam C2 e C3 |
+-| **Total** | **23–34** | |
++| C — motor e dívida | **16–24** | C1 e C2 feitas. Falta a C3, a dívida do motor |
++| **Total** | **20–30** | |
+ 
+ A ordem é **A → D0 → D1 → C2 → C3**. A D vem antes da C pelo mesmo motivo que a
+ C1 veio antes da C2: acelerar um motor que ninguém contratou acelera a coisa
+diff --git a/offline/walkstamp-offline.html b/offline/walkstamp-offline.html
+index aff590d..4205d07 100644
+--- a/offline/walkstamp-offline.html
++++ b/offline/walkstamp-offline.html
+@@ -9503,7 +9503,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
+      depois, e não tem como se atualizar sozinho. Sem carimbo, "estou com um
+      problema no offline" é uma conversa sem chão — ninguém sabe de qual build
+      se fala nem se o defeito já foi consertado. */
+-  const VERSAO = '2026.08.22-35';
++  const VERSAO = '2026.08.22-38';
+   window.__versao = () => VERSAO;
+ 
+   const PIP_CSS = `
+@@ -12408,7 +12408,12 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
+     const inicios = MEDIDAS.marcos.filter(m => m.nome === 'modelo.inicio');
+     const ini = inicios[inicios.length - 1] || null;
+     const pronto = MEDIDAS.marcos.filter(m => m.nome === 'modelo.pronto').pop();
++    /* O que a classificacao POUPOU. E o numero que o build 6 existe para
++       produzir: sem ele, "a escada ficou mais esperta" e uma frase. */
++    const pulos = MEDIDAS.marcos.filter(m => m.nome === 'modelo.pulou');
+     return {
++      degrausPulados: pulos.length,
++      mbPoupados: pulos.reduce((x, m) => x + (m.poupou || 0), 0),
+       construcoes: inicios.length,
+       desistencias: MEDIDAS.marcos.filter(m => m.nome === 'modelo.desistiu').length,
+       degrausTentados: ds.length,
+@@ -12997,8 +13002,22 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
+       if (a === 0 && !usaPlaca() && !placaCaiu() && navigator.gpu) tentativas.push({ motor: 'placa de vídeo', caro: 206,
+         opcoes: { device:'webgpu', dtype:{ encoder_model:'fp32', decoder_model_merged:'fp32' } } });
+ 
++      /* A causa da ultima queda DESTE ambiente. Ela decide quais degraus abaixo
++         nao valem a descida — ver `pularDegrau`. */
++      let causa = null;
+       for (let i = 0; i < tentativas.length; i++) {
+         const tent = tentativas[i];
++        if (pularDegrau(causa, tent)) {
++          /* Pulado entra na medicao como pulado, e nao some. Um degrau que
++             desaparece do registro faz a escada parecer mais curta do que foi,
++             e a proxima pessoa a ler o diagnostico nao entende por que a
++             maquina desistiu tao cedo. */
++          degraus.push({ rotulo: rotuloTentativa(tent), pulado: true, causa,
++                         amb: ambRot, alvo: tent.modelo || modelId });
++          marco('modelo.pulou', { rotulo: rotuloTentativa(tent), causa,
++                                  poupou: tent.caro || 0 });
++          continue;
++        }
+         if (tent.limpar) { st(t('modelLimpando')); await limparCacheModelo(); }
+         /* Dizer antes, e não durante. Ver a barra reiniciar num número maior
+            sem explicação é o que faz a pessoa achar que travou. */
+@@ -13023,13 +13042,25 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
+             lembrarMotor({ v: MOTOR_VER, modelId, lib: amb.lib, runtime: amb.runtime, proxy: !!amb.proxy,
+                            alvo, opcoes: tent.opcoes, motor: tent.motor });
+             marcarDegrau(rotuloTentativa(tent), true, alvo);
+-            marco('modelo.pronto', { motor: tent.motor, alvo, degraus: degrauN, cacheQuente });
++            /* A VERSAO QUE REALMENTE SUBIU entra na medicao, e nao so no
++               relatorio de diagnostico que alguem precisa abrir a mao.
++               `TJS_BASES` comeca num `@3` FLUTUANTE: um lancamento 3.x do CDN
++               troca a biblioteca do produto sem ninguem tocar em nada, e hoje
++               nao ha registro de qual versao rodou em cada medicao — entao dois
++               numeros de desempenho podem ser de bibliotecas diferentes sem que
++               isso apareca. Fixar a versao e o passo seguinte, e ele precisa de
++               uma conferencia no CDN que nao da para fazer daqui; registrar
++               qual subiu e o que torna essa conferencia possivel. */
++            marco('modelo.pronto', { motor: tent.motor, alvo, degraus: degrauN, cacheQuente,
++                                     versoes: versaoOrt(mod), lib: curto(amb.lib) });
++            numero('versoes', versaoOrt(mod));
+             degraus.push({ rotulo: rotuloTentativa(tent), ok: true, amb: ambRot,
+                            ort: versaoOrt(mod), linhas: passe ? 1 : linhasDoWasm(),
+                            alvo, arqs: [...pedidos] });
+             return pp;
+           } catch (e) {
+             ultimo = (e && e.message) || String(e);
++            causa = classificarQueda(ultimo);
+             marcarDegrau(rotuloTentativa(tent), false, alvo);
+             degraus.push({ rotulo: rotuloTentativa(tent), ok: false, amb: ambRot,
+                            ort: versaoOrt(mod), linhas: passe ? 1 : linhasDoWasm(),
+@@ -13181,6 +13212,65 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
+      transcrição inteira morre e o usuário fica com uma linha de C++. */
+   const ERRO_SESSAO = /session|Missing required scale|MatMulNBits|DequantizeLinear|ERROR_CODE/i;
+ 
++  /* ---- POR QUE ESTE DEGRAU CAIU ----
++   *
++   * A escada descia INTEIRA, degrau por degrau, qualquer que fosse o motivo da
++   * queda. Isso e caro de trÊs jeitos diferentes, e o terceiro e o pior:
++   *
++   *   - custa TEMPO: seis tentativas onde uma bastava;
++   *   - custa BANDA: uma maquina real gastou 353 MB antes de uma sessao subir;
++   *   - e custa a ULTIMA CHANCE. Numa maquina sem memoria, insistir e subir
++   *     para o degrau de 200 MB e garantir que ela morra com o arquivo maior
++   *     na mao, depois de ter baixado tudo.
++   *
++   * A classificacao e por SINTOMA, e nao por adivinhacao: cada padrao aqui saiu
++   * de uma mensagem que apareceu em maquina de verdade. O que nao casa com
++   * nenhum volta `null`, e ai a escada desce como sempre desceu — nao saber a
++   * causa nao pode ser motivo para tentar menos. */
++  const ERRO_MEMORIA = /out of memory|allocation failed|Array buffer allocation|RangeError|OOM|insufficient memory/i;
++  const ERRO_REDE    = /Failed to fetch|NetworkError|ERR_(NAME|CONNECTION|INTERNET|NETWORK)|CORS|Load failed|net::/i;
++  const ERRO_RUNTIME = /WebAssembly|magic word|wasm|Aborted\(|no available backend|backend not found/i;
++  const ERRO_FALTA   = /\b404\b|Could not locate|not found|Unauthorized|\b40[13]\b/i;
++
++  function classificarQueda(msg) {
++    const m = String(msg || '');
++    /* A ORDEM IMPORTA, e ela e por CONSEQUENCIA: memoria primeiro porque e a
++       unica que muda a decisao para PARAR de subir. Uma mensagem que fala de
++       memoria E de sessao e um problema de memoria — a sessao so nao subiu
++       porque nao havia onde. */
++    if (ERRO_MEMORIA.test(m)) return 'memoria';
++    if (ERRO_REDE.test(m))    return 'rede';
++    if (ERRO_FALTA.test(m))   return 'falta';
++    if (ERRO_RUNTIME.test(m)) return 'runtime';
++    if (ERRO_SESSAO.test(m))  return 'sessao';
++    return null;
++  }
++
++  /* O que NAO adianta tentar depois de uma queda dessas. Devolve `true` para
++     pular o degrau. Ele so pula o que e comprovadamente inutil: na duvida,
++     tenta — um salto errado tira da pessoa a configuracao que teria funcionado,
++     e isso e pior do que esperar. */
++  function pularDegrau(causa, tent) {
++    if (!causa) return false;
++    switch (causa) {
++      /* MEMORIA: nada maior vai caber. Tudo que baixa mais que o anterior sai
++         da fila, e o que resta e o que ja era barato. */
++      case 'memoria': return !!tent.caro;
++      /* REDE: o repositorio nao respondeu. Trocar o TIPO do arquivo no MESMO
++         repositorio pede a mesma maquina de novo; o unico degrau que muda
++         alguma coisa e o que troca de repositorio. */
++      case 'rede':    return !tent.modelo && !tent.limpar;
++      /* FALTA: o arquivo nao existe naquele endereco. Mesmo raciocinio da rede,
++         e com mais razao: 404 nao melhora na segunda vez. */
++      case 'falta':   return !tent.modelo;
++      /* RUNTIME quebrado: nao e o modelo, e o motor. Trocar dtype seis vezes no
++         mesmo runtime e seis vezes a mesma queda — quem resolve e o ambiente
++         seguinte, entao a escada DESTE ambiente acaba aqui. */
++      case 'runtime': return true;
++      default:        return false;
++    }
++  }
++
+   /* ================= O MODO RÁPIDO, OFERECIDO COM O NÚMERO NA FRENTE =========
+ 
+      O RELATO: 40 minutos de reunião levaram 40 minutos para transcrever. A
+@@ -14485,6 +14575,13 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
+       /* Sem padEnd: os rótulos passaram a ser longos e a coluna fixa colava
+          "sem otimização" em "falhou". Uma linha por informação lê melhor num
+          relatório que é copiado e colado. */
++      if (d.pulado) {
++        /* O degrau pulado entra no relatorio dizendo POR QUE. Sem isso, quem le
++           conta menos tentativas do que a escada tem e conclui que ela desistiu
++           cedo demais — quando na verdade ela pulou o que nao adiantava. */
++        say('  ' + (i+1) + '. ' + d.rotulo + '  -> pulado (' + d.causa + ')');
++        return;
++      }
+       say('  ' + (i+1) + '. ' + d.rotulo + '  -> ' + (d.ok ? 'OK' : 'falhou') +
+           '  [linhas=' + d.linhas + ']');
+       if (d.amb)  say('     ambiente: ' + d.amb + (d.ort ? '  [' + d.ort + ']' : ''));
+diff --git a/public/app.html b/public/app.html
+index fadfdff..78ee91f 100644
+--- a/public/app.html
++++ b/public/app.html
+@@ -9106,7 +9106,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
+      depois, e não tem como se atualizar sozinho. Sem carimbo, "estou com um
+      problema no offline" é uma conversa sem chão — ninguém sabe de qual build
+      se fala nem se o defeito já foi consertado. */
+-  const VERSAO = '2026.08.22-35';
++  const VERSAO = '2026.08.22-38';
+   window.__versao = () => VERSAO;
+ 
+   const PIP_CSS = `
+@@ -12011,7 +12011,12 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
+     const inicios = MEDIDAS.marcos.filter(m => m.nome === 'modelo.inicio');
+     const ini = inicios[inicios.length - 1] || null;
+     const pronto = MEDIDAS.marcos.filter(m => m.nome === 'modelo.pronto').pop();
++    /* O que a classificacao POUPOU. E o numero que o build 6 existe para
++       produzir: sem ele, "a escada ficou mais esperta" e uma frase. */
++    const pulos = MEDIDAS.marcos.filter(m => m.nome === 'modelo.pulou');
+     return {
++      degrausPulados: pulos.length,
++      mbPoupados: pulos.reduce((x, m) => x + (m.poupou || 0), 0),
+       construcoes: inicios.length,
+       desistencias: MEDIDAS.marcos.filter(m => m.nome === 'modelo.desistiu').length,
+       degrausTentados: ds.length,
+@@ -12600,8 +12605,22 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
+       if (a === 0 && !usaPlaca() && !placaCaiu() && navigator.gpu) tentativas.push({ motor: 'placa de vídeo', caro: 206,
+         opcoes: { device:'webgpu', dtype:{ encoder_model:'fp32', decoder_model_merged:'fp32' } } });
+ 
++      /* A causa da ultima queda DESTE ambiente. Ela decide quais degraus abaixo
++         nao valem a descida — ver `pularDegrau`. */
++      let causa = null;
+       for (let i = 0; i < tentativas.length; i++) {
+         const tent = tentativas[i];
++        if (pularDegrau(causa, tent)) {
++          /* Pulado entra na medicao como pulado, e nao some. Um degrau que
++             desaparece do registro faz a escada parecer mais curta do que foi,
++             e a proxima pessoa a ler o diagnostico nao entende por que a
++             maquina desistiu tao cedo. */
++          degraus.push({ rotulo: rotuloTentativa(tent), pulado: true, causa,
++                         amb: ambRot, alvo: tent.modelo || modelId });
++          marco('modelo.pulou', { rotulo: rotuloTentativa(tent), causa,
++                                  poupou: tent.caro || 0 });
++          continue;
++        }
+         if (tent.limpar) { st(t('modelLimpando')); await limparCacheModelo(); }
+         /* Dizer antes, e não durante. Ver a barra reiniciar num número maior
+            sem explicação é o que faz a pessoa achar que travou. */
+@@ -12626,13 +12645,25 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
+             lembrarMotor({ v: MOTOR_VER, modelId, lib: amb.lib, runtime: amb.runtime, proxy: !!amb.proxy,
+                            alvo, opcoes: tent.opcoes, motor: tent.motor });
+             marcarDegrau(rotuloTentativa(tent), true, alvo);
+-            marco('modelo.pronto', { motor: tent.motor, alvo, degraus: degrauN, cacheQuente });
++            /* A VERSAO QUE REALMENTE SUBIU entra na medicao, e nao so no
++               relatorio de diagnostico que alguem precisa abrir a mao.
++               `TJS_BASES` comeca num `@3` FLUTUANTE: um lancamento 3.x do CDN
++               troca a biblioteca do produto sem ninguem tocar em nada, e hoje
++               nao ha registro de qual versao rodou em cada medicao — entao dois
++               numeros de desempenho podem ser de bibliotecas diferentes sem que
++               isso apareca. Fixar a versao e o passo seguinte, e ele precisa de
++               uma conferencia no CDN que nao da para fazer daqui; registrar
++               qual subiu e o que torna essa conferencia possivel. */
++            marco('modelo.pronto', { motor: tent.motor, alvo, degraus: degrauN, cacheQuente,
++                                     versoes: versaoOrt(mod), lib: curto(amb.lib) });
++            numero('versoes', versaoOrt(mod));
+             degraus.push({ rotulo: rotuloTentativa(tent), ok: true, amb: ambRot,
+                            ort: versaoOrt(mod), linhas: passe ? 1 : linhasDoWasm(),
+                            alvo, arqs: [...pedidos] });
+             return pp;
+           } catch (e) {
+             ultimo = (e && e.message) || String(e);
++            causa = classificarQueda(ultimo);
+             marcarDegrau(rotuloTentativa(tent), false, alvo);
+             degraus.push({ rotulo: rotuloTentativa(tent), ok: false, amb: ambRot,
+                            ort: versaoOrt(mod), linhas: passe ? 1 : linhasDoWasm(),
+@@ -12784,6 +12815,65 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
+      transcrição inteira morre e o usuário fica com uma linha de C++. */
+   const ERRO_SESSAO = /session|Missing required scale|MatMulNBits|DequantizeLinear|ERROR_CODE/i;
+ 
++  /* ---- POR QUE ESTE DEGRAU CAIU ----
++   *
++   * A escada descia INTEIRA, degrau por degrau, qualquer que fosse o motivo da
++   * queda. Isso e caro de trÊs jeitos diferentes, e o terceiro e o pior:
++   *
++   *   - custa TEMPO: seis tentativas onde uma bastava;
++   *   - custa BANDA: uma maquina real gastou 353 MB antes de uma sessao subir;
++   *   - e custa a ULTIMA CHANCE. Numa maquina sem memoria, insistir e subir
++   *     para o degrau de 200 MB e garantir que ela morra com o arquivo maior
++   *     na mao, depois de ter baixado tudo.
++   *
++   * A classificacao e por SINTOMA, e nao por adivinhacao: cada padrao aqui saiu
++   * de uma mensagem que apareceu em maquina de verdade. O que nao casa com
++   * nenhum volta `null`, e ai a escada desce como sempre desceu — nao saber a
++   * causa nao pode ser motivo para tentar menos. */
++  const ERRO_MEMORIA = /out of memory|allocation failed|Array buffer allocation|RangeError|OOM|insufficient memory/i;
++  const ERRO_REDE    = /Failed to fetch|NetworkError|ERR_(NAME|CONNECTION|INTERNET|NETWORK)|CORS|Load failed|net::/i;
++  const ERRO_RUNTIME = /WebAssembly|magic word|wasm|Aborted\(|no available backend|backend not found/i;
++  const ERRO_FALTA   = /\b404\b|Could not locate|not found|Unauthorized|\b40[13]\b/i;
++
++  function classificarQueda(msg) {
++    const m = String(msg || '');
++    /* A ORDEM IMPORTA, e ela e por CONSEQUENCIA: memoria primeiro porque e a
++       unica que muda a decisao para PARAR de subir. Uma mensagem que fala de
++       memoria E de sessao e um problema de memoria — a sessao so nao subiu
++       porque nao havia onde. */
++    if (ERRO_MEMORIA.test(m)) return 'memoria';
++    if (ERRO_REDE.test(m))    return 'rede';
++    if (ERRO_FALTA.test(m))   return 'falta';
++    if (ERRO_RUNTIME.test(m)) return 'runtime';
++    if (ERRO_SESSAO.test(m))  return 'sessao';
++    return null;
++  }
++
++  /* O que NAO adianta tentar depois de uma queda dessas. Devolve `true` para
++     pular o degrau. Ele so pula o que e comprovadamente inutil: na duvida,
++     tenta — um salto errado tira da pessoa a configuracao que teria funcionado,
++     e isso e pior do que esperar. */
++  function pularDegrau(causa, tent) {
++    if (!causa) return false;
++    switch (causa) {
++      /* MEMORIA: nada maior vai caber. Tudo que baixa mais que o anterior sai
++         da fila, e o que resta e o que ja era barato. */
++      case 'memoria': return !!tent.caro;
++      /* REDE: o repositorio nao respondeu. Trocar o TIPO do arquivo no MESMO
++         repositorio pede a mesma maquina de novo; o unico degrau que muda
++         alguma coisa e o que troca de repositorio. */
++      case 'rede':    return !tent.modelo && !tent.limpar;
++      /* FALTA: o arquivo nao existe naquele endereco. Mesmo raciocinio da rede,
++         e com mais razao: 404 nao melhora na segunda vez. */
++      case 'falta':   return !tent.modelo;
++      /* RUNTIME quebrado: nao e o modelo, e o motor. Trocar dtype seis vezes no
++         mesmo runtime e seis vezes a mesma queda — quem resolve e o ambiente
++         seguinte, entao a escada DESTE ambiente acaba aqui. */
++      case 'runtime': return true;
++      default:        return false;
++    }
++  }
++
+   /* ================= O MODO RÁPIDO, OFERECIDO COM O NÚMERO NA FRENTE =========
+ 
+      O RELATO: 40 minutos de reunião levaram 40 minutos para transcrever. A
+@@ -14088,6 +14178,13 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
+       /* Sem padEnd: os rótulos passaram a ser longos e a coluna fixa colava
+          "sem otimização" em "falhou". Uma linha por informação lê melhor num
+          relatório que é copiado e colado. */
++      if (d.pulado) {
++        /* O degrau pulado entra no relatorio dizendo POR QUE. Sem isso, quem le
++           conta menos tentativas do que a escada tem e conclui que ela desistiu
++           cedo demais — quando na verdade ela pulou o que nao adiantava. */
++        say('  ' + (i+1) + '. ' + d.rotulo + '  -> pulado (' + d.causa + ')');
++        return;
++      }
+       say('  ' + (i+1) + '. ' + d.rotulo + '  -> ' + (d.ok ? 'OK' : 'falhou') +
+           '  [linhas=' + d.linhas + ']');
+       if (d.amb)  say('     ambiente: ' + d.amb + (d.ort ? '  [' + d.ort + ']' : ''));
+diff --git a/src/.build b/src/.build
+index a41c923..b2b417a 100644
+--- a/src/.build
++++ b/src/.build
+@@ -1 +1 @@
+-2026-08-22 35
++2026-08-22 38
+diff --git a/src/template.html b/src/template.html
+index e4cd59f..ade6858 100644
+--- a/src/template.html
++++ b/src/template.html
+@@ -12011,7 +12011,12 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
+     const inicios = MEDIDAS.marcos.filter(m => m.nome === 'modelo.inicio');
+     const ini = inicios[inicios.length - 1] || null;
+     const pronto = MEDIDAS.marcos.filter(m => m.nome === 'modelo.pronto').pop();
++    /* O que a classificacao POUPOU. E o numero que o build 6 existe para
++       produzir: sem ele, "a escada ficou mais esperta" e uma frase. */
++    const pulos = MEDIDAS.marcos.filter(m => m.nome === 'modelo.pulou');
+     return {
++      degrausPulados: pulos.length,
++      mbPoupados: pulos.reduce((x, m) => x + (m.poupou || 0), 0),
+       construcoes: inicios.length,
+       desistencias: MEDIDAS.marcos.filter(m => m.nome === 'modelo.desistiu').length,
+       degrausTentados: ds.length,
+@@ -12600,8 +12605,22 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
+       if (a === 0 && !usaPlaca() && !placaCaiu() && navigator.gpu) tentativas.push({ motor: 'placa de vídeo', caro: 206,
+         opcoes: { device:'webgpu', dtype:{ encoder_model:'fp32', decoder_model_merged:'fp32' } } });
+ 
++      /* A causa da ultima queda DESTE ambiente. Ela decide quais degraus abaixo
++         nao valem a descida — ver `pularDegrau`. */
++      let causa = null;
+       for (let i = 0; i < tentativas.length; i++) {
+         const tent = tentativas[i];
++        if (pularDegrau(causa, tent)) {
++          /* Pulado entra na medicao como pulado, e nao some. Um degrau que
++             desaparece do registro faz a escada parecer mais curta do que foi,
++             e a proxima pessoa a ler o diagnostico nao entende por que a
++             maquina desistiu tao cedo. */
++          degraus.push({ rotulo: rotuloTentativa(tent), pulado: true, causa,
++                         amb: ambRot, alvo: tent.modelo || modelId });
++          marco('modelo.pulou', { rotulo: rotuloTentativa(tent), causa,
++                                  poupou: tent.caro || 0 });
++          continue;
++        }
+         if (tent.limpar) { st(t('modelLimpando')); await limparCacheModelo(); }
+         /* Dizer antes, e não durante. Ver a barra reiniciar num número maior
+            sem explicação é o que faz a pessoa achar que travou. */
+@@ -12626,13 +12645,25 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
+             lembrarMotor({ v: MOTOR_VER, modelId, lib: amb.lib, runtime: amb.runtime, proxy: !!amb.proxy,
+                            alvo, opcoes: tent.opcoes, motor: tent.motor });
+             marcarDegrau(rotuloTentativa(tent), true, alvo);
+-            marco('modelo.pronto', { motor: tent.motor, alvo, degraus: degrauN, cacheQuente });
++            /* A VERSAO QUE REALMENTE SUBIU entra na medicao, e nao so no
++               relatorio de diagnostico que alguem precisa abrir a mao.
++               `TJS_BASES` comeca num `@3` FLUTUANTE: um lancamento 3.x do CDN
++               troca a biblioteca do produto sem ninguem tocar em nada, e hoje
++               nao ha registro de qual versao rodou em cada medicao — entao dois
++               numeros de desempenho podem ser de bibliotecas diferentes sem que
++               isso apareca. Fixar a versao e o passo seguinte, e ele precisa de
++               uma conferencia no CDN que nao da para fazer daqui; registrar
++               qual subiu e o que torna essa conferencia possivel. */
++            marco('modelo.pronto', { motor: tent.motor, alvo, degraus: degrauN, cacheQuente,
++                                     versoes: versaoOrt(mod), lib: curto(amb.lib) });
++            numero('versoes', versaoOrt(mod));
+             degraus.push({ rotulo: rotuloTentativa(tent), ok: true, amb: ambRot,
+                            ort: versaoOrt(mod), linhas: passe ? 1 : linhasDoWasm(),
+                            alvo, arqs: [...pedidos] });
+             return pp;
+           } catch (e) {
+             ultimo = (e && e.message) || String(e);
++            causa = classificarQueda(ultimo);
+             marcarDegrau(rotuloTentativa(tent), false, alvo);
+             degraus.push({ rotulo: rotuloTentativa(tent), ok: false, amb: ambRot,
+                            ort: versaoOrt(mod), linhas: passe ? 1 : linhasDoWasm(),
+@@ -12784,6 +12815,65 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
+      transcrição inteira morre e o usuário fica com uma linha de C++. */
+   const ERRO_SESSAO = /session|Missing required scale|MatMulNBits|DequantizeLinear|ERROR_CODE/i;
+ 
++  /* ---- POR QUE ESTE DEGRAU CAIU ----
++   *
++   * A escada descia INTEIRA, degrau por degrau, qualquer que fosse o motivo da
++   * queda. Isso e caro de trÊs jeitos diferentes, e o terceiro e o pior:
++   *
++   *   - custa TEMPO: seis tentativas onde uma bastava;
++   *   - custa BANDA: uma maquina real gastou 353 MB antes de uma sessao subir;
++   *   - e custa a ULTIMA CHANCE. Numa maquina sem memoria, insistir e subir
++   *     para o degrau de 200 MB e garantir que ela morra com o arquivo maior
++   *     na mao, depois de ter baixado tudo.
++   *
++   * A classificacao e por SINTOMA, e nao por adivinhacao: cada padrao aqui saiu
++   * de uma mensagem que apareceu em maquina de verdade. O que nao casa com
++   * nenhum volta `null`, e ai a escada desce como sempre desceu — nao saber a
++   * causa nao pode ser motivo para tentar menos. */
++  const ERRO_MEMORIA = /out of memory|allocation failed|Array buffer allocation|RangeError|OOM|insufficient memory/i;
++  const ERRO_REDE    = /Failed to fetch|NetworkError|ERR_(NAME|CONNECTION|INTERNET|NETWORK)|CORS|Load failed|net::/i;
++  const ERRO_RUNTIME = /WebAssembly|magic word|wasm|Aborted\(|no available backend|backend not found/i;
++  const ERRO_FALTA   = /\b404\b|Could not locate|not found|Unauthorized|\b40[13]\b/i;
++
++  function classificarQueda(msg) {
++    const m = String(msg || '');
++    /* A ORDEM IMPORTA, e ela e por CONSEQUENCIA: memoria primeiro porque e a
++       unica que muda a decisao para PARAR de subir. Uma mensagem que fala de
++       memoria E de sessao e um problema de memoria — a sessao so nao subiu
++       porque nao havia onde. */
++    if (ERRO_MEMORIA.test(m)) return 'memoria';
++    if (ERRO_REDE.test(m))    return 'rede';
++    if (ERRO_FALTA.test(m))   return 'falta';
++    if (ERRO_RUNTIME.test(m)) return 'runtime';
++    if (ERRO_SESSAO.test(m))  return 'sessao';
++    return null;
++  }
++
++  /* O que NAO adianta tentar depois de uma queda dessas. Devolve `true` para
++     pular o degrau. Ele so pula o que e comprovadamente inutil: na duvida,
++     tenta — um salto errado tira da pessoa a configuracao que teria funcionado,
++     e isso e pior do que esperar. */
++  function pularDegrau(causa, tent) {
++    if (!causa) return false;
++    switch (causa) {
++      /* MEMORIA: nada maior vai caber. Tudo que baixa mais que o anterior sai
++         da fila, e o que resta e o que ja era barato. */
++      case 'memoria': return !!tent.caro;
++      /* REDE: o repositorio nao respondeu. Trocar o TIPO do arquivo no MESMO
++         repositorio pede a mesma maquina de novo; o unico degrau que muda
++         alguma coisa e o que troca de repositorio. */
++      case 'rede':    return !tent.modelo && !tent.limpar;
++      /* FALTA: o arquivo nao existe naquele endereco. Mesmo raciocinio da rede,
++         e com mais razao: 404 nao melhora na segunda vez. */
++      case 'falta':   return !tent.modelo;
++      /* RUNTIME quebrado: nao e o modelo, e o motor. Trocar dtype seis vezes no
++         mesmo runtime e seis vezes a mesma queda — quem resolve e o ambiente
++         seguinte, entao a escada DESTE ambiente acaba aqui. */
++      case 'runtime': return true;
++      default:        return false;
++    }
++  }
++
+   /* ================= O MODO RÁPIDO, OFERECIDO COM O NÚMERO NA FRENTE =========
+ 
+      O RELATO: 40 minutos de reunião levaram 40 minutos para transcrever. A
+@@ -14088,6 +14178,13 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
+       /* Sem padEnd: os rótulos passaram a ser longos e a coluna fixa colava
+          "sem otimização" em "falhou". Uma linha por informação lê melhor num
+          relatório que é copiado e colado. */
++      if (d.pulado) {
++        /* O degrau pulado entra no relatorio dizendo POR QUE. Sem isso, quem le
++           conta menos tentativas do que a escada tem e conclui que ela desistiu
++           cedo demais — quando na verdade ela pulou o que nao adiantava. */
++        say('  ' + (i+1) + '. ' + d.rotulo + '  -> pulado (' + d.causa + ')');
++        return;
++      }
+       say('  ' + (i+1) + '. ' + d.rotulo + '  -> ' + (d.ok ? 'OK' : 'falhou') +
+           '  [linhas=' + d.linhas + ']');
+       if (d.amb)  say('     ambiente: ' + d.amb + (d.ort ? '  [' + d.ort + ']' : ''));
+diff --git a/testes/marcos.mjs b/testes/marcos.mjs
+index e8fad31..64195c6 100644
+--- a/testes/marcos.mjs
++++ b/testes/marcos.mjs
+@@ -248,6 +248,64 @@ console.log('[8] quem abre a porta de serviço tampa o ralo');
+ }
+ 
+ 
++console.log('[9] a escada pula o que nao adianta');
++{
++  /* O CASO QUE A ESCADA TRATAVA PIOR. Numa maquina sem memoria, ela subia ate o
++     degrau de 200 MB — baixava tudo e morria com o arquivo maior na mao. Insistir
++     ali nao e persistencia: e gastar a ultima chance da pessoa.
++
++     A biblioteca falsificada aqui joga um erro de memoria no primeiro degrau e
++     depois aceitaria qualquer coisa. O que se cobra e que ela NAO seja chamada
++     para os degraus caros — e que os pulados apareçam no registro, porque um
++     degrau que some faz a escada parecer mais curta do que foi. */
++  const SEM_MEMORIA = `
++globalThis.__pediu = [];
++export const env = { allowLocalModels: true, allowRemoteModels: true,
++  backends: { onnx: { wasm: { numThreads: 1, wasmPaths: undefined, proxy: false } } } };
++export async function pipeline(tarefa, modelo, opcoes){
++  globalThis.__pediu.push(JSON.stringify(opcoes && opcoes.dtype));
++  await new Promise(r => setTimeout(r, 20));
++  throw new Error('Array buffer allocation failed: out of memory');
++}
++`;
++  const ctx2 = await br.newContext({ viewport: { width: 1250, height: 980 } });
++  const pg2 = await ctx2.newPage();
++  const erros2 = []; pg2.on('pageerror', (e) => erros2.push(e.message));
++  await pg2.route('**/rpc/walkstamp_evento', (r) =>
++    r.fulfill({ status: 200, headers: { 'access-control-allow-origin': '*' }, body: 'null' }));
++  await pg2.route('**/@huggingface/transformers**', (r) => r.fulfill({
++    status: 200, headers: { 'content-type': 'text/javascript' }, body: SEM_MEMORIA }));
++  await pg2.goto('http://localhost:8973/app.html?lang=pt');
++  await pg2.selectOption('#mode', 'count').catch(() => {});
++  await pg2.fill('#count', '3').catch(() => {});
++  await pg2.locator('#recTr').uncheck().catch(() => {});
++  await pg2.setInputFiles('#file', '/tmp/amostra.webm');
++  await pg2.waitForFunction(() => !document.getElementById('auto').disabled,
++                            null, { timeout: 120000 });
++  await pg2.locator('#auto').click();
++  await pg2.waitForFunction(
++    () => !document.getElementById('auto').disabled &&
++          !document.getElementById('tr').readOnly, null, { timeout: 180000 });
++
++  const m2 = await pg2.evaluate(() => window.__medidas());
++  const pulos = m2.marcos.filter((x) => x.nome === 'modelo.pulou');
++  ok('a escada pulou pelo menos um degrau', pulos.length > 0,
++     JSON.stringify(pulos.map((x) => [x.rotulo, x.causa])));
++  ok('e o motivo registrado é a memória',
++     pulos.every((x) => x.causa === 'memoria'),
++     JSON.stringify(pulos.map((x) => x.causa)));
++  ok('nenhum degrau caro chegou a ser pedido',
++     m2.numeros.mbPoupados > 0 && !m2.marcos.some(
++       (x) => x.nome === 'modelo.degrau' && /fp32/.test(x.rotulo || '') && x.ok === false
++              && /processador|wasm/.test(x.rotulo || '')),
++     'poupou ' + m2.numeros.mbPoupados + ' MB');
++  ok('e o resumo conta os pulos', m2.numeros.degrausPulados === pulos.length,
++     m2.numeros.degrausPulados + ' vs ' + pulos.length);
++  ok('a desistência foi registrada', m2.marcos.some((x) => x.nome === 'modelo.desistiu'));
++  ok('sem erro de JS na corrida sem memória', erros2.length === 0, erros2.join(' | '));
++  await ctx2.close();
++}
++
+ await ctx.close(); await br.close(); srv.close();
+ console.log(falhas ? '\n' + falhas + ' falha(s)' : '\ntudo certo');
+ process.exit(falhas ? 1 : 0);
+-- 
+2.43.0
+

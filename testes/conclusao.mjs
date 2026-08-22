@@ -175,6 +175,29 @@ console.log('\n[6] guardar o projeto muda a linha, e o painel continua lá');
   ok('o painel continua visível', p.visivel === true);
 }
 
+console.log('\n[P] a ponte para a rodada, no unico instante em que ela nao interrompe');
+{
+  /* Este painel e o instante em que a pessoa JA PROVOU que a ferramenta serve —
+     ela tem o documento na mao e o trabalho acabou. Perguntar aqui se ela tem
+     outros casos e a unica pergunta comercial que nao atravessa nada.
+
+     O que esta afirmacao guarda e o TOM: uma linha com um link, e nao um botao
+     com peso igual aos de baixar. Uma oferta com cara de acao transformaria o
+     "pronto" num "agora pague", que e o oposto do que o painel existe para
+     dizer. E o endereco tem que ser o do idioma: a ponte em alemao que cai numa
+     pagina em portugues e pior do que ponte nenhuma. */
+  ok('a ponte aparece junto do documento pronto',
+     await pg.locator('#fimPonteCx').isVisible());
+  const txt = ((await pg.locator('#fimPonte').textContent()) || '').trim();
+  ok('e ela fala da planilha de casos', /planilha|casos/i.test(txt), txt.slice(0, 72));
+  const href = await pg.locator('#fimPonteLink').getAttribute('href');
+  ok('o link leva aos precos', /precos|pricing|precios|preise|tarifs/.test(href || ''),
+     String(href));
+  const eBotao = await pg.locator('#fimPonteLink').evaluate(
+    (el) => el.tagName === 'BUTTON' || el.classList.contains('btn') || el.classList.contains('sm'));
+  ok('e ela nao tem peso de botao', !eBotao);
+}
+
 ok('sem erro de página', erros.length === 0, erros[0]);
 await br.close(); srv.close();
 console.log(falhas ? `\n  ${falhas} falha(s)` : '\n  tudo certo');

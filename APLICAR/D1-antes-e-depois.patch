@@ -1,0 +1,300 @@
+From 4098c27231e0f42d552c39ea39418b642287621f Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Sat, 22 Aug 2026 08:02:02 +0000
+Subject: [PATCH] A home passou a dizer que TRABALHO ela substitui
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Ela explicava bem o MECANISMO — gravacao vira documento, so o que mudou
+sobrevive — e nunca dizia de qual trabalho ela toma o lugar. Um recurso se
+compara com outro recurso; um fluxo se compara com a segunda-feira de quem
+executa uma rodada de casos.
+
+A secao nova fica logo depois da primeira dobra e tem quatro linhas, na ordem em
+que o dia acontece:
+
+  abrir o caso e recopiar os campos    -> o link abre o caso preenchido
+  Print Screen e Word a cada passo     -> a mudanca de tela vira passo sozinha
+  renomear arquivo e lembrar de quem   -> recibo e impressao presos ao caso
+  atualizar a planilha linha por linha -> o roteiro volta em .xlsx preenchido
+
+Cada uma aponta para uma peca que EXISTE — o `caso=` do template, os passos com
+hora, `roteiro_caso.recibo`, as colunas do `app/conta/planilha/route.ts`. Nenhuma
+promete coisa nova, e e por isso que a trava consegue cobra-las.
+
+E TABELA DE VERDADE, e nao dois blocos soltos. O valor da secao esta na LINHA —
+"o que eu faco hoje" ao lado de "o que passa a acontecer" —, e uma tabela com
+`scope="col"` e o que diz isso para quem ouve a pagina tambem. Num telefone as
+colunas nao cabem: a linha vira um par empilhado com a etiqueta na frente, pelo
+`data-rot`, que continua sendo a mesma leitura.
+
+TRAVA: `planos.mjs` [10] cobra a secao, a tabela com as duas colunas, as quatro
+linhas e as doze frases nos cinco idiomas — uma traducao que perdesse uma linha
+faria a pagina prometer menos numa lingua que na outra, que e o mesmo defeito do
+[3]. E cobra que a coluna do DEPOIS termine na planilha devolvida: e isso que
+distingue esta secao de mais uma lista de recursos.
+
+planos, chaves, cenarios, a11y, dobra e seo verdes.
+---
+ offline/walkstamp-offline.html |  2 +-
+ public/app.html                |  2 +-
+ public/site.css                | 24 ++++++++++++++
+ src/.build                     |  2 +-
+ src/i18n-site.json             | 60 ++++++++++++++++++++++++++++++++++
+ src/site/home.html             | 26 +++++++++++++++
+ testes/planos.mjs              | 35 ++++++++++++++++++++
+ 7 files changed, 148 insertions(+), 3 deletions(-)
+
+diff --git a/offline/walkstamp-offline.html b/offline/walkstamp-offline.html
+index 05f6fac..da417ad 100644
+--- a/offline/walkstamp-offline.html
++++ b/offline/walkstamp-offline.html
+@@ -9480,7 +9480,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
+      depois, e não tem como se atualizar sozinho. Sem carimbo, "estou com um
+      problema no offline" é uma conversa sem chão — ninguém sabe de qual build
+      se fala nem se o defeito já foi consertado. */
+-  const VERSAO = '2026.08.22-29';
++  const VERSAO = '2026.08.22-30';
+   window.__versao = () => VERSAO;
+ 
+   const PIP_CSS = `
+diff --git a/public/app.html b/public/app.html
+index 030cbfd..6cc88a7 100644
+--- a/public/app.html
++++ b/public/app.html
+@@ -9083,7 +9083,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
+      depois, e não tem como se atualizar sozinho. Sem carimbo, "estou com um
+      problema no offline" é uma conversa sem chão — ninguém sabe de qual build
+      se fala nem se o defeito já foi consertado. */
+-  const VERSAO = '2026.08.22-29';
++  const VERSAO = '2026.08.22-30';
+   window.__versao = () => VERSAO;
+ 
+   const PIP_CSS = `
+diff --git a/public/site.css b/public/site.css
+index e8d799d..3be9e78 100644
+--- a/public/site.css
++++ b/public/site.css
+@@ -298,6 +298,30 @@ footer a:hover{color:var(--ink)}
+ 
+ /* As saídas como fichas, na home. É a coisa que mais gente pergunta e que
+    estava escondida numa frase no meio de um parágrafo. */
++/* ANTES E DEPOIS. Duas colunas de verdade, e nao dois blocos soltos: o valor
++   da secao esta na LINHA — "o que eu faco hoje" ao lado de "o que passa a
++   acontecer" —, e uma tabela e o que diz isso para quem ouve a pagina tambem.
++   Num telefone as duas colunas nao cabem, e ai a linha vira um par empilhado
++   com a etiqueta na frente, que continua sendo a mesma leitura. */
++.antesDepois{width:100%;border-collapse:collapse;margin-top:22px;font-size:15px}
++.antesDepois th{text-align:left;font-weight:620;font-size:13px;letter-spacing:.02em;
++      text-transform:uppercase;color:color-mix(in srgb, var(--ink) 55%, transparent);
++      padding:0 16px 8px 0;border-bottom:1px solid var(--line)}
++.antesDepois td{padding:13px 16px 13px 0;border-bottom:1px solid var(--line);
++      vertical-align:top;width:50%}
++.antesDepois tbody tr:last-child td{border-bottom:0}
++.antesDepois td:last-child{padding-right:0;font-weight:520}
++.antesDepois td:first-child{color:color-mix(in srgb, var(--ink) 68%, transparent)}
++@media (max-width:640px){
++  .antesDepois, .antesDepois tbody, .antesDepois tr, .antesDepois td{display:block;width:auto}
++  .antesDepois thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
++  .antesDepois tr{padding:12px 0;border-bottom:1px solid var(--line)}
++  .antesDepois td{border:0;padding:2px 0}
++  .antesDepois td::before{content:attr(data-rot);display:block;font-size:12px;
++        text-transform:uppercase;letter-spacing:.02em;
++        color:color-mix(in srgb, var(--ink) 45%, transparent)}
++}
++
+ .saidas{display:flex;flex-wrap:wrap;gap:9px;margin:24px 0 6px}
+ .saida{display:inline-flex;align-items:center;gap:7px;background:var(--panel);
+       border:1px solid var(--line);border-radius:999px;padding:8px 15px;
+diff --git a/src/.build b/src/.build
+index 9862d7c..0a10037 100644
+--- a/src/.build
++++ b/src/.build
+@@ -1 +1 @@
+-2026-08-22 29
++2026-08-22 30
+diff --git a/src/i18n-site.json b/src/i18n-site.json
+index 51c2770..ab8f475 100644
+--- a/src/i18n-site.json
++++ b/src/i18n-site.json
+@@ -13,6 +13,18 @@
+     "cta": "Testar com um vídeo — é grátis",
+     "cta2": "Ver como funciona o roteiro de casos",
+     "ctaSub": "Sem cadastro para testar, sem instalação, sem limite de tamanho. O vídeo, o áudio e a transcrição são processados dentro do seu navegador.",
++    "adH": "A segunda-feira de quem executa uma rodada",
++    "adP": "Não é uma lista de recursos: é o mesmo trabalho, na mesma ordem, feito de dois jeitos.",
++    "adAntes": "Hoje",
++    "adDepois": "Com o Walkstamp",
++    "ad1A": "Abrir o caso na planilha e copiar sistema, chamado e responsável para o documento.",
++    "ad1D": "O link abre o caso já preenchido. Nada é redigitado.",
++    "ad2A": "Print Screen a cada passo, colar no Word, escrever o que aconteceu.",
++    "ad2D": "As mudanças da tela viram passos sozinhas, com hora exata e a fala do trecho.",
++    "ad3A": "Renomear os arquivos e lembrar qual anexo é de qual caso.",
++    "ad3D": "O recibo e a impressão digital ficam presos ao caso que os gerou.",
++    "ad4A": "Voltar à planilha e atualizar situação, data e quem executou, linha por linha.",
++    "ad4D": "O roteiro volta em .xlsx com tudo isso preenchido.",
+     "whyH": "Por que a gravação crua não resolve",
+     "whyP": "Um vídeo de uma hora não é anexável em lugar nenhum: não cabe num chamado, não cabe numa ata, e ninguém vai assistir. Mandar o arquivo cru para uma IA tem o mesmo problema por outro caminho — parte delas recusa vídeo, e a que aceita amostra um quadro por segundo às cegas: 3.600 imagens e mais de um milhão de tokens, quase tudo repetição da tela anterior. Tirar print na mão tem o defeito oposto: dá trabalho, e some a hora de cada um.",
+     "howEyebrow": "Como funciona",
+@@ -135,6 +147,18 @@
+     "cta": "Try it with a video — free",
+     "cta2": "See how the case script works",
+     "ctaSub": "No sign-up to try it, no install, no size limit. The video, the audio and the transcript are processed inside your browser.",
++    "adH": "The Monday of someone running a round of cases",
++    "adP": "This is not a feature list: it is the same work, in the same order, done two ways.",
++    "adAntes": "Today",
++    "adDepois": "With Walkstamp",
++    "ad1A": "Open the case in the spreadsheet and copy system, ticket and owner into the document.",
++    "ad1D": "The link opens the case already filled in. Nothing is retyped.",
++    "ad2A": "Screenshot at every step, paste into Word, write down what happened.",
++    "ad2D": "Screen changes become steps on their own, with the exact time and what was said.",
++    "ad3A": "Rename the files and remember which attachment belongs to which case.",
++    "ad3D": "The receipt and the fingerprint stay tied to the case that produced them.",
++    "ad4A": "Go back to the spreadsheet and update status, date and who ran it, row by row.",
++    "ad4D": "The script comes back as .xlsx with all of that filled in.",
+     "whyH": "Why the raw recording does not solve it",
+     "whyP": "An hour-long video is not attachable anywhere: it does not fit in a ticket, it does not fit in minutes, and nobody will watch it. Sending the raw file to an AI has the same problem by another route — some refuse video outright, and the ones that accept it sample one frame per second, blind: 3,600 images and over a million tokens, almost all of it the previous screen again. Taking screenshots by hand has the opposite flaw: it is laborious, and the time of each one is lost.",
+     "howEyebrow": "How it works",
+@@ -257,6 +281,18 @@
+     "cta": "Probar con un vídeo — es gratis",
+     "cta2": "Ver cómo funciona el guion de casos",
+     "ctaSub": "Sin registro para probarlo, sin instalación, sin límite de tamaño. El vídeo, el audio y la transcripción se procesan dentro de tu navegador.",
++    "adH": "El lunes de quien ejecuta una ronda de casos",
++    "adP": "No es una lista de funciones: es el mismo trabajo, en el mismo orden, hecho de dos maneras.",
++    "adAntes": "Hoy",
++    "adDepois": "Con Walkstamp",
++    "ad1A": "Abrir el caso en la hoja y copiar sistema, ticket y responsable al documento.",
++    "ad1D": "El enlace abre el caso ya rellenado. No se reescribe nada.",
++    "ad2A": "Captura en cada paso, pegar en Word, escribir lo que pasó.",
++    "ad2D": "Los cambios de pantalla se vuelven pasos solos, con la hora exacta y lo que se dijo.",
++    "ad3A": "Renombrar los archivos y recordar qué adjunto es de qué caso.",
++    "ad3D": "El recibo y la huella quedan atados al caso que los generó.",
++    "ad4A": "Volver a la hoja y actualizar situación, fecha y quién lo ejecutó, fila por fila.",
++    "ad4D": "El guion vuelve en .xlsx con todo eso rellenado.",
+     "whyH": "Por qué la grabación en crudo no resuelve",
+     "whyP": "Un vídeo de una hora no se adjunta en ningún sitio: no cabe en un ticket, no cabe en un acta, y nadie lo va a ver. Mandar el archivo crudo a una IA tiene el mismo problema por otro camino — algunas rechazan el vídeo, y las que lo aceptan muestrean un fotograma por segundo a ciegas: 3.600 imágenes y más de un millón de tokens, casi todo repetición de la pantalla anterior. Hacer capturas a mano tiene el defecto opuesto: da trabajo, y se pierde la hora de cada una.",
+     "howEyebrow": "Cómo funciona",
+@@ -379,6 +415,18 @@
+     "cta": "Mit einem Video testen — kostenlos",
+     "cta2": "So funktioniert die Fallliste",
+     "ctaSub": "Zum Testen ohne Registrierung, ohne Installation, ohne Größenbeschränkung. Video, Audio und Transkription werden in Ihrem Browser verarbeitet.",
++    "adH": "Der Montag einer Person, die eine Runde Fälle abarbeitet",
++    "adP": "Keine Funktionsliste: dieselbe Arbeit, in derselben Reihenfolge, auf zwei Arten erledigt.",
++    "adAntes": "Heute",
++    "adDepois": "Mit Walkstamp",
++    "ad1A": "Den Fall in der Tabelle öffnen und System, Ticket und Verantwortliche ins Dokument kopieren.",
++    "ad1D": "Der Link öffnet den Fall bereits ausgefüllt. Nichts wird neu getippt.",
++    "ad2A": "Bei jedem Schritt ein Screenshot, in Word einfügen, aufschreiben, was passiert ist.",
++    "ad2D": "Bildschirmwechsel werden von selbst zu Schritten, mit genauer Uhrzeit und dem Gesagten.",
++    "ad3A": "Die Dateien umbenennen und sich merken, welcher Anhang zu welchem Fall gehört.",
++    "ad3D": "Beleg und Fingerabdruck bleiben an dem Fall, der sie erzeugt hat.",
++    "ad4A": "Zurück in die Tabelle und Status, Datum und ausführende Person Zeile für Zeile nachtragen.",
++    "ad4D": "Die Liste kommt als .xlsx zurück, mit all dem ausgefüllt.",
+     "whyH": "Warum die rohe Aufnahme nicht reicht",
+     "whyP": "Ein einstündiges Video lässt sich nirgends anhängen: Es passt in kein Ticket, in kein Protokoll, und niemand sieht es sich an. Die Rohdatei an eine KI zu schicken hat dasselbe Problem auf anderem Weg — manche lehnen Video ab, und die, die es annehmen, greifen blind einen Screenshot pro Sekunde ab: 3.600 Bilder und über eine Million Token, fast alles Wiederholung des vorherigen Bildschirms. Screenshots von Hand haben den umgekehrten Fehler: Das ist Arbeit, und die Uhrzeit jedes einzelnen geht verloren.",
+     "howEyebrow": "So funktioniert es",
+@@ -501,6 +549,18 @@
+     "cta": "Essayer avec une vidéo — c’est gratuit",
+     "cta2": "Voir comment marche la liste de cas",
+     "ctaSub": "Sans inscription pour essayer, sans installation, sans limite de taille. La vidéo, l’audio et la transcription sont traités dans votre navigateur.",
++    "adH": "Le lundi de celui qui exécute une série de cas",
++    "adP": "Ce n’est pas une liste de fonctions : c’est le même travail, dans le même ordre, fait de deux façons.",
++    "adAntes": "Aujourd’hui",
++    "adDepois": "Avec Walkstamp",
++    "ad1A": "Ouvrir le cas dans le tableur et recopier système, ticket et responsable dans le document.",
++    "ad1D": "Le lien ouvre le cas déjà rempli. Rien n’est retapé.",
++    "ad2A": "Une capture à chaque étape, coller dans Word, écrire ce qui s’est passé.",
++    "ad2D": "Les changements d’écran deviennent des étapes tout seuls, avec l’heure exacte et ce qui était dit.",
++    "ad3A": "Renommer les fichiers et se souvenir de quel cas vient quelle pièce jointe.",
++    "ad3D": "Le reçu et l’empreinte restent attachés au cas qui les a produits.",
++    "ad4A": "Retourner au tableur et mettre à jour statut, date et exécutant, ligne par ligne.",
++    "ad4D": "La liste revient en .xlsx avec tout cela rempli.",
+     "whyH": "Pourquoi l’enregistrement brut ne suffit pas",
+     "whyP": "Une vidéo d’une heure ne s’attache nulle part : elle ne tient pas dans un ticket, ni dans un compte rendu, et personne ne la regardera. Envoyer le fichier brut à une IA pose le même problème par un autre chemin — certaines refusent la vidéo, et celles qui l’acceptent échantillonnent une capture par seconde, à l’aveugle : 3 600 images et plus d’un million de tokens, presque toutes une répétition de l’écran précédent. Faire les captures à la main a le défaut inverse : c’est du travail, et l’heure de chacune disparaît.",
+     "howEyebrow": "Comment ça marche",
+diff --git a/src/site/home.html b/src/site/home.html
+index 860335e..be6dbac 100644
+--- a/src/site/home.html
++++ b/src/site/home.html
+@@ -87,6 +87,32 @@
+   </div>
+ </section>
+ 
++<!-- ANTES E DEPOIS, e nao mais uma lista de recursos.
++
++     A home explicava bem o MECANISMO e nunca dizia que TRABALHO ela substitui.
++     Um recurso se compara com outro recurso; um fluxo se compara com a
++     segunda-feira de quem executa uma rodada de casos. As quatro linhas abaixo
++     sao o dia dessa pessoa, na ordem em que ele acontece — e cada uma delas
++     aponta para uma peca que ja existe no produto, e nao para uma promessa. -->
++<section id="antesdepois">
++  <div class="wrap">
++    <h2>{{adH}}</h2>
++    <p class="lead">{{adP}}</p>
++    <table class="antesDepois">
++      <caption class="soLeitor">{{adH}}</caption>
++      <thead>
++        <tr><th scope="col">{{adAntes}}</th><th scope="col">{{adDepois}}</th></tr>
++      </thead>
++      <tbody>
++        <tr><td data-rot="{{adAntes}}">{{ad1A}}</td><td data-rot="{{adDepois}}">{{ad1D}}</td></tr>
++        <tr><td data-rot="{{adAntes}}">{{ad2A}}</td><td data-rot="{{adDepois}}">{{ad2D}}</td></tr>
++        <tr><td data-rot="{{adAntes}}">{{ad3A}}</td><td data-rot="{{adDepois}}">{{ad3D}}</td></tr>
++        <tr><td data-rot="{{adAntes}}">{{ad4A}}</td><td data-rot="{{adDepois}}">{{ad4D}}</td></tr>
++      </tbody>
++    </table>
++  </div>
++</section>
++
+ <section>
+   <div class="wrap">
+     <h2>{{whyH}}</h2>
+diff --git a/testes/planos.mjs b/testes/planos.mjs
+index 67f4f3a..d742b71 100644
+--- a/testes/planos.mjs
++++ b/testes/planos.mjs
+@@ -236,5 +236,40 @@ console.log('\n[9] nenhum "em breve" DENTRO de um cartão de plano');
+   }
+ }
+ 
++console.log('\n[10] a home diz que TRABALHO ela substitui, e não só o mecanismo');
++{
++  /* A home explicava bem o mecanismo e nunca dizia qual trabalho ela toma o
++     lugar. Um recurso se compara com outro recurso; um fluxo se compara com a
++     segunda-feira de quem executa uma rodada de casos.
++     
++     As quatro linhas do "antes e depois" apontam para peças que EXISTEM — o
++     link que abre o caso preenchido, os passos com hora, o recibo preso ao
++     caso, a planilha que volta. Por isso a régua cobra as quatro nos cinco
++     idiomas: uma tradução que perdesse uma linha faria a página prometer
++     menos numa língua do que na outra, que é o mesmo defeito do [3]. */
++  const home = fs.readFileSync(`${RAIZ_WS}/src/site/home.html`, 'utf8');
++  ok('a seção existe na home', /id="antesdepois"/.test(home));
++  ok('e é tabela de verdade, com cabeçalho de coluna',
++     /<table class="antesDepois">/.test(home) && (home.match(/scope="col"/g) || []).length === 2);
++  ok('e as quatro linhas estão lá',
++     [1, 2, 3, 4].every((n) => home.includes(`{{ad${n}A}}`) && home.includes(`{{ad${n}D}}`)));
++
++  const site = JSON.parse(fs.readFileSync(`${RAIZ_WS}/src/i18n-site.json`, 'utf8'));
++  const CHAVES = ['adH', 'adP', 'adAntes', 'adDepois',
++                  'ad1A', 'ad1D', 'ad2A', 'ad2D', 'ad3A', 'ad3D', 'ad4A', 'ad4D'];
++  for (const L of IDIOMAS) {
++    const faltando = CHAVES.filter((k) => !site[L] || !String(site[L][k] || '').trim());
++    ok(`${L}: as doze frases do antes e depois existem`, faltando.length === 0,
++       faltando.join(', '));
++  }
++  /* E o depois fala da RODADA, e não de um documento avulso: é isso que
++     distingue esta seção de mais uma lista de recursos. */
++  for (const L of IDIOMAS) {
++    const depois = ['ad1D', 'ad2D', 'ad3D', 'ad4D'].map((k) => site[L][k]).join(' ');
++    ok(`${L}: e a coluna do depois termina na planilha devolvida`,
++       /xlsx/i.test(depois), depois.slice(-70));
++  }
++}
++
+ console.log(falhas ? `\n${falhas} FALHA(S)` : '\nCartões e catálogo: uma verdade só.');
+ process.exit(falhas ? 1 : 0);
+-- 
+2.43.0
+

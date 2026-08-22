@@ -128,8 +128,14 @@ async function corrida({ ctx, semearCache }) {
      desenvolvimento de quem for investigar. */
   const doNavegador = await pg.evaluate(() =>
     performance.getEntriesByType('mark').map(e => e.name).filter(n => n.startsWith('ws:')));
+  /* `performance.memory` e do Chrome e mais ninguem; quem pergunta e a corrida,
+     porque e ela que tem a pagina aberta. */
+  const temMemoria = await pg.evaluate(() => {
+    try { return !!(performance.memory && performance.memory.usedJSHeapSize); }
+    catch (e) { return false; }
+  }).catch(() => false);
   await pg.close();
-  return { m, erros, enviados, doNavegador };
+  return { m, erros, enviados, doNavegador, temMemoria };
 }
 
 const ctx = await br.newContext({ viewport: { width: 1250, height: 980 } });
@@ -221,6 +227,39 @@ ok('nenhum marco viajou na medição',
 ok('e nem os três de sempre: de localhost a medição fica muda',
    corpos === '', corpos.slice(0, 200));
 
+console.log('[6b] o pico de memoria, e onde ele acontece');
+{
+  /* A escada ja protege a maquina que fica sem memoria. Proteger nao e
+     entender: a pergunta que decide o que otimizar depois e se o pico e a
+     leitura do arquivo, o buffer de audio decodificado ou a sessao do modelo —
+     cada resposta manda mexer num lugar diferente.
+
+     `performance.memory` e do Chrome e mais ninguem, entao a medida diz `null`
+     onde a informacao nao existe. Este teste roda no Chromium, onde ela existe;
+     o que ele guarda e que o numero seja PLAUSIVEL e que o `onde` seja um dos
+     marcos de verdade — um pico sem lugar nao serve para decidir nada. */
+  const temApi = frio.temMemoria;
+  if (!temApi) {
+    ok('(este navegador nao conta memoria — a medida diz null, e esta certo)',
+       M.numeros.picoDeMemoriaMB === null, String(M.numeros.picoDeMemoriaMB));
+  } else {
+    ok('o pico foi medido', M.numeros.picoDeMemoriaMB > 0,
+       M.numeros.picoDeMemoriaMB + ' MB');
+    ok('e ele nao passa do teto do heap',
+       M.numeros.picoDeMemoriaMB <= M.numeros.tetoDoHeapMB,
+       M.numeros.picoDeMemoriaMB + ' / ' + M.numeros.tetoDoHeapMB);
+    ok('a sobra e o teto menos o pico',
+       M.numeros.sobrouNoPicoMB === M.numeros.tetoDoHeapMB - M.numeros.picoDeMemoriaMB,
+       String(M.numeros.sobrouNoPicoMB));
+    /* O `onde` tem que ser um marco de verdade, e nao um rotulo solto: e ele
+       que diz em qual pedaco mexer. */
+    const lugares = new Set(M.marcos.map((x) => x.nome).concat(['inferencia']));
+    ok('e o pico tem lugar, e o lugar existe',
+       !!M.numeros.picoOnde && lugares.has(M.numeros.picoOnde),
+       String(M.numeros.picoOnde));
+  }
+}
+
 console.log('[7] sem erro de JS');
 ok('a corrida fria', frio.erros.length === 0, frio.erros.join(' | '));
 ok('a corrida quente', quente.erros.length === 0, quente.erros.join(' | '));
@@ -247,6 +286,64 @@ console.log('[8] quem abre a porta de serviço tampa o ralo');
      abrem.length <= 3, abrem.length + ': ' + abrem.join(', '));
 }
 
+
+console.log('[9] a escada pula o que nao adianta');
+{
+  /* O CASO QUE A ESCADA TRATAVA PIOR. Numa maquina sem memoria, ela subia ate o
+     degrau de 200 MB — baixava tudo e morria com o arquivo maior na mao. Insistir
+     ali nao e persistencia: e gastar a ultima chance da pessoa.
+
+     A biblioteca falsificada aqui joga um erro de memoria no primeiro degrau e
+     depois aceitaria qualquer coisa. O que se cobra e que ela NAO seja chamada
+     para os degraus caros — e que os pulados apareçam no registro, porque um
+     degrau que some faz a escada parecer mais curta do que foi. */
+  const SEM_MEMORIA = `
+globalThis.__pediu = [];
+export const env = { allowLocalModels: true, allowRemoteModels: true,
+  backends: { onnx: { wasm: { numThreads: 1, wasmPaths: undefined, proxy: false } } } };
+export async function pipeline(tarefa, modelo, opcoes){
+  globalThis.__pediu.push(JSON.stringify(opcoes && opcoes.dtype));
+  await new Promise(r => setTimeout(r, 20));
+  throw new Error('Array buffer allocation failed: out of memory');
+}
+`;
+  const ctx2 = await br.newContext({ viewport: { width: 1250, height: 980 } });
+  const pg2 = await ctx2.newPage();
+  const erros2 = []; pg2.on('pageerror', (e) => erros2.push(e.message));
+  await pg2.route('**/rpc/walkstamp_evento', (r) =>
+    r.fulfill({ status: 200, headers: { 'access-control-allow-origin': '*' }, body: 'null' }));
+  await pg2.route('**/@huggingface/transformers**', (r) => r.fulfill({
+    status: 200, headers: { 'content-type': 'text/javascript' }, body: SEM_MEMORIA }));
+  await pg2.goto('http://localhost:8973/app.html?lang=pt');
+  await pg2.selectOption('#mode', 'count').catch(() => {});
+  await pg2.fill('#count', '3').catch(() => {});
+  await pg2.locator('#recTr').uncheck().catch(() => {});
+  await pg2.setInputFiles('#file', '/tmp/amostra.webm');
+  await pg2.waitForFunction(() => !document.getElementById('auto').disabled,
+                            null, { timeout: 120000 });
+  await pg2.locator('#auto').click();
+  await pg2.waitForFunction(
+    () => !document.getElementById('auto').disabled &&
+          !document.getElementById('tr').readOnly, null, { timeout: 180000 });
+
+  const m2 = await pg2.evaluate(() => window.__medidas());
+  const pulos = m2.marcos.filter((x) => x.nome === 'modelo.pulou');
+  ok('a escada pulou pelo menos um degrau', pulos.length > 0,
+     JSON.stringify(pulos.map((x) => [x.rotulo, x.causa])));
+  ok('e o motivo registrado é a memória',
+     pulos.every((x) => x.causa === 'memoria'),
+     JSON.stringify(pulos.map((x) => x.causa)));
+  ok('nenhum degrau caro chegou a ser pedido',
+     m2.numeros.mbPoupados > 0 && !m2.marcos.some(
+       (x) => x.nome === 'modelo.degrau' && /fp32/.test(x.rotulo || '') && x.ok === false
+              && /processador|wasm/.test(x.rotulo || '')),
+     'poupou ' + m2.numeros.mbPoupados + ' MB');
+  ok('e o resumo conta os pulos', m2.numeros.degrausPulados === pulos.length,
+     m2.numeros.degrausPulados + ' vs ' + pulos.length);
+  ok('a desistência foi registrada', m2.marcos.some((x) => x.nome === 'modelo.desistiu'));
+  ok('sem erro de JS na corrida sem memória', erros2.length === 0, erros2.join(' | '));
+  await ctx2.close();
+}
 
 await ctx.close(); await br.close(); srv.close();
 console.log(falhas ? '\n' + falhas + ' falha(s)' : '\ntudo certo');

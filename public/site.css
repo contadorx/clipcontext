@@ -298,7 +298,41 @@ footer a:hover{color:var(--ink)}
 
 /* As saídas como fichas, na home. É a coisa que mais gente pergunta e que
    estava escondida numa frase no meio de um parágrafo. */
+/* ANTES E DEPOIS. Duas colunas de verdade, e nao dois blocos soltos: o valor
+   da secao esta na LINHA — "o que eu faco hoje" ao lado de "o que passa a
+   acontecer" —, e uma tabela e o que diz isso para quem ouve a pagina tambem.
+   Num telefone as duas colunas nao cabem, e ai a linha vira um par empilhado
+   com a etiqueta na frente, que continua sendo a mesma leitura. */
+.antesDepois{width:100%;border-collapse:collapse;margin-top:22px;font-size:15px}
+.antesDepois th{text-align:left;font-weight:620;font-size:13px;letter-spacing:.02em;
+      text-transform:uppercase;color:color-mix(in srgb, var(--ink) 55%, transparent);
+      padding:0 16px 8px 0;border-bottom:1px solid var(--line)}
+.antesDepois td{padding:13px 16px 13px 0;border-bottom:1px solid var(--line);
+      vertical-align:top;width:50%}
+.antesDepois tbody tr:last-child td{border-bottom:0}
+.antesDepois td:last-child{padding-right:0;font-weight:520}
+.antesDepois td:first-child{color:color-mix(in srgb, var(--ink) 68%, transparent)}
+@media (max-width:640px){
+  .antesDepois, .antesDepois tbody, .antesDepois tr, .antesDepois td{display:block;width:auto}
+  .antesDepois thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  .antesDepois tr{padding:12px 0;border-bottom:1px solid var(--line)}
+  .antesDepois td{border:0;padding:2px 0}
+  .antesDepois td::before{content:attr(data-rot);display:block;font-size:12px;
+        text-transform:uppercase;letter-spacing:.02em;
+        color:color-mix(in srgb, var(--ink) 45%, transparent)}
+}
+
 .saidas{display:flex;flex-wrap:wrap;gap:9px;margin:24px 0 6px}
+/* O resto dos formatos, a um clique. `summary` com aparencia de link porque e
+   isso que ele e — nao um botao de acao, e sim "mostre o resto da lista". */
+.maisSaidas{margin-top:6px}
+.maisSaidas > summary{cursor:pointer;font-size:14px;color:var(--accent);
+      display:inline-block;padding:4px 0;list-style:none}
+.maisSaidas > summary::-webkit-details-marker{display:none}
+.maisSaidas > summary::before{content:"+ ";font-weight:600}
+.maisSaidas[open] > summary::before{content:"\2212 "}
+.maisSaidas > summary:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:3px}
+.maisSaidas .saidas{margin-top:10px}
 .saida{display:inline-flex;align-items:center;gap:7px;background:var(--panel);
       border:1px solid var(--line);border-radius:999px;padding:8px 15px;
       font-size:14px;color:var(--ink);font-weight:520}

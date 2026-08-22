@@ -236,5 +236,138 @@ console.log('\n[9] nenhum "em breve" DENTRO de um cartão de plano');
   }
 }
 
+console.log('\n[10] a home diz que TRABALHO ela substitui, e não só o mecanismo');
+{
+  /* A home explicava bem o mecanismo e nunca dizia qual trabalho ela toma o
+     lugar. Um recurso se compara com outro recurso; um fluxo se compara com a
+     segunda-feira de quem executa uma rodada de casos.
+     
+     As quatro linhas do "antes e depois" apontam para peças que EXISTEM — o
+     link que abre o caso preenchido, os passos com hora, o recibo preso ao
+     caso, a planilha que volta. Por isso a régua cobra as quatro nos cinco
+     idiomas: uma tradução que perdesse uma linha faria a página prometer
+     menos numa língua do que na outra, que é o mesmo defeito do [3]. */
+  const home = fs.readFileSync(`${RAIZ_WS}/src/site/home.html`, 'utf8');
+  ok('a seção existe na home', /id="antesdepois"/.test(home));
+  ok('e é tabela de verdade, com cabeçalho de coluna',
+     /<table class="antesDepois">/.test(home) && (home.match(/scope="col"/g) || []).length === 2);
+  ok('e as quatro linhas estão lá',
+     [1, 2, 3, 4].every((n) => home.includes(`{{ad${n}A}}`) && home.includes(`{{ad${n}D}}`)));
+
+  const site = JSON.parse(fs.readFileSync(`${RAIZ_WS}/src/i18n-site.json`, 'utf8'));
+  const CHAVES = ['adH', 'adP', 'adAntes', 'adDepois',
+                  'ad1A', 'ad1D', 'ad2A', 'ad2D', 'ad3A', 'ad3D', 'ad4A', 'ad4D'];
+  for (const L of IDIOMAS) {
+    const faltando = CHAVES.filter((k) => !site[L] || !String(site[L][k] || '').trim());
+    ok(`${L}: as doze frases do antes e depois existem`, faltando.length === 0,
+       faltando.join(', '));
+  }
+  /* E o depois fala da RODADA, e não de um documento avulso: é isso que
+     distingue esta seção de mais uma lista de recursos. */
+  for (const L of IDIOMAS) {
+    const depois = ['ad1D', 'ad2D', 'ad3D', 'ad4D'].map((k) => site[L][k]).join(' ');
+    ok(`${L}: e a coluna do depois termina na planilha devolvida`,
+       /xlsx/i.test(depois), depois.slice(-70));
+  }
+}
+
+console.log('\n[11] a home apresenta os três planos, e mostra quatro formatos');
+{
+  /* DOIS DEFEITOS DA MESMA PAGINA, e eles se anulavam.
+   *
+   * A home empurrava so para o Free: o Personal so aparecia na pagina de
+   * precos, entao quem chega com uma planilha de casos na mao tinha que
+   * adivinhar que existe um plano para isso. E logo na primeira rolagem havia
+   * TREZE fichas de formato, que fazem a pagina parecer um conversor de arquivo
+   * — a categoria errada, e justamente a que nao se vende.
+   *
+   * Agora os tres planos aparecem descritos pelo TRABALHO que fazem, e os
+   * formatos entram quatro na frente com o resto a um clique. A regua cobra os
+   * dois nos cinco idiomas, e cobra que o resto continue INTEIRO: esconder
+   * formato de quem veio conferir se o dele cabe seria trocar um defeito
+   * por outro. */
+  const home = fs.readFileSync(`${RAIZ_WS}/src/site/home.html`, 'utf8');
+  ok('a home tem o resumo dos planos', /id="planos"/.test(home));
+  ok('e ele vem antes do FAQ', home.indexOf('id="planos"') < home.indexOf('{{faqH}}'));
+  ok('e leva à página de preços', /id="planos"[\s\S]{0,900}\{\{precos\}\}/.test(home));
+
+  /* Quatro na tira de cima. O corte e por CONTAGEM, e nao por lista escrita
+     aqui: qual formato entra na frente e decisao de produto e pode mudar; que
+     sejam poucos e a regra. */
+  const primeira = home.slice(home.indexOf('<div class="saidas">'), home.indexOf('<details class="maisSaidas">'));
+  const naFrente = (primeira.match(/class="saida"/g) || []).length;
+  ok('a primeira tira mostra quatro formatos', naFrente === 4, String(naFrente));
+  const dentro = home.slice(home.indexOf('<details class="maisSaidas">'));
+  const escondidos = (dentro.slice(0, dentro.indexOf('</details>')).match(/class="saida"/g) || []).length;
+  ok('e nenhum formato sumiu: os treze continuam na página',
+     naFrente + escondidos === 13, `${naFrente} + ${escondidos}`);
+
+  const site = JSON.parse(fs.readFileSync(`${RAIZ_WS}/src/i18n-site.json`, 'utf8'));
+  const CHAVES = ['plH', 'plP', 'plFreeT', 'plFreeD', 'plPersT', 'plPersD',
+                  'plTimeT', 'plTimeD', 'plVer', 'saidasTodas', 'saidasPlan'];
+  for (const L of IDIOMAS) {
+    const faltando = CHAVES.filter((k) => !String((site[L] || {})[k] || '').trim());
+    ok(`${L}: as frases do resumo e do "ver todas" existem`, faltando.length === 0,
+       faltando.join(', '));
+  }
+  /* E o Personal continua sendo descrito pela RODADA, aqui como no cartao: um
+     resumo que voltasse a falar de logotipo desfaria o B5 pela porta dos
+     fundos, numa secao que nenhuma regua olhava. */
+  for (const L of IDIOMAS) {
+    ok(`${L}: o Personal do resumo fala da planilha, e não da marca`,
+       /xlsx|planilha|spreadsheet|hoja|tabelle|tableur|guion|script|fallliste/i.test(site[L].plPersD),
+       site[L].plPersD.slice(0, 64));
+  }
+}
+
+console.log('\n[12] as seis perguntas de quem está decidindo pagar');
+{
+  /* As sete perguntas antigas respondem "isto funciona?". Quem esta decidindo
+     pagar tem outras seis — o que fica na conta, cancelamento, cobranca por
+     pessoa — e elas nao estavam em lugar nenhum do site. A pessoa tinha que
+     escrever perguntando, e a maioria nao escreve.
+     
+     A resposta de CADA uma foi conferida no codigo antes de ser escrita, e uma
+     mudou por causa disso: a analise supunha Jira, Zephyr e TestRail no fluxo, e
+     so o Jira existe — como resumo para colar, e nao como integracao. Escrever
+     "integramos com Zephyr" teria sido exatamente o defeito que o B1 consertou.
+     Esta afirmacao guarda os dois lados: as seis existem, e a do Jira continua
+     dizendo que os outros dois NAO. */
+  const home = fs.readFileSync(`${RAIZ_WS}/src/site/home.html`, 'utf8');
+  const site = JSON.parse(fs.readFileSync(`${RAIZ_WS}/src/i18n-site.json`, 'utf8'));
+  for (let n = 1; n <= 6; n++) {
+    ok(`a pergunta comercial ${n} está no FAQ da home`,
+       home.includes(`{{qc${n}}}`) && home.includes(`{{ac${n}}}`));
+  }
+  for (const L of IDIOMAS) {
+    const faltando = [];
+    for (let n = 1; n <= 6; n++) {
+      if (!String((site[L] || {})[`qc${n}`] || '').trim()) faltando.push(`qc${n}`);
+      if (!String((site[L] || {})[`ac${n}`] || '').trim()) faltando.push(`ac${n}`);
+    }
+    ok(`${L}: as doze frases comerciais existem`, faltando.length === 0, faltando.join(', '));
+  }
+  /* A trava que importa: a resposta do Jira nao pode virar promessa. */
+  for (const L of IDIOMAS) {
+    const r = site[L].ac3 || '';
+    ok(`${L}: a resposta do Jira continua negando Zephyr e TestRail`,
+       /Zephyr/.test(r) && /TestRail/.test(r) &&
+       /(não|no|nicht|pas|ningún|nenhum|only|solo|sólo|só|nur|seulement|seule)/i.test(r),
+       r.slice(0, 72));
+  }
+  /* E o prazo do cancelamento e o que o codigo faz, e nao um numero redondo:
+     o expurgo conta 90 dias do encerramento, e a fatura sobrevive por guarda
+     fiscal. Se um dia o prazo mudar na migracao, esta linha obriga a pagina a
+     mudar junto. */
+  const expurgo = fs.readdirSync(`${RAIZ_WS}/supabase/migrations`)
+    .filter((f) => /expurgo/.test(f))
+    .map((f) => fs.readFileSync(`${RAIZ_WS}/supabase/migrations/${f}`, 'utf8')).join('\n');
+  const dias = (expurgo.match(/(\d+)\s*days/) || [])[1] || '90';
+  for (const L of IDIOMAS) {
+    ok(`${L}: o prazo do cancelamento bate com o do expurgo (${dias})`,
+       site[L].ac4.includes(dias), site[L].ac4.slice(0, 70));
+  }
+}
+
 console.log(falhas ? `\n${falhas} FALHA(S)` : '\nCartões e catálogo: uma verdade só.');
 process.exit(falhas ? 1 : 0);

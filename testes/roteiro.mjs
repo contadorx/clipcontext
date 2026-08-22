@@ -543,6 +543,53 @@ w.save('/tmp/roteiro-entrada.xlsx')`]);
      pg.url());
 }
 
+console.log('\n[11b] a tela nao abre vazia: o exemplo passa pelo caminho de verdade');
+{
+  /* A TELA VAZIA ERA O PRIMEIRO OBSTACULO de quem acabou de assinar. Arrumar
+     uma planilha no meio do expediente e o tipo de tarefa que fica para depois
+     e nunca acontece — e ai o primeiro caso concluido, que e a metrica do
+     plano, nunca sai.
+
+     O que esta afirmacao guarda e o CAMINHO: o exemplo preenche o campo de
+     colar e manda o mesmo formulario da planilha de verdade. Um atalho que
+     desenhasse a tabela de conferencia sem passar pela leitura mostraria a
+     pessoa uma tela que o produto nao produz — e o palpite das colunas, que e
+     a parte que erra, ficaria sem prova. */
+  await pg.goto(`${BASE}/conta/roteiro`);
+  const antesDoExemplo = chamadas.length;
+  const btn = pg.locator('button:has-text("Ver com um exemplo")');
+  ok('o botao do exemplo esta na tela', await btn.count() === 1);
+  await btn.click();
+  await pg.waitForSelector('text=Confira o que foi entendido', { timeout: 20000 });
+
+  /* Que ele nao pulou a leitura se prova no CODIGO, e nao na tela: depois do
+     envio o React redesenha e o campo volta vazio, entao ler o `value` aqui
+     nao diria nada. O que importa e que o exemplo escreve no mesmo campo e
+     manda o mesmo formulario — sem endpoint proprio e sem tabela fabricada. */
+  const fonte = fs.readFileSync(`${RAIZ_WS}/app/conta/[lang]/roteiro/Importar.tsx`, 'utf8');
+  ok('o exemplo escreve no campo e manda o MESMO formulario',
+     /rotExemploTsv/.test(fonte) && /form\?\.requestSubmit\(\)/.test(fonte));
+  ok('e nao existe tabela de conferencia fabricada no cliente',
+     !/CT-0\d/.test(fonte), (fonte.match(/CT-0\d.{0,30}/) || [''])[0]);
+
+  const txt = await pg.locator('table.legal').last().innerText();
+  ok('os quatro casos apareceram na conferencia',
+     ['CT-01', 'CT-02', 'CT-03', 'CT-04'].every((c) => txt.includes(c)),
+     txt.slice(0, 70).replace(/\n/g, ' '));
+  /* O palpite das colunas tem que ACERTAR no exemplo: um exemplo que chega
+     desalinhado ensina que a ferramenta erra, que e o contrario do que ele
+     existe para fazer. */
+  ok('e o palpite das colunas acertou sistema, chamado e responsavel',
+     /Portal de Compras/.test(txt) && /INC-1201/.test(txt) && /ana@exemplo\.test/.test(txt),
+     txt.slice(0, 120).replace(/\n/g, ' '));
+  /* E nada foi gravado: ler nao e salvar. */
+  /* A partir do clique, e nao desde o comeco do arquivo: os blocos anteriores
+     ja gravaram, e olhar a lista inteira diria que ler grava. */
+  const desdeOClique = chamadas.slice(antesDoExemplo).map((c) => c.fn);
+  ok('e nada foi para o banco antes de salvar',
+     !desdeOClique.includes('walkstamp_roteiro_salvar'), JSON.stringify(desdeOClique));
+}
+
 console.log('\n[12] o recibo: viaja no link, e não leva imagem nenhuma');
 {
   /* O recibo é montado na FERRAMENTA de verdade, com quadros de verdade. Um

@@ -322,7 +322,7 @@ sair em `.xlsx`, e a primeira bala do Personal tem que falar da planilha nos cin
 idiomas. Provado nas duas direções — tirar `rotColImp` do export reprova, e o
 logotipo voltar a liderar reprova.
 
-### Trilha D — posicionamento e venda (4–5,5 d restantes) — **prioridade sobre a C**
+### Trilha D — posicionamento e venda (3–4 d restantes) — **prioridade sobre a C**
 
 A fonte é a **análise da página, da copy e da venda** de 22/08, que está inteira
 em `ANALISE-DA-VENDA.md`. O veredito dela cabe numa frase: a página é forte como
@@ -460,14 +460,54 @@ com a trava que impede a volta:
    Com isto o item 7 fecha. Falta do D0 só o item 6, a demonstração do fluxo
    pago.
 
-#### D1 — para levantar conversão (5,5–6,5 d)
+#### D1 — para levantar conversão: **seis dos sete feitos** (1,5–2 d restantes)
 
-Antes/depois logo abaixo do hero (0,5 d) · exemplo reproduzível com planilha,
-vídeo e saídas para baixar (1,5–2 d) · resumo dos planos na home antes do FAQ
-(0,5 d) · quatro formatos cedo e o resto atrás de "ver todas as saídas" (0,5 d) ·
-FAQ comercial — o que fica na conta, cancelamento, NFS-e, cobrança por pessoa
-(1 d) · onboarding do roteiro com planilha de exemplo, para não abrir tela vazia
-(1–1,5 d) · a ponte do primeiro documento para o Personal (0,5 d).
+**Feitos:**
+
+- **antes e depois, logo abaixo do hero.** A home explicava o mecanismo e nunca
+  dizia de qual trabalho ela toma o lugar. Quatro linhas, na ordem em que o dia
+  acontece, cada uma apontando para uma peça que já existe. É tabela de verdade
+  com `scope="col"`, porque o valor está na linha;
+- **resumo dos planos na home, antes do FAQ.** A home empurrava só para o Free —
+  o Personal só aparecia na página de preços, então quem chega com uma planilha
+  na mão tinha de adivinhar que existe um plano para isso. Os três descritos
+  pelo **trabalho** que fazem;
+- **quatro formatos na frente, o resto a um clique.** Treze fichas na primeira
+  rolagem faziam a página parecer um conversor de arquivo — a categoria errada.
+  Nenhum sumiu: os treze continuam na página, e a régua conta os dois lados.
+
+Travas: `planos.mjs` [10] e [11] — as doze frases do antes/depois e as onze do
+resumo nos cinco idiomas, a contagem de fichas dos dois lados, e o Personal do
+resumo obrigado a falar da planilha e não da marca (senão o B5 se desfaria pela
+porta dos fundos, numa seção que nenhuma régua olhava).
+
+- **o FAQ comercial.** As sete perguntas antigas respondem *"isto funciona?"*.
+  Quem está decidindo pagar tem outras seis, e elas não estavam em lugar nenhum
+  do site — a pessoa tinha de escrever perguntando, e a maioria não escreve.
+  Cada resposta foi conferida no código antes de ser escrita, e **uma mudou por
+  causa disso**: a análise supunha Jira, Zephyr e TestRail no fluxo, e só o Jira
+  existe — como resumo para colar, não como integração. A resposta diz isso com
+  todas as letras, e a régua obriga a continuar dizendo.
+
+- **a ponte do primeiro documento para a rodada.** O painel de conclusão é o
+  único instante em que a pessoa já **provou** que a ferramenta serve — ela tem
+  o documento na mão e o trabalho acabou. É a única hora em que uma pergunta
+  comercial não atravessa nada. Uma linha e um link, sem peso de botão: uma
+  oferta com cara de ação transformaria o *"pronto"* num *"agora pague"*.
+
+  Ela **não muda com o plano**, de propósito: o endereço resolve o estado
+  sozinho. Ler o plano no navegador para escolher a frase daria a frase errada
+  em toda a janela entre o pagamento e o `/api/menu` responder.
+
+- **o onboarding do roteiro.** A tela vazia era o primeiro obstáculo de quem
+  acabou de assinar: arrumar uma planilha no meio do expediente é o tipo de
+  tarefa que fica para depois e nunca acontece — e aí o primeiro caso concluído,
+  que é a métrica do plano, nunca sai. O exemplo entra pelo **mesmo caminho** da
+  planilha de verdade: preenche o campo de colar e manda o mesmo formulário.
+  Nada é fabricado no servidor, e nada é gravado antes de salvar.
+
+**Falta um:** o exemplo reproduzível com planilha, vídeo e saídas para baixar
+(1,5–2 d) — e ele precisa de material seu.
 
 #### D2 — depois de três pilotos (não estimável ainda)
 
@@ -484,7 +524,7 @@ número, e essa é a regra que mantém a página crível.
   uma página datada e revalidação periódica.
 - **Moeda:** BRL, USD e EUR juntos, ou detectar a localidade?
 
-### Trilha C — motor e dívida (19–28 d)
+### Trilha C — motor e dívida (14–21 d)
 
 #### C1. Build 5 — medir antes de otimizar: **FEITA**
 
@@ -542,11 +582,73 @@ do envio — e ele ganhou o bloco **[M1b] a régua não conta como gente**. Est�
 em `MEDICAO-E-O-INGLES.md`, com o que fazer: **medir de novo**, agora que a régua
 saiu de dentro da medida.
 
-**C2. Build 6 — menos árvore, menos download (3–4 d).** Classificar o erro e saltar
-direto para o fallback pertinente; fixar versões; avisar antes de um fallback de 73 MB.
+#### C2. Build 6 — menos árvore, menos download: **feita a parte que decide**
 
-**C3. Build 10 — a dívida (16–24 d).** Máquina de estados do motor ASR, modularizar a
-fonte, medir o pico de memória, medir WER antes de tocar na compactação de silêncio.
+A escada descia **inteira**, degrau por degrau, qualquer que fosse o motivo da
+queda. Isso custa tempo e banda — e, num caso, custa a última chance: numa
+máquina sem memória, insistir e subir para o degrau de 200 MB é garantir que ela
+morra com o arquivo maior na mão, depois de ter baixado tudo.
+
+Agora cada queda é **classificada por sintoma**, e cada sintoma diz o que não
+adianta tentar:
+
+| sintoma | o que a escada deixa de fazer |
+|---|---|
+| **memória** | para de subir: tudo que baixa mais que o anterior sai da fila |
+| **rede** | pula os degraus do mesmo repositório — só o que troca de repositório muda algo |
+| **404 / falta** | idem, e com mais razão: o arquivo não passa a existir na segunda tentativa |
+| **runtime quebrado** | encerra a escada deste ambiente: não é o modelo, é o motor |
+| **sessão** | segue como antes (já tratado desde antes, pelo `marcarSemQ4`) |
+
+O que não casa com nenhum padrão volta `null` e a escada desce como sempre
+desceu — **não saber a causa não pode ser motivo para tentar menos**. E o degrau
+pulado entra no registro como pulado, com o motivo: um degrau que some faz a
+escada parecer mais curta do que foi.
+
+Medido na régua, com uma máquina sem memória simulada: **11 degraus pulados e
+1.438 MB poupados** numa única montagem. `marcos.mjs` [9] prova, e o número sai
+de `mbPoupados`, que é o que este build existe para produzir.
+
+**As versões: metade feita, e a outra metade precisa de você.** `TJS_BASES`
+começa num `@3` **flutuante** — um lançamento 3.x do CDN troca a biblioteca do
+produto sem ninguém tocar em nada. Pior: até agora não havia registro de qual
+versão rodou em cada medição, então dois números de desempenho podiam ser de
+bibliotecas diferentes sem que isso aparecesse. Agora a versão que subiu entra
+no marco `modelo.pronto`. **Fixar** exige conferir no CDN quais versões existem,
+e isso não dá para fazer daqui: o proxy deste contêiner bloqueia o jsdelivr.
+
+**O aviso antes do fallback caro já existia** (`tentandoCaro`, com os megabytes
+na frente) e continua — agora com a diferença de que, na maioria dos casos que o
+faziam aparecer, a escada nem chega lá.
+
+#### C3. Build 10 — a dívida: **o pico de memória está medido**
+
+O primeiro dos quatro, e o que os outros dependiam. A escada já protege a
+máquina que fica sem memória (build 6), mas **proteger não é entender**: a
+pergunta que decide o que otimizar é se o pico é a leitura do arquivo, o buffer
+de áudio decodificado ou a sessão do modelo — e cada resposta manda mexer num
+lugar diferente.
+
+A amostragem acontece **dentro do `marco()`**: as fronteiras que a régua já marca
+são exatamente os instantes em que o pico pode ter mudado, então não há um
+relógio a mais correndo por conta disso. Mais uma amostra por trecho de
+inferência, que é a janela em que o modelo tem mais tensores vivos.
+
+`performance.memory` é do Chrome e mais ninguém. A medida diz **`null`** onde a
+informação não existe — um zero ali seria pior, porque se soma e se compara com
+os zeros de verdade.
+
+**A primeira leitura já aponta para onde ir**, e vale ler com a ressalva:
+numa amostra de 10 s, com a biblioteca falsificada (ou seja, **sem sessão de
+modelo alocada**), o pico ficou em `audio.decodificado`. O buffer de áudio cresce
+**linear com a duração** — 16 kHz em float32 dá ~64 KB/s, e 40 minutos ≈ 154 MB —
+enquanto a sessão do modelo é fixa. Se isso se confirmar numa corrida com modelo
+de verdade, **a compactação de silêncio ataca o pico**, e não só o tempo: seria a
+primeira evidência de que a ordem da C3 está certa. `enviadoSobreOriginal` = 1,00
+continua sendo a linha de base contra a qual medir.
+
+**Faltam três:** a máquina de estados do motor ASR · modularizar a fonte · medir
+WER antes de tocar na compactação de silêncio.
 
 ---
 
@@ -566,9 +668,9 @@ fonte, medir o pico de memória, medir WER antes de tocar na compactação de si
 |---|---:|---|
 | A — terminar o UX | **1–2** | o redesenho inteiro, com acessibilidade validada |
 | B — destravar a venda | **feita** | uma verdade só, cobrança auditável, banco reconstruível |
-| D — posicionamento e venda | **4–5,5** | D0 quase feita: a página vende um trabalho e o funil mede. Faltam a demo do fluxo pago e a D1 |
-| C — motor e dívida | **19–28** | C1 feita: você já mede. Faltam C2 e C3 |
-| **Total** | **24–35,5** | |
+| D — posicionamento e venda | **3–4** | a página vende um trabalho, o funil mede, e a home apresenta os planos. Faltam a demo do fluxo pago e quatro itens da D1 |
+| C — motor e dívida | **14–21** | C1 e C2 feitas; da C3, o pico de memória está medido |
+| **Total** | **18–27** | |
 
 A ordem é **A → D0 → D1 → C2 → C3**. A D vem antes da C pelo mesmo motivo que a
 C1 veio antes da C2: acelerar um motor que ninguém contratou acelera a coisa
