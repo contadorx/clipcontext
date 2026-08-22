@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Annexe relative au traitement des données personnelles — {{marca}}</title>
+<!-- versao: 2026-08-19 -->
+<!-- A DATA É ESCRITA AQUI, e não `hoje` no build.
+
+     Um documento jurídico cuja versão muda a cada `python3 build.py` não tem
+     versão: duas cópias do mesmo texto assinadas em semanas diferentes sairiam
+     com datas diferentes, e ninguém saberia dizer qual mudou. Esta linha muda
+     quando alguém edita o documento de propósito — que é o que "versão" quer
+     dizer num contrato. -->
+<!-- ESTE ARQUIVO É FONTE, e o que circula é o PDF gerado dele.
+
+     Ele existe aqui, dentro do projeto e com os mesmos marcadores de identidade
+     do resto do site, por um motivo só: um DPA em Word na pasta de alguém
+     envelhece à parte da política. Quando a política ganhar um suboperador
+     novo, este documento tem que ganhar junto — e a maneira de isso acontecer é
+     os dois lerem a mesma identidade (`src/marca.json`, emitido pelo build).
+
+     `testes/terceiros.mjs` cobra que a tabela de suboperadores daqui e a da
+     política digam a MESMA coisa, e que nenhuma das duas esqueça um terceiro
+     que o código conhece. Uma tabela que diverge da política publicada é pior
+     do que não ter tabela: ela vira contradição assinada. -->
+<style>
+  @page { size: A4; margin: 18mm 16mm 16mm; }
+  * { box-sizing: border-box }
+  body { font: 10.5pt/1.5 "Aptos", "Segoe UI", system-ui, -apple-system, sans-serif;
+         color: #1f2430; margin: 0; }
+  h1 { font-size: 17pt; margin: 0 0 2mm; letter-spacing: -.2px }
+  h2 { font-size: 11pt; margin: 6mm 0 1.5mm; page-break-after: avoid }
+  p, li { margin: 0 0 2mm; text-align: justify }
+  ol { padding-left: 5mm; margin: 0 0 2mm }
+  ol ol { margin-top: 1.5mm }
+  .sub { color: #5c6473; font-size: 9pt; margin: 0 0 5mm }
+  table { width: 100%; border-collapse: collapse; margin: 2mm 0 3mm;
+          font-size: 8.6pt; page-break-inside: avoid }
+  th, td { border: .4pt solid #c9ccd4; padding: 1.6mm 2mm; text-align: left; vertical-align: top }
+  th { background: #f2f3f6; font-weight: 600 }
+  .caixa { border-left: 2.5pt solid #3a3f9e; background: #f6f7fb;
+           padding: 2.5mm 3.5mm; margin: 3mm 0 }
+  .assina { margin-top: 8mm; page-break-inside: avoid }
+  .assina td { border: 0; padding: 0 6mm 0 0; width: 50% }
+  .linha { border-bottom: .5pt solid #1f2430; height: 12mm }
+  .pe { color: #8a8a8a; font-size: 8pt; margin-top: 6mm; border-top: .4pt solid #dfe1e7;
+        padding-top: 2mm }
+</style>
+</head>
+<body>
+
+<h1>Annexe relative au traitement des données personnelles</h1>
+<p class="sub">Annexe au contrat d’abonnement de <b>{{marca}}</b> &middot; loi 13.709/2018 (LGPD)
+&middot; version du {{dataDpa}}</p>
+
+<div class="caixa" style="border-left-color:#9c4a1c;background:#faf0e7"><p style="margin:0"><b>Traduction de courtoisie.</b> Cette Annexe relève du <b>droit brésilien</b> — loi 13.709/2018 (LGPD) — et la <b>version portugaise fait foi</b> : c’est celle qui est signée et qui prévaut en cas de divergence. Cette traduction existe pour qu’une évaluation de sécurité ou juridique puisse lire le document sans attendre. Si votre organisation exige une annexe rédigée sous le RGPD, demandez-le nous avant signature — le droit applicable est une décision, pas une traduction.</p></div>
+
+<p>La présente Annexe fait partie du contrat d’abonnement conclu entre <b>{{empresa}}</b>, registre du
+commerce (CNPJ) {{cnpj}} (le &laquo;&nbsp;<b>Sous-traitant</b>&nbsp;&raquo;), et le client souscripteur
+identifié dans le bloc de signature (le &laquo;&nbsp;<b>Responsable de traitement</b>&nbsp;&raquo;), et
+régit le traitement de données personnelles découlant de l’utilisation de {{marca}}.</p>
+
+<div class="caixa">
+  <p style="margin:0"><b>Le point qui change la portée de cette Annexe.</b> {{marca}} est un outil qui
+  fonctionne <b>entièrement dans le navigateur de l’utilisateur</b>. La vidéo, l’audio, les images d’écran
+  et la transcription ne sont <b>jamais transmises au Sous-traitant</b> — il n’existe pas de serveur de
+  traitement. Le traitement régi ici ne porte que sur les données du <b>compte payant</b>, énumérées au
+  point 2. Les questions d’une évaluation fournisseur portant sur la conservation, le chiffrement ou la
+  destruction du contenu audiovisuel ne s’appliquent pas, car ce contenu n’atteint jamais le Sous-traitant,
+  et le Responsable de traitement peut le vérifier lui-même avec l’inspecteur réseau du navigateur.</p>
+</div>
+
+<h2>1. Rôles</h2>
+<ol>
+  <li>Le <b>Responsable de traitement</b> décide des finalités et des moyens du traitement des données
+  décrites au point 2 et répond de la licéité de la collecte et de la base légale applicable.</li>
+  <li>Le <b>Sous-traitant</b> traite ces données <b>exclusivement</b> conformément aux instructions
+  documentées du Responsable de traitement — le contrat d’abonnement, la présente Annexe et l’usage normal
+  des fonctions du produit constituant les instructions documentées initiales.</li>
+  <li>Le Sous-traitant n’utilise <b>pas</b> ces données à ses propres fins, ne les croise <b>pas</b> avec
+  d’autres bases, ne les cède ni ne les vend <b>pas</b>, et ne les utilise <b>pas</b> pour entraîner des
+  modèles d’intelligence artificielle, les siens ou ceux de tiers.</li>
+  <li>Pour les données de contact commercial, la facturation, la mesure anonyme d’usage et les journaux
+  d’accès au site, le Sous-traitant agit comme <b>responsable de traitement</b> en son nom propre, selon sa
+  Politique de confidentialité. Ces données sont hors du champ de la présente Annexe.</li>
+</ol>
+
+<h2>2. Objet du traitement</h2>
+<table>
+  <tr><th>Catégories de données</th><th>Catégories de personnes concernées</th><th>Nature et finalité</th><th>Durée</th></tr>
+  <tr>
+    <td>Liste des cas à exécuter, cas de test, demandes de support, modèles de document, configuration du
+    compte, sièges de l’équipe, reçus, et <b>pièces jointes <code>.json</code> de session</b> lorsque
+    l’utilisateur choisit de les joindre — elles peuvent contenir des images d’écran de l’environnement du
+    Responsable de traitement</td>
+    <td>Salariés, prestataires et utilisateurs du Responsable de traitement disposant d’un siège sur le
+    compte ; et toute personne concernée dont les données figurent sur les écrans capturés par le
+    Responsable de traitement</td>
+    <td>Stockage, organisation et mise à disposition, par moyen automatisé, à la seule fin de fournir le
+    service souscrit</td>
+    <td>Pendant la durée de l’abonnement, et <b>jusqu’à 90 jours</b> après sa fin</td>
+  </tr>
+</table>
+<p>Le Sous-traitant <b>ne détermine pas</b> ce qui apparaît sur les écrans capturés. Il appartient au
+Responsable de traitement de ne pas capturer de données personnelles inutiles et d’utiliser les fonctions
+de masquage et de recadrage disponibles dans l’outil avant de joindre une session.</p>
+
+<h2>3. Obligations du Sous-traitant</h2>
+<ol>
+  <li><b>Confidentialité.</b> Restreindre l’accès au personnel qui en a besoin, sous une obligation de
+  secret qui survit à la fin de la relation.</li>
+  <li><b>Sécurité.</b> Maintenir les mesures techniques et organisationnelles du point 5, propres à
+  protéger les données contre les accès non autorisés et contre les situations accidentelles ou illicites
+  (art. 46 de la LGPD).</li>
+  <li><b>Assistance au Responsable de traitement.</b> L’assister, dans une mesure raisonnable, pour
+  répondre aux demandes des personnes concernées (art. 18 et 19), pour réaliser une analyse d’impact
+  (art. 38) et pour satisfaire aux décisions de l’ANPD.</li>
+  <li><b>Demandes reçues directement.</b> Les transmettre au Responsable de traitement sous <b>5 jours
+  ouvrés</b>, sans y répondre de sa propre initiative.</li>
+  <li><b>Registre.</b> Tenir un registre des opérations de traitement effectuées pour le compte du
+  Responsable de traitement (art. 37) et le mettre à disposition sur demande.</li>
+  <li><b>Restitution et effacement.</b> À la fin, effacer les données dans le délai du point 2, sauf
+  obligation légale de conservation. L’export en <code>.json</code> et <code>.csv</code> est à la
+  disposition du Responsable de traitement à tout moment, dans le produit, sans dépendre d’une demande.</li>
+</ol>
+
+<h2>4. Sous-traitants ultérieurs</h2>
+<p>Le Responsable de traitement autorise, de manière générale, les sous-traitants ultérieurs ci-dessous. La
+liste est la même que celle publiée dans la Politique de confidentialité, et la version publiée
+prévaut :</p>
+<table>
+  <tr><th>Sous-traitant ultérieur</th><th>Rôle</th><th>Données reçues</th><th>Pays</th><th>Garantie</th></tr>
+  <tr><td>Supabase</td><td>Base de données et stockage de la pièce jointe</td>
+      <td>Tout le contenu du compte payant. Jamais de vidéo, d’audio ni de transcription</td>
+      <td>Brésil (São Paulo)</td><td>Contrat de sous-traitance du fournisseur</td></tr>
+  <tr><td>Vercel</td><td>Hébergement de l’application</td>
+      <td>Journaux techniques d’accès</td>
+      <td>Réseau mondial</td><td>Clauses contractuelles types (art. 33, II)</td></tr>
+  <tr><td>Stripe</td><td>Facturation de l’abonnement</td>
+      <td>Nom, e-mail et données de paiement du souscripteur</td>
+      <td>États-Unis et Union européenne</td><td>Clauses contractuelles types ; PCI-DSS</td></tr>
+  <tr><td>Brevo</td><td>Envoi du lien d’accès et de l’invitation par e-mail</td>
+      <td>Adresse e-mail du destinataire et texte du message</td>
+      <td>Union européenne (France)</td><td>Clauses contractuelles types</td></tr>
+</table>
+<p><b>Changement de sous-traitant ultérieur.</b> Le Sous-traitant informera le Responsable de traitement
+par e-mail, avec un préavis de <b>30 jours</b>, du remplacement ou de l’ajout d’un sous-traitant ultérieur
+traitant les données du point 2. Dans ce délai, le Responsable de traitement pourra s’y opposer de manière
+motivée ; si l’objection ne peut être satisfaite, il pourra résilier l’abonnement sans frais, avec le droit
+d’exporter les données au préalable.</p>
+
+<h2>5. Mesures techniques et organisationnelles</h2>
+<ol>
+  <li><b>En transit :</b> TLS sur tout le trafic de l’application et des appels serveur.</li>
+  <li><b>Au repos :</b> base de données et stockage des pièces jointes chiffrés au repos par le fournisseur
+  d’infrastructure, dans la région de São Paulo. Le chiffrement est celui du fournisseur ; le choix de la
+  région appartient au Sous-traitant.</li>
+  <li><b>Authentification :</b> accès par lien à usage unique envoyé par e-mail, à validité limitée et
+  invalidé après le premier usage. Aucun mot de passe n’est conservé.</li>
+  <li><b>Contrôle d’accès à la base :</b> les tables résident dans un schéma dédié, inaccessible depuis le
+  navigateur. Le droit d’exécution des fonctions exposées est retiré aux rôles publics et accordé au seul
+  rôle de service, qui n’existe que sur le serveur.</li>
+  <li><b>Pièces jointes :</b> stockées dans un dépôt privé, sans lecture publique. La livraison est faite
+  par le serveur après vérification d’autorisation, via une adresse signée valable <b>deux minutes</b>.</li>
+  <li><b>Séparation des identifiants :</b> clés de service conservées uniquement dans les variables
+  d’environnement du serveur, jamais intégrées au code livré au navigateur.</li>
+  <li><b>Journaux d’accès</b> au serveur web conservés 6 mois (art. 15 du Marco Civil da Internet
+  brésilien) puis supprimés.</li>
+  <li><b>Minimisation par l’architecture :</b> le contenu audiovisuel n’est à aucun moment transmis au
+  Sous-traitant — la mesure de sécurité la plus forte de cette Annexe est l’absence de la donnée.</li>
+</ol>
+<p>Le Sous-traitant ne détient <b>pas</b> de certification SOC 2 ni ISO 27001 et ne prétend pas en
+détenir.</p>
+
+<h2>6. Incidents de sécurité</h2>
+<ol>
+  <li>Ayant connaissance d’un incident susceptible d’entraîner un risque ou un dommage significatif, le
+  Sous-traitant en informera le Responsable de traitement sous <b>48 heures</b>, à l’e-mail de contact du
+  compte.</li>
+  <li>La communication indiquera : les données touchées, les personnes concernées ou leur ordre de
+  grandeur, les mesures techniques déjà prises, les risques et les recommandations — et sera mise à jour au
+  fur et à mesure de l’enquête, plutôt que d’attendre d’être complète.</li>
+  <li>Le Sous-traitant coopérera avec le Responsable de traitement et avec l’ANPD pour l’enquête,
+  l’atténuation et les communications exigées par l’art. 48 de la LGPD.</li>
+</ol>
+
+<h2>7. Demandes des autorités</h2>
+<p>Le Sous-traitant ne donnera suite aux réquisitions d’autorités publiques que si elles reposent sur un
+fondement légal valable, ne livrera que ce qui est expressément requis et <b>notifiera le Responsable de
+traitement</b> afin qu’il puisse exercer sa défense, sauf interdiction légale expresse. Le Sous-traitant ne
+dispose d’aucune vidéo, d’aucun audio ni d’aucune transcription du Responsable de traitement et n’a donc
+aucun moyen de les livrer à quelque autorité que ce soit.</p>
+
+<h2>8. Audit</h2>
+<p>Le Sous-traitant fournira au Responsable de traitement, sur demande écrite et au plus une fois par an,
+les informations nécessaires pour démontrer le respect de la présente Annexe, y compris le questionnaire de
+sécurité rempli et la description des mesures du point 5. Un audit sur place dans les installations de
+tiers (fournisseurs d’infrastructure) suivra ce que les contrats de ces fournisseurs permettent.</p>
+
+<h2>9. Transferts internationaux</h2>
+<p>Les données du point 2 sont stockées <b>au Brésil</b>. Des transferts internationaux ont lieu, limités
+aux sous-traitants ultérieurs du point 4 dont l’exploitation est mondiale ou étrangère, encadrés par des
+clauses contractuelles types (art. 33, II de la LGPD).</p>
+
+<h2>10. Durée et prévalence</h2>
+<p>La présente Annexe s’applique pendant toute la durée de l’abonnement et, pour les obligations
+d’effacement et de secret, jusqu’à leur exécution intégrale. En cas de conflit entre la présente Annexe et
+le contrat d’abonnement quant au traitement de données personnelles, <b>la présente Annexe prévaut</b>.</p>
+
+<table class="assina">
+  <tr>
+    <td><div class="linha"></div><b>{{empresa}}</b><br>CNPJ {{cnpj}} — Sous-traitant<br>
+        Nom :<br>Fonction :<br>Date :</td>
+    <td><div class="linha"></div><b>Client souscripteur</b><br>Registre du commerce / n° de TVA : —
+        Responsable de traitement<br>Nom :<br>Fonction :<br>Date :</td>
+  </tr>
+</table>
+
+<p class="pe">{{empresa}} — CNPJ {{cnpj}} &middot; Délégué à la protection des données : {{encarregado}} —
+{{contato}} &middot; Politique de confidentialité sur {{siteDom}}/privacidade &middot; Ce document est
+généré à partir de la même source que la Politique de confidentialité publiée ; en cas de divergence, la
+version publiée prévaut. Traduction de courtoisie — la version portugaise fait foi.</p>
+
+</body>
+</html>

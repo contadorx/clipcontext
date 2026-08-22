@@ -81,7 +81,20 @@ await pg.waitForTimeout(300);
 {
   const gratis = await pg.locator('.plan').first().innerHTML();
   const time = await pg.locator('.plan').nth(1).innerHTML();
-  ok('está no cartão Free', /Link pronto/.test(gratis), gratis.match(/Link[^<]*/)||'');
+  /* PELA ALÇA TAMBÉM AQUI. Esta linha citava "Link pronto" e reprovou quando a
+     bala foi reescrita — o item continuava no cartão, com outras palavras. O
+     que ela quer saber é se o link para a página do `/link` está no cartão
+     GRÁTIS, e isso se pergunta pelo `href`. */
+  ok('está no cartão Free', /href="[^"]*\/link"/.test(gratis),
+     gratis.match(/<li>[^<]*<a href="[^"]*link"[^>]*>[^<]*<\/a>[^<]*/) || '');
+  /* E a bala tem que dizer o que a coisa É. Antes ela dizia "link pronto para
+     Zephyr, Jira e TestRail", a uma palavra de ser lida como integração — e o
+     FAQ gastava uma resposta inteira desmentindo o próprio cartão ("não existe
+     conexão com Zephyr nem com TestRail hoje, e não vou dizer que existe"). Um
+     cartão que precisa de nota de rodapé para não enganar está enganando. */
+  ok('  e diz que é endereço, não integração',
+     /integra[çc]|integration|Integration/.test(gratis),
+     (gratis.match(/<li>[^<]*<a[^>]*link"[^>]*>[\s\S]{0,140}?<\/li>/) || [''])[0].slice(0, 130));
   ok('saiu do cartão pago', !/Link de equipe/.test(time));
   /* PELA ALÇA, E NÃO PELA PROSA. O que este teste quer saber é se a identidade
      continua no cartão pago depois de o link ter descido para o Free — e isso é

@@ -480,6 +480,10 @@ def escrever_marca(root: pathlib.Path) -> None:
     # de o vídeo deles existir: o build.py conferia o arquivo e o lib/site.ts
     # tinha ['pt','en','es'] escrito dentro.
     com_tour = [L for L in IDIOMAS if (root / "public" / "demo" / f"tour.{L}.webm").exists()]
+    # E o mesmo para o vídeo da RODADA PAGA, que vive na página de preços. Ele
+    # nasceu nos cinco de uma vez, mas a lista sai do disco pelo mesmo motivo:
+    # a próxima língua a entrar no site vai entrar antes de entrar no estúdio.
+    com_rodada = [L for L in IDIOMAS if (root / "public" / "demo" / f"rodada.{L}.webm").exists()]
     # As sub-rotas do painel da conta, traduzidas. Elas são lidas pelo
     # `next.config.mjs` (que monta a ponte de reescrita) E pelo `lib/conta/nav.ts`
     # (que monta o menu). Duas tabelas para a mesma coisa é exatamente como o
@@ -551,7 +555,8 @@ def escrever_marca(root: pathlib.Path) -> None:
         {"slug": "negocio", "rotulo": "navNegocio", "quando": "dono",
          "icone": "M3 3v18h18 M7 15l4-4 3 3 5-6"},
     ]
-    rotas = {"idiomas": IDIOMAS, "demoLangs": com_tour, "subConta": sub_conta,
+    rotas = {"idiomas": IDIOMAS, "demoLangs": com_tour, "rodadaLangs": com_rodada,
+             "subConta": sub_conta,
              "abasNegocio": abas_negocio, "menuConta": menu_conta,
              "caminhoConta": CAMINHO_CONTA, "slugs": SLUGS,
              "metas": {pg: {L: {"titulo": m[L][0], "desc": m[L][1]} for L in IDIOMAS}
@@ -642,6 +647,7 @@ def build_site(root: pathlib.Path) -> None:
         # preta vazia no alto da home, que é a primeira coisa que a pessoa vê.
         # Cai no inglês até os dois serem gravados.
         t["demoLang"] = lang if (ROOT / "public" / "demo" / f"tour.{lang}.webm").exists() else "en"
+        t["rodadaLang"] = lang if (ROOT / "public" / "demo" / f"rodada.{lang}.webm").exists() else "en"
         t["redirect"] = REDIRECT if lang == "pt" else LEMBRAR
         # A figura do fluxo, na home. Ela não tem uma palavra dentro; o que
         # muda por idioma é o rótulo de acessibilidade e a legenda.

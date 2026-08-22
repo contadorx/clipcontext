@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Anhang zur Verarbeitung personenbezogener Daten — {{marca}}</title>
+<!-- versao: 2026-08-19 -->
+<!-- A DATA É ESCRITA AQUI, e não `hoje` no build.
+
+     Um documento jurídico cuja versão muda a cada `python3 build.py` não tem
+     versão: duas cópias do mesmo texto assinadas em semanas diferentes sairiam
+     com datas diferentes, e ninguém saberia dizer qual mudou. Esta linha muda
+     quando alguém edita o documento de propósito — que é o que "versão" quer
+     dizer num contrato. -->
+<!-- ESTE ARQUIVO É FONTE, e o que circula é o PDF gerado dele.
+
+     Ele existe aqui, dentro do projeto e com os mesmos marcadores de identidade
+     do resto do site, por um motivo só: um DPA em Word na pasta de alguém
+     envelhece à parte da política. Quando a política ganhar um suboperador
+     novo, este documento tem que ganhar junto — e a maneira de isso acontecer é
+     os dois lerem a mesma identidade (`src/marca.json`, emitido pelo build).
+
+     `testes/terceiros.mjs` cobra que a tabela de suboperadores daqui e a da
+     política digam a MESMA coisa, e que nenhuma das duas esqueça um terceiro
+     que o código conhece. Uma tabela que diverge da política publicada é pior
+     do que não ter tabela: ela vira contradição assinada. -->
+<style>
+  @page { size: A4; margin: 18mm 16mm 16mm; }
+  * { box-sizing: border-box }
+  body { font: 10.5pt/1.5 "Aptos", "Segoe UI", system-ui, -apple-system, sans-serif;
+         color: #1f2430; margin: 0; }
+  h1 { font-size: 17pt; margin: 0 0 2mm; letter-spacing: -.2px }
+  h2 { font-size: 11pt; margin: 6mm 0 1.5mm; page-break-after: avoid }
+  p, li { margin: 0 0 2mm; text-align: justify }
+  ol { padding-left: 5mm; margin: 0 0 2mm }
+  ol ol { margin-top: 1.5mm }
+  .sub { color: #5c6473; font-size: 9pt; margin: 0 0 5mm }
+  table { width: 100%; border-collapse: collapse; margin: 2mm 0 3mm;
+          font-size: 8.6pt; page-break-inside: avoid }
+  th, td { border: .4pt solid #c9ccd4; padding: 1.6mm 2mm; text-align: left; vertical-align: top }
+  th { background: #f2f3f6; font-weight: 600 }
+  .caixa { border-left: 2.5pt solid #3a3f9e; background: #f6f7fb;
+           padding: 2.5mm 3.5mm; margin: 3mm 0 }
+  .assina { margin-top: 8mm; page-break-inside: avoid }
+  .assina td { border: 0; padding: 0 6mm 0 0; width: 50% }
+  .linha { border-bottom: .5pt solid #1f2430; height: 12mm }
+  .pe { color: #8a8a8a; font-size: 8pt; margin-top: 6mm; border-top: .4pt solid #dfe1e7;
+        padding-top: 2mm }
+</style>
+</head>
+<body>
+
+<h1>Anhang zur Verarbeitung personenbezogener Daten</h1>
+<p class="sub">Anhang zum Abonnementvertrag von <b>{{marca}}</b> &middot; Gesetz 13.709/2018 (LGPD)
+&middot; Fassung vom {{dataDpa}}</p>
+
+<div class="caixa" style="border-left-color:#9c4a1c;background:#faf0e7"><p style="margin:0"><b>Übersetzung zur Information.</b> Dieser Anhang unterliegt <b>brasilianischem Recht</b> — Gesetz 13.709/2018 (LGPD) — und die <b>portugiesische Fassung ist maßgeblich</b>: sie wird unterzeichnet und geht im Fall von Abweichungen vor. Diese Übersetzung gibt es, damit eine Sicherheits- oder Rechtsprüfung das Dokument lesen kann, ohne darauf zu warten. Benötigt Ihre Organisation stattdessen einen nach der DSGVO verfassten Anhang, fragen Sie uns vor der Unterzeichnung — das anwendbare Recht ist eine Entscheidung, keine Übersetzung.</p></div>
+
+<p>Dieser Anhang ist Bestandteil des Abonnementvertrags zwischen <b>{{empresa}}</b>, Handelsregister
+(CNPJ) {{cnpj}} (&bdquo;<b>Auftragsverarbeiterin</b>&ldquo;), und dem in der Unterschriftszeile
+bezeichneten abschließenden Kunden (&bdquo;<b>Verantwortlicher</b>&ldquo;) und regelt die Verarbeitung
+personenbezogener Daten, die aus der Nutzung von {{marca}} entsteht.</p>
+
+<div class="caixa">
+  <p style="margin:0"><b>Der Punkt, der den Umfang dieses Anhangs verändert.</b> {{marca}} ist ein Werkzeug,
+  das <b>vollständig im Browser der nutzenden Person</b> läuft. Video, Audio, Bildschirmbilder und
+  Transkription werden <b>nie an die Auftragsverarbeiterin übertragen</b> — es gibt keinen
+  Verarbeitungsserver. Die hier geregelte Verarbeitung erfasst nur die Daten des <b>bezahlten Kontos</b>,
+  aufgeführt in Ziffer 2. Fragen einer Lieferantenprüfung zu Aufbewahrung, Verschlüsselung oder Vernichtung
+  der audiovisuellen Inhalte greifen nicht, weil diese Inhalte die Auftragsverarbeiterin nie erreichen —
+  und der Verantwortliche kann das selbst mit dem Netzwerk-Inspektor des Browsers überprüfen.</p>
+</div>
+
+<h2>1. Rollen</h2>
+<ol>
+  <li>Der <b>Verantwortliche</b> entscheidet über Zwecke und Mittel der Verarbeitung der in Ziffer 2
+  beschriebenen Daten und haftet für die Rechtmäßigkeit der Erhebung und für die anwendbare
+  Rechtsgrundlage.</li>
+  <li>Die <b>Auftragsverarbeiterin</b> verarbeitet diese Daten <b>ausschließlich</b> nach den
+  dokumentierten Weisungen des Verantwortlichen — wobei der Abonnementvertrag, dieser Anhang und die
+  gewöhnliche Nutzung der Produktfunktionen die anfänglichen dokumentierten Weisungen sind.</li>
+  <li>Die Auftragsverarbeiterin nutzt diese Daten <b>nicht</b> für eigene Zwecke, führt sie <b>nicht</b>
+  mit anderen Beständen zusammen, überlässt oder verkauft sie <b>nicht</b> und nutzt sie <b>nicht</b> zum
+  Training von Modellen künstlicher Intelligenz, weder eigener noch fremder.</li>
+  <li>Bei geschäftlichen Kontaktdaten, Abrechnung, anonymer Nutzungsmessung und Zugriffsprotokollen der
+  Website handelt die Auftragsverarbeiterin als <b>Verantwortliche</b> im eigenen Namen, gemäß ihrer
+  Datenschutzerklärung. Diese Daten liegen außerhalb des Anwendungsbereichs dieses Anhangs.</li>
+</ol>
+
+<h2>2. Gegenstand der Verarbeitung</h2>
+<table>
+  <tr><th>Datenkategorien</th><th>Kategorien betroffener Personen</th><th>Art und Zweck</th><th>Dauer</th></tr>
+  <tr>
+    <td>Liste der abzuarbeitenden Fälle (Fallliste), Testfälle, Support-Anfragen, Dokumentvorlagen,
+    Kontokonfiguration, Team-Plätze, Belege und <b><code>.json</code>-Sitzungsanhänge</b>, wenn die nutzende
+    Person sie anhängt — sie können Bildschirmbilder aus der Umgebung des Verantwortlichen enthalten</td>
+    <td>Beschäftigte, Dienstleister und Nutzende des Verantwortlichen mit einem Platz im Konto; sowie alle
+    betroffenen Personen, deren Daten auf den vom Verantwortlichen aufgenommenen Bildschirmen erscheinen</td>
+    <td>Speicherung, Organisation und Bereitstellung, auf automatisiertem Weg, zum alleinigen Zweck der
+    Erbringung der beauftragten Leistung</td>
+    <td>Für die Dauer des Abonnements und <b>bis zu 90 Tage</b> nach dessen Ende</td>
+  </tr>
+</table>
+<p>Die Auftragsverarbeiterin <b>bestimmt nicht</b>, was auf den aufgenommenen Bildschirmen erscheint. Es
+obliegt dem Verantwortlichen, keine unnötigen personenbezogenen Daten aufzunehmen und vor dem Anhängen
+einer Sitzung die im Werkzeug verfügbaren Funktionen zum Schwärzen und Zuschneiden zu nutzen.</p>
+
+<h2>3. Pflichten der Auftragsverarbeiterin</h2>
+<ol>
+  <li><b>Vertraulichkeit.</b> Zugang auf das Personal beschränken, das ihn benötigt, unter einer
+  Verschwiegenheitspflicht, die das Ende des Beschäftigungsverhältnisses überdauert.</li>
+  <li><b>Sicherheit.</b> Die technischen und organisatorischen Maßnahmen aus Ziffer 5 aufrechterhalten,
+  geeignet, die Daten vor unbefugtem Zugriff und vor zufälligen oder unrechtmäßigen Vorgängen zu schützen
+  (Art. 46 LGPD).</li>
+  <li><b>Unterstützung des Verantwortlichen.</b> Ihn in angemessenem Umfang bei der Beantwortung von
+  Betroffenenanfragen (Art. 18 und 19), bei der Erstellung einer Folgenabschätzung (Art. 38) und bei der
+  Erfüllung von Anordnungen der ANPD unterstützen.</li>
+  <li><b>Unmittelbar erhaltene Betroffenenanfragen.</b> Diese binnen <b>5 Werktagen</b> an den
+  Verantwortlichen weiterleiten, ohne sie eigenständig zu beantworten.</li>
+  <li><b>Verzeichnis.</b> Ein Verzeichnis der im Auftrag des Verantwortlichen durchgeführten
+  Verarbeitungsvorgänge führen (Art. 37) und es auf Anfrage bereitstellen.</li>
+  <li><b>Rückgabe und Löschung.</b> Bei Beendigung die Daten innerhalb der Frist aus Ziffer 2 löschen,
+  vorbehaltlich gesetzlicher Aufbewahrungspflichten. Der Export als <code>.json</code> und <code>.csv</code>
+  steht dem Verantwortlichen jederzeit im Produkt zur Verfügung, ohne dass es einer Anfrage bedarf.</li>
+</ol>
+
+<h2>4. Unterauftragsverarbeiter</h2>
+<p>Der Verantwortliche erteilt eine allgemeine Genehmigung für die nachstehenden
+Unterauftragsverarbeiter. Die Aufstellung entspricht der in der Datenschutzerklärung veröffentlichten, und
+die veröffentlichte Fassung geht vor:</p>
+<table>
+  <tr><th>Unterauftragsverarbeiter</th><th>Funktion</th><th>Erhaltene Daten</th><th>Land</th><th>Schutzmaßnahme</th></tr>
+  <tr><td>Supabase</td><td>Datenbank und Speicher des Anhangs</td>
+      <td>Der gesamte Inhalt des bezahlten Kontos. Nie Video, Audio oder Transkription</td>
+      <td>Brasilien (São Paulo)</td><td>Auftragsverarbeitungsvertrag des Anbieters</td></tr>
+  <tr><td>Vercel</td><td>Hosting der Anwendung</td>
+      <td>Technische Zugriffsprotokolle</td>
+      <td>Globales Netz</td><td>Standardvertragsklauseln (Art. 33 II)</td></tr>
+  <tr><td>Stripe</td><td>Abrechnung des Abonnements</td>
+      <td>Name, E-Mail und Zahlungsdaten der abschließenden Person</td>
+      <td>USA und Europäische Union</td><td>Standardvertragsklauseln; PCI-DSS</td></tr>
+  <tr><td>Brevo</td><td>Versand des Zugangslinks und der Einladung per E-Mail</td>
+      <td>E-Mail-Adresse der empfangenden Person und Text der Nachricht</td>
+      <td>Europäische Union (Frankreich)</td><td>Standardvertragsklauseln</td></tr>
+</table>
+<p><b>Wechsel eines Unterauftragsverarbeiters.</b> Die Auftragsverarbeiterin teilt dem Verantwortlichen den
+Austausch oder die Hinzunahme eines Unterauftragsverarbeiters, der die Daten aus Ziffer 2 verarbeitet, per
+E-Mail mit einer Frist von <b>30 Tagen</b> mit. Innerhalb dieser Frist kann der Verantwortliche begründet
+widersprechen; lässt sich der Einwand nicht berücksichtigen, kann der Verantwortliche das Abonnement ohne
+Kosten kündigen, mit dem Recht, die Daten zuvor zu exportieren.</p>
+
+<h2>5. Technische und organisatorische Maßnahmen</h2>
+<ol>
+  <li><b>Bei der Übertragung:</b> TLS im gesamten Verkehr der Anwendung und der Serveraufrufe.</li>
+  <li><b>Im Ruhezustand:</b> Datenbank und Anhangspeicher werden vom Infrastrukturanbieter in der Region
+  São Paulo im Ruhezustand verschlüsselt. Die Verschlüsselung ist die des Anbieters; die Wahl der Region
+  liegt bei der Auftragsverarbeiterin.</li>
+  <li><b>Authentifizierung:</b> Zugang über einen per E-Mail versandten Einmal-Link mit begrenzter
+  Gültigkeit, der nach der ersten Nutzung ungültig wird. Es wird kein Passwort gespeichert.</li>
+  <li><b>Zugriffskontrolle auf die Datenbank:</b> die Tabellen liegen in einem eigenen Schema, für den
+  Browser nicht erreichbar. Die Ausführungsberechtigung der offenen Funktionen ist den öffentlichen Rollen
+  entzogen und nur der Dienstrolle erteilt, die ausschließlich auf dem Server existiert.</li>
+  <li><b>Anhänge:</b> in einem privaten Speicher abgelegt, ohne öffentlichen Lesezugriff. Die Auslieferung
+  erfolgt durch den Server nach Prüfung der Berechtigung, über eine signierte Adresse mit <b>zwei Minuten</b>
+  Gültigkeit.</li>
+  <li><b>Trennung der Zugangsdaten:</b> Dienstschlüssel ausschließlich in Umgebungsvariablen des Servers,
+  niemals eingebettet in den an den Browser ausgelieferten Code.</li>
+  <li><b>Zugriffsprotokolle</b> des Webservers werden 6 Monate aufbewahrt (Art. 15 des brasilianischen
+  Marco Civil da Internet) und danach verworfen.</li>
+  <li><b>Minimierung durch Architektur:</b> die audiovisuellen Inhalte werden zu keinem Zeitpunkt an die
+  Auftragsverarbeiterin übertragen — die stärkste Sicherheitsmaßnahme dieses Anhangs ist das Fehlen der
+  Daten.</li>
+</ol>
+<p>Die Auftragsverarbeiterin besitzt <b>keine</b> SOC-2- oder ISO-27001-Zertifizierung und behauptet dies
+auch nicht.</p>
+
+<h2>6. Sicherheitsvorfälle</h2>
+<ol>
+  <li>Erhält die Auftragsverarbeiterin Kenntnis von einem Vorfall, der ein erhebliches Risiko oder einen
+  erheblichen Schaden nach sich ziehen kann, benachrichtigt sie den Verantwortlichen binnen <b>48
+  Stunden</b> an die Kontakt-E-Mail-Adresse des Kontos.</li>
+  <li>Die Mitteilung nennt: betroffene Daten, betroffene Personen oder deren Größenordnung, bereits
+  ergriffene technische Maßnahmen, Risiken und Empfehlungen — und wird mit dem Fortschritt der Aufklärung
+  aktualisiert, statt auf Vollständigkeit zu warten.</li>
+  <li>Die Auftragsverarbeiterin wirkt mit dem Verantwortlichen und der ANPD bei Aufklärung, Eindämmung und
+  den nach Art. 48 LGPD erforderlichen Mitteilungen zusammen.</li>
+</ol>
+
+<h2>7. Behördliche Anfragen</h2>
+<p>Die Auftragsverarbeiterin kommt Anfragen öffentlicher Stellen nur nach, wenn sie auf einer gültigen
+Rechtsgrundlage beruhen, gibt nur das ausdrücklich Angeforderte heraus und <b>benachrichtigt den
+Verantwortlichen</b>, damit dieser seine Verteidigung wahrnehmen kann, sofern dies nicht ausdrücklich
+gesetzlich untersagt ist. Die Auftragsverarbeiterin verfügt über kein Video, kein Audio und keine
+Transkription des Verantwortlichen und kann sie daher keiner Behörde herausgeben.</p>
+
+<h2>8. Prüfung</h2>
+<p>Die Auftragsverarbeiterin stellt dem Verantwortlichen auf schriftliche Anfrage und höchstens einmal
+jährlich die Informationen bereit, die zum Nachweis der Einhaltung dieses Anhangs erforderlich sind,
+einschließlich des ausgefüllten Sicherheitsfragebogens und der Beschreibung der Maßnahmen aus Ziffer 5.
+Eine Prüfung vor Ort in Einrichtungen Dritter (Infrastrukturanbieter) richtet sich danach, was die
+Verträge dieser Anbieter zulassen.</p>
+
+<h2>9. Internationale Übermittlung</h2>
+<p>Die Daten aus Ziffer 2 werden <b>in Brasilien</b> gespeichert. Es finden internationale Übermittlungen
+statt, beschränkt auf die Unterauftragsverarbeiter aus Ziffer 4 mit globalem oder ausländischem Betrieb,
+gestützt auf Standardvertragsklauseln (Art. 33 II LGPD).</p>
+
+<h2>10. Laufzeit und Vorrang</h2>
+<p>Dieser Anhang gilt für die Dauer des Abonnements und, was die Lösch- und Verschwiegenheitspflichten
+betrifft, bis zu deren vollständiger Erfüllung. Im Fall eines Widerspruchs zwischen diesem Anhang und dem
+Abonnementvertrag hinsichtlich der Verarbeitung personenbezogener Daten <b>geht dieser Anhang vor</b>.</p>
+
+<table class="assina">
+  <tr>
+    <td><div class="linha"></div><b>{{empresa}}</b><br>CNPJ {{cnpj}} — Auftragsverarbeiterin<br>
+        Name:<br>Funktion:<br>Datum:</td>
+    <td><div class="linha"></div><b>Abschließender Kunde</b><br>Handelsregister / USt-IdNr.: —
+        Verantwortlicher<br>Name:<br>Funktion:<br>Datum:</td>
+  </tr>
+</table>
+
+<p class="pe">{{empresa}} — CNPJ {{cnpj}} &middot; Datenschutzbeauftragter: {{encarregado}} — {{contato}}
+&middot; Datenschutzerklärung unter {{siteDom}}/privacidade &middot; Dieses Dokument wird aus derselben
+Quelle wie die veröffentlichte Datenschutzerklärung erzeugt; bei Abweichungen geht die veröffentlichte
+Fassung vor. Übersetzung zur Information — die portugiesische Fassung ist maßgeblich.</p>
+
+</body>
+</html>

@@ -1,4 +1,4 @@
-# O estúdio — como os dois vídeos do site são feitos
+# O estúdio — como os três vídeos do site são feitos
 
 Os vídeos de `public/demo/` não são gravados à mão. São **gerados**, e os
 geradores estão aqui. Um vídeo de produto feito à mão envelhece em silêncio: o
@@ -8,7 +8,7 @@ ninguém percebe porque nada quebra.
 Aqui, se o aplicativo mudar de forma incompatível, o roteiro quebra na hora de
 gravar — que é o único jeito honesto de manter isto atualizado.
 
-## Os dois vídeos, e o que cada um é
+## Os três vídeos, e o que cada um é
 
 **`exemplo.<lang>.webm` / `.mp4` / `.vtt`** — o vídeo que o botão *"Usar vídeo de
 exemplo"* carrega dentro da ferramenta. É **um sistema sendo percorrido**: abrir
@@ -28,10 +28,31 @@ a marcação manual existe para pegar e o que o comentário existe para explicar
 Playwright abrindo o `app.html` publicado e percorrendo o aplicativo de verdade:
 escolher o cenário, carregar o exemplo, extrair os quadros, conferir, gerar.
 
+**`rodada.<lang>.webm` / `.mp4` / `.jpg`** — o vídeo da **rodada paga**, na
+página de preços. O tour vende o mecanismo e não vende o plano, porque o que se
+paga não é a ferramenta: é a rodada. Aqui uma planilha de quarenta casos entra,
+o link de um caso abre a ferramenta já preenchida, a execução gera a evidência
+no computador de quem executa, e o caso volta fechado com data, executor e
+impressão digital.
+
+> Ele sobe um Next de verdade com um **Supabase de mentira** do outro lado — o
+> mesmo desenho do `testes/roteiro.mjs`, com uma diferença: aqui os dados contam
+> uma história (uma regressão de agosto, quarenta casos, doze concluídos) em vez
+> de exercitar casos-limite. Gravar contra a produção significaria inventar uma
+> conta de verdade na base do cliente, ou gravar com a conta de alguém.
+>
+> **Gravar este vídeo achou um defeito de verdade.** O PDF — que é a saída
+> RECOMENDADA para o cenário de evidência — saía pelo `doc.save()` do jsPDF, e
+> não pelo `baixarBlob()`, que é onde mora o botão "marcar este caso como feito".
+> Quem chegava pelo link de um caso e clicava no botão principal gerava o
+> documento e não recebia a volta: a rodada paga não fechava pelo seu próprio
+> caminho. Nada dava erro. Corrigido, e travado em `testes/voltadocaso.mjs`,
+> que cobra as duas portas de saída.
+
 ## Refazer tudo, do zero
 
 ```bash
-cd /root/cc/walkstamp
+cd <a raiz do projeto>
 
 # 1. o sistema de mentira precisa estar servido em algum lugar
 mkdir -p /tmp/sistema && cp estudio/sistema-de-mentira.html /tmp/sistema/app.html
@@ -57,7 +78,11 @@ python3 build.py
 for L in pt en es de fr; do node estudio/gravar-tour.mjs $L; done
 for L in pt en es de fr; do bash estudio/montar-tour.sh $L; done
 
-# 6. e conferir
+# 6. o vídeo da rodada paga, nas cinco línguas
+for L in pt en es de fr; do node estudio/gravar-roteiro.mjs $L; done
+for L in pt en es de fr; do bash estudio/montar-roteiro.sh $L; done
+
+# 7. e conferir
 python3 build.py && node /tmp/tourvid.mjs   # com o site de pé na 8802
 ```
 

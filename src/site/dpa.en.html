@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Personal Data Processing Annex — {{marca}}</title>
+<!-- versao: 2026-08-19 -->
+<!-- A DATA É ESCRITA AQUI, e não `hoje` no build.
+
+     Um documento jurídico cuja versão muda a cada `python3 build.py` não tem
+     versão: duas cópias do mesmo texto assinadas em semanas diferentes sairiam
+     com datas diferentes, e ninguém saberia dizer qual mudou. Esta linha muda
+     quando alguém edita o documento de propósito — que é o que "versão" quer
+     dizer num contrato. -->
+<!-- ESTE ARQUIVO É FONTE, e o que circula é o PDF gerado dele.
+
+     Ele existe aqui, dentro do projeto e com os mesmos marcadores de identidade
+     do resto do site, por um motivo só: um DPA em Word na pasta de alguém
+     envelhece à parte da política. Quando a política ganhar um suboperador
+     novo, este documento tem que ganhar junto — e a maneira de isso acontecer é
+     os dois lerem a mesma identidade (`src/marca.json`, emitido pelo build).
+
+     `testes/terceiros.mjs` cobra que a tabela de suboperadores daqui e a da
+     política digam a MESMA coisa, e que nenhuma das duas esqueça um terceiro
+     que o código conhece. Uma tabela que diverge da política publicada é pior
+     do que não ter tabela: ela vira contradição assinada. -->
+<style>
+  @page { size: A4; margin: 18mm 16mm 16mm; }
+  * { box-sizing: border-box }
+  body { font: 10.5pt/1.5 "Aptos", "Segoe UI", system-ui, -apple-system, sans-serif;
+         color: #1f2430; margin: 0; }
+  h1 { font-size: 17pt; margin: 0 0 2mm; letter-spacing: -.2px }
+  h2 { font-size: 11pt; margin: 6mm 0 1.5mm; page-break-after: avoid }
+  p, li { margin: 0 0 2mm; text-align: justify }
+  ol { padding-left: 5mm; margin: 0 0 2mm }
+  ol ol { margin-top: 1.5mm }
+  .sub { color: #5c6473; font-size: 9pt; margin: 0 0 5mm }
+  table { width: 100%; border-collapse: collapse; margin: 2mm 0 3mm;
+          font-size: 8.6pt; page-break-inside: avoid }
+  th, td { border: .4pt solid #c9ccd4; padding: 1.6mm 2mm; text-align: left; vertical-align: top }
+  th { background: #f2f3f6; font-weight: 600 }
+  .caixa { border-left: 2.5pt solid #3a3f9e; background: #f6f7fb;
+           padding: 2.5mm 3.5mm; margin: 3mm 0 }
+  .assina { margin-top: 8mm; page-break-inside: avoid }
+  .assina td { border: 0; padding: 0 6mm 0 0; width: 50% }
+  .linha { border-bottom: .5pt solid #1f2430; height: 12mm }
+  .pe { color: #8a8a8a; font-size: 8pt; margin-top: 6mm; border-top: .4pt solid #dfe1e7;
+        padding-top: 2mm }
+</style>
+</head>
+<body>
+
+<h1>Personal Data Processing Annex</h1>
+<p class="sub">Annex to the <b>{{marca}}</b> subscription agreement &middot; Law 13.709/2018 (LGPD)
+&middot; version of {{dataDpa}}</p>
+
+<div class="caixa" style="border-left-color:#9c4a1c;background:#faf0e7"><p style="margin:0"><b>Courtesy translation.</b> This Annex is executed under <b>Brazilian law</b> — Law 13.709/2018 (LGPD) — and the <b>Portuguese version governs</b>: it is the one that is signed, and it prevails in case of any divergence. This translation exists so that a security or legal review can read the document without waiting for one. If your organisation requires an annex drafted under the GDPR instead, ask us before signing — the applicable law is a decision, not a translation.</p></div>
+
+<p>This Annex forms part of the subscription agreement entered into between <b>{{empresa}}</b>, company
+register (CNPJ) {{cnpj}} (the &ldquo;<b>Processor</b>&rdquo;), and the subscribing customer identified in
+the signature block (the &ldquo;<b>Controller</b>&rdquo;), and governs the processing of personal data
+arising from the use of {{marca}}.</p>
+
+<div class="caixa">
+  <p style="margin:0"><b>The point that changes the scope of this Annex.</b> {{marca}} is a tool that runs
+  <b>entirely in the user's browser</b>. Video, audio, screen images and transcripts are <b>never
+  transmitted to the Processor</b> — there is no processing server. The processing governed here reaches
+  only the data of the <b>paid account</b>, listed in section 2. Vendor-review questions about retention,
+  encryption or destruction of the audiovisual content do not apply because that content never reaches the
+  Processor, and the Controller can verify this itself with the browser's network inspector open on the
+  Network tab.</p>
+</div>
+
+<h2>1. Roles</h2>
+<ol>
+  <li>The <b>Controller</b> decides the purposes and the means of processing the data described in section 2
+  and is responsible for the lawfulness of the collection and for the applicable legal basis.</li>
+  <li>The <b>Processor</b> processes that data <b>exclusively</b> in accordance with the Controller's
+  documented instructions — the subscription agreement, this Annex and the ordinary use of the product's
+  functions being the initial documented instructions.</li>
+  <li>The Processor does <b>not</b> use that data for its own purposes, does <b>not</b> combine it with
+  other databases, does <b>not</b> transfer or sell it, and does <b>not</b> use it to train artificial
+  intelligence models, whether its own or a third party's.</li>
+  <li>For commercial contact data, billing, anonymous usage measurement and website access logs, the
+  Processor acts as a <b>controller</b> in its own name, as set out in its Privacy Policy. That data falls
+  outside the scope of this Annex.</li>
+</ol>
+
+<h2>2. Subject matter of the processing</h2>
+<table>
+  <tr><th>Categories of data</th><th>Categories of data subjects</th><th>Nature and purpose</th><th>Duration</th></tr>
+  <tr>
+    <td>List of cases to execute (the script), test cases, support tickets, document templates, account
+    configuration, team seats, receipts, and <b><code>.json</code> session attachments</b> where the user
+    chooses to attach them — which may contain screen images of the Controller's environment</td>
+    <td>Employees, contractors and users of the Controller holding a seat on the account; and any data
+    subjects whose data appears on the screens captured by the Controller</td>
+    <td>Storage, organisation and provision, by automated means, for the sole purpose of providing the
+    contracted service</td>
+    <td>For the term of the subscription, and <b>up to 90 days</b> after it ends</td>
+  </tr>
+</table>
+<p>The Processor does <b>not determine</b> what appears on the captured screens. It is for the Controller
+not to capture unnecessary personal data and to use the redaction and cropping functions available in the
+tool before attaching a session.</p>
+
+<h2>3. Obligations of the Processor</h2>
+<ol>
+  <li><b>Confidentiality.</b> Restrict access to personnel who need it, under a confidentiality obligation
+  that survives the end of their engagement.</li>
+  <li><b>Security.</b> Maintain the technical and administrative measures in section 5, suitable to protect
+  the data from unauthorised access and from accidental or unlawful situations (LGPD art. 46).</li>
+  <li><b>Assistance to the Controller.</b> Assist it, to a reasonable extent, in responding to data subject
+  requests (arts. 18 and 19), in carrying out impact assessments (art. 38) and in complying with
+  determinations of the ANPD.</li>
+  <li><b>Data subject requests received directly.</b> Forward them to the Controller within <b>5 business
+  days</b>, without answering them on its own initiative.</li>
+  <li><b>Records.</b> Keep records of the processing operations carried out on behalf of the Controller
+  (art. 37) and make them available upon request.</li>
+  <li><b>Return and deletion.</b> On termination, delete the data within the period in section 2, save for
+  a legal retention obligation. Export in <code>.json</code> and <code>.csv</code> is available to the
+  Controller at any time, inside the product, without depending on a request.</li>
+</ol>
+
+<h2>4. Sub-processors</h2>
+<p>The Controller grants general authorisation to the sub-processors below. The list is the same one
+published in the Privacy Policy, and the published version prevails:</p>
+<table>
+  <tr><th>Sub-processor</th><th>Role</th><th>Data it receives</th><th>Country</th><th>Safeguard</th></tr>
+  <tr><td>Supabase</td><td>Database and attachment storage</td>
+      <td>All paid-account content. Never video, audio or transcripts</td>
+      <td>Brazil (São Paulo)</td><td>Vendor data-processing agreement</td></tr>
+  <tr><td>Vercel</td><td>Application hosting</td>
+      <td>Technical access logs</td>
+      <td>Global network</td><td>Standard contractual clauses (art. 33, II)</td></tr>
+  <tr><td>Stripe</td><td>Subscription billing</td>
+      <td>Name, e-mail and payment details of the subscriber</td>
+      <td>United States and European Union</td><td>Standard contractual clauses; PCI-DSS</td></tr>
+  <tr><td>Brevo</td><td>Sending the sign-in link and the e-mail invitation</td>
+      <td>Recipient e-mail address and message text</td>
+      <td>European Union (France)</td><td>Standard contractual clauses</td></tr>
+</table>
+<p><b>Change of sub-processor.</b> The Processor will notify the Controller by e-mail, <b>30 days in
+advance</b>, of the replacement or addition of any sub-processor that processes the data in section 2.
+Within that period the Controller may object on reasoned grounds; where the objection cannot be
+accommodated, the Controller may terminate the subscription without penalty, with the right to export the
+data beforehand.</p>
+
+<h2>5. Technical and administrative measures</h2>
+<ol>
+  <li><b>In transit:</b> TLS across all application traffic and server calls.</li>
+  <li><b>At rest:</b> database and attachment storage encrypted at rest by the infrastructure provider, in
+  the São Paulo region. The encryption is the provider's; the choice of region is the Processor's.</li>
+  <li><b>Authentication:</b> access by a single-use link sent by e-mail, with limited validity and
+  invalidation after first use. No password is stored.</li>
+  <li><b>Database access control:</b> the tables live in their own schema, unreachable from the browser.
+  Execute permission on the exposed functions is revoked from the public roles and granted only to the
+  service role, which exists solely on the server.</li>
+  <li><b>Attachments:</b> stored in a private repository, with no public read. Delivery is made by the
+  server after an authorisation check, through a signed address valid for <b>two minutes</b>.</li>
+  <li><b>Credential segregation:</b> service keys kept only in server environment variables, never embedded
+  in the code delivered to the browser.</li>
+  <li><b>Web server access logs</b> kept for 6 months (art. 15 of the Brazilian Civil Rights Framework for
+  the Internet) and then discarded.</li>
+  <li><b>Minimisation by architecture:</b> the audiovisual content is never transmitted to the Processor —
+  the strongest security measure in this Annex is the absence of the data.</li>
+</ol>
+<p>The Processor does <b>not</b> hold SOC 2 or ISO 27001 certification and does not claim to.</p>
+
+<h2>6. Security incidents</h2>
+<ol>
+  <li>On becoming aware of an incident that may give rise to relevant risk or harm, the Processor will
+  notify the Controller within <b>48 hours</b>, at the account's contact e-mail.</li>
+  <li>The notification will state: the data affected, the data subjects involved or their order of
+  magnitude, the technical measures already taken, the risks and the recommendations — and will be updated
+  as the investigation advances, rather than waiting to be complete.</li>
+  <li>The Processor will cooperate with the Controller and with the ANPD in the investigation, the
+  mitigation and the communications required by art. 48 of the LGPD.</li>
+</ol>
+
+<h2>7. Requests from public authorities</h2>
+<p>The Processor will only comply with requests from public authorities supported by a valid legal basis,
+delivering only what is expressly requested, and will <b>notify the Controller</b> so that it may exercise
+its defence, save where expressly prohibited by law. The Processor holds no video, audio or transcript of
+the Controller and therefore has no way of delivering them to any authority.</p>
+
+<h2>8. Audit</h2>
+<p>The Processor will provide the Controller, upon written request and at most once a year, with the
+information needed to demonstrate compliance with this Annex, including the completed security
+questionnaire and the description of the measures in section 5. On-site audit at third-party facilities
+(infrastructure providers) will follow what those vendors' contracts allow.</p>
+
+<h2>9. International transfers</h2>
+<p>The data in section 2 is stored <b>in Brazil</b>. International transfers occur, restricted to the
+sub-processors in section 4 whose operation is global or foreign, supported by standard contractual clauses
+(LGPD art. 33, II).</p>
+
+<h2>10. Term and precedence</h2>
+<p>This Annex remains in force for the term of the subscription and, as to the deletion and confidentiality
+obligations, until they are fully performed. In case of conflict between this Annex and the subscription
+agreement as to the processing of personal data, <b>this Annex prevails</b>.</p>
+
+<table class="assina">
+  <tr>
+    <td><div class="linha"></div><b>{{empresa}}</b><br>CNPJ {{cnpj}} — Processor<br>
+        Name:<br>Title:<br>Date:</td>
+    <td><div class="linha"></div><b>Subscribing customer</b><br>Company register / tax ID: — Controller<br>
+        Name:<br>Title:<br>Date:</td>
+  </tr>
+</table>
+
+<p class="pe">{{empresa}} — CNPJ {{cnpj}} &middot; Data protection officer: {{encarregado}} — {{contato}}
+&middot; Privacy Policy at {{siteDom}}/privacidade &middot; This document is generated from the same source
+as the published Privacy Policy; in case of divergence, the published version prevails. Courtesy
+translation — the Portuguese version governs.</p>
+
+</body>
+</html>

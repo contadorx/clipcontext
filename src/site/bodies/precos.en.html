@@ -27,6 +27,16 @@
       <span class="saida"><b>Jira</b></span>
     </div>
 
+    <!-- A PROVA DE PRIVACIDADE, ANTES DOS CARTOES.
+         Ela estava depois da tabela de noventa e tres linhas — ou seja,
+         depois do ponto a que quem faz avaliacao de fornecedor chega. E a
+         primeira coisa que essa pessoa procura, e a unica que decide se o
+         resto da pagina vale ser lido. -->
+    <p class="small muted" style="margin-top:24px"><b>Still no server, paid plans included.</b> The key is
+    checked inside your browser and works offline — <b>we never receive your video or your audio, on any
+    plan</b>. On the paid plans there is exactly one thing you can choose to store in your account: the
+    complete file of a session, attached by you to a case in your test run, and deletable at any time. <a href="{{seguranca}}">How that works underneath</a>.</p>
+
     <div class="plans tres">
 
       <div class="plan" data-plano="free">
@@ -40,10 +50,10 @@
           <li>Frames on scene change and transcription on your own device</li>
           <li>PDF, Word, HTML, Markdown, spreadsheet, ZIP and JSON</li>
           <li>Redact, crop, highlight, and the sensitive-data warning</li>
-          <li><a href="/en/link">Ready-made link</a> for Zephyr, Jira and TestRail</li>
+          <li><a href="/en/link">Pre-filled link</a> to paste into Zephyr, Jira, Xray or TestRail — it is an address, not an integration</li>
           <li>Reopen the document later to fix a step — and a SCORM package for the LMS</li>
         </ul>
-        <a class="btn" href="/app?lang=en">Open the tool</a>
+        <a class="btn" href="/app?lang=en">Create an evidence document now</a>
         <p class="pe">Everything that makes your evidence acceptable is in here.</p>
       </div>
 
@@ -60,7 +70,7 @@
           <li data-f="modeloProprio">Client logo and name in the PDF, the Word file and the HTML, with your cover and your fields — and the profile comes back on any machine</li>
           <li>Everything in Free</li>
         </ul>
-        <a class="btn" href="{{conta}}">Start the 14 days</a>
+        <a class="btn" href="{{conta}}">Try Personal for 14 days</a>
         <p class="pe">Right away, no card. Or <a href="mailto:{{contato}}?subject=Walkstamp%20Personal">write to me</a>.</p>
       </div>
 
@@ -71,14 +81,14 @@
         <p class="moedas">R$ 349 &middot; € 65</p>
         <p class="small muted" style="margin:0">For the team that needs the same document in everyone’s hands.</p>
         <ul>
+          <li><b>Split the round and follow it:</b> assign each case to a person and see who finished what — with date, file and fingerprint, and the spreadsheet comes back with all of it inside.</li>
           <li>Activated by link: whoever coordinates sends an address, nobody types a key</li>
           <li data-f="padraoDoTime">A team profile pushed to everyone</li>
           <li>Seat panel: invite, block and pick the term, from 1 to 90 days</li>
-          <li>Invoices and support tickets in your account</li>
           <li>Everything in Personal</li>
         </ul>
-        <a class="btn ghost" href="{{time}}">Talk about Team</a>
-        <p class="pe">No login, and no sign-up for your IT to approve.</p>
+        <a class="btn ghost" href="{{time}}">Get the Team link</a>
+        <p class="pe">Whoever records does not log in: the licence travels in the link and is checked on their own computer. The account belongs to whoever coordinates — that is where seats, invoices and support tickets live.</p>
       </div>
 
     </div>
@@ -88,9 +98,62 @@
          no build: sessenta e poucas linhas em três idiomas, escritas à mão,
          seriam 195 chances de a versão em espanhol prometer o que a portuguesa
          não promete. -->
+
+
+    <!-- A DEMONSTRACAO CENTRAL.
+         O tour da home mostra a ferramenta gratuita. O que o plano vende e a
+         RODADA, e rodada nao cabe em texto: sao quatro telas, duas pessoas e
+         uma planilha que volta diferente do que entrou. Este video percorre o
+         produto de verdade — quem o gera e o `estudio/gravar-roteiro.mjs`, e
+         ele quebra na hora de gravar se a tela mudar. -->
+    <h2 style="margin-top:52px">The whole round, in 47 seconds</h2>
+    <p class="lead">This is what the plan buys, and it is hard to explain in text: a spreadsheet of forty cases goes in, each person gets theirs already filled in, running them produces the evidence on the executor’s own computer, and the spreadsheet comes back with status, date, who ran it and a fingerprint.</p>
+    <ol class="passosRodada">
+        <li>The spreadsheet of cases goes in</li>
+        <li>Each case becomes a link that opens the tool filled in</li>
+        <li>Running it produces the evidence, on the executor’s own computer</li>
+        <li>The case comes back closed, with date, executor and fingerprint</li>
+    </ol>
+    <figure class="tour" style="margin-top:18px">
+      <video poster="/demo/rodada.{{rodadaLang}}.jpg" controls muted playsinline preload="none"
+             aria-label="The control screen of a round: the spreadsheet of cases, a case opening the tool already filled in, and the case coming back closed">
+        <source src="/demo/rodada.{{rodadaLang}}.webm" type="video/webm">
+        <source src="/demo/rodada.{{rodadaLang}}.mp4" type="video/mp4">
+        <img src="/demo/rodada.{{rodadaLang}}.jpg" alt="The control screen of a round: the spreadsheet of cases, a case opening the tool already filled in, and the case coming back closed" style="width:100%">
+      </video>
+      <figcaption>Recorded by walking through the real product. The video never leaves your computer at any of these steps — what travels to the account is the file name, the date and the fingerprint of the screens.</figcaption>
+    </figure>
+
+    <!-- A COMPARACAO CURTA, e o motivo de ela vir ANTES da lista completa.
+         Noventa e tres linhas honestas descrevem o produto e nao decidem a
+         compra: quem esta escolhendo precisa de cinco. A lista completa
+         continua logo abaixo, para quem quiser conferir linha a linha. -->
+    <h2 style="margin-top:52px">In five lines, not ninety-three</h2>
+    <p class="lead">The full table is right below and it is honest — but ninety-three lines hide the difference that decides. These five are the difference.</p>
+    <table class="legal cmpPlanos">
+      <caption class="soLeitor">What changes from one plan to the next</caption>
+      <thead>
+        <tr><th scope="col">What you get to do</th><th scope="col">Free</th><th scope="col">Personal</th><th scope="col">Team</th></tr>
+      </thead>
+      <tbody>
+          <tr><th scope="row">Create the evidence and hand it over</th><td data-rot="Free">yes</td><td data-rot="Personal">yes</td><td data-rot="Team">yes</td></tr>
+          <tr><th scope="row">Run a spreadsheet of cases</th><td class="nao" data-rot="Free">—</td><td data-rot="Personal">your own</td><td data-rot="Team">the team’s</td></tr>
+          <tr><th scope="row">Hand the spreadsheet back filled in</th><td class="nao" data-rot="Free">—</td><td data-rot="Personal">yes</td><td data-rot="Team">yes</td></tr>
+          <tr><th scope="row">Keep your own document format</th><td class="nao" data-rot="Free">—</td><td data-rot="Personal">yes</td><td data-rot="Team">yes</td></tr>
+          <tr><th scope="row">Assign the cases and see who finished</th><td class="nao" data-rot="Free">—</td><td class="nao" data-rot="Personal">—</td><td data-rot="Team">yes</td></tr>
+          <tr><th scope="row">Push the same format to everyone</th><td class="nao" data-rot="Free">—</td><td class="nao" data-rot="Personal">—</td><td data-rot="Team">yes</td></tr>
+      </tbody>
+    </table>
+
     <h2 style="margin-top:52px">{{tpH}}</h2>
     <p class="lead">{{tpP}}</p>
     {{tabelaPlanos}}
+
+    <!-- A LEGENDA DOS SELOS.
+         Um selo que a pessoa nao entende e ruido — e "beta" numa tabela de
+         preco, sem explicacao, e a palavra que faz a avaliacao de fornecedor
+         parar e perguntar. A legenda responde antes de perguntarem. -->
+    <p class="small muted" style="margin-top:12px;max-width:70ch">{{tpLegenda}}</p>
 
     <!-- A CAIXA DO QUE AINDA NAO EXISTE.
          Um item marcado "em breve" DENTRO do conjunto principal do plano
@@ -105,11 +168,6 @@
       </ul>
     </div>
 
-    <p class="small muted" style="margin-top:24px"><b>Still no server, paid plans included.</b> The key is
-    checked inside your browser and works offline — <b>we never receive your video or your audio, on any
-    plan</b>. On the paid plans there is exactly one thing you can choose to store in your account: the
-    complete file of a session, attached by you to a case in your test run, and deletable at any time. <a href="{{seguranca}}">How that works underneath</a>.</p>
-
     <p class="small muted" style="margin-top:14px"><b>Pro and API</b> — converting formats the browser
     refuses (HEVC, MKV, ProRes), transcribing on a server, batch processing, or an endpoint that returns
     frames and transcript for your own product to consume. None of it exists yet, and it is what comes next.
@@ -123,18 +181,7 @@
   </div>
 </section>
 
-<section id="lista" data-espera="proapi">
-  <div class="wrap">
-    <h2>Want to be told about Pro and the API?</h2>
-    <p class="lead">The paid plan is <b>already live</b> — what does not exist yet is Pro and the API, described above. Leave an email and I will tell you when they land. One message, not a newsletter.</p>
-    <form class="lista" id="listaForm" data-url="{{supaUrl}}" data-key="{{supaKey}}" novalidate>
-      <input type="email" id="listaEmail" autocomplete="email" placeholder="you@email.com" aria-label="Your email">
-      <button class="btn" type="submit" id="listaBtn">Tell me when they land</button>
-    </form>
-    <p class="small muted listaMsg" id="listaMsg" role="status"></p>
-    <p class="small muted" style="max-width:640px">The promise of this tool is that <b>your video never leaves your machine</b>, and it still holds: this field has nothing to do with what you process here — the browser sends no video, audio or transcript anywhere. The email sits in a database of mine, is not sold, does not go to any third-party list, and disappears the day you ask. Rather not leave it? No problem — the tool does not change because of that.</p>
-  </div>
-</section>
+
 
 <section id="support"></section>
 
@@ -145,5 +192,24 @@
     else — data, ads, or a limit that shows up at the worst moment. Here the reason is simpler: your video is
     processed by your own computer, so the cost of serving you is close to zero. There is nothing to
     subsidise, and therefore nothing to recover later.</p>
+  </div>
+</section>
+
+<!-- A LISTA DE ESPERA DO PRO/API, DEPOIS E NAO ANTES.
+     Ela ficava entre os planos e o fim da pagina, ocupando o lugar
+     nobre com algo que nao se compra: a propria secao diz que "nada
+     disso existe ainda". O texto e honesto e a lista ja tem gente
+     inscrita, entao ela nao sai — desce. Quem chegou para decidir
+     entre tres planos decide primeiro. -->
+<section id="lista" data-espera="proapi">
+  <div class="wrap">
+    <h2>Want to be told about Pro and the API?</h2>
+    <p class="lead">The paid plan is <b>already live</b> — what does not exist yet is Pro and the API, described above. Leave an email and I will tell you when they land. One message, not a newsletter.</p>
+    <form class="lista" id="listaForm" data-url="{{supaUrl}}" data-key="{{supaKey}}" novalidate>
+      <input type="email" id="listaEmail" autocomplete="email" placeholder="you@email.com" aria-label="Your email">
+      <button class="btn" type="submit" id="listaBtn">Tell me when they land</button>
+    </form>
+    <p class="small muted listaMsg" id="listaMsg" role="status"></p>
+    <p class="small muted" style="max-width:640px">The promise of this tool is that <b>your video never leaves your machine</b>, and it still holds: this field has nothing to do with what you process here — the browser sends no video, audio or transcript anywhere. The email sits in a database of mine, is not sold, does not go to any third-party list, and disappears the day you ask. Rather not leave it? No problem — the tool does not change because of that.</p>
   </div>
 </section>

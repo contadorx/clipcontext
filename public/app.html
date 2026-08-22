@@ -9106,7 +9106,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      depois, e não tem como se atualizar sozinho. Sem carimbo, "estou com um
      problema no offline" é uma conversa sem chão — ninguém sabe de qual build
      se fala nem se o defeito já foi consertado. */
-  const VERSAO = '2026.08.22-43';
+  const VERSAO = '2026.08.22-68';
   window.__versao = () => VERSAO;
 
   const PIP_CSS = `
@@ -22394,9 +22394,19 @@ ${relsSlide[i]}</Relationships>`) });
     }
 
     doc.save(base + '.pdf');
-    /* `doc.save` é a porta do jsPDF, e não a nossa: sem esta linha o PDF era a
-       única saída do produto que não contava que tinha saído. */
+    /* `doc.save` é a porta do jsPDF, e não a nossa: sem estas linhas o PDF era
+       a única saída do produto que não contava que tinha saído — e a única de
+       onde não dava para fechar o caso do roteiro.
+
+       As duas chamadas moram dentro do `baixarBlob()`, por onde passam DOCX,
+       PPTX, ZIP, SCORM, HTML e Markdown. O PDF não passa por lá, e o preço
+       disso foi silencioso e caro: quem chegava pelo link de um caso, extraía
+       e clicava no botão RECOMENDADO — que para a evidência é justamente o
+       PDF — não recebia o "marcar este caso como feito". A rodada paga não
+       fechava pelo seu próprio caminho principal, e sem erro nenhum: o
+       documento saía, e o botão simplesmente não aparecia. */
     registrarSaida();
+    if (casoDoRoteiro) oferecerVoltaDoRoteiro(base + '.pdf');
     medir('baixou_saida', { p_formato: 'pdf' });
     $('pdfStatus').innerHTML = `<span class="ok">${t('pdfDone')}</span>${t('pdfDone2', kept.length, page)}`;
     emUso.delete('go'); $('go').disabled = false;

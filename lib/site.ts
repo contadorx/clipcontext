@@ -45,6 +45,8 @@ const rotas: {
   /* Quais idiomas têm vídeo do tour. Escrito pelo `build.py`, que olha o disco —
      ver o comentário no ponto de uso, mais abaixo. */
   demoLangs?: string[];
+  /* E quem tem o vídeo da rodada paga, que vive na página de preços. */
+  rodadaLangs?: string[];
   caminhoConta: Record<Lang, string>;
   slugs: Record<string, Record<Lang, string>>;
   metas: Record<string, Record<Lang, { titulo: string; desc: string }>>;
@@ -159,7 +161,7 @@ function seletor(lang: Lang, pagina: string): string {
 
 /* ------------------------------------------------ a tabela de funcionalidades */
 
-type Feature = { planos: string; breve?: boolean } & Record<string, unknown>;
+type Feature = { planos: string; estado?: string } & Record<string, unknown>;
 type Grupo = { id: string; titulo: Record<Lang, string>; itens: Feature[] };
 
 const features: { grupos: Grupo[] } = JSON.parse(ler('features.json'));
@@ -196,6 +198,37 @@ function seloDoPlano(planos: string, t: Dicionario): string {
  *  com a contagem de cada um, e a pessoa abre o que é o problema dela. O
  *  conteúdo é o mesmo, e nada ficou escondido: os grupos nascem abertos.
  */
+/* O ESTADO DE UMA FUNCIONALIDADE — quatro, e não o liga-desliga de antes.
+ *
+ * O catálogo tinha `breve: true` ou nada, e "nada" queria dizer duas coisas
+ * diferentes que ninguém separava: o que está pronto e o que FUNCIONA mas tem
+ * uma ressalva que quem compra precisa saber. "Entrada automática por domínio
+ * de e-mail" era o exemplo: a tabela existe, a licença concede por domínio — e
+ * não há tela para a empresa cadastrar o domínio nem prova nenhuma de que ela
+ * é dona dele. As linhas entram à mão. Vendida como pronta, ela promete um
+ * self-service que não existe; escondida, some um recurso que funciona.
+ *
+ * `estado` ausente quer dizer `producao`. É um campo só, e não dois: `breve`
+ * foi absorvido por ele, porque duas listas para a mesma verdade é como este
+ * projeto já perdeu o hreflang de dois idiomas e deixou o tour em inglês numa
+ * página alemã. */
+type Estado = 'producao' | 'beta' | 'construcao' | 'descoberta';
+export const estadoDe = (item: Feature): Estado =>
+  ((item.estado as Estado) || 'producao');
+
+const SELO: Record<Estado, { classe: string; chave: string } | null> = {
+  producao: null,
+  beta: { classe: 'beta', chave: 'tpBeta' },
+  construcao: { classe: 'soon', chave: 'tpBreve' },
+  descoberta: { classe: 'descoberta', chave: 'tpDescoberta' },
+};
+
+function seloDoEstado(item: Feature, t: Dicionario): string {
+  const selo = SELO[estadoDe(item)];
+  if (!selo) return '';
+  return ` <span class="${selo.classe}">${escapar(String(t[selo.chave] ?? ''))}</span>`;
+}
+
 export function tabelaDePlanos(lang: Lang, t: Dicionario): string {
   const gratis = features.grupos.reduce(
     (n, g) => n + g.itens.filter((i) => i.planos.includes('f')).length, 0);
@@ -205,8 +238,7 @@ export function tabelaDePlanos(lang: Lang, t: Dicionario): string {
     const pagosNoGrupo = g.itens.filter((i) => !i.planos.includes('f')).length;
     const itens = g.itens.map((item) => {
       const rotulo = escapar(String(item[lang] ?? item.en ?? ''));
-      const breve = item.breve ? ` <span class="soon">${escapar(t.tpBreve)}</span>` : '';
-      return `<li>${rotulo}${breve}${seloDoPlano(item.planos, t)}</li>`;
+      return `<li>${rotulo}${seloDoEstado(item, t)}${seloDoPlano(item.planos, t)}</li>`;
     }).join('');
     /* A contagem no título é o que deixa a lista fechada ainda informativa:
        "O que sai (15)" já responde "vale a pena abrir?" antes do clique. */
@@ -358,6 +390,13 @@ export function paginaHtml(pagina: string, lang: Lang): string {
     .replace('{1}', '</a>');
   // a tabela só é montada onde é usada; nas outras páginas o token vira vazio
   t.tabelaPlanos = pagina === 'precos' ? tabelaDePlanos(lang, t) : '';
+  /* O vídeo da rodada mora na página de PREÇOS, e por isso o token nasce aqui
+     e não no ramo da home — onde a primeira versão dele ficou, derrubando o
+     build com "chaves sem valor em precos.pt: rodadaLang". Onde o vídeo não
+     existe, cai no inglês, pelo mesmo motivo do tour: um `<video>` apontando
+     para um 404 é uma caixa preta, que é pior do que outro idioma. */
+  const comRodada: string[] = rotas.rodadaLangs ?? ['en'];
+  t.rodadaLang = comRodada.includes(lang) ? lang : 'en';
   t.quantasFeatures = String(quantasFeatures);
 
   let bruto: string;

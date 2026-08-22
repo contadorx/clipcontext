@@ -14,7 +14,10 @@ set -e
 L="$1"
 BRUTO="/tmp/tour-bruto-$L.webm"
 MARCAS="/tmp/tour-marcas-$L.json"
-DEST="/root/cc/walkstamp/public/demo"
+# A raiz sai daqui de dentro: o estúdio precisa rodar onde o projeto estiver,
+# e não onde ele estava no dia em que este arquivo foi escrito.
+RAIZ="${RAIZ:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
+DEST="$RAIZ/public/demo"
 [ -f "$BRUTO" ] || { echo "falta $BRUTO"; exit 1; }
 
 INI=$(python3 -c "import json;print(json.load(open('$MARCAS'))['scanIni'])")

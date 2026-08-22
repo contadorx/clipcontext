@@ -68,17 +68,22 @@ console.log('\n[3] OS CINCO CARTÕES PROMETEM AS MESMAS COISAS');
   }
 }
 
-console.log('\n[4] O SELO "EM BREVE" SAI DO CATÁLOGO, E DE MAIS NENHUM LUGAR');
+console.log('\n[4] O SELO SAI DO CATÁLOGO, E DE MAIS NENHUM LUGAR');
 {
+  /* `breve: true` virou `estado`, com quatro valores em vez de dois — e
+     `estado` ausente quer dizer `producao`. O que esta régua cobra não mudou:
+     o cartão e o catálogo têm que dizer a mesma coisa sobre o que ainda não
+     existe. O que mudou é que agora "não existe" tem grau. */
+  const estadoDe = (i) => i.estado || 'producao';
   for (const L of IDIOMAS) {
     const erradas = marcados[L].filter((b) => {
       const temSelo = /class="soon"/.test(b.dentro);
-      return temSelo !== !!porId.get(b.id).breve;
+      return temSelo !== (estadoDe(porId.get(b.id)) === 'construcao');
     });
     ok(`${L}: cartão e catálogo concordam sobre o que ainda não existe`,
        erradas.length === 0,
        erradas.map((b) => `${b.id}: cartão diz ${/soon/.test(b.dentro) ? 'breve' : 'pronto'}, ` +
-                          `catálogo diz ${porId.get(b.id).breve ? 'breve' : 'pronto'}`).join(' | '));
+                          `catálogo diz ${estadoDe(porId.get(b.id))}`).join(' | '));
     /* E a PALAVRA do selo é a mesma dos dois lados. O alemão dizia "bald" no
        cartão e "demnächst" na lista comparativa — duas palavras para o mesmo
        selo, na mesma página, e nenhum teste reclamava. */

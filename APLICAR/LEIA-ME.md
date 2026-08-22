@@ -568,7 +568,72 @@ de verdade**: até esta rodada ele imprimia o erro e saía com código 0.
 - **`terceiros.mjs` reprova** — `privacidade.en` está sem a tabela de
   suboperadores traduzida (`<table id="suboperadores">`). É conteúdo do site,
   não foi tocado por nenhum destes commits, e precisa de tradução;
-- **a demonstração do fluxo pago** — é o único item que falta do D0, e ele
-  precisa de você: um vídeo de 60 a 90 segundos de planilha → casos →
-  evidência → planilha devolvida, mais a planilha de entrada e o pacote de saída
-  para baixar. O tour de hoje mostra gravação → documento, que é o Free.
+- **a planilha de entrada e o pacote de saída para baixar** — o vídeo do fluxo
+  pago já existe (ver abaixo), mas quem quiser *conferir* em vez de assistir
+  precisa dos dois arquivos, e eles são seus: uma planilha de casos de verdade e
+  o `.zip` que sai de uma execução.
+
+
+---
+
+## E — o site negava três coisas que o produto faz, e o PDF não fechava a rodada
+
+`E-o-site-negava-e-o-pdf-nao-fechava.patch` · commit `c386ce8`
+
+**Este patch não traz os vídeos.** Eles são binários e somam ~8 MB; estão no
+zip, em `public/demo/rodada.{pt,en,es,de,fr}.{webm,mp4,jpg}`. Aplicar o patch
+sem copiar esses arquivos deixa a página de preços com um `<video>` apontando
+para 404 — copie a pasta `public/demo/` junto, ou rode o estúdio:
+
+```bash
+for L in pt en es de fr; do node estudio/gravar-roteiro.mjs $L; done
+for L in pt en es de fr; do bash estudio/montar-roteiro.sh $L; done
+```
+
+### O que ele conserta, e por que nada disso dava erro
+
+1. **Três negações mentindo, nos cinco idiomas.** A seção "o que ele não faz"
+   das páginas de caso negava o clipe de 15 s e a revisão assistida — as duas
+   existem e estão no catálogo como prontas e gratuitas — e mandava a agência
+   de três pessoas para o Team, que começa em cinco assentos. A trava é o
+   `testes/promessa.mjs`: nome negado não pode coincidir com `id` anunciado
+   como pronto, e o registro tem que ser idêntico nas cinco línguas.
+
+2. **O cartão Team prometia "sem login"** três linhas abaixo de "painel de
+   assentos: convidar, bloquear". Agora diz a verdade, que vende melhor: quem
+   grava não faz login, e conta existe só para quem coordena.
+
+3. **O PDF não oferecia o botão "marcar este caso como feito".** Ele sai pelo
+   `doc.save()` do jsPDF, e não pelo `baixarBlob()`, que é onde o botão nasce —
+   e o PDF é a saída *recomendada* da evidência. Quem chegava pelo link de um
+   caso e clicava no botão principal gerava o documento e não recebia a volta:
+   **a rodada paga não fechava pelo seu próprio caminho.** Travado em
+   `testes/voltadocaso.mjs`, que cobra as duas portas.
+
+4. **O segundo CTA do hero caía abaixo da dobra no telefone** (689px de 667). A
+   régua media um botão e, com dois, parava por ambiguidade em vez de reprovar
+   por posição. Agora mede o bloco e o respiro do topo encolhe no telefone.
+
+### O que veio junto
+
+- o vídeo da rodada paga, 47 s, nos cinco idiomas, na página de preços;
+- a comparação curta de seis linhas acima da tabela de noventa e três;
+- o bullet do Zephyr/TestRail dizendo que é endereço, não integração;
+- o estúdio sem caminhos absolutos, com o mapa de endereços saindo do
+  `rotas.json` (escrito à mão, ele estava errado em alemão e francês);
+- `ANALISE-DA-VENDA-2.md` na íntegra, e a **Trilha E** no `PLANO.md`.
+
+### O que ainda é seu, desta parte
+
+- **E2 — o vocabulário de estado da funcionalidade** (`produção`, `beta`, `em
+  construção`, `descoberta`) no lugar do `breve` de hoje: 1 dia, e é o que
+  transforma a trava do `promessa.mjs` de "não pode negar o que existe" em
+  "tem que dizer em que estado está";
+- **E3 — duas decisões de espaço, não de verdade**: as faturas e chamados como
+  bala do cartão Team, e a seção inteira de lista de espera do Pro/API entre os
+  planos e o FAQ. Os dois textos são honestos; o que se discute é se merecem o
+  lugar que ocupam. A lista já tem gente inscrita, então a decisão é sua;
+- **E4b — a calculadora de ROI**, que depende de um número que é seu: quantos
+  minutos custa, de verdade, montar uma evidência à mão na sua operação.
+  Calculadora com número inventado é o mesmo defeito da E1 virado ao contrário,
+  e pior, porque tem casas decimais.

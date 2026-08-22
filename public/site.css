@@ -457,6 +457,13 @@ table.legal td:first-child .small,table.legal td:first-child .muted{font-weight:
 /* 1.22 / .78, e não meio a meio: o h1 tem uma quebra escrita à mão dentro e,
    numa coluna estreita, ele quebrava de novo no meio da primeira linha —
    "Você percorre a / tela." A coluna do texto manda; o desenho cede. */
+/* O respiro do topo era `style="padding-top:78px"` no HTML, e por isso não
+   tinha como encolher no telefone. Encolher passou a importar quando o hero
+   ganhou o segundo botão: em 390x667 os dois não cabem lado a lado, empilham,
+   e o par terminava 22px abaixo da dobra — o caminho pago ficava invisível
+   sem rolar, que é exatamente o que ele veio corrigir. */
+.heroSec{padding-top:78px}
+@media(max-width:760px){ .heroSec{padding-top:40px} }
 .heroDuo{display:grid;grid-template-columns:1.22fr .78fr;gap:40px;align-items:center}
 .heroDuo .figDobra{margin:0}
 .heroDuo .figDobra svg{display:block;width:100%;height:auto;max-width:376px;margin-left:auto;
@@ -665,3 +672,38 @@ table.legal td:first-child .small,table.legal td:first-child .muted{font-weight:
   .postList a.comCapa{grid-template-columns:1fr}
   .postList a.comCapa img{width:100%;height:auto;aspect-ratio:16/10}
 }
+
+/* A comparacao curta da pagina de precos. Ela reusa `table.legal` — que ja e
+   responsiva e ja foi provada nas paginas legais — e so ajusta o que muda:
+   quatro colunas em vez de duas, os planos centralizados, e o travessao do
+   "nao tem" em cinza em vez de vermelho. Vermelho ali leria como defeito, e o
+   que a celula diz e "isto e do plano de cima". */
+table.cmpPlanos th:not(:first-child),
+table.cmpPlanos td{text-align:center}
+table.cmpPlanos th[scope="row"]{text-align:left;font-weight:550}
+table.cmpPlanos td.nao{color:var(--muted)}
+table.cmpPlanos td.nao::before{content:none}
+@media(max-width:620px){
+  table.cmpPlanos td{text-align:right}
+}
+
+/* Os quatro passos da rodada, na pagina de precos. Numerados de verdade: aqui
+   a ordem CARREGA informacao — a planilha entra antes de o caso abrir, e o
+   caso so volta depois de a evidencia existir. Numero enfeitando lista sem
+   ordem e ruido; aqui ele e o assunto. */
+ol.passosRodada{margin:14px 0 0;padding-left:22px;max-width:64ch}
+ol.passosRodada li{margin:0 0 6px;color:var(--ink)}
+ol.passosRodada li::marker{color:var(--accent);font-weight:600}
+
+/* OS SELOS DE ESTADO, ao lado do nome da funcionalidade.
+   `soon` ja existia. `beta` e `descoberta` sao irmaos dele e nao concorrentes:
+   a mesma forma, cores diferentes, e nenhuma delas vermelha — estado nao e
+   defeito. Beta puxa para o acento (funciona), descoberta para o silencio
+   (ainda nao e uma promessa). */
+.fts .beta,.fts .descoberta{
+  font-family:inherit;font-size:11px;letter-spacing:.03em;
+  padding:1px 6px;border-radius:3px;margin-left:6px;white-space:nowrap;
+  border:1px solid var(--line);vertical-align:1px;
+}
+.fts .beta{color:var(--accent);border-color:color-mix(in srgb,var(--accent) 38%,transparent)}
+.fts .descoberta{color:var(--muted)}

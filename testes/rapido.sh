@@ -40,7 +40,7 @@ case "$GRUPO" in
   medir) TESTES="memoria.mjs pesagem.mjs espelho.mjs modelo.mjs espera.mjs ritmo.mjs" ; SITE=0 ;;
   site) TESTES="cinco.mjs ajuda.mjs vitrine.mjs venda.mjs paginas.mjs idiomas.mjs figuras.mjs dobrafig.mjs
                 linkpage.mjs legal.mjs contradicao.mjs negocio.mjs isca.mjs blog.mjs convite.mjs email.mjs tourvid.mjs semmarca.mjs
-                barraapp.mjs paridade.mjs roteiro.mjs planos.mjs" ; SITE=1 ;;
+                barraapp.mjs paridade.mjs roteiro.mjs planos.mjs promessa.mjs voltadocaso.mjs" ; SITE=1 ;;
   *)    TESTES="$GRUPO $*" ; SITE=1 ;;
 esac
 

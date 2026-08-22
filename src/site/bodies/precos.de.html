@@ -27,6 +27,17 @@
       <span class="saida"><b>Jira</b></span>
     </div>
 
+    <!-- A PROVA DE PRIVACIDADE, ANTES DOS CARTOES.
+         Ela estava depois da tabela de noventa e tres linhas — ou seja,
+         depois do ponto a que quem faz avaliacao de fornecedor chega. E a
+         primeira coisa que essa pessoa procura, e a unica que decide se o
+         resto da pagina vale ser lido. -->
+    <p class="small muted" style="margin-top:24px"><b>Weiterhin ohne Server, auch im bezahlten Plan.</b> Der
+    Schlüssel wird in Ihrem Browser geprüft und funktioniert offline — <b>wir erhalten weder Ihr Video noch
+    Ihr Audio, in keinem Plan</b>. In den bezahlten Plänen gibt es genau eine Sache, die Sie in Ihrem Konto
+    ablegen können: die vollständige Datei einer Sitzung, von Ihnen an einen Fall der Testfallliste
+    angehängt und jederzeit löschbar. <a href="{{seguranca}}">Wie das intern funktioniert</a>.</p>
+
     <div class="plans tres">
 
       <div class="plan" data-plano="free">
@@ -40,10 +51,10 @@
           <li>Screenshots bei Szenenwechsel und Transkription auf Ihrem Gerät</li>
           <li>PDF, Word, HTML, Markdown, Tabelle, ZIP und JSON</li>
           <li>Schwärzen, zuschneiden, hervorheben und der Hinweis auf sensible Daten</li>
-          <li><a href="/de/link">Fertiger Link</a> für Zephyr, Jira und TestRail</li>
+          <li><a href="/de/link">Vorbefüllter Link</a> zum Einfügen in Zephyr, Jira, Xray oder TestRail — eine Adresse, keine Integration</li>
           <li>Das Dokument später erneut öffnen, um einen Schritt zu korrigieren — und ein SCORM-Paket für das LMS</li>
         </ul>
-        <a class="btn" href="/app?lang=de">Werkzeug öffnen</a>
+        <a class="btn" href="/app?lang=de">Jetzt einen Nachweis erstellen</a>
         <p class="pe">Alles, was Ihren Nachweis akzeptabel macht, ist hier enthalten.</p>
       </div>
 
@@ -60,7 +71,7 @@
           <li data-f="modeloProprio">Kundenlogo und Kundenname im PDF, im Word-Dokument und im HTML, mit Ihrem Deckblatt und Ihren Feldern — und das Profil kehrt auf jedem Rechner zurück</li>
           <li>Alles aus Free</li>
         </ul>
-        <a class="btn" href="{{conta}}">Die 14 Tage starten</a>
+        <a class="btn" href="{{conta}}">Personal 14 Tage testen</a>
         <p class="pe">Sofort, ohne Karte. Oder <a href="mailto:{{contato}}?subject=Walkstamp%20Personal">schreiben Sie mir</a>.</p>
       </div>
 
@@ -71,14 +82,14 @@
         <p class="moedas">R$ 349 &middot; US$ 69</p>
         <p class="small muted" style="margin:0">Für das Team, das dasselbe Dokument in allen Händen braucht.</p>
         <ul>
+          <li><b>Teilen Sie die Runde auf und verfolgen Sie sie:</b> Weisen Sie jeden Fall einer Person zu und sehen Sie, wer was erledigt hat — mit Datum, Datei und Prüfsumme, und die Liste kommt mit all dem zurück.</li>
           <li>Zugang per Link: Wer koordiniert, verschickt eine Adresse, niemand tippt einen Schlüssel ein</li>
           <li data-f="padraoDoTime">Ein Teamprofil, das an alle verteilt wird</li>
           <li>Platzverwaltung: einladen, sperren und die Laufzeit von 1 bis 90 Tagen wählen</li>
-          <li>Rechnungen und Tickets in Ihrem Konto</li>
           <li>Alles aus Personal</li>
         </ul>
-        <a class="btn ghost" href="{{time}}">Über Team sprechen</a>
-        <p class="pe">Ohne Login und ohne Registrierung, die Ihre IT genehmigen müsste.</p>
+        <a class="btn ghost" href="{{time}}">Den Team-Link erhalten</a>
+        <p class="pe">Wer aufnimmt, meldet sich nicht an: Die Lizenz steckt im Link und wird auf dem eigenen Rechner geprüft. Das Konto gehört der koordinierenden Person — dort liegen Plätze, Rechnungen und Support-Tickets.</p>
       </div>
 
     </div>
@@ -88,9 +99,62 @@
          no build: sessenta e poucas linhas em três idiomas, escritas à mão,
          seriam 195 chances de a versão em espanhol prometer o que a portuguesa
          não promete. -->
+
+
+    <!-- A DEMONSTRACAO CENTRAL.
+         O tour da home mostra a ferramenta gratuita. O que o plano vende e a
+         RODADA, e rodada nao cabe em texto: sao quatro telas, duas pessoas e
+         uma planilha que volta diferente do que entrou. Este video percorre o
+         produto de verdade — quem o gera e o `estudio/gravar-roteiro.mjs`, e
+         ele quebra na hora de gravar se a tela mudar. -->
+    <h2 style="margin-top:52px">Die ganze Runde, in 47 Sekunden</h2>
+    <p class="lead">Das ist es, was der Plan kauft, und in Text lässt es sich schwer erklären: Eine Liste mit vierzig Fällen geht hinein, jede Person bekommt ihre bereits ausgefüllt, die Ausführung erzeugt den Nachweis auf dem Rechner der ausführenden Person, und die Liste kommt zurück mit Status, Datum, ausführender Person und Prüfsumme.</p>
+    <ol class="passosRodada">
+        <li>Die Fallliste geht hinein</li>
+        <li>Jeder Fall wird zu einem Link, der das Werkzeug ausgefüllt öffnet</li>
+        <li>Die Ausführung erzeugt den Nachweis, auf dem eigenen Rechner</li>
+        <li>Der Fall kommt abgeschlossen zurück — mit Datum, ausführender Person und Prüfsumme</li>
+    </ol>
+    <figure class="tour" style="margin-top:18px">
+      <video poster="/demo/rodada.{{rodadaLang}}.jpg" controls muted playsinline preload="none"
+             aria-label="Die Steuerungsansicht einer Runde: die Fallliste, ein Fall, der das Werkzeug bereits ausgefüllt öffnet, und der Fall, der abgeschlossen zurückkommt">
+        <source src="/demo/rodada.{{rodadaLang}}.webm" type="video/webm">
+        <source src="/demo/rodada.{{rodadaLang}}.mp4" type="video/mp4">
+        <img src="/demo/rodada.{{rodadaLang}}.jpg" alt="Die Steuerungsansicht einer Runde: die Fallliste, ein Fall, der das Werkzeug bereits ausgefüllt öffnet, und der Fall, der abgeschlossen zurückkommt" style="width:100%">
+      </video>
+      <figcaption>Aufgenommen, indem das echte Produkt durchlaufen wurde. Das Video verlässt Ihren Rechner in keinem dieser Schritte — zum Konto reisen der Dateiname, das Datum und die Prüfsumme der Bildschirme.</figcaption>
+    </figure>
+
+    <!-- A COMPARACAO CURTA, e o motivo de ela vir ANTES da lista completa.
+         Noventa e tres linhas honestas descrevem o produto e nao decidem a
+         compra: quem esta escolhendo precisa de cinco. A lista completa
+         continua logo abaixo, para quem quiser conferir linha a linha. -->
+    <h2 style="margin-top:52px">In fünf Zeilen, nicht in dreiundneunzig</h2>
+    <p class="lead">Die vollständige Tabelle steht direkt darunter und ist ehrlich — aber dreiundneunzig Zeilen verdecken den Unterschied, der entscheidet. Diese fünf sind der Unterschied.</p>
+    <table class="legal cmpPlanos">
+      <caption class="soLeitor">Was sich von einem Plan zum nächsten ändert</caption>
+      <thead>
+        <tr><th scope="col">Was Sie tun können</th><th scope="col">Free</th><th scope="col">Personal</th><th scope="col">Team</th></tr>
+      </thead>
+      <tbody>
+          <tr><th scope="row">Den Nachweis erstellen und abgeben</th><td data-rot="Free">ja</td><td data-rot="Personal">ja</td><td data-rot="Team">ja</td></tr>
+          <tr><th scope="row">Eine Fallliste abarbeiten</th><td class="nao" data-rot="Free">—</td><td data-rot="Personal">Ihre eigene</td><td data-rot="Team">die des Teams</td></tr>
+          <tr><th scope="row">Die Liste ausgefüllt zurückgeben</th><td class="nao" data-rot="Free">—</td><td data-rot="Personal">ja</td><td data-rot="Team">ja</td></tr>
+          <tr><th scope="row">Das eigene Dokumentformat speichern</th><td class="nao" data-rot="Free">—</td><td data-rot="Personal">ja</td><td data-rot="Team">ja</td></tr>
+          <tr><th scope="row">Fälle zuweisen und sehen, wer fertig ist</th><td class="nao" data-rot="Free">—</td><td class="nao" data-rot="Personal">—</td><td data-rot="Team">ja</td></tr>
+          <tr><th scope="row">Allen dasselbe Format vorgeben</th><td class="nao" data-rot="Free">—</td><td class="nao" data-rot="Personal">—</td><td data-rot="Team">ja</td></tr>
+      </tbody>
+    </table>
+
     <h2 style="margin-top:52px">{{tpH}}</h2>
     <p class="lead">{{tpP}}</p>
     {{tabelaPlanos}}
+
+    <!-- A LEGENDA DOS SELOS.
+         Um selo que a pessoa nao entende e ruido — e "beta" numa tabela de
+         preco, sem explicacao, e a palavra que faz a avaliacao de fornecedor
+         parar e perguntar. A legenda responde antes de perguntarem. -->
+    <p class="small muted" style="margin-top:12px;max-width:70ch">{{tpLegenda}}</p>
 
     <!-- A CAIXA DO QUE AINDA NAO EXISTE.
          Um item marcado "em breve" DENTRO do conjunto principal do plano
@@ -105,12 +169,6 @@
       </ul>
     </div>
 
-    <p class="small muted" style="margin-top:24px"><b>Weiterhin ohne Server, auch im bezahlten Plan.</b> Der
-    Schlüssel wird in Ihrem Browser geprüft und funktioniert offline — <b>wir erhalten weder Ihr Video noch
-    Ihr Audio, in keinem Plan</b>. In den bezahlten Plänen gibt es genau eine Sache, die Sie in Ihrem Konto
-    ablegen können: die vollständige Datei einer Sitzung, von Ihnen an einen Fall der Testfallliste
-    angehängt und jederzeit löschbar. <a href="{{seguranca}}">Wie das intern funktioniert</a>.</p>
-
     <p class="small muted" style="margin-top:14px"><b>Pro und API</b> — Formate umwandeln, die der Browser
     ablehnt (HEVC, MKV, ProRes), auf dem Server transkribieren, im Stapel verarbeiten, oder eine Adresse, die
     Screenshots und Transkription zurückgibt, damit Ihr eigenes Produkt sie nutzt. Nichts davon existiert
@@ -118,25 +176,14 @@
     <a href="mailto:{{contato}}?subject=Walkstamp%20API">Schildern Sie mir Ihren Fall</a> — so entscheide ich die Reihenfolge.</p>
 
     <p class="small muted" style="margin-top:24px">Zwei ehrliche Hinweise zu dieser Seite. Was mit
-    <span class="soon">bald</span> gekennzeichnet ist, existiert noch nicht: Es steht hier, weil ich es bauen
+    <span class="soon">demnächst</span> gekennzeichnet ist, existiert noch nicht: Es steht hier, weil ich es bauen
     werde, und wer jetzt einsteigt, hilft bei der Reihenfolge und zahlt den Preis dieser Seite dauerhaft. Und
     der <b>kostenlose Plan verliert keine Funktionen</b>, wenn die bezahlten wachsen — die Trennlinie liegt
     fest: Datenschutz und die Qualität des Nachweises stehen nie hinter einer Zahlung.</p>
   </div>
 </section>
 
-<section id="lista" data-espera="proapi">
-  <div class="wrap">
-    <h2>Möchten Sie über Pro und die API informiert werden?</h2>
-    <p class="lead">Der bezahlte Plan ist <b>bereits verfügbar</b> — was es noch nicht gibt, sind Pro und die API, oben beschrieben. Hinterlassen Sie eine E-Mail-Adresse, und ich melde mich, sobald sie da sind. Eine Nachricht, kein Newsletter.</p>
-    <form class="lista" id="listaForm" data-url="{{supaUrl}}" data-key="{{supaKey}}" novalidate>
-      <input type="email" id="listaEmail" autocomplete="email" placeholder="ihre@email.de" aria-label="Ihre E-Mail-Adresse">
-      <button class="btn" type="submit" id="listaBtn">Bitte benachrichtigen</button>
-    </form>
-    <p class="small muted listaMsg" id="listaMsg" role="status"></p>
-    <p class="small muted" style="max-width:640px">Das Versprechen dieses Werkzeugs lautet, dass <b>Ihr Video Ihren Rechner nicht verlässt</b>, und es gilt weiterhin: Dieses Feld hat nichts mit dem zu tun, was Sie hier verarbeiten — der Browser sendet weder Video noch Audio noch Transkription irgendwohin. Die E-Mail-Adresse liegt in einer Datenbank von mir, wird nicht verkauft, geht an keine Liste Dritter und verschwindet an dem Tag, an dem Sie es verlangen. Lieber nicht hinterlassen? Kein Problem — das Werkzeug ändert sich dadurch nicht.</p>
-  </div>
-</section>
+
 
 <section id="support"></section>
 
@@ -148,5 +195,24 @@
     Grund einfacher: Ihr Video wird von Ihrem eigenen Rechner verarbeitet, die Kosten Ihrer Nutzung liegen
     also nahe null. Es gibt nichts zu subventionieren und deshalb auch nichts, was später wieder
     hereingeholt werden müsste.</p>
+  </div>
+</section>
+
+<!-- A LISTA DE ESPERA DO PRO/API, DEPOIS E NAO ANTES.
+     Ela ficava entre os planos e o fim da pagina, ocupando o lugar
+     nobre com algo que nao se compra: a propria secao diz que "nada
+     disso existe ainda". O texto e honesto e a lista ja tem gente
+     inscrita, entao ela nao sai — desce. Quem chegou para decidir
+     entre tres planos decide primeiro. -->
+<section id="lista" data-espera="proapi">
+  <div class="wrap">
+    <h2>Möchten Sie über Pro und die API informiert werden?</h2>
+    <p class="lead">Der bezahlte Plan ist <b>bereits verfügbar</b> — was es noch nicht gibt, sind Pro und die API, oben beschrieben. Hinterlassen Sie eine E-Mail-Adresse, und ich melde mich, sobald sie da sind. Eine Nachricht, kein Newsletter.</p>
+    <form class="lista" id="listaForm" data-url="{{supaUrl}}" data-key="{{supaKey}}" novalidate>
+      <input type="email" id="listaEmail" autocomplete="email" placeholder="ihre@email.de" aria-label="Ihre E-Mail-Adresse">
+      <button class="btn" type="submit" id="listaBtn">Bitte benachrichtigen</button>
+    </form>
+    <p class="small muted listaMsg" id="listaMsg" role="status"></p>
+    <p class="small muted" style="max-width:640px">Das Versprechen dieses Werkzeugs lautet, dass <b>Ihr Video Ihren Rechner nicht verlässt</b>, und es gilt weiterhin: Dieses Feld hat nichts mit dem zu tun, was Sie hier verarbeiten — der Browser sendet weder Video noch Audio noch Transkription irgendwohin. Die E-Mail-Adresse liegt in einer Datenbank von mir, wird nicht verkauft, geht an keine Liste Dritter und verschwindet an dem Tag, an dem Sie es verlangen. Lieber nicht hinterlassen? Kein Problem — das Werkzeug ändert sich dadurch nicht.</p>
   </div>
 </section>

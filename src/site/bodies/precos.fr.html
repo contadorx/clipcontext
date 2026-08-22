@@ -28,6 +28,16 @@
       <span class="saida"><b>Jira</b></span>
     </div>
 
+    <!-- A PROVA DE PRIVACIDADE, ANTES DOS CARTOES.
+         Ela estava depois da tabela de noventa e tres linhas — ou seja,
+         depois do ponto a que quem faz avaliacao de fornecedor chega. E a
+         primeira coisa que essa pessoa procura, e a unica que decide se o
+         resto da pagina vale ser lido. -->
+    <p class="small muted" style="margin-top:24px"><b>Toujours sans serveur, y compris dans les offres payantes.</b> La clé est
+    vérifiée à l’intérieur de votre navigateur et fonctionne hors ligne — <b>nous ne recevons ni votre vidéo ni votre
+    audio, dans aucune offre</b>. Dans les offres payantes, il y a une seule chose que vous pouvez choisir de conserver dans votre compte : le
+    fichier complet d’une session, joint par vous à un cas de la liste, et supprimable à tout moment. <a href="{{seguranca}}">Comment cela fonctionne à l’intérieur</a>.</p>
+
     <div class="plans tres">
 
       <div class="plan" data-plano="free">
@@ -41,10 +51,10 @@
           <li>Captures au changement de scène et transcription sur votre appareil</li>
           <li>PDF, Word, HTML, Markdown, tableur, ZIP et JSON</li>
           <li>Caviarder, rogner, surligner, et l’alerte de donnée sensible</li>
-          <li><a href="/fr/link">Lien prêt à l’emploi</a> pour Zephyr, Jira et TestRail</li>
+          <li><a href="/fr/link">Lien pré-rempli</a> à coller dans Zephyr, Jira, Xray ou TestRail — c’est une adresse, pas une intégration</li>
           <li>Rouvrir le document plus tard pour corriger une étape — et un paquet SCORM pour le LMS</li>
         </ul>
-        <a class="btn" href="/app?lang=fr">Ouvrir l’outil</a>
+        <a class="btn" href="/app?lang=fr">Créer une preuve maintenant</a>
         <p class="pe">Tout ce qui fait accepter votre preuve est ici.</p>
       </div>
 
@@ -61,7 +71,7 @@
           <li data-f="modeloProprio">Logo et nom du client dans le PDF, dans le Word et dans le HTML, avec votre couverture et vos champs — et le profil revient sur n’importe quelle machine</li>
           <li>Tout ce qu’il y a dans Free</li>
         </ul>
-        <a class="btn" href="{{conta}}">Démarrer les 14 jours</a>
+        <a class="btn" href="{{conta}}">Essayer Personal 14 jours</a>
         <p class="pe">Tout de suite, sans carte. Ou <a href="mailto:{{contato}}?subject=Walkstamp%20Personal">écrivez-moi</a>.</p>
       </div>
 
@@ -72,14 +82,14 @@
         <p class="moedas">R$ 349 &middot; US$ 69</p>
         <p class="small muted" style="margin:0">Pour l’équipe qui a besoin du même document entre toutes les mains.</p>
         <ul>
+          <li><b>Répartissez la série et suivez-la :</b> attribuez chaque cas à une personne et voyez qui a terminé quoi — avec date, fichier et empreinte, et le tableur revient avec tout cela dedans.</li>
           <li>L’activation passe par un lien : la personne qui coordonne envoie une adresse, personne ne saisit de clé</li>
           <li data-f="padraoDoTime">Un profil d’équipe poussé à tout le monde</li>
           <li>Tableau des sièges : inviter, bloquer et choisir la durée, de 1 à 90 jours</li>
-          <li>Factures et tickets dans votre compte</li>
           <li>Tout ce qu’il y a dans Personal</li>
         </ul>
-        <a class="btn ghost" href="{{time}}">Parler de Team</a>
-        <p class="pe">Sans identifiant, et sans inscription à faire approuver par votre DSI.</p>
+        <a class="btn ghost" href="{{time}}">Recevoir le lien Team</a>
+        <p class="pe">Celui qui enregistre ne se connecte pas : la licence voyage dans le lien et se vérifie sur son propre ordinateur. Le compte est celui qui coordonne — c’est là que vivent les sièges, les factures et les tickets de support.</p>
       </div>
 
     </div>
@@ -89,9 +99,62 @@
          no build: sessenta e poucas linhas em três idiomas, escritas à mão,
          seriam 195 chances de a versão em espanhol prometer o que a portuguesa
          não promete. -->
+
+
+    <!-- A DEMONSTRACAO CENTRAL.
+         O tour da home mostra a ferramenta gratuita. O que o plano vende e a
+         RODADA, e rodada nao cabe em texto: sao quatro telas, duas pessoas e
+         uma planilha que volta diferente do que entrou. Este video percorre o
+         produto de verdade — quem o gera e o `estudio/gravar-roteiro.mjs`, e
+         ele quebra na hora de gravar se a tela mudar. -->
+    <h2 style="margin-top:52px">La série entière, en 47 secondes</h2>
+    <p class="lead">C’est ce que l’offre achète, et c’est difficile à expliquer en texte : un tableur de quarante cas entre, chaque personne reçoit les siens déjà remplis, l’exécution produit la preuve sur l’ordinateur de celui qui exécute, et le tableur revient avec statut, date, exécutant et empreinte.</p>
+    <ol class="passosRodada">
+        <li>Le tableur de cas entre</li>
+        <li>Chaque cas devient un lien qui ouvre l’outil rempli</li>
+        <li>L’exécution produit la preuve, sur l’ordinateur de l’exécutant</li>
+        <li>Le cas revient clos, avec date, exécutant et empreinte</li>
+    </ol>
+    <figure class="tour" style="margin-top:18px">
+      <video poster="/demo/rodada.{{rodadaLang}}.jpg" controls muted playsinline preload="none"
+             aria-label="L’écran de pilotage d’une série : le tableur de cas, le cas qui ouvre l’outil déjà rempli, et le cas qui revient clos">
+        <source src="/demo/rodada.{{rodadaLang}}.webm" type="video/webm">
+        <source src="/demo/rodada.{{rodadaLang}}.mp4" type="video/mp4">
+        <img src="/demo/rodada.{{rodadaLang}}.jpg" alt="L’écran de pilotage d’une série : le tableur de cas, le cas qui ouvre l’outil déjà rempli, et le cas qui revient clos" style="width:100%">
+      </video>
+      <figcaption>Enregistré en parcourant le produit réel. La vidéo ne quitte votre ordinateur à aucune de ces étapes — ce qui voyage vers le compte, c’est le nom du fichier, la date et l’empreinte des écrans.</figcaption>
+    </figure>
+
+    <!-- A COMPARACAO CURTA, e o motivo de ela vir ANTES da lista completa.
+         Noventa e tres linhas honestas descrevem o produto e nao decidem a
+         compra: quem esta escolhendo precisa de cinco. A lista completa
+         continua logo abaixo, para quem quiser conferir linha a linha. -->
+    <h2 style="margin-top:52px">En cinq lignes, et non en quatre-vingt-treize</h2>
+    <p class="lead">Le tableau complet est juste en dessous et il est honnête — mais quatre-vingt-treize lignes masquent la différence qui décide. Ces cinq-là sont la différence.</p>
+    <table class="legal cmpPlanos">
+      <caption class="soLeitor">Ce qui change d’une offre à l’autre</caption>
+      <thead>
+        <tr><th scope="col">Ce que vous pouvez faire</th><th scope="col">Free</th><th scope="col">Personal</th><th scope="col">Team</th></tr>
+      </thead>
+      <tbody>
+          <tr><th scope="row">Créer la preuve et la remettre</th><td data-rot="Free">oui</td><td data-rot="Personal">oui</td><td data-rot="Team">oui</td></tr>
+          <tr><th scope="row">Dérouler un tableur de cas</th><td class="nao" data-rot="Free">—</td><td data-rot="Personal">le vôtre</td><td data-rot="Team">celui de l’équipe</td></tr>
+          <tr><th scope="row">Rendre le tableur rempli</th><td class="nao" data-rot="Free">—</td><td data-rot="Personal">oui</td><td data-rot="Team">oui</td></tr>
+          <tr><th scope="row">Garder votre propre format de document</th><td class="nao" data-rot="Free">—</td><td data-rot="Personal">oui</td><td data-rot="Team">oui</td></tr>
+          <tr><th scope="row">Attribuer les cas et voir qui a terminé</th><td class="nao" data-rot="Free">—</td><td class="nao" data-rot="Personal">—</td><td data-rot="Team">oui</td></tr>
+          <tr><th scope="row">Imposer le même format à tout le monde</th><td class="nao" data-rot="Free">—</td><td class="nao" data-rot="Personal">—</td><td data-rot="Team">oui</td></tr>
+      </tbody>
+    </table>
+
     <h2 style="margin-top:52px">{{tpH}}</h2>
     <p class="lead">{{tpP}}</p>
     {{tabelaPlanos}}
+
+    <!-- A LEGENDA DOS SELOS.
+         Um selo que a pessoa nao entende e ruido — e "beta" numa tabela de
+         preco, sem explicacao, e a palavra que faz a avaliacao de fornecedor
+         parar e perguntar. A legenda responde antes de perguntarem. -->
+    <p class="small muted" style="margin-top:12px;max-width:70ch">{{tpLegenda}}</p>
 
     <!-- A CAIXA DO QUE AINDA NAO EXISTE.
          Um item marcado "em breve" DENTRO do conjunto principal do plano
@@ -106,11 +169,6 @@
       </ul>
     </div>
 
-    <p class="small muted" style="margin-top:24px"><b>Toujours sans serveur, y compris dans les offres payantes.</b> La clé est
-    vérifiée à l’intérieur de votre navigateur et fonctionne hors ligne — <b>nous ne recevons ni votre vidéo ni votre
-    audio, dans aucune offre</b>. Dans les offres payantes, il y a une seule chose que vous pouvez choisir de conserver dans votre compte : le
-    fichier complet d’une session, joint par vous à un cas de la liste, et supprimable à tout moment. <a href="{{seguranca}}">Comment cela fonctionne à l’intérieur</a>.</p>
-
     <p class="small muted" style="margin-top:14px"><b>Pro et API</b> — convertir les formats que le navigateur
     refuse (HEVC, MKV, ProRes), transcrire sur un serveur, traiter par lots, ou une adresse qui renvoie
     captures et transcription pour que votre propre produit les consomme. Rien de tout cela n’existe encore, et c’est ce qui vient ensuite.
@@ -124,18 +182,7 @@
   </div>
 </section>
 
-<section id="lista" data-espera="proapi">
-  <div class="wrap">
-    <h2>Vous voulez être prévenu du Pro et de l’API ?</h2>
-    <p class="lead">L’offre payante est <b>déjà disponible</b> — ce qui n’existe pas encore, c’est le Pro et l’API, décrits ci-dessus. Laissez un e-mail et je vous préviens quand ils sortiront. Un message, pas une newsletter.</p>
-    <form class="lista" id="listaForm" data-url="{{supaUrl}}" data-key="{{supaKey}}" novalidate>
-      <input type="email" id="listaEmail" autocomplete="email" placeholder="vous@email.com" aria-label="Votre e-mail">
-      <button class="btn" type="submit" id="listaBtn">Je veux être prévenu</button>
-    </form>
-    <p class="small muted listaMsg" id="listaMsg" role="status"></p>
-    <p class="small muted" style="max-width:640px">La promesse de cet outil, c’est que <b>votre vidéo ne quitte pas votre machine</b>, et elle tient toujours : ce champ n’a aucun rapport avec ce que vous traitez ici — le navigateur n’envoie ni vidéo, ni audio, ni transcription nulle part. L’e-mail reste dans une base à moi, il n’est pas vendu, il ne part dans aucune liste de tiers et il disparaît le jour où vous le demandez. Vous préférez ne pas le laisser ? Aucun problème — l’outil ne change pas pour autant.</p>
-  </div>
-</section>
+
 
 <section id="support"></section>
 
@@ -146,5 +193,24 @@
     — des données, de la publicité, ou une limite qui apparaît au mauvais moment. Ici la raison est plus simple : votre vidéo
     est traitée par votre propre ordinateur, donc le coût de vous servir est quasiment nul. Il n’y a rien à subventionner,
     et donc rien à récupérer ensuite.</p>
+  </div>
+</section>
+
+<!-- A LISTA DE ESPERA DO PRO/API, DEPOIS E NAO ANTES.
+     Ela ficava entre os planos e o fim da pagina, ocupando o lugar
+     nobre com algo que nao se compra: a propria secao diz que "nada
+     disso existe ainda". O texto e honesto e a lista ja tem gente
+     inscrita, entao ela nao sai — desce. Quem chegou para decidir
+     entre tres planos decide primeiro. -->
+<section id="lista" data-espera="proapi">
+  <div class="wrap">
+    <h2>Vous voulez être prévenu du Pro et de l’API ?</h2>
+    <p class="lead">L’offre payante est <b>déjà disponible</b> — ce qui n’existe pas encore, c’est le Pro et l’API, décrits ci-dessus. Laissez un e-mail et je vous préviens quand ils sortiront. Un message, pas une newsletter.</p>
+    <form class="lista" id="listaForm" data-url="{{supaUrl}}" data-key="{{supaKey}}" novalidate>
+      <input type="email" id="listaEmail" autocomplete="email" placeholder="vous@email.com" aria-label="Votre e-mail">
+      <button class="btn" type="submit" id="listaBtn">Je veux être prévenu</button>
+    </form>
+    <p class="small muted listaMsg" id="listaMsg" role="status"></p>
+    <p class="small muted" style="max-width:640px">La promesse de cet outil, c’est que <b>votre vidéo ne quitte pas votre machine</b>, et elle tient toujours : ce champ n’a aucun rapport avec ce que vous traitez ici — le navigateur n’envoie ni vidéo, ni audio, ni transcription nulle part. L’e-mail reste dans une base à moi, il n’est pas vendu, il ne part dans aucune liste de tiers et il disparaît le jour où vous le demandez. Vous préférez ne pas le laisser ? Aucun problème — l’outil ne change pas pour autant.</p>
   </div>
 </section>

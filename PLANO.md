@@ -411,11 +411,13 @@ com a trava que impede a volta:
    mentira. Trava: `chaves.mjs` proíbe o nome fora dessa lista. Se você quiser a
    comparação nominal de volta, ela custa uma página datada com protocolo e
    revalidação — e a trava sai junto com a decisão.
-**Falta um, 1,5–2 d:**
+**Os sete estão feitos:**
 
-6. **A demonstração do fluxo pago (1,5–2 d).** O tour mostra gravação →
-   documento, que é o Free. Falta planilha → casos → evidência → planilha
-   devolvida, que é o que se compra.
+6. **A demonstração do fluxo pago — FEITA na E4a.** O tour mostra gravação →
+   documento, que é o Free. Faltava planilha → casos → evidência → planilha
+   devolvida, que é o que se compra. Existe agora: `rodada.<lang>` em
+   `public/demo/`, 47 segundos, nos cinco idiomas, na página de preços — e
+   gerada pelo estúdio, percorrendo o produto, e não montada à mão.
 7. **O funil jogava fora oito de onze eventos — FEITO no banco; falta ligar os
    quatro novos na conta.** A C1 tinha tirado a esteira de dentro da medida.
    Medindo de novo apareceu coisa pior: o produto chama `medir()` com **onze**
@@ -457,8 +459,8 @@ com a trava que impede a volta:
    a ação. Quem desligou o rastreamento desligou o rastreamento, e não "o
    rastreamento feito por JavaScript".
 
-   Com isto o item 7 fecha. Falta do D0 só o item 6, a demonstração do fluxo
-   pago.
+   Com isto o item 7 fecha — e o item 6 fechou na E4a, o que fecha o D0
+   inteiro.
 
 #### D1 — para levantar conversão: **seis dos sete feitos** (1,5–2 d restantes)
 
@@ -554,6 +556,283 @@ número, e essa é a regra que mantém a página crível.
   uma página datada e revalidação periódica.
 - **Moeda:** BRL, USD e EUR juntos, ou detectar a localidade?
 
+### Trilha E — a reanálise da venda, versão 2 (2–3 d restantes)
+
+A fonte é a **Reanálise do site e nova proposta de venda**, de 22/08, que está
+inteira em `ANALISE-DA-VENDA-2.md`. Ela é a segunda passada — a primeira virou a
+Trilha D — e a diferença de método importa: a v1 leu a página de preços, a v2 leu
+o site inteiro contra o código, incluindo o catálogo de funcionalidades e os
+testes das features pagas. Por isso ela acha uma classe de defeito que a v1 não
+podia achar: **o site nega coisas que o produto faz.**
+
+A tese comercial dela, que eu aceito:
+
+> Walkstamp transforma uma execução de sistema em evidência pronta, liga essa
+> evidência ao caso de teste e devolve o controle da rodada para quem coordena.
+
+E o arco de planos que sai daí — **Free cria, Personal repete, Team coordena,
+Cloud acelera** — é o mesmo que a D1 já escreveu nos cartões (`plFreeD`,
+`plPersD`, `plTimeD`), nos cinco idiomas. Nesse ponto as duas análises
+convergiram sem combinar, o que é um sinal razoável de que o arco está certo.
+
+#### O que a v2 pede e as trilhas B e D já entregaram
+
+A v2 foi escrita contra o site de **antes** dos builds B1–B5 e D0–D1. Seis dos
+seus P0/P1 já não existem, e vale não refazer:
+
+| O que a v2 aponta | Onde já foi resolvido |
+|---|---|
+| P0 — o plano parece disponível e indisponível ao mesmo tempo | **B4**: uma verdade só sobre o trial |
+| P0 — cartões dizem "em breve", catálogo diz que existe | **B1**: `breve` virou a fonte única, e o cartão lê dela |
+| P0 — o site vende identidade, o código pago entrega orquestração | **B5**: a manchete passou a ser o roteiro, não o logotipo |
+| P0 — RPCs pagas sem migração no Git | **B3** + as seis migrações aplicadas em produção em 22/08 |
+| P0 — dois webhooks Stripe aparentes | **B2**: um só, no Next, com idempotência por evento |
+
+Dois que eu quase dei por feito sem conferir — e os dois estavam de pé: o P1 do **"sem login"**. A minha
+primeira leitura desta tabela dizia que a D1 tinha resolvido, porque "sem
+cadastro" tinha ficado só no cartão Free. Não tinha: o cartão **Team** da página
+de preços terminava, nos cinco idiomas, em *"sem login e sem exigir cadastro
+para a sua TI aprovar"* — três linhas abaixo de *"painel de assentos: convidar,
+bloquear e escolher o prazo"*. Uma contradição dentro de um cartão só, e a que
+custa mais caro: quem avalia lê "sem cadastro", descobre a conta por magic link,
+e para de acreditar na página. Corrigido junto com a E1, e agora a frase diz a
+verdade, que é melhor do que a mentira era: **quem grava não faz login** — a
+licença viaja no link e é conferida no computador de quem executa (`LIC_PUB`,
+verificação offline por construção) — e **conta existe só para quem coordena**,
+que é onde moram os assentos e as faturas.
+
+E o P2 do **Pro/API**. Eu tinha escrito aqui que ele "morreu sozinho, `grep` não
+acha" — só que eu procurei por "Pro/API" e "API pública", e ele está escrito como
+*"Quer ser avisado do Pro e da API?"*. Está lá inteiro: uma `<section>` com
+título, formulário de lista de espera e banco, entre os planos e o FAQ. O texto
+em si é honesto (*"nada disso existe ainda"*), então isto **não** é defeito de
+verdade como os outros três — é ocupação de espaço nobre por algo que não se
+compra, e a lista já tem gente inscrita. Fica na E3, e a decisão de tirar é sua,
+não minha.
+
+#### E1. As três negações que estavam mentindo: **FEITA**
+
+Esta é a descoberta da v2, e ela é melhor do que a v2 sabia. As páginas de caso
+terminam com uma seção honesta — *"o que ele não faz — e é melhor saber antes"*.
+Ela é provavelmente a melhor parte do site: quem faz avaliação de fornecedor lê
+aquilo e passa a acreditar no resto. **E ela apodrece sozinha**, porque nada no
+build ligava um parágrafo de negação à funcionalidade que ele nega. Uma feature
+saía de "em breve", chegava ao produto, entrava no catálogo — e a página seguia
+dizendo que ela não existe.
+
+Três estavam nesse estado, nos cinco idiomas:
+
+1. **O clipe de 15 s.** `casoUx` dizia *"ainda não guarda o clipe de vídeo do
+   momento marcado … é o que está em construção"* — trinta linhas depois de a
+   **mesma página** dizer *"só os 15 segundos em volta do que você marcou são
+   guardados"*, e com o clipe existindo no produto (`#recClipe`, `#lenteClipe`,
+   `#clipeBaixar`, e ele sai no `.zip`) e no catálogo como pronto e gratuito.
+   Numa página de pesquisa de usabilidade, esse é o parágrafo que decide a
+   compra, e ele estava negando exatamente a peça que a página diz ser a mais
+   pedida.
+2. **A revisão assistida.** `casoIn` dizia *"o que ainda não existe é a
+   ferramenta te guiar por ele perguntando 'esta tela ainda está assim?'"* — que
+   é, palavra por palavra, o que `revAbrir`/`revPintar` fazem desde que o painel
+   entrou. A mesma página, no parágrafo 11, já mandava *"deixe a revisão
+   assistida conduzir"*. Ela se contradizia sozinha em duas telas de distância.
+3. **O mínimo do Team.** `casoUx` mandava a agência de três pessoas para o Team;
+   o Team começa em **cinco** assentos no `lib/stripe.ts`. Duas regras públicas
+   diferentes sobre quem pode comprar o quê — e a que estava na página do caso
+   era a que o cliente lia primeiro.
+
+As três foram corrigidas nos cinco idiomas. As duas primeiras não viraram
+silêncio: o slot continua sendo uma negação, e o que entrou no lugar é verdade
+verificada no código — *"não guarda a sessão inteira em vídeo"* (o clipe existe,
+é opt-in, e o descarte do resto é o que torna sessão de cliente viável) e *"não
+controla versão nem guarda a trilha de aprovação"* (o cabeçalho tem o campo
+versão, mas quem aprova e o que está valendo continua no sistema de gestão de
+mudanças da empresa — o próprio produto já dizia isso em `pNoteRel`).
+
+**A trava** é o `testes/promessa.mjs`, e ela é a parte que dura. Cada parágrafo
+de negação carrega `data-nao="nome"`; o catálogo identifica as funcionalidades
+por `id`; e o teste reprova quando um nome negado coincide com um `id` anunciado
+como pronto. Ele também exige que o registro seja idêntico nos cinco idiomas — se
+não fosse, bastaria a tradução alemã perder a marcação para a negação alemã
+voltar a mentir sozinha — e confere o mínimo do Team contra o `lib/stripe.ts`, em
+número por extenso, nas cinco línguas. Provado nas duas direções: devolver
+`data-nao="clipe"` reprova em cinco pontos e imprime a linha do catálogo que o
+contradiz.
+
+O efeito de segunda ordem é o que interessa: **daqui para frente, uma feature que
+sai de "em breve" não consegue chegar ao `main` sem que alguém volte na página de
+caso e reescreva a frase.** Era exatamente o passo que ninguém dava.
+
+#### E2. O vocabulário de estado da funcionalidade: **FEITO**
+
+A v2 pede que "pronta" pare de significar "existe código" e passe a significar
+seis coisas: está em produção, está no plano certo, tem teste de ponta a ponta,
+está documentada, é suportável e é medida. E propõe estados únicos no catálogo:
+`produção`, `beta`, `em construção`, `descoberta`.
+
+O catálogo tinha **dois** estados — `breve: true` ou nada — e "nada" queria
+dizer duas coisas diferentes que ninguém separava: o que está pronto, e o que
+**funciona mas tem uma ressalva que quem compra precisa saber**.
+
+`estado` agora é um campo só, com quatro valores, e a ausência dele quer dizer
+`producao`. **`breve` foi absorvido, não duplicado** — duas listas para a mesma
+verdade é como este projeto já perdeu o `hreflang` de dois idiomas e deixou o
+tour em inglês numa página alemã, duas vezes.
+
+**A classificação saiu de leitura de código, e não de palpite.** A seção 9 da v2
+marca quatro funcionalidades pagas como de "prontidão incerta". Conferindo cada
+uma:
+
+| Funcionalidade | A v2 dizia | O que o código mostra | Estado |
+|---|---|---|---|
+| Padrão do time | incerta | `aplicarPerfil()` empurra empresa, rótulo, ambiente, papel, layout e hash — e perde para a mão de quem está com o caso aberto | `producao` |
+| Modelo persistente | incerta | `time_modelo` grava, `pintarModelosDoCliente()` reaplica, vem da conta | `producao` |
+| Vocabulário persistente | incerta | é o único item que não existe | `construcao` |
+| Entrada por domínio | só com domínio verificado | tabela e concessão existem; **sem tela e sem prova de posse** | `beta` |
+
+Duas das quatro estavam prontas e a análise julgou de fora do código. A quarta é
+a que dá razão a ela, e vale escrever por extenso porque é a que interessa: o
+catálogo vendia **"Entrada automática por domínio de e-mail"** como pronta. A
+tabela existe e a licença concede por domínio — mas **não há tela para a empresa
+cadastrar o domínio, nem prova nenhuma de que ela é dona dele**. As linhas entram
+à mão. Vendida como pronta, ela promete um self-service que não existe; e foi por
+esse mesmo caminho que `modelo.example` acabou concedendo Team na produção.
+
+Agora ela sai da tabela com o selo `beta`, e a página traz uma **legenda** que
+diz o que cada selo quer dizer — nos cinco idiomas. "Beta" numa tabela de preço,
+sem explicação, é a palavra que faz a avaliação de fornecedor parar e perguntar.
+
+**A trava** cresceu no `promessa.mjs`: nenhum estado fora do vocabulário de
+quatro (campo livre vira `beta`, `Beta`, `em beta`, `parcial` e `quase` em seis
+meses, e aí nenhum teste consegue mais perguntar nada); todo estado em uso tem
+palavra nos cinco idiomas; a legenda está nas cinco páginas; e `breve` não
+sobrevive em lugar nenhum — nem no dado, nem em quem o lia.
+
+E ela achou um defeito na hora em que entrou: o alemão **explicava o selo com a
+palavra errada**. O parágrafo dizia "o que está marcado *bald* ainda não existe"
+enquanto o selo dizia *demnächst* — o leitor era mandado procurar uma palavra que
+não está escrita em lugar nenhum da página. O `planos.mjs` já cobrava uma palavra
+por selo, mas só nas balas com `data-f`, que é por onde ele acha o item no
+catálogo; a prosa que EXPLICA o selo ficava fora. Agora a varredura é da página
+inteira.
+
+**O que continua sendo seu:** classificar as outras 92. Eu só mexi no que
+consegui verificar; supor estado de funcionalidade lendo o nome dela seria
+repetir, do meu lado, o erro que a E1 acabou de consertar.
+
+#### E3. A página de preços, reordenada: **FEITA**
+
+Quatro mudanças de ordem e de texto, nenhuma delas de verdade — a página já não
+mentia depois da E1; ela estava mal arrumada.
+
+**A prova de privacidade subiu.** O parágrafo *"continua sem servidor, inclusive
+no pago — não recebemos o seu vídeo nem o seu áudio em plano nenhum"* estava
+**depois da tabela de noventa e três linhas**. É a primeira coisa que quem faz
+avaliação de fornecedor procura, e a única que decide se o resto da página vale
+ser lido — e estava depois do ponto a que essa pessoa chega. Agora vem antes dos
+cartões, nos cinco idiomas.
+
+**Cada CTA diz o resultado, e não o gesto.** "Abrir a ferramenta" → *"Criar uma
+evidência agora"*; "Começar os 14 dias" → *"Testar o Personal por 14 dias"*;
+"Falar sobre o Team" → *"Receber o link do Team"*. Este último é onde a v2 pede
+*"Agendar um piloto do Team"* e eu não segui: a página do Team entrega **um
+link**, não uma reunião marcada. "Agendar" seria a mesma classe de defeito que a
+E1 acabou de consertar.
+
+**Faturas e chamados saíram das balas de valor do Team** e viraram uma frase no
+rodapé do cartão, junto com o resto da higiene — que é o que a v2 pede na seção
+9. E aí o `cenarios.mjs` reprovou por desequilíbrio (6/5/**4**), o que levou à
+descoberta que vale mais do que a arrumação toda:
+
+> **O cartão Team não mencionava atribuir casos e acompanhar quem concluiu.**
+> Vendia entrada por link, perfil de equipe e painel de assentos — a higiene — e
+> não vendia aquilo para que o plano existe. A coisa que o vídeo da E4a mostra
+> em quarenta e sete segundos, e que a v2 chama de "benefício principal", não
+> estava escrita no cartão que cobra por ela.
+
+Ela entrou como primeira bala, nos cinco idiomas: *"divida a rodada e acompanhe:
+atribua cada caso a uma pessoa e veja quem concluiu o quê — com data, arquivo e
+impressão digital, e a planilha volta com tudo isso dentro."*
+
+**A lista de espera do Pro/API desceu** para depois da última seção. Ela ocupava
+o lugar nobre entre os planos e o fim da página com algo que não se compra — a
+própria seção diz que "nada disso existe ainda". Não saiu, porque o texto é
+honesto e a lista já tem gente inscrita: desceu. Quem chegou para decidir entre
+três planos decide primeiro.
+
+**O que ficou de fora, e é seu:** a comparação curta da 7.4 já existe (feita na
+E4b), mas a **prova da seção 7.6** depende de material seu — o exemplo real de
+planilha antes/depois e o PDF/Word de saída para baixar. Sem eles, a página
+mostra o vídeo e não deixa ninguém conferir.
+
+#### E4a. A demonstração central da seção 7.3, e o defeito que ela achou: **FEITA**
+
+A v2 pede, na 7.3, quatro passos visuais mostrando a rodada — *"essa demonstração
+vende mais que a tabela de 93 itens"*. Ela existe agora, e é um **vídeo de 47
+segundos** na página de preços, nos cinco idiomas, gerado como os outros dois:
+`estudio/gravar-roteiro.mjs` sobe um Next de verdade com um Supabase de mentira
+do outro lado e percorre o produto — a planilha de quarenta casos, o link do
+caso abrindo a ferramenta já preenchida, a execução gerando a evidência, o
+recibo, a confirmação, e a linha voltando fechada com data, executor e impressão
+digital. Se a tela mudar de forma incompatível, ele quebra na hora de gravar.
+
+**E gravar isso achou um defeito que estava custando a rodada inteira.**
+
+O botão "marcar este caso como feito" nasce dentro do `baixarBlob()`, por onde
+passam DOCX, PPTX, ZIP, SCORM, HTML e Markdown. **O PDF não passa por lá** — ele
+sai pelo `doc.save()`, a porta do próprio jsPDF. E o PDF é a saída *recomendada*
+para o cenário de evidência, ou seja: o botão grande que o produto pede para
+clicar. Quem chegava pelo link de um caso, extraía e clicava nele gerava o
+documento e **não recebia a volta**. A rodada paga não fechava pelo seu próprio
+caminho principal, e sem erro nenhum: o PDF baixava, o painel dizia "pronto", e o
+botão simplesmente não existia. A pessoa concluía que precisava avisar o
+coordenador na mão — que é exatamente o trabalho que o plano vende ter eliminado.
+
+O mesmo lugar já tinha sido remendado uma vez pelo mesmo motivo. O comentário ao
+lado do `doc.save()` conta que sem uma linha ali o PDF era *"a única saída do
+produto que não contava que tinha saído"*: consertaram a medição e não a volta.
+
+**A trava** é o `testes/voltadocaso.mjs`, e ele cobra as **duas** portas — PDF
+pelo `doc.save()`, DOCX pelo `baixarBlob()` — exigindo que a volta apareça só
+depois de existir documento, aponte para o caso certo, e leve o nome do arquivo
+e a impressão das telas. Provado nas duas direções: com o conserto revertido,
+o bloco do PDF reprova em quatro pontos e o do DOCX passa — que é exatamente a
+assimetria que abriu o buraco.
+
+De quebra, o estúdio deixou de ter caminho absoluto (`/root/cc/walkstamp` em
+três arquivos), que era o P0 nº 10 da seção 10 da v2 — e o mapa de endereços da
+tela do roteiro passou a sair do `rotas.json` em vez de ser escrito à mão: a
+lista à mão estava errada em duas línguas (`faelle`/`cas` em vez de
+`testfaelle`/`cas-de-test`), e alemão e francês não gravaram por causa disso.
+
+#### E4b. A calculadora de ROI, e a comparação da 7.4: **a comparação FEITA**
+
+A comparação curta da seção 7.4 está de pé, nos cinco idiomas: seis linhas de
+resultado — criar a evidência, executar uma planilha, devolvê-la preenchida,
+guardar o padrão, atribuir e acompanhar, impor o padrão — acima da tabela de
+noventa e três. O `promessa.mjs` cobra que a forma seja idêntica nas cinco
+línguas: se uma tradução perder uma linha, ou marcar como incluído no Free algo
+que o Free não tem, a página passa a vender coisas diferentes em línguas
+diferentes e ninguém que fala uma delas percebe.
+
+Falta a **calculadora de ROI** (7.5)
+
+— e ela depende de um número que é seu: quantos minutos custa,
+de verdade, montar uma evidência à mão na sua operação. Enquanto esse número não
+existir, a calculadora **não deve subir**. Uma calculadora de ROI com número
+inventado é a mesma classe de defeito que a E1 acabou de corrigir, só que virada
+para o outro lado — e é pior, porque tem casas decimais.
+
+#### O que eu não vou fazer da v2, e por quê
+
+- **Homologação separada** (P0 nº 9 da seção 10) é certo, mas é ambiente, não
+  código, e custa mais do que a trilha inteira. Fica registrado como decisão sua.
+- **Chargeback e reconciliação** (P0 nº 3 e 4) exigem o Stripe em modo real com
+  webhook público — não dá para provar daqui, e provar pela metade é pior do que
+  não provar.
+- **"Remover caminhos absolutos dos testes"** (P0 nº 10) já foi: `_caminhos.mjs`
+  existe e `RAIZ_WS`/`CHROME_WS` são o que a suíte usa.
+
+---
 ### Trilha C — motor e dívida (8–12 d)
 
 #### C1. Build 5 — medir antes de otimizar: **FEITA**
@@ -744,9 +1023,12 @@ esperar quem está soltando.
 | B — destravar a venda | **feita** | uma verdade só, cobrança auditável, banco reconstruível |
 | D — posicionamento e venda | **5,5–7** | treze dos quinze itens feitos; da D3, a tabela de suboperadores já está nos cinco idiomas |
 | C — motor e dívida | **8–12** | C1 e C2 feitas; da C3 falta só modularizar a fonte |
-| **Total** | **14,5–21** | |
+| E — a reanálise, versão 2 | **0,5** | E1, E2 e E4 feitas: o site parou de negar o que o produto faz, a rodada paga tem vídeo — e voltou a fechar pelo PDF — e cada funcionalidade tem um estado |
+| **Total** | **16–23,5** | |
 
-A ordem era **A → D0 → D1 → C2 → C3**; a D e a C1/C2 estão feitas, e a C3 está em curso. A D vem antes da C pelo mesmo motivo que a
+A ordem era **A → D0 → D1 → C2 → C3**; a D e a C1/C2 estão feitas, a C3 está em curso, e a
+E entrou depois — a E1 na frente de tudo, porque uma página que nega o que o produto
+faz custa a venda antes de qualquer otimização. A D vem antes da C pelo mesmo motivo que a
 C1 veio antes da C2: acelerar um motor que ninguém contratou acelera a coisa
 errada.
 

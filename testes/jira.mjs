@@ -64,7 +64,17 @@ await nomes[0].fill('Abrir a ME21N');
 await pg.waitForTimeout(200);
 
 await pg.locator('#jira').click();
-await pg.waitForTimeout(500);
+
+/* ESPERAR A MENSAGEM, E NÃO FOTOGRAFAR DEPOIS DE MEIO SEGUNDO.
+   `#pdfStatus` é uma linha só com vários escritores — o fim da varredura, o
+   placar das saídas, a confirmação de cada formato. Meio segundo depois do
+   clique, quem estava lá podia ser qualquer um deles: medido, este teste
+   reprovava cerca de uma vez em três, sempre nesta linha, sempre por corrida e
+   nunca por defeito. Meia hora de suíte perdida por um `waitForTimeout`. */
+await pg.waitForFunction(
+  () => /Resumo copiado/.test(document.getElementById('pdfStatus').textContent || ''),
+  null, { timeout: 15000 },
+).catch(() => {});
 const txt = await pg.evaluate(() => navigator.clipboard.readText());
 console.log(txt.split('\n').map(l => '      ' + l).join('\n'));
 
