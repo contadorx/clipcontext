@@ -99,6 +99,18 @@ levam à etapa, uma frase de próxima ação em `role="status"`, e **a travessia
 cruzar uma fronteira trabalhando leva a pessoa até a etapa nova — só para
 frente, nunca durante a captura, e sem tirar o cursor de quem está escrevendo.
 
+**A barra acompanha a rolagem** e mostra os quatro estados — *atual*,
+*concluída*, *com atenção* e *bloqueada* —, cada um por palavra no rótulo
+acessível e não só por cor. "Com atenção" sai da mesma conta do botão de faxina,
+e por isso os dois nunca discordam. No celular vira `Etapa 2 de 3 · Conferir`
+mais uma barra de três segmentos. Abaixo, sempre, uma frase só: **"Próxima
+ação: …"**.
+
+E nada pousa debaixo dela: `scroll-padding-top` conserta a classe inteira do
+problema — `scrollIntoView`, âncora, o `irPara()` dos subpassos e a travessia.
+As duas alturas (cabeçalho e barra) são **medidas** por `ResizeObserver`, porque
+cravar o número erraria no alemão a 900 px, onde o menu quebra em duas linhas.
+
 **O estado é derivado**, não guardado: não há quadro → entrada; há quadros e nada
 saiu → conferir; saiu documento → baixar. `etapas.mjs` cobra isso recomeçando a
 sessão e vendo a barra voltar sozinha.
@@ -128,21 +140,97 @@ medido — `aria-current`, o foco indo para o cabeçalho, o rótulo acessível c
 número e a palavra "feita", a frase de status que não se repete, e as duas
 guardas da travessia.
 
-### Trilha B — o que trava a venda (4,5–7,5 d)
+### Trilha B — o que trava a venda (2,5–3,5 d)
 
-**B1. Verdade única entre página, catálogo e código (1–2 d)**
+**B1. Verdade única entre página, catálogo e código — FEITO**
 
-Medido: `src/features.json` tem **zero** itens marcados `breve`; `precos.pt.html` diz
-"breve" **cinco vezes**. Ou o produto deixa de vender algo que já funciona, ou promete
-como pronto algo que não passou por produção. Os dois são problema de release, não de
-texto. Cards, tabela e feature flags devem nascer da mesma fonte.
+A página de preços tinha duas listas vindas de lugares diferentes: a **lista
+comparativa**, montada de `src/features.json` nos cinco idiomas por
+`tabelaDePlanos()`, e os **cartões de plano**, escritos à mão em cinco arquivos.
+Elas discordavam.
 
-**B2. Webhook único (1–2 d)**
+Medido item por item, contra o código e o banco:
 
-Medido: existem os dois — `app/api/stripe/webhook/route.ts` e
-`supabase/functions/walkstamp-stripe/index.ts`. O repositório não diz qual URL está
-configurada na Stripe. Eleger uma autoridade, desativar a outra, testar com a Stripe CLI,
-e tornar idempotência por `event.id` e replay observáveis.
+| o cartão dizia | a verdade |
+|---|---|
+| Modelo de documento próprio — *em breve* | **existe** desde 16/08 (`modelo_doc`, `time_modelo()`, salvar e listar na ferramenta) |
+| Perfil entre visitas e máquinas — *em breve* | **existe** (`config`, `perfil_do_usuario()`, `aplicarPerfil()`) |
+| Perfil de equipe empurrado — *em breve* | **existe** (`time_config()`, e a ferramenta consome) |
+| Termos do sistema guardados — *em breve* | **não existe**: `vocLista` mora em `sessionStorage` e morre com a aba |
+
+Ou seja: **três coisas prontas há cinco dias estavam sendo anunciadas como
+futuras**. A migração `20260816062235` diz isso com todas as letras — "a metade
+que faltava de duas features que estavam meio prontas" — e a página nunca soube.
+
+O que mudou:
+
+- as três saíram do "em breve" nos cinco idiomas;
+- a que falta entrou no catálogo como `"breve": true`, que é onde a regra do
+  próprio arquivo sempre disse que ela deveria morar;
+- cada bala do cartão ganhou `data-f`, a alça que a amarra ao item do catálogo —
+  o selo passa a ter uma fonte só;
+- o alemão dizia **"bald"** no cartão e **"demnächst"** na lista comparativa:
+  duas palavras para o mesmo selo, na mesma página. Unificado.
+
+**A "terceira fonte" não existia.** O plano falava em unificar também as *feature
+flags* do código; medido, a ferramenta não trava nada por nome de plano — ela
+trava por haver sessão com cliente. O campo `planos` do catálogo é documentação,
+e não interruptor. Um problema a menos, por não existir.
+
+**A trava:** `testes/planos.mjs`, estático — lê JSON e HTML, sem navegador e sem
+servidor, porque um portão de release que precisa de `next start` é um portão que
+se aprende a pular. Ele reprova (provado nas duas direções) se um cartão marcar
+como futuro o que o catálogo diz que existe, se um idioma prometer o que outro
+não promete, ou se a palavra do selo divergir. Entrou no `rodar.sh` ao lado do
+`chaves.mjs`, e no `rapido.sh site`.
+
+**B2. Webhook único — FEITO**
+
+Havia dois, e o repositório não dizia qual URL estava no painel da Stripe. **Não
+era empate.** Medido:
+
+| | rota do Next | Edge Function |
+|---|---|---|
+| faturas | 6 tipos | os mesmos 6 |
+| **`checkout.session.completed`** | **sim** | **não** |
+| **`customer.subscription.*`** | **sim** | **não** |
+| assentos pela `quantity` | sim | não |
+| conferência da assinatura | `constructEvent` da biblioteca | à mão |
+
+A Edge Function tratava **só faturas**. Com a URL apontada para lá, a pessoa
+paga, a fatura aparece, e o plano **nunca chega** — em silêncio, porque a Stripe
+recebe 200 e vai embora satisfeita.
+
+E ela estava no ar: `walkstamp-stripe`, versão 2, `ACTIVE`, `verify_jwt:false`.
+
+A autoridade é a rota do Next, por três medidas: só ela chama
+`walkstamp_assinatura_da_stripe`, e portanto só ela transforma pagamento em
+acesso; ela usa a biblioteca oficial; e a produção tem cliente com
+`stripe_assinatura` preenchido, campo que só esse caminho escreve.
+
+A Edge Function passou a responder **410 com o endereço certo no corpo** — e não
+a ser apagada: um 404 é indistinguível de deploy quebrado, e o 410 diz que o
+endereço existiu e mudou. Ela continua reentregando, que é o que se quer.
+
+**A ordem de aplicar importa:** mover a URL no painel da Stripe primeiro,
+reenviar por lá o que falhou, e só então publicar a recusa. Ao contrário, as
+faturas do intervalo se perdem.
+
+**Idempotência e replay observáveis.** A idempotência já existia, e no lugar
+certo — `fatura_stripe_uk` único em `stripe_id` com `on conflict do update`, e a
+assinatura sobrescrita inteira a cada evento. O que faltava era **saber que a
+entrega aconteceu**: hoje, quando uma compra não vira plano, não há como
+distinguir "a Stripe não mandou" de "recebemos e falhamos".
+
+`walkstamp.stripe_evento` responde isso. Ela é **anotação, não trava**: uma
+trava que pulasse o `event.id` repetido descartaria justamente a reentrega com
+que a Stripe conserta uma falha. `repetido` conta as reentregas — é o número que
+denuncia um laço.
+
+Régua: `stripehook.mjs` reescrito (a Edge recusa, a rota do Next é a única que
+concede plano, e anota **depois** do trabalho), mais o bloco [8b] da
+`supabase/testes/10-fumaca.sql`. **O que continua por conferir:** o caminho de
+rede, com `stripe listen --forward-to` e a Stripe CLI — não dá para fazer daqui.
 
 **B3. Banco versionado — FEITO**
 
@@ -215,9 +303,9 @@ fonte, medir o pico de memória, medir WER antes de tocar na compactação de si
 | Trilha | Dias | O que você tem no fim |
 |---|---:|---|
 | A — terminar o UX | **1–2** | o redesenho inteiro, com acessibilidade validada |
-| B — destravar a venda | **4,5–7,5** | uma verdade só e cobrança auditável (o banco já é reconstruível) |
+| B — destravar a venda | **2,5–3,5** | uma verdade só e cobrança auditável (o banco já é reconstruível) |
 | C — motor e dívida | **22,5–32,5** | você mede antes de otimizar; as próximas mudanças ficam baratas |
-| **Total** | **28–42** | |
+| **Total** | **26–38** | |
 
 ---
 
