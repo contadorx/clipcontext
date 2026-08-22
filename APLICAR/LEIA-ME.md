@@ -5,9 +5,9 @@ A árvore deste zip **já está construída**: `public/app.html` e
 rodar `build.py`.
 
 Base: `285d4a5` (o `main` de produção) + os seis commits do `correcoes.bundle`
-= a árvore do `walkstampbuild8_1.zip`. Sobre ela, oito commits novos.
+= a árvore do `walkstampbuild8_1.zip`. Sobre ela, nove commits novos.
 
-## Os oito commits
+## Os nove commits
 
 **A0 — a saída recomendada chega à linhagem.** Em vez de sete formatos com o
 mesmo peso, a ferramenta olha o cenário e propõe um; os outros ficam recolhidos
@@ -99,17 +99,31 @@ trava.
 > reenviar por lá o que falhou, e só então publicar a recusa. Ao contrário, as
 > faturas do intervalo se perdem.
 
+**B4 — a página vendia o Personal e pedia e-mail para avisar quando ele sair.**
+O cartão dizia "R$ 149 / ano · teste de 14 dias · na hora, sem cartão"; cinquenta
+linhas abaixo, a seção da lista dizia "deixe um e-mail e eu aviso quando o plano
+pago sair". Nos cinco idiomas. E há checkout de verdade, então quem manda é o
+cartão.
+
+A lista tinha um assunto verdadeiro esperando por ela: **Pro e API**, que a
+própria página descreve como "nada disso existe ainda". Agora é disso que ela
+fala, e diz em voz alta que o plano pago já está no ar.
+
+A trava é estrutural — `data-plano` nos cartões, `data-espera` na seção — porque
+casar frases em cinco idiomas envelhece na primeira reescrita de copy.
+
 ## Os arquivos
 
 | arquivo | o que é |
 |---|---|
-| `tudo.bundle` | os oito commits, para aplicar por Git sobre `d5db0f7` |
+| `tudo.bundle` | os nove commits, para aplicar por Git sobre `d5db0f7` |
 | `A0-saida-recomendada.patch` | o A0 em diff legível |
 | `A1-cartao-da-grade.patch` | o A1 em diff legível (fonte e régua) |
 | `B3-banco-versionado.patch` | o B3 em diff legível |
 | `A2-tres-etapas.patch` | o A2 em diff legível |
 | `B1-uma-verdade-so.patch` | o B1 em diff legível |
 | `barra-e-B2.patch` | a barra grudada e o B2, em diff legível |
+| `B4-um-estado-por-plano.patch` | o B4 em diff legível |
 | `correcoes.bundle`, `correcoes-so-fonte.patch` | os seis commits originais do zip |
 | `ARQUIVOS.txt`, `MENSAGENS.txt` | o inventário original |
 

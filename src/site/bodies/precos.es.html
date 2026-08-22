@@ -25,7 +25,7 @@
 
     <div class="plans tres">
 
-      <div class="plan">
+      <div class="plan" data-plano="free">
         <span class="badge">disponible ya</span>
         <h3 style="margin-top:14px">Free</h3>
         <div class="price">US$ 0<span> / para siempre</span></div>
@@ -43,7 +43,7 @@
         <p class="pe">Todo lo que hace que tu evidencia sea aceptada está aquí.</p>
       </div>
 
-      <div class="plan hi">
+      <div class="plan hi" data-plano="personal">
         <span class="badge">prueba de 14 días</span>
         <h3 style="margin-top:14px">Personal</h3>
         <div class="price">US$ 29<span> / año</span></div>
@@ -61,7 +61,7 @@
         <p class="pe">Al instante, sin tarjeta. O <a href="mailto:{{contato}}?subject=Walkstamp%20Personal">escríbeme</a>.</p>
       </div>
 
-      <div class="plan">
+      <div class="plan" data-plano="team">
         <span class="badge">desde 5 personas</span>
         <h3 style="margin-top:14px">Team</h3>
         <div class="price">US$ 69<span> / persona / año</span></div>
@@ -108,13 +108,13 @@
   </div>
 </section>
 
-<section id="lista">
+<section id="lista" data-espera="proapi">
   <div class="wrap">
-    <h2>¿Quieres que te avise?</h2>
-    <p class="lead">Deja un correo y te aviso cuando salga el plan de pago. Un mensaje, no una newsletter.</p>
+    <h2>¿Quieres que te avise del Pro y de la API?</h2>
+    <p class="lead">El plan de pago <b>ya está disponible</b> — lo que todavía no existe es el Pro y la API, descritos arriba. Deja un correo y te aviso cuando salgan. Un mensaje, no una newsletter.</p>
     <form class="lista" id="listaForm" data-url="{{supaUrl}}" data-key="{{supaKey}}" novalidate>
       <input type="email" id="listaEmail" autocomplete="email" placeholder="tu@correo.com" aria-label="Tu correo">
-      <button class="btn" type="submit" id="listaBtn">Avísame cuando salga</button>
+      <button class="btn" type="submit" id="listaBtn">Avísame cuando salgan</button>
     </form>
     <p class="small muted listaMsg" id="listaMsg" role="status"></p>
     <p class="small muted" style="max-width:640px">La promesa de esta herramienta es que <b>tu vídeo no sale de tu máquina</b>, y sigue en pie: este campo no tiene ninguna relación con lo que procesas aquí — el navegador no manda vídeo, audio ni transcripción a ninguna parte. El correo queda en una base mía, no se vende, no va a ninguna lista de terceros y desaparece el día que lo pidas. ¿Prefieres no dejarlo? Sin problema — la herramienta no cambia por eso.</p>

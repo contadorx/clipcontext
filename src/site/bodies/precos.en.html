@@ -25,7 +25,7 @@
 
     <div class="plans tres">
 
-      <div class="plan">
+      <div class="plan" data-plano="free">
         <span class="badge">available now</span>
         <h3 style="margin-top:14px">Free</h3>
         <div class="price">US$ 0<span> / forever</span></div>
@@ -43,7 +43,7 @@
         <p class="pe">Everything that makes your evidence acceptable is in here.</p>
       </div>
 
-      <div class="plan hi">
+      <div class="plan hi" data-plano="personal">
         <span class="badge">14-day trial</span>
         <h3 style="margin-top:14px">Personal</h3>
         <div class="price">US$ 29<span> / year</span></div>
@@ -61,7 +61,7 @@
         <p class="pe">Right away, no card. Or <a href="mailto:{{contato}}?subject=Walkstamp%20Personal">write to me</a>.</p>
       </div>
 
-      <div class="plan">
+      <div class="plan" data-plano="team">
         <span class="badge">from 5 people</span>
         <h3 style="margin-top:14px">Team</h3>
         <div class="price">US$ 69<span> / person / year</span></div>
@@ -107,13 +107,13 @@
   </div>
 </section>
 
-<section id="lista">
+<section id="lista" data-espera="proapi">
   <div class="wrap">
-    <h2>Want to be told?</h2>
-    <p class="lead">Leave an email and I will tell you when the paid plan is out. One message, not a newsletter.</p>
+    <h2>Want to be told about Pro and the API?</h2>
+    <p class="lead">The paid plan is <b>already live</b> — what does not exist yet is Pro and the API, described above. Leave an email and I will tell you when they land. One message, not a newsletter.</p>
     <form class="lista" id="listaForm" data-url="{{supaUrl}}" data-key="{{supaKey}}" novalidate>
       <input type="email" id="listaEmail" autocomplete="email" placeholder="you@email.com" aria-label="Your email">
-      <button class="btn" type="submit" id="listaBtn">Tell me when it is out</button>
+      <button class="btn" type="submit" id="listaBtn">Tell me when they land</button>
     </form>
     <p class="small muted listaMsg" id="listaMsg" role="status"></p>
     <p class="small muted" style="max-width:640px">The promise of this tool is that <b>your video never leaves your machine</b>, and it still holds: this field has nothing to do with what you process here — the browser sends no video, audio or transcript anywhere. The email sits in a database of mine, is not sold, does not go to any third-party list, and disappears the day you ask. Rather not leave it? No problem — the tool does not change because of that.</p>

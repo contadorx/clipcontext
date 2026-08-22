@@ -104,5 +104,41 @@ console.log('\n[5] e nada fora dos cartões promete futuro por conta própria');
   }
 }
 
+console.log('\n[6] UM ESTADO POR PLANO, e a lista espera o que não existe');
+{
+  /* O DEFEITO. A página vendia o Personal com preço, badge de 14 dias e
+     "na hora, sem cartão" — e cinquenta linhas abaixo pedia o e-mail da pessoa
+     para avisar "quando o plano pago sair". As duas coisas na mesma página, e
+     as duas em cinco idiomas.
+
+     Não era erro de texto: era a página não saber que o que ela promete já foi
+     entregue. O mesmo defeito do B1, no outro sentido — lá ela escondia o que
+     existia, aqui ela promete o que já existe. */
+  for (const L of IDIOMAS) {
+    const html = fs.readFileSync(`${RAIZ_WS}/src/site/bodies/precos.${L}.html`, 'utf8');
+
+    const planos = [...html.matchAll(/<div class="plan[^"]*" data-plano="([^"]+)"/g)].map((m) => m[1]);
+    ok(`${L}: os três planos têm identidade`, planos.join() === 'free,personal,team', planos.join());
+
+    /* UMA ação primária por cartão. Dois botões num cartão de preço é a pessoa
+       parada escolhendo entre eles em vez de escolhendo o plano. */
+    /* Cortar no primeiro `</div>` não serve: há `<div>` aninhado dentro do
+       cartão. Dividir pelo próprio marcador dá os três pedaços certos — o
+       último vai até o fim da fileira, e é o que se quer. */
+    const fileira = html.slice(html.indexOf('<div class="plans'));
+    const cartoes = fileira.split(/<div class="plan[^"]*" data-plano=/).slice(1);
+    const botoes = cartoes.map((c) => (c.match(/<a class="btn/g) || []).length);
+    ok(`${L}: uma ação primária em cada`, botoes.length === 3 && botoes.every((n) => n === 1),
+       botoes.join('/'));
+
+    /* E O QUE A LISTA ESPERA NÃO PODE SER O QUE A PÁGINA VENDE. É a afirmação
+       estrutural do defeito: `data-espera` nomeia o que ainda não saiu, e se
+       um dia ele coincidir com um plano que tem preço na tela, isto reprova. */
+    const espera = (html.match(/<section id="lista" data-espera="([^"]+)"/) || [])[1];
+    ok(`${L}: a lista diz o que está esperando`, !!espera, espera || '(nada)');
+    ok(`${L}: e não é algo que a página já vende`, !planos.includes(espera), `${espera} vs ${planos.join()}`);
+  }
+}
+
 console.log(falhas ? `\n${falhas} FALHA(S)` : '\nCartões e catálogo: uma verdade só.');
 process.exit(falhas ? 1 : 0);

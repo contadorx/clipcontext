@@ -140,7 +140,7 @@ medido — `aria-current`, o foco indo para o cabeçalho, o rótulo acessível c
 número e a palavra "feita", a frase de status que não se repete, e as duas
 guardas da travessia.
 
-### Trilha B — o que trava a venda (2,5–3,5 d)
+### Trilha B — o que trava a venda (2–3 d)
 
 **B1. Verdade única entre página, catálogo e código — FEITO**
 
@@ -260,11 +260,36 @@ parede que separa o navegador das tabelas. Ver `supabase/LEIA-ME.md`.
 As quatro novas ainda **não foram aplicadas**: falta um `supabase db push`, e só a da
 limpeza mexe em dado.
 
-**B4. Um estado por plano no funil (0,5 d)**
+**B4. Um estado por plano no funil — FEITO**
 
-Hoje a página oferece "Começar os 14 dias", "Falar" e um campo para avisar "quando o
-plano pago sair", tudo junto. Escolher um por plano: *Testar agora*, *Pedir acesso*,
-*Entrar na lista*.
+Cada cartão já tinha uma ação primária. O que estava jogado no meio era outra
+coisa, e pior: a página **vendia o Personal** — preço, selo de 14 dias, "na hora,
+sem cartão" — e cinquenta linhas abaixo pedia o e-mail da pessoa para avisar
+**"quando o plano pago sair"**. Nos cinco idiomas.
+
+Não é erro de texto. É a página não saber que o que ela promete já foi entregue —
+o mesmo defeito do B1, no sentido contrário: lá ela escondia o que existia, aqui
+ela promete o que já vende. E há checkout de verdade
+(`stripe().checkout.sessions.create`), então quem manda é o cartão.
+
+A lista tinha um assunto verdadeiro esperando por ela: **Pro e API**, que a
+própria página descreve dois parágrafos acima como "nada disso existe ainda".
+Agora ela espera isso, e diz em voz alta que o plano pago já está no ar.
+
+Os quatro estados ficam assim:
+
+| plano | estado | ação |
+|---|---|---|
+| Free | *testar agora* | Abrir a ferramenta |
+| Personal | *testar agora* | Começar os 14 dias |
+| Team | *pedir acesso* | Falar sobre o Team |
+| Pro e API — não existe | *entrar na lista* | Quero ser avisado |
+
+**A trava** entrou no `planos.mjs`, e é estrutural em vez de casar frases: os
+cartões ganharam `data-plano`, a seção ganhou `data-espera`, e o teste afirma que
+o que a lista espera **não pode ser algo que a página vende** — mais uma ação
+primária por cartão. Provado nas duas direções: apontar a lista para `personal`
+reprova, e um segundo botão num cartão reprova.
 
 **B5. Reposicionar o Personal em torno do roteiro (2–3 d)**
 
@@ -303,9 +328,9 @@ fonte, medir o pico de memória, medir WER antes de tocar na compactação de si
 | Trilha | Dias | O que você tem no fim |
 |---|---:|---|
 | A — terminar o UX | **1–2** | o redesenho inteiro, com acessibilidade validada |
-| B — destravar a venda | **2,5–3,5** | uma verdade só e cobrança auditável (o banco já é reconstruível) |
+| B — destravar a venda | **2–3** | uma verdade só e cobrança auditável (o banco já é reconstruível) |
 | C — motor e dívida | **22,5–32,5** | você mede antes de otimizar; as próximas mudanças ficam baratas |
-| **Total** | **26–38** | |
+| **Total** | **25,5–37,5** | |
 
 ---
 

@@ -25,7 +25,7 @@
 
     <div class="plans tres">
 
-      <div class="plan">
+      <div class="plan" data-plano="free">
         <span class="badge">jetzt verfügbar</span>
         <h3 style="margin-top:14px">Free</h3>
         <div class="price">€ 0<span> / für immer</span></div>
@@ -43,7 +43,7 @@
         <p class="pe">Alles, was Ihren Nachweis akzeptabel macht, ist hier enthalten.</p>
       </div>
 
-      <div class="plan hi">
+      <div class="plan hi" data-plano="personal">
         <span class="badge">14 Tage testen</span>
         <h3 style="margin-top:14px">Personal</h3>
         <div class="price">€ 27<span> / Jahr</span></div>
@@ -61,7 +61,7 @@
         <p class="pe">Sofort, ohne Karte. Oder <a href="mailto:{{contato}}?subject=Walkstamp%20Personal">schreiben Sie mir</a>.</p>
       </div>
 
-      <div class="plan">
+      <div class="plan" data-plano="team">
         <span class="badge">ab 5 Personen</span>
         <h3 style="margin-top:14px">Team</h3>
         <div class="price">€ 65<span> / Person / Jahr</span></div>
@@ -109,10 +109,10 @@
   </div>
 </section>
 
-<section id="lista">
+<section id="lista" data-espera="proapi">
   <div class="wrap">
-    <h2>Möchten Sie benachrichtigt werden?</h2>
-    <p class="lead">Hinterlassen Sie eine E-Mail-Adresse, und ich melde mich, wenn der bezahlte Plan erscheint. Eine Nachricht, kein Newsletter.</p>
+    <h2>Möchten Sie über Pro und die API informiert werden?</h2>
+    <p class="lead">Der bezahlte Plan ist <b>bereits verfügbar</b> — was es noch nicht gibt, sind Pro und die API, oben beschrieben. Hinterlassen Sie eine E-Mail-Adresse, und ich melde mich, sobald sie da sind. Eine Nachricht, kein Newsletter.</p>
     <form class="lista" id="listaForm" data-url="{{supaUrl}}" data-key="{{supaKey}}" novalidate>
       <input type="email" id="listaEmail" autocomplete="email" placeholder="ihre@email.de" aria-label="Ihre E-Mail-Adresse">
       <button class="btn" type="submit" id="listaBtn">Bitte benachrichtigen</button>
