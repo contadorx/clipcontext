@@ -5,9 +5,9 @@ A árvore deste zip **já está construída**: `public/app.html` e
 rodar `build.py`.
 
 Base: `285d4a5` (o `main` de produção) + os seis commits do `correcoes.bundle`
-= a árvore do `walkstampbuild8_1.zip`. Sobre ela, cinco commits novos.
+= a árvore do `walkstampbuild8_1.zip`. Sobre ela, oito commits novos.
 
-## Os cinco commits
+## Os oito commits
 
 **A0 — a saída recomendada chega à linhagem.** Em vez de sete formatos com o
 mesmo peso, a ferramenta olha o cenário e propõe um; os outros ficam recolhidos
@@ -61,21 +61,61 @@ RPCs. Agora são **42 migrações versionadas**, e um comando prova que elas
 reconstroem a produção. Leia `supabase/LEIA-ME.md` — é lá que está a história
 inteira, inclusive as quatro coisas que a comparação encontrou.
 
+**B1 — três coisas prontas há cinco dias estavam à venda como "em breve".** A
+página de preços tinha duas listas de fontes diferentes: a comparativa, montada
+de `src/features.json` nos cinco idiomas, e os cartões de plano, escritos à mão.
+Medido contra o código e o banco:
+
+| o cartão dizia | a verdade |
+|---|---|
+| Modelo de documento próprio — *em breve* | **existe** desde 16/08 |
+| Perfil entre visitas e máquinas — *em breve* | **existe** |
+| Perfil de equipe empurrado — *em breve* | **existe** |
+| Termos do sistema guardados — *em breve* | **não existe**, e está certo |
+
+As três saíram do "em breve"; a quarta passou a declarar-se no catálogo com
+`"breve": true`; cada bala ganhou uma alça `data-f` para o item do catálogo; e o
+alemão parou de dizer "bald" no cartão e "demnächst" na lista. `testes/planos.mjs`
+é o portão — estático, sem servidor — e reprova nas duas direções.
+
+**A barra das etapas acompanha a rolagem.** Ela dizia onde você estava e sumia no
+primeiro rolar. Agora fica colada na base do cabeçalho e mostra os quatro
+estados — *atual*, *concluída*, *com atenção* e *bloqueada* —, cada um por
+palavra no rótulo acessível. No celular vira `Etapa 2 de 3 · Conferir` mais uma
+barra de três segmentos. Abaixo, sempre, **"Próxima ação: …"**.
+
+**B2 — não era empate.** Havia dois webhooks da Stripe e o repositório não dizia
+qual URL estava configurada. A Edge Function tratava **só faturas**: nunca
+`checkout.session.completed` nem `customer.subscription.*`. Com a URL apontada
+para lá, a pessoa paga, a fatura aparece, e **o plano nunca chega** — em
+silêncio, porque a Stripe recebe 200. E ela estava no ar.
+
+A autoridade é `POST /api/stripe/webhook`. A Edge Function passou a responder
+**410 com o endereço certo no corpo**. E `walkstamp.stripe_evento` passou a
+registrar o que a Stripe entregou, com contador de reentregas — anotação, e não
+trava.
+
+> **A ordem de aplicar importa:** mover a URL no painel da Stripe **primeiro**,
+> reenviar por lá o que falhou, e só então publicar a recusa. Ao contrário, as
+> faturas do intervalo se perdem.
+
 ## Os arquivos
 
 | arquivo | o que é |
 |---|---|
-| `A0-A1-B3-A2.bundle` | os cinco commits, para aplicar por Git sobre `d5db0f7` |
+| `tudo.bundle` | os oito commits, para aplicar por Git sobre `d5db0f7` |
 | `A0-saida-recomendada.patch` | o A0 em diff legível |
 | `A1-cartao-da-grade.patch` | o A1 em diff legível (fonte e régua) |
 | `B3-banco-versionado.patch` | o B3 em diff legível |
 | `A2-tres-etapas.patch` | o A2 em diff legível |
+| `B1-uma-verdade-so.patch` | o B1 em diff legível |
+| `barra-e-B2.patch` | a barra grudada e o B2, em diff legível |
 | `correcoes.bundle`, `correcoes-so-fonte.patch` | os seis commits originais do zip |
 | `ARQUIVOS.txt`, `MENSAGENS.txt` | o inventário original |
 
 Aplicar por Git:
 
-    git fetch /caminho/para/A0-A1-B3-A2.bundle
+    git fetch /caminho/para/tudo.bundle
     git merge FETCH_HEAD
 
 ## As réguas
@@ -115,6 +155,10 @@ aplicou.
 - **figura do blog** — precisa de deploy; até lá, exportar abaixo de 1 MB;
 - **a branch remota velha** `claude/ux-build-continuation-2hs0b2`, parada em
   `f505ea8`: apagá-la faz o contador de commits parar de mentir;
+- **a URL da Stripe** — mover para `https://<host>/api/stripe/webhook` **antes**
+  de publicar a Edge Function que recusa (ver B2 acima);
+- **`stripe listen --forward-to`** com a Stripe CLI, uma vez: é o caminho de
+  rede, que não dá para conferir daqui;
 - **proteção de senha vazada** no Supabase Auth está desligada. É um botão do
   painel; o produto entra por link mágico, então o impacto é pequeno;
 - **`terceiros.mjs` reprova** — `privacidade.en` está sem a tabela de

@@ -1,4 +1,28 @@
-/* O webhook da Stripe.
+/* O webhook da Stripe. ESTE, e não o outro.
+ *
+ * ---- QUAL DOS DOIS ----
+ *
+ * Existiam duas implementações — esta rota e a Edge Function
+ * `supabase/functions/walkstamp-stripe` — e o repositório não dizia qual URL
+ * estava configurada no painel da Stripe. Não era empate: a Edge Function trata
+ * SÓ faturas. Ela não trata `checkout.session.completed` nem
+ * `customer.subscription.*`, que são os eventos que CONCEDEM O PLANO.
+ *
+ * Quer dizer: com a URL apontada para lá, a pessoa paga, a fatura aparece, e o
+ * plano nunca chega. Em silêncio, porque a Stripe recebe 200.
+ *
+ * Esta é a autoridade, por três medidas:
+ *   1. só ela chama `walkstamp_assinatura_da_stripe`, e portanto só ela
+ *      transforma um pagamento em acesso;
+ *   2. ela confere a assinatura com `constructEvent` da biblioteca oficial —
+ *      comparação em tempo constante e janela de relógio, coisas que dá para
+ *      escrever à mão e não dá para escrever à mão *bem*;
+ *   3. medido na produção em 22/08/2026: há cliente com `stripe_assinatura`
+ *      preenchido, campo que só este caminho escreve.
+ *
+ * A outra passou a recusar, dizendo para onde ir. A ORDEM IMPORTA na hora de
+ * aplicar: mover a URL no painel da Stripe PRIMEIRO, e só depois publicar a
+ * recusa — ao contrário, as faturas do intervalo se perdem.
  *
  * A fechadura é a ASSINATURA do corpo, e é só ela: quem chama é a Stripe, que
  * não tem sessão. Sem `STRIPE_WEBHOOK_SECRET` configurado a rota recusa tudo,
@@ -62,6 +86,30 @@ async function gravarAssinatura(assinatura: Stripe.Subscription, emailDoEvento?:
   });
 }
 
+/** Anota que a Stripe entregou este evento, e o que aconteceu com ele.
+ *
+ *  DEPOIS do trabalho, e nunca antes. Anotar antes e pular o que já foi visto
+ *  pareceria idempotência e seria o contrário: se a primeira tentativa gravasse
+ *  o evento e falhasse em seguida, a REENTREGA — que é exatamente como a Stripe
+ *  conserta uma falha — seria descartada como repetida, e a compra sumiria.
+ *
+ *  A idempotência de verdade já existe, e no lugar certo: `fatura_stripe_uk` é
+ *  único em `stripe_id` e a gravação é `on conflict do update`; a assinatura é
+ *  sobrescrita inteira a cada evento. Rodar duas vezes dá o mesmo resultado.
+ *  O que faltava era saber que a entrega aconteceu — hoje, quando a compra não
+ *  vira plano, não há como distinguir "a Stripe não mandou" de "recebemos e
+ *  falhamos".
+ *
+ *  Ela nunca derruba o webhook: um registro que falha não pode custar a compra.
+ */
+async function anotar(ev: Stripe.Event, resultado: string) {
+  try {
+    await rpc('walkstamp_stripe_entregue', {
+      p_id: ev.id, p_tipo: ev.type, p_origem: 'next', p_resultado: resultado,
+    });
+  } catch { /* o registro é diagnóstico, e diagnóstico não pode virar defeito */ }
+}
+
 export async function POST(req: Request) {
   const segredo = process.env.STRIPE_WEBHOOK_SECRET;
   if (!segredo || !temStripe) return new NextResponse('sem segredo', { status: 503 });
@@ -112,8 +160,10 @@ export async function POST(req: Request) {
     /* 500 faz a Stripe tentar de novo, que é o que se quer quando o banco
        piscou. Engolir com 200 perderia a compra em silêncio — e a pessoa
        pagou. */
+    await anotar(ev, String(e).slice(0, 200));
     return new NextResponse(String(e).slice(0, 200), { status: 500 });
   }
 
+  await anotar(ev, 'ok');
   return new NextResponse('ok', { status: 200 });
 }

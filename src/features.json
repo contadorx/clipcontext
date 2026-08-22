@@ -232,12 +232,23 @@
           "fr": "Corriger la parole segment par segment, dans la loupe de la capture"
         },
         {
+          "id": "termosAplicados",
           "planos": "fpt",
           "pt": "Termos do seu sistema, aplicados de uma vez na transcrição",
           "en": "Your system's terms, applied to the transcript in one go",
           "es": "Términos de tu sistema, aplicados de una vez a la transcripción",
           "de": "Begriffe Ihres Systems, auf einmal auf das Transkript angewendet",
           "fr": "Les termes de votre système, appliqués en une fois à la transcription"
+        },
+        {
+          "id": "termosGuardados",
+          "breve": true,
+          "planos": "pt",
+          "pt": "E a lista de termos guardada: volta na próxima visita, em qualquer máquina",
+          "en": "And the term list kept: it comes back next visit, on any machine",
+          "es": "Y la lista de términos guardada: vuelve en la próxima visita, en cualquier equipo",
+          "de": "Und die Begriffsliste bleibt: Sie kehrt beim nächsten Besuch zurück, auf jedem Rechner",
+          "fr": "Et la liste de termes conservée : elle revient à la prochaine visite, sur n’importe quelle machine"
         },
         {
           "planos": "pt",
@@ -736,6 +747,7 @@
           "fr": "Logo et nom du client dans le PDF, le Word et le HTML"
         },
         {
+          "id": "modeloProprio",
           "planos": "pt",
           "pt": "Salvar o que está na tela como modelo seu, e reaplicar em um clique",
           "en": "Save what is on screen as your own template, and reapply it in one click",
@@ -744,6 +756,7 @@
           "fr": "Enregistrer ce qui est à l’écran comme votre modèle, et le réappliquer en un clic"
         },
         {
+          "id": "perfilVolta",
           "planos": "pt",
           "pt": "Perfil que volta ao entrar, em qualquer máquina",
           "en": "A profile that comes back when you sign in, on any machine",
@@ -796,6 +809,7 @@
           "fr": "Durée de licence de votre choix, de 1 à 90 jours"
         },
         {
+          "id": "padraoDoTime",
           "planos": "t",
           "pt": "Padrão do time empurrado para todo mundo",
           "en": "The team's defaults pushed to everyone",

@@ -301,6 +301,20 @@ console.log('\n[6] a faixa só fala de trabalho que a pessoa começou');
   const pg = await (await br.newContext({ viewport: { width: 1250, height: 900 } })).newPage();
   await pg.goto('http://localhost:8957/app.html?lang=pt');
   await pg.selectOption('#modelo', 'evidencia');
+  /* ESPERAR A CORTESIA ACABAR, antes de simular qualquer coisa.
+
+     `adiantarModelo()` baixa o modelo sozinho ao abrir a página, e quando
+     termina — ou falha — chama `prog(null)`, que APAGA `#abarWrap`. Este bloco
+     acende essa barra à mão para simular a cortesia; se a cortesia de verdade
+     terminar no meio, ela apaga a simulação e o teste reprova acusando a faixa
+     de não aparecer, quando o que sumiu foi a barra.
+
+     Não é hipótese: quando uma mudança em outro lugar deslocou o instante em
+     que a cortesia acaba, este bloco reprovou três vezes em três — e a primeira
+     leitura foi "flake", que estava errada. `__adiantouFim` existe para tirar o
+     relógio da conta. */
+  await pg.waitForFunction(() => window.__adiantouFim === true,
+                           null, { timeout: 30000 }).catch(() => {});
   await pg.evaluate(() => {
     document.getElementById('abarWrap').classList.remove('hide');
     document.getElementById('astatus').textContent = 'baixando o modelo…';
@@ -312,7 +326,18 @@ console.log('\n[6] a faixa só fala de trabalho que a pessoa começou');
      await pg.locator('#faixa').evaluate(e => e.classList.contains('hide')));
 
   /* E a outra metade: com trabalho de verdade, ela fala. Sem esta linha, o
-     conserto poderia ser "nunca mostrar a faixa" e o teste passaria. */
+     conserto poderia ser "nunca mostrar a faixa" e o teste passaria.
+
+     A BARRA É REACESA AQUI, e isso não é zelo. `adiantarModelo()` — o download
+     de cortesia que começa sozinho ao abrir a página — termina em algum
+     instante e chama `prog(null)`, que apaga `#abarWrap`. Se ele terminar entre
+     o acender de cima e esta medição, o cenário se desfaz e o teste reprova
+     acusando a faixa de não aparecer, quando o que sumiu foi a barra.
+
+     Ele reprovou exatamente assim, três vezes seguidas, quando uma mudança em
+     outro lugar deslocou o instante em que a cortesia acaba — e a primeira
+     leitura foi "flake", que estava errada. Reafirmar a premissa imediatamente
+     antes de medir tira o relógio da conta. */
   await pg.evaluate(() => window.__ocupado(true));
   await pg.waitForTimeout(1000);
   ok('mas com trabalho de verdade ela aparece',

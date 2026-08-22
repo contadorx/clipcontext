@@ -191,6 +191,36 @@ begin
   perform pg_temp.confere(r ? 'faturas_mantidas', 'o relatorio diz o que a fatura preserva');
 end $$;
 
+\echo '[8b] o registro do que a Stripe entregou'
+do $$
+declare n int; u jsonb;
+begin
+  /* Ele e ANOTACAO, e nao trava: o trabalho do webhook roda sempre. Uma trava
+     que pulasse o trabalho no `event.id` repetido descartaria justamente a
+     reentrega que a Stripe faz para consertar uma falha. */
+  n := walkstamp.stripe_entregue('evt_1','invoice.paid','next','ok');
+  perform pg_temp.confere(n = 0, 'a primeira entrega conta zero repeticoes');
+  n := walkstamp.stripe_entregue('evt_1','invoice.paid','next','ok');
+  perform pg_temp.confere(n = 1, 'a reentrega da mesma conta uma');
+  n := walkstamp.stripe_entregue('evt_1','invoice.paid','next','ok');
+  perform pg_temp.confere(n = 2, 'e a seguinte, duas — e o numero que denuncia um laco');
+  perform pg_temp.confere(
+    (select count(*) from walkstamp.stripe_evento where id='evt_1') = 1,
+    'sem duplicar a linha');
+  /* O ULTIMO resultado vence: o que importa e se terminou bem DEPOIS das
+     reentregas, e nao como comecou. */
+  perform walkstamp.stripe_entregue('evt_2','invoice.paid','next','erro: banco piscou');
+  perform walkstamp.stripe_entregue('evt_2','invoice.paid','next','ok');
+  perform pg_temp.confere(
+    (select resultado from walkstamp.stripe_evento where id='evt_2') = 'ok',
+    'e a reentrega que deu certo apaga o erro anterior');
+  n := walkstamp.stripe_entregue('','invoice.paid','next','ok');
+  perform pg_temp.confere(n = 0 and (select count(*) from walkstamp.stripe_evento) = 2,
+                          'evento sem id nao vira linha');
+  u := walkstamp.stripe_ultimos(10);
+  perform pg_temp.confere(jsonb_array_length(u) = 2, 'e o painel consegue listar o que chegou');
+end $$;
+
 \echo '[9] a parede: o navegador nao alcanca nada disto'
 do $$
 declare aberto text;
@@ -209,7 +239,13 @@ begin
   select string_agg(c.relname, ', ') into aberto
     from pg_class c join pg_namespace n on n.oid = c.relnamespace
    where n.nspname = 'walkstamp' and c.relkind = 'r' and not c.relrowsecurity;
-  perform pg_temp.confere(aberto is null, 'e as dezoito tabelas estao com RLS ligada');
+  /* O NUMERO SAI DA CONTAGEM, e nao escrito a mao. A frase dizia "as dezoito
+     tabelas" e continuou dizendo depois de a decima nona entrar — a afirmacao
+     estava certa e o texto, mentindo. */
+  perform pg_temp.confere(aberto is null,
+    'e as ' || (select count(*) from pg_class c join pg_namespace n on n.oid=c.relnamespace
+                 where n.nspname='walkstamp' and c.relkind='r')
+            || ' tabelas estao com RLS ligada');
 
   /* As SEIS que o navegador PODE chamar, e so elas. Esta lista e uma decisao
      de produto, e mudar o tamanho dela sem passar por aqui e o jeito de abrir

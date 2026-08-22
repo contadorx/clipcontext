@@ -190,10 +190,64 @@
   .etapa.feita .etapaN{background:var(--ok);color:#fff;border-color:var(--ok);font-size:12px}
   .etapa.feita .etapaN::before{content:'\2713'}
   .etapa.feita[aria-current="step"]{color:var(--accent);border-color:var(--accent)}
-  .proxAcao{margin:0 0 26px;font-size:13.5px;color:var(--ink);min-height:1.4em}
+  /* COM ATENCAO. Ha o que agir ali, e a acao esta escrita embaixo. O sinal e
+     um "!" no lugar do numero, e a PALAVRA entra no rotulo acessivel — cor
+     sozinha some para quem nao a distingue. */
+  .etapa.atencao{color:var(--warn);border-color:color-mix(in srgb,var(--warn) 55%,var(--line))}
+  .etapa.atencao .etapaN{background:var(--warn);color:#fff;border-color:var(--warn)}
+  .etapa.atencao .etapaN::before{content:'!'}
+  .etapa.atencao[aria-current="step"]{color:var(--warn);border-color:var(--warn)}
+  /* BLOQUEADA. Nao ha nada la ainda. Ela continua ALCANCAVEL pelo teclado —
+     `aria-disabled` e nao `disabled` —, porque tirar da ordem de foco esconde
+     de quem navega por tabulacao que a etapa existe. O clique e que nao faz
+     nada, e o leitor de tela ja avisou por que. */
+  .etapa[aria-disabled="true"]{opacity:.5;cursor:not-allowed}
+  .etapa[aria-disabled="true"]:hover{border-color:var(--line);color:var(--muted)}
+  /* ---- ELA ACOMPANHA A ROLAGEM ----
+
+     A barra dizia onde voce estava e sumia no primeiro rolar — numa pagina de
+     tres cartoes longos, ela ficava visivel nos primeiros 200 px e depois a
+     pessoa rolava mil px sem nenhuma referencia de onde estava.
+
+     `top` sai de `--altTopo`, MEDIDO em tempo de execucao. Cravar um numero
+     aqui daria certo em portugues a 1440 e erraria no alemao a 900, onde o
+     menu do cabecalho quebra em duas linhas e empurra tudo 30 px para baixo. */
+  /* ---- E NADA POUSA DEBAIXO DELA ----
+
+     Uma barra grudada cobre o que rola para o topo. Quem pegou foi o
+     `cartao.mjs`: `elementFromPoint` no centro do botao `Editar` devolvia
+     `proxAcao` — o botao estava LA, visivel na medida, e o clique batia na
+     barra. Nao e artefato de teste: e o botao inalcancavel.
+
+     `scroll-padding-top` conserta a classe inteira do problema de uma vez —
+     `scrollIntoView`, ancora com `#`, o `irPara()` dos subpassos e a travessia
+     das etapas. Cravar o numero aqui erraria como erraria no `top`: as duas
+     alturas sao MEDIDAS. */
+  html{scroll-padding-top:calc(var(--altTopo,0px) + var(--altEtapas,0px) + 12px)}
+  .etapasFixa{position:sticky;top:var(--altTopo,0px);z-index:20;
+      background:var(--bg);padding:12px 0 10px;margin:0 0 20px;
+      border-bottom:1px solid var(--line)}
+  .proxAcao{margin:0;font-size:13.5px;color:var(--ink);min-height:1.4em}
+  .proxAcao b{color:var(--muted);font-weight:600}
+  /* A LINHA CURTA, so no celular. */
+  .etapaCurta{display:none;margin:0 0 8px;font-size:13px;font-weight:640;color:var(--ink)}
+  /* ---- NO CELULAR, UMA FRASE E UMA BARRA CURTA ----
+
+     Tres pilulas com nome nao cabem em 360 px: elas quebram em tres linhas e
+     comem meia tela que era do trabalho. Entao o NOME sobe para uma frase
+     ("Etapa 2 de 3 · Conferir") e as tres viram segmentos de uma barra — que
+     continuam sendo botoes, com o mesmo rotulo acessivel de sempre. */
   @media (max-width:560px){
-    .etapas{gap:6px}
-    .etapa{min-width:0;flex:1 1 auto;padding:6px 10px;font-size:12px}
+    .etapaCurta{display:block}
+    .etapas{gap:5px}
+    .etapa{min-width:0;flex:1 1 0;padding:0;height:7px;border-radius:99px;
+        border-width:0;background:var(--line);overflow:hidden}
+    .etapa > *{display:none}
+    .etapa[aria-current="step"]{background:var(--accent)}
+    .etapa.feita{background:var(--ok)}
+    .etapa.atencao{background:var(--warn)}
+    .etapa[aria-disabled="true"]{opacity:.45}
+    .etapasFixa{padding-top:10px}
   }
   /* Os dois caminhos do passo 1. O de gravar tem borda de destaque porque é o
      que a maioria vem fazer; o de arquivo continua inteiro ao lado, e não
@@ -1221,18 +1275,25 @@
        controlador de etapas com verdade propria seria um segundo lugar onde a
        resposta mora, e o dia em que os dois discordarem e o dia em que a barra
        aponta para uma etapa que nao e a que esta aberta. -->
-  <nav class="etapas" id="etapas" data-i18n-aria="etapasNav">
-    <button type="button" class="etapa" data-etapa="1" data-alvo="cardVideo">
-      <i class="etapaN">1</i><span data-i18n="et1"></span></button>
-    <button type="button" class="etapa" data-etapa="2" data-alvo="prevCard">
-      <i class="etapaN">2</i><span data-i18n="et2"></span></button>
-    <button type="button" class="etapa" data-etapa="3" data-alvo="cardBaixar">
-      <i class="etapaN">3</i><span data-i18n="et3"></span></button>
-  </nav>
+  <div class="etapasFixa" id="etapasFixa">
+    <!-- A LINHA DO CELULAR. Ela e `aria-hidden` de proposito: diz exatamente o
+         que o `<nav>` abaixo ja anuncia, e um leitor de tela lendo as duas
+         ouviria a mesma etapa duas vezes seguidas. Ela existe para o OLHO numa
+         tela de 360 px, onde os tres nomes nao cabem lado a lado. -->
+    <p class="etapaCurta" id="etapaCurta" aria-hidden="true"></p>
+    <nav class="etapas" id="etapas" data-i18n-aria="etapasNav">
+      <button type="button" class="etapa" data-etapa="1" data-alvo="cardVideo">
+        <i class="etapaN">1</i><span data-i18n="et1"></span></button>
+      <button type="button" class="etapa" data-etapa="2" data-alvo="prevCard">
+        <i class="etapaN">2</i><span data-i18n="et2"></span></button>
+      <button type="button" class="etapa" data-etapa="3" data-alvo="cardBaixar">
+        <i class="etapaN">3</i><span data-i18n="et3"></span></button>
+    </nav>
   <!-- A frase da proxima acao. `role=status` porque ela e a unica coisa que
        ANUNCIA a mudanca de etapa: `aria-current` muda em silencio, e um leitor
        de tela que nao e avisado fica numa etapa nova sem saber. -->
-  <p class="proxAcao" id="proxAcao" role="status"></p>
+    <p class="proxAcao" id="proxAcao" role="status"><b id="proxRot"></b> <span id="proxTxt"></span></p>
+  </div>
 
   <div class="card" id="cardVideo">
     <h2 id="h2Entrada" tabindex="-1"><span class="step">1</span><span data-i18n="s1"></span></h2>
@@ -3533,6 +3594,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       s6:'Baixar',
       etapasNav:'As três etapas',
       et1:'Entrada', et2:'Conferir', et3:'Baixar', etFeita:'feita',
+      etAtual:'você está aqui', etAtencao:'com atenção', etBloqueada:'ainda não dá',
+      etapaDe:'Etapa {0} de {1}', proxRotulo:'Próxima ação',
+      proxLimpar:'remover {0}.', proxRepetidas:'{0} telas repetidas', proxSemFala:'{0} telas sem fala',
+      proxRepetidaU:'1 tela repetida', proxSemFalaU:'1 tela sem fala',
       proxNada:'Comece escolhendo um vídeo ou gravando a tela.',
       proxVideo:'O vídeo está pronto. Aperte “{0}” para as telas aparecerem aqui embaixo.',
       proxGravando:'Gravando. Marque os passos pela janelinha; ao parar, as telas aparecem para conferir.',
@@ -4151,6 +4216,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       s6:'Download',
       etapasNav:'The three steps',
       et1:'Input', et2:'Check', et3:'Download', etFeita:'done',
+      etAtual:'you are here', etAtencao:'needs attention', etBloqueada:'not yet',
+      etapaDe:'Step {0} of {1}', proxRotulo:'Next action',
+      proxLimpar:'remove {0}.', proxRepetidas:'{0} repeated screens', proxSemFala:'{0} screens with no speech',
+      proxRepetidaU:'1 repeated screen', proxSemFalaU:'1 screen with no speech',
       proxNada:'Start by choosing a video or recording your screen.',
       proxVideo:'The video is ready. Press “{0}” and the screens show up below.',
       proxGravando:'Recording. Mark the steps from the little window; when you stop, the screens appear here to check.',
@@ -4763,6 +4832,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       s6:'Descargar',
       etapasNav:'Las tres etapas',
       et1:'Entrada', et2:'Comprobar', et3:'Descargar', etFeita:'hecha',
+      etAtual:'estás aquí', etAtencao:'con atención', etBloqueada:'todavía no',
+      etapaDe:'Etapa {0} de {1}', proxRotulo:'Próxima acción',
+      proxLimpar:'quitar {0}.', proxRepetidas:'{0} pantallas repetidas', proxSemFala:'{0} pantallas sin voz',
+      proxRepetidaU:'1 pantalla repetida', proxSemFalaU:'1 pantalla sin voz',
       proxNada:'Empieza eligiendo un vídeo o grabando la pantalla.',
       proxVideo:'El vídeo está listo. Pulsa “{0}” y las pantallas aparecerán aquí abajo.',
       proxGravando:'Grabando. Marca los pasos desde la ventanita; al parar, las pantallas aparecerán para comprobar.',
@@ -5374,6 +5447,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       s6:'Herunterladen',
       etapasNav:'Die drei Schritte',
       et1:'Eingabe', et2:'Prüfen', et3:'Herunterladen', etFeita:'erledigt',
+      etAtual:'Sie sind hier', etAtencao:'braucht Aufmerksamkeit', etBloqueada:'noch nicht',
+      etapaDe:'Schritt {0} von {1}', proxRotulo:'Als Nächstes',
+      proxLimpar:'{0} entfernen.', proxRepetidas:'{0} doppelte Bildschirme', proxSemFala:'{0} Bildschirme ohne Ton',
+      proxRepetidaU:'1 doppelten Bildschirm', proxSemFalaU:'1 Bildschirm ohne Ton',
       proxNada:'Wählen Sie zuerst ein Video oder nehmen Sie den Bildschirm auf.',
       proxVideo:'Das Video ist bereit. Drücken Sie „{0}“, dann erscheinen die Bildschirme hier unten.',
       proxGravando:'Aufnahme läuft. Markieren Sie die Schritte im kleinen Fenster; nach dem Stoppen erscheinen die Bildschirme zum Prüfen.',
@@ -5991,6 +6068,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       s6:'Télécharger',
       etapasNav:'Les trois étapes',
       et1:'Entrée', et2:'Vérifier', et3:'Télécharger', etFeita:'faite',
+      etAtual:'vous êtes ici', etAtencao:'à vérifier', etBloqueada:'pas encore',
+      etapaDe:'Étape {0} sur {1}', proxRotulo:'Prochaine action',
+      proxLimpar:'retirer {0}.', proxRepetidas:'{0} écrans répétés', proxSemFala:'{0} écrans sans parole',
+      proxRepetidaU:'1 écran répété', proxSemFalaU:'1 écran sans parole',
       proxNada:'Commencez par choisir une vidéo ou enregistrer votre écran.',
       proxVideo:'La vidéo est prête. Appuyez sur « {0} » et les écrans apparaissent ci-dessous.',
       proxGravando:'Enregistrement en cours. Marquez les étapes depuis la petite fenêtre; à l’arrêt, les écrans apparaissent pour vérification.',
@@ -7458,7 +7539,17 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
            uma caixa vermelha para quem nem começou. */
         prog(null); st('');
         $('recMsg').textContent = t('recHint');
-      } finally { adiantando = null; }
+      } finally {
+        adiantando = null;
+        /* O FIM DA CORTESIA, para a régua poder esperar por ele.
+           `__adiantou` já dizia que ela COMEÇOU; faltava dizer que acabou — e é
+           o fim que importa, porque é ele que chama `prog(null)` e apaga a
+           barra. Sem este sinal, qualquer teste que acenda a barra à mão corre
+           contra um relógio que ninguém controla: foi assim que o `espera2`
+           passou a reprovar três vezes em três, e a primeira leitura foi
+           "flake" — que estava errada. */
+        try { window.__adiantouFim = true; } catch (e) {}
+      }
     })();
   }
 
@@ -15741,18 +15832,55 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
        documento sai. Marcar como feita uma etapa por onde a pessoa passou seria
        a bolinha mentindo, que e a mesma regra dos subpassos. */
     const feita = { 1: frames.length > 0, 2: baixouAlgo, 3: baixouAlgo };
+    /* BLOQUEADA sai do `inert` do cartao, e nao de uma regra escrita de novo
+       aqui. `passos()` ja decidiu quem pode ser tocado; a barra le a decisao
+       dele. Duas regras para "da para agir nesta etapa?" e o jeito de um dia a
+       barra dizer que da e o cartao recusar. */
+    const bloqueada = (n) => {
+      const c = $(CARTAO_DA_ETAPA[n - 1]);
+      return !!(c && c.hasAttribute('inert'));
+    };
+    /* COM ATENCAO: ha o que agir, e o que agir esta escrito na frase de baixo.
+       Hoje so a etapa de conferir tem esse sinal — telas repetidas ou sem fala,
+       que e a mesma conta do botao de faxina. Nao invento um segundo calculo:
+       se `planoDaFaxina` mudar, a barra muda junto. */
+    const atencao = (n) => {
+      if (n !== 2 || !frames.some(f => f.keep)) return false;
+      try { return planoDaFaxina().todos.length > 0; } catch (e) { return false; }
+    };
     nav.querySelectorAll('.etapa').forEach(b => {
       const n = +b.dataset.etapa;
-      b.classList.toggle('feita', !!feita[n]);
+      const trancada = bloqueada(n);
+      /* CONCLUÍDA GANHA DE COM ATENÇÃO. Depois que o documento saiu, cutucar
+         sobre telas repetidas é discutir uma decisão que a pessoa já tomou —
+         ela olhou, escolheu manter, e baixou. Antes de baixar, o aviso é ajuda;
+         depois, é segunda opinião não pedida. */
+      const atenta = !trancada && !feita[n] && atencao(n);
+      b.classList.toggle('feita', !!feita[n] && !atenta);
+      b.classList.toggle('atencao', atenta);
+      if (trancada) b.setAttribute('aria-disabled', 'true');
+      else b.removeAttribute('aria-disabled');
       if (n === atual) b.setAttribute('aria-current', 'step');
       else b.removeAttribute('aria-current');
       /* O numero entra no rotulo acessivel porque ele esta na tela: quem
          controla por voz diz "clicar em 2 Conferir", e um nome que nao contem
          o que se ve nao atende. E "feita" entra por PALAVRA — o visto verde
          some para quem nao o distingue. */
+      /* O ESTADO ENTRA POR PALAVRA. O visto verde, o "!" ambar e o cinza da
+         bloqueada somem para quem nao distingue cor — e "bloqueada" e a unica
+         informacao que explica por que o clique nao levou a lugar nenhum. */
+      const est = trancada ? t('etBloqueada')
+                : atenta   ? t('etAtencao')
+                : feita[n] ? t('etFeita')
+                : n === atual ? t('etAtual') : '';
       b.setAttribute('aria-label',
-        n + '. ' + t('et' + n) + (feita[n] ? ' \u2014 ' + t('etFeita') : ''));
+        n + '. ' + t('et' + n) + (est ? ' \u2014 ' + est : ''));
     });
+    /* A frase do celular. `de 3` sai da contagem de botoes, e nao de um 3
+       escrito a mao: o dia em que existir uma quarta etapa, ela conta sozinha. */
+    const curta = $('etapaCurta');
+    if (curta) curta.textContent =
+      t('etapaDe', atual, nav.querySelectorAll('.etapa').length) + ' \u00b7 ' + t('et' + atual);
     /* ---- A TRAVESSIA ----
 
        SO PARA FRENTE, e nunca durante a captura. As duas restricoes sao o que
@@ -15773,6 +15901,35 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     }
     etapaAnterior = atual;
   }
+  /* A ALTURA DO CABECALHO, medida e nao chutada.
+   *
+   * A barra das etapas gruda logo abaixo do `header.topo`, que tambem e
+   * `sticky`. Cravar um `top: 78px` daria certo em portugues a 1440 e erraria
+   * no alemao a 900, onde o menu quebra em duas linhas. E erraria de novo no
+   * dia em que alguem acrescentar um item ao menu.
+   *
+   * `ResizeObserver` e nao `resize`: o cabecalho muda de altura sem a janela
+   * mudar de tamanho — trocar de idioma reescreve o menu, e a barra da conta
+   * aparece depois que o `/api/menu` responde. */
+  function medirTopo(){
+    const alto = (el) => (el ? Math.round(el.getBoundingClientRect().height) : 0);
+    const r = document.documentElement.style;
+    r.setProperty('--altTopo',   alto(document.querySelector('header.topo')) + 'px');
+    /* A altura da propria barra entra no `scroll-padding`, e ela muda: a frase
+       da proxima acao quebra em duas linhas quando o texto e longo, e no celular
+       ganha a linha do "Etapa 2 de 3". */
+    r.setProperty('--altEtapas', alto($('etapasFixa')) + 'px');
+  }
+  medirTopo();
+  try {
+    if (window.ResizeObserver) {
+      const ob = new ResizeObserver(medirTopo);
+      const h = document.querySelector('header.topo'); if (h) ob.observe(h);
+      const e = $('etapasFixa'); if (e) ob.observe(e);
+    }
+  } catch (e) {}
+  window.addEventListener('resize', medirTopo);
+
   const CARTAO_DA_ETAPA = ['cardVideo', 'prevCard', 'cardBaixar'];
   function levarAEtapa(n){
     const alvo = $(CARTAO_DA_ETAPA[n - 1]); if (!alvo) return;
@@ -15796,11 +15953,29 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      na transcricao. Reescrever o mesmo texto faz o leitor de tela repetir a
      frase inteira toda vez — a diferenca entre uma dica e um papagaio. */
   function pintarProxAcao(){
-    const el = $('proxAcao'); if (!el) return;
+    const el = $('proxTxt'); if (!el) return;
+    const rot = $('proxRot');
+    if (rot && rot.textContent !== t('proxRotulo') + ':') rot.textContent = t('proxRotulo') + ':';
     let txt;
     if (liveOn)               txt = t('proxGravando');
     else if (baixouAlgo)      txt = t('proxFim');
-    else if (frames.length)   txt = t('proxTelas', frames.filter(f => f.keep).length);
+    else if (frames.length) {
+      /* A LIMPEZA VEM ANTES DA CONTAGEM. "4 telas prontas" e verdade e nao
+         ajuda; "remover 4 telas repetidas" e a proxima acao de verdade — e e a
+         mesma conta que acende o "!" na barra, para as duas nunca discordarem. */
+      let faxina = null;
+      try { faxina = planoDaFaxina(); } catch (e) {}
+      const kept = frames.filter(f => f.keep).length;
+      if (kept && faxina && faxina.todos.length) {
+        const quais = [];
+        const nR = faxina.rep.length, nM = faxina.mudas.length;
+        if (nR) quais.push(nR === 1 ? t('proxRepetidaU') : t('proxRepetidas', nR));
+        if (nM) quais.push(nM === 1 ? t('proxSemFalaU')  : t('proxSemFala',  nM));
+        txt = t('proxLimpar', quais.join(' \u00b7 '));
+      } else {
+        txt = t('proxTelas', kept);
+      }
+    }
     else if (modoAtual() === 'arquivo') txt = t('proxVideo', t('autoBtn'));
     else                      txt = t('proxNada');
     if (el.textContent !== txt) el.textContent = txt;
@@ -15810,6 +15985,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      trocar o mesmo manipulador por ele mesmo para sempre. */
   if ($('etapas')) $('etapas').onclick = (e) => {
     const b = e.target.closest('.etapa'); if (!b) return;
+    /* Bloqueada nao leva a lugar nenhum — nao ha nada la. Ela continua no
+       caminho do teclado de proposito (`aria-disabled`, e nao `disabled`), para
+       quem tabula saber que a etapa existe e por que ainda nao da. */
+    if (b.getAttribute('aria-disabled') === 'true') return;
     const alvo = $(b.dataset.alvo); if (!alvo) return;
     const suave = !(window.matchMedia &&
                     window.matchMedia('(prefers-reduced-motion: reduce)').matches);

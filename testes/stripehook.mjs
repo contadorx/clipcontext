@@ -93,15 +93,42 @@ console.log('\n[5] a comparação não vaza pelo tempo');
      !(await assinaturaConfere(CORPO, `t=${t},v1=${boa.slice(0,20)}`, SEGREDO, agora)));
 }
 
-console.log('\n[6] a Edge Function usa este módulo, e não uma cópia');
+console.log('\n[6] SÓ UM webhook manda, e o outro diz para onde ir');
 {
-  const fonte = fs.readFileSync(
+  const edge = fs.readFileSync(
     `${RAIZ_WS}/supabase/functions/walkstamp-stripe/index.ts`,'utf8');
-  ok('o index importa assinatura.mjs',
-     /import \{ assinaturaConfere \} from "\.\/assinatura\.mjs"/.test(fonte));
-  ok('sem segredo, responde 503 e não processa', /sem segredo", \{ status: 503 \}/.test(fonte));
-  ok('assinatura ruim responde 401', /assinatura", \{ status: 401 \}/.test(fonte));
-  ok('e falha de banco responde 500, para a Stripe reenviar', /status: 500/.test(fonte));
+  const next = fs.readFileSync(`${RAIZ_WS}/app/api/stripe/webhook/route.ts`,'utf8');
+
+  /* O DEFEITO QUE ESTE BLOCO GUARDA. Havia dois webhooks e o repositório não
+     dizia qual URL estava no painel da Stripe. Não era empate: a Edge Function
+     tratava SÓ faturas — nunca `checkout.session.completed` nem
+     `customer.subscription.*`, que são os eventos que concedem o plano. Com a
+     URL apontada para lá, a pessoa pagava, a fatura aparecia, e o plano nunca
+     chegava. Em silêncio, porque a Stripe recebia 200. */
+  ok('a Edge Function não processa mais nada', !/walkstamp_fatura_da_stripe/.test(edge));
+  ok('ela responde 410 — existiu e mudou, não 404', /status: 410/.test(edge));
+  ok('e diz para onde ir', /\/api\/stripe\/webhook/.test(edge));
+
+  /* E a autoridade tem que continuar sendo a única que concede plano. */
+  ok('a rota do Next trata a compra', /checkout\.session\.completed/.test(next));
+  ok('e as mudanças de assinatura', /customer\.subscription\./.test(next));
+  ok('e é a única que chama assinatura_da_stripe',
+     /walkstamp_assinatura_da_stripe/.test(next) && !/walkstamp_assinatura_da_stripe/.test(edge));
+  ok('e confere a assinatura com a biblioteca oficial', /constructEvent/.test(next));
+
+  /* O registro do que a Stripe entregou. Ele é ANOTAÇÃO e não trava: se ele
+     pulasse o trabalho no `event.id` repetido, descartaria justamente a
+     reentrega com que a Stripe conserta uma falha. */
+  ok('a rota anota o que recebeu', /walkstamp_stripe_entregue/.test(next));
+  const depois = next.indexOf('await anotar(ev,');
+  ok('e anota DEPOIS do trabalho, nunca antes',
+     depois > next.indexOf('STATUS_DA_FATURA[ev.type]'), String(depois));
+  ok('anotar nunca derruba o webhook', /catch \{ \/\* o registro é diagnóstico/.test(next));
+
+  /* `assinatura.mjs` fica: é a fechadura, tem régua (os blocos acima) e é a
+     referência de como conferir uma assinatura da Stripe sem a biblioteca. */
+  ok('o módulo da assinatura continua no repositório',
+     fs.existsSync(`${RAIZ_WS}/supabase/functions/walkstamp-stripe/assinatura.mjs`));
 }
 
 console.log(falhas ? '\n'+falhas+' falha(s)' : '\nAssinatura do webhook: tudo passou.');
