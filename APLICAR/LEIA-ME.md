@@ -5,9 +5,9 @@ A árvore deste zip **já está construída**: `public/app.html` e
 rodar `build.py`.
 
 Base: `285d4a5` (o `main` de produção) + os seis commits do `correcoes.bundle`
-= a árvore do `walkstampbuild8_1.zip`. Sobre ela, dez commits novos.
+= a árvore do `walkstampbuild8_1.zip`. Sobre ela, quinze commits novos.
 
-## Os dez commits
+## Os quinze commits
 
 **A0 — a saída recomendada chega à linhagem.** Em vez de sete formatos com o
 mesmo peso, a ferramenta olha o cenário e propõe um; os outros ficam recolhidos
@@ -129,11 +129,93 @@ A marca continua no pago — como prova visível do plano, não como a justifica
 
 **Com isto a trilha B fecha inteira.**
 
+**C1 — o funil media a própria esteira, e o arquivo não tinha um só
+`performance.mark`.** O plano pedia marcas em cada fronteira e trazia uma
+pergunta aberta: *"inglês abre 48 vezes e converte zero"*. A instrumentação
+entrou; a pergunta virou outra.
+
+O arquivo tinha **39 `performance.now()` e zero `performance.mark()`**. Um
+`now()` avulso calcula uma diferença, mostra numa frase e joga fora — o número
+existe no instante e some, e sem ele não se compara duas execuções, nem duas
+máquinas, nem a mesma máquina antes e depois de uma mudança.
+
+As oito fronteiras estão marcadas, e três ganharam detalhe que não existia:
+rede e sessão são tempos **separados** dentro do mesmo degrau (um degrau lento
+era ambíguo, e rede ruim e máquina ruim pedem decisões opostas); os degraus que
+**perderam** contam, porque `mbBaixados` soma o caminho inteiro — foi assim que
+uma máquina real gastou 353 MB antes de uma sessão subir; e mais de uma
+construção por aba é o caso normal, então a régua conta quantas houve em vez de
+somar duas escadas numa só.
+
+`node testes/regua.mjs` dirige o produto e recolhe o que o **produto** marcou —
+uma régua que cronometrasse por fora mediria o Playwright e o disco. As amostras
+de 1, 10 e 40 min saem de `python3 testes/amostras.py --medida`, com `sha256` e
+versão de receita viajando dentro do JSON. Elas **não são fala de verdade**: sem
+sintetizador de voz, o áudio é um tom e o tempo é um piso — o campo `fala` diz
+isso em cada linha. `node testes/marcos.mjs` afere a régua sem rede, fazendo os
+dois primeiros degraus falharem de propósito.
+
+**E a pergunta aberta.** Os marcos não carregam IP, navegador nem sessão — de
+propósito —, então "são robôs ou é funil quebrado?" não é respondível com este
+instrumento. Pior: medindo para responder, apareceu que o instrumento estava
+sujo. Entre **23h09 e 01h52** de uma noite em que ninguém abriu o produto, **43
+marcos entraram na base de produção** — `pdf`, `docx` e `json` baixados, vídeos
+"carregados" de gravação e de exemplo, dois marcos **em inglês**. Era a esteira
+de testes: o endereço da medição é assado no `app.html`, e a regressão abre esse
+mesmo arquivo em `localhost` dezenas de vezes por dia, sem guarda nenhuma.
+
+`medir()` passou a calar em origem de desenvolvimento (`localhost`, `127.*`,
+`::1`, `.local`, rede privada, `file:`), por regra de **origem** e não por lista
+de domínios. Detalhe em `MEDICAO-E-O-INGLES.md` e em
+`testes/REGUA-DE-DESEMPENHO.md`.
+
+**O primeiro número da série:** `enviadoSobreOriginal` = **1,00**. O modelo
+recebe hoje exatamente o áudio que o vídeo tem — a linha de base que precisava
+existir antes de alguém mexer na compactação de silêncio.
+
+**A Trilha D — a análise da venda entra no roadmap, na frente da C.** A análise
+da página, da copy e da venda de 22/08 está inteira e sem edição em
+`ANALISE-DA-VENDA.md`, e virou a Trilha D do `PLANO.md` (12–15 d). Ela entra
+antes da C2 e da C3 pelo mesmo motivo que a C1 veio antes da C2: acelerar um
+motor que ninguém contratou acelera a coisa errada. A ordem passa a ser
+**A → D0 → D1 → C2 → C3**.
+
+Três itens do P0 dela **já estão feitos** — a análise foi escrita contra a
+página de antes do B1, B4 e B5, e o `PLANO.md` marca cada um para ninguém
+refazer. O que sobrou tem um item afiado: a abertura de preços ainda diz que o
+pago é *"a identidade do documento e a administração de uma equipe"*, texto
+anterior ao B5 — a página argumenta contra o próprio cartão, comparando
+R$ 149/ano com "PDF com logotipo".
+
+**Duas réguas liam a tela errada.** Saíram da regressão completa — a primeira
+que rodou com o Next de pé nesta máquina, então alcançou arquivos que as pistas
+curtas nunca alcançaram.
+
+`linkpage.mjs` era minha, do B5: cobrava a frase inteira do item de identidade
+no cartão Personal, e o B5 reescreveu o cartão — o item continuou lá, com outras
+palavras. Passou a cobrar pela **alça** (`data-f="modeloProprio"`), que existe
+desde o B1 com o catálogo garantindo que ela aponta para um recurso de verdade.
+
+`modelos.mjs` quase virou minha. O primeiro A/B parecia condenar; cinco amostras
+de cada build, depois, passaram 5/5 nos dois. Imprimir o texto achou o
+mecanismo: `#pdfStatus` é uma linha só com vários donos, e o fim da varredura
+escreve "3 quadros prontos" nela — numa máquina ocupada, **depois** do clique,
+apagando a mensagem que o teste veio conferir. Fotografar um campo de último
+escritor virou esperar o texto aparecer.
+
+**E o diário da Stripe dizia "ok" para o que ignorou.** `venda.mjs` cobrava que
+um evento que não interessa não tocasse o banco. Antes do B2 era assim; o B2 pôs
+o diário de auditoria — foi ele que revelou que um dos dois webhooks nunca
+concedeu plano — e o diário registra todo evento, inclusive o que não interessa.
+Um diário com buracos não responde "quem tratou o quê". Mas `ok` para um evento
+que ninguém tratou é pior que silêncio: lê-se como "tratei". O webhook passou a
+registrar **`ignorado`**, e o teste cobra precisão em vez de silêncio.
+
 ## Os arquivos
 
 | arquivo | o que é |
 |---|---|
-| `tudo.bundle` | os dez commits, para aplicar por Git sobre `d5db0f7` |
+| `tudo.bundle` | os quinze commits, para aplicar por Git sobre `d5db0f7` — é um bundle de **intervalo** (`d5db0f7..HEAD`), então ele precisa que você já tenha esse commit; foi assim que ele saiu de 22 MB para 314 KB e o pacote coube no limite de envio |
 | `A0-saida-recomendada.patch` | o A0 em diff legível |
 | `A1-cartao-da-grade.patch` | o A1 em diff legível (fonte e régua) |
 | `B3-banco-versionado.patch` | o B3 em diff legível |
@@ -142,6 +224,10 @@ A marca continua no pago — como prova visível do plano, não como a justifica
 | `barra-e-B2.patch` | a barra grudada e o B2, em diff legível |
 | `B4-um-estado-por-plano.patch` | o B4 em diff legível |
 | `B5-personal-em-torno-do-roteiro.patch` | o B5 em diff legível |
+| `C1-medir-antes-de-otimizar.patch` | o C1 em diff legível |
+| `D-roadmap-da-venda.patch` | a análise da venda e a Trilha D do `PLANO.md` |
+| `reguas-que-liam-a-tela-errada.patch` | `linkpage.mjs` e `modelos.mjs` |
+| `stripe-ignorado-e-validacao.patch` | o diário da Stripe e o roteiro do leitor de tela |
 | `correcoes.bundle`, `correcoes-so-fonte.patch` | os seis commits originais do zip |
 | `ARQUIVOS.txt`, `MENSAGENS.txt` | o inventário original |
 
@@ -152,14 +238,51 @@ Aplicar por Git:
 
 ## As réguas
 
-**A ferramenta.** `testes/cartao.mjs` (A1) e `testes/etapas.mjs` (A2) são novas
-e entram no grupo `app` do `rapido.sh`.
+**A ferramenta.** `testes/cartao.mjs` (A1), `testes/etapas.mjs` (A2) e
+`testes/marcos.mjs` (C1) são novas e entram no grupo `app` do `rapido.sh` — e
+agora também no `rodar.sh`, onde as duas primeiras faltavam.
 
-Varredura completa desta árvore: **99 dos 110** testes que rodam sem servidor
-passam. Os 11 restantes são **10 que precisam do Next ou de um servidor de
-apoio** (`ficha`, `liclink`, `medicao`, `timepag`, `verificador`, `cabecalho`,
-`chamadoconta`, `faxina`, `portal`, `seo`) e o `terceiros.mjs`, abaixo. Nenhuma
-regressão.
+**A régua de desempenho** não entra na regressão, e é de propósito: ela mede, e
+medir se faz ao mudar a mecânica, não a cada ajuste de tela.
+
+    python3 testes/amostras.py --medida        # 1, 10 e 40 min, com sha256
+    node testes/regua.mjs --amostras=1min,10min --cache=frio,quente
+
+**Ela precisa de rede** (`cdn.jsdelivr.net` e `huggingface.co`). Sem rede a
+escada falha inteira, e isso não é defeito dela: o JSON sai com `modelo.desistiu`
+e a lista de degraus tentados, que é a medição legítima de uma máquina que não
+monta o modelo. Quem afere a régua sem rede nenhuma é o `marcos.mjs`.
+
+**A regressão completa rodou pela primeira vez nesta máquina** — com o Next de
+pé, o que alcançou os dez arquivos que precisam de servidor e que nunca tinham
+rodado (`medicao`, `ficha`, `liclink`, `timepag`, `verificador`, `cabecalho`,
+`chamadoconta`, `faxina`, `portal`, `seo`). **Todos passaram**, inclusive o
+bloco novo `[M1b] a régua não conta como gente`.
+
+Ela apontou quatro falhas, e as quatro foram investigadas:
+
+| teste | de quem | estado |
+|---|---|---|
+| `linkpage.mjs` | minha, do B5 | corrigido — cobra pela alça `data-f`, não pela prosa |
+| `modelos.mjs` | de ninguém: corrida na própria régua | corrigido — espera o texto em vez de fotografá-lo |
+| `venda.mjs` | minha, do B2 | corrigido no produto — o diário diz `ignorado`, não `ok` |
+| `semmarca.mjs` | **da árvore base** | **decisão sua**, abaixo |
+
+Depois das correções, os três rerodaram verdes. Uma armadilha que custou meia
+hora e vale registrar: um `next-server` órfão de uma execução anterior segurava
+a porta 8803, o `venda.mjs` não conseguia subir o dele e falava com o servidor
+**velho** — o teste reprovava uma correção que estava certa. Se ele reprovar sem
+explicação, `pkill -f next-server` antes de acreditar.
+
+**`semmarca.mjs` é sua.** Ele proíbe a palavra `Natura` em qualquer arquivo da
+árvore — o comentário dele explica: *"exemplos de SQL com o domínio de e-mail e
+o CNPJ de verdade da companhia, num repositório que constrói o site publicado.
+Isso não se desfaz depois de publicado."* Quem viola é `DEMO-NATURA.md`, que
+entrou no commit base `d5db0f7` e que **nenhum destes commits tocou**. Não mexi:
+mover ou apagar um documento de negócio com o nome de um cliente real é decisão
+sua. A correção é de uma linha — o guarda pula uma pasta `demo/` de propósito, e
+ela não existe: `git mv DEMO-NATURA.md demo/`. Se ele também não deve viajar no
+zip, `demo/*` entra no `testes/naovai.txt` no mesmo movimento.
 
 `chaves.mjs`: 946 chaves, ordem igual nos cinco idiomas — e agora também a
 guarda do vocabulário, que reprova se "frame" ou "passo 2" voltarem ao
@@ -193,6 +316,14 @@ aplicou.
   rede, que não dá para conferir daqui;
 - **proteção de senha vazada** no Supabase Auth está desligada. É um botão do
   painel; o produto entra por link mágico, então o impacto é pequeno;
+- **a validação com leitor de tela** — o que falta do A2, e o único item da
+  trilha A. O roteiro está em `testes/VALIDACAO-COM-LEITOR-DE-TELA.md`: oito
+  itens, 20 a 30 minutos, NVDA+Chrome e VoiceOver+Safari;
+- **`DEMO-NATURA.md`** — o `semmarca.mjs` reprova por causa dele; a decisão de
+  mover, apagar ou manter é sua (ver acima);
+- **medir o funil de novo** — a partir desta versão publicada os números são de
+  gente, e não do público somado à esteira. Uma semana de dados limpos responde
+  "o inglês converte?" melhor que qualquer releitura dos 447 eventos anteriores;
 - **`terceiros.mjs` reprova** — `privacidade.en` está sem a tabela de
   suboperadores traduzida (`<table id="suboperadores">`). É conteúdo do site,
   não foi tocado por nenhum destes quatro commits, e precisa de tradução.

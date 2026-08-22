@@ -113,6 +113,10 @@ await pg.addInitScript(() => {
   };
   if (!ligar()) document.addEventListener('DOMContentLoaded', ligar);
 });
+/* A porta de serviço da medição: sem ela o produto fica mudo em `localhost`,
+   e este arquivo usa os marcos como canal de observação. A rota é
+   interceptada logo abaixo — nada sai desta máquina. */
+await pg.addInitScript(() => { window.__medirDaqui = true; });
 const medidos = [];
 await pg.route('**/rpc/walkstamp_evento', r => {
   try { medidos.push(JSON.parse(r.request().postData() || '{}')); } catch (e) {}

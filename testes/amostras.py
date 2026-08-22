@@ -210,8 +210,62 @@ def escrever_longo(caminho, quadros, segundos_por_cena, dur):
         shutil.rmtree(tmp, ignore_errors=True)
 
 
+# ---- AS AMOSTRAS DA MEDICAO ----
+#
+# Um numero de desempenho so vale comparado com outro. E dois numeros so se
+# comparam se o insumo for o MESMO — nao "parecido", nao "de 10 minutos
+# tambem": o mesmo arquivo, com a mesma identidade escrita ao lado do
+# resultado. Sem isso, "melhorou 18%%" pode ser uma amostra diferente.
+#
+# Dai a versao. `MEDIDA_VER` muda quando a receita muda; a regua carimba o
+# `sha256` de cada arquivo no JSON de saida, e duas medicoes com identidades
+# diferentes ficam VISIVELMENTE diferentes em vez de serem somadas por engano.
+#
+# O QUE ESTAS AMOSTRAS NAO SAO: fala de verdade. Nao ha sintetizador de voz
+# nesta maquina, e o audio e um tom continuo. Um tom rende MENOS texto que
+# fala, e o decodificador do Whisper para mais cedo — ou seja, o tempo medido
+# aqui e um PISO, e nao a espera de um cliente. Ele serve para comparar duas
+# execucoes da mesma coisa, que e o que a otimizacao precisa. Para prever a
+# espera real e preciso um video real, e o campo `fala` do JSON diz qual dos
+# dois casos aquele numero e.
+MEDIDA_VER = 1
+MEDIDA_ALVOS = [1, 10, 40]
+
+
+def amostras_de_medida(forcar=False):
+    """Gera 1, 10 e 40 minutos e devolve o manifesto com a identidade de cada."""
+    import hashlib
+    import json
+    manifesto = {'versao': MEDIDA_VER, 'fala': 'tom continuo, nao voz', 'itens': []}
+    for minutos in MEDIDA_ALVOS:
+        caminho = '/tmp/medida-%dmin.webm' % minutos
+        if not os.path.exists(caminho) or forcar:
+            # 30 s por cena, como o video longo: um PNG por cena faz 40 minutos
+            # custarem 80 imagens em vez de 24 mil quadros.
+            escrever_longo(caminho, longo(640, 360, minutos, 30), 30, minutos * 60)
+        h = hashlib.sha256()
+        with open(caminho, 'rb') as f:
+            for bloco in iter(lambda: f.read(1 << 20), b''):
+                h.update(bloco)
+        manifesto['itens'].append({
+            'nome': '%dmin' % minutos, 'caminho': caminho, 'minutos': minutos,
+            'segundos': minutos * 60, 'bytes': os.path.getsize(caminho),
+            'sha256': h.hexdigest(),
+        })
+    with open('/tmp/medida-amostras.json', 'w') as f:
+        json.dump(manifesto, f, indent=2)
+    return manifesto
+
+
 def main():
     forcar = '--forcar' in sys.argv
+    if '--medida' in sys.argv:
+        m = amostras_de_medida(forcar)
+        for it in m['itens']:
+            print('  medida: %s  %.1f MB  sha256 %s...'
+                  % (it['caminho'], it['bytes'] / 1048576, it['sha256'][:12]))
+        print('  manifesto: /tmp/medida-amostras.json  (receita v%d)' % m['versao'])
+        return
     if '--longo' in sys.argv:
         alvo = '/tmp/longo.webm'
         if os.path.exists(alvo) and not forcar:

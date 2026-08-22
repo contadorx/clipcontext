@@ -322,11 +322,147 @@ sair em `.xlsx`, e a primeira bala do Personal tem que falar da planilha nos cin
 idiomas. Provado nas duas direções — tirar `rotColImp` do export reprova, e o
 logotipo voltar a liderar reprova.
 
-### Trilha C — motor e dívida (22,5–32,5 d)
+### Trilha D — posicionamento e venda (12–15 d) — **prioridade sobre a C**
 
-**C1. Build 5 — medir antes de otimizar (3,5–4,5 d).** `performance.mark()` em cada
-fronteira, amostras versionadas, cold e warm cache. E a pergunta aberta: inglês abre 48
-vezes e converte zero.
+A fonte é a **análise da página, da copy e da venda** de 22/08, que está inteira
+em `ANALISE-DA-VENDA.md`. O veredito dela cabe numa frase: a página é forte como
+explicação de produto gratuito e fraca como página de venda — ela prova o
+mecanismo e não responde para quem é, que trabalho substitui e por que pagar.
+
+Ela entra **na frente da C2 e da C3**, e o motivo é o mesmo da C1: otimizar o
+motor de um produto que ninguém está comprando otimiza a coisa errada. A C1 já
+deu a régua; a D decide o que vale medir.
+
+#### O que a análise pede e a trilha B já entregou
+
+A análise foi escrita contra a página de **antes** dos builds B1, B4 e B5. Três
+itens do P0 dela já estão feitos, e vale não refazer:
+
+| pedido da análise | estado |
+|---|---|
+| P0.2 — acabar com a contradição entre trial disponível e lista de espera | **feito no B4.** A lista de aviso agora é do Pro e da API, e diz "o plano pago já está no ar" |
+| P0.2 — "em breve" no cartão para coisa que já existe | **feito no B1.** Três recursos publicados eram anunciados como futuros desde 16/08 |
+| P0.4 — validar cada benefício antes de pôr no cartão | **feito no B1.** O `planos.mjs` amarra catálogo, página e código, nos cinco idiomas |
+| P1 (parte) — Personal vendido por orquestração, não por logotipo | **feito no B5.** O cartão foi reescrito em torno do roteiro; a marca caiu para a quarta bala |
+
+**O que sobrou do P0 é o que segue.**
+
+#### D0 — antes de comprar tráfego (6,5–8 d)
+
+1. **A home escolhe um comprador (1,5–2 d).** Hoje o H1 é
+   *"Você percorre a tela. Ele carimba cada passo."* — tem personalidade e não é
+   pesquisável: quem faz QA não lê ali "caso de teste", "evidência" nem
+   "planilha". E o lead abre dois produtos com o mesmo peso (provar o teste /
+   entregar a uma IA), que têm compradores e disposições a pagar diferentes.
+   Reescrever olho, H1, lead e o par de CTAs **nos cinco idiomas**, mantendo a
+   voz como subtítulo. A categoria passa a ser *execução e comprovação de casos
+   de teste*; "gravação → documento" vira o mecanismo, não a categoria.
+2. **A abertura de preços contradiz o próprio cartão (1 d).** Ela ainda diz que
+   o pago é *"a identidade do documento e a administração de uma equipe"* —
+   escrita antes do B5, que passou a vender o Personal pelo roteiro. Do jeito
+   que está, a própria página compara R$ 149/ano com "PDF com logotipo". Trocar
+   por caso avulso / roteiro individual / execução coordenada, nos cinco idiomas.
+3. **Os absolutos de privacidade (0,5 d).** "Não existe servidor", "não há
+   conta", "não há banco" valem para o **vídeo** e deixaram de valer para a
+   **conta**. Separar as quatro coisas — arquivo local, site, conta paga,
+   telemetria — em uma frase só, e propagar para a política.
+4. **O último "em breve" sai do cartão (0,5 d).** Sobrou um (`termosGuardados`),
+   dentro das balas do Personal. A regra da análise é boa e vira trava no
+   `planos.mjs`: o que está no conjunto principal do plano tem que estar
+   utilizável; futuro vai para caixa separada.
+5. **As afirmações sobre Claude, ChatGPT e Gemini (0,5 d).** Capacidade de
+   modelo muda em semanas; a frase envelhece e leva o resto junto. Ou vira
+   formulação durável, ou vira página datada com protocolo e revalidação.
+6. **A demonstração do fluxo pago (1,5–2 d).** O tour mostra gravação →
+   documento, que é o Free. Falta planilha → casos → evidência → planilha
+   devolvida, que é o que se compra.
+7. **Os eventos que faltam no funil (1–1,5 d).** A C1 já limpou a medida — a
+   esteira parou de contar como gente — e o evento de ativação existe
+   (`baixou_saida`). Faltam os de intenção paga: roteiro importado, caso
+   concluído, trial iniciado, checkout iniciado. Sem conteúdo do cliente, como
+   os três de hoje.
+
+#### D1 — para levantar conversão (5,5–6,5 d)
+
+Antes/depois logo abaixo do hero (0,5 d) · exemplo reproduzível com planilha,
+vídeo e saídas para baixar (1,5–2 d) · resumo dos planos na home antes do FAQ
+(0,5 d) · quatro formatos cedo e o resto atrás de "ver todas as saídas" (0,5 d) ·
+FAQ comercial — o que fica na conta, cancelamento, NFS-e, cobrança por pessoa
+(1 d) · onboarding do roteiro com planilha de exemplo, para não abrir tela vazia
+(1–1,5 d) · a ponte do primeiro documento para o Personal (0,5 d).
+
+#### D2 — depois de três pilotos (não estimável ainda)
+
+Prova social real com nome, cargo e autorização; números só com amostra, contexto
+e método; teste de verticalização e de preço do Team. **Nada disto antes de
+haver piloto** — a análise é explícita em não inventar logotipo, depoimento nem
+número, e essa é a regra que mantém a página crível.
+
+#### O que precisa de decisão sua, e não minha
+
+- **O trial de 14 dias está de pé em produção?** Se não estiver, o CTA
+  secundário do hero é "Ver um caso completo", e não "Testar o roteiro".
+- **A comparação nominal com Claude, ChatGPT e Gemini fica ou sai?** Ficar custa
+  uma página datada e revalidação periódica.
+- **Moeda:** BRL, USD e EUR juntos, ou detectar a localidade?
+
+### Trilha C — motor e dívida (19–28 d)
+
+#### C1. Build 5 — medir antes de otimizar: **FEITA**
+
+O arquivo tinha **39 `performance.now()` e zero `performance.mark()`**. A diferença
+não é de estilo: um `now()` avulso calcula uma diferença, mostra numa frase e joga
+fora — o número existe no instante e some. Sem ele não se compara duas execuções,
+nem duas máquinas, nem a mesma máquina antes e depois de uma mudança. Toda decisão
+de motor era palpite com cara de decisão.
+
+As **oito fronteiras** que o plano pedia estão marcadas, e três delas ganharam
+detalhe que não existia:
+
+- **rede e sessão são tempos separados dentro do mesmo degrau** (`ms_download` /
+  `ms_sessao`). Um degrau lento era ambíguo: rede ruim e máquina ruim rendem o
+  mesmo cronômetro e pedem decisões opostas;
+- **os degraus que perderam contam.** `mbBaixados` soma o caminho inteiro, e não o
+  arquivo que venceu — foi assim que uma máquina real gastou 353 MB antes de uma
+  sessão subir;
+- **mais de uma construção por aba é o caso normal** (a cortesia adianta o modelo
+  enquanto a pessoa escolhe o arquivo). A régua conta quantas houve; o relógio da
+  escada é o da última.
+
+Nada disso sai da máquina: é `window.__medidas()`, para quem estiver medindo.
+
+**As amostras versionadas** (`python3 testes/amostras.py --medida`) são de 1, 10 e
+40 minutos, com `sha256` e versão de receita num manifesto que viaja dentro do JSON
+de saída — dois números só se comparam se o insumo for o mesmo arquivo. Elas **não
+são fala de verdade**: não há sintetizador de voz na máquina, o áudio é um tom, e o
+tempo medido é um **piso**. O campo `fala` do JSON diz isso em cada linha.
+
+**A régua** é `node testes/regua.mjs` (`--amostras`, `--linhas`, `--cache`,
+`--placa`, `--repetir`, `--saida`); as quatro linhas do wasm exigem servir a página
+com COOP e COEP, senão o runtime cai para uma sozinho. **A aferição da régua** é
+`node testes/marcos.mjs`, que roda sem rede com a biblioteca falsificada e faz os
+dois primeiros degraus falharem de propósito. Tudo em `testes/REGUA-DE-DESEMPENHO.md`.
+
+**O primeiro número da série:** `enviadoSobreOriginal` = **1,00**. O modelo recebe
+hoje exatamente o áudio que o vídeo tem. É a linha de base que precisava existir
+antes de alguém mexer na compactação de silêncio — o C3 depende dela.
+
+**E a pergunta aberta virou outra pergunta.** O inglês abre 51 vezes e converte
+zero, mas os eventos não carregam IP, navegador nem sessão — de propósito —, então
+"são robôs ou é funil quebrado?" **não é respondível com este instrumento**. Pior:
+medindo para responder, apareceu que o instrumento estava sujo. Entre 23h09 e 01h52
+de uma noite em que ninguém abriu o produto, **43 marcos entraram na base de
+produção** — dois deles em inglês. Era a esteira de testes: o endereço da medição é
+assado no `app.html`, e a regressão abre esse mesmo arquivo em `localhost` dezenas
+de vezes por dia, sem guarda nenhuma. O funil que a gente lia era o público somado
+à régua, em proporção que não dá para separar depois.
+
+`medir()` passou a calar em origem de desenvolvimento (`localhost`, `127.*`, `::1`,
+`.local`, rede privada, `file:`), por regra de origem e não por lista de domínios.
+Só `testes/medicao.mjs` abre a porta de serviço, porque é ele que cobra o conteúdo
+do envio — e ele ganhou o bloco **[M1b] a régua não conta como gente**. Está tudo
+em `MEDICAO-E-O-INGLES.md`, com o que fazer: **medir de novo**, agora que a régua
+saiu de dentro da medida.
 
 **C2. Build 6 — menos árvore, menos download (3–4 d).** Classificar o erro e saltar
 direto para o fallback pertinente; fixar versões; avisar antes de um fallback de 73 MB.
@@ -352,8 +488,13 @@ fonte, medir o pico de memória, medir WER antes de tocar na compactação de si
 |---|---:|---|
 | A — terminar o UX | **1–2** | o redesenho inteiro, com acessibilidade validada |
 | B — destravar a venda | **feita** | uma verdade só, cobrança auditável, banco reconstruível |
-| C — motor e dívida | **22,5–32,5** | você mede antes de otimizar; as próximas mudanças ficam baratas |
-| **Total** | **23,5–34,5** | |
+| D — posicionamento e venda | **12–15** | a página passa a vender um trabalho, e não uma ferramenta |
+| C — motor e dívida | **19–28** | C1 feita: você já mede. Faltam C2 e C3 |
+| **Total** | **32–45** | |
+
+A ordem é **A → D0 → D1 → C2 → C3**. A D vem antes da C pelo mesmo motivo que a
+C1 veio antes da C2: acelerar um motor que ninguém contratou acelera a coisa
+errada.
 
 ---
 

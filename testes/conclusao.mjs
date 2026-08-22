@@ -46,6 +46,10 @@ const pg = await ctx.newPage();
 const erros = []; pg.on('pageerror', e => erros.push(e.message));
 /* A medição não pode sair daqui para lugar nenhum — e serve de contador: o
    segundo download do MESMO arquivo não pode contar como documento novo. */
+/* A porta de serviço da medição: sem ela o produto fica mudo em `localhost`,
+   e este arquivo usa os marcos como canal de observação. A rota é
+   interceptada logo abaixo — nada sai desta máquina. */
+await pg.addInitScript(() => { window.__medirDaqui = true; });
 const medidos = [];
 await pg.route('**/rpc/walkstamp_evento', r => {
   try { medidos.push(JSON.parse(r.request().postData() || '{}')); } catch (e) {}

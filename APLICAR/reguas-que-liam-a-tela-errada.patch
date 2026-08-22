@@ -1,0 +1,89 @@
+From 7620aa71882c1c3cd2710b320ed817b2bc05394a Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Sat, 22 Aug 2026 02:42:48 +0000
+Subject: [PATCH] Duas reguas liam a tela errada: uma fotografava, a outra
+ citava a prosa
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Sairam da regressao completa — a primeira que roda com o Next de pe nesta
+maquina, entao ela alcancou arquivos que as pistas curtas nunca alcancaram.
+
+`linkpage.mjs` — ESTA ERA MINHA, DO B5. A asercao cobrava a frase inteira
+("Identificar o documento: logotipo e nome do cliente") no cartao Personal. O
+B5 reescreveu o cartao em torno da rodada e o item continuou la, com outras
+palavras — a regua reprovou a redacao, nao o produto. O portao do B5 rodou
+`planos.mjs` e `cenarios.mjs`, e nao chegou aqui.
+
+Agora ela cobra pela ALCA (`data-f="modeloProprio"`), que existe desde o B1 e
+tem o catalogo garantindo que aponta para um recurso de verdade. A pergunta do
+teste sempre foi qual ITEM esta no cartao, e nao como ele esta escrito.
+
+`modelos.mjs` — quase chamei de minha. O primeiro A/B parecia condenar: o build
+anterior ao C1 passou duas vezes e o meu falhou duas, sob a mesma carga. Duas
+amostras nao provam nada — cinco de cada, depois, passaram 5/5 nos dois builds.
+
+Imprimir o texto de verdade achou o mecanismo: `#pdfStatus` e uma linha so com
+varios donos, e o fim da varredura escreve "3 quadros prontos. Escolha um
+formato" nela. Numa maquina ocupada essa escrita chega DEPOIS do clique e apaga
+a mensagem que o teste veio conferir. O teste fotografava um campo de ultimo
+escritor em vez de esperar o texto aparecer. Virou `waitForFunction`, e o texto
+lido entra na saida — sem ele, o diagnostico era uma adivinhacao.
+---
+ testes/linkpage.mjs | 12 ++++++++++--
+ testes/modelos.mjs  | 14 +++++++++++++-
+ 2 files changed, 23 insertions(+), 3 deletions(-)
+
+diff --git a/testes/linkpage.mjs b/testes/linkpage.mjs
+index 6823c6a..a432cb7 100644
+--- a/testes/linkpage.mjs
++++ b/testes/linkpage.mjs
+@@ -83,9 +83,17 @@ await pg.waitForTimeout(300);
+   const time = await pg.locator('.plan').nth(1).innerHTML();
+   ok('está no cartão Free', /Link pronto/.test(gratis), gratis.match(/Link[^<]*/)||'');
+   ok('saiu do cartão pago', !/Link de equipe/.test(time));
++  /* PELA ALÇA, E NÃO PELA PROSA. O que este teste quer saber é se a identidade
++     continua no cartão pago depois de o link ter descido para o Free — e isso é
++     uma pergunta sobre QUAL item está lá, não sobre como ele está escrito. A
++     versão anterior citava a frase inteira ("Identificar o documento: logotipo e
++     nome do cliente") e reprovou quando o B5 reescreveu o cartão em torno da
++     rodada: o item continuava lá, com outras palavras. A alça `data-f` existe
++     desde o B1 justamente para isso, e é o catálogo que garante que ela aponta
++     para um recurso de verdade. */
+   ok('e o Personal continua com a identidade',
+-     /Identificar o documento:<\/b> logotipo e nome do cliente/.test(time),
+-     (time.match(/Identificar[^<]*/) || ['(não achou)'])[0]);
++     /data-f="modeloProprio"[^>]*>[^<]*[Ll]ogotipo/.test(time),
++     (time.match(/data-f="modeloProprio"[^<]*/) || ['(não achou)'])[0]);
+   /* O que o cartão pago vende do vocabulário é a lista ficar GRAVADA, e não o
+      acesso: aplicar os termos continua sendo de todo mundo. Prometer no pago o
+      que o produto entrega de graça é a contradição que ninguém reclama — e é
+diff --git a/testes/modelos.mjs b/testes/modelos.mjs
+index 04497ab..5181a40 100644
+--- a/testes/modelos.mjs
++++ b/testes/modelos.mjs
+@@ -89,7 +89,19 @@ console.log('\n[2] a fala vira o rascunho da anotação');
+   const n1=await pg.locator('#thumbs input.nota').nth(1).inputValue();
+   ok('a anotação vazia foi preenchida com a fala', /ME21N|transacao/.test(n0), n0.slice(0,40));
+   ok('o que a pessoa escreveu não foi sobrescrito', n1==='escrito à mão, não pode ser sobrescrito');
+-  ok('a mensagem diz quantas foram', /anotaç/.test(await pg.locator('#pdfStatus').textContent()));
++  /* ESPERAR A MENSAGEM, e não fotografá-la.
++     `#pdfStatus` é uma linha só, com vários donos: o fim da varredura escreve
++     "3 quadros prontos" ali, e numa máquina ocupada essa escrita chega DEPOIS
++     do clique — apagando a mensagem que este teste veio conferir. Medido: com a
++     esteira carregando a máquina, a leitura única reprovava; sozinho, passava.
++     Isso é defeito da régua, e não do produto: quem lê um campo de último
++     escritor tem que esperar o texto aparecer, e não amostrá-lo uma vez. */
++  let notaTxt = '';
++  const viuNota = await pg.waitForFunction(
++    () => /anotaç/.test(document.getElementById('pdfStatus').textContent || ''),
++    null, { timeout: 8000 }).then(() => true).catch(() => false);
++  notaTxt = await pg.locator('#pdfStatus').textContent();
++  ok('a mensagem diz quantas foram', viuNota, 'pdfStatus=' + JSON.stringify(notaTxt));
+ }
+ 
+ console.log('\n[3] trocar o modelo reconfigura os quatro controles');
+-- 
+2.43.0
+

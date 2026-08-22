@@ -30,6 +30,15 @@ async function pagina(url, opts = {}) {
   const eventos = [], listas = [], vercel = [];
   const erros = []; pg.on('pageerror', e => erros.push(e.message));
 
+  /* A PORTA DE SERVIÇO DA MEDIÇÃO. O produto passou a calar a medição quando a
+     página vem de `localhost` ou de rede local — sem isso a esteira desta
+     máquina entrava na base de produção como gente, e entrou: numa noite, 43
+     marcos, dois deles em inglês, num funil que ninguém conseguia separar
+     depois. Este arquivo é o único que precisa ver o envio ACONTECER, porque é
+     ele que cobra o que vai dentro; por isso é o único que abre a porta.
+     `opts.mudo` existe para o caso simétrico — provar que sem a porta aberta
+     não sai nada. */
+  if (!opts.mudo) await pg.addInitScript(() => { window.__medirDaqui = true; });
   if (opts.dnt) await pg.addInitScript(() => {
     Object.defineProperty(navigator, 'doNotTrack', { get: () => '1' });
   });
@@ -96,6 +105,18 @@ console.log('\n[M1] os três marcos, e só eles');
   ok('nada do vídeo vai junto (nome, tamanho, duração)',
      !/amostra|webm|\.mp4|size|dura/i.test(bruto), bruto.slice(0, 160));
   ok('sem erro de JS', erros.length === 0, erros.join(' | ').slice(0, 160));
+  await ctx.close();
+}
+
+console.log('\n[M1b] a régua não conta como gente');
+{
+  const { pg, ctx, eventos } = await pagina('http://localhost:8877/app.html?lang=pt',
+                                            { mudo: true });
+  await pg.setInputFiles('#file', '/tmp/amostra.webm');
+  await pg.waitForFunction(() => !document.getElementById('auto').disabled, null, { timeout: 20000 });
+  await pg.waitForTimeout(500);
+  ok('de localhost, sem a porta de serviço, nada é enviado', eventos.length === 0,
+     eventos.length + ' enviados: ' + JSON.stringify(eventos).slice(0, 160));
   await ctx.close();
 }
 

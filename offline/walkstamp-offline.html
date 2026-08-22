@@ -6866,6 +6866,40 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     navigator.globalPrivacyControl === true ||
     navigator.doNotTrack === '1' || window.doNotTrack === '1';
 
+  /* ---- A RÉGUA NÃO É GENTE ----
+   *
+   * Isto foi achado medindo, e é a razão de a medição existir: entre 23h09 e
+   * 01h52 de uma noite em que ninguém abriu o produto, 43 marcos entraram na
+   * base — três formatos baixados, vídeos "carregados" de gravação e de
+   * exemplo, e dois marcos em INGLÊS. Era a esteira de testes desta máquina.
+   *
+   * O endereço da medição é assado no `app.html`, e o `app.html` é o mesmo
+   * arquivo que a regressão abre em `localhost` dezenas de vezes por dia. Cada
+   * abertura contava como uma pessoa. O funil que a gente lia — "abre e não
+   * converte" — estava medindo a régua junto com o público, e não havia como
+   * separar depois: os marcos não têm identificador, de propósito.
+   *
+   * A regra é por ORIGEM, e não por lista de domínios: um domínio novo entraria
+   * mudo sem ninguém perceber, enquanto `localhost` e rede local nunca são
+   * lugar de gente usando o produto. O `__medirDaqui` é a porta de serviço, e
+   * quem a abre são os três arquivos da régua que usam os marcos como canal de
+   * observação — `medicao.mjs`, `conclusao.mjs` e `parar.mjs`. Todos os três
+   * interceptam a rota, então nada sai da máquina, e o `marcos.mjs` cobra
+   * justamente isso: quem abre a porta tampa o ralo. */
+  function origemDeDesenvolvimento(){
+    try {
+      if (location.protocol === 'file:') return true;
+      const h = location.hostname || '';
+      if (!h) return true;
+      if (h === 'localhost' || h === '::1' || h === '[::1]') return true;
+      if (/\.local$/i.test(h) || /\.localhost$/i.test(h)) return true;
+      if (/^127\./.test(h) || /^10\./.test(h) || /^192\.168\./.test(h)) return true;
+      if (/^172\.(1[6-9]|2\d|3[01])\./.test(h)) return true;
+      return false;
+    } catch (e) { return false; }
+  }
+  const naoMedirDaqui = () => origemDeDesenvolvimento() && window.__medirDaqui !== true;
+
   function medir(nome, extra){
     /* Um documento saiu — e este é o único lugar do arquivo por onde TODA saída
        passa. Pendurar o convite aqui é o que evita catorze lugares para lembrar
@@ -6877,7 +6911,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
          único lugar por onde toda saída passa. */
       try { mostrarFim((extra && extra.p_formato) || ''); } catch (e) {}
     }
-    if (!MEDIR_URL || !MEDIR_KEY || naoQuerMedir()) return;
+    if (!MEDIR_URL || !MEDIR_KEY || naoQuerMedir() || naoMedirDaqui()) return;
     try {
       fetch(MEDIR_URL + '/rest/v1/rpc/walkstamp_evento', {
         method: 'POST',
@@ -9436,7 +9470,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
      depois, e não tem como se atualizar sozinho. Sem carimbo, "estou com um
      problema no offline" é uma conversa sem chão — ninguém sabe de qual build
      se fala nem se o defeito já foi consertado. */
-  const VERSAO = '2026.08.22-13';
+  const VERSAO = '2026.08.22-23';
   window.__versao = () => VERSAO;
 
   const PIP_CSS = `
@@ -12029,7 +12063,14 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
      mesmo tempo no instante da conversão. Pedir 16 kHz na criação do contexto
      nunca aloca o grande. */
   async function decodeTo16k(file){
+    const tLeitura = performance.now();
     const buf = await file.arrayBuffer();
+    /* A LEITURA DO DISCO, separada da decodificação. São custos de naturezas
+       diferentes — um é I/O, o outro é CPU — e somados viram um número que não
+       diz o que fazer com ele. */
+    marco('arquivo.lido', { ms_leitura: Math.round(performance.now() - tLeitura),
+                            bytes: (file && file.size) || null });
+    const tDec = performance.now();
     const AC = window.AudioContext || window.webkitAudioContext;
     let ctx;
     /* Nem todo navegador aceita a opção; o que não aceita, joga. */
@@ -12043,8 +12084,19 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
        "a transcrição veio errada", que manda procurar no lugar errado. Conferir
        custa uma comparação; supor custou transcrições inteiras em outros
        projetos. */
-    if (dec.sampleRate === SR_ASR) return canal;
-    return await reamostrar(canal, dec.sampleRate, SR_ASR);
+    const pronto = (dec.sampleRate === SR_ASR) ? canal
+                 : await reamostrar(canal, dec.sampleRate, SR_ASR);
+    /* `taxaDecodificada`, e nao `taxaOriginal`: o que `dec.sampleRate` diz e a
+       taxa em que o audio SAIU do decodificador, que e 16 kHz quando o navegador
+       atende o pedido do construtor e 48 kHz quando o ignora. Chamar isso de
+       "original" mediria o arquivo e leria o navegador — e as duas coisas so
+       coincidem no navegador que ignora. Ela entra junto porque decide se houve
+       reamostragem, e a reamostragem e o pedaco caro. */
+    marco('audio.decodificado', { taxaDecodificada: dec.sampleRate,
+                                  reamostrou: dec.sampleRate !== SR_ASR,
+                                  ms_decodificacao: Math.round(performance.now() - tDec) });
+    numero('segundosDeAudio', pronto.length / SR_ASR);
+    return pronto;
   }
 
   /* A mistura soma TODOS os canais, e não os dois primeiros.
@@ -12242,6 +12294,47 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
      o texto pronto, e para o idioma que a pessoa quiser. */
   const tarefaAsr = () => 'transcribe';
 
+  /* ---- AS MEDIDAS, NUM LUGAR SÓ ----
+   *
+   * O arquivo tinha 39 `performance.now()` espalhados, e ZERO `performance.mark()`.
+   * A diferença não é de estilo: um `now()` avulso calcula uma diferença, mostra
+   * numa frase e joga fora. O número existe no instante e some. Não dá para
+   * comparar duas execuções, nem duas máquinas, nem a mesma máquina antes e
+   * depois de uma mudança — e sem isso, trocar janela, modelo ou runtime é
+   * palpite com cara de decisão.
+   *
+   * `performance.mark()` custa o mesmo e resolve os dois: ele aparece na linha
+   * do tempo do navegador de graça, e fica guardado aqui num formato que uma
+   * régua consegue ler.
+   *
+   * NADA DISTO SAI DA MÁQUINA. Não é telemetria: é um bloco de números que o
+   * `window.__medidas()` devolve para quem estiver medindo. A medição que sai
+   * daqui continua sendo a de sempre — três eventos, sem identificador. */
+  const MEDIDAS = { versao: 1, marcos: [], numeros: {} };
+  /* `extra` entra ANTES do nome e do carimbo, e nao depois. Escrito ao
+     contrario, um marco que carregasse um campo `ms` proprio — e o da escada de
+     degraus carregava — sobrescrevia o instante com uma DURACAO, e a linha do
+     tempo passava a andar para tras. Apanhei disso: o teste da ordem reprovou. */
+  function marco(nome, extra){
+    try { performance.mark('ws:' + nome); } catch (e) {}
+    MEDIDAS.marcos.push(Object.assign({}, extra || {},
+                                      { nome, ms: Math.round(performance.now()) }));
+  }
+  /* `numero`, e nao `medida`: ha um `medida` local no montador de PDF que
+     mede imagem. Ele ganha do global no escopo dele — mas dois nomes iguais
+     com significados diferentes no mesmo arquivo e armadilha de leitura. */
+  function numero(chave, valor){
+    if (valor !== null && valor !== undefined && valor === valor) MEDIDAS.numeros[chave] = valor;
+  }
+  /* O primeiro de um nome, e não todos: "quando saiu o primeiro texto" é uma
+     pergunta com uma resposta só, e registrá-la a cada janela transformaria a
+     medida em ruído do tamanho do vídeo. */
+  const marcosUnicos = new Set();
+  function marcoUmaVez(nome, extra){
+    if (marcosUnicos.has(nome)) return;
+    marcosUnicos.add(nome); marco(nome, extra);
+  }
+
   /* Relógio do modelo: segundos de áudio que entraram, contra tempo de parede
      gasto. O download não entra na conta — é outra medida, e misturar as duas
      esconderia justamente o que se quer ver. */
@@ -12254,6 +12347,63 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
              audio: relogio.audio, segundos: relogio.ms / 1000,
              vezes: relogio.ms > 0 ? relogio.audio / (relogio.ms / 1000) : null };
   }
+
+  /* Tudo o que foi medido, num objeto só, para quem estiver comparando.
+   *
+   * `enviadoSobreOriginal` é a razão que o plano pedia por último e a mais
+   * difícil de obter de outro jeito: quantos segundos de áudio o modelo REALMENTE
+   * recebeu, divididos pelos segundos que o vídeo tinha. Ela é o que diz se a
+   * compactação de silêncio está fazendo diferença — e é a conta que precisa
+   * existir ANTES de alguém mexer nas margens dela. */
+  /* A escada de degraus, somada. O `degraus` que ja existia serve ao
+     diagnostico — ele conta a HISTORIA de cada tentativa, com o erro inteiro.
+     Aqui a pergunta e outra e cabe em quatro numeros: quantos degraus a
+     maquina desceu antes de montar, quanto disso foi rede, quanto foi sessao,
+     e quantos megabytes custou. E o par que decide se a proxima mudanca deve
+     mexer na ORDEM da escada ou no tamanho do arquivo. */
+  function escadaSomada(){
+    const ds = MEDIDAS.marcos.filter(m => m.nome === 'modelo.degrau');
+    if (!ds.length) return {};
+    const soma = c => ds.reduce((x, m) => x + (m[c] || 0), 0);
+    const venceu = ds.filter(m => m.ok).pop() || null;
+    /* MAIS DE UMA CONSTRUCAO NA MESMA ABA e o caso normal, e nao a excecao: a
+       cortesia adianta o modelo enquanto a pessoa ainda escolhe o arquivo, e
+       trocar de modelo na tela monta outro. A regua mostrou duas escadas
+       inteiras numa carga so. Por isso o relogio da escada e o da ULTIMA — a
+       que produziu o modelo em uso —, e o numero de construcoes vai junto:
+       somar as duas responderia uma pergunta que ninguem fez. */
+    const inicios = MEDIDAS.marcos.filter(m => m.nome === 'modelo.inicio');
+    const ini = inicios[inicios.length - 1] || null;
+    const pronto = MEDIDAS.marcos.filter(m => m.nome === 'modelo.pronto').pop();
+    return {
+      construcoes: inicios.length,
+      desistencias: MEDIDAS.marcos.filter(m => m.nome === 'modelo.desistiu').length,
+      degrausTentados: ds.length,
+      degrausDesperdicados: ds.filter(m => !m.ok).length,
+      degrauQueVenceu: venceu ? venceu.rotulo : null,
+      msDaEscada: (ini && pronto) ? pronto.ms - ini.ms : null,
+      msBaixando: soma('ms_download'),
+      msMontandoSessao: soma('ms_sessao'),
+      /* Os bytes de TODOS os degraus, inclusive os que falharam. Foi assim que
+         uma maquina real gastou 353 MB antes de uma sessao subir: o numero que
+         importa nao e o do arquivo que venceu, e a soma do caminho. */
+      mbBaixados: +(soma('bytes') / 1048576).toFixed(1),
+    };
+  }
+
+  try {
+    window.__medidas = () => {
+      const d = desempenho();
+      const orig = MEDIDAS.numeros.segundosDeAudio;
+      return JSON.parse(JSON.stringify(Object.assign({}, MEDIDAS, {
+        numeros: Object.assign({}, MEDIDAS.numeros, escadaSomada(), {
+          motor: d.motor, linhasDoWasm: d.linhas, isolado: d.isolado,
+          audioInferido: d.audio, paredeDaInferencia: d.segundos, vezesTempoReal: d.vezes,
+          enviadoSobreOriginal: (orig > 0 && d.audio > 0) ? d.audio / orig : null,
+        }),
+      })));
+    };
+  } catch (e) {}
 
   /* A frase que aparece junto do resultado. As linhas entram no texto de
      propósito: quando a hospedagem deixa de mandar os cabeçalhos de isolamento
@@ -12599,8 +12749,26 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     let t0 = performance.now();
     let pisoPct = 0;
     let degrauN = 0;
+    /* ---- OS TRES TEMPOS DE UM DEGRAU ----
+
+       Um degrau lento e ambiguo: rede ruim e maquina ruim rendem o mesmo
+       cronometro, e a decisao que sai de cada uma e oposta — uma pede arquivo
+       menor, a outra pede outra sessao. Por isso o degrau guarda TRES tempos:
+       o que gastou ate o ultimo byte chegar, o que gastou DEPOIS dele (montar
+       a sessao do ONNX Runtime), e o total. Num cache quente o primeiro e
+       zero, e o degrau inteiro e sessao. */
+    let ultimoProgresso = 0, bytesDoDegrau = 0;
     const novoDegrau = () => {
       arquivos = {}; t0 = performance.now(); pisoPct = 0; degrauN++;
+      ultimoProgresso = 0; bytesDoDegrau = 0;
+    };
+    const marcarDegrau = (rotulo, ok, alvo) => {
+      const fim = performance.now();
+      marco('modelo.degrau', { n: degrauN, rotulo, ok, alvo: alvo || null,
+        ms_total: Math.round(fim - t0),
+        ms_download: ultimoProgresso ? Math.round(ultimoProgresso - t0) : 0,
+        ms_sessao: Math.round(fim - (ultimoProgresso || t0)),
+        bytes: bytesDoDegrau });
     };
     /* Quais arquivos o degrau pediu de verdade. Sem isto, dizer "o degrau fp32
        falhou" não diz se ele chegou a pedir o arquivo fp32 — e não chegava. */
@@ -12622,6 +12790,10 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
         arquivos[p.file] = { loaded: p.loaded || 0, total: p.total || 0 };
         let l = 0, tt = 0;
         for (const k in arquivos) { l += arquivos[k].loaded; tt += arquivos[k].total; }
+        /* Antes do desvio de `tt === 0`: um degrau que baixou sem o servidor
+           dizer o tamanho baixou do mesmo jeito, e sem carimbar aqui ele
+           apareceria na regua como se fosse cache quente. */
+        ultimoProgresso = performance.now(); bytesDoDegrau = l;
 
         /* `tt === 0` quer dizer "o servidor ainda não disse o tamanho". Isto
            virava `pct = 0`, e a tela escrevia **0%** — que se lê como travado,
@@ -12659,7 +12831,10 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       }
     };
 
-    if (await modeloEmCache(modelId)) { prog('?'); st(t('modelCache')); }
+    const cacheQuente = await modeloEmCache(modelId);
+    marco('modelo.inicio', { modelo: modelId, cacheQuente });
+    numero('cacheQuente', cacheQuente);
+    if (cacheQuente) { prog('?'); st(t('modelCache')); }
 
     /* Sem isto o navegador trata o modelo baixado como cache descartável e o
        apaga quando o disco aperta — e o próximo vídeo baixa tudo de novo. */
@@ -12689,12 +12864,16 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
           Object.assign({ progress_callback }, lembrado.opcoes));
         libMod = mod0; tjsEmUso = lembrado.lib;
         motorEmUso = lembrado.motor; modeloEmUso = lembrado.alvo;
+        marcarDegrau('combinação lembrada', true, lembrado.alvo);
+        marco('modelo.pronto', { motor: motorEmUso, alvo: modeloEmUso,
+                                 degraus: degrauN, cacheQuente });
         degraus.push({ rotulo: 'combinação lembrada', ok: true, alvo: lembrado.alvo,
                        amb: curto(lembrado.lib) + ' · runtime ' + lembrado.runtime +
                             (lembrado.proxy ? ' · fora do fio principal' : ''),
                        ort: versaoOrt(mod0), linhas: linhasDoWasm(), arqs: [...pedidos] });
         return pp;
       } catch (e) {
+        marcarDegrau('combinação lembrada', false, lembrado.alvo);
         degraus.push({ rotulo: 'combinação lembrada', ok: false, alvo: lembrado.alvo,
                        amb: curto(lembrado.lib) + ' · runtime ' + lembrado.runtime +
                             (lembrado.proxy ? ' · fora do fio principal' : ''),
@@ -12711,8 +12890,14 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       let mod;
       try {
         if (a > 0) st(t('trocandoMotor'));
+        /* A biblioteca que nao carrega e um degrau como os outros — e numa
+           maquina sem saida para o CDN e o UNICO que existe. Sem contar aqui, a
+           medicao dessa maquina sairia com a escada vazia, que se le como "nem
+           tentou" em vez de "tentou tres e nenhuma chegou". */
+        novoDegrau();
         mod = await importarFresco(amb.lib);
       } catch (e) {
+        marcarDegrau('biblioteca ' + curto(amb.lib), false, null);
         degraus.push({ rotulo: 'biblioteca ' + curto(amb.lib), ok: false,
                        erro: (e && e.message) || String(e), linhas: 0, arqs: [] });
         continue;
@@ -12804,12 +12989,15 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
             modeloEmUso = alvo;
             lembrarMotor({ v: MOTOR_VER, modelId, lib: amb.lib, runtime: amb.runtime, proxy: !!amb.proxy,
                            alvo, opcoes: tent.opcoes, motor: tent.motor });
+            marcarDegrau(rotuloTentativa(tent), true, alvo);
+            marco('modelo.pronto', { motor: tent.motor, alvo, degraus: degrauN, cacheQuente });
             degraus.push({ rotulo: rotuloTentativa(tent), ok: true, amb: ambRot,
                            ort: versaoOrt(mod), linhas: passe ? 1 : linhasDoWasm(),
                            alvo, arqs: [...pedidos] });
             return pp;
           } catch (e) {
             ultimo = (e && e.message) || String(e);
+            marcarDegrau(rotuloTentativa(tent), false, alvo);
             degraus.push({ rotulo: rotuloTentativa(tent), ok: false, amb: ambRot,
                            ort: versaoOrt(mod), linhas: passe ? 1 : linhasDoWasm(),
                            erro: ultimo, alvo, arqs: [...pedidos] });
@@ -12828,6 +13016,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
 
     /* A mensagem amigável NUNCA substitui a técnica: ela vem na frente, e o
        texto do runtime vai junto entre parênteses. */
+    marco('modelo.desistiu', { degraus: degrauN, cacheQuente });
     ultimoErroModelo = ultimo || 'não consegui montar o modelo';
     if (ERRO_SESSAO.test(ultimo || '')) throw new Error(t('erroSessao') + ' (' + ultimo + ')');
     throw new Error(ultimoErroModelo);
@@ -13037,6 +13226,10 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     try {
       const r = await pipe(dados, opts);
       relogio.audio += seg; relogio.ms += performance.now() - t0;
+      /* O PRIMEIRO TEXTO. É a medida que descreve a espera de quem está
+         olhando: o resto do vídeo pode levar quarenta minutos, mas o que decide
+         se a pessoa fecha a aba é quanto tempo a tela ficou muda. */
+      marcoUmaVez('texto.primeiro', { ms_desdeOInicio: Math.round(performance.now()) });
       return r;
     } catch (e) {
       const msg = (e && e.message) || String(e);

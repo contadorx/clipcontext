@@ -127,6 +127,14 @@ export async function POST(req: Request) {
     return new NextResponse('assinatura', { status: 401 });
   }
 
+  /* TRATADO OU IGNORADO — e o registro tem que saber a diferença.
+     O `anotar` marcava `ok` em tudo que não estourasse, inclusive no que caiu
+     por todos os ramos sem ninguém fazer nada. Num diário de auditoria isso é
+     pior que silêncio: "ok" lê-se como "tratei", e o dia em que um evento que
+     importa parar de casar com os ramos daqui, o diário vai dizer que estava
+     tudo bem. `venda.mjs` cobrava o silêncio total; o silêncio total era o
+     comportamento de antes do B2, e perdê-lo sem trocar por nada era o defeito. */
+  let tratado = false;
   try {
     if (ev.type === 'checkout.session.completed') {
       const s = ev.data.object as Stripe.Checkout.Session;
@@ -135,6 +143,7 @@ export async function POST(req: Request) {
         const assinatura = await stripe().subscriptions.retrieve(id);
         await gravarAssinatura(assinatura, s.customer_details?.email || s.customer_email);
       }
+      tratado = true;
     } else if (ev.type.startsWith('customer.subscription.')) {
       const a = ev.data.object as Stripe.Subscription;
       /* `deleted` chega com o status que a assinatura tinha antes de morrer;
@@ -142,6 +151,7 @@ export async function POST(req: Request) {
          reescrito para o que ele de fato significa. */
       if (ev.type === 'customer.subscription.deleted') a.status = 'canceled';
       await gravarAssinatura(a);
+      tratado = true;
     } else if (STATUS_DA_FATURA[ev.type]) {
       const f = ev.data.object as Stripe.Invoice;
       await rpc('walkstamp_fatura_da_stripe', {
@@ -155,6 +165,7 @@ export async function POST(req: Request) {
         p_vence: f.due_date ? new Date(f.due_date * 1000).toISOString().slice(0, 10) : null,
         p_url: f.hosted_invoice_url || null,
       });
+      tratado = true;
     }
   } catch (e) {
     /* 500 faz a Stripe tentar de novo, que é o que se quer quando o banco
@@ -164,6 +175,6 @@ export async function POST(req: Request) {
     return new NextResponse(String(e).slice(0, 200), { status: 500 });
   }
 
-  await anotar(ev, 'ok');
+  await anotar(ev, tratado ? 'ok' : 'ignorado');
   return new NextResponse('ok', { status: 200 });
 }

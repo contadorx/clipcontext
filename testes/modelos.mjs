@@ -89,7 +89,19 @@ console.log('\n[2] a fala vira o rascunho da anotação');
   const n1=await pg.locator('#thumbs input.nota').nth(1).inputValue();
   ok('a anotação vazia foi preenchida com a fala', /ME21N|transacao/.test(n0), n0.slice(0,40));
   ok('o que a pessoa escreveu não foi sobrescrito', n1==='escrito à mão, não pode ser sobrescrito');
-  ok('a mensagem diz quantas foram', /anotaç/.test(await pg.locator('#pdfStatus').textContent()));
+  /* ESPERAR A MENSAGEM, e não fotografá-la.
+     `#pdfStatus` é uma linha só, com vários donos: o fim da varredura escreve
+     "3 quadros prontos" ali, e numa máquina ocupada essa escrita chega DEPOIS
+     do clique — apagando a mensagem que este teste veio conferir. Medido: com a
+     esteira carregando a máquina, a leitura única reprovava; sozinho, passava.
+     Isso é defeito da régua, e não do produto: quem lê um campo de último
+     escritor tem que esperar o texto aparecer, e não amostrá-lo uma vez. */
+  let notaTxt = '';
+  const viuNota = await pg.waitForFunction(
+    () => /anotaç/.test(document.getElementById('pdfStatus').textContent || ''),
+    null, { timeout: 8000 }).then(() => true).catch(() => false);
+  notaTxt = await pg.locator('#pdfStatus').textContent();
+  ok('a mensagem diz quantas foram', viuNota, 'pdfStatus=' + JSON.stringify(notaTxt));
 }
 
 console.log('\n[3] trocar o modelo reconfigura os quatro controles');

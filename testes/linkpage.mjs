@@ -83,9 +83,17 @@ await pg.waitForTimeout(300);
   const time = await pg.locator('.plan').nth(1).innerHTML();
   ok('está no cartão Free', /Link pronto/.test(gratis), gratis.match(/Link[^<]*/)||'');
   ok('saiu do cartão pago', !/Link de equipe/.test(time));
+  /* PELA ALÇA, E NÃO PELA PROSA. O que este teste quer saber é se a identidade
+     continua no cartão pago depois de o link ter descido para o Free — e isso é
+     uma pergunta sobre QUAL item está lá, não sobre como ele está escrito. A
+     versão anterior citava a frase inteira ("Identificar o documento: logotipo e
+     nome do cliente") e reprovou quando o B5 reescreveu o cartão em torno da
+     rodada: o item continuava lá, com outras palavras. A alça `data-f` existe
+     desde o B1 justamente para isso, e é o catálogo que garante que ela aponta
+     para um recurso de verdade. */
   ok('e o Personal continua com a identidade',
-     /Identificar o documento:<\/b> logotipo e nome do cliente/.test(time),
-     (time.match(/Identificar[^<]*/) || ['(não achou)'])[0]);
+     /data-f="modeloProprio"[^>]*>[^<]*[Ll]ogotipo/.test(time),
+     (time.match(/data-f="modeloProprio"[^<]*/) || ['(não achou)'])[0]);
   /* O que o cartão pago vende do vocabulário é a lista ficar GRAVADA, e não o
      acesso: aplicar os termos continua sendo de todo mundo. Prometer no pago o
      que o produto entrega de graça é a contradição que ninguém reclama — e é

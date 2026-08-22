@@ -1,0 +1,253 @@
+/* A AFERIÇÃO DA RÉGUA — os marcos existem, e dizem a verdade.
+ *
+ * `testes/regua.mjs` mede; este arquivo prova que o que ela lê tem sentido. Sem
+ * ele, a instrumentação seria a única parte do produto sem régua — e uma medida
+ * errada é pior que medida nenhuma, porque decide.
+ *
+ * Ele roda SEM REDE. A biblioteca do Whisper é falsificada, como em
+ * `parar.mjs` e `modelo.mjs`, e a falsificação faz de propósito o que a máquina
+ * real faz por acidente: OS DOIS PRIMEIROS DEGRAUS FALHAM. É esse o caso que
+ * interessa — a escada existe porque máquinas reais descem por ela, e uma
+ * medição que só soubesse contar o degrau vencedor esconderia justamente o
+ * desperdício que se quer enxergar (uma máquina real gastou 353 MB antes de
+ * uma sessão subir).
+ *
+ * O que este arquivo cobra:
+ *
+ *   1. os oito marcos que o plano pediu existem e estão em ordem;
+ *   2. a escada registra os degraus PERDIDOS, com megabytes e tudo;
+ *   3. cada degrau separa o tempo de rede do tempo de montar a sessão;
+ *   4. cache quente e cache frio saem diferentes na medida;
+ *   5. a razão "áudio enviado ÷ áudio original" existe e é plausível;
+ *   6. nada disso sai da máquina;
+ *   7. nenhum erro de JS.
+ *
+ *   node testes/marcos.mjs
+ */
+import { chromium } from './_navegador.mjs';
+import http from 'http'; import fs from 'fs';
+import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+
+const html = fs.readFileSync(RAIZ_WS + '/public/app.html', 'utf8');
+const srv = http.createServer((q, r) => {
+  if (q.url.startsWith('/_vercel/')) {
+    r.writeHead(200, { 'Content-Type': 'text/javascript' }); return r.end('');
+  }
+  r.writeHead(200, { 'Content-Type': 'text/html' }); r.end(html);
+});
+await new Promise(r => srv.listen(8973, r));
+
+let falhas = 0;
+const ok = (n, c, e) => {
+  console.log((c ? '  ok   ' : '  FALHA') + '  ' + n + (e ? '  → ' + e : ''));
+  if (!c) falhas++;
+};
+
+/* A ESCADA FALSIFICADA.
+ *
+ * Duas quedas e uma subida. As quedas usam a mensagem de erro de sessão de
+ * verdade — é a que o produto reconhece — e a subida vem com progresso de
+ * download e uma pausa DEPOIS do último byte, que é o que separa "esperei a
+ * rede" de "esperei o runtime montar". Sem essa pausa, `ms_sessao` sairia zero
+ * e o teste passaria sem testar. */
+const BIBLIOTECA_FALSA = `
+globalThis.__degrau = globalThis.__degrau || 0;
+export const env = {
+  allowLocalModels: true, allowRemoteModels: true,
+  backends: { onnx: { wasm: { numThreads: 1, wasmPaths: undefined, proxy: false } } }
+};
+const dorme = ms => new Promise(r => setTimeout(r, ms));
+export async function pipeline(tarefa, modelo, opcoes){
+  const n = globalThis.__degrau++;
+  if (n < 2) {
+    await dorme(30);
+    throw new Error('Failed to load model because protobuf parsing failed. (degrau ' + n + ')');
+  }
+  /* Download em três pedaços, com o total conhecido desde o primeiro: é o
+     caminho comum, e o que exercita o piso da porcentagem. */
+  const total = 12 * 1048576;
+  for (const parte of [0.3, 0.7, 1]) {
+    await dorme(60);
+    if (opcoes && opcoes.progress_callback)
+      opcoes.progress_callback({ file: 'onnx/model_q8.onnx', status: 'progress',
+                                 loaded: Math.round(total * parte), total });
+  }
+  /* A montagem da sessão, depois do último byte. */
+  await dorme(250);
+  const p = async () => { await dorme(40); return { text: 'fala de prova', chunks: [] }; };
+  p.dispose = async () => {};
+  return p;
+}
+`;
+
+const br = await chromium.launch({ executablePath: CHROME_WS });
+
+/** Uma corrida inteira: abre, carrega, transcreve, devolve `__medidas()`. */
+async function corrida({ ctx, semearCache }) {
+  const pg = await ctx.newPage();
+  const erros = []; pg.on('pageerror', e => erros.push(e.message));
+  const enviados = [];
+  await pg.route('**/rpc/walkstamp_evento', r => {
+    enviados.push(r.request().postData() || '');
+    r.fulfill({ status: 200, headers: { 'access-control-allow-origin': '*' }, body: 'null' });
+  });
+  await pg.route('**/@huggingface/transformers**', r => r.fulfill({
+    status: 200, headers: { 'content-type': 'text/javascript' }, body: BIBLIOTECA_FALSA }));
+  await pg.goto('http://localhost:8973/app.html?lang=pt');
+
+  /* O CACHE QUENTE, SEMEADO À MÃO. A biblioteca falsa não escreve na Cache
+     Storage — ela nem baixa nada de verdade —, então o único jeito honesto de
+     provar que o produto DISTINGUE quente de frio é pôr lá dentro o que um
+     download de verdade poria: uma entrada num cache com "transformers" no
+     nome, cuja URL contém o modelo escolhido. É o que `modeloEmCache` procura. */
+  if (semearCache) {
+    await pg.evaluate(async () => {
+      const id = document.getElementById('model').value;
+      const c = await caches.open('transformers-cache');
+      await c.put(new Request('https://exemplo.invalido/' + id + '/onnx/model_q8.onnx'),
+                  new Response('x'));
+    });
+  }
+
+  /* A varredura não é o assunto: três quadros bastam, e mexer nos controles já
+     cancela o agendamento automático dela. */
+  await pg.selectOption('#mode', 'count').catch(() => {});
+  await pg.fill('#count', '3').catch(() => {});
+  await pg.locator('#recTr').uncheck().catch(() => {});
+  await pg.setInputFiles('#file', '/tmp/amostra.webm');
+  await pg.waitForFunction(() => !document.getElementById('auto').disabled,
+                           null, { timeout: 120000 });
+  await pg.locator('#auto').click();
+  await pg.waitForFunction(
+    () => !document.getElementById('auto').disabled &&
+          !document.getElementById('tr').readOnly,
+    null, { timeout: 180000 });
+  const m = await pg.evaluate(() => window.__medidas());
+  /* Os marcos do navegador, e não só o nosso vetor: `performance.mark()` é
+     metade do valor — é ele que aparece na linha do tempo da ferramenta de
+     desenvolvimento de quem for investigar. */
+  const doNavegador = await pg.evaluate(() =>
+    performance.getEntriesByType('mark').map(e => e.name).filter(n => n.startsWith('ws:')));
+  await pg.close();
+  return { m, erros, enviados, doNavegador };
+}
+
+const ctx = await br.newContext({ viewport: { width: 1250, height: 980 } });
+const frio = await corrida({ ctx, semearCache: false });
+const M = frio.m, nums = M.numeros;
+const nomes = M.marcos.map(x => x.nome);
+const primeiro = n => M.marcos.find(x => x.nome === n);
+
+console.log('[1] os oito marcos que o plano pediu');
+ok('leitura do arquivo', !!primeiro('arquivo.lido'),
+   nomes.join(', '));
+ok('decodificação do áudio', !!primeiro('audio.decodificado'));
+ok('cache: frio ou quente, dito no começo', !!primeiro('modelo.inicio'));
+ok('sessão do ONNX: cada degrau tem o seu tempo',
+   M.marcos.some(x => x.nome === 'modelo.degrau' && x.ms_sessao > 0));
+ok('primeiro texto', !!primeiro('texto.primeiro'));
+ok('inferência total', typeof nums.paredeDaInferencia === 'number' && nums.paredeDaInferencia > 0,
+   String(nums.paredeDaInferencia));
+ok('a escada de fallback, degrau a degrau', nums.degrausTentados >= 3, String(nums.degrausTentados));
+ok('áudio enviado ÷ áudio original', typeof nums.enviadoSobreOriginal === 'number',
+   String(nums.enviadoSobreOriginal));
+ok('e eles estão em ordem no tempo',
+   M.marcos.every((x, i) => i === 0 || x.ms >= M.marcos[i - 1].ms));
+ok('e aparecem na linha do tempo do navegador, com prefixo próprio',
+   frio.doNavegador.includes('ws:arquivo.lido') && frio.doNavegador.includes('ws:modelo.pronto'),
+   frio.doNavegador.join(', '));
+
+console.log('[2] a escada registra o que PERDEU, e não só o que venceu');
+const degraus = M.marcos.filter(x => x.nome === 'modelo.degrau');
+ok('os dois degraus que caíram estão lá', degraus.filter(d => !d.ok).length >= 2,
+   JSON.stringify(degraus.map(d => [d.rotulo, d.ok])));
+ok('e o que venceu também', degraus.some(d => d.ok));
+ok('o resumo conta os dois', nums.degrausTentados === degraus.length &&
+   nums.degrausDesperdicados === degraus.filter(d => !d.ok).length,
+   nums.degrausTentados + '/' + nums.degrausDesperdicados);
+ok('o degrau vencedor tem nome', !!nums.degrauQueVenceu, String(nums.degrauQueVenceu));
+/* A cortesia adianta o modelo enquanto a pessoa escolhe o arquivo, e trocar o
+   modelo na tela monta outro: mais de uma construcao por aba e o caso normal. A
+   regua conta quantas houve — sem isso, duas escadas somadas passariam por uma
+   escada comprida. */
+ok('e a régua conta quantas vezes o modelo foi montado',
+   nums.construcoes >= 1 && nums.desistencias === 0,
+   nums.construcoes + ' construção(ões), ' + nums.desistencias + ' desistência(s)');
+ok('os megabytes somados são os do CAMINHO, não os do arquivo que venceu',
+   nums.mbBaixados >= 11 && nums.mbBaixados <= 13, String(nums.mbBaixados));
+
+console.log('[3] rede e sessão são tempos diferentes');
+const venc = degraus.filter(d => d.ok).pop();
+ok('o degrau vencedor baixou e montou', venc.ms_download > 0 && venc.ms_sessao > 0,
+   JSON.stringify(venc));
+ok('e o total não é menor que as partes', venc.ms_total >= venc.ms_sessao,
+   venc.ms_total + ' vs ' + venc.ms_sessao);
+ok('a montagem da sessão foi vista como o que é (≥200 ms de propósito)',
+   venc.ms_sessao >= 200, String(venc.ms_sessao));
+ok('os degraus que caíram não inventaram download',
+   degraus.filter(d => !d.ok).every(d => d.ms_download === 0 && d.bytes === 0),
+   JSON.stringify(degraus.filter(d => !d.ok)));
+ok('e a soma da escada bate com o começo e o fim',
+   nums.msDaEscada > 0 && nums.msDaEscada >= nums.msBaixando,
+   nums.msDaEscada + ' vs ' + nums.msBaixando);
+
+console.log('[4] o áudio que o modelo recebeu, contra o que o vídeo tinha');
+ok('os segundos de áudio foram medidos', nums.segundosDeAudio > 0, String(nums.segundosDeAudio));
+ok('a razão é plausível', nums.enviadoSobreOriginal > 0 && nums.enviadoSobreOriginal <= 1.05,
+   String(nums.enviadoSobreOriginal));
+ok('a decodificação disse a taxa de saída, o custo e se reamostrou',
+   primeiro('audio.decodificado').taxaDecodificada > 0 &&
+   primeiro('audio.decodificado').ms_decodificacao >= 0 &&
+   typeof primeiro('audio.decodificado').reamostrou === 'boolean',
+   JSON.stringify(primeiro('audio.decodificado')));
+
+console.log('[5] cache quente é uma medida diferente de cache frio');
+ok('a primeira corrida foi fria', nums.cacheQuente === false, String(nums.cacheQuente));
+const quente = await corrida({ ctx, semearCache: true });
+ok('a segunda, com o modelo guardado, foi quente',
+   quente.m.numeros.cacheQuente === true, String(quente.m.numeros.cacheQuente));
+ok('e isso aparece no marco de começo, e não só no resumo',
+   quente.m.marcos.find(x => x.nome === 'modelo.inicio').cacheQuente === true);
+
+console.log('[6] nada disto sai da máquina');
+const corpos = frio.enviados.concat(quente.enviados).join(' ');
+ok('nenhum marco viajou na medição',
+   !/modelo\.degrau|ms_sessao|mbBaixados|arquivo\.lido/.test(corpos),
+   corpos.slice(0, 200));
+/* E mais: desta máquina não sai marco NENHUM. O produto passou a calar a
+   medição quando a página vem de `localhost` — porque a esteira estava entrando
+   na base de produção como gente. Só `testes/medicao.mjs` abre a porta de
+   serviço, e é ele quem cobra o conteúdo do que é enviado. */
+ok('e nem os três de sempre: de localhost a medição fica muda',
+   corpos === '', corpos.slice(0, 200));
+
+console.log('[7] sem erro de JS');
+ok('a corrida fria', frio.erros.length === 0, frio.erros.join(' | '));
+ok('a corrida quente', quente.erros.length === 0, quente.erros.join(' | '));
+
+/* ---- A TRAVA DA PORTA DE SERVIÇO ----
+ *
+ * Três arquivos precisam ver a medição ACONTECER — eles a usam como canal de
+ * observação do produto — e por isso abrem `__medirDaqui`. O risco é óbvio: um
+ * quarto arquivo abre a porta, esquece de interceptar a rota, e a esteira volta
+ * a escrever na base de produção sem ninguém notar. Foi exatamente esse
+ * descuido (sem porta nenhuma, na verdade) que pôs 43 marcos de teste no funil.
+ *
+ * A regra é estática e curta: quem abre a porta tampa o ralo. */
+console.log('[8] quem abre a porta de serviço tampa o ralo');
+{
+  const dir = new URL('.', import.meta.url).pathname;
+  const abrem = fs.readdirSync(dir).filter(f => f.endsWith('.mjs'))
+    .filter(f => /__medirDaqui\s*=\s*true/.test(fs.readFileSync(dir + f, 'utf8')));
+  const semRota = abrem.filter(f =>
+    !/route\(\s*['"`]\*\*\/rpc\/walkstamp_evento/.test(fs.readFileSync(dir + f, 'utf8')));
+  ok('todo arquivo que abre a porta intercepta a rota da medição',
+     semRota.length === 0, semRota.join(', '));
+  ok('e não são muitos: só quem observa a medição precisa dela',
+     abrem.length <= 3, abrem.length + ': ' + abrem.join(', '));
+}
+
+
+await ctx.close(); await br.close(); srv.close();
+console.log(falhas ? '\n' + falhas + ' falha(s)' : '\ntudo certo');
+process.exit(falhas ? 1 : 0);

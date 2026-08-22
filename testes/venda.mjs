@@ -172,7 +172,25 @@ console.log('\n[6] o que a Stripe manda e não nos interessa não vira nada');
   /* 200 de propósito: a Stripe reenvia o que não recebe 2xx, e recusar o que
      não interessa é combinar uma fila de reentrega que nunca vai passar. */
   ok('responde 200 e ignora', r.status === 200, String(r.status));
-  ok('sem tocar no banco', chamadas.length === 0, JSON.stringify(chamadas).slice(0, 120));
+  /* O QUE MUDOU AQUI, E POR QUE. Antes do B2 este evento não produzia chamada
+     nenhuma, e a asserção era "banco intocado". O B2 pôs um diário de auditoria
+     — foi ele que revelou que um dos dois webhooks nunca concedeu plano — e o
+     diário registra TODO evento, inclusive o que não interessa: um diário com
+     buracos não serve para responder "quem tratou o quê".
+
+     Então o que se cobra deixa de ser silêncio e passa a ser precisão: o único
+     registro é o do diário, ele diz `ignorado` e não `ok`, e nenhum efeito de
+     negócio acontece. "ok" para um evento que ninguém tratou seria pior que
+     silêncio — leria-se como "tratei". */
+  ok('só o diário de auditoria foi escrito', chamadas.length === 1,
+     JSON.stringify(chamadas).slice(0, 160));
+  const diario = chamadas[0] || {};
+  ok('e é o diário mesmo', diario.funcao === 'walkstamp_stripe_entregue', diario.funcao);
+  ok('que diz IGNORADO, e não "ok"', (diario.args || {}).p_resultado === 'ignorado',
+     JSON.stringify(diario.args || {}));
+  ok('nenhum efeito de negócio',
+     !chamadas.some(x => /assinatura|fatura|plano/.test(x.funcao || '')),
+     JSON.stringify(chamadas.map(x => x.funcao)));
 }
 
 /* --------------------------------------------------- a área do cliente */
