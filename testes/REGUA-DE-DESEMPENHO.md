@@ -115,6 +115,41 @@ carga só**, dez degraus, antes mesmo de o arquivo ser lido. É a cortesia
 adiantando o modelo. Numa máquina com rede isso é um acerto; numa sem, é o dobro
 do tempo até a mensagem de erro.
 
+## O texto: antes e depois de mexer no motor
+
+```
+node testes/regua.mjs --base=/tmp/base.json     # grava a linha de base
+# … mexe no motor …
+node testes/regua.mjs --wer=/tmp/base.json      # compara com ela
+```
+
+**Duas perguntas diferentes usam o mesmo instrumento**, e vale não confundi-las.
+
+WER contra uma transcrição **humana** responde *"o modelo entende esta fala?"*.
+Para isso é preciso áudio real com texto conferido à mão, e isso não se fabrica:
+as amostras desta régua têm um tom no lugar da fala. Quem tiver esse material
+ganha a leitura com o mesmo comando.
+
+WER contra a **linha de base** responde a pergunta que decide: *"o que eu acabei
+de mexer alterou o texto?"*. É essa que o plano pede antes de tocar na
+compactação de silêncio — a dúvida não é se o Whisper é bom, é se comprimir o
+silêncio piora o que ele já produzia. E essa leitura sai sem transcrição humana
+nenhuma.
+
+**A chave da comparação leva o `sha256` da amostra.** Comparar o texto de hoje
+com o de uma amostra diferente daria um WER alto que não quer dizer nada — e é
+o tipo de engano que sobrevive semanas, porque o número "parece ruim mesmo".
+
+**Remoção sai destacada dos outros erros.** Trocar trinta palavras espalhadas e
+perder um parágrafo inteiro têm o mesmo tamanho na conta, e consequências
+opostas. Quando o assunto é comprimir silêncio, é a segunda que importa — por
+isso o veredito traz `fracaoRemovida` junto do WER.
+
+`node testes/wer.mjs` afere o instrumento com casos de resposta conhecida: uma
+substituição em quatro palavras é 0,25; inventar texto não dilui o erro, porque
+o denominador é a referência; e doze mil palavras saem em segundos, porque a
+conta guarda duas linhas em vez da matriz inteira.
+
 ## A aferição da régua
 
 ```

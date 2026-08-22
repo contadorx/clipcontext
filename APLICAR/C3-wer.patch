@@ -1,0 +1,509 @@
+From ba6aa75d2cc29b3ac19a16c049f24abeebcb9d98 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Sat, 22 Aug 2026 09:05:45 +0000
+Subject: [PATCH] O WER, que e o portao da compactacao de silencio
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+O pico de memoria apontou para o buffer de audio — que cresce linear com a
+duracao enquanto a sessao do modelo e fixa. Se isso se confirmar com modelo de
+verdade, comprimir silencio ataca o PICO, e nao so o tempo. Mas nao da para
+mexer nisso sem uma forma de saber se o texto piorou, e ela nao existia.
+
+DUAS PERGUNTAS DIFERENTES USAM O MESMO INSTRUMENTO, e confundi-las e o erro
+comum. WER contra transcricao HUMANA responde "o modelo entende esta fala?" —
+precisa de audio real com texto conferido a mao, e as amostras desta regua tem
+um tom no lugar da fala, entao essa leitura nao sai daqui e eu nao vou fingir que
+sai. WER contra a LINHA DE BASE responde a que decide: "o que eu acabei de mexer
+alterou o texto?". A duvida antes de comprimir silencio nao e se o Whisper e bom;
+e se comprimir piora o que ele ja produzia — e isso se mede sem transcricao
+humana nenhuma.
+
+  node testes/regua.mjs --base=/tmp/base.json   grava a linha de base
+  node testes/regua.mjs --wer=/tmp/base.json    compara depois de mexer
+
+DUAS DECISOES DO INSTRUMENTO:
+
+A chave da comparacao leva o `sha256` DA AMOSTRA. Comparar o texto de hoje com o
+de uma amostra diferente daria um WER alto que nao quer dizer nada — e e o tipo
+de engano que sobrevive semanas, porque o numero "parece ruim mesmo".
+
+A REMOCAO SAI DESTACADA dos outros erros. Trocar trinta palavras espalhadas e
+perder um paragrafo inteiro tem o mesmo tamanho na conta e consequencias opostas.
+Quando o assunto e comprimir silencio, e a segunda que importa: por isso o
+veredito traz `fracaoRemovida` junto do WER.
+
+Ele mora em `testes/`, e nao no produto: o produto nao precisa saber medir a si
+mesmo, e uma conta destas dentro do `template.html` seria peso que todo mundo
+baixa para servir a quem esta comparando duas versoes.
+
+TRAVA: `testes/wer.mjs`, com casos de resposta conhecida na mao — uma
+substituicao em quatro palavras e 0,25; inventar texto NAO dilui o erro, porque o
+denominador e a referencia; doze mil palavras saem em segundos, porque a conta
+guarda duas linhas em vez da matriz inteira. Um medidor de erro que erra e a pior
+peca possivel de uma esteira: ele autoriza mudanca ruim com um numero
+tranquilizador do lado.
+
+E UM CASO MEU NASCEU ERRADO: eu comparei "tres substituicoes" com "seis
+remocoes" e chamei de erro parecido. Nao era — e o proprio teste reprovou. O par
+agora tem exatamente o mesmo numero de erros, que e o unico jeito de a
+comparacao provar o que ela existe para provar.
+---
+ PLANO.md                      |  32 ++++++++--
+ testes/REGUA-DE-DESEMPENHO.md |  35 +++++++++++
+ testes/_wer.mjs               |  97 +++++++++++++++++++++++++++++++
+ testes/rapido.sh              |   2 +-
+ testes/regua.mjs              |  53 ++++++++++++++++-
+ testes/rodar.sh               |   2 +-
+ testes/wer.mjs                | 106 ++++++++++++++++++++++++++++++++++
+ 7 files changed, 318 insertions(+), 9 deletions(-)
+ create mode 100644 testes/_wer.mjs
+ create mode 100644 testes/wer.mjs
+
+diff --git a/PLANO.md b/PLANO.md
+index adfe5f0..1639edd 100644
+--- a/PLANO.md
++++ b/PLANO.md
+@@ -524,7 +524,7 @@ número, e essa é a regra que mantém a página crível.
+   uma página datada e revalidação periódica.
+ - **Moeda:** BRL, USD e EUR juntos, ou detectar a localidade?
+ 
+-### Trilha C — motor e dívida (14–21 d)
++### Trilha C — motor e dívida (12–18 d)
+ 
+ #### C1. Build 5 — medir antes de otimizar: **FEITA**
+ 
+@@ -647,8 +647,30 @@ de verdade, **a compactação de silêncio ataca o pico**, e não só o tempo: s
+ primeira evidência de que a ordem da C3 está certa. `enviadoSobreOriginal` = 1,00
+ continua sendo a linha de base contra a qual medir.
+ 
+-**Faltam três:** a máquina de estados do motor ASR · modularizar a fonte · medir
+-WER antes de tocar na compactação de silêncio.
++**E o WER está medível — o que era o portão da compactação de silêncio.**
++
++Duas perguntas diferentes usam o mesmo instrumento, e confundi-las é o erro
++comum. WER contra transcrição **humana** responde *"o modelo entende esta
++fala?"* e precisa de áudio real com texto conferido à mão — as amostras desta
++régua têm um tom no lugar da fala, então essa leitura não sai daqui. WER contra
++a **linha de base** responde a que decide: *"o que eu acabei de mexer alterou o
++texto?"*. A dúvida antes de comprimir silêncio não é se o Whisper é bom; é se
++comprimir piora o que ele já produzia — e isso se mede sem transcrição humana
++nenhuma.
++
++```
++node testes/regua.mjs --base=/tmp/base.json     # grava a linha de base
++node testes/regua.mjs --wer=/tmp/base.json      # compara depois de mexer
++```
++
++Duas decisões do instrumento: a chave da comparação leva o **`sha256` da
++amostra** (comparar com uma amostra diferente daria um WER alto que não quer
++dizer nada), e **a remoção sai destacada** dos outros erros — trocar trinta
++palavras espalhadas e perder um parágrafo têm o mesmo tamanho na conta e
++consequências opostas, e é a segunda que importa aqui. `wer.mjs` afere o
++instrumento com casos de resposta conhecida.
++
++**Faltam dois:** a máquina de estados do motor ASR · modularizar a fonte.
+ 
+ ---
+ 
+@@ -669,8 +691,8 @@ WER antes de tocar na compactação de silêncio.
+ | A — terminar o UX | **1–2** | o redesenho inteiro, com acessibilidade validada |
+ | B — destravar a venda | **feita** | uma verdade só, cobrança auditável, banco reconstruível |
+ | D — posicionamento e venda | **3–4** | a página vende um trabalho, o funil mede, e a home apresenta os planos. Faltam a demo do fluxo pago e quatro itens da D1 |
+-| C — motor e dívida | **14–21** | C1 e C2 feitas; da C3, o pico de memória está medido |
+-| **Total** | **18–27** | |
++| C — motor e dívida | **12–18** | C1 e C2 feitas; da C3, o pico de memória e o WER estão medíveis |
++| **Total** | **16–24** | |
+ 
+ A ordem é **A → D0 → D1 → C2 → C3**. A D vem antes da C pelo mesmo motivo que a
+ C1 veio antes da C2: acelerar um motor que ninguém contratou acelera a coisa
+diff --git a/testes/REGUA-DE-DESEMPENHO.md b/testes/REGUA-DE-DESEMPENHO.md
+index 49a0372..126fbf1 100644
+--- a/testes/REGUA-DE-DESEMPENHO.md
++++ b/testes/REGUA-DE-DESEMPENHO.md
+@@ -115,6 +115,41 @@ carga só**, dez degraus, antes mesmo de o arquivo ser lido. É a cortesia
+ adiantando o modelo. Numa máquina com rede isso é um acerto; numa sem, é o dobro
+ do tempo até a mensagem de erro.
+ 
++## O texto: antes e depois de mexer no motor
++
++```
++node testes/regua.mjs --base=/tmp/base.json     # grava a linha de base
++# … mexe no motor …
++node testes/regua.mjs --wer=/tmp/base.json      # compara com ela
++```
++
++**Duas perguntas diferentes usam o mesmo instrumento**, e vale não confundi-las.
++
++WER contra uma transcrição **humana** responde *"o modelo entende esta fala?"*.
++Para isso é preciso áudio real com texto conferido à mão, e isso não se fabrica:
++as amostras desta régua têm um tom no lugar da fala. Quem tiver esse material
++ganha a leitura com o mesmo comando.
++
++WER contra a **linha de base** responde a pergunta que decide: *"o que eu acabei
++de mexer alterou o texto?"*. É essa que o plano pede antes de tocar na
++compactação de silêncio — a dúvida não é se o Whisper é bom, é se comprimir o
++silêncio piora o que ele já produzia. E essa leitura sai sem transcrição humana
++nenhuma.
++
++**A chave da comparação leva o `sha256` da amostra.** Comparar o texto de hoje
++com o de uma amostra diferente daria um WER alto que não quer dizer nada — e é
++o tipo de engano que sobrevive semanas, porque o número "parece ruim mesmo".
++
++**Remoção sai destacada dos outros erros.** Trocar trinta palavras espalhadas e
++perder um parágrafo inteiro têm o mesmo tamanho na conta, e consequências
++opostas. Quando o assunto é comprimir silêncio, é a segunda que importa — por
++isso o veredito traz `fracaoRemovida` junto do WER.
++
++`node testes/wer.mjs` afere o instrumento com casos de resposta conhecida: uma
++substituição em quatro palavras é 0,25; inventar texto não dilui o erro, porque
++o denominador é a referência; e doze mil palavras saem em segundos, porque a
++conta guarda duas linhas em vez da matriz inteira.
++
+ ## A aferição da régua
+ 
+ ```
+diff --git a/testes/_wer.mjs b/testes/_wer.mjs
+new file mode 100644
+index 0000000..3d1c872
+--- /dev/null
++++ b/testes/_wer.mjs
+@@ -0,0 +1,97 @@
++/* A TAXA DE ERRO DE PALAVRA — o instrumento, sozinho.
++ *
++ * Ele vive aqui e não dentro do produto de propósito: o produto não precisa
++ * saber medir a si mesmo, e uma conta destas dentro do `template.html` seria
++ * peso que todo mundo baixa para servir a quem está comparando duas versões.
++ *
++ * ---- O QUE ELE COMPARA, E O QUE ISSO NÃO É ----
++ *
++ * WER contra uma transcrição HUMANA responde "o modelo entende esta fala?".
++ * Para isso é preciso áudio real com transcrição conferida à mão, e isso não se
++ * fabrica: as amostras desta régua têm um tom contínuo no lugar da fala.
++ *
++ * WER entre DUAS EXECUÇÕES da mesma fala responde outra coisa, e é a que
++ * autoriza ou proíbe uma mudança: "o que eu acabei de mexer alterou o texto?".
++ * É essa que o plano pede antes de tocar na compactação de silêncio — a
++ * pergunta não é se o Whisper é bom, é se comprimir o silêncio piora o que ele
++ * já produzia. Uma linha de base do comportamento de hoje serve para isso, e
++ * ela existe sem transcrição humana nenhuma.
++ *
++ * Quem tiver áudio real com transcrição conferida ganha as duas leituras com o
++ * mesmo instrumento — é a mesma conta, muda só o que entra do lado esquerdo.
++ */
++
++/* Pontuação fora, caixa fora, espaço colapsado. Acento FICA: em português ele
++   distingue palavras ("e"/"é", "esta"/"está"), e tirá-lo esconderia justamente
++   o tipo de erro que se quer contar. */
++export function normalizar(texto) {
++  return String(texto || '')
++    .toLowerCase()
++    .replace(/[.,;:!?"'`´“”‘’()\[\]{}…—–]/g, ' ')
++    .replace(/\s+/g, ' ')
++    .trim();
++}
++
++export function palavras(texto) {
++  const n = normalizar(texto);
++  return n ? n.split(' ') : [];
++}
++
++/** Distância de edição por PALAVRA, com a conta de cada tipo de erro separada.
++ *
++ *  Separar substituição, inserção e remoção não é preciosismo: elas vêm de
++ *  causas diferentes. Substituição é o modelo ouvindo outra palavra; remoção em
++ *  bloco é trecho que sumiu — que é exatamente o risco de comprimir silêncio. */
++export function wer(referencia, hipotese) {
++  const r = palavras(referencia);
++  const h = palavras(hipotese);
++  /* Duas linhas de programação dinâmica em vez da matriz inteira: uma
++     transcrição de quarenta minutos passa de dez mil palavras, e a matriz
++     completa seria 100 milhões de células para um número só. */
++  const N = r.length, M = h.length;
++  if (!N) return { n: 0, subs: 0, ins: M, del: 0, erros: M, wer: M ? 1 : 0 };
++
++  /* Cada célula guarda o custo e de onde veio, para a contagem por tipo sair
++     no fim sem uma segunda passada. */
++  const vazio = () => ({ c: 0, s: 0, i: 0, d: 0 });
++  let ant = Array.from({ length: M + 1 }, (_, j) => ({ c: j, s: 0, i: j, d: 0 }));
++  for (let a = 1; a <= N; a++) {
++    const cur = [{ c: a, s: 0, i: 0, d: a }];
++    for (let b = 1; b <= M; b++) {
++      const igual = r[a - 1] === h[b - 1];
++      const dSub = ant[b - 1], dDel = ant[b], dIns = cur[b - 1];
++      const cSub = dSub.c + (igual ? 0 : 1);
++      const cDel = dDel.c + 1;
++      const cIns = dIns.c + 1;
++      let escolha;
++      if (cSub <= cDel && cSub <= cIns) {
++        escolha = { c: cSub, s: dSub.s + (igual ? 0 : 1), i: dSub.i, d: dSub.d };
++      } else if (cDel <= cIns) {
++        escolha = { c: cDel, s: dDel.s, i: dDel.i, d: dDel.d + 1 };
++      } else {
++        escolha = { c: cIns, s: dIns.s, i: dIns.i + 1, d: dIns.d };
++      }
++      cur.push(escolha);
++    }
++    ant = cur;
++  }
++  const f = ant[M];
++  void vazio;
++  return { n: N, subs: f.s, ins: f.i, del: f.d, erros: f.c, wer: f.c / N };
++}
++
++/** O par de números que decide se uma mudança pode entrar.
++ *
++ *  `wer` sozinho esconde a diferença entre "trocou trinta palavras espalhadas"
++ *  e "perdeu um parágrafo inteiro" — e as duas têm o mesmo tamanho na conta. A
++ *  segunda é a que importa quando o assunto é compactar silêncio, então a
++ *  remoção sai destacada. */
++export function veredito(referencia, hipotese, teto = 0.02) {
++  const w = wer(referencia, hipotese);
++  return Object.assign(w, {
++    /* Quanto do erro é texto que SUMIU, e não texto trocado. */
++    fracaoRemovida: w.erros ? w.del / w.erros : 0,
++    passou: w.wer <= teto,
++    teto,
++  });
++}
+diff --git a/testes/rapido.sh b/testes/rapido.sh
+index 630146a..a119659 100644
+--- a/testes/rapido.sh
++++ b/testes/rapido.sh
+@@ -36,7 +36,7 @@ GRUPO="$1"; shift
+ case "$GRUPO" in
+   app)  TESTES="smoke.mjs saidas.mjs passos.mjs dobra.mjs travado.mjs gravando.mjs
+                 janelinha.mjs comentario.mjs marcados.mjs revisao.mjs marca.mjs
+-                formato.mjs promptcx.mjs appidioma.mjs compartilhar.mjs celular.mjs teto.mjs rolar.mjs cenario1.mjs organiza.mjs acabamento.mjs lente2.mjs traducao.mjs passomulti.mjs pessoas.mjs matriz.mjs espera2.mjs conclusao.mjs parar.mjs entrada.mjs indice.mjs figura.mjs resumo.mjs perna.mjs cartao.mjs etapas.mjs marcos.mjs funil.mjs" ; SITE=0 ;;
++                formato.mjs promptcx.mjs appidioma.mjs compartilhar.mjs celular.mjs teto.mjs rolar.mjs cenario1.mjs organiza.mjs acabamento.mjs lente2.mjs traducao.mjs passomulti.mjs pessoas.mjs matriz.mjs espera2.mjs conclusao.mjs parar.mjs entrada.mjs indice.mjs figura.mjs resumo.mjs perna.mjs cartao.mjs etapas.mjs marcos.mjs funil.mjs wer.mjs" ; SITE=0 ;;
+   medir) TESTES="memoria.mjs pesagem.mjs espelho.mjs modelo.mjs espera.mjs ritmo.mjs" ; SITE=0 ;;
+   site) TESTES="cinco.mjs ajuda.mjs vitrine.mjs venda.mjs paginas.mjs idiomas.mjs figuras.mjs dobrafig.mjs
+                 linkpage.mjs legal.mjs contradicao.mjs negocio.mjs isca.mjs blog.mjs convite.mjs email.mjs tourvid.mjs semmarca.mjs
+diff --git a/testes/regua.mjs b/testes/regua.mjs
+index 9331acf..073c14a 100644
+--- a/testes/regua.mjs
++++ b/testes/regua.mjs
+@@ -17,6 +17,8 @@
+  *   node testes/regua.mjs --linhas=1,4 --cache=frio,quente
+  *   node testes/regua.mjs --placa --modelo=onnx-community/whisper-small
+  *   node testes/regua.mjs --saida=/tmp/regua.json --repetir=3
++ *   node testes/regua.mjs --base=/tmp/base.json          # grava a linha de base
++ *   node testes/regua.mjs --wer=/tmp/base.json           # compara com ela
+  *
+  * ANTES: `python3 testes/amostras.py --medida` gera as amostras versionadas de
+  * 1, 10 e 40 minutos e o manifesto com o sha256 de cada uma. A identidade delas
+@@ -37,6 +39,7 @@
+ import { chromium } from './_navegador.mjs';
+ import http from 'http'; import fs from 'fs';
+ import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
++import { veredito } from './_wer.mjs';
+ 
+ const arg = (nome, padrao) => {
+   const a = process.argv.find(x => x.startsWith('--' + nome + '='));
+@@ -51,6 +54,13 @@ const MODELO   = arg('modelo', '');
+ const SAIDA    = arg('saida', '/tmp/regua.json');
+ const REPETIR  = Number(arg('repetir', '1')) || 1;
+ const PLACA    = tem('placa');
++/* O texto de referencia. Ele NAO precisa ser transcricao humana: o que autoriza
++   ou proibe uma mudanca no motor e a divergencia contra o comportamento de
++   HOJE, e essa linha de base sai de uma corrida da propria regua.
++     --base=/tmp/base.json   grava a linha de base (o texto de cada amostra)
++     --wer=/tmp/base.json    compara esta corrida contra ela */
++const BASE     = arg('base', '');
++const CONTRA   = arg('wer', '');
+ const TETO_MS  = Number(arg('teto', '1800000')) || 1800000;
+ 
+ const MANIFESTO = '/tmp/medida-amostras.json';
+@@ -154,7 +164,8 @@ async function medir({ amostra, linhas, cache, ctxReuso }) {
+   } catch (e) { acabou = false; }
+ 
+   const medidas = await pg.evaluate(() => window.__medidas ? window.__medidas() : null);
+-  const texto = await pg.evaluate(() => (document.getElementById('tr').value || '').length);
++  const textoCru = await pg.evaluate(() => document.getElementById('tr').value || '');
++  const texto = textoCru.length;
+   await pg.close();
+   if (!ctxReuso) { /* devolvido ao chamador, que decide se reaproveita */ }
+ 
+@@ -172,7 +183,7 @@ async function medir({ amostra, linhas, cache, ctxReuso }) {
+         isolado: medidas.numeros.isolado,
+         cacheQuente: medidas.numeros.cacheQuente,
+       } : null,
+-      acabou, caracteresDeTexto: texto,
++      acabou, caracteresDeTexto: texto, texto: textoCru,
+       msDeParede: Date.now() - t0,
+       erros,
+       medidas,
+@@ -214,6 +225,44 @@ for (const amostra of AMOSTRAS) {
+ await br.close();
+ srvSimples.close(); srvIsolado.close();
+ 
++/* ---- A COMPARACAO DE TEXTO ----
++ *
++ * WER contra transcricao HUMANA responde "o modelo entende esta fala?" e precisa
++ * de audio real com texto conferido a mao — as amostras desta regua tem um tom
++ * no lugar da fala, entao essa leitura nao sai daqui.
++ *
++ * WER contra a LINHA DE BASE responde a pergunta que decide: "o que eu acabei
++ * de mexer alterou o texto?". E e essa que o plano pede antes de tocar na
++ * compactacao de silencio — a duvida nao e se o Whisper e bom, e se comprimir o
++ * silencio piora o que ele ja produzia. */
++if (BASE) {
++  const base = {};
++  for (const l of linhas) base[l.amostra.nome + '@' + l.amostra.sha256.slice(0, 12)] = l.texto || '';
++  fs.writeFileSync(BASE, JSON.stringify(base, null, 2));
++  console.log('  linha de base gravada em ' + BASE);
++}
++if (CONTRA) {
++  const base = JSON.parse(fs.readFileSync(CONTRA, 'utf8'));
++  console.log('\n  texto contra a linha de base:');
++  for (const l of linhas) {
++    /* A CHAVE LEVA O sha256 DA AMOSTRA. Comparar o texto de hoje com o de uma
++       amostra diferente daria um WER alto que nao quer dizer nada — e e o tipo
++       de engano que sobrevive por semanas porque o numero "parece ruim mesmo". */
++    const chave = l.amostra.nome + '@' + l.amostra.sha256.slice(0, 12);
++    const ref = base[chave];
++    if (ref == null) {
++      console.log('    ' + chave + ': sem linha de base para esta amostra');
++      l.wer = { erro: 'sem base' };
++      continue;
++    }
++    const v = veredito(ref, l.texto || '');
++    l.wer = v;
++    console.log('    %s: WER %s%%  (%d subs, %d ins, %d rem — %s%% do erro é texto que sumiu)  %s',
++      chave, (v.wer * 100).toFixed(2), v.subs, v.ins, v.del,
++      (v.fracaoRemovida * 100).toFixed(0), v.passou ? 'dentro do teto' : 'ACIMA DO TETO');
++  }
++}
++
+ const saida = {
+   versao: 1,
+   /* A identidade de QUEM mediu entra junto: um JSON de desempenho sem a
+diff --git a/testes/rodar.sh b/testes/rodar.sh
+index 88eb513..05f6c75 100644
+--- a/testes/rodar.sh
++++ b/testes/rodar.sh
+@@ -34,7 +34,7 @@ TESTES="smoke.mjs saidas.mjs passos.mjs evidencia.mjs modelos.mjs cenarios.mjs
+          venda.mjs vitrine.mjs fluxo.mjs roteiro.mjs faxina.mjs formato.mjs comentario.mjs
+          travado.mjs promptcx.mjs cabec.mjs ajuda.mjs cinco.mjs appidioma.mjs gravando.mjs janelinha.mjs marca.mjs figuras.mjs dobrafig.mjs
+          compartilhar.mjs contradicao.mjs negocio.mjs celular.mjs barraapp.mjs paridade.mjs teto.mjs ritmo.mjs rolar.mjs isca.mjs blog.mjs cenario1.mjs organiza.mjs acabamento.mjs convite.mjs email.mjs tourvid.mjs semmarca.mjs lente2.mjs
+-         memoria.mjs pesagem.mjs espelho.mjs grade.mjs varredura.mjs audio.mjs plano.mjs faixa.mjs reuniao.mjs diagchamado.mjs modelo.mjs espera.mjs passomulti.mjs pessoas.mjs matriz.mjs espera2.mjs anotacao.mjs roteirojanela.mjs quedaplaca.mjs conclusao.mjs parar.mjs entrada.mjs indice.mjs figura.mjs resumo.mjs perna.mjs saidarec.mjs chaves.mjs planos.mjs cartao.mjs etapas.mjs marcos.mjs funil.mjs"
++         memoria.mjs pesagem.mjs espelho.mjs grade.mjs varredura.mjs audio.mjs plano.mjs faixa.mjs reuniao.mjs diagchamado.mjs modelo.mjs espera.mjs passomulti.mjs pessoas.mjs matriz.mjs espera2.mjs anotacao.mjs roteirojanela.mjs quedaplaca.mjs conclusao.mjs parar.mjs entrada.mjs indice.mjs figura.mjs resumo.mjs perna.mjs saidarec.mjs chaves.mjs planos.mjs cartao.mjs etapas.mjs marcos.mjs funil.mjs wer.mjs"
+ falhou=""
+ for t in $TESTES; do
+   [ -f "$t" ] || { echo "??  $t não existe"; continue; }
+diff --git a/testes/wer.mjs b/testes/wer.mjs
+new file mode 100644
+index 0000000..69f363a
+--- /dev/null
++++ b/testes/wer.mjs
+@@ -0,0 +1,106 @@
++/* A AFERIÇÃO DO INSTRUMENTO DE WER.
++ *
++ * Um medidor de erro que erra é a pior peça possível de uma esteira: ele
++ * autoriza mudanças ruins com um número tranquilizador do lado. Por isso o
++ * instrumento tem régua própria, e ela é de casos com resposta conhecida na
++ * mão — não de "parece razoável".
++ *
++ *   node testes/wer.mjs
++ */
++import { wer, veredito, normalizar, palavras } from './_wer.mjs';
++
++let falhas = 0;
++const ok = (n, c, e) => {
++  console.log((c ? '  ok   ' : '  FALHA') + '  ' + n + (e ? '  → ' + e : ''));
++  if (!c) falhas++;
++};
++const perto = (a, b) => Math.abs(a - b) < 1e-9;
++
++console.log('[1] a normalização tira o que não é palavra, e guarda o que é');
++ok('pontuação e caixa saem',
++   normalizar('Abri a transação ME21N, e informei o fornecedor.') ===
++   'abri a transação me21n e informei o fornecedor');
++ok('espaço repetido colapsa', normalizar('a   b\n\nc') === 'a b c');
++/* O acento FICA: em português ele separa palavras, e tirá-lo esconderia
++   justamente o tipo de erro que se quer contar. */
++ok('o acento fica', normalizar('está') === 'está');
++ok('e "e" continua diferente de "é"', wer('e', 'é').erros === 1);
++ok('texto vazio dá zero palavras', palavras('  ').length === 0);
++
++console.log('\n[2] os três tipos de erro, contados separados');
++{
++  const igual = wer('um dois três quatro', 'um dois três quatro');
++  ok('igual a si mesmo dá zero', igual.wer === 0 && igual.erros === 0);
++
++  const sub = wer('um dois três quatro', 'um DOIS_TROCADO três quatro');
++  ok('uma substituição em quatro é 0,25',
++     perto(sub.wer, 0.25) && sub.subs === 1 && sub.ins === 0 && sub.del === 0,
++     JSON.stringify(sub));
++
++  const del = wer('um dois três quatro', 'um três quatro');
++  ok('uma remoção em quatro é 0,25',
++     perto(del.wer, 0.25) && del.del === 1 && del.subs === 0 && del.ins === 0,
++     JSON.stringify(del));
++
++  const ins = wer('um dois três quatro', 'um dois EXTRA três quatro');
++  ok('uma inserção em quatro é 0,25',
++     perto(ins.wer, 0.25) && ins.ins === 1 && ins.subs === 0 && ins.del === 0,
++     JSON.stringify(ins));
++
++  /* O denominador é a REFERÊNCIA, e não a hipótese: uma transcrição que inventa
++     texto não pode diluir o próprio erro aumentando o divisor. */
++  const inventou = wer('um dois', 'um dois a b c d e f');
++  ok('inventar texto não dilui o erro', inventou.wer > 1, String(inventou.wer));
++}
++
++console.log('\n[3] o caso que decide a compactação de silêncio');
++{
++  /* Dois erros do MESMO tamanho na conta, e consequências opostas: trocar
++     palavras espalhadas é o modelo ouvindo diferente; perder um bloco é trecho
++     que sumiu — que é exatamente o risco de comprimir silêncio. */
++  const base = 'o pedido foi aprovado pelo gerente e enviado ao fornecedor na terça';
++  const espalhado = 'a pedido foi aprovada pelo gerente e enviada ao fornecedor na terça';
++  /* Os dois com o MESMO numero de erros de proposito — tres. E disso que o
++     caso vive: na conta eles empatam, e na consequencia nao. */
++  const bloco = 'o pedido foi aprovado pelo gerente e enviado ao';
++
++  const a = veredito(base, espalhado);
++  const b = veredito(base, bloco);
++  ok('os dois têm exatamente o mesmo erro no total', a.erros === b.erros,
++     a.erros + ' vs ' + b.erros);
++  ok('e o mesmo WER', perto(a.wer, b.wer), a.wer + ' vs ' + b.wer);
++  ok('mas só um deles é texto que sumiu',
++     a.fracaoRemovida === 0 && b.fracaoRemovida === 1,
++     a.fracaoRemovida + ' vs ' + b.fracaoRemovida);
++}
++
++console.log('\n[4] o veredito, com o teto na frente');
++{
++  const dentro = veredito('a b c d e f g h i j', 'a b c d e f g h i X');
++  ok('uma palavra em dez fica acima do teto de 2%', !dentro.passou,
++     dentro.wer + ' > ' + dentro.teto);
++  const cem = 'palavra '.repeat(100).trim();
++  const quase = cem.split(' ').map((p, i) => (i === 7 ? 'outra' : p)).join(' ');
++  const v = veredito(cem, quase);
++  ok('e uma em cem passa', v.passou, v.wer + ' <= ' + v.teto);
++  ok('o teto é dito junto do resultado', v.teto === 0.02);
++}
++
++console.log('\n[5] o texto longo não estoura');
++{
++  /* Uma transcrição de quarenta minutos passa de dez mil palavras. A matriz
++     completa seria cem milhões de células para um número só — por isso a conta
++     guarda duas linhas, e este caso é o que prova que ela aguenta. */
++  const n = 12000;
++  const a = Array.from({ length: n }, (_, i) => 'p' + (i % 97)).join(' ');
++  const b = a.split(' ').map((p, i) => (i % 500 === 0 ? 'x' : p)).join(' ');
++  const t0 = Date.now();
++  const r = wer(a, b);
++  const ms = Date.now() - t0;
++  ok('doze mil palavras saem com o número certo', r.subs === Math.ceil(n / 500),
++     r.subs + ' substituições');
++  ok('e em tempo de régua, não de café', ms < 20000, ms + ' ms');
++}
++
++console.log(falhas ? `\n${falhas} FALHA(S)` : '\nWER: o instrumento mede o que diz medir.');
++process.exit(falhas ? 1 : 0);
+-- 
+2.43.0
+

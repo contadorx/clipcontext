@@ -17,6 +17,8 @@
  *   node testes/regua.mjs --linhas=1,4 --cache=frio,quente
  *   node testes/regua.mjs --placa --modelo=onnx-community/whisper-small
  *   node testes/regua.mjs --saida=/tmp/regua.json --repetir=3
+ *   node testes/regua.mjs --base=/tmp/base.json          # grava a linha de base
+ *   node testes/regua.mjs --wer=/tmp/base.json           # compara com ela
  *
  * ANTES: `python3 testes/amostras.py --medida` gera as amostras versionadas de
  * 1, 10 e 40 minutos e o manifesto com o sha256 de cada uma. A identidade delas
@@ -37,6 +39,7 @@
 import { chromium } from './_navegador.mjs';
 import http from 'http'; import fs from 'fs';
 import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+import { veredito } from './_wer.mjs';
 
 const arg = (nome, padrao) => {
   const a = process.argv.find(x => x.startsWith('--' + nome + '='));
@@ -51,6 +54,13 @@ const MODELO   = arg('modelo', '');
 const SAIDA    = arg('saida', '/tmp/regua.json');
 const REPETIR  = Number(arg('repetir', '1')) || 1;
 const PLACA    = tem('placa');
+/* O texto de referencia. Ele NAO precisa ser transcricao humana: o que autoriza
+   ou proibe uma mudanca no motor e a divergencia contra o comportamento de
+   HOJE, e essa linha de base sai de uma corrida da propria regua.
+     --base=/tmp/base.json   grava a linha de base (o texto de cada amostra)
+     --wer=/tmp/base.json    compara esta corrida contra ela */
+const BASE     = arg('base', '');
+const CONTRA   = arg('wer', '');
 const TETO_MS  = Number(arg('teto', '1800000')) || 1800000;
 
 const MANIFESTO = '/tmp/medida-amostras.json';
@@ -154,7 +164,8 @@ async function medir({ amostra, linhas, cache, ctxReuso }) {
   } catch (e) { acabou = false; }
 
   const medidas = await pg.evaluate(() => window.__medidas ? window.__medidas() : null);
-  const texto = await pg.evaluate(() => (document.getElementById('tr').value || '').length);
+  const textoCru = await pg.evaluate(() => document.getElementById('tr').value || '');
+  const texto = textoCru.length;
   await pg.close();
   if (!ctxReuso) { /* devolvido ao chamador, que decide se reaproveita */ }
 
@@ -172,7 +183,7 @@ async function medir({ amostra, linhas, cache, ctxReuso }) {
         isolado: medidas.numeros.isolado,
         cacheQuente: medidas.numeros.cacheQuente,
       } : null,
-      acabou, caracteresDeTexto: texto,
+      acabou, caracteresDeTexto: texto, texto: textoCru,
       msDeParede: Date.now() - t0,
       erros,
       medidas,
@@ -213,6 +224,44 @@ for (const amostra of AMOSTRAS) {
 
 await br.close();
 srvSimples.close(); srvIsolado.close();
+
+/* ---- A COMPARACAO DE TEXTO ----
+ *
+ * WER contra transcricao HUMANA responde "o modelo entende esta fala?" e precisa
+ * de audio real com texto conferido a mao — as amostras desta regua tem um tom
+ * no lugar da fala, entao essa leitura nao sai daqui.
+ *
+ * WER contra a LINHA DE BASE responde a pergunta que decide: "o que eu acabei
+ * de mexer alterou o texto?". E e essa que o plano pede antes de tocar na
+ * compactacao de silencio — a duvida nao e se o Whisper e bom, e se comprimir o
+ * silencio piora o que ele ja produzia. */
+if (BASE) {
+  const base = {};
+  for (const l of linhas) base[l.amostra.nome + '@' + l.amostra.sha256.slice(0, 12)] = l.texto || '';
+  fs.writeFileSync(BASE, JSON.stringify(base, null, 2));
+  console.log('  linha de base gravada em ' + BASE);
+}
+if (CONTRA) {
+  const base = JSON.parse(fs.readFileSync(CONTRA, 'utf8'));
+  console.log('\n  texto contra a linha de base:');
+  for (const l of linhas) {
+    /* A CHAVE LEVA O sha256 DA AMOSTRA. Comparar o texto de hoje com o de uma
+       amostra diferente daria um WER alto que nao quer dizer nada — e e o tipo
+       de engano que sobrevive por semanas porque o numero "parece ruim mesmo". */
+    const chave = l.amostra.nome + '@' + l.amostra.sha256.slice(0, 12);
+    const ref = base[chave];
+    if (ref == null) {
+      console.log('    ' + chave + ': sem linha de base para esta amostra');
+      l.wer = { erro: 'sem base' };
+      continue;
+    }
+    const v = veredito(ref, l.texto || '');
+    l.wer = v;
+    console.log('    %s: WER %s%%  (%d subs, %d ins, %d rem — %s%% do erro é texto que sumiu)  %s',
+      chave, (v.wer * 100).toFixed(2), v.subs, v.ins, v.del,
+      (v.fracaoRemovida * 100).toFixed(0), v.passou ? 'dentro do teto' : 'ACIMA DO TETO');
+  }
+}
 
 const saida = {
   versao: 1,

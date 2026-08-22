@@ -5,9 +5,9 @@ A árvore deste zip **já está construída**: `public/app.html` e
 rodar `build.py`.
 
 Base: `285d4a5` (o `main` de produção) + os seis commits do `correcoes.bundle`
-= a árvore do `walkstampbuild8_1.zip`. Sobre ela, vinte e cinco commits novos.
+= a árvore do `walkstampbuild8_1.zip`. Sobre ela, vinte e seis commits novos.
 
-## Os vinte e cinco commits
+## Os vinte e seis commits
 
 **A0 — a saída recomendada chega à linhagem.** Em vez de sete formatos com o
 mesmo peso, a ferramenta olha o cenário e propõe um; os outros ficam recolhidos
@@ -400,11 +400,28 @@ linear com a duração (~64 KB/s, 40 min ≈ 154 MB) e a sessão é fixa — se 
 confirmar com modelo de verdade, a compactação de silêncio ataca o **pico**, e
 não só o tempo.
 
+**E o WER, que é o portão da compactação de silêncio.** Não dá para mexer nisso
+sem saber se o texto piorou, e essa forma não existia. Duas perguntas usam o
+mesmo instrumento: WER contra transcrição **humana** responde *"o modelo entende
+esta fala?"* e precisa de áudio real conferido à mão — não sai daqui; WER contra
+a **linha de base** responde *"o que eu mexi alterou o texto?"*, e é essa que
+decide.
+
+```
+node testes/regua.mjs --base=/tmp/base.json     # grava a linha de base
+node testes/regua.mjs --wer=/tmp/base.json      # compara depois de mexer
+```
+
+A chave da comparação leva o `sha256` da amostra, e a **remoção sai destacada**
+dos outros erros: trocar trinta palavras espalhadas e perder um parágrafo têm o
+mesmo tamanho na conta e consequências opostas. `testes/wer.mjs` afere o
+instrumento com casos de resposta conhecida.
+
 ## Os arquivos
 
 | arquivo | o que é |
 |---|---|
-| `tudo.bundle` | os vinte e cinco commits, para aplicar por Git sobre `d5db0f7` — é um bundle de **intervalo** (`d5db0f7..HEAD`), então ele precisa que você já tenha esse commit; foi assim que ele saiu de 22 MB para 314 KB e o pacote coube no limite de envio |
+| `tudo.bundle` | os vinte e seis commits, para aplicar por Git sobre `d5db0f7` — é um bundle de **intervalo** (`d5db0f7..HEAD`), então ele precisa que você já tenha esse commit; foi assim que ele saiu de 22 MB para 314 KB e o pacote coube no limite de envio |
 | `A0-saida-recomendada.patch` | o A0 em diff legível |
 | `A1-cartao-da-grade.patch` | o A1 em diff legível (fonte e régua) |
 | `B3-banco-versionado.patch` | o B3 em diff legível |
@@ -428,6 +445,7 @@ não só o tempo.
 | `D1-onboarding-do-roteiro.patch` | a tela do roteiro não abre mais vazia |
 | `C2-a-escada-esperta.patch` | a escada de fallback pula o que não adianta |
 | `C3-pico-de-memoria.patch` | o pico de memória passou a ter número e lugar |
+| `C3-wer.patch` | o WER, que é o portão da compactação de silêncio |
 | `correcoes.bundle`, `correcoes-so-fonte.patch` | os seis commits originais do zip |
 | `ARQUIVOS.txt`, `MENSAGENS.txt` | o inventário original |
 

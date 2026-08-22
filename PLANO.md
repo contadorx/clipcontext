@@ -524,7 +524,7 @@ número, e essa é a regra que mantém a página crível.
   uma página datada e revalidação periódica.
 - **Moeda:** BRL, USD e EUR juntos, ou detectar a localidade?
 
-### Trilha C — motor e dívida (14–21 d)
+### Trilha C — motor e dívida (12–18 d)
 
 #### C1. Build 5 — medir antes de otimizar: **FEITA**
 
@@ -647,8 +647,30 @@ de verdade, **a compactação de silêncio ataca o pico**, e não só o tempo: s
 primeira evidência de que a ordem da C3 está certa. `enviadoSobreOriginal` = 1,00
 continua sendo a linha de base contra a qual medir.
 
-**Faltam três:** a máquina de estados do motor ASR · modularizar a fonte · medir
-WER antes de tocar na compactação de silêncio.
+**E o WER está medível — o que era o portão da compactação de silêncio.**
+
+Duas perguntas diferentes usam o mesmo instrumento, e confundi-las é o erro
+comum. WER contra transcrição **humana** responde *"o modelo entende esta
+fala?"* e precisa de áudio real com texto conferido à mão — as amostras desta
+régua têm um tom no lugar da fala, então essa leitura não sai daqui. WER contra
+a **linha de base** responde a que decide: *"o que eu acabei de mexer alterou o
+texto?"*. A dúvida antes de comprimir silêncio não é se o Whisper é bom; é se
+comprimir piora o que ele já produzia — e isso se mede sem transcrição humana
+nenhuma.
+
+```
+node testes/regua.mjs --base=/tmp/base.json     # grava a linha de base
+node testes/regua.mjs --wer=/tmp/base.json      # compara depois de mexer
+```
+
+Duas decisões do instrumento: a chave da comparação leva o **`sha256` da
+amostra** (comparar com uma amostra diferente daria um WER alto que não quer
+dizer nada), e **a remoção sai destacada** dos outros erros — trocar trinta
+palavras espalhadas e perder um parágrafo têm o mesmo tamanho na conta e
+consequências opostas, e é a segunda que importa aqui. `wer.mjs` afere o
+instrumento com casos de resposta conhecida.
+
+**Faltam dois:** a máquina de estados do motor ASR · modularizar a fonte.
 
 ---
 
@@ -669,8 +691,8 @@ WER antes de tocar na compactação de silêncio.
 | A — terminar o UX | **1–2** | o redesenho inteiro, com acessibilidade validada |
 | B — destravar a venda | **feita** | uma verdade só, cobrança auditável, banco reconstruível |
 | D — posicionamento e venda | **3–4** | a página vende um trabalho, o funil mede, e a home apresenta os planos. Faltam a demo do fluxo pago e quatro itens da D1 |
-| C — motor e dívida | **14–21** | C1 e C2 feitas; da C3, o pico de memória está medido |
-| **Total** | **18–27** | |
+| C — motor e dívida | **12–18** | C1 e C2 feitas; da C3, o pico de memória e o WER estão medíveis |
+| **Total** | **16–24** | |
 
 A ordem é **A → D0 → D1 → C2 → C3**. A D vem antes da C pelo mesmo motivo que a
 C1 veio antes da C2: acelerar um motor que ninguém contratou acelera a coisa
