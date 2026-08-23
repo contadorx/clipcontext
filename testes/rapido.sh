@@ -1,5 +1,5 @@
 #!/bin/bash
-# A pista rápida. `rodar.sh` roda os 74 e leva ~20 min; isto roda só o que o
+# A pista rápida. `rodar.sh` roda os 141 e leva ~70 min; isto roda só o que o
 # que você mexeu pode ter quebrado, e leva 1 a 3.
 #
 #   rapido.sh app        -> a ferramenta, só o comportamento (~4 min)
@@ -36,7 +36,7 @@ GRUPO="$1"; shift
 case "$GRUPO" in
   app)  TESTES="smoke.mjs saidas.mjs passos.mjs dobra.mjs travado.mjs gravando.mjs
                 janelinha.mjs comentario.mjs marcados.mjs revisao.mjs marca.mjs
-                formato.mjs promptcx.mjs appidioma.mjs compartilhar.mjs celular.mjs teto.mjs rolar.mjs cenario1.mjs organiza.mjs acabamento.mjs lente2.mjs traducao.mjs passomulti.mjs pessoas.mjs matriz.mjs espera2.mjs conclusao.mjs parar.mjs entrada.mjs indice.mjs figura.mjs resumo.mjs perna.mjs cartao.mjs etapas.mjs marcos.mjs funil.mjs wer.mjs" ; SITE=0 ;;
+                formato.mjs promptcx.mjs appidioma.mjs compartilhar.mjs celular.mjs teto.mjs rolar.mjs cenario1.mjs organiza.mjs acabamento.mjs lente2.mjs traducao.mjs passomulti.mjs pessoas.mjs matriz.mjs espera2.mjs conclusao.mjs parar.mjs entrada.mjs indice.mjs figura.mjs resumo.mjs perna.mjs cartao.mjs etapas.mjs marcos.mjs funil.mjs wer.mjs semundefined.mjs middleware.mjs inventario.mjs" ; SITE=0 ;;
   medir) TESTES="memoria.mjs pesagem.mjs espelho.mjs modelo.mjs espera.mjs ritmo.mjs" ; SITE=0 ;;
   site) TESTES="cinco.mjs ajuda.mjs vitrine.mjs venda.mjs paginas.mjs idiomas.mjs figuras.mjs dobrafig.mjs
                 linkpage.mjs legal.mjs contradicao.mjs negocio.mjs isca.mjs blog.mjs convite.mjs email.mjs tourvid.mjs semmarca.mjs
@@ -56,7 +56,20 @@ if [ "$SITE" = 1 ]; then
 fi
 
 cd "$(cd "$(dirname "$0")" && pwd)"
+# A PISTA CURTA SAI PELA MESMA REGRA DA LONGA.
+#
+# Ela terminava sempre em 0: o `xargs` devolve o status do ÚLTIMO comando, e o
+# `sh -c` de dentro sempre acabava num `printf` bem-sucedido. Quem chamasse
+# `rapido.sh && git commit` comitava com a pista vermelha na tela.
+#
+# `xargs` devolve 123 quando algum dos comandos saiu diferente de zero — então
+# basta o `sh -c` propagar o status do teste, e não o do `printf`.
 printf '%s\n' $TESTES | xargs -P 2 -I{} sh -c '
   s=$(timeout 400 node "{}" 2>&1)
   if [ $? -eq 0 ]; then printf "%-18s ok\n" "{}"
-  else printf "%-18s FALHOU\n" "{}"; echo "$s" | grep -E "FALHA|Error" | head -4 | sed "s/^/     /"; fi' 2>&1
+  else printf "%-18s FALHOU\n" "{}"; echo "$s" | grep -E "FALHA|Error" | head -4 | sed "s/^/     /"; exit 1; fi' 2>&1
+estado=${PIPESTATUS[1]}
+if [ "$estado" = 0 ]; then exit 0; fi
+echo
+echo "a pista curta terminou com falha."
+exit 1

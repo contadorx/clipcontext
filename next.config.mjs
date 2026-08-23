@@ -90,6 +90,23 @@ const config = {
         // (a transcrição em WebAssembly) sem barrar imagem de outra origem.
         { key: 'Cross-Origin-Embedder-Policy', value: 'credentialless' },
         { key: 'Cross-Origin-Resource-Policy', value: 'cross-origin' },
+        /* OS TRÊS BARATOS, E A CSP DE PROPÓSITO FORA DAQUI.
+           `X-Frame-Options` e `frame-ancestors` fecham o enquadramento em
+           página de terceiro — a conta e a ferramenta não têm por que existir
+           dentro do site de mais ninguém. `HSTS` tranca o protocolo. E o
+           `Permissions-Policy` desliga o que o produto não usa: geolocalização,
+           pagamento e sensores. Câmera, microfone e captura de tela ficam em
+           `self`, porque são o produto.
+
+           A Content-Security-Policy NÃO entra aqui. Uma CSP apertada demais
+           desliga a transcrição, que é o que a pessoa veio fazer — ela precisa
+           de uma semana em `Report-Only` antes de travar, e essa semana é um
+           trabalho com começo e fim, não uma linha nesta lista. */
+        { key: 'X-Frame-Options', value: 'DENY' },
+        { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' },
+        { key: 'Permissions-Policy',
+          value: 'geolocation=(), payment=(), usb=(), magnetometer=(), gyroscope=(), ' +
+                 'accelerometer=(), camera=(self), microphone=(self), display-capture=(self)' },
       ],
     }];
   },

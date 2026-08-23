@@ -262,6 +262,7 @@
         },
         {
           "planos": "pt",
+          "estado": "construcao",
           "pt": "… e a lista fica GRAVADA: não se redigita a cada visita",
           "en": "… and the list is SAVED: no retyping on every visit",
           "es": "… y la lista queda GUARDADA: no se reescribe en cada visita",

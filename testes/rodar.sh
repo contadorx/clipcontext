@@ -34,7 +34,8 @@ TESTES="smoke.mjs saidas.mjs passos.mjs evidencia.mjs modelos.mjs cenarios.mjs
          venda.mjs vitrine.mjs fluxo.mjs roteiro.mjs faxina.mjs formato.mjs comentario.mjs
          travado.mjs promptcx.mjs cabec.mjs ajuda.mjs cinco.mjs appidioma.mjs gravando.mjs janelinha.mjs marca.mjs figuras.mjs dobrafig.mjs
          compartilhar.mjs contradicao.mjs negocio.mjs celular.mjs barraapp.mjs paridade.mjs teto.mjs ritmo.mjs rolar.mjs isca.mjs blog.mjs cenario1.mjs organiza.mjs acabamento.mjs convite.mjs email.mjs tourvid.mjs semmarca.mjs lente2.mjs
-         memoria.mjs pesagem.mjs espelho.mjs grade.mjs varredura.mjs audio.mjs plano.mjs faixa.mjs reuniao.mjs diagchamado.mjs modelo.mjs espera.mjs passomulti.mjs pessoas.mjs matriz.mjs espera2.mjs anotacao.mjs roteirojanela.mjs quedaplaca.mjs conclusao.mjs parar.mjs entrada.mjs indice.mjs figura.mjs resumo.mjs perna.mjs saidarec.mjs chaves.mjs planos.mjs promessa.mjs voltadocaso.mjs cartao.mjs etapas.mjs marcos.mjs funil.mjs wer.mjs"
+         memoria.mjs pesagem.mjs espelho.mjs grade.mjs varredura.mjs audio.mjs plano.mjs faixa.mjs reuniao.mjs diagchamado.mjs modelo.mjs espera.mjs passomulti.mjs pessoas.mjs matriz.mjs espera2.mjs anotacao.mjs roteirojanela.mjs quedaplaca.mjs conclusao.mjs parar.mjs entrada.mjs indice.mjs figura.mjs resumo.mjs perna.mjs saidarec.mjs chaves.mjs planos.mjs promessa.mjs voltadocaso.mjs cartao.mjs etapas.mjs marcos.mjs funil.mjs wer.mjs
+         terceiros.mjs precos.mjs semundefined.mjs middleware.mjs inventario.mjs"
 falhou=""
 for t in $TESTES; do
   [ -f "$t" ] || { echo "??  $t não existe"; continue; }
@@ -48,4 +49,13 @@ for t in $TESTES; do
   fi
 done
 echo
-[ -z "$falhou" ] && echo "Regressão inteira: verde." || echo "Falharam:$falhou"
+if [ -z "$falhou" ]; then
+  echo "Regressão inteira: verde."
+  exit 0
+fi
+# A ESTEIRA SAI DIFERENTE DE ZERO. Ela imprimia os que falharam e saía 0 — o que
+# deixa verde um pipeline que só olha o código de saída, com dez réguas
+# vermelhas na tela. Um vermelho que não reprova é um vermelho que se aprende a
+# rolar para baixo.
+echo "Falharam:$falhou"
+exit 1

@@ -8065,6 +8065,17 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
      worker está se registrando e o vídeo de exemplo pode estar sendo buscado.
      Entrar na frente disso seria trocar uma espera por outra. */
   function podeAdiantarSozinho(){
+    /* O PACOTE OFFLINE NÃO ANTECIPA NADA.
+       Ele é vendido para rede fechada, e a antecipação o fazia buscar o modelo
+       no jsDelivr 1,2 s depois de aberto — sem clique nenhum, e antes de a
+       pessoa ter feito coisa alguma. Medido: a promessa "nada nele fala com
+       servidor nenhum" caía no primeiro segundo e meio.
+
+       O `file:` responde por isso sem carimbo novo no build: é dele que o
+       pacote de arquivo único é aberto, e é o mesmo teste que `compartilhar` e
+       `licença` já usam. Na web nada muda — a antecipação continua, porque lá
+       ela paga uma espera real na primeira transcrição. */
+    if (location.protocol === 'file:') return false;
     try {
       const c = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
       if (!c) return true;                       // sem informação, o padrão é ajudar
@@ -9503,7 +9514,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
      depois, e não tem como se atualizar sozinho. Sem carimbo, "estou com um
      problema no offline" é uma conversa sem chão — ninguém sabe de qual build
      se fala nem se o defeito já foi consertado. */
-  const VERSAO = '2026.08.22-88';
+  const VERSAO = '2026.08.23-6';
   window.__versao = () => VERSAO;
 
   const PIP_CSS = `
@@ -22063,7 +22074,12 @@ ${relsSlide[i]}</Relationships>`) });
     }
     L.push('');
     L.push('* *' + t('pDur') + ':* ' + fmt(dur));
-    L.push('* *' + t('wFrames') + ':* ' + kept.length);
+    /* `wFrames` não existe em idioma nenhum — a verba morreu quando a ficha
+       técnica virou uma só (ver `fichaDoDoc`), e este caminho ficou para trás.
+       `t()` devolve `undefined` para verba que não existe, então o resumo que a
+       pessoa cola no chamado saía com a palavra "undefined" dentro. Agora é a
+       mesma verba e o mesmo número que o documento usa. */
+    L.push('* *' + t('pQuadros', rotuloUnidade()) + ':* ' + totalDePassosDe(kept));
     L.push('');
     L.push('||' + t('csvPasso') + '||' + t('pWhen') + '||' +
            (ev.horaVisivel ? t('pRelogio') + '||' : '') + t('notaPh') + '||');

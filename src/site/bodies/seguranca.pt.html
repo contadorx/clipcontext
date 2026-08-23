@@ -55,10 +55,10 @@
       <tr><td>Vercel Web Analytics</td><td>Sempre; não envia se o navegador manda <i>Do&nbsp;Not&nbsp;Track</i> ou <i>Global Privacy Control</i></td>
           <td>Qual página foi vista, sem cookie e sem identificador que persista</td>
           <td>Identificador de pessoa ou de sessão</td></tr>
-      <tr><td>Supabase (marcos de uso)</td><td>Em três momentos: abriu a ferramenta, abriu um vídeo, baixou um arquivo. Respeita DNT e GPC</td>
-          <td>O nome do marco, o idioma da página, a origem do vídeo e o formato baixado</td>
+      <tr><td>Supabase (marcos de uso)</td><td>Em quinze marcos, onze na ferramenta e quatro na conta — abriu a ferramenta, abriu um vídeo, baixou um arquivo, importou um roteiro, começou um pagamento, entre outros. Respeita DNT e GPC</td>
+          <td>O nome do marco, o idioma da página, a origem do vídeo, o formato baixado, uma faixa (“4-10”, e nunca o número exato) e o plano</td>
           <td>Nome de arquivo, tamanho, duração, conteúdo, identificador de sessão</td></tr>
-      <tr><td>jsDelivr (CDN público)</td><td>Só ao usar transcrição automática ou leitura de texto da imagem</td>
+      <tr><td>jsDelivr (CDN público)</td><td>No carregamento da ferramenta (a biblioteca de PDF) e ao usar transcrição automática ou leitura de texto da imagem</td>
           <td>O pedido da biblioteca</td><td>Seu áudio, sua imagem, seu texto</td></tr>
       <tr><td>Hugging Face</td><td>Só ao acionar a transcrição automática, e uma vez por navegador</td>
           <td>O pedido do modelo de voz</td><td>Seu áudio</td></tr>
@@ -70,7 +70,7 @@
           <td>Nada além do documento que você mandou; ele vai do seu navegador direto ao Google, sem passar por nós</td></tr>
     </table>
     <p><b>Nenhuma dessas conexões carrega vídeo, áudio, imagem ou transcrição.</b>
-    A biblioteca de PDF é servida do nosso próprio domínio, e não de CDN.</p>
+    A biblioteca de PDF vem do jsDelivr junto com a página; é o pacote offline que a embute.</p>
     <p>Há uma exceção, e ela está na tabela em vez de escondida: o botão <b>Enviar para o Google Docs</b>
     é a única função em que o <b>documento gerado sai do computador</b>. Ele existe porque muita equipe
     revisa evidência no Drive, e ele pede confirmação explícita antes de enviar — quem não quer isso não

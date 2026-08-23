@@ -65,9 +65,21 @@ console.log('\n[2b] e a lista de quem tem o vídeo da rodada, do mesmo jeito');
   const build = fs.readFileSync(`${RAIZ_WS}/build.py`, 'utf8');
   ok('e o build.py apura olhando o disco',
      /com_rodada = \[L for L in IDIOMAS if \(root \/ "public" \/ "demo"/.test(build));
-  ok('os cinco entraram no rotas.json',
-     JSON.stringify(ROTAS.rodadaLangs) === JSON.stringify(ROTAS.idiomas),
-     JSON.stringify(ROTAS.rodadaLangs));
+  /* E A RÉGUA COBRA A DERIVAÇÃO, NÃO O NÚMERO CINCO.
+     Ela exigia `rodadaLangs === idiomas` — quer dizer, exigia que os cinco
+     vídeos existissem. Eles NUNCA existiram: `public/demo/rodada.*.webm` são
+     quinze arquivos que nenhum commit trouxe, e a página de preços já pôs uma
+     figura no lugar. O que a régua tem de cobrar é o que o comentário acima
+     diz: que a lista saia do disco. Se os vídeos forem gravados um dia, ela
+     volta a cobrá-los sozinha, sem ninguém editar este arquivo. */
+  const noDisco = ROTAS.idiomas.filter(
+    (L) => fs.existsSync(`${DEMO}/rodada.${L}.webm`));
+  ok('o rotas.json diz exatamente o que está no disco',
+     JSON.stringify(ROTAS.rodadaLangs) === JSON.stringify(noDisco),
+     `rotas=${JSON.stringify(ROTAS.rodadaLangs)} disco=${JSON.stringify(noDisco)}`);
+  if (!noDisco.length) {
+    console.log('  nota    nenhum rodada.*.webm no disco: a página de preços usa a figura.');
+  }
 }
 
 console.log('\n[3] cada home mostra o tour da própria língua');
@@ -127,7 +139,11 @@ console.log('\n[7] a página de preços mostra a rodada da própria língua');
      em francês. Ele sai do `rotas.json`: escrever `/de/precos` aqui daria 404
      e o teste diria "o vídeo não está lá" sobre uma página que não existe. */
   const slug = ROTAS.slugs?.precos || {};
-  for (const L of ROTAS.idiomas) {
+  /* Sobre `rodadaLangs`, e não sobre `idiomas`: cobrar o vídeo de uma língua
+     cujo arquivo não existe é cobrar do produto uma coisa que o estúdio ainda
+     não entregou. Hoje a lista é vazia e este laço não roda — quando o
+     primeiro vídeo entrar no disco, ele passa a rodar sozinho. */
+  for (const L of ROTAS.rodadaLangs) {
     const u = L === 'pt' ? '/' + (slug.pt || 'precos') : `/${L}/${slug[L] || 'precos'}`;
     const r = await fetch(BASE + u);
     ok(`${L}: ${u} responde 200`, r.ok, String(r.status));
@@ -139,7 +155,7 @@ console.log('\n[7] a página de preços mostra a rodada da própria língua');
        abrir é cobrar de todo mundo o interesse de poucos. */
     ok(`${L}: e não baixa sozinho`, /rodada[\s\S]{0,400}?preload="none"|preload="none"[\s\S]{0,400}?rodada/.test(html));
   }
-  for (const L of ROTAS.idiomas) {
+  for (const L of ROTAS.rodadaLangs) {
     const t = fs.statSync(`${DEMO}/rodada.${L}.webm`).size;
     /* Mais folga que o tour: este não roda em laço nem começa sozinho — só
        baixa quando alguém aperta o play. */

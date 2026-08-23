@@ -55,10 +55,10 @@
       <tr><td>Vercel Web Analytics</td><td>Toujours ; rien n’est envoyé si le navigateur émet <i>Do&nbsp;Not&nbsp;Track</i> ou <i>Global Privacy Control</i></td>
           <td>Quelle page a été vue, sans cookie et sans identifiant qui persiste</td>
           <td>Un identifiant de personne ou de session</td></tr>
-      <tr><td>Supabase (jalons d’usage)</td><td>À trois moments : l’outil a été ouvert, une vidéo a été ouverte, un fichier a été téléchargé. Respecte DNT et GPC</td>
-          <td>Le nom du jalon, la langue de la page, l’origine de la vidéo et le format téléchargé</td>
+      <tr><td>Supabase (jalons d’usage)</td><td>À quinze jalons, onze dans l’outil et quatre dans le compte — l’outil a été ouvert, une vidéo a été ouverte, un fichier a été téléchargé, un script a été importé, un paiement a été commencé, entre autres. Respecte DNT et GPC</td>
+          <td>Le nom du jalon, la langue de la page, l’origine de la vidéo, le format téléchargé, une tranche (« 4-10 », jamais le nombre exact) et le forfait</td>
           <td>Nom de fichier, taille, durée, contenu, identifiant de session</td></tr>
-      <tr><td>jsDelivr (CDN public)</td><td>Seulement à l’usage de la transcription automatique ou de la lecture du texte dans l’image</td>
+      <tr><td>jsDelivr (CDN public)</td><td>Au chargement de l’outil (la bibliothèque PDF) et à l’usage de la transcription automatique ou de la lecture du texte dans l’image</td>
           <td>La requête de la bibliothèque</td><td>Votre audio, votre image, votre texte</td></tr>
       <tr><td>Hugging Face</td><td>Seulement au déclenchement de la transcription automatique, et une fois par navigateur</td>
           <td>La requête du modèle de reconnaissance vocale</td><td>Votre audio</td></tr>
@@ -70,7 +70,7 @@
           <td>Rien d’autre que le document que vous avez envoyé ; il va de votre navigateur directement à Google, sans passer par nous</td></tr>
     </table>
     <p><b>Aucune de ces connexions ne transporte de vidéo, d’audio, d’image ou de transcription.</b>
-    La bibliothèque PDF est servie depuis notre propre domaine, et non depuis un CDN.</p>
+    La bibliothèque PDF vient de jsDelivr avec la page ; c’est le paquet hors ligne qui l’intègre.</p>
     <p>Il y a une exception, et elle est dans le tableau plutôt que cachée : le bouton <b>Envoyer vers Google Docs</b>
     est la seule fonction où le <b>document généré sort de l’ordinateur</b>. Il existe parce que beaucoup d’équipes
     relisent la preuve dans le Drive, et il demande une confirmation explicite avant d’envoyer — qui n’en veut pas ne

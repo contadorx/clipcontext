@@ -57,10 +57,10 @@
       <tr><td>Vercel Web Analytics</td><td>Always; not sent if the browser signals <i>Do&nbsp;Not&nbsp;Track</i> or <i>Global Privacy Control</i></td>
           <td>Which page was viewed, with no cookie and no identifier that persists</td>
           <td>Any person or session identifier</td></tr>
-      <tr><td>Supabase (usage milestones)</td><td>At three moments: tool opened, video opened, output downloaded. Respects DNT and GPC</td>
-          <td>The milestone name, the page language, where the video came from, and the format downloaded</td>
+      <tr><td>Supabase (usage milestones)</td><td>At fifteen milestones, eleven in the tool and four in the account — tool opened, video opened, output downloaded, script imported, payment started, among others. Respects DNT and GPC</td>
+          <td>The milestone name, the page language, where the video came from, the format downloaded, a bracket (“4-10”, never the exact number) and the plan</td>
           <td>File name, size, duration, content, session identifier</td></tr>
-      <tr><td>jsDelivr (public CDN)</td><td>Only when using automatic transcription or text recognition</td>
+      <tr><td>jsDelivr (public CDN)</td><td>When the tool loads (the PDF library) and when using automatic transcription or text recognition</td>
           <td>The request for the library</td><td>Your audio, your images, your text</td></tr>
       <tr><td>Hugging Face</td><td>Only when you start automatic transcription, and once per browser</td>
           <td>The request for the speech model</td><td>Your audio</td></tr>
@@ -72,7 +72,7 @@
           <td>Anything beyond the document you sent; it goes from your browser straight to Google, never through us</td></tr>
     </table>
     <p><b>None of these connections carries video, audio, images or transcripts.</b>
-    The PDF library is served from our own domain, not from a CDN.</p>
+    The PDF library comes from jsDelivr along with the page; it is the offline package that embeds it.</p>
     <p>There is one exception, and it is in the table rather than hidden: the <b>Send to Google Docs</b>
     button is the only function where the <b>generated document leaves the computer</b>. It exists because
     many teams review evidence in Drive, and it asks for explicit confirmation before sending — if you do

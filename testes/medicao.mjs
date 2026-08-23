@@ -142,7 +142,13 @@ console.log('\n[M3] o arquivo offline é mudo');
   pg.on('request', r => { if (!r.url().startsWith('file:')) externos.push(r.url()); });
   const erros = []; pg.on('pageerror', e => erros.push(e.message));
   await pg.goto(`file://${RAIZ_WS}/offline/walkstamp-offline.html`);
-  await pg.waitForTimeout(900);
+  /* TRÊS SEGUNDOS, E NÃO NOVECENTOS MILISSEGUNDOS.
+     A antecipação do modelo dispara num `setTimeout` de 1200 ms — quer dizer
+     que esta régua media a janela ANTES do único pedido que ela existe para
+     pegar, e passava verde enquanto o pacote "mudo" chamava o jsDelivr 1,7 s
+     depois de abrir. Três segundos cobrem a antecipação com folga; medido, o
+     pedido saía em 1,7 s. */
+  await pg.waitForTimeout(3000);
   ok('abrindo o arquivo, nenhum pedido sai da máquina', externos.length === 0, externos.join(' | ').slice(0,160));
   ok('e ele funciona: a interface montou', await pg.locator('#drop').isVisible());
   ok('sem erro de JS', erros.length === 0, erros.join(' | ').slice(0, 160));

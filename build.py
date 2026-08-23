@@ -77,6 +77,10 @@ CAMINHO_CONTA = {"pt": "/conta", "en": "/en/account", "es": "/es/cuenta",
 # parâmetro que mude, quem já visitou o site continua vendo o ícone antigo
 # mesmo depois do deploy. Suba este número sempre que a marca mudar.
 ICON_V = "3"
+# Versão do service worker, separada da dos ícones: ela sobe quando o COMPORTAMENTO
+# do sw muda e o cache antigo precisa morrer. Subiu para 2 quando /conta e /api
+# deixaram de ser guardados.
+SW_V = "2"
 
 # ---------------------------------------------------------------------------
 # Medição. São duas coisas separadas, de propósito:
@@ -806,7 +810,12 @@ def build_site(root: pathlib.Path) -> None:
    caso de a rede cair no meio do trabalho, e para os arquivos estáticos.
    Ele NÃO guarda vídeo, áudio, transcrição nem documento gerado: nada disso
    passa por aqui, porque nada disso é uma requisição de rede. */
-const CACHE = 'walkstamp-v%s';
+/* A versão tem duas partes: a dos ícones e a DO PRÓPRIO service worker. Elas
+   mudam por motivos diferentes — a segunda subiu quando /conta e /api saíram do
+   cache, e ela precisa subir para que o cache velho, que ainda guarda o e-mail
+   do cliente, seja apagado pelo `activate`. Um conserto que não invalida o
+   cache antigo não conserta a máquina de ninguém. */
+const CACHE = 'walkstamp-v%s.%s';
 const ESSENCIAIS = ['/app', '/site.css', '/favicon.svg', '/logo.svg'];
 
 self.addEventListener('install', e => {
@@ -824,6 +833,13 @@ self.addEventListener('fetch', e => {
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
   if (url.origin !== self.location.origin) return;   // CDN e modelo não passam por aqui
+  /* A CONTA E AS APIs NÃO ENTRAM NO CACHE.
+     O produto manda `no-store` nessas respostas — e o cache aqui apagava esse
+     pedido, porque `caches.put()` não olha `Cache-Control`. O efeito é o pior
+     possível numa máquina compartilhada: o e-mail do cliente e a linha da
+     fatura sobrevivem ao logout, e voltam para a próxima pessoa quando a rede
+     cai. Nada aqui é estático; nada aqui deve ser servido de ontem. */
+  if (url.pathname.startsWith('/conta') || url.pathname.startsWith('/api/')) return;
   e.respondWith(
     fetch(req).then(r => {
       const copia = r.clone();
@@ -832,7 +848,7 @@ self.addEventListener('fetch', e => {
     }).catch(() => caches.match(req).then(r => r || caches.match('/app')))
   );
 });
-""" % (MARCA, ICON_V)
+""" % (MARCA, ICON_V, SW_V)
     (root / "public" / "sw.js").write_text(sw, encoding="utf-8")
     print("public/sw.js")
 
@@ -1930,16 +1946,44 @@ def main() -> int:
     # origem para existir ali, e um <link> apontando para /manifest.webmanifest
     # só produziria um 404 no console de quem o abrir
     offline = offline.replace('<link rel="manifest" href="/manifest.webmanifest">\n', "")
-    out_off = ROOT / "offline" / "walkstamp-offline.html"
-    out_off.parent.mkdir(exist_ok=True)
-    out_off.write_text(offline, encoding="utf-8")
-
     # Trava, não conferência: se um dia alguém colar um endereço direto no
     # template, o build quebra em vez de publicar um "offline" que telefona.
+    #
+    # E ela roda ANTES do `write_text`. Rodava depois: o build saía 1, e o
+    # arquivo de 1,7 MB com `supabase.co` dentro já estava no disco, tendo
+    # sobrescrito a versão boa. Uma trava que contamina o disco antes de
+    # reprovar deixa o próximo `git status` limpo e o próximo deploy errado.
     for proibido in ("supabase.co", "_vercel/insights"):
         if proibido in offline:
             print(f"o build offline contém {proibido!r} — ele tem que ser mudo", file=sys.stderr)
             return 1
+
+    # O TETO DECLARADO DE CDN NO PACOTE OFFLINE.
+    #
+    # Estes dois endereços NÃO são proibição: eles estão lá, hoje, na cadeia de
+    # reserva da transcrição e do OCR, e proibi-los agora só derrubaria o build
+    # sem consertar nada. O que esta trava impede é o número CRESCER em
+    # silêncio — que foi como ele chegou a 13 sem ninguém decidir.
+    #
+    # Enquanto estes números não forem zero, a frase "nada nele fala com
+    # servidor nenhum" é falsa e não pode ser publicada. Quando a decisão do
+    # offline for tomada (embutir tudo, ou declarar que ele não transcreve),
+    # baixe os tetos junto — o build avisa quando eles ficarem folgados.
+    TETO_CDN_OFFLINE = {"cdn.jsdelivr.net": 13, "huggingface.co": 2}
+    for endereco, teto in TETO_CDN_OFFLINE.items():
+        achou = offline.count(endereco)
+        if achou > teto:
+            print(f"o build offline passou a citar {endereco!r} {achou}× "
+                  f"(o teto declarado é {teto}) — decida antes de subir o número",
+                  file=sys.stderr)
+            return 1
+        if achou < teto:
+            print(f"  o teto de {endereco!r} está folgado: {achou} de {teto}. "
+                  f"Baixe TETO_CDN_OFFLINE em build.py.", file=sys.stderr)
+
+    out_off = ROOT / "offline" / "walkstamp-offline.html"
+    out_off.parent.mkdir(exist_ok=True)
+    out_off.write_text(offline, encoding="utf-8")
 
     for path in (out_web, out_off):
         print(f"{path.relative_to(ROOT)}  {len(path.read_text(encoding='utf-8')) / 1024:.1f} KB")

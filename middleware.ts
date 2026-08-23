@@ -30,4 +30,23 @@ export async function middleware(req: NextRequest) {
   return resposta;
 }
 
-export const config = { matcher: ['/conta', '/conta/:caminho*'] };
+/* A CONTA NÃO SE CHAMA "conta" EM CINCO LÍNGUAS.
+ *
+ * O matcher casava só `/conta`, que é o endereço PORTUGUÊS. Por dentro tudo
+ * mora em `/conta/<idioma>`, mas o middleware roda ANTES das reescritas — ele
+ * vê o endereço que o navegador pediu, e o navegador de quem fala alemão pede
+ * `/de/konto`. Resultado: a sessão não era renovada em quatro dos cinco
+ * idiomas, e a pessoa caía para fora sozinha.
+ *
+ * Escrito por extenso porque o `config` do Next tem de ser legível em tempo de
+ * build — importar `rotas.json` aqui não compila. A régua que impede esta
+ * lista de divergir de `src/rotas.json` é `testes/middleware.mjs`. */
+export const config = {
+  matcher: [
+    '/conta', '/conta/:caminho*',            // pt
+    '/en/account', '/en/account/:caminho*',
+    '/es/cuenta', '/es/cuenta/:caminho*',
+    '/de/konto', '/de/konto/:caminho*',
+    '/fr/compte', '/fr/compte/:caminho*',
+  ],
+};

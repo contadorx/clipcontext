@@ -200,7 +200,10 @@ console.log('\n[4] as páginas do blog não batem no banco a cada visita');
   for (let i = 0; i < 3; i++) await texto(`/blog/${POST.versoes.pt.slug}`);
   const gastos = pedidosAoBanco - antes;
   console.log('     três visitas → ' + gastos + ' pedido(s) ao banco');
-  ok('três visitas não viram três consultas', gastos < 3, gastos + ' consultas em 3 visitas');
+  /* `=== 1`, e não `< 3`. O comentário do produto garante ZERO consulta
+     nas visitas seguintes; a régua aceitava duas. A regressão que isso
+     deixa passar só aparece na fatura do banco. */
+  ok('três visitas não viram três consultas', gastos === 1, gastos + ' consultas em 3 visitas');
   const rr = await fetch(BASE + '/sitemap-blog.xml');
   ok('e o sitemap manda a CDN guardar',
      /s-maxage/.test(rr.headers.get('cache-control') || ''),

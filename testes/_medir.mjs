@@ -1,10 +1,13 @@
 import { chromium } from './_navegador.mjs';
 import http from 'http'; import fs from 'fs';
-const RAIZ='/root/walkstamp';
+import { RAIZ_WS, comChrome } from './_caminhos.mjs';
+/* A raiz vem de onde ESTE arquivo está, e não de uma máquina só. Estes três
+   ajudantes ficaram para trás quando os outros 140 passaram a derivar. */
+const RAIZ = RAIZ_WS;
 const html = fs.readFileSync(RAIZ+'/public/app.html','utf8');
 const srv=http.createServer((q,r)=>{ if(q.url.startsWith('/_vercel/')){r.writeHead(200,{'Content-Type':'text/javascript'});return r.end('')} r.writeHead(200,{'Content-Type':'text/html'}); r.end(html); });
 await new Promise(r=>srv.listen(8993,r));
-const br=await chromium.launch({executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome'});
+const br=await chromium.launch(comChrome());
 const ctx=await br.newContext({acceptDownloads:true, viewport:{width:1250,height:900}});
 const pg=await ctx.newPage();
 const erros=[]; pg.on('pageerror',e=>erros.push(e.message));

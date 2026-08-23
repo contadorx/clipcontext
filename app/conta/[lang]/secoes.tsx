@@ -67,7 +67,7 @@ export function Plano({ conta, lang, t }: { conta: Conta; lang: Lang; t: Textos 
             <form action={comprar} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
               <input type="hidden" name="lang" value={lang} />
               <input type="hidden" name="plano" value="time" />
-              <input type="number" name="assentos" min={5} max={500} defaultValue={5}
+              <input type="number" name="assentos" min={3} max={500} defaultValue={3}
                      aria-label={t.pessoasAria} style={{ width: 78 }} />
               <button className="btn ghost" type="submit"
                       disabled={!temStripe || !PLANOS.time.preco()}>{t.assinarTeam}</button>
