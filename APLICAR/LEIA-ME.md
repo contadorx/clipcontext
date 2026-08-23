@@ -14,10 +14,10 @@ Não vêm junto, porque se regeneram ou são enormes: `.git/`, `node_modules/`
 
 ---
 
-## `build1-e-pista.bundle` — a rodada de 23/08
+## `builds-1-e-2.bundle` — a rodada de 23/08
 
 **Base:** `7c90a97` (o `main` do GitHub, de 19/08).
-**Traz:** três commits.
+**Traz:** quatro commits.
 
 1. **Sincroniza a árvore interna com o deploy de 22/08.** O repositório estava
    três dias atrás da árvore publicada na Vercel. 267 arquivos, nenhuma
@@ -27,12 +27,13 @@ Não vêm junto, porque se regeneram ou são enormes: `.git/`, `node_modules/`
    middleware nos cinco idiomas, o offline que telefonava sozinho, e nove
    frases falsas fora do ar nos cinco idiomas.
 3. **A pista de liberação**, mais as três réguas que ainda mentiam.
+4. **Build 2 — não perder trabalho**, e a esteira de 70 para 12 minutos.
 
-O relatório completo está em `BUILD-1.md`, na raiz. A fila dos próximos e as
+Os relatórios estão em `BUILD-1.md` e `BUILD-2.md`, na raiz. A fila dos próximos e as
 decisões abertas estão em `FILA.md`.
 
 ```bash
-git fetch APLICAR/build1-e-pista.bundle \
+git fetch APLICAR/builds-1-e-2.bundle \
   claude/builds-deploys-sequence-0fatlg:claude/builds-deploys-sequence-0fatlg
 git checkout claude/builds-deploys-sequence-0fatlg
 ```
@@ -49,7 +50,7 @@ git checkout claude/builds-deploys-sequence-0fatlg
 
 **Base:** `7c90a97`. **Traz:** os seis commits da rodada de preços, que já estão
 incluídos no commit 1 do bundle acima. Fica aqui como registro; quem aplicar o
-`build1-e-pista.bundle` não precisa dele.
+`builds-1-e-2.bundle` não precisa dele.
 
 ```bash
 git fetch APLICAR/rodada-precos.bundle \
