@@ -1,5 +1,12 @@
 # O que há nesta pasta
 
+> **Os `.bundle` NÃO viajam dentro do zip — 23/08.**
+> O pacote passou de 30 MB e não coube na entrega. O bundle é a mesma árvore
+> outra vez, comprimida com a história junto: mandá-lo dentro do zip é mandar o
+> projeto duas vezes. Ele vai **separado**, ao lado do zip, e este arquivo
+> continua aqui explicando o que fazer com ele.
+> Se você recebeu só o zip e quer a história, peça o bundle.
+
 Dois bundles de git. Cada um traz commits com as mensagens inteiras, para quem
 prefere aplicar a HISTÓRIA em vez de copiar a árvore por cima.
 
