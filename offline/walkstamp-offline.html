@@ -2283,7 +2283,13 @@
                parar no meio: quem descobre que a tela mudou descobre, no mesmo
                segundo, que a anotação envelheceu junto. -->
           <label class="status" for="revNotaEd" data-i18n="revNotaLbl"></label>
-          <input type="text" id="revNotaEd" maxlength="180" autocomplete="off"
+          <!-- 600 e não 180. Os três campos que escrevem em `f.nota` — a caixa
+               da gravação, o campo da miniatura e este — tinham tetos
+               diferentes, e este era o menor. Resultado: uma anotação de 400
+               caracteres escrita durante a gravação era CORTADA para 180 só por
+               a pessoa passar por ela na revisão, sem tocar em nada. O texto
+               que se perdia era o único que não dá para reconstruir depois. -->
+          <input type="text" id="revNotaEd" maxlength="600" autocomplete="off"
                  style="width:100%;padding:8px 10px;border:1px solid var(--line);
                         border-radius:7px;background:var(--bg);color:var(--ink);
                         font:inherit;font-size:14px;margin-bottom:4px">
@@ -2933,11 +2939,18 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
              vazio e o valor passa de mil" não consegue reler o que escreveu, e
              o que não se relê não se corrige.
 
-             O limite continua 180 — ele existe porque a anotação vira título de
-             passo no documento, e título não é parágrafo. O que mudou é caber
-             na tela. -->
+             O limite passou a ser 600, o MESMO dos outros dois campos que
+             escrevem em `f.nota`. Ele era 180 aqui e na revisão, e 600 na caixa
+             da gravação e na miniatura — então uma anotação de 400 caracteres
+             escrita durante a gravação era cortada ao meio só por alguém abrir
+             a lente. Nenhum campo deste produto pode destruir texto digitado
+             sem dizer.
+             O argumento do 180 continua verdadeiro — a anotação vira TÍTULO do
+             passo, e título não é parágrafo —, mas ele é um conselho, e conselho
+             se dá com o contador que já está logo abaixo (`lenteNotaResta`),
+             não com uma tesoura silenciosa. -->
         <div><label for="lenteNota" data-i18n="notaPh"></label>
-             <textarea id="lenteNota" maxlength="180" rows="3"
+             <textarea id="lenteNota" maxlength="600" rows="3"
                        autocomplete="off"></textarea>
              <p class="evPe" style="padding:5px 0 0"><span id="lenteNotaConta"></span></p></div>
         <div id="lenteHoraCx"><label for="lenteHora" data-i18n="lenteHora"></label>
@@ -3674,6 +3687,10 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
   const $ = id => document.getElementById(id);
   const video = $('v');
   let manual = [], fileName = '', fileSize = 0, currentFile = null, frames = [], stop = false;
+  /* O teto da anotação, num lugar só. Ele morava em três: `maxlength="600"`
+     na caixa da gravação, `maxlength="600"` na miniatura e `slice(0, 180)`
+     na revisão — e o menor ganhava de quem chegasse por último. */
+  const TETO_NOTA = 600;
 
   /* O espelho por onde a régua enxerga os quadros (`testes/pesagem.mjs`).
      É uma FUNÇÃO e não a referência: `frames` é reatribuído quando alguém
@@ -3973,7 +3990,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       trDizParou:'Transcrição parada a seu pedido. {0} trechos guardados.',
       trDizFim:'Transcrição concluída: {0} trechos.', trDizErro:'A transcrição falhou.',
       keepOpen:'Processando. Não feche esta aba.', esperaDica:'Avisamos no título da aba quando terminar. Para outro vídeo, abra uma nova sessão:', esperaNova:'Nova sessão', esperaNovaDica:'Cada sessão usa a mesma máquina: duas ao mesmo tempo ficam mais lentas.',
-      leaveWarn:'O processamento ainda está em andamento. Se sair agora, perde o que já foi feito.', noGpu:'WebGPU indisponível — usando o processador, vai demorar mais.',
+      leaveWarn:'O processamento ainda está em andamento. Se sair agora, perde o que já foi feito.', leaveFeito:'Há trabalho não guardado nesta aba. Se sair agora, ele se perde — baixe o projeto (.json) antes.', perderTudo:'Isto descarta {0} e recomeça do zero. O que você escreveu não volta.', perderAnota:'{0} anotação(ões)', perderMarca:'{0} tarja(s)/recorte(s)', perderHash:'{0} impressão(ões) digital(is)', perderClipe:'{0} clipe(s)', noGpu:'WebGPU indisponível — usando o processador, vai demorar mais.',
       transcribing:'Transcrevendo… bloco {0} de {1}', trDone:'Transcrição pronta — {0} trechos.',
       trErr:'Não consegui transcrever aqui: {0} — clique em Diagnóstico para ver em qual etapa trava.',
       diagDone:'Diagnóstico pronto. Selecione o bloco acima, copie e envie.',
@@ -4175,7 +4192,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       espFalhou:'Não consegui guardar as telas no seu computador ({0}). A gravação continua, mas se a aba fechar antes de sair um documento, ela se perde.',
       reabrirLendo:'Lendo o arquivo…',
       reabrirOk:'{0} quadros de volta. Corrija o que precisar e gere de novo.',
-      reabrirTarja:'As tarjas voltam queimadas na imagem: elas nunca foram uma camada por cima, e não há como desfazê-las.',
+      reabrirTarja:'As tarjas voltam queimadas na imagem: elas nunca foram uma camada por cima, e não há como desfazê-las.', reabrirNovo:'Este arquivo foi gravado por uma versão mais nova (formato {0}; esta lê até {1}). O que ela não entende foi ignorado — confira o documento antes de usar.', reabrirPulou:'{0} de {1} telas não vieram: elas estão no arquivo sem imagem dentro.',
       reabrirErro:'Não consegui abrir este arquivo: {0}',
       reabrirVazio:'este arquivo não tem quadros dentro',
       reabrirSemImg:'não achei imagem nenhuma aqui dentro',
@@ -4595,7 +4612,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       trDizParou:'Transcription stopped at your request. {0} segments kept.',
       trDizFim:'Transcription done: {0} segments.', trDizErro:'The transcription failed.',
       keepOpen:'Processing. Do not close this tab.', esperaDica:'We flag the tab title when it is done. For another video, open a new session:', esperaNova:'New session', esperaNovaDica:'Each session uses the same machine: two at once both run slower.',
-      leaveWarn:'Processing is still running. If you leave now, you lose what has been done.', noGpu:'WebGPU unavailable — using the CPU, this will be slower.',
+      leaveWarn:'Processing is still running. If you leave now, you lose what has been done.', leaveFeito:'There is unsaved work in this tab. If you leave now, it is lost — download the project (.json) first.', perderTudo:'This discards {0} and starts over. What you wrote does not come back.', perderAnota:'{0} note(s)', perderMarca:'{0} redaction(s)/crop(s)', perderHash:'{0} fingerprint(s)', perderClipe:'{0} clip(s)', noGpu:'WebGPU unavailable — using the CPU, this will be slower.',
       transcribing:'Transcribing… chunk {0} of {1}', trDone:'Transcript ready — {0} segments.',
       trErr:'Could not transcribe here: {0} — click Diagnostics to see which step fails.',
       diagDone:'Diagnostics ready. Select the block above, copy it and send it over.',
@@ -4791,7 +4808,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       espFalhou:'I could not keep the screens on your computer ({0}). The recording continues, but if the tab closes before a document comes out, it is lost.',
       reabrirLendo:'Reading the file…',
       reabrirOk:'{0} frames back. Fix what you need and generate again.',
-      reabrirTarja:'Redactions come back burned into the image: they were never a layer on top, and there is no undoing them.',
+      reabrirTarja:'Redactions come back burned into the image: they were never a layer on top, and there is no undoing them.', reabrirNovo:'This file was written by a newer version (format {0}; this one reads up to {1}). Anything it does not understand was ignored — check the document before using it.', reabrirPulou:'{0} of {1} screens did not come back: they are in the file with no image inside.',
       reabrirErro:'I could not open this file: {0}',
       reabrirVazio:'this file has no frames inside',
       reabrirSemImg:'I found no image in here',
@@ -5211,7 +5228,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       trDizParou:'Transcripción parada a petición tuya. {0} fragmentos guardados.',
       trDizFim:'Transcripción terminada: {0} fragmentos.', trDizErro:'La transcripción falló.',
       keepOpen:'Procesando. No cierres esta pestaña.', esperaDica:'Avisamos en el título de la pestaña al terminar. Para otro vídeo, abre una nueva sesión:', esperaNova:'Nueva sesión', esperaNovaDica:'Cada sesión usa la misma máquina: dos a la vez van más lentas.',
-      leaveWarn:'El procesamiento sigue en curso. Si sales ahora, pierdes lo que ya se hizo.', noGpu:'WebGPU no disponible — usando el procesador, será más lento.',
+      leaveWarn:'El procesamiento sigue en curso. Si sales ahora, pierdes lo que ya se hizo.', leaveFeito:'Hay trabajo sin guardar en esta pestaña. Si sales ahora, se pierde — descarga el proyecto (.json) antes.', perderTudo:'Esto descarta {0} y empieza de cero. Lo que escribiste no vuelve.', perderAnota:'{0} anotación(es)', perderMarca:'{0} franja(s)/recorte(s)', perderHash:'{0} huella(s) digital(es)', perderClipe:'{0} clip(s)', noGpu:'WebGPU no disponible — usando el procesador, será más lento.',
       transcribing:'Transcribiendo… bloque {0} de {1}', trDone:'Transcripción lista — {0} tramos.',
       trErr:'No pude transcribir aquí: {0} — pulsa Diagnóstico para ver en qué paso falla.',
       diagDone:'Diagnóstico listo. Selecciona el bloque de arriba, cópialo y envíalo.',
@@ -5407,7 +5424,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       espFalhou:'No pude guardar las pantallas en tu ordenador ({0}). La grabación sigue, pero si se cierra la pestaña antes de salir un documento, se pierde.',
       reabrirLendo:'Leyendo el archivo…',
       reabrirOk:'{0} fotogramas de vuelta. Corrige lo que haga falta y genera otra vez.',
-      reabrirTarja:'Los tapados vuelven quemados en la imagen: nunca fueron una capa encima, y no hay forma de deshacerlos.',
+      reabrirTarja:'Los tapados vuelven quemados en la imagen: nunca fueron una capa encima, y no hay forma de deshacerlos.', reabrirNovo:'Este archivo se guardó con una versión más nueva (formato {0}; esta lee hasta {1}). Lo que no entiende se ignoró — revisa el documento antes de usarlo.', reabrirPulou:'{0} de {1} pantallas no volvieron: están en el archivo sin imagen dentro.',
       reabrirErro:'No pude abrir este archivo: {0}',
       reabrirVazio:'este archivo no tiene fotogramas dentro',
       reabrirSemImg:'no encontré ninguna imagen aquí dentro',
@@ -5826,7 +5843,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       trDizParou:'Transkription auf Ihren Wunsch angehalten. {0} Abschnitte gesichert.',
       trDizFim:'Transkription fertig: {0} Abschnitte.', trDizErro:'Die Transkription ist fehlgeschlagen.',
       keepOpen:'Wird verarbeitet. Diesen Tab nicht schließen.', esperaDica:'Wir melden es im Tab-Titel. Für ein weiteres Video eine neue Sitzung öffnen:', esperaNova:'Neue Sitzung', esperaNovaDica:'Jede Sitzung nutzt dieselbe Maschine: zwei gleichzeitig laufen langsamer.',
-      leaveWarn:'Die Verarbeitung läuft noch. Wenn Sie jetzt gehen, geht das bereits Erledigte verloren.', noGpu:'WebGPU nicht verfügbar — es wird der Prozessor verwendet, das dauert länger.',
+      leaveWarn:'Die Verarbeitung läuft noch. Wenn Sie jetzt gehen, geht das bereits Erledigte verloren.', leaveFeito:'In diesem Tab gibt es ungespeicherte Arbeit. Wenn Sie jetzt gehen, geht sie verloren — laden Sie zuerst das Projekt (.json) herunter.', perderTudo:'Damit werden {0} verworfen und alles beginnt von vorn. Was Sie geschrieben haben, kommt nicht zurück.', perderAnota:'{0} Notiz(en)', perderMarca:'{0} Balken/Ausschnitt(e)', perderHash:'{0} Fingerabdruck/-abdrücke', perderClipe:'{0} Clip(s)', noGpu:'WebGPU nicht verfügbar — es wird der Prozessor verwendet, das dauert länger.',
       transcribing:'Wird transkribiert… Block {0} von {1}', trDone:'Transkription fertig — {0} Abschnitte.',
       trErr:'Die Transkription war hier nicht möglich: {0} — klicken Sie auf Diagnose, um zu sehen, in welchem Schritt es hängt.',
       diagDone:'Diagnose fertig. Markieren Sie den Block oben, kopieren Sie ihn und senden Sie ihn.',
@@ -6028,7 +6045,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       espFalhou:'Ich konnte die Bildschirme nicht auf Ihrem Computer behalten ({0}). Die Aufnahme läuft weiter, aber wenn der Tab schließt, bevor ein Dokument herauskommt, ist sie verloren.',
       reabrirLendo:'Die Datei wird gelesen…',
       reabrirOk:'{0} Screenshots zurück. Korrigieren Sie, was nötig ist, und erzeugen Sie erneut.',
-      reabrirTarja:'Die Schwärzungen kommen fest in das Bild eingebrannt zurück: Sie waren nie eine Ebene darüber, und sie lassen sich nicht rückgängig machen.',
+      reabrirTarja:'Die Schwärzungen kommen fest in das Bild eingebrannt zurück: Sie waren nie eine Ebene darüber, und sie lassen sich nicht rückgängig machen.', reabrirNovo:'Diese Datei wurde von einer neueren Version geschrieben (Format {0}; diese liest bis {1}). Was sie nicht versteht, wurde übergangen — prüfen Sie das Dokument vor der Verwendung.', reabrirPulou:'{0} von {1} Bildschirmen kamen nicht zurück: Sie stehen ohne Bild in der Datei.',
       reabrirErro:'Diese Datei konnte nicht geöffnet werden: {0}',
       reabrirVazio:'diese Datei enthält keine Screenshots',
       reabrirSemImg:'hier drin wurde kein Bild gefunden',
@@ -6447,7 +6464,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       trDizParou:'Transcription arrêtée à votre demande. {0} passages gardés.',
       trDizFim:'Transcription terminée : {0} passages.', trDizErro:'La transcription a échoué.',
       keepOpen:'Traitement en cours. Ne fermez pas cet onglet.', esperaDica:'Nous le signalons dans le titre de l’onglet. Pour une autre vidéo, ouvrez une nouvelle session :', esperaNova:'Nouvelle session', esperaNovaDica:'Chaque session utilise la même machine : deux à la fois sont plus lentes.',
-      leaveWarn:'Le traitement est encore en cours. Si vous partez maintenant, vous perdez ce qui a déjà été fait.', noGpu:'WebGPU indisponible — utilisation du processeur, ce sera plus long.',
+      leaveWarn:'Le traitement est encore en cours. Si vous partez maintenant, vous perdez ce qui a déjà été fait.', leaveFeito:'Il y a du travail non enregistré dans cet onglet. Si vous partez maintenant, il est perdu — téléchargez d’abord le projet (.json).', perderTudo:'Ceci écarte {0} et recommence de zéro. Ce que vous avez écrit ne revient pas.', perderAnota:'{0} note(s)', perderMarca:'{0} bandeau(x)/recadrage(s)', perderHash:'{0} empreinte(s) numérique(s)', perderClipe:'{0} clip(s)', noGpu:'WebGPU indisponible — utilisation du processeur, ce sera plus long.',
       transcribing:'Transcription… bloc {0} sur {1}', trDone:'Transcription prête — {0} segments.',
       trErr:'Transcription impossible ici : {0} — cliquez sur Diagnostic pour voir à quelle étape ça bloque.',
       diagDone:'Diagnostic prêt. Sélectionnez le bloc ci-dessus, copiez-le et envoyez-le.',
@@ -6649,7 +6666,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       espFalhou:'Je n’ai pas pu garder les écrans sur votre ordinateur ({0}). L’enregistrement continue, mais si l’onglet se ferme avant qu’un document sorte, il est perdu.',
       reabrirLendo:'Lecture du fichier…',
       reabrirOk:'{0} captures récupérées. Corrigez ce qu’il faut et générez de nouveau.',
-      reabrirTarja:'Les caviardages reviennent incrustés dans l’image : ils n’ont jamais été une couche par-dessus, et il n’y a pas moyen de les défaire.',
+      reabrirTarja:'Les caviardages reviennent incrustés dans l’image : ils n’ont jamais été une couche par-dessus, et il n’y a pas moyen de les défaire.', reabrirNovo:'Ce fichier a été écrit par une version plus récente (format {0} ; celle-ci lit jusqu’à {1}). Ce qu’elle ne comprend pas a été ignoré — vérifiez le document avant de l’utiliser.', reabrirPulou:'{0} des {1} écrans ne sont pas revenus : ils sont dans le fichier sans image dedans.',
       reabrirErro:'Impossible d’ouvrir ce fichier : {0}',
       reabrirVazio:'ce fichier ne contient aucune capture',
       reabrirSemImg:'aucune image trouvée là-dedans',
@@ -7045,10 +7062,31 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       window.open(location.pathname + location.search, '_blank', 'noopener');
     };
   }
+  /* O AVISO DE SAÍDA COBRIA O MOMENTO ERRADO.
+   *
+   * Ele só existia enquanto algo estava RODANDO — gravação, varredura,
+   * transcrição. Mas o momento de maior risco é o desprotegido: a meia hora
+   * DEPOIS, com a grade na tela, anotando quadro a quadro. Nada está ocupado,
+   * e um Ctrl+W leva tudo.
+   *
+   * A condição passa a ser "há trabalho em curso OU há trabalho feito que não
+   * foi guardado". `projetoGuardado` já existia (:20376) e é ligado quando o
+   * .json recuperável é baixado — é exatamente a pergunta certa.
+   *
+   * E ele NÃO avisa quando não há o que perder: quem só abriu um vídeo e
+   * desistiu sai direto. Avisar demais treina a pessoa a clicar "sair" sem ler,
+   * e aí o aviso que importa passa junto. */
   window.addEventListener('beforeunload', e => {
-    if (!ocupado) return;
+    const temQuadros = typeof frames !== 'undefined' && frames.length > 0;
+    const naoGuardado = temQuadros && !projetoGuardado;
+    if (!ocupado && !naoGuardado) return;
     e.preventDefault();
-    e.returnValue = t('leaveWarn');
+    /* Duas frases, porque são dois riscos diferentes: "está rodando, você perde
+       o que falta" e "está pronto e não foi guardado, baixe o .json". A segunda
+       diz o que fazer; a primeira só pede paciência. (Os navegadores atuais
+       mostram o texto deles e não o nosso — mas quem lê este código merece ver
+       a distinção, e o dia em que voltarem a mostrar já está resolvido.) */
+    e.returnValue = ocupado ? t('leaveWarn') : t('leaveFeito');
     return e.returnValue;
   });
 
@@ -7321,6 +7359,10 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     if (fim) fim.textContent = 'Produtize Produtos e Serviços Inteligentes Ltda. · CNPJ 48.417.292/0001-99 · v' + VERSAO;
   }
 
+  /* Erguida pelo `change` do seletor de fala; ver `applyLang`. */
+  let idiomaDaFalaManual = false;
+  if ($('lang')) $('lang').addEventListener('change', () => { idiomaDaFalaManual = true; });
+
   function applyLang(){
     document.documentElement.lang = LANG;
     document.title = t('docTitle');
@@ -7390,7 +7432,14 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     if (currentFile) showMeta();
     $('idiomas').querySelectorAll('a[data-l]').forEach(a =>
       a.classList.toggle('atual', a.dataset.l === LANG));
-    $('lang').value = LANG;   // idioma da transcrição acompanha o da interface
+    /* O IDIOMA DA FALA SÓ ACOMPANHA A INTERFACE ENQUANTO NINGUÉM O ESCOLHEU.
+       Era uma linha sem condição: trocar a interface para inglês reescrevia,
+       em silêncio, o idioma da TRANSCRIÇÃO — e uma transcrição de quarenta
+       minutos saía em inglês fonético. O custo é o tempo inteiro da inferência,
+       pago de novo, e a pessoa não tem como saber o que aconteceu.
+       O padrão continua sendo acompanhar, porque na maioria dos casos ele
+       acerta. O que muda é que a escolha explícita ganha. */
+    if (!idiomaDaFalaManual) $('lang').value = LANG;
     notaTr();
     passos();                 // as dicas dos passos não têm data-i18n: são escritas aqui
     /* O bloco da gravação guardada também é escrito à mão, com número dentro
@@ -7751,6 +7800,11 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
        porta que não passa por aqui é a de reabrir um documento — e ela não
        precisa, porque o cenário vem escrito dentro do arquivo. */
     if (!exigirCenario()) { try { $('file').value = ''; } catch (e) {} return; }
+    /* Carregar outro vídeo descarta o que está na tela. O quarto caminho
+       destrutivo, e o mais silencioso dos quatro: os outros três a pessoa pede
+       ("varrer", "gravar", "abrir"); este ela pede por engano, arrastando o
+       arquivo errado. */
+    if (!podeRecomecar()) { try { $('file').value = ''; } catch (e) {} return; }
     /* Sem isto, a duração e os rótulos de uma captura anterior contaminariam o
        arquivo novo: o PDF diria 30 s para um vídeo de 10 min, e o prompt
        explicaria canais de áudio que não existem neste material. */
@@ -9514,7 +9568,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
      depois, e não tem como se atualizar sozinho. Sem carimbo, "estou com um
      problema no offline" é uma conversa sem chão — ninguém sabe de qual build
      se fala nem se o defeito já foi consertado. */
-  const VERSAO = '2026.08.23-12';
+  const VERSAO = '2026.08.23-24';
   window.__versao = () => VERSAO;
 
   const PIP_CSS = `
@@ -10652,6 +10706,10 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
   $('rec').onclick = async () => {
     if (!podeGravar) { $('recMsg').innerHTML = `<span class="err">${t('recNo')}</span>`; return; }
     if (!exigirCenario()) return;
+    /* Gravar de novo descarta a lista atual — e a pergunta vem ANTES do seletor
+       de tela do navegador, não depois. Perguntar depois de a pessoa já ter
+       escolhido a tela é cobrar duas decisões pela mesma coisa. */
+    if (!podeRecomecar()) return;
     /* Antes de tudo: o roteiro que está escrito na caixa passa a valer. Depois
        daqui a janelinha já abre com o passo 1 na frente. */
     garantirRoteiro();
@@ -15122,6 +15180,49 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     recolherImagens();
   }
 
+  /* ---- O QUE SE PERDE AO RECOMEÇAR, E A PERGUNTA ANTES ----
+   *
+   * "Extrair frames" não parece destrutivo: parece um refinamento — trocar o
+   * modo, subir o número de quadros, varrer de novo. E na maior parte das vezes
+   * é: quem só extraiu e não fez nada não perde nada varrendo outra vez, porque
+   * a varredura reproduz o mesmo resultado.
+   *
+   * O que a varredura NÃO reproduz é o que a pessoa escreveu: anotação, tarja,
+   * recorte, impressão digital, clipe. Isso não volta, e o botão apagava tudo
+   * sem confirmar e sem desfazer.
+   *
+   * POR ISSO A PERGUNTA É CONDICIONAL. Confirmar sempre seria pior: um diálogo
+   * que aparece toda vez vira um clique automático, e aí o diálogo que importa
+   * passa junto. Ele só aparece quando há trabalho de verdade para perder — e
+   * diz QUANTO, item por item, porque "tem certeza?" não é informação.
+   *
+   * `projetoGuardado` desarma: quem já baixou o .json recuperável tem o
+   * trabalho no disco, e a pergunta seria falsa. */
+  function trabalhoAMais(){
+    if (typeof frames === 'undefined' || !frames.length) return null;
+    const n = { nota: 0, marca: 0, hash: 0, clipe: 0 };
+    for (const f of frames) {
+      if (f.nota) n.nota++;
+      if ((f.tarja && f.tarja.length) || (f.marcas && f.marcas.length)) n.marca++;
+      if (f.hash) n.hash++;
+      if (f.clipe) n.clipe++;
+    }
+    return (n.nota || n.marca || n.hash || n.clipe) ? n : null;
+  }
+
+  /** `true` para seguir. Pergunta só quando há o que perder. */
+  function podeRecomecar(){
+    if (projetoGuardado) return true;
+    const n = trabalhoAMais();
+    if (!n) return true;
+    const partes = [];
+    if (n.nota)  partes.push(t('perderAnota', n.nota));
+    if (n.marca) partes.push(t('perderMarca', n.marca));
+    if (n.hash)  partes.push(t('perderHash',  n.hash));
+    if (n.clipe) partes.push(t('perderClipe', n.clipe));
+    return confirm(t('perderTudo', partes.join(', ')));
+  }
+
   /* Fechar a aba com a gravação aberta também solta: o navegador limparia
      sozinho, mas um `pagehide` explícito é o que torna o vazamento testável. */
   addEventListener('pagehide', () => {
@@ -15705,6 +15806,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
   $('extract').onclick = async () => {
     const dur = video.duration;
     if (!dur || !isFinite(dur)) { $('status').innerHTML = `<span class="err">${t('noDur')}</span>`; return; }
+    /* Antes de qualquer coisa: varrer de novo joga fora a lista inteira. */
+    if (!podeRecomecar()) return;
 
     // trecho a analisar; vazio = vídeo inteiro
     let ini = Math.max(0, Math.min(lerTempo($('tIni').value, 0), dur));
@@ -16074,7 +16177,12 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       campo.type = 'text';
       campo.className = 'nota';
       campo.autocomplete = 'off';
-      campo.maxLength = 180;
+      /* O TETO VEM DA CONSTANTE, e não escrito aqui.
+         Este é o campo em que mais gente digita — é o da miniatura, na grade —,
+         e era o quarto valor diferente para a mesma coisa: 600 na caixa da
+         gravação, 180 aqui, 180 na lente e 180 na revisão. Quem escrevia
+         durante a gravação e depois passava pela grade perdia o texto no meio. */
+      campo.maxLength = TETO_NOTA;
       campo.dataset.i = i;
       campo.placeholder = t('notaPh');
       campo.value = f.nota || '';
@@ -18894,10 +19002,20 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
      vira TÍTULO do passo no documento, e título não é parágrafo. Um campo que
      para de aceitar texto sem dizer por quê parece quebrado; um que conta
      explica a regra enquanto ela é aplicada. */
+  /** Corta uma lista de linhas já quebradas e MARCA o corte.
+   *  Devolve a lista intacta quando ela cabe — a marca só aparece quando algo
+   *  ficou de fora, senão ela mesma vira ruído. */
+  function cortarLinhas(linhas, teto){
+    if (!linhas || linhas.length <= teto) return linhas || [];
+    const corte = linhas.slice(0, teto);
+    corte[teto - 1] = String(corte[teto - 1]).replace(/\s+\S*$/, '') + ' […]';
+    return corte;
+  }
+
   function pintarNotaResta(){
     const el = $('lenteNota'), c = $('lenteNotaConta');
     if (!el || !c) return;
-    c.textContent = t('lenteNotaResta', 180 - (el.value || '').length);
+    c.textContent = t('lenteNotaResta', TETO_NOTA - (el.value || '').length);
   }
   if ($('lenteNota')) $('lenteNota').addEventListener('input', pintarNotaResta);
 
@@ -19745,6 +19863,12 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
            primeiro salvamento. E ela só é escrita quando é verdadeira, para um
            documento sem agrupamento nenhum continuar byte a byte o que era. */
         junto: f.junto ? true : undefined,
+        /* O CAPÍTULO VIAJA PELO MESMO ARGUMENTO DA BANDEIRA ACIMA.
+           Sem ele, um estudo com cinco tarefas separadas voltava como uma lista
+           corrida de sessenta passos — e refazer o agrupamento é refazer a
+           leitura do material inteiro. Escrito só quando existe, para um
+           documento sem capítulo continuar byte a byte o que era. */
+        capitulo: f.cap || undefined,
         segundos: +f.t.toFixed(2),
         tempo: fmt(f.t),
         horaDeRelogio: ev.inicio == null ? null : new Date(msDoFrame(ev.inicio, f.t)).toISOString(),
@@ -19875,7 +19999,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
   $('revNotaEd').oninput = () => {
     const kept = frames.filter(f2 => f2.keep);
     const f = kept[revI]; if (!f) return;
-    f.nota = ($('revNotaEd').value || '').slice(0, 180);
+    f.nota = ($('revNotaEd').value || '').slice(0, TETO_NOTA);
     /* A miniatura correspondente acompanha, sem `render()`: redesenhar a grade
        inteira a cada tecla roubaria o foco do campo que está sendo digitado —
        e o campo é este aqui. Os dois apontam para o MESMO quadro, então
@@ -20165,11 +20289,30 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
      de identificação de cada uma NÃO podem sobrescrever a tela — a quinta
      apagaria as quatro anteriores e o documento sairia com o código do último
      participante como se fosse o do estudo inteiro. */
+  /* A versão de formato que esta build sabe ler. Ela é escrita em todo `.json`
+     desde sempre (`formato: 1`) e NUNCA era lida — um arquivo gravado por uma
+     versão futura abria calado, com o que esta build entendesse e sem uma
+     palavra sobre o que ela não entendeu. */
+  const FORMATO_CONHECIDO = 1;
+
+  /* OS AVISOS DA REABERTURA SOBREVIVEM À MENSAGEM DE SUCESSO.
+     Escrevê-los direto em `#reabrirMsg` não funcionaria: a linha de sucesso é
+     montada depois e passaria por cima. Eles são recolhidos aqui e anexados no
+     fim — do lado do aviso da tarja, que já mora lá. */
+  let avisosReabrir = [];
+  const avisarReabrir = (msg) => { if (msg) avisosReabrir.push(msg); };
+
   async function reabrirJson(j, soQuadros){
     if (!j || !Array.isArray(j.frames) || !j.frames.length) throw new Error(t('reabrirVazio'));
+    if (+j.formato > FORMATO_CONHECIDO) avisarReabrir(t('reabrirNovo', j.formato, FORMATO_CONHECIDO));
     const novos = [];
+    let pulados = 0;
     for (const f of j.frames) {
-      if (!f.imagemBase64) continue;
+      /* CONTADO, E DITO. Um quadro sem imagem sumia em silêncio e a contagem na
+         tela mentia junto: voltavam cinco telas de um documento de seis, e a
+         ferramenta dizia que estava tudo certo. `juntarVarios` já fazia o
+         certo aqui ao lado. */
+      if (!f.imagemBase64) { pulados++; continue; }
       const img = await imagemDeFora(f.imagemBase64);
       novos.push({
         t: typeof f.segundos === 'number' ? f.segundos : mmss(f.tempo),
@@ -20186,6 +20329,9 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
            ausência dela já quer dizer "um quadro, um passo" — que é o que ele
            era. Nenhuma conversão, nenhuma versão de formato. */
         ...(f.junto ? { junto: true } : {}),
+        /* E o capítulo, pelo mesmo desenho: ausente num arquivo antigo, e a
+           ausência já quer dizer "sem capítulo". */
+        ...(f.capitulo ? { cap: f.capitulo } : {}),
         /* Reaberto, e não capturado agora. A etiqueta serve para quem revisa
            saber que aquela imagem veio de um documento anterior — e para nós
            não fingirmos que houve uma varredura de vídeo que não houve. */
@@ -20193,6 +20339,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       });
     }
     if (!novos.length) throw new Error(t('reabrirSemImg'));
+    if (pulados) avisarReabrir(t('reabrirPulou', pulados, j.frames.length));
 
     if (soQuadros) return novos;
 
@@ -20239,9 +20386,26 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
        imagens na ordem do nome, que já é a ordem dos passos. */
     const notas = {};
     if (itens['indice.txt']) {
+      /* A COLUNA 5, E NÃO "A ÚLTIMA".
+         "A última" era o defeito: num pacote sem anotação, ela era a hora do
+         relógio — ou, sem hora, o tempo decorrido —, e a reabertura carimbava
+         isso na anotação de todo quadro. A escrita passou a ter largura fixa,
+         então aqui basta ler `c[4]`.
+
+         OS PACOTES ANTIGOS CONTINUAM ABRINDO, e sem herdar o defeito. Naqueles,
+         a coluna vazia sumia, então o número de colunas é a única pista — e ela
+         resolve, porque as duas colunas que podiam ser confundidas com anotação
+         têm formato conhecido: a hora do relógio é `AAAA-MM-DD HH:MM:SS` e o
+         tempo decorrido é `MM:SS` ou `HH:MM:SS`. O que não casa com nenhum dos
+         dois é anotação de verdade. */
+      const RELOGIO = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/;
+      const DECORRIDO = /^\d{1,2}:\d{2}(:\d{2})?$/;
       new TextDecoder().decode(itens['indice.txt']).split(/\r?\n/).forEach(l => {
         const c = l.split('\t');
-        if (c.length >= 2 && /\.(jpe?g|png)$/i.test(c[0])) notas[c[0]] = c[c.length - 1] || '';
+        if (c.length < 2 || !/\.(jpe?g|png)$/i.test(c[0])) return;
+        if (c.length >= 5) { notas[c[0]] = c[4] || ''; return; }   // largura fixa
+        const ultima = c[c.length - 1] || '';
+        notas[c[0]] = (RELOGIO.test(ultima) || DECORRIDO.test(ultima)) ? '' : ultima;
       });
     }
     const novos = [];
@@ -20276,12 +20440,18 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     const escolhidos = [...(ev2.target.files || [])];
     $('reabrirArq').value = '';
     if (!escolhidos.length) return;
+    /* Abrir um projeto TROCA a lista inteira — e quem tem trabalho na tela e
+       abre outro arquivo quase sempre queria a outra aba, não este descarte.
+       Vale para o caminho de um arquivo e para o de juntar vários: os dois
+       passam por aqui. */
+    if (!podeRecomecar()) return;
     /* Dois ou mais viram capítulos de um documento só. A pessoa não escolhe
        entre "abrir" e "juntar": ela escolhe arquivos, e o número deles diz o
        que ela quis. */
     if (escolhidos.length > 1) return juntarVarios(escolhidos);
     const file = escolhidos[0];
     $('reabrirMsg').textContent = t('reabrirLendo');
+    avisosReabrir = [];
     trabalhando(true, 'reabrir');
     try {
       const novos = /\.zip$/i.test(file.name)
@@ -20298,7 +20468,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
          segunda visita o que se avisou na primeira. */
       varrerSensivel();
       $('reabrirMsg').innerHTML = `<span class="ok">${t('reabrirOk', novos.length)}</span> ` +
-        `<span class="status">${t('reabrirTarja')}</span>`;
+        `<span class="status">${t('reabrirTarja')}</span>` +
+        avisosReabrir.map(m => ` <span class="err">${m}</span>`).join('');
       irPara('prevCard', true);
       medir('carregou_video', { p_origem: 'arquivo' });
     } catch (err) {
@@ -20324,6 +20495,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
      consequência do que a pessoa selecionou — que é como ela já pensava. */
   async function juntarVarios(arqs){
     $('reabrirMsg').textContent = t('reabrirLendo');
+    avisosReabrir = [];
     trabalhando(true, 'reabrir');
     const juntos = [], cues = [], nomes = [];
     let desloc = 0, pulados = 0;
@@ -20927,9 +21099,21 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
         const RP = reguaDePassos();
         kept.forEach((f, i) => {
           const hora = horaDe(f.t);
+          /* LARGURA FIXA: cinco colunas SEMPRE, mesmo vazias.
+             O `.filter(Boolean)` que estava aqui apagava a coluna vazia — e a
+             leitura, do outro lado, pegava a ÚLTIMA coluna como anotação. Sem
+             hora de relógio e sem anotação, a última virava o tempo decorrido;
+             COM hora e sem anotação, virava a hora do relógio. Quer dizer:
+             reabrir o próprio pacote escrevia "2026-08-23 14:05:11" na anotação
+             de todo quadro que a pessoa não anotou — e a anotação é o TÍTULO DO
+             PASSO no documento.
+
+             E a anotação vai numa linha só: `\n` e `\t` dentro dela partiam a
+             linha do TSV, e a segunda metade do texto sumia na reabertura. */
+          const nota1 = (f.nota || '').replace(/[\t\r\n]+/g, ' ').trim();
           linhas.push([String(i + 1).padStart(4, '0') + '-' + fmt(f.t).replace(/:/g, '-') + '.jpg',
                        passoN(RP.num(f)) + (RP.telas(f) > 1 ? ' (' + (RP.ordem(f)+1) + '/' + RP.telas(f) + ')' : ''),
-                       fmt(f.t), hora, f.nota || ''].filter(Boolean).join('\t'));
+                       fmt(f.t), hora, nota1].join('\t'));
           if (f.hash) linhas.push('\t' + t('pHash') + ': ' + f.hash);
           if (f.clipe) linhas.push('\t' + t('lenteClipe') + ': ' + nomeDoClipe(f, i + 1) +
                                    '  (' + t('lenteClipeNota', fmt(f.clipe.em), String(Math.round(f.clipe.seg))) + ')');
@@ -21371,7 +21555,17 @@ ${marcaSvg(46)}
       .concat(temCap ? ['capitulo','tarefa'] : [])
       .concat(ux ? ['tipo'] : [])
       .concat(['nota','fala','ocr','hash']);
-    const cel = v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
+    /* GUARDA DE FÓRMULA. Uma célula que começa com `=`, `+`, `-` ou `@` é
+       EXECUTADA ao abrir a planilha — o Excel e o LibreOffice fazem isso desde
+       sempre. Numa evidência de teste isso é duas coisas ao mesmo tempo:
+       a anotação "=1+1 não bateu" chega ao auditor como o número 2, quer dizer,
+       a prova mente; e uma anotação hostil vira execução na máquina de quem
+       abre.
+       A aspa simples na frente é o que a própria planilha entende por "isto é
+       texto": ela não aparece na célula, e o conteúdo volta a ser o que a
+       pessoa escreveu. */
+    const semFormula = (s) => /^[=+\-@\t\r]/.test(s) ? "'" + s : s;
+    const cel = v => '"' + semFormula(String(v == null ? '' : v)).replace(/"/g, '""') + '"';
     const linhas = [cabec.map(cel).join(';')];
     (await linhasDoDoc()).forEach(l => linhas.push(campos.map(c => cel(l[c])).join(';')));
     return '\ufeff' + linhas.join('\r\n') + '\r\n';
@@ -22702,7 +22896,7 @@ ${relsSlide[i]}</Relationships>`) });
           doc.text(t('pOcr'), M, yy);
           yy += 4;
           doc.setFontSize(8.4).setTextColor(95);
-          const oc = doc.splitTextToSize(f.ocr, CW).slice(0, 6);
+          const oc = cortarLinhas(doc.splitTextToSize(f.ocr, CW), 6);
           doc.text(oc, M, yy, { lineHeightFactor: 1.3 });
           yy += oc.length * 3.9;
         }
@@ -22731,7 +22925,15 @@ ${relsSlide[i]}</Relationships>`) });
         // não podem se sobrepor à imagem da linha de baixo
         doc.setFont('helvetica','normal').setFontSize(7.4);
         const hora = horaDe(f.t);
-        const notaG = f.nota ? doc.splitTextToSize(f.nota, cellW).slice(0, 3) : [];
+        /* CORTE COM MARCA, e não corte mudo.
+           Três linhas é o que cabe no cartão da grade, e o teto é legítimo. O
+           que não é legítimo é a anotação chegar cortada ao chamado sem
+           nenhum sinal: quem lê o PDF vê uma frase que termina no meio e não
+           tem como saber se foi a pessoa que parou de escrever ou se foi o
+           layout. Com a anotação subindo para 600 caracteres, isso deixou de
+           ser raro. O irmão desta função, o layout de página cheia, já faz o
+           certo. */
+        const notaG = f.nota ? cortarLinhas(doc.splitTextToSize(f.nota, cellW), 3) : [];
         const { ihG, iwG } = medidaG(telaDe(f));
         const blockH = ihG + 7 + (hora ? 3.6 : 0) + notaG.length * 3.4;
         if (col === 0 && top + blockH > PH - 18) { foot(); doc.addPage(); top = M; }

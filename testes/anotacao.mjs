@@ -57,6 +57,17 @@ const br = await chromium.launch({ executablePath: CHROME,
   args: ['--autoplay-policy=no-user-gesture-required'] });
 const ctx = await br.newContext({ viewport: { width: 1250, height: 980 }, acceptDownloads: true });
 const pg = await ctx.newPage();
+/* O GUARDA DE DESCARTE, E POR QUE ELE É ACEITO AQUI.
+   Varrer de novo, gravar de novo, abrir outro projeto e carregar outro vídeo
+   passaram a perguntar antes de jogar a lista fora — mas só quando há trabalho
+   de verdade para perder (anotação, tarja, impressão digital, clipe). Este
+   arquivo tem trabalho na tela e DESCARTA de propósito: é o que ele veio
+   afirmar. Sem esta linha o Playwright recusa o diálogo por padrão, o descarte
+   não acontece e o teste falha por um motivo que não é o dele.
+   Quem prova que o guarda existe é `testes/descarte.mjs`, e é lá que ele tem de
+   ser cobrado — aceitar em todo lugar sem uma régua própria seria apagar o
+   recurso e o teste dele no mesmo gesto. */
+pg.on('dialog', d => d.accept());
 const erros = []; pg.on('pageerror', e => erros.push(e.message));
 await pg.route('**/rpc/*stamp_*', r => r.fulfill({ status:200, headers:{'access-control-allow-origin':'*'}, body:'null' }));
 await pg.addInitScript(() => {
