@@ -26,10 +26,35 @@ Você deu três, e elas mandam mais que a gravidade dos documentos:
    depende de tocar na Stripe ou no Google. Onde a Stripe aparece antes
    (Build 6), é **leitura** do que ela já manda — não é reconectar nada.
 
-E uma quarta, que é minha e eu justifico: **decisão sua não bloqueia build.**
-Toda decisão da seção seguinte tem um caminho padrão que eu sigo se você não
-responder. Onde o padrão é "não fazer", eu não faço e digo. Onde o padrão é
-reversível, eu faço e digo. Nenhum build fica parado esperando.
+E uma quarta, que você acrescentou no meio do Build 1: **o escopo do build é
+aceito antes de eu mexer.** Antes de cada build eu escrevo o que vai acontecer
+nele — os itens, o que muda na tela, o que pode quebrar — e espero seu aceite,
+do mesmo jeito que faço com as decisões. O caminho pode mudar, e mudar antes é
+barato.
+
+Isso não anula a regra do parágrafo anterior sobre as **decisões**: cada uma
+tem um caminho padrão, para que uma decisão pendente não segure um build já
+aceito. O que passa a exigir aceite é o **escopo**, não cada decisão.
+
+## Como um build é liberado
+
+A regressão inteira leva ~70 minutos. Pagá-la a cada build cobra uma hora e dez
+por uma mudança de duas linhas — e o custo real não é o relógio: é que a espera
+ensina a pular a régua.
+
+| | quando | quanto |
+|---|---|---:|
+| `bash testes/liberar.sh` | **libera um build** | ~1–3 min |
+| `bash testes/rodar.sh` | **libera uma entrega** — antes de publicar | ~70 min |
+
+A pista de liberação roda em três partes: o chão (`build.py` e o TypeScript),
+os doze contratos estáticos — sem navegador e sem servidor, catorze segundos —,
+e **as réguas que cobrem os arquivos que este build tocou**, derivadas do `git
+diff` por uma tabela escrita à mão. Ela sobe o Next só quando alguma régua do
+diff precisa dele.
+
+E ela diz, no rodapé, **quantas réguas ficaram de fora**. Um recorte silencioso
+lê-se como "cobri tudo"; este diz o número.
 
 ---
 
@@ -388,6 +413,55 @@ numérico).
 
 ---
 
+### DEC-16 — A lista de aviso do plano pago ainda existe?
+
+*Nasceu durante o Build 1: eu fui aplicar a migração do idioma e descobri que o
+formulário não existe em página nenhuma.*
+
+O estado medido hoje, e ele é estranho nos três lados:
+
+- **O formulário não existe.** `#listaForm` está em `src/site/support.js` e em
+  **nenhum corpo de página**. São ~75 linhas de JavaScript morto servidas em
+  toda página do site.
+- **A régua ainda o exige.** `medicao.mjs [M4]` afirma "o formulário existe" e
+  reprova — é uma das falhas da regressão hoje.
+- **O painel ainda o mostra.** `interesse` continua sendo uma das cinco abas do
+  back-office, e a tabela tem 3 linhas. É um funil que ninguém pode mais
+  alimentar.
+
+E o motivo de ele ter sumido é defensável: a lista era "avise-me quando o plano
+pago sair", **e ele saiu**. A pergunta agora é outra.
+
+**Caminho A — recolocar o formulário**, com a pergunta atualizada: não mais
+"avise quando sair", e sim "quero falar sobre o Team" ou "me avise sobre a
+versão offline".
+
+- **Pró:** a `/precos` volta a ter uma porta para quem não está pronto para
+  comprar hoje — e hoje ela não tem nenhuma, além do checkout. A aba do painel
+  volta a fazer sentido. E o banco já está pronto: a migração de hoje fez
+  `interesse` aceitar os cinco idiomas.
+- **Contra:** é uma caixa de e-mail a mais para alguém responder, e sem
+  responsável ela vira o pior tipo de formulário — o que recebe e não devolve.
+
+**Caminho B — apagar o resto**: as ~75 linhas mortas do `support.js`, a aba
+`interesse` do painel, e reescrever o `[M4]` do `medicao.mjs` no inverso — como
+o `paginas.mjs` já faz com o Pix, cobrando que nenhuma página volte a pedir.
+
+- **Pró:** honesto, e o script cai de 25 KB em toda página do site. Uma régua
+  que cobra a ausência é melhor que uma régua apagada.
+- **Contra:** perde-se a única captura de lead que não é o checkout.
+
+> **Minha indicação: A**, com a pergunta trocada e um responsável nomeado — e,
+> se não houver responsável, **B sem hesitar**. Um formulário sem dono é pior
+> que nenhum formulário.
+>
+> **Se você não responder:** faço **B** no Build 4, junto com as outras listas
+> paralelas. É o caminho reversível: recolocar um formulário depois é uma tarde;
+> deixar um funil quebrado no ar não tem data para acabar. Deixo o SQL e o
+> painel de pé — só o que está morto sai.
+
+---
+
 ### DEC-14 — A Stripe (por sua instrução: último, ou sob demanda)
 
 Nada de 1 a 9 exige tocar na conexão. O que fica represado, e que você deve
@@ -492,8 +566,18 @@ mais de 2 h, nenhum depende de decisão sua, e três deles destravam todo o rest
 - `seo.mjs`: "ZERO consultas ao banco" aceitava até duas
 - `estado: "construcao"` na linha órfã do vocabulário
 
+**A pista de liberação** (`testes/liberar.sh`) — pedida no meio desta rodada, e
+entregue nela. 1 min 8 s no lugar de 70.
+
 **Fica de fora deste build, de propósito:** tudo que precisa de decisão sua,
 tudo que mexe em hierarquia de página, e tudo que toca Stripe ou Drive.
+
+**O que este build fez nascer:** a **DEC-16**. Fui aplicar a migração do idioma
+da lista de aviso e descobri que o formulário não existe em página nenhuma — e
+que a régua ainda o exigia, o painel ainda mostra a aba, e ~75 linhas de
+JavaScript morto viajam em toda página. As duas saídas são legítimas e a
+escolha é comercial, então eu não escolhi: o bloco da régua passou a **pular,
+alto, com o nome da decisão**, em vez de reprovar por algo que ninguém decidiu.
 
 ---
 

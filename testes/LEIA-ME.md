@@ -69,7 +69,8 @@ bash testes/rapido.sh app      # a ferramenta, só comportamento       (~3m30)
 bash testes/rapido.sh medir    # as réguas: memória, peso, espelho, espera (~12 min)
 bash testes/rapido.sh site     # o site: build + next build + páginas
 bash testes/rapido.sh a.mjs b.mjs
-bash testes/rodar.sh           # a regressão inteira                    (~70 min)
+bash testes/liberar.sh         # a pista de liberação: libera um build   (~1-3 min)
+bash testes/rodar.sh           # a regressão inteira: libera uma entrega (~70 min)
 ```
 
 `rodar.sh` sobe um Next de verdade na 8802 antes de começar, porque sete testes

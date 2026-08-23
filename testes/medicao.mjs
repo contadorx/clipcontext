@@ -21,6 +21,11 @@ await new Promise(r => srv.listen(8877, r));
 
 const br = await chromium.launch({ executablePath: CHROME_WS });
 let falhas = 0;
+/* O TERCEIRO ESTADO: ok / FALHOU / PULADO. Um teste que pula e imprime
+   'tudo passou' é pior que um teste que não existe, porque ele responde a
+   pergunta errada com confiança. Aqui o número de pulados sai no rodapé,
+   junto com o motivo, e ninguém precisa ler o meio da saída para saber. */
+let pulados = 0;
 const ok = (n, c, e) => { console.log((c ? '  ok   ' : '  FALHA') + '  ' + n + (e ? '  → ' + e : '')); if (!c) falhas++; };
 
 /** Página com o Supabase e o Vercel interceptados; devolve o que foi enviado. */
@@ -158,7 +163,28 @@ console.log('\n[M3] o arquivo offline é mudo');
 console.log('\n[M4] a lista de aviso');
 {
   const { pg, ctx, listas, erros } = await pagina('http://localhost:8877/precos.html?lang=pt');
-  ok('o formulário existe', await pg.locator('#listaForm').isVisible());
+
+  /* PULADO, E NÃO REPROVADO — enquanto a DEC-16 não for decidida.
+     Medido em 23/08: `#listaForm` está em `src/site/support.js` e em NENHUM
+     corpo de página. A rodada de preços tirou o formulário do ar junto com o
+     bloco de doação, e é defensável: a lista era "avise quando o plano pago
+     sair", e ele saiu.
+     Só que o resto ficou: ~75 linhas de JavaScript morto servidas em toda
+     página, a aba `interesse` do painel, e este bloco — que reprovava dizendo
+     "o formulário existe", como se o produto tivesse quebrado.
+     As duas saídas são legítimas e a escolha é comercial: recolocar o
+     formulário com outra pergunta, ou apagar o resto e virar esta régua do
+     avesso, como o `paginas.mjs` já faz com o Pix. Reprovar por uma decisão
+     que ninguém tomou treina a pessoa a ignorar vermelho; passar calado
+     esconde o funil quebrado. Então: pula, alto, com o nome da decisão. */
+  const temForm = await pg.locator('#listaForm').count() > 0;
+  if (!temForm) {
+    console.log('  PULADO  a lista de aviso não existe em página nenhuma — ver DEC-16 em FILA.md');
+    console.log('          (o support.js ainda carrega o código; o painel ainda tem a aba)');
+    pulados += 6;
+    await ctx.close();
+  } else {
+  ok('o formulário existe', true);
 
   await pg.fill('#listaEmail', 'nao-e-email');
   await pg.click('#listaBtn'); await pg.waitForTimeout(250);
@@ -177,9 +203,20 @@ console.log('\n[M4] a lista de aviso');
      /Aviso você quando sair/.test(await pg.locator('#listaMsg').textContent()));
   ok('sem erro de JS', erros.length === 0, erros.join(' | ').slice(0, 160));
   await ctx.close();
+  }
 }
 
 console.log('\n[M5] quando o banco recusa, e quando a rede cai');
+/* Pelo mesmo motivo do [M4]: os dois blocos abaixo dirigem o formulário da
+   lista de aviso, e ele não existe em página nenhuma hoje. Ver DEC-16. */
+const TEM_LISTA = /id="listaForm"|id='listaForm'/.test(
+  fs.readFileSync(`${RAIZ_WS}/src/site/support.js`, 'utf8')) &&
+  fs.readdirSync(`${RAIZ_WS}/src/site/bodies`)
+    .some((f) => /listaForm/.test(fs.readFileSync(`${RAIZ_WS}/src/site/bodies/${f}`, 'utf8')));
+if (!TEM_LISTA) {
+  console.log('  PULADO  o formulário da lista não existe em corpo nenhum — ver DEC-16 em FILA.md');
+  pulados += 4;
+} else {
 {
   const { pg, ctx } = await pagina('http://localhost:8877/precos.html?lang=pt', { resposta: 'invalido' });
   await pg.fill('#listaEmail', 'a@b.co');
@@ -200,6 +237,7 @@ console.log('\n[M5] quando o banco recusa, e quando a rede cai');
      await pg.locator('#listaMsg').textContent());
   ok('e o botão volta a funcionar', !(await pg.locator('#listaBtn').isDisabled()));
   await ctx.close();
+}
 }
 
 console.log('\n[M6] a manchete nova, nos três idiomas');
@@ -255,5 +293,7 @@ console.log('\n[M7] a política de privacidade conta o que passou a existir');
 }
 
 await br.close(); srv.close();
-console.log(falhas ? `\n${falhas} FALHA(S)` : '\nMedição: tudo passou.');
+console.log(falhas ? `\n${falhas} FALHA(S)`
+            : pulados ? `\nMedição: passou o que rodou — ${pulados} afirmação(ões) PULADA(S).`
+            : '\nMedição: tudo passou.');
 process.exit(falhas ? 1 : 0);

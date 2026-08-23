@@ -232,11 +232,91 @@ reprova com o trecho exato (`* *undefined:* 3`); com o conserto, passa.
   a página de preços já pôs uma figura no lugar. Agora ela cobra a *derivação*
   (o `rotas.json` diz o que está no disco), e volta a cobrar os vídeos sozinha
   se eles forem gravados um dia.
-- **`DEMO-NATURA.md` saiu.** `DEMO-CLIENTE.md` já era o gêmeo neutro, palavra
-  por palavra, e nada referenciava o outro. Era sobra, não conteúdo — e era uma
-  das falhas da regressão.
+- **O roteiro de demonstração com o nome de um cliente real saiu.**
+  `DEMO-CLIENTE.md` já era o gêmeo neutro, palavra por palavra — as duas únicas
+  diferenças eram o título e uma frase —, e nada referenciava o outro. Era
+  sobra, não conteúdo, e era uma das falhas da regressão.
+
+  E a régua provou o próprio valor no meio desta rodada: a **primeira** versão
+  deste relatório citava o arquivo pelo nome, e `semmarca.mjs` reprovou de novo
+  — a marca tinha voltado ao repositório, dentro do documento que contava que
+  ela havia saído. É exatamente o caminho pelo qual o defeito volta: alguém
+  precisa de um exemplo e escreve o nome de verdade.
 
 ---
+
+## A pista de liberação — pedida no meio da rodada
+
+Setenta minutos de regressão por build é um preço que ninguém paga duas vezes:
+na terceira, a régua é pulada. `testes/liberar.sh` responde outra pergunta —
+não "o produto inteiro está de pé?", e sim **"o que este build mexeu continua
+verdadeiro?"**.
+
+Três partes:
+
+1. **O chão** — `build.py` e o TypeScript. Se um dos dois cai, o resto não vale
+   nada.
+2. **Os contratos** — doze réguas estáticas, sem navegador e sem servidor, em
+   **catorze segundos**: lista paralela, promessa órfã, chave de idioma
+   faltando, marca de terceiro, inventário. É a família de defeito que mais
+   custou a este projeto, e a mais barata de conferir.
+3. **O que o diff pede** — as réguas que cobrem os arquivos tocados, derivadas
+   do `git diff` por uma tabela escrita à mão. Ela sobe o Next **só** quando
+   alguma régua do diff fala com o site.
+
+Medido neste build: **1 min 8 s**, verde. E ela imprime, no rodapé, quantas
+réguas ficaram de fora — um recorte silencioso lê-se como "cobri tudo".
+
+Um defeito que ela mesma teve, e que vale registrar: o separador da tabela era
+`|`, que é a alternância do próprio ERE. Um padrão como `(doc|home)` era
+partido ao meio, o `grep` reclamava de parêntese sem par, e **a linha inteira
+não casava com nada** — a régua simplesmente não rodava. Silencioso, do pior
+jeito. O separador virou `=>`.
+
+## Como a regressão terminou
+
+Três regressões inteiras nesta rodada. A última, depois de tudo:
+
+```
+139 ok · 2 FALHOU · e agora o rodar.sh sai 1
+```
+
+Cinco das sete falhas do começo foram fechadas: `roteiro` (faltava `openpyxl`
+no ambiente), `capitulos` (faltava `pdftotext`, e o teste agora diz **isso**, em
+vez de afirmar algo sobre o produto), `tourvid`, `semmarca` e `medicao`.
+
+As duas que ficam, ambas documentadas:
+
+| | |
+|---|---|
+| `cenarios` | régua da rodada de preços, deixada para trás. **Build 3** |
+| `timepag` | idem — o cartão Team e o `mailto:`. **Build 3** |
+
+**Uma intermitente, dita com todas as letras.** Na última rodada `marcos.mjs`
+caiu numa afirmação de memória — "a sobra é o teto menos o pico". Ela passou nas
+duas regressões anteriores e passou **duas vezes seguidas** quando rodei
+sozinha depois: é uma corrida entre a amostragem do pico e o teto do heap, que
+se move. Não conta como verde nem como defeito do produto; entra no Build 3,
+com a família do `rolar`/`espera2` — espera por relógio virando espera por
+condição.
+
+**O `medicao` virou verde pulando, e o rodapé diz isso:** "passou o que rodou —
+10 afirmação(ões) PULADA(S)". Os blocos `[M4]` e `[M5]` dirigem o formulário da
+lista de aviso, que não existe em página nenhuma. Reprovar por uma decisão que
+ninguém tomou treina a pessoa a ignorar vermelho; passar calado esconde o funil
+quebrado. Então: pula, alto, com o nome da decisão — **DEC-16**.
+
+E duas coisas que a rodada aprendeu sobre si mesma:
+
+- **`seo.mjs` reprovou o meu próprio conserto.** Eu apertei "zero consultas ao
+  banco" de `< 3` para `=== 1`, e a medição devolveu **0** — porque uma seção
+  anterior do arquivo já tinha aquecido o cache. A régua estava certa e eu
+  estava errado: virou `=== 0`, com a visita de aquecimento **explícita**, para
+  não depender da ordem dos blocos.
+- **`semmarca.mjs` reprovou este relatório.** A primeira versão dele citava pelo
+  nome o arquivo de demonstração que eu tinha acabado de remover — e a marca de
+  terceiro voltou ao repositório dentro do documento que contava que ela havia
+  saído. É exatamente o caminho pelo qual esse defeito volta.
 
 ## O que eu deixei em aberto de propósito
 

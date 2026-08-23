@@ -27,13 +27,27 @@ let falhas = 0;
 const ok = (n, c, e) => { console.log((c ? '  ok   ' : '  FALHA') + '  ' + n + (e ? '  → ' + e : '')); if (!c) falhas++; };
 
 console.log('[1] os cinco idiomas têm tour e exemplo, em disco');
+/* A RODADA SAIU DESTA LISTA, e é a única que sai.
+   `tour` e `exemplo` existem: são quinze arquivos que estão no disco e que a
+   home e a página de casos usam. `rodada` são outros quinze que NUNCA
+   existiram — a página de preços pôs uma figura de quatro estados no lugar. A
+   régua cobrava os três formatos dela em cinco idiomas e reprovava quinze
+   vezes por um vídeo que ninguém gravou.
+   Quem cobra a rodada é o bloco [2b], e ele a cobra do jeito certo: a lista
+   sai do disco, e quando o primeiro arquivo entrar, tudo volta sozinho. */
 for (const L of ROTAS.idiomas) {
   for (const [tipo, ext] of [['tour', 'webm'], ['tour', 'mp4'], ['tour', 'jpg'],
-                             ['exemplo', 'webm'], ['exemplo', 'mp4'], ['exemplo', 'vtt'],
-                             ['rodada', 'webm'], ['rodada', 'mp4'], ['rodada', 'jpg']]) {
+                             ['exemplo', 'webm'], ['exemplo', 'mp4'], ['exemplo', 'vtt']]) {
     const f = `${DEMO}/${tipo}.${L}.${ext}`;
     const existe = fs.existsSync(f) && fs.statSync(f).size > 400;
     ok(`${L}: ${tipo}.${ext}`, existe, existe ? '' : 'falta ou está vazio');
+  }
+}
+for (const L of ROTAS.rodadaLangs) {
+  for (const ext of ['webm', 'mp4', 'jpg']) {
+    const f = `${DEMO}/rodada.${L}.${ext}`;
+    const existe = fs.existsSync(f) && fs.statSync(f).size > 400;
+    ok(`${L}: rodada.${ext}`, existe, existe ? '' : 'falta ou está vazio');
   }
 }
 
