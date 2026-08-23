@@ -14,10 +14,10 @@ Não vêm junto, porque se regeneram ou são enormes: `.git/`, `node_modules/`
 
 ---
 
-## `builds-1-e-2.bundle` — a rodada de 23/08
+## `builds-1-a-3.bundle` — a rodada de 23/08
 
 **Base:** `7c90a97` (o `main` do GitHub, de 19/08).
-**Traz:** quatro commits.
+**Traz:** seis commits.
 
 1. **Sincroniza a árvore interna com o deploy de 22/08.** O repositório estava
    três dias atrás da árvore publicada na Vercel. 267 arquivos, nenhuma
@@ -28,12 +28,15 @@ Não vêm junto, porque se regeneram ou são enormes: `.git/`, `node_modules/`
    frases falsas fora do ar nos cinco idiomas.
 3. **A pista de liberação**, mais as três réguas que ainda mentiam.
 4. **Build 2 — não perder trabalho**, e a esteira de 70 para 12 minutos.
+5. O bundle passa a trazer os dois builds.
+6. **Build 3 — a esteira honesta**, mais as três decisões respondidas:
+   a captura da lista sai, os 14 dias são anunciados, a Stripe fica para o fim.
 
-Os relatórios estão em `BUILD-1.md` e `BUILD-2.md`, na raiz. A fila dos próximos e as
+Os relatórios estão em `BUILD-1.md`, `BUILD-2.md` e `BUILD-3.md`, na raiz. A fila dos próximos e as
 decisões abertas estão em `FILA.md`.
 
 ```bash
-git fetch APLICAR/builds-1-e-2.bundle \
+git fetch APLICAR/builds-1-a-3.bundle \
   claude/builds-deploys-sequence-0fatlg:claude/builds-deploys-sequence-0fatlg
 git checkout claude/builds-deploys-sequence-0fatlg
 ```
@@ -50,7 +53,7 @@ git checkout claude/builds-deploys-sequence-0fatlg
 
 **Base:** `7c90a97`. **Traz:** os seis commits da rodada de preços, que já estão
 incluídos no commit 1 do bundle acima. Fica aqui como registro; quem aplicar o
-`builds-1-e-2.bundle` não precisa dele.
+`builds-1-a-3.bundle` não precisa dele.
 
 ```bash
 git fetch APLICAR/rodada-precos.bundle \
