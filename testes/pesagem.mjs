@@ -26,7 +26,8 @@ import { chromium } from 'playwright';
 import http from 'http';
 import fs from 'fs';
 
-const RAIZ = '/root/walkstamp';
+import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+const RAIZ = `${RAIZ_WS}`;
 const html = fs.readFileSync(RAIZ + '/public/app.html', 'utf8');
 const arg = (nome, padrao) => {
   const i = process.argv.indexOf('--' + nome);
@@ -53,7 +54,7 @@ const kb = n => (n / 1024).toFixed(1) + ' KB';
 const mb = n => (n / 1048576).toFixed(1) + ' MB';
 
 const br = await chromium.launch({
-  executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome',
+  executablePath: CHROME_WS,
   args: ['--use-fake-device-for-media-stream', '--use-fake-ui-for-media-stream',
          '--auto-accept-this-tab-capture', '--allow-http-screen-capture',
          '--enable-precise-memory-info', '--js-flags=--expose-gc'],

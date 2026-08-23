@@ -18,6 +18,7 @@
  */
 import { chromium } from 'playwright';
 import http from 'http'; import fs from 'fs'; import path from 'path';
+import { RAIZ_WS, CHROME_WS } from '../testes/_caminhos.mjs';
 
 const LANG = process.argv[2] || 'pt';
 const SAIDA = `/tmp/exemplo-${LANG}`;
@@ -33,7 +34,7 @@ await new Promise(r => srv.listen(8881, r));
 
 fs.rmSync(SAIDA, { recursive: true, force: true });
 const br = await chromium.launch({
-  executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome',
+  executablePath: CHROME_WS,
 });
 const ctx = await br.newContext({
   viewport: { width: 1280, height: 720 },

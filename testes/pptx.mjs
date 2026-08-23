@@ -3,14 +3,15 @@
    Um .pptx só existe se o pacote OOXML estiver completo — falta o theme1.xml e o
    PowerPoint recusa o arquivo inteiro com "precisa ser reparado". Por isso o
    teste confere a lista de peças antes de olhar o conteúdo. */
-import { chromium } from 'playwright';
+import { chromium } from './_navegador.mjs';
 import http from 'http'; import fs from 'fs';
 import { execSync } from 'child_process';
-const html = fs.readFileSync('/root/walkstamp/public/app.html','utf8');
-const jspdf = fs.readFileSync('/root/walkstamp/vendor/jspdf.umd.min.js','utf8');
+import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+const html = fs.readFileSync(`${RAIZ_WS}/public/app.html`,'utf8');
+const jspdf = fs.readFileSync(`${RAIZ_WS}/vendor/jspdf.umd.min.js`,'utf8');
 const srv = http.createServer((q,r)=>{ if(q.url.startsWith('/_vercel/')){r.writeHead(200,{'Content-Type':'text/javascript'});return r.end('')} r.writeHead(200,{'Content-Type':'text/html'}); r.end(html); });
 await new Promise(r=>srv.listen(8931,r));
-const br = await chromium.launch({ executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
+const br = await chromium.launch({ executablePath:CHROME_WS });
 let falhas = 0;
 const ok = (n,c,e2)=>{console.log((c?'  ok   ':'  FALHA')+'  '+n+(e2?'  → '+e2:''));if(!c)falhas++};
 const ctx = await br.newContext({ acceptDownloads:true, viewport:{width:1300,height:1000} });
@@ -123,7 +124,7 @@ console.log('\n[6] a tarja é queimada no slide, como nas outras saídas');
 {
   /* Se o PowerPoint recebesse a imagem original e a tarja só como um retângulo
      por cima, qualquer um arrastaria o retângulo e leria o dado. */
-  await pg.locator('#thumbs figure').nth(1).locator('.lupa').click();
+  await pg.locator('#thumbs figure').nth(1).locator('.editar').click();
   await pg.waitForSelector('#lente:not(.hide)');
   await pg.waitForTimeout(400);
   await pg.locator('#tarjaModo').click();

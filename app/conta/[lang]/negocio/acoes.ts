@@ -55,6 +55,42 @@ export async function responder(form: FormData) {
 
 import { salvar as salvarPost, publicar as publicarPost, apagar as apagarPost, paraSlug } from '@/lib/blog';
 
+/* ---- O BLOG PÚBLICO TAMBÉM PRECISA SER REVALIDADO ----
+
+   `revalidatePath(base)` limpava a tela do PAINEL — a lista do back-office. O
+   blog público tem cache próprio agora (as páginas guardam por cinco minutos e
+   a leitura do banco também), e sem esta parte publicar um post significaria
+   esperar cinco minutos para ele aparecer, sem nada na tela explicando por quê.
+
+   Com ela, os cinco minutos deixam de ser um prazo e viram rede de segurança:
+   o caminho normal atualiza na hora, e o prazo só age se a revalidação
+   explícita falhar.
+
+   `layout` e não `page` para o índice: ele revalida a subárvore inteira, que é
+   onde moram o post, as etiquetas e a página do autor — todos mudam quando um
+   post muda, e listá-los um a um seria a lista escrita à mão de novo. */
+const IDIOMAS_BLOG = ['pt', 'en', 'es', 'de', 'fr'] as const;
+function revalidarBlog() {
+  /* ---- O CAMINHO INTERNO, E NÃO O PÚBLICO ----
+
+     O endereço público do blog em português é `/blog`; por dentro ele mora em
+     `/pt/blog`, e quem faz a ponte é o `rewrites` do `next.config`. O
+     `revalidatePath` fala com o ROTEADOR, e o roteador só conhece o de dentro:
+     `revalidatePath('/blog')` aponta para uma rota que não existe e não limpa
+     nada — em silêncio, que é como este tipo de defeito sempre aparece.
+
+     O sintoma, medido: publicar um post e o índice continuar vazio, porque a
+     leitura de cinco minutos seguia guardada. */
+  try { revalidatePath('/[lang]/blog', 'layout'); } catch { /* fora de contexto */ }
+  for (const L of IDIOMAS_BLOG) {
+    try { revalidatePath(`/${L}/blog`, 'layout'); } catch { /* idem */ }
+  }
+  /* Os mapas e o feed, que leem os posts e são o que o buscador consulta. */
+  for (const rota of ['/sitemap.xml', '/sitemap-blog.xml']) {
+    try { revalidatePath(rota); } catch { /* idem */ }
+  }
+}
+
 const IDIOMAS_POST = ['pt', 'en', 'es', 'de', 'fr'] as const;
 
 async function souDono(lang: string) {
@@ -97,6 +133,7 @@ export async function salvarPublicacao(form: FormData) {
   if (r.erro) redirect(`${base}?erro=${r.erro}&chave=${encodeURIComponent(chave)}`);
 
   revalidatePath(base);
+  revalidarBlog();
   redirect(`${base}?feito=salvo&chave=${encodeURIComponent(chave)}`);
 }
 
@@ -118,6 +155,7 @@ export async function alternarPublicacao(form: FormData) {
   if (r.erro) redirect(`${base}?erro=${r.erro}`);
 
   revalidatePath(base);
+  revalidarBlog();
   redirect(`${base}?feito=${pub ? 'publicado' : 'rascunho'}`);
 }
 
@@ -128,6 +166,10 @@ export async function apagarPublicacao(form: FormData) {
   try { await apagarPost(String(form.get('chave') || '')); }
   catch (e) { redirect(`${base}?erro=${encodeURIComponent(String(e).slice(0, 120))}`); }
   revalidatePath(base);
+  /* Apagar é o caso que MAIS precisa: um post que sumiu do banco e continua no
+     cache é uma página que responde 200 com conteúdo que já não existe — e
+     continua no sitemap convidando o buscador a voltar nela. */
+  revalidarBlog();
   redirect(`${base}?feito=apagado`);
 }
 
@@ -156,14 +198,28 @@ export async function enviarFigura(form: FormData) {
   /* O caminho leva o instante: uma figura trocada não pode reaproveitar o
      endereço da anterior, senão o cache de um ano serve a imagem velha. */
   const caminho = `${chave}/${Date.now()}.${ext}`;
+  /* O `redirect` do Next FUNCIONA LANÇANDO — ele joga um `NEXT_REDIRECT` que o
+     framework pega lá em cima. Então um `redirect` dentro de um `try` com
+     `catch` é apanhado pelo próprio `catch`: a recusa limpa do banco
+     ("endereco_repetido") virava `erro=Error: NEXT_REDIRECT;replace;/conta/...`
+     na tela, que não diz nada a ninguém.
+
+     Por isso o resultado sai do `try` como VALOR, e o desvio acontece depois,
+     fora dele. O `catch` volta a cobrir só o que ele existe para cobrir: a
+     falha de rede ou de disco ao subir o arquivo. */
+  let falhou = '';
   try {
     const url = await subirFigura(caminho, await f.arrayBuffer(), f.type);
     const r = await figuraAdd(chave, caminho, url, String(form.get('alt') || '').trim());
-    if (r.erro) redirect(`${volta}&erro=${r.erro}`);
+    if (r.erro) falhou = String(r.erro);
   } catch (e) {
-    redirect(`${volta}&erro=${encodeURIComponent(String(e).slice(0, 120))}`);
+    falhou = encodeURIComponent(String(e).slice(0, 120));
   }
+  if (falhou) redirect(`${volta}&erro=${falhou}`);
   revalidatePath(base);
+  /* A figura vira CAPA do post, e a capa aparece na lista e na prévia de
+     quem compartilha: mexer nela é mexer no que já está no ar. */
+  revalidarBlog();
   redirect(`${volta}&feito=figura`);
 }
 
@@ -183,6 +239,9 @@ export async function removerFigura(form: FormData) {
     redirect(`${base}?chave=${encodeURIComponent(chave)}&erro=${encodeURIComponent(String(e).slice(0, 120))}`);
   }
   revalidatePath(base);
+  /* Apagar a figura pode tirar a CAPA do post — e uma capa que sumiu do banco
+     e continua na lista é a lista mentindo. */
+  revalidarBlog();
   redirect(`${base}?chave=${encodeURIComponent(chave)}&feito=figura_apagada`);
 }
 
@@ -194,5 +253,6 @@ export async function escolherCapa(form: FormData) {
   try { await definirCapa(chave, String(form.get('url') || '')); }
   catch (e) { redirect(`${base}?chave=${encodeURIComponent(chave)}&erro=${encodeURIComponent(String(e).slice(0, 120))}`); }
   revalidatePath(base);
+  revalidarBlog();
   redirect(`${base}?chave=${encodeURIComponent(chave)}&feito=capa`);
 }

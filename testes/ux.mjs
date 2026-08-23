@@ -1,10 +1,11 @@
-import { chromium } from 'playwright';
+import { chromium } from './_navegador.mjs';
 import http from 'http'; import fs from 'fs';
-const html = fs.readFileSync('/root/walkstamp/public/app.html','utf8');
-const jspdf = fs.readFileSync('/root/walkstamp/vendor/jspdf.umd.min.js','utf8');
+import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+const html = fs.readFileSync(`${RAIZ_WS}/public/app.html`,'utf8');
+const jspdf = fs.readFileSync(`${RAIZ_WS}/vendor/jspdf.umd.min.js`,'utf8');
 const srv = http.createServer((q,r)=>{ if(q.url.startsWith('/_vercel/')){r.writeHead(200,{'Content-Type':'text/javascript'});return r.end('')} r.writeHead(200,{'Content-Type':'text/html'}); r.end(html); });
 await new Promise(r=>srv.listen(8941,r));
-const br = await chromium.launch({ executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
+const br = await chromium.launch({ executablePath:CHROME_WS });
 let falhas=0; const ok=(n,c,e)=>{console.log((c?'  ok   ':'  FALHA')+'  '+n+(e?'  → '+e:''));if(!c)falhas++};
 const ctx = await br.newContext({ acceptDownloads:true, viewport:{width:1280,height:1000} });
 const pg = await ctx.newPage(); const erros=[]; pg.on('pageerror',e=>erros.push(e.message));
@@ -79,12 +80,17 @@ await pg.selectOption('#mode','count'); await pg.fill('#count','3');
 await pg.locator('#extract').click();
 await pg.waitForFunction(()=>document.querySelectorAll('#thumbs figure').length>=3,null,{timeout:40000});
 await pg.waitForTimeout(500);
-ok('são quatro', (await pg.locator('#prevCard details.sub').count()) === 4);
+/* TRÊS, e não quatro. O quarto era "Gerar" — e uma ação que a pessoa veio
+   fazer, escondida como sub-item de "Revisão" atrás de outros três blocos, era
+   o defeito de numeração mais caro da ferramenta. Ele virou a etapa 3. */
+ok('são três, e gerar saiu daqui', (await pg.locator('#prevCard details.sub').count()) === 3);
+ok('gerar virou a etapa 3', (await pg.locator('#cardBaixar details.sub').count()) === 1);
 /* Abertos por padrão: fechar a fileira de saídas atrás de três cliques
    cobraria de quem já conhece a ferramenta o preço da orientação de quem não
    conhece. O que se ganha aqui é saber onde se está, não esconder. */
-ok('todos nascem abertos', (await pg.locator('#prevCard details.sub[open]').count()) === 4,
+ok('todos nascem abertos', (await pg.locator('#prevCard details.sub[open]').count()) === 3,
    String(await pg.locator('#prevCard details.sub[open]').count()));
+ok('e o de gerar também', (await pg.locator('#cardBaixar details.sub[open]').count()) === 1);
 ok('o primeiro diz quantos quadros', /3 quadros mantidos/.test(await pg.locator('#sbEst1').textContent()),
    await pg.locator('#sbEst1').textContent());
 ok('e já está marcado como feito', await pg.locator('#sb1').evaluate(e=>e.classList.contains('feito')));

@@ -1,8 +1,9 @@
 /* Tradução: o tradutor embutido do navegador (falsificado aqui, porque o
    Chromium do teste não traz o modelo) e a rota do Whisper para inglês. */
-import { chromium } from 'playwright';
+import { chromium } from './_navegador.mjs';
 import http from 'http'; import fs from 'fs';
-const html=fs.readFileSync('/root/walkstamp/public/app.html','utf8');
+import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+const html=fs.readFileSync(`${RAIZ_WS}/public/app.html`,'utf8');
 const srv=http.createServer((q,r)=>{
   if(q.url.startsWith('/_vercel/')){r.writeHead(200,{'Content-Type':'text/javascript'});return r.end('')}
   // o service worker precisa chegar como JavaScript; servi-lo como HTML faz o
@@ -11,7 +12,7 @@ const srv=http.createServer((q,r)=>{
   if(q.url.split('?')[0]==='/sw.js'){r.writeHead(404);return r.end()}
   r.writeHead(200,{'Content-Type':'text/html'});r.end(html);});
 await new Promise(r=>srv.listen(8915,r));
-const br=await chromium.launch({executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome'});
+const br=await chromium.launch({executablePath:CHROME_WS});
 let falhas=0; const ok=(n,c,e)=>{console.log((c?'  ok   ':'  FALHA')+'  '+n+(e?'  → '+e:''));if(!c)falhas++};
 
 console.log('\n[1] sem o tradutor embutido, a linha some e explica a alternativa');

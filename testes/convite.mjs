@@ -17,9 +17,10 @@
 import { chromium } from 'playwright';
 import fs from 'fs';
 
+import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
 const BASE = 'http://localhost:8802';
-const APP = '/root/walkstamp/public/app.html';
-const ROTA = '/root/walkstamp/app/api/convite/route.ts';
+const APP = `${RAIZ_WS}/public/app.html`;
+const ROTA = `${RAIZ_WS}/app/api/convite/route.ts`;
 
 let falhas = 0;
 const ok = (n, c, e) => { console.log((c ? '  ok   ' : '  FALHA') + '  ' + n + (e ? '  → ' + e : '')); if (!c) falhas++; };
@@ -69,7 +70,7 @@ console.log('\n[2] as travas do servidor');
      o corpo do erro do servico as vezes traz o endereco de destino, e a tela e
      de quem enviou, nao de quem recebe. Entao a prova passou a olhar os dois
      arquivos: o log existe no disparador, e a rota nao devolve detalhe. */
-  const disparador = fs.readFileSync('/root/walkstamp/lib/email.ts', 'utf8');
+  const disparador = fs.readFileSync(`${RAIZ_WS}/lib/email.ts`, 'utf8');
   ok('o erro do serviço vai para o log', /console\.error\('email:/.test(disparador));
   ok('e a rota devolve só "envio", sem o corpo do erro',
      /erro: 'envio'/.test(rota) && !/detalhe:[^\n]*enviado|await r\.text\(\)/.test(rota));
@@ -91,7 +92,7 @@ console.log('\n[3] o servidor recusa de verdade');
 
 console.log('\n[4] a página de privacidade declara a exceção, nas cinco');
 {
-  const ROTAS = JSON.parse(fs.readFileSync('/root/walkstamp/src/rotas.json', 'utf8'));
+  const ROTAS = JSON.parse(fs.readFileSync(`${RAIZ_WS}/src/rotas.json`, 'utf8'));
   const PROVA = {
     pt: /convite por e-mail/i, en: /email invitation/i, es: /invitación por correo/i,
     de: /Einladung per E-Mail/i, fr: /invitation par e-mail/i,
@@ -135,7 +136,7 @@ console.log('\n[5] o mailto continua existindo — como reserva, não como camin
 
 console.log('\n[6] o documento para pôr isso de pé existe');
 {
-  const doc = fs.readFileSync('/root/walkstamp/CONVITE-POR-EMAIL.md', 'utf8');
+  const doc = fs.readFileSync(`${RAIZ_WS}/CONVITE-POR-EMAIL.md`, 'utf8');
   ok('tem o SQL da tabela', /create table if not exists public\.convite_envio/.test(doc));
   ok('com a função de limite', /walkstamp_convite_pode/.test(doc));
   /* Regra de servidor, e só de servidor: se o navegador pudesse chamar,
@@ -160,7 +161,7 @@ console.log('\n[7] o LinkedIn continua sem passar por nós');
 }
 
 const br = await chromium.launch({
-  executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome',
+  executablePath: CHROME_WS,
 });
 console.log('\n[8] o formulário aparece e valida antes de gastar uma ida ao servidor');
 {

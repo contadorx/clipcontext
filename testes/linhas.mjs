@@ -1,7 +1,8 @@
 /* O degrau de linhas do WASM e a parada antes de pedir a tela. */
 import { chromium } from 'playwright';
 import http from 'http'; import fs from 'fs'; import path from 'path';
-const ROOT='/root/walkstamp/public';
+import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+const ROOT=`${RAIZ_WS}/public`;
 const T={'.html':'text/html','.css':'text/css','.js':'text/javascript','.webm':'video/webm','.png':'image/png','.svg':'image/svg+xml','.ico':'image/x-icon'};
 let ISOLAR=true;
 const srv=http.createServer((q,r)=>{
@@ -13,7 +14,7 @@ const srv=http.createServer((q,r)=>{
   h['Content-Type']=T[path.extname(f)]||'application/octet-stream';
   r.writeHead(200,h);r.end(fs.readFileSync(f));});
 await new Promise(r=>srv.listen(8875,r));
-const br=await chromium.launch({executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome',
+const br=await chromium.launch({executablePath:CHROME_WS,
   args:['--autoplay-policy=no-user-gesture-required']});
 let falhas=0; const ok=(n,c,e)=>{console.log((c?'  ok   ':'  FALHA')+'  '+n+(e?'  → '+e:''));if(!c)falhas++};
 

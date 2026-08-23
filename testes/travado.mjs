@@ -15,7 +15,8 @@
 import { chromium } from 'playwright';
 import http from 'http'; import fs from 'fs';
 
-const ROOT = '/root/walkstamp/public';
+import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+const ROOT = `${RAIZ_WS}/public`;
 const html = fs.readFileSync(ROOT + '/app.html', 'utf8');
 const srv = http.createServer((q, r) => {
   const u = q.url.split('?')[0];
@@ -26,7 +27,7 @@ const srv = http.createServer((q, r) => {
 await new Promise(r => srv.listen(8908, r));
 
 const br = await chromium.launch({
-  executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome',
+  executablePath: CHROME_WS,
   args: ['--autoplay-policy=no-user-gesture-required']
 });
 let falhas = 0;
@@ -64,7 +65,7 @@ console.log('[1] antes de qualquer coisa, 3 e 4 já estão travados — e dizend
 {
   ok('a revisão está travada', await travado('prevCard'));
   ok('o prompt também', await travado('promptCard'));
-  ok('e a dica é a de "escolha um vídeo"', /passo 2/.test(await dica('hintPrev')),
+  ok('e a dica é a de "escolha um vídeo"', /etapa 2/.test(await dica('hintPrev')),
      (await dica('hintPrev')).slice(0, 70));
 }
 

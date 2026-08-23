@@ -1,6 +1,7 @@
 import { chromium } from 'playwright';
 import http from 'http'; import fs from 'fs';
 
+import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
 /* O diagnóstico tem que ser CLICÁVEL de verdade — com clique do Playwright, sem
    `force` e sem `el.click()` por dentro. Foi assim que o defeito escapou: os
    dois testes que precisavam do botão contornaram o clique bloqueado em vez de
@@ -9,7 +10,7 @@ import http from 'http'; import fs from 'fs';
    da dobra é recortado por overflow:hidden — inclusive as ferramentas de quem
    está com problema. */
 
-const ROOT = '/root/walkstamp/public';
+const ROOT = `${RAIZ_WS}/public`;
 const html = fs.readFileSync(ROOT + '/app.html', 'utf8');
 const srv = http.createServer((q, r) => {
   const u = q.url.split('?')[0];
@@ -20,7 +21,7 @@ const srv = http.createServer((q, r) => {
 await new Promise(r => srv.listen(8903, r));
 
 const br = await chromium.launch({
-  executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome',
+  executablePath: CHROME_WS,
   args: ['--autoplay-policy=no-user-gesture-required']
 });
 let falhas = 0;

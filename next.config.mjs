@@ -49,7 +49,33 @@ const publico = (pg, L) => (pg === 'home' ? PREFIXO[L] || '/' : PREFIXO[L] + '/'
 /** E onde ela mora dentro do `app/`. */
 const interno = (pg, L) => (pg === 'home' ? `/${L}` : `/${L}/${slugs[pg][L]}`);
 
+/* ---- O TETO DA FIGURA DO BLOG, DITO ONDE O NEXT LÊ ----
+
+   O DEFEITO, relatado de produção: subir a figura de um post devolvia "This
+   page couldn't load — a server error occurred". Sem mensagem, sem pista, e
+   dependendo do arquivo: figuras pequenas subiam.
+
+   A causa são DOIS TETOS que não se falavam. O produto permite 8 MB
+   (`TETO_FIGURA`, em `lib/supabase/figura.ts`), o formulário aceita 8 MB e a
+   ação tem até a frase pronta para recusar acima disso. Só que uma Server
+   Action do Next tem teto PRÓPRIO, e o padrão dele é 1 MB — conferido na fonte
+   da versão instalada, `app-render/action-handler.js`: sem `bodySizeLimit`, o
+   valor é `1024 * 1024`, e passar dele lança um 413 ANTES de a ação rodar.
+
+   Quer dizer: toda figura entre 1 MB e 8 MB morria no framework, e a recusa
+   educada que o produto escreveu ("a figura passou de 8 MB, exporte menor")
+   nunca chegava a ser possível de ver. O erro genérico do Next era tudo o que
+   sobrava.
+
+   O número aqui é o do produto mais uma folga: o corpo multipart carrega
+   também `lang`, `chave` e `alt`, e o teto vale para o corpo inteiro, não só
+   para o arquivo. `testes/figura.mjs` compara os dois números a cada rodada —
+   dois tetos em dois arquivos voltam a divergir na primeira distração, e a
+   régua é mais barata que descobrir de novo por relato. */
 const config = {
+  experimental: {
+    serverActions: { bodySizeLimit: '9mb' },
+  },
   // Os cabeçalhos vinham do vercel.json. Vieram para cá porque agora valem
   // também em desenvolvimento e nos testes — um cabeçalho que só existe em
   // produção é um cabeçalho que ninguém testa.
@@ -75,6 +101,8 @@ const config = {
     // o buscador dividindo a força dela entre as duas.
     r.push({ source: '/pt', destination: '/', permanent: true });
     r.push({ source: '/pt/blog', destination: '/blog', permanent: true });
+    r.push({ source: '/pt/blog/tag/:tag', destination: '/blog/tag/:tag', permanent: true });
+    r.push({ source: '/pt/blog/autor/:autor', destination: '/blog/autor/:autor', permanent: true });
     r.push({ source: '/pt/blog/:slug', destination: '/blog/:slug', permanent: true });
     for (const pg of paginas) {
       r.push({ source: `/pt/${slugs[pg].pt}`, destination: publico(pg, 'pt'), permanent: true });
@@ -109,6 +137,12 @@ const config = {
        ponte, porque o endereço público é `/blog` e por dentro ele mora em
        `/pt/blog`. O `:slug` cobre o post. */
     depois.push({ source: '/blog', destination: '/pt/blog' });
+    /* Etiqueta e autor ANTES do `:slug`: eles têm dois segmentos, e `:slug` só
+       casa com um — sem estas duas linhas, `/blog/tag/evidencia` não casa com
+       nada e responde 404. Uma página que existe por dentro e não tem ponte é
+       uma página que não existe. */
+    depois.push({ source: '/blog/tag/:tag', destination: '/pt/blog/tag/:tag' });
+    depois.push({ source: '/blog/autor/:autor', destination: '/pt/blog/autor/:autor' });
     depois.push({ source: '/blog/:slug', destination: '/pt/blog/:slug' });
 
     // A ferramenta é um arquivo estático em `public/app.html` e continua sendo.

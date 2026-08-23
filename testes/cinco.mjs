@@ -8,15 +8,16 @@
 import { chromium } from 'playwright';
 import fs from 'fs';
 
+import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
 const SITE = 'http://localhost:8802';
-const rotas = JSON.parse(fs.readFileSync('/root/walkstamp/src/rotas.json','utf8'));
+const rotas = JSON.parse(fs.readFileSync(`${RAIZ_WS}/src/rotas.json`,'utf8'));
 const { idiomas, slugs } = rotas;
 const pre = (L) => (L === 'pt' ? '' : '/' + L);
 
 let falhas = 0;
 const ok = (n, c, e) => { console.log((c ? '  ok   ' : '  FALHA') + '  ' + n + (e ? '  → ' + e : '')); if (!c) falhas++; };
 
-const br = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
+const br = await chromium.launch({ executablePath: CHROME_WS });
 const pg = await (await br.newContext({ viewport: { width: 1200, height: 900 } })).newPage();
 
 console.log('[1] os cinco idiomas estão declarados');
@@ -90,7 +91,7 @@ console.log('\n[5] o rodapé e o hreflang não ficaram para trás');
   /* O português sai como `pt-BR`, com região, porque é o que ele é. */
   for (const L of idiomas)
     ok(`  hreflang ${L}`, alt.includes(L === 'pt' ? 'pt-BR' : L), alt.join(' '));
-  const mapa = fs.readFileSync('/root/walkstamp/public/sitemap.xml', 'utf8');
+  const mapa = fs.readFileSync(`${RAIZ_WS}/public/sitemap-paginas.xml`, 'utf8');
   for (const u of ['/de/hilfe', '/fr/aide', '/de/preise', '/fr/tarifs'])
     ok(`  o sitemap conhece ${u}`, mapa.includes(u));
 }
@@ -109,11 +110,48 @@ console.log('\n[6] o preço grande é na moeda de quem lê');
     ok(`${L}: o número grande é em ${p}`,
        grandes.length === 3 && grandes.every((t) => t.trim().startsWith(p + ' ')),
        grandes.map((t) => t.trim().split(' ').slice(0, 2).join(' ')).join(' · '));
-    /* E as outras duas continuam ali embaixo, para a conversão ser possível. */
-    const linhas = await pg.locator('.plan .moedas').allTextContents();
-    ok(`  e as outras duas moedas continuam na linha de baixo`,
-       linhas.length === 3 && linhas.every((t) => !t.includes(p) && (t.match(/·/g) || []).length === 1),
-       linhas[1]);
+    /* E NENHUMA OUTRA MOEDA APARECE.
+       Antes havia uma segunda linha com as outras duas, "para a conversão ser
+       possível" — e era ela que punha `R$ 349` dentro da página alemã. Ler o
+       próprio preço numa moeda que não é a sua não ajuda a converter: faz
+       perguntar qual das três é a que vai ser cobrada. Agora cada página fala
+       uma moeda só, e esta régua cobra a ausência das outras duas. */
+    const OUTRAS = { 'R$': ['US$', '€'], 'US$': ['R$', '€'], '€': ['R$', 'US$'] };
+    const cartoes = (await pg.locator('.plans.tres').innerText()).replace(/\s+/g, ' ');
+    const intrusas = OUTRAS[p].filter((m) => cartoes.includes(m));
+    ok(`  e nenhuma outra moeda aparece nos cartões`,
+       intrusas.length === 0, intrusas.join(', '));
+  }
+}
+
+console.log('\n[6b] os blocos novos da página de preços existem nos cinco');
+{
+  /* A rodada anterior publicou blocos em português e deixou quatro idiomas
+     para depois. "Depois" durou meses, e a página espanhola vendia um produto
+     diferente do que a portuguesa vendia. A régua agora é por idioma. */
+  const MIN_FRASE = { pt: 'a partir de 3 pessoas', en: 'from 3 people',
+                      es: 'desde 3 personas', de: 'ab 3 Personen',
+                      fr: 'à partir de 3 personnes' };
+  const MIN_TOTAL = { pt: 'R$ 1.047', en: 'US$ 207', es: 'US$ 207',
+                      de: '€ 195', fr: '€ 195' };
+  for (const L of idiomas) {
+    await pg.goto(SITE + pre(L) + '/' + slugs.precos[L], { waitUntil: 'domcontentloaded' });
+    ok(`${L}: os três cartões, um CTA em cada`,
+       (await pg.locator('.plans.tres .plan').count()) === 3 &&
+       (await pg.locator('.plans.tres .plan a[data-cta]').count()) === 3);
+    ok(`  a comparação curta tem cinco linhas`,
+       (await pg.locator('table.cmpCurta tbody tr').count()) === 5);
+    ok(`  a figura da rodada está desenhada`,
+       (await pg.locator('.figRodada svg').count()) === 1);
+    ok(`  a lista completa está recolhida num <details>`,
+       (await pg.locator('details.listaCompleta').count()) === 1);
+    ok(`  o FAQ de compra tem seis perguntas`,
+       (await pg.locator('.faqCompra dt').count()) === 6);
+    /* O mínimo e o total mínimo, na moeda do idioma. O número por assento sem
+       o total ao lado é a surpresa que chega no checkout. */
+    const txt = (await pg.locator('.plan[data-plano="team"]').innerText()).replace(/\s+/g, ' ');
+    ok(`  o mínimo de 3 está dito por extenso`, txt.includes(MIN_FRASE[L]), txt.slice(0, 90));
+    ok(`  e o total mínimo anual está ao lado`, txt.includes(MIN_TOTAL[L]), txt.slice(0, 90));
   }
 }
 

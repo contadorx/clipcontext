@@ -21,6 +21,7 @@
  */
 import { chromium } from 'playwright';
 
+import { CHROME_WS } from './_caminhos.mjs';
 const BASE = 'http://localhost:8802';
 /* `?lang=pt` na home, e não `/` puro. A home em português É a raiz, e a raiz
  * roda o detector de idioma: num navegador configurado em inglês — que é o
@@ -45,7 +46,7 @@ const ok = (n, c, e) => {
 };
 
 const br = await chromium.launch({
-  executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome',
+  executablePath: CHROME_WS,
 });
 const ctx = await br.newContext({ viewport: { width: 1200, height: 900 } });
 const pg = await ctx.newPage();
@@ -187,13 +188,18 @@ console.log('\n[6] no telefone o desenho cai depois do botão');
   const tel = await br.newContext({ viewport: { width: 390, height: 667 } });
   const pt = await tel.newPage();
   await pt.goto(BASE + '/');
-  const cxBotao = await pt.locator('.heroDuo .btn').boundingBox();
+  /* O hero passou a ter DOIS botões (o de menor atrito e o que leva ao
+     trabalho que vira plano), e o que precisa caber na primeira tela é o par
+     inteiro: se o segundo cair abaixo da dobra, o caminho pago fica invisível
+     no telefone — que é justamente o que ele veio corrigir. Por isso a medida
+     é a do bloco `.ctas`, e não a do primeiro botão. */
+  const cxBotao = await pt.locator('.heroDuo .ctas').boundingBox();
   const cxFig = await pt.locator('.figDobra').boundingBox();
-  ok('o botão está acima do desenho', cxBotao.y + cxBotao.height <= cxFig.y + 4,
-     `botão termina em ${Math.round(cxBotao.y + cxBotao.height)}, desenho começa em ${Math.round(cxFig.y)}`);
-  /* E a parte que importa de verdade: o botão cabe na primeira tela. */
-  ok('e cabe na primeira tela do telefone', cxBotao.y + cxBotao.height < 667,
-     `termina em ${Math.round(cxBotao.y + cxBotao.height)}px de 667`);
+  ok('os botões estão acima do desenho', cxBotao.y + cxBotao.height <= cxFig.y + 4,
+     `botões terminam em ${Math.round(cxBotao.y + cxBotao.height)}, desenho começa em ${Math.round(cxFig.y)}`);
+  /* E a parte que importa de verdade: os dois cabem na primeira tela. */
+  ok('e cabem na primeira tela do telefone', cxBotao.y + cxBotao.height < 667,
+     `terminam em ${Math.round(cxBotao.y + cxBotao.height)}px de 667`);
   ok('uma coluna só, e não duas espremidas',
      (await pt.evaluate(() => getComputedStyle(document.querySelector('.heroDuo')).gridTemplateColumns
        .split(' ').length)) === 1);

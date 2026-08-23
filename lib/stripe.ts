@@ -41,7 +41,16 @@ export const PLANOS = {
   },
   time: {
     preco: () => process.env.STRIPE_PRICE_TIME || '',
-    assentos: 5,
+    // O MÍNIMO DO TEAM MORA AQUI, E SÓ AQUI.
+    //
+    // Era 5, e cinco pessoas é um time grande demais para ser o primeiro
+    // degrau: a agência de três, que é quem mais sofre com a rodada manual,
+    // ficava de fora da única versão que resolve o problema dela.
+    //
+    // `testes/promessa.mjs` lê este número e cobra que a página do caso de UX
+    // e a de preços digam a MESMA palavra nos cinco idiomas. Mudar aqui e
+    // esquecer o texto reprova a suíte — que é exatamente o que se quer.
+    assentos: 3,
     dias: 45,
   },
 } as const;

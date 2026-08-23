@@ -1,7 +1,8 @@
 /* Teclado e i18n na revisão de frames — os dois bloqueadores que a auditoria achou. */
 import { chromium } from 'playwright';
 import http from 'http'; import fs from 'fs'; import path from 'path';
-const ROOT='/root/walkstamp/public';
+import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+const ROOT=`${RAIZ_WS}/public`;
 const T={'.html':'text/html','.css':'text/css','.js':'text/javascript','.svg':'image/svg+xml','.ico':'image/x-icon','.png':'image/png','.webm':'video/webm','.vtt':'text/vtt','.jpg':'image/jpeg','.mp4':'video/mp4'};
 const srv=http.createServer((q,r)=>{
   if(q.url.startsWith('/_vercel/')){r.writeHead(200,{'Content-Type':'text/javascript'});return r.end('')}
@@ -11,7 +12,7 @@ const srv=http.createServer((q,r)=>{
   r.writeHead(200,{'Content-Type':T[path.extname(f)]||'application/octet-stream'});r.end(fs.readFileSync(f));
 });
 await new Promise(r=>srv.listen(8891,r));
-const br=await chromium.launch({executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome'});
+const br=await chromium.launch({executablePath:CHROME_WS});
 let falhas=0; const ok=(n,c,e)=>{console.log((c?'  ok   ':'  FALHA')+'  '+n+(e?'  → '+e:''));if(!c)falhas++};
 
 for (const [lang, esperado] of [['pt','descartado'], ['en','discarded'], ['es','descartado']]) {

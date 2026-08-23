@@ -27,9 +27,13 @@
  */
 import { chromium } from 'playwright';
 import http from 'http'; import fs from 'fs'; import path from 'path';
+import { RAIZ_WS, CHROME_WS } from '../testes/_caminhos.mjs';
 
-const ROOT = '/root/cc/walkstamp/public';
-const jspdf = fs.readFileSync('/root/cc/walkstamp/vendor/jspdf.umd.min.js', 'utf8');
+/* A raiz sai do `_caminhos.mjs` da suíte, e não de uma constante escrita aqui.
+   Escrita aqui, ela amarrava o estúdio a UMA máquina — e o vídeo do produto
+   passava a ser algo que só uma pessoa consegue refazer. */
+const ROOT = `${RAIZ_WS}/public`;
+const jspdf = fs.readFileSync(`${RAIZ_WS}/vendor/jspdf.umd.min.js`, 'utf8');
 const LANG = process.argv[2] || 'pt';
 const SAIDA = `/tmp/tour-${LANG}`;
 
@@ -54,7 +58,7 @@ await new Promise(r => srv.listen(8879, r));
 
 fs.rmSync(SAIDA, { recursive: true, force: true });
 const br = await chromium.launch({
-  executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome',
+  executablePath: CHROME_WS,
   args: ['--autoplay-policy=no-user-gesture-required', '--force-prefers-reduced-motion=false']
 });
 const ctx = await br.newContext({

@@ -4,13 +4,14 @@
    OCR entra pela porta pública que existe para isso: um documento reaberto, com
    `textoNaTela` e `palavrasNaTela` — exatamente os campos que o próprio produto
    grava quando o leitor roda de verdade. */
-import { chromium } from 'playwright';
+import { chromium } from './_navegador.mjs';   // abre os painéis e a gaveta das saídas
 import http from 'http'; import fs from 'fs';
-const html = fs.readFileSync('/root/walkstamp/public/app.html','utf8');
-const jspdf = fs.readFileSync('/root/walkstamp/vendor/jspdf.umd.min.js','utf8');
+import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+const html = fs.readFileSync(`${RAIZ_WS}/public/app.html`,'utf8');
+const jspdf = fs.readFileSync(`${RAIZ_WS}/vendor/jspdf.umd.min.js`,'utf8');
 const srv = http.createServer((q,r)=>{ if(q.url.startsWith('/_vercel/')){r.writeHead(200,{'Content-Type':'text/javascript'});return r.end('')} r.writeHead(200,{'Content-Type':'text/html'}); r.end(html); });
 await new Promise(r=>srv.listen(8927,r));
-const br = await chromium.launch({ executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
+const br = await chromium.launch({ executablePath:CHROME_WS });
 let falhas = 0;
 const ok = (n,c,e2)=>{console.log((c?'  ok   ':'  FALHA')+'  '+n+(e2?'  → '+e2:''));if(!c)falhas++};
 const ctx = await br.newContext({ acceptDownloads:true, viewport:{width:1250,height:980} });
@@ -82,7 +83,7 @@ ok('a mensagem confirma quantas foram aplicadas',
 ok('e o botão trava para não tarjar duas vezes', await pg.locator('#tarjarTudo').isDisabled());
 
 console.log('\n[3] a tarja está mesmo no quadro, e queima na exportação');
-await pg.locator('#thumbs figure').nth(0).locator('.lupa').click();
+await pg.locator('#thumbs figure').nth(0).locator('.editar').click();
 await pg.waitForSelector('#lente:not(.hide)');
 await pg.waitForTimeout(300);
 ok('a lente mostra a tarja do passo 1', (await pg.locator('#lenteTarjas > *').count()) >= 1,

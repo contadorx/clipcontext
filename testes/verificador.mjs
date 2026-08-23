@@ -1,17 +1,18 @@
 /* O verificador: um pacote íntegro passa, um pacote adulterado é pego. */
-import { chromium } from 'playwright';
+import { chromium } from './_navegador.mjs';
 import http from 'http'; import fs from 'fs'; import path from 'path';
 import { criarProxy, exigirNext } from './proxy.mjs';
+import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
 await exigirNext();
-const ROOT='/root/walkstamp/public';
+const ROOT=`${RAIZ_WS}/public`;
 const T={'.html':'text/html','.css':'text/css','.js':'text/javascript','.svg':'image/svg+xml','.ico':'image/x-icon','.png':'image/png','.webm':'video/webm','.jpg':'image/jpeg','.vtt':'text/vtt','.mp4':'video/mp4'};
-const jspdf=fs.readFileSync('/root/walkstamp/vendor/jspdf.umd.min.js','utf8');
+const jspdf=fs.readFileSync(`${RAIZ_WS}/vendor/jspdf.umd.min.js`,'utf8');
 /* O site virou Next.js: as páginas não existem mais como arquivo em public/.
    O servidorzinho estático daqui virou um encaminhador para o Next — mesma
    porta, mesmas URLs no teste, e quem responde é o produto de verdade. */
 const srv = criarProxy();
 await new Promise(r=>srv.listen(8921,r));
-const br=await chromium.launch({executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome'});
+const br=await chromium.launch({executablePath:CHROME_WS});
 let falhas=0; const ok=(n,c,e)=>{console.log((c?'  ok   ':'  FALHA')+'  '+n+(e?'  → '+e:''));if(!c)falhas++};
 const ctx=await br.newContext({acceptDownloads:true});
 const pg=await ctx.newPage();

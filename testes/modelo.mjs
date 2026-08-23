@@ -26,7 +26,8 @@ import { chromium } from 'playwright';
 import http from 'http';
 import fs from 'fs';
 
-const RAIZ = '/root/walkstamp';
+import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+const RAIZ = `${RAIZ_WS}`;
 const html = fs.readFileSync(RAIZ + '/public/app.html', 'utf8');
 const srv = http.createServer((q, r) => {
   if (q.url.startsWith('/_vercel/')) {
@@ -76,7 +77,7 @@ export async function pipeline(tarefa, modelo, opcoes){
 `;
 
 const br = await chromium.launch({
-  executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome',
+  executablePath: CHROME_WS,
 });
 const ctx = await br.newContext({ viewport: { width: 1250, height: 980 } });
 const pg = await ctx.newPage();

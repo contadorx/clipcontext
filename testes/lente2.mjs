@@ -18,10 +18,11 @@
  * 6. O CENÁRIO DO EXEMPLO. Quem clica em "usar vídeo de exemplo" está pedindo
  *    para VER a ferramenta funcionar, não para responder um formulário.
  */
-import { chromium } from 'playwright';
+import { chromium } from './_navegador.mjs';
 import http from 'http'; import fs from 'fs';
 
-const ROOT = '/root/walkstamp/public';
+import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+const ROOT = `${RAIZ_WS}/public`;
 const html = fs.readFileSync(ROOT + '/app.html', 'utf8');
 const srv = http.createServer((q, r) => {
   const u = q.url.split('?')[0];
@@ -32,7 +33,7 @@ const srv = http.createServer((q, r) => {
 await new Promise(r => srv.listen(8957, r));
 
 const br = await chromium.launch({
-  executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome',
+  executablePath: CHROME_WS,
   args: ['--autoplay-policy=no-user-gesture-required']
 });
 let falhas = 0;
@@ -62,7 +63,7 @@ console.log('[1] o exemplo escolhe o cenário — e DIZ que escolheu');
               (await pg.locator('#demoMsg').textContent() || '');
   const fonte = fs.readFileSync(ROOT + '/app.html', 'utf8');
   ok('e existe a frase que avisa', /demoCenario/.test(fonte));
-  ok('com a instrução de onde trocar', /troque no passo 1/.test(fonte));
+  ok('com a instrução de onde trocar', /troque na etapa 1/.test(fonte));
 }
 
 console.log('\n[2] as ações da imagem dizem o objeto, e não só o verbo');
@@ -93,7 +94,7 @@ await pg.waitForFunction(() => document.querySelectorAll('#thumbs figure').lengt
 await pg.waitForTimeout(500);
 
 console.log('\n[3] o campo da anotação cabe o que se escreve nele');
-await pg.locator('#thumbs figure .lupa').first().click();
+await pg.locator('#thumbs figure .editar').first().click();
 await pg.waitForTimeout(500);
 {
   const cx = await pg.locator('#lenteNota').evaluate(e => ({
@@ -112,11 +113,11 @@ await pg.waitForTimeout(500);
 await pg.locator('#lenteFechar').click();
 await pg.waitForTimeout(400);
 
-console.log('\n[4] a lente aberta pela lupa NÃO fala em revisão');
+console.log('\n[4] a lente aberta pelo Editar NÃO fala em revisão');
 {
   /* Um botão dizendo "finalizar a revisão" numa lente aberta pela miniatura
      seria uma porta para um lugar onde a pessoa não está. */
-  await pg.locator('#thumbs figure .lupa').first().click();
+  await pg.locator('#thumbs figure .editar').first().click();
   await pg.waitForTimeout(400);
   ok('o botão de voltar para a revisão está escondido',
      await pg.locator('#lenteRev').evaluate(e => e.classList.contains('hide')));
@@ -219,7 +220,7 @@ console.log('\n[9] com o destaque ligado, "Cortar as bordas" corta — não dese
 {
   await pg.locator('#lenteFechar').click().catch(() => {});
   await pg.waitForTimeout(300);
-  await pg.locator('#thumbs figure .lupa').first().click();
+  await pg.locator('#thumbs figure .editar').first().click();
   await pg.waitForTimeout(500);
 
   const antes = await pg.evaluate(() => {

@@ -28,7 +28,8 @@ import { chromium } from 'playwright';
 import http from 'http';
 import fs from 'fs';
 
-const RAIZ = '/root/walkstamp';
+import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+const RAIZ = `${RAIZ_WS}`;
 const VIDEO = '/tmp/longo.webm';
 if (!fs.existsSync(VIDEO)) {
   console.log('  pulado  ' + VIDEO + ' não existe.');
@@ -52,7 +53,7 @@ const ok = (n, c, e) => {
 };
 
 const br = await chromium.launch({
-  executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome',
+  executablePath: CHROME_WS,
   args: ['--enable-precise-memory-info', '--js-flags=--expose-gc',
          '--autoplay-policy=no-user-gesture-required'],
 });

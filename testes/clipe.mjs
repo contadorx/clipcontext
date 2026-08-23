@@ -4,15 +4,16 @@
    `--auto-select-desktop-capture-source`, então a captura ao vivo roda de
    verdade — MediaRecorder incluído. As janelas são encurtadas por dentro da
    página para o teste não durar um minuto por marca. */
-import { chromium } from 'playwright';
+import { chromium } from './_navegador.mjs';
 import http from 'http'; import fs from 'fs';
 import { execSync } from 'child_process';
-const html = fs.readFileSync('/root/walkstamp/public/app.html','utf8');
-const jspdf = fs.readFileSync('/root/walkstamp/vendor/jspdf.umd.min.js','utf8');
+import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+const html = fs.readFileSync(`${RAIZ_WS}/public/app.html`,'utf8');
+const jspdf = fs.readFileSync(`${RAIZ_WS}/vendor/jspdf.umd.min.js`,'utf8');
 const srv = http.createServer((q,r)=>{ if(q.url.startsWith('/_vercel/')){r.writeHead(200,{'Content-Type':'text/javascript'});return r.end('')} r.writeHead(200,{'Content-Type':'text/html'}); r.end(html); });
 await new Promise(r=>srv.listen(8932,r));
 const br = await chromium.launch({
-  executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome',
+  executablePath:CHROME_WS,
   args:['--use-fake-ui-for-media-stream','--use-fake-device-for-media-stream',
         '--auto-select-desktop-capture-source=Entire screen','--allow-http-screen-capture']
 });
@@ -126,7 +127,7 @@ console.log('\n[3] o clipe toca na lente');
     return f.findIndex(x => x.querySelector('.selo'));
   });
   ok('há um quadro com clipe', i >= 0, String(i));
-  await pg.locator('#thumbs figure').nth(i).locator('.lupa').click();
+  await pg.locator('#thumbs figure').nth(i).locator('.editar').click();
   await pg.waitForSelector('#lente:not(.hide)');
   await pg.waitForTimeout(900);
   ok('a caixa do clipe apareceu', await pg.locator('#lenteClipeCx').isVisible());
@@ -183,7 +184,7 @@ console.log('\n[4b] reabrir o pacote traz o clipe de volta');
      String(await pg.locator('#thumbs .selo').count()));
   const i = await pg.evaluate(() => [...document.querySelectorAll('#thumbs figure')]
                                      .findIndex(x => x.querySelector('.selo')));
-  await pg.locator('#thumbs figure').nth(i).locator('.lupa').click();
+  await pg.locator('#thumbs figure').nth(i).locator('.editar').click();
   await pg.waitForSelector('#lente:not(.hide)');
   await pg.waitForTimeout(900);
   const w = await pg.evaluate(()=>document.getElementById('lenteClipe').videoWidth);

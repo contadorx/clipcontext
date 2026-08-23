@@ -13,7 +13,8 @@
 import { chromium } from 'playwright';
 import http from 'http'; import fs from 'fs';
 
-const ROOT = '/root/walkstamp/public';
+import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+const ROOT = `${RAIZ_WS}/public`;
 const app = fs.readFileSync(ROOT + '/app.html', 'utf8');
 const logo = fs.readFileSync(ROOT + '/logo.svg', 'utf8');
 let falhas = 0;
@@ -53,7 +54,7 @@ console.log('\n[2] o nome ao lado do símbolo, do mesmo tamanho nos dois');
     r.writeHead(200, {'Content-Type':'text/html'}); r.end(app);
   });
   await new Promise((r) => srv.listen(8921, r));
-  const br = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
+  const br = await chromium.launch({ executablePath: CHROME_WS });
   const pg = await (await br.newContext({ viewport: { width: 1200, height: 500 } })).newPage();
 
   const medir = async (url, sel) => {

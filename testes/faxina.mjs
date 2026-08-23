@@ -23,6 +23,7 @@ import { spawn, execSync } from 'child_process';
 import http from 'http';
 import fs from 'fs';
 
+import { RAIZ_WS } from './_caminhos.mjs';
 const P = 8821, B = 8822;
 const BASE = `http://localhost:${P}`;
 const SEGREDO = 'segredo-de-cron-de-teste';
@@ -65,7 +66,7 @@ async function comNext(env, corpo) {
   matarPorta();
   await new Promise((r) => setTimeout(r, 600));
   const n = spawn('npx', ['next', 'start', '-p', String(P)], {
-    cwd: '/root/walkstamp', stdio: 'ignore',
+    cwd: `${RAIZ_WS}`, stdio: 'ignore',
     env: { ...process.env,
       SUPABASE_URL: `http://localhost:${B}`,
       SUPABASE_SERVICE_ROLE_KEY: 'chave_de_mentira',
@@ -174,14 +175,14 @@ await comNext({ CRON_SECRET: SEGREDO }, async () => {
 
 console.log('\n[6] o disparo está configurado, e a política diz a verdade');
 {
-  const v = JSON.parse(fs.readFileSync('/root/walkstamp/vercel.json', 'utf8'));
+  const v = JSON.parse(fs.readFileSync(`${RAIZ_WS}/vercel.json`, 'utf8'));
   const cron = (v.crons || []).find((c) => c.path === '/api/faxina');
   ok('o cron da Vercel aponta para a faxina', !!cron, JSON.stringify(v.crons));
   ok('e roda todo dia', !!cron && /^\d+ \d+ \* \* \*$/.test(cron.schedule), cron?.schedule);
 
   /* Prazo escrito sem código atrás foi o defeito; prazo com código e texto
      desencontrado seria o mesmo defeito com outra roupa. */
-  const pol = fs.readFileSync('/root/walkstamp/src/site/bodies/privacidade.pt.html', 'utf8');
+  const pol = fs.readFileSync(`${RAIZ_WS}/src/site/bodies/privacidade.pt.html`, 'utf8');
   ok('a política não promete mais apagar a conta INTEIRA',
      !/a conta inteira — roteiros inclusive — é apagada/.test(pol));
   ok('ela promete o conteúdo em 90 dias', /conteúdo da conta é apagado em até 90 dias/.test(pol));
@@ -191,7 +192,7 @@ console.log('\n[6] o disparo está configurado, e a política diz a verdade');
      /Conteúdo da conta paga/.test(pol));
   for (const [L, frase] of [['en', "account's content is deleted within 90 days"],
                             ['es', 'contenido de la cuenta se borra en un plazo de 90 días']]) {
-    const t = fs.readFileSync(`/root/walkstamp/src/site/bodies/privacidade.${L}.html`, 'utf8');
+    const t = fs.readFileSync(`${RAIZ_WS}/src/site/bodies/privacidade.${L}.html`, 'utf8');
     ok(`e o ${L} diz o mesmo`, t.includes(frase));
   }
 }

@@ -1,7 +1,8 @@
 import { chromium } from 'playwright';
 import http from 'http'; import fs from 'fs';
 
-const ROOT = '/root/walkstamp/public';
+import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+const ROOT = `${RAIZ_WS}/public`;
 const html = fs.readFileSync(ROOT + '/app.html', 'utf8');
 const srv = http.createServer((q, r) => {
   const u = q.url.split('?')[0];
@@ -12,7 +13,7 @@ const srv = http.createServer((q, r) => {
 await new Promise(r => srv.listen(8906, r));
 
 const br = await chromium.launch({
-  executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome',
+  executablePath: CHROME_WS,
   args: ['--autoplay-policy=no-user-gesture-required']
 });
 let falhas = 0;
@@ -124,7 +125,7 @@ console.log('\n[4] manter só as marcadas');
 
 console.log('\n[5] a barra da cauda existe e é a que se vê');
 {
-  const fonte = fs.readFileSync('/root/walkstamp/public/app.html', 'utf8');
+  const fonte = fs.readFileSync(`${RAIZ_WS}/public/app.html`, 'utf8');
   ok('a barra da cauda mora no cartão 1', /id="caudaBar"/.test(fonte));
   ok('a porcentagem sai do total da cauda', /function progressoCauda\(\)/.test(fonte));
   ok('a previsão usa o ritmo medido', /relogio\.audio \/ \(relogio\.ms \/ 1000\)/.test(fonte));
@@ -138,7 +139,7 @@ console.log('\n[6] o retorno na janelinha flutuante');
   /* A janelinha usa Document Picture-in-Picture, que o Chromium sem cabeça não
      abre — então aqui a verificação é do código que a alimenta. O comportamento
      em si depende de um gesto de usuário numa janela de verdade. */
-  const fonte = fs.readFileSync('/root/walkstamp/public/app.html', 'utf8');
+  const fonte = fs.readFileSync(`${RAIZ_WS}/public/app.html`, 'utf8');
   ok('a confirmação tem prazo, como o aviso da página', /pipAvisoAte = performance\.now\(\)/.test(fonte));
   ok('o relógio da janelinha respeita o prazo', /const aviso = \(performance\.now\(\) < pipAvisoAte\)/.test(fonte));
   ok('o botão da janelinha pisca', /pipMarcar\.classList\.toggle\('piscou'/.test(fonte));

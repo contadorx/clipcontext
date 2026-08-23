@@ -1,11 +1,12 @@
 /* Comparar dois quadros: sobreposição, piscada e diferença calculada. */
-import { chromium } from 'playwright';
+import { chromium } from './_navegador.mjs';   // abre os painéis e a gaveta das saídas
 import http from 'http'; import fs from 'fs';
-const html = fs.readFileSync('/root/walkstamp/public/app.html','utf8');
-const jspdf = fs.readFileSync('/root/walkstamp/vendor/jspdf.umd.min.js','utf8');
+import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+const html = fs.readFileSync(`${RAIZ_WS}/public/app.html`,'utf8');
+const jspdf = fs.readFileSync(`${RAIZ_WS}/vendor/jspdf.umd.min.js`,'utf8');
 const srv = http.createServer((q,r)=>{ if(q.url.startsWith('/_vercel/')){r.writeHead(200,{'Content-Type':'text/javascript'});return r.end('')} r.writeHead(200,{'Content-Type':'text/html'}); r.end(html); });
 await new Promise(r=>srv.listen(8935,r));
-const br = await chromium.launch({ executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
+const br = await chromium.launch({ executablePath:CHROME_WS });
 let falhas = 0;
 const ok = (n,c,e2)=>{console.log((c?'  ok   ':'  FALHA')+'  '+n+(e2?'  → '+e2:''));if(!c)falhas++};
 const ctx = await br.newContext({ acceptDownloads:true, viewport:{width:1300,height:1000} });
@@ -21,7 +22,7 @@ await pg.waitForFunction(()=>document.querySelectorAll('#thumbs figure').length>
 await pg.waitForTimeout(500);
 
 console.log('[1] a comparação abre na lente');
-await pg.locator('#thumbs figure').nth(2).locator('.lupa').click();
+await pg.locator('#thumbs figure').nth(2).locator('.editar').click();
 await pg.waitForSelector('#lente:not(.hide)');
 await pg.waitForTimeout(300);
 ok('o botão existe', await pg.locator('#comparar').isVisible());
@@ -102,7 +103,7 @@ console.log('\n[4] comparar um quadro com ele mesmo dá zero');
     return null;
   });
   ok('a duplicata existe e é idêntica', !!par, JSON.stringify(par));
-  await pg.locator('#thumbs figure').nth(par[0]).locator('.lupa').click();
+  await pg.locator('#thumbs figure').nth(par[0]).locator('.editar').click();
   await pg.waitForSelector('#lente:not(.hide)');
   await pg.waitForTimeout(300);
   await pg.locator('#comparar').click();
@@ -132,7 +133,7 @@ ok('fechar a lente tira a camada', (await pg.locator('#cmpCamada').count()) === 
   ok('e as imagens continuam lá', (md.match(/!\[/g)||[]).length >= 4,
      String((md.match(/!\[/g)||[]).length));
 }
-await pg.locator('#thumbs figure').nth(0).locator('.lupa').click();
+await pg.locator('#thumbs figure').nth(0).locator('.editar').click();
 await pg.waitForSelector('#lente:not(.hide)');
 await pg.waitForTimeout(300);
 ok('e reabrir a lente noutro quadro começa sem comparação', await pg.locator('#cmpBox').isHidden());

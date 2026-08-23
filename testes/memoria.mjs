@@ -31,12 +31,13 @@
  * E, no fim, `file://`: a ferramenta é vendida como um arquivo que abre sem
  * servidor, e uma URL de blob é o tipo de coisa que morre lá primeiro.
  */
-import { chromium } from 'playwright';
+import { chromium } from './_navegador.mjs';
 import http from 'http';
 import fs from 'fs';
 import { execSync } from 'child_process';
 
-const RAIZ = '/root/walkstamp';
+import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+const RAIZ = `${RAIZ_WS}`;
 const html = fs.readFileSync(RAIZ + '/public/app.html', 'utf8');
 const jspdf = fs.readFileSync(RAIZ + '/vendor/jspdf.umd.min.js', 'utf8');
 const srv = http.createServer((q, r) => {
@@ -54,7 +55,7 @@ const ok = (n, c, e) => {
 };
 
 const br = await chromium.launch({
-  executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome',
+  executablePath: CHROME_WS,
 });
 
 /* Um JPEG começa com FF D8 FF, sempre. É a única pergunta que importa nos
@@ -285,7 +286,7 @@ console.log('\n[4] gravar de novo não dobra a conta de blobs');
   ok('e as de agora continuam vivas — soltar demais seria pior', depois >= 4, String(depois));
 
   /* Trocar a imagem de um passo: a antiga não tem para onde voltar. */
-  await pg.locator('#thumbs figure').first().locator('.lupa').click();
+  await pg.locator('#thumbs figure').first().locator('.editar').click();
   await pg.waitForSelector('#lente:not(.hide)');
   await pg.setInputFiles('#trocarArq', RAIZ + '/public/apple-touch-icon.png');
   await pg.waitForTimeout(900);

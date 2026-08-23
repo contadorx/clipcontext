@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Anexo de Tratamiento de Datos Personales — {{marca}}</title>
+<!-- versao: 2026-08-19 -->
+<!-- A DATA É ESCRITA AQUI, e não `hoje` no build.
+
+     Um documento jurídico cuja versão muda a cada `python3 build.py` não tem
+     versão: duas cópias do mesmo texto assinadas em semanas diferentes sairiam
+     com datas diferentes, e ninguém saberia dizer qual mudou. Esta linha muda
+     quando alguém edita o documento de propósito — que é o que "versão" quer
+     dizer num contrato. -->
+<!-- ESTE ARQUIVO É FONTE, e o que circula é o PDF gerado dele.
+
+     Ele existe aqui, dentro do projeto e com os mesmos marcadores de identidade
+     do resto do site, por um motivo só: um DPA em Word na pasta de alguém
+     envelhece à parte da política. Quando a política ganhar um suboperador
+     novo, este documento tem que ganhar junto — e a maneira de isso acontecer é
+     os dois lerem a mesma identidade (`src/marca.json`, emitido pelo build).
+
+     `testes/terceiros.mjs` cobra que a tabela de suboperadores daqui e a da
+     política digam a MESMA coisa, e que nenhuma das duas esqueça um terceiro
+     que o código conhece. Uma tabela que diverge da política publicada é pior
+     do que não ter tabela: ela vira contradição assinada. -->
+<style>
+  @page { size: A4; margin: 18mm 16mm 16mm; }
+  * { box-sizing: border-box }
+  body { font: 10.5pt/1.5 "Aptos", "Segoe UI", system-ui, -apple-system, sans-serif;
+         color: #1f2430; margin: 0; }
+  h1 { font-size: 17pt; margin: 0 0 2mm; letter-spacing: -.2px }
+  h2 { font-size: 11pt; margin: 6mm 0 1.5mm; page-break-after: avoid }
+  p, li { margin: 0 0 2mm; text-align: justify }
+  ol { padding-left: 5mm; margin: 0 0 2mm }
+  ol ol { margin-top: 1.5mm }
+  .sub { color: #5c6473; font-size: 9pt; margin: 0 0 5mm }
+  table { width: 100%; border-collapse: collapse; margin: 2mm 0 3mm;
+          font-size: 8.6pt; page-break-inside: avoid }
+  th, td { border: .4pt solid #c9ccd4; padding: 1.6mm 2mm; text-align: left; vertical-align: top }
+  th { background: #f2f3f6; font-weight: 600 }
+  .caixa { border-left: 2.5pt solid #3a3f9e; background: #f6f7fb;
+           padding: 2.5mm 3.5mm; margin: 3mm 0 }
+  .assina { margin-top: 8mm; page-break-inside: avoid }
+  .assina td { border: 0; padding: 0 6mm 0 0; width: 50% }
+  .linha { border-bottom: .5pt solid #1f2430; height: 12mm }
+  .pe { color: #8a8a8a; font-size: 8pt; margin-top: 6mm; border-top: .4pt solid #dfe1e7;
+        padding-top: 2mm }
+</style>
+</head>
+<body>
+
+<h1>Anexo de Tratamiento de Datos Personales</h1>
+<p class="sub">Anexo al contrato de suscripción de <b>{{marca}}</b> &middot; Ley 13.709/2018 (LGPD)
+&middot; versión de {{dataDpa}}</p>
+
+<div class="caixa" style="border-left-color:#9c4a1c;background:#faf0e7"><p style="margin:0"><b>Traducción de cortesía.</b> Este Anexo se rige por la <b>ley brasileña</b> — Ley 13.709/2018 (LGPD) — y la <b>versión en portugués es la que vale</b>: es la que se firma y la que prevalece en caso de divergencia. Esta traducción existe para que una evaluación de seguridad o jurídica pueda leer el documento sin esperar. Si tu organización necesita un anexo redactado bajo el RGPD, pregúntanos antes de firmar — la ley aplicable es una decisión, no una traducción.</p></div>
+
+<p>Este Anexo integra el contrato de suscripción celebrado entre <b>{{empresa}}</b>, registro mercantil
+(CNPJ) {{cnpj}} (&ldquo;<b>Encargada</b>&rdquo;), y el cliente suscriptor identificado en la firma
+(&ldquo;<b>Responsable</b>&rdquo;), y regula el tratamiento de datos personales derivado del uso de
+{{marca}}.</p>
+
+<div class="caixa">
+  <p style="margin:0"><b>El punto que cambia el alcance de este Anexo.</b> {{marca}} es una herramienta que
+  corre <b>enteramente en el navegador del usuario</b>. El vídeo, el audio, las imágenes de pantalla y la
+  transcripción <b>nunca se transmiten a la Encargada</b> — no existe servidor de procesamiento. El
+  tratamiento aquí regulado alcanza solo los datos de la <b>cuenta de pago</b>, listados en el punto 2. Las
+  preguntas de evaluación de proveedores sobre conservación, cifrado o destrucción del contenido
+  audiovisual no se aplican porque ese contenido no llega a la Encargada, y el propio Responsable puede
+  verificarlo con el inspector de red del navegador abierto en la pestaña Red.</p>
+</div>
+
+<h2>1. Papeles</h2>
+<ol>
+  <li>El <b>Responsable</b> decide las finalidades y los medios del tratamiento de los datos descritos en
+  el punto 2 y responde por la licitud de la recogida y por la base legal aplicable.</li>
+  <li>La <b>Encargada</b> trata esos datos <b>exclusivamente</b> conforme a las instrucciones documentadas
+  del Responsable — siendo el contrato de suscripción, este Anexo y el uso normal de las funciones del
+  producto las instrucciones documentadas iniciales.</li>
+  <li>La Encargada <b>no</b> usa esos datos para finalidad propia, <b>no</b> los cruza con otras bases,
+  <b>no</b> los cede ni comercializa y <b>no</b> los usa para entrenar modelos de inteligencia artificial,
+  propios o de terceros.</li>
+  <li>En los datos de contacto comercial, facturación, medición anónima de uso y registros de acceso al
+  sitio, la Encargada actúa como <b>responsable</b> en nombre propio, según su Política de Privacidad.
+  Esos datos quedan fuera del alcance de este Anexo.</li>
+</ol>
+
+<h2>2. Objeto del tratamiento</h2>
+<table>
+  <tr><th>Categorías de datos</th><th>Categorías de titulares</th><th>Naturaleza y finalidad</th><th>Duración</th></tr>
+  <tr>
+    <td>Lista de casos a ejecutar (guion), casos de prueba, tickets de soporte, plantillas de documento,
+    configuración de la cuenta, asientos del equipo, recibos y <b>adjuntos <code>.json</code> de sesión</b>
+    cuando el usuario opte por adjuntarlos — que pueden contener imágenes de pantalla del entorno del
+    Responsable</td>
+    <td>Empleados, prestadores y usuarios del Responsable con asiento en la cuenta; y cualesquiera
+    titulares cuyos datos aparezcan en las pantallas capturadas por el Responsable</td>
+    <td>Almacenamiento, organización y puesta a disposición, por medio automatizado, con la finalidad única
+    de prestar el servicio contratado</td>
+    <td>Mientras dure la suscripción, y <b>hasta 90 días</b> después de su fin</td>
+  </tr>
+</table>
+<p>La Encargada <b>no determina</b> lo que aparece en las pantallas capturadas. Corresponde al Responsable
+no capturar dato personal innecesario y usar las funciones de tarjado y recorte disponibles en la
+herramienta antes de adjuntar una sesión.</p>
+
+<h2>3. Obligaciones de la Encargada</h2>
+<ol>
+  <li><b>Confidencialidad.</b> Restringir el acceso al personal que lo necesite, bajo obligación de secreto
+  que sobrevive al término del vínculo.</li>
+  <li><b>Seguridad.</b> Mantener las medidas técnicas y administrativas del punto 5, aptas para proteger
+  los datos de accesos no autorizados y de situaciones accidentales o ilícitas (art. 46 de la LGPD).</li>
+  <li><b>Auxilio al Responsable.</b> Auxiliarlo, en la medida de lo razonable, a responder a solicitudes de
+  titulares (arts. 18 y 19), a realizar informe de impacto (art. 38) y a atender determinaciones de la
+  ANPD.</li>
+  <li><b>Solicitudes de titular recibidas directamente.</b> Remitirlas al Responsable en hasta <b>5 días
+  hábiles</b>, sin responderlas por cuenta propia.</li>
+  <li><b>Registro.</b> Mantener registro de las operaciones de tratamiento realizadas por cuenta del
+  Responsable (art. 37) y ponerlo a disposición previa solicitud.</li>
+  <li><b>Devolución y eliminación.</b> Al término, eliminar los datos en el plazo del punto 2, salvo
+  obligación legal de conservación. La exportación en <code>.json</code> y <code>.csv</code> está
+  disponible al Responsable en cualquier momento, dentro del producto, sin depender de solicitud.</li>
+</ol>
+
+<h2>4. Subencargados</h2>
+<p>El Responsable autoriza, de forma general, a los subencargados de abajo. La relación es la misma
+publicada en la Política de Privacidad y prevalece la versión publicada:</p>
+<table>
+  <tr><th>Subencargado</th><th>Función</th><th>Dato que recibe</th><th>País</th><th>Salvaguarda</th></tr>
+  <tr><td>Supabase</td><td>Base de datos y almacenamiento del adjunto</td>
+      <td>Todo el contenido de la cuenta de pago. Nunca vídeo, audio ni transcripción</td>
+      <td>Brasil (São Paulo)</td><td>Contrato de tratamiento del proveedor</td></tr>
+  <tr><td>Vercel</td><td>Alojamiento de la aplicación</td>
+      <td>Registros técnicos de acceso</td>
+      <td>Red global</td><td>Cláusulas contractuales tipo (art. 33, II)</td></tr>
+  <tr><td>Stripe</td><td>Cobro de la suscripción</td>
+      <td>Nombre, correo y datos de pago del contratante</td>
+      <td>EE. UU. y Unión Europea</td><td>Cláusulas contractuales tipo; PCI-DSS</td></tr>
+  <tr><td>Brevo</td><td>Envío del enlace de acceso y de la invitación por correo</td>
+      <td>Dirección de correo del destinatario y texto del mensaje</td>
+      <td>Unión Europea (Francia)</td><td>Cláusulas contractuales tipo</td></tr>
+</table>
+<p><b>Cambio de subencargado.</b> La Encargada comunicará al Responsable, por correo y con <b>30 días de
+antelación</b>, la sustitución o el añadido de subencargado que trate los datos del punto 2. Dentro de ese
+plazo el Responsable podrá oponerse de forma fundamentada; si no fuera posible acomodar la objeción, el
+Responsable podrá rescindir la suscripción sin coste, con derecho a la exportación previa de los datos.</p>
+
+<h2>5. Medidas técnicas y administrativas</h2>
+<ol>
+  <li><b>En tránsito:</b> TLS en todo el tráfico de la aplicación y de las llamadas de servidor.</li>
+  <li><b>En reposo:</b> base de datos y almacenamiento de adjuntos cifrados en reposo por el proveedor de
+  infraestructura, en la región de São Paulo. El cifrado es del proveedor; la elección de la región es de
+  la Encargada.</li>
+  <li><b>Autenticación:</b> acceso por enlace de un solo uso enviado por correo, con validez limitada e
+  invalidación tras el primer uso. No se almacena contraseña.</li>
+  <li><b>Control de acceso a la base:</b> las tablas residen en un esquema propio, inaccesible al
+  navegador. El permiso de ejecución de las funciones expuestas se revoca de los roles públicos y se
+  concede solo al rol de servicio, que existe únicamente en el servidor.</li>
+  <li><b>Adjuntos:</b> almacenados en repositorio privado, sin lectura pública. La entrega la hace el
+  servidor tras verificación de autorización, por dirección firmada con validez de <b>dos minutos</b>.</li>
+  <li><b>Segregación de credenciales:</b> claves de servicio mantenidas solo en variables de entorno del
+  servidor, jamás embebidas en el código entregado al navegador.</li>
+  <li><b>Registros de acceso</b> al servidor web mantenidos 6 meses (art. 15 del Marco Civil de Internet
+  brasileño) y luego descartados.</li>
+  <li><b>Minimización por arquitectura:</b> el contenido audiovisual no se transmite a la Encargada en
+  ningún momento — la medida de seguridad más fuerte de este Anexo es la ausencia del dato.</li>
+</ol>
+<p>La Encargada <b>no</b> posee certificación SOC 2 ni ISO 27001 y no declara poseerlas.</p>
+
+<h2>6. Incidentes de seguridad</h2>
+<ol>
+  <li>Conocedora de un incidente que pueda acarrear riesgo o daño relevante, la Encargada comunicará al
+  Responsable en hasta <b>48 horas</b>, por el correo de contacto de la cuenta.</li>
+  <li>La comunicación indicará: datos afectados, titulares involucrados o su orden de magnitud, medidas
+  técnicas ya adoptadas, riesgos y recomendaciones — actualizándose conforme avance la investigación, en
+  vez de esperar a estar completa.</li>
+  <li>La Encargada cooperará con el Responsable y con la ANPD en la investigación, la mitigación y las
+  comunicaciones exigidas por el art. 48 de la LGPD.</li>
+</ol>
+
+<h2>7. Solicitudes de autoridad</h2>
+<p>La Encargada solo atenderá requerimientos de autoridad pública amparados en fundamento legal válido,
+entregando solo lo expresamente requerido, y <b>notificará al Responsable</b> para que pueda ejercer su
+defensa, salvo prohibición legal expresa. La Encargada no dispone de vídeo, audio ni transcripción del
+Responsable y, por tanto, no tiene cómo entregarlos a autoridad alguna.</p>
+
+<h2>8. Auditoría</h2>
+<p>La Encargada prestará al Responsable, mediante solicitud escrita y como máximo una vez al año, la
+información necesaria para demostrar el cumplimiento de este Anexo, incluido el cuestionario de seguridad
+cumplimentado y la descripción de las medidas del punto 5. La auditoría presencial en instalaciones de
+terceros (proveedores de infraestructura) seguirá lo que permitan los contratos de esos proveedores.</p>
+
+<h2>9. Transferencia internacional</h2>
+<p>Los datos del punto 2 se almacenan <b>en Brasil</b>. Ocurren transferencias internacionales restringidas
+a los subencargados del punto 4 cuya operación es global o extranjera, amparadas en cláusulas
+contractuales tipo (art. 33, II de la LGPD).</p>
+
+<h2>10. Vigencia y prevalencia</h2>
+<p>Este Anexo rige mientras dure la suscripción y, en cuanto a las obligaciones de eliminación y secreto,
+hasta su cumplimiento íntegro. En caso de conflicto entre este Anexo y el contrato de suscripción en
+cuanto a tratamiento de datos personales, <b>prevalece este Anexo</b>.</p>
+
+<table class="assina">
+  <tr>
+    <td><div class="linha"></div><b>{{empresa}}</b><br>CNPJ {{cnpj}} — Encargada<br>
+        Nombre:<br>Cargo:<br>Fecha:</td>
+    <td><div class="linha"></div><b>Cliente suscriptor</b><br>Registro mercantil / NIF: — Responsable<br>
+        Nombre:<br>Cargo:<br>Fecha:</td>
+  </tr>
+</table>
+
+<p class="pe">{{empresa}} — CNPJ {{cnpj}} &middot; Delegado de protección de datos: {{encarregado}} —
+{{contato}} &middot; Política de Privacidad en {{siteDom}}/privacidade &middot; Este documento se genera a
+partir de la misma fuente que la Política de Privacidad publicada; en caso de divergencia, prevalece la
+versión publicada. Traducción de cortesía — la versión en portugués es la que vale.</p>
+
+</body>
+</html>

@@ -41,9 +41,23 @@ export type PostAdmin = {
   figuras: Figura[];
 };
 
-export const lista = (lang: Lang) => rpc<Resumo[]>('walkstamp_blog_lista', { p_lang: lang });
+/* ---- AS DUAS LEITURAS PÚBLICAS DO BLOG ----
+
+   Elas são as únicas deste projeto que podem ser guardadas em cache: o post é
+   igual para todo mundo, e um rastreador que passa cem vezes por dia não tem
+   por que abrir cem consultas ao banco. Os cinco minutos são o mesmo prazo do
+   `revalidate` das páginas — dois números diferentes aqui produziriam uma
+   página fresca sobre dados velhos, que é o pior dos dois mundos.
+
+   Publicar pelo painel revalida os endereços explicitamente, então no caminho
+   normal ninguém espera os cinco minutos. */
+const CACHE_BLOG = 300;
+
+export const lista = (lang: Lang) =>
+  rpc<Resumo[]>('walkstamp_blog_lista', { p_lang: lang }, CACHE_BLOG);
 export const post = (lang: Lang, slug: string) =>
-  rpc<Post | Record<string, never>>('walkstamp_blog_post', { p_lang: lang, p_slug: slug });
+  rpc<Post | Record<string, never>>('walkstamp_blog_post',
+    { p_lang: lang, p_slug: slug }, CACHE_BLOG);
 export const todos = () => rpc<PostAdmin[]>('walkstamp_blog_todos', {});
 export const salvar = (chave: string, autor: string, tags: string[], versoes: unknown) =>
   rpc<{ ok?: boolean; erro?: string }>('walkstamp_blog_salvar',
@@ -137,3 +151,142 @@ export const minutos = (md: string) =>
 export const paraSlug = (s: string) =>
   String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '')
     .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 80);
+
+/* ---- OS LINKS CONTEXTUAIS DO CORPO DO ARTIGO ----
+ *
+ * Um artigo do blog linkava duas coisas: o próprio blog e o rodapé. Nenhuma das
+ * duas transfere autoridade para as páginas que vendem — as de caso de uso —, e
+ * é justamente isso que um link dentro do texto faz: ele diz ao buscador, e a
+ * quem lê, que aquele artigo é sobre AQUILO.
+ *
+ * ---- as quatro travas, e por que cada uma existe ----
+ *
+ * Ligar termos automaticamente é fácil de fazer e fácil de estragar. Um texto
+ * salpicado de links repetidos lê pior, e um excesso de âncoras iguais
+ * apontando para a mesma página é padrão de manipulação — o oposto do que se
+ * quer. Então:
+ *
+ *   1. UMA VEZ POR DESTINO. A primeira ocorrência vira link; as outras ficam
+ *      como texto. Cinco links para a mesma página num artigo não valem mais
+ *      que um, e valem menos.
+ *   2. SÓ FORA DE `<a>`, `<code>` e `<pre>`. Um link dentro de um link é HTML
+ *      inválido, e um termo dentro de um bloco de código é código.
+ *   3. SÓ EM TEXTO, nunca dentro de etiqueta. Casar `alt="ata de reunião"`
+ *      quebraria o atributo e, com ele, a imagem.
+ *   4. TERMO MAIS LONGO PRIMEIRO. Sem isso, "teste" dentro de "evidência de
+ *      teste" venceria e o link apontaria para o lugar errado.
+ *
+ * E o mais importante: o texto NÃO é reescrito. O que entra é uma âncora em
+ * volta das palavras que o autor já tinha escrito. Se o termo não estiver lá,
+ * nada acontece — não há link inventado por conveniência.
+ */
+import rotas from '@/src/rotas.json';
+
+/* Os destinos: as cinco páginas de caso, mais as duas que respondem a uma
+   busca própria. O RÓTULO é o título da página no dicionário do site — a mesma
+   palavra que a página usa como `h1`, e não uma lista de sinônimos escrita
+   aqui, que envelheceria sozinha. */
+import i18nSite from '@/src/i18n-site.json';
+
+const ALVOS: Array<{ pagina: string; chave: string }> = [
+  { pagina: 'casoEv', chave: 'casoEvT' },
+  { pagina: 'casoIn', chave: 'casoInT' },
+  { pagina: 'casoAta', chave: 'casoAtaT' },
+  { pagina: 'casoUx', chave: 'casoUxT' },
+  { pagina: 'casoIa', chave: 'casoIaT' },
+];
+
+/* ---- O ÍNDICE TEM QUE SOBREVIVER À NORMALIZAÇÃO ----
+
+   `texto.normalize('NFD').replace(marcas,'')` parece a forma óbvia de comparar
+   sem acento, e ela produz uma string de OUTRO TAMANHO: "é" vira "e" e o texto
+   encolhe um caractere por acento. O índice achado na versão sem acento passa a
+   apontar para o lugar errado no texto original — e a âncora sairia cortando
+   palavra no meio, num idioma com acento a cada duas linhas.
+
+   Esta versão anda caractere a caractere e só troca quando a troca cabe em UM
+   caractere. Quando não cabe (ligadura, caixa que muda o tamanho), o original
+   fica. O resultado tem, por construção, o mesmo comprimento da entrada — e a
+   verificação logo abaixo transforma essa promessa numa trava. */
+const MARCAS = /[\u0300-\u036f]/g;
+
+function planificar(texto: string): string {
+  let plano = '';
+  for (let k = 0; k < texto.length; k++) {
+    const c = texto[k];
+    const semMarca = c.normalize('NFD').replace(MARCAS, '');
+    const baixo = (semMarca.length === 1 ? semMarca : c).toLowerCase();
+    plano += baixo.length === 1 ? baixo : c;
+  }
+  return plano;
+}
+
+const semAcento = (s: string) => s.normalize('NFD').replace(MARCAS, '').toLowerCase();
+
+const escapaRe = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+export function ligarTermos(html: string, lang: Lang): string {
+  const dic = (i18nSite as Record<string, Record<string, string>>)[lang]
+           || (i18nSite as Record<string, Record<string, string>>).pt || {};
+  const slugs = (rotas as { slugs: Record<string, Record<string, string>> }).slugs;
+  const prefixo = lang === 'pt' ? '' : '/' + lang;
+
+  const termos = ALVOS
+    .map((a) => ({
+      termo: String(dic[a.chave] || '').trim(),
+      href: `${prefixo}/${slugs[a.pagina]?.[lang] || ''}`,
+    }))
+    .filter((a) => a.termo.length > 3 && !a.href.endsWith('/'))
+    /* Do mais longo para o mais curto: "evidência de teste" tem que ser
+       tentado antes de qualquer termo que caiba dentro dele. */
+    .sort((a, b) => b.termo.length - a.termo.length);
+
+  const feitos = new Set<string>();
+
+  /* A varredura anda pelo HTML separando ETIQUETA de TEXTO, e mantém a conta de
+     quantos `<a>`, `<code>` e `<pre>` estão abertos. Só o texto com as três
+     contas zeradas é candidato. Uma expressão regular sozinha não sabe disso —
+     ela veria o documento como uma linha de caracteres. */
+  const partes = html.split(/(<[^>]+>)/);
+  let emA = 0, emCode = 0;
+  for (let i = 0; i < partes.length; i++) {
+    const parte = partes[i];
+    if (parte.startsWith('<')) {
+      const m = parte.match(/^<\s*(\/?)\s*(a|code|pre)\b/i);
+      if (m) {
+        const fecha = m[1] === '/';
+        const alvo = m[2].toLowerCase();
+        if (alvo === 'a') emA += fecha ? -1 : 1;
+        else emCode += fecha ? -1 : 1;
+        if (emA < 0) emA = 0;
+        if (emCode < 0) emCode = 0;
+      }
+      continue;
+    }
+    if (emA > 0 || emCode > 0 || !parte.trim()) continue;
+
+    let texto = parte;
+    for (const { termo, href } of termos) {
+      if (feitos.has(href)) continue;
+      /* A busca é sem acento e sem caixa — quem escreve "evidencia de teste"
+         está falando da mesma coisa —, mas o que fica na tela é EXATAMENTE o
+         que o autor escreveu: a âncora envolve o trecho original. */
+      const alvo = semAcento(termo);
+      const plano = planificar(texto);
+      /* A promessa do `planificar`, virada trava. Se um dia ela deixar de
+         valer, é melhor não ligar nada do que ligar no lugar errado. */
+      if (plano.length !== texto.length) break;
+      const re = new RegExp(`(^|[^\\p{L}\\p{N}])(${escapaRe(alvo)})(?![\\p{L}\\p{N}])`, 'iu');
+      const achou = plano.match(re);
+      if (!achou || achou.index === undefined) continue;
+      const inicio = achou.index + achou[1].length;
+      const fim = inicio + achou[2].length;
+      texto = texto.slice(0, inicio) +
+              `<a href="${href}">` + texto.slice(inicio, fim) + '</a>' +
+              texto.slice(fim);
+      feitos.add(href);
+    }
+    partes[i] = texto;
+  }
+  return partes.join('');
+}

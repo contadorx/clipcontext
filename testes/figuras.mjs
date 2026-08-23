@@ -10,8 +10,9 @@
 import { chromium } from 'playwright';
 import fs from 'fs';
 
+import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
 const SITE = 'http://localhost:8802';
-const rotas = JSON.parse(fs.readFileSync('/root/walkstamp/src/rotas.json','utf8'));
+const rotas = JSON.parse(fs.readFileSync(`${RAIZ_WS}/src/rotas.json`,'utf8'));
 const { idiomas, slugs } = rotas;
 const pre = (L) => (L === 'pt' ? '' : '/' + L);
 const CASOS = ['casoEv','casoIn','casoAta','casoUx','casoIa'];
@@ -19,7 +20,7 @@ const CASOS = ['casoEv','casoIn','casoAta','casoUx','casoIa'];
 let falhas = 0;
 const ok = (n,c,e) => { console.log((c?'  ok   ':'  FALHA')+'  '+n+(e?'  → '+e:'')); if(!c) falhas++; };
 
-const br = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
+const br = await chromium.launch({ executablePath: CHROME_WS });
 const pg = await (await br.newContext({ viewport: { width: 1200, height: 1000 } })).newPage();
 
 console.log('[1] toda página de caso de uso tem a figura, nos cinco idiomas');
@@ -107,6 +108,40 @@ console.log('\n[5] a home mostra o fluxo, e não só conta');
   await pg.goto(SITE + '/', { waitUntil: 'domcontentloaded' });
   ok('o desenho tem o quadro DESCARTADO, que é o argumento dele',
      await pg.locator('.figFluxo svg [opacity=".45"]').count() > 0);
+}
+
+console.log('\n[5b] a rodada em quatro estados, na página de preços');
+{
+  /* Esta figura entrou no lugar de um `<video>` que apontava para
+     `/demo/rodada.*` — quinze arquivos que não existem no repositório. Nos
+     cinco idiomas a página servia um `poster` 404 e um vídeo sem fonte, e nada
+     reprovava: um `<video>` quebrado não derruba página, só decepciona.
+     O desenho não tem esse jeito de falhar — ou nasce no build, ou o build cai. */
+  const desenhos = new Set(), legendas = new Set();
+  let bytes = 0, externas = 0, altura = 0;
+  for (const L of idiomas) {
+    await pg.goto(SITE + pre(L) + '/' + slugs.precos[L], { waitUntil: 'domcontentloaded' });
+    ok(`${L}: a figura da rodada está lá`, (await pg.locator('.figRodada svg').count()) === 1);
+    const svg = pg.locator('.figRodada svg');
+    desenhos.add(await svg.evaluate((e) => e.innerHTML.replace(/<title[^>]*>.*?<\/title>/, '')));
+    legendas.add((await pg.locator('.figRodada figcaption').textContent() || '').trim());
+    bytes = Math.max(bytes, (await svg.evaluate((e) => e.outerHTML)).length);
+    externas += await pg.locator('.figRodada image, .figRodada img').count();
+    /* Altura calculada e não zero: um SVG sem altura resolvida colapsa para
+       nada em alguns navegadores, e a figura some sem erro nenhum. */
+    altura = Math.max(altura, await svg.evaluate((e) => e.getBoundingClientRect().height));
+  }
+  ok('um desenho só para os cinco', desenhos.size === 1, String(desenhos.size));
+  ok('e cinco textos de legenda', legendas.size === 5, String(legendas.size));
+  ok('a altura é calculada, e não zero', altura > 40, `${Math.round(altura)}px`);
+  ok('não referencia nada externo', externas === 0, String(externas));
+  ok('e cabe em poucos quilobytes', bytes < 20000, `${(bytes / 1024).toFixed(1)} KB`);
+  /* Os quatro estados são o argumento da figura: sem os quatro, ela vira um
+     desenho bonito de uma planilha. */
+  await pg.goto(SITE + '/precos', { waitUntil: 'domcontentloaded' });
+  const passos = await pg.locator('.figRodada svg text').allTextContents();
+  ok('os quatro estados estão numerados', ['1', '2', '3', '4'].every((n) => passos.includes(n)),
+     passos.slice(0, 8).join(' '));
 }
 
 console.log('\n[6] a página de preços diz o que SAI');

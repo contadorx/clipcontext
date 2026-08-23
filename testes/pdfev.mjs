@@ -1,11 +1,12 @@
-import { chromium } from 'playwright';
+import { chromium } from './_navegador.mjs';
 import http from 'http'; import fs from 'fs';
-const ROOT='/root/walkstamp/public';
+import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+const ROOT=`${RAIZ_WS}/public`;
 const html=fs.readFileSync(ROOT+'/app.html','utf8');
-const jspdf=fs.readFileSync('/root/walkstamp/vendor/jspdf.umd.min.js','utf8');
+const jspdf=fs.readFileSync(`${RAIZ_WS}/vendor/jspdf.umd.min.js`,'utf8');
 const srv=http.createServer((q,r)=>{if(q.url.startsWith('/_vercel/')){r.writeHead(200,{'Content-Type':'text/javascript'});return r.end('')}r.writeHead(200,{'Content-Type':'text/html'});r.end(html)});
 await new Promise(r=>srv.listen(8894,r));
-const br=await chromium.launch({executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome'});
+const br=await chromium.launch({executablePath:CHROME_WS});
 const ctx=await br.newContext({acceptDownloads:true});
 const pg=await ctx.newPage();
 await pg.route('**/jspdf**',r=>r.fulfill({status:200,headers:{'content-type':'text/javascript','access-control-allow-origin':'*'},body:jspdf}));

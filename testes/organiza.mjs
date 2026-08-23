@@ -15,10 +15,11 @@
  *   - e a janelinha avisa quando o modelo falha, porque é para ela que a
  *     pessoa está olhando enquanto a aba está atrás da tela compartilhada.
  */
-import { chromium } from 'playwright';
+import { chromium } from './_navegador.mjs';
 import http from 'http'; import fs from 'fs';
 
-const ROOT = '/root/walkstamp/public';
+import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+const ROOT = `${RAIZ_WS}/public`;
 const html = fs.readFileSync(ROOT + '/app.html', 'utf8');
 const srv = http.createServer((q, r) => {
   const u = q.url.split('?')[0];
@@ -29,7 +30,7 @@ const srv = http.createServer((q, r) => {
 await new Promise(r => srv.listen(8949, r));
 
 const br = await chromium.launch({
-  executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome',
+  executablePath: CHROME_WS,
   args: ['--autoplay-policy=no-user-gesture-required']
 });
 let falhas = 0;
@@ -134,7 +135,11 @@ console.log('\n[4] no passo 3, o resultado vem DEPOIS da ação');
   ok('e não é o mesmo botão do recomeçar do meio', iReset > 0 && iReset < iPrompt,
      `${iReset} < ${iPrompt}`);
   const lbl = (await pg.locator('label[for="unNome"]').textContent() || '').trim();
-  ok('o campo diz o que se escreve nele', /quadro\/frame/i.test(lbl), lbl);
+  /* Era `/quadro\/frame/`: o rótulo mostrava os DOIS termos, porque a
+     ferramenta falava os dois. Com uma palavra só, a barra perdeu a razão
+     de existir — e o campo continua sendo a pergunta "como VOCÊ chama
+     isto?", que é o que ele sempre respondeu. */
+  ok('o campo diz o que se escreve nele', /cada quadro de/i.test(lbl), lbl);
   /* O botão passou a dizer QUANTAS e a usar a palavra do cenário — a mesma
      que `rotuloUnidade()` dá aos outros dezoito lugares. Antes ele dizia
      "Revisar quadro a quadro", fixo; numa ata, a tela inteira falava em
@@ -155,17 +160,26 @@ console.log('\n[5] baixar a transcrição solta saiu, e o plano saiu do rodapé'
   const fonte = fs.readFileSync(ROOT + '/app.html', 'utf8');
   ok('mas a legenda continua sendo montada para o .zip', /function montarLegenda/.test(fonte));
   ok('e a caixa da licença continua existindo para o link', /id="licBox"/.test(fonte));
-  ok('a frase do .vtt não encosta na borda', /data-i18n="subDeOnde" style="flex:1/.test(fonte));
+  /* A frase que explica o .vtt MUDOU DE CASA. Ela era um texto solto ao lado do
+     botão, segurado por `flex:1` para não colar na borda; virou o parágrafo do
+     bloco "Enviar arquivo de transcrição", que tem respiro próprio. A régua
+     cobra o respiro onde ele agora mora — cobrar o `flex:1` de um elemento que
+     não existe mais é cobrar a forma antiga de resolver, e não o problema. */
+  ok('a frase do envio de transcrição não encosta na borda',
+     /\.trFonte\{[^}]*padding:12px 14px/.test(fonte) && /data-i18n="trEnviarP"/.test(fonte));
 }
 
 console.log('\n[6] a caixa da janelinha é legível mesmo desligada');
 {
   const fonte = fs.readFileSync(ROOT + '/app.html', 'utf8');
+  /* O campo virou `textarea`: uma linha só ensinava a escrever pouco, e o que
+     se pede ali não cabe em quarenta caracteres. O que a régua cobra continua
+     idêntico — desligado tem que ser legível —, só mudou a etiqueta. */
   ok('desligada não é quase invisível',
-     !/input\.nota:disabled\{opacity:\.45\}/.test(fonte));
+     !/textarea\.nota:disabled\{opacity:\.45\}/.test(fonte));
   ok('ela fica pontilhada, que é o sinal de "ainda não vale"',
-     /input\.nota:disabled\{[^}]*border-style:dashed/.test(fonte));
-  ok('e a frase dentro dela tem contraste', /input\.nota::placeholder\{color:#9aa3b2/.test(fonte));
+     /textarea\.nota:disabled\{[^}]*border-style:dashed/.test(fonte));
+  ok('e a frase dentro dela tem contraste', /textarea\.nota::placeholder\{color:#9aa3b2/.test(fonte));
   ok('o botão de trazer a janelinha de volta é destacado',
      /class="sm hide destaque" id="recPip"/.test(fonte));
 }

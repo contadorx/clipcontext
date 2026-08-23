@@ -1,13 +1,13 @@
 /* O plano Time entra por LINK, e não por chave digitada. */
-import { chromium } from 'playwright';
+import { chromium } from './_navegador.mjs';
 import http from 'http'; import fs from 'fs';
 import { execSync } from 'child_process';
 import { criarProxy, exigirNext } from './proxy.mjs';
 await exigirNext();
 
-const ROOT = '/root/walkstamp/public';
+const ROOT = `${RAIZ_WS}/public`;
 const tipos = { '.css':'text/css', '.svg':'image/svg+xml', '.js':'text/javascript', '.ico':'image/x-icon' };
-const jspdf = fs.readFileSync('/root/walkstamp/vendor/jspdf.umd.min.js', 'utf8');
+const jspdf = fs.readFileSync(`${RAIZ_WS}/vendor/jspdf.umd.min.js`, 'utf8');
 /* O site virou Next.js: as páginas não existem mais como arquivo em public/.
    O servidorzinho estático daqui virou um encaminhador para o Next — mesma
    porta, mesmas URLs no teste, e quem responde é o produto de verdade. */
@@ -23,7 +23,8 @@ await new Promise(r => srv.listen(8918, r));
  * inteiro. Sai com 0: uma esteira vermelha por uma ausência esperada é uma
  * esteira que se aprende a ignorar. */
 import { existsSync } from 'fs';
-if (!existsSync('/root/walkstamp/emitir-licenca.py')) {
+import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+if (!existsSync(`${RAIZ_WS}/emitir-licenca.py`)) {
   console.log('  pulado  emitir-licenca.py não está neste pacote (ele guarda as chaves privadas).');
   console.log('          Rode este teste na máquina onde o emissor vive.');
   process.exit(0);
@@ -31,12 +32,12 @@ if (!existsSync('/root/walkstamp/emitir-licenca.py')) {
 
 /* Emitida na hora pelo mesmo programa que o Leandro usa — se ele quebrar, este
    teste quebra junto, que é exatamente o que se quer. */
-const saida = execSync('python3 /root/walkstamp/emitir-licenca.py "Cliente Exemplo — QA" 5 2030-01-01',
+const saida = execSync(`python3 ${RAIZ_WS}/emitir-licenca.py "Cliente Exemplo — QA" 5 2030-01-01`,
                        { encoding: 'utf8' });
 const VALIDA = saida.split('\n').find(l => l.trim().startsWith('WS1.')).trim();
 const LINK_EMITIDO = (saida.match(/https?:\/\/\S+/) || [''])[0];
 
-const br = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
+const br = await chromium.launch({ executablePath: CHROME_WS });
 let falhas = 0;
 const ok = (n, c, extra) => { console.log((c ? '  ok   ' : '  FALHA') + '  ' + n + (extra ? '  → ' + extra : '')); if (!c) falhas++; };
 const pagina = async () => {

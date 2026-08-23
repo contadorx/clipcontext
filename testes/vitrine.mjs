@@ -8,18 +8,19 @@
 import { chromium } from 'playwright';
 import fs from 'fs';
 import { criarProxy, exigirNext } from './proxy.mjs';
+import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
 await exigirNext();
 
 const srv = criarProxy();
 await new Promise((r) => srv.listen(8967, r));
 const BASE = 'http://localhost:8967';
-const br = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
+const br = await chromium.launch({ executablePath: CHROME_WS });
 let falhas = 0;
 const ok = (n, c, e) => { console.log((c ? '  ok   ' : '  FALHA') + '  ' + n + (e ? '  → ' + e : '')); if (!c) falhas++; };
 
-const feats = JSON.parse(fs.readFileSync('/root/walkstamp/src/features.json', 'utf8'));
+const feats = JSON.parse(fs.readFileSync(`${RAIZ_WS}/src/features.json`, 'utf8'));
 const TOTAL = feats.grupos.reduce((n, g) => n + g.itens.length, 0);
-const app = fs.readFileSync('/root/walkstamp/public/app.html', 'utf8');
+const app = fs.readFileSync(`${RAIZ_WS}/public/app.html`, 'utf8');
 
 const ctx = await br.newContext({ viewport: { width: 1200, height: 900 } });
 const pg = await ctx.newPage();

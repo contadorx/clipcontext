@@ -19,10 +19,11 @@
  * cartão nem na janelinha. Uma remoção pela metade deixaria um campo órfão
  * escrevendo num quadro que ninguém mais aponta.
  */
-import { chromium } from 'playwright';
+import { chromium } from './_navegador.mjs';   // abre os painéis e a gaveta das saídas
 import http from 'http'; import fs from 'fs';
 
-const ROOT = '/root/walkstamp/public';
+import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+const ROOT = `${RAIZ_WS}/public`;
 const html = fs.readFileSync(ROOT + '/app.html', 'utf8');
 const srv = http.createServer((q, r) => {
   const u = q.url.split('?')[0];
@@ -33,7 +34,7 @@ const srv = http.createServer((q, r) => {
 await new Promise(r => srv.listen(8907, r));
 
 const br = await chromium.launch({
-  executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome',
+  executablePath: CHROME_WS,
   args: ['--autoplay-policy=no-user-gesture-required']
 });
 let falhas = 0;

@@ -3,15 +3,16 @@
 import { chromium } from 'playwright';
 import http from 'http'; import fs from 'fs'; import path from 'path';
 import { criarProxy, exigirNext } from './proxy.mjs';
+import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
 await exigirNext();
-const ROOT='/root/walkstamp/public';
+const ROOT=`${RAIZ_WS}/public`;
 const T={'.html':'text/html','.css':'text/css','.js':'text/javascript','.svg':'image/svg+xml','.ico':'image/x-icon','.png':'image/png','.xml':'application/xml','.txt':'text/plain'};
 /* O site virou Next.js: as páginas não existem mais como arquivo em public/.
    O servidorzinho estático daqui virou um encaminhador para o Next — mesma
    porta, mesmas URLs no teste, e quem responde é o produto de verdade. */
 const srv = criarProxy();
 await new Promise(r=>srv.listen(8898,r));
-const br=await chromium.launch({executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome'});
+const br=await chromium.launch({executablePath:CHROME_WS});
 let falhas=0; const ok=(n,c,e)=>{console.log((c?'  ok   ':'  FALHA')+'  '+n+(e?'  → '+e:''));if(!c)falhas++};
 const pg=await (await br.newContext()).newPage();
 const erros=[]; pg.on('pageerror',e=>erros.push(e.message));
@@ -89,16 +90,24 @@ console.log('\n[2c] o nome antigo não aparece fora do aviso histórico');
     const txt = await pg.locator('body').innerText();
     ok(`${rota} sem ClipContext`, !/clipcontext/i.test(txt));
   }
-  // o bloco de apoio saiu da home e da ferramenta: ficou só na página de preços
-  await pg.goto('http://localhost:8898/');
-  await pg.waitForTimeout(400);
-  ok('a home não pede apoio', await pg.locator('#support').count() === 0);
+  /* O BLOCO DE APOIO SAIU DO SITE INTEIRO, e a regra virou o inverso.
+     Ele já tinha saído da home e da ferramenta e vivia só na página de preços.
+     Saiu de lá também: a página vende dois planos com preço e checkout, e um
+     botão de "pague um café" ao lado de uma assinatura de R$ 349 por
+     pessoa/ano é a página se desculpando por cobrar — quem está com o cartão
+     na mão para para decidir entre comprar e doar.
+     O que se cobra agora é que ele não volte por nenhuma porta. */
+  for (const rota of ['/', '/precos', '/en/precos', '/de/preise', '/comparativo']) {
+    await pg.goto('http://localhost:8898' + rota);
+    await pg.waitForTimeout(400);
+    ok(`${rota} não pede apoio`, (await pg.locator('#support').count()) === 0);
+  }
   await pg.goto('http://localhost:8898/precos');
-  await pg.waitForTimeout(500);
-  const apoio = await pg.locator('#support').innerText().catch(()=> '');
-  // o idioma do bloco segue o navegador do teste (en); o que importa é o nome
-  ok('o apoio da página de preços diz Walkstamp',
-     /Walkstamp (é gratuito|is free|es gratuito)/.test(apoio), apoio.slice(0,60));
+  await pg.waitForTimeout(400);
+  const txtP = await pg.locator('body').innerText();
+  ok('e a página de preços não fala em doação nem em Pix',
+     !/\bpix\b|doa[çc][ãa]o|donate|café|coffee/i.test(txtP),
+     (txtP.match(/[^\n]*(pix|doa[çc]|donate|café|coffee)[^\n]*/i) || ['(limpo)'])[0].slice(0, 70));
 }
 
 console.log('\n[2d] o cabeçalho tem a ação como botão');
@@ -133,15 +142,28 @@ console.log('\n[3] navegação e idiomas');
 
 console.log('\n[4] sitemap e robots');
 {
+  /* `/sitemap.xml` virou ÍNDICE quando o blog entrou: as páginas fixas nascem
+     no build e o mapa do blog é lido do banco a cada rastreio, e são duas
+     cadências que não cabem num arquivo só. Então a régua segue o índice em vez
+     de procurar as páginas nele — procurá-las ali passaria a cobrar do índice
+     uma coisa que ele não promete mais. */
   const r1 = await pg.goto('http://localhost:8898/sitemap.xml');
-  const xml = await r1.text();
+  const idx = await r1.text();
   ok('o sitemap existe', r1.status()===200);
+  ok('e ele é um índice, apontando para os dois mapas',
+     /<sitemapindex/.test(idx) &&
+     idx.includes('https://walkstamp.com/sitemap-paginas.xml') &&
+     idx.includes('https://walkstamp.com/sitemap-blog.xml'), idx.slice(0, 120));
+
+  const rp = await pg.goto('http://localhost:8898/sitemap-paginas.xml');
+  const xml = await rp.text();
+  ok('o mapa das páginas existe', rp.status()===200);
   ok('e traz as páginas novas nos três idiomas',
      ['/seguranca','/en/security','/es/seguridad','/substituto-do-steps-recorder',
       '/en/steps-recorder-replacement','/es/alternativa-al-steps-recorder',
       '/comparativo','/en/compare','/es/comparativa']
        .every(u => xml.includes('https://walkstamp.com'+u)));
-  ok('sem endereço do domínio antigo', !/clipcontext/i.test(xml));
+  ok('sem endereço do domínio antigo', !/clipcontext/i.test(xml) && !/clipcontext/i.test(idx));
   const r2 = await pg.goto('http://localhost:8898/robots.txt');
   ok('o robots aponta para o sitemap', (await r2.text()).includes('sitemap.xml'));
 }

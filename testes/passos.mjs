@@ -1,7 +1,8 @@
 /* Passo a passo, ordem das permissões e a janelinha de controle. */
-import { chromium } from 'playwright';
+import { chromium } from './_navegador.mjs';
 import http from 'http'; import fs from 'fs'; import path from 'path';
-const ROOT='/root/walkstamp/public';
+import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+const ROOT=`${RAIZ_WS}/public`;
 const T={'.html':'text/html','.css':'text/css','.js':'text/javascript','.svg':'image/svg+xml','.ico':'image/x-icon','.png':'image/png','.webm':'video/webm','.vtt':'text/vtt','.jpg':'image/jpeg','.mp4':'video/mp4'};
 const srv=http.createServer((q,r)=>{
   if(q.url.startsWith('/_vercel/')){r.writeHead(200,{'Content-Type':'text/javascript'});return r.end('')}
@@ -11,7 +12,7 @@ const srv=http.createServer((q,r)=>{
   r.writeHead(200,{'Content-Type':T[path.extname(f)]||'application/octet-stream'});r.end(fs.readFileSync(f));
 });
 await new Promise(r=>srv.listen(8889,r));
-const br=await chromium.launch({executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome',
+const br=await chromium.launch({executablePath:CHROME_WS,
   args:['--autoplay-policy=no-user-gesture-required','--auto-accept-this-tab-capture']});
 let falhas=0; const ok=(n,c,e)=>{console.log((c?'  ok   ':'  FALHA')+'  '+n+(e?'  → '+e:''));if(!c)falhas++};
 
@@ -71,7 +72,7 @@ console.log('\n[P1] estado inicial: só o passo 1 está aberto');
   ok('mas Recomeçar continua ao alcance',
      await pg.evaluate(() => !document.getElementById('reset').closest('[inert]')));
   ok('e a dica explica o que destrava',
-     /passo 1/.test(await pg.locator('#cardTr .lockHint').textContent()),
+     /etapa 1/.test(await pg.locator('#cardTr .lockHint').textContent()),
      await pg.locator('#cardTr .lockHint').textContent());
   ok('o bloco travado fica cinza',
      parseFloat(await pg.locator('#promptCard').evaluate(e=>getComputedStyle(e).opacity)) < .6);
@@ -145,10 +146,10 @@ console.log('\n[P3] ordem das permissões: microfone ANTES da tela');
    mensagem porque ela é promessa do produto, dita na página e na política, e
    não informação de resultado. O que sobra é o que se faz alguma coisa com. */
 ok('a mensagem final diz o que saiu, e só',
-   /Pronto: \d\d:\d\d de captura, \d+ frames e \d+ falas\./.test(msg) && !/tempo real/.test(msg), msg);
+   /Pronto: \d\d:\d\d de captura, \d+ quadros e \d+ falas\./.test(msg) && !/tempo real/.test(msg), msg);
   ok('depois de gravar, "transcrever" fica travado (não morto)',
      await pg.locator('#trAuto').getAttribute('inert') !== null);
-  ok('e a tela explica por quê', /ao vivo|só de frames/.test(await pg.locator('#hintTr').textContent()),
+  ok('e a tela explica por quê', /ao vivo|só de quadros/.test(await pg.locator('#hintTr').textContent()),
      (await pg.locator('#hintTr').textContent()).slice(0,60));
   ok('o texto da transcrição continua editável',
      await pg.locator('#trManual').getAttribute('inert') === null);

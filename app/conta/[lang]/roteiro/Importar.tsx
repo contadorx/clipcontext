@@ -12,7 +12,7 @@
  * O resto da tela — a lista, o link, o "feito", o atribuir — é formulário puro
  * e funciona sem nada disto.
  */
-import { useActionState, useState } from 'react';
+import { useActionState, useRef, useState } from 'react';
 import { lerPlanilha, salvarRoteiro } from '../../roteiro-acoes';
 import type { Lido } from '../../roteiro-acoes';
 
@@ -25,6 +25,23 @@ export default function Importar(
   { lang, t, podeTime }: { lang: string; t: Textos; podeTime: boolean },
 ) {
   const [lido, ler, lendo] = useActionState<Lido | null, FormData>(lerPlanilha, null);
+  /* A TELA VAZIA ERA O PRIMEIRO OBSTÁCULO.
+   *
+   * Quem chega aqui sem nunca ter usado precisa arrumar uma planilha ANTES de
+   * descobrir se a coisa serve — e arrumar uma planilha no meio do expediente é
+   * exatamente o tipo de tarefa que fica para depois e nunca acontece.
+   *
+   * O exemplo entra pelo MESMO caminho da planilha de verdade: ele preenche o
+   * campo de colar e manda o formulário. Não há atalho e não há dado
+   * fabricado no servidor — a pessoa vê a leitura real, o palpite real das
+   * colunas e a conferência real, e nada é gravado enquanto ela não salvar. */
+  const campo = useRef<HTMLTextAreaElement>(null);
+  const verExemplo = () => {
+    const el = campo.current;
+    if (!el) return;
+    el.value = t.rotExemploTsv || '';
+    el.form?.requestSubmit();
+  };
   return (
     <div className="card" style={{ marginBottom: 24 }}>
       <h2 style={{ marginTop: 0 }}>{t.rotImportarTitulo}</h2>
@@ -36,14 +53,18 @@ export default function Importar(
           <input type="file" name="arquivo" accept=".xlsx,.csv,.tsv,.txt" style={{ display: 'block', marginTop: 4 }} />
         </label>
         <label className="small">{t.rotColar}
-          <textarea name="colado" rows={3} placeholder={t.rotColarPlaceholder}
+          <textarea ref={campo} name="colado" rows={3} placeholder={t.rotColarPlaceholder}
                     style={{ width: '100%', marginTop: 4 }} />
         </label>
-        <div>
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
           <button className="btn ghost" type="submit" disabled={lendo}>
             {lendo ? t.rotLendo : t.rotLerBotao}
           </button>
+          <button className="btn ghost" type="button" onClick={verExemplo} disabled={lendo}>
+            {t.rotExemploBtn}
+          </button>
         </div>
+        <p className="small muted" style={{ margin: 0 }}>{t.rotExemploNota}</p>
       </form>
 
       {lido?.erro && <p className="aviso err" style={{ marginTop: 14 }}>{lido.erro}</p>}

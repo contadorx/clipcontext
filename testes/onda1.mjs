@@ -1,12 +1,13 @@
 /* Onda 1: perfil na aba, fuso no documento, e a lente de um passo. */
-import { chromium } from 'playwright';
+import { chromium } from './_navegador.mjs';
 import http from 'http'; import fs from 'fs'; import zlib from 'zlib';
-const ROOT='/root/walkstamp/public';
+import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+const ROOT=`${RAIZ_WS}/public`;
 const html=fs.readFileSync(ROOT+'/app.html','utf8');
-const jspdf=fs.readFileSync('/root/walkstamp/vendor/jspdf.umd.min.js','utf8');
+const jspdf=fs.readFileSync(`${RAIZ_WS}/vendor/jspdf.umd.min.js`,'utf8');
 const srv=http.createServer((q,r)=>{if(q.url.startsWith('/_vercel/')){r.writeHead(200,{'Content-Type':'text/javascript'});return r.end('')}r.writeHead(200,{'Content-Type':'text/html'});r.end(html)});
 await new Promise(r=>srv.listen(8908,r));
-const br=await chromium.launch({executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome'});
+const br=await chromium.launch({executablePath:CHROME_WS});
 let falhas=0; const ok=(n,c,e)=>{console.log((c?'  ok   ':'  FALHA')+'  '+n+(e?'  → '+e:''));if(!c)falhas++};
 function textoDoPdf(caminho){
   const buf=fs.readFileSync(caminho); let out=''; let i=0;
@@ -81,7 +82,7 @@ console.log('\n[1] perfil da aba');
 console.log('\n[2] a lente de um passo');
 await prep();
 {
-  await pg.locator('#thumbs .lupa').first().click({force:true});
+  await pg.locator('#thumbs .editar').first().click({force:true});
   await pg.waitForTimeout(300);
   ok('a lente abre', !(await pg.locator('#lente').getAttribute('class')).includes('hide'));
   ok('mostra a imagem grande', await pg.locator('#lenteImg').isVisible());

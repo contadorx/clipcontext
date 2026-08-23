@@ -35,7 +35,8 @@
 import fs from 'fs';
 import path from 'path';
 
-const RAIZ = '/root/walkstamp';
+import { RAIZ_WS } from './_caminhos.mjs';
+const RAIZ = `${RAIZ_WS}`;
 let falhas = 0;
 const ok = (n, c, e) => {
   console.log((c ? '  ok   ' : '  FALHA') + '  ' + n + (e ? '  → ' + e : ''));
@@ -138,10 +139,35 @@ for (const lang of IDIOMAS) {
 // ---------------------------------------------------------------------------
 console.log('\n[3] e no anexo que vai assinado');
 {
-  const arq = path.join(RAIZ, 'src', 'site', 'dpa.pt.html');
-  if (!fs.existsSync(arq)) ok('dpa.pt.html existe', false);
+  /* NOS CINCO IDIOMAS. O anexo e o unico documento que vai ASSINADO, e existia
+     so em portugues enquanto o produto vende em cinco. Um fornecedor novo
+     entrando no produto tem que reprovar os CINCO de uma vez — a versao que
+     fica para tras e a que alguem assina dizendo menos do que a politica. */
+  for (const L of IDIOMAS) {
+  const arq = path.join(RAIZ, 'src', 'site', `dpa.${L}.html`);
+  if (!fs.existsSync(arq)) ok(`dpa.${L}.html existe`, false);
   else {
     const dpa = fs.readFileSync(arq, 'utf8').toLowerCase();
+    /* E a traducao tem que DIZER que e traducao. Alguem assinar a versao
+       alema achando que assinou o contrato e o unico jeito de esta entrega
+       piorar a situacao em vez de melhorar. */
+    if (L !== 'pt') {
+      /* `portug`, e nao `portugu`: em alemao e "portugiesische" e em frances
+         "portugaise" — a raiz comum e mais curta do que a portuguesa. */
+      ok(`dpa.${L}: diz que a versão portuguesa é a que vale`,
+         /portug/i.test(dpa) && /(governs|vale|maßgeblich|fait foi|prevalec)/i.test(dpa));
+      /* O bloco de assinatura NAO pode pedir CNPJ de quem nao tem. Foi o tell
+         que mostrou que traduzir sozinho nao resolvia: uma empresa alema nao
+         tem CNPJ, e um campo impossivel de preencher trava a assinatura. */
+      /* So a celula do cliente, e ela acaba no `</table>`: o rodape logo abaixo
+         traz o CNPJ da Walkstamp de propósito, e sem cortar aqui ele entrava na
+         conferencia e reprovava um documento correto. */
+      const bloco = dpa.slice(dpa.indexOf('class="assina"'));
+      const tabela = bloco.slice(0, bloco.indexOf('</table>'));
+      const doCliente = tabela.slice(tabela.indexOf('</td>'));
+      ok(`dpa.${L}: não pede CNPJ de quem não tem`, !doCliente.includes('cnpj'),
+         doCliente.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').slice(0, 70));
+    }
     /* O DPA lista SUBOPERADORES — quem trata dado da conta paga por nossa
        conta. jsDelivr e Hugging Face entregam arquivo ao navegador da pessoa e
        não tocam em dado de conta nenhum; exigi-los aqui seria inflar o anexo
@@ -150,17 +176,18 @@ console.log('\n[3] e no anexo que vai assinado');
     const NUCLEO = achados.filter(v => vendors.get(v).startsWith('credencial'));
     console.log('     núcleo (temos credencial deles): ' + NUCLEO.join(', '));
     const faltando = NUCLEO.filter(v => !dpa.includes(v));
-    ok('o DPA lista todo terceiro de quem guardamos credencial',
+    ok(`dpa.${L}: lista todo terceiro de quem guardamos credencial`,
        faltando.length === 0, faltando.join(', ') || '—');
 
     /* E a tabela do DPA não pode contradizer a da política: um contrato
        assinado que diverge da política publicada é pior do que não ter
        contrato. */
-    const pol = fs.readFileSync(path.join(RAIZ, 'src', 'site', 'bodies', 'privacidade.pt.html'), 'utf8')
-      .toLowerCase();
+    const pol = fs.readFileSync(
+      path.join(RAIZ, 'src', 'site', 'bodies', `privacidade.${L}.html`), 'utf8').toLowerCase();
     const soNoDpa = NUCLEO.filter(v => dpa.includes(v) && !pol.includes(v));
-    ok('e não inventa nenhum que a política não conheça', soNoDpa.length === 0,
+    ok(`dpa.${L}: não inventa nenhum que a política não conheça`, soNoDpa.length === 0,
        soNoDpa.join(', ') || '—');
+  }
   }
 }
 

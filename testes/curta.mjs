@@ -1,7 +1,8 @@
 /* Gravar e parar quase imediatamente — o relato: some o vídeo e não sobra nada. */
-import { chromium } from 'playwright';
+import { chromium } from './_navegador.mjs';
 import http from 'http'; import fs from 'fs'; import path from 'path';
-const ROOT='/root/walkstamp/public';
+import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+const ROOT=`${RAIZ_WS}/public`;
 const T={'.html':'text/html','.css':'text/css','.js':'text/javascript','.webm':'video/webm','.png':'image/png','.svg':'image/svg+xml','.ico':'image/x-icon'};
 const srv=http.createServer((q,r)=>{
   if(q.url.startsWith('/_vercel/')){r.writeHead(200,{'Content-Type':'text/javascript'});return r.end('')}
@@ -9,7 +10,7 @@ const srv=http.createServer((q,r)=>{
   if(!fs.existsSync(f)){r.writeHead(404);return r.end()}
   r.writeHead(200,{'Content-Type':T[path.extname(f)]||'application/octet-stream'});r.end(fs.readFileSync(f));});
 await new Promise(r=>srv.listen(8880,r));
-const br=await chromium.launch({executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome',
+const br=await chromium.launch({executablePath:CHROME_WS,
   args:['--autoplay-policy=no-user-gesture-required']});
 let falhas=0; const ok=(n,c,e)=>{console.log((c?'  ok   ':'  FALHA')+'  '+n+(e?'  → '+e:''));if(!c)falhas++};
 const FAKE=`export const env={allowLocalModels:true,allowRemoteModels:true,backends:{onnx:{wasm:{}}}};
@@ -75,13 +76,13 @@ for (const [rot, espera, semTr, semImagem] of [['parar em 200 ms', 200, false, f
     // caso teórico: getDisplayMedia sempre devolve trilha de vídeo. O que importa
     // é falhar sem deixar a pessoa presa.
     ok('falha sem travar: o botão Gravar continua disponível', e.recOk);
-    ok('e a dica volta ao começo', /passo 1/.test(e.hintTr), e.hintTr);
+    ok('e a dica volta ao começo', /etapa 1/.test(e.hintTr), e.hintTr);
   } else {
     ok('sobra pelo menos um frame (era zero)', e.frames >= 1, e.frames + ' frames');
     ok('o cartão de revisão aparece', !e.prevHide);
     ok('a mensagem final é de conclusão', /Pronto:/.test(e.recMsg), e.recMsg.slice(0,60));
     ok('a dica do passo 2 combina com o que aconteceu',
-       semTr ? /só de frames/.test(e.hintTr) : /ao vivo/.test(e.hintTr), e.hintTr);
+       semTr ? /só de quadros/.test(e.hintTr) : /ao vivo/.test(e.hintTr), e.hintTr);
     ok('o botão Gravar continua disponível', e.recOk);
   }
   if (erros.length) ok('sem erro de JS', false, erros.join(' | ').slice(0,160));

@@ -18,6 +18,7 @@ import crypto from 'crypto';
 import http from 'http';
 import fs from 'fs';
 
+import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
 const SEGREDO = 'whsec_um_segredo_de_teste';
 const PORTA_NEXT = 8803;
 const PORTA_BANCO = 8804;
@@ -42,7 +43,7 @@ const banco = http.createServer((q, r) => {
 await new Promise((r) => banco.listen(PORTA_BANCO, r));
 
 const next = spawn('npx', ['next', 'start', '-p', String(PORTA_NEXT)], {
-  cwd: '/root/walkstamp',
+  cwd: `${RAIZ_WS}`,
   env: { ...process.env,
     STRIPE_SECRET_KEY: 'sk_test_de_mentira',
     STRIPE_WEBHOOK_SECRET: SEGREDO,
@@ -171,12 +172,30 @@ console.log('\n[6] o que a Stripe manda e não nos interessa não vira nada');
   /* 200 de propósito: a Stripe reenvia o que não recebe 2xx, e recusar o que
      não interessa é combinar uma fila de reentrega que nunca vai passar. */
   ok('responde 200 e ignora', r.status === 200, String(r.status));
-  ok('sem tocar no banco', chamadas.length === 0, JSON.stringify(chamadas).slice(0, 120));
+  /* O QUE MUDOU AQUI, E POR QUE. Antes do B2 este evento não produzia chamada
+     nenhuma, e a asserção era "banco intocado". O B2 pôs um diário de auditoria
+     — foi ele que revelou que um dos dois webhooks nunca concedeu plano — e o
+     diário registra TODO evento, inclusive o que não interessa: um diário com
+     buracos não serve para responder "quem tratou o quê".
+
+     Então o que se cobra deixa de ser silêncio e passa a ser precisão: o único
+     registro é o do diário, ele diz `ignorado` e não `ok`, e nenhum efeito de
+     negócio acontece. "ok" para um evento que ninguém tratou seria pior que
+     silêncio — leria-se como "tratei". */
+  ok('só o diário de auditoria foi escrito', chamadas.length === 1,
+     JSON.stringify(chamadas).slice(0, 160));
+  const diario = chamadas[0] || {};
+  ok('e é o diário mesmo', diario.funcao === 'walkstamp_stripe_entregue', diario.funcao);
+  ok('que diz IGNORADO, e não "ok"', (diario.args || {}).p_resultado === 'ignorado',
+     JSON.stringify(diario.args || {}));
+  ok('nenhum efeito de negócio',
+     !chamadas.some(x => /assinatura|fatura|plano/.test(x.funcao || '')),
+     JSON.stringify(chamadas.map(x => x.funcao)));
 }
 
 /* --------------------------------------------------- a área do cliente */
 console.log('\n[7] a conta é oferecida, nunca exigida');
-const br = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
+const br = await chromium.launch({ executablePath: CHROME_WS });
 {
   const pg = await (await br.newContext()).newPage();
   const erros = []; pg.on('pageerror', (e) => erros.push(e.message));
@@ -272,7 +291,7 @@ console.log('\n[11] o endereço interno não é um segundo endereço público');
 
 console.log('\n[12] o dicionário da conta não tem buraco');
 {
-  const d = JSON.parse(fs.readFileSync('/root/walkstamp/src/i18n-conta.json', 'utf8'));
+  const d = JSON.parse(fs.readFileSync(`${RAIZ_WS}/src/i18n-conta.json`, 'utf8'));
   const base = Object.keys(d.pt);
   for (const L of ['en', 'es']) {
     const faltam = base.filter((k) => !(k in d[L]));

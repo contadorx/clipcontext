@@ -1,11 +1,12 @@
 /* Revisão assistida: a ferramenta conduz passo a passo e recaptura só o que mudou. */
-import { chromium } from 'playwright';
+import { chromium } from './_navegador.mjs';   // abre os painéis e a gaveta das saídas
 import http from 'http'; import fs from 'fs';
-const html = fs.readFileSync('/root/walkstamp/public/app.html','utf8');
-const jspdf = fs.readFileSync('/root/walkstamp/vendor/jspdf.umd.min.js','utf8');
+import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+const html = fs.readFileSync(`${RAIZ_WS}/public/app.html`,'utf8');
+const jspdf = fs.readFileSync(`${RAIZ_WS}/vendor/jspdf.umd.min.js`,'utf8');
 const srv = http.createServer((q,r)=>{ if(q.url.startsWith('/_vercel/')){r.writeHead(200,{'Content-Type':'text/javascript'});return r.end('')} r.writeHead(200,{'Content-Type':'text/html'}); r.end(html); });
 await new Promise(r=>srv.listen(8928,r));
-const br = await chromium.launch({ executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
+const br = await chromium.launch({ executablePath:CHROME_WS });
 let falhas = 0;
 const ok = (n,c,e2)=>{console.log((c?'  ok   ':'  FALHA')+'  '+n+(e2?'  → '+e2:''));if(!c)falhas++};
 const ctx = await br.newContext({ acceptDownloads:true, viewport:{width:1300,height:1000} });
@@ -145,7 +146,7 @@ ok('foi para o passo 2', /2 de 4/.test(await pg.locator('#revPos').textContent()
 ok('e nada foi tocado', (await pg.locator('#thumbs figure').count()) === 4);
 
 console.log('\n[4] "mudou" troca a imagem e preserva o resto');
-await pg.setInputFiles('#revArq', '/root/walkstamp/public/apple-touch-icon.png');
+await pg.setInputFiles('#revArq', `${RAIZ_WS}/public/apple-touch-icon.png`);
 await pg.waitForTimeout(800);
 ok('avançou sozinho para o passo 3', /3 de 4/.test(await pg.locator('#revPos').textContent()),
    await pg.locator('#revPos').textContent());

@@ -9,11 +9,23 @@ import { ehLang, textos, CAMINHO } from '@/lib/conta/textos';
 import { podeAbrir } from '@/lib/conta/nav';
 import { Envolver, Porta, capacidades, carregar } from '../carga';
 import { Chamados } from '../secoes';
+import { abrirChamado } from '../../acoes';
+import Abrir from './Abrir';
 
 export const dynamic = 'force-dynamic';
 
-export default async function Pagina({ params }: PageProps<'/conta/[lang]/chamados'>) {
+export default async function Pagina(
+  { params, searchParams }: PageProps<'/conta/[lang]/chamados'>,
+) {
   const { lang } = await params;
+  /* O aviso da ação volta PARA CÁ, e é lido aqui. Ele morava só na raiz do
+     painel, e por isso quem abrisse um chamado daqui seria mandado para outra
+     página para ler o número que precisa anotar. */
+  const q = await searchParams;
+  const recado = (n: string) => {
+    const v = q?.[n];
+    return typeof v === 'string' ? v : null;
+  };
   if (!ehLang(lang)) notFound();
   const t = textos(lang);
   const carga = await carregar();
@@ -31,8 +43,16 @@ export default async function Pagina({ params }: PageProps<'/conta/[lang]/chamad
           precisa de um `h1`: sem ele, quem navega por cabeçalhos com leitor de
           tela cai num documento que começa no meio. */}
       <h1 className="soLeitor">{t.navChamados}</h1>
+      {recado('erro') && <p className="aviso err">{recado('erro')}</p>}
+      {recado('feito') && <p className="aviso ok">{recado('feito')}</p>}
       {carga.estado === 'ok' && liberado
-        ? <Chamados conta={carga.conta} lang={lang} t={t} />
+        ? <>
+            {/* ABRIR VEM ANTES DE LISTAR. Quem chega aqui com um problema quer
+                contar o problema; a lista é o que se consulta depois, e ela
+                nasce vazia justamente para quem mais precisa do formulário. */}
+            <Abrir lang={lang} t={t} acao={abrirChamado} />
+            <Chamados conta={carga.conta} lang={lang} t={t} />
+          </>
         : <Porta lang={lang} t={t}
                  motivo={carga.estado === 'fora' ? 'fora' : 'plano'}
                  titulo={t.navChamados} texto={t.pitchChamados} />}

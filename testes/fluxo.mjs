@@ -14,10 +14,11 @@
  *   3. nenhuma bolinha de "feito" fica verde por uma coisa que a pessoa não fez;
  *   4. nenhuma bolinha continua verde depois que o que ela afirmava sumiu.
  */
-import { chromium } from 'playwright';
+import { chromium } from './_navegador.mjs';
 import http from 'http'; import fs from 'fs'; import path from 'path';
 
-const ROOT = '/root/walkstamp/public';
+import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+const ROOT = `${RAIZ_WS}/public`;
 const T = { '.html': 'text/html', '.css': 'text/css', '.js': 'text/javascript',
             '.svg': 'image/svg+xml', '.webm': 'video/webm', '.mp4': 'video/mp4',
             '.jpg': 'image/jpeg', '.vtt': 'text/vtt', '.png': 'image/png' };
@@ -30,14 +31,14 @@ const srv = http.createServer((q, r) => {
 });
 await new Promise((r) => srv.listen(8975, r));
 
-const br = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
+const br = await chromium.launch({ executablePath: CHROME_WS });
 let falhas = 0;
 const ok = (n, c, e) => { console.log((c ? '  ok   ' : '  FALHA') + '  ' + n + (e ? '  → ' + e : '')); if (!c) falhas++; };
 
 const ctx = await br.newContext({ acceptDownloads: true, viewport: { width: 1300, height: 1000 } });
 const pg = await ctx.newPage();
 const erros = []; pg.on('pageerror', (e) => erros.push(e.message));
-const jspdf = fs.readFileSync('/root/walkstamp/vendor/jspdf.umd.min.js', 'utf8');
+const jspdf = fs.readFileSync(`${RAIZ_WS}/vendor/jspdf.umd.min.js`, 'utf8');
 await pg.route('**/jspdf**', (r) => r.fulfill({ status: 200, headers: { 'content-type': 'text/javascript' }, body: jspdf }));
 await pg.route('**/rpc/**', (r) => r.fulfill({ status: 200, body: 'null' }));
 await pg.goto('http://localhost:8975/app.html?lang=pt');
@@ -81,9 +82,17 @@ await pg.waitForTimeout(600);
   ok('e a tela diz por quê', st.length > 20, st.slice(0, 70));
   ok('dizendo ONDE se resolve, não só que faltou',
      /passo 2|grave a tela/i.test(st), st.slice(0, 90));
-  /* Toda a lista da tela, não só a que este arquivo conhece: um botão de saída
-     novo que ninguém pensou em travar cai aqui. */
-  const naTela = await pg.locator('#sb4 button:not(.sbOk), #sb4 a.btn').evaluateAll(
+  /* Toda a lista da tela, não só a que este arquivo conhece: um botão de SAÍDA
+     novo que ninguém pensou em travar cai aqui.
+
+     `#recTodos` fica de fora, e não por conveniência: ele não é uma saída, é o
+     controle que REVELA a lista de saídas. Clicá-lo sem material não tenta
+     gerar nada — abre uma gaveta em que todos os onze botões estão visivelmente
+     desligados, que é a resposta honesta a "quais formatos existem?". Travá-lo
+     junto seria esconder o cardápio de quem ainda está decidindo se vale a pena,
+     e custaria o acesso às saídas em cinquenta réguas: `_navegador.mjs` abre a
+     gaveta clicando nele, e botão desabilitado não responde a clique. */
+  const naTela = await pg.locator('#sb4 button:not(.sbOk):not(#recTodos), #sb4 a.btn').evaluateAll(
     (bs) => bs.filter((b) => b.offsetParent !== null && !b.disabled).map((b) => b.id || b.textContent.trim()));
   ok('nem os que este teste não conhece', naTela.length === 0, naTela.join(' '));
 }
@@ -134,7 +143,18 @@ await pg.waitForTimeout(700);
   const presos = ['go', 'docx', 'html', 'md', 'pptx', 'json', 'csv', 'zip'].filter((id) => e[id] !== 'clicavel');
   ok('os oito formatos de sempre ficam clicáveis', presos.length === 0, presos.join(' '));
   const st = (await pg.locator('#pdfStatus').textContent()).trim();
-  ok('e a tela convida em vez de ficar muda', /4/.test(st) && st.length > 15, st.slice(0, 70));
+  /* DUAS FRASES VÁLIDAS, e qual delas aparece depende do relógio da máquina.
+     A esperada é "4 quadros prontos — escolha um formato". Mas se a transcrição
+     ainda estiver correndo, o aviso de que o documento sairia SEM A FALA ganha
+     a linha — e ganha com razão: é a informação que muda a decisão de baixar
+     agora. O `espera.mjs` cobra justamente que esse aviso apareça. Exigir só a
+     primeira aqui era pôr as duas réguas para brigar, e quem perdia era a
+     máquina lenta. O que este bloco afirma é que a linha CONVIDA em vez de
+     ficar muda — e as duas convidam. */
+  const contou = /4/.test(st);
+  const avisou = /fala/i.test(st);
+  ok('e a tela convida em vez de ficar muda', (contou || avisou) && st.length > 15,
+     st.slice(0, 70));
   const dl = pg.waitForEvent('download', { timeout: 30000 });
   await pg.locator('#md').click();
   await dl;

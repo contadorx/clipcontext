@@ -4,12 +4,13 @@
      2. Do Not Track ser respeitado;
      3. nenhum dado do vídeo escapar junto com os marcos;
      4. o formulário de e-mail funcionar e falhar de forma legível. */
-import { chromium } from 'playwright';
+import { chromium } from './_navegador.mjs';
 import http from 'http'; import fs from 'fs'; import path from 'path';
 import { criarProxy, exigirNext } from './proxy.mjs';
+import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
 await exigirNext();
 
-const ROOT = '/root/walkstamp/public';
+const ROOT = `${RAIZ_WS}/public`;
 const T = {'.html':'text/html','.css':'text/css','.js':'text/javascript','.svg':'image/svg+xml',
   '.ico':'image/x-icon','.png':'image/png','.jpg':'image/jpeg','.mp4':'video/mp4','.webm':'video/webm','.vtt':'text/vtt'};
 /* O site virou Next.js: as páginas não existem mais como arquivo em public/.
@@ -18,7 +19,7 @@ const T = {'.html':'text/html','.css':'text/css','.js':'text/javascript','.svg':
 const srv = criarProxy();
 await new Promise(r => srv.listen(8877, r));
 
-const br = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
+const br = await chromium.launch({ executablePath: CHROME_WS });
 let falhas = 0;
 const ok = (n, c, e) => { console.log((c ? '  ok   ' : '  FALHA') + '  ' + n + (e ? '  → ' + e : '')); if (!c) falhas++; };
 
@@ -29,6 +30,15 @@ async function pagina(url, opts = {}) {
   const eventos = [], listas = [], vercel = [];
   const erros = []; pg.on('pageerror', e => erros.push(e.message));
 
+  /* A PORTA DE SERVIÇO DA MEDIÇÃO. O produto passou a calar a medição quando a
+     página vem de `localhost` ou de rede local — sem isso a esteira desta
+     máquina entrava na base de produção como gente, e entrou: numa noite, 43
+     marcos, dois deles em inglês, num funil que ninguém conseguia separar
+     depois. Este arquivo é o único que precisa ver o envio ACONTECER, porque é
+     ele que cobra o que vai dentro; por isso é o único que abre a porta.
+     `opts.mudo` existe para o caso simétrico — provar que sem a porta aberta
+     não sai nada. */
+  if (!opts.mudo) await pg.addInitScript(() => { window.__medirDaqui = true; });
   if (opts.dnt) await pg.addInitScript(() => {
     Object.defineProperty(navigator, 'doNotTrack', { get: () => '1' });
   });
@@ -98,6 +108,18 @@ console.log('\n[M1] os três marcos, e só eles');
   await ctx.close();
 }
 
+console.log('\n[M1b] a régua não conta como gente');
+{
+  const { pg, ctx, eventos } = await pagina('http://localhost:8877/app.html?lang=pt',
+                                            { mudo: true });
+  await pg.setInputFiles('#file', '/tmp/amostra.webm');
+  await pg.waitForFunction(() => !document.getElementById('auto').disabled, null, { timeout: 20000 });
+  await pg.waitForTimeout(500);
+  ok('de localhost, sem a porta de serviço, nada é enviado', eventos.length === 0,
+     eventos.length + ' enviados: ' + JSON.stringify(eventos).slice(0, 160));
+  await ctx.close();
+}
+
 console.log('\n[M2] Do Not Track e Global Privacy Control calam a medição');
 for (const [k, rot] of [['dnt','Do Not Track'], ['gpc','Global Privacy Control']]) {
   const { pg, ctx, eventos } = await pagina('http://localhost:8877/app.html?lang=pt', { [k]: true });
@@ -110,7 +132,7 @@ for (const [k, rot] of [['dnt','Do Not Track'], ['gpc','Global Privacy Control']
 
 console.log('\n[M3] o arquivo offline é mudo');
 {
-  const off = fs.readFileSync('/root/walkstamp/offline/walkstamp-offline.html', 'utf8');
+  const off = fs.readFileSync(`${RAIZ_WS}/offline/walkstamp-offline.html`, 'utf8');
   ok('sem endereço do Supabase no arquivo', !/supabase/i.test(off));
   ok('sem snippet do Vercel no arquivo', !/_vercel\/insights/.test(off));
 
@@ -119,7 +141,7 @@ console.log('\n[M3] o arquivo offline é mudo');
   const externos = [];
   pg.on('request', r => { if (!r.url().startsWith('file:')) externos.push(r.url()); });
   const erros = []; pg.on('pageerror', e => erros.push(e.message));
-  await pg.goto('file:///root/walkstamp/offline/walkstamp-offline.html');
+  await pg.goto(`file://${RAIZ_WS}/offline/walkstamp-offline.html`);
   await pg.waitForTimeout(900);
   ok('abrindo o arquivo, nenhum pedido sai da máquina', externos.length === 0, externos.join(' | ').slice(0,160));
   ok('e ele funciona: a interface montou', await pg.locator('#drop').isVisible());
@@ -176,10 +198,22 @@ console.log('\n[M5] quando o banco recusa, e quando a rede cai');
 
 console.log('\n[M6] a manchete nova, nos três idiomas');
 {
+  /* A MANCHETE MUDOU DE CATEGORIA, e esta lista mudou junto.
+   *
+   * "Você percorre a tela. Ele carimba cada passo." tem personalidade e não é
+   * pesquisável: quem faz QA não lê ali "caso de teste", "evidência" nem
+   * "planilha", e o lead abria dois produtos com o mesmo peso. A manchete passou
+   * a dizer o trabalho — executar os casos e organizar a prova —, e "gravação
+   * vira documento" virou o mecanismo, que é o que ele sempre foi.
+   *
+   * O que continua cobrado aqui: os 3.600 quadros (o número concreto que faz a
+   * comparação ser memorizável) e os dois casos de uso, que desceram na
+   * hierarquia mas não sumiram. E a voz antiga sobrevive como subtítulo mais
+   * abaixo — o que esta lista NÃO cobra é ela na manchete. */
   const esperado = {
-    '/':   ['Você percorre a tela', 'carimba cada passo', '3.600', 'Evidência de teste', 'Contexto para IA'],
-    '/en': ['You walk the screen', 'stamps every step', '3,600', 'Test evidence', 'Context for AI'],
-    '/es': ['Tú recorres la pantalla', 'sella cada paso', '3.600', 'Evidencia de prueba', 'Contexto para IA'],
+    '/':   ['Execute os casos', 'organiza a prova', 'roteiro de casos', '3.600', 'Evidência de teste', 'Contexto para IA'],
+    '/en': ['Run the cases', 'organises the proof', 'case script', '3,600', 'Test evidence', 'Context for AI'],
+    '/es': ['Ejecuta los casos', 'organiza la prueba', 'guion de casos', '3.600', 'Evidencia de prueba', 'Contexto para IA'],
   };
   for (const [rota, termos] of Object.entries(esperado)) {
     const ctx = await br.newContext(); const pg = await ctx.newPage();

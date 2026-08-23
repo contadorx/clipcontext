@@ -1,16 +1,17 @@
-import { chromium } from 'playwright';
+import { chromium } from './_navegador.mjs';
 import http from 'http'; import fs from 'fs';
 
-const ROOT = '/root/walkstamp/public';
+import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+const ROOT = `${RAIZ_WS}/public`;
 const html = fs.readFileSync(ROOT + '/app.html', 'utf8');
-const jspdf = fs.readFileSync('/root/walkstamp/vendor/jspdf.umd.min.js', 'utf8');
+const jspdf = fs.readFileSync(`${RAIZ_WS}/vendor/jspdf.umd.min.js`, 'utf8');
 const srv = http.createServer((q, r) => {
   if (q.url.startsWith('/_vercel/')) { r.writeHead(200,{'Content-Type':'text/javascript'}); return r.end('') }
   r.writeHead(200, {'Content-Type':'text/html'}); r.end(html);
 });
 await new Promise(r => srv.listen(8916, r));
 
-const br = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
+const br = await chromium.launch({ executablePath: CHROME_WS });
 let falhas = 0;
 const ok = (n, c, extra) => { console.log((c ? '  ok   ' : '  FALHA') + '  ' + n + (extra ? '  → ' + extra : '')); if (!c) falhas++; };
 
@@ -100,7 +101,7 @@ console.log('\n[4] o tamanho da lente');
 {
   await pg.locator('#allOn').click();
   await pg.waitForTimeout(200);
-  await pg.locator('#thumbs figure').first().locator('.lupa').click();
+  await pg.locator('#thumbs figure').first().locator('.editar').click();
   await pg.waitForSelector('#lente:not(.hide)');
   const larg = async () => (await pg.locator('.lenteCx').boundingBox()).width;
   const m = await larg();

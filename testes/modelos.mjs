@@ -1,14 +1,15 @@
 /* Modelo de saída: uma escolha só que acerta layout, prompt, nome do arquivo e
    os dados da evidência. Mais o botão que transforma a fala em anotação. */
-import { chromium } from 'playwright';
+import { chromium } from './_navegador.mjs';
 import http from 'http'; import fs from 'fs'; import zlib from 'zlib';
 
-const ROOT='/root/walkstamp/public';
+import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+const ROOT=`${RAIZ_WS}/public`;
 const html=fs.readFileSync(ROOT+'/app.html','utf8');
-const jspdf=fs.readFileSync('/root/walkstamp/vendor/jspdf.umd.min.js','utf8');
+const jspdf=fs.readFileSync(`${RAIZ_WS}/vendor/jspdf.umd.min.js`,'utf8');
 const srv=http.createServer((q,r)=>{if(q.url.startsWith('/_vercel/')){r.writeHead(200,{'Content-Type':'text/javascript'});return r.end('')}r.writeHead(200,{'Content-Type':'text/html'});r.end(html)});
 await new Promise(r=>srv.listen(8896,r));
-const br=await chromium.launch({executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome'});
+const br=await chromium.launch({executablePath:CHROME_WS});
 let falhas=0;
 const ok=(n,c,extra)=>{console.log((c?'  ok   ':'  FALHA')+'  '+n+(extra?'  → '+extra:''));if(!c)falhas++;};
 
@@ -88,7 +89,19 @@ console.log('\n[2] a fala vira o rascunho da anotação');
   const n1=await pg.locator('#thumbs input.nota').nth(1).inputValue();
   ok('a anotação vazia foi preenchida com a fala', /ME21N|transacao/.test(n0), n0.slice(0,40));
   ok('o que a pessoa escreveu não foi sobrescrito', n1==='escrito à mão, não pode ser sobrescrito');
-  ok('a mensagem diz quantas foram', /anotaç/.test(await pg.locator('#pdfStatus').textContent()));
+  /* ESPERAR A MENSAGEM, e não fotografá-la.
+     `#pdfStatus` é uma linha só, com vários donos: o fim da varredura escreve
+     "3 quadros prontos" ali, e numa máquina ocupada essa escrita chega DEPOIS
+     do clique — apagando a mensagem que este teste veio conferir. Medido: com a
+     esteira carregando a máquina, a leitura única reprovava; sozinho, passava.
+     Isso é defeito da régua, e não do produto: quem lê um campo de último
+     escritor tem que esperar o texto aparecer, e não amostrá-lo uma vez. */
+  let notaTxt = '';
+  const viuNota = await pg.waitForFunction(
+    () => /anotaç/.test(document.getElementById('pdfStatus').textContent || ''),
+    null, { timeout: 8000 }).then(() => true).catch(() => false);
+  notaTxt = await pg.locator('#pdfStatus').textContent();
+  ok('a mensagem diz quantas foram', viuNota, 'pdfStatus=' + JSON.stringify(notaTxt));
 }
 
 console.log('\n[3] trocar o modelo reconfigura os quatro controles');

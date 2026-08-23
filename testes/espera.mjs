@@ -23,12 +23,24 @@
  * A biblioteca do modelo é falsificada — o Whisper não sobe nesta máquina, e o
  * que está sendo medido aqui é a tela, não a inferência.
  */
-import { chromium } from 'playwright';
+import { chromium } from './_navegador.mjs';
 import http from 'http';
 import fs from 'fs';
 
-const RAIZ = '/root/walkstamp';
-const VIDEO = fs.existsSync('/tmp/longo.webm') ? '/tmp/longo.webm' : '/tmp/amostra.webm';
+import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+const RAIZ = `${RAIZ_WS}`;
+/* A AMOSTRA LONGA NÃO É UM DETALHE AQUI. Este arquivo mede o que acontece
+   DURANTE a espera, e a amostra curta não tem durante: a transcrição inteira
+   cabe entre duas leituras do vigia, e as afirmações caem por falta de amostra.
+   Ele caía como "o campo nunca esteve à vista" — que se lê como defeito do
+   produto, e não como instrumento sem material. Cair assim é pior do que não
+   rodar: manda procurar o defeito no lugar errado. */
+const VIDEO = '/tmp/longo.webm';
+if (!fs.existsSync(VIDEO)) {
+  console.log('  pulado  ' + VIDEO + ' não existe — e a amostra curta não serve para medir espera.');
+  console.log('          Gere com:  python3 testes/amostras.py --longo   (~1 min, 41 MB)');
+  process.exit(0);
+}
 const html = fs.readFileSync(RAIZ + '/public/app.html', 'utf8');
 const srv = http.createServer((q, r) => {
   if (q.url.startsWith('/_vercel/')) {
@@ -62,7 +74,7 @@ export async function pipeline(t, m, o){
 }`;
 
 const br = await chromium.launch({
-  executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome',
+  executablePath: CHROME_WS,
 });
 const ctx = await br.newContext({ viewport: { width: 1250, height: 900 } });
 const pg = await ctx.newPage();

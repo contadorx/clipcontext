@@ -1,19 +1,20 @@
 /* O cenário no passo 1, o quinto cenário, e as cinco páginas de caso de uso. */
-import { chromium } from 'playwright';
+import { chromium } from './_navegador.mjs';
 import http from 'http'; import fs from 'fs';
 import { criarProxy, exigirNext } from './proxy.mjs';
+import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
 await exigirNext();
 
-const ROOT = '/root/walkstamp/public';
+const ROOT = `${RAIZ_WS}/public`;
 const tipos = { '.css':'text/css', '.svg':'image/svg+xml', '.js':'text/javascript', '.ico':'image/x-icon' };
-const jspdf = fs.readFileSync('/root/walkstamp/vendor/jspdf.umd.min.js', 'utf8');
+const jspdf = fs.readFileSync(`${RAIZ_WS}/vendor/jspdf.umd.min.js`, 'utf8');
 /* O site virou Next.js: as páginas não existem mais como arquivo em public/.
    O servidorzinho estático daqui virou um encaminhador para o Next — mesma
    porta, mesmas URLs no teste, e quem responde é o produto de verdade. */
 const srv = criarProxy();
 await new Promise(r => srv.listen(8921, r));
 
-const br = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
+const br = await chromium.launch({ executablePath: CHROME_WS });
 let falhas = 0;
 const ok = (n, c, extra) => { console.log((c ? '  ok   ' : '  FALHA') + '  ' + n + (extra ? '  → ' + extra : '')); if (!c) falhas++; };
 const ctx = await br.newContext({ acceptDownloads: true, locale: 'pt-BR', viewport: { width: 1250, height: 950 } });
@@ -122,7 +123,7 @@ console.log('\n[4] as cinco páginas existem nos três idiomas');
     const h1 = await pg.locator('h1').textContent();
     ok(u, r.status() === 200 && h1.includes(marca), h1.slice(0, 40));
   }
-  const sm = fs.readFileSync(ROOT + '/sitemap.xml', 'utf8');
+  const sm = fs.readFileSync(ROOT + '/sitemap-paginas.xml', 'utf8');
   ok('as quinze estão no sitemap',
      paginas.every(([u]) => sm.includes(u + '<')));
   await pg.close();
@@ -171,7 +172,16 @@ console.log('\n[7] preços: três planos, três moedas, mesma altura');
   ok('e a lista de cada um é curta', itens.every(n => n <= 6), itens.join('/'));
   ok('nenhum cartão é muito mais longo que o outro',
      Math.max(...itens) - Math.min(...itens) <= 1, itens.join('/'));
-  ok('o que não existe está marcado', (await pg.locator('.plan .soon').count()) > 0);
+  /* INVERTIDO, E DE PROPOSITO. Esta linha cobrava que o futuro estivesse
+     marcado DENTRO do cartao — e marcar era, na epoca, a coisa honesta a fazer.
+     Continua sendo honesto dizer; mudou o lugar. Um "em breve" no meio das
+     balas do plano obriga quem decide a separar, linha a linha, o que ja se
+     compra do que foi prometido, na hora em que ele esta com o cartao na mao.
+     Agora o cartao so promete o que existe, e o resto mora na caixa do roteiro
+     logo abaixo — dito com todas as letras, e fora da conta. */
+  ok('nenhum cartão promete futuro', (await pg.locator('.plan .soon').count()) === 0);
+  ok('e o que não existe está dito na caixa do roteiro',
+     (await pg.locator('.roteiroFuturo .soon').count()) > 0);
   await pg.close();
 }
 

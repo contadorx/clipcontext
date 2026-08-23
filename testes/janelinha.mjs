@@ -12,14 +12,19 @@
 import { chromium } from 'playwright';
 import fs from 'fs';
 
-const app = fs.readFileSync('/root/walkstamp/public/app.html', 'utf8');
+import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+const app = fs.readFileSync(`${RAIZ_WS}/public/app.html`, 'utf8');
 let falhas = 0;
 const ok = (n, c, e) => { console.log((c ? '  ok   ' : '  FALHA') + '  ' + n + (e ? '  → ' + e : '')); if (!c) falhas++; };
 
 /* O tamanho pedido, o CSS e o corpo, tirados do próprio arquivo. */
-const med = app.match(/requestWindow\(\{ width: (\d+), height: (\d+) \}\)/);
+/* A altura passou a depender do roteiro: com lista de passos colada, a
+   janelinha ganha a linha do passo atual e a do seguinte. Então o arquivo
+   declara as DUAS, e a régua mede a menor — a que vale para quem não colou
+   roteiro nenhum, que é o caso comum e o mais apertado por quadro de tela. */
+const med = app.match(/width: (\d+), height: roteiro\.length \? (\d+) : (\d+)/);
 ok('a janelinha declara um tamanho', !!med, med ? med[0] : '(não achei)');
-const [LARG, ALT] = med ? [ +med[1], +med[2] ] : [258, 282];
+const [LARG, ALT, ALT_ROT] = med ? [ +med[1], +med[3], +med[2] ] : [250, 392, 486];
 
 const css = app.slice(app.indexOf('const PIP_CSS = `') + 17).split('`;')[0];
 ok('o CSS dela foi encontrado', css.length > 400, String(css.length));
@@ -30,7 +35,7 @@ const corpo = (corpoSrc.slice(0, corpoSrc.indexOf(';\n')).match(/'([^']*)'/g) ||
   .map((x) => x.slice(1, -1)).join('');
 ok('e o corpo também', /class="top"/.test(corpo) && /id="stop"/.test(corpo), corpo.slice(0, 60));
 
-const br = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
+const br = await chromium.launch({ executablePath: CHROME_WS });
 const pg = await (await br.newContext({ viewport: { width: LARG, height: ALT } })).newPage();
 await pg.setContent(`<!doctype html><html><head><meta charset="utf-8"><style>${css}</style></head>` +
                     `<body>${corpo}</body></html>`);
@@ -53,14 +58,41 @@ console.log(`\n[1] gravando: cabe em ${LARG}×${ALT}`);
     for (const [id, txt] of [['marcar','Marcar este passo'],['pausa','Pausar'],['stop','Parar']]) {
       const b = document.getElementById(id); if (b) { b.textContent = txt; b.disabled = false; }
     }
-    const n = document.getElementById('pipNota');
-    if (n) { n.disabled = false; n.placeholder = 'o que aconteceu aqui'; }
+    /* O bloco da anotação com o texto que ele REALMENTE tem: rótulo cheio,
+       campo com duas linhas escritas, botão rotulado e a confirmação de que
+       salvou. Medi-lo vazio media outra janela — e a janela que transborda é
+       sempre a de quem está usando. */
+    const n = document.getElementById('nota');
+    if (n) { n.disabled = false; n.value = 'Cliquei em Salvar e o sistema devolveu a mensagem 4711.'; }
+    const nl = document.getElementById('notaLbl');
+    if (nl) nl.textContent = 'Tela 2 do Passo 3';
+    const nk = document.getElementById('notaOk');
+    if (nk) { nk.disabled = false; nk.textContent = 'Salvar anotação'; }
+    const nm = document.getElementById('notaMsg');
+    if (nm) nm.textContent = '✓ salvo neste quadro';
   });
   await pg.waitForTimeout(150);
   const m = await medir();
   ok('o conteúdo cabe na altura pedida', m.precisa <= m.cabe + 1, `${m.precisa} de ${m.cabe}`);
   ok('e nada fica para fora', m.vaza.length === 0, m.vaza.join(' '));
-  ok('a janela não é maior que a de antes (258×282)', LARG <= 258 && ALT <= 282, `${LARG}×${ALT}`);
+  /* O TETO, e o histórico dele — porque a próxima subida precisa de um motivo
+     tão bom quanto os anteriores:
+
+       282 → 300  o segundo botão de marcação;
+       300 → 392  a caixa de anotação ganhou rótulo, campo de duas linhas,
+                  botão e confirmação. Com 300 o corpo tinha `height:100vh` e
+                  `justify-content:center`: o conteúdo maior era cortado nas
+                  DUAS pontas, e a de baixo é onde ficam PAUSAR e PARAR. Não
+                  era estética — era o botão irreversível fora da janela;
+       392 → 486  só quando há roteiro, para a linha do passo atual e a do
+                  seguinte. Sem roteiro a janelinha continua nos 392.
+
+     Cada pixel daqui é um pixel a menos do trabalho que a pessoa está
+     documentando, e ainda aparece nos quadros. A largura nunca subiu. */
+  ok('a largura não passa de 250', LARG <= 250, String(LARG));
+  ok('sem roteiro, a altura fica em 392', ALT <= 392, String(ALT));
+  ok('com roteiro ela sobe, e só até 486', ALT_ROT > ALT && ALT_ROT <= 486,
+     `${ALT} → ${ALT_ROT}`);
 
   /* O botão de calar nasce escondido, e `.hide` mora no CSS da ABA — a
      janelinha é outro documento. Sem a regra lá dentro ele aparecia como uma
@@ -86,7 +118,7 @@ console.log('\n[2] contando: só o número, e ele é grande');
   });
   ok('o número é enorme', n.fs >= 56, String(n.fs));
   ok('e mesmo assim cabe', m.precisa <= m.cabe + 1, `${m.precisa} de ${m.cabe}`);
-  const escondidos = await pg.evaluate(() => ['.top', '.vus', '.pe', '#pipNota', '#marcar', '#pausa']
+  const escondidos = await pg.evaluate(() => ['.top', '.vus', '.pe', '.notaCx', '#marcar', '#pausa']
     .filter((s) => { const e = document.querySelector(s); return e && e.offsetParent !== null; }));
   ok('e o resto some — é o que deixa o número ser enorme sem a janela crescer',
      escondidos.length === 0, escondidos.join(' '));

@@ -1569,3 +1569,511 @@ remendava `jsPDF.prototype.addImage` e passava com a lista vazia — o jsPDF
 instala os métodos de desenho na INSTÂNCIA, e o remendo ficava num protótipo que
 ninguém consulta. Um teste que mede nada é pior do que teste nenhum: ele diz que
 está tudo bem.
+
+---
+
+## 19/08/2026, décima sétima rodada — a velocidade do áudio, e onde ela estava mesmo
+
+A queixa voltou: *"ainda estou com muitos problemas na velocidade do áudio"*. A
+décima primeira rodada tinha respondido que o dominante é o modelo e que as
+quatro otimizações propostas já estavam feitas — o que era verdade e não
+resolveu nada para quem espera. Então esta rodada não avaliou propostas: mediu o
+caminho, e o que apareceu foram três coisas, nenhuma delas o modelo.
+
+A régua é nova e entra na regressão: **`testes/plano.mjs`**. Ela grava a própria
+amostra — uma reunião de 150 s em `.webm`/Opus a 48 kHz estéreo, com fala e
+pausa, porque o que precisa estar lá é justamente o que um `sine` do ffmpeg não
+tem — e roda o passo 2 inteiro contra um modelo falsificado que cobra um preço
+fixo por janela. O que ela mede é o **nosso** caminho.
+
+### 1. A peneira de silêncio não pula nada numa reunião
+
+Ela existe desde a terceira proposta da décima primeira rodada e o raciocínio
+está certo: o Whisper processa sempre trinta segundos, com ou sem fala dentro,
+então uma janela muda custa o mesmo que uma cheia e não deve ser mandada.
+
+O que ninguém tinha medido é **quantas vezes ela dispara**. Com uma reunião
+sintética no formato de uma de verdade — frases de 3 a 8 s, pausas de 0,3 a 2 s
+entre elas, uma pausa longa de vez em quando:
+
+| gravação | janelas de 30 s | puladas pela peneira | ao modelo |
+|---|---|---|---|
+| 10 min, 29% parada | 20 | **0** | 20 |
+| 40 min, 28% parada | 80 | **0** | 80 |
+
+Zero. E não é defeito da regra, é do **tamanho do que ela mede**: a peneira
+exige trinta segundos seguidos com menos de 200 ms de voz, e o silêncio de uma
+reunião não vem assim. Ele vem em pedaços de um ou dois segundos, espalhados
+entre as frases. A peneira acerta o caso raro — a gravação esquecida ligada — e
+não toca no caso comum, que é o de todo mundo.
+
+### 2. O que economiza é não mandar o silêncio, e não pular a janela muda
+
+`planoDeJanelas()` junta os trechos com fala e os empacota em janelas cheias. A
+mesma fala, menos janelas. Medido sobre áudio com a fala em posições conhecidas
+(8 min, 54 frases):
+
+| | valor |
+|---|---|
+| janelas retas | 16 |
+| janelas compactadas | **12** — 25% menos inferência |
+| silêncio deixado de fora | 2,3 min |
+| frases perdidas | **0** |
+| erro do mapa de volta | **0,000 ms** |
+
+E no caminho de verdade, com a gravação de 150 s decodificada pelo
+`decodeTo16k`: 5 janelas retas → **4**, com 55,8 s de silêncio fora.
+
+**As duas coisas que a tornam segura**, e que estão no código como estão aqui:
+
+- **nenhuma fala se perde.** Cada trecho leva 0,30 s de margem antes e 0,40 s
+  depois, e dois trechos a menos de 0,60 s de distância continuam juntos — uma
+  pausa curta é parte da frase, e cortar nela entrega ao modelo pedaços sem
+  contexto, que é como nascem as invenções que a `semGagueira` limpa depois. A
+  régua confere frase por frase que o meio de cada uma está dentro de alguma
+  janela;
+- **a minutagem continua sendo a da gravação.** Sem o mapa de volta, os tempos
+  da legenda seriam os do áudio encolhido e a evidência apontaria para o minuto
+  errado — que é um estrago maior do que ser lenta. Na gravação de 150 s o
+  último tempo da legenda sai em **145,8 s**, sobre 94,2 s de áudio compactado.
+
+E ela só entra **quando ganha**: menos de 10% de economia não paga o risco de
+emendar trechos, e aí as janelas seguem inteiras, como sempre foram. Numa
+gravação de fala contínua a compactação simplesmente não acontece.
+
+### 3. O modelo era montado DUAS VEZES
+
+Este é o que mais custava, e não estava na lista de ninguém.
+
+`adiantarModelo()` começa a baixar o modelo no instante em que a caixa
+"transcrever ao vivo" é marcada — o conserto da décima segunda rodada, e ele é
+bom. O clique em Gravar espera essa promessa. **O passo 2 não esperava.** Ele
+perguntava `pipeServe()`, ouvia "não" — porque `pipe` só é atribuído no FIM da
+montagem — e começava uma segunda, do zero, com a primeira ainda correndo.
+
+Medido, com o conserto desligado: **duas montagens vivas ao mesmo tempo**,
+começando com 1,5 s de diferença. Numa máquina de verdade isso é o download
+inteiro duas vezes e dois modelos residentes.
+
+E havia um segundo caminho para o mesmo estrago, mais velho e mais grave, que a
+`testes/modelo.mjs` já pegava **antes desta rodada**: `trocarPipe` era chamado
+de quatro lugares e nada impedia dois deles de correrem juntos. Quando isso
+acontece, cada um chama `soltarPipe()` enquanto `pipe` ainda é nulo, não solta
+nada, monta o seu, e o último a terminar escreve por cima do outro — deixando um
+modelo residente que ninguém mais sabe soltar. O mesmo vazamento que a décima
+primeira rodada fechou, por outra porta.
+
+| `testes/modelo.mjs` | corridas com dois modelos vivos |
+|---|---|
+| antes (na versão publicada) | **1 em 3** |
+| agora | 0 em 7 |
+
+Um defeito de corrida que aparece em parte das vezes e some nas outras é o que
+não se conserta olhando: conserta-se **tirando a corrida do desenho**. Agora a
+montagem em curso é esperada, e não duplicada; um alvo diferente entra na fila
+atrás dela e pergunta de novo, ao chegar a sua vez, se ainda precisa montar.
+
+### 4. A extração do áudio e a montagem do modelo correm juntas
+
+Elas estavam em série: extrair o áudio, e **só então** montar o modelo. Os dois
+são longos — a extração de uma hora de vídeo levou 20,8 s na medição da décima
+primeira rodada, e a montagem vai de segundos (em cache) a um minuto (baixando)
+— e nenhum precisa do outro. Um é o decodificador de áudio do navegador; o outro
+é rede e compilação de WebAssembly. Somá-los era cobrar duas esperas por uma.
+
+É a mesma conta que já valia para a varredura de quadros, que roda junto com a
+transcrição desde a décima segunda rodada: trabalhos que não disputam nada
+correm juntos, e o custo é o maior dos dois, não a soma.
+
+Medido (ms desde o clique em "transcrever a fala"):
+
+| | montagem começa | áudio termina |
+|---|---|---|
+| antes | depois do áudio | — |
+| agora | **565 ms** | 1.889 ms |
+
+O aviso na tela passou a ser o da **montagem** quando ela existe, e não o da
+extração: entre "extraindo o áudio" e "baixando 77 MB", quem espera precisa ver
+o que explica a espera.
+
+### O que NÃO foi feito, e por quê
+
+**Mandar várias janelas ao modelo de uma vez (`batch`).** É a otimização
+seguinte da lista e pode valer bastante no caminho da placa. Não entrou porque
+o ganho depende de uma medição que esta máquina não pode fazer — o modelo não
+sobe aqui — e porque ela custa o que esta rodada mais protegeu: o texto que
+aparece enquanto sai, a troca de modo entre uma janela e outra, e a previsão
+que se corrige a cada janela. Trocar isso por um número que ninguém mediu seria
+a mesma inversão de ordem da décima primeira rodada.
+
+**Desligar `return_timestamps`.** Ele custa tokens de decodificação, e é o que
+faz a legenda ter minutagem por frase em vez de por janela de trinta segundos.
+Numa ferramenta de evidência, essa é a coisa errada de trocar por velocidade.
+
+### O que continua sendo o dominante
+
+O modelo, como na décima primeira rodada. O que mudou é que agora ele é montado
+uma vez em vez de duas, começa a montar enquanto o áudio é extraído, e recebe um
+quarto a menos de janelas numa reunião com pausas. Nada disso o acelera — apenas
+para de pagá-lo mais vezes do que o necessário.
+
+---
+
+## 20/08/2026, décima sétima rodada — o diagnóstico que não chegava
+
+O relato: *"o botão de diagnóstico, ou ele na abertura de um problema, não está
+ativo"*. Ele estava — tinha deixado de ser botão e virado o anexo do recado, o
+que foi uma boa decisão e continua sendo. O que **não** estava ativo era o
+anexo, e isso não se via na tela: via-se no banco.
+
+### O defeito, medido em produção
+
+A coleta é assíncrona. Com a rede boa ela leva **1 s**; com a rede ruim — que é
+a máquina de quem está reclamando — passou de **10 s** na medição. Durante essa
+janela, o campo do relatório mostra a mensagem de espera, dentro de um
+`<details>` fechado, com a caixa "mandar o relatório técnico" já marcada.
+
+E o botão Enviar **não esperava a coleta**: ele lia o elemento da tela e
+mandava o que estivesse lá. Quem descrevia o problema depressa e apertava
+enviar mandava o texto de espera no lugar do relatório.
+
+No banco de produção, `walkstamp.recado`:
+
+| origem | recados | com relatório de verdade | menor relatório |
+|---|---|---|---|
+| app | 2 | **0** | 1 caractere |
+| site | 3 | 2 | 0 |
+
+O chamado **WS-0005** chegou com `diagnostico = "…"`. Um caractere — a
+reticência da mensagem "montando o relatório…". Dos dois chamados abertos pela
+ferramenta, nenhum trouxe a única parte que quem abre o chamado não sabe
+escrever.
+
+Medido com o conserto desligado, na régua `testes/diagchamado.mjs`: o recado
+partia em **59 ms** levando 21 caracteres — `Montando o relatório…`. Com o
+conserto: espera **10,3 s** e leva **1.969 caracteres**, o relatório inteiro.
+
+**A espera é o preço de uma promessa, e não uma trava.** Com a caixa
+desmarcada, o recado sai em 53 ms e sem relatório nenhum — medido na mesma
+régua, porque um conserto que faz todo mundo esperar por causa de uma caixa que
+alguns desmarcam seria trocar um defeito por outro.
+
+### O botão, de volta — e onde ele foi procurado
+
+Ele voltou a existir em dois lugares, e nos dois pelo mesmo motivo: **é onde os
+chamados moram** que se procura o diagnóstico.
+
+**Na ferramenta**, no painel "meus chamados": coleta, mostra o relatório ali
+para ler e copiar, e só então oferece *abrir chamado com este relatório* — que
+reaproveita o que acabou de ser coletado em vez de refazer a espera na frente
+de quem já esperou uma vez.
+
+**No painel da conta** (`/conta/chamados`), que até aqui só LISTAVA e mandava a
+pessoa "abrir um no rodapé da ferramenta". Agora abre. O formulário vem antes
+da lista — quem chega ali com um problema quer contar o problema, e a lista
+nasce vazia justamente para quem mais precisa do formulário.
+
+Uma diferença que está escrita na tela, e não escondida: o relatório do painel
+descreve **o navegador daquela página** — versão, placa de vídeo, espaço em
+disco e se o modelo de voz é alcançável dali. Quadros na memória, degraus do
+modelo e ritmo da transcrição vivem dentro da ferramenta e não existem ali. É
+por isso que o botão está nos dois lugares, e não só no mais novo.
+
+E o e-mail do chamado aberto pelo painel vem **da sessão**, nunca do
+formulário. Na ferramenta ele é digitado, e um chamado com o e-mail errado é um
+chamado que nunca volta para quem o abriu.
+
+### Um relatório guardado, com idade
+
+O coletor é chamado de três lugares e produz o mesmo relatório. Ele agora fica
+guardado por **90 segundos** — curto de propósito: um relatório de dois minutos
+atrás descreve outra máquina se uma gravação aconteceu no meio, e um relatório
+velho é pior que nenhum, porque parece atual.
+
+---
+
+## 20/08/2026, décima oitava rodada — a transcrição que já existe, e a faixa que piscava
+
+Quatro pedidos vindos do uso, e um deles muda o custo do produto inteiro.
+
+### 1. A transcrição do Meet não entrava — e o defeito era o parser, não a falta de botão
+
+Quem sai de uma reunião do Google Meet, do Teams ou do Zoom **já tem a
+transcrição pronta**, feita no servidor deles, sem custo nenhum aqui.
+Transcrever de novo custa 206 MB de download e minutos de máquina para produzir
+um texto **pior** — o modelo daqui é o `base` e não sabe quem falou.
+
+O caminho existia: havia um botão "abrir legenda pronta". Ele não funcionava
+para reunião, e não por causa do botão. O Meet — e as "Anotações do Gemini" que
+saem dele — escreve **um tempo por BLOCO**, sozinho na linha, com as falas
+embaixo:
+
+```
+00:02:04
+
+LUCINELIA GONCALVES DA SILVA: na nas reuniões…
+LEANDRO OLIVEIRA: Tá bom. Tira aí do
+```
+
+O `parseTranscript` pedia tempo e texto **na mesma linha**. Diante deste arquivo
+ele achava zero marcações e caía no caminho "texto solto". O sintoma não é um
+erro na tela: é um documento em que **a fala não acompanha as telas** — que é
+exatamente o que esta ferramenta existe para fazer.
+
+Medido contra os dois arquivos reais de uma reunião de quarenta minutos:
+
+| | antes | agora |
+|---|---|---|
+| trechos com minutagem | **0** | **521** |
+| primeiro / último | — | 00:02:04 → 00:40:52 |
+| fora de ordem | — | 0 |
+
+E os dois arquivos dão o mesmo resultado — a aba de transcrição sozinha e o
+arquivo inteiro com Resumo, Decisões e Próximas etapas. O cabeçalho e as
+seções de notas ficam de fora sozinhos, porque vêm **antes do primeiro tempo** e
+não há onde pendurá-los.
+
+**O `.docx` é lido no navegador, sem biblioteca.** Um `.docx` é um `.zip` com um
+XML dentro, e o navegador já sabe as duas partes: `DecompressionStream
+('deflate-raw')` é o mesmo algoritmo do zip, e o índice são vinte linhas de
+leitura. Uma biblioteca aqui seria mais um endereço de CDN para cair — e este
+arquivo funciona de `file://`, onde CDN nenhum existe.
+
+**A minutagem por bloco é ESTIMADA, e a tela diz isso.** Um bloco carrega um
+instante e várias falas; elas são distribuídas pelo tamanho do texto — quem
+fala mais ocupa mais tempo. É melhor que empilhar seis falas no mesmo segundo,
+que teria cara de precisão. Uma estimativa que se apresenta como medida é a
+única coisa aqui pior do que não ter minutagem.
+
+O botão subiu para **antes do quadro de texto**, com nome próprio: quem chega
+com a reunião já transcrita lia o quadro vazio, concluía que precisava
+transcrever aqui, e pagava os 206 MB por um texto que já estava pronto.
+
+### 2. A faixa aparecia e sumia sozinha
+
+O relato: *"a faixa avisando que a transcrição está sendo realizada some,
+aparece e some"*.
+
+A causa não estava na faixa. `ocupado` era um **booleano**, e isso bastava
+enquanto houvesse um trabalho por vez. Não há mais: a varredura dos quadros
+corre junto da transcrição de propósito, e a montagem do modelo começa junto da
+extração do áudio. **O primeiro a terminar apagava o estado do outro.** Numa
+varredura de dez segundos ao lado de uma transcrição de quarenta minutos, a
+faixa vivia dez segundos.
+
+O estrago maior não é a faixa: é o `beforeunload`. Com `ocupado` falso, **a aba
+fecha sem avisar** no meio da transcrição — a única coisa nesta ferramenta que
+não dá para refazer sem pagar o tempo de novo.
+
+Medido em `testes/faixa.mjs`, com o booleano de antes:
+
+| | amostras com a transcrição correndo | e a faixa fora da tela |
+|---|---|---|
+| antes | 33 | **8** |
+| agora | 33 | 0 |
+
+Um **conjunto de nomes** no lugar do booleano. É idempotente — ligar duas vezes
+é ligar uma, desligar quem não estava ligado não faz nada — e por isso é mais
+seguro que um contador, onde um `false` sem par derruba o trabalho alheio.
+
+### 3. "Começar outro documento" morava depois do rodapé
+
+Abaixo dos links de preços, termos e privacidade, fora da coluna de trabalho.
+Quem termina o documento para de ler no fim do passo 4; o que vem depois do
+rodapé é o fim da **página**, não o fim da tarefa, e ninguém rola por cima de
+dezesseis links institucionais procurando o botão de recomeçar. Agora ele fica
+logo depois do passo 4.
+
+### 4. A opção que conta o caminho curto antes da espera
+
+No passo 1, ao lado de "transcrever enquanto gravo", entrou **"usar transcrição
+do Google Meet, Zoom ou Teams"** — recomendada e **desmarcada**.
+
+Não é contradição: a recomendação é para quem tem o arquivo, e quem não tem não
+pode ser levado a desmarcar a transcrição automática por engano. Marcar não faz
+nada sozinho — leva ao passo 3, onde o arquivo entra — e **desliga a outra
+caixa**, porque baixar 206 MB para não usar é o desperdício que esta opção
+existe para evitar.
+
+---
+
+## 20/08/2026, décima nona rodada — uma moldura só, e a regra que a quebrava
+
+O relato: *"o menu da ferramenta fica deslocado dos demais, ele aloca o logo um
+pouco mais para a direita… a ideia é que o cabeçalho e o rodapé não tenham
+alteração independente da página"*.
+
+### O número, antes
+
+Medido a 1440 de largura, nas três telas:
+
+| | logo em x | cabeçalho | rodapé | menu |
+|---|---|---|---|---|
+| página principal | 272 | 940 | 940 | Como funciona · Comparativo · Preços · **[Ferramenta]** |
+| painel da conta | 272 | 940 | 940 | **[Abrir a ferramenta]** |
+| **ferramenta** | **356** | **1240** | **1240** | **[Minha conta]** |
+
+84 pixels de diferença, e três menus diferentes na mesma marca.
+
+### A causa não estava no cabeçalho da ferramenta
+
+Estava numa regra escrita para outra coisa:
+
+```css
+body.comBarra .wrap{display:grid;grid-template-columns:206px minmax(0,1fr);…;max-width:1240px}
+```
+
+Ela monta a grade de duas colunas da barra da conta, e foi escrita pensando na
+`.wrap` do trabalho. Mas `.wrap` é também a do cabeçalho **e** a do rodapé. Um
+seletor de classe nua alcança tudo o que ainda não foi escrito — e o efeito era
+mais fundo do que uma largura: o cabeçalho virava GRADE, o `.topbar` caía na
+segunda coluna, e a marca começava em x=508 depois que a largura foi corrigida.
+
+É a mesma lição que o `.painelMenu` do site já tinha aprendido com o `nav` nu, e
+a terceira vez que este projeto a paga. A `.wrap` do corpo ganhou nome — `.wrap
+.corpo` — e a grade passou a falar só com ela.
+
+### O que passou a valer
+
+`--maxTopo` é UM número, e ele vale para o cabeçalho e para o rodapé das três
+telas. O corpo continua com a medida de cada uma — 940 no site, que tem texto
+corrido; 1240 na ferramenta, que tem grade de miniaturas; 1220 na conta, que tem
+tabela. Isso é legítimo: **é a moldura que não pode mudar, não o quadro.** A
+conta já resolvia assim, com cabeçalho de 940 sobre corpo de 1220.
+
+Medido depois, pela régua nova `testes/cabecalho.mjs`:
+
+| | logo em x | nav termina em | cabeçalho | rodapé |
+|---|---|---|---|---|
+| página principal | 272 | 1168 | 940 | 940 |
+| ferramenta | 272 | 1168 | 940 | 940 |
+| painel da conta | 272 | 1168 | 940 | 940 |
+
+### O menu, um só — e o Blog nele
+
+As três telas passaram a ter os mesmos quatro itens, na mesma ordem e com as
+mesmas quebras (`hide-sm`, `hide-xs`): **Como funciona · Comparativo · Preços ·
+Blog**, e então o botão de ação — o único item cujo destino depende de onde a
+pessoa está (no site e na conta ele leva à ferramenta; na ferramenta, à conta).
+
+O **Blog** entrou, e antes do botão: ele existia só no rodapé, que é onde se
+procura o que já se sabe que existe. Um blog no rodapé não é lido por quem ainda
+não sabe que há o que ler. E vem antes da ação porque o botão é o fim do
+caminho — o que vem depois dele não é lido.
+
+Na ferramenta, os rótulos vêm do dicionário do **site** e os endereços do
+`ROTAS_SITE`, pelo mesmo caminho que o rodapé já usava. Conferido em alemão, que
+é o caso que pega o defeito: `Preise → /de/preise`, `Vergleich → /de/vergleich`.
+Escritos à mão lá dentro, seriam a enésima cópia — e a cópia que existia tinha
+quatro das dezesseis páginas, todas apontando para o português.
+
+### Por que uma régua nova
+
+Nenhum teste de conteúdo pega isto: cada página, sozinha, estava perfeita. O
+defeito só existe na COMPARAÇÃO entre elas, e por isso a régua abre as três na
+mesma janela e mede a mesma coisa nas três.
+
+---
+
+## 20/08/2026, vigésima rodada — os nove itens de ranqueamento
+
+Uma lista pronta, por retorno sobre esforço. O que segue é o que cada um era
+antes, o que virou, e o que foi medido — porque **nada disto aparece na tela**,
+e é por isso que tudo aqui ganhou régua: quando quebra, ninguém vê. O sintoma
+chega meses depois como "o post não indexou", sem nada na página que indique o
+quê.
+
+### 1 e 3. O sitemap: os posts não estavam lá, e nada tinha `lastmod`
+
+`/sitemap.xml` era um arquivo escrito pelo `build.py`. Isso bastava enquanto o
+site fosse só páginas fixas — elas mudam no deploy, e o arquivo nasce no deploy.
+O blog quebrou a conta: **um post publicado pelo painel ficava fora do mapa até
+a próxima subida de código**, que pode ser semanas.
+
+Agora `/sitemap.xml` é um **índice** e aponta para dois mapas com cadências
+diferentes: `sitemap-paginas.xml`, que continua nascendo no build e sendo lido
+do disco por quatro testes; e `sitemap-blog.xml`, lido do banco a cada rastreio.
+
+O `lastmod` do post é o **`atualizado_em`**, e não o `publicado_em`: a pergunta
+que ele responde é "mudou?", não "nasceu quando?". As páginas fixas levam a data
+do build, que é literalmente quando elas mudaram.
+
+Um detalhe que não dá erro e estraga tudo: um arquivo `public/sitemap.xml`
+**sombreia** a rota — no Next o estático ganha. Por isso o nome mudou em vez de
+o índice ter outro, e o `build.py` apaga o antigo se ele existir.
+
+### 2. Dados estruturados — o único item que muda COMO o resultado aparece
+
+| onde | o quê |
+|---|---|
+| home | `SoftwareApplication` + `Organization` |
+| base de conhecimento | `FAQPage` com **45 perguntas** + trilha |
+| post | `Article` + `Organization` (publicador) + `BreadcrumbList` |
+| autor | `ProfilePage` |
+| demais páginas | `BreadcrumbList` + `Organization` |
+
+O FAQ é **lido do corpo da página**, pergunta por pergunta, dos `<details>` que
+já estavam lá. Escrevê-lo de novo seria a segunda lista ao lado da lista de
+verdade — e aqui a divergência seria pior que invisível: marcação de FAQ que não
+corresponde ao texto visível é motivo de punição, e com razão. A régua confere
+que a primeira pergunta do JSON-LD está mesmo escrita na página.
+
+### 4. Todo rastreio batia no Supabase — e a primeira correção trouxe outro defeito
+
+O item pedia trocar `force-dynamic` por `revalidate`. A primeira versão fez
+exatamente isso, e o `testes/blog.mjs` caiu: com `revalidate`, o Next monta a
+página **no build**, e num build sem banco — uma prévia, um deploy com o
+Supabase fora do ar — o blog nasce **vazio** e serve 200 com uma lista que não
+existe por cinco minutos. Um índice vazio servido a um rastreador é pior que um
+índice lento: ele ensina que não há nada ali.
+
+O que custava não era montar a página; era a **consulta**. Então o cache mudou
+de lugar: `fetchCache: 'default-cache'` guarda a LEITURA por cinco minutos, e a
+página continua sendo montada a cada pedido, sempre com o que existe agora.
+
+Medido em `testes/seo.mjs`: **três visitas seguidas → 0 consultas ao banco.**
+
+E publicar revalida os endereços públicos — com uma armadilha achada no
+caminho: `revalidatePath('/blog')` **não limpa nada**. O endereço público é
+`/blog`, mas por dentro a rota é `/pt/blog`, e o `revalidatePath` fala com o
+roteador, que só conhece o de dentro. Em silêncio, como sempre.
+
+### 5. O artigo linkava o próprio blog e o rodapé
+
+`ligarTermos` acrescenta, ao corpo já convertido, **um link por página de
+caso** — na primeira vez que o termo aparece e só ali. Quatro travas, e cada uma
+existe por um motivo: uma vez por destino (cinco links iguais valem menos que
+um, e são padrão de manipulação); nunca dentro de `<a>`, `<code>` ou `<pre>`;
+nunca dentro de etiqueta (casar `alt="ata de reunião"` quebraria a imagem); e o
+termo mais longo primeiro, senão "teste" venceria dentro de "evidência de
+teste".
+
+Um defeito meu, achado antes de sair: comparar sem acento com
+`normalize('NFD')` muda o TAMANHO da string, e o índice achado apontava para o
+lugar errado no texto original — a âncora sairia cortando palavra no meio, num
+idioma com acento a cada duas linhas. `planificar()` troca caractere a caractere
+e só quando a troca cabe em um; a igualdade de comprimento virou trava.
+
+### 6 a 9. Feed, Open Graph, etiquetas e autor
+
+**RSS por idioma**, com `dc:creator`, `category` e `rel="self"`. Um feed
+misturado é um feed que se cancela: quem assina o alemão não quer português. O
+corpo vai como **resumo**, e não inteiro — mandar o artigo completo faz o leitor
+de feed virar o destino final.
+
+**`modifiedTime` e `author`** no Open Graph, e **`x-default`** no `hreflang` do
+post — apontando para o inglês *quando ele existe*, e para o próprio post quando
+não: mandar para um idioma que aquele post não tem repetiria o 404 que o resto
+do `hreflang` evita.
+
+**`/blog/tag/...` e `/blog/autor/...`.** O modelo guardava `tags: string[]` e
+`autor` desde sempre, e nenhum dos dois virava nada. A chave é normalizada —
+"Evidência" e "evidencia" são a mesma etiqueta, e duas páginas para a mesma
+coisa competiriam entre si, que é o defeito que o `canonical` existe para
+evitar, criado por nós. E **etiqueta sem posts sai do índice**: uma página fina
+que responde 200 e não tem conteúdo enche o site de endereços que não servem a
+ninguém.
+
+Um detalhe que fazia as duas responderem 404: a ponte `/blog/:slug` casa com UM
+segmento, e `/blog/tag/evidencia` tem dois. Uma página que existe por dentro e
+não tem ponte é uma página que não existe.

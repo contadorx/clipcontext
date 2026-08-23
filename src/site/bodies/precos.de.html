@@ -1,136 +1,134 @@
 <section style="padding-top:66px">
   <div class="wrap">
-    <h1 style="font-size:34px">Preise</h1>
-    <p class="lead">Das Werkzeug, das in Ihrem Browser läuft, ist kostenlos und bleibt es. Es kostet uns
-    nichts: Es gibt keinen Server, der Ihre Videos verarbeitet. Bezahlt werden die <b>Identität</b> des
-    Dokuments und die <b>Verwaltung</b> eines Teams — nie die Qualität des Nachweises.</p>
 
-    <!-- A tira dos formatos, a mesma da home. A página de preços falava de
-         planos e nunca dizia o que SAI — e o que sai é o que se compra. -->
-    <div class="saidas">
-      <span class="saida"><b>PDF</b></span>
-      <span class="saida"><b>DOCX</b> Word</span>
-      <span class="saida"><b>PPTX</b> PowerPoint</span>
-      <span class="saida"><b>HTML</b></span>
-      <span class="saida"><b>MD</b> Markdown</span>
-      <span class="saida"><b>SCORM</b></span>
-      <span class="saida"><b>CSV</b></span>
-      <span class="saida"><b>JSON</b></span>
-      <span class="saida"><b>ZIP</b></span>
-      <span class="saida"><b>VTT</b></span>
-      <span class="saida"><b>SRT</b></span>
-      <span class="saida"><b>Google&nbsp;Docs</b></span>
-      <span class="saida"><b>Jira</b></span>
+    <!-- 1. HERO.
+         Sem botão aqui de propósito: o primeiro CTA da página é o do cartão do
+         Free, logo abaixo. Um botão no hero competiria com os três que decidem. -->
+    <h1 class="precoH1">Der Nachweis ist kostenlos. Sie zahlen fürs Wiederholen, Koordinieren und Vereinheitlichen.</h1>
+    <p class="lead">Nehmen Sie auf oder öffnen Sie ein Video und erzeugen Sie den vollständigen Nachweis auf Ihrem eigenen Rechner. Sobald eine ganze Tabelle oder ein Team im Spiel ist, verteilt Walkstamp die Fälle und liefert Status, Ausführenden und Belege zurück.</p>
+    <p class="small muted privHero">Video, Ton und Transkript verlassen Ihren Rechner nicht — im bezahlten Plan genauso wenig wie im kostenlosen.</p>
+
+    <!-- 2. OS TRÊS CARTÕES, POR RESULTADO.
+         Gerados em `build.py` (CARTOES) e entregues por `src/precos.json`. O
+         título de cada um é o resultado; o nome do plano é o subtítulo. Tirar um
+         benefício é apagar uma entrada lá, e ele some nos cinco idiomas. -->
+    {{cartoesPlanos}}
+    <p class="small muted cobranca">Jährliche Abrechnung bei beiden Abos. Es verlängert sich am Jahresende von selbst, und Sie kündigen jederzeit in Ihrem Konto: der Zugang bleibt bis zum Ende des bereits bezahlten Zeitraums.</p>
+
+    <!-- 3. A COMPARAÇÃO CURTA — cinco linhas, e só cinco. -->
+    <h2 class="cmpH">In fünf Zeilen</h2>
+    <p class="lead">Die vollständige Tabelle steht am Fuß der Seite und ist ehrlich. Diese fünf Zeilen sind der Unterschied, der entscheidet.</p>
+    {{comparacaoCurta}}
+
+    <!-- 4. A DEMONSTRAÇÃO DA RODADA, em quatro estados.
+         Aqui havia um <video> apontando para /demo/rodada.* — quinze arquivos
+         que não existem no repositório. A figura nasce no build, no mesmo lugar
+         que desenha as outras, e não pode dar 404. -->
+    <h2>Die Runde, von Anfang bis Ende</h2>
+    <p class="lead">Eine Falltabelle geht hinein, die Fälle verteilen sich auf die Personen, jede Ausführung erzeugt den Nachweis auf dem Rechner der ausführenden Person, und die Tabelle kommt mit Ihren ursprünglichen Spalten unberührt zurück.</p>
+    {{figuraRodada}}
+
+    <!-- 5. A CALCULADORA.
+         `hidden` no HTML e destravada pelo script. Sem JS, o bloco inteiro não
+         aparece — que é melhor do que quatro campos mortos que não somam nada.
+         Nenhum número sai daqui: não há fetch, não há evento, não há form. -->
+    <div class="roi" id="roi" hidden data-plano="{{personalNum}}" data-moeda="{{precoPersonal}}">
+      <h2>Was Handarbeit kostet</h2>
+      <p class="lead">Die vier Zahlen gehören Ihnen und bleiben in Ihrem Browser. Es wird nichts gesendet, auch nicht beim Tippen.</p>
+      <div class="roiCampos">
+        <p><label for="roiCasos">Fälle pro Runde</label><input id="roiCasos" type="number" min="0" step="1" value="40" inputmode="numeric"></p>
+        <p><label for="roiMin">Minuten Handarbeit pro Fall</label><input id="roiMin" type="number" min="0" step="1" value="12" inputmode="numeric"></p>
+        <p><label for="roiRodadas">Runden pro Monat</label><input id="roiRodadas" type="number" min="0" step="1" value="2" inputmode="numeric"></p>
+        <p><label for="roiHora">Kosten pro Stunde</label><input id="roiHora" type="number" min="0" step="1" value="60" inputmode="numeric"></p>
+      </div>
+      <ul class="roiSaida" aria-live="polite">
+        <li><span>Stunden pro Monat</span> <b id="roiHoras">—</b></li>
+        <li><span>Geschätzte Monatskosten</span> <b id="roiCusto">—</b></li>
+        <li><span>Pro Jahr</span> <b id="roiAno">—</b></li>
+        <li><span>Personal kostet</span> <b id="roiVs">{{precoPersonal}}</b></li>
+      </ul>
+      <p class="small muted roiNota">Eine Schätzung. Sie ist genau so viel wert wie Ihre vier Zahlen — und keine davon verlässt diese Seite.</p>
     </div>
 
-    <div class="plans tres">
+    <!-- 6. AS PROVAS: o que sai, onde fica, o que abre, e o que NÃO fazemos. -->
+    <h2>Was herauskommt, und wo jede Sache liegt</h2>
+    <p class="lead">Ein Nachweisdokument kommt in diesen Formaten heraus, und jedes davon entsteht auf Ihrem Rechner:</p>
+    <div class="saidas"><span class="saida"><b>PDF</b></span><span class="saida"><b>DOCX</b> Word</span><span class="saida"><b>PPTX</b> PowerPoint</span><span class="saida"><b>HTML</b></span><span class="saida"><b>MD</b> Markdown</span><span class="saida"><b>SCORM</b></span><span class="saida"><b>CSV</b></span><span class="saida"><b>JSON</b></span><span class="saida"><b>ZIP</b></span><span class="saida"><b>VTT</b></span><span class="saida"><b>SRT</b></span><span class="saida"><b>Google&nbsp;Docs</b></span><span class="saida"><b>Jira</b></span></div>
+    <p class="small muted"><b>Auf Ihrem Rechner:</b> das Video, der Ton, das Transkript und die Erstellung des Dokuments. <b>Auf dem Server:</b> Ihr Konto, die Plätze und die Rechnung. Das ist die Grenze, und sie verschiebt sich im bezahlten Plan nicht.</p>
+    <p class="small muted">Die Dateien öffnen in Word, in PowerPoint, im Browser und in Ihrem LMS. Der vorbereitete Link lässt sich in Jira, Zephyr, Xray oder TestRail einfügen — <b>er ist eine Adresse, keine automatische Integration</b>.</p>
+    <p class="small muted">Die Lizenz wird auf Ihrem Rechner geprüft und funktioniert ohne Internet. Das ist Vorteil und Einschränkung zugleich: der Entzug eines Platzes hält die Frist von 1 bis 90 Tagen ein, die die verwaltende Person gewählt hat.</p>
 
-      <div class="plan">
-        <span class="badge">jetzt verfügbar</span>
-        <h3 style="margin-top:14px">Free</h3>
-        <div class="price">€ 0<span> / für immer</span></div>
-        <p class="moedas">R$ 0 &middot; US$ 0</p>
-        <p class="small muted" style="margin:0">Keine Registrierung, keine Karte, kein Nutzungslimit.</p>
-        <ul>
-          <li>Den Bildschirm aufnehmen oder ein Video verwenden, in beliebiger Größe</li>
-          <li>Screenshots bei Szenenwechsel und Transkription auf Ihrem Gerät</li>
-          <li>PDF, Word, HTML, Markdown, Tabelle, ZIP und JSON</li>
-          <li>Schwärzen, zuschneiden, hervorheben und der Hinweis auf sensible Daten</li>
-          <li><a href="/de/link">Fertiger Link</a> für Zephyr, Jira und TestRail</li>
-          <li>Das Dokument später erneut öffnen, um einen Schritt zu korrigieren — und ein SCORM-Paket für das LMS</li>
-        </ul>
-        <a class="btn" href="/app?lang=de">Werkzeug öffnen</a>
-        <p class="pe">Alles, was Ihren Nachweis akzeptabel macht, ist hier enthalten.</p>
-      </div>
-
-      <div class="plan hi">
-        <span class="badge">14 Tage testen</span>
-        <h3 style="margin-top:14px">Personal</h3>
-        <div class="price">€ 27<span> / Jahr</span></div>
-        <p class="moedas">R$ 149 &middot; US$ 29</p>
-        <p class="small muted" style="margin:0">Für alle, die ein Dokument unter eigenem Namen übergeben — oder unter dem des Kunden.</p>
-        <ul>
-          <li><b>Das Dokument kennzeichnen:</b> Kundenlogo und Kundenname im PDF, im Word-Dokument und im HTML</li>
-          <li><b>Testfallliste:</b> Tabelle laden, Fall für Fall ausführen, und sie kommt ausgefüllt zurück</li>
-          <li>Eigene Dokumentvorlage: Deckblatt und Felder in Ihrem Standard <span class="soon">bald</span></li>
-          <li>Ein Profil, das Besuche und Rechnerwechsel übersteht <span class="soon">bald</span></li>
-          <li><b>Die Begriffe Ihres Systems bleiben gespeichert</b> — die Liste überlebt den Besuch und den Rechner, statt neu getippt zu werden. Anwenden ist bereits kostenlos; Speichern gibt es hier <span class="soon">bald</span></li>
-          <li>Alles aus Free</li>
-        </ul>
-        <a class="btn" href="{{conta}}">Die 14 Tage starten</a>
-        <p class="pe">Sofort, ohne Karte. Oder <a href="mailto:{{contato}}?subject=Walkstamp%20Personal">schreiben Sie mir</a>.</p>
-      </div>
-
-      <div class="plan">
-        <span class="badge">ab 5 Personen</span>
-        <h3 style="margin-top:14px">Team</h3>
-        <div class="price">€ 65<span> / Person / Jahr</span></div>
-        <p class="moedas">R$ 349 &middot; US$ 69</p>
-        <p class="small muted" style="margin:0">Für das Team, das dasselbe Dokument in allen Händen braucht.</p>
-        <ul>
-          <li>Zugang per Link: Wer koordiniert, verschickt eine Adresse, niemand tippt einen Schlüssel ein</li>
-          <li>Ein Teamprofil, das an alle verteilt wird <span class="soon">bald</span></li>
-          <li>Platzverwaltung: einladen, sperren und die Laufzeit von 1 bis 90 Tagen wählen</li>
-          <li>Rechnungen und Tickets in Ihrem Konto</li>
-          <li>Alles aus Personal</li>
-        </ul>
-        <a class="btn ghost" href="{{time}}">Über Team sprechen</a>
-        <p class="pe">Ohne Login und ohne Registrierung, die Ihre IT genehmigen müsste.</p>
-      </div>
-
-    </div>
-
-
-    <!-- A lista completa. O dado mora em src/features.json e a tabela é montada
-         no build: sessenta e poucas linhas em três idiomas, escritas à mão,
-         seriam 195 chances de a versão em espanhol prometer o que a portuguesa
-         não promete. -->
-    <h2 style="margin-top:52px">{{tpH}}</h2>
+    <!-- 7. A LISTA COMPLETA, RECOLHIDA.
+         `open` no HTML, e o script fecha no telefone. A ordem é essa e não a
+         inversa por um motivo de indexação: <details> fechado esconde o texto
+         do Ctrl+F e do buscador, e esta lista é a página inteira em palavras.
+         Nascendo aberta, o conteúdo é indexável mesmo se o script não rodar; o
+         telefone, onde noventa e quatro linhas seriam uma parede de rolagem,
+         recebe a versão fechada. O número acima dela é contado, não digitado. -->
+    <h2>{{tpH}}</h2>
     <p class="lead">{{tpP}}</p>
-    {{tabelaPlanos}}
+    <details class="listaCompleta" id="listaF" open>
+      <summary>Alle Funktionen ansehen</summary>
+      {{tabelaPlanos}}
+      <p class="small muted">{{tpLegenda}}</p>
+    </details>
 
-    <p class="small muted" style="margin-top:24px"><b>Weiterhin ohne Server, auch im bezahlten Plan.</b> Der
-    Schlüssel wird in Ihrem Browser geprüft und funktioniert offline — <b>wir erhalten weder Ihr Video noch
-    Ihr Audio, in keinem Plan</b>. In den bezahlten Plänen gibt es genau eine Sache, die Sie in Ihrem Konto
-    ablegen können: die vollständige Datei einer Sitzung, von Ihnen an einen Fall der Testfallliste
-    angehängt und jederzeit löschbar. <a href="{{seguranca}}">Wie das intern funktioniert</a>.</p>
+    <!-- 8. AS PERGUNTAS DE COMPRA. Seis, resposta curta, e nenhuma promete
+         prazo de suporte. -->
+    <h2>Fragen von Leuten, die kaufen</h2>
+    <dl class="faqCompra">
+      <dt>Brauche ich eine Karte für Free?</dt>
+      <dd>Nein. Weder Karte noch Konto.</dd>
+      <dt>Was passiert, wenn ich kündige?</dt>
+      <dd>Der Zugang bleibt bis zum Ende des bereits bezahlten Zeitraums. Danach läuft Free weiter, und Sie exportieren Ihre Vorlagen und Ihre Skripte.</dd>
+      <dt>Bekommen Sie mein Video?</dt>
+      <dd>Nein, in keinem Plan. Video, Ton und Transkript werden auf Ihrem Rechner verarbeitet und nirgendwohin gesendet.</dd>
+      <dt>Wie läuft die Rechnung?</dt>
+      <dd>Abgerechnet wird über Stripe. Die Rechnung folgt der Zahlung, und der Link dazu erscheint in Ihrem Konto, sobald es sie gibt.</dd>
+      <dt>Kann ich 3 Plätze kaufen und später wachsen?</dt>
+      <dd>Ja. Die Zahl der Plätze lässt sich jederzeit in Ihrem Konto anpassen.</dd>
+      <dt>Funktioniert die Lizenz ohne Internet?</dt>
+      <dd>Ja. Sie wird auf Ihrem Rechner geprüft. Dafür hält der Entzug eines Platzes die Frist von 1 bis 90 Tagen ein, die die verwaltende Person gewählt hat.</dd>
+    </dl>
 
-    <p class="small muted" style="margin-top:14px"><b>Pro und API</b> — Formate umwandeln, die der Browser
-    ablehnt (HEVC, MKV, ProRes), auf dem Server transkribieren, im Stapel verarbeiten, oder eine Adresse, die
-    Screenshots und Transkription zurückgibt, damit Ihr eigenes Produkt sie nutzt. Nichts davon existiert
-    bisher, und es ist das, was als Nächstes kommt.
-    <a href="mailto:{{contato}}?subject=Walkstamp%20API">Schildern Sie mir Ihren Fall</a> — so entscheide ich die Reihenfolge.</p>
-
-    <p class="small muted" style="margin-top:24px">Zwei ehrliche Hinweise zu dieser Seite. Was mit
-    <span class="soon">bald</span> gekennzeichnet ist, existiert noch nicht: Es steht hier, weil ich es bauen
-    werde, und wer jetzt einsteigt, hilft bei der Reihenfolge und zahlt den Preis dieser Seite dauerhaft. Und
-    der <b>kostenlose Plan verliert keine Funktionen</b>, wenn die bezahlten wachsen — die Trennlinie liegt
-    fest: Datenschutz und die Qualität des Nachweises stehen nie hinter einer Zahlung.</p>
   </div>
 </section>
 
-<section id="lista">
-  <div class="wrap">
-    <h2>Möchten Sie benachrichtigt werden?</h2>
-    <p class="lead">Hinterlassen Sie eine E-Mail-Adresse, und ich melde mich, wenn der bezahlte Plan erscheint. Eine Nachricht, kein Newsletter.</p>
-    <form class="lista" id="listaForm" data-url="{{supaUrl}}" data-key="{{supaKey}}" novalidate>
-      <input type="email" id="listaEmail" autocomplete="email" placeholder="ihre@email.de" aria-label="Ihre E-Mail-Adresse">
-      <button class="btn" type="submit" id="listaBtn">Bitte benachrichtigen</button>
-    </form>
-    <p class="small muted listaMsg" id="listaMsg" role="status"></p>
-    <p class="small muted" style="max-width:640px">Das Versprechen dieses Werkzeugs lautet, dass <b>Ihr Video Ihren Rechner nicht verlässt</b>, und es gilt weiterhin: Dieses Feld hat nichts mit dem zu tun, was Sie hier verarbeiten — der Browser sendet weder Video noch Audio noch Transkription irgendwohin. Die E-Mail-Adresse liegt in einer Datenbank von mir, wird nicht verkauft, geht an keine Liste Dritter und verschwindet an dem Tag, an dem Sie es verlangen. Lieber nicht hinterlassen? Kein Problem — das Werkzeug ändert sich dadurch nicht.</p>
-  </div>
-</section>
-
-<section id="support"></section>
-
-<section>
-  <div class="wrap">
-    <h2>Warum der kostenlose Plan keinen Haken hat</h2>
-    <p class="lead" style="margin-bottom:0">Die Frage ist berechtigt: Ein kostenloses Werkzeug kassiert
-    meist an anderer Stelle — Daten, Werbung oder ein Limit, das im falschen Moment auftaucht. Hier ist der
-    Grund einfacher: Ihr Video wird von Ihrem eigenen Rechner verarbeitet, die Kosten Ihrer Nutzung liegen
-    also nahe null. Es gibt nichts zu subventionieren und deshalb auch nichts, was später wieder
-    hereingeholt werden müsste.</p>
-  </div>
-</section>
+<script>
+/* Os dois comportamentos desta página, e nada mais.
+   Sem rede: nenhum fetch, nenhum XHR, nenhuma imagem remota. O que se digita
+   na calculadora não sai do navegador — não há para onde sair. */
+(function () {
+  var b = document.getElementById('roi');
+  if (b) {
+    /* Só agora o bloco aparece: se este script não carregar, a pessoa não vê
+       quatro campos que não respondem. */
+    b.hidden = false;
+    var campos = ['roiCasos', 'roiMin', 'roiRodadas', 'roiHora'].map(function (i) {
+      return document.getElementById(i);
+    });
+    var horas = document.getElementById('roiHoras');
+    var custo = document.getElementById('roiCusto');
+    var ano = document.getElementById('roiAno');
+    var moeda = (b.getAttribute('data-moeda') || '').replace(/[\d.,\s]+$/, '').trim();
+    var num = function (e) {
+      var v = Number(e && e.value);
+      return isFinite(v) && v > 0 ? v : 0;
+    };
+    var conta = function () {
+      var h = num(campos[0]) * num(campos[1]) * num(campos[2]) / 60;
+      var c = h * num(campos[3]);
+      horas.textContent = h.toFixed(1);
+      custo.textContent = moeda + ' ' + Math.round(c).toLocaleString();
+      ano.textContent = moeda + ' ' + Math.round(c * 12).toLocaleString();
+    };
+    campos.forEach(function (e) { if (e) e.addEventListener('input', conta); });
+    conta();
+  }
+  /* A lista completa nasce aberta (indexável) e fecha no telefone. */
+  var d = document.getElementById('listaF');
+  if (d && window.matchMedia && window.matchMedia('(max-width: 720px)').matches) {
+    d.open = false;
+  }
+})();
+</script>

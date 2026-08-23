@@ -152,6 +152,47 @@
     <p>Diese Dritten haben eigene Richtlinien und können technische Daten der Verbindung protokollieren, etwa
     die IP-Adresse, genauso wie es beim Besuch jeder beliebigen Website geschieht.</p>
 
+    
+    <p>Die folgende Tabelle ist die, nach der eine Lieferantenprüfung fragt: wer die Daten sonst noch berührt, was er erhält und unter welcher Schutzmaßnahme.</p>
+    <table class="legal" id="suboperadores">
+      <tr><th>Dritter</th><th>Funktion</th><th>Erhaltene Daten</th><th>Land</th><th>Schutzmaßnahme</th></tr>
+      <tr><td><b>Supabase</b></td>
+          <td>Datenbank und Speicher für den Sitzungsanhang</td>
+          <td>E-Mail der Benachrichtigungsliste, Nutzungsmeilensteine und der gesamte Inhalt des bezahlten Kontos. <b>Nie</b> Video, Audio oder Transkription</td>
+          <td>Brasilien (Region São Paulo)</td>
+          <td>Auftragsverarbeitungsvertrag des Anbieters; Daten ruhen in Brasilien</td></tr>
+      <tr><td><b>Vercel</b></td>
+          <td>Hosting der Website und Zählung der Besuche</td>
+          <td>Technische Zugriffsprotokolle und die Besuchszählung, ohne Cookie und ohne Kennung</td>
+          <td>Globales Netz</td>
+          <td>Standardvertragsklauseln des Anbieters (Art. 33 II LGPD)</td></tr>
+      <tr><td><b>Stripe</b></td>
+          <td>Abrechnung des Abonnements</td>
+          <td>Name, E-Mail und Zahlungsdaten der abschließenden Person. <b>Wir erhalten die Kartennummer nicht</b> — sie geht direkt an Stripe</td>
+          <td>Vereinigte Staaten und Europäische Union</td>
+          <td>Standardvertragsklauseln; PCI-DSS-Zertifizierung des Anbieters</td></tr>
+      <tr><td><b>Brevo</b></td>
+          <td>Versand des Zugangslinks zum Konto und der Einladung per E-Mail</td>
+          <td>Die E-Mail-Adresse der empfangenden Person und der Text der Nachricht</td>
+          <td>Europäische Union (Frankreich)</td>
+          <td>Standardvertragsklauseln; Land mit angemessenem Schutzniveau</td></tr>
+      <tr><td><b>jsDelivr</b></td>
+          <td>Auslieferung der Bibliotheken zur PDF-Erzeugung und zur Transkription</td>
+          <td>Nur die Anfrage nach der Datei der Bibliothek</td>
+          <td>Globales Netz</td>
+          <td>Erhält keine Kontodaten und keine Inhalte; Verbindung stets verschlüsselt</td></tr>
+      <tr><td><b>Hugging Face</b></td>
+          <td>Von dort wird das Transkriptionsmodell geladen, und nur wenn Sie die Transkription auslösen</td>
+          <td>Nur die Anfrage nach dem Modell. <b>Nie Ihr Audio</b></td>
+          <td>Vereinigte Staaten</td>
+          <td>Erhält keine Kontodaten und keine Inhalte; Verbindung stets verschlüsselt</td></tr>
+      <tr><td><b>Google<br><span class="small muted">kein Unterauftragsverarbeiter von uns</span></b></td>
+          <td>Ein Video aus Ihrem Drive öffnen und die Schaltfläche <b>An Google Docs senden</b> — <b>nur wenn Sie klicken</b></td>
+          <td>Beim Öffnen: nichts außer der Anfrage nach der von Ihnen gewählten Datei. Beim Senden an Docs: <b>das erzeugte Dokument</b>, das aus Ihrem Browser direkt in Ihr Google-Konto geht</td>
+          <td>Gemäß Ihrem Google-Konto</td>
+          <td>Minimale Berechtigung (<code>drive.file</code>), beschränkt auf die von Ihnen gewählten Dateien. Das Senden verlangt eine ausdrückliche Bestätigung</td></tr>
+    </table>
+
     <h2>Bildschirmaufnahme und Mikrofon</h2>
     <p>Bei der Nutzung der Aufnahme fragt der Browser Sie um Erlaubnis, den Bildschirm zu erfassen und, wenn
     Sie die Option markieren, das Mikrofon. Das Bild und die beiden Audiokanäle werden auf Ihrem eigenen

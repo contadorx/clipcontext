@@ -18,9 +18,10 @@
  */
 import fs from 'fs';
 
+import { RAIZ_WS } from './_caminhos.mjs';
 const BASE = 'http://localhost:8802';
-const DEMO = '/root/walkstamp/public/demo';
-const ROTAS = JSON.parse(fs.readFileSync('/root/walkstamp/src/rotas.json', 'utf8'));
+const DEMO = `${RAIZ_WS}/public/demo`;
+const ROTAS = JSON.parse(fs.readFileSync(`${RAIZ_WS}/src/rotas.json`, 'utf8'));
 
 let falhas = 0;
 const ok = (n, c, e) => { console.log((c ? '  ok   ' : '  FALHA') + '  ' + n + (e ? '  → ' + e : '')); if (!c) falhas++; };
@@ -28,7 +29,8 @@ const ok = (n, c, e) => { console.log((c ? '  ok   ' : '  FALHA') + '  ' + n + (
 console.log('[1] os cinco idiomas têm tour e exemplo, em disco');
 for (const L of ROTAS.idiomas) {
   for (const [tipo, ext] of [['tour', 'webm'], ['tour', 'mp4'], ['tour', 'jpg'],
-                             ['exemplo', 'webm'], ['exemplo', 'mp4'], ['exemplo', 'vtt']]) {
+                             ['exemplo', 'webm'], ['exemplo', 'mp4'], ['exemplo', 'vtt'],
+                             ['rodada', 'webm'], ['rodada', 'mp4'], ['rodada', 'jpg']]) {
     const f = `${DEMO}/${tipo}.${L}.${ext}`;
     const existe = fs.existsSync(f) && fs.statSync(f).size > 400;
     ok(`${L}: ${tipo}.${ext}`, existe, existe ? '' : 'falta ou está vazio');
@@ -40,16 +42,32 @@ console.log('\n[2] a lista de quem tem tour é DERIVADA do disco');
   /* Escrita à mão, ela ficou meses dizendo ['pt','en','es'] depois de o vídeo
      alemão existir — e ninguém viu, porque um vídeo em inglês numa página
      alemã não quebra nada, só decepciona. */
-  const site = fs.readFileSync('/root/walkstamp/lib/site.ts', 'utf8');
+  const site = fs.readFileSync(`${RAIZ_WS}/lib/site.ts`, 'utf8');
   ok('o site não tem a lista escrita à mão',
      !/\['pt', 'en', 'es'\]\.includes\(lang\)/.test(site));
   ok('ele lê o que o build.py apurou', /rotas\.demoLangs/.test(site));
-  const build = fs.readFileSync('/root/walkstamp/build.py', 'utf8');
+  const build = fs.readFileSync(`${RAIZ_WS}/build.py`, 'utf8');
   ok('e o build.py apura olhando o disco',
      /com_tour = \[L for L in IDIOMAS if \(root \/ "public" \/ "demo"/.test(build));
   ok('os cinco entraram no rotas.json',
      JSON.stringify(ROTAS.demoLangs) === JSON.stringify(ROTAS.idiomas),
      JSON.stringify(ROTAS.demoLangs));
+}
+
+console.log('\n[2b] e a lista de quem tem o vídeo da rodada, do mesmo jeito');
+{
+  /* O vídeo da rodada paga nasceu nos cinco de uma vez. A lista sai do disco
+     pelo mesmo motivo do tour: a próxima língua a entrar no site vai entrar
+     antes de entrar no estúdio, e um `<video>` apontando para um 404 numa
+     página de PREÇOS é pior do que na home — é a página onde a pessoa decide. */
+  const site = fs.readFileSync(`${RAIZ_WS}/lib/site.ts`, 'utf8');
+  ok('o site lê o que o build.py apurou', /rotas\.rodadaLangs/.test(site));
+  const build = fs.readFileSync(`${RAIZ_WS}/build.py`, 'utf8');
+  ok('e o build.py apura olhando o disco',
+     /com_rodada = \[L for L in IDIOMAS if \(root \/ "public" \/ "demo"/.test(build));
+  ok('os cinco entraram no rotas.json',
+     JSON.stringify(ROTAS.rodadaLangs) === JSON.stringify(ROTAS.idiomas),
+     JSON.stringify(ROTAS.rodadaLangs));
 }
 
 console.log('\n[3] cada home mostra o tour da própria língua');
@@ -101,6 +119,32 @@ for (const L of ROTAS.idiomas) {
      de todo mundo. Acima de 2 MB isso começa a doer em rede de escritório. */
   ok(`${L}: o tour cabe em 2 MB`, t < 2 * 1024 * 1024, `${(t/1048576).toFixed(2)} MB`);
   ok(`${L}: e o exemplo em 1 MB`, e < 1024 * 1024, `${(e/1048576).toFixed(2)} MB`);
+}
+
+console.log('\n[7] a página de preços mostra a rodada da própria língua');
+{
+  /* O endereço da página de preços é traduzido — `preise` em alemão, `tarifs`
+     em francês. Ele sai do `rotas.json`: escrever `/de/precos` aqui daria 404
+     e o teste diria "o vídeo não está lá" sobre uma página que não existe. */
+  const slug = ROTAS.slugs?.precos || {};
+  for (const L of ROTAS.idiomas) {
+    const u = L === 'pt' ? '/' + (slug.pt || 'precos') : `/${L}/${slug[L] || 'precos'}`;
+    const r = await fetch(BASE + u);
+    ok(`${L}: ${u} responde 200`, r.ok, String(r.status));
+    const html = await r.text();
+    const achou = (html.match(/demo\/rodada\.([a-z]{2})\.webm/) || [])[1];
+    ok(`${L}: mostra a rodada em ${L}`, achou === L, achou || 'nenhum vídeo da rodada');
+    /* `preload="none"`: a rodada é um vídeo de 1,7 MB numa página que já carrega
+       a tabela de noventa e três linhas. Baixar sozinho o que quase ninguém vai
+       abrir é cobrar de todo mundo o interesse de poucos. */
+    ok(`${L}: e não baixa sozinho`, /rodada[\s\S]{0,400}?preload="none"|preload="none"[\s\S]{0,400}?rodada/.test(html));
+  }
+  for (const L of ROTAS.idiomas) {
+    const t = fs.statSync(`${DEMO}/rodada.${L}.webm`).size;
+    /* Mais folga que o tour: este não roda em laço nem começa sozinho — só
+       baixa quando alguém aperta o play. */
+    ok(`${L}: a rodada cabe em 3 MB`, t < 3 * 1024 * 1024, `${(t / 1048576).toFixed(2)} MB`);
+  }
 }
 
 console.log(falhas ? `\n${falhas} FALHA(S)` : '\nVídeos do site: tudo passou.');

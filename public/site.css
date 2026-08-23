@@ -6,6 +6,10 @@
      o mesmo da ferramenta, para as duas telas terem o mesmo vermelho. */
   --err:#b32a3a;
   --max:940px;
+  /* A moldura — cabeçalho e rodapé — é MAIS LARGA que a coluna de texto, e isso
+     é de propósito: o texto quer linha curta, o menu quer espaço. O que os dois
+     não podem é discordar entre páginas. Ver o comentário do `header`. */
+  --maxTopo:1000px;
 }
 @media (prefers-color-scheme:dark){
   :root{--err:#ef8484;
@@ -20,8 +24,33 @@ body{margin:0;background:var(--bg);color:var(--ink);
 .wrap{max-width:var(--max);margin:0 auto;padding:0 22px}
 
 /* topo */
+/* ---- A MOLDURA CRESCEU 60 px, E O MOTIVO ESTÁ MEDIDO ----
+
+   Com o Blog no menu, a fileira deixou de caber em 940. Medido a 1440 de
+   largura, o que o menu PRECISA contra o que CABE:
+
+       inglês      634 / 686    sobra  52
+       alemão      642 / 686    sobra  44
+       francês     689 / 686    falta   3
+       português   717 / 686    falta  31
+       espanhol    735 / 686    falta  49
+
+   Faltar significa transbordar: o menu passava da borda direita da moldura, e
+   era por isso que ele terminava em x=1199 na conta e no blog contra x=1168 na
+   home — o desalinhamento voltando por outra porta, quatro dias depois.
+
+   Duas saídas: tirar um item do menu, ou dar espaço. Tirar um item é decisão de
+   produto e não de layout — e o item que sobraria para tirar seria justamente o
+   Blog, que acabou de entrar. Então: 1000 de moldura e os vãos mais apertados
+   (20→16 no menu, 16→12 no bloco de idiomas). O pior caso, o espanhol, passa a
+   sobrar 53 px.
+
+   O que NÃO muda: as quatro telas continuam com a MESMA moldura, e o logo
+   continua começando no mesmo x nas quatro. Ele só anda 30 px para fora, junto,
+   que é o que preserva a única coisa que importava aqui. */
 header{border-bottom:1px solid var(--line);position:sticky;top:0;z-index:9;
        background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(9px)}
+header .wrap, footer .wrap{max-width:var(--maxTopo)}
 header .wrap{display:flex;align-items:center;justify-content:space-between;height:62px;gap:16px}
 /* A palavra pesa mais que o desenho. O símbolo já ficou grande numa rodada
    anterior; o nome continuou em 19px, e é ele que a pessoa lê, repete e digita
@@ -34,13 +63,36 @@ header .wrap{display:flex;align-items:center;justify-content:space-between;heigh
 @media (max-width:560px){ .brand img{width:32px;height:32px} .brand{font-size:21px} }
 @media (max-width:430px){ .brand img{width:29px;height:29px} .brand{font-size:19px} }
 .brand b{font-weight:700;color:var(--accent)}
-nav{display:flex;gap:20px;align-items:center}
-nav a{color:var(--muted);text-decoration:none;font-size:14.5px}
+nav{display:flex;gap:16px;align-items:center}
+/* `nowrap` porque o menu cresceu. Com quatro itens antes do botão, a fileira
+   chega perto do limite dos 940 — e a primeira coisa que cede é o botão, que
+   encolhe e quebra "Abrir a ferramenta" em duas linhas. Medido a 1440: 66 px de
+   altura contra 42 na home em inglês, onde o texto é mais curto. Um botão que
+   muda de altura conforme o idioma é a moldura desalinhada por tradução. */
+nav a{color:var(--muted);text-decoration:none;font-size:14.5px;white-space:nowrap}
 nav a:hover{color:var(--ink)}
 /* A ação principal do cabeçalho vira botão: no meio de três links cinzas,
    "Abrir a ferramenta" era o único que importava e o que menos aparecia. */
+/* A ALTURA NÃO PODE VIR DO `line-height` HERDADO. O site é 16/1.65 e a
+   ferramenta é outro número: o mesmo botão saía com 42 px de um lado e 40 do
+   outro, e a diferença não estava em nada escrito no botão. 24 px é o que o
+   1,65 do site já dava — o valor não muda, ele só deixa de ser herdado. */
+/* `transition` NOMEADA, e não `.15s` para tudo.
+
+   `transition:.15s` anima TODA propriedade que mudar — inclusive o `outline`
+   do anel de foco. O `:focus-visible` desta folha escreve `transition:none`
+   justamente para o anel não aparecer desbotando, e a regra do botão, sendo
+   mais específica, ganhava dela: o anel entrava em 150 ms.
+
+   Não é só estética. `testes/a11y.mjs` anda vinte paradas de Tab e lê o
+   contorno de cada uma — e lia `0px` neste botão, porque media no meio da
+   animação. Um anel que só existe depois de 150 ms é um anel que quem navega
+   por teclado rápido não vê.
+
+   O que muda no hover é o fundo e o brilho; são esses os dois nomeados. */
 nav a.btnTop{background:var(--accent);color:var(--accent-ink);font-weight:600;
-    padding:9px 16px;border-radius:8px;transition:.15s}
+    padding:9px 16px;border-radius:8px;flex:none;line-height:24px;
+    transition:background .15s, filter .15s}
 nav a.btnTop:hover{color:var(--accent-ink);filter:brightness(1.08)}
 @media (max-width:560px){ nav a.btnTop{padding:7px 12px;font-size:13px} }
 @media (max-width:620px){ nav a.hide-sm{display:none} }
@@ -84,6 +136,9 @@ nav a.btnTop:hover{color:var(--accent-ink);filter:brightness(1.08)}
      font-weight:600;padding:13px 24px;border-radius:9px;font-size:15.5px;transition:.15s;border:0;cursor:pointer}
 .btn:hover{filter:brightness(1.08)}
 .btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line);font-weight:550}
+/* Os dois caminhos da primeira dobra. `wrap` porque num telefone eles nao cabem
+   lado a lado, e o segundo empilhado e melhor que o segundo cortado. */
+.ctas{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
 
 /* seções */
 section{padding:64px 0;border-bottom:1px solid var(--line)}
@@ -243,7 +298,41 @@ footer a:hover{color:var(--ink)}
 
 /* As saídas como fichas, na home. É a coisa que mais gente pergunta e que
    estava escondida numa frase no meio de um parágrafo. */
+/* ANTES E DEPOIS. Duas colunas de verdade, e nao dois blocos soltos: o valor
+   da secao esta na LINHA — "o que eu faco hoje" ao lado de "o que passa a
+   acontecer" —, e uma tabela e o que diz isso para quem ouve a pagina tambem.
+   Num telefone as duas colunas nao cabem, e ai a linha vira um par empilhado
+   com a etiqueta na frente, que continua sendo a mesma leitura. */
+.antesDepois{width:100%;border-collapse:collapse;margin-top:22px;font-size:15px}
+.antesDepois th{text-align:left;font-weight:620;font-size:13px;letter-spacing:.02em;
+      text-transform:uppercase;color:color-mix(in srgb, var(--ink) 55%, transparent);
+      padding:0 16px 8px 0;border-bottom:1px solid var(--line)}
+.antesDepois td{padding:13px 16px 13px 0;border-bottom:1px solid var(--line);
+      vertical-align:top;width:50%}
+.antesDepois tbody tr:last-child td{border-bottom:0}
+.antesDepois td:last-child{padding-right:0;font-weight:520}
+.antesDepois td:first-child{color:color-mix(in srgb, var(--ink) 68%, transparent)}
+@media (max-width:640px){
+  .antesDepois, .antesDepois tbody, .antesDepois tr, .antesDepois td{display:block;width:auto}
+  .antesDepois thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  .antesDepois tr{padding:12px 0;border-bottom:1px solid var(--line)}
+  .antesDepois td{border:0;padding:2px 0}
+  .antesDepois td::before{content:attr(data-rot);display:block;font-size:12px;
+        text-transform:uppercase;letter-spacing:.02em;
+        color:color-mix(in srgb, var(--ink) 45%, transparent)}
+}
+
 .saidas{display:flex;flex-wrap:wrap;gap:9px;margin:24px 0 6px}
+/* O resto dos formatos, a um clique. `summary` com aparencia de link porque e
+   isso que ele e — nao um botao de acao, e sim "mostre o resto da lista". */
+.maisSaidas{margin-top:6px}
+.maisSaidas > summary{cursor:pointer;font-size:14px;color:var(--accent);
+      display:inline-block;padding:4px 0;list-style:none}
+.maisSaidas > summary::-webkit-details-marker{display:none}
+.maisSaidas > summary::before{content:"+ ";font-weight:600}
+.maisSaidas[open] > summary::before{content:"\2212 "}
+.maisSaidas > summary:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:3px}
+.maisSaidas .saidas{margin-top:10px}
 .saida{display:inline-flex;align-items:center;gap:7px;background:var(--panel);
       border:1px solid var(--line);border-radius:999px;padding:8px 15px;
       font-size:14px;color:var(--ink);font-weight:520}
@@ -368,6 +457,13 @@ table.legal td:first-child .small,table.legal td:first-child .muted{font-weight:
 /* 1.22 / .78, e não meio a meio: o h1 tem uma quebra escrita à mão dentro e,
    numa coluna estreita, ele quebrava de novo no meio da primeira linha —
    "Você percorre a / tela." A coluna do texto manda; o desenho cede. */
+/* O respiro do topo era `style="padding-top:78px"` no HTML, e por isso não
+   tinha como encolher no telefone. Encolher passou a importar quando o hero
+   ganhou o segundo botão: em 390x667 os dois não cabem lado a lado, empilham,
+   e o par terminava 22px abaixo da dobra — o caminho pago ficava invisível
+   sem rolar, que é exatamente o que ele veio corrigir. */
+.heroSec{padding-top:78px}
+@media(max-width:760px){ .heroSec{padding-top:40px} }
 .heroDuo{display:grid;grid-template-columns:1.22fr .78fr;gap:40px;align-items:center}
 .heroDuo .figDobra{margin:0}
 .heroDuo .figDobra svg{display:block;width:100%;height:auto;max-width:376px;margin-left:auto;
@@ -575,4 +671,138 @@ table.legal td:first-child .small,table.legal td:first-child .muted{font-weight:
 @media(max-width:620px){
   .postList a.comCapa{grid-template-columns:1fr}
   .postList a.comCapa img{width:100%;height:auto;aspect-ratio:16/10}
+}
+
+/* A comparacao curta da pagina de precos. Ela reusa `table.legal` — que ja e
+   responsiva e ja foi provada nas paginas legais — e so ajusta o que muda:
+   quatro colunas em vez de duas, os planos centralizados, e o travessao do
+   "nao tem" em cinza em vez de vermelho. Vermelho ali leria como defeito, e o
+   que a celula diz e "isto e do plano de cima". */
+table.cmpPlanos th:not(:first-child),
+table.cmpPlanos td{text-align:center}
+table.cmpPlanos th[scope="row"]{text-align:left;font-weight:550}
+table.cmpPlanos td.nao{color:var(--muted)}
+table.cmpPlanos td.nao::before{content:none}
+@media(max-width:620px){
+  table.cmpPlanos td{text-align:right}
+}
+
+/* Os quatro passos da rodada, na pagina de precos. Numerados de verdade: aqui
+   a ordem CARREGA informacao — a planilha entra antes de o caso abrir, e o
+   caso so volta depois de a evidencia existir. Numero enfeitando lista sem
+   ordem e ruido; aqui ele e o assunto. */
+ol.passosRodada{margin:14px 0 0;padding-left:22px;max-width:64ch}
+ol.passosRodada li{margin:0 0 6px;color:var(--ink)}
+ol.passosRodada li::marker{color:var(--accent);font-weight:600}
+
+/* OS SELOS DE ESTADO, ao lado do nome da funcionalidade.
+   `soon` ja existia. `beta` e `descoberta` sao irmaos dele e nao concorrentes:
+   a mesma forma, cores diferentes, e nenhuma delas vermelha — estado nao e
+   defeito. Beta puxa para o acento (funciona), descoberta para o silencio
+   (ainda nao e uma promessa). */
+.fts .beta,.fts .descoberta{
+  font-family:inherit;font-size:11px;letter-spacing:.03em;
+  padding:1px 6px;border-radius:3px;margin-left:6px;white-space:nowrap;
+  border:1px solid var(--line);vertical-align:1px;
+}
+.fts .beta{color:var(--accent);border-color:color-mix(in srgb,var(--accent) 38%,transparent)}
+.fts .descoberta{color:var(--muted)}
+
+/* ===========================================================================
+   A PÁGINA DE PREÇOS REFEITA — os blocos que passaram a existir nesta rodada.
+
+   A página vendia quantidade de recurso: uma lista de noventa e quatro itens
+   com vistos, aberta, no meio do caminho. Passa a vender resultado, e a lista
+   vira prova secundária, recolhida no fim. O que muda aqui é o peso visual de
+   cada coisa, na ordem em que a decisão acontece.
+   =========================================================================== */
+
+/* O hero não tem botão: o primeiro CTA é o do cartão do Free. Sem um botão para
+   competir, o h1 pode ser maior sem gritar. */
+.doc h1.precoH1{font-size:clamp(27px,3.2vw,38px);letter-spacing:-.02em;max-width:22ch}
+.doc .privHero{margin-top:10px;max-width:62ch}
+
+/* O NOME DO PLANO É O SUBTÍTULO, e o resultado é o título. É a inversão que
+   sustenta a página inteira: ninguém compra "Personal", compra parar de refazer
+   quarenta vezes a mesma coisa à mão. Por isso o h3 é o resultado e isto aqui,
+   menor e apagado, é que carrega Free/Personal/Team. */
+.plan .planoNome{margin:4px 0 0;font-size:13.5px;color:var(--muted);font-weight:600;
+      text-transform:uppercase;letter-spacing:.05em}
+
+/* O MÍNIMO ANDA COLADO NO PREÇO POR PESSOA.
+   Preço por assento sozinho é uma promessa de "a partir de 65" que o checkout
+   desmente na linha seguinte. O total mínimo ao lado é o que evita a surpresa. */
+.plan .minimo{margin:6px 0 0;font-size:13.5px;color:var(--accent);font-weight:600}
+.plan .minimoTotal{margin:2px 0 0;font-size:14px;color:var(--muted);font-weight:550}
+.doc .cobranca{margin-top:16px;max-width:70ch}
+
+/* A COMPARAÇÃO CURTA. Cinco linhas, e o sinal precisa ser legível antes da
+   palavra: quem decide passa o olho pela coluna, não lê a linha. */
+.doc h2.cmpH{margin-top:52px}
+/* A caixa que rola, e o motivo de ela existir: quatro colunas mais um rótulo
+   de linha por extenso não cabem em 380 px. Sem esta caixa a tabela empurrava o
+   DOCUMENTO para o lado — a página inteira andava na horizontal e o hero saía
+   da tela junto. Em inglês cabia por sorte; as outras quatro escrevem mais. */
+/* A caixa fica como rede de segurança, mas a tabela não tem largura mínima:
+   ela quebra a linha do rótulo em vez de empurrar o documento para o lado. */
+.cmpEnvolve{overflow-x:auto;margin:18px 0 0}
+table.cmpCurta{width:100%;border-collapse:collapse;font-size:15px}
+table.cmpCurta th,table.cmpCurta td{border-bottom:1px solid var(--line);padding:11px 10px;text-align:left}
+table.cmpCurta thead th{font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+table.cmpCurta th:not(:first-child),table.cmpCurta td:not(:first-child){text-align:center;width:16%}
+table.cmpCurta tbody th{font-weight:550}
+/* `--err` para o "não", e ele existe: já houve meses em que a variável não
+   estava declarada e a célula do "não" ficava da cor do texto — a tabela
+   inteira parecia dizer que sim. */
+table.cmpCurta td.sim{color:var(--accent);font-weight:700;font-size:17px}
+table.cmpCurta td.nao{color:var(--err);font-weight:700;font-size:17px}
+
+/* A figura de quatro estados, no lugar do vídeo que apontava para arquivos que
+   não existem. Ela rola dentro da própria caixa: a 380 px de largura, forçar
+   904 px de desenho na página daria rolagem lateral no documento inteiro. */
+/* SEM `min-width`, e isso é uma regra do projeto e não uma preferência:
+   `vitrine.mjs` cobra que NADA fique pendurado para fora da tela — nem o que
+   rola por dentro. Uma tabela com 560 px de largura mínima já tinha ensinado
+   isso. Então a figura encolhe junto com a coluna; num telefone ela vira uma
+   tira pequena, e os quatro estados continuam ditos no parágrafo acima dela. */
+.figRodada{margin:20px 0 0}
+.figRodada svg{display:block;width:100%;height:auto}
+.figRodada figcaption{margin-top:10px;font-size:14px;color:var(--muted);max-width:62ch}
+
+/* A CALCULADORA. `hidden` no HTML; o script a destrava. Sem JS ela não aparece,
+   em vez de aparecer com quatro campos que não somam nada. */
+.roi{margin-top:52px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:24px}
+.roi[hidden]{display:none}
+.roiCampos{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;margin:18px 0 0}
+.roiCampos p{margin:0;display:flex;flex-direction:column;gap:6px}
+.roiCampos label{font-size:13.5px;color:var(--muted);font-weight:550}
+.roiCampos input{font:inherit;font-size:16px;padding:9px 11px;border:1px solid var(--line);
+      border-radius:9px;background:var(--bg);color:var(--ink);width:100%;box-sizing:border-box}
+.roiCampos input:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.roiSaida{list-style:none;padding:0;margin:20px 0 0;display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px}
+.roiSaida li{display:flex;flex-direction:column;gap:3px}
+.roiSaida span{font-size:13px;color:var(--muted)}
+.roiSaida b{font-size:21px;font-weight:680;letter-spacing:-.01em}
+.roi .roiNota{margin:16px 0 0;max-width:62ch}
+
+/* A LISTA COMPLETA, RECOLHIDA. Nasce aberta — <details> fechado esconde o texto
+   do Ctrl+F e do buscador, e esta lista é a página inteira em palavras. Quem
+   fecha no telefone é o script. */
+.listaCompleta{margin-top:18px;border:1px solid var(--line);border-radius:14px;padding:0 20px}
+.listaCompleta>summary{cursor:pointer;padding:16px 0;font-weight:620;font-size:15.5px;list-style-position:inside}
+.listaCompleta>summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+.listaCompleta[open]>summary{border-bottom:1px solid var(--line);margin-bottom:14px}
+
+/* O FAQ de compra. `dl` e não uma pilha de h3: são pares pergunta/resposta, e
+   um leitor de tela que anuncia "lista de definições, 6 itens" já dá o mapa. */
+.faqCompra{margin:18px 0 0;display:grid;gap:16px}
+.faqCompra dt{font-weight:620;font-size:15.5px}
+.faqCompra dd{margin:5px 0 0;color:var(--muted);max-width:74ch}
+
+/* No telefone, aperta o respiro da tabela antes de deixar rolar: rolagem que
+   existe mas não precisa ser usada é melhor do que rolagem obrigatória. */
+@media (max-width:520px){
+  table.cmpCurta th,table.cmpCurta td{padding:9px 5px;font-size:14px}
+  table.cmpCurta thead th{font-size:11.5px;letter-spacing:.03em}
 }

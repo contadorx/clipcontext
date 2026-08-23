@@ -16,14 +16,15 @@
  * `fora_do_cliente`, `nao_a_si`). Elas moram no Postgres e são provadas lá —
  * uma página que "esconde o botão" não é controle de acesso.
  */
-import { chromium } from 'playwright';
+import { chromium } from './_navegador.mjs';
 import { spawn, execSync } from 'child_process';
 import http from 'http';
 import fs from 'fs';
+import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
 /* O menu sai do `rotas.json`, a mesma tabela que o painel usa. Escrito aqui,
    seria a lista de mentira ao lado da de verdade. */
 const MENU_CONTA = JSON.parse(
-  fs.readFileSync('/root/walkstamp/src/rotas.json', 'utf8')).menuConta;
+  fs.readFileSync(`${RAIZ_WS}/src/rotas.json`, 'utf8')).menuConta;
 
 const P = 8817, B = 8818;
 const BASE = `http://localhost:${P}`;
@@ -102,7 +103,7 @@ matarPorta();
 await new Promise((r) => setTimeout(r, 500));
 
 const next = spawn('npx', ['next', 'start', '-p', String(P)], {
-  cwd: '/root/walkstamp', stdio: 'ignore',
+  cwd: `${RAIZ_WS}`, stdio: 'ignore',
   env: { ...process.env,
     SUPABASE_URL: `http://localhost:${B}`,
     SUPABASE_SERVICE_ROLE_KEY: 'chave_de_mentira',
@@ -114,7 +115,7 @@ for (let i = 0; i < 60; i++) {
   await new Promise((r) => setTimeout(r, 500));
 }
 
-const br = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
+const br = await chromium.launch({ executablePath: CHROME_WS });
 const b64 = (o) => Buffer.from(JSON.stringify(o)).toString('base64url');
 const ctx = await br.newContext({ viewport: { width: 1200, height: 1400 } });
 {
@@ -388,7 +389,7 @@ console.log('\n[11] os cinco idiomas: o menu, a rota do time e o rodapé');
    MESMA tabela que o `next.config.mjs` usa para a ponte de reescrita e que o
    `lib/conta/nav.ts` usa para o menu — se o teste tivesse a própria cópia, ele
    passaria a provar que a cópia dele está certa, e não o produto. */
-const ROTAS_JSON = JSON.parse(fs.readFileSync('/root/walkstamp/src/rotas.json', 'utf8'));
+const ROTAS_JSON = JSON.parse(fs.readFileSync(`${RAIZ_WS}/src/rotas.json`, 'utf8'));
 const RAIZ = { pt: '/conta', en: '/en/account', es: '/es/cuenta', de: '/de/konto', fr: '/fr/compte' };
 for (const [L, menuTime] of [['pt', 'Time'], ['en', 'Team'], ['es', 'Equipo'],
                              ['de', 'Team'], ['fr', 'Équipe']]) {

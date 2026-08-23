@@ -3,9 +3,10 @@
 import { chromium } from 'playwright';
 import http from 'http'; import fs from 'fs';
 import { criarProxy, exigirNext } from './proxy.mjs';
+import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
 await exigirNext();
 
-const ROOT = '/root/walkstamp/public';
+const ROOT = `${RAIZ_WS}/public`;
 const tipos = { '.css':'text/css', '.svg':'image/svg+xml', '.js':'text/javascript', '.ico':'image/x-icon' };
 /* O site virou Next.js: as páginas não existem mais como arquivo em public/.
    O servidorzinho estático daqui virou um encaminhador para o Next — mesma
@@ -13,7 +14,7 @@ const tipos = { '.css':'text/css', '.svg':'image/svg+xml', '.js':'text/javascrip
 const srv = criarProxy();
 await new Promise(r => srv.listen(8919, r));
 
-const br = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
+const br = await chromium.launch({ executablePath: CHROME_WS });
 let falhas = 0;
 const ok = (n, c, extra) => { console.log((c ? '  ok   ' : '  FALHA') + '  ' + n + (extra ? '  → ' + extra : '')); if (!c) falhas++; };
 const ctx = await br.newContext({ permissions: ['clipboard-read','clipboard-write'] });
@@ -27,7 +28,7 @@ console.log('[1] a página existe nos três idiomas e está no mapa');
     ok(u + ' abre', (await pg.locator('h1').textContent()).includes(marca),
        (await pg.locator('h1').textContent()).slice(0, 45));
   }
-  const sm = fs.readFileSync(ROOT + '/sitemap.xml', 'utf8');
+  const sm = fs.readFileSync(ROOT + '/sitemap-paginas.xml', 'utf8');
   ok('as três versões estão no sitemap',
      sm.includes('/time<') && sm.includes('/en/team<') && sm.includes('/es/equipo<'));
   await pg.close();

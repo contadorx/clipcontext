@@ -11,6 +11,7 @@
  */
 import fs from 'node:fs';
 import FIGURAS from '@/src/figuras.json';
+import PRECOS from '@/src/precos.json';
 import path from 'node:path';
 
 /* Tudo o que se lê daqui mora em `src/`, e o caminho é montado com esse prefixo
@@ -45,6 +46,8 @@ const rotas: {
   /* Quais idiomas têm vídeo do tour. Escrito pelo `build.py`, que olha o disco —
      ver o comentário no ponto de uso, mais abaixo. */
   demoLangs?: string[];
+  /* E quem tem o vídeo da rodada paga, que vive na página de preços. */
+  rodadaLangs?: string[];
   caminhoConta: Record<Lang, string>;
   slugs: Record<string, Record<Lang, string>>;
   metas: Record<string, Record<Lang, { titulo: string; desc: string }>>;
@@ -154,12 +157,12 @@ function seletor(lang: Lang, pagina: string): string {
     return `<a href="${href}"${atual}>${L.toUpperCase()}</a>`;
   });
   return '<span style="display:inline-flex;gap:9px;border-left:1px solid var(--line);' +
-    'padding-left:16px">' + itens.join('') + '</span>';
+    'padding-left:12px">' + itens.join('') + '</span>';
 }
 
 /* ------------------------------------------------ a tabela de funcionalidades */
 
-type Feature = { planos: string; breve?: boolean } & Record<string, unknown>;
+type Feature = { planos: string; estado?: string } & Record<string, unknown>;
 type Grupo = { id: string; titulo: Record<Lang, string>; itens: Feature[] };
 
 const features: { grupos: Grupo[] } = JSON.parse(ler('features.json'));
@@ -196,6 +199,37 @@ function seloDoPlano(planos: string, t: Dicionario): string {
  *  com a contagem de cada um, e a pessoa abre o que é o problema dela. O
  *  conteúdo é o mesmo, e nada ficou escondido: os grupos nascem abertos.
  */
+/* O ESTADO DE UMA FUNCIONALIDADE — quatro, e não o liga-desliga de antes.
+ *
+ * O catálogo tinha `breve: true` ou nada, e "nada" queria dizer duas coisas
+ * diferentes que ninguém separava: o que está pronto e o que FUNCIONA mas tem
+ * uma ressalva que quem compra precisa saber. "Entrada automática por domínio
+ * de e-mail" era o exemplo: a tabela existe, a licença concede por domínio — e
+ * não há tela para a empresa cadastrar o domínio nem prova nenhuma de que ela
+ * é dona dele. As linhas entram à mão. Vendida como pronta, ela promete um
+ * self-service que não existe; escondida, some um recurso que funciona.
+ *
+ * `estado` ausente quer dizer `producao`. É um campo só, e não dois: `breve`
+ * foi absorvido por ele, porque duas listas para a mesma verdade é como este
+ * projeto já perdeu o hreflang de dois idiomas e deixou o tour em inglês numa
+ * página alemã. */
+type Estado = 'producao' | 'beta' | 'construcao' | 'descoberta';
+export const estadoDe = (item: Feature): Estado =>
+  ((item.estado as Estado) || 'producao');
+
+const SELO: Record<Estado, { classe: string; chave: string } | null> = {
+  producao: null,
+  beta: { classe: 'beta', chave: 'tpBeta' },
+  construcao: { classe: 'soon', chave: 'tpBreve' },
+  descoberta: { classe: 'descoberta', chave: 'tpDescoberta' },
+};
+
+function seloDoEstado(item: Feature, t: Dicionario): string {
+  const selo = SELO[estadoDe(item)];
+  if (!selo) return '';
+  return ` <span class="${selo.classe}">${escapar(String(t[selo.chave] ?? ''))}</span>`;
+}
+
 export function tabelaDePlanos(lang: Lang, t: Dicionario): string {
   const gratis = features.grupos.reduce(
     (n, g) => n + g.itens.filter((i) => i.planos.includes('f')).length, 0);
@@ -205,8 +239,7 @@ export function tabelaDePlanos(lang: Lang, t: Dicionario): string {
     const pagosNoGrupo = g.itens.filter((i) => !i.planos.includes('f')).length;
     const itens = g.itens.map((item) => {
       const rotulo = escapar(String(item[lang] ?? item.en ?? ''));
-      const breve = item.breve ? ` <span class="soon">${escapar(t.tpBreve)}</span>` : '';
-      return `<li>${rotulo}${breve}${seloDoPlano(item.planos, t)}</li>`;
+      return `<li>${rotulo}${seloDoEstado(item, t)}${seloDoPlano(item.planos, t)}</li>`;
     }).join('');
     /* A contagem no título é o que deixa a lista fechada ainda informativa:
        "O que sai (15)" já responde "vale a pena abrir?" antes do clique. */
@@ -228,7 +261,7 @@ export function tabelaDePlanos(lang: Lang, t: Dicionario): string {
   }).join('');
 
   return `<p class="small muted tpRegra">${preencherTexto(t.tpResumo, [quantasFeatures, gratis, pagas])}</p>` +
-    `<div class="listaF" aria-label="${escapar(t.tpLegenda)}">${blocos}</div>`;
+    `<div class="listaF" aria-label="${escapar(t.tpListaRot)}">${blocos}</div>`;
 }
 
 /** `{0}`, `{1}`… trocados por números. Existe para o resumo acima da lista sair
@@ -253,6 +286,100 @@ export const quantasFeatures = features.grupos.reduce((n, g) => n + g.itens.leng
  *  uma tarde de erros de digitação. O React aqui é a casca — `<html>`, `<head>`
  *  e as tags de script; o conteúdo continua sendo conteúdo.
  */
+/* ---- OS DADOS ESTRUTURADOS DAS PÁGINAS FIXAS ----
+ *
+ * Eles não mudam ONDE a página aparece; mudam COMO ela aparece — é o único
+ * item desta rodada que mexe na cara do resultado, e não só na posição.
+ *
+ * Três formatos, um por natureza de página:
+ *
+ *   `SoftwareApplication` na home — é o que a ferramenta É, e é o que permite
+ *     ao resultado mostrar categoria e preço. `price: 0` não é marketing: a
+ *     ferramenta no navegador é gratuita, e declarar isso onde o buscador lê é
+ *     a mesma frase que a página já diz.
+ *
+ *   `FAQPage` na base de conhecimento — e ele é LIDO DO CORPO, pergunta por
+ *     pergunta. Escrever as perguntas de novo aqui seria a segunda lista ao lado
+ *     da lista de verdade, e a divergência seria invisível: a página diria uma
+ *     coisa e o buscador leria outra. Pior que isso, marcação de FAQ que não
+ *     corresponde ao texto visível é motivo de punição — e com razão.
+ *
+ *   `BreadcrumbList` nas demais — a trilha que faz o resultado mostrar o
+ *     caminho em vez do endereço cru.
+ *
+ * `Organization` viaja em todas, como publicador: é o que amarra as páginas a
+ * uma entidade só em vez de a um punhado de endereços soltos.
+ */
+function faqDoCorpo(corpo: string): Array<{ q: string; a: string }> {
+  const limpo = (h: string) => h
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"')
+    .replace(/&#39;|&apos;/g, "'")
+    .replace(/\s+/g, ' ').trim();
+  const fora: Array<{ q: string; a: string }> = [];
+  const re = /<details\b[^>]*>([\s\S]*?)<\/details>/gi;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(corpo))) {
+    const dentro = m[1];
+    const s2 = dentro.match(/<summary\b[^>]*>([\s\S]*?)<\/summary>/i);
+    if (!s2) continue;
+    const q = limpo(s2[1]);
+    const a = limpo(dentro.slice((s2.index || 0) + s2[0].length));
+    /* Resposta curta demais não é resposta — e uma entrada de FAQ sem conteúdo
+       é exatamente o tipo de marcação vazia que não deve existir. */
+    if (q.length > 3 && a.length > 25) fora.push({ q, a });
+  }
+  return fora;
+}
+
+function dadosEstruturados(pagina: string, lang: Lang, t: Dicionario, corpo: string): string {
+  const site = marca.site;
+  const url = site + endereco(pagina, lang);
+  const org = {
+    '@type': 'Organization', name: marca.marca, url: site,
+    logo: { '@type': 'ImageObject', url: `${site}/logo.svg` },
+    legalName: marca.empresa, email: marca.contato,
+  };
+  const blocos: unknown[] = [];
+
+  if (pagina === 'home') {
+    blocos.push({
+      '@context': 'https://schema.org', '@type': 'SoftwareApplication',
+      name: marca.marca, url: site, inLanguage: lang,
+      applicationCategory: 'BusinessApplication',
+      operatingSystem: 'Web browser',
+      description: String(t.docDesc || t.metaDesc || ''),
+      offers: { '@type': 'Offer', price: '0', priceCurrency: 'BRL' },
+      publisher: org,
+    });
+  } else {
+    const faq = pagina === 'ajuda' ? faqDoCorpo(corpo) : [];
+    if (faq.length) {
+      blocos.push({
+        '@context': 'https://schema.org', '@type': 'FAQPage', inLanguage: lang,
+        mainEntity: faq.map((f) => ({
+          '@type': 'Question', name: f.q,
+          acceptedAnswer: { '@type': 'Answer', text: f.a },
+        })),
+      });
+    }
+    blocos.push({
+      '@context': 'https://schema.org', '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: marca.marca, item: site + endereco('home', lang) },
+        { '@type': 'ListItem', position: 2, name: String(t.docTitle || pagina).split(' — ')[0], item: url },
+      ],
+    });
+  }
+  blocos.push({ '@context': 'https://schema.org', ...org });
+
+  return blocos.map((b) =>
+    '<script type="application/ld+json">' +
+    JSON.stringify(b).replace(/</g, '\\u003c').replace(/>/g, '\\u003e') +
+    '</script>').join('\n');
+}
+
 export function paginaHtml(pagina: string, lang: Lang): string {
   const t = tokens(lang);
   t.selfPath = endereco(pagina, lang);
@@ -264,6 +391,13 @@ export function paginaHtml(pagina: string, lang: Lang): string {
     .replace('{1}', '</a>');
   // a tabela só é montada onde é usada; nas outras páginas o token vira vazio
   t.tabelaPlanos = pagina === 'precos' ? tabelaDePlanos(lang, t) : '';
+  /* O vídeo da rodada mora na página de PREÇOS, e por isso o token nasce aqui
+     e não no ramo da home — onde a primeira versão dele ficou, derrubando o
+     build com "chaves sem valor em precos.pt: rodadaLang". Onde o vídeo não
+     existe, cai no inglês, pelo mesmo motivo do tour: um `<video>` apontando
+     para um 404 é uma caixa preta, que é pior do que outro idioma. */
+  const comRodada: string[] = rotas.rodadaLangs ?? ['en'];
+  t.rodadaLang = comRodada.includes(lang) ? lang : 'en';
   t.quantasFeatures = String(quantasFeatures);
 
   let bruto: string;
@@ -309,9 +443,47 @@ export function paginaHtml(pagina: string, lang: Lang): string {
     t.figura = ((FIGURAS as Record<string, string>)[pagina] ?? '')
       .replace('__ALT__', String(t.figAlt ?? ''))
       .replace('__LEG__', String(t.figLegenda ?? ''));
+    /* OS DOIS BLOCOS GERADOS DA PÁGINA DE PREÇOS.
+       Cartões e comparação curta saem de constantes nomeadas no `build.py` e
+       chegam aqui como dado, pelo `precos.json` — o mesmo caminho das figuras.
+       Escritos à mão dentro dos cinco corpos, tirar uma linha da comparação
+       custaria cinco edições, e a quinta seria esquecida.
+
+       O `trocar` roda ANTES de o bloco entrar no corpo porque os CTAs trazem
+       `{{app}}` e `{{conta}}` dentro. Se ele entrasse cru, os endereços
+       dependeriam da ordem em que as chaves saem do dicionário — e a guarda de
+       chave sobrando derrubaria o build, ou pior, não derrubaria. */
+    if (pagina === 'precos') {
+      const bl = (PRECOS as Record<string, Record<string, string>>)[lang];
+      t.cartoesPlanos = trocar(bl?.cartoes ?? '', t);
+      t.comparacaoCurta = bl?.comparacao ?? '';
+      /* Preço e mínimo como token: a calculadora e o texto de cobrança
+         precisam do número na moeda do idioma, e cada cópia à mão num corpo
+         traduzido é uma chance de o alemão anunciar um preço que não existe.
+
+         UM POR LINHA, e não num laço sobre uma lista de nomes. O `build.py`
+         descobre as chaves que o Next escreve lendo `t.<nome> =` daqui — é
+         assim que ele evita manter uma segunda lista dos mesmos nomes. Um laço
+         é invisível para essa leitura, e o build volta a acusar chave sem
+         valor em cinco idiomas a cada vez, que é o aviso falso que esconde o
+         verdadeiro. */
+      t.precoPersonal = bl?.precoPersonal ?? '';
+      t.precoTeam = bl?.precoTeam ?? '';
+      t.precoTeamMin = bl?.precoTeamMin ?? '';
+      t.personalNum = bl?.personalNum ?? '';
+      t.teamNum = bl?.teamNum ?? '';
+      t.teamMinimo = bl?.teamMinimo ?? '';
+      t.minimoFrase = bl?.minimoFrase ?? '';
+      t.figuraRodada = ((FIGURAS as Record<string, string>).rodada ?? '')
+        .replace('__ALT__', String(t.rodadaAlt ?? ''))
+        .replace('__LEG__', String(t.rodadaLeg ?? ''));
+    }
     t.body = trocar(ler(`site/bodies/${pagina}.${lang}.html`), t);
     bruto = ler('site/doc.html');
   }
+  /* Depois do corpo, porque o FAQ é LIDO dele. Antes do `trocar`, porque é ele
+     que troca o `{{jsonld}}` pelo bloco. */
+  t.jsonld = dadosEstruturados(pagina, lang, t, String(t.body || ''));
 
   const inteiro = trocar(bruto, t);
   const sobrando = [...new Set([...inteiro.matchAll(/\{\{(\w+)\}\}/g)].map((m) => m[1]))];

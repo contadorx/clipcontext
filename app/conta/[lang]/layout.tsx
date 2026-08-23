@@ -1,6 +1,14 @@
-/* A área do cliente tem a casca do site, mas não o menu do site: quem está aqui
-   veio resolver uma coisa (fatura, chamado, assento) e não é hora de oferecer as
-   páginas de venda.
+/* A área do cliente tem a casca do site — e agora o MENU do site também.
+
+   Ela não tinha, e o argumento era este: "quem está aqui veio resolver uma coisa
+   (fatura, chamado, assento) e não é hora de oferecer as páginas de venda". O
+   argumento continua bom para o CORPO da página e continua valendo lá: não há
+   oferta nenhuma dentro do painel.
+
+   Mas o cabeçalho não é o corpo. Ele é a moldura, e uma moldura que muda de
+   página para página ensina que se saiu do produto — que é o oposto do que uma
+   área de cliente precisa dizer. Três telas da mesma marca, três menus
+   diferentes, e a marca dando um passo para o lado a cada pulo.
 
    O layout mora dentro de `[lang]` pelo mesmo motivo que o do site: é a única
    forma de o `<html lang>` ser o idioma da página. O endereço público não tem o
@@ -48,8 +56,16 @@ export default async function LayoutDaConta({ children, params }: LayoutProps<'/
               <span>{marca.marcaA}<b>{marca.marcaB}</b></span>
             </a>
             <nav>
+              {/* Os MESMOS itens do site e da ferramenta, na mesma ordem e com
+                  as mesmas quebras. Os rótulos e os endereços saem do dicionário
+                  e das rotas do site — escrevê-los aqui seria a terceira cópia
+                  da mesma lista. */}
+              <a href={`${rota('home')}#como`} className="hide-sm">{s3.navHow}</a>
+              <a href={rota('comparativo')} className="hide-sm">{s3.navComp}</a>
+              <a href={rota('precos')} className="hide-xs">{s3.navPrice}</a>
+              <a href={s3.blog} className="hide-sm">{s3.fBlog}</a>
               <a className="btnTop" href={`/app?lang=${lang}`}>{t.abrirFerramenta}</a>
-              <span style={{ display: 'inline-flex', gap: 9, borderLeft: '1px solid var(--line)', paddingLeft: 16 }}>
+              <span style={{ display: 'inline-flex', gap: 9, borderLeft: '1px solid var(--line)', paddingLeft: 12 }}>
                 {IDIOMAS_CONTA.map((L) => (
                   <a key={L} href={CAMINHO[L]}
                      style={L === lang ? { color: 'var(--ink)', fontWeight: 600 } : undefined}>

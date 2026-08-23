@@ -1,7 +1,8 @@
 /* Cartões colapsados: fecham quando o passo não chegou, abrem quando destrava. */
 import { chromium } from 'playwright';
 import http from 'http'; import fs from 'fs'; import path from 'path';
-const ROOT='/root/walkstamp/public';
+import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+const ROOT=`${RAIZ_WS}/public`;
 const T={'.html':'text/html','.css':'text/css','.js':'text/javascript','.webm':'video/webm','.png':'image/png','.svg':'image/svg+xml','.ico':'image/x-icon'};
 const srv=http.createServer((q,r)=>{
   if(q.url.startsWith('/_vercel/')){r.writeHead(200,{'Content-Type':'text/javascript'});return r.end('')}
@@ -9,7 +10,7 @@ const srv=http.createServer((q,r)=>{
   if(!fs.existsSync(f)){r.writeHead(404);return r.end()}
   r.writeHead(200,{'Content-Type':T[path.extname(f)]||'application/octet-stream'});r.end(fs.readFileSync(f));});
 await new Promise(r=>srv.listen(8878,r));
-const br=await chromium.launch({executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome'});
+const br=await chromium.launch({executablePath:CHROME_WS});
 let falhas=0; const ok=(n,c,e)=>{console.log((c?'  ok   ':'  FALHA')+'  '+n+(e?'  → '+e:''));if(!c)falhas++};
 const pg=await br.newPage({viewport:{width:1000,height:900}});
 const erros=[]; pg.on('pageerror',e=>erros.push(e.message));
@@ -41,12 +42,17 @@ ok('passo 4 (prompt) fechado', await fechado('promptCard'));
 ok('o passo 3 EXISTE na tela (a numeração não pula)',
    await pg.locator('#prevCard').isVisible());
 ok('e explica quando vai servir',
-   /depois do passo 2/.test(await pg.locator('#hintPrev').textContent()),
+   /depois da etapa 2/.test(await pg.locator('#hintPrev').textContent()),
    await pg.locator('#hintPrev').textContent());
 {
   const nums = await pg.locator('.card .step').allTextContents();
-  ok('os quatro passos estão numerados em sequência',
-     JSON.stringify(nums) === JSON.stringify(['1','2','3','4']), nums.join(','));
+  /* TRÊS, e não quatro. O quarto era o prompt para IA — a numeração dizia que
+     entregar o vídeo a uma máquina é um quarto da tarefa, e para a maioria não
+     é tarefa nenhuma: quem vinha gravar uma tela terminava o trabalho olhando
+     para um passo por fazer. O cartão continua na página, oferecido no fim
+     junto dos outros próximos passos; o que saiu foi o número. */
+  ok('os passos estão numerados em sequência, e são três',
+     JSON.stringify(nums) === JSON.stringify(['1','2','3']), nums.join(','));
 }
 ok('o cabeçalho e a dica continuam visíveis',
    await pg.locator('#cardTr h2').isVisible() && await pg.locator('#hintTr').isVisible());

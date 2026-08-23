@@ -4,7 +4,16 @@
     "",
     "REGRA DE OURO deste arquivo: só entra o que EXISTE. Uma linha aqui vira uma",
     "marca de visto numa tabela de preço, e uma marca de visto é uma promessa.",
-    "O que ainda não existe entra com \"breve\": true, e sai escrito como tal.",
+    "Cada linha carrega um ESTADO, e a ausência dele quer dizer `producao`:",
+    "  producao   — existe, é self-service, e foi provada de ponta a ponta;",
+    "  beta       — funciona, mas com uma ressalva que quem compra precisa saber",
+    "               (não é self-service, depende de nós, falta uma prova);",
+    "  construcao — ainda não existe. Era o antigo \"breve\": true;",
+    "  descoberta — não estamos construindo: ainda estamos aprendendo se vale.",
+    "",
+    "REGRA: o estado é UM campo, e não dois. `breve` foi absorvido por ele — duas",
+    "listas para a mesma verdade é como o alemão ficou sem hreflang e depois",
+    "vendo o tour em inglês. Quem precisa do booleano deriva de `estado`.",
     "",
     "`planos` é uma string com as letras de quem tem: f = Free, p = Personal,",
     "t = Team. Quase tudo é \"fpt\", e isso é a tese do produto, não um descuido —",
@@ -172,6 +181,7 @@
           "fr": "Contrôle flottant : horloge, niveau des deux canaux et boutons"
         },
         {
+          "id": "clipe",
           "planos": "fpt",
           "pt": "Clipe de vídeo dos 15 s de cada momento marcado",
           "en": "A 15 s video clip around each marked moment",
@@ -232,12 +242,23 @@
           "fr": "Corriger la parole segment par segment, dans la loupe de la capture"
         },
         {
+          "id": "termosAplicados",
           "planos": "fpt",
           "pt": "Termos do seu sistema, aplicados de uma vez na transcrição",
           "en": "Your system's terms, applied to the transcript in one go",
           "es": "Términos de tu sistema, aplicados de una vez a la transcripción",
           "de": "Begriffe Ihres Systems, auf einmal auf das Transkript angewendet",
           "fr": "Les termes de votre système, appliqués en une fois à la transcription"
+        },
+        {
+          "id": "termosGuardados",
+          "estado": "construcao",
+          "planos": "pt",
+          "pt": "E a lista de termos guardada: volta na próxima visita, em qualquer máquina",
+          "en": "And the term list kept: it comes back next visit, on any machine",
+          "es": "Y la lista de términos guardada: vuelve en la próxima visita, en cualquier equipo",
+          "de": "Und die Begriffsliste bleibt: Sie kehrt beim nächsten Besuch zurück, auf jedem Rechner",
+          "fr": "Et la liste de termes conservée : elle revient à la prochaine visite, sur n’importe quelle machine"
         },
         {
           "planos": "pt",
@@ -356,6 +377,7 @@
           "fr": "Chapitres : un enregistrement devient plusieurs cas, chacun avec son temps"
         },
         {
+          "id": "revisaoAssistida",
           "planos": "fpt",
           "pt": "Revisão assistida: percorre passo a passo e recaptura só o que mudou",
           "en": "Guided review: walks step by step and recaptures only what changed",
@@ -736,6 +758,7 @@
           "fr": "Logo et nom du client dans le PDF, le Word et le HTML"
         },
         {
+          "id": "modeloProprio",
           "planos": "pt",
           "pt": "Salvar o que está na tela como modelo seu, e reaplicar em um clique",
           "en": "Save what is on screen as your own template, and reapply it in one click",
@@ -744,6 +767,7 @@
           "fr": "Enregistrer ce qui est à l’écran comme votre modèle, et le réappliquer en un clic"
         },
         {
+          "id": "perfilVolta",
           "planos": "pt",
           "pt": "Perfil que volta ao entrar, em qualquer máquina",
           "en": "A profile that comes back when you sign in, on any machine",
@@ -796,6 +820,7 @@
           "fr": "Durée de licence de votre choix, de 1 à 90 jours"
         },
         {
+          "id": "padraoDoTime",
           "planos": "t",
           "pt": "Padrão do time empurrado para todo mundo",
           "en": "The team's defaults pushed to everyone",
@@ -804,6 +829,8 @@
           "fr": "Réglages par défaut de l’équipe poussés à tous"
         },
         {
+          "id": "dominioAutomatico",
+          "estado": "beta",
           "planos": "t",
           "pt": "Entrada automática por domínio de e-mail",
           "en": "Automatic enrolment by email domain",

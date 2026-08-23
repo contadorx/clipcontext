@@ -1,18 +1,19 @@
 /* Passos 2 e 3 viraram um só, opcional, com três botões — e o texto da fala
    desceu para a revisão. */
-import { chromium } from 'playwright';
+import { chromium } from './_navegador.mjs';
 import http from 'http'; import fs from 'fs';
 
-const ROOT = '/root/walkstamp/public';
+import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+const ROOT = `${RAIZ_WS}/public`;
 const html = fs.readFileSync(ROOT + '/app.html', 'utf8');
-const jspdf = fs.readFileSync('/root/walkstamp/vendor/jspdf.umd.min.js', 'utf8');
+const jspdf = fs.readFileSync(`${RAIZ_WS}/vendor/jspdf.umd.min.js`, 'utf8');
 const srv = http.createServer((q, r) => {
   if (q.url.startsWith('/_vercel/')) { r.writeHead(200,{'Content-Type':'text/javascript'}); return r.end('') }
   r.writeHead(200, {'Content-Type':'text/html'}); r.end(html);
 });
 await new Promise(r => srv.listen(8917, r));
 
-const br = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
+const br = await chromium.launch({ executablePath: CHROME_WS });
 let falhas = 0;
 const ok = (n, c, extra) => { console.log((c ? '  ok   ' : '  FALHA') + '  ' + n + (extra ? '  → ' + extra : '')); if (!c) falhas++; };
 
@@ -26,20 +27,39 @@ await pg.goto('http://localhost:8917/app.html?lang=pt');
 await pg.selectOption('#modelo', 'ia').catch(() => {});
 await pg.waitForTimeout(400);
 
-console.log('[1] são quatro cartões, numerados 1 a 4');
+console.log('[1] são três cartões, numerados 1 a 3');
 {
+  /* ERAM QUATRO, e o quarto era o prompt para IA.
+     O build 2 o tirou da numeração — a numeração dizia que entregar o vídeo a
+     uma máquina é um quarto da tarefa, e para a maioria não é tarefa nenhuma —
+     e atualizou `conclusao.mjs`, que passou a cobrar "sobraram três passos" e
+     "nenhum deles é o 4". Este arquivo ficou cobrando o contrário.
+     Duas réguas afirmando o oposto sobre o mesmo fato é pior do que uma régua
+     desatualizada: a suíte passa a guardar duas verdades, e uma delas reprova
+     em toda execução até alguém aprender a ignorá-la. O cartão do prompt
+     continua na página — ele perdeu o número, não o lugar. */
   const nums = await pg.locator('.card .step').allTextContents();
-  ok('a numeração é 1,2,3,4', JSON.stringify(nums) === JSON.stringify(['1','2','3','4']), nums.join(','));
+  ok('a numeração é 1,2,3', JSON.stringify(nums) === JSON.stringify(['1','2','3']), nums.join(','));
+  ok('e o cartão do prompt continua existindo, sem número',
+     (await pg.locator('#promptBox').count()) === 1);
   ok('o cartão dos frames não existe mais sozinho', (await pg.locator('#cardFrames').count()) === 0);
-  ok('o passo 2 diz que é opcional',
-     /opcional/i.test(await pg.locator('#cardTr h2').textContent()),
+  /* O rótulo "opcional" saiu, e o número junto. Este cartão carrega `#auto`,
+     `#extract` e os ajustes de extração — chamá-lo de passo OPCIONAL era a
+     numeração dizendo que o botão que faz a ferramenta funcionar é dispensável.
+     Ele passou a ser a segunda metade da ENTRADA, sem número próprio. */
+  ok('o cartão da fala NÃO é mais uma etapa numerada',
+     (await pg.locator('#cardTr h2 .step').count()) === 0 &&
+     !/opcional/i.test(await pg.locator('#cardTr h2').textContent()),
      await pg.locator('#cardTr h2').textContent());
   /* Ele deixou de se chamar "Transcrição e frames": os frames não moram mais
      aqui como decisão — eles saem sozinhos. O que sobra neste cartão é a fala. */
   ok('e ele fala da FALA, não mais dos frames',
      !/frame/i.test(await pg.locator('#cardTr h2').textContent()),
      await pg.locator('#cardTr h2').textContent());
-  ok('o passo 3 é a revisão', /Revis/.test(await pg.locator('#prevCard h2').textContent()));
+  ok('a etapa 2 é conferir', /Conferir/.test(await pg.locator('#prevCard h2').textContent()));
+  /* E a etapa 3 existe, separada. Gerar era o quarto bloco de "Revisão" — a
+     acao que a pessoa veio fazer, escondida como sub-item de outra coisa. */
+  ok('e a etapa 3 é baixar', /Baixar/.test(await pg.locator('#cardBaixar h2').textContent()));
 }
 
 console.log('\n[2] o passo 2 tem DOIS botões, a ação antes dos ajustes');

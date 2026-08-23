@@ -20,12 +20,13 @@
  *
  *   node testes/passomulti.mjs
  */
-import { chromium } from 'playwright';
+import { chromium } from './_navegador.mjs';   // abre os painéis e a gaveta das saídas
 import http from 'http';
 import fs from 'fs';
 import { execSync } from 'child_process';
 
-const RAIZ = '/root/walkstamp';
+import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+const RAIZ = `${RAIZ_WS}`;
 const html = fs.readFileSync(RAIZ + '/public/app.html', 'utf8');
 const jspdf = fs.readFileSync(RAIZ + '/vendor/jspdf.umd.min.js', 'utf8');
 const srv = http.createServer((q, r) => {
@@ -43,7 +44,7 @@ const ok = (n, c, e) => {
 };
 
 const br = await chromium.launch({
-  executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome',
+  executablePath: CHROME_WS,
 });
 const ctx = await br.newContext({ acceptDownloads: true, viewport: { width: 1250, height: 980 } });
 const pg = await ctx.newPage();
@@ -251,9 +252,29 @@ console.log('\n[5c] o índice lista passos anotados, e não repete a narração'
      JSON.stringify(linhas));
 
   /* O CASO QUE SEPARA AS DUAS RÉGUAS, e sem ele o bloco acima passaria com o
-     defeito ligado: aqui SÓ O PRIMEIRO passo tem anotação. Um índice enxuto
-     lista uma linha; o índice antigo listava duas, e a segunda era o começo da
-     narração que já aparece embaixo da imagem. */
+     defeito ligado: aqui SÓ O PRIMEIRO passo tem anotação. O índice antigo
+     listava duas linhas, e a segunda era o começo da narração que já aparece
+     embaixo da imagem.
+
+     ---- ESTA AFIRMAÇÃO MUDOU, e vale dizer por quê ----
+
+     Ela dizia "só o anotado entra", e passou muito tempo verde afirmando o
+     comportamento errado. O que ela QUERIA garantir está no comentário acima e
+     no título do bloco: **o índice não repete a narração**. O que ela cobrava,
+     porém, era a implementação que por acaso conseguia isso — DERRUBAR A LINHA
+     do passo sem nome.
+
+     As duas coisas se separaram em produção. O quadro automático do começo da
+     gravação não é marcado por ninguém e, sem roteiro, não recebe título; os
+     passos seguintes, marcados no botão, recebem. Bastava isso para o passo 1
+     sumir do índice: quatro passos no documento e três linhas no índice,
+     começando no Passo 2, com o corpo do documento mostrando o Passo 1 do
+     mesmo jeito. O índice e o documento discordavam sobre quantos passos
+     existem — e quem confere uma evidência confere pelo índice.
+
+     A afirmação nova cobra as DUAS coisas, e por isso é mais apertada que a
+     antiga: a linha do passo sem nome existe, E o texto dela não é a narração.
+     Ver `testes/indice.mjs` para os quatro cenários completos. */
   const misto = await pg.evaluate(() => {
     const q = window.__quadros();
     const guardada = q[3].nota;
@@ -263,8 +284,14 @@ console.log('\n[5c] o índice lista passos anotados, e não repete a narração'
     return r;
   });
   console.log('     com só um passo anotado: ' + JSON.stringify(misto));
-  ok('com um passo anotado e outro não, só o anotado entra',
-     misto.length === 1 && misto[0] === '1|Abrir a ME21N', JSON.stringify(misto));
+  ok('nenhum passo sai do índice por não ter nome', misto.length === 2,
+     JSON.stringify(misto));
+  ok('o anotado entra com a anotação', misto[0] === '1|Abrir a ME21N',
+     JSON.stringify(misto));
+  /* O QUE A RÉGUA ANTIGA GUARDAVA, e continua guardado: o passo sem nome entra
+     com o travessão, e não com a fala que já está três centímetros abaixo. */
+  ok('e o sem nome entra com o travessão, não com a narração repetida',
+     misto[1] === '2|—', JSON.stringify(misto));
 
   /* A OUTRA METADE: sem nenhuma anotação o índice não pode ficar vazio — aí a
      narração é tudo o que há, e ele volta a listar todos os passos. */
@@ -345,7 +372,7 @@ console.log('\n[8] cortar só ESTA tela não mexe nas outras');
   await pg.evaluate(() => { (window.__quadros() || []).forEach(f => { f.keep = true; }); });
   await redesenhar();
   const antes = await pg.evaluate(() => (window.__quadros() || []).map(f => f.img.w));
-  await pg.locator('#thumbs figure .lupa').nth(1).click();
+  await pg.locator('#thumbs figure .editar').nth(1).click();
   await pg.waitForSelector('#lente:not(.hide)');
   await pg.locator('#cropUma').click();
   await pg.waitForTimeout(250);
@@ -412,7 +439,7 @@ console.log('\n[9] cortar UMA tela não deforma as outras no PDF');
   });
 
   // corta SÓ a primeira, que é o caso do relato
-  await pg.locator('#thumbs figure .lupa').first().click();
+  await pg.locator('#thumbs figure .editar').first().click();
   await pg.waitForSelector('#lente:not(.hide)');
   await pg.locator('#cropUma').click();
   await pg.waitForTimeout(250);

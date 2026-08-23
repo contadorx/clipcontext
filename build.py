@@ -480,6 +480,10 @@ def escrever_marca(root: pathlib.Path) -> None:
     # de o vídeo deles existir: o build.py conferia o arquivo e o lib/site.ts
     # tinha ['pt','en','es'] escrito dentro.
     com_tour = [L for L in IDIOMAS if (root / "public" / "demo" / f"tour.{L}.webm").exists()]
+    # E o mesmo para o vídeo da RODADA PAGA, que vive na página de preços. Ele
+    # nasceu nos cinco de uma vez, mas a lista sai do disco pelo mesmo motivo:
+    # a próxima língua a entrar no site vai entrar antes de entrar no estúdio.
+    com_rodada = [L for L in IDIOMAS if (root / "public" / "demo" / f"rodada.{L}.webm").exists()]
     # As sub-rotas do painel da conta, traduzidas. Elas são lidas pelo
     # `next.config.mjs` (que monta a ponte de reescrita) E pelo `lib/conta/nav.ts`
     # (que monta o menu). Duas tabelas para a mesma coisa é exatamente como o
@@ -551,7 +555,8 @@ def escrever_marca(root: pathlib.Path) -> None:
         {"slug": "negocio", "rotulo": "navNegocio", "quando": "dono",
          "icone": "M3 3v18h18 M7 15l4-4 3 3 5-6"},
     ]
-    rotas = {"idiomas": IDIOMAS, "demoLangs": com_tour, "subConta": sub_conta,
+    rotas = {"idiomas": IDIOMAS, "demoLangs": com_tour, "rodadaLangs": com_rodada,
+             "subConta": sub_conta,
              "abasNegocio": abas_negocio, "menuConta": menu_conta,
              "caminhoConta": CAMINHO_CONTA, "slugs": SLUGS,
              "metas": {pg: {L: {"titulo": m[L][0], "desc": m[L][1]} for L in IDIOMAS}
@@ -561,9 +566,15 @@ def escrever_marca(root: pathlib.Path) -> None:
     figs = {pg: figura_documento(c) for pg, c in CENARIO_DA_PAGINA.items()}
     figs["fluxo"] = figura_fluxo()
     figs["dobra"] = figura_dobra()
+    figs["rodada"] = figura_rodada()
     (root / "src" / "figuras.json").write_text(
         json.dumps(figs, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print("src/figuras.json  (as figuras dos casos de uso, sem uma palavra dentro)")
+
+    precos = {L: blocos_de_precos(L, ROTULOS_PRECOS[L]) for L in IDIOMAS}
+    (root / "src" / "precos.json").write_text(
+        json.dumps(precos, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    print("src/precos.json  (cartões e comparação curta, dos mesmos dados nos cinco idiomas)")
 
     arq = root / "src" / "rotas.json"
     arq.write_text(json.dumps(rotas, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
@@ -642,6 +653,7 @@ def build_site(root: pathlib.Path) -> None:
         # preta vazia no alto da home, que é a primeira coisa que a pessoa vê.
         # Cai no inglês até os dois serem gravados.
         t["demoLang"] = lang if (ROOT / "public" / "demo" / f"tour.{lang}.webm").exists() else "en"
+        t["rodadaLang"] = lang if (ROOT / "public" / "demo" / f"rodada.{lang}.webm").exists() else "en"
         t["redirect"] = REDIRECT if lang == "pt" else LEMBRAR
         # A figura do fluxo, na home. Ela não tem uma palavra dentro; o que
         # muda por idioma é o rótulo de acessibilidade e a legenda.
@@ -656,7 +668,12 @@ def build_site(root: pathlib.Path) -> None:
         for k, v in t.items():
             html = html.replace("{{" + k + "}}", str(v))
 
-        faltando = set(re.findall(r"\{\{(\w+)\}\}", html))
+        # `- chaves_do_render()` como na verificação das páginas internas, vinte
+        # linhas abaixo. Sem isto, a home acusava `jsonld` — que é escrito pelo
+        # `lib/site.ts` na hora de renderizar, e não pelo dicionário — e o build
+        # PARAVA. As duas verificações fazem a mesma pergunta e precisavam já
+        # estar fazendo do mesmo jeito; a de baixo já subtraía, a de cima não.
+        faltando = set(re.findall(r"\{\{(\w+)\}\}", html)) - chaves_do_render()
         if faltando:
             print(f"AVISO: chaves sem tradução em {lang}: {sorted(faltando)}", file=sys.stderr)
             return 1
@@ -714,9 +731,30 @@ def build_site(root: pathlib.Path) -> None:
             if sobrando:
                 print(f"AVISO: chaves sem valor em {pagina}.{lang}: {sorted(sobrando)}", file=sys.stderr)
 
-    # sitemap e robots: a página do Steps Recorder só serve se for encontrada,
-    # e um site sem mapa deixa o buscador adivinhar. As alternativas de idioma
-    # vão declaradas em cada URL, senão as três versões competem entre si.
+    # ---- O MAPA DAS PÁGINAS FIXAS ----
+    #
+    # A página do Steps Recorder só serve se for encontrada, e um site sem mapa
+    # deixa o buscador adivinhar. As alternativas de idioma vão declaradas em
+    # cada URL, senão as cinco versões competem entre si.
+    #
+    # ELE MUDOU DE NOME: era `sitemap.xml`, e virou `sitemap-paginas.xml`.
+    #
+    # O motivo é o blog. Um post publicado hoje precisa entrar no mapa hoje, e
+    # este arquivo só é escrito quando alguém faz um deploy — um post publicado
+    # pelo painel ficava fora do mapa até a próxima subida de código, que pode
+    # ser semanas. Então `/sitemap.xml` passou a ser um ÍNDICE servido pelo
+    # Next, apontando para dois mapas: este, que é fixo e nasce aqui, e o do
+    # blog, que é lido do banco a cada rastreio.
+    #
+    # Um arquivo em `public/` chamado `sitemap.xml` sombrearia a rota — no Next
+    # o estático ganha —, e por isso o nome mudou em vez de o índice ter outro.
+    # E ele continua sendo um arquivo em disco de propósito: quatro testes o
+    # leem sem subir servidor nenhum, e ler do disco é o que os mantém rápidos.
+    #
+    # `lastmod` entrou junto: sem ele o rastreador não tem como priorizar o que
+    # mudou, e reprocessa quarenta e cinco páginas iguais toda vez. A data é a
+    # do BUILD, que é literalmente quando estas páginas mudaram pela última vez.
+    hoje = _dt.datetime.now(_dt.timezone.utc).strftime("%Y-%m-%d")
     urls = []
     for pagina in ["home"] + list(SLUGS):
         for lang in IDIOMAS:
@@ -724,15 +762,22 @@ def build_site(root: pathlib.Path) -> None:
                 f'\n    <xhtml:link rel="alternate" hreflang="{L if L != "pt" else "pt-BR"}" '
                 f'href="{SITE}{paginas[L][pagina]}"/>'
                 for L in IDIOMAS)
-            urls.append(f'  <url>\n    <loc>{SITE}{paginas[lang][pagina]}</loc>{alt}\n'
+            urls.append(f'  <url>\n    <loc>{SITE}{paginas[lang][pagina]}</loc>\n'
+                        f'    <lastmod>{hoje}</lastmod>{alt}\n'
                         f'    <xhtml:link rel="alternate" hreflang="x-default" href="{SITE}{paginas["en"][pagina]}"/>\n'
                         f'  </url>')
     sitemap = ('<?xml version="1.0" encoding="UTF-8"?>\n'
                '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" '
                'xmlns:xhtml="http://www.w3.org/1999/xhtml">\n'
                + "\n".join(urls) + "\n</urlset>\n")
-    (root / "public" / "sitemap.xml").write_text(sitemap, encoding="utf-8")
-    print(f"public/sitemap.xml  {len(sitemap)/1024:.1f} KB")
+    (root / "public" / "sitemap-paginas.xml").write_text(sitemap, encoding="utf-8")
+    # O nome antigo sai do disco: enquanto ele existir, o Next serve o estático
+    # e o índice nunca é alcançado — um defeito que não dá erro, só deixa o blog
+    # fora do mapa em silêncio.
+    antigo = root / "public" / "sitemap.xml"
+    if antigo.exists():
+        antigo.unlink()
+    print(f"public/sitemap-paginas.xml  {len(sitemap)/1024:.1f} KB")
 
     # ---- PWA ----
     # "Instalar sem instalar": o atalho vai para a área de trabalho sem que a TI
@@ -1238,6 +1283,511 @@ def gerar_og(root: pathlib.Path, textos_por_idioma: dict) -> None:
     print(f"public/og/  ({len(textos_por_idioma)} imagens de compartilhamento)")
 
 
+# ---------------------------------------------------------------------------
+# A PÁGINA DE PREÇOS, EM DADOS.
+#
+# Por que isto mora aqui e não dentro de cada `precos.<idioma>.html`:
+#
+# A página vendia QUANTIDADE — uma lista de noventa e quatro itens com vistos.
+# Passa a vender RESULTADO, e a lista vira prova secundária, recolhida. Nessa
+# virada, o benefício de cartão e a linha de comparação deixam de ser enfeite e
+# viram promessa comercial: cada um deles é uma coisa que alguém compra por
+# acreditar.
+#
+# Promessa escrita à mão dentro de cinco arquivos de HTML é promessa que sai do
+# ar em um idioma e continua no ar em quatro. Tirar uma linha da comparação
+# custaria cinco edições e uma caçada; aqui custa apagar uma entrada.
+#
+# Cada benefício carrega, no comentário, o teste que prova que ele existe. Onde
+# está `sem teste`, é promessa sem trava — e é essa lista que vira o
+# `AUDITORIA-PENDENTE.md`.
+# ---------------------------------------------------------------------------
+
+# A moeda de cada idioma, e o preço em cada moeda. Os números não são inventados
+# aqui: são os que a página já publicava. O que muda nesta rodada é o mínimo do
+# Team, que desceu de cinco assentos para três — e ele mora, de verdade, em
+# `lib/stripe.ts`. Este dicionário só o repete para a vitrine.
+MOEDA_DO_IDIOMA = {"pt": "BRL", "en": "USD", "es": "USD", "de": "EUR", "fr": "EUR"}
+
+TEAM_MINIMO = 3
+
+PRECO = {
+    "free":     {"BRL": "R$ 0",   "USD": "US$ 0",  "EUR": "€ 0"},
+    "personal": {"BRL": "R$ 149", "USD": "US$ 29", "EUR": "€ 27"},
+    "team":     {"BRL": "R$ 349", "USD": "US$ 69", "EUR": "€ 65"},
+    # 3 × o preço por pessoa. Escrito por extenso e não calculado em tempo de
+    # execução porque a separação de milhar muda com a língua, e um `1047` cru
+    # numa página em alemão é um erro que ninguém vê até um cliente escrever.
+    "teamMin":  {"BRL": "R$ 1.047", "USD": "US$ 207", "EUR": "€ 195"},
+}
+
+# O período, por idioma. O alemão e o francês precisam da flexão certa em
+# "por pessoa", e é por isso que isto não é uma string montada com `+`.
+PERIODO = {
+    "free":     {"pt": "/ para sempre", "en": "/ forever", "es": "/ para siempre",
+                 "de": "/ für immer", "fr": "/ pour toujours"},
+    "personal": {"pt": "/ ano", "en": "/ year", "es": "/ año",
+                 "de": "/ Jahr", "fr": "/ an"},
+    "team":     {"pt": "/ pessoa / ano", "en": "/ person / year", "es": "/ persona / año",
+                 "de": "/ Person / Jahr", "fr": "/ personne / an"},
+}
+
+# ---------------------------------------------------------------------------
+# OS TRÊS CARTÕES.
+#
+# O título é o RESULTADO e o nome do plano é o subtítulo — e não o contrário.
+# Quem chega à página não está comprando "Personal": está comprando parar de
+# refazer quarenta vezes a mesma coisa à mão.
+# ---------------------------------------------------------------------------
+CARTOES = [
+    {
+        "id": "free",
+        "titulo": {"pt": "Crie a evidência", "en": "Create the evidence",
+                   "es": "Cree la evidencia", "de": "Erstellen Sie den Nachweis",
+                   "fr": "Créez la preuve"},
+        "sub": {"pt": "Free · sem cadastro, sem cartão, sem limite",
+                "en": "Free · no sign-up, no card, no limit",
+                "es": "Free · sin registro, sin tarjeta, sin límite",
+                "de": "Free · ohne Registrierung, ohne Karte, ohne Limit",
+                "fr": "Free · sans inscription, sans carte, sans limite"},
+        "cta": {"pt": "Criar uma evidência grátis", "en": "Create evidence for free",
+                "es": "Crear una evidencia gratis", "de": "Kostenlos einen Nachweis erstellen",
+                "fr": "Créer une preuve gratuitement"},
+        "destino": "app",
+        "bullets": [
+            # "Evidência completa, com hash e tarja de dado sensível" ← evidencia.mjs
+            {"pt": "Evidência completa, com impressão digital e tarja de dado sensível",
+             "en": "Complete evidence, with a fingerprint and sensitive-data redaction",
+             "es": "Evidencia completa, con huella digital y tarjado de dato sensible",
+             "de": "Vollständiger Nachweis, mit Fingerabdruck und Schwärzung sensibler Daten",
+             "fr": "Preuve complète, avec empreinte et masquage des données sensibles"},
+            # "Tudo processado no seu computador" ← terceiros.mjs prova a lista de
+            #   suboperadores, não o processamento local ← sem teste
+            {"pt": "Tudo processado no seu computador",
+             "en": "Everything processed on your own computer",
+             "es": "Todo procesado en su computadora",
+             "de": "Alles auf Ihrem eigenen Rechner verarbeitet",
+             "fr": "Tout est traité sur votre propre ordinateur"},
+            # "Todos os formatos de saída" ← saidas.mjs
+            {"pt": "Todos os formatos de saída",
+             "en": "Every output format",
+             "es": "Todos los formatos de salida",
+             "de": "Alle Ausgabeformate",
+             "fr": "Tous les formats de sortie"},
+            # "Link pré-configurado ... é um endereço, não uma integração" ← linkpage.mjs
+            #
+            # Esta bala é a única porta da página de preços para o `/link`, e ela
+            # tem de dizer o que a coisa É na mesma frase: "link para o Jira" é,
+            # a uma palavra, lido como integração — e aí o FAQ gasta uma resposta
+            # desmentindo o próprio cartão. Um cartão que precisa de nota de
+            # rodapé para não enganar está enganando.
+            {"pt": "Link pré-configurado para colar no Jira, no Zephyr, no Xray ou no "
+                   "TestRail — é um endereço, não uma integração",
+             "en": "A pre-filled link to paste into Jira, Zephyr, Xray or TestRail — "
+                   "it is an address, not an integration",
+             "es": "Enlace preconfigurado para pegar en Jira, Zephyr, Xray o TestRail — "
+                   "es una dirección, no una integración",
+             "de": "Vorbereiteter Link zum Einfügen in Jira, Zephyr, Xray oder "
+                   "TestRail — eine Adresse, keine Integration",
+             "fr": "Lien prérempli à coller dans Jira, Zephyr, Xray ou TestRail — "
+                   "c’est une adresse, pas une intégration",
+             "href": "link"},
+            # "Sem conta para usar" ← sem teste
+            {"pt": "Sem conta para usar",
+             "en": "No account needed to use it",
+             "es": "Sin cuenta para usarlo",
+             "de": "Kein Konto nötig",
+             "fr": "Aucun compte pour l’utiliser"},
+        ],
+    },
+    {
+        "id": "personal",
+        "titulo": {"pt": "Execute o seu roteiro", "en": "Run your test script",
+                   "es": "Ejecute su guion", "de": "Führen Sie Ihr Testskript aus",
+                   "fr": "Exécutez votre scénario"},
+        "sub": {"pt": "Personal", "en": "Personal", "es": "Personal",
+                "de": "Personal", "fr": "Personal"},
+        "cta": {"pt": "Assinar o Personal", "en": "Subscribe to Personal",
+                "es": "Suscribirse a Personal", "de": "Personal abonnieren",
+                "fr": "S’abonner à Personal"},
+        "destino": "conta",
+        "bullets": [
+            # "Importe a planilha de casos de teste" ← roteiro.mjs
+            {"pt": "Importe a planilha de casos de teste",
+             "en": "Import your spreadsheet of test cases",
+             "es": "Importe la planilla de casos de prueba",
+             "de": "Importieren Sie Ihre Tabelle mit Testfällen",
+             "fr": "Importez votre tableur de cas de test"},
+            # "Abra cada caso já preenchido" ← roteiro.mjs
+            {"pt": "Abra cada caso já preenchido",
+             "en": "Open each case already filled in",
+             "es": "Abra cada caso ya rellenado",
+             "de": "Öffnen Sie jeden Fall bereits ausgefüllt",
+             "fr": "Ouvrez chaque cas déjà prérempli"},
+            # "Devolva status, data, executor e hash na mesma planilha" ← roteiro.mjs
+            {"pt": "Devolva situação, data, executor e impressão digital na mesma planilha",
+             "en": "Send status, date, tester and fingerprint back in the same spreadsheet",
+             "es": "Devuelva situación, fecha, ejecutor y huella en la misma planilla",
+             "de": "Geben Sie Status, Datum, Ausführenden und Fingerabdruck in derselben Tabelle zurück",
+             "fr": "Renvoyez statut, date, exécutant et empreinte dans le même tableur"},
+            # "Guarde o seu padrão de documento, o cliente e o vocabulário" ← modelos.mjs, vocab.mjs
+            # SEM O VOCABULÁRIO, e o motivo importa.
+            #
+            # A primeira versão desta bala dizia "guarde o seu padrão, o cliente
+            # e o VOCABULÁRIO". Guardar a lista de termos é `termosGuardados` no
+            # catálogo, e ela está em `construcao`: `vocLista` mora em
+            # `sessionStorage` e morre com a aba. Aplicar os termos existe, é
+            # `termosAplicados`, e é de GRAÇA — está no Free.
+            #
+            # Quer dizer: a bala vendia no plano pago a única metade que não
+            # existe, e deixava de fora a metade que existe e é gratuita. É
+            # exatamente o defeito que este projeto já pagou duas vezes.
+            {"id": "modeloProprio",
+             "pt": "Guarde o seu padrão de documento e o seu cliente",
+             "en": "Keep your document standard and your client",
+             "es": "Guarde su estándar de documento y su cliente",
+             "de": "Bewahren Sie Ihren Dokumentstandard und Ihren Kunden",
+             "fr": "Conservez votre standard de document et votre client"},
+            # "A sua marca no topo de todos os formatos" ← marca.mjs
+            {"pt": "A sua marca no topo de todos os formatos",
+             "en": "Your brand at the top of every format",
+             "es": "Su marca en la parte superior de todos los formatos",
+             "de": "Ihre Marke im Kopf jedes Formats",
+             "fr": "Votre marque en tête de tous les formats"},
+        ],
+    },
+    {
+        "id": "team",
+        "titulo": {"pt": "Coordene a rodada", "en": "Coordinate the round",
+                   "es": "Coordine la ronda", "de": "Koordinieren Sie die Runde",
+                   "fr": "Coordonnez la série"},
+        "sub": {"pt": "Team", "en": "Team", "es": "Team", "de": "Team", "fr": "Team"},
+        "cta": {"pt": "Assinar o Team", "en": "Subscribe to Team",
+                "es": "Suscribirse a Team", "de": "Team abonnieren",
+                "fr": "S’abonner à Team"},
+        # `conta`, e não `time`: `{{time}}` é a página que APRESENTA o Team, e o
+        # CTA de um cartão de preço tem de levar à compra. A compra começa na
+        # conta, que é onde mora o seletor de assentos e a ação de checkout.
+        "destino": "conta",
+        "bullets": [
+            # "Distribua e reatribua os casos do roteiro" ← roteiro.mjs
+            {"pt": "Distribua e reatribua os casos do roteiro",
+             "en": "Hand out and reassign the cases in the script",
+             "es": "Reparta y reasigne los casos del guion",
+             "de": "Verteilen Sie die Fälle des Skripts und weisen Sie sie neu zu",
+             "fr": "Répartissez et réattribuez les cas du scénario"},
+            # "Acompanhe o que está pendente e quem está executando" ← roteiro.mjs
+            {"pt": "Acompanhe o que está pendente e quem está executando",
+             "en": "Track what is pending and who is running it",
+             "es": "Siga lo que está pendiente y quién lo está ejecutando",
+             "de": "Verfolgen Sie, was offen ist und wer gerade ausführt",
+             "fr": "Suivez ce qui est en attente et qui exécute"},
+            # "Padrão da equipe aplicado no documento de todo mundo" ← modelos.mjs
+            {"id": "padraoDoTime",
+             "pt": "Padrão da equipe aplicado no documento de todo mundo",
+             "en": "The team standard applied to everyone’s document",
+             "es": "El estándar del equipo aplicado al documento de todos",
+             "de": "Der Teamstandard im Dokument aller Beteiligten",
+             "fr": "Le standard de l’équipe appliqué au document de chacun"},
+            # "Assentos, convite, bloqueio e prazo de revogação" ← licenca.mjs, convite.mjs
+            {"pt": "Assentos, convite, bloqueio e prazo de revogação",
+             "en": "Seats, invitations, blocking and a revocation window",
+             "es": "Asientos, invitación, bloqueo y plazo de revocación",
+             "de": "Plätze, Einladung, Sperrung und Widerrufsfrist",
+             "fr": "Sièges, invitation, blocage et délai de révocation"},
+            # "Classificação e campo de emissor no documento" ← sem teste
+            {"pt": "Classificação e campo de emissor no documento",
+             "en": "Classification and an issuer field on the document",
+             "es": "Clasificación y campo de emisor en el documento",
+             "de": "Einstufung und Ausstellerfeld im Dokument",
+             "fr": "Classification et champ émetteur sur le document"},
+        ],
+    },
+]
+
+# ---------------------------------------------------------------------------
+# A COMPARAÇÃO CURTA — CINCO LINHAS, E SÓ CINCO.
+#
+# Ela é que decide a compra; a tabela de noventa e quatro só confirma. Uma
+# sexta linha aqui não é "mais informação": é uma linha a menos de atenção
+# sobrando para as cinco que importam.
+#
+# Célula com palavra ("individual", "compartilhado") precisa de texto por
+# idioma. Célula de sim/não usa sinal, e o sinal é igual nos cinco.
+# ---------------------------------------------------------------------------
+SIM = "sim"
+NAO = "nao"
+
+COMPARACAO = [
+    # "Criar a evidência" ← evidencia.mjs
+    {"rot": {"pt": "Criar a evidência", "en": "Create the evidence",
+             "es": "Crear la evidencia", "de": "Den Nachweis erstellen",
+             "fr": "Créer la preuve"},
+     "free": SIM, "personal": SIM, "team": SIM},
+    # "Guardar padrão, cliente e vocabulário" ← modelos.mjs, vocab.mjs
+    {"rot": {"pt": "Guardar o seu padrão e o seu cliente",
+             "en": "Keep your standard and your client",
+             "es": "Guardar su estándar y su cliente",
+             "de": "Ihren Standard und Ihren Kunden behalten",
+             "fr": "Conserver votre standard et votre client"},
+     "free": NAO, "personal": SIM, "team": SIM},
+    # "Executar um roteiro de casos" ← roteiro.mjs
+    {"rot": {"pt": "Executar um roteiro de casos", "en": "Run a script of cases",
+             "es": "Ejecutar un guion de casos", "de": "Ein Fallskript ausführen",
+             "fr": "Exécuter un scénario de cas"},
+     "free": NAO,
+     "personal": {"pt": "individual", "en": "individual", "es": "individual",
+                  "de": "einzeln", "fr": "individuel"},
+     "team": {"pt": "compartilhado", "en": "shared", "es": "compartido",
+              "de": "geteilt", "fr": "partagé"}},
+    # "Atribuir e acompanhar quem executa" ← roteiro.mjs
+    {"rot": {"pt": "Atribuir e acompanhar quem executa",
+             "en": "Assign and track who runs it",
+             "es": "Asignar y seguir quién ejecuta",
+             "de": "Zuweisen und verfolgen, wer ausführt",
+             "fr": "Attribuer et suivre qui exécute"},
+     "free": NAO, "personal": NAO, "team": SIM},
+    # "Padronizar o documento da equipe" ← modelos.mjs
+    {"rot": {"pt": "Padronizar o documento da equipe",
+             "en": "Standardise the team’s document",
+             "es": "Estandarizar el documento del equipo",
+             "de": "Das Dokument des Teams vereinheitlichen",
+             "fr": "Uniformiser le document de l’équipe"},
+     "free": NAO, "personal": NAO, "team": SIM},
+]
+
+
+# Os rótulos de moldura da página: cabeçalho da comparação, a frase do mínimo e
+# o nome dos sinais para quem usa leitor de tela. Ficam aqui, e não no
+# `i18n-site.json`, porque quem os consome é o gerador destes dois blocos — e
+# uma frase de mínimo longe do número do mínimo é como o "5 pessoas" sobreviveu
+# em cinco arquivos.
+ROTULOS_PRECOS = {
+    "pt": {"minimo": "a partir de 3 pessoas", "minimoTotal": "A partir de {0}/ano",
+           "cmpCaption": "O que muda de um plano para o outro",
+           "cmpResultado": "Resultado", "sim": "incluído", "nao": "não incluído"},
+    "en": {"minimo": "from 3 people", "minimoTotal": "From {0}/year",
+           "cmpCaption": "What changes from one plan to the next",
+           "cmpResultado": "Outcome", "sim": "included", "nao": "not included"},
+    "es": {"minimo": "desde 3 personas", "minimoTotal": "Desde {0}/año",
+           "cmpCaption": "Qué cambia de un plan a otro",
+           "cmpResultado": "Resultado", "sim": "incluido", "nao": "no incluido"},
+    "de": {"minimo": "ab 3 Personen", "minimoTotal": "Ab {0}/Jahr",
+           "cmpCaption": "Was sich von einem Plan zum anderen ändert",
+           "cmpResultado": "Ergebnis", "sim": "enthalten", "nao": "nicht enthalten"},
+    "fr": {"minimo": "à partir de 3 personnes", "minimoTotal": "À partir de {0}/an",
+           "cmpCaption": "Ce qui change d’une offre à l’autre",
+           "cmpResultado": "Résultat", "sim": "inclus", "nao": "non inclus"},
+}
+
+
+def figura_rodada() -> str:
+    """A rodada em quatro estados, desenhada.
+
+    O que o plano pago vende é difícil de contar em texto: uma planilha entra,
+    os casos se dividem entre pessoas, cada execução gera a evidência no
+    computador de quem executa, e a planilha volta com as colunas originais
+    intactas mais quatro novas. São quatro estados de UMA COISA SÓ, e um
+    parágrafo obriga quem lê a manter os quatro na cabeça ao mesmo tempo.
+
+    Aqui havia um vídeo de 47 segundos apontando para `/demo/rodada.*`. Os
+    quinze arquivos não existem no repositório — a página servia um `poster`
+    404 e um `<video>` sem fonte nos cinco idiomas. O desenho não tem esse
+    problema: nasce do código, no mesmo build.
+
+    Sem uma palavra dentro, como as outras figuras — o que aparece escrito é
+    código de caso (`CT-01`), data ISO e um pedaço de impressão digital, que
+    são iguais nos cinco idiomas. Uma figura com frase dentro seria cinco
+    figuras.
+    """
+    A, ESC, LIN, TXT, MUT = FIG_A, FIG_ESC, FIG_LIN, FIG_TXT, FIG_MUT
+    PAPEL = FIG_PAPEL
+    p = []
+    add = p.append
+    MONO = "font-family=\"ui-monospace,SFMono-Regular,Menlo,monospace\""
+
+    def painel(x, n):
+        """A moldura de um estado, com o número do passo no canto."""
+        add(f'<rect x="{x}" y="26" width="196" height="150" rx="8" fill="{PAPEL}" stroke="{LIN}"/>')
+        add(f'<circle cx="{x + 16}" cy="26" r="10" fill="{A}"/>')
+        add(f'<text x="{x + 16}" y="29.8" {MONO} font-size="11" font-weight="700" '
+            f'fill="{PAPEL}" text-anchor="middle">{n}</text>')
+
+    def seta(x):
+        add(f'<path d="M{x} 101 h22 m-6 -6 l6 6 -6 6" stroke="{TXT}" stroke-width="2" '
+            f'fill="none" stroke-linecap="round" stroke-linejoin="round"/>')
+
+    def cabecalho(x, cols):
+        """A linha de títulos da planilha: barras, não palavras."""
+        add(f'<rect x="{x + 12}" y="40" width="172" height="16" rx="3" fill="{ESC}"/>')
+        for cx, cw in cols:
+            add(f'<rect x="{x + cx}" y="46" width="{cw}" height="4" rx="2" fill="{TXT}"/>')
+
+    def codigo(x, y, i):
+        add(f'<text x="{x + 16}" y="{y + 4}" {MONO} font-size="8" fill="{MUT}">CT-0{i}</text>')
+
+    # ---- 1. a planilha como ela chega -------------------------------------
+    # Código, cenário, resultado esperado — e duas colunas de situação vazias.
+    painel(6, 1)
+    cabecalho(6, [(16, 22), (46, 46), (100, 40), (150, 14), (170, 14)])
+    for i in range(1, 5):
+        y = 68 + (i - 1) * 22
+        add(f'<line x1="18" y1="{y + 10}" x2="190" y2="{y + 10}" stroke="{LIN}"/>')
+        codigo(6, y, i)
+        add(f'<rect x="52" y="{y - 3}" width="{44 - (i % 3) * 6}" height="4" rx="2" fill="{TXT}"/>')
+        add(f'<rect x="106" y="{y - 3}" width="{34 - (i % 2) * 8}" height="4" rx="2" fill="{TXT}"/>')
+        # as duas colunas que voltarão preenchidas, aqui ainda vazias
+        add(f'<rect x="156" y="{y - 5}" width="12" height="8" rx="2" fill="none" stroke="{LIN}"/>')
+        add(f'<rect x="176" y="{y - 5}" width="12" height="8" rx="2" fill="none" stroke="{LIN}"/>')
+    seta(208)
+
+    # ---- 2. os casos distribuídos ------------------------------------------
+    # As mesmas linhas, agora com um executor em cada. Três pessoas: é o
+    # mínimo do Team, e a figura não pode contradizer o cartão ao lado.
+    painel(238, 2)
+    cabecalho(238, [(16, 22), (46, 46), (100, 40), (150, 34)])
+    CORES = [A, "#6E9BEF", "#E0A44A"]
+    for i in range(1, 5):
+        y = 68 + (i - 1) * 22
+        add(f'<line x1="250" y1="{y + 10}" x2="422" y2="{y + 10}" stroke="{LIN}"/>')
+        codigo(238, y, i)
+        add(f'<rect x="284" y="{y - 3}" width="{44 - (i % 3) * 6}" height="4" rx="2" fill="{TXT}"/>')
+        cor = CORES[(i - 1) % 3]
+        add(f'<circle cx="{344}" cy="{y - 1}" r="7" fill="{cor}" opacity=".9"/>')
+        add(f'<rect x="356" y="{y - 3}" width="52" height="4" rx="2" fill="{TXT}"/>')
+    seta(440)
+
+    # ---- 3. a evidência gerada ---------------------------------------------
+    # Uma miniatura de documento com a impressão digital visível: é o que a
+    # execução produz, e é o que o auditor vai abrir.
+    painel(470, 3)
+    add(f'<rect x="502" y="44" width="132" height="124" rx="4" fill="{ESC}" stroke="{LIN}"/>')
+    add(f'<rect x="514" y="56" width="46" height="8" rx="2" fill="{A}"/>')
+    add(f'<rect x="514" y="72" width="108" height="4" rx="2" fill="{TXT}"/>')
+    add(f'<rect x="514" y="82" width="92" height="4" rx="2" fill="{TXT}"/>')
+    # os dois quadros da tela, que são o miolo da evidência
+    add(f'<rect x="514" y="94" width="50" height="34" rx="3" fill="{PAPEL}" stroke="{LIN}"/>')
+    add(f'<rect x="572" y="94" width="50" height="34" rx="3" fill="{PAPEL}" stroke="{LIN}"/>')
+    add(f'<rect x="520" y="102" width="30" height="4" rx="2" fill="{TXT}"/>')
+    add(f'<rect x="578" y="102" width="24" height="4" rx="2" fill="{TXT}"/>')
+    add(f'<rect x="514" y="136" width="108" height="12" rx="3" fill="{A}" opacity=".12"/>')
+    add(f'<text x="519" y="145" {MONO} font-size="7.5" fill="{A}">a1f3…9c</text>')
+    add(f'<rect x="514" y="154" width="70" height="4" rx="2" fill="{TXT}"/>')
+    seta(672)
+
+    # ---- 4. a planilha de volta --------------------------------------------
+    # As colunas originais intactas; o que entra é acréscimo. É a promessa da
+    # legenda logo abaixo da figura, e ela precisa estar visível no desenho.
+    painel(702, 4)
+    cabecalho(702, [(16, 22), (46, 40), (94, 22), (122, 22), (150, 34)])
+    for i in range(1, 5):
+        y = 68 + (i - 1) * 22
+        add(f'<line x1="714" y1="{y + 10}" x2="886" y2="{y + 10}" stroke="{LIN}"/>')
+        codigo(702, y, i)
+        add(f'<rect x="748" y="{y - 3}" width="{38 - (i % 3) * 6}" height="4" rx="2" fill="{TXT}"/>')
+        # o visto verde: a coluna de situação que voltou preenchida
+        add(f'<path d="M796 {y - 1} l3 3 6 -6" stroke="{A}" stroke-width="2" fill="none" '
+            f'stroke-linecap="round" stroke-linejoin="round"/>')
+        add(f'<rect x="824" y="{y - 3}" width="22" height="4" rx="2" fill="{A}" opacity=".55"/>')
+        add(f'<rect x="852" y="{y - 3}" width="34" height="4" rx="2" fill="{A}" opacity=".55"/>')
+
+    return ('<figure class="figRodada"><svg viewBox="0 0 904 190" role="img" '
+            'aria-labelledby="figRodadaT"><title id="figRodadaT">__ALT__</title>'
+            + "".join(p) + '</svg><figcaption>__LEG__</figcaption></figure>')
+
+
+def _cel(valor, lang: str) -> str:
+    """Uma célula da comparação curta: sinal ou palavra."""
+    if valor == SIM:
+        return '<td class="sim" aria-label="__SIM__">✓</td>'
+    if valor == NAO:
+        return '<td class="nao" aria-label="__NAO__">✕</td>'
+    return f'<td>{valor[lang]}</td>'
+
+
+def blocos_de_precos(lang: str, rot: dict) -> dict:
+    """Os dois blocos gerados da página de preços, num idioma.
+
+    `rot` traz os rótulos que dependem de idioma e não cabem numa constante de
+    conteúdo: o cabeçalho da tabela, o texto do mínimo, o rótulo dos sinais.
+    """
+    m = MOEDA_DO_IDIOMA[lang]
+
+    cartoes = []
+    for c in CARTOES:
+        pid = c["id"]
+        preco = PRECO[pid][m]
+        per = PERIODO[pid][lang]
+        # O mínimo e o total mínimo andam JUNTOS do preço por pessoa. Preço por
+        # assento sem o mínimo ao lado é surpresa no checkout.
+        extra = ""
+        if pid == "team":
+            extra = (f'<p class="minimo">{rot["minimo"]}</p>'
+                     f'<p class="minimoTotal">{rot["minimoTotal"].replace("{0}", PRECO["teamMin"][m])}</p>')
+        # A ALÇA, onde o benefício corresponde a um item do catálogo.
+        #
+        # Ela não é enfeite: é o que deixa `planos.mjs` cobrar que nenhum cartão
+        # prometa uma funcionalidade que o catálogo diz que ainda não existe.
+        # Sem ela, cartão e catálogo voltam a poder discordar em silêncio — foi
+        # assim que três coisas prontas ficaram à venda como "em breve".
+        def bala(b):
+            texto = b[lang]
+            # `href` transforma a bala inteira em porta para outra página. Só o
+            # Free usa hoje, para o `/link`.
+            if b.get("href"):
+                texto = f'<a href="{{{{{b["href"]}}}}}">{texto}</a>'
+            alca = f' data-f="{b["id"]}"' if b.get("id") else ""
+            return f"<li{alca}>{texto}</li>"
+        itens = "".join(bala(b) for b in c["bullets"])
+        cartoes.append(
+            f'<div class="plan" data-plano="{pid}">'
+            f'<h3>{c["titulo"][lang]}</h3>'
+            f'<p class="planoNome">{c["sub"][lang]}</p>'
+            f'<div class="price">{preco}<span> {per}</span></div>'
+            f'{extra}'
+            f'<ul>{itens}</ul>'
+            f'<a class="btn" href="{{{{{c["destino"]}}}}}" data-cta="{pid}">{c["cta"][lang]}</a>'
+            f'</div>')
+
+    linhas = []
+    for r in COMPARACAO:
+        linhas.append(
+            f'<tr><th scope="row">{r["rot"][lang]}</th>'
+            + _cel(r["free"], lang) + _cel(r["personal"], lang) + _cel(r["team"], lang)
+            + "</tr>")
+    # A TABELA ROLA DENTRO DA PRÓPRIA CAIXA.
+    # Quatro colunas mais um rótulo de linha por extenso não cabem em 380 px, e
+    # uma tabela que não cabe empurra o DOCUMENTO para o lado: a página inteira
+    # passa a andar na horizontal e o hero sai da tela junto. Em inglês ela
+    # cabia por sorte — as outras quatro línguas escrevem mais longo.
+    tabela = (
+        '<div class="cmpEnvolve">'
+        '<table class="cmpCurta">'
+        f'<caption class="soLeitor">{rot["cmpCaption"]}</caption>'
+        '<thead><tr>'
+        f'<th scope="col">{rot["cmpResultado"]}</th>'
+        '<th scope="col">Free</th><th scope="col">Personal</th><th scope="col">Team</th>'
+        '</tr></thead><tbody>' + "".join(linhas) + '</tbody></table></div>')
+    tabela = tabela.replace("__SIM__", rot["sim"]).replace("__NAO__", rot["nao"])
+
+    # O preço solto também sai daqui, e não escrito dentro de cada corpo: a
+    # calculadora compara o custo estimado com a mensalidade do plano, e um
+    # número de plano digitado à mão no HTML alemão é a forma mais barata de a
+    # página passar a mentir sobre o próprio preço.
+    NUM = {"free": {"BRL": 0, "USD": 0, "EUR": 0},
+           "personal": {"BRL": 149, "USD": 29, "EUR": 27},
+           "team": {"BRL": 349, "USD": 69, "EUR": 65}}
+    return {"cartoes": f'<div class="plans tres">{"".join(cartoes)}</div>',
+            "comparacao": tabela,
+            "precoPersonal": PRECO["personal"][m],
+            "precoTeam": PRECO["team"][m],
+            "precoTeamMin": PRECO["teamMin"][m],
+            "personalNum": str(NUM["personal"][m]),
+            "teamNum": str(NUM["team"][m]),
+            "teamMinimo": str(TEAM_MINIMO),
+            "minimoFrase": rot["minimo"]}
+
+
 def sobras_que_tapam_o_site(root: pathlib.Path) -> list[str]:
     """Arquivos em `public/` que a Vercel serve ANTES das rotas do Next.
 
@@ -1324,13 +1874,23 @@ def main() -> int:
     for pg, sl in SLUGS.items():
         rotas_app[pg] = {L: (("" if L == "pt" else "/" + L) + "/" + sl[L]) for L in IDIOMAS}
     rotas_app["blog"] = {L: (("" if L == "pt" else "/" + L) + "/blog") for L in IDIOMAS}
+    # A home não tem slug — ela É a raiz do idioma —, e por isso ficava de fora
+    # da tabela. O cabeçalho da ferramenta precisa dela: "Como funciona" é uma
+    # âncora dentro da home, e sem esta linha o link nascia vazio.
+    rotas_app["home"] = {L: ("/" if L == "pt" else "/" + L) for L in IDIOMAS}
     rotas_app["conta"] = dict(CAMINHO_CONTA)
     src = src.replace("__ROTAS_SITE__", json.dumps(rotas_app, ensure_ascii=False))
 
     # Os rótulos do rodapé saem do dicionário do SITE, para as duas telas
     # dizerem as mesmas palavras. Só as chaves usadas — mandar o dicionário
     # inteiro seriam dezenas de KB dentro de um arquivo que já tem 900.
+    # `navHow`, `navComp` e `navPrice` entraram aqui pelo mesmo motivo que o
+    # rodapé entrou: o CABEÇALHO da ferramenta também passou a ser o do site, e
+    # as palavras dele não podem ser uma segunda tradução escrita à mão dentro
+    # do template. Um menu que diz "Preços" no site e "Planos" na ferramenta é
+    # a mesma marca falando duas línguas.
     CHAVES_RODAPE = ["fColProduto", "fColCasos", "fColConfianca",
+                     "navHow", "navComp",
                      "navApp", "navPrice", "fAjuda", "fBlog", "fComp", "fConta",
                      "casoEvT", "casoInT", "casoAtaT", "casoUxT", "casoIaT",
                      "fSec", "fVerif", "fPriv", "fTerms", "fPsr"]

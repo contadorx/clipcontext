@@ -13,6 +13,7 @@ import { contaDe, rpc } from '@/lib/supabase/servico';
 import { type Lang, type Textos, ehLang, textos } from '@/lib/conta/textos';
 import { CAMINHO_ROTEIRO } from '@/lib/conta/roteiro';
 import { lerRecibo } from '@/lib/conta/recibo';
+import { medirConta } from '@/lib/conta/medir';
 import { TETO_ANEXO, apagarAnexo, subirAnexo } from '@/lib/supabase/arquivo';
 import { type CasoCru, adivinharMapa, separar, textoParaLinhas, xlsxParaLinhas } from '@/lib/planilha';
 
@@ -168,16 +169,22 @@ export async function salvarRoteiro(form: FormData) {
   if (!casos.length) return volta(lang, 'erro', t.rotErroSemCasos);
 
   const idAntigo = Number(form.get('id')) || null;
+  const escopo = String(form.get('escopo') || 'personal') === 'time' ? 'time' : 'personal';
   const r = await rpc<Resposta>('walkstamp_roteiro_salvar', {
     p_email: email,
     p_nome: String(form.get('nome') || '').trim().slice(0, 120) || t.rotSemNome,
-    p_escopo: String(form.get('escopo') || 'personal') === 'time' ? 'time' : 'personal',
+    p_escopo: escopo,
     p_casos: casos,
     p_id: idAntigo,
   }).catch(() => ({ erro: 'leitura' }) as Resposta);
   if (r?.erro) return volta(lang, 'erro', recusa(lang, r.erro));
   /* Um caso que sumiu da planilha nova levou o anexo dele para a fila. */
   await faxinar(r?.faxina);
+  /* O PRIMEIRO PASSO DO LADO PAGO. O funil terminava em "baixou um documento",
+     e a pergunta que decide o produto comeca depois disso. Vai o ESCOPO, e nao
+     o tamanho da planilha: quantos casos alguem subiu e assunto da conta dessa
+     pessoa, e nao da nossa contagem. */
+  await medirConta('importou_roteiro', { lang, plano: escopo });
   volta(lang, 'feito', t.rotSalvo, r?.id);
 }
 
@@ -214,6 +221,10 @@ export async function marcarFeito(form: FormData) {
     const erroAnexo = await guardarAnexo(email, casoId, form.get('anexo'), t);
     if (erroAnexo) return volta(lang, 'erro', erroAnexo, r?.id);
   }
+  /* Um caso CONCLUIDO, e nao um desfeito: desfazer e conserto, e contar
+     conserto como valor entregue inflaria o unico numero que diz se o roteiro
+     esta sendo usado de verdade. */
+  if (!desfazendo) await medirConta('concluiu_caso', { lang });
   volta(lang, 'feito', desfazendo ? t.rotDesfeito : t.rotMarcado, r?.id);
 }
 

@@ -16,8 +16,10 @@ import { clienteDoServidor, emailDaSessao } from '@/lib/supabase/servidor';
 import { contaDe, rpc } from '@/lib/supabase/servico';
 import { PLANOS, ehPlano, stripe, temStripe } from '@/lib/stripe';
 import { marca } from '@/lib/marca';
-import { CAMINHO, type Lang, ehLang, textos } from '@/lib/conta/textos';
+import { CAMINHO, type Lang, ehLang, preencher, textos } from '@/lib/conta/textos';
+import { enderecoDoItem } from '@/lib/conta/nav';
 import { type Chave, emitirChave } from '@/lib/conta/licenca';
+import { medirConta } from '@/lib/conta/medir';
 
 /** O idioma vem do formulário de propósito: ele decide só em que língua a
  *  resposta é escrita, e não dá acesso a nada. */
@@ -28,6 +30,12 @@ function idioma(form: FormData): Lang {
 
 const volta = (lang: Lang, par: string, valor: string) =>
   redirect(`${CAMINHO[lang]}?${par}=${encodeURIComponent(valor)}`);
+
+/* A resposta volta para a TELA DE CHAMADOS, e não para a raiz da conta. Mandar
+   quem acabou de abrir um chamado para outra página é fazê-la procurar o
+   número que ela precisa anotar. */
+const voltaChamados = (lang: Lang, par: string, valor: string) =>
+  redirect(`${enderecoDoItem('chamados', lang)}?${par}=${encodeURIComponent(valor)}`);
 
 /** Traduz a recusa que veio do banco. Um `nao_admin` cru na tela não é um
  *  recado, é um vazamento de nome de variável. */
@@ -91,7 +99,12 @@ export async function comprar(form: FormData) {
     return volta(lang, 'erro', t.erroJaAssinante);
   }
 
-  const quantidade = Math.max(1, Math.min(500, Number(form.get('assentos') || PLANOS[plano].assentos)));
+  /* O piso é o do plano, não `1`. Com `Math.max(1, …)` o formulário podia
+     mandar `assentos=1` e a Stripe cobrava um assento de um plano que se
+     anuncia a partir de três — o preço da página e o do checkout eram
+     regras diferentes sobre a mesma compra. */
+  const minimo = PLANOS[plano].assentos;
+  const quantidade = Math.max(minimo, Math.min(500, Number(form.get('assentos') || minimo)));
   const sessao = await stripe().checkout.sessions.create({
     mode: 'subscription',
     line_items: [{ price: PLANOS[plano].preco(), quantity: plano === 'time' ? quantidade : 1 }],
@@ -105,6 +118,14 @@ export async function comprar(form: FormData) {
     cancel_url: `${marca.site}${CAMINHO[lang]}?cancelou=1`,
     locale: lang === 'pt' ? 'pt-BR' : lang,
   });
+  /* ANTES do `redirect`, e nao depois: o `redirect` do Next funciona lancando
+     uma excecao — nada escrito abaixo dele roda. Medir depois seria escrever
+     uma linha que nunca executa e achar que o funil esta ligado.
+
+     E o marco e "comecou", nao "pagou": quem paga e a Stripe, e quem sabe disso
+     e o webhook. O que este mede e a INTENCAO — e a distancia entre ela e o
+     pagamento e justamente o numero que faltava. */
+  await medirConta('comecou_pagamento', { lang, plano });
   redirect(sessao.url!);
 }
 
@@ -137,8 +158,16 @@ export async function emitirLicenca(_antes: Chave | null, form: FormData): Promi
   const lang = idioma(form);
   const email = await emailDaSessao();
   if (!email) return { erro: 'sem_sessao' };
-  void lang;
-  return emitirChave();
+  const chave = await emitirChave();
+  /* A MESMA PORTA SERVE AOS DOIS, e por isso a conta e consultada aqui: esta
+     acao emite a chave do teste de 14 dias E a de quem ja assinou. Contar as
+     duas como "comecou o teste" faria o numero crescer justamente com quem ja
+     pagou — que e o contrario do que ele existe para responder. */
+  if (!chave.erro && chave.link) {
+    const conta = await contaDe(email).catch(() => null);
+    if (!conta?.assinante) await medirConta('comecou_teste', { lang });
+  }
+  return chave;
 }
 
 /* -------------------------------------------------------------------- time */
@@ -194,6 +223,44 @@ export async function apagarModelo(form: FormData) {
     p_id: Number(form.get('id')) || 0,
     p_nome: null, p_escopo: null, p_dados: null, p_apagar: true,
   });
+}
+
+/* ------------------------------------------------------------- chamados */
+
+/** Abrir um chamado daqui, e não "no rodapé da ferramenta".
+ *
+ *  O e-mail vem da SESSÃO, como em todo o resto deste arquivo — e aqui isso
+ *  vale o dobro: na ferramenta o e-mail é digitado, e um chamado com o e-mail
+ *  errado é um chamado que nunca chega de volta a quem o abriu.
+ *
+ *  O relatório vem do formulário porque ele é do NAVEGADOR de quem está lá: o
+ *  servidor não tem como saber se aquela máquina tem WebGPU. Ele é opcional e
+ *  a pessoa o vê antes de mandar; o que ele não pode é decidir quem é ela. */
+export async function abrirChamado(form: FormData) {
+  const lang = idioma(form);
+  const t = textos(lang);
+  const email = await emailDaSessao();
+  if (!email) return voltaChamados(lang, 'erro', t.erroEntrePrimeiro);
+
+  const texto = String(form.get('texto') || '').trim();
+  if (!texto) return voltaChamados(lang, 'erro', t.chamadoSemTexto);
+  /* O relatório é cortado no servidor, e não confiado ao tamanho do campo: ele
+     chega de um formulário, e um formulário é o que qualquer um pode montar. */
+  const diag = String(form.get('diag') || '').trim().slice(0, 20000) || null;
+
+  let numero: string | null;
+  try {
+    numero = await rpc<string>('walkstamp_recado', {
+      p_tipo: 'problema', p_texto: texto.slice(0, 2000), p_email: email,
+      p_idioma: lang, p_cenario: null, p_origem: 'conta', p_diag: diag,
+    });
+  } catch {
+    return voltaChamados(lang, 'erro', t.chamadoErro);
+  }
+  if (!numero || numero === 'vazio' || numero === 'muitos') {
+    return voltaChamados(lang, 'erro', numero === 'muitos' ? t.chamadoMuitos : t.chamadoErro);
+  }
+  return voltaChamados(lang, 'feito', preencher(t.chamadoAberto, { numero }));
 }
 
 export async function configurar(form: FormData) {
