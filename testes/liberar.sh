@@ -51,7 +51,7 @@ MAPA="
 ^src/template[.]html$ => smoke.mjs saidas.mjs passos.mjs dobra.mjs travado.mjs gravando.mjs janelinha.mjs comentario.mjs marcados.mjs revisao.mjs marca.mjs formato.mjs promptcx.mjs appidioma.mjs compartilhar.mjs celular.mjs teto.mjs cenario1.mjs organiza.mjs acabamento.mjs lente2.mjs traducao.mjs passomulti.mjs pessoas.mjs matriz.mjs conclusao.mjs parar.mjs entrada.mjs indice.mjs figura.mjs resumo.mjs perna.mjs cartao.mjs etapas.mjs marcos.mjs semundefined.mjs reabrir.mjs juntar.mjs juntos.mjs grade.mjs anotacao.mjs trocar.mjs varredura.mjs descarte.mjs clipe.mjs
 ^src/features[.]json$ => planos.mjs promessa.mjs site:precos.mjs
 ^src/i18n-site[.]json$ => chaves.mjs site:cinco.mjs site:contradicao.mjs
-^src/site/bodies/ => site:paginas.mjs site:legal.mjs site:ajuda.mjs site:vitrine.mjs
+^src/site/bodies/ => folha.mjs site:paginas.mjs site:legal.mjs site:ajuda.mjs site:vitrine.mjs
 ^src/site/(doc|home)[.]html$ => site:paginas.mjs site:cinco.mjs
 ^src/site/support[.]js$ => site:ficha.mjs site:paginas.mjs
 ^build[.]py$ => figuras.mjs cartao.mjs promessa.mjs planos.mjs auditoria.mjs site:precos.mjs
@@ -62,13 +62,14 @@ MAPA="
 ^lib/stripe[.]ts$ => site:precos.mjs promessa.mjs
 ^lib/ => site:paginas.mjs
 ^public/sw[.]js$ => site:seo.mjs
+^public/site[.]css$ => folha.mjs site:paginas.mjs site:dobrafig.mjs
 ^offline/ => site:medicao.mjs
 ^supabase/migrations/ => conferir-migracoes
 ^testes/ => inventario.mjs
 "
 
 # ---- 1. os contratos: sempre, e são catorze segundos ------------------------
-CONTRATOS="auditoria.mjs chaves.mjs faxina.mjs figura.mjs funil.mjs inventario.mjs middleware.mjs
+CONTRATOS="auditoria.mjs folha.mjs chaves.mjs faxina.mjs figura.mjs funil.mjs inventario.mjs middleware.mjs
            planos.mjs promessa.mjs semmarca.mjs stripehook.mjs terceiros.mjs wer.mjs"
 
 # ----------------------------------------------------------------------------

@@ -1,6 +1,6 @@
 # A regressão
 
-144 arquivos que afirmam coisas sobre o produto. Cada um roda sozinho com
+145 arquivos que afirmam coisas sobre o produto. Cada um roda sozinho com
 `node <arquivo>.mjs` e sai com código 1 se alguma afirmação cair.
 
 ## Primeiro uso, depois de abrir o zip
@@ -55,6 +55,31 @@ cobertura**. Quem decide isso é a forma da linha:
 Escrever `  pulado  ` em minúscula não é nenhum dos dois: a esteira não vê, o
 processo sai 0, e o arquivo é somado aos aprovados. `inventario.mjs [4]` reprova
 quem fizer isso.
+
+## O antes e o depois de um build visual
+
+`capturar.mjs` é **instrumento, e não régua** — ele não afirma nada sozinho.
+Existe porque um build de CSS não se prova com teste de texto: `display:block`
+virando `display:flex` passa em toda régua desta pasta e ainda assim pode
+estragar dez páginas.
+
+```bash
+node testes/capturar.mjs /tmp/antes            # com o site de pé em :8802
+LARG=390 node testes/capturar.mjs /tmp/antes-tel
+#  ... mexe, npm run build, sobe de novo ...
+node testes/capturar.mjs /tmp/depois
+node testes/capturar.mjs --diff /tmp/antes /tmp/depois
+```
+
+Ele fotografa **cada página em cada idioma** — as duas listas saem do
+`rotas.json`, e não de uma lista escrita aqui — e o `--diff` compara pixel a
+pixel.
+
+O número que importa é **quantas ficaram idênticas**. Numa mudança que devia ser
+invisível, qualquer página diferente é defeito; numa mudança deliberada,
+qualquer página que mudou **sem estar na lista** é defeito. Os dois lados
+precisam do mesmo dado. Foi assim que o Build 4-A provou que a `.lockHint` não
+mexeu num pixel e que só as dez páginas com lista de passos mudaram.
 
 ## O navegador da régua, e por que ele não é o do Playwright
 

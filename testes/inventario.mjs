@@ -33,6 +33,7 @@ const INSTRUMENTOS = new Set([
   'proxy.mjs',      // encaminhador para o Next, usado por dez testes
   'regua.mjs',      // instrumento de medição de desempenho, roda sob demanda
   'gerar-dpa.mjs',  // gerador dos PDFs do DPA, não afirma nada
+  'capturar.mjs',   // captura e compara o antes/depois de um build visual
 ]);
 
 const ehTeste = (f) =>

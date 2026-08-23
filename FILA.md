@@ -463,6 +463,62 @@ o `paginas.mjs` já faz com o Pix, cobrando que nenhuma página volte a pedir.
 
 ---
 
+### DEC-18 — Na tabela de preços, o que o Free não tem sai em VERMELHO
+
+*Nasceu durante o Build 4-A, dentro de uma regra morta que eu ia apagar.*
+
+A comparação curta da `/precos` marca com **✕ vermelho** (`var(--err)`, 17px,
+negrito) cada linha que um plano não tem. São **seis células** na tabela de
+hoje, e elas descrevem o **nosso próprio** plano Free e o Personal — não um
+concorrente.
+
+**Não fui eu que achei isso: foi o autor da folha.** A regra que eu apaguei
+neste build, `table.cmpPlanos`, existia justamente para consertar isso, e trazia
+o argumento escrito:
+
+> *"o travessão do 'não tem' em cinza em vez de vermelho. Vermelho ali leria
+> como defeito, e o que a célula diz é 'isto é do plano de cima'."*
+
+A regra nunca pegou: ela foi escrita com o nome `cmpPlanos` e o `build.py` emite
+a tabela como `cmpCurta`. Ficou meses ali, certa e desligada — a mesma fóssil do
+`passosRodada`. Apaguei o código morto e trouxe o argumento para cá, que é onde
+decisão mora.
+
+**Isto não é conserto, é decisão comercial, e por isso eu não a tomei.** A
+`/steps` também usa ✕ vermelho, e lá está certo: ela compara com o **Steps
+Recorder**, um concorrente. Na `/precos` o mesmo símbolo aponta para dentro de
+casa.
+
+**Caminho A — cinza, sem símbolo, como o autor queria.**
+
+- **Pró:** a tabela passa a dizer "isto é do plano de cima", que é o que ela é.
+  Vermelho numa linha de preço convida a pessoa a ler o Free como uma versão
+  quebrada, e o Free é a porta de entrada inteira deste produto.
+- **Contra:** o contraste cai, e quem lê rápido pode não notar a diferença entre
+  os planos — que é exatamente o que a tabela veio mostrar. Vender exige que a
+  falta seja visível.
+
+**Caminho B — cinza, mas mantendo o símbolo `✕`.** Meio-termo: a falta continua
+legível de longe, sem a cor de erro.
+
+- **Pró:** mantém a varredura visual e tira a leitura de defeito.
+- **Contra:** um ✕ cinza ainda é um ✕; parte da objeção do autor era o símbolo.
+
+**Caminho C — deixar vermelho.**
+
+- **Pró:** zero trabalho, e o contraste máximo entre planos.
+- **Contra:** o único argumento escrito no repositório sobre esta decisão diz
+  que está errado, e ninguém o contestou — ele só nunca chegou à tela.
+
+> **A minha indicação: caminho B.** Ele atende as duas preocupações — a falta
+> continua óbvia, e a cor deixa de acusar o próprio produto. É uma linha de CSS,
+> e entra junto com o Build 6, que já é o build das promessas da página de
+> preços.
+>
+> **Se você não responder:** eu levo para o Build 6 e trato como caminho B.
+
+---
+
 ### DEC-17 — O vocabulário do domínio não fala alemão nem francês
 
 *Nasceu durante o Build 4, na varredura de tabelas de idioma. Não estava na
@@ -710,11 +766,33 @@ O defeito que mais custou a este projeto. Relatório em `BUILD-4.md`.
   com o modelo **inglês**; `HESITA` limpava transcrição alemã com as regras do
   **português**; e o vocabulário do domínio não fala de/fr — este virou a
   **DEC-17**
-- ⤳ **CSS** (cinco classes usadas e ausentes, cinco regras mortas): build
-  próprio, por decisão sua — mexe em 35 corpos de página e pede captura de tela
-  antes e depois nas 18 combinações
+- ✅ **CSS** — virou o **Build 4-A**, sozinho, como você decidiu. Fora da
+  numeração de propósito: ele nasceu de dentro do Build 4, e numerá-lo como 5
+  empurraria os outros dez e quebraria as referências das decisões. Os dois
+  números do item estavam errados: eram **quatro** classes usadas sem regra
+  (não cinco) e **seis** regras mortas (não cinco). Relatório em `BUILD-4A.md`
 - ⤳ **Vocabulário de cenários** (`tutorial`/`instrucao`, `usabilidade`/`ux`):
   mexe em dado guardado, foi para o Build 12
+
+---
+
+## Princípio — acabamento novo vai para recurso pago
+
+*Dado por você em 23/08, respondendo ao Build 4-A.*
+
+**"Acabamento tem que ficar em feature paga somente."** Vale para o **produto**:
+polimento novo dentro da ferramenta entra em recurso do Personal ou do Team, e
+não em recurso gratuito. O que já existe no Free continua funcionando; o que não
+cresce é o acabamento dele.
+
+**Não vale para o site.** Página de venda bem-acabada é o que vende o plano
+pago — deixar as páginas de caso de uso feias para "não dar acabamento de graça"
+cobraria o preço do lado errado, e dez páginas do mesmo site com dois
+acabamentos diferentes leem-se como descuido, não como estratégia. Foi essa a
+leitura que você confirmou quando eu perguntei.
+
+Aplico dos próximos builds em diante, e é isto que eu vou consultar quando um
+item da fila propuser polimento em recurso gratuito.
 
 ---
 

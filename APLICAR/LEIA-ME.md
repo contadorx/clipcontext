@@ -21,10 +21,10 @@ Não vêm junto, porque se regeneram ou são enormes: `.git/`, `node_modules/`
 
 ---
 
-## `builds-1-a-4.bundle` — a rodada de 23/08
+## `builds-1-a-4A.bundle` — a rodada de 23/08
 
 **Base:** `7c90a97` (o `main` do GitHub, de 19/08).
-**Traz:** oito commits.
+**Traz:** dez commits.
 
 1. **Sincroniza a árvore interna com o deploy de 22/08.** O repositório estava
    três dias atrás da árvore publicada na Vercel. 267 arquivos, nenhuma
@@ -44,8 +44,13 @@ Não vêm junto, porque se regeneram ou são enormes: `.git/`, `node_modules/`
    uma régua nova varre o produto atrás de tabela de idioma incompleta — achou
    três, entre elas o OCR que lia a tela do cliente alemão com o modelo inglês.
 
-Os relatórios estão em `BUILD-1.md`, `BUILD-2.md`, `BUILD-3.md` e `BUILD-4.md`,
-na raiz. A fila dos próximos e as decisões abertas estão em `FILA.md`.
+8. **Build 4-A — a folha de estilo.** Fora da numeração de propósito: nasceu
+   dentro do Build 4 e saiu sozinho, com captura de tela antes e depois. A
+   regra das listas de passos estava escrita com um nome que ninguém usava, e
+   a `.row` repetia setenta vezes uma decisão de estilo que não fazia efeito.
+
+Os relatórios estão em `BUILD-1.md`, `BUILD-2.md`, `BUILD-3.md`, `BUILD-4.md` e
+`BUILD-4A.md`, na raiz. A fila dos próximos e as decisões abertas estão em `FILA.md`.
 
 ```bash
 git fetch APLICAR/builds-1-a-4.bundle \
@@ -65,7 +70,7 @@ git checkout claude/builds-deploys-sequence-0fatlg
 
 **Base:** `7c90a97`. **Traz:** os seis commits da rodada de preços, que já estão
 incluídos no commit 1 do bundle acima. Fica aqui como registro; quem aplicar o
-`builds-1-a-4.bundle` não precisa dele.
+`builds-1-a-4A.bundle` não precisa dele.
 
 ```bash
 git fetch APLICAR/rodada-precos.bundle \
@@ -87,7 +92,7 @@ bash testes/liberar.sh
 bash testes/rodar.sh
 ```
 
-A regressão sai com **140 ok · 4 PULADO · 0 FALHOU** de 144 réguas. Um pulado
+A regressão sai com **141 ok · 4 PULADO · 0 FALHOU** de 145 réguas. Um pulado
 **não conta como cobertura**, e o motivo de cada um sai impresso: três por falta
 do emissor de chaves — que não viaja no pacote, de propósito —, e um pela
 tradução jurídica pendente de alemão e francês.

@@ -140,6 +140,28 @@ nav a.btnTop:hover{color:var(--accent-ink);filter:brightness(1.08)}
    lado a lado, e o segundo empilhado e melhor que o segundo cortado. */
 .ctas{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
 
+/* A FILEIRA DE BOTOES. A mesma regra que a ferramenta tem no estilo dela, e que
+   esta folha nao tinha — as duas sao separadas de proposito, porque o app e um
+   arquivo so e nao pode baixar este CSS.
+   O que acontecia sem ela: `.row` computava `display:block` (medido na pagina
+   servida), e os setenta usos carregavam `gap` e `flex-wrap` no `style` inline.
+   As duas propriedades so valem em container flex. Quer dizer que setenta
+   elementos, em trinta e cinco arquivos, escreviam a mesma decisao de estilo a
+   mao E ela nao fazia efeito: os botoes se separavam pelo espaco de palavra do
+   texto, uns quatro pixels, no lugar dos dez pedidos.
+   Com a regra aqui, o `style` inline daqueles setenta perde a razao de existir
+   e sai — fica so a margem, que e a unica coisa que varia de um para outro. */
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+
+/* A LINHA DE AVISO ao lado de um recurso que pede plano ou conta.
+   Ela ja estava visualmente pronta — porque os vinte e um usos carregavam o
+   estilo inteiro no `style` inline, copiado de um para o outro. Nada estava
+   quebrado; o que existia era a mesma decisao escrita vinte e uma vezes, e
+   mudar a cor da barra exigia vinte e uma edicoes.
+   A margem NAO entra aqui: ela varia de proposito (26px na maioria, 30px em
+   cinco, `22px 0` numa), e e a unica parte que sobra no inline. */
+.lockHint{border-left:3px solid var(--accent);padding-left:12px}
+
 /* seções */
 section{padding:64px 0;border-bottom:1px solid var(--line)}
 section:last-of-type{border-bottom:0}
@@ -191,17 +213,15 @@ p{margin:0 0 16px}
 .plan{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:26px}
 /* O mesmo preço nas três moedas, sem conversão ao vivo: quem lê de fora do
    Brasil não precisa abrir a calculadora, e a página continua sem chamar rede. */
-.plan .moedas{margin:2px 0 10px;font-size:14px;color:var(--muted);font-weight:550}
 /* O que ainda não existe fica dito na própria linha. Listar sem marcar seria
    vender o que não foi construído; esconder seria esconder o plano. */
 /* Também na tabela de planos, que fica fora de `.plan`. */
-.plan .soon,.tabPlanos .soon{display:inline-block;font-size:11px;text-transform:uppercase;letter-spacing:.06em;
+.plan .soon{display:inline-block;font-size:11px;text-transform:uppercase;letter-spacing:.06em;
       font-weight:650;color:var(--muted);border:1px solid var(--line);border-radius:99px;
       padding:1px 7px;margin-left:5px;vertical-align:1px;white-space:nowrap}
 .plan .pe{margin:10px 0 0;font-size:13px;color:var(--muted);text-align:center}
 .plan .pe a{color:var(--accent)}
 .plan ul a{color:var(--accent)}
-.plan.hi{border-color:var(--accent);border-width:2px}
 .plan .price{font-size:clamp(25px,2.4vw,33px);font-weight:680;letter-spacing:-.02em;margin:10px 0 2px;white-space:nowrap}
 .plan .price span{font-size:14.5px;font-weight:450;color:var(--muted);letter-spacing:0;white-space:nowrap}
 .plan ul{list-style:none;padding:0;margin:18px 0 22px;display:grid;gap:9px;font-size:14.8px}
@@ -344,10 +364,6 @@ footer a:hover{color:var(--ink)}
       border:1px solid var(--line);border-radius:10px;padding:12px 14px;font:inherit;font-size:15px}
 .lista input:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent)}
 .lista button{border:0;cursor:pointer;font:inherit;font-weight:600}
-.lista button[disabled]{opacity:.55;cursor:default}
-.listaMsg{min-height:20px;margin:0 0 14px}
-.listaMsg.ok{color:var(--accent)}
-.listaMsg.err{color:var(--err)}
 
 /* Tabelas: as dos documentos legais e as da área do cliente.
    O seletor era `.doc table.legal`, e por isso a área do cliente — que não tem
@@ -673,27 +689,22 @@ table.legal td:first-child .small,table.legal td:first-child .muted{font-weight:
   .postList a.comCapa img{width:100%;height:auto;aspect-ratio:16/10}
 }
 
-/* A comparacao curta da pagina de precos. Ela reusa `table.legal` — que ja e
-   responsiva e ja foi provada nas paginas legais — e so ajusta o que muda:
-   quatro colunas em vez de duas, os planos centralizados, e o travessao do
-   "nao tem" em cinza em vez de vermelho. Vermelho ali leria como defeito, e o
-   que a celula diz e "isto e do plano de cima". */
-table.cmpPlanos th:not(:first-child),
-table.cmpPlanos td{text-align:center}
-table.cmpPlanos th[scope="row"]{text-align:left;font-weight:550}
-table.cmpPlanos td.nao{color:var(--muted)}
-table.cmpPlanos td.nao::before{content:none}
-@media(max-width:620px){
-  table.cmpPlanos td{text-align:right}
-}
+/* AS LISTAS DE PASSOS. Numeradas de verdade: aqui a ordem CARREGA informacao —
+   a planilha entra antes de o caso abrir, e o caso so volta depois de a
+   evidencia existir. Numero enfeitando lista sem ordem e ruido; aqui ele e o
+   assunto.
 
-/* Os quatro passos da rodada, na pagina de precos. Numerados de verdade: aqui
-   a ordem CARREGA informacao — a planilha entra antes de o caso abrir, e o
-   caso so volta depois de a evidencia existir. Numero enfeitando lista sem
-   ordem e ruido; aqui ele e o assunto. */
-ol.passosRodada{margin:14px 0 0;padding-left:22px;max-width:64ch}
-ol.passosRodada li{margin:0 0 6px;color:var(--ink)}
-ol.passosRodada li::marker{color:var(--accent);font-weight:600}
+   ELA SE CHAMAVA `passosRodada` E NINGUEM A USAVA. As dez paginas que tem lista
+   de passos escrevem `class="passos"`, e escreviam antes de esta regra existir:
+   no `main` de 19/08 o `class="passos"` ja estava la e a regra nao. Ela entrou
+   depois, com um nome que nenhum arquivo cita — regra viva apontando para uma
+   classe morta, ao lado de uma classe viva sem regra nenhuma. As duas metades
+   do mesmo defeito, uma de cada lado da folha.
+   As cinquenta listas passavam com o `<ol>` cru do navegador: recuo largo
+   demais e marcador da cor do texto. */
+ol.passos{margin:14px 0 0;padding-left:22px;max-width:64ch}
+ol.passos li{margin:0 0 6px;color:var(--ink)}
+ol.passos li::marker{color:var(--accent);font-weight:600}
 
 /* OS SELOS DE ESTADO, ao lado do nome da funcionalidade.
    `soon` ja existia. `beta` e `descoberta` sao irmaos dele e nao concorrentes:
