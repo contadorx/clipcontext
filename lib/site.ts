@@ -278,6 +278,69 @@ function preencherTexto(molde: string, vals: Array<string | number>): string {
  *  na primeira vez que alguém mexe na lista e esquece do parágrafo. */
 export const quantasFeatures = features.grupos.reduce((n, g) => n + g.itens.length, 0);
 
+/* ------------------------------------------------- a tira de formatos de saída
+ *
+ * Ela existia em SEIS cópias escritas à mão — os cinco `precos.*.html` e a
+ * `home.html` —, todas com treze selos. O catálogo tem QUINZE saídas, e a
+ * ferramenta tem doze botões. Três números para a mesma pergunta.
+ *
+ * As três que a tira não mostrava são capacidades PRONTAS, vendidas como
+ * inexistentes: o documento por tarefa, o pacote em vários idiomas e o prompt
+ * para IA. Ninguém decidiu escondê-las — elas nasceram depois da tira, e a tira
+ * era um `<div>` que ninguém lembrou de abrir.
+ *
+ * Nome de formato não se traduz, então o selo é um campo só em `features.json`
+ * e não cinco. E TODA saída precisa de um: sem essa trava, acrescentar um
+ * formato ao catálogo e esquecer a tira reabre em silêncio o buraco que este
+ * bloco veio fechar — que é exatamente como ele durou até aqui.
+ */
+type Saida = Feature & {
+  selo?: string;
+  /** Nota literal, para nome de produto: "Word", "PowerPoint". Não se traduz. */
+  seloNota?: string;
+  /** Nota TRADUZIDA, por chave do dicionário. Só o CSV precisa ("planilha"). */
+  seloNotaChave?: string;
+  /** A home mostra estes quatro em cima e o resto numa gaveta. */
+  destaque?: boolean;
+};
+
+function saidasDoCatalogo(): Saida[] {
+  const grupo = features.grupos.find((g) => g.id === 'saidas');
+  if (!grupo) throw new Error('features.json não tem o grupo `saidas` — a tira sai de lá');
+  const itens = grupo.itens as Saida[];
+  const semSelo = itens.filter((i) => !i.selo).map((i) => String(i.pt));
+  if (semSelo.length) {
+    throw new Error(
+      'saídas do catálogo sem `selo`, a tira sairia menor que o catálogo:\n  ' +
+      semSelo.join('\n  '));
+  }
+  return itens;
+}
+
+function tira(itens: Saida[], t: Dicionario): string {
+  return '<div class="saidas">' + itens.map((i) => {
+    const nota = i.seloNotaChave ? String(t[i.seloNotaChave] ?? '') : (i.seloNota ?? '');
+    return `<span class="saida"><b>${i.selo}</b>${nota ? ' ' + escapar(nota) : ''}</span>`;
+  }).join('') + '</div>';
+}
+
+/** A tira inteira — a página de preços mostra as quinze de uma vez. */
+const tiraDeSaidas = (t: Dicionario) => tira(saidasDoCatalogo(), t);
+
+/* A HOME MOSTRA QUATRO EM CIMA E O RESTO NUMA GAVETA, e isso é decisão
+   editorial, não descuido: quem decide comprar quer saber se a ENTREGA dele
+   cabe, e não quantos formatos existem. Quinze selos de uma vez leem-se como
+   "conversor de arquivo", que é a categoria errada.
+   O que muda é que os quatro passam a ser DECLARADOS no catálogo (`destaque`)
+   em vez de escritos à mão na home — e a gaveta é o complemento, calculado.
+   Assim um formato novo entra na gaveta sozinho, e a curadoria dos quatro
+   continua sendo uma escolha, feita num lugar só. */
+const tiraDestaque = (t: Dicionario) => tira(saidasDoCatalogo().filter((i) => i.destaque), t);
+const tiraResto = (t: Dicionario) => tira(saidasDoCatalogo().filter((i) => !i.destaque), t);
+
+/** Quantas saídas o catálogo declara. A tira e o texto saem do mesmo número. */
+export const quantasSaidas = (features.grupos.find((g) => g.id === 'saidas')?.itens.length) ?? 0;
+
 /** Tudo o que fica DENTRO do `<body>` de uma página: cabeçalho, corpo e rodapé.
  *
  *  O HTML sai dos mesmos `src/site/home.html` e `src/site/doc.html` que o
@@ -391,6 +454,12 @@ export function paginaHtml(pagina: string, lang: Lang): string {
     .replace('{1}', '</a>');
   // a tabela só é montada onde é usada; nas outras páginas o token vira vazio
   t.tabelaPlanos = pagina === 'precos' ? tabelaDePlanos(lang, t) : '';
+  /* A tira vale na página de preços E na home: as duas a tinham escrita à
+     mão, e a home era a sexta cópia. */
+  t.tiraSaidas = pagina === 'precos' ? tiraDeSaidas(t) : '';
+  t.tiraDestaque = pagina === 'home' ? tiraDestaque(t) : '';
+  t.tiraResto = pagina === 'home' ? tiraResto(t) : '';
+  t.quantasSaidas = String(quantasSaidas);
   /* O vídeo da rodada mora na página de PREÇOS, e por isso o token nasce aqui
      e não no ramo da home — onde a primeira versão dele ficou, derrubando o
      build com "chaves sem valor em precos.pt: rodadaLang". Onde o vídeo não
@@ -493,9 +562,23 @@ export function paginaHtml(pagina: string, lang: Lang): string {
     throw new Error(`chaves sem valor em ${pagina}.${lang}: ${sobrando.join(', ')}`);
   }
 
-  const abre = inteiro.indexOf('>', inteiro.indexOf('<body')) + 1;
+  /* A TAG DE ABERTURA DO CORPO, PROCURADA FORA DOS COMENTÁRIOS.
+     Isto era um `indexOf` cru, e um comentário que MENCIONAVA a tag — escrito
+     por mim, no build que apagou os cabeçalhos fósseis — casou primeiro. O
+     recorte começou dentro do comentário: meia página de prosa em português
+     virou texto visível acima do cabeçalho, em toda página do site e nos cinco
+     idiomas, e os atributos do corpo de verdade nunca chegaram ao React.
+     Não deu erro nenhum. Quem pegou foi uma régua de dobra, medindo que o
+     botão tinha saído da primeira tela do telefone — sintoma a três passos da
+     causa.
+     Os comentários viram espaços do mesmo tamanho, então os índices continuam
+     valendo no texto original. */
+  const semComentario = inteiro.replace(/<!--[\s\S]*?-->/g, (c) => ' '.repeat(c.length));
+  const inicio = semComentario.indexOf('<body');
+  if (inicio < 0) throw new Error(`sem tag de corpo em ${pagina}`);
+  const abre = semComentario.indexOf('>', inicio) + 1;
   const fecha = inteiro.lastIndexOf('</body>');
-  if (abre <= 0 || fecha < 0) throw new Error(`sem <body> em ${pagina}`);
+  if (abre <= 0 || fecha < 0) throw new Error(`corpo sem fim em ${pagina}`);
   return inteiro
     .slice(abre, fecha)
     // o support.js e o seletor de idioma já são responsabilidade do layout

@@ -463,6 +463,69 @@ o `paginas.mjs` já faz com o Pix, cobrando que nenhuma página volte a pedir.
 
 ---
 
+### DEC-17 — O vocabulário do domínio não fala alemão nem francês
+
+*Nasceu durante o Build 4, na varredura de tabelas de idioma. Não estava na
+fila — a `tabelas.mjs` o encontrou junto com o OCR e a limpeza de hesitação.*
+
+**O que é o recurso.** A pessoa lista os termos do sistema dela (`ME21N`,
+`KI235`) e o produto acha a forma FALADA de cada um dentro da transcrição —
+*eme vinte e um ene* volta a ser `ME21N`. É do plano **gratuito por regra**: o
+comentário no código diz, com todas as letras, que "o que faz a evidência de UMA
+pessoa ser aceita é grátis".
+
+**O estado medido.** As três tabelas que o sustentam — `LETRAS`, `NUMS` e
+`APELIDOS` — falam `pt`, `en` e `es`. Um cliente alemão ou francês não recebe
+erro: até este build ele caía num `|| NUMS.pt` e a ferramenta procurava
+*"duzentos e trinta e cinco"* dentro de um texto que nunca vai dizer isso.
+Ganho zero, e risco não-zero de trocar uma palavra por acaso **dentro de uma
+evidência**.
+
+**Já feito no Build 4, sem decisão sua:** a queda para o português saiu. Sem
+tabela, os mapas ficam vazios e sobra o caminho que não depende de língua —
+sigla escrita em letras e dígitos (`M E 21 N`) continua sendo achada. É menos
+do que pt/en/es têm, e é a verdade sobre o que existe. A `tabelas.mjs` imprime
+essa exceção em toda execução, com o motivo.
+
+**Por que isto é uma decisão e não uma tarefa.** Não é preencher tabela.
+Os números alemães vêm invertidos e colados — 21 é `einundzwanzig`, uma palavra
+só, e o casador atual soma palavras separadas. Os franceses de 70 a 99 são
+compostos — 91 é `quatre-vingt-onze`. Os dois exigem mexer em como o número é
+montado, não em qual palavra está na lista.
+
+**Caminho A — fazer os dois idiomas** (~1 dia, mais teste com fala de verdade).
+
+- **Pró:** o recurso que o produto vende como gratuito passa a existir nos cinco
+  mercados. Alemanha e França são justamente os dois que fazem avaliação de
+  fornecedor, e é onde o SAP mais aparece — o caso de uso que gerou o recurso.
+- **Contra:** eu não consigo verificar aqui contra saída real de reconhecimento
+  de fala em alemão. Escrevo as tabelas e a montagem, e a prova de que funciona
+  em campo depende de alguém falar num microfone.
+
+**Caminho B — só o alemão agora** (~meio dia).
+
+- **Pró:** é onde a evidência de auditoria pesa mais, e a inversão alemã é uma
+  regra só. O francês fica com a exceção escrita, visível a cada execução.
+- **Contra:** deixa metade da falha de pé, com o mesmo custo de contexto para
+  retomar depois.
+
+**Caminho C — deixar como está**, com a exceção escrita e impressa.
+
+- **Pró:** custo zero agora, e o estado é honesto: nada finge funcionar.
+- **Contra:** a página de preços não distingue idiomas ao anunciar o recurso.
+  Enquanto ele não existir em dois dos cinco, ou o recurso cresce ou a promessa
+  encolhe — e encolher a promessa em cinco idiomas dá mais trabalho do que o
+  caminho B.
+
+> **A minha indicação: caminho A**, mas no Build 6 ("o que já está vendido"), e
+> não agora. Ele é exatamente daquela família: um visto na tabela de preço que
+> não entrega em dois mercados. Fazer junto com os outros da mesma família sai
+> mais barato do que abrir um build para ele, e nenhum outro item depende dele.
+>
+> **Se você não responder:** eu levo para o Build 6 e trato como caminho A.
+
+---
+
 ### DEC-14 — A Stripe (por sua instrução: último, ou sob demanda)
 
 Nada de 1 a 9 exige tocar na conexão. O que fica represado, e que você deve
@@ -623,22 +686,35 @@ faz o vermelho ser **verdadeiro**.
 
 ---
 
-## Build 4 — Listas paralelas *(2,5–3 d)*
+## Build 4 — Listas paralelas — **feito**
 
-O defeito que mais custou a este projeto. Só as que **já divergem**.
+O defeito que mais custou a este projeto. Relatório em `BUILD-4.md`.
 
-- A tira de formatos existe em seis cópias à mão: 13 selos, 15 itens no
-  catálogo, 12 botões na tela — três capacidades prontas vendidas como inexistentes
-- `LISTA_TXT` com 3 idiomas ao lado de `FICHA_TXT` com 5, no mesmo arquivo
-- Mapa de locale de data com 3 idiomas numa ferramenta de 5: a validade sai em
-  português dentro do documento que o cliente alemão anexa a uma auditoria
-- Vocabulário de cenários divergente entre a ferramenta e o site
-- Duas tabelas de preço no `build.py`, e `TEAM_MINIMO` duplicado
-- Quatro tabelas `LOCALE` idênticas e uma quinta variante que vai para a Stripe
-- `CAMINHO` e `HTML_LANG` escritos à mão
-- `hreflang` fóssil de três idiomas
-- `AUDITORIA-PENDENTE.md` passa a ser **gerado**
-- CSS: cinco classes usadas e ausentes, cinco regras mortas
+- ✅ A tira de formatos: era escrita à mão em seis cópias com 13 selos ao lado
+  de um catálogo de 15. Agora `lib/site.ts` a gera de `src/features.json` — 15
+  selos nos cinco idiomas, 4 na frente e 11 na gaveta na home
+- ✅ Mapa de locale de data com 3 idiomas numa ferramenta de 5
+- ✅ `TEAM_MINIMO`: o `build.py` repetia o `3` embaixo de um comentário dizendo
+  que ele mora em `lib/stripe.ts`. Passa a **ler** de lá, e para o build se
+  não achar
+- ✅ `NUM` derivado de `PRECO` — a segunda tabela de preço saiu
+- ✅ Quatro tabelas `LOCALE` idênticas; a quinta variante ganhou nome
+  (`LOCALE_STRIPE`) e o motivo escrito de continuar diferente
+- ✅ `CAMINHO` sai do `rotas.json`
+- ✅ `hreflang` fóssil de três idiomas: o `<head>` inteiro de `home.html` e
+  `doc.html` era fóssil — nunca foi servido. Apagado
+- ✅ `AUDITORIA-PENDENTE.md` passa a ser **gerado**, e os 21 comentários que o
+  duplicavam saíram
+- ✅ **Três achados novos, da régua nova** (`tabelas.mjs`, que varre o produto
+  atrás de tabela de idioma incompleta): `OCR_LANG` lia a tela do cliente alemão
+  com o modelo **inglês**; `HESITA` limpava transcrição alemã com as regras do
+  **português**; e o vocabulário do domínio não fala de/fr — este virou a
+  **DEC-17**
+- ⤳ **CSS** (cinco classes usadas e ausentes, cinco regras mortas): build
+  próprio, por decisão sua — mexe em 35 corpos de página e pede captura de tela
+  antes e depois nas 18 combinações
+- ⤳ **Vocabulário de cenários** (`tutorial`/`instrucao`, `usabilidade`/`ux`):
+  mexe em dado guardado, foi para o Build 12
 
 ---
 

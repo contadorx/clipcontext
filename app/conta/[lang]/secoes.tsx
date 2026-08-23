@@ -14,13 +14,11 @@
  */
 import type { Conta } from '@/lib/supabase/servico';
 import { PLANOS, temStripe } from '@/lib/stripe';
-import { type Lang, type Textos, preencher } from '@/lib/conta/textos';
+import { LOCALE, preencher, type Lang, type Textos } from '@/lib/conta/textos';
 import { CAMINHO_ROTEIRO } from '@/lib/conta/roteiro';
 import { ajustar, apagarModelo, bloquear, comprar, configurar, convidar, gerenciar } from '../acoes';
 import Licenca from './Licenca';
 
-const LOCALE: Record<Lang, string> = { pt: 'pt-BR', en: 'en-US', es: 'es-ES',
-                                      de: 'de-DE', fr: 'fr-FR' };
 
 const dinheiro = (lang: Lang, centavos: number, moeda: string) =>
   new Intl.NumberFormat(LOCALE[lang], { style: 'currency', currency: moeda || 'BRL' }).format(centavos / 100);

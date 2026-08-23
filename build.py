@@ -585,6 +585,88 @@ def escrever_marca(root: pathlib.Path) -> None:
     print(f"{arq.relative_to(root)}  (endereços para o Next)")
 
 
+def escrever_auditoria(root: pathlib.Path) -> None:
+    """O `AUDITORIA-PENDENTE.md`, gerado — e não escrito à mão.
+
+    O comentário do `CARTOES` prometia isto há meses: "é essa lista que vira o
+    AUDITORIA-PENDENTE.md". Nada gerava. O arquivo era escrito à mão, e já tinha
+    divergido dos comentários do próprio build — o comentário ficou com a frase
+    velha e um teste que a .md já não creditava.
+
+    UMA MARCA DE VISTO NUMA TABELA DE PREÇO É UMA PROMESSA. Este arquivo é a
+    lista de quais delas têm trava e quais não têm, e ele só vale se ninguém
+    precisar lembrar de atualizá-lo.
+
+    O QUE ELE NÃO GERA, e diz que não gera: as afirmações soltas dentro dos
+    cinco `precos.<idioma>.html`. Elas moram no HTML, não aqui — e prometer
+    gerar o que não se gera seria repetir, em código, o defeito que este
+    gerador veio consertar. A seção continua escrita à mão, marcada como tal.
+    """
+    linhas = [
+        "# Auditoria pendente — a página de preços",
+        "",
+        "> **GERADO POR `build.py`. Não edite à mão.**",
+        "> Uma linha por promessa que os cartões e a comparação publicam: a frase,",
+        "> e o teste que a comprova — ou `sem teste`, com todas as letras.",
+        "> Onde está `sem teste`, **não quer dizer que não funcione**: quer dizer",
+        "> que nada no repositório reprova se parar de funcionar.",
+        "",
+    ]
+    sem = 0
+    for c in CARTOES:
+        linhas += [f"## Cartão — {c['titulo']['pt']} ({c['sub']['pt'].split(' · ')[0]})", "",
+                   "| A frase publicada | O teste |", "|---|---|"]
+        for b in c["bullets"]:
+            teste = b.get("teste") or ""
+            if teste:
+                col = ", ".join(f"`{x.strip()}`" for x in teste.split(","))
+            else:
+                sem += 1
+                col = "**sem teste**"
+                if b.get("semTestePorque"):
+                    col += " — " + b["semTestePorque"]
+            linhas.append(f"| {b['pt']} | {col} |")
+        linhas.append("")
+
+    linhas += ["## A comparação curta", "",
+               "| A linha | O teste |", "|---|---|"]
+    for r in COMPARACAO:
+        teste = r.get("teste") or ""
+        col = ", ".join(f"`{x.strip()}`" for x in teste.split(",")) if teste else "**sem teste**"
+        if not teste:
+            sem += 1
+        linhas.append(f"| {r['rot']['pt']} | {col} |")
+
+    linhas += ["", "---", "",
+               f"**{sem} promessa(s) sem trava** de "
+               f"{sum(len(c['bullets']) for c in CARTOES) + len(COMPARACAO)}.",
+               ""]
+
+    # A METADE ESCRITA À MÃO, COLADA — e não perdida.
+    #
+    # As afirmações soltas da página moram dentro dos cinco
+    # `precos.<idioma>.html`, e não nesta lista de dados; a lista de pendências
+    # também é prosa. A primeira versão deste gerador simplesmente as deixou de
+    # fora e escreveu, no lugar delas, um parágrafo dizendo que não as gerava.
+    # Estava certo sobre o que não gerava e errado sobre o resto: apagou onze
+    # linhas de auditoria que não tinham outro lugar para morar.
+    #
+    # Então a metade escrita à mão ganhou arquivo próprio, e o gerador a cola.
+    # O `AUDITORIA-PENDENTE.md` continua sendo gerado inteiro — quem edita, edita
+    # `src/auditoria-solta.md`.
+    # `ROOT`, e não `root`: o argumento diz ONDE ESCREVER — a régua
+    # `auditoria.mjs` regenera num diretório temporário para comparar com o que
+    # está publicado. A metade escrita à mão é fonte do projeto, e mora sempre
+    # aqui.
+    solta = ROOT / "src" / "auditoria-solta.md"
+    if not solta.exists():
+        raise SystemExit("build.py: falta src/auditoria-solta.md — a metade "
+                         "escrita à mão do AUDITORIA-PENDENTE.md")
+    linhas += ["---", "", solta.read_text(encoding="utf-8").rstrip(), ""]
+    (root / "AUDITORIA-PENDENTE.md").write_text("\n".join(linhas) + "\n", encoding="utf-8")
+    print(f"AUDITORIA-PENDENTE.md  ({sem} sem trava)")
+
+
 def build_site(root: pathlib.Path) -> None:
     """Os arredores do site — o que não é página e precisa existir como arquivo.
 
@@ -1314,18 +1396,51 @@ def gerar_og(root: pathlib.Path, textos_por_idioma: dict) -> None:
 # ar em um idioma e continua no ar em quatro. Tirar uma linha da comparação
 # custaria cinco edições e uma caçada; aqui custa apagar uma entrada.
 #
-# Cada benefício carrega, no comentário, o teste que prova que ele existe. Onde
-# está `sem teste`, é promessa sem trava — e é essa lista que vira o
-# `AUDITORIA-PENDENTE.md`.
+# Cada benefício carrega um campo `teste` com a régua que prova que ele existe,
+# e `escrever_auditoria()` publica essa lista no `AUDITORIA-PENDENTE.md` a cada
+# build. Campo vazio quer dizer promessa sem trava, e sai no arquivo com todas
+# as letras — com o `semTestePorque` ao lado, quando existe uma régua parecida
+# que NÃO prova aquilo (é a confusão que o campo vazio sozinho convidaria).
+#
+# O campo é um CAMPO, e não um comentário, porque comentário não é lido por
+# ninguém a não ser por quem já está olhando para a linha. Até este build eram
+# as duas coisas: um comentário `# "frase" ← teste.mjs` em cima de cada bala,
+# mais o `.md` escrito à mão embaixo. As duas cópias divergiram — o comentário
+# ficou com a frase velha ("hash", "vocabulário", "status") e creditava
+# `vocab.mjs` a uma promessa que a página já não faz. Os comentários foram
+# apagados; o que sobrou deles foi o campo, que é o que o arquivo lê.
 # ---------------------------------------------------------------------------
 
 # A moeda de cada idioma, e o preço em cada moeda. Os números não são inventados
-# aqui: são os que a página já publicava. O que muda nesta rodada é o mínimo do
-# Team, que desceu de cinco assentos para três — e ele mora, de verdade, em
-# `lib/stripe.ts`. Este dicionário só o repete para a vitrine.
+# aqui: são os que a página já publicava.
 MOEDA_DO_IDIOMA = {"pt": "BRL", "en": "USD", "es": "USD", "de": "EUR", "fr": "EUR"}
 
-TEAM_MINIMO = 3
+
+def _team_minimo() -> int:
+    """O mínimo de assentos do Team, LIDO de `lib/stripe.ts`.
+
+    O comentário de lá diz, em maiúsculas, "O MÍNIMO DO TEAM MORA AQUI, E SÓ
+    AQUI" — e este arquivo repetia o `3` logo abaixo de um comentário dizendo
+    que ele mora lá. Duas cópias, uma delas se declarando cópia: é o defeito
+    inteiro em duas linhas. Era 5 antes desta rodada, e as duas desceram juntas
+    só porque quem mexeu lembrou das duas.
+
+    Falta o número, o build PARA. Uma vitrine que anuncia "a partir de 3
+    pessoas" enquanto o checkout cobra o mínimo de 5 é pior do que uma build
+    vermelha — a régua `promessa.mjs` lê o mesmo arquivo e cobra que as duas
+    páginas digam a mesma palavra nos cinco idiomas, mas ela só roda depois.
+    """
+    fonte = (ROOT / "lib" / "stripe.ts").read_text(encoding="utf-8")
+    time = fonte.split("time: {", 1)
+    if len(time) < 2:
+        raise SystemExit("build.py: não achei o bloco `time:` em lib/stripe.ts")
+    achado = re.search(r"assentos:\s*(\d+)", time[1])
+    if not achado:
+        raise SystemExit("build.py: não achei `assentos:` no bloco `time:` de lib/stripe.ts")
+    return int(achado.group(1))
+
+
+TEAM_MINIMO = _team_minimo()
 
 PRECO = {
     "free":     {"BRL": "R$ 0",   "USD": "US$ 0",  "EUR": "€ 0"},
@@ -1371,33 +1486,28 @@ CARTOES = [
                 "fr": "Créer une preuve gratuitement"},
         "destino": "app",
         "bullets": [
-            # "Evidência completa, com hash e tarja de dado sensível" ← evidencia.mjs
-            {"pt": "Evidência completa, com impressão digital e tarja de dado sensível",
+            {"teste": 'evidencia.mjs', "pt": "Evidência completa, com impressão digital e tarja de dado sensível",
              "en": "Complete evidence, with a fingerprint and sensitive-data redaction",
              "es": "Evidencia completa, con huella digital y tarjado de dato sensible",
              "de": "Vollständiger Nachweis, mit Fingerabdruck und Schwärzung sensibler Daten",
              "fr": "Preuve complète, avec empreinte et masquage des données sensibles"},
-            # "Tudo processado no seu computador" ← terceiros.mjs prova a lista de
-            #   suboperadores, não o processamento local ← sem teste
-            {"pt": "Tudo processado no seu computador",
+            {"teste": '', "semTestePorque": 'terceiros.mjs prova a lista de suboperadores, não o processamento local', "pt": "Tudo processado no seu computador",
              "en": "Everything processed on your own computer",
              "es": "Todo procesado en su computadora",
              "de": "Alles auf Ihrem eigenen Rechner verarbeitet",
              "fr": "Tout est traité sur votre propre ordinateur"},
-            # "Todos os formatos de saída" ← saidas.mjs
-            {"pt": "Todos os formatos de saída",
+            {"teste": 'saidas.mjs', "pt": "Todos os formatos de saída",
              "en": "Every output format",
              "es": "Todos los formatos de salida",
              "de": "Alle Ausgabeformate",
              "fr": "Tous les formats de sortie"},
-            # "Link pré-configurado ... é um endereço, não uma integração" ← linkpage.mjs
             #
             # Esta bala é a única porta da página de preços para o `/link`, e ela
             # tem de dizer o que a coisa É na mesma frase: "link para o Jira" é,
             # a uma palavra, lido como integração — e aí o FAQ gasta uma resposta
             # desmentindo o próprio cartão. Um cartão que precisa de nota de
             # rodapé para não enganar está enganando.
-            {"pt": "Link pré-configurado para colar no Jira, no Zephyr, no Xray ou no "
+            {"teste": 'linkpage.mjs', "pt": "Link pré-configurado para colar no Jira, no Zephyr, no Xray ou no "
                    "TestRail — é um endereço, não uma integração",
              "en": "A pre-filled link to paste into Jira, Zephyr, Xray or TestRail — "
                    "it is an address, not an integration",
@@ -1408,8 +1518,7 @@ CARTOES = [
              "fr": "Lien prérempli à coller dans Jira, Zephyr, Xray ou TestRail — "
                    "c’est une adresse, pas une intégration",
              "href": "link"},
-            # "Sem conta para usar" ← sem teste
-            {"pt": "Sem conta para usar",
+            {"teste": '', "pt": "Sem conta para usar",
              "en": "No account needed to use it",
              "es": "Sin cuenta para usarlo",
              "de": "Kein Konto nötig",
@@ -1442,25 +1551,21 @@ CARTOES = [
                 "fr": "S’abonner à Personal"},
         "destino": "conta",
         "bullets": [
-            # "Importe a planilha de casos de teste" ← roteiro.mjs
-            {"pt": "Importe a planilha de casos de teste",
+            {"teste": 'roteiro.mjs', "pt": "Importe a planilha de casos de teste",
              "en": "Import your spreadsheet of test cases",
              "es": "Importe la planilla de casos de prueba",
              "de": "Importieren Sie Ihre Tabelle mit Testfällen",
              "fr": "Importez votre tableur de cas de test"},
-            # "Abra cada caso já preenchido" ← roteiro.mjs
-            {"pt": "Abra cada caso já preenchido",
+            {"teste": 'roteiro.mjs', "pt": "Abra cada caso já preenchido",
              "en": "Open each case already filled in",
              "es": "Abra cada caso ya rellenado",
              "de": "Öffnen Sie jeden Fall bereits ausgefüllt",
              "fr": "Ouvrez chaque cas déjà prérempli"},
-            # "Devolva status, data, executor e hash na mesma planilha" ← roteiro.mjs
-            {"pt": "Devolva situação, data, executor e impressão digital na mesma planilha",
+            {"teste": 'roteiro.mjs', "pt": "Devolva situação, data, executor e impressão digital na mesma planilha",
              "en": "Send status, date, tester and fingerprint back in the same spreadsheet",
              "es": "Devuelva situación, fecha, ejecutor y huella en la misma planilla",
              "de": "Geben Sie Status, Datum, Ausführenden und Fingerabdruck in derselben Tabelle zurück",
              "fr": "Renvoyez statut, date, exécutant et empreinte dans le même tableur"},
-            # "Guarde o seu padrão de documento, o cliente e o vocabulário" ← modelos.mjs, vocab.mjs
             # SEM O VOCABULÁRIO, e o motivo importa.
             #
             # A primeira versão desta bala dizia "guarde o seu padrão, o cliente
@@ -1473,13 +1578,12 @@ CARTOES = [
             # existe, e deixava de fora a metade que existe e é gratuita. É
             # exatamente o defeito que este projeto já pagou duas vezes.
             {"id": "modeloProprio",
-             "pt": "Guarde o seu padrão de documento e o seu cliente",
+             "teste": 'modelos.mjs, planos.mjs', "pt": "Guarde o seu padrão de documento e o seu cliente",
              "en": "Keep your document standard and your client",
              "es": "Guarde su estándar de documento y su cliente",
              "de": "Bewahren Sie Ihren Dokumentstandard und Ihren Kunden",
              "fr": "Conservez votre standard de document et votre client"},
-            # "A sua marca no topo de todos os formatos" ← marca.mjs
-            {"pt": "A sua marca no topo de todos os formatos",
+            {"teste": 'marca.mjs', "pt": "A sua marca no topo de todos os formatos",
              "en": "Your brand at the top of every format",
              "es": "Su marca en la parte superior de todos los formatos",
              "de": "Ihre Marke im Kopf jedes Formats",
@@ -1504,33 +1608,28 @@ CARTOES = [
         # conta, que é onde mora o seletor de assentos e a ação de checkout.
         "destino": "conta",
         "bullets": [
-            # "Distribua e reatribua os casos do roteiro" ← roteiro.mjs
-            {"pt": "Distribua e reatribua os casos do roteiro",
+            {"teste": 'roteiro.mjs', "pt": "Distribua e reatribua os casos do roteiro",
              "en": "Hand out and reassign the cases in the script",
              "es": "Reparta y reasigne los casos del guion",
              "de": "Verteilen Sie die Fälle des Skripts und weisen Sie sie neu zu",
              "fr": "Répartissez et réattribuez les cas du scénario"},
-            # "Acompanhe o que está pendente e quem está executando" ← roteiro.mjs
-            {"pt": "Acompanhe o que está pendente e quem está executando",
+            {"teste": 'roteiro.mjs', "pt": "Acompanhe o que está pendente e quem está executando",
              "en": "Track what is pending and who is running it",
              "es": "Siga lo que está pendiente y quién lo está ejecutando",
              "de": "Verfolgen Sie, was offen ist und wer gerade ausführt",
              "fr": "Suivez ce qui est en attente et qui exécute"},
-            # "Padrão da equipe aplicado no documento de todo mundo" ← modelos.mjs
             {"id": "padraoDoTime",
-             "pt": "Padrão da equipe aplicado no documento de todo mundo",
+             "teste": 'modelos.mjs', "pt": "Padrão da equipe aplicado no documento de todo mundo",
              "en": "The team standard applied to everyone’s document",
              "es": "El estándar del equipo aplicado al documento de todos",
              "de": "Der Teamstandard im Dokument aller Beteiligten",
              "fr": "Le standard de l’équipe appliqué au document de chacun"},
-            # "Assentos, convite, bloqueio e prazo de revogação" ← licenca.mjs, convite.mjs
-            {"pt": "Assentos, convite, bloqueio e prazo de revogação",
+            {"teste": 'licenca.mjs, convite.mjs', "pt": "Assentos, convite, bloqueio e prazo de revogação",
              "en": "Seats, invitations, blocking and a revocation window",
              "es": "Asientos, invitación, bloqueo y plazo de revocación",
              "de": "Plätze, Einladung, Sperrung und Widerrufsfrist",
              "fr": "Sièges, invitation, blocage et délai de révocation"},
-            # "Classificação e campo de emissor no documento" ← sem teste
-            {"pt": "Classificação e campo de emissor no documento",
+            {"teste": '', "semTestePorque": 'miudos.mjs cobre a classificação no prompt, não o campo no documento', "pt": "Classificação e campo de emissor no documento",
              "en": "Classification and an issuer field on the document",
              "es": "Clasificación y campo de emisor en el documento",
              "de": "Einstufung und Ausstellerfeld im Dokument",
@@ -1553,20 +1652,20 @@ SIM = "sim"
 NAO = "nao"
 
 COMPARACAO = [
-    # "Criar a evidência" ← evidencia.mjs
-    {"rot": {"pt": "Criar a evidência", "en": "Create the evidence",
+    {"teste": 'evidencia.mjs',
+     "rot": {"pt": "Criar a evidência", "en": "Create the evidence",
              "es": "Crear la evidencia", "de": "Den Nachweis erstellen",
              "fr": "Créer la preuve"},
      "free": SIM, "personal": SIM, "team": SIM},
-    # "Guardar padrão, cliente e vocabulário" ← modelos.mjs, vocab.mjs
-    {"rot": {"pt": "Guardar o seu padrão e o seu cliente",
+    {"teste": 'modelos.mjs',
+     "rot": {"pt": "Guardar o seu padrão e o seu cliente",
              "en": "Keep your standard and your client",
              "es": "Guardar su estándar y su cliente",
              "de": "Ihren Standard und Ihren Kunden behalten",
              "fr": "Conserver votre standard et votre client"},
      "free": NAO, "personal": SIM, "team": SIM},
-    # "Executar um roteiro de casos" ← roteiro.mjs
-    {"rot": {"pt": "Executar um roteiro de casos", "en": "Run a script of cases",
+    {"teste": 'roteiro.mjs',
+     "rot": {"pt": "Executar um roteiro de casos", "en": "Run a script of cases",
              "es": "Ejecutar un guion de casos", "de": "Ein Fallskript ausführen",
              "fr": "Exécuter un scénario de cas"},
      "free": NAO,
@@ -1574,15 +1673,15 @@ COMPARACAO = [
                   "de": "einzeln", "fr": "individuel"},
      "team": {"pt": "compartilhado", "en": "shared", "es": "compartido",
               "de": "geteilt", "fr": "partagé"}},
-    # "Atribuir e acompanhar quem executa" ← roteiro.mjs
-    {"rot": {"pt": "Atribuir e acompanhar quem executa",
+    {"teste": 'roteiro.mjs',
+     "rot": {"pt": "Atribuir e acompanhar quem executa",
              "en": "Assign and track who runs it",
              "es": "Asignar y seguir quién ejecuta",
              "de": "Zuweisen und verfolgen, wer ausführt",
              "fr": "Attribuer et suivre qui exécute"},
      "free": NAO, "personal": NAO, "team": SIM},
-    # "Padronizar o documento da equipe" ← modelos.mjs
-    {"rot": {"pt": "Padronizar o documento da equipe",
+    {"teste": 'modelos.mjs',
+     "rot": {"pt": "Padronizar o documento da equipe",
              "en": "Standardise the team’s document",
              "es": "Estandarizar el documento del equipo",
              "de": "Das Dokument des Teams vereinheitlichen",
@@ -1808,9 +1907,23 @@ def blocos_de_precos(lang: str, rot: dict) -> dict:
     # calculadora compara o custo estimado com a mensalidade do plano, e um
     # número de plano digitado à mão no HTML alemão é a forma mais barata de a
     # página passar a mentir sobre o próprio preço.
-    NUM = {"free": {"BRL": 0, "USD": 0, "EUR": 0},
-           "personal": {"BRL": 149, "USD": 29, "EUR": 27},
-           "team": {"BRL": 349, "USD": 69, "EUR": 65}}
+    # O NÚMERO SAI DO PREÇO, e não de uma segunda tabela.
+    #
+    # Eram duas: `PRECO` (o texto que aparece — "R$ 149") e `NUM` (o número que
+    # a calculadora usa). Hoje elas batem. Quem subir o preço vai editar `PRECO`,
+    # porque é ela que aparece na página — e a calculadora continuaria comparando
+    # com o preço velho, em silêncio, que é o jeito mais barato de uma página
+    # passar a mentir sobre o próprio preço.
+    #
+    # A separação de milhar é o motivo de `PRECO` ser texto ("R$ 1.047"), e é
+    # justamente ela que impede um `float()` ingênuo: os dígitos são extraídos e
+    # os separadores descartados.
+    def _num(txt: str) -> int:
+        digitos = re.sub(r"[^\d]", "", txt)
+        return int(digitos) if digitos else 0
+
+    NUM = {plano: {moeda: _num(txt) for moeda, txt in por_moeda.items()}
+           for plano, por_moeda in PRECO.items()}
     return {"cartoes": f'<div class="plans tres">{"".join(cartoes)}</div>',
             "comparacao": tabela,
             "precoPersonal": PRECO["personal"][m],
@@ -2008,6 +2121,7 @@ def main() -> int:
 
     escrever_marca(ROOT)
 
+    escrever_auditoria(ROOT)
     return build_site(ROOT) or 0
 
 

@@ -54,7 +54,7 @@ MAPA="
 ^src/site/bodies/ => site:paginas.mjs site:legal.mjs site:ajuda.mjs site:vitrine.mjs
 ^src/site/(doc|home)[.]html$ => site:paginas.mjs site:cinco.mjs
 ^src/site/support[.]js$ => site:ficha.mjs site:paginas.mjs
-^build[.]py$ => figuras.mjs cartao.mjs promessa.mjs planos.mjs site:precos.mjs
+^build[.]py$ => figuras.mjs cartao.mjs promessa.mjs planos.mjs auditoria.mjs site:precos.mjs
 ^src/rotas[.]json$ => middleware.mjs site:idiomas.mjs site:paginas.mjs
 ^middleware[.]ts$ => middleware.mjs
 ^next[.]config[.]mjs$ => site:paginas.mjs site:seo.mjs
@@ -68,7 +68,7 @@ MAPA="
 "
 
 # ---- 1. os contratos: sempre, e são catorze segundos ------------------------
-CONTRATOS="chaves.mjs faxina.mjs figura.mjs funil.mjs inventario.mjs middleware.mjs
+CONTRATOS="auditoria.mjs chaves.mjs faxina.mjs figura.mjs funil.mjs inventario.mjs middleware.mjs
            planos.mjs promessa.mjs semmarca.mjs stripehook.mjs terceiros.mjs wer.mjs"
 
 # ----------------------------------------------------------------------------

@@ -17,7 +17,6 @@ for i in $(seq 1 30); do
   curl -sf -o /dev/null http://localhost:8802/precos && break
   sleep 1
 done
-trap 'kill $NEXT 2>/dev/null' EXIT
 
 cd "$(cd "$(dirname "$0")" && pwd)"
 TESTES="smoke.mjs saidas.mjs passos.mjs evidencia.mjs modelos.mjs cenarios.mjs
@@ -35,7 +34,7 @@ TESTES="smoke.mjs saidas.mjs passos.mjs evidencia.mjs modelos.mjs cenarios.mjs
          travado.mjs promptcx.mjs cabec.mjs ajuda.mjs cinco.mjs appidioma.mjs gravando.mjs janelinha.mjs marca.mjs figuras.mjs dobrafig.mjs
          compartilhar.mjs contradicao.mjs negocio.mjs celular.mjs barraapp.mjs paridade.mjs teto.mjs ritmo.mjs rolar.mjs isca.mjs blog.mjs cenario1.mjs organiza.mjs acabamento.mjs convite.mjs email.mjs tourvid.mjs semmarca.mjs lente2.mjs
          memoria.mjs pesagem.mjs espelho.mjs grade.mjs varredura.mjs audio.mjs plano.mjs faixa.mjs reuniao.mjs diagchamado.mjs modelo.mjs espera.mjs passomulti.mjs pessoas.mjs matriz.mjs espera2.mjs anotacao.mjs roteirojanela.mjs quedaplaca.mjs conclusao.mjs parar.mjs entrada.mjs indice.mjs figura.mjs resumo.mjs perna.mjs saidarec.mjs chaves.mjs planos.mjs promessa.mjs voltadocaso.mjs cartao.mjs etapas.mjs marcos.mjs funil.mjs wer.mjs
-         terceiros.mjs precos.mjs semundefined.mjs middleware.mjs inventario.mjs descarte.mjs"
+         terceiros.mjs precos.mjs semundefined.mjs middleware.mjs inventario.mjs descarte.mjs auditoria.mjs tabelas.mjs"
 # EM PARALELO, E COM O NÚMERO SAINDO DA MÁQUINA.
 #
 # Ela rodava um de cada vez: setenta minutos, com três dos quatro núcleos desta
@@ -57,8 +56,29 @@ echo
 # é montado na ordem da lista no fim — misturar a saída de três processos numa
 # tela só é como não ter saída.
 SAIDAS="$(mktemp -d)"
-trap 'rm -rf "$SAIDAS"' EXIT
 export SAIDAS
+
+# UM TRAP SÓ, PORQUE O SEGUNDO APAGA O PRIMEIRO.
+# Havia dois `trap ... EXIT` neste arquivo: um para derrubar o Next, outro para
+# limpar as saídas. O segundo substituiu o primeiro em silêncio, e o servidor
+# ficava de pé depois da esteira terminar — foi assim que uma execução seguinte
+# foi medida contra uma build velha, e que `npx next start` passou a responder
+# `EADDRINUSE` sem ninguém ter subido nada.
+#
+# E as saídas SOBREVIVEM quando algo reprova. Elas eram apagadas sempre, o que
+# quer dizer que a única cópia do que a régua vermelha imprimiu morria junto com
+# o comando — restava rodar o teste de novo, sozinho, onde ele costuma passar.
+limpar() {
+  kill $NEXT 2>/dev/null
+  if [ -n "$falhou" ]; then
+    echo
+    echo "As saídas de todas as réguas ficaram em: $SAIDAS"
+    for t in $falhou; do echo "  $SAIDAS/$t.log"; done
+  else
+    rm -rf "$SAIDAS"
+  fi
+}
+trap limpar EXIT
 
 # O TICKER, porque vinte minutos de silêncio não são melhores que setenta de
 # ruído. Cada teste que termina imprime UMA linha, na ordem em que acabou, com
@@ -78,6 +98,10 @@ printf '%s\n' $TESTES | xargs -P "$PARALELO" -I{} sh -c '
   # que prova o destravamento pago de ponta a ponta nunca rodou onde a esteira
   # roda, e o rodapé dizia "verde".
   if [ "$c" != 0 ]; then printf "FALHOU\n" > "$SAIDAS/$t.estado"
+  # `^PULADO` no começo da linha quer dizer O ARQUIVO INTEIRO não rodou, e só
+  # isso. Um bloco que não roda dentro de um arquivo que rodou escreve
+  # `BLOCO PULADO` — ele aparece no rodapé (o grep de baixo casa com os dois),
+  # mas não tira das 139 um arquivo que passou em quatro dos cinco blocos.
   elif grep -q "^PULADO" "$SAIDAS/$t.log"; then printf "PULADO\n" > "$SAIDAS/$t.estado"
   else printf "ok\n" > "$SAIDAS/$t.estado"; fi
   feitos=$(ls "$SAIDAS" | grep -c "[.]estado$")

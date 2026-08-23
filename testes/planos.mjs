@@ -363,16 +363,32 @@ console.log('\n[11] a home apresenta os três planos, e mostra quatro formatos')
   ok('e ele vem antes do FAQ', home.indexOf('id="planos"') < home.indexOf('{{faqH}}'));
   ok('e leva à página de preços', /id="planos"[\s\S]{0,900}\{\{precos\}\}/.test(home));
 
-  /* Quatro na tira de cima. O corte e por CONTAGEM, e nao por lista escrita
-     aqui: qual formato entra na frente e decisao de produto e pode mudar; que
-     sejam poucos e a regra. */
-  const primeira = home.slice(home.indexOf('<div class="saidas">'), home.indexOf('<details class="maisSaidas">'));
-  const naFrente = (primeira.match(/class="saida"/g) || []).length;
-  ok('a primeira tira mostra quatro formatos', naFrente === 4, String(naFrente));
-  const dentro = home.slice(home.indexOf('<details class="maisSaidas">'));
-  const escondidos = (dentro.slice(0, dentro.indexOf('</details>')).match(/class="saida"/g) || []).length;
-  ok('e nenhum formato sumiu: os treze continuam na página',
-     naFrente + escondidos === 13, `${naFrente} + ${escondidos}`);
+  /* A TIRA NAO MORA MAIS NO HTML. Ate o Build 4, os selos estavam escritos a
+     mao aqui e o numero "treze" estava escrito aqui no teste — duas listas
+     paralelas ao catalogo, que ja tinha quinze saidas. As duas envelheceram
+     juntas e ninguem viu.
+     Agora `lib/site.ts` gera a tira a partir de `src/features.json`, e a home
+     so carrega os dois tokens. Entao o que esta regua cobra aqui e a ORDEM —
+     destaque na frente, o resto dentro do `<details>` — e a CONTAGEM sai do
+     catalogo, e nao de um numero digitado. Quem afirma que a pagina servida
+     tem os quinze selos e `figuras.mjs [6]`. */
+  const iDest = home.indexOf('{{tiraDestaque}}');
+  const iMais = home.indexOf('<details class="maisSaidas">');
+  const iResto = home.indexOf('{{tiraResto}}');
+  ok('a tira de destaque vem do catalogo, e nao escrita a mao', iDest > 0, String(iDest));
+  ok('o resto vem do catalogo tambem', iResto > 0, String(iResto));
+  ok('e o destaque vem ANTES da gaveta, com o resto dentro dela',
+     iDest > 0 && iDest < iMais && iMais < iResto, `${iDest} < ${iMais} < ${iResto}`);
+  ok('nenhum selo sobrou escrito a mao na home',
+     !/class="saida"/.test(home), 'ha `class="saida"` no HTML — a tira voltou para o arquivo');
+
+  const cat = JSON.parse(fs.readFileSync(`${RAIZ_WS}/src/features.json`, 'utf8'));
+  const saidas = (cat.grupos.find((g) => g.id === 'saidas') || {}).itens || [];
+  const naFrente = saidas.filter((i) => i.destaque).length;
+  ok('o catalogo marca poucos formatos como destaque', naFrente >= 3 && naFrente <= 5,
+     `${naFrente} de ${saidas.length}`);
+  ok('e nenhum formato sumiu: o resto continua na gaveta',
+     saidas.length - naFrente > 0, `${naFrente} + ${saidas.length - naFrente}`);
 
   const site = JSON.parse(fs.readFileSync(`${RAIZ_WS}/src/i18n-site.json`, 'utf8'));
   const CHAVES = ['plH', 'plP', 'plFreeT', 'plFreeD', 'plPersT', 'plPersD',

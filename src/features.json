@@ -416,6 +416,9 @@
       "itens": [
         {
           "planos": "fpt",
+          "selo": "PDF",
+          "prova": "id=\"go\"",
+          "destaque": true,
           "pt": "PDF, em A4 ou Carta",
           "en": "PDF, in A4 or Letter",
           "es": "PDF, en A4 o Carta",
@@ -424,6 +427,10 @@
         },
         {
           "planos": "fpt",
+          "selo": "DOCX",
+          "destaque": true,
+          "seloNota": "Word",
+          "prova": "id=\"docx\"",
           "pt": "Word (.docx), editável",
           "en": "Word (.docx), editable",
           "es": "Word (.docx), editable",
@@ -432,6 +439,9 @@
         },
         {
           "planos": "fpt",
+          "selo": "PPTX",
+          "seloNota": "PowerPoint",
+          "prova": "id=\"pptx\"",
           "pt": "PowerPoint (.pptx), um slide por passo",
           "en": "PowerPoint (.pptx), one slide per step",
           "es": "PowerPoint (.pptx), una diapositiva por paso",
@@ -440,6 +450,8 @@
         },
         {
           "planos": "fpt",
+          "selo": "HTML",
+          "prova": "id=\"html\"",
           "pt": "HTML de um arquivo só, com as imagens dentro",
           "en": "A single-file HTML, images inside",
           "es": "HTML de un solo archivo, con las imágenes dentro",
@@ -448,6 +460,9 @@
         },
         {
           "planos": "fpt",
+          "selo": "MD",
+          "seloNota": "Markdown",
+          "prova": "id=\"md\"",
           "pt": "Markdown, para colar onde a sua equipe escreve",
           "en": "Markdown, to paste wherever your team writes",
           "es": "Markdown, para pegar donde escribe tu equipo",
@@ -456,6 +471,8 @@
         },
         {
           "planos": "fpt",
+          "selo": "SCORM",
+          "prova": "id=\"scorm\"",
           "pt": "Pacote SCORM 1.2 para o LMS (no passo a passo)",
           "en": "A SCORM 1.2 package for the LMS (in the step-by-step)",
           "es": "Paquete SCORM 1.2 para el LMS (en el paso a paso)",
@@ -464,6 +481,10 @@
         },
         {
           "planos": "fpt",
+          "selo": "CSV",
+          "seloNotaChave": "saidasPlan",
+          "prova": "id=\"csv\"",
+          "destaque": true,
           "pt": "Planilha (.csv), uma linha por passo",
           "en": "A spreadsheet (.csv), one row per step",
           "es": "Hoja de cálculo (.csv), una fila por paso",
@@ -472,6 +493,8 @@
         },
         {
           "planos": "fpt",
+          "selo": "JSON",
+          "prova": "id=\"json\"",
           "pt": "JSON com tudo, para reabrir ou para outro sistema ler",
           "en": "JSON with everything, to reopen or for another system to read",
           "es": "JSON con todo, para reabrir o para que otro sistema lo lea",
@@ -480,6 +503,9 @@
         },
         {
           "planos": "fpt",
+          "selo": "ZIP",
+          "seloNota": "figuras",
+          "prova": "id=\"zip\"",
           "pt": "ZIP com as figuras numeradas, o índice e os clipes",
           "en": "A ZIP with numbered images, the index and the clips",
           "es": "ZIP con las imágenes numeradas, el índice y los clips",
@@ -488,6 +514,9 @@
         },
         {
           "planos": "fpt",
+          "selo": "ZIP",
+          "seloNota": "por tarefa",
+          "prova": "id=\"capPacote\"",
           "pt": "Um documento por tarefa, num ZIP (com 2+ capítulos)",
           "en": "One document per task, in a ZIP (with 2+ chapters)",
           "es": "Un documento por tarea, en un ZIP (con 2+ capítulos)",
@@ -496,6 +525,8 @@
         },
         {
           "planos": "fpt",
+          "selo": "Multi-idioma",
+          "prova": "id=\"multiGerar\"",
           "pt": "Pacote em vários idiomas de uma vez (HTML e Markdown)",
           "en": "A multi-language package in one go (HTML and Markdown)",
           "es": "Paquete en varios idiomas de una vez (HTML y Markdown)",
@@ -504,6 +535,9 @@
         },
         {
           "planos": "fpt",
+          "selo": "VTT/SRT",
+          "seloNota": "legenda",
+          "prova": "nome: 'legenda.vtt'",
           "pt": "Legenda .vtt, .srt ou .txt",
           "en": "Caption as .vtt, .srt or .txt",
           "es": "Subtítulo .vtt, .srt o .txt",
@@ -512,6 +546,8 @@
         },
         {
           "planos": "fpt",
+          "selo": "Google&nbsp;Docs",
+          "prova": "id=\"gdocs\"",
           "pt": "Enviar direto ao Google Docs (pede confirmação)",
           "en": "Send straight to Google Docs (asks first)",
           "es": "Enviar directo a Google Docs (pide confirmación)",
@@ -520,6 +556,9 @@
         },
         {
           "planos": "fpt",
+          "selo": "Jira",
+          "prova": "id=\"jira\"",
+          "destaque": true,
           "pt": "Resumo em marcação de wiki, pronto para colar no Jira",
           "en": "A wiki-markup summary, ready to paste into Jira",
           "es": "Resumen en marcado de wiki, listo para pegar en Jira",
@@ -528,6 +567,9 @@
         },
         {
           "planos": "fpt",
+          "selo": "Prompt",
+          "seloNota": "para IA",
+          "prova": "id=\"copyPrompt\"",
           "pt": "Prompt pronto para colar numa IA",
           "en": "A ready-made prompt to paste into an AI",
           "es": "Prompt listo para pegar en una IA",

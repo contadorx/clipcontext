@@ -29,7 +29,7 @@ import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
 const RAIZ = `${RAIZ_WS}`;
 const VIDEO = '/tmp/longo.webm';
 if (!fs.existsSync(VIDEO)) {
-  console.log('  pulado  ' + VIDEO + ' não existe.');
+  console.log('PULADO  ' + VIDEO + ' não existe.');
   console.log('          Gere com:  python3 testes/amostras.py --longo   (~1 min, 8 MB)');
   process.exit(0);
 }

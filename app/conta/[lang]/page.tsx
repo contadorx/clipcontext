@@ -11,7 +11,7 @@
  */
 import { notFound } from 'next/navigation';
 import { emailDaSessao } from '@/lib/supabase/servidor';
-import { type Lang, type Textos, ehLang, preencher, textos } from '@/lib/conta/textos';
+import { LOCALE, ehLang, preencher, textos, type Lang, type Textos } from '@/lib/conta/textos';
 import { entrar, sair } from '../acoes';
 import { Envolver, carregar } from './carga';
 import { Plano, RoteiroAtalho } from './secoes';
@@ -19,8 +19,6 @@ import Licenca from './Licenca';
 
 export const dynamic = 'force-dynamic';
 
-const LOCALE: Record<Lang, string> = { pt: 'pt-BR', en: 'en-US', es: 'es-ES',
-                                      de: 'de-DE', fr: 'fr-FR' };
 
 const dinheiro = (lang: Lang, centavos: number, moeda: string) =>
   new Intl.NumberFormat(LOCALE[lang], { style: 'currency', currency: moeda || 'BRL' }).format(centavos / 100);

@@ -6831,6 +6831,18 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
   const GOOGLE_APP_ID    = '';      // número do projeto (só dígitos)
 
   const LANGS = ['pt','en','es','de','fr'];
+  /* O LOCALE DE FORMATAÇÃO de cada idioma — data, hora e número.
+     Ele era `{pt,en,es}` com `|| 'pt-BR'` de reserva, num produto que fala
+     cinco: alemão e francês caíam em português, e a DATA DE VALIDADE saía em
+     português dentro do documento que o cliente alemão anexa a uma auditoria.
+     A reserva era a parte perigosa — ela fazia o buraco parecer intencional.
+     Derivado de `LANGS` para que um idioma novo entre aqui no mesmo gesto: o
+     que não estiver mapeado vira `undefined`, e `toLocaleDateString(undefined)`
+     usa o do navegador, que é um palpite honesto — melhor que o palpite
+     errado de sempre devolver português. */
+  const LOCALE_DE = { pt:'pt-BR', en:'en-US', es:'es-ES', de:'de-DE', fr:'fr-FR' };
+  const faltando = LANGS.filter(L => !LOCALE_DE[L]);
+  if (faltando.length) console.warn('idioma sem locale de formatação:', faltando.join(', '));
   /* O vídeo de exemplo: um sistema de compras sendo percorrido — abrir a lista,
      criar um pedido, LEVAR UMA RECUSA do sistema, corrigir e sair com um número
      de protocolo.
@@ -9568,7 +9580,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
      depois, e não tem como se atualizar sozinho. Sem carimbo, "estou com um
      problema no offline" é uma conversa sem chão — ninguém sabe de qual build
      se fala nem se o defeito já foi consertado. */
-  const VERSAO = '2026.08.23-34';
+  const VERSAO = '2026.08.23-58';
   window.__versao = () => VERSAO;
 
   const PIP_CSS = `
@@ -16615,15 +16627,31 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
        única informação aqui que muda o que sai do documento. */
     else if (transcrevendoPct != null) {
       st.innerHTML = `<span class="err">${t('saidaSemFala', transcrevendoPct.toFixed(0))}</span>`;
-      /* Marcado como NOSSO. Sem isto o aviso ficava na tela depois de a
-         transcrição terminar — dizendo "está em 100%, vai sair sem a fala"
-         justamente quando a fala inteira já estava lá. A regra logo abaixo só
-         escreve em campo vazio, e o campo não estava vazio: estava com o aviso
-         de antes. */
-      st.dataset.aviso = '1';
+      /* GUARDA O TEXTO QUE DEIXOU, e não só um "1".
+         Sem marca nenhuma, o aviso ficava na tela depois de a transcrição
+         terminar — dizendo "está em 100%, vai sair sem a fala" justamente
+         quando a fala inteira já estava lá, porque a regra de baixo só escreve
+         em campo vazio e o campo tinha o aviso.
+         Com uma marca cega (`= '1'`), o conserto virou outro defeito: a volta
+         apagava o campo INTEIRO, fosse o aviso ou não. Esta linha tem uns vinte
+         donos, e o último escreve por cima. Quem perdia era quem tinha acabado
+         de clicar: numa máquina ocupada, a transcrição terminava DEPOIS do
+         clique em "usar a fala como anotação", e a resposta desse clique
+         sumia — a pessoa fica sem saber se funcionou. Reprovou duas regressões
+         seguidas, e as duas vezes tinha razão.
+         Guardando o texto, dá para perguntar na volta se o que está na tela
+         ainda é nosso. */
+      st.dataset.aviso = st.textContent;
     }
-    else if (st.dataset.aviso) { delete st.dataset.aviso; st.innerHTML =
-      `<span class="muted">${t('saidaPronta', keep)}</span>`; }
+    else if (st.dataset.aviso != null) {
+      const nosso = st.dataset.aviso;
+      delete st.dataset.aviso;
+      /* Só substitui o que ainda é o nosso aviso. Se outro dono escreveu no
+         meio, o recado dele fica: ele é mais novo, e é a resposta a um clique
+         que alguém deu. */
+      if (!st.textContent.trim() || st.textContent === nosso)
+        st.innerHTML = `<span class="muted">${t('saidaPronta', keep)}</span>`;
+    }
     /* Só preenche quando está vazio: o resultado de uma geração ("saiu o PDF
        com 12 telas") mora aqui, e sobrescrevê-lo apagaria a resposta que a
        pessoa acabou de receber. */
@@ -17694,23 +17722,14 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
           cem:'cien', e:'y' },
     };
 
-  /* Todas as maneiras de dizer um número de 0 a 999 naquele idioma. Devolve
-     mais de uma quando a língua permite ("vinte e um" e "vinte um"). */
-  function numPorExtenso(n, L){
-    const T = NUMS[L] || NUMS.pt;
-    if (n < 10) return [T.u[n]];
-    if (n < 20) return [T.d[n - 10]];
-    if (n < 100) {
-      const z = T.z[Math.floor(n / 10)], r = n % 10;
-      if (!r) return [z];
-      return [z + ' ' + T.e + ' ' + T.u[r], z + ' ' + T.u[r], z + '-' + T.u[r]];
-    }
-    const c = Math.floor(n / 100), r = n % 100;
-    const cab = (n === 100) ? T.cem : T.c[c];
-    if (!r) return [cab];
-    return numPorExtenso(r, L).map(x => cab + ' ' + T.e + ' ' + x)
-      .concat(numPorExtenso(r, L).map(x => cab + ' ' + x));
-  }
+  /* AQUI MORAVA `numPorExtenso`, e ela estava morta.
+     Gerava todas as formas faladas de um número para procurá-las no texto — a
+     primeira versão do recurso, a que o comentário logo acima descreve como
+     tendo falhado no primeiro teste com fala de verdade. O sentido se inverteu
+     (normalizar o texto e comparar), e a função ficou: catorze linhas chamadas
+     só por si mesmas, carregando mais um `|| NUMS.pt`.
+     Sai inteira. `NUMS` continua, porque é dela que `tabelaNumeros` monta o
+     caminho que o produto usa de verdade. */
 
   const semAcento = txt => txt.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 
@@ -17758,14 +17777,31 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
 
   /* Palavras de número → valor. Montada da mesma tabela que escreve por extenso,
      para as duas nunca discordarem. */
+  /* SEM CAIR NA TABELA DE OUTRA LÍNGUA.
+     Era `NUMS[L] || NUMS.pt`, e o mesmo em `NOME_LETRA` e em
+     `aplicarVocabulario`. Numa transcrição alemã ou francesa isso não é uma
+     rede: é a ferramenta procurando "duzentos e trinta e cinco" dentro de um
+     texto que nunca vai dizer isso — e, no que casar por acaso, TROCANDO
+     palavra dentro de uma evidência. Ganho zero e risco não-zero.
+     Sem tabela, os mapas saem vazios: o que continua funcionando é o caminho
+     que não depende de língua nenhuma — dígito escrito como dígito e letra
+     escrita como letra ("M E 21 N"). É menos do que pt/en/es têm, e é a
+     verdade sobre o que existe hoje. As tabelas de `de` e `fr` são item
+     próprio da fila: os números alemães vêm invertidos ("einundzwanzig") e os
+     franceses são compostos ("quatre-vingt-onze"), então não é preencher
+     tabela, é mudar como o número é montado. */
+  const NUMS_VAZIA = { u: [], d: [], z: [], c: [], cem: '', e: '' };
+
   function tabelaNumeros(L){
-    const T = NUMS[L] || NUMS.pt, m = {};
+    const T = NUMS[L] || NUMS_VAZIA, m = {};
     T.u.forEach((w, i) => { if (w) m[semAcento(w)] = i; });
     T.d.forEach((w, i) => { if (w) m[semAcento(w)] = 10 + i; });
     T.z.forEach((w, i) => { if (w) m[semAcento(w)] = 10 * i; });
     T.c.forEach((w, i) => { if (w) m[semAcento(w)] = 100 * i; });
-    m[semAcento(T.cem)] = 100;
-    return { mapa: m, e: semAcento(T.e) };
+    if (T.cem) m[semAcento(T.cem)] = 100;
+    /* `e` vazio faria `w === e` casar com toda palavra vazia; um sentinela que
+       nenhuma palavra é resolve isso sem um `if` em cada volta do laço. */
+    return { mapa: m, e: T.e ? semAcento(T.e) : '\u0000' };
   }
 
   /* Distância de edição, limitada: acima do teto devolve o teto e para. */
@@ -17799,7 +17835,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
      dígito, nome de letra vira letra, o resto entra como está. */
   function siglaDaJanela(js, L){
     const { mapa, e } = tabelaNumeros(L);
-    const nomes = NOME_LETRA[L] || NOME_LETRA.pt;
+    const nomes = NOME_LETRA[L] || {};
     let saida = '', acumulado = null, temDigito = false;
     const fechar = () => { if (acumulado != null) { saida += acumulado; acumulado = null; } };
     for (const p2 of js) {
@@ -17827,7 +17863,9 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
      e o número de trocas — sem o número, "apliquei" é indistinguível de "não
      achei nada". */
   function aplicarVocabulario(texto, termos, L){
-    if (!LETRAS[L]) L = 'pt';
+    /* Idioma sem tabela NÃO vira português — ver `tabelaNumeros`. O termo
+       ainda é achado quando a transcrição escreve a sigla em letras e dígitos;
+       o que não acontece é a caça a números por extenso de outra língua. */
     const alvos = termos.map(t2 => ({ termo: t2, comp: compacto(t2) }))
                         .filter(a => a.comp.length >= 2)
                         .sort((a, b) => b.comp.length - a.comp.length);
@@ -17992,7 +18030,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     try {
       const [a, m, d] = String(iso).split('-').map(Number);
       return new Date(a, m - 1, d).toLocaleDateString(
-        { pt:'pt-BR', en:'en-US', es:'es-ES' }[LANG] || 'pt-BR',
+        LOCALE_DE[LANG],
         { year:'numeric', month:'long', day:'numeric' });
     } catch (e) { return iso; }
   }
@@ -19735,7 +19773,19 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     }
     return null;
   }
-  const OCR_LANG = { pt: 'por', en: 'eng', es: 'spa' };
+  /* O MODELO DE OCR POR IDIOMA — os cinco, e não três.
+     Esta tabela tinha `pt`, `en` e `es` numa ferramenta que fala cinco, e o
+     `|| 'eng'` lá embaixo transformava a falta em silêncio: quem trabalha em
+     alemão ou em francês lia a própria tela com o modelo INGLÊS. Não dá erro;
+     dá "Bestatigen" onde estava "Bestätigen", e a evidência sai com o texto
+     errado dentro. `deu` e `fra` existem no mesmo `tessdata` que os outros três
+     — a falta era da tabela, e não do modelo.
+     O `|| 'eng'` fica, como rede para um sexto idioma que chegue antes daqui. */
+  const OCR_LANG = { pt: 'por', en: 'eng', es: 'spa', de: 'deu', fr: 'fra' };
+  {
+    const semModelo = LANGS.filter((L) => !OCR_LANG[L]);
+    if (semModelo.length) console.warn('idioma sem modelo de OCR:', semModelo.join(', '));
+  }
   let ocrParar = false;
 
   /* carregarScript() é declarada uma única vez, junto do bloco do Google Drive. */
@@ -22329,10 +22379,26 @@ ${relsSlide[i]}</Relationships>`) });
   const HESITA = {
     pt: ['é+','eh+','ééé+','hã+','ãh+','ahn+','hum+','uhm+','tipo assim','tipo,','né,','ahn'],
     en: ['um+','uh+','erm+','hmm+','you know,','like,','i mean,'],
-    es: ['eh+','este,','o sea,','mmm+','pues,']
+    es: ['eh+','este,','o sea,','mmm+','pues,'],
+    /* Alemão e francês entram aqui porque, sem eles, o `|| HESITA.pt` de baixo
+       aplicava as regras do PORTUGUÊS a uma transcrição alemã: o titubeio de
+       verdade (`äh`, `euh`) ficava na evidência, e o risco de apagar palavra
+       boa era o de outra língua. Mesma régua de conservadorismo dos três de
+       cima — só o que não é palavra em nenhum outro papel. `also`, `ja`, `bon`
+       e `hein` ficam de FORA de propósito: são palavras legítimas, e apagar
+       palavra de uma evidência é pior do que deixar um "äh…". */
+    de: ['äh+','ähm+','ehm+','öh+','öhm+','hm+','mhm+'],
+    fr: ['euh+','heu+','hum+','ben,','bah,']
   };
+  {
+    const semLista = LANGS.filter((L) => !HESITA[L]);
+    if (semLista.length) console.warn('idioma sem lista de hesitação:', semLista.join(', '));
+  }
   function tirarHesitacoes(texto, L){
-    const lista = HESITA[L] || HESITA.pt;
+    /* SEM CAIR NO PORTUGUÊS. Antes era `|| HESITA.pt`, e um idioma sem lista
+       recebia as regras de outra língua — que é como este defeito nasceu.
+       Lista vazia não tira nada, e não tirar nada é o comportamento honesto. */
+    const lista = HESITA[L] || [];
     let n = 0;
     const linhas = texto.split(/\n/).map(linha => {
       /* Linha de tempo do VTT não é fala: mexer nela quebra a legenda. */

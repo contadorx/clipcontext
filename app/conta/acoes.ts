@@ -16,7 +16,7 @@ import { clienteDoServidor, emailDaSessao } from '@/lib/supabase/servidor';
 import { contaDe, rpc } from '@/lib/supabase/servico';
 import { PLANOS, ehPlano, stripe, temStripe } from '@/lib/stripe';
 import { marca } from '@/lib/marca';
-import { CAMINHO, type Lang, ehLang, preencher, textos } from '@/lib/conta/textos';
+import { CAMINHO, LOCALE_STRIPE, type Lang, ehLang, preencher, textos } from '@/lib/conta/textos';
 import { enderecoDoItem } from '@/lib/conta/nav';
 import { type Chave, emitirChave } from '@/lib/conta/licenca';
 import { medirConta } from '@/lib/conta/medir';
@@ -116,7 +116,7 @@ export async function comprar(form: FormData) {
     allow_promotion_codes: true,
     success_url: `${marca.site}${CAMINHO[lang]}?comprou=1`,
     cancel_url: `${marca.site}${CAMINHO[lang]}?cancelou=1`,
-    locale: lang === 'pt' ? 'pt-BR' : lang,
+    locale: LOCALE_STRIPE[lang] as 'pt-BR' | 'en' | 'es' | 'de' | 'fr',
   });
   /* ANTES do `redirect`, e nao depois: o `redirect` do Next funciona lancando
      uma excecao — nada escrito abaixo dele roda. Medir depois seria escrever

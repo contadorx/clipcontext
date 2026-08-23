@@ -1,20 +1,22 @@
 <!DOCTYPE html>
 <html lang="{{htmlLang}}">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{{docTitle}}</title>
-<meta name="description" content="{{docDesc}}">
-<link rel="canonical" href="{{site}}{{selfPath}}">
-<link rel="alternate" hreflang="pt-BR" href="{{site}}{{ptPath}}">
-<link rel="alternate" hreflang="en" href="{{site}}{{enPath}}">
-<link rel="alternate" hreflang="es" href="{{site}}{{esPath}}">
-<link rel="icon" href="/favicon.ico?v={{ICONV}}" sizes="any">
-<link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<link rel="apple-touch-icon" href="/apple-touch-icon.png?v={{ICONV}}">
-<link rel="stylesheet" href="/site.css">
-{{analytics}}
-</head>
+<!-- O CABEÇALHO DESTE ARQUIVO NÃO É SERVIDO — apagado em 23/08.
+     O `lib/site.ts` recorta só o miolo do corpo; quem escreve a moldura da
+     página e as tags de idioma é o React, com os dados de `rotas.json`.
+     O que estava aqui era um `hreflang` de TRÊS idiomas, num site que fala
+     cinco — a fóssil literal do defeito que já custou o hreflang de duas
+     línguas. Produção sempre esteve certa; o risco era alguém ler isto como
+     fonte e "consertar" a página errada.
+     Para mexer na moldura, o lugar é `lib/site.ts`.
+
+     E NENHUM COMENTÁRIO DAQUI PODE ESCREVER A TAG DE ABERTURA DO CORPO.
+     A primeira versão deste comentário a escrevia, entre crases, para explicar
+     o recorte — e o recorte casava com ela: meia página de comentário virou
+     TEXTO VISÍVEL acima do cabeçalho, nos cinco idiomas, empurrando o botão
+     para fora da primeira tela do telefone. O `lib/site.ts` passou a apagar os
+     comentários antes de procurar, mas a regra continua valendo aqui: sobre a
+     tag, escreva o nome dela, não a tag. -->
+
 <body data-supa-url="{{supaUrl}}" data-supa-key="{{supaKey}}">
 
 {{jsonld}}

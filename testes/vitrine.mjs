@@ -130,22 +130,29 @@ console.log('\n[5] cada ficha de saída na home existe como botão na ferramenta
 {
   await pg.goto(BASE + '/?lang=pt');
   await pg.waitForTimeout(300);
-  const fichas = await pg.locator('.saidas .saida b').allTextContents();
-  ok('a home lista os formatos', fichas.length >= 10, fichas.join(' '));
-  const provas = {
-    PDF: 'id="go"', DOCX: 'id="docx"', PPTX: 'id="pptx"', HTML: 'id="html"',
-    MD: 'id="md"', SCORM: 'id="scorm"', CSV: 'id="csv"', JSON: 'id="json"',
-    /* VTT e SRT não têm botão próprio: eles viajam DENTRO do .zip, como
-       `legenda.vtt` e `legenda.srt`. Os botões de baixar legenda solta saíram
-       da tela — eram mais três arquivos numa ferramenta que já entrega quinze.
-       O formato continua existindo, e é isso que a home promete. */
-    ZIP: 'id="zip"', VTT: "nome: 'legenda.vtt'", SRT: "nome: 'legenda.srt'",
-    'Google Docs': 'id="gdocs"', Jira: 'id="jira"',
-  };
-  for (const f of fichas) {
-    const prova = provas[f];
-    ok(`"${f}" tem botão de verdade no app.html`, !!prova && app.includes(prova),
-       prova ? 'não achei ' + prova : 'ficha sem prova declarada no teste');
+  /* A PROVA MORA NO CATÁLOGO, junto do selo que ela sustenta.
+     Até o Build 4 ela morava aqui, num dicionário indexado pelo TEXTO do selo —
+     e o texto do selo é decisão de vitrine. Bastou o catálogo ganhar os selos
+     de verdade para três fichas ("Multi-idioma", "VTT/SRT", "Prompt") caírem
+     com "ficha sem prova declarada no teste": a régua não tinha achado defeito
+     nenhum, ela só não conhecia os nomes novos. Duas fichas do mesmo ZIP, ainda
+     por cima, colidiam na mesma chave `ZIP` e uma delas ficava sem cobrança.
+     Agora cada saída carrega `prova` — o que precisa existir no `app.html` para
+     a ficha ser verdadeira — e um selo novo sem prova é vermelho aqui, no build
+     em que nasce.
+     VTT e SRT não têm botão próprio: viajam DENTRO do .zip, como `legenda.vtt`
+     e `legenda.srt`. O formato continua existindo, e é isso que a home promete. */
+  const saidas = feats.grupos.find((g) => g.id === 'saidas').itens;
+  const fichas = await pg.locator('.saidas .saida').count();
+  ok('a home mostra uma ficha para cada saída do catálogo',
+     fichas === saidas.length, `${fichas} na página × ${saidas.length} no catálogo`);
+  const semProva = saidas.filter((i) => !String(i.prova || '').trim());
+  ok('toda saída do catálogo declara a sua prova', semProva.length === 0,
+     semProva.map((i) => i.selo).join(', '));
+  for (const i of saidas) {
+    const nome = i.selo + (i.seloNota ? ' ' + i.seloNota : '');
+    ok(`"${nome}" existe de verdade no app.html`, app.includes(i.prova),
+       'não achei ' + i.prova);
   }
 }
 

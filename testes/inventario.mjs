@@ -69,5 +69,28 @@ for (const f of INSTRUMENTOS) {
   ok(`${f} está no disco`, fs.existsSync(path.join(AQUI, f)));
 }
 
+console.log('\n[4] quem pula, pula ALTO — e não em letra minúscula');
+{
+  /* O TERCEIRO ESTADO SÓ VALE SE A ESTEIRA O ENXERGAR.
+     O `rodar.sh` reconhece um pulado por `^PULADO` no começo da linha. Cinco
+     arquivos escreviam `  pulado  ` — minúsculo e indentado —, saíam 0, e a
+     esteira contava **ok**. É o mesmo defeito que o Build 3 consertou nos três
+     testes de licença, sobrevivendo em mais cinco: `audio`, `espera`, `faixa`,
+     `varredura` e `semmarca`. O `espera.mjs` passou builds inteiros contando
+     como verde sem nunca ter rodado, por falta da amostra longa.
+     Aqui se cobra a FORMA, que é o que a esteira lê. Um bloco interno que se
+     descreve como pulado no meio da saída não conta: o que não pode é a linha
+     do desfecho começar com a palavra em minúscula. */
+  const errados = [];
+  for (const f of disco) {
+    const txt = fs.readFileSync(path.join(AQUI, f), 'utf8');
+    for (const linha of txt.split('\n')) {
+      if (/console\.log\(\s*['"`]\s+pulado/i.test(linha)) errados.push(`${f}: ${linha.trim().slice(0, 60)}`);
+    }
+  }
+  ok('nenhum teste anuncia um pulo em minúscula', errados.length === 0,
+     errados.join(' | '));
+}
+
 console.log(falhas ? `\n${falhas} FALHA(S)` : '\nInventário dos testes: os três números batem.');
 process.exit(falhas ? 1 : 0);

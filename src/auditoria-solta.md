@@ -1,57 +1,3 @@
-# Auditoria pendente — a página de preços
-
-> **GERADO POR `build.py`. Não edite à mão.**
-> Uma linha por promessa que os cartões e a comparação publicam: a frase,
-> e o teste que a comprova — ou `sem teste`, com todas as letras.
-> Onde está `sem teste`, **não quer dizer que não funcione**: quer dizer
-> que nada no repositório reprova se parar de funcionar.
-
-## Cartão — Crie a evidência (Free)
-
-| A frase publicada | O teste |
-|---|---|
-| Evidência completa, com impressão digital e tarja de dado sensível | `evidencia.mjs` |
-| Tudo processado no seu computador | **sem teste** — terceiros.mjs prova a lista de suboperadores, não o processamento local |
-| Todos os formatos de saída | `saidas.mjs` |
-| Link pré-configurado para colar no Jira, no Zephyr, no Xray ou no TestRail — é um endereço, não uma integração | `linkpage.mjs` |
-| Sem conta para usar | **sem teste** |
-
-## Cartão — Execute o seu roteiro (Personal)
-
-| A frase publicada | O teste |
-|---|---|
-| Importe a planilha de casos de teste | `roteiro.mjs` |
-| Abra cada caso já preenchido | `roteiro.mjs` |
-| Devolva situação, data, executor e impressão digital na mesma planilha | `roteiro.mjs` |
-| Guarde o seu padrão de documento e o seu cliente | `modelos.mjs`, `planos.mjs` |
-| A sua marca no topo de todos os formatos | `marca.mjs` |
-
-## Cartão — Coordene a rodada (Team)
-
-| A frase publicada | O teste |
-|---|---|
-| Distribua e reatribua os casos do roteiro | `roteiro.mjs` |
-| Acompanhe o que está pendente e quem está executando | `roteiro.mjs` |
-| Padrão da equipe aplicado no documento de todo mundo | `modelos.mjs` |
-| Assentos, convite, bloqueio e prazo de revogação | `licenca.mjs`, `convite.mjs` |
-| Classificação e campo de emissor no documento | **sem teste** — miudos.mjs cobre a classificação no prompt, não o campo no documento |
-
-## A comparação curta
-
-| A linha | O teste |
-|---|---|
-| Criar a evidência | `evidencia.mjs` |
-| Guardar o seu padrão e o seu cliente | `modelos.mjs` |
-| Executar um roteiro de casos | `roteiro.mjs` |
-| Atribuir e acompanhar quem executa | `roteiro.mjs` |
-| Padronizar o documento da equipe | `modelos.mjs` |
-
----
-
-**3 promessa(s) sem trava** de 20.
-
----
-
 ## As afirmações soltas da página — escritas à mão, e por quê
 
 Estas moram dentro dos cinco `src/site/bodies/precos.<idioma>.html`, e não na
@@ -105,4 +51,3 @@ instrução.
 > Personal que vendia o vocabulário guardado — a metade que não existe — sem
 > mencionar a que existe e é gratuita. O motivo desta última está escrito no
 > `build.py`, em cima da bala, porque é o tipo de erro que volta.
-
