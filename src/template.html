@@ -12143,8 +12143,17 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
           picoDeMemoriaMB: memoria.amostras ? emMB(memoria.pico) : null,
           picoOnde: memoria.amostras ? memoria.onde : null,
           tetoDoHeapMB: memoria.amostras ? emMB(memoria.limite) : null,
+          /* A SOBRA SAI DOS DOIS NÚMEROS ARREDONDADOS, e não dos bytes.
+             Era `emMB(limite - pico)`, e `emMB` arredonda: `round(a) - round(b)`
+             e `round(a - b)` diferem em 1 sempre que as duas partes fracionárias
+             caem em lados opostos do meio. Os três números aparecem juntos, e um
+             de cada três olhares via 4085 onde o teto menos o pico dava 4084 —
+             a medição contradizendo a si mesma na mesma linha.
+             Foi assim que `marcos.mjs` ficou intermitente: ele cobra
+             `sobra === teto - pico`, que é a coisa certa a cobrar. Quem estava
+             errado era o produto. */
           sobrouNoPicoMB: memoria.amostras && memoria.limite
-            ? emMB(memoria.limite - memoria.pico) : null,
+            ? emMB(memoria.limite) - emMB(memoria.pico) : null,
           motor: d.motor, linhasDoWasm: d.linhas, isolado: d.isolado,
           audioInferido: d.audio, paredeDaInferencia: d.segundos, vezesTempoReal: d.vezes,
           enviadoSobreOriginal: (orig > 0 && d.audio > 0) ? d.audio / orig : null,

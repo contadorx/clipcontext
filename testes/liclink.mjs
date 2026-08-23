@@ -22,11 +22,37 @@ await new Promise(r => srv.listen(8918, r));
  * morrer com "Command failed" e mandar procurar defeito num produto que está
  * inteiro. Sai com 0: uma esteira vermelha por uma ausência esperada é uma
  * esteira que se aprende a ignorar. */
+/* `#licTag` MORREU NO PRODUTO — 23/08.
+ *
+ * A etiqueta do cabeçalho que dizia "Plano Time" não existe mais no `app.html`:
+ * `grep licTag public/app.html` dá ZERO. O sucessor dela, `#licBtn`, também
+ * saiu — o que restou no código é uma referência guardada por `if (bl)`, que
+ * nunca é verdadeira.
+ *
+ * Onde o estado ATIVO aparece hoje, sem depender de conta: `#licMsg`, dentro da
+ * caixa da licença, com a frase `licValida` — "Licença válida para {cliente} —
+ * {n} pessoa(s), até {data}". Ela diz mais do que "Plano Time" dizia: para
+ * quem, quantos assentos e até quando.
+ *
+ * (`#planoLinha` existe, mas é a linha da BARRA DA CONTA e só é desenhada
+ * quando o servidor devolve o plano. Estes testes ativam uma chave sem conta
+ * nenhuma, então lá ele não está na tela.)
+ */
 import { existsSync } from 'fs';
 import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
 if (!existsSync(`${RAIZ_WS}/emitir-licenca.py`)) {
-  console.log('  pulado  emitir-licenca.py não está neste pacote (ele guarda as chaves privadas).');
-  console.log('          Rode este teste na máquina onde o emissor vive.');
+  /* PULADO, EM MAIÚSCULAS E NO COMEÇO DA LINHA — 23/08.
+     A palavra é a mesma; o que mudou é ela ser MÁQUINA-LEGÍVEL. Antes saía
+     "  pulado" e o processo saía 0, então a esteira registrava "ok": o arquivo
+     inteiro não rodava e o rodapé dizia "regressão verde". Três dos testes de
+     licença estavam nesse estado — quer dizer, a única régua que prova o
+     destravamento pago de ponta a ponta nunca rodou onde a esteira roda.
+     Sair 0 continua certo: uma ausência esperada não é defeito, e uma esteira
+     vermelha por ela vira uma esteira que se aprende a ignorar. O que não pode
+     é a ausência se disfarçar de aprovação. `rodar.sh` lê esta linha e conta os
+     pulados no rodapé, ao lado dos verdes e dos vermelhos. */
+  console.log('PULADO  emitir-licenca.py não está neste pacote (ele guarda as chaves privadas).');
+  console.log('        Rode este teste na máquina onde o emissor vive.');
   process.exit(0);
 }
 
@@ -60,8 +86,8 @@ console.log('\n[2] abrir o link ativa o plano — sem ninguém colar nada');
   const { ctx, pg, erros } = await pagina();
   await pg.goto(`http://localhost:8918/app.html?lang=pt&lic=${encodeURIComponent(VALIDA)}&marca=${encodeURIComponent('Cliente Exemplo S.A.')}`);
   await pg.waitForTimeout(700);
-  ok('o plano está ativo', /Plano Time/.test(await pg.locator('#licTag').textContent()),
-     await pg.locator('#licTag').textContent());
+  ok('o plano está ativo', /Licen[çc]a v[áa]lida/.test(await pg.locator('#licMsg').textContent()),
+     (await pg.locator('#licMsg').textContent()).slice(0, 70));
   ok('a marca do cliente apareceu', await pg.locator('#marcaBox').isVisible());
   ok('e já com o nome preenchido', (await pg.locator('#mcNome').inputValue()) === 'Cliente Exemplo S.A.',
      await pg.locator('#mcNome').inputValue());
@@ -88,7 +114,7 @@ console.log('\n[3] o F5 mantém: a chave ficou no navegador, não no endereço')
   await pg.goto('http://localhost:8918/app.html?lang=pt');
   await pg.waitForTimeout(700);
   ok('continua no plano Time depois de abrir sem o link',
-     /Plano Time/.test(await pg.locator('#licTag').textContent()));
+     /Licen[çc]a v[áa]lida/.test(await pg.locator('#licMsg').textContent()));
   await ctx.close();
 }
 
@@ -97,7 +123,7 @@ console.log('\n[4] link com chave ruim não engole o erro');
   const { ctx, pg } = await pagina();
   await pg.goto(`http://localhost:8918/app.html?lang=pt&lic=${encodeURIComponent(VALIDA.slice(0, -4) + 'AAAA')}`);
   await pg.waitForTimeout(700);
-  ok('não ativou', !/Plano Time/.test(await pg.locator('#licTag').textContent()));
+  ok('não ativou', !/Licen[çc]a v[áa]lida/.test(await pg.locator('#licMsg').textContent()));
   ok('a caixa abriu sozinha para mostrar o motivo', await pg.locator('#licBox').isVisible());
   ok('e o motivo está escrito', /não confere/i.test(await pg.locator('#licMsg').textContent()),
      (await pg.locator('#licMsg').textContent()).slice(0, 70));

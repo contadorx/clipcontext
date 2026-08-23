@@ -22,7 +22,7 @@
     generate.</b> That has not changed, it holds on every plan, and it is the promise the product rests on —
     not a setting we can loosen later.</p>
     <p>What does exist is this, all detailed below: a page-view count with no cookie and no identifier; an
-    anonymous count of three usage milestones; your e-mail, if you leave it on the pricing page; and, for
+    anonymous count of fifteen usage milestones; your e-mail, if you leave it on the pricing page; and, for
     anyone on a paid plan, an <b>account</b> — holding the sign-in e-mail, the invoices, the support tickets
     and the <b>list of cases to run</b>, if you use the test-run screen. Using the tool still requires no
     account: signed out, it records, transcribes and generates documents exactly the same.</p>
@@ -49,7 +49,7 @@
     <ul>
       <li><strong>Page views</strong>, through Vercel Web Analytics. No cookie and no identifier that persists
       between visits. It tells us how many people arrived and by which route.</li>
-      <li><strong>Three usage milestones</strong>, inside the tool: that it was opened, that a video was opened
+      <li><strong>Fifteen usage milestones</strong>, inside the tool: that it was opened, that a video was opened
       successfully, and that an output file was downloaded. Alongside goes the page language, where the video
       came from (file, Drive, recording or sample) and the format downloaded. <strong>Nothing else.</strong>
       No file name, size, duration, content or session identifier — there is no way to tie two milestones to
@@ -138,7 +138,7 @@
       transcription libraries. It only receives the request for the library file.</li>
       <li><strong>Hugging Face</strong> — where the transcription model is downloaded from, and only if you
       trigger automatic transcription. It receives the request for the model, never your audio.</li>
-      <li><strong>Supabase</strong> — the database that receives the three usage milestones and, if you fill
+      <li><strong>Supabase</strong> — the database that receives the fifteen usage milestones and, if you fill
       it in, the notification-list e-mail. It never receives video, audio or transcripts.</li>
       <li><strong>Vercel</strong> — the page's hosting and the page-view count. Like any web server, it technically logs requests to
       the site.</li>
@@ -326,7 +326,7 @@
       <tr><th>Data</th><th>Purpose</th><th>Legal basis</th><th>Retention</th></tr>
       <tr><td>Notification-list e-mail</td><td>Telling you when the paid plan exists</td>
           <td>Consent (LGPD art. 7 I / GDPR art. 6(1)(a))</td><td>Until you withdraw it, or 24 months unused</td></tr>
-      <tr><td>The three usage milestones</td><td>Knowing where the tool fails, and improving it</td>
+      <tr><td>The fifteen usage milestones</td><td>Knowing where the tool fails, and improving it</td>
           <td>Anonymised data (LGPD art. 12); if in doubt, legitimate interest</td><td>18 months</td></tr>
       <tr><td>Page views</td><td>Knowing how many people arrive, and from where</td>
           <td>Anonymised data (LGPD art. 12); if in doubt, legitimate interest</td>

@@ -48,7 +48,7 @@ MAPA="
 # nem `anotacao`, que são exatamente as que afirmam sobre isso. Quem toca o
 # produto roda o grupo do produto — é o `app` do `rapido.sh`, sem servidor, e é
 # o preço honesto de mexer no arquivo que faz tudo.
-^src/template[.]html$ => smoke.mjs saidas.mjs passos.mjs dobra.mjs travado.mjs gravando.mjs janelinha.mjs comentario.mjs marcados.mjs revisao.mjs marca.mjs formato.mjs promptcx.mjs appidioma.mjs compartilhar.mjs celular.mjs teto.mjs cenario1.mjs organiza.mjs acabamento.mjs lente2.mjs traducao.mjs passomulti.mjs pessoas.mjs matriz.mjs conclusao.mjs parar.mjs entrada.mjs indice.mjs figura.mjs resumo.mjs perna.mjs cartao.mjs etapas.mjs marcos.mjs semundefined.mjs reabrir.mjs juntar.mjs juntos.mjs grade.mjs anotacao.mjs trocar.mjs varredura.mjs descarte.mjs clipe.mjs lente2.mjs
+^src/template[.]html$ => smoke.mjs saidas.mjs passos.mjs dobra.mjs travado.mjs gravando.mjs janelinha.mjs comentario.mjs marcados.mjs revisao.mjs marca.mjs formato.mjs promptcx.mjs appidioma.mjs compartilhar.mjs celular.mjs teto.mjs cenario1.mjs organiza.mjs acabamento.mjs lente2.mjs traducao.mjs passomulti.mjs pessoas.mjs matriz.mjs conclusao.mjs parar.mjs entrada.mjs indice.mjs figura.mjs resumo.mjs perna.mjs cartao.mjs etapas.mjs marcos.mjs semundefined.mjs reabrir.mjs juntar.mjs juntos.mjs grade.mjs anotacao.mjs trocar.mjs varredura.mjs descarte.mjs clipe.mjs
 ^src/features[.]json$ => planos.mjs promessa.mjs site:precos.mjs
 ^src/i18n-site[.]json$ => chaves.mjs site:cinco.mjs site:contradicao.mjs
 ^src/site/bodies/ => site:paginas.mjs site:legal.mjs site:ajuda.mjs site:vitrine.mjs
@@ -74,6 +74,7 @@ CONTRATOS="chaves.mjs faxina.mjs figura.mjs funil.mjs inventario.mjs middleware.
 # ----------------------------------------------------------------------------
 falhou=""
 rodados=""
+pulados=""
 
 echo "[0] o chão"
 printf '  %-24s ' 'build.py'
@@ -103,6 +104,11 @@ DERIVADAS=""
 PRECISA_SITE=0
 while read -r linha; do
   [ -z "${linha:-}" ] && continue
+  # Comentário dentro do mapa é comentário, e não padrão. Sem esta linha ele
+  # virava um ERE que o `grep` tentava casar — silencioso enquanto não casasse
+  # nada, e um erro de sintaxe no dia em que alguém escrevesse um parêntese.
+  case "$linha" in \#*) continue ;; esac
+  case "$linha" in *"=>"*) ;; *) continue ;; esac
   padrao="${linha%%=>*}"; padrao="${padrao% }"
   reguas="${linha#*=>}"
   if [ "$TUDO" = 1 ]; then casou=1
@@ -120,7 +126,11 @@ echo
 echo "[1] os contratos — sem navegador, sem servidor"
 for t in $CONTRATOS; do
   printf '  %-24s ' "$t"
-  if saida=$(timeout 180 node "$AQUI/$t" 2>&1); then echo ok; rodados="$rodados $t"
+  if saida=$(timeout 180 node "$AQUI/$t" 2>&1); then
+    if printf '%s\n' "$saida" | grep -q "^PULADO"; then
+      echo PULADO; printf '%s\n' "$saida" | grep "^PULADO" | head -1 | sed 's/^PULADO  */       por que: /'
+      pulados="$pulados $t"
+    else echo ok; rodados="$rodados $t"; fi
   else echo FALHOU; echo "$saida" | grep -E 'FALHA|Error' | head -4 | sed 's/^/     /'; falhou="$falhou $t"; fi
 done
 
@@ -163,7 +173,11 @@ else
   for t in $RESTO; do
     [ -f "$AQUI/$t" ] || { echo "  ??  $t não existe no disco"; continue; }
     printf '  %-24s ' "$t"
-    if saida=$(timeout 400 node "$AQUI/$t" 2>&1); then echo ok; rodados="$rodados $t"
+    if saida=$(timeout 400 node "$AQUI/$t" 2>&1); then
+      if printf '%s\n' "$saida" | grep -q "^PULADO"; then
+        echo PULADO; printf '%s\n' "$saida" | grep "^PULADO" | head -1 | sed 's/^PULADO  */       por que: /'
+        pulados="$pulados $t"
+      else echo ok; rodados="$rodados $t"; fi
     else echo FALHOU; echo "$saida" | grep -E 'FALHA|Error' | head -4 | sed 's/^/     /'; falhou="$falhou $t"; fi
   done
 fi
@@ -177,9 +191,13 @@ fi
 total=$(ls "$AQUI"/*.mjs | grep -vE '/(_|shot|dbg)' \
         | grep -vE '/(proxy|regua|gerar-dpa)[.]mjs$' | wc -l)
 n_rodados=$(printf '%s\n' $rodados | sort -u | grep -c .)
+n_pul=$(printf '%s\n' $pulados | grep -c .)
 echo
 echo "rodaram $n_rodados de $total réguas. As outras $((total - n_rodados)) ficaram de fora"
 echo "de propósito: este diff não as toca. Antes de PUBLICAR, rode 'bash testes/rodar.sh'."
+# Um pulado não entra em `rodados`: ele não rodou. Dizê-lo aqui é o que impede
+# a pista de contar como cobertura o que não foi exercitado.
+[ "$n_pul" -gt 0 ] && echo "E $n_pul PULARAM (não contam como cobertura):$pulados"
 
 if [ -n "$falhou" ]; then
   echo

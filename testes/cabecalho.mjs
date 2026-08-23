@@ -199,7 +199,10 @@ console.log('\n  o plano, na barra lateral:');
     const bar = document.getElementById('barraConta');
     const quem = bar.querySelector('.quem');
     const plano = bar.querySelector('.planoLinha');
-    const dentroDoCabecalho = !!document.querySelector('header .planoLinha, header #licTag');
+    /* `#licTag` saiu daqui: ele não existe mais no produto, e um seletor morto
+       numa NEGAÇÃO a enfraquece — ela passa a afirmar a ausência de algo que
+       não podia estar lá de qualquer jeito. */
+    const dentroDoCabecalho = !!document.querySelector('header .planoLinha');
     return {
       email: quem ? quem.textContent.trim() : null,
       plano: plano ? plano.textContent.trim() : null,

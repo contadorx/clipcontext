@@ -86,9 +86,26 @@ console.log('\n[3] o que se compartilha é a FERRAMENTA, não o documento');
      /para, quem[^}]*lang/.test(corpoDoPedido), corpoDoPedido.slice(0, 80));
   ok('  nada de documento no e-mail',
      !/data:|blob:|base64|frames|imagem|doc/i.test(corpoDoPedido), corpoDoPedido.slice(0, 80));
-  const mailto = (fonte.match(/const mailto = '[^']*'[^;]*/) || [''])[0];
-  ok('e a reserva do mailto também leva só o endereço',
-     /compCorpo'\) \+ '\\n\\n' \+ url/.test(mailto), mailto.slice(0, 90));
+  /* A STRING INTEIRA, E NÃO O COMEÇO DELA.
+     A régua ancorava em `compCorpo') + '\n\n' + url` e parava ali — quer dizer,
+     um `+ nomeArquivo()` acrescentado depois passava verde, e o nome do
+     documento saía dentro do e-mail. E o `mailto:` é o ÚNICO caminho de convite
+     do pacote offline: exatamente onde a promessa de nada sair pesa mais.
+     Agora ela lê a expressão até o `;` e cobra as duas metades — o que TEM de
+     estar lá, e o que não pode. A lista de proibidos é a mesma ideia da negação
+     que este arquivo já faz para o LinkedIn. */
+  const mailto = (fonte.match(/const mailto = [\s\S]*?;/) || [''])[0];
+  ok('o mailto foi encontrado na fonte', mailto.length > 20, mailto.slice(0, 40));
+  ok('e a reserva do mailto leva o assunto, o convite e o endereço',
+     /compAssunto/.test(mailto) && /compCorpo/.test(mailto) && /\+ url/.test(mailto),
+     mailto.replace(/\s+/g, ' ').slice(0, 110));
+  /* O que carrega material da pessoa. `nomeArquivo` é o pior deles: ele traz a
+     chave do chamado e o nome do caso de teste, e ia no ASSUNTO de um e-mail. */
+  const PROIBIDO = ['nomeArquivo', 'tituloDoDoc', 'fileName', 'evDados', 'frames',
+                    'base64', 'data:', 'blob:', 'licenca', 'imagem'];
+  const achados = PROIBIDO.filter((x) => mailto.includes(x));
+  ok('  e nada do documento nem da conta entra nele', achados.length === 0,
+     achados.join(', '));
   const nota = await pg.locator('#compNota').innerText();
   ok('e a tela DIZ que o documento não sai daqui',
      /não sai deste computador/i.test(nota), nota.slice(0, 70));

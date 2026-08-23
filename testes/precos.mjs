@@ -54,6 +54,13 @@ for (const L of idiomas) {
     if (n !== 1) ruins.push(`${p}=${n}`);
   }
   ok(`  um botão em cada`, ruins.length === 0, ruins.join(' '));
+  /* E NENHUM `mailto:`. Ele era a saída secundária do cartão Personal quando a
+     venda ainda não existia — "fale comigo" ao lado de "assine". Um cartão com
+     duas saídas é a pessoa parada escolhendo entre elas em vez de comprando, e
+     um `mailto:` só funciona em metade das máquinas corporativas.
+     Esta é a metade que o `a.btn` acima não pega: um `mailto` não é `.btn`. */
+  ok(`  e nenhum mailto sobrou nos cartões`,
+     (await pg.locator('.plans.tres a[href^="mailto:"]').count()) === 0);
 }
 
 /* ---- [2] o CTA do Free não passa por conta nem por cartão ------------------ */
@@ -243,6 +250,109 @@ console.log('\n[10] no telefone a página não anda para o lado');
   ok('e a lista completa chega fechada',
      (await estreito.locator('details.listaCompleta').evaluate((e) => e.open)) === false);
   await estreito.close();
+}
+
+/* ---- [11] a forma dos três cartões ----------------------------------------
+ *
+ * VEIO DO `cenarios.mjs [7]`, e veio corrigido. Aquele bloco nasceu antes desta
+ * régua existir e ficou afirmando a página ANTIGA: cobrava que o `h3` de cada
+ * cartão fosse "Free", "Personal" e "Team", e que os três preços aparecessem
+ * lado a lado em real, dólar e euro.
+ *
+ * Os dois viraram falsos por decisão, e não por defeito. O `h3` passou a ser o
+ * RESULTADO ("Crie a evidência") com o nome do plano abaixo, porque quem chega
+ * não está comprando "Personal": está comprando parar de refazer quarenta vezes
+ * a mesma coisa. E cada idioma passou a mostrar UMA moeda, a dele — três moedas
+ * na mesma tela obrigam a pessoa a achar a própria linha antes de saber o preço.
+ *
+ * Manter duas réguas sobre a mesma página é o defeito que mais custou a este
+ * projeto. Então o que era único lá mora aqui agora, e lá ficou o ponteiro. */
+console.log('\n[11] a forma dos três cartões');
+{
+  /* A moeda de cada idioma sai do `build.py`, que é quem a decide. Escrita
+     aqui, seria a segunda tabela de moeda do projeto. */
+  const bp = fs.readFileSync(`${RAIZ_WS}/build.py`, 'utf8');
+  const bloco = /MOEDA_DO_IDIOMA = \{([^}]*)\}/.exec(bp)[1];
+  const MOEDA = Object.fromEntries([...bloco.matchAll(/"(\w+)":\s*"(\w+)"/g)].map((m) => [m[1], m[2]]));
+  const SIMBOLO = { BRL: 'R$', USD: 'US$', EUR: '€' };
+  const OUTROS = { BRL: ['US$', '€'], USD: ['R$', '€'], EUR: ['R$', 'US$'] };
+  ok('o build.py declara a moeda dos cinco idiomas',
+     idiomas.every((L) => MOEDA[L]), JSON.stringify(MOEDA));
+
+  for (const L of idiomas) {
+    await pg.goto(enderecoPrecos(L), { waitUntil: 'domcontentloaded' });
+
+    /* O NOME DO PLANO existe, e está no subtítulo — não no título. */
+    const nomes = await pg.locator('.plan .planoNome').allTextContents();
+    ok(`${L}: os três planos se identificam pelo nome`,
+       nomes.length === 3 && /Free/.test(nomes[0]) && /Personal/.test(nomes[1]) && /Team/.test(nomes[2]),
+       nomes.join(' | ').slice(0, 70));
+    const titulos = await pg.locator('.plan h3').allTextContents();
+    ok(`  e o título de cada um é o RESULTADO, não o nome`,
+       titulos.every((x) => !/^(Free|Personal|Team)$/.test(x.trim())), titulos.join(','));
+
+    /* UMA MOEDA POR PÁGINA, a do idioma. */
+    const precos = (await pg.locator('.plan .price').allTextContents()).join(' ');
+    const minha = SIMBOLO[MOEDA[L]];
+    ok(`  ${L}: os preços saem em ${MOEDA[L]}`, precos.includes(minha), precos.slice(0, 60));
+    const intrusas = OUTROS[MOEDA[L]].filter((s) => precos.includes(s));
+    ok(`  e nenhuma outra moeda aparece nos cartões`, intrusas.length === 0, intrusas.join(' '));
+
+    /* MESMA ALTURA, listas curtas e equilibradas. Um cartão mais alto que os
+       outros lê-se como o cartão "certo", e a decisão vira desenho e não valor. */
+    const alturas = await pg.locator('.plan')
+      .evaluateAll((e) => e.map((x) => Math.round(x.getBoundingClientRect().height)));
+    ok(`  os três têm a mesma altura`, new Set(alturas).size === 1, alturas.join(' / '));
+    const itens = await pg.locator('.plan ul').evaluateAll((u) => u.map((x) => x.children.length));
+    ok(`  a lista de cada um é curta`, itens.every((n) => n <= 6), itens.join('/'));
+    ok(`  e nenhuma é muito mais longa que a outra`,
+       Math.max(...itens) - Math.min(...itens) <= 1, itens.join('/'));
+  }
+}
+
+/* ---- a degustação de 14 dias é DITA, nos cinco idiomas --------------------
+ *
+ * Ela existe no banco desde sempre — `plano_de`, migração 20260815142538:68:
+ * quem entra na conta pela primeira vez ganha 14 dias com tudo do Team, sem
+ * cartão e sem checkout. E "14 dias" tinha ZERO ocorrências em `/`, `/precos`,
+ * `/evidencia-de-teste`, `/seguranca` e `/comparativo`: a melhor oferta do
+ * produto só aparecia DEPOIS do login, quer dizer, para quem já tinha decidido.
+ *
+ * O número sai do BANCO e não é escrito aqui, pelo mesmo motivo do `MINIMO`
+ * logo acima: escrito aqui, esta seria a terceira regra pública sobre a
+ * degustação, e a que ninguém lembraria de atualizar. Se um dia forem 30 dias,
+ * a migração muda e a página tem de mudar junto — e é essa a afirmação. */
+console.log('\n[' + 'degustação] os 14 dias aparecem antes do login');
+{
+  const migracoes = fs.readdirSync(`${RAIZ_WS}/supabase/migrations`)
+    .filter((f) => /funcoes|plano_de/.test(f))
+    .map((f) => fs.readFileSync(`${RAIZ_WS}/supabase/migrations/${f}`, 'utf8')).join('\n');
+  const m = /'time'::text,\s*\d+,\s*(\d+)/.exec(migracoes);
+  ok('o banco diz de quantos dias é a degustação', !!m, m && m[1]);
+  const DIAS = m ? m[1] : '14';
+
+  for (const L of idiomas) {
+    await pg.goto(enderecoPrecos(L), { waitUntil: 'domcontentloaded' });
+    const txt = await pg.locator('body').innerText();
+    ok(`${L}: a página diz "${DIAS}"`, txt.includes(DIAS), '');
+    /* No subtítulo dos DOIS cartões pagos: é ao lado do preço que a objeção
+       nasce, e é ali que ela precisa de resposta. */
+    for (const plano of ['personal', 'team']) {
+      const sub = await pg.locator(`.plan[data-plano="${plano}"] .planoNome`).innerText()
+        .catch(() => '');
+      ok(`  ${L}/${plano}: o subtítulo traz a degustação`, sub.includes(DIAS), sub.slice(0, 48));
+    }
+    /* E uma pergunta no FAQ de compra, que é onde ela cabe por extenso — e
+       onde ela responde à objeção real, que não é "quanto custa" e sim
+       "e se não servir?". */
+    const faq = await pg.locator('.faqCompra').innerText().catch(() => '');
+    ok(`  ${L}: o FAQ de compra responde "dá para testar antes?"`,
+       faq.includes(DIAS), faq.slice(0, 60));
+    /* SEM CARTÃO é metade da oferta: uma degustação que pede cartão é um
+       pedágio na porta, e o produto promete não ter. */
+    ok(`  ${L}: e diz que não pede cartão`,
+       /sem cart|no card|sin tarjeta|ohne Karte|sans carte/i.test(faq + txt));
+  }
 }
 
 await br.close();

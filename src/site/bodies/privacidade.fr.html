@@ -22,7 +22,7 @@
     générez.</b> Cela n’a pas changé, cela vaut dans toutes les offres, et c’est la promesse qui soutient le produit — ce n’est pas
     un réglage que nous pourrions relâcher plus tard.</p>
     <p>Ce qui existe, c’est ceci, et c’est détaillé plus bas : un décompte de visites sans cookie et sans
-    identifiant ; un décompte anonyme de trois jalons d’usage ; l’e-mail, si vous le laissez sur la page des
+    identifiant ; un décompte anonyme de quinze jalons d’usage ; l’e-mail, si vous le laissez sur la page des
     tarifs ; et, pour qui souscrit une offre payante, un <b>compte</b> — avec l’e-mail d’accès, les factures, les
     tickets de support et la <b>liste des cas à exécuter</b>, quand vous utilisez l’écran de liste de cas de test. Utiliser
     l’outil continue de ne pas exiger de compte : sans identifiant, il enregistre, transcrit et génère le document exactement
@@ -50,13 +50,13 @@
     <ul>
       <li><strong>Les visites de page</strong>, par Vercel Web Analytics. Sans cookie et sans identifiant qui
       persiste entre les visites. Cela sert à savoir combien de personnes sont arrivées et par quel chemin.</li>
-      <li><strong>Trois jalons d’usage</strong>, à l’intérieur de l’outil : qu’il a été ouvert, qu’une vidéo a été
+      <li><strong>Quinze jalons d’usage</strong>, à l’intérieur de l’outil : qu’il a été ouvert, qu’une vidéo a été
       ouverte avec succès, et qu’un fichier de sortie a été téléchargé. Avec cela partent la langue de la page, l’origine de la
       vidéo (fichier, Drive, enregistrement ou exemple) et le format téléchargé. <strong>Rien de plus.</strong> Ne partent ni nom
       de fichier, ni taille, ni durée, ni contenu, ni aucun identifiant de session — il n’y a aucun moyen de relier deux
       jalons à la même personne, ni cette visite à la suivante.</li>
     </ul>
-    <p>Si votre navigateur émet <em>Do Not Track</em> ou <em>Global Privacy Control</em>, les trois jalons ne
+    <p>Si votre navigateur émet <em>Do Not Track</em> ou <em>Global Privacy Control</em>, les quinze jalons ne
     sont pas envoyés. Et la <strong>version hors ligne</strong> — le fichier unique que vous téléchargez — sort du build sans
     aucune adresse de mesure à l’intérieur : elle ne parle à personne, et cela se vérifie en cherchant
     &laquo;&nbsp;supabase&nbsp;&raquo; dans le fichier.</p>
@@ -141,7 +141,7 @@
       transcription. Il ne reçoit que la requête du fichier de la bibliothèque.</li>
       <li><strong>Hugging Face</strong> — d’où le modèle de transcription est téléchargé, et seulement si vous déclenchez
       la transcription automatique. Il reçoit la requête du modèle, jamais votre audio.</li>
-      <li><strong>Supabase</strong> — base de données qui reçoit les trois jalons d’usage et, si vous le remplissez,
+      <li><strong>Supabase</strong> — base de données qui reçoit les quinze jalons d’usage et, si vous le remplissez,
       l’e-mail de la liste de notification. Elle ne reçoit jamais de vidéo, d’audio ou de transcription.</li>
       <li><strong>Vercel</strong> — l’hébergement de la page et le décompte des visites. Comme tout serveur web, il journalise techniquement les
       accès au site.</li>
@@ -317,7 +317,7 @@
 
     <h2>Cookies</h2>
     <p>Nous n’utilisons ni cookies propres ni cookies de tiers — ni pour le pistage, ni pour la publicité,
-    ni pour la mesure. Le décompte des visites et les trois jalons décrits ci-dessus fonctionnent <b>sans cookie et sans
+    ni pour la mesure. Le décompte des visites et les quinze jalons décrits ci-dessus fonctionnent <b>sans cookie et sans
     identifiant qui persiste entre les visites</b>, et c’est justement pour cela qu’il n’existe pas de bandeau cookies
     sur cette page : il n’y aurait rien à consentir.</p>
 
@@ -334,7 +334,7 @@
       <tr><th>Donnée</th><th>Pour quoi faire</th><th>Base légale</th><th>Durée</th></tr>
       <tr><td>E-mail de la liste de notification</td><td>Prévenir quand l’offre payante existera</td>
           <td>Consentement (art. 7, I)</td><td>Jusqu’à votre révocation, ou 24 mois sans usage</td></tr>
-      <tr><td>Les trois jalons d’usage</td><td>Savoir où l’outil échoue et l’améliorer</td>
+      <tr><td>Les quinze jalons d’usage</td><td>Savoir où l’outil échoue et l’améliorer</td>
           <td>Donnée anonymisée (art. 12) ; en cas de doute, intérêt légitime (art. 7, IX)</td>
           <td>18 mois</td></tr>
       <tr><td>Visites de page</td><td>Savoir combien de personnes arrivent et par où</td>

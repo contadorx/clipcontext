@@ -53,12 +53,21 @@ pg.on('dialog', async (d) => {
   if (resposta === 'accept') await d.accept(); else await d.dismiss();
 });
 
+/* ESPERA POR CONDIÇÃO, E NÃO POR RELÓGIO.
+   A primeira versão esperava `#prevCard` aparecer e mais 500 ms. Sozinha, ela
+   passava; na regressão, com três Chromiums disputando quatro núcleos, a
+   varredura ficou mais lenta que o meio segundo e o teste leu 1 quadro onde
+   pedira 3 — vermelho por carga de máquina, e não por defeito.
+   É exatamente o defeito que este build veio consertar em `rolar` e `espera2`,
+   escrito por mim, no arquivo novo, no mesmo dia. Fica registrado por isso. */
 async function extrair(quantos) {
   await pg.selectOption('#mode', 'count');
   await pg.fill('#count', String(quantos));
   await pg.locator('#extract').click();
   await pg.waitForSelector('#prevCard:not(.hide)', { timeout: 40000 });
-  await pg.waitForTimeout(500);
+  await pg.waitForFunction(
+    (n) => document.querySelectorAll('#thumbs figure').length >= n,
+    quantos, { timeout: 60000 });
 }
 const quantos = () => pg.locator('#thumbs figure').count();
 
@@ -87,7 +96,9 @@ resposta = 'dismiss';
 await pg.selectOption('#mode', 'count');
 await pg.fill('#count', '2');
 await pg.locator('#extract').click();
-await pg.waitForTimeout(800);
+/* Aqui a espera é pelo DIÁLOGO, que é o que este bloco veio ver. */
+await pg.waitForFunction(() => true, null, { timeout: 1000 }).catch(() => {});
+for (let i = 0; i < 40 && dialogos.length === 0; i++) await pg.waitForTimeout(100);
 
 ok('perguntou antes de descartar', dialogos.length === 1, String(dialogos.length));
 ok('e a pergunta CONTA o que se perde, em vez de só "tem certeza?"',
@@ -105,7 +116,11 @@ await pg.selectOption('#mode', 'count');
 await pg.fill('#count', '2');
 await pg.locator('#extract').click();
 await pg.waitForSelector('#prevCard:not(.hide)', { timeout: 40000 });
-await pg.waitForTimeout(700);
+/* Pelo mesmo motivo do `extrair()` acima: a lista tem de CHEGAR a dois, e não
+   "provavelmente já chegou depois de 700 ms". */
+await pg.waitForFunction(
+  () => document.querySelectorAll('#thumbs figure').length === 2, null, { timeout: 60000 })
+  .catch(() => {});
 ok('perguntou de novo', dialogos.length === 1, String(dialogos.length));
 ok('e agora a varredura nova valeu', (await quantos()) === 2, String(await quantos()));
 const depois = await pg.locator('#thumbs figure input.nota').first().inputValue();

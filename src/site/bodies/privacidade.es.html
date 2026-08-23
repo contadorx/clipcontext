@@ -22,7 +22,7 @@
     generas.</b> Eso no ha cambiado, vale en todos los planes, y es la promesa sobre la que se sostiene el
     producto — no es un ajuste que podamos aflojar después.</p>
     <p>Lo que sí existe es esto, detallado más abajo: un recuento de visitas sin cookie y sin identificador;
-    un recuento anónimo de tres hitos de uso; tu correo, si lo dejas en la página de precios; y, para quien
+    un recuento anónimo de quince hitos de uso; tu correo, si lo dejas en la página de precios; y, para quien
     contrata un plan de pago, una <b>cuenta</b> — con el correo de acceso, las facturas, los tickets de
     soporte y la <b>lista de casos por ejecutar</b>, si usas la pantalla de guion. Usar la herramienta sigue
     sin exigir cuenta: sin sesión, graba, transcribe y genera documentos exactamente igual.</p>
@@ -49,13 +49,13 @@
     <ul>
       <li><strong>Visitas de página</strong>, con Vercel Web Analytics. Sin cookie y sin identificador que
       persista entre visitas. Sirve para saber cuánta gente llegó y por qué camino.</li>
-      <li><strong>Tres hitos de uso</strong>, dentro de la herramienta: que se abrió, que un vídeo se abrió con
+      <li><strong>Quince hitos de uso</strong>, dentro de la herramienta: que se abrió, que un vídeo se abrió con
       éxito y que se descargó un archivo de salida. Con ellos va el idioma de la página, el origen del vídeo
       (archivo, Drive, grabación o ejemplo) y el formato descargado. <strong>Nada más.</strong> No va nombre de
       archivo, tamaño, duración, contenido ni identificador de sesión — no hay forma de unir dos hitos a la
       misma persona, ni esta visita con la siguiente.</li>
     </ul>
-    <p>Si tu navegador envía <em>Do Not Track</em> o <em>Global Privacy Control</em>, los tres hitos no se
+    <p>Si tu navegador envía <em>Do Not Track</em> o <em>Global Privacy Control</em>, los quince hitos no se
     envían. Y la <strong>versión offline</strong> — el archivo único que descargas — se genera sin ninguna
     dirección de medición dentro: no habla con nadie, y puedes comprobarlo buscando
     &ldquo;supabase&rdquo; en el archivo.</p>
@@ -141,7 +141,7 @@
       y de transcripción. Solo recibe la petición del archivo de la biblioteca.</li>
       <li><strong>Hugging Face</strong> — de donde se descarga el modelo de transcripción, y solo si activas
       la transcripción automática. Recibe la petición del modelo, nunca tu audio.</li>
-      <li><strong>Supabase</strong> — la base de datos que recibe los tres hitos de uso y, si lo rellenas,
+      <li><strong>Supabase</strong> — la base de datos que recibe los quince hitos de uso y, si lo rellenas,
       el correo de la lista de aviso. Nunca recibe vídeo, audio ni transcripciones.</li>
       <li><strong>Vercel</strong> — el alojamiento de la página y el recuento de visitas. Como cualquier servidor web, registra
       técnicamente los accesos al sitio.</li>
@@ -318,7 +318,7 @@
 
     <h2>Cookies</h2>
     <p>No utilizamos cookies propias ni de terceros — ni para rastreo, ni para publicidad, ni para
-    medición. El recuento de visitas y los tres hitos descritos arriba funcionan <b>sin cookie y sin
+    medición. El recuento de visitas y los quince hitos descritos arriba funcionan <b>sin cookie y sin
     identificador que persista entre visitas</b>, y por eso mismo no hay aviso de cookies en esta página:
     no habría nada que consentir.</p>
 
@@ -335,7 +335,7 @@
       <tr><th>Dato</th><th>Para qué</th><th>Base legal</th><th>Plazo</th></tr>
       <tr><td>Correo de la lista de aviso</td><td>Avisarte cuando exista el plan de pago</td>
           <td>Consentimiento (LGPD art. 7 I / RGPD art. 6.1.a)</td><td>Hasta que lo revoques, o 24 meses sin uso</td></tr>
-      <tr><td>Los tres hitos de uso</td><td>Saber dónde falla la herramienta y mejorarla</td>
+      <tr><td>Los quince hitos de uso</td><td>Saber dónde falla la herramienta y mejorarla</td>
           <td>Dato anonimizado (LGPD art. 12); en la duda, interés legítimo</td><td>18 meses</td></tr>
       <tr><td>Visitas de página</td><td>Saber cuánta gente llega y por dónde</td>
           <td>Dato anonimizado (LGPD art. 12); en la duda, interés legítimo</td>

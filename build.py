@@ -1421,8 +1421,22 @@ CARTOES = [
         "titulo": {"pt": "Execute o seu roteiro", "en": "Run your test script",
                    "es": "Ejecute su guion", "de": "Führen Sie Ihr Testskript aus",
                    "fr": "Exécutez votre scénario"},
-        "sub": {"pt": "Personal", "en": "Personal", "es": "Personal",
-                "de": "Personal", "fr": "Personal"},
+        # A DEGUSTAÇÃO ENTRA NO SUBTÍTULO DOS DOIS CARTÕES PAGOS — 23/08.
+        #
+        # Ela existe no banco desde sempre (`plano_de`, migração 20260815142538:68):
+        # quem entra pela primeira vez ganha 14 dias com TUDO, sem cartão e sem
+        # checkout. E "14 dias" tinha ZERO ocorrências em `/`, `/precos`,
+        # `/evidencia-de-teste`, `/seguranca` e `/comparativo` — a melhor oferta do
+        # produto só aparecia depois do login, que é onde ela não serve para nada.
+        #
+        # No SUBTÍTULO, e não numa bala: a objeção de preço nasce ao lado do preço,
+        # e é ali que ela precisa de resposta. Numa bala, ela seria a sexta linha
+        # de uma lista que ninguém lê inteira.
+        "sub": {"pt": "Personal · 14 dias grátis antes, sem cartão",
+                "en": "Personal · 14 days free first, no card",
+                "es": "Personal · 14 días gratis antes, sin tarjeta",
+                "de": "Personal · 14 Tage kostenlos vorab, ohne Karte",
+                "fr": "Personal · 14 jours gratuits d’abord, sans carte"},
         "cta": {"pt": "Assinar o Personal", "en": "Subscribe to Personal",
                 "es": "Suscribirse a Personal", "de": "Personal abonnieren",
                 "fr": "S’abonner à Personal"},
@@ -1477,7 +1491,11 @@ CARTOES = [
         "titulo": {"pt": "Coordene a rodada", "en": "Coordinate the round",
                    "es": "Coordine la ronda", "de": "Koordinieren Sie die Runde",
                    "fr": "Coordonnez la série"},
-        "sub": {"pt": "Team", "en": "Team", "es": "Team", "de": "Team", "fr": "Team"},
+        "sub": {"pt": "Team · 14 dias grátis antes, sem cartão",
+                "en": "Team · 14 days free first, no card",
+                "es": "Team · 14 días gratis antes, sin tarjeta",
+                "de": "Team · 14 Tage kostenlos vorab, ohne Karte",
+                "fr": "Team · 14 jours gratuits d’abord, sans carte"},
         "cta": {"pt": "Assinar o Team", "en": "Subscribe to Team",
                 "es": "Suscribirse a Team", "de": "Team abonnieren",
                 "fr": "S’abonner à Team"},

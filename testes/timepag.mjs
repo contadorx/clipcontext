@@ -34,21 +34,22 @@ console.log('[1] a página existe nos três idiomas e está no mapa');
   await pg.close();
 }
 
-console.log('\n[2] a página de preços leva para onde se começa');
-{
-  /* O Personal ganhou caminho de compra: ele vai para a área do cliente, que é
-     de onde sai a degustação E a assinatura. O Team continua indo para o link
-     por e-mail — venda de cinco assentos com nota fiscal não começa num botão. */
-  const pg = await ctx.newPage();
-  await pg.goto('http://localhost:8919/precos');
-  await pg.waitForTimeout(200);
-  const personal = await pg.locator('.plan').nth(1).innerHTML();
-  const equipe = await pg.locator('.plan').nth(2).innerHTML();
-  ok('o cartão Personal leva para a conta', /href="\/conta"/.test(personal));
-  ok('e o mailto continua como saída', /mailto:/.test(personal));
-  ok('o cartão Team continua chamando o link por e-mail', /href="\/time"/.test(equipe));
-  await pg.close();
-}
+/* [2] O CAMINHO DE COMPRA MORA NO `precos.mjs` — 23/08.
+ *
+ * Este bloco afirmava o funil ANTIGO: que o cartão Personal ainda tivesse um
+ * `mailto:` como saída secundária, e que o cartão Team levasse para `/time`.
+ *
+ * Os dois mudaram por DECISÃO. O `mailto` saiu porque um cartão com duas saídas
+ * é a pessoa parada escolhendo entre elas em vez de comprando — e porque um
+ * `mailto:` não abre em metade das máquinas corporativas. E o CTA do Team passou
+ * a levar à conta, que é onde o checkout começa: `/time` APRESENTA o Team, e o
+ * botão de um cartão de preço tem de levar à compra.
+ *
+ * O positivo está em `precos.mjs [1]` e `[3]`; a negação do `mailto` entrou no
+ * `[1]` junto, porque um `mailto` não é um `a.btn` e escapava dos dois.
+ *
+ * Este arquivo volta ao que é a tese dele: a página `/time`. */
+
 
 console.log('\n[3] e-mail malformado não sai do lugar');
 {

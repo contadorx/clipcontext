@@ -71,8 +71,15 @@ printf '%s\n' $TESTES | xargs -P "$PARALELO" -I{} sh -c '
   if [ ! -f "$t" ]; then printf "ausente\n" > "$SAIDAS/$t.estado"; exit 0; fi
   s=$(timeout 400 node "$t" 2>&1); c=$?
   printf "%s\n" "$s" > "$SAIDAS/$t.log"
-  if [ "$c" = 0 ]; then printf "ok\n" > "$SAIDAS/$t.estado"
-  else printf "FALHOU\n" > "$SAIDAS/$t.estado"; fi
+  # TRÊS ESTADOS, E NÃO DOIS. Um teste que sai 0 sem ter rodado não é um teste
+  # que passou — e três dos testes de licença estavam exatamente aí: o emissor
+  # de chaves não viaja no pacote (ele guarda as privadas), então eles pulavam,
+  # saíam 0, e a esteira somava três verdes que nunca existiram. A única régua
+  # que prova o destravamento pago de ponta a ponta nunca rodou onde a esteira
+  # roda, e o rodapé dizia "verde".
+  if [ "$c" != 0 ]; then printf "FALHOU\n" > "$SAIDAS/$t.estado"
+  elif grep -q "^PULADO" "$SAIDAS/$t.log"; then printf "PULADO\n" > "$SAIDAS/$t.estado"
+  else printf "ok\n" > "$SAIDAS/$t.estado"; fi
   feitos=$(ls "$SAIDAS" | grep -c "[.]estado$")
   estado=$(cat "$SAIDAS/$t.estado")
   # O placar parcial só aparece na linha de quem FALHOU. Repeti-lo em toda
@@ -90,12 +97,15 @@ echo
 echo "---- o relatório, na ordem da lista ----"
 echo
 
-falhou=""
+falhou=""; pulados=""; verdes=0
 for t in $TESTES; do
   estado=$(cat "$SAIDAS/$t.estado" 2>/dev/null || echo FALHOU)
   case "$estado" in
     ausente) echo "??  $t não existe"; continue ;;
-    ok)      printf '%-20s ok\n' "$t" ;;
+    ok)      printf '%-20s ok\n' "$t"; verdes=$((verdes+1)) ;;
+    PULADO)  printf '%-20s PULADO\n' "$t"
+             grep "^PULADO" "$SAIDAS/$t.log" 2>/dev/null | head -1 | sed 's/^PULADO  */      por que: /'
+             pulados="$pulados $t" ;;
     *)       printf '%-20s FALHOU\n' "$t"
              grep -E 'FALHA|Error|error:' "$SAIDAS/$t.log" 2>/dev/null | head -6 | sed 's/^/      /'
              falhou="$falhou $t" ;;
@@ -106,8 +116,17 @@ for t in $TESTES; do
   grep -E 'PULADA|PULADO' "$SAIDAS/$t.log" 2>/dev/null | tail -1 | sed 's/^/      /'
 done
 echo
+# O PLACAR TEM TRÊS NÚMEROS. "Verde" com pulado dentro é a mesma mentira que a
+# esteira contava antes, escrita de outro jeito.
+n_pul=$(printf '%s\n' $pulados | grep -c .)
+n_mau=$(printf '%s\n' $falhou | grep -c .)
+printf '%s ok · %s PULADO · %s FALHOU\n' "$verdes" "$n_pul" "$n_mau"
+if [ "$n_pul" -gt 0 ]; then
+  echo "Pulados:$pulados"
+  echo "  Um teste pulado NÃO é um teste que passou. O motivo de cada um está acima."
+fi
 if [ -z "$falhou" ]; then
-  echo "Regressão inteira: verde."
+  [ "$n_pul" -gt 0 ] && echo "Nada vermelho — mas a cobertura é a dos $verdes, não a dos $((verdes + n_pul))."
   exit 0
 fi
 # A ESTEIRA SAI DIFERENTE DE ZERO. Ela imprimia os que falharam e saía 0 — o que

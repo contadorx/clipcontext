@@ -198,10 +198,11 @@ pública está em `/time`, que é órfã.
 - **Pró B:** funil mais limpo. **Contra B:** a objeção de preço não tem resposta
   na página onde ela nasce.
 
-> **Minha indicação: A.** Uma linha no cartão e uma pergunta no FAQ.
->
-> **Se você não responder:** faço A no Build 5. É texto, é reversível em cinco
-> minutos, e o custo de não fazer é invisível — que é o pior tipo.
+> **RESPONDIDA em 23/08 — caminho A.** "Anuncia os 14 dias."
+> Feito no Build 3, nos cinco idiomas: no subtítulo dos dois cartões pagos
+> ("Personal · 14 dias grátis antes, sem cartão") e como **primeira** pergunta
+> do FAQ de compra. A régua nova tira o número do banco, e não de uma constante
+> escrita no teste.
 
 ---
 
@@ -451,14 +452,14 @@ o `paginas.mjs` já faz com o Pix, cobrando que nenhuma página volte a pedir.
   que cobra a ausência é melhor que uma régua apagada.
 - **Contra:** perde-se a única captura de lead que não é o checkout.
 
-> **Minha indicação: A**, com a pergunta trocada e um responsável nomeado — e,
-> se não houver responsável, **B sem hesitar**. Um formulário sem dono é pior
-> que nenhum formulário.
+> **RESPONDIDA em 23/08 — caminho B.** "Tira a captura, deixa somente o plano."
+> Feito no Build 3: as 76 linhas mortas saíram do `support.js` (25,1 → 22,5 KB
+> em toda página), e `medicao.mjs [M4]` virou do avesso — passou a cobrar que o
+> formulário **não volte**.
 >
-> **Se você não responder:** faço **B** no Build 4, junto com as outras listas
-> paralelas. É o caminho reversível: recolocar um formulário depois é uma tarde;
-> deixar um funil quebrado no ar não tem data para acabar. Deixo o SQL e o
-> painel de pé — só o que está morto sai.
+> **O painel continua de pé**, com as três linhas que já entraram: tirar a
+> captura não é apagar quem se cadastrou. Se quiser a aba fora também, é uma
+> linha — mas não farei sem você pedir.
 
 ---
 
@@ -474,9 +475,10 @@ saber:
 - Cancelamento, acesso até o fim do período, renovação e ajuste proporcional de
   assentos: sem prova em sandbox.
 
-> **Minha indicação: uma janela de meio dia, sob demanda, quando você quiser.**
-> Só o `stripe:conferir` já paga a janela. Não entra em nenhum build até você
-> pedir.
+> **RESPONDIDA em 23/08 — fica para o fim.** "Stripe no fim."
+> Não entra em build nenhum até você pedir. O que continua represado, e continua
+> sendo o que eu antecipararia se você mudasse de ideia: **se o preço do Team
+> estiver em `tiered` ou `volume`, comprar 12 assentos cobra por 1.**
 
 ---
 
@@ -497,8 +499,8 @@ depende do seguinte para ser entregue.
 | # | Build | Dias | O que muda para quem usa |
 |---|---|---:|---|
 | **1** | O chão | **1,5** | nenhuma frase falsa no ar, o convite volta a funcionar, e a régua roda em qualquer máquina |
-| 2 | Não perder trabalho | 3–4 | ninguém mais perde meia hora de anotação por um clique |
-| 3 | A esteira honesta | 2–3 | vermelho volta a querer dizer vermelho |
+| **2** | Não perder trabalho | **feito** | ninguém mais perde meia hora de anotação por um clique |
+| **3** | A esteira honesta | **feito** | vermelho volta a querer dizer vermelho — e verde, verde |
 | 4 | Listas paralelas | 2,5–3 | o que o catálogo diz e o que a tela mostra param de divergir |
 | 5 | O caminho até a compra | 3–4 | quem clica "assinar" chega ao checkout com o plano escolhido |
 | 6 | O que já está vendido | 4–5 | fatura, convite, licença que renova e vocabulário guardado |
