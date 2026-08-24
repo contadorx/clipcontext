@@ -61,7 +61,7 @@ MAPA="
 ^next[.]config[.]mjs$ => site:paginas.mjs site:seo.mjs
 ^app/conta/ => site:compra.mjs site:negocio.mjs
 ^app/ => site:paginas.mjs site:seo.mjs site:negocio.mjs
-^lib/stripe[.]ts$ => site:precos.mjs promessa.mjs site:compra.mjs
+^lib/stripe[.]ts$ => site:precos.mjs promessa.mjs site:compra.mjs renovar.mjs
 ^lib/ => site:paginas.mjs
 ^public/sw[.]js$ => site:seo.mjs
 ^public/site[.]css$ => folha.mjs site:paginas.mjs site:dobrafig.mjs
@@ -71,7 +71,7 @@ MAPA="
 "
 
 # ---- 1. os contratos: sempre, e são catorze segundos ------------------------
-CONTRATOS="auditoria.mjs folha.mjs modelopessoal.mjs chaves.mjs faxina.mjs figura.mjs funil.mjs inventario.mjs middleware.mjs
+CONTRATOS="auditoria.mjs folha.mjs modelopessoal.mjs renovar.mjs chaves.mjs faxina.mjs figura.mjs funil.mjs inventario.mjs middleware.mjs
            planos.mjs promessa.mjs semmarca.mjs stripehook.mjs terceiros.mjs wer.mjs"
 
 # ----------------------------------------------------------------------------

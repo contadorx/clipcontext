@@ -31,14 +31,32 @@ const ok = (n, c, e) => {
   if (!c) falhas++;
 };
 
-/* A migração mais recente que mexe no vocabulário é a fonte. Achada por
-   conteúdo e não por nome: renomear o arquivo não pode cegar a régua. */
+/* CADA VOCABULÁRIO VEM DA ÚLTIMA MIGRAÇÃO QUE MEXEU NELE — e não de uma só.
+   Esta régua lia a última migração que continha `evento_nome_check` e tirava os
+   SEIS vocabulários dela. Funcionava enquanto as seis restrições andassem
+   juntas; na primeira migração que mexeu só numa — a que abriu `renovacao` como
+   origem — a régua continuou lendo a lista velha e reprovou um valor que o
+   banco já aceitava.
+   Migração é acumulada: quem manda é a última que definiu AQUELA restrição.
+   Achadas por conteúdo e não por nome: renomear o arquivo não pode cegar. */
 const dir = `${RAIZ_WS}/supabase/migrations`;
 const migs = fs.readdirSync(dir).sort()
-  .map((f) => ({ f, sql: fs.readFileSync(`${dir}/${f}`, 'utf8') }))
-  .filter((m) => /evento_nome_check/.test(m.sql));
-const sql = migs[migs.length - 1].sql;
-console.log(`[0] vocabulário lido de ${migs[migs.length - 1].f}`);
+  .map((f) => ({ f, sql: fs.readFileSync(`${dir}/${f}`, 'utf8') }));
+
+/** A última migração que define `evento_<campo>_check`. */
+function fonteDe(campo) {
+  const marca = `add constraint evento_${campo}_check check (`;
+  const achadas = migs.filter((m) => m.sql.includes(marca));
+  return achadas.length ? achadas[achadas.length - 1] : null;
+}
+/* A assinatura da função continua vindo da última que a declara. */
+const daFuncao = migs.filter((m) => /create or replace function public\.walkstamp_evento\(/.test(m.sql));
+const sql = daFuncao.length ? daFuncao[daFuncao.length - 1].sql : '';
+console.log('[0] vocabulário lido da última migração de cada restrição');
+for (const campo of ['nome', 'idioma', 'formato', 'origem', 'faixa', 'plano']) {
+  const f = fonteDe(campo);
+  console.log(`     ${campo.padEnd(8)} ${f ? f.f : '(nenhuma)'}`);
+}
 
 /** Os valores de um `check (campo in ('a','b'))` ou `check (campo is null or campo in (...))`. */
 function vocab(campo) {
@@ -46,11 +64,14 @@ function vocab(campo) {
      `new RegExp` em cima de SQL com parenteses aninhados e o tipo de coisa que
      passa a dar zero resultado em silencio — que e justamente o defeito que
      esta regua existe para pegar. */
+  const fonte = fonteDe(campo);
+  if (!fonte) return new Set();
   const marca = `add constraint evento_${campo}_check check (`;
-  const i = sql.indexOf(marca);
-  if (i < 0) return new Set();
-  const fim = sql.indexOf(');', i);
-  const bloco = sql.slice(i + marca.length, fim);
+  /* `lastIndexOf`: uma mesma migração pode declarar a restrição mais de uma
+     vez, e quem vale é a última. */
+  const i = fonte.sql.lastIndexOf(marca);
+  const fim = fonte.sql.indexOf(');', i);
+  const bloco = fonte.sql.slice(i + marca.length, fim);
   return new Set([...bloco.matchAll(/'([^']+)'/g)].map((m) => m[1]));
 }
 const NOMES = vocab('nome');
@@ -59,7 +80,7 @@ const FORMATOS = vocab('formato');
 const ORIGENS = vocab('origem');
 const FAIXAS = vocab('faixa');
 const PLANOS = vocab('plano');
-ok('a migração declara os seis vocabulários',
+ok('as migrações declaram os seis vocabulários',
    [NOMES, IDIOMAS, FORMATOS, ORIGENS, FAIXAS, PLANOS].every((v) => v.size > 0),
    [...NOMES].length + '/' + [...IDIOMAS].length + '/' + [...FORMATOS].length + '/' +
    [...ORIGENS].length + '/' + [...FAIXAS].length + '/' + [...PLANOS].length);

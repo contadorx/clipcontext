@@ -510,12 +510,9 @@ legível de longe, sem a cor de erro.
 - **Contra:** o único argumento escrito no repositório sobre esta decisão diz
   que está errado, e ninguém o contestou — ele só nunca chegou à tela.
 
-> **A minha indicação: caminho B.** Ele atende as duas preocupações — a falta
-> continua óbvia, e a cor deixa de acusar o próprio produto. É uma linha de CSS,
-> e entra junto com o Build 6, que já é o build das promessas da página de
-> preços.
->
-> **Se você não responder:** eu levo para o Build 6 e trato como caminho B.
+> **RESPONDIDA em 24/08 — caminho B.** O ✕ ficou, a cor saiu: as seis células
+> passaram de `var(--err)` para `var(--muted)`. A `/steps` continua vermelha, e
+> lá está certo — ela compara com um concorrente. Feito no Build 6.
 
 ---
 
@@ -843,20 +840,25 @@ números certos estão lá.
 
 ---
 
-## Build 6 — O que já está vendido *(4–5 d)*
+## Build 6 — O que já está vendido — **feito**
 
-Um visto numa tabela de preço é uma promessa. Estas são as que não entregam.
+Relatório em `BUILD-6.md`. Dois dos seis itens já estavam feitos ou meio feitos.
 
-- "Licença que se renova sozinha, sem colar chave nenhuma" — **nada renova**, e
-  quando vence o recado diz "fale comigo para renovar"
-- "Faturas para baixar" — a `hosted_invoice_url` chega da Stripe e é descartada
-  *(DEC-9)*
-- "Assentos: convidar por e-mail" — nenhum e-mail sai *(DEC-6)*
-- "Modelo pessoal": o botão aparece para qualquer membro, o banco exige admin, e
-  o modelo pessoal vaza entre colegas
-- O vocabulário guardado *(DEC-5)*
-- Bloqueio imediato de assento: revogar de verdade, ou dizer que vale na próxima
-  expiração
+- ✅ **O modelo "só para mim" é de quem salvou.** Eram duas metades: um membro
+  não conseguia salvar o próprio, e o que fosse salvo aparecia para os colegas.
+  A função que alimenta a ferramenta trazia um comentário descrevendo o filtro
+  que não existia
+- ✅ **A chave avisa antes de vencer**, com o link da conta, e se renova sozinha
+  quando há sessão. O limite está escrito no relatório e no `lib/stripe.ts` —
+  renovar sem sessão exigiria credencial de longa duração ou cron
+- ✅ **O endereço da fatura da Stripe** deixou de ser descartado: a função
+  recebia `p_url` e nunca o usava. Coluna própria, separada da nota fiscal
+- ✅ **DEC-18**: o ✕ do que o Free não tem deixou de ser vermelho
+- ✅ Já estavam feitos: o convite por e-mail *(DEC-6)* e a metade "dizer" do
+  bloqueio de assento
+- ⤳ **O vocabulário guardado** *(DEC-5 / DEC-17)*: build próprio
+- ⤳ **Bloqueio imediato de assento**: hoje vale na próxima emissão, e isso está
+  dito na tela. Torná-lo imediato custa a operação offline — decisão sua
 
 ---
 

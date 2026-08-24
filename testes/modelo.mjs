@@ -189,7 +189,16 @@ console.log('\n[5] "apagar o modelo de voz" solta o que está carregado');
   await pg.locator('#limparModelo').click();
   await pg.waitForFunction(() => !document.getElementById('limparModelo').disabled,
                            null, { timeout: 30000 });
-  await pg.waitForTimeout(400);
+  /* ESPERA A CONDIÇÃO, E NÃO O RELÓGIO.
+     Eram 400 ms depois de o botão voltar a habilitar. Sozinho passava; na
+     regressão, com três Chromiums disputando quatro núcleos, soltar o modelo da
+     memória levou mais que isso e a régua leu 1 onde já ia dar 0 — vermelho por
+     carga de máquina, e não por defeito.
+     É a mesma família de `rolar`, `espera2` e `descarte`, que o Build 3
+     consertou. Esta escapou porque só reprova sob carga. */
+  await pg.waitForFunction(
+    () => ((globalThis.__reg || {}).vivos ?? 1) === 0, null, { timeout: 30000 })
+    .catch(() => {});
   const r = await reg();
   ok('e depois de apagar não sobrou nenhum na memória', r.vivos === 0, String(r.vivos));
   ok('sem erro de JavaScript', erros.length === 0, erros.join(' | ').slice(0, 200));

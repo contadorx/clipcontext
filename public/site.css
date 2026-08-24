@@ -766,7 +766,22 @@ table.cmpCurta tbody th{font-weight:550}
    estava declarada e a célula do "não" ficava da cor do texto — a tabela
    inteira parecia dizer que sim. */
 table.cmpCurta td.sim{color:var(--accent);font-weight:700;font-size:17px}
-table.cmpCurta td.nao{color:var(--err);font-weight:700;font-size:17px}
+/* O QUE O PLANO NÃO TEM NÃO É UM ERRO — DEC-18, 24/08.
+   Esta célula saía em `var(--err)`: o mesmo vermelho de "falhou". São seis
+   delas na tabela, e elas descrevem o NOSSO plano Free e o Personal, não um
+   concorrente. Vermelho ali convida a ler o Free como uma versão quebrada, e o
+   Free é a porta de entrada inteira deste produto.
+   Quem achou isso não fui eu: foi o autor desta folha, num bloco `table.cmpPlanos`
+   que existia para consertar exatamente isto e nunca pegou, porque o gerador
+   emite a tabela como `cmpCurta`. O argumento dele, palavra por palavra:
+   "vermelho ali leria como defeito, e o que a célula diz é 'isto é do plano de
+   cima'". O bloco morto saiu no Build 4-A; o argumento virou decisão, e a
+   decisão foi esta.
+   O SÍMBOLO FICA. Tirar o ✕ junto com a cor deixaria a varredura visual da
+   tabela pior — e mostrar a diferença entre planos é o trabalho dela.
+   A `/steps` continua com o vermelho, e lá está certo: ela compara com o Steps
+   Recorder, que é de outra pessoa. */
+table.cmpCurta td.nao{color:var(--muted);font-weight:700;font-size:17px}
 
 /* A figura de quatro estados, no lugar do vídeo que apontava para arquivos que
    não existem. Ela rola dentro da própria caixa: a 380 px de largura, forçar

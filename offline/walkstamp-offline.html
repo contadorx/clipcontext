@@ -3870,6 +3870,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       licTirada:'Licença removida deste navegador.',
       licFormato:'Isso não parece uma chave do Walkstamp. Ela começa com WS1. e vem numa linha só.',
       licInvalida:'Esta chave não confere. Se você a recebeu por e-mail, copie a linha inteira, sem quebras.',
+      licPerto:'A sua chave vence em {0} dia(s).',
+      licPegarOutra:'Pegar a próxima na sua conta',
       licVencida:'Esta licença venceu em {0}. Fale comigo para renovar — nada do que você já gerou deixa de funcionar.',
       licSemCripto:'Este navegador não sabe conferir a assinatura da chave. Use o Chrome ou o Edge atualizados.',
       licNota:'A chave é conferida aqui dentro, sem falar com servidor nenhum — funciona offline, e nós não ficamos sabendo que ela foi usada. Ela fica guardada neste navegador até você removê-la.',
@@ -4501,6 +4503,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       licTirada:'Licence removed from this browser.',
       licFormato:'That does not look like a Walkstamp key. It starts with WS1. and comes on a single line.',
       licInvalida:'This key does not check out. If you received it by email, copy the whole line, with no breaks.',
+      licPerto:'Your key expires in {0} day(s).',
+      licPegarOutra:'Get the next one in your account',
       licVencida:'This licence expired on {0}. Get in touch to renew — nothing you have already generated stops working.',
       licSemCripto:'This browser cannot verify the key signature. Use an up-to-date Chrome or Edge.',
       licNota:'The key is checked right here, without talking to any server — it works offline, and we never learn that it was used. It stays in this browser until you remove it.',
@@ -5117,6 +5121,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       licTirada:'Licencia quitada de este navegador.',
       licFormato:'Eso no parece una clave de Walkstamp. Empieza con WS1. y viene en una sola línea.',
       licInvalida:'Esta clave no cuadra. Si la recibiste por correo, copia la línea entera, sin saltos.',
+      licPerto:'Su clave vence en {0} día(s).',
+      licPegarOutra:'Obtener la siguiente en su cuenta',
       licVencida:'Esta licencia venció el {0}. Habla conmigo para renovar — nada de lo que ya generaste deja de funcionar.',
       licSemCripto:'Este navegador no sabe verificar la firma de la clave. Usa Chrome o Edge actualizados.',
       licNota:'La clave se verifica aquí mismo, sin hablar con ningún servidor — funciona sin conexión, y nosotros nunca nos enteramos de que se usó. Se queda en este navegador hasta que la quites.',
@@ -5732,6 +5738,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       licTirada:'Lizenz aus diesem Browser entfernt.',
       licFormato:'Das sieht nicht nach einem Walkstamp-Schlüssel aus. Er beginnt mit WS1. und steht in einer einzigen Zeile.',
       licInvalida:'Dieser Schlüssel stimmt nicht. Wenn Sie ihn per E-Mail erhalten haben, kopieren Sie die ganze Zeile ohne Umbrüche.',
+      licPerto:'Ihr Schlüssel läuft in {0} Tag(en) ab.',
+      licPegarOutra:'Den nächsten in Ihrem Konto holen',
       licVencida:'Diese Lizenz ist am {0} abgelaufen. Wenden Sie sich an uns, um sie zu verlängern — nichts, was Sie bereits erzeugt haben, hört auf zu funktionieren.',
       licSemCripto:'Dieser Browser kann die Signatur des Schlüssels nicht prüfen. Verwenden Sie ein aktuelles Chrome oder Edge.',
       licNota:'Der Schlüssel wird hier im Browser geprüft, ohne Kontakt zu einem Server — das funktioniert offline, und wir erfahren nicht, dass er verwendet wurde. Er bleibt in diesem Browser gespeichert, bis Sie ihn entfernen.',
@@ -6353,6 +6361,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       licTirada:'Licence retirée de ce navigateur.',
       licFormato:'Cela ne ressemble pas à une clé Walkstamp. Elle commence par WS1. et tient sur une seule ligne.',
       licInvalida:'Cette clé n’est pas valide. Si vous l’avez reçue par e-mail, copiez la ligne entière, sans saut de ligne.',
+      licPerto:'Votre clé expire dans {0} jour(s).',
+      licPegarOutra:'Obtenir la suivante dans votre compte',
       licVencida:'Cette licence a expiré le {0}. Contactez-nous pour la renouveler — rien de ce que vous avez déjà généré ne cesse de fonctionner.',
       licSemCripto:'Ce navigateur ne sait pas vérifier la signature de la clé. Utilisez une version à jour de Chrome ou d’Edge.',
       licNota:'La clé est vérifiée ici même, sans contacter aucun serveur — cela fonctionne hors ligne, et nous ne savons pas qu’elle a été utilisée. Elle reste dans ce navigateur jusqu’à ce que vous la retiriez.',
@@ -9580,7 +9590,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
      depois, e não tem como se atualizar sozinho. Sem carimbo, "estou com um
      problema no offline" é uma conversa sem chão — ninguém sabe de qual build
      se fala nem se o defeito já foi consertado. */
-  const VERSAO = '2026.08.24-2';
+  const VERSAO = '2026.08.24-8';
   window.__versao = () => VERSAO;
 
   const PIP_CSS = `
@@ -12761,6 +12771,19 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     return { dados };
   }
 
+  /* Quantos dias faltam para a licença vencer, ou `null` quando não há
+     licença. Fração conta como dia inteiro, pelo mesmo motivo do `conferir`:
+     a validade é meia-noite e o relógio de agora não é. */
+  /* DEZ DIAS, e a constante mora AQUI porque é aqui que ela é usada primeiro.
+     Ela nasceu junto da renovação, seiscentas linhas abaixo, e `const` em zona
+     morta temporal não devolve `undefined`: derruba a carga inteira com um
+     ReferenceError. O aviso na tela roda antes da renovação. */
+  const RENOVAR_FALTANDO = 10;      // dias
+
+  const diasDeLicenca = () => (licenca && licenca.a)
+    ? Math.ceil((new Date(licenca.a + 'T00:00:00Z') - Date.now()) / 86400000)
+    : null;
+
   const LIC_CHAVE = 'Walkstamp.licenca';
   let licenca = null;                     // { q, n, a, p } quando ativa
   const temTime = () => !!licenca;
@@ -13973,7 +13996,16 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
          são coisas diferentes, e a diferença tem que ser dita antes, não
          descoberta depois. */
       (diasDeDegustacao() != null
-        ? `<p class="status" style="margin:6px 0 0">${t('degustacao', diasDeDegustacao())}</p>` : '');
+        ? `<p class="status" style="margin:6px 0 0">${t('degustacao', diasDeDegustacao())}</p>` : '') +
+      /* O AVISO VEM ANTES DE VENCER, e com o caminho para a próxima chave.
+         O que existia era o contrário: no dia seguinte ao vencimento, a
+         ferramenta dizia "fale comigo para renovar" — depois de a marca do
+         cliente já ter sumido do documento, e sem dizer para onde ir.
+         Dez dias é o prazo de quem trabalha: cabe uma semana de férias e ainda
+         sobra a segunda-feira. */
+      (diasDeLicenca() != null && diasDeLicenca() <= RENOVAR_FALTANDO
+        ? `<p class="status" style="margin:6px 0 0">${t('licPerto', diasDeLicenca())} ` +
+          `<a href="${CAMINHO_CONTA[LANG] || '/conta'}">${t('licPegarOutra')}</a></p>` : '');
     if (typeof pintarMarcaCliente === 'function') pintarMarcaCliente();
   }
 
@@ -14560,7 +14592,64 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     pintarLicenca();
     marcaDaUrl();
     if (r.erro) $('licMsg').innerHTML = `<span class="err">${r.erro}</span>`;
+    renovarSePerto();
   })();
+
+  /* A CHAVE SE RENOVA SOZINHA — e era isso que o `lib/stripe.ts` já prometia,
+     em comentário, sem ninguém cumprir:
+     "uma licença curta que se renova sozinha enquanto a assinatura estiver viva
+      para de renovar sozinha quando ela morrer."
+     O que existia era o contrário: a chave vale 45 dias, nada a renovava, e ao
+     vencer a ferramenta dizia "fale comigo para renovar". Quem paga por ano
+     voltava à conta oito vezes por ano para colar uma chave.
+
+     QUEM RENOVA É QUEM ABRE A FERRAMENTA, e não uma tarefa agendada. A escolha
+     é do desenho do produto: um cron precisaria de um servidor sabendo quando
+     cada licença vence e de um e-mail saindo daqui — e a tese é que a chave é
+     conferida no navegador, sem consulta a servidor de licença. Renovar no uso
+     mantém isso de pé: sem sessão, sem rede ou sem nada a renovar, a ferramenta
+     segue funcionando igual.
+
+     PERTO, e não vencida: às vésperas de vencer ainda dá para pedir outra. No
+     dia seguinte já não há licença válida para substituir, e a pessoa cai na
+     tela de colar chave — que é justamente o que isto veio evitar.
+
+     E SILENCIOSA quando dá certo: renovar é manutenção, não notícia. O que
+     aparece na tela é o resultado — a validade nova, pintada por
+     `pintarLicenca`. Falhou, também não grita: a licença de agora continua
+     valendo, e quem falha é a tentativa, não o produto. Só a última tentativa
+     antes de vencer merece a tela, e essa a mensagem de vencida já cobre. */
+  async function renovarSePerto(){
+    if (!licenca || !licenca.a) return;
+    if (!sessao || !sessao.token || !MEDIR_URL) return;
+    const faltam = Math.ceil((new Date(licenca.a + 'T00:00:00Z') - Date.now()) / 86400000);
+    if (faltam > RENOVAR_FALTANDO) return;
+    let nova = null;
+    try {
+      const r = await fetch(MEDIR_URL + '/functions/v1/walkstamp-licenca', {
+        method: 'POST',
+        headers: { apikey: MEDIR_KEY, Authorization: 'Bearer ' + sessao.token,
+                   'Content-Type': 'application/json' },
+        body: '{}'
+      });
+      const d = await r.json().catch(() => null);
+      if (!r.ok || !d || !d.link) return;
+      /* O servidor devolve um LINK com a chave dentro, que é o formato que ele
+         manda por e-mail. Aqui só a chave interessa: guardar o endereço seria
+         guardar a chave dentro de uma URL, que é o que a ferramenta já se
+         recusa a deixar na barra. */
+      nova = new URL(d.link, location.href).searchParams.get('lic');
+    } catch (e) { return; }
+    if (!nova) return;
+    const c = await conferirLicenca(nova);
+    /* Só troca se a nova PASSAR e valer mais que a de agora. Uma resposta
+       estranha não pode piorar o que já está guardado. */
+    if (!c.dados || !c.dados.a || c.dados.a <= licenca.a) return;
+    licenca = c.dados;
+    try { localStorage.setItem(LIC_CHAVE, nova.trim()); } catch (e) {}
+    medir('ativou_licenca', { p_origem: 'renovacao' });
+    pintarLicenca();
+  }
 
   /* O nome do cliente também vem no link — e só faz efeito com o plano ativo,
      porque é ele que desenha a marca no documento.

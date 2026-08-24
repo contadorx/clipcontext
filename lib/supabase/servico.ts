@@ -69,6 +69,11 @@ export type Conta = {
   faturas: Array<{
     numero: string | null; valor: number; moeda: string; status: string;
     vence_em: string | null; pago_em: string | null; nf_url: string | null;
+    /* `fatura_url` e `nf_url` são DOCUMENTOS DIFERENTES, e por isso são dois
+       campos: a primeira é o recibo da Stripe, a segunda é a nota fiscal que
+       sai do Financeirox depois do pagamento. Juntar as duas faria a tela
+       oferecer "nota fiscal" apontando para um recibo em inglês. */
+    fatura_url?: string | null;
     nf_numero: string | null; criado_em: string;
   }>;
   chamados: Array<{
