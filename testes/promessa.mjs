@@ -158,6 +158,62 @@ for (const lg of LINGUAS) {
   }
 }
 
+/* ---- [3c] três promessas que o produto contradiz ------------------------
+ *
+ * Nenhuma delas quebra nada. Todas custam venda ou confiança, e todas foram
+ * medidas contra o código, não contra a memória de quem escreveu a página.
+ */
+{
+  /* 1. O ROTEIRO NÃO É SÓ DO TIME.
+     A ajuda dizia "numa conta de time dá para subir uma planilha de casos" —
+     mas `podeRoteiro()` devolve verdadeiro para QUALQUER plano pago. A frase
+     mandava o comprador do Personal para o plano de cima, ou embora. */
+  const acoes = fs.readFileSync(`${RAIZ_WS}/app/conta/roteiro-acoes.ts`, 'utf8');
+  const porta = (/export async function podeRoteiro[\s\S]{0,260}?\n}/.exec(acoes) || [''])[0];
+  const aberto = /Boolean\(c\.plano\)/.test(porta) && !/=== *'time'/.test(porta);
+  ok('o roteiro abre para qualquer plano pago, e não só para o time', aberto,
+     aberto ? '' : porta.replace(/\s+/g, ' ').slice(0, 110));
+  const SO_TIME = [
+    /numa conta de time/i, /on a team account/i,
+    /en una cuenta de equipo/i, /in einem team-konto/i, /dans un compte d.équipe/i,
+  ];
+  for (const lg of LINGUAS) {
+    const txt = corpo('ajuda', lg);
+    const preso = SO_TIME.filter((r) => r.test(txt));
+    ok(`ajuda.${lg}: não prende o roteiro ao plano de time`, preso.length === 0,
+       preso.map(String).join(' '));
+  }
+
+  /* 2. O "NUM CLIQUE" DA TARJA DEPENDE DE CDN PÚBLICO.
+     O produto tem a mensagem `ocrSemCdn` — "se a rede da empresa bloqueia CDN
+     público, este recurso não vai funcionar aqui". A página vendia o clique e
+     não dizia isso, e rede corporativa que bloqueia CDN é o cliente-alvo. */
+  const prod = fs.readFileSync(`${RAIZ_WS}/src/template.html`, 'utf8');
+  ok('o produto realmente avisa quando não alcança a biblioteca de OCR',
+     /ocrSemCdn:/.test(prod));
+  for (const lg of LINGUAS) {
+    const txt = corpo('casoEv', lg);
+    const diz = /CDN/i.test(txt);
+    ok(`casoEv.${lg}: a promessa da tarja diz que depende de CDN`, diz,
+       diz ? '' : '(promete o clique sem dizer do que ele depende)');
+  }
+
+  /* 3. A CALCULADORA NÃO PODE ARGUMENTAR CONTRA A COMPRA.
+     Ela mostrava o custo do trabalho manual AO LADO do preço do Personal — e
+     com números modestos o resultado dizia, com a nossa própria régua, que o
+     produto não se paga. É a DEC-2 caminho B, respondida: manter a calculadora
+     e matar só a comparação. */
+  for (const lg of LINGUAS) {
+    const txt = corpo('precos', lg);
+    const semVs = !/id="roiVs"/.test(txt);
+    ok(`precos.${lg}: a calculadora não compara com o nosso preço`, semVs,
+       semVs ? '' : '(a linha de comparação voltou)');
+    /* E continua sendo uma calculadora: matar a comparação não podia virar
+       matar o instrumento. */
+    ok(`precos.${lg}: e continua calculando`, /id="roiHoras"/.test(txt));
+  }
+}
+
 /* ---- [4] o cartão que administra assentos não pode dizer "sem login" ------
    O rodapé do cartão Team terminava, nos cinco idiomas, em "sem login e sem
    exigir cadastro para a sua TI aprovar" — três linhas abaixo de "painel de

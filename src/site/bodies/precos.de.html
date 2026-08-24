@@ -32,7 +32,7 @@
          `hidden` no HTML e destravada pelo script. Sem JS, o bloco inteiro não
          aparece — que é melhor do que quatro campos mortos que não somam nada.
          Nenhum número sai daqui: não há fetch, não há evento, não há form. -->
-    <div class="roi" id="roi" hidden data-plano="{{personalNum}}" data-moeda="{{precoPersonal}}">
+    <div class="roi" id="roi" hidden data-moeda="{{precoPersonal}}">
       <h2>Was Handarbeit kostet</h2>
       <p class="lead">Die vier Zahlen gehören Ihnen und bleiben in Ihrem Browser. Es wird nichts gesendet, auch nicht beim Tippen.</p>
       <div class="roiCampos">
@@ -45,9 +45,11 @@
         <li><span>Stunden pro Monat</span> <b id="roiHoras">—</b></li>
         <li><span>Geschätzte Monatskosten</span> <b id="roiCusto">—</b></li>
         <li><span>Pro Jahr</span> <b id="roiAno">—</b></li>
-        <li><span>Personal kostet</span> <b id="roiVs">{{precoPersonal}}</b></li>
       </ul>
-      <p class="small muted roiNota">Eine Schätzung. Sie ist genau so viel wert wie Ihre vier Zahlen — und keine davon verlässt diese Seite.</p>
+      <p class="small muted roiNota">Eine Schätzung dessen, was die Handarbeit kostet. Sie ist genau so viel
+      wert wie Ihre vier Zahlen — und keine davon verlässt diese Seite. Sie vergleicht bewusst nicht
+      mit unserem Preis: Was sich für ein Team mit vierzig Fällen pro Runde lohnt, ist nicht dieselbe
+      Rechnung wie für jemanden mit fünf, und diese Rechnung ist Ihre.</p>
     </div>
 
     <!-- 6. AS PROVAS: o que sai, onde fica, o que abre, e o que NÃO fazemos. -->
