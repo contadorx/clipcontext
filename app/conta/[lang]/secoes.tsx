@@ -371,13 +371,27 @@ export function Modelos({ p, lang, t }: { p: NonNullable<Conta['time']>; lang: L
                 <td>{m.nome}</td>
                 <td>{m.escopo === 'time' ? t.timeModeloTime : t.timeModeloMeu}</td>
                 <td style={{ textAlign: 'right' }}>
-                  <form action={apagarModelo}>
-                    <input type="hidden" name="lang" value={lang} />
-                    <input type="hidden" name="id" value={m.id} />
-                    <button className="btn ghost" type="submit" style={{ padding: '4px 10px', fontSize: 13 }}>
-                      {t.timeModeloApagar}
-                    </button>
-                  </form>
+                  {/* O BOTÃO SÓ APARECE PARA QUEM PODE MESMO APAGAR.
+                      Ele aparecia para todo mundo, em cima de qualquer linha, e
+                      quem não podia descobria clicando: o banco respondia
+                      `nao_admin` e a tela mostrava um erro por uma coisa que
+                      nunca deveria ter sido oferecida.
+                      Quem pode: o dono, no que é dele; quem administra, no
+                      padrão da equipe. Nem quem administra apaga o "só para
+                      mim" de alguém — e o banco recusa também, porque uma regra
+                      que só existe na tela é uma regra que não existe.
+                      Aqui não se pergunta se a pessoa administra porque esta
+                      tela SÓ existe para quem administra: `time_painel` devolve
+                      nulo para os outros. O que sobra a decidir é o `meu`. */}
+                  {(m.meu || m.escopo === 'time') && (
+                    <form action={apagarModelo}>
+                      <input type="hidden" name="lang" value={lang} />
+                      <input type="hidden" name="id" value={m.id} />
+                      <button className="btn ghost" type="submit" style={{ padding: '4px 10px', fontSize: 13 }}>
+                        {t.timeModeloApagar}
+                      </button>
+                    </form>
+                  )}
                 </td>
               </tr>
             ))}

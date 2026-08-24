@@ -66,12 +66,12 @@ MAPA="
 ^public/sw[.]js$ => site:seo.mjs
 ^public/site[.]css$ => folha.mjs site:paginas.mjs site:dobrafig.mjs
 ^offline/ => site:medicao.mjs
-^supabase/migrations/ => conferir-migracoes
+^supabase/migrations/ => modelopessoal.mjs conferir-migracoes
 ^testes/ => inventario.mjs
 "
 
 # ---- 1. os contratos: sempre, e são catorze segundos ------------------------
-CONTRATOS="auditoria.mjs folha.mjs chaves.mjs faxina.mjs figura.mjs funil.mjs inventario.mjs middleware.mjs
+CONTRATOS="auditoria.mjs folha.mjs modelopessoal.mjs chaves.mjs faxina.mjs figura.mjs funil.mjs inventario.mjs middleware.mjs
            planos.mjs promessa.mjs semmarca.mjs stripehook.mjs terceiros.mjs wer.mjs"
 
 # ----------------------------------------------------------------------------
