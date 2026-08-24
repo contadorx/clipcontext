@@ -579,11 +579,45 @@ export function paginaHtml(pagina: string, lang: Lang): string {
   const abre = semComentario.indexOf('>', inicio) + 1;
   const fecha = inteiro.lastIndexOf('</body>');
   if (abre <= 0 || fecha < 0) throw new Error(`corpo sem fim em ${pagina}`);
-  return inteiro
-    .slice(abre, fecha)
-    // o support.js e o seletor de idioma já são responsabilidade do layout
-    .replace(/<script src="\/?support\.js"><\/script>/, '')
-    .trim();
+  return embrulharTabelas(
+    inteiro
+      .slice(abre, fecha)
+      // o support.js e o seletor de idioma já são responsabilidade do layout
+      .replace(/<script src="\/?support\.js"><\/script>/, '')
+      .trim(),
+  );
+}
+
+/* ---- A TABELA ROLA DENTRO DELA, E NÃO A PÁGINA -------------------------
+ *
+ * Medido a 380px — a largura de um telefone comum — em todas as combinações de
+ * página e idioma que o site publica: **19 de 70 rolavam na horizontal**, e em
+ * 17 delas o culpado era a mesma coisa, a `table.legal`. As piores eram as
+ * páginas legais em alemão: `/de/privacidade` transbordava 464px, quase uma
+ * segunda tela inteira para o lado.
+ *
+ * São justamente as páginas que quem avalia fornecedor abre — e ele abre no
+ * telefone, na fila do café, antes de levar ao jurídico.
+ *
+ * A saída NÃO é encolher a tabela: uma tabela de prazos de retenção com quatro
+ * colunas não cabe em 380px sem virar ilegível, e alemão tem palavra composta
+ * que não quebra. A saída é a tabela rolar DENTRO da caixa dela, com a página
+ * parada — que é o comportamento que todo mundo já espera de tabela larga.
+ *
+ * E ISTO MORA AQUI, e não nas 85 páginas: envolver a mão significaria 85
+ * arquivos onde a próxima tabela nasce sem o embrulho. Aqui, toda tabela que
+ * entrar já nasce embrulhada.
+ *
+ * `tabindex="0"` porque uma caixa que rola precisa ser alcançável pelo teclado:
+ * sem ele, quem não usa mouse não tem como ver a coluna da direita. O
+ * `role="region"` com nome é o que faz o leitor de tela anunciar que ali há
+ * algo navegável.
+ */
+function embrulharTabelas(corpo: string): string {
+  return corpo.replace(
+    /<table class="legal"[\s\S]*?<\/table>/g,
+    (t) => `<div class="tabRola" tabindex="0" role="region" aria-label="tabela">${t}</div>`,
+  );
 }
 
 /** Os hreflang de uma página. O `x-default` só na home, como no site antigo:

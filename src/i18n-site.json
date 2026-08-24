@@ -162,7 +162,8 @@
     "figLegenda": "<b>Como a página sai.</b> O que aparece muda com o cenário: a evidência leva hora de relógio e impressão digital; a instrução de trabalho não leva nenhuma das duas.",
     "fluxoAlt": "A tela sendo gravada, os quadros que sobraram com a fala transcrita embaixo, e a página que sai",
     "fluxoLeg": "<b>Só o que mudou sobrevive.</b> O quadro do meio foi descartado porque a tela não mudou o bastante — é essa decisão, tomada centenas de vezes, que transforma quarenta minutos em doze telas.",
-    "dobraAlt": "A página que o Walkstamp devolve: três passos numerados, cada um com a imagem da tela, o texto do que foi feito e a hora — uma tarja cobrindo um dado no segundo passo — e, no rodapé, a impressão digital do documento com o selo de verificação"
+    "dobraAlt": "A página que o Walkstamp devolve: três passos numerados, cada um com a imagem da tela, o texto do que foi feito e a hora — uma tarja cobrindo um dado no segundo passo — e, no rodapé, a impressão digital do documento com o selo de verificação",
+    "pular": "Pular para o conteúdo"
   },
   "en": {
     "htmlLang": "en",
@@ -327,7 +328,8 @@
     "figLegenda": "<b>How the page comes out.</b> What appears changes with the scenario: test evidence carries wall-clock time and a checksum; a work instruction carries neither.",
     "fluxoAlt": "The screen being recorded, the frames that survived with the transcript below, and the page that comes out",
     "fluxoLeg": "<b>Only what changed survives.</b> The middle frame was dropped because the screen had not changed enough — that decision, taken hundreds of times, is what turns forty minutes into twelve screens.",
-    "dobraAlt": "The page Walkstamp gives back: three numbered steps, each with the screenshot, the text of what was done and the time — a redaction bar covering a value in the second step — and, in the footer, the document fingerprint with the verification seal"
+    "dobraAlt": "The page Walkstamp gives back: three numbered steps, each with the screenshot, the text of what was done and the time — a redaction bar covering a value in the second step — and, in the footer, the document fingerprint with the verification seal",
+    "pular": "Skip to content"
   },
   "es": {
     "htmlLang": "es",
@@ -492,7 +494,8 @@
     "figLegenda": "<b>Cómo sale la página.</b> Lo que aparece cambia con el escenario: la evidencia lleva hora de reloj y huella digital; la instrucción de trabajo no lleva ninguna de las dos.",
     "fluxoAlt": "La pantalla grabándose, los fotogramas que quedaron con la transcripción debajo, y la página que sale",
     "fluxoLeg": "<b>Solo sobrevive lo que cambió.</b> El fotograma del medio se descartó porque la pantalla no cambió lo suficiente — esa decisión, tomada cientos de veces, es lo que convierte cuarenta minutos en doce pantallas.",
-    "dobraAlt": "La página que devuelve Walkstamp: tres pasos numerados, cada uno con la captura de pantalla, el texto de lo que se hizo y la hora — una franja que tapa un dato en el segundo paso — y, en el pie, la huella digital del documento con el sello de verificación"
+    "dobraAlt": "La página que devuelve Walkstamp: tres pasos numerados, cada uno con la captura de pantalla, el texto de lo que se hizo y la hora — una franja que tapa un dato en el segundo paso — y, en el pie, la huella digital del documento con el sello de verificación",
+    "pular": "Saltar al contenido"
   },
   "de": {
     "htmlLang": "de",
@@ -657,7 +660,8 @@
     "figLegenda": "<b>So sieht die Seite aus.</b> Was erscheint, hängt vom Anwendungsfall ab: Der Testnachweis führt Uhrzeit und Prüfsumme, die Arbeitsanweisung keines von beiden.",
     "fluxoAlt": "Der aufgenommene Bildschirm, die übrig gebliebenen Screenshots mit der Transkription darunter, und die Seite, die herauskommt",
     "fluxoLeg": "<b>Nur was sich geändert hat, bleibt.</b> Der mittlere Screenshot fiel weg, weil sich der Bildschirm nicht genug geändert hatte — diese Entscheidung, hundertfach getroffen, macht aus vierzig Minuten zwölf Bildschirme.",
-    "dobraAlt": "Die Seite, die Walkstamp zurückgibt: drei nummerierte Schritte, jeder mit dem Bildschirmfoto, dem Text der Handlung und der Uhrzeit — ein Schwärzungsbalken über einem Wert im zweiten Schritt — und in der Fußzeile der Fingerabdruck des Dokuments mit dem Prüfsiegel"
+    "dobraAlt": "Die Seite, die Walkstamp zurückgibt: drei nummerierte Schritte, jeder mit dem Bildschirmfoto, dem Text der Handlung und der Uhrzeit — ein Schwärzungsbalken über einem Wert im zweiten Schritt — und in der Fußzeile der Fingerabdruck des Dokuments mit dem Prüfsiegel",
+    "pular": "Zum Inhalt springen"
   },
   "fr": {
     "htmlLang": "fr",
@@ -822,6 +826,7 @@
     "figLegenda": "<b>À quoi ressemble la page.</b> Ce qui apparaît change selon le cas d’usage : la preuve de test porte l’heure d’horloge et une empreinte ; le mode opératoire, ni l’une ni l’autre.",
     "fluxoAlt": "L’écran en cours d’enregistrement, les captures qui ont survécu avec la transcription en dessous, et la page qui en sort",
     "fluxoLeg": "<b>Seul ce qui a changé survit.</b> La capture du milieu a été écartée parce que l’écran n’avait pas assez changé — cette décision, prise des centaines de fois, transforme quarante minutes en douze écrans.",
-    "dobraAlt": "La page que Walkstamp renvoie : trois étapes numérotées, chacune avec la capture d’écran, le texte de ce qui a été fait et l’heure — un bandeau masquant une donnée à la deuxième étape — et, en pied de page, l’empreinte du document avec le sceau de vérification"
+    "dobraAlt": "La page que Walkstamp renvoie : trois étapes numérotées, chacune avec la capture d’écran, le texte de ce qui a été fait et l’heure — un bandeau masquant une donnée à la deuxième étape — et, en pied de page, l’empreinte du document avec le sceau de vérification",
+    "pular": "Aller au contenu"
   }
 }

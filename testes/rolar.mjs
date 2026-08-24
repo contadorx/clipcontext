@@ -204,7 +204,19 @@ console.log('\n[3] a máscara se desmancha quando a região para');
   const pico = await pg.evaluate(() => (window.__motivos || {}).mascaradas | 0);
   const antes = await pg.evaluate(() => (window.__motivos || {}).guardados | 0);
   await pg.evaluate(() => { window.__tocando = false; });   // congelou
-  await pg.waitForTimeout(20000);
+  /* ESPERAR O QUADRO, E NÃO VINTE SEGUNDOS DE RELÓGIO.
+     Aqui havia `waitForTimeout(20000)`. Quantos segundos a captura leva para
+     reparar que a tela parou depende do passo de amostragem e da carga da
+     máquina — medido, o mesmo teste dá `1 → 1` numa execução e `1 → 2` na
+     seguinte, com o mesmo código. Vinte segundos é a aposta que às vezes
+     perde, e um vermelho por aposta perdida ensina a ignorar o vermelho.
+     Agora ela espera a CONDIÇÃO, com um teto folgado: quando o quadro chega,
+     ela segue na hora; quando não chega, o teto expira e a afirmação reprova
+     com o mesmo `antes → depois` de sempre. */
+  await pg.waitForFunction(
+    (n) => ((window.__motivos || {}).guardados | 0) > n,
+    antes, { timeout: 45000 },
+  ).catch(() => {});
   const depois = await pg.evaluate(() => (window.__motivos || {}).guardados | 0);
   console.log(`      máscara no pico: ${pico}  quadros antes: ${antes}  depois: ${depois}`);
   console.log('      motivos:', await pg.evaluate(() => JSON.stringify(window.__motivos || null)));
