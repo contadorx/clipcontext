@@ -54,7 +54,17 @@ const CHAVE_BANCO = process.env.SUPABASE_SERVICE_ROLE_KEY;
 /* O disparo saiu daqui e virou `lib/email.ts`: agora há um segundo e-mail no
    produto (a resposta de um chamado) e vão aparecer outros. Cada rota com a sua
    chamada é cada rota com a sua versão do remetente e do tratamento de erro. */
-const SAL = process.env.CONVITE_SAL || process.env.CRON_SECRET;
+/* O SAL É DELE, E NÃO EMPRESTADO DO `CRON_SECRET` — 24/08.
+   Era `process.env.CONVITE_SAL || process.env.CRON_SECRET`, e o `CRON_SECRET` é
+   a chave do endereço que APAGA dado de cliente. Rodar o segredo daquele
+   endereço é uma boa prática de segurança — e, com o encosto aqui, ela
+   reescrevia todos os hashes deste arquivo em silêncio: as contagens do
+   limite de convite zeravam junto.
+   Quem faz aquela rotação está pensando em faxina, não em convite. Um efeito
+   colateral que ninguém tem motivo para prever é a definição de armadilha, e o
+   custo de evitá-la é uma variável de ambiente que a lista de configuração já
+   pede desde sempre (passo 8). */
+const SAL = process.env.CONVITE_SAL;
 
 
 const temTudo = Boolean(URL_BASE && CHAVE_BANCO && podeMandarEmail() && SAL);

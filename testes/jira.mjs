@@ -56,8 +56,18 @@ await pg.waitForTimeout(2500);
 await pg.selectOption('#mode', 'count');
 await pg.fill('#count', '3');
 await pg.locator('#extract').click();
+/* ESPERAR OS TRÊS QUADROS, E NÃO O CARTÃO APARECER.
+   O `#prevCard` deixa de estar escondido quando o PRIMEIRO quadro chega — os
+   outros ainda estão vindo. Depois disso havia `waitForTimeout(600)`, que é uma
+   aposta em quanto tempo a máquina leva para entregar os outros dois. Sob carga
+   a aposta perde: a tabela do Jira saía com DOIS passos, e a régua reprovava
+   por um motivo que não é o dela.
+   O arquivo já pregava isto trinta linhas abaixo, para a mensagem de "resumo
+   copiado" — a lição estava aprendida para o texto e não para os quadros. */
 await pg.waitForSelector('#prevCard:not(.hide)', { timeout: 40000 });
-await pg.waitForTimeout(600);
+await pg.waitForFunction(
+  () => document.querySelectorAll('#thumbs figure').length >= 3,
+  null, { timeout: 40000 });
 
 const nomes = await pg.locator('#thumbs figure input').all();
 await nomes[0].fill('Abrir a ME21N');

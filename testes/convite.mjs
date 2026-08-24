@@ -60,6 +60,23 @@ console.log('\n[2] as travas do servidor');
      /permitido === null[\s\S]{0,140}status: 503/.test(rota));
   ok('guarda hash, e não o endereço', /createHash\('sha256'\)/.test(rota));
   ok('com sal do ambiente', /CONVITE_SAL/.test(rota));
+  /* E O SAL É DELE, NÃO EMPRESTADO. Era
+     `process.env.CONVITE_SAL || process.env.CRON_SECRET`, e o `CRON_SECRET` é a
+     chave do endereço que APAGA dado de cliente. Rodar aquele segredo — que é
+     boa prática, e feita por outro motivo — reescrevia todos os hashes daqui e
+     zerava as contagens do limite, em silêncio.
+     Quem faz aquela rotação está pensando em faxina. Um efeito colateral que
+     ninguém tem motivo para prever é uma armadilha, e ela custava uma variável
+     de ambiente que a lista de configuração já pede no passo 8. */
+  /* A afirmação lê a LINHA, e não o arquivo: o comentário logo acima dela cita
+     o código antigo para explicar por que ele saiu, e um `grep` no arquivo
+     inteiro casaria com a explicação. A primeira versão desta régua reprovou
+     com o conserto instalado, exatamente por isso. */
+  {
+    const linha = (rota.match(/^const SAL = .*$/m) || [''])[0];
+    ok('e o sal NÃO se encosta no segredo do endereço que apaga dado',
+       /CONVITE_SAL/.test(linha) && !/CRON_SECRET/.test(linha), linha);
+  }
   /* O corpo é nosso, sempre. Um endereço que manda texto livre com o nosso
      remetente é um envelope aberto: o conteúdo é de quem chamou e a reputação
      queimada é a nossa. */

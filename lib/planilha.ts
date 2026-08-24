@@ -33,39 +33,108 @@ function colunaDaRef(ref: string): number {
   return n - 1;
 }
 
+/* ---- OS TETOS DA LEITURA, E POR QUE ELES EXISTEM ----------------------
+ *
+ * UM `.xlsx` É UM ZIP, E UM ZIP MENTE SOBRE O PRÓPRIO TAMANHO. Quatro megas
+ * de entrada — o limite que a tela já cobrava — viram gigabytes ao
+ * descomprimir: zeros comprimem perto de 1000:1, e nada obriga o arquivo a ser
+ * honesto. Este código roda no servidor que segura a chave de serviço, e
+ * derrubá-lo por falta de memória não precisa de senha nenhuma: os 14 dias de
+ * degustação dão conta a qualquer e-mail, e a conta dá acesso a esta porta.
+ *
+ * Antes: `inflateRawSync(cru)` sem teto, e o laço inflava TODAS as entradas do
+ * zip para dentro de um objeto. Uma bomba escondida numa entrada que a planilha
+ * nem usa era descomprimida do mesmo jeito.
+ *
+ * Agora são quatro travas, e cada uma sozinha já barra a bomba:
+ *   1. só se descomprime o que se vai LER (`interessa`) — a entrada de enfeite
+ *      nunca é tocada;
+ *   2. teto por entrada, imposto pelo próprio zlib (`maxOutputLength`), que
+ *      para de inflar no meio em vez de alocar primeiro e estourar depois;
+ *   3. teto SOMADO, porque mil entradas de 20 MB cabem no teto individual;
+ *   4. teto de quantidade de entradas, porque o diretório central declara
+ *      quantas são e esse número também é do atacante.
+ *
+ * Os números são folgados para planilha de gente e apertados para bomba: a
+ * maior aba de um roteiro de 2000 linhas não chega a 20 MB de XML. */
+const ZIP_TETO_ENTRADA = 24 * 1024 * 1024;
+const ZIP_TETO_TOTAL = 64 * 1024 * 1024;
+const ZIP_TETO_ENTRADAS = 512;
+
 /** Abre o zip pelo DIRETÓRIO CENTRAL. Quem escreve zip em fluxo — e o Excel
  *  escreve — deixa o tamanho fora do cabeçalho local; varrer os cabeçalhos
- *  daria lixo em silêncio. */
-function abrirZip(buf: Buffer): Record<string, Buffer> {
+ *  daria lixo em silêncio.
+ *
+ *  `interessa` decide o que é descomprimido. Sem ele, tudo — e é isso que a
+ *  leitura NÃO faz mais. */
+function abrirZip(buf: Buffer, interessa?: (nome: string) => boolean): Record<string, Buffer> {
   const saida: Record<string, Buffer> = {};
   let fim = -1;
   for (let i = buf.length - 22; i >= 0 && i > buf.length - 66000; i--) {
     if (buf.readUInt32LE(i) === 0x06054b50) { fim = i; break; }
   }
   if (fim < 0) throw new Error('zip');
-  const quantos = buf.readUInt16LE(fim + 10);
+  const quantos = Math.min(buf.readUInt16LE(fim + 10), ZIP_TETO_ENTRADAS);
   let p = buf.readUInt32LE(fim + 16);
+  let somado = 0;
   for (let k = 0; k < quantos; k++) {
+    /* O ponteiro vem de dentro do arquivo. Ler fora do buffer lançaria
+       RangeError com uma mensagem que não diz nada a quem enviou a planilha. */
+    if (p < 0 || p + 46 > buf.length) break;
     if (buf.readUInt32LE(p) !== 0x02014b50) break;
     const metodo = buf.readUInt16LE(p + 10);
     const comp = buf.readUInt32LE(p + 20);
+    const bruto = buf.readUInt32LE(p + 24);
     const nl = buf.readUInt16LE(p + 28);
     const el = buf.readUInt16LE(p + 30);
     const cl = buf.readUInt16LE(p + 32);
     const local = buf.readUInt32LE(p + 42);
     const nome = buf.subarray(p + 46, p + 46 + nl).toString('utf8');
+    p += 46 + nl + el + cl;
+
+    if (interessa && !interessa(nome)) continue;
+    if (local < 0 || local + 30 > buf.length) continue;
     const lnl = buf.readUInt16LE(local + 26);
     const lel = buf.readUInt16LE(local + 28);
     const ini = local + 30 + lnl + lel;
+    if (ini + comp > buf.length) continue;
+
+    /* O TAMANHO DECLARADO É DO ATACANTE, e por isso ele não libera nada — só
+       barra cedo. Quem manda de verdade é o `maxOutputLength` abaixo, que não
+       acredita em declaração nenhuma. */
+    if (bruto > ZIP_TETO_ENTRADA) throw new Error('planilha grande demais');
+    if (somado + Math.min(bruto, ZIP_TETO_ENTRADA) > ZIP_TETO_TOTAL) {
+      throw new Error('planilha grande demais');
+    }
+
     const cru = buf.subarray(ini, ini + comp);
-    saida[nome] = metodo === 8 ? inflateRawSync(cru) : cru;
-    p += 46 + nl + el + cl;
+    let dados: Buffer;
+    if (metodo === 8) {
+      try {
+        dados = inflateRawSync(cru, { maxOutputLength: ZIP_TETO_ENTRADA });
+      } catch (e) {
+        /* `ERR_BUFFER_TOO_LARGE` é a bomba batendo no teto. Qualquer outro erro
+           aqui é zip corrompido, e os dois viram a mesma resposta para quem
+           enviou: o arquivo não serve. O motivo real fica no `cause`. */
+        throw new Error('planilha grande demais ou corrompida', { cause: e });
+      }
+    } else {
+      if (comp > ZIP_TETO_ENTRADA) throw new Error('planilha grande demais');
+      dados = cru;
+    }
+    somado += dados.length;
+    if (somado > ZIP_TETO_TOTAL) throw new Error('planilha grande demais');
+    saida[nome] = dados;
   }
   return saida;
 }
 
 export function xlsxParaLinhas(buf: Buffer): string[][] {
-  const itens = abrirZip(buf);
+  /* O QUE ESTA LEITURA USA, e só isso é descomprimido: o dicionário de textos
+     e as abas. Estilos, temas, imagens coladas e o que mais o Excel enfia no
+     pacote não são lidos — e agora também não são inflados. */
+  const itens = abrirZip(buf, (n) =>
+    n === 'xl/sharedStrings.xml' || /^xl\/worksheets\/.*\.xml$/.test(n));
   const txt = (n: string) => (itens[n] ? itens[n].toString('utf8') : '');
   const compart = [...txt('xl/sharedStrings.xml').matchAll(/<si>([\s\S]*?)<\/si>/g)]
     .map((m) => [...m[1].matchAll(/<t[^>]*>([\s\S]*?)<\/t>/g)].map((x) => desXml(x[1])).join(''));
