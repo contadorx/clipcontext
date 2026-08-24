@@ -180,9 +180,23 @@ console.log('\n[3] a máscara se desmancha quando a região para');
     c.width = 960; c.height = 540;
     const cx = c.getContext('2d');
     let n = 0;
+    let jaCongelou = false;
     window.__tocando = true;
     setInterval(() => {
       if (window.__tocando) n++;
+      /* A PREMISSA DESTE CENÁRIO, TORNADA REAL — e ela estava só escrita.
+         O comentário acima afirma que a tela congela "numa imagem DIFERENTE da
+         que estava quando o último quadro foi guardado". Só que o matiz cicla
+         em 360 e `n` avança de um em um: congelar podia cair perto do que já
+         havia sido guardado, e aí o produto recusa o quadro por pouca mudança
+         — com razão, que é para isso que a recusa existe.
+         Medido: a mesma execução dá `guardados: 2` numa vez e `1` na outra, e
+         a diferença é `poucaMudanca` indo de 44 para 81. Não é o teste sendo
+         lento; é o cenário não garantindo o que ele afirma.
+         O salto de 180 põe o matiz do outro lado do círculo. O que a régua
+         mede continua sendo o mesmo: que o quadro sai MESMO estando a mudança
+         inteira dentro da máscara de movimento. */
+      if (!window.__tocando && !jaCongelou) { jaCongelou = true; n += 180; }
       cx.fillStyle = '#fff'; cx.fillRect(0, 0, 960, 540);
       // a metade parada
       cx.fillStyle = '#15171C'; cx.font = 'bold 34px sans-serif';

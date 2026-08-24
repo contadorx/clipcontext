@@ -415,6 +415,11 @@
   .card.fechado .ferramentas{margin-top:6px}
   @media (prefers-reduced-motion:reduce){ .dobra{transition:none} }
   [inert]{opacity:.45;filter:saturate(.4)}
+  /* O QUE FICA INERTE POR CAUSA DE UM DIÁLOGO NÃO DESBOTA.
+     O `[inert]` acima existe para o cartão TRAVADO, onde desbotar é a mensagem.
+     Um diálogo modal já tem o próprio véu por cima da página; aplicar os dois
+     deixaria o fundo lavado duas vezes. Aqui o `inert` é só sobre FOCO. */
+  [data-inerte-modal]{opacity:1;filter:none}
   .lockHint{margin:-6px 0 14px;font-size:13px;color:var(--muted);
             border-left:3px solid var(--line);padding-left:11px}
   /* Sem isto, os dois elementos que acabaram de virar focáveis — a zona de
@@ -2421,7 +2426,7 @@
       <span class="status" id="trFonteMsg" style="display:block;margin-top:6px"></span>
     </div>
 
-    <textarea id="tr" placeholder="Cole aqui a transcrição do Google Drive, ou arraste um arquivo .srt / .vtt.
+    <textarea id="tr" data-i18n-aria="trAria" placeholder="Cole aqui a transcrição do Google Drive, ou arraste um arquivo .srt / .vtt.
 
 Reconheço automaticamente:
   00:00:12,400 --> 00:00:15,900   (SRT / VTT)
@@ -3568,6 +3573,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       diagChamado:'Abrir chamado com este relatório', diagIndo:'Montando o relatório…', diagFalhou:'Não consegui montar o relatório aqui.', fbDiagEspera:'Terminando de montar o relatório antes de enviar…',
       openSub:'Abrir uma legenda pronta', orDrag:'ou arraste o arquivo sobre o campo acima, ou cole o texto',
       subDeOnde:'.vtt ou .srt de uma reunião já transcrita pelo Teams, Meet ou Zoom — assim não precisa baixar o modelo de voz. Também dá para arrastar sobre a caixa, ou simplesmente colar.',
+      trAria:'Transcrição do vídeo',
       trPh:'Cole aqui a transcrição, ou arraste um arquivo .srt / .vtt.\n\nReconheço automaticamente:\n  00:00:12,400 --> 00:00:15,900   (SRT / VTT)\n  0:12  texto falado             (colado de um painel de legendas)\n  texto solto sem marcação de tempo\n\nCom marcação de tempo, cada quadro sai no PDF junto do que é dito naquele trecho.',
       trCues:'{0} trechos com marcação de tempo', trCues2:' — cada quadro sai junto da fala correspondente.',
       trPlain:'Texto sem marcação de tempo — vai entrar no PDF como um bloco no final.',
@@ -4198,6 +4204,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       diagChamado:'Open a ticket with this report', diagIndo:'Building the report…', diagFalhou:'I could not build the report here.', fbDiagEspera:'Finishing the report before sending…',
       openSub:'Open an existing transcript', orDrag:'or drag the file onto the box above, or paste the text',
       subDeOnde:'.vtt or .srt from a meeting already transcribed by Teams, Meet or Zoom — that way there is no speech model to download. You can also drag it onto the box, or just paste.',
+      trAria:'Video transcript',
       trPh:'Paste the transcript here, or drag in a .srt / .vtt file.\n\nRecognised automatically:\n  00:00:12,400 --> 00:00:15,900   (SRT / VTT)\n  0:12  spoken text              (pasted from a caption panel)\n  plain text with no timestamps\n\nWith timestamps, each frame appears in the PDF next to what is said at that point.',
       trCues:'{0} timestamped segments', trCues2:' — each frame will appear next to its matching speech.',
       trPlain:'Text without timestamps — it will go into the PDF as a block at the end.',
@@ -4816,6 +4823,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       diagChamado:'Abrir un ticket con este informe', diagIndo:'Preparando el informe…', diagFalhou:'No pude preparar el informe aquí.', fbDiagEspera:'Terminando el informe antes de enviar…',
       openSub:'Abrir una transcripción ya hecha', orDrag:'o arrastra el archivo sobre el campo de arriba, o pega el texto',
       subDeOnde:'.vtt o .srt de una reunión ya transcrita por Teams, Meet o Zoom — así no hay que descargar el modelo de voz. También puedes arrastrarlo sobre la caja, o simplemente pegar.',
+      trAria:'Transcripción del vídeo',
       trPh:'Pega aquí la transcripción, o arrastra un archivo .srt / .vtt.\n\nReconozco automáticamente:\n  00:00:12,400 --> 00:00:15,900   (SRT / VTT)\n  0:12  texto hablado            (copiado de un panel de subtítulos)\n  texto suelto sin marcas de tiempo\n\nCon marcas de tiempo, cada fotograma aparece en el PDF junto a lo que se dice en ese tramo.',
       trCues:'{0} tramos con marca de tiempo', trCues2:' — cada fotograma saldrá junto al habla correspondiente.',
       trPlain:'Texto sin marcas de tiempo — irá al PDF como un bloque al final.',
@@ -5433,6 +5441,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       diagChamado:'Ticket mit diesem Bericht eröffnen', diagIndo:'Bericht wird erstellt…', diagFalhou:'Der Bericht konnte hier nicht erstellt werden.', fbDiagEspera:'Bericht wird vor dem Senden fertiggestellt…',
       openSub:'Fertige Untertiteldatei öffnen', orDrag:'oder ziehen Sie die Datei auf das Feld oben, oder fügen Sie den Text ein',
       subDeOnde:'.vtt oder .srt aus einer Besprechung, die Teams, Meet oder Zoom bereits transkribiert hat — so muss kein Spracherkennungsmodell heruntergeladen werden. Sie können die Datei auch auf das Feld ziehen oder den Text einfach einfügen.',
+      trAria:'Transkription des Videos',
       trPh:'Fügen Sie hier die Transkription ein oder ziehen Sie eine .srt-/.vtt-Datei hierher.\n\nAutomatisch erkannt werden:\n  00:00:12,400 --> 00:00:15,900   (SRT / VTT)\n  0:12  gesprochener Text         (aus einem Untertitelfenster kopiert)\n  reiner Text ohne Zeitmarken\n\nMit Zeitmarken erscheint jeder Screenshot im PDF neben dem, was in diesem Abschnitt gesagt wird.',
       trCues:'{0} Abschnitte mit Zeitmarke', trCues2:' — jeder Screenshot erscheint neben dem, was dort gesagt wird.',
       trPlain:'Text ohne Zeitmarken — er kommt als Block am Ende ins PDF.',
@@ -6056,6 +6065,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       diagChamado:'Ouvrir un ticket avec ce rapport', diagIndo:'Préparation du rapport…', diagFalhou:'Je n’ai pas pu préparer le rapport ici.', fbDiagEspera:'Finalisation du rapport avant l’envoi…',
       openSub:'Ouvrir un fichier de sous-titres', orDrag:'ou déposez le fichier sur le champ ci-dessus, ou collez le texte',
       subDeOnde:'.vtt ou .srt d’une réunion déjà transcrite par Teams, Meet ou Zoom — ainsi, aucun modèle de reconnaissance vocale à télécharger. Vous pouvez aussi le déposer sur la zone, ou simplement coller.',
+      trAria:'Transcription de la vidéo',
       trPh:'Collez ici la transcription, ou déposez un fichier .srt / .vtt.\n\nReconnaissance automatique :\n  00:00:12,400 --> 00:00:15,900   (SRT / VTT)\n  0:12  texte parlé              (collé d’un panneau de sous-titres)\n  texte brut sans marquage temporel\n\nAvec marquage temporel, chaque capture sort dans le PDF à côté de ce qui est dit dans ce segment.',
       trCues:'{0} segments horodatés', trCues2:' — chaque capture sort à côté de la parole correspondante.',
       trPlain:'Texte sans marquage temporel — il entrera dans le PDF comme un bloc à la fin.',
@@ -14708,10 +14718,52 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      contar o problema; a lista de capacidades do navegador é o que NÓS
      precisamos, e pedi-la de quem já está irritado é pedir errado. Quem não
      quiser mandar, desmarca — e ela fica visível antes de sair. */
+  /* ---- UM DIÁLOGO MODAL PRENDE O FOCO, OU NÃO É MODAL ----
+
+     Os três diálogos da ferramenta declaram `aria-modal="true"`. Medido, o
+     recado (`#fbModal`) deixava o foco sair em 21 de 25 tabulações: quem usa
+     teclado ou leitor de tela saía para a página de trás com o diálogo aberto,
+     e o `aria-modal` estava dizendo à tecnologia assistiva uma coisa que não
+     era verdade. Dizer o falso para um leitor de tela é pior do que não dizer
+     nada: ele para de anunciar o que está atrás justamente porque acreditou.
+
+     A trava usa `inert`, que o produto já usa para travar cartão — ele tira o
+     ramo da ordem de foco E da árvore de acessibilidade, que é exatamente o
+     que se quer, e não precisa de laço de teclas.
+
+     E ela sobe até o corpo tornando inertes os IRMÃOS de cada nível: os
+     diálogos não são filhos diretos do `body`, então marcar só os irmãos do
+     topo deixaria vivo tudo que divide o pai com eles. */
+  let modalAnterior = null;
+  function modalPrender(dlg, abrir){
+    if (abrir) {
+      modalAnterior = document.activeElement;
+      for (let n = dlg; n && n.parentElement && n !== document.body; n = n.parentElement) {
+        for (const irmao of n.parentElement.children) {
+          if (irmao === n || irmao.hasAttribute('inert')) continue;
+          irmao.setAttribute('inert', '');
+          irmao.dataset.inerteModal = '1';
+        }
+      }
+    } else {
+      document.querySelectorAll('[data-inerte-modal]').forEach(e => {
+        e.removeAttribute('inert');
+        delete e.dataset.inerteModal;
+      });
+      /* O foco volta de onde saiu. Sem isto o teclado recomeça no topo da
+         página, e quem fechou o diálogo perde o lugar onde estava. */
+      if (modalAnterior && document.contains(modalAnterior)) {
+        try { modalAnterior.focus(); } catch (e) {}
+      }
+      modalAnterior = null;
+    }
+  }
+
   let fbTipo = 'problema';
   let fbDiagPronto = null;
   const fbAbrir = async (abrir) => {
     $('fbModal').classList.toggle('hide', !abrir);
+    modalPrender($('fbModal'), abrir);
     if (!abrir) return;
     pintarFbTipo();
     $('fbTexto').focus();
@@ -14736,6 +14788,15 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     $('avisar').onclick = () => fbAbrir(true);
     $('fbFechar').onclick = () => fbAbrir(false);
     $('fbModal').addEventListener('click', e => { if (e.target === $('fbModal')) fbAbrir(false); });
+    /* ESCAPE FECHA, e o ouvinte é do DOCUMENTO — como nos outros dois.
+       Pendurado no próprio diálogo ele só funcionaria com o foco lá dentro, e
+       o foco lá dentro é justamente o que não se pode dar por garantido: se
+       ele escapou, a tecla que devolveria o controle não chega. */
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && !$('fbModal').classList.contains('hide')) {
+        e.preventDefault(); fbAbrir(false);
+      }
+    });
     document.querySelectorAll('.fbTipo').forEach(b2 => {
       b2.onclick = () => { fbTipo = b2.dataset.tipo; pintarFbTipo(); };
     });
@@ -17407,6 +17468,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      ocupavam metade do cartão de gravar para a maioria que nunca os liga. */
   const abrirClipeModal = (abrir) => {
     $('clipeModal').classList.toggle('hide', !abrir);
+    modalPrender($('clipeModal'), abrir);
+    /* O foco daqui é DELE, e não o do `modalPrender`: ao fechar, o clipe volta
+       para o botão que o abre e não para o que estava focado antes — são o
+       mesmo na prática, e esta linha é a que já existia. */
     if (abrir) { $('recClipe').focus(); }
     else { pintarBotaoClipe(); $('clipeAbrir').focus(); }
   };
@@ -19116,6 +19181,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     lenteI = i;
     lenteVoltar = document.activeElement;
     $('lente').classList.remove('hide');
+    modalPrender($('lente'), true);
     pintarLente();
     pintarLenteRevisao();
     $('lenteFechar').focus();
@@ -19153,6 +19219,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     if (cortando) modoCrop(false);
     if (typeof fecharComparar === 'function') fecharComparar();
     $('lente').classList.add('hide');
+    modalPrender($('lente'), false);
     lenteI = -1;
     // o foco volta para a miniatura de onde saiu; sem isso o teclado recomeça no topo
     if (lenteVoltar && document.contains(lenteVoltar)) lenteVoltar.focus();
