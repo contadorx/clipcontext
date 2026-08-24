@@ -569,6 +569,16 @@
   @media (max-width:560px){ .contagem{font-size:42px} }
   label.opt{display:flex;align-items:center;gap:9px;padding:7px 0;font-size:14.5px;cursor:pointer}
   label.opt input[type=checkbox]{flex:none}
+  /* ---- O RECURSO QUE ESTE NAVEGADOR NÃO TEM ----
+     Desligado e DITO. O `usar a placa de vídeo` some quando não há WebGPU, e
+     ali sumir cabe: ninguém procura por ele. Clipe e webcam a pessoa procura —
+     e não achar responde "isto não existe no produto" em vez de "o seu
+     navegador não faz". Então eles ficam, apagados, com o motivo do lado.
+     `cursor:default` porque `not-allowed` sobre uma escolha que nunca foi
+     oferecida soa como recusa, e não é: é ausência. */
+  label.opt.semApoio{opacity:.5;cursor:default}
+  label.opt.semApoio:focus-within{outline-color:var(--muted)}
+  .semApoioNota{margin:2px 0 12px 26px;border-left-color:var(--muted)}
   /* A etiqueta do plano no cabeçalho. Discreta de propósito: é um estado, não
      um botão de ação — quem já pagou não precisa ser convidado de novo. */
   .optNota{margin-left:auto;font-weight:400;font-size:12.5px;color:var(--muted)}
@@ -1626,8 +1636,10 @@
             </div>
             <div style="padding:4px 2px 2px">
               <label class="opt"><input type="checkbox" id="recClipe"><span data-i18n="recClipeLbl"></span></label>
+              <p class="note semApoioNota hide" id="recClipeAviso"></p>
               <p class="note" id="recClipeNota" data-i18n="recClipeNota" style="margin:2px 0 12px"></p>
               <label class="opt"><input type="checkbox" id="recCam"><span data-i18n="recCamLbl"></span></label>
+              <p class="note semApoioNota hide" id="recCamAviso"></p>
               <div class="row hide" id="camOpts" style="gap:10px;margin:6px 0 0 26px;align-items:center;flex-wrap:wrap">
                 <select id="camCanto" style="width:auto">
                   <option value="bd" data-i18n="camBD"></option>
@@ -3707,6 +3719,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recAutoLbl:'Parar sozinho depois de', recAutoMinLbl:'minutos',
       recAutoParou:'A gravação parou sozinha no limite de {0} minutos que você definiu. Tudo o que foi capturado até aqui está no documento.',
       atalhos:'Atalhos, quando o foco não está num campo: G grava e para, M marca a tela, P pausa.',
+      recCamSemApoio:'Este navegador não abre webcam — o resto da captura funciona normalmente.',
+      recClipeSemApoio:'Este navegador não grava clipe — o resto da captura funciona normalmente.',
       recCamNao:'Não consegui abrir a webcam; a gravação continua sem ela.',
       recCamNota:'O rosto é desenhado por cima da tela, nos quadros e nos clipes. Ele NÃO participa da detecção de mudança — senão cada respiração viraria um passo novo. Como todo o resto, a imagem não sai do seu computador; e como é rosto, peça permissão a quem está sendo filmado.',
       camTD:'canto de cima, à direita', camTE:'canto de cima, à esquerda', camP:'pequena', camM:'média', camG:'grande',
@@ -4332,6 +4346,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recAutoLbl:'Stop by itself after', recAutoMinLbl:'minutes',
       recAutoParou:'The recording stopped by itself at the {0}-minute limit you set. Everything captured up to here is in the document.',
       atalhos:'Shortcuts, when focus is not in a field: G records and stops, M marks the screen, P pauses.',
+      recCamSemApoio:'This browser cannot open a webcam — the rest of the capture works normally.',
+      recClipeSemApoio:'This browser cannot record a clip — the rest of the capture works normally.',
       recCamNao:'I could not open the webcam; the recording continues without it.',
       recCamNota:'The face is drawn on top of the screen, in the frames and in the clips. It does NOT take part in change detection — otherwise every breath would become a new step. Like everything else, the image never leaves your computer; and because it is a face, ask permission from whoever is being filmed.',
       camTD:'top right', camTE:'top left', camP:'small', camM:'medium', camG:'large',
@@ -4951,6 +4967,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recAutoLbl:'Parar solo después de', recAutoMinLbl:'minutos',
       recAutoParou:'La grabación se detuvo sola en el límite de {0} minutos que definiste. Todo lo capturado hasta aquí está en el documento.',
       atalhos:'Atajos, cuando el foco no está en un campo: G graba y detiene, M marca la pantalla, P pausa.',
+      recCamSemApoio:'Este navegador no abre la webcam — el resto de la captura funciona normalmente.',
+      recClipeSemApoio:'Este navegador no graba clip — el resto de la captura funciona normalmente.',
       recCamNao:'No he podido abrir la webcam; la grabación continúa sin ella.',
       recCamNota:'La cara se dibuja encima de la pantalla, en los fotogramas y en los clips. NO participa en la detección de cambio — si no, cada respiración sería un paso nuevo. Como todo lo demás, la imagen no sale de tu ordenador; y como es una cara, pide permiso a quien está siendo filmado.',
       camTD:'arriba a la derecha', camTE:'arriba a la izquierda', camP:'pequeña', camM:'mediana', camG:'grande',
@@ -5569,6 +5587,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recAutoLbl:'Von selbst stoppen nach', recAutoMinLbl:'Minuten',
       recAutoParou:'Die Aufnahme wurde beim von Ihnen gesetzten Limit von {0} Minuten von selbst gestoppt. Alles bis hierher Erfasste steht im Dokument.',
       atalhos:'Tastenkürzel, wenn der Fokus nicht in einem Feld liegt: G startet und stoppt die Aufnahme, M markiert den Bildschirm, P pausiert.',
+      recCamSemApoio:'Dieser Browser öffnet keine Webcam — der Rest der Aufnahme funktioniert normal.',
+      recClipeSemApoio:'Dieser Browser nimmt keinen Clip auf — der Rest der Aufnahme funktioniert normal.',
       recCamNao:'Die Webcam konnte nicht geöffnet werden; die Aufnahme läuft ohne sie weiter.',
       recCamNota:'Das Gesicht wird über den Bildschirm gezeichnet, in den Screenshots und in den Clips. Es nimmt NICHT an der Änderungserkennung teil — sonst würde jeder Atemzug zu einem neuen Schritt. Wie alles andere verlässt das Bild Ihren Computer nicht; und weil es ein Gesicht ist, holen Sie die Erlaubnis der gefilmten Person ein.',
       camTD:'oben rechts', camTE:'oben links', camP:'klein', camM:'mittel', camG:'groß',
@@ -6193,6 +6213,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recAutoLbl:'Arrêter tout seul après', recAutoMinLbl:'minutes',
       recAutoParou:'L’enregistrement s’est arrêté tout seul à la limite de {0} minutes que vous avez définie. Tout ce qui a été capturé jusqu’ici est dans le document.',
       atalhos:'Raccourcis, quand le focus n’est pas dans un champ : G lance et arrête l’enregistrement, M marque l’écran, P met en pause.',
+      recCamSemApoio:'Ce navigateur n’ouvre pas de webcam — le reste de la capture fonctionne normalement.',
+      recClipeSemApoio:'Ce navigateur n’enregistre pas de clip — le reste de la capture fonctionne normalement.',
       recCamNao:'Impossible d’ouvrir la webcam ; l’enregistrement continue sans elle.',
       recCamNota:'Le visage est dessiné par-dessus l’écran, dans les captures et dans les clips. Il ne participe PAS à la détection de changement — sinon chaque respiration deviendrait une nouvelle étape. Comme tout le reste, l’image ne quitte pas votre ordinateur ; et comme il s’agit d’un visage, demandez l’autorisation à la personne filmée.',
       camTD:'en haut à droite', camTE:'en haut à gauche', camP:'petite', camM:'moyenne', camG:'grande',
@@ -17466,8 +17488,59 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      Clipe e webcam saíram da lista de opções e viraram um botão. Os dois
      servem a um cenário só e são os que mais precisam de explicação; juntos
      ocupavam metade do cartão de gravar para a maioria que nunca os liga. */
+  /* ---- O RECURSO DIZ O QUE ELE É ANTES DE SER TENTADO ----
+
+     Medido: com `MediaRecorder` ausente, a caixa "Guardar um clipe" ficava
+     VISÍVEL E LIGADA. A pessoa marcava, gravava a reunião inteira e só então
+     recebia "este navegador não grava clipe" — depois de a gravação ter
+     acontecido sem o que ela pediu. O mesmo com a webcam.
+
+     O `usar a placa de vídeo` já fazia certo, mas ESCONDENDO o controle. Aqui
+     esconder seria pior: quem veio procurar o clipe e não acha nada conclui
+     "isto não existe no produto", e não "o meu navegador não faz". É a mesma
+     razão que está escrita no CSS do botão de mover — não ver controle nenhum
+     responde a pergunta errada.
+
+     Então o controle FICA, desligado, com o motivo do lado. Desligado e dito é
+     informação; ausente é mistério, e ligado é promessa falsa.
+
+     A CÂMERA RECUSADA continua sendo descoberta no uso, e está certo assim:
+     não há como saber se alguém vai negar a permissão sem pedir a permissão.
+     O que dá para saber antes é se o navegador tem a porta — e é isso que esta
+     função responde. */
+  function pintarApoio(){
+    const marcar = (idCaixa, apoia, motivo) => {
+      const cx = $(idCaixa); if (!cx) return;
+      const rot = cx.closest('label');
+      cx.disabled = !apoia;
+      if (!apoia && cx.checked) cx.checked = false;
+      if (rot) rot.classList.toggle('semApoio', !apoia);
+      /* O motivo vai no `title` E no `aria-label` do rótulo: quem passa o mouse
+         lê, e quem usa leitor de tela ouve junto com o nome do controle. Uma
+         caixa desligada sem motivo é a mesma pergunta sem resposta. */
+      if (rot) {
+        if (apoia) { rot.removeAttribute('title'); rot.removeAttribute('aria-label'); }
+        else {
+          const txt = t(motivo);
+          rot.setAttribute('title', txt);
+          rot.setAttribute('aria-label', (rot.textContent || '').trim() + ' — ' + txt);
+        }
+      }
+      const nota = $(idCaixa + 'Aviso');
+      if (nota) { nota.textContent = apoia ? '' : t(motivo); nota.classList.toggle('hide', apoia); }
+    };
+    marcar('recClipe', clipeSuportado(), 'recClipeSemApoio');
+    marcar('recCam',
+           !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia),
+           'recCamSemApoio');
+  }
+
   const abrirClipeModal = (abrir) => {
     $('clipeModal').classList.toggle('hide', !abrir);
+    /* Repintado A CADA abertura, e não uma vez no carregamento: o suporte é do
+       navegador, mas a permissão da câmera pode mudar entre uma abertura e
+       outra — e um estado calculado uma vez envelhece calado. */
+    if (abrir) pintarApoio();
     modalPrender($('clipeModal'), abrir);
     /* O foco daqui é DELE, e não o do `modalPrender`: ao fechar, o clipe volta
        para o botão que o abre e não para o que estava focado antes — são o
