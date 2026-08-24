@@ -170,5 +170,48 @@
     <p class="small muted">Esta página describe el funcionamiento en la fecha indicada arriba. Si algo cambia
     de forma que afecte a lo escrito aquí, esta página cambia con ello — y la fecha del principio es cómo lo
     compruebas.</p>
+
+
+    <!-- A MECÂNICA DA LICENÇA, VINDA DA `/time` — 23/08.
+         A `/time` era órfã: nenhuma página do site levava a ela, e ela estava
+         indexada. Duas páginas vendendo o mesmo plano é o defeito que mais
+         custou a este projeto, e a órfã é sempre a que ninguém lembra de
+         atualizar.
+         Ela foi redirecionada para a página de preços. Destas seções, o que
+         falava de administrar o time já existe na conta, e o que falava de
+         guardar dados e da versão offline já existe acima nesta página. O que
+         não tinha outro lugar é isto: como a chave é conferida e por que ela
+         vale pouco tempo. Numa avaliação de fornecedor é exatamente a pergunta
+         que vem depois de "o que sai da minha máquina". -->
+<h2>Cómo funciona por dentro</h2>
+    <ol class="passos">
+      <li><b>Pides.</b> Escribes el correo aquí. Nada se decide en este momento: solo sale un mensaje a
+      tu buzón.</li>
+      <li><b>Haces clic en lo que llegó.</b> Eso es lo que prueba que la dirección es tuya — y es el único
+      momento en que existe algo parecido a una sesión.</li>
+      <li><b>Vuelves con el enlace listo.</b> La clave se firma en el servidor, con tu correo dentro, y se
+      entrega ya envuelta en una dirección de {{marca}}.</li>
+      <li><b>A partir de ahí, nada de red.</b> La clave se comprueba <b>dentro del navegador</b>, contra
+      una clave pública que está en el propio HTML de la herramienta. Funciona en el avión, en la máquina
+      del cliente con internet bloqueada, y en el ordenador al que TI no deja hablar con nuestro
+      alojamiento.</li>
+    </ol>
+
+    <h2>Por qué la validez es corta</h2>
+    <p>Cada clave emitida vale <b>45 días</b> (14 en la prueba), y la siguiente llega por correo antes
+    de que venza la anterior. El administrador puede acortar ese plazo, de 1 a 90 días, en el portal del equipo. No es burocracia: es lo que hace que un enlace filtrado <b>muera solo</b>.
+    Como no hay servidor comprobando nada durante el uso, no existe botón de revocar — el plazo es la
+    revocación. Es un trato elegido a propósito: preferimos una filtración que caduca a un producto de
+    pago que deja de funcionar cuando se cae internet.</p>
+
+    <!-- A SAÍDA — 23/08. Esta página era um beco: saía só para a política de
+         privacidade. Quem termina de ler aqui já resolveu a pergunta que o
+         trouxe, e a próxima pergunta dele tem endereço. -->
+    <h2>{{confiancaTit}}</h2>
+    <p>{{segSaida}}</p>
+    <p class="row" style="margin:12px 0 0">
+      <a class="btn ghost" href="{{verificar}}">{{fVerif}}</a>
+      <a class="btn ghost" href="{{precos}}">{{navPrice}}</a>
+    </p>
   </div>
 </section>

@@ -170,5 +170,47 @@
     <p class="small muted">This page describes how things work as of the date above. If anything changes in a
     way that affects what is written here, this page changes with it — and the date at the top is how you
     check that.</p>
+
+
+    <!-- A MECÂNICA DA LICENÇA, VINDA DA `/time` — 23/08.
+         A `/time` era órfã: nenhuma página do site levava a ela, e ela estava
+         indexada. Duas páginas vendendo o mesmo plano é o defeito que mais
+         custou a este projeto, e a órfã é sempre a que ninguém lembra de
+         atualizar.
+         Ela foi redirecionada para a página de preços. Destas seções, o que
+         falava de administrar o time já existe na conta, e o que falava de
+         guardar dados e da versão offline já existe acima nesta página. O que
+         não tinha outro lugar é isto: como a chave é conferida e por que ela
+         vale pouco tempo. Numa avaliação de fornecedor é exatamente a pergunta
+         que vem depois de "o que sai da minha máquina". -->
+<h2>How it works underneath</h2>
+    <ol class="passos">
+      <li><b>You ask.</b> Type your email here. Nothing is decided at this moment: a message goes out
+      to your mailbox, that is all.</li>
+      <li><b>You click what arrived.</b> That is what proves the address is yours — and it is the only
+      moment anything resembling a session exists.</li>
+      <li><b>You come back with the link ready.</b> The key is signed on the server, with your email
+      inside it, and handed over already wrapped in a {{marca}} address.</li>
+      <li><b>From then on, no network at all.</b> The key is checked <b>inside the browser</b>, against a
+      public key that sits in the tool's own HTML. It works on a plane, on the client machine with the
+      internet locked down, and on the computer IT will not let talk to our hosting.</li>
+    </ol>
+
+    <h2>Why the validity is short</h2>
+    <p>Each key issued lasts <b>45 days</b> (14 on the trial), and the next one arrives by email
+    before the previous expires. The administrator can shorten that window, from 1 to 90 days, in the team portal. This is not bureaucracy: it is what makes a leaked link <b>die on its
+    own</b>. Since no server checks anything while you work, there is no revoke button — the deadline is
+    the revocation. It is a trade we chose on purpose: we would rather have a leak that expires than a
+    paid product that stops working when the internet drops.</p>
+
+    <!-- A SAÍDA — 23/08. Esta página era um beco: saía só para a política de
+         privacidade. Quem termina de ler aqui já resolveu a pergunta que o
+         trouxe, e a próxima pergunta dele tem endereço. -->
+    <h2>{{confiancaTit}}</h2>
+    <p>{{segSaida}}</p>
+    <p class="row" style="margin:12px 0 0">
+      <a class="btn ghost" href="{{verificar}}">{{fVerif}}</a>
+      <a class="btn ghost" href="{{precos}}">{{navPrice}}</a>
+    </p>
   </div>
 </section>

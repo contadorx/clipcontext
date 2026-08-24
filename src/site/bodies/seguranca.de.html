@@ -173,5 +173,47 @@
     <p class="small muted">Diese Seite beschreibt die Funktionsweise zum oben genannten Datum. Wenn sich etwas
     so ändert, dass es das hier Geschriebene betrifft, ändert sich diese Seite mit — und das Datum oben ist,
     woran Sie das überprüfen.</p>
+
+
+    <!-- A MECÂNICA DA LICENÇA, VINDA DA `/time` — 23/08.
+         A `/time` era órfã: nenhuma página do site levava a ela, e ela estava
+         indexada. Duas páginas vendendo o mesmo plano é o defeito que mais
+         custou a este projeto, e a órfã é sempre a que ninguém lembra de
+         atualizar.
+         Ela foi redirecionada para a página de preços. Destas seções, o que
+         falava de administrar o time já existe na conta, e o que falava de
+         guardar dados e da versão offline já existe acima nesta página. O que
+         não tinha outro lugar é isto: como a chave é conferida e por que ela
+         vale pouco tempo. Numa avaliação de fornecedor é exatamente a pergunta
+         que vem depois de "o que sai da minha máquina". -->
+<h2>Wie es intern funktioniert</h2>
+    <ol class="passos">
+      <li><b>Sie fordern an.</b> Sie geben die E-Mail-Adresse hier ein. In diesem Moment wird nichts
+      entschieden: Es geht nur eine Nachricht an Ihr Postfach.</li>
+      <li><b>Sie klicken auf das, was angekommen ist.</b> Das ist der Nachweis, dass die Adresse Ihnen
+      gehört — und es ist der einzige Moment, in dem es so etwas wie eine Sitzung gibt.</li>
+      <li><b>Sie kommen mit dem fertigen Link zurück.</b> Der Schlüssel wird auf dem Server signiert, mit
+      Ihrer E-Mail-Adresse darin, und bereits in einer Adresse von {{marca}} ausgeliefert.</li>
+      <li><b>Von da an kein Netz mehr.</b> Der Schlüssel wird <b>im Browser</b> geprüft, gegen einen
+      öffentlichen Schlüssel, der im HTML des Werkzeugs selbst steht. Er funktioniert im Flugzeug, auf dem
+      Rechner des Kunden mit gesperrtem Internet und auf dem Computer, den die IT nicht mit unserem Hosting sprechen lässt.</li>
+    </ol>
+
+    <h2>Warum die Gültigkeit kurz ist</h2>
+    <p>Jeder ausgestellte Schlüssel gilt <b>45 Tage</b> (14 im Test), und der nächste kommt per E-Mail,
+    bevor der vorherige abläuft. Die Administration kann diese Frist im Team-Portal auf 1 bis 90 Tage verkürzen. Das ist keine Bürokratie: Es ist das, was einen durchgesickerten Link
+    <b>von selbst sterben</b> lässt. Da während der Nutzung kein Server irgendetwas prüft, gibt es keine
+    Schaltfläche zum Widerrufen — die Frist ist der Widerruf. Dieser Tausch ist mit Absicht so gewählt: Uns
+    ist ein Leck, das abläuft, lieber als ein bezahltes Produkt, das aufhört zu funktionieren, wenn das Internet ausfällt.</p>
+
+    <!-- A SAÍDA — 23/08. Esta página era um beco: saía só para a política de
+         privacidade. Quem termina de ler aqui já resolveu a pergunta que o
+         trouxe, e a próxima pergunta dele tem endereço. -->
+    <h2>{{confiancaTit}}</h2>
+    <p>{{segSaida}}</p>
+    <p class="row" style="margin:12px 0 0">
+      <a class="btn ghost" href="{{verificar}}">{{fVerif}}</a>
+      <a class="btn ghost" href="{{precos}}">{{navPrice}}</a>
+    </p>
   </div>
 </section>

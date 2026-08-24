@@ -126,8 +126,20 @@ console.log('\n[4] a base existe nos três idiomas, com os nove temas');
      porque o defeito que ele existe para pegar é UM idioma ficar para trás dos
      outros, não a base crescer. Contando o português, a afirmação volta a ser
      a que importa: os idiomas têm a MESMA quantidade de blocos. */
-  const ESPERADO = (fs.readFileSync(`${RAIZ_WS}/src/site/bodies/ajuda.pt.html`, 'utf8')
-    .match(/<details>/g) || []).length;
+  /* `<details\b`, e não `<details>`: os blocos passaram a nascer abertos
+     (`<details open>`) e a contagem literal enxergou UM onde há quarenta e
+     cinco. A régua estava certa sobre o que cobrar e errada sobre como ler —
+     e uma régua que lê errado reprova o inocente, que é a maneira mais rápida
+     de ensinar todo mundo a ignorá-la. */
+  const fonte = fs.readFileSync(`${RAIZ_WS}/src/site/bodies/ajuda.pt.html`, 'utf8')
+    /* SEM OS COMENTÁRIOS. Um comentário que MENCIONA a tag entrava na conta e
+       dava 46 onde há 45 — e o comentário era meu, escrito no build que abriu
+       os blocos. É a segunda vez em dois builds: no anterior, um comentário que
+       escrevia a tag de abertura do corpo fez o recorte da página começar no
+       lugar errado. Contar HTML sem apagar comentário é contar o que alguém
+       escreveu sobre o código junto com o código. */
+    .replace(/<!--[\s\S]*?-->/g, ' ');
+  const ESPERADO = (fonte.match(/<details\b/g) || []).length;
   const ctx = await br.newContext({ viewport: { width: 1200, height: 900 } });
   const pg = await ctx.newPage();
   for (const [u, titulo] of [['/ajuda', 'Base de conhecimento'],

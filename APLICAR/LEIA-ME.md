@@ -21,10 +21,10 @@ Não vêm junto, porque se regeneram ou são enormes: `.git/`, `node_modules/`
 
 ---
 
-## `builds-1-a-4A.bundle` — a rodada de 23/08
+## `builds-1-a-5.bundle` — a rodada de 23/08
 
 **Base:** `7c90a97` (o `main` do GitHub, de 19/08).
-**Traz:** dez commits.
+**Traz:** doze commits.
 
 1. **Sincroniza a árvore interna com o deploy de 22/08.** O repositório estava
    três dias atrás da árvore publicada na Vercel. 267 arquivos, nenhuma
@@ -49,8 +49,14 @@ Não vêm junto, porque se regeneram ou são enormes: `.git/`, `node_modules/`
    regra das listas de passos estava escrita com um nome que ninguém usava, e
    a `.row` repetia setenta vezes uma decisão de estilo que não fazia efeito.
 
-Os relatórios estão em `BUILD-1.md`, `BUILD-2.md`, `BUILD-3.md`, `BUILD-4.md` e
-`BUILD-4A.md`, na raiz. A fila dos próximos e as decisões abertas estão em `FILA.md`.
+9. **Build 5 — o caminho até a compra.** A intenção de compra morria em três
+   pontos entre o clique e o checkout; as três pontes foram construídas. Quatro
+   endereços de volta apontavam para produção mesmo numa prévia. A base de
+   conhecimento saiu de trás dos acordeões, e a `/time` foi aposentada com os
+   cinco endereços velhos respondendo 308.
+
+Os relatórios estão em `BUILD-1.md`, `BUILD-2.md`, `BUILD-3.md`, `BUILD-4.md`,
+`BUILD-4A.md` e `BUILD-5.md`, na raiz. A fila dos próximos e as decisões abertas estão em `FILA.md`.
 
 ```bash
 git fetch APLICAR/builds-1-a-4.bundle \
@@ -70,7 +76,7 @@ git checkout claude/builds-deploys-sequence-0fatlg
 
 **Base:** `7c90a97`. **Traz:** os seis commits da rodada de preços, que já estão
 incluídos no commit 1 do bundle acima. Fica aqui como registro; quem aplicar o
-`builds-1-a-4A.bundle` não precisa dele.
+`builds-1-a-5.bundle` não precisa dele.
 
 ```bash
 git fetch APLICAR/rodada-precos.bundle \
@@ -92,10 +98,12 @@ bash testes/liberar.sh
 bash testes/rodar.sh
 ```
 
-A regressão sai com **141 ok · 4 PULADO · 0 FALHOU** de 145 réguas. Um pulado
+A regressão sai com **141 ok · 5 PULADO · 0 FALHOU** de 146 réguas. Um pulado
 **não conta como cobertura**, e o motivo de cada um sai impresso: três por falta
-do emissor de chaves — que não viaja no pacote, de propósito —, e um pela
-tradução jurídica pendente de alemão e francês.
+do emissor de chaves — que não viaja no pacote, de propósito —, um pela tradução
+jurídica pendente de alemão e francês, e um (`timepag.mjs`) porque a página que
+ele testava foi aposentada no Build 5 e o fluxo dela ainda não tem régua na
+arquitetura nova. Este último é dívida deste projeto, e está na `FILA.md`.
 
 O `testes/preparar.sh` gera as amostras de vídeo que sete testes consomem. Ele
 precisa de Pillow e de um `ffmpeg` completo — a build mínima que vem com o

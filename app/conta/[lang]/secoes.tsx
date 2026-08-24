@@ -29,7 +29,8 @@ const data = (lang: Lang, iso: string | null) =>
 const escapar = (s: string) =>
   s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
-export function Plano({ conta, lang, t }: { conta: Conta; lang: Lang; t: Textos }) {
+export function Plano({ conta, lang, t, quer }:
+                      { conta: Conta; lang: Lang; t: Textos; quer: 'personal' | 'time' | null }) {
   /* O motivo importa mais que o nome do plano: "teste" e "conta" mostram o
      mesmo `time` e são situações completamente diferentes para quem lê. */
   const legenda: Record<string, string> = {
@@ -49,6 +50,18 @@ export function Plano({ conta, lang, t }: { conta: Conta; lang: Lang; t: Textos 
       <p className="small muted">{legenda[conta.motivo] || conta.motivo}</p>
       {conta.motivo === 'teste' && <p className="small muted">{t.degustacao}</p>}
 
+      {/* O QUE A PESSOA VEIO FAZER, dito na tela.
+          `quer` atravessou a página de preços, o link do e-mail e a rota de
+          confirmação para chegar até aqui. Se ele morresse no caminho, esta
+          linha não apareceria e os dois botões ficariam iguais — que era
+          exatamente a tela de antes: a pessoa escolhia de novo o que já tinha
+          escolhido. Ela some para quem já assina: não há o que comprar. */}
+      {quer && !conta.assinante && (
+        <p className="small" style={{ marginTop: 12, marginBottom: 0 }}>
+          {(t.veioPara || '').replace('{plano}', quer === 'time' ? 'Team' : 'Personal')}
+        </p>
+      )}
+
       <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 14 }}>
         {conta.assinante ? (
           <form action={gerenciar}>
@@ -60,14 +73,18 @@ export function Plano({ conta, lang, t }: { conta: Conta; lang: Lang; t: Textos 
             <form action={comprar}>
               <input type="hidden" name="lang" value={lang} />
               <input type="hidden" name="plano" value="personal" />
-              <button className="btn" type="submit" disabled={semVenda}>{t.assinarPersonal}</button>
+              {/* O botão pedido é o cheio; o outro recua para fantasma. Não
+                  esconder o outro é de propósito: quem clicou errado na página
+                  de preços não pode ficar preso na escolha que fez lá. */}
+              <button className={quer === 'personal' || !quer ? 'btn' : 'btn ghost'}
+                      type="submit" disabled={semVenda}>{t.assinarPersonal}</button>
             </form>
             <form action={comprar} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
               <input type="hidden" name="lang" value={lang} />
               <input type="hidden" name="plano" value="time" />
               <input type="number" name="assentos" min={3} max={500} defaultValue={3}
                      aria-label={t.pessoasAria} style={{ width: 78 }} />
-              <button className="btn ghost" type="submit"
+              <button className={quer === 'time' ? 'btn' : 'btn ghost'} type="submit"
                       disabled={!temStripe || !PLANOS.time.preco()}>{t.assinarTeam}</button>
             </form>
           </>

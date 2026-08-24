@@ -283,7 +283,6 @@ SLUGS = {
     "verificar":   {"pt": "verificar",   "en": "verify",      "es": "verificar", "de": "pruefen", "fr": "verifier"},
     "comparativo": {"pt": "comparativo",  "en": "compare",     "es": "comparativa", "de": "vergleich", "fr": "comparatif"},
     "link":        {"pt": "link",        "en": "link",        "es": "link", "de": "link", "fr": "link"},
-    "time":        {"pt": "time",        "en": "team",        "es": "equipo", "de": "team", "fr": "equipe"},
     # A base de conhecimento. O endereço é traduzido porque é uma página de
     # BUSCA: ninguém procura "ajuda" em inglês.
     "ajuda":       {"pt": "ajuda",       "en": "help",        "es": "ayuda", "de": "hilfe", "fr": "aide"},
@@ -297,6 +296,29 @@ SLUGS = {
     "steps":       {"pt": "substituto-do-steps-recorder",
                     "en": "steps-recorder-replacement",
                     "es": "alternativa-al-steps-recorder", "de": "steps-recorder-ersatz", "fr": "alternative-au-steps-recorder"},
+}
+
+
+# ENDEREÇOS APOSENTADOS — publicados um dia, e que continuam respondendo.
+#
+# Um endereço que sai do ar não some: ele está em canonical já indexado, em
+# sitemap já enviado e em links que outras pessoas publicaram. Apagar a página e
+# deixar o endereço dar 404 é jogar fora o tráfego que ele custou.
+#
+# `time` saiu porque era ÓRFÃ e indexável: nenhuma página do site levava a ela, e
+# ela vendia o mesmo plano que a de preços. Duas páginas vendendo a mesma coisa é
+# o defeito que mais custou a este projeto — e a órfã é sempre a que ninguém
+# lembra de atualizar. O que ela dizia de único (como a chave é conferida, por
+# que a validade é curta) foi para a `/seguranca`, que é onde essa pergunta
+# nasce numa avaliação de fornecedor.
+#
+# Esta tabela vira `rotas.aposentadas`, e o `next.config.mjs` monta os
+# redirecionamentos a partir dela. Escrever a lista lá também seria a mesma lista
+# em dois lugares.
+APOSENTADAS = {
+    "time": {"para": "precos",
+             "slugs": {"pt": "time", "en": "team", "es": "equipo",
+                       "de": "team", "fr": "equipe"}},
 }
 
 
@@ -399,14 +421,6 @@ METAS = {
                       "Moderador y participante separados, momentos marcados durante la sesión y tapado para anonimizar. La grabación del participante no sale de tu ordenador."),
               "de": (f"Usability-Test, der zum Bericht wird — Walkstamp", "Moderator und Teilnehmer getrennt, Momente während der Sitzung markiert und Balken zum Anonymisieren. Die Aufnahme bleibt auf Ihrem Rechner."),
               "fr": (f"Test d’utilisabilité qui devient un rapport — Walkstamp", "Modérateur et participant séparés, moments marqués pendant la session et bandeau d’anonymisation. L’enregistrement reste sur votre poste.")},
-    "time": {"pt": (f"Plano Time: receba seu link por e-mail — {MARCA}",
-                    "Informe seu e-mail e receba um link que ativa o plano Time no navegador do seu time. Teste de 14 dias, sem cadastro, sem senha e sem cartão."),
-             "en": (f"Team plan: get your link by email — {MARCA}",
-                    "Enter your email and get a link that switches on the Team plan in your team's browser. 14-day trial, no sign-up, no password, no card."),
-             "es": (f"Plan Equipo: recibe tu enlace por correo — {MARCA}",
-                    "Escribe tu correo y recibe un enlace que activa el plan Equipo en el navegador de tu equipo. Prueba de 14 días, sin registro, sin contraseña y sin tarjeta."),
-            "de": (f"Plan Team: Link per E-Mail erhalten — Walkstamp", "Geben Sie Ihre E-Mail-Adresse an und erhalten Sie einen Link, der den Plan Team im Browser Ihres Teams aktiviert. 14 Tage, ohne Karte."),
-            "fr": (f"Offre Équipe : recevez votre lien par e-mail — Walkstamp", "Indiquez votre adresse e-mail et recevez un lien qui active l’offre Équipe dans le navigateur de votre équipe. Essai de 14 jours, sans carte.")},
     "steps": {"pt": (f"O Steps Recorder acabou — o que usar no lugar | {MARCA}",
                      "O Gravador de Etapas do Windows foi descontinuado e nada que a Microsoft indica gera documento de passos. O que fazer."),
               "en": (f"Steps Recorder is gone — what to use instead | {MARCA}",
@@ -563,6 +577,7 @@ def escrever_marca(root: pathlib.Path) -> None:
              "subConta": sub_conta,
              "abasNegocio": abas_negocio, "menuConta": menu_conta,
              "caminhoConta": CAMINHO_CONTA, "slugs": SLUGS,
+             "aposentadas": APOSENTADAS,
              "metas": {pg: {L: {"titulo": m[L][0], "desc": m[L][1]} for L in IDIOMAS}
                        for pg, m in METAS.items()},
              "scripts": {"detectarIdioma": so_o_js(REDIRECT),
@@ -1442,6 +1457,50 @@ def _team_minimo() -> int:
 
 TEAM_MINIMO = _team_minimo()
 
+
+def _planos_do_codigo() -> set:
+    """Os planos que `lib/stripe.ts` conhece, lidos de lá.
+
+    A vitrine chama o plano de `team`; o código chama de `time`. Os dois nomes
+    são legítimos — um é palavra de venda, o outro é chave da Stripe — e a
+    tradução entre eles tem de morar em UM lugar declarado, e não num `if`
+    escondido no meio de um gerador de HTML.
+    Ela mora no campo `planoCodigo` de cada cartão, e esta função existe para
+    conferi-lo: um `planoCodigo` que a Stripe não conhece derruba o build, em
+    vez de virar um `?plano=team` que a conta recebe e ignora em silêncio.
+    """
+    fonte = (ROOT / "lib" / "stripe.ts").read_text(encoding="utf-8")
+    bloco = re.search(r"export const PLANOS = \{(.*?)\n\} as const;", fonte, re.S)
+    if not bloco:
+        raise SystemExit("build.py: não achei `export const PLANOS` em lib/stripe.ts")
+    return set(re.findall(r"^  ([a-z][\w]*): \{", bloco.group(1), re.M))
+
+
+PLANOS_DO_CODIGO = _planos_do_codigo()
+
+
+def _intencao(cartao: dict) -> str:
+    """O `?plano=` que o botão de compra leva consigo.
+
+    O CLIQUE TEM DE CARREGAR O QUE A PESSOA QUIS. Sem isto, quem clicava
+    "Assinar o Team" chegava à conta e escolhia de novo — e entre o clique e a
+    chegada ainda havia um link de e-mail, que é onde a intenção morria de vez.
+    Três telas para dizer duas vezes a mesma coisa.
+
+    O cartão gratuito não leva nada: ele vai para a ferramenta, e não há o que
+    comprar. Um `?plano=free` seria um parâmetro que ninguém lê, e parâmetro que
+    ninguém lê é o começo de um que alguém lê errado.
+    """
+    codigo = cartao.get("planoCodigo")
+    if not codigo:
+        return ""
+    if codigo not in PLANOS_DO_CODIGO:
+        raise SystemExit(
+            f"build.py: o cartão '{cartao['id']}' declara planoCodigo={codigo!r}, "
+            f"que lib/stripe.ts não conhece. Conhecidos: {sorted(PLANOS_DO_CODIGO)}. "
+            "Um plano que a conta não reconhece vira um clique que se perde em silêncio.")
+    return f"?plano={codigo}"
+
 PRECO = {
     "free":     {"BRL": "R$ 0",   "USD": "US$ 0",  "EUR": "€ 0"},
     "personal": {"BRL": "R$ 149", "USD": "US$ 29", "EUR": "€ 27"},
@@ -1527,6 +1586,7 @@ CARTOES = [
     },
     {
         "id": "personal",
+        "planoCodigo": "personal",
         "titulo": {"pt": "Execute o seu roteiro", "en": "Run your test script",
                    "es": "Ejecute su guion", "de": "Führen Sie Ihr Testskript aus",
                    "fr": "Exécutez votre scénario"},
@@ -1592,6 +1652,7 @@ CARTOES = [
     },
     {
         "id": "team",
+        "planoCodigo": "time",
         "titulo": {"pt": "Coordene a rodada", "en": "Coordinate the round",
                    "es": "Coordine la ronda", "de": "Koordinieren Sie die Runde",
                    "fr": "Coordonnez la série"},
@@ -1879,7 +1940,7 @@ def blocos_de_precos(lang: str, rot: dict) -> dict:
             f'<div class="price">{preco}<span> {per}</span></div>'
             f'{extra}'
             f'<ul>{itens}</ul>'
-            f'<a class="btn" href="{{{{{c["destino"]}}}}}" data-cta="{pid}">{c["cta"][lang]}</a>'
+            f'<a class="btn" href="{{{{{c["destino"]}}}}}{_intencao(c)}" data-cta="{pid}">{c["cta"][lang]}</a>'
             f'</div>')
 
     linhas = []

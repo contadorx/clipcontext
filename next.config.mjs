@@ -124,6 +124,22 @@ const config = {
     for (const pg of paginas) {
       r.push({ source: `/pt/${slugs[pg].pt}`, destination: publico(pg, 'pt'), permanent: true });
     }
+    /* OS ENDEREÇOS APOSENTADOS. Uma página que sai do ar não some do mundo:
+       ela está em canonical indexado, em sitemap enviado e em links que outras
+       pessoas publicaram. Um 404 ali é jogar fora o tráfego que ela custou.
+       A lista sai do `rotas.json` — escrevê-la aqui seria a mesma lista em dois
+       lugares, que é o defeito que este projeto mais pagou. */
+    for (const [nome, velha] of Object.entries(rotas.aposentadas || {})) {
+      for (const L of idiomas) {
+        const de = `${PREFIXO[L]}/${velha.slugs[L]}`;
+        r.push({ source: de, destination: publico(velha.para, L), permanent: true });
+        r.push({ source: `${de}.html`, destination: publico(velha.para, L), permanent: true });
+        if (L === 'pt') r.push({ source: `/pt/${velha.slugs.pt}`,
+                                 destination: publico(velha.para, 'pt'), permanent: true });
+      }
+      void nome;
+    }
+
     // O site antigo era servido com `cleanUrls`, que aceitava `/precos.html` e
     // mandava para `/precos`. Continua aceitando: há links por aí com o `.html`.
     r.push({ source: '/index.html', destination: '/', permanent: true });

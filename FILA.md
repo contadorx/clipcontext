@@ -776,6 +776,31 @@ O defeito que mais custou a este projeto. Relatório em `BUILD-4.md`.
 
 ---
 
+## Aberto pelo Build 5 — o fluxo de entrada perdeu a régua
+
+A `/time` foi aposentada e o `timepag.mjs` **pula, alto**, dizendo o que se
+perdeu: seis afirmações sobre o caminho de entrada, que hoje ninguém cobre.
+
+    [3] e-mail malformado não sai do lugar
+    [4] pedir o link
+    [5] o limite de envio é dito, e não engolido
+    [6] a volta do link mágico entrega o link do plano
+    [7] degustação já usada tem resposta escrita, e não silêncio
+    [8] link do e-mail vencido
+
+**O fluxo não morreu — a maneira de testá-lo daqui morreu.** Ele mora em
+`entrar()` e na rota `/conta/confirmar`. Os blocos antigos falsificavam as
+respostas do Supabase interceptando chamadas do **navegador**; na conta essas
+chamadas acontecem no **servidor**, dentro de uma ação, e a interceptação do
+lado do navegador não alcança.
+
+Reescrever contra a arquitetura nova é trabalho de verdade — provavelmente um
+Supabase falso injetado por variável de ambiente, ou um modo de teste na ação.
+Não cabia no Build 5, e eu preferi um pulado escrito a um verde falso. O arquivo
+antigo, com os oito blocos, está na história do git para quem for reescrever.
+
+---
+
 ## Princípio — acabamento novo vai para recurso pago
 
 *Dado por você em 23/08, respondendo ao Build 4-A.*
@@ -796,22 +821,25 @@ item da fila propuser polimento em recurso gratuito.
 
 ---
 
-## Build 5 — O caminho até a compra *(3–4 d)*
+## Build 5 — O caminho até a compra — **feito**
 
-Cinco cliques da home ao checkout, um deles fora do site. Três coisas quebram no
-meio.
+Relatório em `BUILD-5.md`. Quatro dos sete itens da fila estavam errados; os
+números certos estão lá.
 
-- O clique de compra **não leva a intenção consigo**: quem clica "Assinar o
-  Personal" chega à conta e escolhe de novo. O parâmetro tem de sobreviver ao
-  link mágico
-- A degustação de 14 dias entra nos cartões e no FAQ *(DEC-4)*
-- `/time` é resolvida *(DEC-7)*
-- A base de conhecimento esconde 86% do próprio conteúdo do Ctrl+F — e os dois
-  links dela para `/precos` estão dentro de acordeões fechados
-- `/precos` não linka `/seguranca` nem `/verificar`, e `/seguranca` é um beco
-  sem saída
-- Código de 6 dígitos como alternativa ao link mágico *(DEC-13, só com seu ok)*
-- CTAs absolutos que quebram em prévia e em localhost
+- ✅ **A intenção de compra sobrevive ao caminho.** Ela morria em três pontos —
+  o cartão a levava num atributo de análise, o link do e-mail carregava só o
+  idioma, e a conta não a lia. As três pontes existem, e a chegada diz o que a
+  pessoa veio fazer
+- ✅ **`planoCodigo`**: a vitrine chama de `team`, a Stripe de `time`, e a
+  tradução virou um campo conferido contra `lib/stripe.ts` no build
+- ✅ **Quatro voltas apontavam para produção**, inclusive o link do e-mail: numa
+  prévia, quem testava a compra testava a de outro site
+- ✅ **A base de conhecimento** nasce aberta — eram 93% do texto fora do Ctrl+F
+- ✅ **`/precos` ↔ `/seguranca` ↔ `/verificar`**: os becos ganharam saída
+- ✅ **`/time` aposentada** *(DEC-7, caminho B)*. A mecânica da licença foi para
+  a `/seguranca`; os cinco endereços velhos devolvem 308 para a de preços
+- ⤳ **DEC-13** (código de 6 dígitos): fora deste build, por decisão sua
+- ⚠️ **O fluxo de entrada perdeu a régua** — item aberto acima
 
 ---
 

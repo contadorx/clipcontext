@@ -166,5 +166,47 @@
     Il n’y a pas de programme de récompense pour vulnérabilité, mais nous répondons.</p>
     <p class="small muted">Cette page décrit le fonctionnement à la date ci-dessus. Si quelque chose change d’une façon qui
     affecte ce qui est écrit ici, cette page change avec — et la date en haut est votre moyen de le vérifier.</p>
+
+
+    <!-- A MECÂNICA DA LICENÇA, VINDA DA `/time` — 23/08.
+         A `/time` era órfã: nenhuma página do site levava a ela, e ela estava
+         indexada. Duas páginas vendendo o mesmo plano é o defeito que mais
+         custou a este projeto, e a órfã é sempre a que ninguém lembra de
+         atualizar.
+         Ela foi redirecionada para a página de preços. Destas seções, o que
+         falava de administrar o time já existe na conta, e o que falava de
+         guardar dados e da versão offline já existe acima nesta página. O que
+         não tinha outro lugar é isto: como a chave é conferida e por que ela
+         vale pouco tempo. Numa avaliação de fornecedor é exatamente a pergunta
+         que vem depois de "o que sai da minha máquina". -->
+<h2>Comment cela fonctionne à l’intérieur</h2>
+    <ol class="passos">
+      <li><b>Vous demandez.</b> Vous écrivez l’e-mail ici. Rien n’est décidé à ce moment-là : il ne part qu’un message vers
+      votre boîte.</li>
+      <li><b>Vous cliquez sur ce qui est arrivé.</b> C’est cela qui prouve que l’adresse est à vous — et c’est le seul moment où
+      il existe quelque chose qui ressemble à une session.</li>
+      <li><b>Vous revenez avec le lien prêt.</b> La clé est signée sur le serveur, avec votre e-mail à l’intérieur, et
+      livrée déjà à l’intérieur d’une adresse de {{marca}}.</li>
+      <li><b>À partir de là, plus rien qui passe par le réseau.</b> La clé est vérifiée <b>à l’intérieur du navigateur</b>, contre
+      une clé publique qui se trouve dans le HTML même de l’outil. Elle fonctionne dans l’avion, sur la machine du
+      client avec internet verrouillé, et sur l’ordinateur que la DSI ne laisse pas parler avec notre hébergement.</li>
+    </ol>
+
+    <h2>Pourquoi la validité est courte</h2>
+    <p>Chaque clé émise vaut <b>45 jours</b> (14 pour l’essai), et la suivante arrive par e-mail avant que la
+    précédente n’expire. L’administrateur peut raccourcir ce délai, de 1 à 90 jours, dans le portail de l’équipe. Ce n’est pas de la bureaucratie : c’est ce qui fait qu’un lien fuité <b>meurt tout seul</b>. Comme aucun
+    serveur ne vérifie quoi que ce soit pendant l’usage, il n’existe pas de bouton de révocation — la durée est la révocation. C’est
+    l’arbitrage choisi exprès : nous préférons une fuite qui expire à un produit payant qui cesse de
+    fonctionner quand internet tombe.</p>
+
+    <!-- A SAÍDA — 23/08. Esta página era um beco: saía só para a política de
+         privacidade. Quem termina de ler aqui já resolveu a pergunta que o
+         trouxe, e a próxima pergunta dele tem endereço. -->
+    <h2>{{confiancaTit}}</h2>
+    <p>{{segSaida}}</p>
+    <p class="row" style="margin:12px 0 0">
+      <a class="btn ghost" href="{{verificar}}">{{fVerif}}</a>
+      <a class="btn ghost" href="{{precos}}">{{navPrice}}</a>
+    </p>
   </div>
 </section>

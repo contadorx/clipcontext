@@ -161,22 +161,28 @@ const corpo = () => pg.locator('body').innerText();
 
 /* ------------------------------------------------------------------ provas */
 
-console.log('[1] o painel SUMIU da /time — e ela virou o que é');
-{
-  const t = await (await fetch(`${BASE}/time`)).text();
-  /* O nome da função ainda aparece — num COMENTÁRIO que conta o que foi
-     tirado e por quê. O que não pode existir é a chamada. */
-  ok('a /time não CHAMA mais a Edge Function do time', !t.includes('functions/v1/walkstamp-time'));
-  ok('nem tem o painel dentro dela', !/tpAba|pintarPainel|tpConteudo/.test(t));
-  ok('mas continua emitindo a chave, que é a porta de entrada',
-     t.includes('walkstamp-licenca') && t.includes('tmEnviar'));
-  ok('e aponta para a conta', /href="\/conta"/.test(t));
-  for (const [rota, destino] of [['/en/team', '/en/account'], ['/es/equipo', '/es/cuenta']]) {
-    const x = await (await fetch(BASE + rota)).text();
-    ok(`${rota} aponta para ${destino}`, x.includes(`href="${destino}"`));
-    ok(`${rota} também perdeu o painel`, !x.includes('functions/v1/walkstamp-time'));
-  }
-}
+/* [1] SAIU DAQUI — a `/time` não existe mais.
+ *
+ * Este bloco afirmava o contrato da página `/time`: que o painel do time tinha
+ * saído dela, que ela ainda emitia a chave, e que ela apontava para a conta.
+ * Era um contrato correto enquanto a página existia.
+ *
+ * Ela era ÓRFÃ e indexável — nenhuma página do site levava a ela — e vendia o
+ * mesmo plano que a de preços. Duas páginas vendendo a mesma coisa é o defeito
+ * que mais custou a este projeto; e é o mesmo motivo pelo qual DUAS RÉGUAS
+ * sobre a mesma página também não podem ficar: a que ninguém lembra de
+ * atualizar fica vermelha, e o vermelho vira paisagem.
+ *
+ * Para onde foi cada afirmação:
+ *   o endereço velho continua respondendo → `compra.mjs [6]`, nos cinco
+ *     idiomas, cobrando o 308 e a saída do sitemap;
+ *   o painel do time só existe na conta  → os blocos [2] e [3] logo abaixo,
+ *     que são sobre a conta e continuam valendo;
+ *   a emissão da chave                    → `licenca.mjs`, que é onde ela
+ *     sempre morou de verdade.
+ */
+
+console.log('[1] (a /time foi aposentada — ver compra.mjs [6])');
 
 console.log('\n[2] quem não administra não vê painel de time');
 {
