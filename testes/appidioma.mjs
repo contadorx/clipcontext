@@ -58,6 +58,18 @@ for (const L of ['pt','en','es','de','fr']) {
     (as) => as.map(a => a.textContent.trim()).filter(t => /^(PT|EN|ES|DE|FR)$/.test(t)));
   ok('as cinco siglas estão no cabeçalho', siglas.length === 5, siglas.join(' '));
 
+  /* O IDIOMA DA FALA TEM QUE PODER SER FIXADO NOS CINCO.
+     O seletor `#lang` tinha pt, en, es e automático. O sintoma não era a opção
+     faltando — era `$('lang').value = LANG` não achar a opção `de` e deixar o
+     campo VAZIO, que neste seletor significa auto-detecção. Alemão e francês
+     eram os dois únicos idiomas que nunca conseguiam fixar a transcrição, e a
+     tela não mostrava erro nenhum: o produto simplesmente adivinhava.
+     A régua cobra o VALOR EFETIVO, e não a existência da opção — era o valor
+     efetivo que estava errado. */
+  ok(`${L}: o idioma da fala fica em ${L}, e não em automático`,
+     (await pg.locator('#lang').inputValue()) === L,
+     await pg.locator('#lang').inputValue());
+
   ok('a aba de ajuda aponta para o site no idioma certo',
      ((await pg.locator('#abaKb').getAttribute('href')) || '')
        .includes({pt:'/ajuda',en:'/en/help',es:'/es/ayuda',de:'/de/hilfe',fr:'/fr/aide'}[L]),

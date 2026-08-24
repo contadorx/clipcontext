@@ -122,7 +122,17 @@ await pg.selectOption('#mode', 'count'); await pg.fill('#count', '4');
 await pg.locator('#extract').click();
 await pg.waitForFunction(() => document.querySelectorAll('#thumbs figure').length >= 4,
                          null, { timeout: 40000 });
-await pg.waitForTimeout(600);
+/* ESPERAR A ASSINATURA, E NÃO O RELÓGIO.
+   Aqui havia `waitForTimeout(600)`. As miniaturas aparecem antes de as
+   assinaturas de imagem estarem calculadas, e é delas que sai o "há repetido?"
+   — então 600ms era uma aposta em quanto tempo a máquina levaria. Sob carga a
+   aposta perde: o plano de faxina chegava DEPOIS da leitura, e a frase da
+   próxima ação virava "remover 1 tela repetida" no meio de um bloco que
+   pergunta outra coisa. Mesma família do `modelo`, do `rolar` e do `espera2`. */
+await pg.waitForFunction(
+  () => { const q = window.__quadros ? window.__quadros() : [];
+          return q.length >= 4 && q.every((f) => f.sig); },
+  null, { timeout: 40000 });
 
 console.log('\n[3] com quadros, a barra anda sozinha');
 {

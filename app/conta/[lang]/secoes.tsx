@@ -244,7 +244,15 @@ export function Time({ conta, lang, t }: { conta: Conta; lang: Lang; t: Textos }
       <form action={ajustar} style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center', marginTop: 16 }}>
         <input type="hidden" name="lang" value={lang} />
         <label className="small" htmlFor="dias">{t.timePrazo}</label>
-        <input id="dias" name="dias" type="number" min={1} max={90} defaultValue={p.dias ?? 90} style={{ width: 78 }} />
+        {/* O PADRÃO VEM DO `lib/stripe.ts`, e não de um número escrito aqui.
+            Era `?? 90`, e o webhook da Stripe grava o que o `PLANOS` diz — 21.
+            Um time sem prazo gravado via o formulário oferecer NOVENTA e
+            acreditava que o prazo era esse; salvar sem tocar no campo trocava
+            um prazo de três semanas por um de três meses, que é justamente o
+            contrário do que este número serve para fazer. Terceiro lugar onde
+            o prazo estava escrito, e o único que discordava dos outros dois. */}
+        <input id="dias" name="dias" type="number" min={1} max={90}
+               defaultValue={p.dias ?? PLANOS.time.dias} style={{ width: 78 }} />
         <span className="small muted">{t.timeDias}</span>
         <label className="small" htmlFor="assentos">{t.timeAssentos}</label>
         <input id="assentos" name="assentos" type="number" min={1} max={500}

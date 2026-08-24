@@ -64,7 +64,23 @@ export const PLANOS = {
     // e a de preços digam a MESMA palavra nos cinco idiomas. Mudar aqui e
     // esquecer o texto reprova a suíte — que é exatamente o que se quer.
     assentos: 3,
-    dias: 45,
+    // VINTE E UM, E NÃO QUARENTA E CINCO — 24/08.
+    //
+    // Este número é o único controle real de revogação que existe sem um
+    // servidor no caminho do uso: bloquear um membro impede a PRÓXIMA emissão,
+    // e a chave que já está no navegador dele vale até vencer. Com 45, cortar
+    // alguém podia levar mês e meio. Com 21, leva no máximo três semanas.
+    //
+    // Por que não 14, que seria mais rápido: 14 é o prazo da DEGUSTAÇÃO, e a
+    // ferramenta identifica degustação por dias restantes. Dois prazos iguais
+    // com significados diferentes é a próxima confusão esperando acontecer.
+    //
+    // O custo é de quem trabalha desconectado: a chave precisa ser renovada
+    // mais vezes. Quem abre a ferramenta com sessão renova sozinho (a janela é
+    // de 10 dias, e cabe dentro dos 21); quem não tem sessão é avisado antes,
+    // com o link da conta. O administrador pode subir até 90 na tela da conta —
+    // o controle é dele, e o `timeAviso` explica o que cada escolha custa.
+    dias: 21,
   },
 } as const;
 

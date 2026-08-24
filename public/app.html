@@ -1942,10 +1942,19 @@
           <option value="onnx-community/whisper-small" data-i18n="mSmall"></option>
           <option value="onnx-community/whisper-large-v3-turbo" data-i18n="mTurbo"></option>
         </select>
+        <!-- ALEMÃO E FRANCÊS FALTAVAM AQUI — 24/08.
+             O site fala cinco idiomas e esta lista tinha três. O efeito não era
+             a opção ausente: era `$('lang').value = LANG` não achar a opção
+             `de` e deixar o campo VAZIO, que neste seletor quer dizer
+             auto-detecção. Os dois mercados que fazem avaliação de fornecedor
+             eram os únicos que nunca conseguiam fixar o idioma da transcrição,
+             e ninguém via porque a tela não mostrava erro nenhum. -->
         <select id="lang" style="width:auto">
           <option value="pt">Português</option>
           <option value="en">English</option>
           <option value="es">Español</option>
+          <option value="de">Deutsch</option>
+          <option value="fr">Français</option>
           <option value="" data-i18n="autoDetect"></option>
         </select>
         <!-- O microfone é uma ENTRADA de transcrição, então mora com as outras.
@@ -9241,7 +9250,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      depois, e não tem como se atualizar sozinho. Sem carimbo, "estou com um
      problema no offline" é uma conversa sem chão — ninguém sabe de qual build
      se fala nem se o defeito já foi consertado. */
-  const VERSAO = '2026.08.24-36';
+  const VERSAO = '2026.08.24-41';
   window.__versao = () => VERSAO;
 
   const PIP_CSS = `
@@ -13737,6 +13746,21 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      uma degustação. Catorze dias é o que o emissor dá a um e-mail novo; uma
      licença de noventa é contrato, e contrato não se chama de degustação. */
   function diasDeDegustacao(){
+    /* UM TIME NUNCA É DEGUSTAÇÃO — 24/08, e isto era uma frase falsa dita a
+       quem paga.
+       A regra abaixo identifica degustação por DIAS RESTANTES, que é um palpite:
+       a chave não carrega a data de emissão, só a de vencimento, então não há
+       como saber se catorze dias são o começo de uma degustação ou o fim de um
+       contrato. Com a chave de time valendo 45 dias, os últimos catorze diziam
+       "Degustação: 14 dias restantes" para um cliente pagante — e encurtar o
+       prazo para 21 faria isso valer por mais tempo ainda.
+       Degustação é de e-mail novo, e e-mail novo não vem com plano de time. É a
+       única distinção que os dados da chave permitem fazer com segurança.
+       O que fica: uma chave PERSONAL curta continua sem como ser distinguida de
+       uma degustação, porque as duas se parecem em tudo que a chave carrega.
+       Resolver aquilo exige a data de emissão dentro da licença, e isso é o
+       emissor — que não mora neste repositório. */
+    if (licenca && licenca.p === 'time') return null;
     /* `a` é a data de validade da licença, o mesmo campo que a frase "até {2}"
        já mostra. Extraído em AAAA-MM-DD para não depender do formato de
        exibição, que muda com o idioma. */
@@ -17660,6 +17684,40 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
 
   const semAcento = txt => txt.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 
+  /* ---- O ALEMÃO ESCRITO SEM TECLADO ALEMÃO ----
+
+     `semAcento` decompõe em NFD e joga fora o que for acento combinante. Isso
+     resolve `é` → `e` e `ü` → `u`, e NÃO resolve o alemão: o `ß` não decompõe
+     em nada, e a forma que um alemão escreve quando não tem a tecla não é `u`,
+     é `ue`. São duas grafias legítimas da MESMA palavra, e a tabela só tinha
+     uma.
+
+     Medido antes do conserto, com o código do produto:
+
+         dreißig                       → 30       certo
+         dreissig                      → dreissig NADA
+         zweihundertfünfunddreißig     → 235      certo
+         zweihundertfuenfunddreissig   → falhava inteiro
+
+     Ou seja: quem transcreve alemão sem trema perdia o recurso todo, e isso
+     não é lacuna de escuta — é ortografia alemã documentada, do mesmo tipo do
+     hífen francês que a tabela já trata. O comentário do `APELIDOS` até
+     anunciava a regra do `ß`; ela nunca tinha sido escrita em lugar nenhum.
+
+     A troca NÃO entra no `semAcento`: lá ela quebraria os outros idiomas, onde
+     `ü` → `u` é o certo (o `aiguë` francês viraria `aigue` + `e`). Ela gera uma
+     chave A MAIS na tabela, e as duas grafias passam a achar o mesmo número. */
+  const TRANSLIT_DE = { 'ä':'ae', 'ö':'oe', 'ü':'ue', 'ß':'ss' };
+  function chavesExtras(txt, L){
+    if (L !== 'de') return [];
+    const t2 = String(txt).toLowerCase()
+      .replace(/[äöüß]/g, (c) => TRANSLIT_DE[c]);
+    const norm = semAcento(t2).toLowerCase().replace(/-/g, ' ').replace(/\s+/g, ' ').trim();
+    const base = semAcento(String(txt)).toLowerCase()
+      .replace(/-/g, ' ').replace(/\s+/g, ' ').trim();
+    return (norm && norm !== base) ? [norm] : [];
+  }
+
   /* O caminho inverso: pegar o que foi FALADO e reduzir a uma sigla comparável.
 
      A primeira versão gerava todas as formas faladas de "ME21N" e procurava por
@@ -17686,34 +17744,65 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      escreve com C — a tabela dizia "ká", tirar o acento dava "ka", e nada casava.
      Grafia certa não serve para reconhecer fala. */
   const APELIDOS = {
-    pt: { k:['ca','kappa','cappa'], h:['aga'], w:['dabliu','double u','dabliu'],
-          y:['ipsilon','ypsilon','i grego'], q:['ke','ku'], r:['er'], s:['es'],
-          x:['chis','shis'], z:['zeta'], j:['jotta'], g:['je'], e:['e'] },
+    /* SEIS ENTRADAS SAÍRAM DAQUI, e nenhuma delas fazia nada — 24/08.
+       `pt h:'aga'` é o que `semAcento('agá')` já devolve; `pt y:'ipsilon'` idem;
+       `pt e:'e'` idem; `pt w` tinha `'dabliu'` DUAS vezes na mesma lista;
+       `es k:'ka'` e `es y:'i griega'` são a própria grafia do `LETRAS`.
+       Um apelido que repete a grafia correta não acrescenta chave nenhuma ao
+       `NOME_LETRA` — ele só faz a lista parecer maior do que é, e uma lista que
+       mente sobre o próprio tamanho é a que esconde o buraco seguinte. O
+       `numeros.mjs [7]` passou a reprovar isso. */
+    pt: { k:['ca','kappa','cappa'], w:['dabliu','double u'],
+          y:['ypsilon','i grego'], q:['ke','ku'], r:['er'], s:['es'],
+          x:['chis','shis'], z:['zeta'], j:['jotta'], g:['je'] },
     en: { k:['kei'], w:['double you','doubleu'], y:['wai'], z:['zed'], h:['aich'] },
-    es: { k:['ca','ka'], w:['doble ve','uve doble'], y:['ye','i griega'],
+    es: { k:['ca'], w:['doble ve','uve doble'], y:['ye'],
           z:['ceta'], h:['ache'], j:['jotta'] },
-    /* ALEMÃO E FRANCÊS ENTRAM SEM APELIDO CONFERIDO — 24/08, e isto é uma
-       lacuna dita, não um esquecimento.
+    /* ALEMÃO E FRANCÊS: A GRAFIA DE DICIONÁRIO, E NÃO A ESCUTA — 24/08.
+       Isto continua sendo uma lacuna dita, e a lacuna não fechou.
+
        O `APELIDOS` existe porque a grafia CERTA não serve para reconhecer fala:
        em português o K é dito "cá" e o modelo escreve com C, e foi isso que
        derrubou a primeira versão deste recurso. Cada linha das três de cima
-       veio de ouvir o Whisper errar.
-       Para `de` e `fr` eu não tenho essa escuta — só a grafia correta, que já
-       está no `LETRAS`. As poucas abaixo são as que a própria ortografia
-       justifica, e não medição: o alemão escreve `ß` como `ss`, e o francês
-       escreve as compostas com e sem hífen. Quando alguém falar num microfone
-       nesses idiomas, esta lista cresce. */
-    de: { s:['es'], z:['zett','tset'], y:['upsilon'], v:['vau'], w:['ve'], j:['jot'] },
-    fr: { w:['double ve','doublevé'], y:['igrec','i grecque'], z:['zed'], k:['kappa'],
-          h:['hache'], x:['ix'] }
+       veio de ouvir o Whisper errar. Para `de` e `fr` essa escuta não existe —
+       o modelo não roda na máquina onde estas listas são escritas.
+
+       O QUE A PRIMEIRA VERSÃO DIZIA, E ESTAVA ERRADO: que as entradas de baixo
+       vinham do `ß` escrito como `ss` e das compostas francesas com e sem
+       hífen. Nenhuma delas tratava disso. O hífen já era resolvido na tabela de
+       números, e o `ß` não estava resolvido em lugar NENHUM — era um defeito, e
+       está consertado no `chavesExtras`, que é onde ele sempre pertenceu.
+
+       O que estas listas são, dito com o nome certo: as grafias que o Duden e a
+       Académie registram para o nome de cada letra. Não são medição, e um
+       modelo pode perfeitamente escrever outra coisa. São o palpite mais
+       defensável que existe sem microfone — um modelo treinado em texto escrito
+       tende a produzir a grafia que o texto escrito usa —, e são ADITIVAS: a
+       grafia do `LETRAS` continua valendo, e nenhuma delas tira nada.
+
+       Quando alguém falar num microfone nesses idiomas, esta lista muda. */
+    de: { b:['be'], c:['ce','zeh'], d:['de'], f:['ef'], g:['ge'], h:['ha'],
+          j:['jot'], k:['ka'], l:['el'], m:['em'], n:['en'], p:['pe'],
+          q:['qu','ku'], r:['er'], s:['es'], t:['te'], v:['vau'],
+          w:['we','ve'], x:['ix'], y:['upsilon'], z:['zett','tset'] },
+    fr: { f:['ef'], h:['hache'], j:['gi'], k:['kappa'], l:['el'], m:['em'],
+          n:['en'], q:['qu','cu'], r:['er'], s:['es'],
+          w:['doublevé','double v'], x:['ix','ixe'], y:['igrec','i grecque'],
+          z:['zed'] }
   };
 
   const NOME_LETRA = {};
   for (const L in LETRAS) {
     NOME_LETRA[L] = {};
-    for (const letra in LETRAS[L]) NOME_LETRA[L][semAcento(LETRAS[L][letra])] = letra;
+    for (const letra in LETRAS[L]) {
+      NOME_LETRA[L][semAcento(LETRAS[L][letra])] = letra;
+      for (const e of chavesExtras(LETRAS[L][letra], L)) NOME_LETRA[L][e] = letra;
+    }
     const ap = APELIDOS[L] || {};
-    for (const letra in ap) ap[letra].forEach(w => { NOME_LETRA[L][semAcento(w)] = letra; });
+    for (const letra in ap) ap[letra].forEach(w => {
+      NOME_LETRA[L][semAcento(w)] = letra;
+      for (const e of chavesExtras(w, L)) NOME_LETRA[L][e] = letra;
+    });
   }
 
   /* A TABELA: sequência de palavras → valor, de 0 a 999.
@@ -17737,6 +17826,11 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
            crescente e não sobrescrevendo, a leitura curta e comum vence. */
         if (!(chave in mapa)) mapa[chave] = n;
         maxPalavras = Math.max(maxPalavras, chave.split(' ').length);
+        /* E a mesma palavra escrita sem trema, quando a língua tem as duas. */
+        for (const extra of chavesExtras(String(forma), L)) {
+          if (!(extra in mapa)) mapa[extra] = n;
+          maxPalavras = Math.max(maxPalavras, extra.split(' ').length);
+        }
       }
     }
     /* O `e` NÃO volta daqui, e a ausência é o ponto: o conector já está DENTRO

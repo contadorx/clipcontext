@@ -120,6 +120,44 @@ for (const lg of LINGUAS) {
      errados.length === 0, errados.join(', '));
 }
 
+/* ---- [3b] o prazo da chave é um número só, e a /seguranca o publica -------
+
+   O PRAZO É O CONTROLE DE REVOGAÇÃO deste produto: bloquear um membro impede a
+   PRÓXIMA emissão, e a chave que já está no navegador dele vale até vencer.
+   Quem lê a `/seguranca` está decidindo se aprova o fornecedor, e o número que
+   ele lê ali é o que ele vai escrever no parecer.
+
+   Em 24/08 o prazo do time caiu de 45 para 21 dias — e as cinco páginas de
+   segurança diziam 45. Era o TERCEIRO lugar onde o prazo estava escrito, e o
+   `lib/stripe.ts` é o único que manda: é dele que o webhook da Stripe grava o
+   valor no banco. Uma régua que lê os dois é o que impede o número de
+   envelhecer numa página que ninguém reabre. */
+{
+  const dias = (plano) => {
+    const b = stripe.slice(stripe.indexOf(plano + ':'));
+    const m = /dias:\s*(\d+)/.exec(b);
+    return m ? Number(m[1]) : 0;
+  };
+  const dTime = dias('time'), dPessoal = dias('personal');
+  ok(`o lib/stripe.ts diz ${dTime} dias no time e ${dPessoal} no individual`,
+     dTime > 0 && dPessoal > 0, `${dTime} / ${dPessoal}`);
+  for (const lg of LINGUAS) {
+    const txt = corpo('seguranca', lg);
+    /* O parágrafo do prazo, e não a página inteira: outros números da página
+       (90 dias de expurgo, 14 da degustação) não podem responder por este. */
+    const par = (txt.split('\n').find((l) => /<b>\d+ (dias|days|días|Tage|jours)<\/b>/.test(l)) || '');
+    ok(`seguranca.${lg}: publica os ${dTime} dias do time`,
+       new RegExp(`<b>${dTime} `).test(par), par.trim().slice(0, 100));
+    ok(`seguranca.${lg}: e os ${dPessoal} do individual`,
+       new RegExp(`<b>${dPessoal}</b>|<b>${dPessoal} `).test(par), par.trim().slice(0, 100));
+    /* E o número velho não pode ter sobrado em lugar nenhum do parágrafo. */
+    const velhos = [45, 30, 60, 90].filter((v) => v !== dTime && v !== dPessoal)
+      .filter((v) => new RegExp(`<b>${v}[< ]`).test(par));
+    ok(`seguranca.${lg}: e nenhum prazo velho sobrou`, velhos.length === 0,
+       velhos.join(', '));
+  }
+}
+
 /* ---- [4] o cartão que administra assentos não pode dizer "sem login" ------
    O rodapé do cartão Team terminava, nos cinco idiomas, em "sem login e sem
    exigir cadastro para a sua TI aprovar" — três linhas abaixo de "painel de
