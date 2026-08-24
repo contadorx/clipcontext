@@ -5,7 +5,7 @@
     Esta política descreve o funcionamento atual do {{marca}}: a ferramenta não possui servidor de
     processamento, e existe uma conta opcional — descrita mais abaixo — para quem contrata um plano pago.</p>
 
-    <p class="lockHint" style="border-left:3px solid var(--accent);padding-left:12px;margin:0 0 26px">
+    <p class="lockHint" style="margin:0 0 26px">
     Até 14 de agosto de 2026 este serviço se chamava <b>ClipContext</b>. Só o nome mudou — a
     controladora, as bases legais e os prazos abaixo continuam exatamente os mesmos.</p>
 
@@ -47,7 +47,7 @@
     gera.</b> Isso não mudou, vale em todos os planos, e é a promessa que sustenta o produto — não é uma
     configuração que a gente possa afrouxar depois.</p>
     <p>O que existe é isto, e está detalhado mais abaixo: uma contagem de visitas sem cookie e sem
-    identificador; uma contagem anônima de três marcos de uso; o e-mail, se você deixá-lo na página de
+    identificador; uma contagem anônima de quinze marcos de uso; o e-mail, se você deixá-lo na página de
     preços; e, para quem contrata um plano pago, uma <b>conta</b> — com o e-mail de acesso, as faturas, os
     chamados de suporte e a <b>lista de casos a executar</b>, quando você usa a tela de roteiro. Usar a
     ferramenta continua não exigindo conta: sem login, ela grava, transcreve e gera documento exatamente
@@ -75,13 +75,16 @@
     <ul>
       <li><strong>Visitas de página</strong>, pelo Vercel Web Analytics. Sem cookie e sem identificador que
       persista entre visitas. Serve para saber quantas pessoas chegaram e por qual caminho.</li>
-      <li><strong>Três marcos de uso</strong>, dentro da ferramenta: que ela foi aberta, que um vídeo foi
-      aberto com sucesso, e que um arquivo de saída foi baixado. Junto vai o idioma da página, a origem do
-      vídeo (arquivo, Drive, gravação ou exemplo) e o formato baixado. <strong>Nada mais.</strong> Não vai nome
+      <li><strong>Quinze marcos de uso</strong> — onze dentro da ferramenta e quatro dentro da conta:
+      que a ferramenta foi aberta, que um vídeo foi aberto com sucesso, que um arquivo de saída foi
+      baixado, que uma transcrição começou, que uma licença foi ativada, que um roteiro foi importado,
+      que um caso foi concluído, que um pagamento foi iniciado, e assim por diante. Junto vai o idioma da
+      página, a origem do vídeo (arquivo, Drive, gravação ou exemplo), o formato baixado, uma faixa
+      (&ldquo;4-10&rdquo;, e nunca o número exato) e o plano. <strong>Nada mais.</strong> Não vai nome
       de arquivo, tamanho, duração, conteúdo, nem qualquer identificador de sessão — não há como ligar dois
       marcos à mesma pessoa, nem esta visita à próxima.</li>
     </ul>
-    <p>Se o seu navegador envia <em>Do Not Track</em> ou <em>Global Privacy Control</em>, os três marcos não
+    <p>Se o seu navegador envia <em>Do Not Track</em> ou <em>Global Privacy Control</em>, os quinze marcos não
     são enviados. E a <strong>versão offline</strong> — o arquivo único que você baixa — sai do build sem
     endereço nenhum de medição dentro: ela não fala com ninguém, e dá para conferir procurando por
     &ldquo;supabase&rdquo; no arquivo.</p>
@@ -221,7 +224,7 @@
     cliente pode se opor; havendo oposição que não consigamos acomodar, ele pode encerrar a assinatura sem
     multa e levar os dados consigo.</p>
 
-    <div class="lockHint" style="border-left:3px solid var(--accent);padding-left:12px;margin:22px 0">
+    <div class="lockHint" style="margin:22px 0">
       <p style="margin:0 0 8px"><b>Nada seu treina modelo de IA.</b></p>
       <p style="margin:0">Nenhum conteúdo seu — vídeo, áudio, transcrição, documento gerado ou anexo de
       sessão — é usado para treinar modelo de inteligência artificial, nosso ou de terceiro. <b>Não há
@@ -354,7 +357,7 @@
 
     <h2>Cookies</h2>
     <p>Não utilizamos cookies próprios nem de terceiros — nem para rastreamento, nem para publicidade,
-    nem para medição. A contagem de visitas e os três marcos descritos acima funcionam <b>sem cookie e sem
+    nem para medição. A contagem de visitas e os quinze marcos descritos acima funcionam <b>sem cookie e sem
     identificador que persista entre visitas</b>, e é justamente por isso que não existe aviso de cookies
     nesta página: não haveria o que consentir.</p>
 
@@ -376,7 +379,7 @@
       <tr><th>Dado</th><th>Para quê</th><th>Base legal</th><th>Prazo</th></tr>
       <tr><td>E-mail da lista de aviso</td><td>Avisar quando o plano pago existir</td>
           <td>Consentimento (art. 7º, I)</td><td>Até você revogar, ou 24 meses sem uso</td></tr>
-      <tr><td>Os três marcos de uso</td><td>Saber onde a ferramenta falha e melhorar</td>
+      <tr><td>Os quinze marcos de uso</td><td>Saber onde a ferramenta falha e melhorar</td>
           <td>Dado anonimizado (art. 12); na dúvida, legítimo interesse (art. 7º, IX)</td>
           <td>18 meses</td></tr>
       <tr><td>Visitas de página</td><td>Saber quantas pessoas chegam e por onde</td>

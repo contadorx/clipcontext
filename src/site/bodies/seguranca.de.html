@@ -5,7 +5,7 @@
     Diese Seite richtet sich an alle, die den Einsatz von {{marca}} in einem Unternehmen freigeben müssen: wie
     es funktioniert, was Ihren Rechner verlässt und was wir <b>nicht</b> haben.</p>
 
-    <p class="lockHint" style="border-left:3px solid var(--accent);padding-left:12px;margin:0 0 26px">
+    <p class="lockHint" style="margin:0 0 26px">
     <b>In einem Satz:</b> Das Werkzeug hat keinen Verarbeitungsserver und erhält weder Ihr Video noch Ihr
     Audio noch Ihre Screenshots. Das gilt in allen Plänen, und Sie müssen es nicht glauben — Sie können es
     in dreißig Sekunden prüfen, mit dem Browser, den Sie ohnehin offen haben. Wer einen bezahlten Plan
@@ -57,10 +57,10 @@
       <tr><td>Vercel Web Analytics</td><td>Immer; sendet nichts, wenn der Browser <i>Do&nbsp;Not&nbsp;Track</i> oder <i>Global Privacy Control</i> übermittelt</td>
           <td>Welche Seite aufgerufen wurde, ohne Cookie und ohne dauerhafte Kennung</td>
           <td>Eine Kennung für Person oder Sitzung</td></tr>
-      <tr><td>Supabase (Nutzungsmeilensteine)</td><td>Zu drei Zeitpunkten: Werkzeug geöffnet, Video geöffnet, Datei heruntergeladen. Beachtet DNT und GPC</td>
-          <td>Der Name des Meilensteins, die Sprache der Seite, die Herkunft des Videos und das heruntergeladene Format</td>
+      <tr><td>Supabase (Nutzungsmeilensteine)</td><td>Bei fünfzehn Meilensteinen, elf im Werkzeug und vier im Konto — Werkzeug geöffnet, Video geöffnet, Datei heruntergeladen, Ablauf importiert, Zahlung begonnen, unter anderem. Beachtet DNT und GPC</td>
+          <td>Der Name des Meilensteins, die Sprache der Seite, die Herkunft des Videos, das heruntergeladene Format, eine Spanne („4-10“, nie die genaue Zahl) und der Tarif</td>
           <td>Dateiname, Größe, Dauer, Inhalt, Sitzungskennung</td></tr>
-      <tr><td>jsDelivr (öffentliches CDN)</td><td>Nur bei Nutzung der automatischen Transkription oder des Auslesens von Text aus dem Bild</td>
+      <tr><td>jsDelivr (öffentliches CDN)</td><td>Beim Laden des Werkzeugs (die PDF-Bibliothek) und bei Nutzung der automatischen Transkription oder des Auslesens von Text aus dem Bild</td>
           <td>Die Anfrage nach der Bibliothek</td><td>Ihr Audio, Ihr Bild, Ihr Text</td></tr>
       <tr><td>Hugging Face</td><td>Nur beim Auslösen der automatischen Transkription, und einmal pro Browser</td>
           <td>Die Anfrage nach dem Spracherkennungsmodell</td><td>Ihr Audio</td></tr>
@@ -72,7 +72,7 @@
           <td>Nichts außer dem Dokument, das Sie gesendet haben; es geht von Ihrem Browser direkt an Google, ohne über uns zu laufen</td></tr>
     </table>
     <p><b>Keine dieser Verbindungen überträgt Video, Audio, Bild oder Transkription.</b>
-    Die PDF-Bibliothek wird von unserer eigenen Domain ausgeliefert und nicht von einem CDN.</p>
+    Die PDF-Bibliothek kommt zusammen mit der Seite von jsDelivr; eingebettet wird sie erst im Offline-Paket.</p>
     <p>Es gibt eine Ausnahme, und sie steht in der Tabelle, statt versteckt zu sein: Die Schaltfläche
     <b>An Google Docs senden</b> ist die einzige Funktion, bei der das <b>erzeugte Dokument den Rechner
     verlässt</b>. Sie existiert, weil viele Teams Nachweise in Drive prüfen, und sie verlangt vor dem Senden
@@ -173,5 +173,47 @@
     <p class="small muted">Diese Seite beschreibt die Funktionsweise zum oben genannten Datum. Wenn sich etwas
     so ändert, dass es das hier Geschriebene betrifft, ändert sich diese Seite mit — und das Datum oben ist,
     woran Sie das überprüfen.</p>
+
+
+    <!-- A MECÂNICA DA LICENÇA, VINDA DA `/time` — 23/08.
+         A `/time` era órfã: nenhuma página do site levava a ela, e ela estava
+         indexada. Duas páginas vendendo o mesmo plano é o defeito que mais
+         custou a este projeto, e a órfã é sempre a que ninguém lembra de
+         atualizar.
+         Ela foi redirecionada para a página de preços. Destas seções, o que
+         falava de administrar o time já existe na conta, e o que falava de
+         guardar dados e da versão offline já existe acima nesta página. O que
+         não tinha outro lugar é isto: como a chave é conferida e por que ela
+         vale pouco tempo. Numa avaliação de fornecedor é exatamente a pergunta
+         que vem depois de "o que sai da minha máquina". -->
+<h2>Wie es intern funktioniert</h2>
+    <ol class="passos">
+      <li><b>Sie fordern an.</b> Sie geben die E-Mail-Adresse hier ein. In diesem Moment wird nichts
+      entschieden: Es geht nur eine Nachricht an Ihr Postfach.</li>
+      <li><b>Sie klicken auf das, was angekommen ist.</b> Das ist der Nachweis, dass die Adresse Ihnen
+      gehört — und es ist der einzige Moment, in dem es so etwas wie eine Sitzung gibt.</li>
+      <li><b>Sie kommen mit dem fertigen Link zurück.</b> Der Schlüssel wird auf dem Server signiert, mit
+      Ihrer E-Mail-Adresse darin, und bereits in einer Adresse von {{marca}} ausgeliefert.</li>
+      <li><b>Von da an kein Netz mehr.</b> Der Schlüssel wird <b>im Browser</b> geprüft, gegen einen
+      öffentlichen Schlüssel, der im HTML des Werkzeugs selbst steht. Er funktioniert im Flugzeug, auf dem
+      Rechner des Kunden mit gesperrtem Internet und auf dem Computer, den die IT nicht mit unserem Hosting sprechen lässt.</li>
+    </ol>
+
+    <h2>Warum die Gültigkeit kurz ist</h2>
+    <p>Jeder ausgestellte Schlüssel gilt <b>45 Tage</b> (14 im Test), und der nächste kommt per E-Mail,
+    bevor der vorherige abläuft. Die Administration kann diese Frist im Team-Portal auf 1 bis 90 Tage verkürzen. Das ist keine Bürokratie: Es ist das, was einen durchgesickerten Link
+    <b>von selbst sterben</b> lässt. Da während der Nutzung kein Server irgendetwas prüft, gibt es keine
+    Schaltfläche zum Widerrufen — die Frist ist der Widerruf. Dieser Tausch ist mit Absicht so gewählt: Uns
+    ist ein Leck, das abläuft, lieber als ein bezahltes Produkt, das aufhört zu funktionieren, wenn das Internet ausfällt.</p>
+
+    <!-- A SAÍDA — 23/08. Esta página era um beco: saía só para a política de
+         privacidade. Quem termina de ler aqui já resolveu a pergunta que o
+         trouxe, e a próxima pergunta dele tem endereço. -->
+    <h2>{{confiancaTit}}</h2>
+    <p>{{segSaida}}</p>
+    <p class="row" style="margin:12px 0 0">
+      <a class="btn ghost" href="{{verificar}}">{{fVerif}}</a>
+      <a class="btn ghost" href="{{precos}}">{{navPrice}}</a>
+    </p>
   </div>
 </section>

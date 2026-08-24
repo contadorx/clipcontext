@@ -1,6 +1,6 @@
 # A regressão
 
-135 arquivos que afirmam coisas sobre o produto. Cada um roda sozinho com
+147 arquivos que afirmam coisas sobre o produto. Cada um roda sozinho com
 `node <arquivo>.mjs` e sai com código 1 se alguma afirmação cair.
 
 ## Primeiro uso, depois de abrir o zip
@@ -27,11 +27,59 @@ vídeo de uma janela a única coisa que dá para provar sobre parar entre janela
 Mais um é opcional e pesado, e por isso não é gerado sozinho:
 
 ```bash
-python3 testes/amostras.py --longo    # 1 hora de vídeo, ~1 min, 8 MB
+python3 testes/amostras.py --longo    # 1 hora de vídeo, ~1 min, 41 MB
 ```
 
-Ele alimenta `varredura.mjs`, que mede a varredura do passo 2 em material de
-verdade. Sem ele, o teste **pula dizendo isso** em vez de falhar.
+Ele alimenta **três** réguas — `varredura.mjs`, `audio.mjs` e `espera.mjs` —,
+que medem em material de verdade. Sem ele, as três **pulam dizendo isso** em vez
+de falhar.
+
+> **Gere este arquivo antes de confiar num "verde".** O `espera.mjs` é quem
+> afirma que o texto aparece na tela ENQUANTO a transcrição corre — a diferença
+> entre uma ferramenta que parece travada e uma que não parece. Até 23/08 ele
+> pulava em letra minúscula e a esteira o somava aos verdes: passou builds
+> inteiros contando como aprovado sem nunca ter rodado.
+
+## Os três estados, e a diferença entre pular um arquivo e pular um bloco
+
+A esteira conta `ok`, `PULADO` e `FALHOU`, e um pulado **não entra na
+cobertura**. Quem decide isso é a forma da linha:
+
+- **`PULADO` no começo da linha** quer dizer *este arquivo não rodou* — falta o
+  material ou a ferramenta. O `rodar.sh` tira o arquivo inteiro da conta e
+  imprime o motivo no rodapé.
+- **`BLOCO PULADO`** quer dizer *um bloco não rodou, o resto do arquivo rodou*.
+  Aparece no rodapé do mesmo jeito, e o arquivo continua contando como verde,
+  porque ele é.
+
+Escrever `  pulado  ` em minúscula não é nenhum dos dois: a esteira não vê, o
+processo sai 0, e o arquivo é somado aos aprovados. `inventario.mjs [4]` reprova
+quem fizer isso.
+
+## O antes e o depois de um build visual
+
+`capturar.mjs` é **instrumento, e não régua** — ele não afirma nada sozinho.
+Existe porque um build de CSS não se prova com teste de texto: `display:block`
+virando `display:flex` passa em toda régua desta pasta e ainda assim pode
+estragar dez páginas.
+
+```bash
+node testes/capturar.mjs /tmp/antes            # com o site de pé em :8802
+LARG=390 node testes/capturar.mjs /tmp/antes-tel
+#  ... mexe, npm run build, sobe de novo ...
+node testes/capturar.mjs /tmp/depois
+node testes/capturar.mjs --diff /tmp/antes /tmp/depois
+```
+
+Ele fotografa **cada página em cada idioma** — as duas listas saem do
+`rotas.json`, e não de uma lista escrita aqui — e o `--diff` compara pixel a
+pixel.
+
+O número que importa é **quantas ficaram idênticas**. Numa mudança que devia ser
+invisível, qualquer página diferente é defeito; numa mudança deliberada,
+qualquer página que mudou **sem estar na lista** é defeito. Os dois lados
+precisam do mesmo dado. Foi assim que o Build 4-A provou que a `.lockHint` não
+mexeu num pixel e que só as dez páginas com lista de passos mudaram.
 
 ## O navegador da régua, e por que ele não é o do Playwright
 
@@ -69,7 +117,8 @@ bash testes/rapido.sh app      # a ferramenta, só comportamento       (~3m30)
 bash testes/rapido.sh medir    # as réguas: memória, peso, espelho, espera (~12 min)
 bash testes/rapido.sh site     # o site: build + next build + páginas
 bash testes/rapido.sh a.mjs b.mjs
-bash testes/rodar.sh           # a regressão inteira                    (~40 min)
+bash testes/liberar.sh         # a pista de liberação: libera um build   (~1-3 min)
+bash testes/rodar.sh           # a regressão inteira: libera uma entrega (~70 min)
 ```
 
 `rodar.sh` sobe um Next de verdade na 8802 antes de começar, porque sete testes

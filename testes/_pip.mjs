@@ -1,10 +1,11 @@
 import { chromium } from 'playwright';
 import http from 'http'; import fs from 'fs';
-const html = fs.readFileSync('/root/walkstamp/public/app.html','utf8');
+import { RAIZ_WS, comChrome } from './_caminhos.mjs';
+/* Idem: a raiz e o navegador vêm do descobridor, não escritos à mão. */
+const html = fs.readFileSync(RAIZ_WS + '/public/app.html','utf8');
 const srv=http.createServer((q,r)=>{ if(q.url.startsWith('/_vercel/')){r.writeHead(200,{'Content-Type':'text/javascript'});return r.end('')} r.writeHead(200,{'Content-Type':'text/html'}); r.end(html); });
 await new Promise(r=>srv.listen(8994,r));
-const br=await chromium.launch({executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome',
-  args:['--autoplay-policy=no-user-gesture-required']});
+const br=await chromium.launch(comChrome({args:['--autoplay-policy=no-user-gesture-required']}));
 const ctx=await br.newContext({viewport:{width:1100,height:900}});
 const pg=await ctx.newPage();
 await pg.addInitScript(()=>{

@@ -101,13 +101,30 @@ await pg.waitForTimeout(500);
     tag: e.tagName, alt: Math.round(e.getBoundingClientRect().height) }));
   ok('é caixa de várias linhas', cx.tag === 'TEXTAREA', cx.tag);
   ok('e tem altura de mais de uma linha', cx.alt > 60, `${cx.alt}px`);
-  /* O limite de 180 continua — a anotação vira TÍTULO do passo no documento, e
-     título não é parágrafo. O que mudou é a regra estar dita. */
-  ok('o limite continua 180', (await pg.locator('#lenteNota').getAttribute('maxlength')) === '180');
+  /* O LIMITE É O MESMO NOS TRÊS CAMPOS, e a régua cobra isso e não o número.
+     Ela exigia 180 aqui. A caixa da gravação e o campo da miniatura aceitavam
+     600 — então uma anotação de 400 caracteres escrita durante a gravação era
+     CORTADA ao meio só por alguém abrir a lente, sem tocar em nada. O texto que
+     se perdia era o único que não dá para reconstruir depois.
+     O argumento do 180 continua verdadeiro — a anotação vira TÍTULO do passo, e
+     título não é parágrafo —, mas ele é um conselho, e conselho se dá com o
+     contador logo abaixo, não com uma tesoura silenciosa.
+     Cobrar a IGUALDADE, e não o número, é o que impede o defeito de voltar:
+     mudar um dos três e esquecer os outros reprova aqui. */
+  const tetos = await pg.evaluate(() => ['lenteNota', 'revNotaEd', 'nota']
+    .map((id) => {
+      const el = document.getElementById(id) ||
+                 document.querySelector('#thumbs textarea.nota, #thumbs input.nota');
+      return el ? el.getAttribute('maxlength') : null;
+    })
+    .filter(Boolean));
+  ok('os campos que escrevem a anotação têm o MESMO teto',
+     tetos.length >= 2 && new Set(tetos).size === 1, tetos.join(' / '));
+  ok('e o teto é 600', tetos[0] === '600', tetos[0]);
   await pg.locator('#lenteNota').fill('o total veio errado');
   await pg.waitForTimeout(250);
   const conta = (await pg.locator('#lenteNotaConta').textContent() || '').trim();
-  ok('e a tela conta o que ainda cabe', /161/.test(conta), conta.slice(0, 60));
+  ok('e a tela conta o que ainda cabe', /581/.test(conta), conta.slice(0, 60));
   ok('dizendo por que há limite', /título deste passo/i.test(conta), conta.slice(0, 70));
 }
 await pg.locator('#lenteFechar').click();

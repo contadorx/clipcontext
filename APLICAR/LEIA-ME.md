@@ -1,51 +1,116 @@
-# O que há neste zip
+# O que há nesta pasta
 
-A árvore do walkstamp **já construída**: `public/app.html` e
+> **Os `.bundle` NÃO viajam dentro do zip — 23/08.**
+> O pacote passou de 30 MB e não coube na entrega. O bundle é a mesma árvore
+> outra vez, comprimida com a história junto: mandá-lo dentro do zip é mandar o
+> projeto duas vezes. Ele vai **separado**, ao lado do zip, e este arquivo
+> continua aqui explicando o que fazer com ele.
+> Se você recebeu só o zip e quer a história, peça o bundle.
+
+Dois bundles de git. Cada um traz commits com as mensagens inteiras, para quem
+prefere aplicar a HISTÓRIA em vez de copiar a árvore por cima.
+
+A árvore crua vem no zip do lado, já construída — `public/app.html` e
 `offline/walkstamp-offline.html` estão gerados, e `src/precos.json`,
 `src/figuras.json`, `src/rotas.json` e `src/marca.json` também. Para subir o
-site não é preciso rodar `build.py`.
-
-**Base:** `7c90a97` (o `main` do GitHub, de 19/08) + seis commits.
+site não é preciso rodar `build.py`. Copiando a árvore, porém, a história se
+perde.
 
 Não vêm junto, porque se regeneram ou são enormes: `.git/`, `node_modules/`
 (`npm install`) e `.next/` (`npm run build`).
 
-## Os seis commits
+---
 
-1. **Sincroniza a árvore com o código de 22/08.** O repositório do GitHub
-   estava três dias atrás da árvore de trabalho, e as duas linhagens de git não
-   se conversam. 267 arquivos.
-2. **O mínimo do Team cai de cinco assentos para três.** O número mora em
-   `lib/stripe.ts`, e junto vai o piso do checkout, que aceitava 1.
-3. **A página de preços passa a vender resultado, e não quantidade de
-   recurso.** Nos cinco idiomas.
-4. **As réguas:** `testes/precos.mjs` novo, mais `cinco`, `figuras` e
-   `promessa` atualizados.
-5. **Dois portões seguem a estrutura nova**, e uma promessa falsa sai do ar.
-6. **Tira o bloco de doação do site.**
+## `builds-1-a-6.bundle` — a rodada de 23/08
 
-## Para aplicar num clone que esteja em `7c90a97`
+**Base:** `7c90a97` (o `main` do GitHub, de 19/08).
+**Traz:** quinze commits.
+
+1. **Sincroniza a árvore interna com o deploy de 22/08.** O repositório estava
+   três dias atrás da árvore publicada na Vercel. 267 arquivos, nenhuma
+   correção de defeito — é só o sincronismo.
+2. **Build 1 — o chão.** As duas migrações novas, a régua rodando fora de uma
+   máquina só, o vazamento do service worker, o curinga do convite, o
+   middleware nos cinco idiomas, o offline que telefonava sozinho, e nove
+   frases falsas fora do ar nos cinco idiomas.
+3. **A pista de liberação**, mais as três réguas que ainda mentiam.
+4. **Build 2 — não perder trabalho**, e a esteira de 70 para 12 minutos.
+5. O bundle passa a trazer os dois builds.
+6. **Build 3 — a esteira honesta**, mais as três decisões respondidas:
+   a captura da lista sai, os 14 dias são anunciados, a Stripe fica para o fim.
+7. **Build 4 — listas paralelas.** A tira de formatos passa a sair do catálogo
+   (13 selos escritos à mão ao lado de 15 no catálogo), o mínimo do Team passa a
+   ser lido de `lib/stripe.ts`, o `AUDITORIA-PENDENTE.md` passa a ser gerado, e
+   uma régua nova varre o produto atrás de tabela de idioma incompleta — achou
+   três, entre elas o OCR que lia a tela do cliente alemão com o modelo inglês.
+
+8. **Build 4-A — a folha de estilo.** Fora da numeração de propósito: nasceu
+   dentro do Build 4 e saiu sozinho, com captura de tela antes e depois. A
+   regra das listas de passos estava escrita com um nome que ninguém usava, e
+   a `.row` repetia setenta vezes uma decisão de estilo que não fazia efeito.
+
+9. **Build 5 — o caminho até a compra.** A intenção de compra morria em três
+   pontos entre o clique e o checkout; as três pontes foram construídas. Quatro
+   endereços de volta apontavam para produção mesmo numa prévia. A base de
+   conhecimento saiu de trás dos acordeões, e a `/time` foi aposentada com os
+   cinco endereços velhos respondendo 308.
+
+10. **Build 6 (em curso) — o que já está vendido.** O primeiro item saiu: o
+    modelo "só para mim" passa a ser de quem salvou. Duas funções liam a tabela
+    sem filtro de dono, e uma delas trazia, no ar, um comentário descrevendo o
+    filtro que não existia.
+
+Os relatórios estão em `BUILD-1.md`, `BUILD-2.md`, `BUILD-3.md`, `BUILD-4.md`,
+`BUILD-4A.md` e `BUILD-5.md`, na raiz. O do Build 6 sai quando ele fechar. A fila dos próximos e as decisões abertas estão em `FILA.md`.
+
+```bash
+git fetch APLICAR/builds-1-a-4.bundle \
+  claude/builds-deploys-sequence-0fatlg:claude/builds-deploys-sequence-0fatlg
+git checkout claude/builds-deploys-sequence-0fatlg
+```
+
+> **Por que ele existe.** O push não passou: o proxy de git desta sessão
+> respondeu `GitHub authentication required. Please reconnect your GitHub
+> account.` — é a conexão do GitHub da conta, e não o repositório. Depois de
+> reconectar em claude.ai → Configurações → Conectores, o push vai direto e
+> este arquivo deixa de ser necessário.
+
+---
+
+## `rodada-precos.bundle` — a rodada de 22/08
+
+**Base:** `7c90a97`. **Traz:** os seis commits da rodada de preços, que já estão
+incluídos no commit 1 do bundle acima. Fica aqui como registro; quem aplicar o
+`builds-1-a-6.bundle` não precisa dele.
 
 ```bash
 git fetch APLICAR/rodada-precos.bundle \
   claude/relaxed-sagan-mnycup:claude/relaxed-sagan-mnycup
-git checkout claude/relaxed-sagan-mnycup
 ```
 
-O bundle traz os seis commits com as mensagens inteiras. Se preferir a árvore
-crua, ela está aqui do lado — mas aí a história se perde.
+---
 
 ## Para rodar
 
 ```bash
 npm install
 npm run build            # python3 build.py && next build
-npx next start -p 8802   # os testes de site falam com esta porta
-node testes/precos.mjs
+
+# a pista de liberação: libera um build          (~1-3 min)
+bash testes/liberar.sh
+
+# a regressão inteira: libera uma entrega        (~12 min, 3 de cada vez)
+bash testes/rodar.sh
 ```
 
-## O que fica pendente
+A regressão sai com **141 ok · 5 PULADO · 0 FALHOU** de 146 réguas. Um pulado
+**não conta como cobertura**, e o motivo de cada um sai impresso: três por falta
+do emissor de chaves — que não viaja no pacote, de propósito —, um pela tradução
+jurídica pendente de alemão e francês, e um (`timepag.mjs`) porque a página que
+ele testava foi aposentada no Build 5 e o fluxo dela ainda não tem régua na
+arquitetura nova. Este último é dívida deste projeto, e está na `FILA.md`.
 
-`AUDITORIA-PENDENTE.md`, na raiz. Uma linha por promessa que a página publica,
-com o teste que a comprova ou `sem teste` — e, no fim, os cinco itens que
-precisam de decisão ou de uma chave que não existe neste ambiente.
+O `testes/preparar.sh` gera as amostras de vídeo que sete testes consomem. Ele
+precisa de Pillow e de um `ffmpeg` completo — a build mínima que vem com o
+Playwright **não serve**, e `testes/amostras.py` agora diz isso pelo nome em vez
+de falhar com "arquivo não encontrado".

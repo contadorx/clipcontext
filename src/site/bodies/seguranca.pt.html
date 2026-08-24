@@ -5,7 +5,7 @@
     Esta página é para quem precisa aprovar o uso do {{marca}} dentro de uma empresa: como ele funciona,
     o que sai da sua máquina, e o que nós <b>não</b> temos.</p>
 
-    <p class="lockHint" style="border-left:3px solid var(--accent);padding-left:12px;margin:0 0 26px">
+    <p class="lockHint" style="margin:0 0 26px">
     <b>Em uma linha:</b> a ferramenta não tem servidor de processamento e não recebe o seu vídeo, o seu
     áudio nem os seus quadros. Isso vale em todos os planos, e você não precisa acreditar — dá para
     conferir em trinta segundos, com o navegador que você já tem aberto. Quem contrata um plano pago
@@ -55,10 +55,10 @@
       <tr><td>Vercel Web Analytics</td><td>Sempre; não envia se o navegador manda <i>Do&nbsp;Not&nbsp;Track</i> ou <i>Global Privacy Control</i></td>
           <td>Qual página foi vista, sem cookie e sem identificador que persista</td>
           <td>Identificador de pessoa ou de sessão</td></tr>
-      <tr><td>Supabase (marcos de uso)</td><td>Em três momentos: abriu a ferramenta, abriu um vídeo, baixou um arquivo. Respeita DNT e GPC</td>
-          <td>O nome do marco, o idioma da página, a origem do vídeo e o formato baixado</td>
+      <tr><td>Supabase (marcos de uso)</td><td>Em quinze marcos, onze na ferramenta e quatro na conta — abriu a ferramenta, abriu um vídeo, baixou um arquivo, importou um roteiro, começou um pagamento, entre outros. Respeita DNT e GPC</td>
+          <td>O nome do marco, o idioma da página, a origem do vídeo, o formato baixado, uma faixa (“4-10”, e nunca o número exato) e o plano</td>
           <td>Nome de arquivo, tamanho, duração, conteúdo, identificador de sessão</td></tr>
-      <tr><td>jsDelivr (CDN público)</td><td>Só ao usar transcrição automática ou leitura de texto da imagem</td>
+      <tr><td>jsDelivr (CDN público)</td><td>No carregamento da ferramenta (a biblioteca de PDF) e ao usar transcrição automática ou leitura de texto da imagem</td>
           <td>O pedido da biblioteca</td><td>Seu áudio, sua imagem, seu texto</td></tr>
       <tr><td>Hugging Face</td><td>Só ao acionar a transcrição automática, e uma vez por navegador</td>
           <td>O pedido do modelo de voz</td><td>Seu áudio</td></tr>
@@ -70,7 +70,7 @@
           <td>Nada além do documento que você mandou; ele vai do seu navegador direto ao Google, sem passar por nós</td></tr>
     </table>
     <p><b>Nenhuma dessas conexões carrega vídeo, áudio, imagem ou transcrição.</b>
-    A biblioteca de PDF é servida do nosso próprio domínio, e não de CDN.</p>
+    A biblioteca de PDF vem do jsDelivr junto com a página; é o pacote offline que a embute.</p>
     <p>Há uma exceção, e ela está na tabela em vez de escondida: o botão <b>Enviar para o Google Docs</b>
     é a única função em que o <b>documento gerado sai do computador</b>. Ele existe porque muita equipe
     revisa evidência no Drive, e ele pede confirmação explícita antes de enviar — quem não quer isso não
@@ -184,5 +184,47 @@
     Não há programa de recompensa por vulnerabilidade, mas respondemos.</p>
     <p class="small muted">Esta página descreve o funcionamento na data acima. Se algo mudar de forma que
     afete o que está escrito aqui, esta página muda junto — e a data no topo é como você verifica isso.</p>
+
+
+    <!-- A MECÂNICA DA LICENÇA, VINDA DA `/time` — 23/08.
+         A `/time` era órfã: nenhuma página do site levava a ela, e ela estava
+         indexada. Duas páginas vendendo o mesmo plano é o defeito que mais
+         custou a este projeto, e a órfã é sempre a que ninguém lembra de
+         atualizar.
+         Ela foi redirecionada para a página de preços. Destas seções, o que
+         falava de administrar o time já existe na conta, e o que falava de
+         guardar dados e da versão offline já existe acima nesta página. O que
+         não tinha outro lugar é isto: como a chave é conferida e por que ela
+         vale pouco tempo. Numa avaliação de fornecedor é exatamente a pergunta
+         que vem depois de "o que sai da minha máquina". -->
+<h2>Como funciona por dentro</h2>
+    <ol class="passos">
+      <li><b>Você pede.</b> Escreve o e-mail aqui. Nada é decidido nesta hora: só sai uma mensagem para
+      a sua caixa.</li>
+      <li><b>Você clica no que chegou.</b> É isso que prova que o endereço é seu — e é o único momento em
+      que existe algo parecido com uma sessão.</li>
+      <li><b>Volta com o link pronto.</b> A chave é assinada no servidor, com o seu e-mail dentro dela, e
+      entregue já dentro de um endereço do {{marca}}.</li>
+      <li><b>Daí em diante, nada mais de rede.</b> A chave é conferida <b>dentro do navegador</b>, contra
+      uma chave pública que está no próprio HTML da ferramenta. Ela funciona no avião, na máquina do
+      cliente com a internet trancada, e no computador que a TI não deixa falar com a nossa hospedagem.</li>
+    </ol>
+
+    <h2>Por que a validade é curta</h2>
+    <p>Cada chave emitida vale <b>45 dias</b> (14 na degustação), e a próxima chega por e-mail antes de a
+    anterior vencer. O administrador pode encurtar esse prazo, de 1 a 90 dias, no portal do time. Não é burocracia: é o que faz um link vazado <b>morrer sozinho</b>. Como não há
+    servidor conferindo nada durante o uso, não existe botão de revogar — o prazo é a revogação. Foi a
+    troca escolhida de propósito: preferimos um vazamento que expira a um produto pago que para de
+    funcionar quando a internet cai.</p>
+
+    <!-- A SAÍDA — 23/08. Esta página era um beco: saía só para a política de
+         privacidade. Quem termina de ler aqui já resolveu a pergunta que o
+         trouxe, e a próxima pergunta dele tem endereço. -->
+    <h2>{{confiancaTit}}</h2>
+    <p>{{segSaida}}</p>
+    <p class="row" style="margin:12px 0 0">
+      <a class="btn ghost" href="{{verificar}}">{{fVerif}}</a>
+      <a class="btn ghost" href="{{precos}}">{{navPrice}}</a>
+    </p>
   </div>
 </section>

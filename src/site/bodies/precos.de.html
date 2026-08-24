@@ -53,7 +53,7 @@
     <!-- 6. AS PROVAS: o que sai, onde fica, o que abre, e o que NÃO fazemos. -->
     <h2>Was herauskommt, und wo jede Sache liegt</h2>
     <p class="lead">Ein Nachweisdokument kommt in diesen Formaten heraus, und jedes davon entsteht auf Ihrem Rechner:</p>
-    <div class="saidas"><span class="saida"><b>PDF</b></span><span class="saida"><b>DOCX</b> Word</span><span class="saida"><b>PPTX</b> PowerPoint</span><span class="saida"><b>HTML</b></span><span class="saida"><b>MD</b> Markdown</span><span class="saida"><b>SCORM</b></span><span class="saida"><b>CSV</b></span><span class="saida"><b>JSON</b></span><span class="saida"><b>ZIP</b></span><span class="saida"><b>VTT</b></span><span class="saida"><b>SRT</b></span><span class="saida"><b>Google&nbsp;Docs</b></span><span class="saida"><b>Jira</b></span></div>
+    {{tiraSaidas}}
     <p class="small muted"><b>Auf Ihrem Rechner:</b> das Video, der Ton, das Transkript und die Erstellung des Dokuments. <b>Auf dem Server:</b> Ihr Konto, die Plätze und die Rechnung. Das ist die Grenze, und sie verschiebt sich im bezahlten Plan nicht.</p>
     <p class="small muted">Die Dateien öffnen in Word, in PowerPoint, im Browser und in Ihrem LMS. Der vorbereitete Link lässt sich in Jira, Zephyr, Xray oder TestRail einfügen — <b>er ist eine Adresse, keine automatische Integration</b>.</p>
     <p class="small muted">Die Lizenz wird auf Ihrem Rechner geprüft und funktioniert ohne Internet. Das ist Vorteil und Einschränkung zugleich: der Entzug eines Platzes hält die Frist von 1 bis 90 Tagen ein, die die verwaltende Person gewählt hat.</p>
@@ -73,10 +73,26 @@
       <p class="small muted">{{tpLegenda}}</p>
     </details>
 
+
+    <!-- OS DOIS CAMINHOS DE CONFIANÇA — 23/08.
+         Esta página não linkava nem `/seguranca` nem `/verificar`: as duas
+         páginas que respondem "posso confiar nisto?" ficavam a um clique de
+         lugar nenhum, enquanto a decisão de comprar acontece aqui. -->
+    <h2>{{confiancaTit}}</h2>
+    <p>{{confiancaP}}</p>
+    <p class="row" style="margin:12px 0 0">
+      <a class="btn ghost" href="{{seguranca}}">{{fSec}}</a>
+      <a class="btn ghost" href="{{verificar}}">{{fVerif}}</a>
+    </p>
     <!-- 8. AS PERGUNTAS DE COMPRA. Seis, resposta curta, e nenhuma promete
          prazo de suporte. -->
     <h2>Fragen von Leuten, die kaufen</h2>
     <dl class="faqCompra">
+      <dt>Kann ich es vor dem Bezahlen ausprobieren?</dt>
+      <dd>Ja. Wer sich zum ersten Mal im Konto anmeldet, erhält <b>14 Tage mit allem aus
+          Team</b> — ohne Karte und ohne Checkout. Nach den 14 Tagen wird nichts berechnet:
+          das Konto fällt auf Free zurück, und was Sie erstellt haben, bleibt auf Ihrem
+          Rechner.</dd>
       <dt>Brauche ich eine Karte für Free?</dt>
       <dd>Nein. Weder Karte noch Konto.</dd>
       <dt>Was passiert, wenn ich kündige?</dt>

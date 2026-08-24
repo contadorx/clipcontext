@@ -10,3 +10,4 @@ MELHORIAS.md
 *.pyc
 __pycache__/*
 next-env.d.ts
+APLICAR/*.bundle

@@ -155,35 +155,23 @@ console.log('\n[6] a home apresenta os cinco');
   await pg.close();
 }
 
-console.log('\n[7] preços: três planos, três moedas, mesma altura');
-{
-  const pg = await ctx.newPage();
-  await pg.goto('http://localhost:8921/precos');
-  await pg.waitForTimeout(300);
-  ok('são três cartões', (await pg.locator('.plan').count()) === 3);
-  const nomes = await pg.locator('.plan h3').allTextContents();
-  ok('Free, Personal e Team', JSON.stringify(nomes) === JSON.stringify(['Free','Personal','Team']), nomes.join(','));
-  const alturas = await pg.locator('.plan').evaluateAll(e => e.map(x => Math.round(x.getBoundingClientRect().height)));
-  ok('os três têm a mesma altura', new Set(alturas).size === 1, alturas.join(' / '));
-  const moedas = await pg.locator('.plan .moedas').allTextContents();
-  ok('cada um traz dólar e euro', moedas.length === 3 && moedas.every(m => /US\$/.test(m) && /€/.test(m)),
-     moedas.join(' | '));
-  const itens = await pg.locator('.plan ul').evaluateAll(u => u.map(x => x.children.length));
-  ok('e a lista de cada um é curta', itens.every(n => n <= 6), itens.join('/'));
-  ok('nenhum cartão é muito mais longo que o outro',
-     Math.max(...itens) - Math.min(...itens) <= 1, itens.join('/'));
-  /* INVERTIDO, E DE PROPOSITO. Esta linha cobrava que o futuro estivesse
-     marcado DENTRO do cartao — e marcar era, na epoca, a coisa honesta a fazer.
-     Continua sendo honesto dizer; mudou o lugar. Um "em breve" no meio das
-     balas do plano obriga quem decide a separar, linha a linha, o que ja se
-     compra do que foi prometido, na hora em que ele esta com o cartao na mao.
-     Agora o cartao so promete o que existe, e o resto mora na caixa do roteiro
-     logo abaixo — dito com todas as letras, e fora da conta. */
-  ok('nenhum cartão promete futuro', (await pg.locator('.plan .soon').count()) === 0);
-  ok('e o que não existe está dito na caixa do roteiro',
-     (await pg.locator('.roteiroFuturo .soon').count()) > 0);
-  await pg.close();
-}
+/* [7] A PÁGINA DE PREÇOS MORA NO `precos.mjs` — 23/08.
+ *
+ * Este bloco nasceu antes daquele arquivo existir, e ficou afirmando a página
+ * ANTIGA: cobrava que o `h3` de cada cartão fosse "Free", "Personal" e "Team",
+ * e que os três preços saíssem lado a lado em real, dólar e euro.
+ *
+ * Os dois viraram falsos por DECISÃO, e não por defeito. O `h3` passou a ser o
+ * resultado ("Crie a evidência"), com o nome do plano abaixo; e cada idioma
+ * passou a mostrar uma moeda só, a dele. A régua ficou vermelha por três
+ * rodadas afirmando um contrato que ninguém mais queria.
+ *
+ * O que era único aqui — nome do plano, moeda por idioma, altura igual, listas
+ * curtas e equilibradas — foi para `testes/precos.mjs [11]`, corrigido. Duas
+ * réguas sobre a mesma página é o defeito que mais custou a este projeto: a que
+ * ninguém lembra de atualizar fica vermelha, e o vermelho vira paisagem.
+ *
+ * Este arquivo volta ao que é a tese dele: os CENÁRIOS. */
 
 await br.close(); srv.close();
 console.log(falhas ? '\n' + falhas + ' falha(s)' : '\nCenários e páginas: tudo passou.');

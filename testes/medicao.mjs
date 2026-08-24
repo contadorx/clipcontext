@@ -3,7 +3,8 @@
      1. o build offline continuar mudo;
      2. Do Not Track ser respeitado;
      3. nenhum dado do vídeo escapar junto com os marcos;
-     4. o formulário de e-mail funcionar e falhar de forma legível. */
+     4. a lista de aviso continuar FORA — ela saiu por decisão, e uma régua
+        apagada junto com o recurso deixa o caminho livre para ele voltar. */
 import { chromium } from './_navegador.mjs';
 import http from 'http'; import fs from 'fs'; import path from 'path';
 import { criarProxy, exigirNext } from './proxy.mjs';
@@ -142,57 +143,55 @@ console.log('\n[M3] o arquivo offline é mudo');
   pg.on('request', r => { if (!r.url().startsWith('file:')) externos.push(r.url()); });
   const erros = []; pg.on('pageerror', e => erros.push(e.message));
   await pg.goto(`file://${RAIZ_WS}/offline/walkstamp-offline.html`);
-  await pg.waitForTimeout(900);
+  /* TRÊS SEGUNDOS, E NÃO NOVECENTOS MILISSEGUNDOS.
+     A antecipação do modelo dispara num `setTimeout` de 1200 ms — quer dizer
+     que esta régua media a janela ANTES do único pedido que ela existe para
+     pegar, e passava verde enquanto o pacote "mudo" chamava o jsDelivr 1,7 s
+     depois de abrir. Três segundos cobrem a antecipação com folga; medido, o
+     pedido saía em 1,7 s. */
+  await pg.waitForTimeout(3000);
   ok('abrindo o arquivo, nenhum pedido sai da máquina', externos.length === 0, externos.join(' | ').slice(0,160));
   ok('e ele funciona: a interface montou', await pg.locator('#drop').isVisible());
   ok('sem erro de JS', erros.length === 0, erros.join(' | ').slice(0, 160));
   await ctx.close();
 }
 
-console.log('\n[M4] a lista de aviso');
+console.log('\n[M4] a lista de aviso SAIU, e não volta sem alguém decidir');
 {
-  const { pg, ctx, listas, erros } = await pagina('http://localhost:8877/precos.html?lang=pt');
-  ok('o formulário existe', await pg.locator('#listaForm').isVisible());
+  /* A RÉGUA VIROU DO AVESSO — 23/08, DEC-16 decidida.
+   *
+   * Ela cobrava que o formulário existisse. Ele já não existia em corpo de
+   * página nenhum desde a rodada de preços: sobravam 76 linhas de JavaScript
+   * morto servidas em toda página, um painel com uma aba que ninguém podia mais
+   * alimentar, e este bloco reprovando com a frase "o formulário existe" — como
+   * se o produto tivesse quebrado.
+   *
+   * A decisão foi: fica só o plano. Quem quer o produto vai ao checkout.
+   *
+   * Então esta régua passa a cobrar a AUSÊNCIA, que é o mesmo movimento que o
+   * `paginas.mjs` já fez com o bloco de apoio: apagar a régua junto com o
+   * recurso deixaria o caminho livre para ele voltar por descuido, e aí a
+   * página de preços teria de novo duas portas competindo pela mesma pessoa.
+   *
+   * O que ela NÃO cobra: a tabela `walkstamp.interesse` e a aba do painel, que
+   * continuam de pé guardando os leads que já entraram. Tirar a captura não é
+   * apagar quem já se cadastrou. */
+  const script = fs.readFileSync(`${RAIZ_WS}/public/support.js`, 'utf8');
+  ok('o support.js não carrega mais o código da lista',
+     !/listaForm|listaEmail|listaBtn/.test(script),
+     (script.match(/lista[A-Za-z]+/g) || []).slice(0, 4).join(' '));
+  ok('nem chama a função de interesse do banco',
+     !/walkstamp_interesse/.test(script));
 
-  await pg.fill('#listaEmail', 'nao-e-email');
-  await pg.click('#listaBtn'); await pg.waitForTimeout(250);
-  ok('endereço torto nem chega a ser enviado', listas.length === 0);
-  ok('e o motivo aparece na tela', /não parece/.test(await pg.locator('#listaMsg').textContent()),
-     await pg.locator('#listaMsg').textContent());
-
-  await pg.fill('#listaEmail', ' Leandro@Exemplo.com ');
-  await pg.click('#listaBtn');
-  await pg.waitForFunction(() => document.getElementById('listaForm').style.display === 'none',
-                           null, { timeout: 5000 });
-  ok('endereço bom é enviado', listas.length === 1 && listas[0].p_email === 'Leandro@Exemplo.com',
-     JSON.stringify(listas[0]));
-  ok('com o idioma da página', listas[0] && listas[0].p_idioma === 'pt');
-  ok('o formulário some e a confirmação aparece',
-     /Aviso você quando sair/.test(await pg.locator('#listaMsg').textContent()));
+  /* E nenhuma página do site pede e-mail para uma lista de espera. A `/precos`
+     é a que hospedava o formulário, e é onde ele voltaria. */
+  const { pg, ctx, erros } = await pagina('http://localhost:8877/precos.html?lang=pt');
+  ok('a página de preços não tem formulário de lista',
+     (await pg.locator('#listaForm').count()) === 0,
+     String(await pg.locator('#listaForm').count()));
+  ok('e nenhum campo de e-mail de espera sobrou nela',
+     (await pg.locator('#listaEmail').count()) === 0);
   ok('sem erro de JS', erros.length === 0, erros.join(' | ').slice(0, 160));
-  await ctx.close();
-}
-
-console.log('\n[M5] quando o banco recusa, e quando a rede cai');
-{
-  const { pg, ctx } = await pagina('http://localhost:8877/precos.html?lang=pt', { resposta: 'invalido' });
-  await pg.fill('#listaEmail', 'a@b.co');
-  await pg.click('#listaBtn'); await pg.waitForTimeout(400);
-  ok('resposta "invalido" vira recado, não silêncio',
-     /não parece/.test(await pg.locator('#listaMsg').textContent()));
-  ok('e o botão volta a funcionar', !(await pg.locator('#listaBtn').isDisabled()));
-  await ctx.close();
-}
-{
-  const ctx = await br.newContext(); const pg = await ctx.newPage();
-  await pg.route('**/rpc/walkstamp_interesse', r => r.abort());
-  await pg.route('**/_vercel/insights/**', r => r.fulfill({ status: 200, body: '' }));
-  await pg.goto('http://localhost:8877/precos.html?lang=pt');
-  await pg.fill('#listaEmail', 'a@b.co');
-  await pg.click('#listaBtn'); await pg.waitForTimeout(600);
-  ok('rede caída vira recado, não trava', /Tente de novo/.test(await pg.locator('#listaMsg').textContent()),
-     await pg.locator('#listaMsg').textContent());
-  ok('e o botão volta a funcionar', !(await pg.locator('#listaBtn').isDisabled()));
   await ctx.close();
 }
 

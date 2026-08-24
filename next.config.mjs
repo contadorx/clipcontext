@@ -90,6 +90,23 @@ const config = {
         // (a transcrição em WebAssembly) sem barrar imagem de outra origem.
         { key: 'Cross-Origin-Embedder-Policy', value: 'credentialless' },
         { key: 'Cross-Origin-Resource-Policy', value: 'cross-origin' },
+        /* OS TRÊS BARATOS, E A CSP DE PROPÓSITO FORA DAQUI.
+           `X-Frame-Options` e `frame-ancestors` fecham o enquadramento em
+           página de terceiro — a conta e a ferramenta não têm por que existir
+           dentro do site de mais ninguém. `HSTS` tranca o protocolo. E o
+           `Permissions-Policy` desliga o que o produto não usa: geolocalização,
+           pagamento e sensores. Câmera, microfone e captura de tela ficam em
+           `self`, porque são o produto.
+
+           A Content-Security-Policy NÃO entra aqui. Uma CSP apertada demais
+           desliga a transcrição, que é o que a pessoa veio fazer — ela precisa
+           de uma semana em `Report-Only` antes de travar, e essa semana é um
+           trabalho com começo e fim, não uma linha nesta lista. */
+        { key: 'X-Frame-Options', value: 'DENY' },
+        { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' },
+        { key: 'Permissions-Policy',
+          value: 'geolocation=(), payment=(), usb=(), magnetometer=(), gyroscope=(), ' +
+                 'accelerometer=(), camera=(self), microphone=(self), display-capture=(self)' },
       ],
     }];
   },
@@ -107,6 +124,22 @@ const config = {
     for (const pg of paginas) {
       r.push({ source: `/pt/${slugs[pg].pt}`, destination: publico(pg, 'pt'), permanent: true });
     }
+    /* OS ENDEREÇOS APOSENTADOS. Uma página que sai do ar não some do mundo:
+       ela está em canonical indexado, em sitemap enviado e em links que outras
+       pessoas publicaram. Um 404 ali é jogar fora o tráfego que ela custou.
+       A lista sai do `rotas.json` — escrevê-la aqui seria a mesma lista em dois
+       lugares, que é o defeito que este projeto mais pagou. */
+    for (const [nome, velha] of Object.entries(rotas.aposentadas || {})) {
+      for (const L of idiomas) {
+        const de = `${PREFIXO[L]}/${velha.slugs[L]}`;
+        r.push({ source: de, destination: publico(velha.para, L), permanent: true });
+        r.push({ source: `${de}.html`, destination: publico(velha.para, L), permanent: true });
+        if (L === 'pt') r.push({ source: `/pt/${velha.slugs.pt}`,
+                                 destination: publico(velha.para, 'pt'), permanent: true });
+      }
+      void nome;
+    }
+
     // O site antigo era servido com `cleanUrls`, que aceitava `/precos.html` e
     // mandava para `/precos`. Continua aceitando: há links por aí com o `.html`.
     r.push({ source: '/index.html', destination: '/', permanent: true });

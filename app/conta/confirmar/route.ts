@@ -19,9 +19,23 @@ export async function GET(req: Request) {
   const bruto = url.searchParams.get('lang') || 'pt';
   const lang = ehLang(bruto) ? bruto : 'pt';
   const t = textos(lang);
-  const volta = (par?: string, valor?: string) =>
-    NextResponse.redirect(new URL(
-      CAMINHO[lang] + (par ? `?${par}=${encodeURIComponent(valor || '')}` : ''), url.origin));
+  /* A INTENÇÃO DE COMPRA ATRAVESSA A ROTA. Ela entrou no link como `?plano=`
+     lá no `entrar()`, e esta rota é o último lugar onde ela pode se perder:
+     antes, `volta()` montava um endereço novo do zero e o parâmetro ficava
+     para trás. Quem clicou "Assinar o Team" e foi ao e-mail voltava para uma
+     conta que não sabia o que ele tinha pedido.
+     Validado aqui também, e não repassado cru: o que chega numa URL de e-mail
+     passou por fora, e um `?plano=` inventado não vira parâmetro de tela. */
+  const pedido = url.searchParams.get('plano');
+  const plano = pedido === 'personal' || pedido === 'time' ? pedido : null;
+  const volta = (par?: string, valor?: string) => {
+    const q = new URLSearchParams();
+    if (par) q.set(par, valor || '');
+    if (plano) q.set('plano', plano);
+    const busca = q.toString();
+    return NextResponse.redirect(new URL(
+      CAMINHO[lang] + (busca ? `?${busca}` : ''), url.origin));
+  };
 
   /* O link volta de UMA de duas formas, e a diferença não é escolha nossa:
      ela depende de como o modelo de e-mail do Supabase foi escrito.

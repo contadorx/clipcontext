@@ -65,13 +65,54 @@ def tela(w, h, fundo, titulo, linhas, barra=None, destaque=None):
     return im
 
 
+def conferir_ffmpeg():
+    """O `ffmpeg` do PATH sabe fazer isto? Perguntado ANTES, e nao descoberto no erro.
+
+    Numa maquina limpa e comum haver so o `ffmpeg` que vem com o Playwright, em
+    `/opt/pw-browsers/ffmpeg-*`. Ele e uma build minima: nao tem o demuxer
+    `image2`, nao tem o decodificador de PNG e nao tem `libopus`. Com ele, a
+    sequencia `%05d.png` falha com "Error opening input: No such file or
+    directory" — que, para quem le, e identico a "o arquivo nao existe".
+
+    Meia hora se perde nisso. A resposta certa nao e um remendo que tenta outro
+    caminho e falha de outro jeito: e dizer o que falta, e como resolver.
+    """
+    faltam = []
+    try:
+        dem = subprocess.run(['ffmpeg', '-hide_banner', '-demuxers'],
+                             capture_output=True, text=True, check=False).stdout
+        enc = subprocess.run(['ffmpeg', '-hide_banner', '-encoders'],
+                             capture_output=True, text=True, check=False).stdout
+    except OSError:
+        print('nao encontrei o `ffmpeg` no PATH. Instale-o (apt install ffmpeg) '
+              'e rode de novo.', file=sys.stderr)
+        return False
+    if not any(l.split()[1:2] == ['image2'] for l in dem.splitlines() if l.strip()):
+        faltam.append('o demuxer `image2`')
+    if 'libvpx' not in enc:
+        faltam.append('o codificador `libvpx`')
+    if 'libopus' not in enc:
+        faltam.append('o codificador `libopus`')
+    if faltam:
+        print('o `ffmpeg` deste PATH nao serve: falta ' + ', '.join(faltam) + '.',
+              file=sys.stderr)
+        print('Provavelmente e a build minima do Playwright. Instale um ffmpeg '
+              'completo (apt install ffmpeg) — as amostras dependem dele.',
+              file=sys.stderr)
+        return False
+    return True
+
+
 def escrever(caminho, quadros, com_audio, dur):
     """PNGs -> webm VP8. VP8 e nao VP9 porque o Chromium sem hardware decodifica
     os dois, e o VP8 sai em segundos em vez de minutos numa maquina de CI."""
     tmp = tempfile.mkdtemp(prefix='walkstamp-amostra-')
     try:
+        nomes = []
         for i, q in enumerate(quadros):
-            q.save(os.path.join(tmp, '%05d.png' % i))
+            nome = os.path.join(tmp, '%05d.png' % i)
+            q.save(nome)
+            nomes.append(nome)
         cmd = ['ffmpeg', '-y', '-loglevel', 'error',
                '-framerate', str(FPS), '-i', os.path.join(tmp, '%05d.png')]
         if com_audio:
@@ -258,6 +299,8 @@ def amostras_de_medida(forcar=False):
 
 
 def main():
+    if not conferir_ffmpeg():
+        sys.exit(2)
     forcar = '--forcar' in sys.argv
     if '--medida' in sys.argv:
         m = amostras_de_medida(forcar)

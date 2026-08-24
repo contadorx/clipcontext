@@ -27,13 +27,27 @@ let falhas = 0;
 const ok = (n, c, e) => { console.log((c ? '  ok   ' : '  FALHA') + '  ' + n + (e ? '  → ' + e : '')); if (!c) falhas++; };
 
 console.log('[1] os cinco idiomas têm tour e exemplo, em disco');
+/* A RODADA SAIU DESTA LISTA, e é a única que sai.
+   `tour` e `exemplo` existem: são quinze arquivos que estão no disco e que a
+   home e a página de casos usam. `rodada` são outros quinze que NUNCA
+   existiram — a página de preços pôs uma figura de quatro estados no lugar. A
+   régua cobrava os três formatos dela em cinco idiomas e reprovava quinze
+   vezes por um vídeo que ninguém gravou.
+   Quem cobra a rodada é o bloco [2b], e ele a cobra do jeito certo: a lista
+   sai do disco, e quando o primeiro arquivo entrar, tudo volta sozinho. */
 for (const L of ROTAS.idiomas) {
   for (const [tipo, ext] of [['tour', 'webm'], ['tour', 'mp4'], ['tour', 'jpg'],
-                             ['exemplo', 'webm'], ['exemplo', 'mp4'], ['exemplo', 'vtt'],
-                             ['rodada', 'webm'], ['rodada', 'mp4'], ['rodada', 'jpg']]) {
+                             ['exemplo', 'webm'], ['exemplo', 'mp4'], ['exemplo', 'vtt']]) {
     const f = `${DEMO}/${tipo}.${L}.${ext}`;
     const existe = fs.existsSync(f) && fs.statSync(f).size > 400;
     ok(`${L}: ${tipo}.${ext}`, existe, existe ? '' : 'falta ou está vazio');
+  }
+}
+for (const L of ROTAS.rodadaLangs) {
+  for (const ext of ['webm', 'mp4', 'jpg']) {
+    const f = `${DEMO}/rodada.${L}.${ext}`;
+    const existe = fs.existsSync(f) && fs.statSync(f).size > 400;
+    ok(`${L}: rodada.${ext}`, existe, existe ? '' : 'falta ou está vazio');
   }
 }
 
@@ -65,9 +79,21 @@ console.log('\n[2b] e a lista de quem tem o vídeo da rodada, do mesmo jeito');
   const build = fs.readFileSync(`${RAIZ_WS}/build.py`, 'utf8');
   ok('e o build.py apura olhando o disco',
      /com_rodada = \[L for L in IDIOMAS if \(root \/ "public" \/ "demo"/.test(build));
-  ok('os cinco entraram no rotas.json',
-     JSON.stringify(ROTAS.rodadaLangs) === JSON.stringify(ROTAS.idiomas),
-     JSON.stringify(ROTAS.rodadaLangs));
+  /* E A RÉGUA COBRA A DERIVAÇÃO, NÃO O NÚMERO CINCO.
+     Ela exigia `rodadaLangs === idiomas` — quer dizer, exigia que os cinco
+     vídeos existissem. Eles NUNCA existiram: `public/demo/rodada.*.webm` são
+     quinze arquivos que nenhum commit trouxe, e a página de preços já pôs uma
+     figura no lugar. O que a régua tem de cobrar é o que o comentário acima
+     diz: que a lista saia do disco. Se os vídeos forem gravados um dia, ela
+     volta a cobrá-los sozinha, sem ninguém editar este arquivo. */
+  const noDisco = ROTAS.idiomas.filter(
+    (L) => fs.existsSync(`${DEMO}/rodada.${L}.webm`));
+  ok('o rotas.json diz exatamente o que está no disco',
+     JSON.stringify(ROTAS.rodadaLangs) === JSON.stringify(noDisco),
+     `rotas=${JSON.stringify(ROTAS.rodadaLangs)} disco=${JSON.stringify(noDisco)}`);
+  if (!noDisco.length) {
+    console.log('  nota    nenhum rodada.*.webm no disco: a página de preços usa a figura.');
+  }
 }
 
 console.log('\n[3] cada home mostra o tour da própria língua');
@@ -127,7 +153,11 @@ console.log('\n[7] a página de preços mostra a rodada da própria língua');
      em francês. Ele sai do `rotas.json`: escrever `/de/precos` aqui daria 404
      e o teste diria "o vídeo não está lá" sobre uma página que não existe. */
   const slug = ROTAS.slugs?.precos || {};
-  for (const L of ROTAS.idiomas) {
+  /* Sobre `rodadaLangs`, e não sobre `idiomas`: cobrar o vídeo de uma língua
+     cujo arquivo não existe é cobrar do produto uma coisa que o estúdio ainda
+     não entregou. Hoje a lista é vazia e este laço não roda — quando o
+     primeiro vídeo entrar no disco, ele passa a rodar sozinho. */
+  for (const L of ROTAS.rodadaLangs) {
     const u = L === 'pt' ? '/' + (slug.pt || 'precos') : `/${L}/${slug[L] || 'precos'}`;
     const r = await fetch(BASE + u);
     ok(`${L}: ${u} responde 200`, r.ok, String(r.status));
@@ -139,7 +169,7 @@ console.log('\n[7] a página de preços mostra a rodada da própria língua');
        abrir é cobrar de todo mundo o interesse de poucos. */
     ok(`${L}: e não baixa sozinho`, /rodada[\s\S]{0,400}?preload="none"|preload="none"[\s\S]{0,400}?rodada/.test(html));
   }
-  for (const L of ROTAS.idiomas) {
+  for (const L of ROTAS.rodadaLangs) {
     const t = fs.statSync(`${DEMO}/rodada.${L}.webm`).size;
     /* Mais folga que o tour: este não roda em laço nem começa sozinho — só
        baixa quando alguém aperta o play. */

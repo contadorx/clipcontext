@@ -95,7 +95,11 @@ export type Conta = {
     /* Estes dois já vinham do banco e não tinham onde aparecer: eram a parte do
        painel que só existia na `/time`. Ficam aqui porque o painel passou a
        morar num lugar só, e um painel a menos é uma divergência a menos. */
-    modelos?: Array<{ id: number; nome: string; escopo: string; dados: unknown }>;
+    /* `meu` vem do banco, e não é deduzido aqui: quem sabe de quem é o modelo
+       é quem guarda o `dono_email`, e mandar o e-mail do dono para a tela só
+       para ela comparar seria publicar o endereço de um colega numa lista onde
+       ele não tem o que fazer. */
+    modelos?: Array<{ id: number; nome: string; escopo: string; dados: unknown; meu?: boolean }>;
     emissoes?: Array<{ email: string; vence_em: string | null; dias: number | null; criado_em: string }>;
   } | null;
 };

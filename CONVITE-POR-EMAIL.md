@@ -16,9 +16,19 @@ sozinho**, dizendo por quê. Nada quebra enquanto isto não estiver configurado.
 
 ---
 
-## 1. O SQL, para colar no Supabase
+## 1. O SQL — agora é migração, e não mais "cole no editor"
 
-Supabase → SQL Editor → cole tudo e rode.
+> **Mudou em 23/08.** Este bloco era a única casa da tabela e da função, com a
+> instrução de colar no SQL Editor. Ele nunca foi colado neste banco: conferido
+> ao vivo, não havia nem `convite_envio` nem `walkstamp_convite_pode`, e o
+> convite falhava fechado desde sempre. Pior: morando fora das migrações, a
+> tabela escapava das duas travas automáticas do projeto — RLS em toda tabela e
+> `search_path` fixo em toda função.
+>
+> O SQL abaixo agora é
+> `supabase/migrations/20260823125413_convite_envio_sai_do_markdown_e_vira_migracao.sql`,
+> **já aplicado em produção**. Num banco novo ele entra junto com os outros 45.
+> O que segue fica aqui como explicação do desenho, não como tarefa.
 
 ```sql
 -- A contagem de convites. Nem o IP nem o endereço de destino são guardados:

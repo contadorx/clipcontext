@@ -26,7 +26,7 @@ const RAIZ = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..',
 const CHROME = process.env.CHROME || CHROME_WS;
 const VIDEO = '/tmp/reuniao.webm';
 if (!fs.existsSync(VIDEO)) {
-  console.log('  pulado  ' + VIDEO + ' não existe. Rode antes:  node testes/plano.mjs');
+  console.log('PULADO  ' + VIDEO + ' não existe. Rode antes:  node testes/plano.mjs');
   process.exit(0);
 }
 const T = {'.html':'text/html','.css':'text/css','.js':'text/javascript','.png':'image/png',

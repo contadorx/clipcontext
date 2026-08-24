@@ -110,8 +110,15 @@ console.log('\n[4] os exemplos de e-mail usam o domínio reservado para exemplos
      assinar licença. Sem ele, este bloco não tem o que ler, e dizer isso é
      melhor do que morrer com ENOENT: quem abre o pacote e vê a esteira vermelha
      vai procurar defeito num produto que está inteiro. */
+  /* `BLOCO PULADO`, e não `PULADO`. A diferença não é de estilo: o `rodar.sh`
+     lê `^PULADO` como "este ARQUIVO não rodou" e tira o teste inteiro da
+     cobertura. Aqui quem não roda é um bloco de quatro linhas, num arquivo com
+     mais quatro blocos que rodaram. Marcar o arquivo inteiro como pulado
+     esconderia que os outros passaram — mentira do tamanho da anterior, virada
+     do avesso. O rodapé da esteira imprime esta linha de qualquer jeito, porque
+     ela casa com `PULADA|PULADO`. */
   if (!fs.existsSync(`${RAIZ}/PLANO-TIME.md`)) {
-    console.log('  pulado  PLANO-TIME.md não está neste pacote (ele guarda as chaves privadas).');
+    console.log('BLOCO PULADO  PLANO-TIME.md não está neste pacote (ele guarda as chaves privadas).');
   } else {
     const plano = fs.readFileSync(`${RAIZ}/PLANO-TIME.md`, 'utf8');
     ok('o PLANO-TIME usa example.com', /@example\.com/.test(plano));

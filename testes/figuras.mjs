@@ -146,11 +146,34 @@ console.log('\n[5b] a rodada em quatro estados, na página de preços');
 
 console.log('\n[6] a página de preços diz o que SAI');
 {
+  /* O NÚMERO SAI DO CATÁLOGO, e não de um piso escrito aqui.
+     Era `>= 10`, e a tira tinha 13 selos escritos à mão em seis cópias — cinco
+     páginas de preço e a home — contra 15 saídas no catálogo. Três capacidades
+     PRONTAS eram vendidas como inexistentes: o documento por tarefa, o pacote
+     em vários idiomas e o prompt para IA. Um piso de 10 nunca ia reprovar isso.
+     Agora a tira é gerada, e esta régua cobra a IGUALDADE com a fonte. */
+  const catalogo = JSON.parse(fs.readFileSync(`${RAIZ_WS}/src/features.json`, 'utf8'));
+  const saidas = (catalogo.grupos.find((g) => g.id === 'saidas') || {}).itens || [];
+  ok('o catálogo declara as saídas', saidas.length > 0, String(saidas.length));
+  ok('e toda saída tem selo — sem isso a tira encolhe em silêncio',
+     saidas.every((i) => i.selo), saidas.filter((i) => !i.selo).map((i) => i.pt).join(' | '));
+
   for (const L of idiomas) {
     await pg.goto(SITE + pre(L) + '/' + slugs.precos[L], { waitUntil: 'domcontentloaded' });
     const n = await pg.locator('.saidas .saida').count();
-    ok(`${L}: a tira de formatos está lá`, n >= 10, String(n));
+    ok(`${L}: a tira mostra as ${saidas.length} saídas do catálogo`, n === saidas.length, String(n));
   }
+
+  /* A HOME É DUAS METADES, e a soma tem de fechar com o catálogo: quatro em
+     destaque e o resto na gaveta. Elas eram a sexta e a sétima cópia à mão. */
+  await pg.goto(SITE + '/', { waitUntil: 'domcontentloaded' });
+  const emCima = await pg.locator('.saidas .saida').count()
+                 - await pg.locator('details.maisSaidas .saida').count();
+  const naGaveta = await pg.locator('details.maisSaidas .saida').count();
+  ok(`a home mostra ${saidas.filter((i) => i.destaque).length} em cima`,
+     emCima === saidas.filter((i) => i.destaque).length, String(emCima));
+  ok('e o resto na gaveta, sem perder nenhuma',
+     emCima + naGaveta === saidas.length, `${emCima} + ${naGaveta}`);
   /* Nomes de formato não se traduzem — é a mesma tira nos cinco. */
   await pg.goto(SITE + '/de/preise', { waitUntil: 'domcontentloaded' });
   const t = await pg.locator('.saidas').innerText();

@@ -5,7 +5,7 @@
     Cette page s’adresse à qui doit approuver l’usage de {{marca}} dans une entreprise : comment il fonctionne,
     ce qui sort de votre machine, et ce que nous n’avons <b>pas</b>.</p>
 
-    <p class="lockHint" style="border-left:3px solid var(--accent);padding-left:12px;margin:0 0 26px">
+    <p class="lockHint" style="margin:0 0 26px">
     <b>En une ligne :</b> l’outil n’a pas de serveur de traitement et ne reçoit ni votre vidéo, ni votre
     audio, ni vos captures. Cela vaut dans toutes les offres, et vous n’avez pas à nous croire — cela se
     vérifie en trente secondes, avec le navigateur que vous avez déjà ouvert. Qui souscrit une offre payante
@@ -55,10 +55,10 @@
       <tr><td>Vercel Web Analytics</td><td>Toujours ; rien n’est envoyé si le navigateur émet <i>Do&nbsp;Not&nbsp;Track</i> ou <i>Global Privacy Control</i></td>
           <td>Quelle page a été vue, sans cookie et sans identifiant qui persiste</td>
           <td>Un identifiant de personne ou de session</td></tr>
-      <tr><td>Supabase (jalons d’usage)</td><td>À trois moments : l’outil a été ouvert, une vidéo a été ouverte, un fichier a été téléchargé. Respecte DNT et GPC</td>
-          <td>Le nom du jalon, la langue de la page, l’origine de la vidéo et le format téléchargé</td>
+      <tr><td>Supabase (jalons d’usage)</td><td>À quinze jalons, onze dans l’outil et quatre dans le compte — l’outil a été ouvert, une vidéo a été ouverte, un fichier a été téléchargé, un script a été importé, un paiement a été commencé, entre autres. Respecte DNT et GPC</td>
+          <td>Le nom du jalon, la langue de la page, l’origine de la vidéo, le format téléchargé, une tranche (« 4-10 », jamais le nombre exact) et le forfait</td>
           <td>Nom de fichier, taille, durée, contenu, identifiant de session</td></tr>
-      <tr><td>jsDelivr (CDN public)</td><td>Seulement à l’usage de la transcription automatique ou de la lecture du texte dans l’image</td>
+      <tr><td>jsDelivr (CDN public)</td><td>Au chargement de l’outil (la bibliothèque PDF) et à l’usage de la transcription automatique ou de la lecture du texte dans l’image</td>
           <td>La requête de la bibliothèque</td><td>Votre audio, votre image, votre texte</td></tr>
       <tr><td>Hugging Face</td><td>Seulement au déclenchement de la transcription automatique, et une fois par navigateur</td>
           <td>La requête du modèle de reconnaissance vocale</td><td>Votre audio</td></tr>
@@ -70,7 +70,7 @@
           <td>Rien d’autre que le document que vous avez envoyé ; il va de votre navigateur directement à Google, sans passer par nous</td></tr>
     </table>
     <p><b>Aucune de ces connexions ne transporte de vidéo, d’audio, d’image ou de transcription.</b>
-    La bibliothèque PDF est servie depuis notre propre domaine, et non depuis un CDN.</p>
+    La bibliothèque PDF vient de jsDelivr avec la page ; c’est le paquet hors ligne qui l’intègre.</p>
     <p>Il y a une exception, et elle est dans le tableau plutôt que cachée : le bouton <b>Envoyer vers Google Docs</b>
     est la seule fonction où le <b>document généré sort de l’ordinateur</b>. Il existe parce que beaucoup d’équipes
     relisent la preuve dans le Drive, et il demande une confirmation explicite avant d’envoyer — qui n’en veut pas ne
@@ -166,5 +166,47 @@
     Il n’y a pas de programme de récompense pour vulnérabilité, mais nous répondons.</p>
     <p class="small muted">Cette page décrit le fonctionnement à la date ci-dessus. Si quelque chose change d’une façon qui
     affecte ce qui est écrit ici, cette page change avec — et la date en haut est votre moyen de le vérifier.</p>
+
+
+    <!-- A MECÂNICA DA LICENÇA, VINDA DA `/time` — 23/08.
+         A `/time` era órfã: nenhuma página do site levava a ela, e ela estava
+         indexada. Duas páginas vendendo o mesmo plano é o defeito que mais
+         custou a este projeto, e a órfã é sempre a que ninguém lembra de
+         atualizar.
+         Ela foi redirecionada para a página de preços. Destas seções, o que
+         falava de administrar o time já existe na conta, e o que falava de
+         guardar dados e da versão offline já existe acima nesta página. O que
+         não tinha outro lugar é isto: como a chave é conferida e por que ela
+         vale pouco tempo. Numa avaliação de fornecedor é exatamente a pergunta
+         que vem depois de "o que sai da minha máquina". -->
+<h2>Comment cela fonctionne à l’intérieur</h2>
+    <ol class="passos">
+      <li><b>Vous demandez.</b> Vous écrivez l’e-mail ici. Rien n’est décidé à ce moment-là : il ne part qu’un message vers
+      votre boîte.</li>
+      <li><b>Vous cliquez sur ce qui est arrivé.</b> C’est cela qui prouve que l’adresse est à vous — et c’est le seul moment où
+      il existe quelque chose qui ressemble à une session.</li>
+      <li><b>Vous revenez avec le lien prêt.</b> La clé est signée sur le serveur, avec votre e-mail à l’intérieur, et
+      livrée déjà à l’intérieur d’une adresse de {{marca}}.</li>
+      <li><b>À partir de là, plus rien qui passe par le réseau.</b> La clé est vérifiée <b>à l’intérieur du navigateur</b>, contre
+      une clé publique qui se trouve dans le HTML même de l’outil. Elle fonctionne dans l’avion, sur la machine du
+      client avec internet verrouillé, et sur l’ordinateur que la DSI ne laisse pas parler avec notre hébergement.</li>
+    </ol>
+
+    <h2>Pourquoi la validité est courte</h2>
+    <p>Chaque clé émise vaut <b>45 jours</b> (14 pour l’essai), et la suivante arrive par e-mail avant que la
+    précédente n’expire. L’administrateur peut raccourcir ce délai, de 1 à 90 jours, dans le portail de l’équipe. Ce n’est pas de la bureaucratie : c’est ce qui fait qu’un lien fuité <b>meurt tout seul</b>. Comme aucun
+    serveur ne vérifie quoi que ce soit pendant l’usage, il n’existe pas de bouton de révocation — la durée est la révocation. C’est
+    l’arbitrage choisi exprès : nous préférons une fuite qui expire à un produit payant qui cesse de
+    fonctionner quand internet tombe.</p>
+
+    <!-- A SAÍDA — 23/08. Esta página era um beco: saía só para a política de
+         privacidade. Quem termina de ler aqui já resolveu a pergunta que o
+         trouxe, e a próxima pergunta dele tem endereço. -->
+    <h2>{{confiancaTit}}</h2>
+    <p>{{segSaida}}</p>
+    <p class="row" style="margin:12px 0 0">
+      <a class="btn ghost" href="{{verificar}}">{{fVerif}}</a>
+      <a class="btn ghost" href="{{precos}}">{{navPrice}}</a>
+    </p>
   </div>
 </section>

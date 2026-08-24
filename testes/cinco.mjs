@@ -134,6 +134,10 @@ console.log('\n[6b] os blocos novos da página de preços existem nos cinco');
                       fr: 'à partir de 3 personnes' };
   const MIN_TOTAL = { pt: 'R$ 1.047', en: 'US$ 207', es: 'US$ 207',
                       de: '€ 195', fr: '€ 195' };
+  /* Quantas perguntas cada idioma tem no FAQ de compra — comparadas depois do
+     laço. Um idioma com uma pergunta a menos é um mercado sem a resposta que os
+     outros têm, e isso não aparece em nenhuma outra régua. */
+  const faqPorIdioma = {};
   for (const L of idiomas) {
     await pg.goto(SITE + pre(L) + '/' + slugs.precos[L], { waitUntil: 'domcontentloaded' });
     ok(`${L}: os três cartões, um CTA em cada`,
@@ -145,14 +149,31 @@ console.log('\n[6b] os blocos novos da página de preços existem nos cinco');
        (await pg.locator('.figRodada svg').count()) === 1);
     ok(`  a lista completa está recolhida num <details>`,
        (await pg.locator('details.listaCompleta').count()) === 1);
-    ok(`  o FAQ de compra tem seis perguntas`,
-       (await pg.locator('.faqCompra dt').count()) === 6);
+    /* PISO E PARIDADE, e não um número escrito à mão.
+       Era `=== 6`. Acrescentar a sétima pergunta — a da degustação de 14 dias,
+       que é a objeção que trava a compra — reprovou nos cinco idiomas por um
+       número que ninguém tinha motivo para manter em 6. É a família do
+       `itens === 6`: contagem à mão onde o que importa é outra coisa. */
+    const nPerguntas = await pg.locator('.faqCompra dt').count();
+    const nRespostas = await pg.locator('.faqCompra dd').count();
+    ok(`  o FAQ de compra não esvaziou`, nPerguntas >= 6, String(nPerguntas));
+    ok(`  e cada pergunta tem a sua resposta`, nRespostas === nPerguntas,
+       `${nPerguntas} dt / ${nRespostas} dd`);
+    faqPorIdioma[L] = nPerguntas;
     /* O mínimo e o total mínimo, na moeda do idioma. O número por assento sem
        o total ao lado é a surpresa que chega no checkout. */
     const txt = (await pg.locator('.plan[data-plano="team"]').innerText()).replace(/\s+/g, ' ');
     ok(`  o mínimo de 3 está dito por extenso`, txt.includes(MIN_FRASE[L]), txt.slice(0, 90));
     ok(`  e o total mínimo anual está ao lado`, txt.includes(MIN_TOTAL[L]), txt.slice(0, 90));
   }
+  /* A PARIDADE, que é a afirmação que o `=== 6` escondia.
+     Um número igual em todos os idiomas é o que importa: um mercado com uma
+     pergunta a menos é um mercado sem a resposta que os outros têm, e nenhuma
+     outra régua olharia para isso. O `=== 6` dava essa garantia de graça, e a
+     perdia inteira no dia em que a página ganhasse uma pergunta legítima. */
+  const contagens = [...new Set(Object.values(faqPorIdioma))];
+  ok(`os cinco idiomas têm o MESMO número de perguntas no FAQ`,
+     contagens.length === 1, JSON.stringify(faqPorIdioma));
 }
 
 console.log('\n[7] o vídeo da home carrega em todo idioma');

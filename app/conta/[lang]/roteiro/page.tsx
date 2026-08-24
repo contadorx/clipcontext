@@ -35,7 +35,7 @@
  */
 import { notFound, redirect } from 'next/navigation';
 import type { Conta } from '@/lib/supabase/servico';
-import { type Lang, type Textos, CAMINHO, ehLang, preencher, textos } from '@/lib/conta/textos';
+import { CAMINHO, LOCALE, ehLang, preencher, textos, type Lang, type Textos } from '@/lib/conta/textos';
 import { Envolver, Porta, carregar } from '../carga';
 import { type Caso, type Resumo, type Roteiro, CAMINHO_ROTEIRO, linkDoCaso, meusRoteiros, verRoteiro } from '@/lib/conta/roteiro';
 import { apagarAnexoDoCaso, apagarRoteiro, atribuirCaso, marcarFeito } from '../../roteiro-acoes';
@@ -45,8 +45,6 @@ import Copiar from './Copiar';
 
 export const dynamic = 'force-dynamic';
 
-const LOCALE: Record<Lang, string> = { pt: 'pt-BR', en: 'en-US', es: 'es-ES',
-                                      de: 'de-DE', fr: 'fr-FR' };
 const quando = (lang: Lang, iso: string | null) =>
   iso ? new Intl.DateTimeFormat(LOCALE[lang], { dateStyle: 'short', timeStyle: 'short' }).format(new Date(iso)) : '—';
 

@@ -121,6 +121,37 @@ console.log('\n[2d] o cabeçalho tem a ação como botão');
   ok('o comparativo entrou no menu', comp>=1, String(comp));
 }
 
+console.log('\n[2e] nenhuma página começa com prosa solta antes do cabeçalho');
+{
+  /* O CORPO DA PÁGINA COMEÇA NO CABEÇALHO, e não em texto.
+     Os `src/site/*.html` são fontes: o `lib/site.ts` recorta o miolo do corpo e
+     o React monta o resto. Se o recorte errar o ponto de partida — foi o que
+     aconteceu quando um COMENTÁRIO daqueles arquivos escreveu a tag de abertura
+     do corpo entre crases —, o que sobra do comentário vira texto visível no
+     topo, em toda página e nos cinco idiomas. Não dá erro, não some nenhum
+     bloco, e o rodapé continua certo: só nasce meia tela de prosa em português
+     acima do cabeçalho, empurrando o botão para fora da primeira tela do
+     telefone. Quem pegou da primeira vez foi uma régua de dobra, medindo o
+     sintoma a três passos da causa.
+     Aqui se cobra a causa, em quatro páginas de dois moldes diferentes. */
+  for (const rota of ['/?lang=pt', '/en', '/de/preise', '/fr/aide']) {
+    await pg.goto('http://localhost:8898' + rota);
+    const antes = await pg.evaluate(() => {
+      const cab = document.querySelector('header');
+      if (!cab) return '(sem cabeçalho)';
+      const passo = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+      let no, solto = '';
+      while ((no = passo.nextNode())) {
+        if (cab.contains(no)) break;
+        if (no.parentElement && getComputedStyle(no.parentElement).display === 'none') continue;
+        solto += no.textContent.trim() ? ' ' + no.textContent.trim() : '';
+      }
+      return solto.trim();
+    });
+    ok(`${rota}: nada escrito antes do cabeçalho`, antes === '', antes.slice(0, 90));
+  }
+}
+
 console.log('\n[3] navegação e idiomas');
 {
   await pg.goto('http://localhost:8898/en/security');

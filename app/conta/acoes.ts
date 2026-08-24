@@ -16,7 +16,7 @@ import { clienteDoServidor, emailDaSessao } from '@/lib/supabase/servidor';
 import { contaDe, rpc } from '@/lib/supabase/servico';
 import { PLANOS, ehPlano, stripe, temStripe } from '@/lib/stripe';
 import { marca } from '@/lib/marca';
-import { CAMINHO, type Lang, ehLang, preencher, textos } from '@/lib/conta/textos';
+import { CAMINHO, LOCALE_STRIPE, type Lang, ehLang, preencher, textos } from '@/lib/conta/textos';
 import { enderecoDoItem } from '@/lib/conta/nav';
 import { type Chave, emitirChave } from '@/lib/conta/licenca';
 import { medirConta } from '@/lib/conta/medir';
@@ -28,8 +28,31 @@ function idioma(form: FormData): Lang {
   return ehLang(v) ? v : 'pt';
 }
 
-const volta = (lang: Lang, par: string, valor: string) =>
-  redirect(`${CAMINHO[lang]}?${par}=${encodeURIComponent(valor)}`);
+/* O `plano` é opcional e viaja ao lado do recado: a tela de "olhe o seu
+   e-mail" tem um link para pedir outro link, e sem ele o segundo pedido perdia
+   a intenção que o primeiro tinha carregado. */
+const volta = (lang: Lang, par: string, valor: string, plano?: string | null) =>
+  redirect(`${CAMINHO[lang]}?${par}=${encodeURIComponent(valor)}` +
+           (plano ? `&plano=${plano}` : ''));
+
+/* A BASE DAS VOLTAS, e ela NÃO é `marca.site` escrita à mão.
+   Quatro endereços deste arquivo mandam a pessoa de volta ao site: o link do
+   e-mail e os três da Stripe. Todos usavam `https://walkstamp.com` fixo — o que
+   quer dizer que, numa prévia da Vercel ou em `localhost`, o link do e-mail
+   levava para PRODUÇÃO. Quem testa a compra numa prévia testava a compra de
+   outro site.
+   `VERCEL_URL` é o endereço da implantação atual; `marca.site` continua sendo a
+   verdade em produção e a rede quando não há nenhuma das duas. O `canonical` e
+   o OG continuam absolutos e fixos de propósito — ali o endereço público é o
+   certo, e é outra pergunta. */
+function base(): string {
+  const proprio = process.env.NEXT_PUBLIC_SITE_URL || process.env.SITE_URL;
+  if (proprio) return proprio.replace(/\/$/, '');
+  if (process.env.VERCEL_ENV && process.env.VERCEL_ENV !== 'production' && process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`;
+  }
+  return marca.site;
+}
 
 /* A resposta volta para a TELA DE CHAMADOS, e não para a raiz da conta. Mandar
    quem acabou de abrir um chamado para outra página é fazê-la procurar o
@@ -60,14 +83,28 @@ export async function entrar(form: FormData) {
   const email = String(form.get('email') || '').trim().toLowerCase();
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return volta(lang, 'erro', textos(lang).erroEmail);
 
+  /* A INTENÇÃO DE COMPRA VIAJA NO LINK, junto com o idioma.
+     Quem clica "Assinar o Team" na página de preços chega aqui querendo uma
+     coisa específica. Antes, só o idioma sobrevivia à ida ao e-mail: a pessoa
+     voltava para uma tela que não sabia o que ela tinha pedido, e escolhia de
+     novo — três telas para dizer duas vezes a mesma coisa.
+     Validado contra `ehPlano`, e não repassado cru: este valor volta da
+     internet dentro de uma URL, e um `?plano=` inventado não pode virar
+     parâmetro de tela. Inválido some, e a pessoa só vê a conta normal. */
+  const querido = String(form.get('plano') || '');
+  const plano = ehPlano(querido) ? querido : null;
+
   const supa = await clienteDoServidor();
   const { error } = await supa.auth.signInWithOtp({
     email,
     // o idioma viaja no link: quem pediu em espanhol volta em espanhol
-    options: { emailRedirectTo: `${marca.site}/conta/confirmar?lang=${lang}` },
+    options: {
+      emailRedirectTo: `${base()}/conta/confirmar?lang=${lang}` +
+                       (plano ? `&plano=${plano}` : ''),
+    },
   });
   if (error) return volta(lang, 'erro', textos(lang).erroEnvio);
-  volta(lang, 'enviado', email);
+  volta(lang, 'enviado', email, plano);
 }
 
 export async function sair(form: FormData) {
@@ -114,9 +151,9 @@ export async function comprar(form: FormData) {
     subscription_data: { metadata: { email, plano } },
     metadata: { email, plano },
     allow_promotion_codes: true,
-    success_url: `${marca.site}${CAMINHO[lang]}?comprou=1`,
-    cancel_url: `${marca.site}${CAMINHO[lang]}?cancelou=1`,
-    locale: lang === 'pt' ? 'pt-BR' : lang,
+    success_url: `${base()}${CAMINHO[lang]}?comprou=1`,
+    cancel_url: `${base()}${CAMINHO[lang]}?cancelou=1`,
+    locale: LOCALE_STRIPE[lang] as 'pt-BR' | 'en' | 'es' | 'de' | 'fr',
   });
   /* ANTES do `redirect`, e nao depois: o `redirect` do Next funciona lancando
      uma excecao — nada escrito abaixo dele roda. Medir depois seria escrever
@@ -144,7 +181,7 @@ export async function gerenciar(form: FormData) {
 
   const portal = await stripe().billingPortal.sessions.create({
     customer: cli.id,
-    return_url: `${marca.site}${CAMINHO[lang]}`,
+    return_url: `${base()}${CAMINHO[lang]}`,
   });
   redirect(portal.url);
 }

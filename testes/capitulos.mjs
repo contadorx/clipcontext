@@ -115,7 +115,18 @@ console.log('\n[4] o capítulo é título nos documentos');
   const dl = pg.waitForEvent('download',{timeout:60000});
   await pg.locator('#go').click();
   const d = await dl; await d.saveAs('/tmp/cap.pdf');
-  const txt = execSync('pdftotext /tmp/cap.pdf - 2>/dev/null || true',{encoding:'utf8'});
+  /* SEM `|| true`. Com ele, uma máquina sem `pdftotext` recebia string vazia e
+     esta linha reprovava dizendo "o PDF traz o nome das tarefas" — que é uma
+     afirmação sobre o PRODUTO para um defeito do AMBIENTE. Quem lê a esteira
+     não tem como distinguir os dois, e vai caçar no lugar errado. Agora a
+     ferramenta que falta é dita pelo nome. */
+  let txt = '';
+  try {
+    txt = execSync('pdftotext /tmp/cap.pdf -', { encoding: 'utf8', stdio: ['ignore','pipe','pipe'] });
+  } catch (e) {
+    ok('o pdftotext está instalado (apt install poppler-utils)', false,
+       String(e.message).split('\n')[0]);
+  }
   ok('o PDF traz o nome das tarefas', /Achar o produto/.test(txt) && /Pagar/.test(txt),
      (txt.match(/Achar[^\n]*/)||[''])[0]);
 }

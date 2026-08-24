@@ -196,11 +196,20 @@ console.log('\n[4] as páginas do blog não batem no banco a cada visita');
      com segmento dinâmico e sem `generateStaticParams` é montada a cada pedido
      mesmo com `revalidate`, e o cabeçalho diz `no-store` de qualquer forma. O
      que passou a ser guardado é a LEITURA, e é ela que custava. */
+  /* `=== 0`, e não `< 3`. O comentário do produto garante ZERO consulta nas
+     visitas seguintes; a régua aceitava duas, e uma regressão que dobrasse o
+     custo passaria — para aparecer depois na fatura do banco.
+
+     A visita de aquecimento é EXPLÍCITA, e não herdada da seção 3. Ela estava
+     lá por acaso — este bloco media 0 porque alguém antes já tinha aberto a
+     mesma página. Uma régua que depende da ordem dos blocos é uma régua que
+     muda de resposta quando alguém reordena o arquivo. */
+  await texto(`/blog/${POST.versoes.pt.slug}`);
   const antes = pedidosAoBanco;
   for (let i = 0; i < 3; i++) await texto(`/blog/${POST.versoes.pt.slug}`);
   const gastos = pedidosAoBanco - antes;
-  console.log('     três visitas → ' + gastos + ' pedido(s) ao banco');
-  ok('três visitas não viram três consultas', gastos < 3, gastos + ' consultas em 3 visitas');
+  console.log('     três visitas depois da primeira → ' + gastos + ' pedido(s) ao banco');
+  ok('as três visitas seguintes não custam nada', gastos === 0, gastos + ' consultas em 3 visitas');
   const rr = await fetch(BASE + '/sitemap-blog.xml');
   ok('e o sitemap manda a CDN guardar',
      /s-maxage/.test(rr.headers.get('cache-control') || ''),

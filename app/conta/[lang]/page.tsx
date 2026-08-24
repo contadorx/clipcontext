@@ -11,7 +11,7 @@
  */
 import { notFound } from 'next/navigation';
 import { emailDaSessao } from '@/lib/supabase/servidor';
-import { type Lang, type Textos, ehLang, preencher, textos } from '@/lib/conta/textos';
+import { LOCALE, ehLang, preencher, textos, type Lang, type Textos } from '@/lib/conta/textos';
 import { entrar, sair } from '../acoes';
 import { Envolver, carregar } from './carga';
 import { Plano, RoteiroAtalho } from './secoes';
@@ -19,8 +19,6 @@ import Licenca from './Licenca';
 
 export const dynamic = 'force-dynamic';
 
-const LOCALE: Record<Lang, string> = { pt: 'pt-BR', en: 'en-US', es: 'es-ES',
-                                      de: 'de-DE', fr: 'fr-FR' };
 
 const dinheiro = (lang: Lang, centavos: number, moeda: string) =>
   new Intl.NumberFormat(LOCALE[lang], { style: 'currency', currency: moeda || 'BRL' }).format(centavos / 100);
@@ -38,6 +36,12 @@ export default async function Pagina({ params, searchParams }: PageProps<'/conta
   const q = await searchParams;
   const email = await emailDaSessao();
   const recado = (n: string) => (typeof q[n] === 'string' ? (q[n] as string) : null);
+  /* O QUE A PESSOA VEIO FAZER. Ele saiu do cartão de preços como `?plano=`,
+     atravessou o link do e-mail e a rota de confirmação, e chega aqui. Validado
+     contra os dois planos que existem: o valor passou por uma URL, e uma URL é
+     coisa que qualquer um escreve. */
+  const bruto = recado('plano');
+  const quer = bruto === 'personal' || bruto === 'time' ? bruto : null;
 
   /* Os recados de volta do Stripe e das ações continuam por cima de tudo: eles
      são a resposta ao que a pessoa acabou de fazer, e uma resposta que aparece
@@ -60,17 +64,20 @@ export default async function Pagina({ params, searchParams }: PageProps<'/conta
     return (
       <Envolver lang={lang} t={t} slug="" carga={{ estado: 'fora' }}>
         {avisos}
-        <Entrada lang={lang} t={t} enviadoPara={recado('enviado')} />
+        <Entrada lang={lang} t={t} enviadoPara={recado('enviado')} quer={quer} />
       </Envolver>
     );
   }
   return <><div className="wrap" style={{ paddingTop: 26 }}>{avisos}</div>
-             <Portal email={email} lang={lang} t={t} /></>;
+             <Portal email={email} lang={lang} t={t} quer={quer} /></>;
 }
 
 /* ------------------------------------------------------------------ entrar */
 
-function Entrada({ lang, t, enviadoPara }: { lang: Lang; t: Textos; enviadoPara: string | null }) {
+type Quer = 'personal' | 'time' | null;
+
+function Entrada({ lang, t, enviadoPara, quer }:
+                 { lang: Lang; t: Textos; enviadoPara: string | null; quer: Quer }) {
   if (enviadoPara) {
     const [antes, depois] = t.olheAjuda.split('{link}');
     return (
@@ -80,7 +87,7 @@ function Entrada({ lang, t, enviadoPara }: { lang: Lang; t: Textos; enviadoPara:
           __html: preencher(t.olheLead, { email: `<b>${escapar(enviadoPara)}</b>` }),
         }} />
         <p className="small muted">
-          {antes}<a href="?">{t.olhePedirOutro}</a>{depois}
+          {antes}<a href={quer ? `?plano=${quer}` : '?'}>{t.olhePedirOutro}</a>{depois}
         </p>
       </>
     );
@@ -91,6 +98,10 @@ function Entrada({ lang, t, enviadoPara }: { lang: Lang; t: Textos; enviadoPara:
       <p className="lead">{t.entrarLead}</p>
       <form action={entrar} style={{ display: 'flex', gap: 10, flexWrap: 'wrap', margin: '20px 0' }}>
         <input type="hidden" name="lang" value={lang} />
+        {/* A intenção entra no formulário para sair no link do e-mail. Sem
+            este campo, ela morria aqui: a pessoa pedia o link e voltava para
+            uma conta que não sabia o que ela tinha vindo comprar. */}
+        {quer && <input type="hidden" name="plano" value={quer} />}
         <input type="email" name="email" required placeholder={t.entrarPlaceholder}
                autoComplete="email" style={{ flex: '1 1 260px' }} />
         <button className="btn" type="submit">{t.entrarBotao}</button>
@@ -105,7 +116,8 @@ function Entrada({ lang, t, enviadoPara }: { lang: Lang; t: Textos; enviadoPara:
 
 /* ------------------------------------------------------------------ portal */
 
-async function Portal({ email, lang, t }: { email: string; lang: Lang; t: Textos }) {
+async function Portal({ email, lang, t, quer }:
+                      { email: string; lang: Lang; t: Textos; quer: Quer }) {
   const carga = await carregar();
 
   if (carga.estado === 'semChave') {
@@ -126,7 +138,7 @@ async function Portal({ email, lang, t }: { email: string; lang: Lang; t: Textos
   if (carga.estado !== 'ok') {
     return (
       <Envolver lang={lang} t={t} slug="" carga={carga}>
-        <Entrada lang={lang} t={t} enviadoPara={null} />
+        <Entrada lang={lang} t={t} enviadoPara={null} quer={quer} />
       </Envolver>
     );
   }
@@ -137,7 +149,7 @@ async function Portal({ email, lang, t }: { email: string; lang: Lang; t: Textos
       <h1>{t.painelTit}</h1>
       <p className="lead">{email}</p>
 
-      <Plano conta={conta} lang={lang} t={t} />
+      <Plano conta={conta} lang={lang} t={t} quer={quer} />
       {/* A chave vinha só da página de venda, e quem já estava logado aqui
           precisava entrar de novo por lá para pegá-la. Duas portas para a mesma
           coisa é o que a rodada do portal veio acabar. */}

@@ -53,7 +53,7 @@
     <!-- 6. AS PROVAS: o que sai, onde fica, o que abre, e o que NÃO fazemos. -->
     <h2>What comes out, and where each thing lives</h2>
     <p class="lead">An evidence document comes out in these formats, and every one of them is born on your computer:</p>
-    <div class="saidas"><span class="saida"><b>PDF</b></span><span class="saida"><b>DOCX</b> Word</span><span class="saida"><b>PPTX</b> PowerPoint</span><span class="saida"><b>HTML</b></span><span class="saida"><b>MD</b> Markdown</span><span class="saida"><b>SCORM</b></span><span class="saida"><b>CSV</b></span><span class="saida"><b>JSON</b></span><span class="saida"><b>ZIP</b></span><span class="saida"><b>VTT</b></span><span class="saida"><b>SRT</b></span><span class="saida"><b>Google&nbsp;Docs</b></span><span class="saida"><b>Jira</b></span></div>
+    {{tiraSaidas}}
     <p class="small muted"><b>On your computer:</b> the video, the audio, the transcript and the making of the document. <b>On the server:</b> your account, the seats and the invoice. That is the line, and it does not move on the paid plan.</p>
     <p class="small muted">The files open in Word, PowerPoint, the browser and your LMS. The pre-filled link pastes into Jira, Zephyr, Xray or TestRail — <b>it is an address, not an automatic integration</b>.</p>
     <p class="small muted">The licence is checked inside your computer and works with no internet. That is an advantage and a limitation at once: revoking a seat respects the 1-to-90-day window whoever administers it chose.</p>
@@ -73,10 +73,25 @@
       <p class="small muted">{{tpLegenda}}</p>
     </details>
 
+
+    <!-- OS DOIS CAMINHOS DE CONFIANÇA — 23/08.
+         Esta página não linkava nem `/seguranca` nem `/verificar`: as duas
+         páginas que respondem "posso confiar nisto?" ficavam a um clique de
+         lugar nenhum, enquanto a decisão de comprar acontece aqui. -->
+    <h2>{{confiancaTit}}</h2>
+    <p>{{confiancaP}}</p>
+    <p class="row" style="margin:12px 0 0">
+      <a class="btn ghost" href="{{seguranca}}">{{fSec}}</a>
+      <a class="btn ghost" href="{{verificar}}">{{fVerif}}</a>
+    </p>
     <!-- 8. AS PERGUNTAS DE COMPRA. Seis, resposta curta, e nenhuma promete
          prazo de suporte. -->
     <h2>Questions from people who are buying</h2>
     <dl class="faqCompra">
+      <dt>Can I try it before paying?</dt>
+      <dd>Yes. Anyone entering the account for the first time gets <b>14 days with everything
+          in Team</b>, no card and no checkout. When the 14 days end, nothing is charged: the
+          account goes back to Free, and what you already produced stays on your computer.</dd>
       <dt>Do I need a card to use Free?</dt>
       <dd>No. No card and no account.</dd>
       <dt>What happens if I cancel?</dt>

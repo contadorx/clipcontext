@@ -1,3 +1,4 @@
+import { LOCALE } from '@/lib/conta/textos';
 /* Os textos e o endereço do blog, num lugar só.
  *
  * `blog` é a mesma palavra nos cinco idiomas — e por isso NÃO entra na tabela de
@@ -31,7 +32,6 @@ export const enderecoTag = (lang: Lang, tag: string) =>
 export const enderecoAutor = (lang: Lang, autor: string) =>
   `${enderecoBlog(lang)}/autor/${encodeURIComponent(chaveDe(autor))}`;
 
-const LOCALE: Record<Lang, string> = { pt: 'pt-BR', en: 'en-US', es: 'es-ES', de: 'de-DE', fr: 'fr-FR' };
 export const dataDe = (lang: Lang, iso: string) => {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return '';

@@ -37,7 +37,7 @@ const RAIZ = `${RAIZ_WS}`;
    rodar: manda procurar o defeito no lugar errado. */
 const VIDEO = '/tmp/longo.webm';
 if (!fs.existsSync(VIDEO)) {
-  console.log('  pulado  ' + VIDEO + ' não existe — e a amostra curta não serve para medir espera.');
+  console.log('PULADO  ' + VIDEO + ' não existe — e a amostra curta não serve para medir espera.');
   console.log('          Gere com:  python3 testes/amostras.py --longo   (~1 min, 41 MB)');
   process.exit(0);
 }
