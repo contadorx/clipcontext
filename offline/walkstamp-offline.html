@@ -7957,7 +7957,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
        na hora, como frame. Num arquivo, só anotamos o momento e a varredura
        busca depois. */
     if (liveOn) {
-      frames.push({ t: liveAgora(), img: snap(900, parseFloat($('quality').value)),
+      frames.push({ t: liveAgora(), img: snap(0, parseFloat($('quality').value)),
                     keep: true, manual: true });
       $('grabbed').textContent = t('marked', frames.filter(f => f.manual).length);
       atualizarLive();
@@ -9679,7 +9679,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
      depois, e não tem como se atualizar sozinho. Sem carimbo, "estou com um
      problema no offline" é uma conversa sem chão — ninguém sabe de qual build
      se fala nem se o defeito já foi consertado. */
-  const VERSAO = '2026.08.24-64';
+  const VERSAO = '2026.08.24-67';
   window.__versao = () => VERSAO;
 
   const PIP_CSS = `
@@ -11654,7 +11654,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
          dentro do `setInterval` derrubaria o laço inteiro em silêncio, e o que
          chega é "gravei e não veio frame nenhum". */
       let img;
-      try { img = snap(900, q); }
+      try { img = snap(0, q); }
       catch (e) { motivosFrame.semImagem++; motivosFrame.erroImagem =
                     (e && e.message) || String(e); return false; }
       /* Espelho para o teste enxergar por que um quadro entrou ou não. Custa
@@ -15882,8 +15882,38 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     }
   }
 
+  /* ---- A LARGURA DO QUADRO É A DA TELA, E NÃO 900 ----
+
+     Isto era `900` fixo, nos quatro caminhos de captura. Uma tela de 1920
+     virava 900: reduzir 2,1 vezes é reduzir a ALTURA DA LETRA na mesma
+     proporção, e o texto de 12px de um sistema de gestão — rótulo de campo,
+     código de material, valor — chegava ao documento com 5,6px. A evidência
+     saía ilegível, e a queixa que chegou do uso foi exatamente essa.
+
+     Medido sobre uma tela de sistema de verdade, texto de 12px, WebP q0,85:
+
+         largura   por quadro   300 quadros   letra de 12px vira
+            900      20,4 KB         6 MB          5,6 px
+           1920      63,7 KB        19 MB         12,0 px   (nativo)
+           2560        71 KB        21 MB
+           3840     120,2 KB        35 MB
+
+     Não há teto artificial. Trinta e cinco megabytes em 4K é o pior caso, os
+     quadros são Blob FORA do heap, e uma evidência ilegível não tem valor
+     nenhum — economizar memória estragando a prova é economizar na única coisa
+     que o produto entrega.
+
+     O seletor de qualidade continua valendo: ele é a COMPRESSÃO, e agora ela
+     age sobre os pixels que existem em vez de sobre os que sobraram. */
+  /* Declaração, e não `const`: o `snap` é hoisted e é chamado de handlers que
+     nascem antes desta linha rodar. Uma seta em `const` aqui seria uma zona
+     morta esperando a primeira captura de quem clica rápido. */
+  function larguraNativa(){ return video.videoWidth || 900; }
+
   function snap(w, q){
     const c = document.createElement('canvas');
+    /* `w` nulo quer dizer: a largura da fonte, seja ela qual for. */
+    if (!w) w = larguraNativa();
     c.width = w; c.height = Math.round(w * video.videoHeight / video.videoWidth);
     const g = c.getContext('2d');
     g.drawImage(video, 0, 0, c.width, c.height);
@@ -16156,7 +16186,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     const janela = fim - ini;
     const q = parseFloat($('quality').value), mode = $('mode').value;
     const maxf = Math.max(1, +$('maxf').value || 300);
-    const px = 900;
+    /* Zero quer dizer NATIVO — a largura da fonte. Ver `snap`. */
+    const px = 0;
 
     $('extract').disabled = true;
     sincAmbos();
@@ -19966,13 +19997,17 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       const im = await new Promise((ok2, erro) => {
         const i = new Image(); i.onload = () => ok2(i); i.onerror = erro; i.src = url;
       });
-      /* Redesenhada na mesma largura das outras: um print de 4K ao lado de
-         quadros de 900 px sairia com outra escala no documento. */
-      const larg = Math.min(900, im.naturalWidth || 900);
-      const esc = larg / (im.naturalWidth || larg);
+      /* NATIVA, como os quadros capturados. Aqui havia `Math.min(900, ...)`, e
+         a justificativa escrita ao lado era "senão sairia com outra escala no
+         documento". A justificativa estava errada, e agora está invertida: o
+         PDF, o Word e o PPTX posicionam a imagem pela PROPORÇÃO (`w/h`), nunca
+         pela largura absoluta — um print de 4K e um quadro de 1920 ocupam o
+         mesmo espaço na página, só que um está nítido e o outro não. Com a
+         captura em nativo, encolher só a tela colada era a única coisa capaz
+         de criar a diferença que o comentário dizia estar evitando. */
       const c2 = document.createElement('canvas');
-      c2.width = Math.max(1, Math.round((im.naturalWidth || larg) * esc));
-      c2.height = Math.max(1, Math.round((im.naturalHeight || larg) * esc));
+      c2.width = Math.max(1, im.naturalWidth || 900);
+      c2.height = Math.max(1, im.naturalHeight || Math.round(c2.width * 9 / 16));
       c2.getContext('2d').drawImage(im, 0, 0, c2.width, c2.height);
       URL.revokeObjectURL(url);
       const q = parseFloat($('quality').value) || 0.8;

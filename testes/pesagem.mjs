@@ -226,10 +226,21 @@ if (heapAntes != null) {
      /quadros nesta aba: \d+ +[\d.]+ MB/.test(rel), linhaMem);
 }
 
-/* 60 KB é o número que separa "base64 de JPEG" (74 KB medidos) de qualquer
-   coisa que guarde bytes em vez de texto. Ele não é um alvo: é a linha que,
-   cruzada de volta, significa que alguém desfez a mudança sem perceber. */
-ok('um quadro custa menos de 60 KB', porQuadro > 0 && porQuadro < 60 * 1024, kb(porQuadro));
+/* O número não é um alvo: é a linha que, cruzada de volta, significa que
+   alguém desfez a mudança sem perceber — o quadro voltou a ser base64 de JPEG
+   morando no heap em vez de bytes num Blob.
+
+   Ele era 60 KB, e foi RE-DERIVADO quando a captura passou a ser nativa. A
+   derivação antiga vinha de um quadro de 900 px de largura: 74 KB de base64
+   contra ~20 KB de Blob, e 60 KB caía no meio. Em nativo os dois lados
+   subiram juntos, porque os dois são a MESMA imagem em formas diferentes:
+   1920 px medidos nesta máquina dão 42 KB de Blob, e a mesma tela como base64
+   de JPEG daria ~112 KB (JPEG é o dobro do WebP, e base64 infla 33%). Numa
+   tela mais densa foram 64 KB de Blob contra ~170 KB.
+   90 KB é a linha que separa os dois regimes nas duas medições — manter os 60
+   antigos reprovaria a tela densa sem que nada estivesse errado, que é a
+   maneira de um teste ensinar a ser ignorado. */
+ok('um quadro custa menos de 90 KB', porQuadro > 0 && porQuadro < 90 * 1024, kb(porQuadro));
 ok('o peso dos quadros está FORA do heap JavaScript',
    durantePeso.fora > durantePeso.heap,
    'fora=' + kb(durantePeso.fora) + '  heap=' + kb(durantePeso.heap));
