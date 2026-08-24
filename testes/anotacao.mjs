@@ -246,31 +246,24 @@ console.log('\n[6] a janelinha não corta os botões');
   else {
     await jn.locator('#marcar').click();
     await jn.waitForTimeout(500);
-    const m = await jn.evaluate(() => {
-      /* A janelinha real tem 392px de altura; o navegador de teste entrega a
-         página com a altura do contexto, e nessa altura tudo cabe — a régua
-         mediria sempre verde. Então a altura de verdade é IMPOSTA aqui, e o
-         que se mede é a geometria que a pessoa vê. */
-      const ALT = 392;
-      document.body.style.height = ALT + 'px';
-      document.body.getBoundingClientRect();
-      const alt = ALT;
-      const fim = el => el ? el.getBoundingClientRect().bottom : 0;
-      return { alt, corpo: document.body.scrollHeight,
-               parar: fim(document.getElementById('stop')),
-               pausa: fim(document.getElementById('pausa')),
-               nota: !!document.getElementById('nota'),
-               notaOn: !document.getElementById('nota').disabled };
-    });
-    console.log('     janela ' + m.alt + 'px  |  conteúdo ' + m.corpo +
-                'px  |  PARAR termina em ' + Math.round(m.parar));
+    /* A GEOMETRIA DA JANELINHA NÃO É MEDIDA AQUI, e antes era — mal.
+       Este bloco copiava a altura declarada (`const ALT = 392`) para dentro do
+       teste e media o corpo com `scrollHeight`. As duas coisas estavam erradas
+       no mesmo lugar: o número copiado envelheceu no dia em que o produto pediu
+       outro tamanho, e o `scrollHeight` de um corpo com `height:100vh` devolve
+       a altura da janela mesmo com o conteúdo passando dela — quer dizer, a
+       afirmação comparava 392 com 392 e dizia ok com o PARAR fora da tela.
+       Duas listas para a mesma verdade, e a cópia era a errada.
+       Quem mede o tamanho da janelinha é `janelinha.mjs`: ele lê a altura que o
+       produto declara, soma os filhos de verdade, e mede as DUAS janelas (com e
+       sem roteiro) com o botão do microfone aceso. Aqui fica o que é deste
+       arquivo: a caixa de anotação. */
+    const m = await jn.evaluate(() => ({
+      nota: !!document.getElementById('nota'),
+      notaOn: !document.getElementById('nota').disabled,
+    }));
     ok('a caixa de anotação está na janelinha', m.nota);
     ok('e liga quando há passo marcado', m.notaOn);
-    ok('o conteúdo cabe na janela', m.corpo <= m.alt + 1, m.corpo + ' > ' + m.alt);
-    ok('PARAR está dentro da janela', m.parar > 0 && m.parar <= m.alt + 1,
-       Math.round(m.parar) + ' > ' + m.alt);
-    ok('PAUSAR também', m.pausa > 0 && m.pausa <= m.alt + 1,
-       Math.round(m.pausa) + ' > ' + m.alt);
 
     /* ---- DIGITAR NA JANELINHA, COM TECLADO DE VERDADE ----
        Aqui morava o defeito que impedia de escrever: a regra lia SEMPRE o
@@ -292,6 +285,87 @@ console.log('\n[6] a janelinha não corta os botões');
        mesmo quadro seria pior do que não ter o segundo campo. */
     const naAba = await pg.evaluate(() => document.getElementById('anotTxt').value);
     ok('e o campo do cartão mostra o mesmo texto', /janelinha 9182/.test(naAba), naAba);
+
+    /* ---- SALVAR NÃO PODE TIRAR O TECLADO DA PESSOA ----
+       O relato: "o texto depois de salvo não libera para um novo texto". E não
+       estava em nenhum dos estados — o campo continuava ligado, o botão voltava
+       a acender ao primeiro toque, e o robô que digitava clicando no campo
+       antes passava. Estava no FOCO.
+
+       Clicar em Salvar tira o foco do campo antes de o clique chegar. O `blur`
+       guarda, o repintar DESLIGA o botão, e um botão desligado não dispara
+       clique: o `onclick` nunca rodava, e o foco ficava no `body` — que é o
+       lugar onde as teclas não vão para nenhum campo. Quem tinha acabado de
+       salvar continuava digitando e via o texto antigo parado na tela.
+
+       Na janelinha isso é pior do que na aba: não há para onde clicar de volta
+       sem sair da tela que está sendo gravada.
+
+       A régua digita SEM clicar no campo de novo, que é o gesto de quem
+       acabou de salvar e continua escrevendo. `fill()` não serviria: ele
+       atribui o valor sem passar pelo teclado, e o defeito era do teclado. */
+    const foco = () => jn.evaluate(() =>
+      document.activeElement ? (document.activeElement.id || document.activeElement.tagName) : '');
+    ok('depois de salvar, o cursor continua no campo', (await foco()) === 'nota', await foco());
+    await jn.keyboard.type(' e continuei escrevendo 7766');
+    await jn.waitForTimeout(250);
+    const seguiu = await jn.evaluate(() => document.getElementById('nota').value);
+    ok('e o que se digita depois de salvar ENTRA no campo',
+       /7766/.test(seguiu) && /janelinha 9182/.test(seguiu), seguiu);
+    /* O botão volta a acender: há coisa nova para guardar outra vez. Sem isto o
+       texto novo entraria no campo e não teria como sair dele. */
+    const bt = await jn.evaluate(() => {
+      const b = document.getElementById('notaOk');
+      return { ligado: !b.disabled, texto: b.textContent.trim() };
+    });
+    ok('e o botão de salvar volta a acender', bt.ligado === true, JSON.stringify(bt));
+    /* Com prazo curto, pelo mesmo motivo do clique lá embaixo: com o defeito
+       instalado o botão está desligado aqui, e a espera padrão de trinta
+       segundos transformaria uma reprovação legível num TimeoutError. */
+    let salvouDeNovo = true;
+    try { await jn.locator('#notaOk').click({ timeout: 4000 }); }
+    catch (e) { salvouDeNovo = false; }
+    await jn.waitForTimeout(400);
+    const gv2 = await pg.evaluate(() => window.__quadros().map(f => f.nota || '').filter(Boolean));
+    ok('e o texto continuado chega ao quadro',
+       salvouDeNovo && gv2.some(x => /7766/.test(x)), JSON.stringify(gv2));
+
+    /* O outro campo, o do cartão, tem o mesmo defeito e o mesmo conserto — e
+       ele só pode ser medido COM A JANELINHA FECHADA. Com ela aberta o campo
+       do cartão não é o que está em uso, e a afirmação passava mesmo com o
+       defeito instalado: media um caminho que naquele momento não era
+       percorrido. Uma afirmação que não sabe reprovar é pior do que nenhuma,
+       porque ocupa o lugar dela.
+       Fechada, é a situação de verdade de quem gravou sem janelinha ou fechou
+       a dela sem querer. */
+    await jn.close();
+    await pg.waitForTimeout(500);
+    await pg.locator('#recMark').click();
+    await pg.waitForTimeout(700);
+    await pg.locator('#anotTxt').click();
+    await pg.keyboard.type('escrito no cartao 4242');
+    await pg.waitForTimeout(150);
+    /* O CLIQUE COM PRAZO, e o prazo é a afirmação.
+       Com o defeito instalado este clique NÃO ACONTECE: o botão se desliga
+       entre o apertar e o soltar, o Playwright se recusa a clicar num botão
+       desligado, e o arquivo morria de TimeoutError trinta segundos depois —
+       vermelho, mas ilegível. Um teste que só sabe reprovar morrendo obriga
+       quem lê a esteira a abrir o registro para descobrir o que quebrou.
+       Agora a espera é curta e a recusa vira uma frase. */
+    let clicou = true;
+    try { await pg.locator('#anotSalvar').click({ timeout: 4000 }); }
+    catch (e) { clicou = false; }
+    ok('o botão de salvar continua clicável até o fim do clique', clicou,
+       clicou ? '' : 'ele se desligou no meio do próprio clique');
+    await pg.waitForTimeout(350);
+    const focoAba = await pg.evaluate(() =>
+      document.activeElement ? (document.activeElement.id || document.activeElement.tagName) : '');
+    ok('no cartão também o cursor volta ao campo', focoAba === 'anotTxt', focoAba);
+    await pg.keyboard.type(' e continuei 9999');
+    await pg.waitForTimeout(250);
+    const noCartao = await pg.evaluate(() => document.getElementById('anotTxt').value);
+    ok('e o cartão também aceita texto depois de salvo',
+       /4242/.test(noCartao) && /9999/.test(noCartao), noCartao);
   }
   await pg.locator('#recStop').click().catch(() => {});
   await pg.waitForTimeout(1200);

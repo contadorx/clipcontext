@@ -3349,7 +3349,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recAdiantando:'Baixando o modelo de voz agora, para não atrasar a gravação. Pode escolher a tela quando quiser.',
       recPronto:'Modelo pronto. A gravação começa na hora.',
       recPauseBtn:'Pausar', recResumeBtn:'Retomar', recMarkBtn:'Marcar este passo',
-      recTelaBtn:'Mais uma tela deste passo',
+      recTelaBtn:'Tela adicional a este passo',
       recTelaFeita:'Mais uma tela guardada no {0}.',
       rotLbl:'Já tem o roteiro?', rotBtn:'Colar os passos',
       rotDica:'uma linha por passo — do documento que você já tem',
@@ -3982,7 +3982,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recAdiantando:'Downloading the speech model now, so it does not delay the recording. Pick your screen whenever you like.',
       recPronto:'Model ready. Recording starts immediately.',
       recPauseBtn:'Pause', recResumeBtn:'Resume', recMarkBtn:'Mark this step',
-      recTelaBtn:'One more screen of this step',
+      recTelaBtn:'Additional screen for this step',
       recTelaFeita:'One more screen saved in {0}.',
       rotLbl:'Already have the script?', rotBtn:'Paste the steps',
       rotDica:'one line per step — from the document you already have',
@@ -4600,7 +4600,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recAdiantando:'Descargando el modelo de voz ahora, para no retrasar la grabación. Elige la pantalla cuando quieras.',
       recPronto:'Modelo listo. La grabación empieza al instante.',
       recPauseBtn:'Pausar', recResumeBtn:'Reanudar', recMarkBtn:'Marcar este paso',
-      recTelaBtn:'Una pantalla más de este paso',
+      recTelaBtn:'Pantalla adicional de este paso',
       recTelaFeita:'Una pantalla más guardada en {0}.',
       rotLbl:'¿Ya tienes el guion?', rotBtn:'Pegar los pasos',
       rotDica:'una línea por paso — del documento que ya tienes',
@@ -5217,7 +5217,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recAdiantando:'Das Spracherkennungsmodell wird jetzt heruntergeladen, damit es die Aufnahme nicht verzögert. Sie können den Bildschirm jederzeit auswählen.',
       recPronto:'Modell bereit. Die Aufnahme startet sofort.',
       recPauseBtn:'Pause', recResumeBtn:'Fortsetzen', recMarkBtn:'Diesen Schritt markieren',
-      recTelaBtn:'Noch ein Bildschirm zu diesem Schritt',
+      recTelaBtn:'Zusätzlicher Bildschirm zu diesem Schritt',
       recTelaFeita:'Noch ein Bildschirm in {0} gespeichert.',
       rotLbl:'Haben Sie das Skript schon?', rotBtn:'Schritte einfügen',
       rotDica:'eine Zeile pro Schritt — aus dem Dokument, das Sie schon haben',
@@ -5840,7 +5840,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recAdiantando:'Téléchargement du modèle de reconnaissance vocale maintenant, pour ne pas retarder l’enregistrement. Vous pouvez choisir l’écran quand vous voulez.',
       recPronto:'Modèle prêt. L’enregistrement démarre immédiatement.',
       recPauseBtn:'Pause', recResumeBtn:'Reprendre', recMarkBtn:'Marquer cette étape',
-      recTelaBtn:'Un écran de plus pour cette étape',
+      recTelaBtn:'Écran supplémentaire pour cette étape',
       recTelaFeita:'Un écran de plus enregistré dans {0}.',
       rotLbl:'Vous avez déjà le script ?', rotBtn:'Coller les étapes',
       rotDica:'une ligne par étape — du document que vous avez déjà',
@@ -9164,13 +9164,61 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     anotPintar();
   }
 
+  /* SALVAR NÃO PODE TIRAR O TECLADO DA PESSOA.
+
+     O defeito, relatado como "o texto depois de salvo não libera para um novo
+     texto", e ele não estava em nenhum dos estados: estava no FOCO. Salvar
+     desliga o botão de salvar — é assim que ele responde "guardei". Só que
+     desligar um botão que está com o foco devolve o foco ao `body`. Quem
+     acabou de clicar em Salvar com o mouse continuava digitando, e cada tecla
+     ia para lugar nenhum: o campo mostrando o texto antigo, o botão cinza, e a
+     conclusão inevitável de que a caixa tinha travado.
+
+     Na janelinha é pior do que na aba, porque ali não há para onde clicar de
+     volta sem sair da tela que está sendo gravada.
+
+     Então quem salva devolve o cursor ao campo em que se escreveu, com o
+     cursor no fim do texto — pronto para continuar. Não seleciona nada: uma
+     seleção faria a primeira tecla apagar a anotação que acabou de ser
+     guardada, que é trocar um defeito por outro pior.
+
+     Isto vale para o GESTO de salvar, e não para o `anotGuardar` em geral: sair
+     do campo também guarda, e ali devolver o foco seria arrancá-lo de onde a
+     pessoa acabou de clicar.
+
+     E DEVOLVER O FOCO SOZINHO NÃO BASTAVA — foi a segunda descoberta, e ela
+     explica por que o defeito era tão sólido. Clicar no botão de salvar tira o
+     foco do campo ANTES do clique chegar. O `onblur` guarda, o `anotPintar`
+     desliga o botão, e um botão desligado não dispara clique nenhum: a função
+     pendurada no `onclick` nunca rodava. Todo o salvamento acontecia pelo
+     caminho do `blur`, e o foco ficava no `body` porque o botão se desligou
+     com ele na mão.
+
+     Por isso o `onmousedown` recusa o padrão: o botão deixa de tomar o foco, o
+     campo não perde o dele, o `blur` não acontece, e o clique chega inteiro no
+     `onclick`. Um botão que não rouba o foco é o que ele sempre deveria ter
+     sido — ele não é um lugar onde se escreve. */
+  function anotGuardarEContinuar(campo){
+    anotGuardar();
+    if (!campo || !campo.isConnected || campo.disabled) return;
+    try {
+      campo.focus();
+      const fim = campo.value.length;
+      campo.setSelectionRange(fim, fim);
+    } catch (e) {}
+  }
+
   if ($('anotSalvar')) {
-    $('anotSalvar').onclick = anotGuardar;
+    /* Não roubar o foco do campo: veja o porquê logo acima. */
+    $('anotSalvar').onmousedown = e => e.preventDefault();
+    $('anotSalvar').onclick = () => anotGuardarEContinuar($('anotTxt'));
     $('anotTxt').oninput = anotDigitou;
     /* Ctrl+Enter guarda sem tirar a mão do teclado. Enter sozinho quebra linha:
        é uma caixa de texto, e roubar o Enter dela seria roubar o parágrafo. */
     $('anotTxt').onkeydown = e => {
-      if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); anotGuardar(); }
+      if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault(); anotGuardarEContinuar($('anotTxt'));
+      }
     };
     /* Sair do campo guarda também. Ninguém deveria perder texto por ter clicado
        fora — e durante uma gravação clicar fora é o gesto mais provável. */
@@ -9214,8 +9262,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
        aparece nos quadros. Então ela encolhe: menos respiro, menos altura de
        botão, e nada que não seja usado durante a gravação. */
     body{font:13px/1.35 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
-         background:#121419;color:#e9ebf1;padding:11px;display:flex;
-         flex-direction:column;gap:6px;justify-content:safe center;height:100vh;
+         background:#121419;color:#e9ebf1;padding:14px 13px;display:flex;
+         flex-direction:column;gap:9px;justify-content:safe center;height:100vh;
          overflow-y:auto}
     /* ---- O ROTEIRO, EM CIMA DE TUDO ----
        Quem colou a lista de passos está seguindo uma lista, e a janelinha é a
@@ -9228,10 +9276,14 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
        relance, sem parar o que se esta fazendo. E fica em cima porque e o que
        se consulta ANTES de agir; o relogio e o medidor sao conferencia. */
     .rot{border-bottom:1px solid #282c36;padding:0 0 6px;margin:0 0 1px}
-    .rotN{display:block;font:700 11px/1.2 system-ui,sans-serif;color:#737cf0;
+    /* MAIORES do que eram (11px e 14.5px). O roteiro e lido DE RELANCE, no meio
+       de outra coisa: a pessoa esta dentro do sistema que documenta e volta o
+       olho aqui por um segundo para saber onde esta e o que vem. Um tamanho que
+       obriga a parar e ler ja custou o que a janelinha existe para poupar. */
+    .rotN{display:block;font:700 12.5px/1.2 system-ui,sans-serif;color:#737cf0;
           letter-spacing:.3px;text-transform:uppercase}
-    .rotT{display:block;font:600 14.5px/1.28 system-ui,-apple-system,sans-serif;
-          color:#f2f4f9;margin-top:2px;
+    .rotT{display:block;font:600 16.5px/1.28 system-ui,-apple-system,sans-serif;
+          color:#f2f4f9;margin-top:3px;
           /* Tres linhas e reticencias: um passo de roteiro pode ter uma frase
              inteira, e deixa-la crescer sem limite empurraria PARAR para fora
              da janela -- que foi o defeito que esta rodada acabou de consertar
@@ -9251,7 +9303,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
           overflow:hidden}
     /* Acabou a lista. Nao some: sumir faria a janelinha encolher no meio da
        gravacao e a pessoa se perguntar o que ela perdeu. */
-    .rot.fim .rotT{color:#949bab;font-weight:500;font-size:12.5px}
+    .rot.fim .rotT{color:#949bab;font-weight:500;font-size:14px}
     .top{display:flex;align-items:center;gap:8px}
     .dot{width:10px;height:10px;border-radius:50%;background:#ef8484;flex:none;
          animation:pulsa 1.4s ease-in-out infinite}
@@ -9299,15 +9351,76 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
                font-size:12.5px;padding:6px}
     button.sec:hover:not(:disabled){border-color:#737cf0;color:#a9b2ff}
     button.sec.off{border-color:#ef8484;color:#ef8484}
-    /* Marcar é o gesto frequente: ele é o cheio. */
-    button#marcar{background:#737cf0;color:#121419;border:0;font-size:13.5px;padding:8px}
-    /* Mais uma tela é o aditivo: contorno, e menor. Dois botões do mesmo peso
-       obrigariam a escolher entre iguais no pior momento possível. */
-    button#maisTela{font-size:11.5px;padding:6px;opacity:.9}
-    button#maisTela:hover:not(:disabled){opacity:1}
+    /* Marcar é o gesto frequente: ele é o cheio, e o maior da janela. É o único
+       botão aqui que se aperta dezenas de vezes numa gravação, e apertá-lo é
+       feito de relance, com o olho no sistema que está sendo documentado. */
+    button#marcar{background:#737cf0;color:#121419;border:0;font-size:15.5px;
+                  padding:10px;font-weight:700}
+    /* A TELA ADICIONAL É DA MESMA FAMÍLIA, e o contorno cinza não dizia isso:
+       ela parecia parente do pausar e do calar, que são de outra natureza —
+       aqueles mexem na gravação, estes dois GUARDAM o que a pessoa veio
+       guardar. Agora ela é o mesmo azul, em versão mais clara: o preenchimento
+       vem apagado e o texto vem no azul claro.
+
+       Mais clara, e não mais forte, porque a hierarquia não pode inverter. Um
+       azul cheio e pálido chamaria MAIS atenção que o cheio saturado, e a
+       escolha entre os dois aconteceria no pior momento possível — no meio da
+       gravação, de relance. Ela pertence à família e continua sendo a segunda. */
+    button#maisTela{background:rgba(115,124,240,.20);color:#a9b2ff;
+                    border:1px solid rgba(115,124,240,.55);
+                    font-size:12.5px;padding:7px;opacity:1}
+    button#maisTela:hover:not(:disabled){background:rgba(115,124,240,.32);
+                    border-color:#737cf0;color:#c4c9ff}
+    button#maisTela:disabled{opacity:.5}
     /* PARAR é o único irreversível da janela: vermelho, e só ele. */
     button#stop{background:#e03131;color:#fff}
     button#stop:hover:not(:disabled){background:#f03e3e}
+    /* ---- OS TRÊS COMANDOS DE GRAVAÇÃO GANHAM UM DESENHO ----
+
+       Pausar, o microfone e Parar são lidos de relance, por cima do sistema que
+       a pessoa está documentando — e três retângulos com texto dentro só se
+       distinguem depois de ler os três. O desenho é reconhecido antes da
+       palavra, que é o que essa pressa exige. A palavra fica: um ícone sozinho
+       é adivinhação, e o botão irreversível desta janela não pode depender de
+       adivinhação.
+
+       São MÁSCARAS, e não texto. Um caractere de pausa ou de microfone depende
+       da fonte da máquina: onde ela não tem o glifo sai um quadradinho vazio,
+       e um quadradinho vazio antes de PARAR é pior do que nada. A máscara é
+       desenho vetorial embutido, igual em qualquer máquina.
+
+       E é máscara em vez de imagem porque a cor vem da cor do próprio texto: o
+       pausar fica vermelho quando pausado, o microfone fica vermelho quando
+       fechado, e o desenho acompanha sem uma segunda lista de cores para
+       alguém esquecer de atualizar. NADA DE CRASE AQUI: este bloco é um
+       template literal. */
+    button#pausa,button#calar,button#stop{display:flex;align-items:center;
+                  justify-content:center;gap:7px}
+    button#pausa::before,button#calar::before,button#stop::before{
+                  content:'';flex:none;width:14px;height:14px;
+                  background-color:currentColor;
+                  -webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;
+                  -webkit-mask-position:center;mask-position:center;
+                  -webkit-mask-size:contain;mask-size:contain}
+    /* Duas barras. Pausado, ele passa a oferecer o oposto — e vira a seta de
+       retomar, porque o rótulo também virou "Retomar". */
+    button#pausa::before{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M7 5h4v14H7zM13 5h4v14h-4z'/%3E%3C/svg%3E");
+                  mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M7 5h4v14H7zM13 5h4v14h-4z'/%3E%3C/svg%3E")}
+    button#pausa.off::before{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M7 4l13 8-13 8z'/%3E%3C/svg%3E");
+                  mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M7 4l13 8-13 8z'/%3E%3C/svg%3E")}
+    /* O microfone, e com o traço em cima quando está fechado: o estado do
+       microfone é o que essa pessoa mais esquece durante uma gravação. */
+    button#calar::before{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 14a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v5a3 3 0 0 0 3 3z'/%3E%3Cpath d='M6 11a6 6 0 0 0 5 5.92V20H9v2h6v-2h-2v-3.08A6 6 0 0 0 18 11h-2a4 4 0 0 1-8 0z'/%3E%3C/svg%3E");
+                  mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 14a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v5a3 3 0 0 0 3 3z'/%3E%3Cpath d='M6 11a6 6 0 0 0 5 5.92V20H9v2h6v-2h-2v-3.08A6 6 0 0 0 18 11h-2a4 4 0 0 1-8 0z'/%3E%3C/svg%3E")}
+    button#calar.off::before{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 14a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v5a3 3 0 0 0 3 3z'/%3E%3Cpath d='M6 11a6 6 0 0 0 5 5.92V20H9v2h6v-2h-2v-3.08A6 6 0 0 0 18 11h-2a4 4 0 0 1-8 0z'/%3E%3Cpath d='M3 2.5l18.5 18.5' stroke='black' stroke-width='2.6' fill='none'/%3E%3C/svg%3E");
+                  mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 14a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v5a3 3 0 0 0 3 3z'/%3E%3Cpath d='M6 11a6 6 0 0 0 5 5.92V20H9v2h6v-2h-2v-3.08A6 6 0 0 0 18 11h-2a4 4 0 0 1-8 0z'/%3E%3Cpath d='M3 2.5l18.5 18.5' stroke='black' stroke-width='2.6' fill='none'/%3E%3C/svg%3E")}
+    /* O quadrado cheio de parar. É o desenho universal do irreversível. */
+    button#stop::before{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 6h12v12H6z'/%3E%3C/svg%3E");
+                  mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 6h12v12H6z'/%3E%3C/svg%3E")}
+    /* Durante a contagem só o PARAR fica, e ali ele é um botão sozinho numa
+       janela vazia: o desenho não tem com quem se distinguir e o número da
+       contagem é o que precisa do espaço. */
+    body.contando button#stop::before{display:none}
     /* O flash de "guardei". Numa janelinha de 250 px não cabe uma mensagem de
        confirmação ao lado do botão — então o próprio botão confirma. Verde, e
        nunca o azul de antes: confirmar e parar não podem ter a mesma cor. */
@@ -9332,7 +9445,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
        o respiro do corpo (7px) uma vez em vez de quatro. Vinte pixels numa
        janela de 282 é a diferença entre caber e transbordar — e transbordar,
        aqui, é o botão de PARAR saindo pela borda de baixo. */
-    .notaCx{display:flex;flex-direction:column;gap:3px}
+    .notaCx{display:flex;flex-direction:column;gap:5px}
     .notaLbl{display:block;font-size:10.5px;font-weight:700;color:#737cf0;line-height:1.25}
     /* Igual ao da aba: desligado porque não há nada novo para guardar, mas com
        opacidade cheia — o estado "salvo" É a confirmação, e desbotá-la é apagar
@@ -9380,7 +9493,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
          quem nao colou lista nenhuma -- e cada pixel daqui e um pixel a menos
          do trabalho que a pessoa esta documentando. */
       pipWin = await documentPictureInPicture.requestWindow(
-        { width: 250, height: roteiro.length ? 486 : 392 });
+        { width: 250, height: roteiro.length ? 560 : 430 });
     } catch (e) { pipWin = null; return; }
 
     const d = pipWin.document;
@@ -9450,10 +9563,18 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
         nt.oninput = anotDigitou;
         nt.onblur = () => { if (anotSujo) anotGuardar(); };
         nt.onkeydown = e => {
-          if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); anotGuardar(); }
+          if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+            e.preventDefault(); anotGuardarEContinuar(nt);
+          }
         };
       }
-      if (ok) { ok.textContent = t('anotSalvar'); ok.onclick = anotGuardar; }
+      /* Salvar devolve o cursor ao campo DESTA janela. Devolvê-lo ao campo do
+         cartão mandaria o teclado para a aba que está atrás da tela gravada. */
+      if (ok) {
+        ok.textContent = t('anotSalvar');
+        ok.onmousedown = e => e.preventDefault();
+        ok.onclick = () => anotGuardarEContinuar(nt);
+      }
       /* A janelinha nasceu no meio de uma gravação: se já há quadro em
          comentário, ela abre mostrando o texto dele. */
       anotApontar(anotAlvo);
