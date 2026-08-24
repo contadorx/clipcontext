@@ -18,6 +18,61 @@ const { idiomas, slugs } = rotas;
    lembrada a cada idioma novo é uma tabela que vai ser esquecida — e o sintoma
    é um `undefined/aide.html` no build, que não aponta para a causa. */
 const PREFIXO = Object.fromEntries(idiomas.map((L) => [L, L === 'pt' ? '' : '/' + L]));
+
+/* ---- A CONTENT-SECURITY-POLICY, EM `Report-Only` --------------------------
+ *
+ * Ela é a resposta executável para a pergunta do questionário de fornecedor:
+ * "o que impede o dado de sair?". Hoje a resposta é "nós"; com ela, é o
+ * navegador — e a diferença entre as duas é a única que conta numa auditoria.
+ *
+ * CADA ORIGEM AQUI TEM MOTIVO, e nenhuma entrou por precaução:
+ *
+ *   cdn.jsdelivr.net   a biblioteca de transcrição, o runtime WebAssembly e o
+ *                      gerador de PDF. É a única dependência de execução que a
+ *                      ferramenta busca de fora;
+ *   huggingface.co     os pesos do modelo de fala, e o `cdn-lfs` que serve os
+ *                      arquivos grandes;
+ *   *.supabase.co      a conta: sessão, licença, chamado e a medição anônima.
+ *                      A ferramenta funciona sem ele — é aditivo, nunca
+ *                      requisito — mas quando existe, é para lá que ele fala;
+ *   accounts/apis      o Google Drive, que é recurso desligado hoje e vai
+ *   /docs.google.com   ligar depois. Fora daqui, ligá-lo quebraria em produção
+ *                      com um erro que ninguém liga à CSP.
+ *
+ * `'wasm-unsafe-eval'` é obrigatório: a transcrição É WebAssembly. Sem ele o
+ * produto não transcreve, e transcrever é o que a pessoa veio fazer.
+ *
+ * `'unsafe-inline'` no estilo, e a razão é contável: são 385 atributos
+ * `style=` nos corpos do site e 147 na ferramenta. Trocá-los por classe é
+ * trabalho de verdade, e ele não cabe no mesmo build que liga a regra. Fica
+ * escrito aqui como dívida, e não como decisão.
+ *
+ * O SCRIPT NÃO GANHOU `'unsafe-inline'`, de propósito — é ali que a regra vale
+ * alguma coisa. É a linha que a régua `testes/csp.mjs` mede, e é o que a
+ * segunda metade da DEC-12 vai ter de resolver com hash ou nonce.
+ */
+const CSP = [
+  "default-src 'self'",
+  "base-uri 'self'",
+  "object-src 'none'",
+  "frame-ancestors 'none'",
+  "form-action 'self'",
+  /* `report-sample` faz o navegador mandar os primeiros caracteres do trecho
+     barrado junto com o aviso. Sem ele, "um script inline violou" não diz QUAL
+     — e a diferença entre um `<script>` que a gente escreveu e um que o
+     framework injeta decide se a saída é hash ou nonce. */
+  "script-src 'self' 'wasm-unsafe-eval' 'report-sample' blob: https://cdn.jsdelivr.net " +
+    'https://apis.google.com https://accounts.google.com',
+  "worker-src 'self' blob:",
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data: blob:",
+  "media-src 'self' data: blob:",
+  "font-src 'self' data:",
+  "connect-src 'self' blob: data: https://cdn.jsdelivr.net https://huggingface.co " +
+    'https://*.huggingface.co https://cdn-lfs.huggingface.co https://cdn-lfs-us-1.huggingface.co ' +
+    'https://*.supabase.co https://www.googleapis.com https://accounts.google.com',
+  "frame-src 'self' https://accounts.google.com https://docs.google.com",
+].join('; ');
 const paginas = Object.keys(slugs);
 
 /* A área do cliente tem endereço traduzido como o resto do site: quem lê em
@@ -98,11 +153,23 @@ const config = {
            pagamento e sensores. Câmera, microfone e captura de tela ficam em
            `self`, porque são o produto.
 
-           A Content-Security-Policy NÃO entra aqui. Uma CSP apertada demais
-           desliga a transcrição, que é o que a pessoa veio fazer — ela precisa
-           de uma semana em `Report-Only` antes de travar, e essa semana é um
-           trabalho com começo e fim, não uma linha nesta lista. */
+           A CSP ENTROU, E EM `Report-Only` — 24/08. Ela não barra nada: o
+           navegador confere e AVISA. É a primeira metade da DEC-12 caminho A,
+           e a segunda metade (travar) é outro build, com a lista do que
+           realmente falta na mão.
+
+           A semana de ler relatórios virou uma RÉGUA: `testes/csp.mjs` abre as
+           páginas e a ferramenta num navegador de verdade, escuta os eventos de
+           violação e conta. O que uma semana de produção daria em relatórios
+           esparsos, ela dá agora e de forma repetível — e reprova quando alguém
+           acrescentar um `<script>` solto.
+
+           O QUE ELA AINDA NÃO PODE MEDIR, e está dito no `csp.mjs`: o caminho
+           da transcrição. O modelo vem de CDN, e a CDN não é alcançável da
+           máquina onde a régua roda. É exatamente por isso que ela entra em
+           `Report-Only` e não travando. */
         { key: 'X-Frame-Options', value: 'DENY' },
+        { key: 'Content-Security-Policy-Report-Only', value: CSP },
         { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' },
         { key: 'Permissions-Policy',
           value: 'geolocation=(), payment=(), usb=(), magnetometer=(), gyroscope=(), ' +

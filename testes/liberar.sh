@@ -61,6 +61,7 @@ MAPA="
 ^next[.]config[.]mjs$ => site:paginas.mjs site:seo.mjs
 ^app/conta/ => site:compra.mjs site:negocio.mjs entrada2.mjs
 ^app/ => site:paginas.mjs site:seo.mjs site:negocio.mjs
+^next[.]config[.]mjs$ => site:csp.mjs site:cabecalho.mjs site:paginas.mjs
 ^lib/planilha[.]ts$ => bomba.mjs site:roteiro.mjs
 ^lib/stripe[.]ts$ => site:precos.mjs promessa.mjs site:compra.mjs renovar.mjs
 ^app/api/convite/ => site:convite.mjs site:email.mjs
