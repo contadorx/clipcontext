@@ -150,7 +150,19 @@ Nada de servidor, nada de banco, nada de site. Nenhuma migração.
 
 ## Regressão
 
-REGRESSAO-AQUI
+A regressão inteira, com a régua nova dentro:
+
+```
+152 ok · 4 PULADO · 0 FALHOU
+Pulados: timepag.mjs licenca.mjs liclink.mjs licauto.mjs
+```
+
+Os quatro pulos são os de sempre e estão explicados no `LEIA-ME.md`:
+`timepag.mjs` cobra uma página aposentada, e os três de licença precisam do
+`emitir-licenca.py`, que guarda as chaves privadas e por isso não viaja no zip.
+Um teste pulado não é um teste que passou — a cobertura é a dos 152.
+
+A régua eram 155; agora são 156.
 
 ---
 
