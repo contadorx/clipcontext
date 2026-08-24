@@ -21,10 +21,10 @@ Não vêm junto, porque se regeneram ou são enormes: `.git/`, `node_modules/`
 
 ---
 
-## `builds-1-a-5.bundle` — a rodada de 23/08
+## `builds-1-a-6.bundle` — a rodada de 23/08
 
 **Base:** `7c90a97` (o `main` do GitHub, de 19/08).
-**Traz:** doze commits.
+**Traz:** quinze commits.
 
 1. **Sincroniza a árvore interna com o deploy de 22/08.** O repositório estava
    três dias atrás da árvore publicada na Vercel. 267 arquivos, nenhuma
@@ -55,8 +55,13 @@ Não vêm junto, porque se regeneram ou são enormes: `.git/`, `node_modules/`
    conhecimento saiu de trás dos acordeões, e a `/time` foi aposentada com os
    cinco endereços velhos respondendo 308.
 
+10. **Build 6 (em curso) — o que já está vendido.** O primeiro item saiu: o
+    modelo "só para mim" passa a ser de quem salvou. Duas funções liam a tabela
+    sem filtro de dono, e uma delas trazia, no ar, um comentário descrevendo o
+    filtro que não existia.
+
 Os relatórios estão em `BUILD-1.md`, `BUILD-2.md`, `BUILD-3.md`, `BUILD-4.md`,
-`BUILD-4A.md` e `BUILD-5.md`, na raiz. A fila dos próximos e as decisões abertas estão em `FILA.md`.
+`BUILD-4A.md` e `BUILD-5.md`, na raiz. O do Build 6 sai quando ele fechar. A fila dos próximos e as decisões abertas estão em `FILA.md`.
 
 ```bash
 git fetch APLICAR/builds-1-a-4.bundle \
@@ -76,7 +81,7 @@ git checkout claude/builds-deploys-sequence-0fatlg
 
 **Base:** `7c90a97`. **Traz:** os seis commits da rodada de preços, que já estão
 incluídos no commit 1 do bundle acima. Fica aqui como registro; quem aplicar o
-`builds-1-a-5.bundle` não precisa dele.
+`builds-1-a-6.bundle` não precisa dele.
 
 ```bash
 git fetch APLICAR/rodada-precos.bundle \
