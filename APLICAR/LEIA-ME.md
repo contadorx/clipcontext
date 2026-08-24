@@ -61,8 +61,14 @@ Não vêm junto, porque se regeneram ou são enormes: `.git/`, `node_modules/`
     vencer e se renova quando há sessão; o endereço da fatura da Stripe deixou
     de ser descartado; e o ✕ do que o Free não tem deixou de ser vermelho.
 
+11. **Build 7 — o vocabulário do domínio.** Ele funcionava em dois dos cinco
+    idiomas, e o inglês era um deles que não — nove chaves da tabela guardavam
+    espaço dentro e nunca podiam casar. Os cinco idiomas passam a ler número
+    falado, com 8.329 formas provadas. E a dívida do Build 5 foi paga: o fluxo
+    de entrada voltou a ter régua.
+
 Os relatórios estão em `BUILD-1.md`, `BUILD-2.md`, `BUILD-3.md`, `BUILD-4.md`,
-`BUILD-4A.md`, `BUILD-5.md` e `BUILD-6.md`, na raiz.  A fila dos próximos e as decisões abertas estão em `FILA.md`.
+`BUILD-4A.md`, `BUILD-5.md`, `BUILD-6.md` e `BUILD-7.md`, na raiz.  A fila dos próximos e as decisões abertas estão em `FILA.md`.
 
 ```bash
 git fetch APLICAR/builds-1-a-4.bundle \
@@ -104,7 +110,7 @@ bash testes/liberar.sh
 bash testes/rodar.sh
 ```
 
-A regressão sai com **143 ok · 5 PULADO · 0 FALHOU** de 148 réguas. Um pulado
+A regressão sai com **145 ok · 5 PULADO · 0 FALHOU** de 150 réguas. Um pulado
 **não conta como cobertura**, e o motivo de cada um sai impresso: três por falta
 do emissor de chaves — que não viaja no pacote, de propósito —, um pela tradução
 jurídica pendente de alemão e francês, e um (`timepag.mjs`) porque a página que

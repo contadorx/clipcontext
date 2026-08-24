@@ -516,66 +516,25 @@ legível de longe, sem a cor de erro.
 
 ---
 
-### DEC-17 — O vocabulário do domínio não fala alemão nem francês
+### DEC-17 — O vocabulário do domínio — **RESPONDIDA e feita em 24/08**
 
-*Nasceu durante o Build 4, na varredura de tabelas de idioma. Não estava na
-fila — a `tabelas.mjs` o encontrou junto com o OCR e a limpeza de hesitação.*
+*Caminho A: os cinco idiomas, com a lacuna escrita.* Relatório em `BUILD-7.md`.
 
-**O que é o recurso.** A pessoa lista os termos do sistema dela (`ME21N`,
-`KI235`) e o produto acha a forma FALADA de cada um dentro da transcrição —
-*eme vinte e um ene* volta a ser `ME21N`. É do plano **gratuito por regra**: o
-comentário no código diz, com todas as letras, que "o que faz a evidência de UMA
-pessoa ser aceita é grátis".
+**A decisão estava incompleta, e a medição corrigiu:** não eram dois idiomas
+faltando, eram **três**. O inglês também não lia número a partir de cem — nove
+chaves da tabela guardavam espaço dentro, num mapa consultado com uma palavra
+só, e nenhuma delas podia casar. Um idioma que a página vende.
 
-**O estado medido.** As três tabelas que o sustentam — `LETRAS`, `NUMS` e
-`APELIDOS` — falam `pt`, `en` e `es`. Um cliente alemão ou francês não recebe
-erro: até este build ele caía num `|| NUMS.pt` e a ferramenta procurava
-*"duzentos e trinta e cinco"* dentro de um texto que nunca vai dizer isso.
-Ganho zero, e risco não-zero de trocar uma palavra por acaso **dentro de uma
-evidência**.
+Cada língua ganhou como ela DIZ um número, e a tabela passou a ser gerada de 0 a
+999. **8.329 formas provadas**, nos cinco idiomas, rodando o código do produto e
+não uma cópia dele. As letras entraram junto — número resolvido sem letra não
+acha `ME21N`.
 
-**Já feito no Build 4, sem decisão sua:** a queda para o português saiu. Sem
-tabela, os mapas ficam vazios e sobra o caminho que não depende de língua —
-sigla escrita em letras e dígitos (`M E 21 N`) continua sendo achada. É menos
-do que pt/en/es têm, e é a verdade sobre o que existe. A `tabelas.mjs` imprime
-essa exceção em toda execução, com o motivo.
-
-**Por que isto é uma decisão e não uma tarefa.** Não é preencher tabela.
-Os números alemães vêm invertidos e colados — 21 é `einundzwanzig`, uma palavra
-só, e o casador atual soma palavras separadas. Os franceses de 70 a 99 são
-compostos — 91 é `quatre-vingt-onze`. Os dois exigem mexer em como o número é
-montado, não em qual palavra está na lista.
-
-**Caminho A — fazer os dois idiomas** (~1 dia, mais teste com fala de verdade).
-
-- **Pró:** o recurso que o produto vende como gratuito passa a existir nos cinco
-  mercados. Alemanha e França são justamente os dois que fazem avaliação de
-  fornecedor, e é onde o SAP mais aparece — o caso de uso que gerou o recurso.
-- **Contra:** eu não consigo verificar aqui contra saída real de reconhecimento
-  de fala em alemão. Escrevo as tabelas e a montagem, e a prova de que funciona
-  em campo depende de alguém falar num microfone.
-
-**Caminho B — só o alemão agora** (~meio dia).
-
-- **Pró:** é onde a evidência de auditoria pesa mais, e a inversão alemã é uma
-  regra só. O francês fica com a exceção escrita, visível a cada execução.
-- **Contra:** deixa metade da falha de pé, com o mesmo custo de contexto para
-  retomar depois.
-
-**Caminho C — deixar como está**, com a exceção escrita e impressa.
-
-- **Pró:** custo zero agora, e o estado é honesto: nada finge funcionar.
-- **Contra:** a página de preços não distingue idiomas ao anunciar o recurso.
-  Enquanto ele não existir em dois dos cinco, ou o recurso cresce ou a promessa
-  encolhe — e encolher a promessa em cinco idiomas dá mais trabalho do que o
-  caminho B.
-
-> **A minha indicação: caminho A**, mas no Build 6 ("o que já está vendido"), e
-> não agora. Ele é exatamente daquela família: um visto na tabela de preço que
-> não entrega em dois mercados. Fazer junto com os outros da mesma família sai
-> mais barato do que abrir um build para ele, e nenhum outro item depende dele.
->
-> **Se você não responder:** eu levo para o Build 6 e trato como caminho A.
+> **A lacuna, que você aceitou deixar escrita:** para `de` e `fr` não houve teste
+> com voz real. As grafias são as corretas; o que falta é saber como o Whisper
+> as escreve errado, que é para isso que existe o `APELIDOS`. Quando alguém falar
+> num microfone nesses idiomas, a lista cresce. Está dito no código, na régua e
+> no relatório.
 
 ---
 
@@ -773,28 +732,18 @@ O defeito que mais custou a este projeto. Relatório em `BUILD-4.md`.
 
 ---
 
-## Aberto pelo Build 5 — o fluxo de entrada perdeu a régua
+## ~~Aberto pelo Build 5~~ — pago em 24/08
 
-A `/time` foi aposentada e o `timepag.mjs` **pula, alto**, dizendo o que se
-perdeu: seis afirmações sobre o caminho de entrada, que hoje ninguém cobre.
+O fluxo de entrada perdeu a régua quando a `/time` foi aposentada: seis
+afirmações sobre e-mail, link mágico e chave ficaram sem cobertura.
 
-    [3] e-mail malformado não sai do lugar
-    [4] pedir o link
-    [5] o limite de envio é dito, e não engolido
-    [6] a volta do link mágico entrega o link do plano
-    [7] degustação já usada tem resposta escrita, e não silêncio
-    [8] link do e-mail vencido
+**`testes/entrada2.mjs` devolveu as seis**, contra o servidor de verdade — com
+um Supabase falso do lado do servidor, que era o que faltava. E o mecanismo já
+existia: `WALKSTAMP_SUPA_TESTE` aponta o cliente de sessão para um endereço
+local, e o `portal.mjs` já usava isso. A dívida era de trabalho, não de desenho.
 
-**O fluxo não morreu — a maneira de testá-lo daqui morreu.** Ele mora em
-`entrar()` e na rota `/conta/confirmar`. Os blocos antigos falsificavam as
-respostas do Supabase interceptando chamadas do **navegador**; na conta essas
-chamadas acontecem no **servidor**, dentro de uma ação, e a interceptação do
-lado do navegador não alcança.
-
-Reescrever contra a arquitetura nova é trabalho de verdade — provavelmente um
-Supabase falso injetado por variável de ambiente, ou um modo de teste na ação.
-Não cabia no Build 5, e eu preferi um pulado escrito a um verde falso. O arquivo
-antigo, com os oito blocos, está na história do git para quem for reescrever.
+De quebra, ela cobra a intenção de compra atravessando o meio do caminho — o
+`compra.mjs` media as pontas.
 
 ---
 
