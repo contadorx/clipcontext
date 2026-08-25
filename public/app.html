@@ -9282,7 +9282,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      depois, e não tem como se atualizar sozinho. Sem carimbo, "estou com um
      problema no offline" é uma conversa sem chão — ninguém sabe de qual build
      se fala nem se o defeito já foi consertado. */
-  const VERSAO = '2026.08.24-74';
+  const VERSAO = '2026.08.25-7';
   window.__versao = () => VERSAO;
 
   const PIP_CSS = `
@@ -11912,16 +11912,28 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      depois de um erro de digitação) faz TODOS os degraus da fila falharem
      identicamente, com a rede aparentando estar perfeita no diagnóstico. Foi
      por isso que este ponto passou a ser testado e relatado, e não só usado. */
-  /* A ordem aqui é resultado de medição, não de preferência pelo novo. Numa
-     máquina Windows/Chrome 151 real, a 4.2.0 falhava em TODA configuração com
-     `MatMulNBits Missing required scale`, e a 3.x montou de primeira com o
-     mesmo arquivo. Enquanto não houver caso contrário, o padrão é a que
-     funciona; a 4.2.0 continua na fila, logo atrás. */
-  const TJS_BASES = [
-    'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3',
-    'https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.2.0',
-    'https://cdn.jsdelivr.net/npm/@huggingface/transformers'
-  ];
+  /* ---- A LISTA VEM DO `src/versoes.json`, E TODAS AS VERSÕES SÃO EXATAS ----
+   *
+   * A ordem é resultado de medição, não de preferência pelo novo: numa máquina
+   * Windows/Chrome 151 real a 4.2.0 falhava em TODA configuração com
+   * `MatMulNBits Missing required scale`, e a 3.x montou de primeira com o
+   * mesmo arquivo. A justificativa mora no manifesto, junto dos números.
+   *
+   * DUAS DAS TRÊS ENTRADAS FLUTUAVAM. A primeira era `@3` — um `major` aberto,
+   * e o motor de voz DESTE produto: qualquer 3.9 publicada no CDN passaria a
+   * rodar aqui sem um commit. A terceira não tinha versão nenhuma: `latest`, o
+   * que o CDN estiver publicando no dia, inclusive um `major` novo. Era a
+   * entrada de último recurso, acionada justamente quando tudo o mais já
+   * falhou — a pior hora possível para estrear uma biblioteca.
+   *
+   * E ela nem era um salva-vidas: `latest` resolve hoje para a MESMA 4.2.0 da
+   * segunda linha. Três tentativas, dois arquivos. Agora são três versões
+   * diferentes, todas exatas.
+   *
+   * Fixar não mudou o que roda hoje — `@3` já entregava 3.8.1. Mudou quem
+   * decide: a atualização virou escolha com aviso (`testes/versoes.mjs`
+   * consulta o npm e reprova quando há versão mais nova) em vez de acidente. */
+  const TJS_BASES = ["https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.8.1", "https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.2.0", "https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.8.0"];
   let tjsEmUso = null, tjsMod = null, tjsErros = [];
 
   async function importarTjs(){
