@@ -188,6 +188,110 @@ console.log('\n[4] e nenhum caminho de captura carrega largura escrita à mão')
      /function larguraNativa\(\)\{ return video\.videoWidth/.test(fonte));
 }
 
+console.log('\n[5] a fidelidade: sem perda quando cabe, e o arquivo segue a memória');
+{
+  /* O elo que decide a qualidade é a CAPTURA, e não o formato do arquivo. Foi
+     preciso medir a cadeia inteira para descobrir isso: um PNG feito a partir
+     de um quadro que já passou por WebP com perda não recupera nada — só
+     guarda o ruído do codificador anterior, com fidelidade perfeita e preço de
+     sem-perda (250,8 KB para preservar o que o JPEG entregava em 96,1 KB,
+     ambos igualmente aproximados).
+     Por isso esta régua cobra a REGRA, e não um formato: quem foi guardado sem
+     perda sai sem perda; quem foi aproximado sai em JPEG, que é menor. */
+  const fonte = fs.readFileSync(ROOT + '/app.html', 'utf8');
+  const teto = Number((fonte.match(/const TETO_SEM_PERDA = ([\d.]+);/) || [])[1]);
+  ok('a captura tenta o sem-perda antes do com-perda',
+     /toBlob\(b => \{\s*if \(semPerdaVale\(b\)\)/.test(fonte));
+  ok('e o teto é por PIXEL, para valer em 4K como vale em 1080p',
+     /b\.size \/ \(c\.width \* c\.height\) <= TETO_SEM_PERDA/.test(fonte));
+  ok('com um teto declarado entre 0 e 1 byte por pixel',
+     teto > 0 && teto < 1, teto > 0 && teto < 1 ? '' : String(teto));
+  /* A parte que se descobre quebrando: escolher o formato do arquivo pelo
+     MENOR tamanho escreveria JPEG por cima de um quadro exato, jogando fora no
+     último metro a fidelidade que a captura pagou quatro vezes mais caro para
+     ter. O arquivo obedece à memória. */
+  ok('e o arquivo obedece à memória, em vez de escolher pelo tamanho',
+     /const png = im\.semPerda \? await cod\('image\/png'\) : null;/.test(fonte));
+
+  /* O quadro real desta corrida: veio de um WebM, que já é com perda — o ruído
+     do codec de vídeo põe qualquer tela acima do teto. Então aqui o esperado é
+     o caminho COM perda, e é isso que se afirma. A captura ao vivo de tela
+     limpa é o outro ramo, e ela é medida em `pesagem.mjs`. */
+  const m = await pg.evaluate(async () => {
+    const q = (window.__quadros() || []).filter(f => f.img);
+    for (const f of q) await f.img.pronta;
+    return q.map(f => ({ sp: !!f.img.semPerda,
+                         bpp: f.img.blob ? f.img.blob.size / (f.img.w * f.img.h) : 0 }));
+  });
+  const semPerda = m.filter(x => x.sp);
+  console.log(`     ${semPerda.length} de ${m.length} sem perda` +
+              (m.length ? `   ${m.map(x => x.bpp.toFixed(3)).join(' · ')} B/px` : ''));
+  const dentro = semPerda.every(x => x.bpp <= teto);
+  ok('todo quadro sem perda está dentro do teto', dentro,
+     dentro ? '' : semPerda.map(x => x.bpp.toFixed(3)).join(', '));
+
+  /* ESTA LINHA EXISTE PORQUE A RÉGUA TINHA UM BURACO, e o buraco era de
+     método: as afirmações acima leem o TEXTO da fonte, e texto não sabe se é
+     alcançável. Desligando o caminho sem-perda com um `if (false)` — o defeito
+     inteiro instalado — as quatro passavam, porque as linhas continuavam
+     escritas ali dentro, mortas.
+     Afirmação sobre texto prova que alguém escreveu; só afirmação sobre
+     COMPORTAMENTO prova que roda. Esta amostra tem cenas de cor chapada, e
+     elas cabem no teto com folga (0,019 a 0,293 B/px): se nenhuma sair sem
+     perda, o caminho não está sendo tomado. */
+  ok('e o caminho sem-perda é de fato TOMADO, e não só escrito',
+     semPerda.length > 0, semPerda.length ? '' : '0 de ' + m.length + ' quadros');
+  /* AQUI EU AFIRMEI UM PALPITE E A MEDIÇÃO O DERRUBOU, e fica escrito porque
+     a lição é o contrário do que eu esperava: escrevi que "um vídeo já
+     comprimido não vira quadro sem perda", supondo que o ruído do codec de
+     vídeo poria toda tela acima do teto. Não põe. Estas cenas são áreas de cor
+     chapada, e depois do WebM continuam quase chapadas: 0,019 a 0,293 B/px,
+     todas dentro do teto.
+     Ou seja, a regra discrimina por CONTEÚDO e não por procedência — que é
+     melhor do que eu tinha suposto e é o que se quer. A afirmação saiu; o que
+     fica é a invariante acima, que vale para os dois ramos. */
+}
+
+console.log('\n[6] a captura pede a resolução da tela');
+{
+  const fonte = fs.readFileSync(ROOT + '/app.html', 'utf8');
+  /* O primeiro elo da corrente. Sem pedir, o navegador entrega o que quiser —
+     e um monitor grande chega já reduzido, com o quadro registrando a redução
+     fielmente. */
+  ok('o getDisplayMedia pede largura e altura',
+     /width:\s*\{ ideal: Math\.round\(screen\.width/.test(fonte) &&
+     /height:\s*\{ ideal: Math\.round\(screen\.height/.test(fonte));
+  ok('o alvo sai da tela de quem grava, e não de um número escrito à mão',
+     /screen\.width\s*\*\s*\(window\.devicePixelRatio \|\| 1\)/.test(fonte));
+  /* `ideal` e nunca `exact`: uma exigência não atendida derruba a captura
+     inteira com OverconstrainedError, e trocar imagem fraca por gravação
+     nenhuma não é conserto. */
+  /* O recorte é ancorado no FIM da chamada, e não num número de caracteres:
+     a primeira versão disto usava uma janela de 1600 e o comentário novo
+     dentro da chamada a estourou — o recorte saiu vazio, e um recorte vazio
+     não contém `ideal:`, então a régua reprovou o produto por um defeito da
+     régua. Uma afirmação sobre um trecho tem que provar que achou o trecho. */
+  const trecho = (fonte.match(/getDisplayMedia\(\{[\s\S]*?surfaceSwitching[^}]*\}\);/) || [''])[0];
+  ok('o trecho da captura foi encontrado', trecho.length > 0);
+  ok('e pede como ideal, nunca como exigência',
+     trecho.length > 0 && /ideal:/.test(trecho) && !/exact:/.test(trecho) && !/\bmin:/.test(trecho));
+  ok('e manda não reescalar', /resizeMode: 'none'/.test(fonte));
+}
+
+console.log('\n[7] o diagnóstico responde a pergunta sozinho');
+{
+  /* "Por que a imagem saiu ruim?" custou três rodadas de investigação, e a
+     resposta inteira cabia em três números que o produto sabia e não dizia. */
+  const fonte = fs.readFileSync(ROOT + '/app.html', 'utf8');
+  for (const [rot, re] of [
+    ['a tela da máquina',    /tela desta máquina: /],
+    ['o que o navegador deu', /o navegador deu  : /],
+    ['o tamanho do quadro',  /o quadro tem     : /]]) {
+    ok('o relatório diz ' + rot, re.test(fonte));
+  }
+  ok('e quantos quadros saíram sem perda', /' sem perda'/.test(fonte));
+}
+
 ok('sem erro de JavaScript', erros.length === 0, erros.join(' | ').slice(0, 200));
 
 await br.close(); srv.close();
