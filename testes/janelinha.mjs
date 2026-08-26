@@ -22,9 +22,18 @@ const ok = (n, c, e) => { console.log((c ? '  ok   ' : '  FALHA') + '  ' + n + (
    janelinha ganha a linha do passo atual e a do seguinte. Então o arquivo
    declara as DUAS, e a régua mede a menor — a que vale para quem não colou
    roteiro nenhum, que é o caso comum e o mais apertado por quadro de tela. */
-const med = app.match(/width: (\d+), height: roteiro\.length \? (\d+) : (\d+)/);
-ok('a janelinha declara um tamanho', !!med, med ? med[0] : '(não achei)');
-const [LARG, ALT, ALT_ROT] = med ? [ +med[1], +med[3], +med[2] ] : [250, 392, 486];
+/* SÃO DOIS TAMANHOS AGORA, e não um. A completa serve a quem tem tela
+   sobrando; quem executa um roteiro num ERP em tela cheia tem UMA janela, e
+   cada pixel da janelinha é um pixel a menos do trabalho documentado.
+   Esta régua mede as duas, porque as duas podem transbordar — e a mínima
+   transborda mais fácil, que é o ponto dela. */
+const med = app.match(/width: (\d+), height: min \? (\d+) : \(roteiro\.length \? (\d+) : (\d+)\)/);
+ok('a janelinha declara os dois tamanhos', !!med, med ? '' : '(não achei)');
+const [LARG, ALT_MIN, ALT_ROT, ALT] = med
+  ? [ +med[1], +med[2], +med[3], +med[4] ] : [250, 168, 560, 430];
+console.log(`     completa ${LARG}×${ALT}   com roteiro ${LARG}×${ALT_ROT}   mínima ${LARG}×${ALT_MIN}`);
+ok('e a mínima é mais baixa que a completa', ALT_MIN < ALT,
+   ALT_MIN < ALT ? '' : `${ALT_MIN} contra ${ALT}`);
 
 const css = app.slice(app.indexOf('const PIP_CSS = `') + 17).split('`;')[0];
 ok('o CSS dela foi encontrado', css.length > 400, String(css.length));
@@ -145,6 +154,52 @@ console.log(`\n[1] gravando: cabe em ${LARG}×${ALT}`);
        c.classList.remove('hide');
        return escondido;
      }));
+}
+
+console.log(`\n[1a] mínima: cabe em ${LARG}×${ALT_MIN}, e sobra só o que se usa`);
+{
+  /* A JANELA MÍNIMA É A QUE TRANSBORDA MAIS FÁCIL, porque é a que tem menos
+     folga — e é justamente a que vai ficar por cima do trabalho de quem testa
+     numa janela só. Medi-la é o preço de oferecê-la.
+     O que tem que sobreviver: os DOIS botões de captura, que são o motivo dela
+     existir; o relógio, que é como se sabe que ainda está gravando; e o parar,
+     que é a única outra coisa que não pode exigir alt-tab. */
+  await pg.setViewportSize({ width: LARG, height: ALT_MIN });
+  await pg.evaluate(() => {
+    document.body.className = 'min gravando';
+    for (const [id, txt] of [['marcar','Marcar este passo'],
+                             ['maisTela','Tela adicional a este passo'],
+                             ['pausa','Pausar'],['stop','Parar']]) {
+      const b = document.getElementById(id); if (b) { b.textContent = txt; b.disabled = false; }
+    }
+    const c = document.getElementById('calar');
+    if (c) { c.classList.remove('hide'); c.textContent = 'Fechar meu microfone'; }
+    const r = document.getElementById('rel'); if (r) r.textContent = '12:34';
+  });
+  await pg.waitForTimeout(150);
+  const m = await medir();
+  console.log(`     precisa ${m.precisa}px, cabe ${m.cabe}px`);
+  ok('o conteúdo da mínima cabe na altura pedida', m.precisa <= m.cabe,
+     m.precisa <= m.cabe ? '' : `precisa ${m.precisa}, cabe ${m.cabe}`);
+  ok('e nada fica para fora', m.vaza.length === 0, m.vaza.join(' '));
+
+  const quem = await pg.evaluate(() => {
+    const vis = (id) => { const e = document.getElementById(id);
+      return !!(e && getComputedStyle(e).display !== 'none' && e.offsetParent !== null); };
+    const visC = (sel) => { const e = document.querySelector(sel);
+      return !!(e && getComputedStyle(e).display !== 'none'); };
+    return { marcar: vis('marcar'), maisTela: vis('maisTela'), stop: vis('stop'),
+             relogio: visC('.top'),
+             medidor: visC('.vus'), texto: vis('txt'), nota: visC('.nota'),
+             pausa: vis('pausa'), calar: vis('calar') };
+  });
+  console.log('     ' + Object.entries(quem).map(([k, v]) => k + (v ? '=sim' : '=não')).join('  '));
+  const fica = quem.marcar && quem.maisTela && quem.stop && quem.relogio;
+  ok('sobrevivem os dois botões de captura, o relógio e o parar', fica,
+     fica ? '' : JSON.stringify(quem));
+  const some = !quem.medidor && !quem.texto && !quem.nota && !quem.pausa && !quem.calar;
+  ok('e some o que não se usa quarenta vezes por sessão', some,
+     some ? '' : JSON.stringify(quem));
 }
 
 console.log(`\n[1b] com roteiro colado: cabe em ${LARG}×${ALT_ROT}`);

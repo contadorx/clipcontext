@@ -1517,6 +1517,19 @@
                comentário, todos de uma vez. Um botão cinza entre botões cinzas
                é a resposta errada para "sumiu tudo". -->
           <button class="sm hide destaque" id="recPip" data-i18n="recPipBtn"></button>
+          <!-- ---- O TAMANHO DA JANELINHA ----
+               Ele fica AQUI, ao lado do botão que a reabre, e não nos ajustes:
+               é aqui que a pessoa está quando descobre que a janelinha ocupa
+               tela demais, e o conserto tem que estar onde o incômodo aparece.
+               Trocar durante a gravação vale na hora — a janelinha é fechada e
+               reaberta no novo tamanho, sem interromper a captura. -->
+          <label class="f pipModo" for="pipTam">
+            <span data-i18n="pipTamLbl"></span>
+            <select id="pipTam">
+              <option value="completa" data-i18n="pipTamCompleta"></option>
+              <option value="min" data-i18n="pipTamMin"></option>
+            </select>
+          </label>
         </div>
         <!-- ---- A CAIXA DE ANOTAÇÃO AO VIVO, DE VOLTA ----
 
@@ -2909,6 +2922,15 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
            exatamente o que ninguém quer encarar no meio de uma evidência. -->
       <p class="subTit" data-i18n="lenteAcoes" style="margin:16px 0 7px"></p>
       <div class="row">
+        <!-- ---- MARCAR DEPOIS ----
+             A captura automática já guardou a tela; a marcação não captura
+             nada — ela só diz QUAL delas abre um passo. Isso é opinião, e
+             opinião se forma melhor com a imagem grande na frente do que às
+             cegas, dentro do sistema testado, com as mãos ocupadas.
+             É a mesma razão que já moveu a anotação para cá.
+             O atalho é a tecla P, e ele existe porque quem revisa quarenta
+             quadros faz este gesto quarenta vezes. -->
+        <button class="ghost sm" id="passoModo" data-i18n="passoBtn"></button>
         <button class="ghost sm" id="tarjaModo" data-i18n="tarjaBtn"></button>
         <button class="ghost sm hide" id="tarjaLimpar" data-i18n="tarjaLimpar"></button>
         <button class="ghost sm" id="mkModo" data-i18n="mkBtn"></button>
@@ -3385,6 +3407,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       rotPronto:'{0} passos prontos — cada marcação já sai com o título.',
       passoTelas:'{0} telas',
       recPipBtn:'Trazer a janelinha de volta',
+      pipTamLbl:'Tamanho da janelinha', pipTamCompleta:'Completa — relógio, medidor e anotação', pipTamMin:'Mínima — só marcar e parar',
       recPausado:'PAUSADO —', recMarcado:'passo marcado.',
       pipPausado:'Pausado: nada sendo guardado.',
       micNegado:'O navegador bloqueou o microfone para este site. Clique no cadeado ao lado do endereço, permita o microfone e grave de novo.',
@@ -3873,7 +3896,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       evPerfil:'O sistema e quem executou ficam guardados enquanto esta aba estiver aberta, para você não redigitar a cada caso. Fechou a aba, some.',
       evLimpar:'Esquecer', evSalvar:'Salvar perfil', evAbrir:'Abrir perfil',
       editarBtn:'Editar', editarTit:'Editar este passo — tarjar, recortar, comparar, trocar a imagem, clipe e fala', fecharBtn:'Fechar',
-      lenteRevVolta:'Voltar para a revisão', lenteRevFim:'Finalizar a revisão', demoCenario:'Escolhemos “Evidência de teste” para o exemplo — troque na etapa 1 se o seu caso for outro.', lenteAcoes:'O que dá para fazer com esta imagem', lenteNotaResta:'{0} caracteres restantes — ela vira o título deste passo no documento.', tarjaBtn:'Tarjar um dado', tarjaFim:'Terminar de tarjar', tarjaLimpar:'Tirar as tarjas',
+      lenteRevVolta:'Voltar para a revisão', lenteRevFim:'Finalizar a revisão', demoCenario:'Escolhemos “Evidência de teste” para o exemplo — troque na etapa 1 se o seu caso for outro.', lenteAcoes:'O que dá para fazer com esta imagem', lenteNotaResta:'{0} caracteres restantes — ela vira o título deste passo no documento.', passoBtn:'Abre um passo (P)', passoJunta:'Junta ao passo anterior (P)', passoPrimeiro:'É o primeiro quadro — ele sempre abre um passo', tarjaBtn:'Tarjar um dado', tarjaFim:'Terminar de tarjar', tarjaLimpar:'Tirar as tarjas',
       tarjaComo:'Arraste sobre a imagem para cobrir. Clique numa tarja para tirá-la.',
       tarjaN:'{0} tarja(s) neste passo — elas são queimadas na imagem que sai no documento.',
       tarjaTirar:'clique para tirar esta tarja',
@@ -4021,6 +4044,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       rotPronto:'{0} steps ready — every mark comes with its title.',
       passoTelas:'{0} screens',
       recPipBtn:'Bring the control window back',
+      pipTamLbl:'Little window size', pipTamCompleta:'Full — clock, meter and note', pipTamMin:'Minimal — just mark and stop',
       recPausado:'PAUSED —', recMarcado:'step marked.',
       pipPausado:'Paused: nothing being kept.',
       micNegado:'The browser blocked the microphone for this site. Click the padlock next to the address, allow the microphone and record again.',
@@ -4494,7 +4518,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       evPerfil:'The system and who ran it are kept while this tab stays open, so you do not retype them for every case. Close the tab and they are gone.',
       evLimpar:'Forget', evSalvar:'Save profile', evAbrir:'Open profile',
       editarBtn:'Edit', editarTit:'Edit this step — redact, crop, compare, replace the image, clip and speech', fecharBtn:'Close',
-      lenteRevVolta:'Back to the review', lenteRevFim:'Finish the review', demoCenario:'We picked “Test evidence” for the example — change it in step 1 if your case is another.', lenteAcoes:'What you can do with this image', lenteNotaResta:'{0} characters left — it becomes the title of this step in the document.', tarjaBtn:'Hide a detail', tarjaFim:'Done redacting', tarjaLimpar:'Remove the bars',
+      lenteRevVolta:'Back to the review', lenteRevFim:'Finish the review', demoCenario:'We picked “Test evidence” for the example — change it in step 1 if your case is another.', lenteAcoes:'What you can do with this image', lenteNotaResta:'{0} characters left — it becomes the title of this step in the document.', passoBtn:'Opens a step (P)', passoJunta:'Joins the previous step (P)', passoPrimeiro:'It is the first frame — it always opens a step', tarjaBtn:'Hide a detail', tarjaFim:'Done redacting', tarjaLimpar:'Remove the bars',
       tarjaComo:'Drag over the image to cover it. Click a box to remove it.',
       tarjaN:'{0} redaction(s) on this step — they are burned into the image that goes in the document.',
       tarjaTirar:'click to remove this redaction',
@@ -4642,6 +4666,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       rotPronto:'{0} pasos listos — cada marca ya sale con su título.',
       passoTelas:'{0} pantallas',
       recPipBtn:'Traer la ventana de control de vuelta',
+      pipTamLbl:'Tamaño de la ventanita', pipTamCompleta:'Completa — reloj, medidor y nota', pipTamMin:'Mínima — solo marcar y parar',
       recPausado:'EN PAUSA —', recMarcado:'paso marcado.',
       pipPausado:'En pausa: no se guarda nada.',
       micNegado:'El navegador bloqueó el micrófono para este sitio. Pulsa el candado junto a la dirección, permite el micrófono y graba de nuevo.',
@@ -5115,7 +5140,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       evPerfil:'El sistema y quién lo ejecutó se guardan mientras esta pestaña siga abierta, para no reescribirlos en cada caso. Cierras la pestaña y desaparecen.',
       evLimpar:'Olvidar', evSalvar:'Guardar perfil', evAbrir:'Abrir perfil',
       editarBtn:'Editar', editarTit:'Editar este paso — tapar, recortar, comparar, cambiar la imagen, clip y habla', fecharBtn:'Cerrar',
-      lenteRevVolta:'Volver a la revisión', lenteRevFim:'Finalizar la revisión', demoCenario:'Elegimos “Evidencia de prueba” para el ejemplo — cámbialo en la etapa 1 si tu caso es otro.', lenteAcoes:'Lo que puedes hacer con esta imagen', lenteNotaResta:'Quedan {0} caracteres — se convierte en el título de este paso en el documento.', tarjaBtn:'Tapar un dato', tarjaFim:'Terminar de tachar', tarjaLimpar:'Quitar las franjas',
+      lenteRevVolta:'Volver a la revisión', lenteRevFim:'Finalizar la revisión', demoCenario:'Elegimos “Evidencia de prueba” para el ejemplo — cámbialo en la etapa 1 si tu caso es otro.', lenteAcoes:'Lo que puedes hacer con esta imagen', lenteNotaResta:'Quedan {0} caracteres — se convierte en el título de este paso en el documento.', passoBtn:'Abre un paso (P)', passoJunta:'Se une al paso anterior (P)', passoPrimeiro:'Es el primer fotograma — siempre abre un paso', tarjaBtn:'Tapar un dato', tarjaFim:'Terminar de tachar', tarjaLimpar:'Quitar las franjas',
       tarjaComo:'Arrastra sobre la imagen para cubrir. Haz clic en una zona para quitarla.',
       tarjaN:'{0} zona(s) tachada(s) en este paso — se queman en la imagen que sale en el documento.',
       tarjaTirar:'haz clic para quitar esta zona',
@@ -5262,6 +5287,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       rotPronto:'{0} Schritte bereit — jede Markierung kommt mit ihrem Titel.',
       passoTelas:'{0} Bildschirme',
       recPipBtn:'Steuerungsfenster zurückholen',
+      pipTamLbl:'Größe des Steuerungsfensters', pipTamCompleta:'Vollständig — Uhr, Pegel und Notiz', pipTamMin:'Minimal — nur markieren und stoppen',
       recPausado:'PAUSIERT —', recMarcado:'Schritt markiert.',
       pipPausado:'Pausiert: Es wird nichts gespeichert.',
       micNegado:'Der Browser hat das Mikrofon für diese Website blockiert. Klicken Sie auf das Schloss neben der Adresse, erlauben Sie das Mikrofon und nehmen Sie erneut auf.',
@@ -5741,7 +5767,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       evPerfil:'System und ausführende Person bleiben gespeichert, solange dieser Tab geöffnet ist, damit Sie sie nicht bei jedem Fall neu eintippen müssen. Wenn Sie den Tab schließen, sind sie weg.',
       evLimpar:'Vergessen', evSalvar:'Profil speichern', evAbrir:'Profil öffnen',
       editarBtn:'Bearbeiten', editarTit:'Diesen Schritt bearbeiten — schwärzen, zuschneiden, vergleichen, Bild ersetzen, Clip und Sprache', fecharBtn:'Schließen',
-      lenteRevVolta:'Zurück zur Prüfung', lenteRevFim:'Prüfung abschließen', demoCenario:'Für das Beispiel haben wir „Testnachweis“ gewählt — ändern Sie es in Schritt 1, wenn Ihr Fall ein anderer ist.', lenteAcoes:'Was Sie mit diesem Bild tun können', lenteNotaResta:'Noch {0} Zeichen — sie wird zur Überschrift dieses Schritts im Dokument.', tarjaBtn:'Etwas schwärzen', tarjaFim:'Schwärzen beenden', tarjaLimpar:'Schwärzungen entfernen',
+      lenteRevVolta:'Zurück zur Prüfung', lenteRevFim:'Prüfung abschließen', demoCenario:'Für das Beispiel haben wir „Testnachweis“ gewählt — ändern Sie es in Schritt 1, wenn Ihr Fall ein anderer ist.', lenteAcoes:'Was Sie mit diesem Bild tun können', lenteNotaResta:'Noch {0} Zeichen — sie wird zur Überschrift dieses Schritts im Dokument.', passoBtn:'Beginnt einen Schritt (P)', passoJunta:'Gehört zum vorigen Schritt (P)', passoPrimeiro:'Es ist der erste Screenshot — er beginnt immer einen Schritt', tarjaBtn:'Etwas schwärzen', tarjaFim:'Schwärzen beenden', tarjaLimpar:'Schwärzungen entfernen',
       tarjaComo:'Ziehen Sie über das Bild, um es abzudecken. Klicken Sie auf eine Schwärzung, um sie zu entfernen.',
       tarjaN:'{0} Schwärzung(en) in diesem Schritt — sie werden fest in das Bild eingebrannt, das in das Dokument kommt.',
       tarjaTirar:'klicken, um diese Schwärzung zu entfernen',
@@ -5888,6 +5914,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       rotPronto:'{0} étapes prêtes — chaque marque arrive avec son titre.',
       passoTelas:'{0} écrans',
       recPipBtn:'Rouvrir la fenêtre de contrôle',
+      pipTamLbl:'Taille de la fenêtre de contrôle', pipTamCompleta:'Complète — horloge, niveau et note', pipTamMin:'Minimale — marquer et arrêter seulement',
       recPausado:'EN PAUSE —', recMarcado:'étape marquée.',
       pipPausado:'En pause : rien n’est conservé.',
       micNegado:'Le navigateur a bloqué le microphone pour ce site. Cliquez sur le cadenas à côté de l’adresse, autorisez le microphone et enregistrez de nouveau.',
@@ -6367,7 +6394,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       evPerfil:'Le système et l’exécutant restent conservés tant que cet onglet est ouvert, pour ne pas les ressaisir à chaque cas. Onglet fermé, ils disparaissent.',
       evLimpar:'Oublier', evSalvar:'Enregistrer le profil', evAbrir:'Ouvrir le profil',
       editarBtn:'Modifier', editarTit:'Modifier cette étape — masquer, rogner, comparer, remplacer l’image, clip et parole', fecharBtn:'Fermer',
-      lenteRevVolta:'Retour à la vérification', lenteRevFim:'Terminer la vérification', demoCenario:'Nous avons choisi « Preuve de test » pour l’exemple — changez-le à l’étape 1 si votre cas est autre.', lenteAcoes:'Ce que vous pouvez faire avec cette image', lenteNotaResta:'{0} caractères restants — elle devient le titre de cette étape dans le document.', tarjaBtn:'Masquer une donnée', tarjaFim:'Terminer le caviardage', tarjaLimpar:'Retirer les bandeaux',
+      lenteRevVolta:'Retour à la vérification', lenteRevFim:'Terminer la vérification', demoCenario:'Nous avons choisi « Preuve de test » pour l’exemple — changez-le à l’étape 1 si votre cas est autre.', lenteAcoes:'Ce que vous pouvez faire avec cette image', lenteNotaResta:'{0} caractères restants — elle devient le titre de cette étape dans le document.', passoBtn:'Ouvre une étape (P)', passoJunta:'Rejoint l’étape précédente (P)', passoPrimeiro:'C’est la première capture — elle ouvre toujours une étape', tarjaBtn:'Masquer une donnée', tarjaFim:'Terminer le caviardage', tarjaLimpar:'Retirer les bandeaux',
       tarjaComo:'Faites glisser sur l’image pour couvrir. Cliquez sur un caviardage pour le retirer.',
       tarjaN:'{0} caviardage(s) sur cette étape — ils sont incrustés dans l’image qui sort dans le document.',
       tarjaTirar:'cliquez pour retirer ce caviardage',
@@ -9282,7 +9309,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      depois, e não tem como se atualizar sozinho. Sem carimbo, "estou com um
      problema no offline" é uma conversa sem chão — ninguém sabe de qual build
      se fala nem se o defeito já foi consertado. */
-  const VERSAO = '2026.08.26-11';
+  const VERSAO = '2026.08.26-15';
   window.__versao = () => VERSAO;
 
   const PIP_CSS = `
@@ -9298,6 +9325,29 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
        de um template literal. Uma crase aqui fecha a string e leva o script
        inteiro junto — foi exatamente o que aconteceu na primeira tentativa. */
     .hide{display:none !important}
+    /* ---- O MODO MINIMO ----
+       A janelinha completa mostra relogio, medidor, roteiro, anotacao e os tres
+       botoes de controle. Isso serve a quem tem tela sobrando; nao serve a quem
+       testa numa janela so, que e o caso comum de quem executa um roteiro num
+       ERP em tela cheia.
+       No modo minimo sobra o que se usa QUARENTA VEZES numa sessao — os dois
+       botoes de captura — mais o relogio, que e como se sabe que ainda esta
+       gravando, e o parar, que e a unica outra coisa que nao pode exigir
+       alt-tab. O resto some.
+       Some, e nao encolhe: um medidor de tres pixels nao mede nada e continua
+       custando altura. */
+    body.min{padding:9px 10px;gap:7px;justify-content:safe flex-start}
+    body.min .vus,
+    body.min #txt,
+    body.min .rot,
+    body.min .nota,
+    body.min #pausa,
+    body.min #calar{display:none !important}
+    body.min .top{gap:6px}
+    body.min .rel{font-size:15px}
+    body.min button#marcar{font-size:15px;padding:9px}
+    body.min button#maisTela{font-size:12px;padding:6px}
+    body.min #stop{font-size:12px;padding:6px}
     /* A janelinha fica POR CIMA da tela que está sendo gravada. Cada pixel dela
        é um pixel a menos do trabalho que a pessoa está documentando — e ainda
        aparece nos quadros. Então ela encolhe: menos respiro, menos altura de
@@ -9519,6 +9569,31 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     button.fina:hover:not(:disabled){opacity:1}
   `;
 
+  /* ---- OS DOIS TAMANHOS DA JANELINHA ----
+   *
+   * A completa serve a quem tem tela sobrando. Quem executa um roteiro num ERP
+   * em tela cheia tem UMA janela, e cada pixel da janelinha é um pixel a menos
+   * do trabalho que ela está documentando — e ainda aparece nos quadros.
+   *
+   * Então há duas, e a escolha é de quem usa: não dá para decidir isto por
+   * medição nossa, porque o que muda é o tamanho do monitor e o hábito de
+   * quem grava. Ficam as duas lado a lado justamente para poderem ser
+   * comparadas em uso.
+   *
+   * O que sobrevive no modo mínimo é o que se usa quarenta vezes numa sessão —
+   * os dois botões de captura — mais o relógio, que é como se sabe que ainda
+   * está gravando, e o parar, que é a única outra coisa que não pode exigir
+   * alt-tab. Pausar, calar, medidor, roteiro e anotação continuam existindo na
+   * completa e na aba. */
+  const PIP_MODO_CHAVE = 'Walkstamp.janelinhaModo';
+  const pipModo = () => {
+    try { return localStorage.getItem(PIP_MODO_CHAVE) === 'min' ? 'min' : 'completa'; }
+    catch (e) { return 'completa'; }
+  };
+  const guardarPipModo = (m) => {
+    try { localStorage.setItem(PIP_MODO_CHAVE, m); } catch (e) {}
+  };
+
   async function abrirControle(){
     if (!('documentPictureInPicture' in window)) return;
     try {
@@ -9533,12 +9608,21 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
          de texto mais a divisoria. Pedir sempre a maior desperdicaria tela de
          quem nao colou lista nenhuma -- e cada pixel daqui e um pixel a menos
          do trabalho que a pessoa esta documentando. */
+      /* A altura do modo mínimo é MEDIDA, e não escolhida: relógio, os dois
+         botões de captura, o parar e os respiros somam 196px — `janelinha.mjs`
+         soma os filhos visíveis e reprova quem não couber. Eu tinha escrito
+         168 de palpite e o PARAR ficava dez pixels para fora, que é o mesmo
+         defeito que essa régua já pegou uma vez.
+         O Chrome impõe um mínimo próprio e pode devolver mais do que se pediu;
+         pedir pouco é o que se pode fazer daqui. */
+      const min = pipModo() === 'min';
       pipWin = await documentPictureInPicture.requestWindow(
-        { width: 250, height: roteiro.length ? 560 : 430 });
+        { width: 250, height: min ? 200 : (roteiro.length ? 560 : 430) });
     } catch (e) { pipWin = null; return; }
 
     const d = pipWin.document;
     d.title = t('pipTit');
+    if (pipModo() === 'min') d.body.classList.add('min');
     const st = d.createElement('style'); st.textContent = PIP_CSS; d.head.appendChild(st);
     d.body.innerHTML =
       /* PRIMEIRO de tudo: e o que se le antes de agir. */
@@ -17605,6 +17689,26 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       t('cenTroca', $('modelo').selectedOptions[0] ? $('modelo').selectedOptions[0].textContent : '');
   };
 
+  /* ---- O SELETOR DO TAMANHO DA JANELINHA ----
+     Ele vale NA HORA, e não só na próxima gravação: o incômodo com o tamanho
+     aparece durante a captura, e mandar esperar a próxima é mandar terminar
+     de trabalhar incomodado. Com gravação rolando, a janelinha é fechada e
+     reaberta no tamanho novo — a captura não passa por aqui, então ela não
+     sente. O `pagehide` da janela antiga acenderia o botão de "trazer de
+     volta"; por isso ele é repintado depois que a nova já existe. */
+  if ($('pipTam')) {
+    $('pipTam').value = pipModo();
+    $('pipTam').addEventListener('change', async () => {
+      guardarPipModo($('pipTam').value === 'min' ? 'min' : 'completa');
+      if (!pipWin) { pintarVoltarJanelinha(); return; }
+      try { pipWin.close(); } catch (e) {}
+      pipWin = null;
+      await abrirControle();
+      if (pipWin && liveOn) controle('gravando', { seg: agora(), frames: frames.length });
+      pintarVoltarJanelinha();
+    });
+  }
+
   /* Quem mexeu no ritmo à mão manda: o cenário sugere, e para de sugerir a
      partir do instante em que a pessoa discordou. Sobrescrever a escolha dela
      na próxima troca de cenário é o jeito mais rápido de um controle parecer
@@ -19163,6 +19267,49 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     pintarTarjas();
   }
 
+  /* ---- MARCAR DEPOIS: ESTE QUADRO ABRE UM PASSO, OU JUNTA AO ANTERIOR ----
+   *
+   * O `junto` só nascia na captura, pelo botão "mais uma tela deste passo" da
+   * janelinha — e não havia como mudar de ideia depois. Quem não conseguiu
+   * marcar durante o teste (mãos no sistema, aba atrás da tela compartilhada)
+   * ficava com o agrupamento que o detector adivinhou, sem apelação.
+   *
+   * Agora muda aqui, com a imagem grande na frente. É a mesma razão que já
+   * moveu a anotação para a revisão: descrever — ou agrupar — uma tela que não
+   * se está vendo é a pior hora possível para decidir qualquer coisa.
+   *
+   * O PRIMEIRO QUADRO MANTIDO NÃO TEM A QUEM SE JUNTAR, e o `listaDePassos` já
+   * sabe disso: ele abre um passo mesmo marcado como `junto`. O botão diz isso
+   * em vez de mentir que está desligado. */
+  function primeiroMantido(){
+    return frames.find(f => f.keep) || null;
+  }
+  function pintarPassoBtn(){
+    const b = $('passoModo'); if (!b) return;
+    const f = frames[lenteI];
+    if (!f) { b.classList.add('hide'); return; }
+    b.classList.remove('hide');
+    const ehPrimeiro = f === primeiroMantido();
+    b.disabled = ehPrimeiro;
+    b.title = ehPrimeiro ? t('passoPrimeiro') : '';
+    /* O rótulo diz o ESTADO, e não a ação: "Abre um passo" com o botão aceso
+       significa que ele abre. Rótulo de ação num botão de duas posições é o
+       que faz a pessoa apertar para conferir o que ele estava fazendo. */
+    b.textContent = (!f.junto || ehPrimeiro) ? t('passoBtn') : t('passoJunta');
+    b.setAttribute('aria-pressed', String(!f.junto || ehPrimeiro));
+  }
+  function virarPasso(){
+    const f = frames[lenteI];
+    if (!f || f === primeiroMantido()) return;
+    if (f.junto) delete f.junto; else f.junto = true;
+    /* A grade inteira é repintada: mudar um quadro renumera os passos abaixo
+       dele, e uma fileira com dois "Passo 4" lê-se como defeito. */
+    const i = lenteI;
+    render(); lenteI = i;
+    pintarLente();
+  }
+  if ($('passoModo')) $('passoModo').onclick = virarPasso;
+
   $('tarjaModo').onclick = () => modoTarja(!tarjando);
 
   /* `soEsta` diz se o próximo arrasto corta SÓ este quadro ou todos. Ele é uma
@@ -19335,6 +19482,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   $('lenteTam').onchange = aplicarTamLente;
 
   function pintarLente(){
+    pintarPassoBtn();
     const f = frames[lenteI]; if (!f) return;
     /* O número do PASSO, e não a posição na lista de mantidos: com telas
        agrupadas, o quarto quadro mantido pode ser a segunda tela do passo 3. */
@@ -19718,6 +19866,13 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     if (e.target.tagName === 'INPUT') return;
     if (e.key === 'ArrowLeft')  { e.preventDefault(); $('lentePrev').click(); }
     if (e.key === 'ArrowRight') { e.preventDefault(); $('lenteProx').click(); }
+    /* P de PASSO. Quem revisa quarenta quadros faz este gesto quarenta vezes,
+       e alternar entre seta e mouse a cada um é o que faz a revisão custar
+       mais que a gravação. Sem modificador de propósito: a lente não tem
+       campo de texto em foco quando as setas andam, e é a mesma guarda. */
+    if ((e.key || '').toLowerCase() === 'p' && !e.ctrlKey && !e.metaKey && !e.altKey) {
+      e.preventDefault(); virarPasso();
+    }
   });
 
   /* ---- a fala vira o rascunho da anotação ----
