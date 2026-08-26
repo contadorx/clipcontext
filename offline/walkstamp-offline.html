@@ -3793,6 +3793,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       recBtn:'Gravar a tela', recStopBtn:'Parar gravação',
       recAdiantando:'Baixando o modelo de voz agora, para não atrasar a gravação. Pode escolher a tela quando quiser.',
       recPronto:'Modelo pronto. A gravação começa na hora.',
+      pipCurtoMarcar:'Marcar', pipCurtoTela:'+ Tela', pipCurtoParar:'Parar',
       recPauseBtn:'Pausar', recResumeBtn:'Retomar', recMarkBtn:'Marcar este passo',
       recTelaBtn:'Tela adicional a este passo',
       recTelaFeita:'Mais uma tela guardada no {0}.',
@@ -4430,6 +4431,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       recBtn:'Record the screen', recStopBtn:'Stop recording',
       recAdiantando:'Downloading the speech model now, so it does not delay the recording. Pick your screen whenever you like.',
       recPronto:'Model ready. Recording starts immediately.',
+      pipCurtoMarcar:'Mark', pipCurtoTela:'+ Screen', pipCurtoParar:'Stop',
       recPauseBtn:'Pause', recResumeBtn:'Resume', recMarkBtn:'Mark this step',
       recTelaBtn:'Additional screen for this step',
       recTelaFeita:'One more screen saved in {0}.',
@@ -5052,6 +5054,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       recBtn:'Grabar la pantalla', recStopBtn:'Detener grabación',
       recAdiantando:'Descargando el modelo de voz ahora, para no retrasar la grabación. Elige la pantalla cuando quieras.',
       recPronto:'Modelo listo. La grabación empieza al instante.',
+      pipCurtoMarcar:'Marcar', pipCurtoTela:'+ Pantalla', pipCurtoParar:'Parar',
       recPauseBtn:'Pausar', recResumeBtn:'Reanudar', recMarkBtn:'Marcar este paso',
       recTelaBtn:'Pantalla adicional de este paso',
       recTelaFeita:'Una pantalla más guardada en {0}.',
@@ -5673,6 +5676,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       recBtn:'Bildschirm aufnehmen', recStopBtn:'Aufnahme stoppen',
       recAdiantando:'Das Spracherkennungsmodell wird jetzt heruntergeladen, damit es die Aufnahme nicht verzögert. Sie können den Bildschirm jederzeit auswählen.',
       recPronto:'Modell bereit. Die Aufnahme startet sofort.',
+      pipCurtoMarcar:'Markieren', pipCurtoTela:'+ Bildschirm', pipCurtoParar:'Stopp',
       recPauseBtn:'Pause', recResumeBtn:'Fortsetzen', recMarkBtn:'Diesen Schritt markieren',
       recTelaBtn:'Zusätzlicher Bildschirm zu diesem Schritt',
       recTelaFeita:'Noch ein Bildschirm in {0} gespeichert.',
@@ -6300,6 +6304,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       recBtn:'Enregistrer l’écran', recStopBtn:'Arrêter l’enregistrement',
       recAdiantando:'Téléchargement du modèle de reconnaissance vocale maintenant, pour ne pas retarder l’enregistrement. Vous pouvez choisir l’écran quand vous voulez.',
       recPronto:'Modèle prêt. L’enregistrement démarre immédiatement.',
+      pipCurtoMarcar:'Marquer', pipCurtoTela:'+ Écran', pipCurtoParar:'Arrêter',
       recPauseBtn:'Pause', recResumeBtn:'Reprendre', recMarkBtn:'Marquer cette étape',
       recTelaBtn:'Écran supplémentaire pour cette étape',
       recTelaFeita:'Un écran de plus enregistré dans {0}.',
@@ -9706,7 +9711,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
      depois, e não tem como se atualizar sozinho. Sem carimbo, "estou com um
      problema no offline" é uma conversa sem chão — ninguém sabe de qual build
      se fala nem se o defeito já foi consertado. */
-  const VERSAO = '2026.08.26-20';
+  const VERSAO = '2026.08.26-25';
   window.__versao = () => VERSAO;
 
   const PIP_CSS = `
@@ -9753,18 +9758,32 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
        arquivo nao desempata especificidade. A fita saia com 170px de altura e
        os rotulos por escrito, porque as regras de baixo continuavam mandando.
        Foi medido assim antes de ser visto assim. */
+    /* ---- O ROTULO VOLTA, PEQUENO ----
+       So icone nao diz o que faz. Testada, a fita ficou "boa, mas nao da para
+       saber o que e o que" — e tem razao: um obturador, duas telas e um
+       quadrado, lado a lado e sem palavra, sao tres desenhos que quem nunca
+       viu tem que adivinhar. Adivinhar durante uma gravacao e o pior momento
+       possivel, porque o erro custa o passo.
+       Entao o desenho fica e a palavra volta ao lado dele, em 10.5px. A fita
+       continua com uma linha e a mesma altura: o que cresce e a LARGURA, que
+       numa faixa por cima do trabalho custa menos que altura — ela ocupa a
+       borda, e nao o meio. */
+    /* `width:auto` E NAO SO `flex:none`. A regra base da janelinha manda
+       `width:100%` — desenhada para uma pilha, onde botao de largura cheia e o
+       certo. Em linha, `flex:none` respeita esse 100% e cada botao virava
+       232px: tres botoes de 232 numa fita de 250. Medido antes de visto. */
     body.min #marcar,body.min #maisTela,body.min #stop,
-    body.min #pausa,body.min #calar{flex:none;width:38px;height:38px;
-                    padding:0;font-size:0;gap:0;border-radius:8px;
+    body.min #pausa,body.min #calar{flex:none;width:auto;height:38px;
+                    padding:0 9px;font-size:10.5px;font-weight:600;gap:5px;
+                    border-radius:8px;white-space:nowrap;
                     display:flex;align-items:center;justify-content:center}
     body.min #marcar::before,body.min #maisTela::before,
-    body.min #stop::before{width:18px;height:18px}
+    body.min #stop::before{width:15px;height:15px}
     /* O MARCAR CONTINUA SENDO O DIFERENTE, e aqui isso importa mais: sem
        rotulo, tres icones cinzentos lado a lado sao tres irmaos. Ele fica
        aceso e um pouco maior — e um pouco maior num alvo de 38 e a diferenca
        entre acertar e mirar. */
-    body.min #marcar{width:46px;height:38px;
-                    background:#737cf0;color:#121419;border:0}
+    body.min #marcar{background:#737cf0;color:#121419;border:0;font-size:11.5px}
     body.min #maisTela{background:rgba(115,124,240,.20);color:#a9b2ff;
                     border:1px solid rgba(115,124,240,.55)}
     /* Os icones que faltavam. Pausar, calar e parar ja tinham; marcar e mais
@@ -10028,6 +10047,32 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     try { localStorage.setItem(PIP_MODO_CHAVE, m); } catch (e) {}
   };
 
+  /* ---- A PALAVRA CURTA NA FITA, A FRASE INTEIRA NO NOME ----
+   *
+   * A fita só de ícones foi testada e o relato foi "ficou bom, mas não dá para
+   * saber o que é o que". Tem razão: um obturador, duas telas e um quadrado,
+   * lado a lado e sem palavra, são três desenhos que quem nunca viu tem que
+   * adivinhar — e adivinhar durante uma gravação custa o passo.
+   *
+   * Mas o rótulo inteiro não cabe: "Tela adicional a este passo" sozinho põe a
+   * fita em 779px de largura, medido. Então são dois rótulos para o mesmo
+   * botão: a palavra curta que aparece, e a frase inteira que fica no `title`
+   * e no `aria-label`.
+   *
+   * O NOME ACESSÍVEL É O INTEIRO, e não o curto: quem usa leitor de tela não
+   * ganha nada com "+ Tela", e "Tela adicional a este passo" é a frase que
+   * explica o que o botão faz. O `aria-label` vence o texto de dentro, então
+   * o curto fica só para os olhos. */
+  function rotularPip(btn, chaveLonga, chaveCurta){
+    if (!btn) return;
+    const longo = t(chaveLonga);
+    const curto = t(chaveCurta) || longo;
+    const min = pipModo() === 'min';
+    btn.textContent = min ? curto : longo;
+    btn.title = longo;
+    btn.setAttribute('aria-label', longo);
+  }
+
   async function abrirControle(){
     if (!('documentPictureInPicture' in window)) return;
     try {
@@ -10051,9 +10096,13 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
          O Chrome impõe um mínimo próprio e pode devolver uma janela maior do
          que a pedida. Se devolver, a fita fica no topo dela e continua
          funcionando — pedir pouco é o que se pode fazer daqui. */
+      /* A FITA É FINA, E NÃO ESTREITA. Ela precisa de 375px de largura no
+         alemão — "Markieren + Bildschirm Stopp" numa linha só — e a largura
+         numa faixa por cima do trabalho custa menos que altura: ela encosta
+         numa borda e deixa o meio da tela livre. 390 dá quinze de folga. */
       const min = pipModo() === 'min';
       pipWin = await documentPictureInPicture.requestWindow(
-        { width: 250, height: min ? 56 : (roteiro.length ? 560 : 430) });
+        { width: min ? 390 : 250, height: min ? 56 : (roteiro.length ? 560 : 430) });
     } catch (e) { pipWin = null; return; }
 
     const d = pipWin.document;
@@ -10108,7 +10157,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     pipMarcar  = d.getElementById('marcar');
     pipTela    = d.getElementById('maisTela');
     pipPausa   = d.getElementById('pausa');
-    pipFrames.textContent = t('pipStop');
+    rotularPip(pipFrames, 'pipStop', 'pipCurtoParar');
     pipFrames.onclick = () => { if (pararLive) pararLive(); };
     /* Marcar e pausar moram aqui porque é aqui que a pessoa está: durante a
        gravação a aba do produto está atrás da tela compartilhada. Os dois
@@ -10208,12 +10257,12 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
          gesto é pior do que retorno nenhum. */
       if (pipMarcar) {
         pipMarcar.disabled = pausado;
-        pipMarcar.textContent = t('recMarkBtn');
+        rotularPip(pipMarcar, 'recMarkBtn', 'pipCurtoMarcar');
         pipMarcar.classList.toggle('piscou', !!aviso && pipAvisoDe !== 'tela');
       }
       if (pipTela) {
         pipTela.disabled = pausado;
-        pipTela.textContent = t('recTelaBtn');
+        rotularPip(pipTela, 'recTelaBtn', 'pipCurtoTela');
         pipTela.classList.toggle('piscou', !!aviso && pipAvisoDe === 'tela');
       }
       if (pipPausa)  {

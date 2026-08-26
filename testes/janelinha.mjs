@@ -27,11 +27,11 @@ const ok = (n, c, e) => { console.log((c ? '  ok   ' : '  FALHA') + '  ' + n + (
    cada pixel da janelinha é um pixel a menos do trabalho documentado.
    Esta régua mede as duas, porque as duas podem transbordar — e a mínima
    transborda mais fácil, que é o ponto dela. */
-const med = app.match(/width: (\d+), height: min \? (\d+) : \(roteiro\.length \? (\d+) : (\d+)\)/);
+const med = app.match(/width: min \? (\d+) : (\d+), height: min \? (\d+) : \(roteiro\.length \? (\d+) : (\d+)\)/);
 ok('a janelinha declara os dois tamanhos', !!med, med ? '' : '(não achei)');
-const [LARG, ALT_MIN, ALT_ROT, ALT] = med
-  ? [ +med[1], +med[2], +med[3], +med[4] ] : [250, 56, 560, 430];
-console.log(`     completa ${LARG}×${ALT}   com roteiro ${LARG}×${ALT_ROT}   fita ${LARG}×${ALT_MIN}`);
+const [LARG_MIN, LARG, ALT_MIN, ALT_ROT, ALT] = med
+  ? [ +med[1], +med[2], +med[3], +med[4], +med[5] ] : [390, 250, 56, 560, 430];
+console.log(`     completa ${LARG}×${ALT}   com roteiro ${LARG}×${ALT_ROT}   fita ${LARG_MIN}×${ALT_MIN}`);
 /* UMA FITA, E NÃO UMA JANELA MENOR. A primeira tentativa foi a mesma pilha de
    botões, mais curta — e testada em uso ainda era uma janela: o relato foi
    "não dá para reduzir mais ou fazer como um controle de mídia fininho?".
@@ -178,7 +178,7 @@ console.log(`\n[1] gravando: cabe em ${LARG}×${ALT}`);
      }));
 }
 
-console.log(`\n[1a] a fita: cabe em ${LARG}×${ALT_MIN}, e sobra só o que se usa`);
+console.log(`\n[1a] a fita: cabe em ${LARG_MIN}×${ALT_MIN}, e sobra só o que se usa`);
 {
   /* A JANELA MÍNIMA É A QUE TRANSBORDA MAIS FÁCIL, porque é a que tem menos
      folga — e é justamente a que vai ficar por cima do trabalho de quem testa
@@ -186,16 +186,22 @@ console.log(`\n[1a] a fita: cabe em ${LARG}×${ALT_MIN}, e sobra só o que se us
      O que tem que sobreviver: os DOIS botões de captura, que são o motivo dela
      existir; o relógio, que é como se sabe que ainda está gravando; e o parar,
      que é a única outra coisa que não pode exigir alt-tab. */
-  await pg.setViewportSize({ width: LARG, height: ALT_MIN });
+  await pg.setViewportSize({ width: LARG_MIN, height: ALT_MIN });
   await pg.evaluate(() => {
     document.body.className = 'min gravando';
-    for (const [id, txt] of [['marcar','Marcar este passo'],
-                             ['maisTela','Tela adicional a este passo'],
-                             ['pausa','Pausar'],['stop','Parar']]) {
+    /* OS RÓTULOS CURTOS, E EM ALEMÃO. Na fita o botão mostra a palavra curta e
+       guarda a frase inteira no nome acessível — medir com a frase inteira
+       punha a fita em 779px de largura, que é a janela completa deitada.
+       E o alemão porque é o mais comprido dos cinco: "Bildschirm" tem onze
+       letras onde o português tem quatro. Uma fita medida em português passa
+       e estoura na primeira gravação em Berlim. */
+    for (const [id, txt] of [['marcar','Markieren'],
+                             ['maisTela','+ Bildschirm'],
+                             ['pausa','Pause'],['stop','Stopp']]) {
       const b = document.getElementById(id); if (b) { b.textContent = txt; b.disabled = false; }
     }
     const c = document.getElementById('calar');
-    if (c) { c.classList.remove('hide'); c.textContent = 'Fechar meu microfone'; }
+    if (c) { c.classList.remove('hide'); c.textContent = 'Mikrofon schließen'; }
     const r = document.getElementById('rel'); if (r) r.textContent = '12:34';
   });
   await pg.waitForTimeout(150);
@@ -227,6 +233,38 @@ console.log(`\n[1a] a fita: cabe em ${LARG}×${ALT_MIN}, e sobra só o que se us
   ok('e some o que não se usa quarenta vezes por sessão', some,
      some ? '' : JSON.stringify(quem));
 
+  /* ---- A PALAVRA TEM QUE ESTAR LÁ ----
+     A primeira fita era só ícone, e o relato de uso foi "ficou bom, mas não dá
+     para saber o que é o que". Um obturador, duas telas e um quadrado, lado a
+     lado e sem palavra, são três desenhos para adivinhar — e adivinhar durante
+     uma gravação custa o passo.
+     Esta linha existe porque a régua NÃO PEGOU esse defeito: eu zerei o
+     font-size dos botões, instalando a queixa inteira de volta, e ela passou.
+     Uma régua que aprova o defeito que motivou o conserto é uma régua que não
+     guarda o conserto. */
+  const letra = await pg.evaluate(() => {
+    const f = (id) => {
+      const e = document.getElementById(id); if (!e) return null;
+      return { px: parseFloat(getComputedStyle(e).fontSize),
+               txt: (e.textContent || '').trim(),
+               larg: Math.round(e.getBoundingClientRect().width) };
+    };
+    return { marcar: f('marcar'), maisTela: f('maisTela'), stop: f('stop') };
+  });
+  console.log('     ' + Object.entries(letra)
+    .map(([k, v]) => `${k} "${v.txt}" ${v.px}px em ${v.larg}px`).join('   '));
+  const legivel = Object.values(letra).every(v => v && v.px >= 9 && v.txt.length > 0);
+  ok('cada botão da fita mostra a palavra, e não só o desenho', legivel,
+     legivel ? '' : JSON.stringify(letra));
+  /* E o desenho continua lá: a palavra volta SOMANDO ao ícone, não no lugar
+     dele — é o ícone que se lê de relance e a palavra que tira a dúvida. */
+  const temIcone = await pg.evaluate(() => ['marcar', 'maisTela', 'stop'].every((id) => {
+    const e = document.getElementById(id); if (!e) return false;
+    const m = getComputedStyle(e, '::before');
+    return /url\(/.test(m.maskImage || m.webkitMaskImage || '');
+  }));
+  ok('e o desenho continua ao lado dela', temIcone);
+
   /* ---- E DEVOLVE A PÁGINA COMO ELA ESTAVA ----
      Este bloco mexe em DOIS estados compartilhados: a classe do corpo e o
      tamanho da janela. Sem desfazer, o bloco [3] media a FITA achando que
@@ -237,6 +275,23 @@ console.log(`\n[1a] a fita: cabe em ${LARG}×${ALT_MIN}, e sobra só o que se us
   await pg.setViewportSize({ width: LARG, height: ALT });
   await pg.evaluate(() => { document.body.className = 'gravando'; });
   await pg.waitForTimeout(120);
+}
+
+console.log('\n[1a2] a palavra curta é para os olhos; o nome é a frase inteira');
+{
+  /* Quem usa leitor de tela não ganha nada com "+ Tela". O `aria-label` vence
+     o texto de dentro do botão, então o curto fica só para quem vê. */
+  ok('a fita rotula por uma função só, e não botão a botão',
+     /function rotularPip\(btn, chaveLonga, chaveCurta\)/.test(app));
+  ok('o texto visível é o curto só no modo fita',
+     /btn\.textContent = min \? curto : longo;/.test(app));
+  ok('e o nome acessível é sempre a frase inteira',
+     /btn\.title = longo;/.test(app) && /btn\.setAttribute\('aria-label', longo\)/.test(app));
+  for (const [id, chave] of [['marcar','pipCurtoMarcar'], ['maisTela','pipCurtoTela'],
+                             ['stop','pipCurtoParar']]) {
+    const n = (app.match(new RegExp(chave + ":'", 'g')) || []).length;
+    ok(`  ${id}: a palavra curta existe nos cinco idiomas`, n === 5, n === 5 ? '' : String(n));
+  }
 }
 
 console.log(`\n[1b] com roteiro colado: cabe em ${LARG}×${ALT_ROT}`);
