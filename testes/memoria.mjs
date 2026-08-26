@@ -61,6 +61,11 @@ const br = await chromium.launch({
 /* Um JPEG começa com FF D8 FF, sempre. É a única pergunta que importa nos
    arquivos: não "que extensão tem", e sim "que bytes tem lá dentro". */
 const ehJpeg = u8 => u8.length > 3 && u8[0] === 0xFF && u8[1] === 0xD8 && u8[2] === 0xFF;
+const ehPng  = u8 => u8.length > 8 && u8[0] === 0x89 && u8[1] === 0x50 && u8[2] === 0x4E && u8[3] === 0x47;
+/* O documento aceita estes dois, e SÓ estes dois. Qual dos dois cada quadro
+   recebe é decidido por medição na captura; o que nunca pode aparecer é WebP,
+   que é o formato da memória e que o jsPDF engole em silêncio. */
+const ehDoDoc = u8 => ehJpeg(u8) || ehPng(u8);
 const ehWebp = u8 => u8.length > 12 &&
   String.fromCharCode(u8[0], u8[1], u8[2], u8[3]) === 'RIFF' &&
   String.fromCharCode(u8[8], u8[9], u8[10], u8[11]) === 'WEBP';
@@ -147,13 +152,24 @@ await extrair(pg, 4);
   });
   console.log('     guardado ' + (comp.agora / 1024).toFixed(1) + ' KB (' + comp.tipo +
               ')  contra ' + (comp.comoEraNoHeap / 1024).toFixed(1) + ' KB de base64 no heap');
-  ok('o quadro guardado é menor do que a base64 que ele substituiu',
-     comp.agora < comp.comoEraNoHeap * 0.9,
-     comp.agora + ' vs ' + comp.comoEraNoHeap);
+  /* ESTA COMPARAÇÃO MORREU, e fica registrada porque foi a segunda régua a
+     morrer da mesma causa (a primeira é o teto em bytes do `pesagem.mjs`).
+     Ela usava o TAMANHO como indício de "não é mais base64 no heap". Com a
+     captura sem perda um quadro legítimo pesa mais que a base64 que ele
+     substituiu — 243 KB contra 37 KB — e o indício passou a reprovar o certo.
+     O que fica é a coisa em si: o quadro é um Blob, e Blob não mora no heap. */
+  ok('o quadro é um Blob, e não uma string no heap',
+     comp.agora > 0 && /^image\//.test(comp.tipo || ''), comp.tipo || '(sem tipo)');
 }
 
 // ---------------------------------------------------------------------------
-console.log('\n[2] tudo que vira ARQUIVO continua saindo em JPEG');
+/* O TÍTULO ERA "continua saindo em JPEG", e a premissa mudou de propósito: o
+   formato de cada quadro passou a ser decidido por medição na captura — sem
+   perda quando cabe no teto por pixel, com perda quando não. O que este bloco
+   protege continua igual e é outra coisa: o arquivo tem que estar num formato
+   que o DOCUMENTO aceita, os bytes têm que casar com a extensão, e WebP não
+   pode vazar para saída nenhuma. */
+console.log('\n[2] tudo que vira ARQUIVO sai num formato que o documento aceita');
 {
   const baixar = async (botao, destino) => {
     const dl = pg.waitForEvent('download', { timeout: 60000 });
@@ -167,40 +183,47 @@ console.log('\n[2] tudo que vira ARQUIVO continua saindo em JPEG');
 
   await baixar('#json', '/tmp/mem.json');
   const j = JSON.parse(fs.readFileSync('/tmp/mem.json', 'utf8'));
-  ok('o .json embute JPEG, como sempre embutiu',
-     j.frames.every(f => /^data:image\/jpeg;base64,/.test(f.imagemBase64)),
+  ok('o .json embute um formato do documento',
+     j.frames.every(f => /^data:image\/(jpeg|png);base64,/.test(f.imagemBase64)),
      (j.frames[0].imagemBase64 || '').slice(0, 24));
 
   await baixar('#html', '/tmp/mem.html');
   const h = fs.readFileSync('/tmp/mem.html', 'utf8');
-  ok('o .html embute JPEG', (h.match(/src="data:image\/jpeg/g) || []).length === 4,
+  ok('o .html embute os quatro quadros',
+     (h.match(/src="data:image\/(jpeg|png)/g) || []).length === 4,
      String((h.match(/src="data:image\/(\w+)/g) || []).slice(0, 2)));
 
   await baixar('#zip', '/tmp/mem.zip');
   const nomes = execSync('unzip -Z1 /tmp/mem.zip', { encoding: 'utf8' })
-    .split('\n').filter(n => /\.jpg$/i.test(n));
-  ok('o .zip traz quatro .jpg', nomes.length === 4, nomes.join(' '));
+    .split('\n').filter(n => /\.(jpg|png)$/i.test(n));
+  ok('o .zip traz os quatro quadros', nomes.length === 4, nomes.join(' '));
   const bytesZip = nomes.map(n => new Uint8Array(
     execSync(`unzip -p /tmp/mem.zip "${n}"`, { maxBuffer: 1 << 28 })));
-  ok('e todos são JPEG de verdade por dentro, não WebP com nome de JPEG',
-     bytesZip.every(ehJpeg) && !bytesZip.some(ehWebp),
-     bytesZip.map(b => [...b.slice(0, 4)].map(x => x.toString(16)).join(' ')).join(' | '));
+  /* E os BYTES casam com a EXTENSÃO. Um `.png` com bytes de JPEG dentro abre
+     em quase todo lugar e quebra no que confere assinatura — é o defeito que
+     não dá erro na máquina de quem escreveu. */
+  const casa = nomes.every((n, k) =>
+    /\.png$/i.test(n) ? ehPng(bytesZip[k]) : ehJpeg(bytesZip[k]));
+  ok('e os bytes casam com a extensão, sem WebP vazando',
+     casa && !bytesZip.some(ehWebp),
+     casa ? '' : nomes.map((n, k) => n + '=' + [...bytesZip[k].slice(0, 4)]
+       .map(x => x.toString(16)).join(' ')).join(' | '));
 
   await baixar('#docx', '/tmp/mem.docx');
   const midiaDocx = execSync('unzip -Z1 /tmp/mem.docx', { encoding: 'utf8' })
-    .split('\n').filter(n => /^word\/media\/.*\.(jpg|jpeg)$/i.test(n));
+    .split('\n').filter(n => /^word\/media\/.*\.(jpg|jpeg|png)$/i.test(n) && !/marca/.test(n));
   const bDocx = midiaDocx.map(n => new Uint8Array(
     execSync(`unzip -p /tmp/mem.docx "${n}"`, { maxBuffer: 1 << 28 })));
-  ok('o .docx leva imagens JPEG', bDocx.length >= 4 && bDocx.every(ehJpeg),
-     midiaDocx.join(' '));
+  ok('o .docx leva os quadros num formato do documento',
+     bDocx.length >= 4 && bDocx.every(ehDoDoc), midiaDocx.join(' '));
 
   await baixar('#pptx', '/tmp/mem.pptx');
   const midiaPptx = execSync('unzip -Z1 /tmp/mem.pptx', { encoding: 'utf8' })
-    .split('\n').filter(n => /^ppt\/media\/.*\.(jpg|jpeg)$/i.test(n));
+    .split('\n').filter(n => /^ppt\/media\/.*\.(jpg|jpeg|png)$/i.test(n) && !/marca/.test(n));
   const bPptx = midiaPptx.map(n => new Uint8Array(
     execSync(`unzip -p /tmp/mem.pptx "${n}"`, { maxBuffer: 1 << 28 })));
-  ok('o .pptx leva imagens JPEG', bPptx.length >= 4 && bPptx.every(ehJpeg),
-     midiaPptx.join(' '));
+  ok('o .pptx leva os quadros num formato do documento',
+     bPptx.length >= 4 && bPptx.every(ehDoDoc), midiaPptx.join(' '));
 
   /* O PDF é o que quase deu errado sem avisar. O jsPDF ACEITA um WebP e escreve
      `/Filter /DCTDecode` — a etiqueta de JPEG — em cima de bytes WebP. Nenhum
@@ -209,8 +232,16 @@ console.log('\n[2] tudo que vira ARQUIVO continua saindo em JPEG');
   await baixar('#go', '/tmp/mem.pdf');
   const pdf = fs.readFileSync('/tmp/mem.pdf');
   const cru = pdf.toString('latin1');
-  ok('o PDF marca as imagens como DCTDecode (JPEG)', /\/DCTDecode/.test(cru));
+  /* Um quadro sem perda entra no PDF como Flate, e não como DCTDecode — são
+     os dois filtros que o formato aceita para imagem. Exigir DCTDecode aqui
+     seria exigir que nenhum quadro saísse exato. O que se cobra é que o PDF
+     carregue imagem, e a linha seguinte é a que protege de verdade. */
+  ok('o PDF carrega imagem', /\/DCTDecode|\/FlateDecode/.test(cru));
   {
+    /* Todo fluxo rotulado DCTDecode tem que começar com a assinatura de JPEG.
+       Zero fluxos DCTDecode é resultado LEGÍTIMO agora: um documento em que
+       todo quadro saiu sem perda não tem nenhum. O que não pode existir é um
+       rótulo mentindo. */
     let achouJpeg = 0, achouOutro = 0;
     const re = /\/DCTDecode[\s\S]{0,400}?stream\r?\n/g;
     let m;
@@ -219,9 +250,12 @@ console.log('\n[2] tudo que vira ARQUIVO continua saindo em JPEG');
       if (pdf[ini] === 0xFF && pdf[ini+1] === 0xD8 && pdf[ini+2] === 0xFF) achouJpeg++;
       else achouOutro++;
     }
-    ok('e o que está lá dentro É JPEG — não WebP com etiqueta de JPEG',
-       achouJpeg >= 1 && achouOutro === 0,
+    ok('nenhum fluxo mente sobre ser JPEG', achouOutro === 0,
        'jpeg=' + achouJpeg + ' outro=' + achouOutro);
+    /* E a proteção que originou este bloco, dita diretamente em vez de por
+       indício: o jsPDF ACEITA um WebP e escreve a etiqueta de JPEG por cima.
+       Então procura-se o WebP, e não a etiqueta. */
+    ok('e nenhum byte de WebP entrou no PDF', !/RIFF[\s\S]{4}WEBP/.test(cru));
   }
   /* A AMARRA. O SHA-256 que o documento imprime tem que ser o da imagem que o
      documento carrega — em TODAS as saídas, e não em cada uma por si. Se o
@@ -347,8 +381,9 @@ console.log('\n[6] de file://, que é como o pacote offline é usado');
   await p2.locator('#json').click();
   await (await dl).saveAs('/tmp/mem-file.json');
   const j = JSON.parse(fs.readFileSync('/tmp/mem-file.json', 'utf8'));
-  ok('e o documento sai de file:// com JPEG dentro',
-     j.frames.length === 3 && j.frames.every(f => /^data:image\/jpeg;base64,/.test(f.imagemBase64)));
+  ok('e o documento sai de file:// com imagem embutida',
+     j.frames.length === 3 &&
+     j.frames.every(f => /^data:image\/(jpeg|png);base64,/.test(f.imagemBase64)));
   /* E A CAIXA DO ESPELHO NÃO APARECE AQUI.
      De `file://` a origem é opaca: `navigator.storage.getDirectory` EXISTE e
      recusa ("certain files are unsafe for access within a Web application").

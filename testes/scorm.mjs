@@ -56,7 +56,11 @@ ok('os dois arquivos estão declarados no recurso',
    /<file href="index\.html"\/>/.test(man) && /<file href="scorm\.js"\/>/.test(man));
 
 const idx = execSync('unzip -p /tmp/scorm.zip index.html', {encoding:'utf8'});
-ok('o conteúdo é o HTML autocontido', /<img src="data:image\/jpeg/.test(idx));
+/* JPEG ou PNG: o formato de cada quadro é decidido por medição na captura
+   (ver `TETO_SEM_PERDA`), e uma régua que exige um dos dois afirma a decisão
+   em vez de afirmar a regra. O que importa aqui é OUTRA coisa — que a imagem
+   vá EMBUTIDA, e não referenciada num arquivo que o LMS não recebeu. */
+ok('o conteúdo é o HTML autocontido', /<img src="data:image\/(jpeg|png)/.test(idx));
 ok('e ele chama o scorm.js', /<script src="scorm\.js"><\/script>/.test(idx));
 const js = execSync('unzip -p /tmp/scorm.zip scorm.js', {encoding:'utf8'});
 ok('o js marca completed', /lesson_status','completed'/.test(js));

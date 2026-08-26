@@ -165,7 +165,7 @@ await pg.waitForTimeout(300);
   const f0 = j.frames[0];
   ok('o JSON conta os destaques', f0.destaques === 1, 'destaques=' + f0.destaques);
   ok('o JSON conta as tarjas', f0.tarjas === 1, 'tarjas=' + f0.tarjas);
-  ok('a imagem do JSON é a queimada', /^data:image\/jpeg/.test(f0.imagemBase64));
+  ok('a imagem do JSON é a queimada', /^data:image\/(jpeg|png)/.test(f0.imagemBase64));
 }
 
 ok('sem erro de JS', erros.length === 0, erros.join(' | ').slice(0, 200));
