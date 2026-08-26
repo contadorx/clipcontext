@@ -3407,7 +3407,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       rotPronto:'{0} passos prontos — cada marcação já sai com o título.',
       passoTelas:'{0} telas',
       recPipBtn:'Trazer a janelinha de volta',
-      pipTamLbl:'Tamanho da janelinha', pipTamCompleta:'Completa — relógio, medidor e anotação', pipTamMin:'Mínima — só marcar e parar',
+      pipTamLbl:'Tamanho da janelinha', pipTamCompleta:'Completa — relógio, medidor e anotação', pipTamMin:'Fita — uma linha de botões, por cima do trabalho',
       recPausado:'PAUSADO —', recMarcado:'passo marcado.',
       pipPausado:'Pausado: nada sendo guardado.',
       micNegado:'O navegador bloqueou o microfone para este site. Clique no cadeado ao lado do endereço, permita o microfone e grave de novo.',
@@ -4044,7 +4044,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       rotPronto:'{0} steps ready — every mark comes with its title.',
       passoTelas:'{0} screens',
       recPipBtn:'Bring the control window back',
-      pipTamLbl:'Little window size', pipTamCompleta:'Full — clock, meter and note', pipTamMin:'Minimal — just mark and stop',
+      pipTamLbl:'Little window size', pipTamCompleta:'Full — clock, meter and note', pipTamMin:'Strip — one row of buttons, over your work',
       recPausado:'PAUSED —', recMarcado:'step marked.',
       pipPausado:'Paused: nothing being kept.',
       micNegado:'The browser blocked the microphone for this site. Click the padlock next to the address, allow the microphone and record again.',
@@ -4666,7 +4666,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       rotPronto:'{0} pasos listos — cada marca ya sale con su título.',
       passoTelas:'{0} pantallas',
       recPipBtn:'Traer la ventana de control de vuelta',
-      pipTamLbl:'Tamaño de la ventanita', pipTamCompleta:'Completa — reloj, medidor y nota', pipTamMin:'Mínima — solo marcar y parar',
+      pipTamLbl:'Tamaño de la ventanita', pipTamCompleta:'Completa — reloj, medidor y nota', pipTamMin:'Franja — una fila de botones, sobre tu trabajo',
       recPausado:'EN PAUSA —', recMarcado:'paso marcado.',
       pipPausado:'En pausa: no se guarda nada.',
       micNegado:'El navegador bloqueó el micrófono para este sitio. Pulsa el candado junto a la dirección, permite el micrófono y graba de nuevo.',
@@ -5287,7 +5287,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       rotPronto:'{0} Schritte bereit — jede Markierung kommt mit ihrem Titel.',
       passoTelas:'{0} Bildschirme',
       recPipBtn:'Steuerungsfenster zurückholen',
-      pipTamLbl:'Größe des Steuerungsfensters', pipTamCompleta:'Vollständig — Uhr, Pegel und Notiz', pipTamMin:'Minimal — nur markieren und stoppen',
+      pipTamLbl:'Größe des Steuerungsfensters', pipTamCompleta:'Vollständig — Uhr, Pegel und Notiz', pipTamMin:'Leiste — eine Reihe Schaltflächen, über Ihrer Arbeit',
       recPausado:'PAUSIERT —', recMarcado:'Schritt markiert.',
       pipPausado:'Pausiert: Es wird nichts gespeichert.',
       micNegado:'Der Browser hat das Mikrofon für diese Website blockiert. Klicken Sie auf das Schloss neben der Adresse, erlauben Sie das Mikrofon und nehmen Sie erneut auf.',
@@ -5914,7 +5914,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       rotPronto:'{0} étapes prêtes — chaque marque arrive avec son titre.',
       passoTelas:'{0} écrans',
       recPipBtn:'Rouvrir la fenêtre de contrôle',
-      pipTamLbl:'Taille de la fenêtre de contrôle', pipTamCompleta:'Complète — horloge, niveau et note', pipTamMin:'Minimale — marquer et arrêter seulement',
+      pipTamLbl:'Taille de la fenêtre de contrôle', pipTamCompleta:'Complète — horloge, niveau et note', pipTamMin:'Bandeau — une rangée de boutons, au-dessus du travail',
       recPausado:'EN PAUSE —', recMarcado:'étape marquée.',
       pipPausado:'En pause : rien n’est conservé.',
       micNegado:'Le navigateur a bloqué le microphone pour ce site. Cliquez sur le cadenas à côté de l’adresse, autorisez le microphone et enregistrez de nouveau.',
@@ -9309,7 +9309,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      depois, e não tem como se atualizar sozinho. Sem carimbo, "estou com um
      problema no offline" é uma conversa sem chão — ninguém sabe de qual build
      se fala nem se o defeito já foi consertado. */
-  const VERSAO = '2026.08.26-15';
+  const VERSAO = '2026.08.26-19';
   window.__versao = () => VERSAO;
 
   const PIP_CSS = `
@@ -9325,29 +9325,66 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
        de um template literal. Uma crase aqui fecha a string e leva o script
        inteiro junto — foi exatamente o que aconteceu na primeira tentativa. */
     .hide{display:none !important}
-    /* ---- O MODO MINIMO ----
-       A janelinha completa mostra relogio, medidor, roteiro, anotacao e os tres
-       botoes de controle. Isso serve a quem tem tela sobrando; nao serve a quem
-       testa numa janela so, que e o caso comum de quem executa um roteiro num
-       ERP em tela cheia.
-       No modo minimo sobra o que se usa QUARENTA VEZES numa sessao — os dois
-       botoes de captura — mais o relogio, que e como se sabe que ainda esta
-       gravando, e o parar, que e a unica outra coisa que nao pode exigir
-       alt-tab. O resto some.
-       Some, e nao encolhe: um medidor de tres pixels nao mede nada e continua
-       custando altura. */
-    body.min{padding:9px 10px;gap:7px;justify-content:safe flex-start}
+    /* ---- O MODO FITA ----
+       A janelinha completa empilha rotulo, medidor, roteiro, anotacao e tres
+       botoes de largura cheia. Isso serve a quem tem tela sobrando; quem
+       executa um roteiro num ERP em tela cheia tem UMA janela, e cada pixel
+       daqui e um pixel a menos do trabalho que ela esta documentando — e ainda
+       aparece nos quadros capturados.
+       A primeira tentativa foi a mesma pilha, mais curta: 200px. Testada, ainda
+       era uma JANELA. A fita e outra coisa — uma linha so, como o controle de
+       midia de um tocador: relogio e tres icones, lado a lado.
+       O TEXTO NAO SOME DO DOCUMENTO, so da tela: font-size zero encolhe o
+       desenho e mantem a palavra na arvore de acessibilidade, entao o leitor de
+       tela continua dizendo Marcar este passo. Esconder com display none
+       apagaria o nome do botao junto. */
+    body.min{flex-direction:row;align-items:center;justify-content:flex-start;
+             gap:6px;padding:7px 9px;height:100vh;overflow:hidden}
     body.min .vus,
     body.min #txt,
     body.min .rot,
-    body.min .nota,
+    body.min .notaCx,
     body.min #pausa,
-    body.min #calar{display:none !important}
-    body.min .top{gap:6px}
-    body.min .rel{font-size:15px}
-    body.min button#marcar{font-size:15px;padding:9px}
-    body.min button#maisTela{font-size:12px;padding:6px}
-    body.min #stop{font-size:12px;padding:6px}
+    body.min #calar,
+    body.min .pe{display:none !important}
+    body.min .top{flex:none;gap:5px;margin:0}
+    body.min .rel{font-size:13px;min-width:38px}
+    /* Alvo de 38px: e o menor que ainda se acerta com o mouse sem mirar, e a
+       fita inteira cabe na altura de um botao. */
+    /* POR ID, E NAO POR ELEMENTO. Escrito como body.min button, isto perdia
+       para button#marcar — seletor de ID vence seletor de classe, e a ordem no
+       arquivo nao desempata especificidade. A fita saia com 170px de altura e
+       os rotulos por escrito, porque as regras de baixo continuavam mandando.
+       Foi medido assim antes de ser visto assim. */
+    body.min #marcar,body.min #maisTela,body.min #stop,
+    body.min #pausa,body.min #calar{flex:none;width:38px;height:38px;
+                    padding:0;font-size:0;gap:0;border-radius:8px;
+                    display:flex;align-items:center;justify-content:center}
+    body.min #marcar::before,body.min #maisTela::before,
+    body.min #stop::before{width:18px;height:18px}
+    /* O MARCAR CONTINUA SENDO O DIFERENTE, e aqui isso importa mais: sem
+       rotulo, tres icones cinzentos lado a lado sao tres irmaos. Ele fica
+       aceso e um pouco maior — e um pouco maior num alvo de 38 e a diferenca
+       entre acertar e mirar. */
+    body.min #marcar{width:46px;height:38px;
+                    background:#737cf0;color:#121419;border:0}
+    body.min #maisTela{background:rgba(115,124,240,.20);color:#a9b2ff;
+                    border:1px solid rgba(115,124,240,.55)}
+    /* Os icones que faltavam. Pausar, calar e parar ja tinham; marcar e mais
+       tela nunca precisaram, porque ate aqui sempre tiveram rotulo do lado. */
+    body.min #marcar::before,body.min #maisTela::before{
+                    content:'';flex:none;background-color:currentColor;
+                    -webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;
+                    -webkit-mask-position:center;mask-position:center;
+                    -webkit-mask-size:contain;mask-size:contain}
+    /* Um obturador: anel com o ponto dentro. E o desenho de "registrar agora"
+       que todo mundo ja viu numa camera. */
+    body.min #marcar::before{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 2.4a7.6 7.6 0 1 1 0 15.2 7.6 7.6 0 0 1 0-15.2z'/%3E%3Ccircle cx='12' cy='12' r='4.6'/%3E%3C/svg%3E");
+                    mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 2.4a7.6 7.6 0 1 1 0 15.2 7.6 7.6 0 0 1 0-15.2z'/%3E%3Ccircle cx='12' cy='12' r='4.6'/%3E%3C/svg%3E")}
+    /* Duas telas, uma atras da outra: e o que o botao faz — mais uma tela
+       DESTE passo, e nao um passo novo. */
+    body.min #maisTela::before{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M8 3h13v13h-2.6V5.6H8V3z'/%3E%3Cpath d='M3 8h13v13H3V8z'/%3E%3C/svg%3E");
+                    mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M8 3h13v13h-2.6V5.6H8V3z'/%3E%3Cpath d='M3 8h13v13H3V8z'/%3E%3C/svg%3E")}
     /* A janelinha fica POR CIMA da tela que está sendo gravada. Cada pixel dela
        é um pixel a menos do trabalho que a pessoa está documentando — e ainda
        aparece nos quadros. Então ela encolhe: menos respiro, menos altura de
@@ -9608,16 +9645,18 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
          de texto mais a divisoria. Pedir sempre a maior desperdicaria tela de
          quem nao colou lista nenhuma -- e cada pixel daqui e um pixel a menos
          do trabalho que a pessoa esta documentando. */
-      /* A altura do modo mínimo é MEDIDA, e não escolhida: relógio, os dois
-         botões de captura, o parar e os respiros somam 196px — `janelinha.mjs`
-         soma os filhos visíveis e reprova quem não couber. Eu tinha escrito
-         168 de palpite e o PARAR ficava dez pixels para fora, que é o mesmo
-         defeito que essa régua já pegou uma vez.
-         O Chrome impõe um mínimo próprio e pode devolver mais do que se pediu;
-         pedir pouco é o que se pode fazer daqui. */
+      /* A ALTURA DA FITA É MEDIDA, e não escolhida. Ela já foi 168 de palpite
+         (o PARAR ficava dez pixels para fora), depois 200 com os botões ainda
+         empilhados — e testada assim ainda era uma JANELA, não uma fita. Com
+         os controles em linha, `janelinha.mjs` soma 52px. São 56 aqui: quatro
+         de folga para arredondamento, e nada mais, porque cada pixel daqui é
+         um pixel a menos do trabalho que a pessoa está documentando.
+         O Chrome impõe um mínimo próprio e pode devolver uma janela maior do
+         que a pedida. Se devolver, a fita fica no topo dela e continua
+         funcionando — pedir pouco é o que se pode fazer daqui. */
       const min = pipModo() === 'min';
       pipWin = await documentPictureInPicture.requestWindow(
-        { width: 250, height: min ? 200 : (roteiro.length ? 560 : 430) });
+        { width: 250, height: min ? 56 : (roteiro.length ? 560 : 430) });
     } catch (e) { pipWin = null; return; }
 
     const d = pipWin.document;

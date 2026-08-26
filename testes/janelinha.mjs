@@ -30,10 +30,16 @@ const ok = (n, c, e) => { console.log((c ? '  ok   ' : '  FALHA') + '  ' + n + (
 const med = app.match(/width: (\d+), height: min \? (\d+) : \(roteiro\.length \? (\d+) : (\d+)\)/);
 ok('a janelinha declara os dois tamanhos', !!med, med ? '' : '(não achei)');
 const [LARG, ALT_MIN, ALT_ROT, ALT] = med
-  ? [ +med[1], +med[2], +med[3], +med[4] ] : [250, 168, 560, 430];
-console.log(`     completa ${LARG}×${ALT}   com roteiro ${LARG}×${ALT_ROT}   mínima ${LARG}×${ALT_MIN}`);
-ok('e a mínima é mais baixa que a completa', ALT_MIN < ALT,
-   ALT_MIN < ALT ? '' : `${ALT_MIN} contra ${ALT}`);
+  ? [ +med[1], +med[2], +med[3], +med[4] ] : [250, 56, 560, 430];
+console.log(`     completa ${LARG}×${ALT}   com roteiro ${LARG}×${ALT_ROT}   fita ${LARG}×${ALT_MIN}`);
+/* UMA FITA, E NÃO UMA JANELA MENOR. A primeira tentativa foi a mesma pilha de
+   botões, mais curta — e testada em uso ainda era uma janela: o relato foi
+   "não dá para reduzir mais ou fazer como um controle de mídia fininho?".
+   Um teto em pixels é o que impede a fita de voltar a ser janela sem ninguém
+   perceber. 72px é mais alto que um botão de 38 com respiro, e muito mais
+   baixo que qualquer pilha de dois. */
+ok('e a fita é uma FITA, não uma janela menor', ALT_MIN <= 72,
+   ALT_MIN <= 72 ? '' : `${ALT_MIN}px de altura`);
 
 const css = app.slice(app.indexOf('const PIP_CSS = `') + 17).split('`;')[0];
 ok('o CSS dela foi encontrado', css.length > 400, String(css.length));
@@ -64,12 +70,28 @@ const medir = () => pg.evaluate(() => {
   const b = document.body, cs = getComputedStyle(b);
   const vis = [...b.children].filter((e) => getComputedStyle(e).display !== 'none');
   let soma = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom);
-  for (const e of vis) soma += e.getBoundingClientRect().height;
-  soma += parseFloat(cs.rowGap || 0) * Math.max(0, vis.length - 1);
+  /* EM LINHA A SOMA É OUTRA. A fita põe os filhos lado a lado, e somar as
+     alturas de quem está em linha dá o triplo do que a janela precisa — a
+     régua reprovaria um desenho correto. Empilhado soma; em linha, o maior. */
+  const emLinha = /row/.test(cs.flexDirection || '');
+  if (emLinha) {
+    let maior = 0;
+    for (const e of vis) maior = Math.max(maior, e.getBoundingClientRect().height);
+    soma += maior;
+  } else {
+    for (const e of vis) soma += e.getBoundingClientRect().height;
+    soma += parseFloat(cs.rowGap || 0) * Math.max(0, vis.length - 1);
+  }
   return {
     precisa: Math.round(soma), cabe: document.documentElement.clientHeight,
+    /* Numa fita o que estoura é a LARGURA, e não a altura: quatro controles
+       lado a lado numa janela de 250px. Quem só olhasse para baixo aprovaria
+       um PARAR pendurado fora pela direita. */
+    precisaLarg: Math.round(b.scrollWidth),
+    cabeLarg: document.documentElement.clientWidth,
     vaza: [...document.querySelectorAll('body *')]
-      .filter((e) => e.getBoundingClientRect().bottom > innerHeight + 1)
+      .filter((e) => e.getBoundingClientRect().bottom > innerHeight + 1 ||
+                     e.getBoundingClientRect().right > innerWidth + 1)
       .map((e) => e.tagName + (e.id ? '#' + e.id : '')).slice(0, 4),
   };
 });
@@ -156,7 +178,7 @@ console.log(`\n[1] gravando: cabe em ${LARG}×${ALT}`);
      }));
 }
 
-console.log(`\n[1a] mínima: cabe em ${LARG}×${ALT_MIN}, e sobra só o que se usa`);
+console.log(`\n[1a] a fita: cabe em ${LARG}×${ALT_MIN}, e sobra só o que se usa`);
 {
   /* A JANELA MÍNIMA É A QUE TRANSBORDA MAIS FÁCIL, porque é a que tem menos
      folga — e é justamente a que vai ficar por cima do trabalho de quem testa
@@ -178,7 +200,11 @@ console.log(`\n[1a] mínima: cabe em ${LARG}×${ALT_MIN}, e sobra só o que se u
   });
   await pg.waitForTimeout(150);
   const m = await medir();
-  console.log(`     precisa ${m.precisa}px, cabe ${m.cabe}px`);
+  console.log(`     precisa ${m.precisa}×${m.precisaLarg}px, cabe ${m.cabe}×${m.cabeLarg}px`);
+  /* Em linha, e não empilhado: é o que separa a fita de uma janela curta. */
+  const emLinha = await pg.evaluate(() =>
+    /row/.test(getComputedStyle(document.body).flexDirection));
+  ok('os controles ficam lado a lado, e não empilhados', emLinha);
   ok('o conteúdo da mínima cabe na altura pedida', m.precisa <= m.cabe,
      m.precisa <= m.cabe ? '' : `precisa ${m.precisa}, cabe ${m.cabe}`);
   ok('e nada fica para fora', m.vaza.length === 0, m.vaza.join(' '));
@@ -190,7 +216,7 @@ console.log(`\n[1a] mínima: cabe em ${LARG}×${ALT_MIN}, e sobra só o que se u
       return !!(e && getComputedStyle(e).display !== 'none'); };
     return { marcar: vis('marcar'), maisTela: vis('maisTela'), stop: vis('stop'),
              relogio: visC('.top'),
-             medidor: visC('.vus'), texto: vis('txt'), nota: visC('.nota'),
+             medidor: visC('.vus'), texto: vis('txt'), nota: visC('.notaCx'),
              pausa: vis('pausa'), calar: vis('calar') };
   });
   console.log('     ' + Object.entries(quem).map(([k, v]) => k + (v ? '=sim' : '=não')).join('  '));
@@ -200,6 +226,17 @@ console.log(`\n[1a] mínima: cabe em ${LARG}×${ALT_MIN}, e sobra só o que se u
   const some = !quem.medidor && !quem.texto && !quem.nota && !quem.pausa && !quem.calar;
   ok('e some o que não se usa quarenta vezes por sessão', some,
      some ? '' : JSON.stringify(quem));
+
+  /* ---- E DEVOLVE A PÁGINA COMO ELA ESTAVA ----
+     Este bloco mexe em DOIS estados compartilhados: a classe do corpo e o
+     tamanho da janela. Sem desfazer, o bloco [3] media a FITA achando que
+     media a janela completa — e acusava "a maior letra dos botões: 0px",
+     porque na fita o rótulo tem font-size zero de propósito. Quatro falhas
+     inventadas, todas em afirmações que não tinham nada de errado.
+     Bloco que muda estado compartilhado devolve o estado. */
+  await pg.setViewportSize({ width: LARG, height: ALT });
+  await pg.evaluate(() => { document.body.className = 'gravando'; });
+  await pg.waitForTimeout(120);
 }
 
 console.log(`\n[1b] com roteiro colado: cabe em ${LARG}×${ALT_ROT}`);
