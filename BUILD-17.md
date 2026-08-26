@@ -134,7 +134,27 @@ byte a byte como estavam. Nada de banco, nada de migração.
 
 ## Regressão
 
-REGRESSAO-AQUI
+A regressão inteira, com a régua nova dentro:
+
+```
+153 ok · 4 PULADO · 0 FALHOU        (157 réguas)
+Pulados: timepag.mjs licenca.mjs liclink.mjs licauto.mjs
+```
+
+Os quatro pulos são os de sempre: `timepag.mjs` cobra uma página aposentada, e
+os três de licença precisam do `emitir-licenca.py`, que guarda as chaves
+privadas e não viaja no zip.
+
+**Um erro meu de operação, registrado porque volta:** a linha de resumo desta
+corrida se perdeu. Eu editei o `testes/rodar.sh` para registrar a régua do
+Build 18 **enquanto ele ainda estava rodando** — e o bash lê um script por
+DESLOCAMENTO DE BYTE, não de uma vez. Acrescentar um nome no meio do arquivo
+deslocou tudo o que vinha depois, e o interpretador retomou a leitura no lugar
+errado: `unexpected EOF while looking for matching '"'`. As 157 réguas tinham
+terminado; o que morreu foi o rodapé que as soma.
+
+O resultado acima foi contado do log, linha a linha. E a regra que fica: não se
+edita a esteira enquanto a esteira corre.
 
 ---
 
