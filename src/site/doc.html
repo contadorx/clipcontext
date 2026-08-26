@@ -20,6 +20,18 @@
 <body data-supa-url="{{supaUrl}}" data-supa-key="{{supaKey}}">
 
 {{jsonld}}
+<!-- O LINK DE PULAR, E POR QUE ELE É O PRIMEIRO ELEMENTO DA PÁGINA.
+
+     Quem navega por teclado — e quem usa leitor de tela — atravessa o
+     cabeçalho e os oito links de navegação ANTES de chegar ao texto, em cada
+     página. Não é desconforto: é o mesmo trabalho repetido a cada clique, e é
+     o motivo pelo qual este link é o primeiro item tabulável de todo site que
+     leva acessibilidade a sério.
+
+     Ele fica escondido até receber o foco. Escondê-lo com `display:none` o
+     tiraria da ordem de tabulação, que é o oposto do que ele existe para
+     fazer — então ele sai da tela por posição, e volta quando é focado. -->
+<a class="pular" href="#conteudo">{{pular}}</a>
 <header>
   <div class="wrap">
     <a class="brand" href="{{home}}"><img src="/logo.svg" alt=""><span>{{marcaA}}<b>{{marcaB}}</b></span></a>
@@ -41,7 +53,12 @@
   </div>
 </header>
 
+<!-- O MARCO DO CONTEÚDO. A página tinha `header`, `nav` e `footer`, e nenhum
+     `main`: o leitor de tela anunciava três regiões e nenhuma delas era o
+     texto. É também o alvo do link de pular logo acima. -->
+<main id="conteudo">
 {{body}}
+</main>
 
 <footer>
   <div class="wrap">

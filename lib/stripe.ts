@@ -35,8 +35,21 @@ export const PLANOS = {
     preco: () => process.env.STRIPE_PRICE_PERSONAL || '',
     assentos: 1,
     // dias de validade da licença que o navegador vai carregar. É o botão de
-    // revogação: uma licença curta que se renova sozinha enquanto a assinatura
-    // estiver viva para de renovar sozinha quando ela morrer.
+    // revogação: uma licença curta para de ser reemitida quando a assinatura
+    // morre.
+    //
+    // "SE RENOVA SOZINHA" saiu daqui — 24/08. Era o que esta linha dizia, e não
+    // era verdade: nada renovava. A chave vencia em 45 dias e a ferramenta
+    // dizia "fale comigo para renovar", no dia seguinte ao vencimento.
+    //
+    // O que existe agora, e o limite dele: quem abre a ferramenta COM SESSÃO
+    // dentro dos últimos dez dias recebe a chave nova sem fazer nada. Sem
+    // sessão — que é o caso comum, porque a sessão vive na aba e o token vence
+    // — a ferramenta AVISA antes, com o número de dias e o link da conta.
+    // Renovar sem sessão exigiria uma credencial de longa duração no navegador
+    // ou um cron mandando e-mail; a primeira piora o modelo de ameaça do
+    // produto e a segunda cria infraestrutura para manter. A escolha está
+    // registrada no `BUILD-6.md`.
     dias: 45,
   },
   time: {
@@ -51,7 +64,23 @@ export const PLANOS = {
     // e a de preços digam a MESMA palavra nos cinco idiomas. Mudar aqui e
     // esquecer o texto reprova a suíte — que é exatamente o que se quer.
     assentos: 3,
-    dias: 45,
+    // VINTE E UM, E NÃO QUARENTA E CINCO — 24/08.
+    //
+    // Este número é o único controle real de revogação que existe sem um
+    // servidor no caminho do uso: bloquear um membro impede a PRÓXIMA emissão,
+    // e a chave que já está no navegador dele vale até vencer. Com 45, cortar
+    // alguém podia levar mês e meio. Com 21, leva no máximo três semanas.
+    //
+    // Por que não 14, que seria mais rápido: 14 é o prazo da DEGUSTAÇÃO, e a
+    // ferramenta identifica degustação por dias restantes. Dois prazos iguais
+    // com significados diferentes é a próxima confusão esperando acontecer.
+    //
+    // O custo é de quem trabalha desconectado: a chave precisa ser renovada
+    // mais vezes. Quem abre a ferramenta com sessão renova sozinho (a janela é
+    // de 10 dias, e cabe dentro dos 21); quem não tem sessão é avisado antes,
+    // com o link da conta. O administrador pode subir até 90 na tela da conta —
+    // o controle é dele, e o `timeAviso` explica o que cada escolha custa.
+    dias: 21,
   },
 } as const;
 

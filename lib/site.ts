@@ -548,6 +548,9 @@ export function paginaHtml(pagina: string, lang: Lang): string {
         .replace('__LEG__', String(t.rodadaLeg ?? ''));
     }
     t.body = trocar(ler(`site/bodies/${pagina}.${lang}.html`), t);
+    /* Antes do `dadosEstruturados`, que lê os `<details>` deste mesmo corpo —
+       e o índice não toca em nenhum deles. */
+    if (pagina === 'ajuda') t.body = indiceDaAjuda(String(t.body), t);
     bruto = ler('site/doc.html');
   }
   /* Depois do corpo, porque o FAQ é LIDO dele. Antes do `trocar`, porque é ele
@@ -579,11 +582,116 @@ export function paginaHtml(pagina: string, lang: Lang): string {
   const abre = semComentario.indexOf('>', inicio) + 1;
   const fecha = inteiro.lastIndexOf('</body>');
   if (abre <= 0 || fecha < 0) throw new Error(`corpo sem fim em ${pagina}`);
-  return inteiro
-    .slice(abre, fecha)
-    // o support.js e o seletor de idioma já são responsabilidade do layout
-    .replace(/<script src="\/?support\.js"><\/script>/, '')
-    .trim();
+  return embrulharTabelas(
+    inteiro
+      .slice(abre, fecha)
+      // o support.js e o seletor de idioma já são responsabilidade do layout
+      .replace(/<script src="\/?support\.js"><\/script>/, '')
+      .trim(),
+  );
+}
+
+/* ---- O ÍNDICE E A BUSCA DA BASE DE CONHECIMENTO ------------------------
+ *
+ * A página tem 45 painéis em nove temas, e não tinha navegação nenhuma: quem
+ * chegava caía no topo de três mil palavras e rolava. O Ctrl+F já alcançava
+ * tudo — os acordeões passaram a nascer abertos em 23/08 —, mas achar a
+ * palavra no meio de uma parede não diz em que tema você está nem o que mais
+ * existe.
+ *
+ * O ÍNDICE É DERIVADO DOS PRÓPRIOS `<h2>`, e não escrito à mão. Escrito à mão
+ * seriam cinco listas, uma por idioma, ao lado das cinco listas de verdade —
+ * o defeito de sempre desta base de código. Derivado, um tema novo aparece no
+ * índice por existir, e um tema renomeado se renomeia sozinho. Se um dia os
+ * corpos divergirem no número de temas, é o índice de cada um que muda, e não
+ * uma lista central que passa a mentir para quatro idiomas.
+ *
+ * O CAMPO DE BUSCA NASCE ESCONDIDO e é revelado pelo `support.js`. Sem
+ * JavaScript ele não aparece: um campo de busca que não busca é pior do que
+ * campo nenhum. Os links do índice são âncoras de HTML puro e funcionam
+ * sempre — é essa metade que carrega a promessa.
+ *
+ * O `tabindex="-1"` nos `<h2>` existe para o salto de âncora levar o FOCO
+ * junto, e não só a rolagem: sem ele, quem navega por teclado clica no índice
+ * e continua tabulando do topo da página.
+ *
+ * AS DUAS FRASES DO CONTADOR VIAJAM EM `data-`, e não numa tabela dentro do
+ * `support.js`. Ele já tem uma tabela de cinco idiomas dentro (a da ficha), e
+ * ela é exatamente a segunda lista ao lado do `i18n-site.json` que este
+ * arquivo existe para não ter. Servidas pelo HTML, as frases saem do mesmo
+ * dicionário que o resto da página e não há o que sincronizar.
+ */
+function indiceDaAjuda(corpo: string, t: Dicionario): string {
+  const temas: Array<{ id: string; nome: string }> = [];
+  const comId = corpo.replace(/<h2>([\s\S]*?)<\/h2>/g, (_todo, dentro: string) => {
+    const id = `tema-${temas.length + 1}`;
+    temas.push({ id, nome: String(dentro).replace(/<[^>]+>/g, '').trim() });
+    return `<h2 id="${id}" tabindex="-1">${dentro}</h2>`;
+  });
+  /* Nenhum tema quer dizer corpo com outra forma. Devolver o corpo intacto é o
+     comportamento certo: um índice vazio seria uma caixa dizendo que a página
+     não tem assunto. */
+  if (!temas.length) return corpo;
+
+  const escapa = (x: string) =>
+    x.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+     .replace(/"/g, '&quot;');
+  const itens = temas
+    .map((x) => `<li><a href="#${x.id}">${escapa(x.nome)}</a></li>`)
+    .join('\n        ');
+
+  const bloco = `<nav class="ajNav" aria-labelledby="ajNavTit">
+      <p class="ajNavTit" id="ajNavTit">${escapa(String(t.ajIndice || ''))}</p>
+      <div class="ajBusca" role="search" hidden>
+        <label for="ajQ">${escapa(String(t.ajBuscaLbl || ''))}</label>
+        <input id="ajQ" type="search" autocomplete="off" spellcheck="false"
+               placeholder="${escapa(String(t.ajBuscaPh || ''))}">
+      </div>
+      <ol class="ajTemas">
+        ${itens}
+      </ol>
+      <p class="ajConta" role="status" aria-live="polite"
+         data-conta="${escapa(String(t.ajConta || ''))}"
+         data-nada="${escapa(String(t.ajNada || ''))}"></p>
+    </nav>
+`;
+  /* Entra ANTES do primeiro tema, que é depois da abertura da página — e não
+     numa posição contada em caracteres, que a primeira reescrita de parágrafo
+     quebraria em silêncio. */
+  const onde = comId.indexOf('<h2 id="tema-1"');
+  return comId.slice(0, onde) + bloco + '    ' + comId.slice(onde);
+}
+
+/* ---- A TABELA ROLA DENTRO DELA, E NÃO A PÁGINA -------------------------
+ *
+ * Medido a 380px — a largura de um telefone comum — em todas as combinações de
+ * página e idioma que o site publica: **19 de 70 rolavam na horizontal**, e em
+ * 17 delas o culpado era a mesma coisa, a `table.legal`. As piores eram as
+ * páginas legais em alemão: `/de/privacidade` transbordava 464px, quase uma
+ * segunda tela inteira para o lado.
+ *
+ * São justamente as páginas que quem avalia fornecedor abre — e ele abre no
+ * telefone, na fila do café, antes de levar ao jurídico.
+ *
+ * A saída NÃO é encolher a tabela: uma tabela de prazos de retenção com quatro
+ * colunas não cabe em 380px sem virar ilegível, e alemão tem palavra composta
+ * que não quebra. A saída é a tabela rolar DENTRO da caixa dela, com a página
+ * parada — que é o comportamento que todo mundo já espera de tabela larga.
+ *
+ * E ISTO MORA AQUI, e não nas 85 páginas: envolver a mão significaria 85
+ * arquivos onde a próxima tabela nasce sem o embrulho. Aqui, toda tabela que
+ * entrar já nasce embrulhada.
+ *
+ * `tabindex="0"` porque uma caixa que rola precisa ser alcançável pelo teclado:
+ * sem ele, quem não usa mouse não tem como ver a coluna da direita. O
+ * `role="region"` com nome é o que faz o leitor de tela anunciar que ali há
+ * algo navegável.
+ */
+function embrulharTabelas(corpo: string): string {
+  return corpo.replace(
+    /<table class="legal"[\s\S]*?<\/table>/g,
+    (t) => `<div class="tabRola" tabindex="0" role="region" aria-label="tabela">${t}</div>`,
+  );
 }
 
 /** Os hreflang de uma página. O `x-default` só na home, como no site antigo:

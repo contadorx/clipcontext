@@ -1,6 +1,6 @@
 # A regressão
 
-147 arquivos que afirmam coisas sobre o produto. Cada um roda sozinho com
+158 arquivos que afirmam coisas sobre o produto. Cada um roda sozinho com
 `node <arquivo>.mjs` e sai com código 1 se alguma afirmação cair.
 
 ## Primeiro uso, depois de abrir o zip

@@ -373,3 +373,121 @@ const FICHA_TXT = {
     }
   };
 })();
+
+/* ================= a busca da base de conhecimento =================
+
+   A página da Ajuda tem 45 painéis em nove temas e não tinha navegação
+   nenhuma: quem chegava caía no topo de três mil palavras e rolava. Os
+   acordeões já nascem abertos desde 23/08, então o Ctrl+F alcança tudo — mas
+   achar a palavra no meio de uma parede não diz em que tema você está nem o
+   que mais existe ao lado.
+
+   O índice é montado no servidor a partir dos próprios `<h2>` (ver
+   `indiceDaAjuda` em `lib/site.ts`) e são âncoras de HTML puro: eles funcionam
+   sem uma linha disto aqui. O que este bloco acrescenta é o filtro, e por isso
+   o campo nasce com `hidden` no HTML e é REVELADO aqui — um campo de busca que
+   não busca é pior do que campo nenhum.
+
+   As frases do contador chegam em `data-` no próprio elemento, e não numa
+   tabela de idiomas aqui dentro. A ficha logo acima tem uma dessas tabelas, e
+   ela é a segunda lista ao lado do `i18n-site.json`.
+
+   O que ele NÃO faz, de propósito: pintar o trecho encontrado. Realçar exige
+   mexer no HTML de dentro do painel, e o texto ali tem link, `<b>` e `<code>` —
+   uma passada de `innerHTML` sobre isso é como se perdem atributos e se criam
+   tags quebradas num idioma que ninguém relê. O Ctrl+F do navegador continua
+   fazendo o realce, e agora sobre uma lista já reduzida. */
+(function buscaDaAjuda() {
+  const nav = document.querySelector('.ajNav');
+  if (!nav) return;
+  const caixa = nav.querySelector('.ajBusca');
+  const campo = nav.querySelector('#ajQ');
+  const conta = nav.querySelector('.ajConta');
+  if (!caixa || !campo || !conta) return;
+
+  /* ACENTO NÃO PODE SER OBRIGATÓRIO. Quem procura "transcricao" no teclado do
+     trabalho quer achar "transcrição", e quem escreve alemão numa máquina sem
+     trema digita "ue" esperando achar "ü".
+
+     Os dois casos são resolvidos INDEXANDO CADA PAINEL DUAS VEZES — sem acento
+     e transliterado — e normalizando a consulta uma vez só. Assim "u" acha
+     "ü" pela primeira forma e "ue" acha "ü" pela segunda, sem que a consulta
+     precise saber em que idioma está. É a mesma regra que a ferramenta já usa
+     para o dicionário de vocabulário em alemão. */
+  const semAcento = (x) => x.normalize('NFD').replace(/[̀-ͯ]/g, '');
+  const comoAlemao = (x) => x
+    .replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue')
+    .replace(/Ä/g, 'Ae').replace(/Ö/g, 'Oe').replace(/Ü/g, 'Ue')
+    .replace(/ß/g, 'ss');
+  const chave = (x) => (x || '').toLowerCase().replace(/\s+/g, ' ').trim();
+
+  const temas = [];
+  for (const h of document.querySelectorAll('h2[id^="tema-"]')) {
+    const faq = h.nextElementSibling;
+    if (!faq || !faq.classList.contains('faq')) continue;
+    const paineis = [];
+    for (const d of faq.children) {
+      if (d.tagName !== 'DETAILS') continue;
+      const txt = d.textContent || '';
+      /* O separador impede que a consulta case atravessando a fronteira entre
+         a forma sem acento e a transliterada. */
+      paineis.push({ el: d, txt: chave(semAcento(txt)) + '  ' + chave(comoAlemao(txt)) });
+    }
+    if (paineis.length) temas.push({ h, faq, paineis });
+  }
+  const TOTAL = temas.reduce((s, t) => s + t.paineis.length, 0);
+  if (!TOTAL) return;
+
+  /* O estado de aberto/fechado de antes da busca, guardado UMA vez. Sem isto,
+     limpar o campo devolveria a página com tudo aberto — inclusive o que a
+     pessoa tinha recolhido de propósito antes de procurar. */
+  let antes = null;
+
+  const molde = (s, a, b) => String(s || '').replace('{0}', a).replace('{1}', b);
+
+  function filtrar() {
+    const cru = chave(semAcento(campo.value));
+    const termos = cru ? cru.split(' ').filter(Boolean) : [];
+
+    if (!termos.length) {
+      for (const t of temas) {
+        t.h.hidden = false; t.faq.hidden = false;
+        for (const p of t.paineis) p.el.hidden = false;
+      }
+      if (antes) { for (const p of antes) p.el.open = p.aberto; antes = null; }
+      conta.textContent = '';
+      return;
+    }
+
+    if (!antes) {
+      antes = [];
+      for (const t of temas) for (const p of t.paineis) antes.push({ el: p.el, aberto: p.el.open });
+    }
+
+    let achados = 0;
+    for (const t of temas) {
+      let vivos = 0;
+      for (const p of t.paineis) {
+        const bate = termos.every((w) => p.txt.indexOf(w) >= 0);
+        p.el.hidden = !bate;
+        /* Achado é achado aberto: quem procurou quer a resposta, e não mais um
+           clique para vê-la. */
+        if (bate) { p.el.open = true; vivos++; achados++; }
+      }
+      t.h.hidden = vivos === 0;
+      t.faq.hidden = vivos === 0;
+    }
+    conta.textContent = achados
+      ? molde(conta.dataset.conta, achados, TOTAL)
+      : (conta.dataset.nada || molde(conta.dataset.conta, 0, TOTAL));
+  }
+
+  campo.addEventListener('input', filtrar);
+  /* Esc limpa — é o que o campo de busca de qualquer lugar faz, e sem isso a
+     única saída de uma busca sem resultado é apagar letra por letra. */
+  campo.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && campo.value) { campo.value = ''; filtrar(); }
+  });
+  /* Revelado só agora: daqui para baixo ele funciona. */
+  caixa.hidden = false;
+})();

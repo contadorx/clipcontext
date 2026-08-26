@@ -108,7 +108,7 @@ guardar nada que identifique alguém.
 | `BREVO_API_KEY` | a chave do Brevo (Settings → SMTP & API → API keys) | 503 → o app cai no `mailto:` |
 | `EMAIL_DE` | o remetente, ex.: `ola@walkstamp.com` | 503 |
 | `EMAIL_DE_NOME` | o nome que aparece, ex.: `Walkstamp` | usa "Walkstamp" |
-| `CONVITE_SAL` | um texto longo e aleatório, o sal dos hashes | usa o `CRON_SECRET`; sem nenhum dos dois, 503 |
+| `CONVITE_SAL` | um texto longo e aleatório, o sal dos hashes | **503** — obrigatório; não se encosta mais no `CRON_SECRET` |
 | `CONVITE_DE` | forma antiga do remetente, `Nome <endereço>` — continua aceita | — |
 | `SUPABASE_SERVICE_ROLE_KEY` | já existe, para a conta | 503 |
 | `SUPABASE_URL` | já existe | 503 |

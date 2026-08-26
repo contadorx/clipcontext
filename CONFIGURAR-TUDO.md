@@ -67,11 +67,18 @@ disso. A seção 3 é o passo a passo.
 | `BREVO_API_KEY` | a chave do Brevo | 503 → o app volta ao `mailto:` e diz por quê |
 | `EMAIL_DE` | o remetente, ex.: `ola@walkstamp.com` | 503 |
 | `EMAIL_DE_NOME` | o nome que aparece | usa "Walkstamp" |
-| `CONVITE_SAL` | um texto longo e aleatório | usa o `CRON_SECRET`; sem nenhum dos dois, 503 |
+| `CONVITE_SAL` | um texto longo e aleatório | **503** — não há mais encosto no `CRON_SECRET` |
 
 > **O sal não pode mudar depois de entrar em produção.** Trocar o sal reescreve
 > todos os hashes e as contagens do último dia se perdem. Não é grave; é bom
 > saber por que os limites "zeraram sozinhos".
+>
+> **Ele deixou de se encostar no `CRON_SECRET` — 24/08.** Antes, faltando o
+> `CONVITE_SAL`, o sal era o `CRON_SECRET` — que é a chave do endereço que
+> APAGA dado de cliente. Rodar aquele segredo, que é boa prática, zerava as
+> contagens deste limite sem ninguém pedir. Agora são independentes, e este
+> aqui é obrigatório: sem ele o convite responde 503 e o aplicativo cai no
+> `mailto:` dizendo por quê.
 
 Para gerar o sal:
 

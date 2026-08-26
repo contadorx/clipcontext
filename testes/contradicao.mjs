@@ -144,6 +144,54 @@ for (const [L, termos] of PAGINAS) {
      /ClipContext/.test(txt) && /MIT/.test(txt));
 }
 
+console.log('\n[6] a política não diz que não usa cookie e usa um');
+{
+  /* A SEGUNDA CONTRADIÇÃO, e ela morava no MESMO documento.
+     Numa lista chamada "Dados que não coletamos":
+         <li>Cookies, de qualquer tipo</li>
+     E noventa linhas abaixo, na seção da conta paga:
+         "A sessão da conta usa um cookie, e ele é necessário."
+     Nos cinco idiomas. As duas frases são verdadeiras separadas e mentem
+     juntas — e quem faz avaliação de fornecedor lê as duas, porque é o mesmo
+     documento e ele lê inteiro.
+     A saída não foi apagar a segunda: o cookie de sessão existe e tem de estar
+     declarado. Foi qualificar a primeira, que é onde estava o exagero.
+
+     A régua mede o TEXTO RENDERIZADO, e não o arquivo: é o que a pessoa lê. */
+  const priv = ROTAS.idiomas.map((L) => [L, endereco('privacidade', L)]);
+  for (const [L, rota] of priv) {
+    await pg.goto(BASE + rota);
+    const txt = await pg.locator('main, body').first().innerText();
+
+    /* 1. A página continua declarando o cookie de sessão. Apagar a declaração
+          "resolveria" a contradição do jeito errado. */
+    const temCookie = /cookie/i.test(txt);
+    ok(`${L}: o cookie de sessão continua declarado`, temCookie,
+       temCookie ? '' : '(a palavra cookie sumiu da política)');
+
+    /* 2. E não existe mais a negação absoluta. Cada idioma escreve a lista do
+          jeito dele, então o que se procura é a forma ABSOLUTA — "cookies, de
+          qualquer tipo" — e não a palavra cookie. */
+    const ABSOLUTO = [
+      /cookies,?\s*de qualquer tipo/i,
+      /cookies,?\s*of any kind/i,
+      /cookies,?\s*de cualquier tipo/i,
+      /cookies,?\s*gleich welcher art/i,
+      /cookies,?\s*de quelque type que ce soit/i,
+    ];
+    const achou = ABSOLUTO.filter((r) => r.test(txt));
+    ok(`${L}: e não nega cookie de qualquer tipo`, achou.length === 0,
+       achou.map(String).join(' '));
+
+    /* 3. A qualificação tem de dizer DE QUE tipo não há — senão o conserto
+          vira só a remoção de uma frase incômoda. */
+    const qualifica =
+      /rastre|track|suivi|Tracking|publicidad|publicit|Werbe|medi[çc]|measurement|Mess/i.test(txt);
+    ok(`${L}: a lista diz de que tipo de cookie não há`, qualifica,
+       qualifica ? '' : '(a lista ficou vaga)');
+  }
+}
+
 await br.close();
 console.log(falhas ? `\n${falhas} FALHA(S)` : '\nContradição dos termos: fechada nas cinco línguas.');
 process.exit(falhas ? 1 : 0);

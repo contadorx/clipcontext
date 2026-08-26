@@ -1,0 +1,24 @@
+{
+  "_leia": "AS VERSÕES DE TERCEIROS QUE O PRODUTO CARREGA DA REDE. Três lugares liam esta verdade e nenhum era a fonte: o `TJS_BASES` dentro do template, a régua que confere, e a cabeça de quem lembrasse. Agora a fonte é este arquivo: o `build.py` escreve a lista no produto pelo token __TJSBASES__, e `versoes.mjs` confere contra o npm. Mudar aqui muda nos três.",
+  "transformers": {
+    "_porque": "A ORDEM É RESULTADO DE MEDIÇÃO, e não preferência pelo novo. Numa máquina Windows/Chrome 151 real a 4.2.0 falhava em TODA configuração com `MatMulNBits Missing required scale`, e a 3.x montou de primeira com o mesmo arquivo. Enquanto não houver caso contrário, o padrão é a que funciona.",
+    "base": "https://cdn.jsdelivr.net/npm/@huggingface/transformers",
+    "pacote": "@huggingface/transformers",
+    "fila": [
+      {
+        "v": "3.8.1",
+        "nota": "o padrão: a maior 3.x, publicada em 2025-12-02"
+      },
+      {
+        "v": "4.2.0",
+        "nota": "a maior 4.x, publicada em 2026-04-22 — atrás por medição, não por idade"
+      },
+      {
+        "v": "3.8.0",
+        "nota": "a 3.x anterior. Terceira entrada com VERSÃO DIFERENTE das outras duas: aqui morava `latest` sem versão, que hoje resolve para a mesma 4.2.0 da segunda linha — um salva-vidas que era uma cópia."
+      }
+    ],
+    "conferido_ate": "4.2.0",
+    "_conferido": "A MAIOR VERSÃO QUE ALGUÉM JÁ OLHOU E DECIDIU. A régua `versoes.mjs` consulta o npm e reprova quando existe versão publicada MAIOR que esta — não maior que a fixada. A diferença é o que separa um aviso de um alarme: sem este campo, o dia em que a Hugging Face publicasse uma 4.3 a esteira ficaria vermelha por uma coisa que não é defeito do produto, e uma régua que fica vermelha sozinha é uma régua que se aprende a ignorar. Com ele, a reprovação diz 'existe versão nova que ninguém olhou' — e limpá-la é olhar, decidir, e escrever a decisão aqui. Subir este número SEM trocar a fila é uma decisão legítima e registrada: quer dizer 'vi a 4.3 e fico na 3.8.1'."
+  }
+}

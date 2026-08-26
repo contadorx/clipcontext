@@ -144,6 +144,13 @@ console.log('\n[2e] nenhuma página começa com prosa solta antes do cabeçalho'
       while ((no = passo.nextNode())) {
         if (cab.contains(no)) break;
         if (no.parentElement && getComputedStyle(no.parentElement).display === 'none') continue;
+        /* O LINK DE PULAR É O ÚNICO QUE PODE ESTAR AQUI, e ele TEM de estar:
+           ele só poupa o menu se for o primeiro item tabulável da página.
+           Ele não é "texto solto" — é um link com nome próprio, fora da tela
+           até receber o foco. A exceção é pelo SELETOR e não pelo texto: um
+           perdão por palavra deixaria qualquer prosa passar bastando começar
+           com "Pular para o conteúdo". */
+        if (no.parentElement && no.parentElement.closest('a.pular')) continue;
         solto += no.textContent.trim() ? ' ' + no.textContent.trim() : '';
       }
       return solto.trim();

@@ -130,8 +130,31 @@ let antes = 0;
      descartada depois do desfazer. "Manter todas" devolveria essa também — e é
      por isso que "manter todas" não é desfazer. */
   await pg.evaluate(() => { const q = window.__quadros(); q[q.length - 1].keep = false; });
-  await pg.locator('#dedup').click(); await pg.waitForTimeout(300);
-  await pg.locator('#faxinaDesfazer').click(); await pg.waitForTimeout(400);
+
+  /* A PREMISSA DESTE BLOCO, COBRADA EM VOZ ALTA: a limpeza tem de ter o que
+     tirar. Sem isso o `#dedup` não faz nada, e o `#faxinaDesfazer` logo abaixo
+     desfaz O GESTO ANTERIOR — o "manter todas" do bloco [3] — devolvendo a tela
+     que EU tinha descartado à mão. O sintoma era "4 vs 3", que não diz nada
+     sobre a causa.
+     Quantas telas o `forjarRepetidos` produz depende de quantos quadros a
+     extração entregou, e isso varia com a carga da máquina. A premissa era
+     acidente; agora é afirmação. */
+  const vaiTirar = Number(((await ler()).vai.match(/(\d+) telas/) || [])[1] || 0);
+  ok('há repetidas para a limpeza tirar', vaiTirar > 0, (await ler()).vai);
+
+  await pg.locator('#dedup').click();
+  /* Condição, e não relógio: a linha só anuncia depois de a limpeza correr. */
+  await pg.waitForFunction(
+    () => !document.getElementById('faxinaDesfazer').classList.contains('hide'),
+    null, { timeout: 15000 });
+  const depoisDaLimpeza = (await ler()).mantidos;
+  ok('e ela tirou mesmo', depoisDaLimpeza < antes - 1,
+     `${depoisDaLimpeza} depois, ${antes - 1} antes`);
+
+  await pg.locator('#faxinaDesfazer').click();
+  await pg.waitForFunction(
+    () => document.getElementById('faxinaDesfazer').classList.contains('hide'),
+    null, { timeout: 15000 });
   const r = await ler();
   const ultima = await pg.evaluate(() => {
     const q = window.__quadros(); return q[q.length - 1].keep;

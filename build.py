@@ -2060,6 +2060,22 @@ def main() -> int:
     src = src.replace("__SITE__", SITE)                      # domínio público, definido no topo
     src = src.replace("__SITEDOM__", SITE.split("//")[-1])  # o mesmo, sem o esquema, para exibir
     src = src.replace("__ICONV__", ICON_V)
+
+    # ---- AS VERSÕES DE TERCEIROS, DE UM LUGAR SÓ ----
+    #
+    # A fila de bibliotecas do motor de voz morava escrita dentro do template,
+    # com duas das tres entradas FLUTUANDO (`@3` e `latest`) — o CDN podia
+    # trocar o motor do produto sem um commit. Agora ela mora no
+    # `src/versoes.json`, com versao exata, e entra aqui.
+    #
+    # Escrita como JSON e nao concatenada a mao: uma lista de URLs montada com
+    # aspas em Python para virar JavaScript e um dia de aspas erradas dentro de
+    # uma string que ninguem le. `json.dumps` e a mesma gramatica nos dois.
+    versoes = json.loads((ROOT / "src" / "versoes.json").read_text(encoding="utf-8"))
+    tjs = versoes["transformers"]
+    bases = [tjs["base"] + "@" + item["v"] for item in tjs["fila"]]
+    src = src.replace("__TJSBASES__", json.dumps(bases, ensure_ascii=False))
+    print("  motor de voz: " + ", ".join(item["v"] for item in tjs["fila"]))
     # O carimbo da versão. Ele entra no app e no offline pelo mesmo caminho de
     # todo o resto: um token no template, trocado aqui.
     VER = versao_do_build(ROOT)

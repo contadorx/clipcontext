@@ -109,7 +109,7 @@
     "duoComp": "Quem mais faz isso, quanto custa, e onde cada um ganha — inclusive da gente: veja o {0}comparativo{1}.",
     "fVerif": "Conferir evidência",
     "confiancaTit": "Antes de decidir",
-    "confiancaP": "Duas páginas respondem o que um preço não responde: como a informação é tratada, e como qualquer pessoa confere um documento gerado aqui — sem instalar nada e sem conta.",
+    "confiancaP": "Duas páginas respondem o que um preço não responde: como a informação é tratada, e como qualquer pessoa confere um documento gerado aqui — sem instalar nada e sem conta. Não temos depoimento de cliente para mostrar, e não vamos inventar um: a prova que oferecemos é melhor de qualquer forma — a verificação de que nada sai leva trinta segundos, no navegador que você já tem aberto, e não depende de acreditar em nós.",
     "segSaida": "Daqui, os dois caminhos que costumam vir a seguir: conferir um documento gerado pela ferramenta, ou ver os planos e o que muda de um para o outro.",
     "casosEyebrow": "Cinco cenários, uma gravação",
     "casosH": "Escolha o que você precisa entregar. O resto a ferramenta acerta sozinha.",
@@ -162,7 +162,13 @@
     "figLegenda": "<b>Como a página sai.</b> O que aparece muda com o cenário: a evidência leva hora de relógio e impressão digital; a instrução de trabalho não leva nenhuma das duas.",
     "fluxoAlt": "A tela sendo gravada, os quadros que sobraram com a fala transcrita embaixo, e a página que sai",
     "fluxoLeg": "<b>Só o que mudou sobrevive.</b> O quadro do meio foi descartado porque a tela não mudou o bastante — é essa decisão, tomada centenas de vezes, que transforma quarenta minutos em doze telas.",
-    "dobraAlt": "A página que o Walkstamp devolve: três passos numerados, cada um com a imagem da tela, o texto do que foi feito e a hora — uma tarja cobrindo um dado no segundo passo — e, no rodapé, a impressão digital do documento com o selo de verificação"
+    "dobraAlt": "A página que o Walkstamp devolve: três passos numerados, cada um com a imagem da tela, o texto do que foi feito e a hora — uma tarja cobrindo um dado no segundo passo — e, no rodapé, a impressão digital do documento com o selo de verificação",
+    "pular": "Pular para o conteúdo",
+    "ajIndice": "Nesta página",
+    "ajBuscaLbl": "Procurar nesta página",
+    "ajBuscaPh": "digite uma palavra — ex.: transcrição",
+    "ajConta": "{0} de {1} respostas",
+    "ajNada": "Nada com essa palavra. Tente outra, ou use o botão Falar com a gente na ferramenta."
   },
   "en": {
     "htmlLang": "en",
@@ -274,7 +280,7 @@
     "duoComp": "Who else does this, what it costs, and where each one wins — including against us: see the {0}comparison{1}.",
     "fVerif": "Check evidence",
     "confiancaTit": "Before you decide",
-    "confiancaP": "Two pages answer what a price cannot: how the information is handled, and how anyone can check a document generated here — with nothing to install and no account.",
+    "confiancaP": "Two pages answer what a price cannot: how the information is handled, and how anyone can check a document generated here — with nothing to install and no account. We have no customer testimonial to show you, and we are not going to invent one: the proof we do offer is better anyway — verifying that nothing leaves takes thirty seconds, in the browser you already have open, and does not depend on believing us.",
     "segSaida": "From here, the two paths that usually come next: check a document the tool generated, or see the plans and what changes from one to the next.",
     "casosEyebrow": "Five use cases, one recording",
     "casosH": "Pick what you have to hand over. The tool gets the rest right on its own.",
@@ -327,7 +333,13 @@
     "figLegenda": "<b>How the page comes out.</b> What appears changes with the scenario: test evidence carries wall-clock time and a checksum; a work instruction carries neither.",
     "fluxoAlt": "The screen being recorded, the frames that survived with the transcript below, and the page that comes out",
     "fluxoLeg": "<b>Only what changed survives.</b> The middle frame was dropped because the screen had not changed enough — that decision, taken hundreds of times, is what turns forty minutes into twelve screens.",
-    "dobraAlt": "The page Walkstamp gives back: three numbered steps, each with the screenshot, the text of what was done and the time — a redaction bar covering a value in the second step — and, in the footer, the document fingerprint with the verification seal"
+    "dobraAlt": "The page Walkstamp gives back: three numbered steps, each with the screenshot, the text of what was done and the time — a redaction bar covering a value in the second step — and, in the footer, the document fingerprint with the verification seal",
+    "pular": "Skip to content",
+    "ajIndice": "On this page",
+    "ajBuscaLbl": "Search this page",
+    "ajBuscaPh": "type a word — e.g. transcription",
+    "ajConta": "{0} of {1} answers",
+    "ajNada": "Nothing matches that word. Try another, or use the Talk to us button in the tool."
   },
   "es": {
     "htmlLang": "es",
@@ -439,7 +451,7 @@
     "duoComp": "Quién más hace esto, cuánto cuesta y dónde gana cada uno — incluso a nosotros: mira la {0}comparativa{1}.",
     "fVerif": "Comprobar evidencia",
     "confiancaTit": "Antes de decidir",
-    "confiancaP": "Dos páginas responden lo que un precio no responde: cómo se trata la información y cómo cualquiera comprueba un documento generado aquí, sin instalar nada y sin cuenta.",
+    "confiancaP": "Dos páginas responden lo que un precio no responde: cómo se trata la información y cómo cualquiera comprueba un documento generado aquí, sin instalar nada y sin cuenta. No tenemos testimonios de clientes que mostrar, y no vamos a inventarlos: la prueba que sí ofrecemos es mejor de todos modos — comprobar que no sale nada lleva treinta segundos, en el navegador que ya tienes abierto, y no depende de creernos.",
     "segSaida": "Desde aquí, los dos caminos que suelen venir después: comprobar un documento generado por la herramienta, o ver los planes y qué cambia de uno a otro.",
     "casosEyebrow": "Cinco escenarios, una grabación",
     "casosH": "Elige lo que tienes que entregar. El resto lo acierta la herramienta sola.",
@@ -492,7 +504,13 @@
     "figLegenda": "<b>Cómo sale la página.</b> Lo que aparece cambia con el escenario: la evidencia lleva hora de reloj y huella digital; la instrucción de trabajo no lleva ninguna de las dos.",
     "fluxoAlt": "La pantalla grabándose, los fotogramas que quedaron con la transcripción debajo, y la página que sale",
     "fluxoLeg": "<b>Solo sobrevive lo que cambió.</b> El fotograma del medio se descartó porque la pantalla no cambió lo suficiente — esa decisión, tomada cientos de veces, es lo que convierte cuarenta minutos en doce pantallas.",
-    "dobraAlt": "La página que devuelve Walkstamp: tres pasos numerados, cada uno con la captura de pantalla, el texto de lo que se hizo y la hora — una franja que tapa un dato en el segundo paso — y, en el pie, la huella digital del documento con el sello de verificación"
+    "dobraAlt": "La página que devuelve Walkstamp: tres pasos numerados, cada uno con la captura de pantalla, el texto de lo que se hizo y la hora — una franja que tapa un dato en el segundo paso — y, en el pie, la huella digital del documento con el sello de verificación",
+    "pular": "Saltar al contenido",
+    "ajIndice": "En esta página",
+    "ajBuscaLbl": "Buscar en esta página",
+    "ajBuscaPh": "escribe una palabra — ej.: transcripción",
+    "ajConta": "{0} de {1} respuestas",
+    "ajNada": "Nada con esa palabra. Prueba otra, o usa el botón Hablar con nosotros en la herramienta."
   },
   "de": {
     "htmlLang": "de",
@@ -604,7 +622,7 @@
     "duoComp": "Wer das sonst macht, was es kostet und wo jeder gewinnt — auch gegen uns: siehe den {0}Vergleich{1}.",
     "fVerif": "Nachweis prüfen",
     "confiancaTit": "Bevor Sie sich entscheiden",
-    "confiancaP": "Zwei Seiten beantworten, was ein Preis nicht beantwortet: wie mit den Informationen umgegangen wird und wie jede Person ein hier erzeugtes Dokument prüft — ohne Installation und ohne Konto.",
+    "confiancaP": "Zwei Seiten beantworten, was ein Preis nicht beantwortet: wie mit den Informationen umgegangen wird und wie jede Person ein hier erzeugtes Dokument prüft — ohne Installation und ohne Konto. Wir haben keine Kundenstimmen zu zeigen, und wir werden keine erfinden: der Nachweis, den wir stattdessen bieten, ist ohnehin besser — die Überprüfung, dass nichts hinausgeht, dauert dreißig Sekunden, im Browser, den Sie ohnehin offen haben, und hängt nicht davon ab, dass Sie uns glauben.",
     "segSaida": "Von hier aus die beiden Wege, die meist folgen: ein von der Anwendung erzeugtes Dokument prüfen, oder die Pläne ansehen und was sich von einem zum anderen ändert.",
     "casosEyebrow": "Fünf Szenarien, eine Aufnahme",
     "casosH": "Wählen Sie, was Sie abliefern müssen. Den Rest stellt das Tool selbst richtig ein.",
@@ -657,7 +675,13 @@
     "figLegenda": "<b>So sieht die Seite aus.</b> Was erscheint, hängt vom Anwendungsfall ab: Der Testnachweis führt Uhrzeit und Prüfsumme, die Arbeitsanweisung keines von beiden.",
     "fluxoAlt": "Der aufgenommene Bildschirm, die übrig gebliebenen Screenshots mit der Transkription darunter, und die Seite, die herauskommt",
     "fluxoLeg": "<b>Nur was sich geändert hat, bleibt.</b> Der mittlere Screenshot fiel weg, weil sich der Bildschirm nicht genug geändert hatte — diese Entscheidung, hundertfach getroffen, macht aus vierzig Minuten zwölf Bildschirme.",
-    "dobraAlt": "Die Seite, die Walkstamp zurückgibt: drei nummerierte Schritte, jeder mit dem Bildschirmfoto, dem Text der Handlung und der Uhrzeit — ein Schwärzungsbalken über einem Wert im zweiten Schritt — und in der Fußzeile der Fingerabdruck des Dokuments mit dem Prüfsiegel"
+    "dobraAlt": "Die Seite, die Walkstamp zurückgibt: drei nummerierte Schritte, jeder mit dem Bildschirmfoto, dem Text der Handlung und der Uhrzeit — ein Schwärzungsbalken über einem Wert im zweiten Schritt — und in der Fußzeile der Fingerabdruck des Dokuments mit dem Prüfsiegel",
+    "pular": "Zum Inhalt springen",
+    "ajIndice": "Auf dieser Seite",
+    "ajBuscaLbl": "Auf dieser Seite suchen",
+    "ajBuscaPh": "ein Wort eingeben — z. B. Transkription",
+    "ajConta": "{0} von {1} Antworten",
+    "ajNada": "Nichts zu diesem Wort. Versuchen Sie ein anderes, oder nutzen Sie die Schaltfläche Kontakt aufnehmen im Werkzeug."
   },
   "fr": {
     "htmlLang": "fr",
@@ -769,7 +793,7 @@
     "duoComp": "Qui fait cela aussi, à quel prix, et où chacun gagne — y compris contre nous : voyez le {0}comparatif{1}.",
     "fVerif": "Vérifier une preuve",
     "confiancaTit": "Avant de décider",
-    "confiancaP": "Deux pages répondent à ce qu’un prix ne dit pas : comment l’information est traitée, et comment n’importe qui vérifie un document produit ici — sans rien installer et sans compte.",
+    "confiancaP": "Deux pages répondent à ce qu’un prix ne dit pas : comment l’information est traitée, et comment n’importe qui vérifie un document produit ici — sans rien installer et sans compte. Nous n’avons pas de témoignage client à montrer, et nous n’allons pas en inventer un : la preuve que nous offrons est de toute façon meilleure — vérifier que rien ne sort prend trente secondes, dans le navigateur que vous avez déjà ouvert, et ne dépend pas de la confiance que vous nous accordez.",
     "segSaida": "D’ici, les deux chemins qui suivent d’ordinaire : vérifier un document produit par l’outil, ou voir les offres et ce qui change de l’une à l’autre.",
     "casosEyebrow": "Cinq scénarios, un enregistrement",
     "casosH": "Choisissez ce que vous devez livrer. L’outil règle le reste tout seul.",
@@ -822,6 +846,12 @@
     "figLegenda": "<b>À quoi ressemble la page.</b> Ce qui apparaît change selon le cas d’usage : la preuve de test porte l’heure d’horloge et une empreinte ; le mode opératoire, ni l’une ni l’autre.",
     "fluxoAlt": "L’écran en cours d’enregistrement, les captures qui ont survécu avec la transcription en dessous, et la page qui en sort",
     "fluxoLeg": "<b>Seul ce qui a changé survit.</b> La capture du milieu a été écartée parce que l’écran n’avait pas assez changé — cette décision, prise des centaines de fois, transforme quarante minutes en douze écrans.",
-    "dobraAlt": "La page que Walkstamp renvoie : trois étapes numérotées, chacune avec la capture d’écran, le texte de ce qui a été fait et l’heure — un bandeau masquant une donnée à la deuxième étape — et, en pied de page, l’empreinte du document avec le sceau de vérification"
+    "dobraAlt": "La page que Walkstamp renvoie : trois étapes numérotées, chacune avec la capture d’écran, le texte de ce qui a été fait et l’heure — un bandeau masquant une donnée à la deuxième étape — et, en pied de page, l’empreinte du document avec le sceau de vérification",
+    "pular": "Aller au contenu",
+    "ajIndice": "Sur cette page",
+    "ajBuscaLbl": "Rechercher dans cette page",
+    "ajBuscaPh": "saisissez un mot — ex. : transcription",
+    "ajConta": "{0} sur {1} réponses",
+    "ajNada": "Rien avec ce mot. Essayez-en un autre, ou utilisez le bouton Nous contacter dans l’outil."
   }
 }

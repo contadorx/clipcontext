@@ -119,27 +119,26 @@ for (const [rota, {tem, nao}] of Object.entries(paginas)) {
     }
 
     const col1 = await pg.locator('table#basesLegais tr td:first-child').allTextContents();
-    /* AS DUAS LINHAS QUE FALTAM EM ALEMÃO E EM FRANCÊS — e por que isto pula
-       em vez de reprovar.
-       As tabelas de prazo de `de` e `fr` têm 13 linhas; a de `pt` tem 15. As
-       duas que faltam são a da CONTA PAGA e a da FATURA — que é a única que
-       NÃO é apagada em 90 dias, por guarda fiscal. É o item C05 do catálogo:
-       levar às quatro traduções as seções que só existem em português.
-       Traduzir uma linha de tabela é mecânico; o que não é mecânico é publicar
-       prazo de retenção e base legal em dois mercados que fazem avaliação de
-       fornecedor sem revisão jurídica. Isso é o Build 7, e a decisão é sua.
-       Enquanto isso: PULADO, contado no rodapé, com o motivo — e não vermelho
-       por um item conhecido nem verde por uma cobertura que não existe. */
-    const TRADUZIDA = ['/privacidade.html', '/en/privacidade.html', '/es/privacidade.html'];
-    if (!TRADUZIDA.includes(rota)) {
-      console.log(`PULADO  ${rota}: a tabela de prazos ainda não tem as linhas da conta paga`);
-      console.log('        e da fatura. É o C05 — tradução jurídica, Build 7.');
-    } else {
-      ok('a conta paga está na tabela de prazos',
-         col1.some((c) => /conta paga|paid-account|cuenta de pago/i.test(c)), col1.join(' | ').slice(0, 120));
-      ok('e a fatura também, que é a que NÃO é apagada em 90 dias',
-         col1.some((c) => /fatura|invoice|factura/i.test(c)), col1.join(' | ').slice(0, 120));
-    }
+    /* ISTO PULAVA POR UM MOTIVO QUE JÁ NÃO ERA VERDADE — consertado em 24/08.
+       O texto dizia que as tabelas de `de` e `fr` tinham 13 linhas contra 15 do
+       `pt`, faltando a da CONTA PAGA e a da FATURA, e que traduzi-las exigia
+       revisão jurídica antes de publicar prazo de retenção em dois mercados que
+       fazem avaliação de fornecedor.
+       Medido: as CINCO tabelas têm as mesmas sete linhas, e as duas em questão
+       estão lá em alemão ("Inhalt des bezahlten Kontos", "Rechnung") e em
+       francês ("Contenu du compte payant", "La facture"). A tradução já tinha
+       sido feita — em algum momento, sem que este arquivo ficasse sabendo.
+       O que faltava era a RÉGUA: as duas expressões regulares só conheciam
+       português, inglês e espanhol, então nem se o alemão estivesse perfeito
+       ele passaria. O pulo escondia a cobertura de dois idiomas atrás de um
+       motivo que tinha deixado de existir — e um pulo que sobrevive ao conserto
+       é lixo que esconde o próximo defeito. Agora as cinco são cobradas. */
+    ok('a conta paga está na tabela de prazos',
+       col1.some((c) => /conta paga|paid-account|cuenta de pago|bezahlten Kontos|compte payant/i
+         .test(c)), col1.join(' | ').slice(0, 140));
+    ok('e a fatura também, que é a que NÃO é apagada em 90 dias',
+       col1.some((c) => /fatura|invoice|factura|Rechnung/i.test(c)
+         || /^la facture/i.test(c.trim())), col1.join(' | ').slice(0, 140));
   }
   ok('sem token do build sobrando', !/\{\{|\}\}/.test(txt));
   await ctx.close();

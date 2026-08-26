@@ -180,9 +180,23 @@ console.log('\n[3] a máscara se desmancha quando a região para');
     c.width = 960; c.height = 540;
     const cx = c.getContext('2d');
     let n = 0;
+    let jaCongelou = false;
     window.__tocando = true;
     setInterval(() => {
       if (window.__tocando) n++;
+      /* A PREMISSA DESTE CENÁRIO, TORNADA REAL — e ela estava só escrita.
+         O comentário acima afirma que a tela congela "numa imagem DIFERENTE da
+         que estava quando o último quadro foi guardado". Só que o matiz cicla
+         em 360 e `n` avança de um em um: congelar podia cair perto do que já
+         havia sido guardado, e aí o produto recusa o quadro por pouca mudança
+         — com razão, que é para isso que a recusa existe.
+         Medido: a mesma execução dá `guardados: 2` numa vez e `1` na outra, e
+         a diferença é `poucaMudanca` indo de 44 para 81. Não é o teste sendo
+         lento; é o cenário não garantindo o que ele afirma.
+         O salto de 180 põe o matiz do outro lado do círculo. O que a régua
+         mede continua sendo o mesmo: que o quadro sai MESMO estando a mudança
+         inteira dentro da máscara de movimento. */
+      if (!window.__tocando && !jaCongelou) { jaCongelou = true; n += 180; }
       cx.fillStyle = '#fff'; cx.fillRect(0, 0, 960, 540);
       // a metade parada
       cx.fillStyle = '#15171C'; cx.font = 'bold 34px sans-serif';
@@ -204,7 +218,19 @@ console.log('\n[3] a máscara se desmancha quando a região para');
   const pico = await pg.evaluate(() => (window.__motivos || {}).mascaradas | 0);
   const antes = await pg.evaluate(() => (window.__motivos || {}).guardados | 0);
   await pg.evaluate(() => { window.__tocando = false; });   // congelou
-  await pg.waitForTimeout(20000);
+  /* ESPERAR O QUADRO, E NÃO VINTE SEGUNDOS DE RELÓGIO.
+     Aqui havia `waitForTimeout(20000)`. Quantos segundos a captura leva para
+     reparar que a tela parou depende do passo de amostragem e da carga da
+     máquina — medido, o mesmo teste dá `1 → 1` numa execução e `1 → 2` na
+     seguinte, com o mesmo código. Vinte segundos é a aposta que às vezes
+     perde, e um vermelho por aposta perdida ensina a ignorar o vermelho.
+     Agora ela espera a CONDIÇÃO, com um teto folgado: quando o quadro chega,
+     ela segue na hora; quando não chega, o teto expira e a afirmação reprova
+     com o mesmo `antes → depois` de sempre. */
+  await pg.waitForFunction(
+    (n) => ((window.__motivos || {}).guardados | 0) > n,
+    antes, { timeout: 45000 },
+  ).catch(() => {});
   const depois = await pg.evaluate(() => (window.__motivos || {}).guardados | 0);
   console.log(`      máscara no pico: ${pico}  quadros antes: ${antes}  depois: ${depois}`);
   console.log('      motivos:', await pg.evaluate(() => JSON.stringify(window.__motivos || null)));

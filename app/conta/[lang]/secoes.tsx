@@ -125,7 +125,7 @@ export function Faturas({ conta, lang, t }: { conta: Conta; lang: Lang; t: Texto
         <table className="legal">
           <thead><tr>
             <th>{t.colNumero}</th><th>{t.colValor}</th><th>{t.colSituacao}</th>
-            <th>{t.colData}</th><th>{t.colNota}</th>
+            <th>{t.colData}</th><th>{t.colFatura}</th><th>{t.colNota}</th>
           </tr></thead>
           <tbody>
             {conta.faturas.map((f, i) => (
@@ -134,6 +134,15 @@ export function Faturas({ conta, lang, t }: { conta: Conta; lang: Lang; t: Texto
                 <td>{dinheiro(lang, f.valor, f.moeda)}</td>
                 <td>{f.status}</td>
                 <td>{data(lang, f.pago_em || f.criado_em)}</td>
+                {/* DUAS COLUNAS, porque são dois documentos. A fatura é o
+                    recibo da Stripe e chega no mesmo evento da cobrança; a nota
+                    fiscal sai do Financeirox depois, e é o que a contabilidade
+                    pede. O endereço da primeira chegava ao banco a cada cobrança
+                    e era descartado — a função recebia o parâmetro e não o
+                    usava. */}
+                <td>{f.fatura_url
+                       ? <a href={f.fatura_url} target="_blank" rel="noopener noreferrer">{t.faturaBaixar}</a>
+                       : '—'}</td>
                 <td>{f.nf_url ? <a href={f.nf_url}>{f.nf_numero || t.notaBaixar}</a> : '—'}</td>
               </tr>
             ))}
@@ -235,7 +244,15 @@ export function Time({ conta, lang, t }: { conta: Conta; lang: Lang; t: Textos }
       <form action={ajustar} style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center', marginTop: 16 }}>
         <input type="hidden" name="lang" value={lang} />
         <label className="small" htmlFor="dias">{t.timePrazo}</label>
-        <input id="dias" name="dias" type="number" min={1} max={90} defaultValue={p.dias ?? 90} style={{ width: 78 }} />
+        {/* O PADRÃO VEM DO `lib/stripe.ts`, e não de um número escrito aqui.
+            Era `?? 90`, e o webhook da Stripe grava o que o `PLANOS` diz — 21.
+            Um time sem prazo gravado via o formulário oferecer NOVENTA e
+            acreditava que o prazo era esse; salvar sem tocar no campo trocava
+            um prazo de três semanas por um de três meses, que é justamente o
+            contrário do que este número serve para fazer. Terceiro lugar onde
+            o prazo estava escrito, e o único que discordava dos outros dois. */}
+        <input id="dias" name="dias" type="number" min={1} max={90}
+               defaultValue={p.dias ?? PLANOS.time.dias} style={{ width: 78 }} />
         <span className="small muted">{t.timeDias}</span>
         <label className="small" htmlFor="assentos">{t.timeAssentos}</label>
         <input id="assentos" name="assentos" type="number" min={1} max={500}

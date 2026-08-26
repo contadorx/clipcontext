@@ -415,6 +415,11 @@
   .card.fechado .ferramentas{margin-top:6px}
   @media (prefers-reduced-motion:reduce){ .dobra{transition:none} }
   [inert]{opacity:.45;filter:saturate(.4)}
+  /* O QUE FICA INERTE POR CAUSA DE UM DIÁLOGO NÃO DESBOTA.
+     O `[inert]` acima existe para o cartão TRAVADO, onde desbotar é a mensagem.
+     Um diálogo modal já tem o próprio véu por cima da página; aplicar os dois
+     deixaria o fundo lavado duas vezes. Aqui o `inert` é só sobre FOCO. */
+  [data-inerte-modal]{opacity:1;filter:none}
   .lockHint{margin:-6px 0 14px;font-size:13px;color:var(--muted);
             border-left:3px solid var(--line);padding-left:11px}
   /* Sem isto, os dois elementos que acabaram de virar focáveis — a zona de
@@ -564,6 +569,16 @@
   @media (max-width:560px){ .contagem{font-size:42px} }
   label.opt{display:flex;align-items:center;gap:9px;padding:7px 0;font-size:14.5px;cursor:pointer}
   label.opt input[type=checkbox]{flex:none}
+  /* ---- O RECURSO QUE ESTE NAVEGADOR NÃO TEM ----
+     Desligado e DITO. O `usar a placa de vídeo` some quando não há WebGPU, e
+     ali sumir cabe: ninguém procura por ele. Clipe e webcam a pessoa procura —
+     e não achar responde "isto não existe no produto" em vez de "o seu
+     navegador não faz". Então eles ficam, apagados, com o motivo do lado.
+     `cursor:default` porque `not-allowed` sobre uma escolha que nunca foi
+     oferecida soa como recusa, e não é: é ausência. */
+  label.opt.semApoio{opacity:.5;cursor:default}
+  label.opt.semApoio:focus-within{outline-color:var(--muted)}
+  .semApoioNota{margin:2px 0 12px 26px;border-left-color:var(--muted)}
   /* A etiqueta do plano no cabeçalho. Discreta de propósito: é um estado, não
      um botão de ação — quem já pagou não precisa ser convidado de novo. */
   .optNota{margin-left:auto;font-weight:400;font-size:12.5px;color:var(--muted)}
@@ -1621,8 +1636,10 @@
             </div>
             <div style="padding:4px 2px 2px">
               <label class="opt"><input type="checkbox" id="recClipe"><span data-i18n="recClipeLbl"></span></label>
+              <p class="note semApoioNota hide" id="recClipeAviso"></p>
               <p class="note" id="recClipeNota" data-i18n="recClipeNota" style="margin:2px 0 12px"></p>
               <label class="opt"><input type="checkbox" id="recCam"><span data-i18n="recCamLbl"></span></label>
+              <p class="note semApoioNota hide" id="recCamAviso"></p>
               <div class="row hide" id="camOpts" style="gap:10px;margin:6px 0 0 26px;align-items:center;flex-wrap:wrap">
                 <select id="camCanto" style="width:auto">
                   <option value="bd" data-i18n="camBD"></option>
@@ -1942,10 +1959,19 @@
           <option value="onnx-community/whisper-small" data-i18n="mSmall"></option>
           <option value="onnx-community/whisper-large-v3-turbo" data-i18n="mTurbo"></option>
         </select>
+        <!-- ALEMÃO E FRANCÊS FALTAVAM AQUI — 24/08.
+             O site fala cinco idiomas e esta lista tinha três. O efeito não era
+             a opção ausente: era `$('lang').value = LANG` não achar a opção
+             `de` e deixar o campo VAZIO, que neste seletor quer dizer
+             auto-detecção. Os dois mercados que fazem avaliação de fornecedor
+             eram os únicos que nunca conseguiam fixar o idioma da transcrição,
+             e ninguém via porque a tela não mostrava erro nenhum. -->
         <select id="lang" style="width:auto">
           <option value="pt">Português</option>
           <option value="en">English</option>
           <option value="es">Español</option>
+          <option value="de">Deutsch</option>
+          <option value="fr">Français</option>
           <option value="" data-i18n="autoDetect"></option>
         </select>
         <!-- O microfone é uma ENTRADA de transcrição, então mora com as outras.
@@ -2412,7 +2438,7 @@
       <span class="status" id="trFonteMsg" style="display:block;margin-top:6px"></span>
     </div>
 
-    <textarea id="tr" placeholder="Cole aqui a transcrição do Google Drive, ou arraste um arquivo .srt / .vtt.
+    <textarea id="tr" data-i18n-aria="trAria" placeholder="Cole aqui a transcrição do Google Drive, ou arraste um arquivo .srt / .vtt.
 
 Reconheço automaticamente:
   00:00:12,400 --> 00:00:15,900   (SRT / VTT)
@@ -3349,7 +3375,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recAdiantando:'Baixando o modelo de voz agora, para não atrasar a gravação. Pode escolher a tela quando quiser.',
       recPronto:'Modelo pronto. A gravação começa na hora.',
       recPauseBtn:'Pausar', recResumeBtn:'Retomar', recMarkBtn:'Marcar este passo',
-      recTelaBtn:'Mais uma tela deste passo',
+      recTelaBtn:'Tela adicional a este passo',
       recTelaFeita:'Mais uma tela guardada no {0}.',
       rotLbl:'Já tem o roteiro?', rotBtn:'Colar os passos',
       rotDica:'uma linha por passo — do documento que você já tem',
@@ -3473,6 +3499,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       licTirada:'Licença removida deste navegador.',
       licFormato:'Isso não parece uma chave do Walkstamp. Ela começa com WS1. e vem numa linha só.',
       licInvalida:'Esta chave não confere. Se você a recebeu por e-mail, copie a linha inteira, sem quebras.',
+      licPerto:'A sua chave vence em {0} dia(s).',
+      licPegarOutra:'Pegar a próxima na sua conta',
       licVencida:'Esta licença venceu em {0}. Fale comigo para renovar — nada do que você já gerou deixa de funcionar.',
       licSemCripto:'Este navegador não sabe conferir a assinatura da chave. Use o Chrome ou o Edge atualizados.',
       licNota:'A chave é conferida aqui dentro, sem falar com servidor nenhum — funciona offline, e nós não ficamos sabendo que ela foi usada. Ela fica guardada neste navegador até você removê-la.',
@@ -3557,6 +3585,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       diagChamado:'Abrir chamado com este relatório', diagIndo:'Montando o relatório…', diagFalhou:'Não consegui montar o relatório aqui.', fbDiagEspera:'Terminando de montar o relatório antes de enviar…',
       openSub:'Abrir uma legenda pronta', orDrag:'ou arraste o arquivo sobre o campo acima, ou cole o texto',
       subDeOnde:'.vtt ou .srt de uma reunião já transcrita pelo Teams, Meet ou Zoom — assim não precisa baixar o modelo de voz. Também dá para arrastar sobre a caixa, ou simplesmente colar.',
+      trAria:'Transcrição do vídeo',
       trPh:'Cole aqui a transcrição, ou arraste um arquivo .srt / .vtt.\n\nReconheço automaticamente:\n  00:00:12,400 --> 00:00:15,900   (SRT / VTT)\n  0:12  texto falado             (colado de um painel de legendas)\n  texto solto sem marcação de tempo\n\nCom marcação de tempo, cada quadro sai no PDF junto do que é dito naquele trecho.',
       trCues:'{0} trechos com marcação de tempo', trCues2:' — cada quadro sai junto da fala correspondente.',
       trPlain:'Texto sem marcação de tempo — vai entrar no PDF como um bloco no final.',
@@ -3690,6 +3719,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recAutoLbl:'Parar sozinho depois de', recAutoMinLbl:'minutos',
       recAutoParou:'A gravação parou sozinha no limite de {0} minutos que você definiu. Tudo o que foi capturado até aqui está no documento.',
       atalhos:'Atalhos, quando o foco não está num campo: G grava e para, M marca a tela, P pausa.',
+      recCamSemApoio:'Este navegador não abre webcam — o resto da captura funciona normalmente.',
+      recClipeSemApoio:'Este navegador não grava clipe — o resto da captura funciona normalmente.',
       recCamNao:'Não consegui abrir a webcam; a gravação continua sem ela.',
       recCamNota:'O rosto é desenhado por cima da tela, nos quadros e nos clipes. Ele NÃO participa da detecção de mudança — senão cada respiração viraria um passo novo. Como todo o resto, a imagem não sai do seu computador; e como é rosto, peça permissão a quem está sendo filmado.',
       camTD:'canto de cima, à direita', camTE:'canto de cima, à esquerda', camP:'pequena', camM:'média', camG:'grande',
@@ -3980,7 +4011,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recAdiantando:'Downloading the speech model now, so it does not delay the recording. Pick your screen whenever you like.',
       recPronto:'Model ready. Recording starts immediately.',
       recPauseBtn:'Pause', recResumeBtn:'Resume', recMarkBtn:'Mark this step',
-      recTelaBtn:'One more screen of this step',
+      recTelaBtn:'Additional screen for this step',
       recTelaFeita:'One more screen saved in {0}.',
       rotLbl:'Already have the script?', rotBtn:'Paste the steps',
       rotDica:'one line per step — from the document you already have',
@@ -4104,6 +4135,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       licTirada:'Licence removed from this browser.',
       licFormato:'That does not look like a Walkstamp key. It starts with WS1. and comes on a single line.',
       licInvalida:'This key does not check out. If you received it by email, copy the whole line, with no breaks.',
+      licPerto:'Your key expires in {0} day(s).',
+      licPegarOutra:'Get the next one in your account',
       licVencida:'This licence expired on {0}. Get in touch to renew — nothing you have already generated stops working.',
       licSemCripto:'This browser cannot verify the key signature. Use an up-to-date Chrome or Edge.',
       licNota:'The key is checked right here, without talking to any server — it works offline, and we never learn that it was used. It stays in this browser until you remove it.',
@@ -4185,6 +4218,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       diagChamado:'Open a ticket with this report', diagIndo:'Building the report…', diagFalhou:'I could not build the report here.', fbDiagEspera:'Finishing the report before sending…',
       openSub:'Open an existing transcript', orDrag:'or drag the file onto the box above, or paste the text',
       subDeOnde:'.vtt or .srt from a meeting already transcribed by Teams, Meet or Zoom — that way there is no speech model to download. You can also drag it onto the box, or just paste.',
+      trAria:'Video transcript',
       trPh:'Paste the transcript here, or drag in a .srt / .vtt file.\n\nRecognised automatically:\n  00:00:12,400 --> 00:00:15,900   (SRT / VTT)\n  0:12  spoken text              (pasted from a caption panel)\n  plain text with no timestamps\n\nWith timestamps, each frame appears in the PDF next to what is said at that point.',
       trCues:'{0} timestamped segments', trCues2:' — each frame will appear next to its matching speech.',
       trPlain:'Text without timestamps — it will go into the PDF as a block at the end.',
@@ -4312,6 +4346,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recAutoLbl:'Stop by itself after', recAutoMinLbl:'minutes',
       recAutoParou:'The recording stopped by itself at the {0}-minute limit you set. Everything captured up to here is in the document.',
       atalhos:'Shortcuts, when focus is not in a field: G records and stops, M marks the screen, P pauses.',
+      recCamSemApoio:'This browser cannot open a webcam — the rest of the capture works normally.',
+      recClipeSemApoio:'This browser cannot record a clip — the rest of the capture works normally.',
       recCamNao:'I could not open the webcam; the recording continues without it.',
       recCamNota:'The face is drawn on top of the screen, in the frames and in the clips. It does NOT take part in change detection — otherwise every breath would become a new step. Like everything else, the image never leaves your computer; and because it is a face, ask permission from whoever is being filmed.',
       camTD:'top right', camTE:'top left', camP:'small', camM:'medium', camG:'large',
@@ -4596,7 +4632,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recAdiantando:'Descargando el modelo de voz ahora, para no retrasar la grabación. Elige la pantalla cuando quieras.',
       recPronto:'Modelo listo. La grabación empieza al instante.',
       recPauseBtn:'Pausar', recResumeBtn:'Reanudar', recMarkBtn:'Marcar este paso',
-      recTelaBtn:'Una pantalla más de este paso',
+      recTelaBtn:'Pantalla adicional de este paso',
       recTelaFeita:'Una pantalla más guardada en {0}.',
       rotLbl:'¿Ya tienes el guion?', rotBtn:'Pegar los pasos',
       rotDica:'una línea por paso — del documento que ya tienes',
@@ -4720,6 +4756,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       licTirada:'Licencia quitada de este navegador.',
       licFormato:'Eso no parece una clave de Walkstamp. Empieza con WS1. y viene en una sola línea.',
       licInvalida:'Esta clave no cuadra. Si la recibiste por correo, copia la línea entera, sin saltos.',
+      licPerto:'Su clave vence en {0} día(s).',
+      licPegarOutra:'Obtener la siguiente en su cuenta',
       licVencida:'Esta licencia venció el {0}. Habla conmigo para renovar — nada de lo que ya generaste deja de funcionar.',
       licSemCripto:'Este navegador no sabe verificar la firma de la clave. Usa Chrome o Edge actualizados.',
       licNota:'La clave se verifica aquí mismo, sin hablar con ningún servidor — funciona sin conexión, y nosotros nunca nos enteramos de que se usó. Se queda en este navegador hasta que la quites.',
@@ -4801,6 +4839,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       diagChamado:'Abrir un ticket con este informe', diagIndo:'Preparando el informe…', diagFalhou:'No pude preparar el informe aquí.', fbDiagEspera:'Terminando el informe antes de enviar…',
       openSub:'Abrir una transcripción ya hecha', orDrag:'o arrastra el archivo sobre el campo de arriba, o pega el texto',
       subDeOnde:'.vtt o .srt de una reunión ya transcrita por Teams, Meet o Zoom — así no hay que descargar el modelo de voz. También puedes arrastrarlo sobre la caja, o simplemente pegar.',
+      trAria:'Transcripción del vídeo',
       trPh:'Pega aquí la transcripción, o arrastra un archivo .srt / .vtt.\n\nReconozco automáticamente:\n  00:00:12,400 --> 00:00:15,900   (SRT / VTT)\n  0:12  texto hablado            (copiado de un panel de subtítulos)\n  texto suelto sin marcas de tiempo\n\nCon marcas de tiempo, cada fotograma aparece en el PDF junto a lo que se dice en ese tramo.',
       trCues:'{0} tramos con marca de tiempo', trCues2:' — cada fotograma saldrá junto al habla correspondiente.',
       trPlain:'Texto sin marcas de tiempo — irá al PDF como un bloque al final.',
@@ -4928,6 +4967,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recAutoLbl:'Parar solo después de', recAutoMinLbl:'minutos',
       recAutoParou:'La grabación se detuvo sola en el límite de {0} minutos que definiste. Todo lo capturado hasta aquí está en el documento.',
       atalhos:'Atajos, cuando el foco no está en un campo: G graba y detiene, M marca la pantalla, P pausa.',
+      recCamSemApoio:'Este navegador no abre la webcam — el resto de la captura funciona normalmente.',
+      recClipeSemApoio:'Este navegador no graba clip — el resto de la captura funciona normalmente.',
       recCamNao:'No he podido abrir la webcam; la grabación continúa sin ella.',
       recCamNota:'La cara se dibuja encima de la pantalla, en los fotogramas y en los clips. NO participa en la detección de cambio — si no, cada respiración sería un paso nuevo. Como todo lo demás, la imagen no sale de tu ordenador; y como es una cara, pide permiso a quien está siendo filmado.',
       camTD:'arriba a la derecha', camTE:'arriba a la izquierda', camP:'pequeña', camM:'mediana', camG:'grande',
@@ -5211,7 +5252,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recAdiantando:'Das Spracherkennungsmodell wird jetzt heruntergeladen, damit es die Aufnahme nicht verzögert. Sie können den Bildschirm jederzeit auswählen.',
       recPronto:'Modell bereit. Die Aufnahme startet sofort.',
       recPauseBtn:'Pause', recResumeBtn:'Fortsetzen', recMarkBtn:'Diesen Schritt markieren',
-      recTelaBtn:'Noch ein Bildschirm zu diesem Schritt',
+      recTelaBtn:'Zusätzlicher Bildschirm zu diesem Schritt',
       recTelaFeita:'Noch ein Bildschirm in {0} gespeichert.',
       rotLbl:'Haben Sie das Skript schon?', rotBtn:'Schritte einfügen',
       rotDica:'eine Zeile pro Schritt — aus dem Dokument, das Sie schon haben',
@@ -5335,6 +5376,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       licTirada:'Lizenz aus diesem Browser entfernt.',
       licFormato:'Das sieht nicht nach einem Walkstamp-Schlüssel aus. Er beginnt mit WS1. und steht in einer einzigen Zeile.',
       licInvalida:'Dieser Schlüssel stimmt nicht. Wenn Sie ihn per E-Mail erhalten haben, kopieren Sie die ganze Zeile ohne Umbrüche.',
+      licPerto:'Ihr Schlüssel läuft in {0} Tag(en) ab.',
+      licPegarOutra:'Den nächsten in Ihrem Konto holen',
       licVencida:'Diese Lizenz ist am {0} abgelaufen. Wenden Sie sich an uns, um sie zu verlängern — nichts, was Sie bereits erzeugt haben, hört auf zu funktionieren.',
       licSemCripto:'Dieser Browser kann die Signatur des Schlüssels nicht prüfen. Verwenden Sie ein aktuelles Chrome oder Edge.',
       licNota:'Der Schlüssel wird hier im Browser geprüft, ohne Kontakt zu einem Server — das funktioniert offline, und wir erfahren nicht, dass er verwendet wurde. Er bleibt in diesem Browser gespeichert, bis Sie ihn entfernen.',
@@ -5416,6 +5459,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       diagChamado:'Ticket mit diesem Bericht eröffnen', diagIndo:'Bericht wird erstellt…', diagFalhou:'Der Bericht konnte hier nicht erstellt werden.', fbDiagEspera:'Bericht wird vor dem Senden fertiggestellt…',
       openSub:'Fertige Untertiteldatei öffnen', orDrag:'oder ziehen Sie die Datei auf das Feld oben, oder fügen Sie den Text ein',
       subDeOnde:'.vtt oder .srt aus einer Besprechung, die Teams, Meet oder Zoom bereits transkribiert hat — so muss kein Spracherkennungsmodell heruntergeladen werden. Sie können die Datei auch auf das Feld ziehen oder den Text einfach einfügen.',
+      trAria:'Transkription des Videos',
       trPh:'Fügen Sie hier die Transkription ein oder ziehen Sie eine .srt-/.vtt-Datei hierher.\n\nAutomatisch erkannt werden:\n  00:00:12,400 --> 00:00:15,900   (SRT / VTT)\n  0:12  gesprochener Text         (aus einem Untertitelfenster kopiert)\n  reiner Text ohne Zeitmarken\n\nMit Zeitmarken erscheint jeder Screenshot im PDF neben dem, was in diesem Abschnitt gesagt wird.',
       trCues:'{0} Abschnitte mit Zeitmarke', trCues2:' — jeder Screenshot erscheint neben dem, was dort gesagt wird.',
       trPlain:'Text ohne Zeitmarken — er kommt als Block am Ende ins PDF.',
@@ -5543,6 +5587,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recAutoLbl:'Von selbst stoppen nach', recAutoMinLbl:'Minuten',
       recAutoParou:'Die Aufnahme wurde beim von Ihnen gesetzten Limit von {0} Minuten von selbst gestoppt. Alles bis hierher Erfasste steht im Dokument.',
       atalhos:'Tastenkürzel, wenn der Fokus nicht in einem Feld liegt: G startet und stoppt die Aufnahme, M markiert den Bildschirm, P pausiert.',
+      recCamSemApoio:'Dieser Browser öffnet keine Webcam — der Rest der Aufnahme funktioniert normal.',
+      recClipeSemApoio:'Dieser Browser nimmt keinen Clip auf — der Rest der Aufnahme funktioniert normal.',
       recCamNao:'Die Webcam konnte nicht geöffnet werden; die Aufnahme läuft ohne sie weiter.',
       recCamNota:'Das Gesicht wird über den Bildschirm gezeichnet, in den Screenshots und in den Clips. Es nimmt NICHT an der Änderungserkennung teil — sonst würde jeder Atemzug zu einem neuen Schritt. Wie alles andere verlässt das Bild Ihren Computer nicht; und weil es ein Gesicht ist, holen Sie die Erlaubnis der gefilmten Person ein.',
       camTD:'oben rechts', camTE:'oben links', camP:'klein', camM:'mittel', camG:'groß',
@@ -5832,7 +5878,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recAdiantando:'Téléchargement du modèle de reconnaissance vocale maintenant, pour ne pas retarder l’enregistrement. Vous pouvez choisir l’écran quand vous voulez.',
       recPronto:'Modèle prêt. L’enregistrement démarre immédiatement.',
       recPauseBtn:'Pause', recResumeBtn:'Reprendre', recMarkBtn:'Marquer cette étape',
-      recTelaBtn:'Un écran de plus pour cette étape',
+      recTelaBtn:'Écran supplémentaire pour cette étape',
       recTelaFeita:'Un écran de plus enregistré dans {0}.',
       rotLbl:'Vous avez déjà le script ?', rotBtn:'Coller les étapes',
       rotDica:'une ligne par étape — du document que vous avez déjà',
@@ -5956,6 +6002,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       licTirada:'Licence retirée de ce navigateur.',
       licFormato:'Cela ne ressemble pas à une clé Walkstamp. Elle commence par WS1. et tient sur une seule ligne.',
       licInvalida:'Cette clé n’est pas valide. Si vous l’avez reçue par e-mail, copiez la ligne entière, sans saut de ligne.',
+      licPerto:'Votre clé expire dans {0} jour(s).',
+      licPegarOutra:'Obtenir la suivante dans votre compte',
       licVencida:'Cette licence a expiré le {0}. Contactez-nous pour la renouveler — rien de ce que vous avez déjà généré ne cesse de fonctionner.',
       licSemCripto:'Ce navigateur ne sait pas vérifier la signature de la clé. Utilisez une version à jour de Chrome ou d’Edge.',
       licNota:'La clé est vérifiée ici même, sans contacter aucun serveur — cela fonctionne hors ligne, et nous ne savons pas qu’elle a été utilisée. Elle reste dans ce navigateur jusqu’à ce que vous la retiriez.',
@@ -6037,6 +6085,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       diagChamado:'Ouvrir un ticket avec ce rapport', diagIndo:'Préparation du rapport…', diagFalhou:'Je n’ai pas pu préparer le rapport ici.', fbDiagEspera:'Finalisation du rapport avant l’envoi…',
       openSub:'Ouvrir un fichier de sous-titres', orDrag:'ou déposez le fichier sur le champ ci-dessus, ou collez le texte',
       subDeOnde:'.vtt ou .srt d’une réunion déjà transcrite par Teams, Meet ou Zoom — ainsi, aucun modèle de reconnaissance vocale à télécharger. Vous pouvez aussi le déposer sur la zone, ou simplement coller.',
+      trAria:'Transcription de la vidéo',
       trPh:'Collez ici la transcription, ou déposez un fichier .srt / .vtt.\n\nReconnaissance automatique :\n  00:00:12,400 --> 00:00:15,900   (SRT / VTT)\n  0:12  texte parlé              (collé d’un panneau de sous-titres)\n  texte brut sans marquage temporel\n\nAvec marquage temporel, chaque capture sort dans le PDF à côté de ce qui est dit dans ce segment.',
       trCues:'{0} segments horodatés', trCues2:' — chaque capture sort à côté de la parole correspondante.',
       trPlain:'Texte sans marquage temporel — il entrera dans le PDF comme un bloc à la fin.',
@@ -6164,6 +6213,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recAutoLbl:'Arrêter tout seul après', recAutoMinLbl:'minutes',
       recAutoParou:'L’enregistrement s’est arrêté tout seul à la limite de {0} minutes que vous avez définie. Tout ce qui a été capturé jusqu’ici est dans le document.',
       atalhos:'Raccourcis, quand le focus n’est pas dans un champ : G lance et arrête l’enregistrement, M marque l’écran, P met en pause.',
+      recCamSemApoio:'Ce navigateur n’ouvre pas de webcam — le reste de la capture fonctionne normalement.',
+      recClipeSemApoio:'Ce navigateur n’enregistre pas de clip — le reste de la capture fonctionne normalement.',
       recCamNao:'Impossible d’ouvrir la webcam ; l’enregistrement continue sans elle.',
       recCamNota:'Le visage est dessiné par-dessus l’écran, dans les captures et dans les clips. Il ne participe PAS à la détection de changement — sinon chaque respiration deviendrait une nouvelle étape. Comme tout le reste, l’image ne quitte pas votre ordinateur ; et comme il s’agit d’un visage, demandez l’autorisation à la personne filmée.',
       camTD:'en haut à droite', camTE:'en haut à gauche', camP:'petite', camM:'moyenne', camG:'grande',
@@ -7509,7 +7560,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
        na hora, como frame. Num arquivo, só anotamos o momento e a varredura
        busca depois. */
     if (liveOn) {
-      frames.push({ t: liveAgora(), img: snap(900, parseFloat($('quality').value)),
+      frames.push({ t: liveAgora(), img: snap(0, parseFloat($('quality').value)),
                     keep: true, manual: true });
       $('grabbed').textContent = t('marked', frames.filter(f => f.manual).length);
       atualizarLive();
@@ -9154,13 +9205,61 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     anotPintar();
   }
 
+  /* SALVAR NÃO PODE TIRAR O TECLADO DA PESSOA.
+
+     O defeito, relatado como "o texto depois de salvo não libera para um novo
+     texto", e ele não estava em nenhum dos estados: estava no FOCO. Salvar
+     desliga o botão de salvar — é assim que ele responde "guardei". Só que
+     desligar um botão que está com o foco devolve o foco ao `body`. Quem
+     acabou de clicar em Salvar com o mouse continuava digitando, e cada tecla
+     ia para lugar nenhum: o campo mostrando o texto antigo, o botão cinza, e a
+     conclusão inevitável de que a caixa tinha travado.
+
+     Na janelinha é pior do que na aba, porque ali não há para onde clicar de
+     volta sem sair da tela que está sendo gravada.
+
+     Então quem salva devolve o cursor ao campo em que se escreveu, com o
+     cursor no fim do texto — pronto para continuar. Não seleciona nada: uma
+     seleção faria a primeira tecla apagar a anotação que acabou de ser
+     guardada, que é trocar um defeito por outro pior.
+
+     Isto vale para o GESTO de salvar, e não para o `anotGuardar` em geral: sair
+     do campo também guarda, e ali devolver o foco seria arrancá-lo de onde a
+     pessoa acabou de clicar.
+
+     E DEVOLVER O FOCO SOZINHO NÃO BASTAVA — foi a segunda descoberta, e ela
+     explica por que o defeito era tão sólido. Clicar no botão de salvar tira o
+     foco do campo ANTES do clique chegar. O `onblur` guarda, o `anotPintar`
+     desliga o botão, e um botão desligado não dispara clique nenhum: a função
+     pendurada no `onclick` nunca rodava. Todo o salvamento acontecia pelo
+     caminho do `blur`, e o foco ficava no `body` porque o botão se desligou
+     com ele na mão.
+
+     Por isso o `onmousedown` recusa o padrão: o botão deixa de tomar o foco, o
+     campo não perde o dele, o `blur` não acontece, e o clique chega inteiro no
+     `onclick`. Um botão que não rouba o foco é o que ele sempre deveria ter
+     sido — ele não é um lugar onde se escreve. */
+  function anotGuardarEContinuar(campo){
+    anotGuardar();
+    if (!campo || !campo.isConnected || campo.disabled) return;
+    try {
+      campo.focus();
+      const fim = campo.value.length;
+      campo.setSelectionRange(fim, fim);
+    } catch (e) {}
+  }
+
   if ($('anotSalvar')) {
-    $('anotSalvar').onclick = anotGuardar;
+    /* Não roubar o foco do campo: veja o porquê logo acima. */
+    $('anotSalvar').onmousedown = e => e.preventDefault();
+    $('anotSalvar').onclick = () => anotGuardarEContinuar($('anotTxt'));
     $('anotTxt').oninput = anotDigitou;
     /* Ctrl+Enter guarda sem tirar a mão do teclado. Enter sozinho quebra linha:
        é uma caixa de texto, e roubar o Enter dela seria roubar o parágrafo. */
     $('anotTxt').onkeydown = e => {
-      if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); anotGuardar(); }
+      if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault(); anotGuardarEContinuar($('anotTxt'));
+      }
     };
     /* Sair do campo guarda também. Ninguém deveria perder texto por ter clicado
        fora — e durante uma gravação clicar fora é o gesto mais provável. */
@@ -9183,7 +9282,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      depois, e não tem como se atualizar sozinho. Sem carimbo, "estou com um
      problema no offline" é uma conversa sem chão — ninguém sabe de qual build
      se fala nem se o defeito já foi consertado. */
-  const VERSAO = '2026.08.24-2';
+  const VERSAO = '2026.08.26-1';
   window.__versao = () => VERSAO;
 
   const PIP_CSS = `
@@ -9204,8 +9303,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
        aparece nos quadros. Então ela encolhe: menos respiro, menos altura de
        botão, e nada que não seja usado durante a gravação. */
     body{font:13px/1.35 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
-         background:#121419;color:#e9ebf1;padding:11px;display:flex;
-         flex-direction:column;gap:6px;justify-content:safe center;height:100vh;
+         background:#121419;color:#e9ebf1;padding:14px 13px;display:flex;
+         flex-direction:column;gap:9px;justify-content:safe center;height:100vh;
          overflow-y:auto}
     /* ---- O ROTEIRO, EM CIMA DE TUDO ----
        Quem colou a lista de passos está seguindo uma lista, e a janelinha é a
@@ -9218,10 +9317,14 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
        relance, sem parar o que se esta fazendo. E fica em cima porque e o que
        se consulta ANTES de agir; o relogio e o medidor sao conferencia. */
     .rot{border-bottom:1px solid #282c36;padding:0 0 6px;margin:0 0 1px}
-    .rotN{display:block;font:700 11px/1.2 system-ui,sans-serif;color:#737cf0;
+    /* MAIORES do que eram (11px e 14.5px). O roteiro e lido DE RELANCE, no meio
+       de outra coisa: a pessoa esta dentro do sistema que documenta e volta o
+       olho aqui por um segundo para saber onde esta e o que vem. Um tamanho que
+       obriga a parar e ler ja custou o que a janelinha existe para poupar. */
+    .rotN{display:block;font:700 12.5px/1.2 system-ui,sans-serif;color:#737cf0;
           letter-spacing:.3px;text-transform:uppercase}
-    .rotT{display:block;font:600 14.5px/1.28 system-ui,-apple-system,sans-serif;
-          color:#f2f4f9;margin-top:2px;
+    .rotT{display:block;font:600 16.5px/1.28 system-ui,-apple-system,sans-serif;
+          color:#f2f4f9;margin-top:3px;
           /* Tres linhas e reticencias: um passo de roteiro pode ter uma frase
              inteira, e deixa-la crescer sem limite empurraria PARAR para fora
              da janela -- que foi o defeito que esta rodada acabou de consertar
@@ -9241,7 +9344,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
           overflow:hidden}
     /* Acabou a lista. Nao some: sumir faria a janelinha encolher no meio da
        gravacao e a pessoa se perguntar o que ela perdeu. */
-    .rot.fim .rotT{color:#949bab;font-weight:500;font-size:12.5px}
+    .rot.fim .rotT{color:#949bab;font-weight:500;font-size:14px}
     .top{display:flex;align-items:center;gap:8px}
     .dot{width:10px;height:10px;border-radius:50%;background:#ef8484;flex:none;
          animation:pulsa 1.4s ease-in-out infinite}
@@ -9289,15 +9392,76 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
                font-size:12.5px;padding:6px}
     button.sec:hover:not(:disabled){border-color:#737cf0;color:#a9b2ff}
     button.sec.off{border-color:#ef8484;color:#ef8484}
-    /* Marcar é o gesto frequente: ele é o cheio. */
-    button#marcar{background:#737cf0;color:#121419;border:0;font-size:13.5px;padding:8px}
-    /* Mais uma tela é o aditivo: contorno, e menor. Dois botões do mesmo peso
-       obrigariam a escolher entre iguais no pior momento possível. */
-    button#maisTela{font-size:11.5px;padding:6px;opacity:.9}
-    button#maisTela:hover:not(:disabled){opacity:1}
+    /* Marcar é o gesto frequente: ele é o cheio, e o maior da janela. É o único
+       botão aqui que se aperta dezenas de vezes numa gravação, e apertá-lo é
+       feito de relance, com o olho no sistema que está sendo documentado. */
+    button#marcar{background:#737cf0;color:#121419;border:0;font-size:15.5px;
+                  padding:10px;font-weight:700}
+    /* A TELA ADICIONAL É DA MESMA FAMÍLIA, e o contorno cinza não dizia isso:
+       ela parecia parente do pausar e do calar, que são de outra natureza —
+       aqueles mexem na gravação, estes dois GUARDAM o que a pessoa veio
+       guardar. Agora ela é o mesmo azul, em versão mais clara: o preenchimento
+       vem apagado e o texto vem no azul claro.
+
+       Mais clara, e não mais forte, porque a hierarquia não pode inverter. Um
+       azul cheio e pálido chamaria MAIS atenção que o cheio saturado, e a
+       escolha entre os dois aconteceria no pior momento possível — no meio da
+       gravação, de relance. Ela pertence à família e continua sendo a segunda. */
+    button#maisTela{background:rgba(115,124,240,.20);color:#a9b2ff;
+                    border:1px solid rgba(115,124,240,.55);
+                    font-size:12.5px;padding:7px;opacity:1}
+    button#maisTela:hover:not(:disabled){background:rgba(115,124,240,.32);
+                    border-color:#737cf0;color:#c4c9ff}
+    button#maisTela:disabled{opacity:.5}
     /* PARAR é o único irreversível da janela: vermelho, e só ele. */
     button#stop{background:#e03131;color:#fff}
     button#stop:hover:not(:disabled){background:#f03e3e}
+    /* ---- OS TRÊS COMANDOS DE GRAVAÇÃO GANHAM UM DESENHO ----
+
+       Pausar, o microfone e Parar são lidos de relance, por cima do sistema que
+       a pessoa está documentando — e três retângulos com texto dentro só se
+       distinguem depois de ler os três. O desenho é reconhecido antes da
+       palavra, que é o que essa pressa exige. A palavra fica: um ícone sozinho
+       é adivinhação, e o botão irreversível desta janela não pode depender de
+       adivinhação.
+
+       São MÁSCARAS, e não texto. Um caractere de pausa ou de microfone depende
+       da fonte da máquina: onde ela não tem o glifo sai um quadradinho vazio,
+       e um quadradinho vazio antes de PARAR é pior do que nada. A máscara é
+       desenho vetorial embutido, igual em qualquer máquina.
+
+       E é máscara em vez de imagem porque a cor vem da cor do próprio texto: o
+       pausar fica vermelho quando pausado, o microfone fica vermelho quando
+       fechado, e o desenho acompanha sem uma segunda lista de cores para
+       alguém esquecer de atualizar. NADA DE CRASE AQUI: este bloco é um
+       template literal. */
+    button#pausa,button#calar,button#stop{display:flex;align-items:center;
+                  justify-content:center;gap:7px}
+    button#pausa::before,button#calar::before,button#stop::before{
+                  content:'';flex:none;width:14px;height:14px;
+                  background-color:currentColor;
+                  -webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;
+                  -webkit-mask-position:center;mask-position:center;
+                  -webkit-mask-size:contain;mask-size:contain}
+    /* Duas barras. Pausado, ele passa a oferecer o oposto — e vira a seta de
+       retomar, porque o rótulo também virou "Retomar". */
+    button#pausa::before{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M7 5h4v14H7zM13 5h4v14h-4z'/%3E%3C/svg%3E");
+                  mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M7 5h4v14H7zM13 5h4v14h-4z'/%3E%3C/svg%3E")}
+    button#pausa.off::before{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M7 4l13 8-13 8z'/%3E%3C/svg%3E");
+                  mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M7 4l13 8-13 8z'/%3E%3C/svg%3E")}
+    /* O microfone, e com o traço em cima quando está fechado: o estado do
+       microfone é o que essa pessoa mais esquece durante uma gravação. */
+    button#calar::before{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 14a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v5a3 3 0 0 0 3 3z'/%3E%3Cpath d='M6 11a6 6 0 0 0 5 5.92V20H9v2h6v-2h-2v-3.08A6 6 0 0 0 18 11h-2a4 4 0 0 1-8 0z'/%3E%3C/svg%3E");
+                  mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 14a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v5a3 3 0 0 0 3 3z'/%3E%3Cpath d='M6 11a6 6 0 0 0 5 5.92V20H9v2h6v-2h-2v-3.08A6 6 0 0 0 18 11h-2a4 4 0 0 1-8 0z'/%3E%3C/svg%3E")}
+    button#calar.off::before{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 14a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v5a3 3 0 0 0 3 3z'/%3E%3Cpath d='M6 11a6 6 0 0 0 5 5.92V20H9v2h6v-2h-2v-3.08A6 6 0 0 0 18 11h-2a4 4 0 0 1-8 0z'/%3E%3Cpath d='M3 2.5l18.5 18.5' stroke='black' stroke-width='2.6' fill='none'/%3E%3C/svg%3E");
+                  mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 14a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v5a3 3 0 0 0 3 3z'/%3E%3Cpath d='M6 11a6 6 0 0 0 5 5.92V20H9v2h6v-2h-2v-3.08A6 6 0 0 0 18 11h-2a4 4 0 0 1-8 0z'/%3E%3Cpath d='M3 2.5l18.5 18.5' stroke='black' stroke-width='2.6' fill='none'/%3E%3C/svg%3E")}
+    /* O quadrado cheio de parar. É o desenho universal do irreversível. */
+    button#stop::before{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 6h12v12H6z'/%3E%3C/svg%3E");
+                  mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 6h12v12H6z'/%3E%3C/svg%3E")}
+    /* Durante a contagem só o PARAR fica, e ali ele é um botão sozinho numa
+       janela vazia: o desenho não tem com quem se distinguir e o número da
+       contagem é o que precisa do espaço. */
+    body.contando button#stop::before{display:none}
     /* O flash de "guardei". Numa janelinha de 250 px não cabe uma mensagem de
        confirmação ao lado do botão — então o próprio botão confirma. Verde, e
        nunca o azul de antes: confirmar e parar não podem ter a mesma cor. */
@@ -9322,7 +9486,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
        o respiro do corpo (7px) uma vez em vez de quatro. Vinte pixels numa
        janela de 282 é a diferença entre caber e transbordar — e transbordar,
        aqui, é o botão de PARAR saindo pela borda de baixo. */
-    .notaCx{display:flex;flex-direction:column;gap:3px}
+    .notaCx{display:flex;flex-direction:column;gap:5px}
     .notaLbl{display:block;font-size:10.5px;font-weight:700;color:#737cf0;line-height:1.25}
     /* Igual ao da aba: desligado porque não há nada novo para guardar, mas com
        opacidade cheia — o estado "salvo" É a confirmação, e desbotá-la é apagar
@@ -9370,7 +9534,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
          quem nao colou lista nenhuma -- e cada pixel daqui e um pixel a menos
          do trabalho que a pessoa esta documentando. */
       pipWin = await documentPictureInPicture.requestWindow(
-        { width: 250, height: roteiro.length ? 486 : 392 });
+        { width: 250, height: roteiro.length ? 560 : 430 });
     } catch (e) { pipWin = null; return; }
 
     const d = pipWin.document;
@@ -9440,10 +9604,18 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
         nt.oninput = anotDigitou;
         nt.onblur = () => { if (anotSujo) anotGuardar(); };
         nt.onkeydown = e => {
-          if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); anotGuardar(); }
+          if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+            e.preventDefault(); anotGuardarEContinuar(nt);
+          }
         };
       }
-      if (ok) { ok.textContent = t('anotSalvar'); ok.onclick = anotGuardar; }
+      /* Salvar devolve o cursor ao campo DESTA janela. Devolvê-lo ao campo do
+         cartão mandaria o teclado para a aba que está atrás da tela gravada. */
+      if (ok) {
+        ok.textContent = t('anotSalvar');
+        ok.onmousedown = e => e.preventDefault();
+        ok.onclick = () => anotGuardarEContinuar(nt);
+      }
       /* A janelinha nasceu no meio de uma gravação: se já há quadro em
          comentário, ela abre mostrando o texto dele. */
       anotApontar(anotAlvo);
@@ -11085,7 +11257,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
          dentro do `setInterval` derrubaria o laço inteiro em silêncio, e o que
          chega é "gravei e não veio frame nenhum". */
       let img;
-      try { img = snap(900, q); }
+      try { img = snap(0, q); }
       catch (e) { motivosFrame.semImagem++; motivosFrame.erroImagem =
                     (e && e.message) || String(e); return false; }
       /* Espelho para o teste enxergar por que um quadro entrou ou não. Custa
@@ -11740,16 +11912,28 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      depois de um erro de digitação) faz TODOS os degraus da fila falharem
      identicamente, com a rede aparentando estar perfeita no diagnóstico. Foi
      por isso que este ponto passou a ser testado e relatado, e não só usado. */
-  /* A ordem aqui é resultado de medição, não de preferência pelo novo. Numa
-     máquina Windows/Chrome 151 real, a 4.2.0 falhava em TODA configuração com
-     `MatMulNBits Missing required scale`, e a 3.x montou de primeira com o
-     mesmo arquivo. Enquanto não houver caso contrário, o padrão é a que
-     funciona; a 4.2.0 continua na fila, logo atrás. */
-  const TJS_BASES = [
-    'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3',
-    'https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.2.0',
-    'https://cdn.jsdelivr.net/npm/@huggingface/transformers'
-  ];
+  /* ---- A LISTA VEM DO `src/versoes.json`, E TODAS AS VERSÕES SÃO EXATAS ----
+   *
+   * A ordem é resultado de medição, não de preferência pelo novo: numa máquina
+   * Windows/Chrome 151 real a 4.2.0 falhava em TODA configuração com
+   * `MatMulNBits Missing required scale`, e a 3.x montou de primeira com o
+   * mesmo arquivo. A justificativa mora no manifesto, junto dos números.
+   *
+   * DUAS DAS TRÊS ENTRADAS FLUTUAVAM. A primeira era `@3` — um `major` aberto,
+   * e o motor de voz DESTE produto: qualquer 3.9 publicada no CDN passaria a
+   * rodar aqui sem um commit. A terceira não tinha versão nenhuma: `latest`, o
+   * que o CDN estiver publicando no dia, inclusive um `major` novo. Era a
+   * entrada de último recurso, acionada justamente quando tudo o mais já
+   * falhou — a pior hora possível para estrear uma biblioteca.
+   *
+   * E ela nem era um salva-vidas: `latest` resolve hoje para a MESMA 4.2.0 da
+   * segunda linha. Três tentativas, dois arquivos. Agora são três versões
+   * diferentes, todas exatas.
+   *
+   * Fixar não mudou o que roda hoje — `@3` já entregava 3.8.1. Mudou quem
+   * decide: a atualização virou escolha com aviso (`testes/versoes.mjs`
+   * consulta o npm e reprova quando há versão mais nova) em vez de acidente. */
+  const TJS_BASES = ["https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.8.1", "https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.2.0", "https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.8.0"];
   let tjsEmUso = null, tjsMod = null, tjsErros = [];
 
   async function importarTjs(){
@@ -12363,6 +12547,19 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     if (!dados.a || dados.a < hoje) return { erro: t('licVencida', dados.a || '?') };
     return { dados };
   }
+
+  /* Quantos dias faltam para a licença vencer, ou `null` quando não há
+     licença. Fração conta como dia inteiro, pelo mesmo motivo do `conferir`:
+     a validade é meia-noite e o relógio de agora não é. */
+  /* DEZ DIAS, e a constante mora AQUI porque é aqui que ela é usada primeiro.
+     Ela nasceu junto da renovação, seiscentas linhas abaixo, e `const` em zona
+     morta temporal não devolve `undefined`: derruba a carga inteira com um
+     ReferenceError. O aviso na tela roda antes da renovação. */
+  const RENOVAR_FALTANDO = 10;      // dias
+
+  const diasDeLicenca = () => (licenca && licenca.a)
+    ? Math.ceil((new Date(licenca.a + 'T00:00:00Z') - Date.now()) / 86400000)
+    : null;
 
   const LIC_CHAVE = 'Walkstamp.licenca';
   let licenca = null;                     // { q, n, a, p } quando ativa
@@ -13576,7 +13773,16 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
          são coisas diferentes, e a diferença tem que ser dita antes, não
          descoberta depois. */
       (diasDeDegustacao() != null
-        ? `<p class="status" style="margin:6px 0 0">${t('degustacao', diasDeDegustacao())}</p>` : '');
+        ? `<p class="status" style="margin:6px 0 0">${t('degustacao', diasDeDegustacao())}</p>` : '') +
+      /* O AVISO VEM ANTES DE VENCER, e com o caminho para a próxima chave.
+         O que existia era o contrário: no dia seguinte ao vencimento, a
+         ferramenta dizia "fale comigo para renovar" — depois de a marca do
+         cliente já ter sumido do documento, e sem dizer para onde ir.
+         Dez dias é o prazo de quem trabalha: cabe uma semana de férias e ainda
+         sobra a segunda-feira. */
+      (diasDeLicenca() != null && diasDeLicenca() <= RENOVAR_FALTANDO
+        ? `<p class="status" style="margin:6px 0 0">${t('licPerto', diasDeLicenca())} ` +
+          `<a href="${CAMINHO_CONTA[LANG] || '/conta'}">${t('licPegarOutra')}</a></p>` : '');
     if (typeof pintarMarcaCliente === 'function') pintarMarcaCliente();
   }
 
@@ -13584,6 +13790,21 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      uma degustação. Catorze dias é o que o emissor dá a um e-mail novo; uma
      licença de noventa é contrato, e contrato não se chama de degustação. */
   function diasDeDegustacao(){
+    /* UM TIME NUNCA É DEGUSTAÇÃO — 24/08, e isto era uma frase falsa dita a
+       quem paga.
+       A regra abaixo identifica degustação por DIAS RESTANTES, que é um palpite:
+       a chave não carrega a data de emissão, só a de vencimento, então não há
+       como saber se catorze dias são o começo de uma degustação ou o fim de um
+       contrato. Com a chave de time valendo 45 dias, os últimos catorze diziam
+       "Degustação: 14 dias restantes" para um cliente pagante — e encurtar o
+       prazo para 21 faria isso valer por mais tempo ainda.
+       Degustação é de e-mail novo, e e-mail novo não vem com plano de time. É a
+       única distinção que os dados da chave permitem fazer com segurança.
+       O que fica: uma chave PERSONAL curta continua sem como ser distinguida de
+       uma degustação, porque as duas se parecem em tudo que a chave carrega.
+       Resolver aquilo exige a data de emissão dentro da licença, e isso é o
+       emissor — que não mora neste repositório. */
+    if (licenca && licenca.p === 'time') return null;
     /* `a` é a data de validade da licença, o mesmo campo que a frase "até {2}"
        já mostra. Extraído em AAAA-MM-DD para não depender do formato de
        exibição, que muda com o idioma. */
@@ -14163,7 +14384,64 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     pintarLicenca();
     marcaDaUrl();
     if (r.erro) $('licMsg').innerHTML = `<span class="err">${r.erro}</span>`;
+    renovarSePerto();
   })();
+
+  /* A CHAVE SE RENOVA SOZINHA — e era isso que o `lib/stripe.ts` já prometia,
+     em comentário, sem ninguém cumprir:
+     "uma licença curta que se renova sozinha enquanto a assinatura estiver viva
+      para de renovar sozinha quando ela morrer."
+     O que existia era o contrário: a chave vale 45 dias, nada a renovava, e ao
+     vencer a ferramenta dizia "fale comigo para renovar". Quem paga por ano
+     voltava à conta oito vezes por ano para colar uma chave.
+
+     QUEM RENOVA É QUEM ABRE A FERRAMENTA, e não uma tarefa agendada. A escolha
+     é do desenho do produto: um cron precisaria de um servidor sabendo quando
+     cada licença vence e de um e-mail saindo daqui — e a tese é que a chave é
+     conferida no navegador, sem consulta a servidor de licença. Renovar no uso
+     mantém isso de pé: sem sessão, sem rede ou sem nada a renovar, a ferramenta
+     segue funcionando igual.
+
+     PERTO, e não vencida: às vésperas de vencer ainda dá para pedir outra. No
+     dia seguinte já não há licença válida para substituir, e a pessoa cai na
+     tela de colar chave — que é justamente o que isto veio evitar.
+
+     E SILENCIOSA quando dá certo: renovar é manutenção, não notícia. O que
+     aparece na tela é o resultado — a validade nova, pintada por
+     `pintarLicenca`. Falhou, também não grita: a licença de agora continua
+     valendo, e quem falha é a tentativa, não o produto. Só a última tentativa
+     antes de vencer merece a tela, e essa a mensagem de vencida já cobre. */
+  async function renovarSePerto(){
+    if (!licenca || !licenca.a) return;
+    if (!sessao || !sessao.token || !MEDIR_URL) return;
+    const faltam = Math.ceil((new Date(licenca.a + 'T00:00:00Z') - Date.now()) / 86400000);
+    if (faltam > RENOVAR_FALTANDO) return;
+    let nova = null;
+    try {
+      const r = await fetch(MEDIR_URL + '/functions/v1/walkstamp-licenca', {
+        method: 'POST',
+        headers: { apikey: MEDIR_KEY, Authorization: 'Bearer ' + sessao.token,
+                   'Content-Type': 'application/json' },
+        body: '{}'
+      });
+      const d = await r.json().catch(() => null);
+      if (!r.ok || !d || !d.link) return;
+      /* O servidor devolve um LINK com a chave dentro, que é o formato que ele
+         manda por e-mail. Aqui só a chave interessa: guardar o endereço seria
+         guardar a chave dentro de uma URL, que é o que a ferramenta já se
+         recusa a deixar na barra. */
+      nova = new URL(d.link, location.href).searchParams.get('lic');
+    } catch (e) { return; }
+    if (!nova) return;
+    const c = await conferirLicenca(nova);
+    /* Só troca se a nova PASSAR e valer mais que a de agora. Uma resposta
+       estranha não pode piorar o que já está guardado. */
+    if (!c.dados || !c.dados.a || c.dados.a <= licenca.a) return;
+    licenca = c.dados;
+    try { localStorage.setItem(LIC_CHAVE, nova.trim()); } catch (e) {}
+    medir('ativou_licenca', { p_origem: 'renovacao' });
+    pintarLicenca();
+  }
 
   /* O nome do cliente também vem no link — e só faz efeito com o plano ativo,
      porque é ele que desenha a marca no documento.
@@ -14474,10 +14752,52 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      contar o problema; a lista de capacidades do navegador é o que NÓS
      precisamos, e pedi-la de quem já está irritado é pedir errado. Quem não
      quiser mandar, desmarca — e ela fica visível antes de sair. */
+  /* ---- UM DIÁLOGO MODAL PRENDE O FOCO, OU NÃO É MODAL ----
+
+     Os três diálogos da ferramenta declaram `aria-modal="true"`. Medido, o
+     recado (`#fbModal`) deixava o foco sair em 21 de 25 tabulações: quem usa
+     teclado ou leitor de tela saía para a página de trás com o diálogo aberto,
+     e o `aria-modal` estava dizendo à tecnologia assistiva uma coisa que não
+     era verdade. Dizer o falso para um leitor de tela é pior do que não dizer
+     nada: ele para de anunciar o que está atrás justamente porque acreditou.
+
+     A trava usa `inert`, que o produto já usa para travar cartão — ele tira o
+     ramo da ordem de foco E da árvore de acessibilidade, que é exatamente o
+     que se quer, e não precisa de laço de teclas.
+
+     E ela sobe até o corpo tornando inertes os IRMÃOS de cada nível: os
+     diálogos não são filhos diretos do `body`, então marcar só os irmãos do
+     topo deixaria vivo tudo que divide o pai com eles. */
+  let modalAnterior = null;
+  function modalPrender(dlg, abrir){
+    if (abrir) {
+      modalAnterior = document.activeElement;
+      for (let n = dlg; n && n.parentElement && n !== document.body; n = n.parentElement) {
+        for (const irmao of n.parentElement.children) {
+          if (irmao === n || irmao.hasAttribute('inert')) continue;
+          irmao.setAttribute('inert', '');
+          irmao.dataset.inerteModal = '1';
+        }
+      }
+    } else {
+      document.querySelectorAll('[data-inerte-modal]').forEach(e => {
+        e.removeAttribute('inert');
+        delete e.dataset.inerteModal;
+      });
+      /* O foco volta de onde saiu. Sem isto o teclado recomeça no topo da
+         página, e quem fechou o diálogo perde o lugar onde estava. */
+      if (modalAnterior && document.contains(modalAnterior)) {
+        try { modalAnterior.focus(); } catch (e) {}
+      }
+      modalAnterior = null;
+    }
+  }
+
   let fbTipo = 'problema';
   let fbDiagPronto = null;
   const fbAbrir = async (abrir) => {
     $('fbModal').classList.toggle('hide', !abrir);
+    modalPrender($('fbModal'), abrir);
     if (!abrir) return;
     pintarFbTipo();
     $('fbTexto').focus();
@@ -14502,6 +14822,15 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     $('avisar').onclick = () => fbAbrir(true);
     $('fbFechar').onclick = () => fbAbrir(false);
     $('fbModal').addEventListener('click', e => { if (e.target === $('fbModal')) fbAbrir(false); });
+    /* ESCAPE FECHA, e o ouvinte é do DOCUMENTO — como nos outros dois.
+       Pendurado no próprio diálogo ele só funcionaria com o foco lá dentro, e
+       o foco lá dentro é justamente o que não se pode dar por garantido: se
+       ele escapou, a tecla que devolveria o controle não chega. */
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && !$('fbModal').classList.contains('hide')) {
+        e.preventDefault(); fbAbrir(false);
+      }
+    });
     document.querySelectorAll('.fbTipo').forEach(b2 => {
       b2.onclick = () => { fbTipo = b2.dataset.tipo; pintarFbTipo(); };
     });
@@ -15168,8 +15497,38 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     }
   }
 
+  /* ---- A LARGURA DO QUADRO É A DA TELA, E NÃO 900 ----
+
+     Isto era `900` fixo, nos quatro caminhos de captura. Uma tela de 1920
+     virava 900: reduzir 2,1 vezes é reduzir a ALTURA DA LETRA na mesma
+     proporção, e o texto de 12px de um sistema de gestão — rótulo de campo,
+     código de material, valor — chegava ao documento com 5,6px. A evidência
+     saía ilegível, e a queixa que chegou do uso foi exatamente essa.
+
+     Medido sobre uma tela de sistema de verdade, texto de 12px, WebP q0,85:
+
+         largura   por quadro   300 quadros   letra de 12px vira
+            900      20,4 KB         6 MB          5,6 px
+           1920      63,7 KB        19 MB         12,0 px   (nativo)
+           2560        71 KB        21 MB
+           3840     120,2 KB        35 MB
+
+     Não há teto artificial. Trinta e cinco megabytes em 4K é o pior caso, os
+     quadros são Blob FORA do heap, e uma evidência ilegível não tem valor
+     nenhum — economizar memória estragando a prova é economizar na única coisa
+     que o produto entrega.
+
+     O seletor de qualidade continua valendo: ele é a COMPRESSÃO, e agora ela
+     age sobre os pixels que existem em vez de sobre os que sobraram. */
+  /* Declaração, e não `const`: o `snap` é hoisted e é chamado de handlers que
+     nascem antes desta linha rodar. Uma seta em `const` aqui seria uma zona
+     morta esperando a primeira captura de quem clica rápido. */
+  function larguraNativa(){ return video.videoWidth || 900; }
+
   function snap(w, q){
     const c = document.createElement('canvas');
+    /* `w` nulo quer dizer: a largura da fonte, seja ela qual for. */
+    if (!w) w = larguraNativa();
     c.width = w; c.height = Math.round(w * video.videoHeight / video.videoWidth);
     const g = c.getContext('2d');
     g.drawImage(video, 0, 0, c.width, c.height);
@@ -15442,7 +15801,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     const janela = fim - ini;
     const q = parseFloat($('quality').value), mode = $('mode').value;
     const maxf = Math.max(1, +$('maxf').value || 300);
-    const px = 900;
+    /* Zero quer dizer NATIVO — a largura da fonte. Ver `snap`. */
+    const px = 0;
 
     $('extract').disabled = true;
     sincAmbos();
@@ -17171,8 +17531,63 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      Clipe e webcam saíram da lista de opções e viraram um botão. Os dois
      servem a um cenário só e são os que mais precisam de explicação; juntos
      ocupavam metade do cartão de gravar para a maioria que nunca os liga. */
+  /* ---- O RECURSO DIZ O QUE ELE É ANTES DE SER TENTADO ----
+
+     Medido: com `MediaRecorder` ausente, a caixa "Guardar um clipe" ficava
+     VISÍVEL E LIGADA. A pessoa marcava, gravava a reunião inteira e só então
+     recebia "este navegador não grava clipe" — depois de a gravação ter
+     acontecido sem o que ela pediu. O mesmo com a webcam.
+
+     O `usar a placa de vídeo` já fazia certo, mas ESCONDENDO o controle. Aqui
+     esconder seria pior: quem veio procurar o clipe e não acha nada conclui
+     "isto não existe no produto", e não "o meu navegador não faz". É a mesma
+     razão que está escrita no CSS do botão de mover — não ver controle nenhum
+     responde a pergunta errada.
+
+     Então o controle FICA, desligado, com o motivo do lado. Desligado e dito é
+     informação; ausente é mistério, e ligado é promessa falsa.
+
+     A CÂMERA RECUSADA continua sendo descoberta no uso, e está certo assim:
+     não há como saber se alguém vai negar a permissão sem pedir a permissão.
+     O que dá para saber antes é se o navegador tem a porta — e é isso que esta
+     função responde. */
+  function pintarApoio(){
+    const marcar = (idCaixa, apoia, motivo) => {
+      const cx = $(idCaixa); if (!cx) return;
+      const rot = cx.closest('label');
+      cx.disabled = !apoia;
+      if (!apoia && cx.checked) cx.checked = false;
+      if (rot) rot.classList.toggle('semApoio', !apoia);
+      /* O motivo vai no `title` E no `aria-label` do rótulo: quem passa o mouse
+         lê, e quem usa leitor de tela ouve junto com o nome do controle. Uma
+         caixa desligada sem motivo é a mesma pergunta sem resposta. */
+      if (rot) {
+        if (apoia) { rot.removeAttribute('title'); rot.removeAttribute('aria-label'); }
+        else {
+          const txt = t(motivo);
+          rot.setAttribute('title', txt);
+          rot.setAttribute('aria-label', (rot.textContent || '').trim() + ' — ' + txt);
+        }
+      }
+      const nota = $(idCaixa + 'Aviso');
+      if (nota) { nota.textContent = apoia ? '' : t(motivo); nota.classList.toggle('hide', apoia); }
+    };
+    marcar('recClipe', clipeSuportado(), 'recClipeSemApoio');
+    marcar('recCam',
+           !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia),
+           'recCamSemApoio');
+  }
+
   const abrirClipeModal = (abrir) => {
     $('clipeModal').classList.toggle('hide', !abrir);
+    /* Repintado A CADA abertura, e não uma vez no carregamento: o suporte é do
+       navegador, mas a permissão da câmera pode mudar entre uma abertura e
+       outra — e um estado calculado uma vez envelhece calado. */
+    if (abrir) pintarApoio();
+    modalPrender($('clipeModal'), abrir);
+    /* O foco daqui é DELE, e não o do `modalPrender`: ao fechar, o clipe volta
+       para o botão que o abre e não para o que estava focado antes — são o
+       mesmo na prática, e esta linha é a que já existia. */
     if (abrir) { $('recClipe').focus(); }
     else { pintarBotaoClipe(); $('clipeAbrir').focus(); }
   };
@@ -17302,11 +17717,48 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
           s:'ess', t:'tee', u:'you', v:'vee', w:'double u', x:'ex', y:'why', z:'zee' },
     es: { a:'a', b:'be', c:'ce', d:'de', e:'e', f:'efe', g:'ge', h:'hache', i:'i', j:'jota',
           k:'ka', l:'ele', m:'eme', n:'ene', o:'o', p:'pe', q:'cu', r:'erre', s:'ese',
-          t:'te', u:'u', v:'uve', w:'doble u', x:'equis', y:'i griega', z:'zeta' }
+          t:'te', u:'u', v:'uve', w:'doble u', x:'equis', y:'i griega', z:'zeta' },
+    de: { a:'ah', b:'beh', c:'tseh', d:'deh', e:'eh', f:'eff', g:'geh', h:'hah', i:'ih',
+          j:'jott', k:'kah', l:'ell', m:'emm', n:'enn', o:'oh', p:'peh', q:'kuh', r:'err',
+          s:'ess', t:'teh', u:'uh', v:'fau', w:'weh', x:'iks', y:'ypsilon', z:'tsett' },
+    fr: { a:'a', b:'bé', c:'cé', d:'dé', e:'e', f:'effe', g:'gé', h:'ache', i:'i', j:'ji',
+          k:'ka', l:'elle', m:'emme', n:'enne', o:'o', p:'pé', q:'ku', r:'erre', s:'esse',
+          t:'té', u:'u', v:'vé', w:'double vé', x:'iks', y:'i grec', z:'zède' }
   };
 
-  /* Números por extenso. Só até 999: código de transação e de conta não passa
-     disso, e uma tabela maior seria peso sem uso. */
+  /* OS NÚMEROS FALADOS, NOS CINCO IDIOMAS — reescrito em 24/08.
+   *
+   * O que existia funcionava em DOIS dos cinco, e ninguém sabia. Medido, o
+   * termo "235" falado virava:
+   *
+   *     pt  duzentos e trinta e cinco     → 235          certo
+   *     es  doscientos treinta y cinco    → 235          certo
+   *     en  two hundred thirty five       → 2hundred35
+   *     de  zweihundertfuenfunddreissig   → (nada)
+   *     fr  deux cent trente-cinq         → 2135
+   *
+   * E as três causas eram diferentes:
+   *
+   *   INGLÊS  a tabela guardava nove chaves com ESPAÇO dentro ('two hundred'),
+   *           e o texto é quebrado em palavras antes da consulta — nenhuma das
+   *           nove podia casar, nunca. `hundred` sozinho não estava no mapa.
+   *   ALEMÃO  a dezena composta é uma palavra só, com a unidade na frente. O
+   *           mapa tinha as partes separadas; o token inteiro não existia.
+   *   FRANCÊS `soixante-dix` é 60+10 e `quatre-vingt-onze` é 4×20+11. A soma
+   *           improvisada só sabia somar em dezena redonda.
+   *
+   * A SAÍDA NÃO É REMENDAR OS TRÊS: é escrever, para cada idioma, como aquela
+   * língua DIZ um número — e gerar de 0 a 999 a partir disso. O casamento passa
+   * a ser por sequência de palavras, e não por aritmética adivinhada. Alemão
+   * colado e francês composto caem no mesmo mecanismo do português.
+   *
+   * O QUE ISTO NÃO PROVA, e está dito porque alguém vai procurar: que o
+   * reconhecimento de fala ESCREVA assim. Estas são as grafias corretas. O
+   * Whisper escreve do jeito dele, e foi exatamente isso que derrubou a
+   * primeira versão deste recurso em português — o `k` dito "cá" que o modelo
+   * grafa com C, que está no `APELIDOS` até hoje. Para `de` e `fr` não houve
+   * teste com voz de verdade: quando houver, a lista de apelidos cresce.
+   */
   const NUMS = {
     pt: { u:['zero','um','dois','três','quatro','cinco','seis','sete','oito','nove'],
           d:['dez','onze','doze','treze','quatorze','quinze','dezesseis','dezessete','dezoito','dezenove'],
@@ -17316,25 +17768,136 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     en: { u:['zero','one','two','three','four','five','six','seven','eight','nine'],
           d:['ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen'],
           z:['','','twenty','thirty','forty','fifty','sixty','seventy','eighty','ninety'],
-          c:['','one hundred','two hundred','three hundred','four hundred','five hundred','six hundred','seven hundred','eight hundred','nine hundred'],
-          cem:'one hundred', e:'and' },
+          cem:'hundred', e:'and' },
     es: { u:['cero','uno','dos','tres','cuatro','cinco','seis','siete','ocho','nueve'],
           d:['diez','once','doce','trece','catorce','quince','dieciséis','diecisiete','dieciocho','diecinueve'],
+          v:['','veintiuno','veintidós','veintitrés','veinticuatro','veinticinco','veintiséis','veintisiete','veintiocho','veintinueve'],
           z:['','','veinte','treinta','cuarenta','cincuenta','sesenta','setenta','ochenta','noventa'],
           c:['','ciento','doscientos','trescientos','cuatrocientos','quinientos','seiscientos','setecientos','ochocientos','novecientos'],
           cem:'cien', e:'y' },
-    };
+    de: { u:['null','ein','zwei','drei','vier','fünf','sechs','sieben','acht','neun'],
+          d:['zehn','elf','zwölf','dreizehn','vierzehn','fünfzehn','sechzehn','siebzehn','achtzehn','neunzehn'],
+          z:['','','zwanzig','dreißig','vierzig','fünfzig','sechzig','siebzig','achtzig','neunzig'],
+          cem:'hundert', e:'und' },
+    fr: { u:['zéro','un','deux','trois','quatre','cinq','six','sept','huit','neuf'],
+          d:['dix','onze','douze','treize','quatorze','quinze','seize','dix-sept','dix-huit','dix-neuf'],
+          z:['','','vingt','trente','quarante','cinquante','soixante','','',''],
+          cem:'cent', e:'et' },
+  };
 
-  /* AQUI MORAVA `numPorExtenso`, e ela estava morta.
-     Gerava todas as formas faladas de um número para procurá-las no texto — a
-     primeira versão do recurso, a que o comentário logo acima descreve como
-     tendo falhado no primeiro teste com fala de verdade. O sentido se inverteu
-     (normalizar o texto e comparar), e a função ficou: catorze linhas chamadas
-     só por si mesmas, carregando mais um `|| NUMS.pt`.
-     Sai inteira. `NUMS` continua, porque é dela que `tabelaNumeros` monta o
-     caminho que o produto usa de verdade. */
+  /* COMO CADA LÍNGUA DIZ O NÚMERO. Devolve as formas possíveis — mais de uma
+     quando a língua aceita ("vinte e um" e "vinte um"). É daqui que sai a
+     tabela; escrever a tabela à mão seria mil linhas por idioma. */
+  const NUM_FALA = {
+    pt(n, T){
+      if (n < 10) return [T.u[n]];
+      if (n < 20) return [T.d[n - 10]];
+      if (n < 100) { const t = T.z[(n / 10) | 0], r = n % 10;
+        return r ? [`${t} ${T.e} ${T.u[r]}`, `${t} ${T.u[r]}`] : [t]; }
+      const h = (n / 100) | 0, r = n % 100;
+      if (!r) return [h === 1 ? T.cem : T.c[h]];
+      return this.pt(r, T).flatMap((x) => [`${T.c[h]} ${T.e} ${x}`, `${T.c[h]} ${x}`]);
+    },
+    en(n, T){
+      if (n < 10) return [T.u[n]];
+      if (n < 20) return [T.d[n - 10]];
+      if (n < 100) { const t = T.z[(n / 10) | 0], r = n % 10;
+        return r ? [`${t} ${T.u[r]}`] : [t]; }
+      const h = (n / 100) | 0, r = n % 100;
+      const cab = `${T.u[h]} ${T.cem}`;
+      if (!r) return [cab];
+      /* "and" no meio é britânico e some no americano; as duas entram. */
+      return this.en(r, T).flatMap((x) => [`${cab} ${T.e} ${x}`, `${cab} ${x}`]);
+    },
+    es(n, T){
+      if (n < 10) return [T.u[n]];
+      if (n < 20) return [T.d[n - 10]];
+      /* 21 a 29 são UMA palavra em espanhol: `veintiuno`, e não `veinte y uno`. */
+      if (n < 30) return n === 20 ? [T.z[2]] : [T.v[n - 20]];
+      if (n < 100) { const t = T.z[(n / 10) | 0], r = n % 10;
+        return r ? [`${t} ${T.e} ${T.u[r]}`] : [t]; }
+      const h = (n / 100) | 0, r = n % 100;
+      if (!r) return [h === 1 ? T.cem : T.c[h]];
+      return this.es(r, T).map((x) => `${T.c[h]} ${x}`);
+    },
+    /* ALEMÃO: tudo colado, e a unidade ANTES da dezena.
+       21 sai como uma palavra só, e 235 também — e é por isso que ter as partes
+       separadas no mapa nunca funcionou. */
+    de(n, T){
+      const ate99 = (m) => {
+        if (m < 10) return m === 1 ? 'eins' : T.u[m];
+        if (m < 20) return T.d[m - 10];
+        const t = T.z[(m / 10) | 0], r = m % 10;
+        return r ? `${T.u[r]}${T.e}${t}` : t;
+      };
+      if (n < 100) {
+        /* `eins` sozinho, `ein` dentro do composto: as duas formas entram, e o
+           mapa não se importa de ter dois caminhos para o mesmo número. */
+        return n === 1 ? ['eins', 'ein'] : [ate99(n)];
+      }
+      const h = (n / 100) | 0, r = n % 100;
+      const cab = h === 1 ? [`${T.cem}`, `ein${T.cem}`] : [`${T.u[h]}${T.cem}`];
+      if (!r) return cab;
+      return cab.map((c) => `${c}${ate99(r)}`);
+    },
+    /* FRANCÊS: 70 é 60+10, 80 é 4×20, 90 é 4×20+10. E o `et` só aparece em 21,
+       31, 41, 51, 61 e 71 — em 81 e 91 não, que é a pegadinha da língua. */
+    fr(n, T){
+      if (n < 10) return [T.u[n]];
+      if (n < 20) return [T.d[n - 10]];
+      if (n < 70) { const t = T.z[(n / 10) | 0], r = n % 10;
+        if (!r) return [t];
+        return r === 1 ? [`${t} ${T.e} ${T.u[1]}`, `${t} ${T.u[1]}`] : [`${t} ${T.u[r]}`]; }
+      if (n < 80) { const r = n - 60;
+        const resto = this.fr(r, T)[0];
+        return r === 11 ? [`${T.z[6]} ${T.e} ${resto}`, `${T.z[6]} ${resto}`]
+                        : [`${T.z[6]} ${resto}`]; }
+      if (n < 100) { const r = n - 80;
+        const cab = `${T.u[4]} ${T.z[2]}`;
+        if (!r) return [cab, `${cab}s`];
+        return [`${cab} ${this.fr(r, T)[0]}`]; }
+      const h = (n / 100) | 0, r = n % 100;
+      const cab = h === 1 ? T.cem : `${T.u[h]} ${T.cem}`;
+      if (!r) return h === 1 ? [cab] : [cab, `${cab}s`];
+      return this.fr(r, T).map((x) => `${cab} ${x}`);
+    },
+  };
 
   const semAcento = txt => txt.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+  /* ---- O ALEMÃO ESCRITO SEM TECLADO ALEMÃO ----
+
+     `semAcento` decompõe em NFD e joga fora o que for acento combinante. Isso
+     resolve `é` → `e` e `ü` → `u`, e NÃO resolve o alemão: o `ß` não decompõe
+     em nada, e a forma que um alemão escreve quando não tem a tecla não é `u`,
+     é `ue`. São duas grafias legítimas da MESMA palavra, e a tabela só tinha
+     uma.
+
+     Medido antes do conserto, com o código do produto:
+
+         dreißig                       → 30       certo
+         dreissig                      → dreissig NADA
+         zweihundertfünfunddreißig     → 235      certo
+         zweihundertfuenfunddreissig   → falhava inteiro
+
+     Ou seja: quem transcreve alemão sem trema perdia o recurso todo, e isso
+     não é lacuna de escuta — é ortografia alemã documentada, do mesmo tipo do
+     hífen francês que a tabela já trata. O comentário do `APELIDOS` até
+     anunciava a regra do `ß`; ela nunca tinha sido escrita em lugar nenhum.
+
+     A troca NÃO entra no `semAcento`: lá ela quebraria os outros idiomas, onde
+     `ü` → `u` é o certo (o `aiguë` francês viraria `aigue` + `e`). Ela gera uma
+     chave A MAIS na tabela, e as duas grafias passam a achar o mesmo número. */
+  const TRANSLIT_DE = { 'ä':'ae', 'ö':'oe', 'ü':'ue', 'ß':'ss' };
+  function chavesExtras(txt, L){
+    if (L !== 'de') return [];
+    const t2 = String(txt).toLowerCase()
+      .replace(/[äöüß]/g, (c) => TRANSLIT_DE[c]);
+    const norm = semAcento(t2).toLowerCase().replace(/-/g, ' ').replace(/\s+/g, ' ').trim();
+    const base = semAcento(String(txt)).toLowerCase()
+      .replace(/-/g, ' ').replace(/\s+/g, ' ').trim();
+    return (norm && norm !== base) ? [norm] : [];
+  }
 
   /* O caminho inverso: pegar o que foi FALADO e reduzir a uma sigla comparável.
 
@@ -17362,49 +17925,101 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      escreve com C — a tabela dizia "ká", tirar o acento dava "ka", e nada casava.
      Grafia certa não serve para reconhecer fala. */
   const APELIDOS = {
-    pt: { k:['ca','kappa','cappa'], h:['aga'], w:['dabliu','double u','dabliu'],
-          y:['ipsilon','ypsilon','i grego'], q:['ke','ku'], r:['er'], s:['es'],
-          x:['chis','shis'], z:['zeta'], j:['jotta'], g:['je'], e:['e'] },
+    /* SEIS ENTRADAS SAÍRAM DAQUI, e nenhuma delas fazia nada — 24/08.
+       `pt h:'aga'` é o que `semAcento('agá')` já devolve; `pt y:'ipsilon'` idem;
+       `pt e:'e'` idem; `pt w` tinha `'dabliu'` DUAS vezes na mesma lista;
+       `es k:'ka'` e `es y:'i griega'` são a própria grafia do `LETRAS`.
+       Um apelido que repete a grafia correta não acrescenta chave nenhuma ao
+       `NOME_LETRA` — ele só faz a lista parecer maior do que é, e uma lista que
+       mente sobre o próprio tamanho é a que esconde o buraco seguinte. O
+       `numeros.mjs [7]` passou a reprovar isso. */
+    pt: { k:['ca','kappa','cappa'], w:['dabliu','double u'],
+          y:['ypsilon','i grego'], q:['ke','ku'], r:['er'], s:['es'],
+          x:['chis','shis'], z:['zeta'], j:['jotta'], g:['je'] },
     en: { k:['kei'], w:['double you','doubleu'], y:['wai'], z:['zed'], h:['aich'] },
-    es: { k:['ca','ka'], w:['doble ve','uve doble'], y:['ye','i griega'],
-          z:['ceta'], h:['ache'], j:['jotta'] }
+    es: { k:['ca'], w:['doble ve','uve doble'], y:['ye'],
+          z:['ceta'], h:['ache'], j:['jotta'] },
+    /* ALEMÃO E FRANCÊS: A GRAFIA DE DICIONÁRIO, E NÃO A ESCUTA — 24/08.
+       Isto continua sendo uma lacuna dita, e a lacuna não fechou.
+
+       O `APELIDOS` existe porque a grafia CERTA não serve para reconhecer fala:
+       em português o K é dito "cá" e o modelo escreve com C, e foi isso que
+       derrubou a primeira versão deste recurso. Cada linha das três de cima
+       veio de ouvir o Whisper errar. Para `de` e `fr` essa escuta não existe —
+       o modelo não roda na máquina onde estas listas são escritas.
+
+       O QUE A PRIMEIRA VERSÃO DIZIA, E ESTAVA ERRADO: que as entradas de baixo
+       vinham do `ß` escrito como `ss` e das compostas francesas com e sem
+       hífen. Nenhuma delas tratava disso. O hífen já era resolvido na tabela de
+       números, e o `ß` não estava resolvido em lugar NENHUM — era um defeito, e
+       está consertado no `chavesExtras`, que é onde ele sempre pertenceu.
+
+       O que estas listas são, dito com o nome certo: as grafias que o Duden e a
+       Académie registram para o nome de cada letra. Não são medição, e um
+       modelo pode perfeitamente escrever outra coisa. São o palpite mais
+       defensável que existe sem microfone — um modelo treinado em texto escrito
+       tende a produzir a grafia que o texto escrito usa —, e são ADITIVAS: a
+       grafia do `LETRAS` continua valendo, e nenhuma delas tira nada.
+
+       Quando alguém falar num microfone nesses idiomas, esta lista muda. */
+    de: { b:['be'], c:['ce','zeh'], d:['de'], f:['ef'], g:['ge'], h:['ha'],
+          j:['jot'], k:['ka'], l:['el'], m:['em'], n:['en'], p:['pe'],
+          q:['qu','ku'], r:['er'], s:['es'], t:['te'], v:['vau'],
+          w:['we','ve'], x:['ix'], y:['upsilon'], z:['zett','tset'] },
+    fr: { f:['ef'], h:['hache'], j:['gi'], k:['kappa'], l:['el'], m:['em'],
+          n:['en'], q:['qu','cu'], r:['er'], s:['es'],
+          w:['doublevé','double v'], x:['ix','ixe'], y:['igrec','i grecque'],
+          z:['zed'] }
   };
 
   const NOME_LETRA = {};
   for (const L in LETRAS) {
     NOME_LETRA[L] = {};
-    for (const letra in LETRAS[L]) NOME_LETRA[L][semAcento(LETRAS[L][letra])] = letra;
+    for (const letra in LETRAS[L]) {
+      NOME_LETRA[L][semAcento(LETRAS[L][letra])] = letra;
+      for (const e of chavesExtras(LETRAS[L][letra], L)) NOME_LETRA[L][e] = letra;
+    }
     const ap = APELIDOS[L] || {};
-    for (const letra in ap) ap[letra].forEach(w => { NOME_LETRA[L][semAcento(w)] = letra; });
+    for (const letra in ap) ap[letra].forEach(w => {
+      NOME_LETRA[L][semAcento(w)] = letra;
+      for (const e of chavesExtras(w, L)) NOME_LETRA[L][e] = letra;
+    });
   }
 
-  /* Palavras de número → valor. Montada da mesma tabela que escreve por extenso,
-     para as duas nunca discordarem. */
-  /* SEM CAIR NA TABELA DE OUTRA LÍNGUA.
-     Era `NUMS[L] || NUMS.pt`, e o mesmo em `NOME_LETRA` e em
-     `aplicarVocabulario`. Numa transcrição alemã ou francesa isso não é uma
-     rede: é a ferramenta procurando "duzentos e trinta e cinco" dentro de um
-     texto que nunca vai dizer isso — e, no que casar por acaso, TROCANDO
-     palavra dentro de uma evidência. Ganho zero e risco não-zero.
-     Sem tabela, os mapas saem vazios: o que continua funcionando é o caminho
-     que não depende de língua nenhuma — dígito escrito como dígito e letra
-     escrita como letra ("M E 21 N"). É menos do que pt/en/es têm, e é a
-     verdade sobre o que existe hoje. As tabelas de `de` e `fr` são item
-     próprio da fila: os números alemães vêm invertidos ("einundzwanzig") e os
-     franceses são compostos ("quatre-vingt-onze"), então não é preencher
-     tabela, é mudar como o número é montado. */
-  const NUMS_VAZIA = { u: [], d: [], z: [], c: [], cem: '', e: '' };
-
+  /* A TABELA: sequência de palavras → valor, de 0 a 999.
+     Mil entradas por idioma, geradas — e não escritas. Chave normalizada como o
+     texto da transcrição vai chegar: sem acento, minúscula, e o hífen valendo
+     como espaço, porque é assim que `palavras()` quebra. */
+  const numTabela = {};
   function tabelaNumeros(L){
-    const T = NUMS[L] || NUMS_VAZIA, m = {};
-    T.u.forEach((w, i) => { if (w) m[semAcento(w)] = i; });
-    T.d.forEach((w, i) => { if (w) m[semAcento(w)] = 10 + i; });
-    T.z.forEach((w, i) => { if (w) m[semAcento(w)] = 10 * i; });
-    T.c.forEach((w, i) => { if (w) m[semAcento(w)] = 100 * i; });
-    if (T.cem) m[semAcento(T.cem)] = 100;
-    /* `e` vazio faria `w === e` casar com toda palavra vazia; um sentinela que
-       nenhuma palavra é resolve isso sem um `if` em cada volta do laço. */
-    return { mapa: m, e: T.e ? semAcento(T.e) : '\u0000' };
+    if (numTabela[L]) return numTabela[L];
+    const T = NUMS[L];
+    if (!T || !NUM_FALA[L]) return (numTabela[L] = { mapa: {}, maxPalavras: 1 });
+    const mapa = {};
+    let maxPalavras = 1;
+    for (let n = 0; n <= 999; n++) {
+      for (const forma of NUM_FALA[L](n, T)) {
+        const chave = semAcento(String(forma)).toLowerCase()
+          .replace(/-/g, ' ').replace(/\s+/g, ' ').trim();
+        if (!chave) continue;
+        /* O MENOR número ganha a chave: em francês, `quatre vingts` é 80 e
+           também poderia ser lido como 4 e depois 20. Gerando em ordem
+           crescente e não sobrescrevendo, a leitura curta e comum vence. */
+        if (!(chave in mapa)) mapa[chave] = n;
+        maxPalavras = Math.max(maxPalavras, chave.split(' ').length);
+        /* E a mesma palavra escrita sem trema, quando a língua tem as duas. */
+        for (const extra of chavesExtras(String(forma), L)) {
+          if (!(extra in mapa)) mapa[extra] = n;
+          maxPalavras = Math.max(maxPalavras, extra.split(' ').length);
+        }
+      }
+    }
+    /* O `e` NÃO volta daqui, e a ausência é o ponto: o conector já está DENTRO
+       das chaves ("vinte e um" é uma chave só). A versão anterior o devolvia
+       para o casador pular toda palavra igual a ele — e em português isso
+       apagava o E de `ME21N`, porque a letra E e o conector são a mesma
+       palavra. Quem sobrou pulando o conector foi a tabela, que o gerou junto. */
+    return (numTabela[L] = { mapa, maxPalavras });
   }
 
   /* Distância de edição, limitada: acima do teto devolve o teto e para. */
@@ -17437,28 +18052,36 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   /* Uma janela de palavras vira uma sigla candidata: número por extenso vira
      dígito, nome de letra vira letra, o resto entra como está. */
   function siglaDaJanela(js, L){
-    const { mapa, e } = tabelaNumeros(L);
+    const { mapa, maxPalavras } = tabelaNumeros(L);
     const nomes = NOME_LETRA[L] || {};
-    let saida = '', acumulado = null, temDigito = false;
-    const fechar = () => { if (acumulado != null) { saida += acumulado; acumulado = null; } };
-    for (const p2 of js) {
-      const w = semAcento(p2.t).toLowerCase();
-      if (w === e) continue;                       // o "e" de "vinte e um"
-      if (/^\d+$/.test(w)) { fechar(); saida += w; temDigito = true; continue; }
-      if (w in mapa) {
-        const v = mapa[w];
-        /* "duzentos e trinta e cinco" soma; "vinte" e "um" também. */
-        if (acumulado == null) acumulado = v;
-        else if (v < 100 && acumulado % 100 === 0) acumulado += v;
-        else if (v < 10 && acumulado % 10 === 0) acumulado += v;
-        else { fechar(); acumulado = v; }
-        temDigito = true;
-        continue;
+    const ws = js.map((p2) => semAcento(p2.t).toLowerCase());
+    let saida = '', temDigito = false;
+    /* SEQUÊNCIA MAIS LONGA PRIMEIRO, e não soma improvisada.
+       A versão anterior acumulava com regras de aritmética escritas à mão — e
+       elas só descreviam o português e o espanhol. `soixante dix` virava 6010,
+       `two hundred thirty five` virava 2hundred35, e o alemão colado não casava
+       com nada.
+       Agora a tabela tem a frase inteira ("soixante dix" → 70), e aqui só se
+       procura a maior que couber. A gulosa é a certa: `quatre vingt onze` tem
+       de ganhar de `quatre`, senão 91 vira 4. */
+    for (let i = 0; i < ws.length; ) {
+      let achou = false;
+      for (let larg = Math.min(maxPalavras, ws.length - i); larg >= 1; larg--) {
+        const chave = ws.slice(i, i + larg).join(' ');
+        if (chave in mapa) {
+          saida += mapa[chave];
+          temDigito = true;
+          i += larg;
+          achou = true;
+          break;
+        }
       }
-      fechar();
+      if (achou) continue;
+      const w = ws[i];
+      if (/^\d+$/.test(w)) { saida += w; temDigito = true; i++; continue; }
       saida += (w in nomes) ? nomes[w] : w;
+      i++;
     }
-    fechar();
     return { sigla: saida, temDigito };
   }
 
@@ -18674,6 +19297,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     lenteI = i;
     lenteVoltar = document.activeElement;
     $('lente').classList.remove('hide');
+    modalPrender($('lente'), true);
     pintarLente();
     pintarLenteRevisao();
     $('lenteFechar').focus();
@@ -18711,6 +19335,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     if (cortando) modoCrop(false);
     if (typeof fecharComparar === 'function') fecharComparar();
     $('lente').classList.add('hide');
+    modalPrender($('lente'), false);
     lenteI = -1;
     // o foco volta para a miniatura de onde saiu; sem isso o teclado recomeça no topo
     if (lenteVoltar && document.contains(lenteVoltar)) lenteVoltar.focus();
@@ -18987,13 +19612,17 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       const im = await new Promise((ok2, erro) => {
         const i = new Image(); i.onload = () => ok2(i); i.onerror = erro; i.src = url;
       });
-      /* Redesenhada na mesma largura das outras: um print de 4K ao lado de
-         quadros de 900 px sairia com outra escala no documento. */
-      const larg = Math.min(900, im.naturalWidth || 900);
-      const esc = larg / (im.naturalWidth || larg);
+      /* NATIVA, como os quadros capturados. Aqui havia `Math.min(900, ...)`, e
+         a justificativa escrita ao lado era "senão sairia com outra escala no
+         documento". A justificativa estava errada, e agora está invertida: o
+         PDF, o Word e o PPTX posicionam a imagem pela PROPORÇÃO (`w/h`), nunca
+         pela largura absoluta — um print de 4K e um quadro de 1920 ocupam o
+         mesmo espaço na página, só que um está nítido e o outro não. Com a
+         captura em nativo, encolher só a tela colada era a única coisa capaz
+         de criar a diferença que o comentário dizia estar evitando. */
       const c2 = document.createElement('canvas');
-      c2.width = Math.max(1, Math.round((im.naturalWidth || larg) * esc));
-      c2.height = Math.max(1, Math.round((im.naturalHeight || larg) * esc));
+      c2.width = Math.max(1, im.naturalWidth || 900);
+      c2.height = Math.max(1, im.naturalHeight || Math.round(c2.width * 9 / 16));
       c2.getContext('2d').drawImage(im, 0, 0, c2.width, c2.height);
       URL.revokeObjectURL(url);
       const q = parseFloat($('quality').value) || 0.8;

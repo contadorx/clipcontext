@@ -28,12 +28,14 @@ import { RAIZ_WS } from './_caminhos.mjs';
 /* Tabelas que PODEM falar menos que cinco, e por quê. O motivo é obrigatório:
    sem ele, esta lista viraria o lugar onde se esconde o defeito. */
 const PERDOADAS = {
-  LETRAS: 'o vocabulário do domínio ainda não fala de/fr — item próprio da fila. ' +
-          'Os números alemães vêm invertidos ("einundzwanzig") e os franceses são ' +
-          'compostos ("quatre-vingt-onze"): não é preencher tabela, é mudar como o ' +
-          'número é montado. Enquanto isso NÃO cai no português — ver tabelaNumeros().',
-  NUMS: 'mesma pendência de LETRAS.',
-  APELIDOS: 'mesma pendência de LETRAS.',
+  /* VAZIO — 24/08, e o vazio é a notícia.
+     Aqui moravam `LETRAS`, `NUMS` e `APELIDOS`: as três tabelas do vocabulário
+     do domínio, que falavam pt/en/es num produto de cinco idiomas. O perdão
+     dizia que preencher tabela não bastava, e não bastava mesmo — o alemão diz
+     a dezena colada numa palavra só e o francês compõe 91 como 4×20+11.
+     A DEC-17 resolveu, e o perdão saiu junto. Um perdão que sobrevive ao
+     conserto é lixo que esconde o próximo defeito, e é por isso que esta régua
+     reprova quando ele fica. Ela reprovou aqui, no build que consertou. */
 };
 
 let falhas = 0;
