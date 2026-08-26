@@ -9711,7 +9711,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
      depois, e não tem como se atualizar sozinho. Sem carimbo, "estou com um
      problema no offline" é uma conversa sem chão — ninguém sabe de qual build
      se fala nem se o defeito já foi consertado. */
-  const VERSAO = '2026.08.26-25';
+  const VERSAO = '2026.08.26-30';
   window.__versao = () => VERSAO;
 
   const PIP_CSS = `
@@ -9768,10 +9768,15 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
        continua com uma linha e a mesma altura: o que cresce e a LARGURA, que
        numa faixa por cima do trabalho custa menos que altura — ela ocupa a
        borda, e nao o meio. */
-    /* `width:auto` E NAO SO `flex:none`. A regra base da janelinha manda
-       `width:100%` — desenhada para uma pilha, onde botao de largura cheia e o
-       certo. Em linha, `flex:none` respeita esse 100% e cada botao virava
-       232px: tres botoes de 232 numa fita de 250. Medido antes de visto. */
+    /* WIDTH AUTO, E NAO SO FLEX NONE. A regra base da janelinha manda largura
+       de 100% — desenhada para uma pilha, onde botao de largura cheia e o
+       certo. Em linha, flex none respeita esse 100% e cada botao virava 232px:
+       tres botoes de 232 numa fita de 250. Medido antes de visto.
+       E SEM CRASE NENHUMA NESTA FRASE: eu escrevi este mesmo comentario com
+       crases em volta dos nomes de propriedade, e as crases FECHARAM o
+       template literal. O script inteiro do produto parou de carregar com
+       "Unexpected identifier width", e o app abria morto. O aviso ja estava
+       escrito trinta linhas acima, e eu o li depois de quebrar. */
     body.min #marcar,body.min #maisTela,body.min #stop,
     body.min #pausa,body.min #calar{flex:none;width:auto;height:38px;
                     padding:0 9px;font-size:10.5px;font-weight:600;gap:5px;
