@@ -171,15 +171,23 @@ console.log('\n[2] a tarja chega em todas as saídas');
   const dz=pg.waitForEvent('download',{timeout:60000});
   await pg.click('#zip'); const dzz=await dz; await dzz.saveAs('/tmp/o2.zip');
   const z=lerZip('/tmp/o2.zip');
-  const jpg=Object.keys(z).find(k=>k.endsWith('.jpg'));
-  fs.writeFileSync('/tmp/o2-frame.jpg', z[jpg]);
-  const preto = await pg.evaluate(async (b64) => {
-    const i = new Image(); i.src = 'data:image/jpeg;base64,'+b64; await i.decode();
+  /* O PRIMEIRO quadro, e não o primeiro `.jpg`. Esta linha procurava `.jpg` e
+     media o quadro errado: o quadro tarjado passou a sair em PNG — tarja é
+     retângulo preto chapado, e chapado comprime barato sem perda —, então o
+     primeiro `.jpg` do pacote virou o SEGUNDO quadro, que não tem tarja
+     nenhuma. A régua reprovava o produto por estar olhando para outro lugar.
+     Ordem primeiro, extensão depois: é assim que o pacote é nomeado. */
+  const nomes = Object.keys(z).filter(k=>/^\d{4}-.*\.(jpg|png)$/i.test(k)).sort();
+  const quadro = nomes[0];
+  const tipo = /\.png$/i.test(quadro) ? 'image/png' : 'image/jpeg';
+  fs.writeFileSync('/tmp/o2-frame' + quadro.slice(-4), z[quadro]);
+  const preto = await pg.evaluate(async ([b64, tipo]) => {
+    const i = new Image(); i.src = 'data:'+tipo+';base64,'+b64; await i.decode();
     const c = document.createElement('canvas'); c.width=i.width; c.height=i.height;
     c.getContext('2d').drawImage(i,0,0);
     const p = c.getContext('2d').getImageData(Math.round(i.width*0.4), Math.round(i.height*0.4),1,1).data;
     return [p[0],p[1],p[2]];
-  }, z[jpg].toString('base64'));
+  }, [z[quadro].toString('base64'), tipo]);
   ok('a imagem do zip sai tarjada', preto[0]===0&&preto[1]===0&&preto[2]===0, JSON.stringify(preto));
 
   const dj=pg.waitForEvent('download',{timeout:60000});

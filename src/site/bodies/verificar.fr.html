@@ -154,7 +154,13 @@
     const partes = texto.split(/\r?\n/);
     for (let i = 0; i < partes.length; i++) {
       const nome = (partes[i].split('\t')[0] || '').trim();
-      if (!/\.jpg$/i.test(nome)) continue;
+      /* `.jpg` OU `.png`. Enquanto o produto só sabia gravar JPEG, este `.jpg`
+         não podia errar; com dois formatos possíveis ele passou a PULAR EM
+         SILÊNCIO os quadros sem perda — e a tela dizia "1 de 1 imagens
+         conferem" sobre um pacote de três, anunciando integridade depois de
+         conferir um terço dele. Num verificador de evidência, contar a menos
+         sem avisar é pior do que falhar alto. */
+      if (!/\.(jpg|png)$/i.test(nome)) continue;
       const seg = (partes[i + 1] || '');
       const m = seg.match(/([0-9a-f]{64})/i);
       if (!m) continue;

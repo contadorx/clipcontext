@@ -53,7 +53,8 @@ console.log('\n[1] HTML autocontido');
   ok('nome do arquivo pelo caso de teste', nome==='evidencia-UAT-77.html', nome);
   const h = fs.readFileSync('/tmp/o4.html','utf8');
   ok('é um documento inteiro', /^<!DOCTYPE html>/.test(h));
-  ok('as imagens vão embutidas', (h.match(/src="data:image\/jpeg/g)||[]).length===3);
+  // jpeg OU png: o formato sai de medição por quadro, e o que se afirma é o embutir
+ok('as imagens vão embutidas', (h.match(/src="data:image\/(jpeg|png)/g)||[]).length===3);
   ok('traz o caso de teste no título', /<title>UAT-77<\/title>/.test(h));
   ok('numera os passos', /Passo 1 de 3/.test(h));
   ok('traz a anotação', /Espera: o sistema recusa/.test(h));
@@ -67,7 +68,7 @@ console.log('\n[2] Markdown');
   const m = fs.readFileSync('/tmp/o4.md','utf8');
   ok('título em markdown', /^# UAT-77/m.test(m));
   ok('um cabeçalho por passo', (m.match(/^## /gm)||[]).length===3);
-  ok('imagem embutida em base64', /!\[.*\]\(data:image\/jpeg/.test(m));
+  ok('imagem embutida em base64', /!\[.*\]\(data:image\/(jpeg|png)/.test(m));
   ok('a fala vai como citação', /^> .*ME21N/m.test(m));
 }
 

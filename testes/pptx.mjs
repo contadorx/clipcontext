@@ -142,7 +142,14 @@ console.log('\n[6] a tarja é queimada no slide, como nas outras saídas');
   const dl = pg.waitForEvent('download',{timeout:60000});
   await pg.locator('#pptx').click();
   const d = await dl; await d.saveAs('/tmp/deck3.pptx');
-  const bytes = (arq) => execSync(`unzip -p ${arq} ppt/media/img0002.jpg | wc -c`,
+  /* O NOME DA MÍDIA É DESCOBERTO, e não escrito. Enquanto todo quadro saía em
+     JPEG, `img0002.jpg` não podia errar; com o formato decidido por medição na
+     captura, o mesmo quadro sai `.png` quando é barato guardá-lo exato — e a
+     régua quebrava com `filename not matched`, que se lê como pacote corrompido
+     e é só um `.jpg` escrito à mão. */
+  const midia = (arq) => execSync(`unzip -Z1 ${arq} 'ppt/media/img0002.*'`,
+                                  {encoding:'utf8',shell:'/bin/bash'}).trim().split('\n')[0];
+  const bytes = (arq) => execSync(`unzip -p ${arq} "${midia(arq)}" | wc -c`,
                                   {encoding:'utf8',shell:'/bin/bash'}).trim();
   ok('a imagem do slide mudou — a tarja foi queimada nela',
      bytes('/tmp/deck2.pptx') !== bytes('/tmp/deck3.pptx'),
@@ -150,10 +157,11 @@ console.log('\n[6] a tarja é queimada no slide, como nas outras saídas');
   {
     /* E o preto tem de estar nos pixels do JPEG que foi para o slide, não num
        retângulo por cima que qualquer um arrasta. */
-    execSync('unzip -o -p /tmp/deck3.pptx ppt/media/img0002.jpg > /tmp/slide2.jpg', {shell:'/bin/bash'});
+    const m3 = midia('/tmp/deck3.pptx');
+    execSync(`unzip -o -p /tmp/deck3.pptx "${m3}" > /tmp/slide2.img`, {shell:'/bin/bash'});
     const saida = execSync(`python3 - <<'PY'
 from PIL import Image
-im = Image.open('/tmp/slide2.jpg').convert('RGB')
+im = Image.open('/tmp/slide2.img').convert('RGB')
 px = im.load(); n = 0
 for y in range(0, im.height, 3):
   for x in range(0, im.width, 3):
