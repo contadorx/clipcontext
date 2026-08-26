@@ -139,9 +139,10 @@ const durante = await pg.evaluate(() => ({
 /* Pesado ANTES de parar: parar dispara a renderização das miniaturas, e o que
    se quer saber é o que a memória carrega DURANTE a gravação — que é a hora em
    que uma reunião de duas horas morre, se morrer. */
-const durantePeso = await pg.evaluate(() => {
+const TETO_APP = Number((html.match(/const TETO_SEM_PERDA = ([\d.]+);/) || [])[1]) || 0.30;
+const durantePeso = await pg.evaluate((TETO) => {
   const q = window.__quadros ? window.__quadros() : [];
-  let heap = 0, fora = 0;
+  let heap = 0, fora = 0; const acima = [];
   for (const f of q) {
     const im = f.img;
     if (!im) continue;
@@ -149,10 +150,16 @@ const durantePeso = await pg.evaluate(() => {
        lugar conforme a versão: string base64 mora no heap, Blob mora fora. */
     if (im.blob) fora += im.blob.size;
     else if (im.url) heap += im.url.length * 0.75;
+    /* Só os SEM PERDA: são os únicos sobre quem o teto por pixel promete algo.
+       O caminho com perda é escolhido justamente quando o sem-perda estourou. */
+    if (im.semPerda && im.blob && im.w && im.h) {
+      const bpp = im.blob.size / (im.w * im.h);
+      if (bpp > TETO) acima.push(bpp);
+    }
   }
-  return { n: q.length, heap, fora,
+  return { n: q.length, heap, fora, acima,
            js: performance.memory ? performance.memory.usedJSHeapSize : null };
-});
+}, TETO_APP);
 
 await pg.locator('#recStop').click();
 await pg.waitForFunction(() => document.getElementById('rec').offsetParent !== null,
@@ -226,21 +233,33 @@ if (heapAntes != null) {
      /quadros nesta aba: \d+ +[\d.]+ MB/.test(rel), linhaMem);
 }
 
-/* O número não é um alvo: é a linha que, cruzada de volta, significa que
-   alguém desfez a mudança sem perceber — o quadro voltou a ser base64 de JPEG
-   morando no heap em vez de bytes num Blob.
-
-   Ele era 60 KB, e foi RE-DERIVADO quando a captura passou a ser nativa. A
-   derivação antiga vinha de um quadro de 900 px de largura: 74 KB de base64
-   contra ~20 KB de Blob, e 60 KB caía no meio. Em nativo os dois lados
-   subiram juntos, porque os dois são a MESMA imagem em formas diferentes:
-   1920 px medidos nesta máquina dão 42 KB de Blob, e a mesma tela como base64
-   de JPEG daria ~112 KB (JPEG é o dobro do WebP, e base64 infla 33%). Numa
-   tela mais densa foram 64 KB de Blob contra ~170 KB.
-   90 KB é a linha que separa os dois regimes nas duas medições — manter os 60
-   antigos reprovaria a tela densa sem que nada estivesse errado, que é a
-   maneira de um teste ensinar a ser ignorado. */
-ok('um quadro custa menos de 90 KB', porQuadro > 0 && porQuadro < 90 * 1024, kb(porQuadro));
+/* ---- O TETO EM BYTES MORREU, E O QUE ELE PROTEGIA CONTINUA ----
+ *
+ * Esta linha afirmou 60 KB, depois 90 KB, e agora nenhum número. Ela existia
+ * para pegar UMA regressão: o quadro voltar a ser base64 de JPEG morando no
+ * heap, em vez de bytes num Blob. O peso servia de indício disso.
+ *
+ * Deixou de servir. Com a captura sem perda, um quadro legítimo de 1080p pesa
+ * ~142 KB, e o mesmo quadro como base64 de JPEG pesaria ~128 KB — MENOS. Um
+ * teto em bytes agora reprovaria o certo e aprovaria o errado, que é a pior
+ * coisa que um teste pode fazer.
+ *
+ * Então o indício sai e a coisa em si fica. Quem pega base64 é a linha
+ * seguinte, e ela sempre foi a de verdade: base64 mora no heap, Blob não.
+ *
+ * E entra a invariante que a captura passou a prometer: um quadro guardado SEM
+ * PERDA está, por construção, dentro do teto por pixel — é essa comparação que
+ * decide guardá-lo assim. Um quadro sem perda acima do teto quer dizer que a
+ * decisão parou de ser tomada. */
+{
+  const teto = Number((fs.readFileSync(RAIZ + '/public/app.html', 'utf8')
+    .match(/const TETO_SEM_PERDA = ([\d.]+);/) || [])[1]);
+  const temTeto = teto > 0 && teto < 1;
+  ok('a captura declara um teto por pixel', temTeto, temTeto ? '' : String(teto));
+  const fora = durantePeso.acima || [];
+  ok('e nenhum quadro sem perda passa dele', fora.length === 0,
+     fora.length ? fora.map(x => x.toFixed(3) + ' B/px').join(', ') : '');
+}
 ok('o peso dos quadros está FORA do heap JavaScript',
    durantePeso.fora > durantePeso.heap,
    'fora=' + kb(durantePeso.fora) + '  heap=' + kb(durantePeso.heap));

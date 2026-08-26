@@ -9679,7 +9679,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
      depois, e não tem como se atualizar sozinho. Sem carimbo, "estou com um
      problema no offline" é uma conversa sem chão — ninguém sabe de qual build
      se fala nem se o defeito já foi consertado. */
-  const VERSAO = '2026.08.26-1';
+  const VERSAO = '2026.08.26-7';
   window.__versao = () => VERSAO;
 
   const PIP_CSS = `
@@ -11121,7 +11121,32 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
            Vale porque compartilhar janela tem duas armadilhas — o som do
            computador não vem junto, e o que acontece fora dela some da evidência.
            A escolha continua sendo de quem grava; só o padrão mudou. */
-        video: { frameRate: 12, displaySurface: 'monitor' },     // 12 q/s bastam: o que interessa é a troca de tela
+        /* ---- PEDIR A RESOLUÇÃO, E NÃO ACEITAR O QUE VIER ----
+         *
+         * Aqui não havia largura nem altura. O quadro passou a ter a medida do
+         * stream (ver `larguraNativa`), mas o stream é o que o navegador
+         * resolver entregar — e sem pedir, ele é livre para entregar uma tela
+         * de 2560 ou de 4K já reduzida. Consertar o segundo elo da corrente sem
+         * olhar o primeiro é consertar metade.
+         *
+         * O alvo sai da TELA de quem grava, e não de um número redondo: um
+         * `ideal` de 4K num monitor de 1080p não inventa pixels, mas um número
+         * escrito à mão envelhece com o parque de monitores.
+         *
+         * `ideal`, e nunca `exact` nem `min`: `ideal` é um pedido, e um pedido
+         * que o navegador não pode atender ele simplesmente não atende. `exact`
+         * seria uma exigência, e uma exigência não atendida derruba a captura
+         * inteira com `OverconstrainedError` — trocar imagem fraca por gravação
+         * nenhuma não é conserto.
+         *
+         * `resizeMode:'none'` é a mesma frase dita ao Chrome: não reescale para
+         * caber em constraint nenhum. Navegador que não conhece a chave ignora. */
+        video: {
+          frameRate: 12, displaySurface: 'monitor',
+          width:  { ideal: Math.round(screen.width  * (window.devicePixelRatio || 1)) },
+          height: { ideal: Math.round(screen.height * (window.devicePixelRatio || 1)) },
+          resizeMode: 'none'
+        },     // 12 q/s bastam: o que interessa é a troca de tela
         audio: true,
         systemAudio: 'include',
         selfBrowserSurface: 'exclude',
@@ -14951,6 +14976,30 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       }
       say('  quadros nesta aba: ' + frames.length + '   ' + (bytes / 1048576).toFixed(1) + ' MB' +
           (frames.length ? '   (' + (bytes / frames.length / 1024).toFixed(1) + ' KB cada)' : ''));
+      /* ---- OS TRÊS NÚMEROS DA IMAGEM ----
+         Esta pergunta — "por que a imagem saiu ruim?" — custou três rodadas de
+         investigação, e nenhuma delas precisava ter acontecido: a resposta
+         inteira cabe em três números que o produto sabia e não dizia. A tela
+         que a pessoa tem, o que o navegador entregou, e o que virou quadro.
+         Quando os dois primeiros divergem, a culpa é do navegador ou do
+         constraint; quando o terceiro diverge, é do produto. */
+      {
+        const tela = screen.width + '×' + screen.height +
+                     ((window.devicePixelRatio || 1) !== 1
+                       ? ' ×' + (window.devicePixelRatio || 1) + ' = ' +
+                         Math.round(screen.width * window.devicePixelRatio) + '×' +
+                         Math.round(screen.height * window.devicePixelRatio)
+                       : '');
+        const v = $('v');
+        const entregue = (v && v.videoWidth) ? v.videoWidth + '×' + v.videoHeight : '—';
+        const q0 = frames.find(f => f.img);
+        const quadro = q0 ? q0.img.w + '×' + q0.img.h : '—';
+        const sp = frames.filter(f => f.img && f.img.semPerda).length;
+        say('  tela desta máquina: ' + tela);
+        say('  o navegador deu  : ' + entregue);
+        say('  o quadro tem     : ' + quadro +
+            (frames.length ? '   ' + sp + ' de ' + frames.length + ' sem perda' : ''));
+      }
       say('  clipes de vídeo  : ' + frames.filter(f => f.clipe).length);
       say('  espelho no disco : ' +
           (!(await espelhoServe()) ? (espelhoExiste()
@@ -15358,6 +15407,14 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
      O custo medido de transcodificar é 7,4 ms por quadro, uma vez por saída. */
   const FORMATO_DOC = 'image/jpeg';
 
+  /* Bytes por pixel acima dos quais o sem-perda deixa de valer a pena. Entre
+     os 0,089 B/px de um painel de sistema e os 1,08 B/px de uma tela
+     fotográfica há mais de dez vezes; 0,30 separa os dois com folga dos dois
+     lados. É o número que decide se a evidência é exata ou apenas muito boa —
+     e, no pior caso, ele limita 300 quadros de 1080p a 186 MB de Blob fora do
+     heap, contra os 12,7 MB de antes. */
+  const TETO_SEM_PERDA = 0.30;
+
   /* Toda imagem criada aqui. Não serve para revogar "no caminho que descarta o
      quadro" — essa seria uma lista escrita à mão ao lado de uma lista de
      verdade, e a lista de verdade é `frames`. Serve para VARRER: veja
@@ -15384,7 +15441,42 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
         im.url = URL.createObjectURL(b);
         res(im);
       };
-      try { c.toBlob(guardar, FORMATO, q); } catch (e) { guardar(null); }
+      /* ---- SEM PERDA PRIMEIRO, COM TETO POR PIXEL ----
+       *
+       * O elo que decide a qualidade da evidência é ESTE, e não o formato do
+       * arquivo lá no fim. O quadro nascia em WebP q0,85 — e depois disso
+       * nenhum formato de saída recupera o que se perdeu; um PNG feito a
+       * partir dele só preserva o estrago, e caro. Medido a 1920×1080, pela
+       * cadeia inteira:
+       *
+       *     painel de sistema   q0,85  42,5 KB  45,99 dB    q1  184,3 KB  exato
+       *     tela fotográfica    q0,85   741 KB  38,46 dB    q1  2.191 KB  exato
+       *
+       * `toBlob(..., 'image/webp', 1)` no Chrome é sem perda de verdade —
+       * conferido pixel a pixel, e não pelo nome do parâmetro.
+       *
+       * O TETO É POR PIXEL, e não em bytes absolutos. Um teto absoluto que
+       * coubesse num painel de 1080p recusaria o mesmo painel em 4K — que é
+       * exatamente onde a fidelidade mais vale. Por pixel os dois casos ficam
+       * a uma ordem de grandeza de distância e a régua vale em toda tela:
+       *
+       *     painel de sistema   0,089 B/px          tela fotográfica  1,08 B/px
+       *
+       * Uma tentativa a mais só acontece quando o sem-perda é RECUSADO — ou
+       * seja, na tela fotográfica, que é o caso raro deste produto. Numa
+       * captura de sistema há uma codificação só, como antes. */
+      const semPerdaVale = b => b && b.size / (c.width * c.height) <= TETO_SEM_PERDA;
+      const tentarComPerda = () => {
+        try { c.toBlob(guardar, FORMATO, q); } catch (e) { guardar(null); }
+      };
+      if (FORMATO === 'image/webp') {
+        try {
+          c.toBlob(b => {
+            if (semPerdaVale(b)) { im.semPerda = true; return guardar(b); }
+            tentarComPerda();
+          }, 'image/webp', 1);
+        } catch (e) { tentarComPerda(); }
+      } else tentarComPerda();
     });
     return im;
   }
@@ -15426,15 +15518,77 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
      MESMOS bytes. Dois transcodes independentes dariam o mesmo resultado por
      sorte do codificador, e evidência não se apoia em sorte. O cache é solto
      por `recolherImagens` junto com o quadro. */
+  /* ---- OS DOIS FORMATOS QUE UM DOCUMENTO ACEITA ----
+   *
+   * PDF, Word e PowerPoint aceitam JPEG e PNG. Não aceitam WebP — que é o
+   * formato da memória, e seria o menor dos três. Por isso todo quadro é
+   * transcodificado uma vez ao sair, e por isso a saída tem duas opções.
+   *
+   * QUAL DAS DUAS não é decidido aqui por tamanho: é decidido lá na captura,
+   * e aqui só é obedecido. Ver `TETO_SEM_PERDA` e `novaImagem`. A primeira
+   * versão desta mudança decidia por tamanho, e estava errada — eu tinha
+   * medido PNG contra JPEG a partir do canvas limpo, fora da cadeia real. Na
+   * cadeia real o quadro passa por WebP ANTES, e um PNG feito depois disso não
+   * recupera nada: só guarda o ruído do codificador anterior, com fidelidade
+   * perfeita e preço de sem-perda. Medido: 250,8 KB de PNG para preservar um
+   * quadro que o JPEG entregava em 96,1 KB, ambos igualmente aproximados.
+   *
+   * Fica escrito porque a lição é geral: medir um elo isolado responde sobre o
+   * elo, e não sobre a corrente.
+   *
+   * E não WebP nas saídas que o aceitariam (o zip, o HTML): usar formato
+   * diferente por saída daria hashes diferentes para a MESMA tela no PDF e no
+   * zip. A impressão digital única por quadro vale mais que os bytes. */
+  const FORMATOS_DOC = {
+    'image/jpeg': { ext: 'jpg', pdf: 'JPEG' },
+    'image/png':  { ext: 'png', pdf: 'PNG'  }
+  };
+  /* A ÚNICA resposta para "que formato é o arquivo deste quadro". Antes esta
+     verdade estava escrita em oito lugares — dois no PDF, dois no ZIP, dois no
+     Word, dois no PowerPoint — todos dizendo `.jpg` porque só havia um formato
+     possível. Oito lugares para a mesma verdade é a lista paralela que este
+     projeto já pagou caro; com dois formatos ela viraria oito chances de o
+     documento anunciar `.jpg` e carregar um PNG dentro.
+     Só vale depois de `paraArquivo`: é ela que decide. */
+  const formatoDe = im => FORMATOS_DOC[(im && im.arquivo && im.arquivo.type) || '']
+                       || FORMATOS_DOC[FORMATO_DOC];
+  const extDe = im => formatoDe(im).ext;
+  /* O nome de um quadro dentro do pacote. UMA receita: esta linha aparecia
+     duas vezes — no arquivo e no índice de texto ao lado dele — e enquanto a
+     extensão era constante as duas cópias não podiam divergir. Com dois
+     formatos possíveis, seriam duas chances de o índice anunciar `.jpg` ao
+     lado de um arquivo PNG. Só vale depois de `paraArquivo`. */
+  const nomeNoPacote = (f, i) =>
+    String(i + 1).padStart(4, '0') + '-' + fmt(f.t).replace(/:/g, '-') + '.' + extDe(telaDe(f));
+
+  /* Codifica os quadros ANTES de qualquer gerador escrever um nome de arquivo.
+     Quem escreve `frame0001.<ext>` precisa saber a extensão, e quem decide a
+     extensão é `paraArquivo`. Não é trabalho extra: é o mesmo que os `dados()`
+     preguiçosos fariam logo depois, guardado no próprio quadro. */
+  async function prepararArquivos(kept){
+    for (const f of kept) await paraArquivo(telaDe(f));
+  }
+
   async function paraArquivo(im){
     await im.pronta;
     if (im.arquivo) return im.arquivo;
-    if (im.blob && im.tipo === FORMATO_DOC) { im.arquivo = im.blob; return im.arquivo; }
+    /* Já está num formato que o documento aceita: são os bytes que vieram de
+       fora (uma tela colada, um `.json` reaberto) e os do navegador sem WebP.
+       Recodificar aqui seria estragar um PNG que chegou intacto. */
+    if (im.blob && FORMATOS_DOC[im.tipo]) { im.arquivo = im.blob; return im.arquivo; }
     const el = await carregarImagem(im.url);
     const c = document.createElement('canvas');
     c.width = im.w; c.height = im.h;
     c.getContext('2d').drawImage(el, 0, 0, c.width, c.height);
-    im.arquivo = await new Promise(r => c.toBlob(r, FORMATO_DOC, im.q == null ? 0.85 : im.q));
+    const q = im.q == null ? 0.85 : im.q;
+    const cod = (tipo, qq) => new Promise(r => { try { c.toBlob(r, tipo, qq); } catch (e) { r(null); } });
+    /* A FIDELIDADE SEGUE A MEMÓRIA, e não o tamanho. Escolher aqui pelo menor
+       arquivo escreveria JPEG por cima de um quadro guardado sem perda — e
+       jogaria fora, no último metro, a fidelidade que a captura acabou de
+       pagar quatro vezes mais caro para ter. Um quadro exato sai exato; um
+       quadro que já era aproximado sai em JPEG, que é menor. */
+    const png = im.semPerda ? await cod('image/png') : null;
+    im.arquivo = png || await cod('image/jpeg', q);
     return im.arquivo;
   }
 
@@ -21763,11 +21917,17 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     await new Promise(r => setTimeout(r, 40));
     try {
       await aplicarTarjas(kept); await calcularHashes(kept);
+      /* Os arquivos são preparados ANTES de os nomes serem escritos, e não por
+         organização: é `paraArquivo` que DECIDE o formato de cada quadro, e o
+         nome carrega a extensão. Nomear primeiro seria anunciar uma extensão
+         antes de saber qual. O trabalho não é extra — `dados()` faria a mesma
+         codificação logo em seguida, e ela fica guardada no próprio quadro. */
+      for (const f of kept) await paraArquivo(telaDe(f));
       const ev = evDados();
       const entradas = kept.map((f, i) => ({
         // ordem primeiro para o gerenciador de arquivos ordenar certo,
         // instante depois para saber de onde a imagem veio
-        nome: String(i + 1).padStart(4, '0') + '-' + fmt(f.t).replace(/:/g, '-') + '.jpg',
+        nome: nomeNoPacote(f, i),
         dados: () => bytesDoArquivo(telaDe(f))
       }));
       /* Um índice de texto junto das imagens: sem ele, um zip de evidência é
@@ -21799,7 +21959,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
              E a anotação vai numa linha só: `\n` e `\t` dentro dela partiam a
              linha do TSV, e a segunda metade do texto sumia na reabertura. */
           const nota1 = (f.nota || '').replace(/[\t\r\n]+/g, ' ').trim();
-          linhas.push([String(i + 1).padStart(4, '0') + '-' + fmt(f.t).replace(/:/g, '-') + '.jpg',
+          linhas.push([nomeNoPacote(f, i),
                        passoN(RP.num(f)) + (RP.telas(f) > 1 ? ' (' + (RP.ordem(f)+1) + '/' + RP.telas(f) + ')' : ''),
                        fmt(f.t), hora, nota1].join('\t'));
           if (f.hash) linhas.push('\t' + t('pHash') + ': ' + f.hash);
@@ -21941,7 +22101,11 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       fala: cues.length ? falaDoFrame(kept, i, cues, dur, true) : '',
       ocr: f.ocr || '',
       hash: f.hash || '',
-      img: imagens[i]
+      img: imagens[i],
+      /* O formato VIAJA COM A IMAGEM. O `addImage` recebia `'JPEG'` escrito à
+         mão, e com dois formatos possíveis isso seria o PDF jurando JPEG sobre
+         bytes de PNG — que o jsPDF aceita e o leitor recusa. */
+      imgFmt: formatoDe(telaDe(f)).pdf
     }));
   }
 
@@ -22496,7 +22660,7 @@ ${interno}</p:spTree></p:cSld><p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></
         grupo.forEach((f, j) => {
           nImg++;
           const rid = 'rId' + (9 + j);
-          const nome = 'img' + String(nImg).padStart(4, '0') + '.jpg';
+          const nome = 'img' + String(nImg).padStart(4, '0') + '.' + extDe(telaDe(f));
           midias.push({ nome: 'ppt/media/' + nome, dados: () => bytesDoArquivo(telaDe(f)) });
           rels.push(`<Relationship Id="${rid}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../media/${nome}"/>`);
 
@@ -22555,6 +22719,7 @@ ${interno}</p:spTree></p:cSld><p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></
 <Default Extension="xml" ContentType="application/xml"/>
 <Default Extension="jpeg" ContentType="image/jpeg"/>
 <Default Extension="jpg" ContentType="image/jpeg"/>
+<Default Extension="png" ContentType="image/png"/>
 <Override PartName="/ppt/presentation.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.presentation.main+xml"/>
 <Override PartName="/ppt/slideMasters/slideMaster1.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.slideMaster+xml"/>
 <Override PartName="/ppt/slideLayouts/slideLayout1.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.slideLayout+xml"/>
@@ -22662,6 +22827,9 @@ ${relsSlide[i]}</Relationships>`) });
     await new Promise(r => setTimeout(r, 40));
     try {
       await aplicarTarjas(kept);
+      /* Antes de montar: `montarPptx` escreve `img0001.<ext>` de forma síncrona,
+         e quem decide a extensão é `paraArquivo`. */
+      await prepararArquivos(kept);
       baixarBlob(await zipar(montarPptx(),
         'application/vnd.openxmlformats-officedocument.presentationml.presentation'),
         nomeArquivo() + '.pptx');
@@ -22785,7 +22953,7 @@ ${relsSlide[i]}</Relationships>`) });
     const RPd = reguaDePassos();
     kept.forEach((f, i) => {
       const rid = 'rIdImg' + (i + 1);
-      const nome = 'frame' + String(i + 1).padStart(4, '0') + '.jpg';
+      const nome = 'frame' + String(i + 1).padStart(4, '0') + '.' + extDe(telaDe(f));
       midias.push({ nome: 'word/media/' + nome, dados: () => bytesDoArquivo(telaDe(f)) });
       rels.push(`<Relationship Id="${rid}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/${nome}"/>`);
 
@@ -23586,7 +23754,7 @@ ${relsSlide[i]}</Relationships>`) });
            uma vez: pedir a imagem outra vez aqui seria transcodificar duas
            vezes o mesmo quadro e — pior — abrir a porta para o PDF e o HTML
            carregarem bytes diferentes com o mesmo SHA-256 impresso ao lado. */
-        doc.addImage(linhasPdf[i].img, 'JPEG', ix, yy, iw, ih);
+        doc.addImage(linhasPdf[i].img, linhasPdf[i].imgFmt, ix, yy, iw, ih);
         yy += ih;
         if (cues.length) {
           yy += 6;
@@ -23642,7 +23810,7 @@ ${relsSlide[i]}</Relationships>`) });
         const blockH = ihG + 7 + (hora ? 3.6 : 0) + notaG.length * 3.4;
         if (col === 0 && top + blockH > PH - 18) { foot(); doc.addPage(); top = M; }
         const x = M + col * (cellW + gap) + (cellW - iwG) / 2;
-        doc.addImage(linhasPdf[i].img, 'JPEG', x, top, iwG, ihG);
+        doc.addImage(linhasPdf[i].img, linhasPdf[i].imgFmt, x, top, iwG, ihG);
         let cy2 = top + ihG + 4.5;
         doc.setFont('helvetica','bold').setFontSize(8.5).setTextColor(60)
            .text(passoN(RPp.num(f)) + '  ·  ' + quando(f), x, cy2);
