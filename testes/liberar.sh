@@ -41,7 +41,15 @@ TUDO=0
 # jeito: a régua simplesmente não rodava.
 # Uma régua com o prefixo `site:` precisa do Next de pé — e é a presença de UMA
 # delas que decide se vale pagar os dois minutos do `next build`.
-MAPA="
+# NADA AQUI DENTRO É EXPANDIDO PELO SHELL — 27/08.
+# Este mapa era uma string entre aspas duplas, e as crases dos comentários eram
+# substituição de comando: o bash executava `src/template.html`, `reabrir`,
+# `juntar`, `indice`, `grade`, `anotacao`, `app` e `rapido.sh` toda vez que a
+# esteira subia. Não quebrou nada porque nenhum deles existe como comando — e
+# esse é exatamente o problema: bastava um comentário citar um comando que
+# existe para a porta de liberação rodá-lo. O heredoc com o delimitador entre
+# aspas simples não expande crase, $ nem nada.
+read -r -d '' MAPA <<'MAPA_FIM'
 # `src/template.html` É O PRODUTO. Seis réguas não o cobrem — este mapa nasceu
 # com elas e o Build 2 provou a falha: mexer nos quatro caminhos destrutivos e na
 # largura do índice do .zip não acionou `reabrir`, `juntar`, `indice`, `grade`
@@ -74,7 +82,7 @@ MAPA="
 ^offline/ => site:medicao.mjs
 ^supabase/migrations/ => modelopessoal.mjs conferir-migracoes
 ^testes/ => inventario.mjs
-"
+MAPA_FIM
 
 # ---- 1. os contratos: sempre, e são catorze segundos ------------------------
 CONTRATOS="auditoria.mjs folha.mjs modelopessoal.mjs renovar.mjs numeros.mjs chaves.mjs faxina.mjs figura.mjs funil.mjs inventario.mjs middleware.mjs
@@ -166,7 +174,7 @@ else
     echo
     echo "[2] subindo o Next em :8802 — alguma régua deste diff fala com o site"
     if npx next build > /tmp/liberar-next.log 2>&1; then
-      fuser -k 8802/tcp 2>/dev/null; sleep 1
+      fuser -k 8802/tcp >/dev/null 2>&1; sleep 1
       npx next start -p 8802 > /tmp/liberar-next-run.log 2>&1 &
       NEXT=$!
       trap 'kill $NEXT 2>/dev/null' EXIT

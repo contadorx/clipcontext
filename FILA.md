@@ -106,7 +106,25 @@ responder**.
 
 ---
 
-### DEC-1 — Qual é a promessa oficial de residência de dados
+### DEC-1 — Qual é a promessa oficial de residência de dados — **DECIDIDA 27/08: A no hospedado, B no offline**
+
+> **O que foi decidido.** No produto hospedado vale o caminho A: *"nada do seu
+> conteúdo sai sem um gesto seu"*, com a matriz de exceções nomeada no mesmo
+> bloco. No artefato offline vale o caminho B, literal — e hoje ele **não
+> cumpre**: referencia `cdn.jsdelivr.net` em onze lugares. Ou as bibliotecas
+> entram no arquivo, ou as funções que dependem delas degradam sem rede e a
+> página de download diz isso.
+>
+> **Por que A e não B no hospedado, nas palavras de quem decidiu:** *"na conta
+> paga vou querer injetar informações para as features"*. Ou seja, a matriz de
+> exceções não é só a lista de hoje — ela precisa nascer com espaço para o
+> conteúdo que a conta paga vai mandar de propósito. O que **não** entra na
+> matriz, e continua absoluto nas duas pontas: **vídeo e áudio não saem**.
+>
+> Vira trabalho: (a) escrever a frase uma vez só e fazer copy, termos e
+> privacidade citarem ela; (b) uma régua que prove a matriz contra o que o
+> produto realmente chama; (c) o item do offline cumprir B.
+
 
 Tudo depende desta. Copy, teste, integração e termos se contradizem hoje porque
 ninguém escreveu a frase verdadeira uma vez só.
@@ -359,7 +377,17 @@ estudos de caso — no site inteiro.
 
 ---
 
-### DEC-11 — Reembolso e garantia
+### DEC-11 — Reembolso e garantia — **DECIDIDA 27/08: caminho B, sem reembolso**
+
+> **O que foi decidido:** *"o reembolso na B não existe"*. A cláusula 14 dos
+> termos, nos cinco idiomas, passou a dizer: cobrança anual pela Stripe, preço
+> o da página no momento da contratação, renovação automática, **14 dias com
+> tudo sem cartão** antes de qualquer cobrança, cancelamento na própria conta,
+> acesso até o fim do período pago e **sem devolução proporcional** — ressalvado
+> o que a legislação consumerista garante a pessoa física, inclusive o art. 49
+> do CDC, porque a cláusula 15 elege a lei brasileira. A régua `legal.mjs`
+> exige as quatro frases nos cinco idiomas e proíbe as duas antigas.
+
 
 Zero ocorrências no site. O que existe responde ao *cancelamento*, não ao
 *arrependimento*.
