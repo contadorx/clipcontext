@@ -60,6 +60,19 @@ read -r -d '' MAPA <<'MAPA_FIM'
 ^src/features[.]json$ => planos.mjs promessa.mjs site:precos.mjs
 ^src/i18n-conta[.]json$ => chaves.mjs site:compra.mjs site:cancelar.mjs
 ^src/i18n-site[.]json$ => chaves.mjs site:cinco.mjs site:contradicao.mjs site:buscaajuda.mjs
+# A PÁGINA TOCADA CHAMA A RÉGUA DELA — 27/08.
+# A linha genérica abaixo era a única cobertura de `src/site/bodies/`, e ela não
+# nomeia `precos.mjs` — a régua da página que tem mais afirmação por metro
+# quadrado do site. Mexer na calculadora de ROI nos cinco idiomas saía verde
+# sem a régua da calculadora rodar. O mapa acumula todas as linhas que casam,
+# então estas somam com a genérica em vez de substituí-la.
+^src/site/bodies/precos[.] => site:precos.mjs venda.mjs
+^src/site/bodies/(termos|privacidade)[.] => site:legal.mjs
+^src/site/bodies/seguranca[.] => site:legal.mjs matriz.mjs
+^src/site/bodies/comparativo[.] => comparar.mjs
+^src/site/bodies/caso[A-Za-z]*[.] => site:vitrine.mjs cenarios.mjs
+^src/site/bodies/ajuda[.] => site:ajuda.mjs site:buscaajuda.mjs
+^src/site/bodies/verificar[.] => verificador.mjs
 ^src/site/bodies/ => folha.mjs site:paginas.mjs site:legal.mjs site:ajuda.mjs site:vitrine.mjs site:compra.mjs site:buscaajuda.mjs
 ^src/site/(doc|home)[.]html$ => site:paginas.mjs site:cinco.mjs
 ^src/site/support[.]js$ => site:ficha.mjs site:paginas.mjs site:buscaajuda.mjs

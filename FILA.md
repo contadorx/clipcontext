@@ -161,7 +161,20 @@ destino voluntário.**
 
 ---
 
-### DEC-2 — A calculadora de ROI da página de preços
+### DEC-2 — A calculadora de ROI da página de preços — **DECIDIDA 27/08: caminho A, 45 minutos**
+
+> **O que foi decidido:** *"A estou usando no real, 45 minutos"*. A premissa
+> deixou de ser chute: o campo "minutos de trabalho manual por caso" começa em
+> **45**, que é o tempo medido em uso real para montar uma evidência à mão, e a
+> página **diz de onde vem o número** nos cinco idiomas. Nasceu em 12 — um chute
+> com cara de medição na frente de quem vai comprar.
+>
+> A régua `precos.mjs` ganhou o bloco `[8b]`: fixa o 45 e a frase de proveniência
+> nos cinco idiomas. Provada por reprovação — com 44 em pt, ela reprova.
+>
+> Continua verdade o que a página já dizia: os quatro números são do usuário,
+> não saem do navegador, e a conta não se compara com o nosso preço de propósito.
+
 
 Ela é o argumento de tempo inteiro, em forma de widget — 30 das 75 ocorrências
 de "tempo" na página.
