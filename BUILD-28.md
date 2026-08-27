@@ -92,3 +92,49 @@ pedidos`).
 ## Regressão
 
 ```
+162 ok · 0 PULADO · 0 FALHOU        (162 réguas)
+Verde inteiro: as 162 rodaram, e nenhuma foi pulada.
+```
+
+### Três vermelhas no caminho, e as três eram a régua
+
+**`reuniao.mjs`** afirmava que *"usar a transcrição pronta"* vem marcada como
+recomendada — **com cenário nenhum escolhido**. O selo passou a ter dono, e o
+dono em `ata` é essa opção. O arquivo é sobre a transcrição de **reunião**:
+escolher `ata` não é contornar a régua, é colocá-la no cenário de que ela trata.
+
+**`faixa.mjs`** pegou 1 de 71 amostras com a transcrição correndo e a faixa fora
+da tela — e passa isolado. A faixa acende quando `ocupado` é verdade **e** a
+barra do trabalho já está na tela: dois estados escritos em funções diferentes,
+com uma janela de um quadro entre eles. Numa máquina folgada ela não é
+amostrada; com três Chromium disputando quatro núcleos, foi.
+
+> Afirmar "nunca escondida" é afirmar sobre a **ordem de duas pinturas**, e não
+> sobre o que a pessoa vê.
+
+O defeito que aquele bloco existe para pegar é outro — a faixa sumindo **no
+meio** e não voltando —, e ele aparece como amostras escondidas **seguidas**.
+Duas seguidas continuam reprovando; uma isolada agora sai impressa com a
+posição, para a próxima ser diagnosticável.
+
+**`juntos.mjs`** reprovou "a fala começou sozinha" com o estado vazio — e a
+causa é esta mudança, funcionando. O `setInputFiles` do Playwright **não é gesto
+de gente**: ele escreve no `<input>` por baixo. Numa pessoa de verdade, o clique
+em "Escolher o vídeo" já disparou o adiantamento; aqui não dispara, então o
+download só começa quando a transcrição pede, e a primeira linha de estado chega
+um instante depois. A régua amostrava no instante zero; agora **espera** a linha
+aparecer, que é o que a afirmação diz.
+
+---
+
+## O que vem depois
+
+1. **Marcar o erro na hora** — pedido de campo, avaliado e proposto: um botão
+   `ERRO` ao lado de Marcar, que carimba a falha no quadro; na revisão ele chega
+   destacado, com a lente já aberta nas ferramentas de marcação; e no documento
+   ele sai como falha, com resumo. Duas decisões pendentes: se o erro é da
+   **tela** ou do **passo**, e o que fica no grátis.
+2. **A nota fiscal e o ajuste de assentos**, atrás da DEC-14.
+
+E os seus dois portões continuam onde estavam: `npm run stripe:conferir` com
+chave de teste, antes da primeira venda, e `CONVITE_SAL` na Vercel.
