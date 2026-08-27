@@ -11,10 +11,10 @@
 | A frase publicada | O teste |
 |---|---|
 | Evidência completa, com impressão digital e tarja de dado sensível | `evidencia.mjs` |
-| Tudo processado no seu computador | **sem teste** — terceiros.mjs prova a lista de suboperadores, não o processamento local |
+| Tudo processado no seu computador | `semrede.mjs` |
 | Todos os formatos de saída | `saidas.mjs` |
 | Link pré-configurado para colar no Jira, no Zephyr, no Xray ou no TestRail — é um endereço, não uma integração | `linkpage.mjs` |
-| Sem conta para usar | **sem teste** |
+| Sem conta para usar | `semrede.mjs` |
 
 ## Cartão — Execute o seu roteiro (Personal)
 
@@ -48,7 +48,7 @@
 
 ---
 
-**2 promessa(s) sem trava** de 20.
+**0 promessa(s) sem trava** de 20.
 
 ---
 
@@ -63,7 +63,7 @@ cada build. Editar o `AUDITORIA-PENDENTE.md` não adianta — ele é reescrito.
 
 | A frase publicada | O teste |
 |---|---|
-| Vídeo, áudio e transcrição não saem do seu computador | `precos.mjs` prova que **a página** não chama a rede; **sem teste** para a ferramenta |
+| Vídeo, áudio e transcrição não saem do seu computador | `semrede.mjs` — a evidência sai inteira com todo pedido externo abortado, e cada corpo que o app tentou mandar é lido, pesado e impresso; `precos.mjs` continua cobrindo a página |
 | Cobrança anual, renova sozinha, cancela na conta | `renovar.mjs` (a renovação, com o aviso pintado), `cancelar.mjs` (o caminho do cancelamento, nos cinco idiomas) — **nenhum dos dois abre o portal da Stripe**, e os dois dizem isso no cabeçalho |
 | A partir de 3 pessoas, e o total mínimo anual | `precos.mjs`, `cinco.mjs`, `promessa.mjs` — o número sai de `lib/stripe.ts`, e desde o Build 4 o `build.py` o lê de lá em vez de repetir |
 | As suas colunas voltam como estavam | `roteiro.mjs` |

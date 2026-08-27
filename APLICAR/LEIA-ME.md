@@ -110,12 +110,17 @@ bash testes/liberar.sh
 bash testes/rodar.sh
 ```
 
-A regressão sai com **145 ok · 5 PULADO · 0 FALHOU** de 150 réguas. Um pulado
-**não conta como cobertura**, e o motivo de cada um sai impresso: três por falta
-do emissor de chaves — que não viaja no pacote, de propósito —, um pela tradução
-jurídica pendente de alemão e francês, e um (`timepag.mjs`) porque a página que
-ele testava foi aposentada no Build 5 e o fluxo dela ainda não tem régua na
-arquitetura nova. Este último é dívida deste projeto, e está na `FILA.md`.
+A regressão sai com **160 ok · 0 PULADO · 0 FALHOU** de 160 réguas — verde
+inteiro, e o rodapé diz isso com todas as letras. Um pulado **não conta como
+cobertura**, e por isso o número acima só vale enquanto o `0 PULADO` estiver
+lá: se algum voltar, o motivo dele sai impresso na tela.
+
+Os cinco que existiam morreram medidos: três por falta do emissor de chaves —
+que não viaja no pacote, de propósito — foram destravados no Build 21, quando a
+régua passou a gerar o próprio par Ed25519; o da tradução jurídica foi pago; e o
+`timepag.mjs` era uma lápide (a página que ele testava foi aposentada no Build 5
+e as afirmações dela vivem em `entrada2.mjs` e `compra.mjs [6]`), apagada no
+Build 25.
 
 O `testes/preparar.sh` gera as amostras de vídeo que sete testes consomem. Ele
 precisa de Pillow e de um `ffmpeg` completo — a build mínima que vem com o

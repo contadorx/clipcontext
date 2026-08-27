@@ -30,7 +30,7 @@ import { RAIZ_WS } from './_caminhos.mjs';
    Ele desce quando uma promessa ganha régua, e a régua manda descer: um teto
    folgado é um teto que não trava nada. Subir exige editar esta linha, que é o
    momento em que alguém tem de justificar a promessa sem prova. */
-const TETO_SEM_TRAVA = 2;
+const TETO_SEM_TRAVA = 0;
 
 let falhas = 0;
 const ok = (n, c, e) => {

@@ -1604,7 +1604,7 @@ CARTOES = [
              "es": "Evidencia completa, con huella digital y tarjado de dato sensible",
              "de": "Vollständiger Nachweis, mit Fingerabdruck und Schwärzung sensibler Daten",
              "fr": "Preuve complète, avec empreinte et masquage des données sensibles"},
-            {"teste": '', "semTestePorque": 'terceiros.mjs prova a lista de suboperadores, não o processamento local', "pt": "Tudo processado no seu computador",
+            {"teste": 'semrede.mjs', "pt": "Tudo processado no seu computador",
              "en": "Everything processed on your own computer",
              "es": "Todo procesado en su computadora",
              "de": "Alles auf Ihrem eigenen Rechner verarbeitet",
@@ -1631,7 +1631,7 @@ CARTOES = [
              "fr": "Lien prérempli à coller dans Jira, Zephyr, Xray ou TestRail — "
                    "c’est une adresse, pas une intégration",
              "href": "link"},
-            {"teste": '', "pt": "Sem conta para usar",
+            {"teste": 'semrede.mjs', "pt": "Sem conta para usar",
              "en": "No account needed to use it",
              "es": "Sin cuenta para usarlo",
              "de": "Kein Konto nötig",
