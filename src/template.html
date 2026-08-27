@@ -9176,6 +9176,9 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   }
   let pipWin = null, pipTexto = null, pipRelogio = null, pipFrames = null;
   let pipVm = null, pipVs = null, pipCalar = null, pipMarcar = null, pipTela = null, pipPausa = null, pipErro = null;
+  /* Uma medida por janela. Ela nasce falsa a cada abertura, inclusive na
+     reabertura que troca o tamanho — a fita nova precisa ser medida de novo. */
+  let fitaMedida = false;
   let pipErroTic = null;
   /* Pausa e marcação vivem fora do bloco da gravação porque a janelinha e o
      cartão precisam alcançá-las, e as duas são recriadas a cada captura. */
@@ -10032,6 +10035,65 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     btn.setAttribute('aria-label', t(vira));
   }
 
+  /* ---- A LARGURA DA FITA SAI DA MEDIDA, E NAO DE UMA TABELA ----
+   *
+   * O relato: "nao da para a janela ser variavel conforme lingua? ela fica
+   * muito grande no portugues, com um espaco que pode ser aproveitado".
+   *
+   * Da — e a tentacao errada seria uma tabela de largura por idioma. Isso e uma
+   * lista paralela: no dia em que um rotulo mudar, a tabela continua com o
+   * numero velho e a fita volta a sobrar ou a espremer. O numero tem que sair
+   * do que esta DESENHADO.
+   *
+   * Entao a janela e pedida na largura do idioma mais comprido (480, que e o
+   * que o alemao precisa) e, com a fita ja montada e rotulada, o conteudo e
+   * medido e a janela encolhe ate ele. Em portugues isso e 390.
+   *
+   * COMO SE MEDE O QUE E ELASTICO: o contador de quadros tem flex de crescer, e
+   * perguntar a largura dele devolveria a da janela. Ele e congelado no tamanho
+   * do proprio texto por um instante, o corpo passa a `max-content`, le-se o
+   * `scrollWidth`, e tudo volta. Nenhum quadro e pintado no meio disso.
+   *
+   * COM ROTEIRO NAO SE ENCOLHE: ali a largura inteira e do passo, e apertar a
+   * janela seria cortar justamente o que ela existe para mostrar.
+   *
+   * E `resizeTo` pode ser recusado numa janela de picture-in-picture. Se for, a
+   * fita fica com os 480 com que abriu: e o tamanho que serve a todos os
+   * idiomas, entao nada quebra — o que se perde e a economia. */
+  function encolherFita(){
+    if (!pipWin || pipModo() !== 'min') return;
+    const d = pipWin.document, b = d.body;
+    if (!b || b.classList.contains('comRoteiro')) return;
+    try {
+      const cs = pipWin.getComputedStyle(b);
+      const txt = d.getElementById('txt');
+      /* A SOMA EXPLICITA DOS FILHOS, e nao um truque de `max-content`.
+         Tentei primeiro por `scrollWidth` (ele ignora o preenchimento da
+         direita: a fita saia sete pixels curta) e depois pela caixa do corpo em
+         `max-content` (ainda quatro pixels curta, e o ultimo botao ficava para
+         fora). A regua pegou as duas, medindo a janela na largura que a conta
+         mandava.
+         Esta conta nao tem truque: preenchimento dos dois lados, mais a largura
+         de cada filho visivel, mais o respiro entre eles. O contador entra com
+         ZERO — ele e o elastico, existe para ocupar a sobra, e numa janela
+         medida nao sobra nada. */
+      const vis = [...b.children].filter((e) => {
+        const s2 = pipWin.getComputedStyle(e);
+        return s2.display !== 'none' && s2.position === 'static';
+      });
+      const respiro = parseFloat(cs.columnGap || 0) || 0;
+      let preciso = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight) +
+                    respiro * Math.max(0, vis.length - 1);
+      for (const e of vis) preciso += (e === txt) ? 0 : e.getBoundingClientRect().width;
+      preciso = Math.ceil(preciso) + 2;
+      const teto = TAM_PIP(true).w;
+      /* Nunca CRESCE: o teto e o que foi pedido na abertura, e uma janela que
+         cresce sozinha por cima do trabalho da pessoa e pior que uma que sobra.
+         E um piso de 300 para nao virar um risco se a medida vier estranha. */
+      if (preciso >= 300 && preciso < teto) pipWin.resizeTo(preciso, TAM_PIP(true).h);
+    } catch (e) {}
+  }
+
   /* Fechar e reabrir e o unico caminho: o tamanho de uma janela de
      `documentPictureInPicture` e pedido na abertura e nao se redimensiona
      depois. Era o que o seletor da pagina ja fazia, e agora e a propria
@@ -10139,6 +10201,9 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       rotularPipTam(pipTamBtn);
       pipTamBtn.onclick = () => trocarTamanhoPip();
     }
+    /* A MEDIDA ESPERA OS ROTULOS, que chegam no estado `gravando`. Aqui so se
+       zera a marca: janela nova, medida nova. */
+    fitaMedida = false;
 
     /* ---- ATALHOS DENTRO DA JANELINHA ----
      *
@@ -10258,6 +10323,11 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
         pipPausa.textContent = pausado ? t('recResumeBtn') : t('recPauseBtn');
         pipPausa.classList.toggle('off', pausado);
       }
+      /* A MEDIDA DA FITA ACONTECE AQUI, e nao na abertura: e neste estado que os
+         botoes recebem os rotulos, e uma fita de botoes vazios cabe em qualquer
+         lugar. Uma vez por janela — `resizeTo` a cada segundo seria uma janela
+         piscando por cima do trabalho da pessoa. */
+      if (!fitaMedida) { fitaMedida = true; encolherFita(); }
       if (pipTexto) pipTexto.classList.remove('contando');
       if (pipWin) { pipWin.document.body.classList.remove('contando');
                     pipWin.document.body.classList.add('gravando'); }

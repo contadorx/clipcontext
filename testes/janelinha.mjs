@@ -432,6 +432,58 @@ console.log(`\n[1a] a fita: cabe em ${LARG_MIN}×${ALT_MIN}, e sobra só o que s
        picture-in-picture, e por isso ele vive dentro de um `try` — o que a
        régua afirma é que a ordem é dada, não que o Chrome obedeceu. Está dito
        assim de propósito: prometer o que não se pode medir daqui seria pior. */
+    /* ---- A FITA ENCOLHE ATÉ O CONTEÚDO ----
+       Relato: "não dá para a janela ser variável conforme a língua? ela fica
+       muito grande no português, com um espaço que pode ser aproveitado".
+       A tentação errada seria uma tabela de largura por idioma — lista paralela,
+       que envelhece no dia em que um rótulo mudar. O produto mede a fita já
+       montada e encolhe a janela até ela.
+       AQUI SE COBRA A CONTA, e não o `resizeTo`: a mesma medida do produto é
+       refeita nesta régua e o resultado é testado como janela — se nada vaza
+       naquela largura, a conta serve. O `resizeTo` em si é uma ordem que só uma
+       janela de picture-in-picture de verdade pode aceitar ou recusar. */
+    const medido = await pg.evaluate(() => {
+      /* A MESMA CONTA DO PRODUTO, refeita aqui: preenchimento dos dois lados,
+         a largura de cada filho visível, o respiro entre eles, e o contador
+         entrando com zero — ele é o elástico.
+         Duas versões anteriores desta conta reprovaram aqui, e as duas eram do
+         produto: o `scrollWidth` ignora o preenchimento da direita, e a caixa
+         do corpo em `max-content` também vinha curta. O último botão ficava
+         para fora nas duas. */
+      const b = document.body, cs = getComputedStyle(b);
+      const txt = document.getElementById('txt');
+      const vis = [...b.children].filter((e) => {
+        const s2 = getComputedStyle(e);
+        return s2.display !== 'none' && s2.position === 'static';
+      });
+      const respiro = parseFloat(cs.columnGap || 0) || 0;
+      let preciso = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight) +
+                    respiro * Math.max(0, vis.length - 1);
+      for (const e of vis) preciso += (e === txt) ? 0 : e.getBoundingClientRect().width;
+      return Math.ceil(preciso) + 2;
+    });
+    console.log(`     a fita alemã encolheria de ${LARG_MIN} para ${medido}px`);
+    ok('a medida da fita cabe no que foi pedido', medido > 0 && medido <= LARG_MIN,
+       `${medido} × ${LARG_MIN}`);
+    await pg.setViewportSize({ width: medido, height: ALT_MIN });
+    await pg.waitForTimeout(120);
+    const naMedida = await pg.evaluate(() => [...document.querySelectorAll('body *')]
+      .filter((e) => e.getBoundingClientRect().right > innerWidth + 1)
+      .map((e) => e.id || e.tagName));
+    ok('  e na largura medida nada fica para fora', naMedida.length === 0,
+       naMedida.join(' '));
+    await pg.setViewportSize({ width: LARG_MIN, height: ALT_MIN });
+
+    /* E O PRODUTO NUNCA CRESCE POR CONTA PRÓPRIA: o teto é o que foi pedido na
+       abertura. Uma janela que cresce sozinha por cima do trabalho da pessoa é
+       pior do que uma que sobra. */
+    ok('o produto mede com o contador FORA da conta',
+       /preciso \+= \(e === txt\) \? 0 :/.test(app));
+    ok('  e só encolhe: nunca cresce além do que pediu',
+       /preciso >= 300 && preciso < teto/.test(app));
+    ok('  e não encolhe quando há roteiro, que é quem usa a largura',
+       /if \(!b \|\| b\.classList\.contains\('comRoteiro'\)\) return;/.test(app));
+
     const manda = /pipWin\.resizeTo\(tam\.w, tam\.h\)/.test(app);
     const soQuandoMuda = /antes !== !!roteiro\.length && pipModo\(\) === 'min'/.test(app);
     ok('e se o roteiro chegar depois, a janela é remedida', manda && soQuandoMuda,
