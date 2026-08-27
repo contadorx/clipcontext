@@ -34,7 +34,7 @@
 | Acompanhe o que está pendente e quem está executando | `roteiro.mjs` |
 | Padrão da equipe aplicado no documento de todo mundo | `modelos.mjs` |
 | Assentos, convite, bloqueio e prazo de revogação | `licenca.mjs`, `convite.mjs` |
-| Classificação e campo de emissor no documento | **sem teste** — miudos.mjs cobre a classificação no prompt, não o campo no documento |
+| Classificação e campo de emissor no documento | `emissor.mjs` |
 
 ## A comparação curta
 
@@ -48,7 +48,7 @@
 
 ---
 
-**3 promessa(s) sem trava** de 20.
+**2 promessa(s) sem trava** de 20.
 
 ---
 

@@ -93,5 +93,23 @@ console.log('\n[4] quem pula, pula ALTO — e não em letra minúscula');
      errados.join(' | '));
 }
 
-console.log(falhas ? `\n${falhas} FALHA(S)` : '\nInventário dos testes: os três números batem.');
+console.log('\n[5] a pista de liberação conta as MESMAS réguas');
+{
+  /* QUATRO NÚMEROS, E NÃO TRÊS. O `liberar.sh` calcula o próprio total no
+     rodapé — "rodaram 23 de 161 réguas" — e esse total saía de uma lista de
+     exclusões escrita à mão, paralela ao `INSTRUMENTOS` daqui. Ela tinha três
+     dos quatro nomes: o `capturar.mjs` faltava, e o rodapé dizia 161 enquanto
+     este arquivo dizia 160.
+     Ninguém reprovava, porque o inventário conferia disco × rodar.sh × LEIA-ME
+     e a quarta lista não estava na conta. É o defeito que este arquivo existe
+     para impedir, sobrevivendo dentro do próprio corredor de liberação. */
+  const lib = fs.readFileSync(path.join(AQUI, 'liberar.sh'), 'utf8');
+  const linha = (lib.match(/^.*grep -vE .*gerar-dpa.*$/m) || [''])[0];
+  ok('o liberar.sh declara as exclusões dele', linha.length > 0, linha.slice(0, 60));
+  const faltando = [...INSTRUMENTOS].filter((f) => !linha.includes(f.replace('.mjs', '')));
+  ok('e elas são exatamente os instrumentos deste arquivo', faltando.length === 0,
+     faltando.length ? `fora da conta do rodapé: ${faltando.join(', ')}` : '');
+}
+
+console.log(falhas ? `\n${falhas} FALHA(S)` : '\nInventário dos testes: os quatro números batem.');
 process.exit(falhas ? 1 : 0);

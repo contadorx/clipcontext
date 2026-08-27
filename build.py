@@ -1744,7 +1744,7 @@ CARTOES = [
              "es": "Asientos, invitación, bloqueo y plazo de revocación",
              "de": "Plätze, Einladung, Sperrung und Widerrufsfrist",
              "fr": "Sièges, invitation, blocage et délai de révocation"},
-            {"teste": '', "semTestePorque": 'miudos.mjs cobre a classificação no prompt, não o campo no documento', "pt": "Classificação e campo de emissor no documento",
+            {"teste": 'emissor.mjs', "pt": "Classificação e campo de emissor no documento",
              "en": "Classification and an issuer field on the document",
              "es": "Clasificación y campo de emisor en el documento",
              "de": "Einstufung und Ausstellerfeld im Dokument",

@@ -198,7 +198,7 @@ fi
 # lugares do projeto respondem números diferentes para a mesma pergunta, que é
 # o defeito que o `inventario.mjs` existe para impedir.
 total=$(ls "$AQUI"/*.mjs | grep -vE '/(_|shot|dbg)' \
-        | grep -vE '/(proxy|regua|gerar-dpa)[.]mjs$' | wc -l)
+        | grep -vE '/(proxy|regua|gerar-dpa|capturar)[.]mjs$' | wc -l)
 n_rodados=$(printf '%s\n' $rodados | sort -u | grep -c .)
 n_pul=$(printf '%s\n' $pulados | grep -c .)
 echo
