@@ -44,8 +44,17 @@ ensina a pular a régua.
 
 | | quando | quanto |
 |---|---|---:|
-| `bash testes/liberar.sh` | **libera um build** | ~1–3 min |
-| `bash testes/rodar.sh` | **libera uma entrega** — antes de publicar | ~70 min |
+| `bash testes/liberar.sh` | **cada build** | ~1–3 min |
+| `bash testes/rodar.sh` | **a cada cinco builds**, e antes de publicar | ~50–70 min |
+
+**A cadência mudou em 27/08, por instrução do Leandro:** a pista específica em
+todo build, a esteira inteira a cada cinco. O motivo é o custo medido — dos
+Builds 23 ao 31, a esteira completa rodou onze vezes e reprovou seis, e todas as
+seis foram apanhadas pelo diff (a pista específica cobre as réguas que o build
+toca). O que a esteira inteira pega, e a específica não, é o efeito colateral em
+régua que o mapa do diff não liga — foi o caso do `fluxo.mjs` no Build 27 e do
+`miudos.mjs` no Build 29. Cinco builds é a distância que ele aceitou carregar
+desse risco.
 
 A pista de liberação roda em três partes: o chão (`build.py` e o TypeScript),
 os doze contratos estáticos — sem navegador e sem servidor, catorze segundos —,
