@@ -9711,7 +9711,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
      depois, e não tem como se atualizar sozinho. Sem carimbo, "estou com um
      problema no offline" é uma conversa sem chão — ninguém sabe de qual build
      se fala nem se o defeito já foi consertado. */
-  const VERSAO = '2026.08.27-1';
+  const VERSAO = '2026.08.27-3';
   window.__versao = () => VERSAO;
 
   const PIP_CSS = `
@@ -9740,8 +9740,15 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
        desenho e mantem a palavra na arvore de acessibilidade, entao o leitor de
        tela continua dizendo Marcar este passo. Esconder com display none
        apagaria o nome do botao junto. */
+    /* APERTADA AO MAXIMO DO QUE E MEU. A barra de titulo com o endereco e os
+       tres icones e do navegador: o documentPictureInPicture sempre a desenha,
+       e ela nao sai. O que eu controlo e a faixa abaixo dela, e ela foi de 52
+       para 42px — botao de 32 em vez de 38, respiro de 5 em vez de 7.
+       Nao desce mais sem estragar o alvo: abaixo de 32px o botao passa a ser
+       mirado em vez de acertado, e quem esta dentro do sistema testado nao tem
+       atencao sobrando para mirar. */
     body.min{flex-direction:row;align-items:center;justify-content:flex-start;
-             gap:6px;padding:7px 9px;height:100vh;overflow:hidden}
+             gap:5px;padding:5px 7px;height:100vh;overflow:hidden}
     body.min .vus,
     body.min #txt,
     body.min .rot,
@@ -9778,12 +9785,12 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
        "Unexpected identifier width", e o app abria morto. O aviso ja estava
        escrito trinta linhas acima, e eu o li depois de quebrar. */
     body.min #marcar,body.min #maisTela,body.min #stop,
-    body.min #pausa,body.min #calar{flex:none;width:auto;height:38px;
-                    padding:0 9px;font-size:10.5px;font-weight:600;gap:5px;
-                    border-radius:8px;white-space:nowrap;
+    body.min #pausa,body.min #calar{flex:none;width:auto;height:32px;
+                    padding:0 8px;font-size:10.5px;font-weight:600;gap:5px;
+                    border-radius:7px;white-space:nowrap;
                     display:flex;align-items:center;justify-content:center}
     body.min #marcar::before,body.min #maisTela::before,
-    body.min #stop::before{width:15px;height:15px}
+    body.min #stop::before{width:14px;height:14px}
     /* O MARCAR CONTINUA SENDO O DIFERENTE, e aqui isso importa mais: sem
        rotulo, tres icones cinzentos lado a lado sao tres irmaos. Ele fica
        aceso e um pouco maior — e um pouco maior num alvo de 38 e a diferenca
@@ -10068,13 +10075,19 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
    * ganha nada com "+ Tela", e "Tela adicional a este passo" é a frase que
    * explica o que o botão faz. O `aria-label` vence o texto de dentro, então
    * o curto fica só para os olhos. */
+  /* A LETRA DO ATALHO ENTRA NO NOME DO BOTÃO. Um atalho que não aparece em
+     lugar nenhum é um atalho que só quem escreveu conhece — e este mora numa
+     janela de 42px onde não cabe uma legenda. O `title` é onde ele cabe. */
+  const ATALHO_PIP = { recMarkBtn: 'M', recTelaBtn: 'T', recPauseBtn: 'P',
+                       recResumeBtn: 'P', pipStop: 'S' };
   function rotularPip(btn, chaveLonga, chaveCurta){
     if (!btn) return;
     const longo = t(chaveLonga);
     const curto = t(chaveCurta) || longo;
     const min = pipModo() === 'min';
+    const letra = ATALHO_PIP[chaveLonga];
     btn.textContent = min ? curto : longo;
-    btn.title = longo;
+    btn.title = longo + (letra ? '  (' + letra + ')' : '');
     btn.setAttribute('aria-label', longo);
   }
 
@@ -10107,7 +10120,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
          numa borda e deixa o meio da tela livre. 390 dá quinze de folga. */
       const min = pipModo() === 'min';
       pipWin = await documentPictureInPicture.requestWindow(
-        { width: min ? 390 : 250, height: min ? 56 : (roteiro.length ? 560 : 430) });
+        { width: min ? 380 : 250, height: min ? 44 : (roteiro.length ? 560 : 430) });
     } catch (e) { pipWin = null; return; }
 
     const d = pipWin.document;
@@ -10196,6 +10209,34 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     }
     pintarRotPip();
     pipPausa.onclick  = () => { if (alternarPausa) alternarPausa(); };
+
+    /* ---- ATALHOS DENTRO DA JANELINHA ----
+     *
+     * Atalho GLOBAL não existe para uma página: sem foco, o navegador não
+     * entrega tecla nenhuma — e uma página que lesse tecla sem foco seria um
+     * keylogger. Isso foi medido e não tem volta.
+     *
+     * Mas a janelinha É UMA JANELA, e janela recebe foco. Ela fica sempre por
+     * cima do sistema testado, então dar foco a ela é um clique — e a partir
+     * daí a mão fica no teclado em vez de mirar um alvo de 32px quarenta vezes
+     * por sessão.
+     *
+     * As letras são as mesmas da aba (`m` marca), para não haver duas línguas
+     * para o mesmo gesto. E não há modificador: aqui não existe campo de texto
+     * onde digitar "marcar" começaria uma marcação — a caixa de anotação está
+     * escondida no modo fita e, na completa, a guarda é o alvo do evento. */
+    pipWin.document.addEventListener('keydown', (e) => {
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+      const alvo = e.target;
+      if (alvo && (alvo.tagName === 'INPUT' || alvo.tagName === 'TEXTAREA' ||
+                   alvo.isContentEditable)) return;
+      const apertar = (b) => { if (b && !b.disabled) { e.preventDefault(); b.click(); } };
+      const k = (e.key || '').toLowerCase();
+      if (k === 'm') apertar(pipMarcar);
+      else if (k === 't') apertar(pipTela);
+      else if (k === 'p') apertar(pipPausa);
+      else if (k === 's') apertar(pipFrames);
+    });
     /* O botão da janelinha não duplica lógica: chama o mesmo `alternarMic` da
        aba, e o rótulo dos dois é repintado pela mesma função. */
     pipCalar.onclick = () => { if (alternarMic) alternarMic(); };

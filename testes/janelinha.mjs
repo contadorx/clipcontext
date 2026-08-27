@@ -279,14 +279,40 @@ console.log(`\n[1a] a fita: cabe em ${LARG_MIN}×${ALT_MIN}, e sobra só o que s
 
 console.log('\n[1a2] a palavra curta é para os olhos; o nome é a frase inteira');
 {
+  /* ---- OS ATALHOS DA JANELINHA ----
+     Atalho global não existe para uma página — sem foco, o navegador não
+     entrega tecla. Mas a janelinha É uma janela, recebe foco com um clique e
+     fica sempre por cima: a partir daí a mão fica no teclado em vez de mirar
+     um alvo de 32px quarenta vezes por sessão.
+     As letras têm que ser as MESMAS da aba, senão são duas línguas para o
+     mesmo gesto. E têm que aparecer em algum lugar: um atalho que não se
+     anuncia é um atalho que só quem escreveu conhece. */
+  ok('a janelinha escuta o teclado', /pipWin\.document\.addEventListener\('keydown'/.test(app));
+  ok('e ignora quem está digitando num campo',
+     /alvo\.tagName === 'INPUT' \|\| alvo\.tagName === 'TEXTAREA'/.test(app));
+  for (const [letra, alvo] of [["'m'", 'pipMarcar'], ["'t'", 'pipTela'],
+                               ["'p'", 'pipPausa'], ["'s'", 'pipFrames']]) {
+    ok(`  ${letra} aciona ${alvo}`,
+       new RegExp("k === " + letra + "\\) apertar\\(" + alvo).test(app));
+  }
+  /* `m` é a mesma tecla da aba: `marcar` lá, `marcar` aqui. */
+  ok('e o m da aba continua sendo o mesmo gesto',
+     /k === 'm' && liveOn/.test(app));
+  ok('a letra aparece no nome do botão, senão ninguém a descobre',
+     /btn\.title = longo \+ \(letra \? '  \(' \+ letra \+ '\)' : ''\)/.test(app));
+
   /* Quem usa leitor de tela não ganha nada com "+ Tela". O `aria-label` vence
      o texto de dentro do botão, então o curto fica só para quem vê. */
   ok('a fita rotula por uma função só, e não botão a botão',
      /function rotularPip\(btn, chaveLonga, chaveCurta\)/.test(app));
   ok('o texto visível é o curto só no modo fita',
      /btn\.textContent = min \? curto : longo;/.test(app));
-  ok('e o nome acessível é sempre a frase inteira',
-     /btn\.title = longo;/.test(app) && /btn\.setAttribute\('aria-label', longo\)/.test(app));
+  /* O `title` ganhou a letra do atalho no fim; o NOME ACESSÍVEL continua sendo
+     só a frase — `aria-label` vence o texto de dentro, e quem ouve não ganha
+     nada com um "(M)" no fim de cada botão. */
+  ok('e o nome acessível é sempre a frase inteira, sem a letra',
+     /btn\.setAttribute\('aria-label', longo\)/.test(app) &&
+     /btn\.title = longo \+/.test(app));
   for (const [id, chave] of [['marcar','pipCurtoMarcar'], ['maisTela','pipCurtoTela'],
                              ['stop','pipCurtoParar']]) {
     const n = (app.match(new RegExp(chave + ":'", 'g')) || []).length;
