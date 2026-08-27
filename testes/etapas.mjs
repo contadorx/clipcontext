@@ -273,18 +273,34 @@ console.log('\n[4c] mas NÃO leva para trás, nem por cima de quem escreve');
   ok('o cursor está na transcrição', focoAntes === 'tr', focoAntes);
 }
 
+/** Espera a rolagem parar de verdade: quatro leituras iguais seguidas.
+ *  Devolve `false` se estourou o tempo — e quem chama diz isso na falha, em vez
+ *  de medir uma tela que ainda estava andando e culpar o produto. */
+async function esperarParar(pg){
+  await pg.evaluate(() => { delete window.__quieto; });
+  return pg.waitForFunction(() => {
+    const y = Math.round(window.scrollY);
+    const e = window.__quieto || { y: -1, n: 0 };
+    if (e.y === y) e.n++; else { e.y = y; e.n = 1; }
+    window.__quieto = e;
+    return e.n >= 4;
+  }, null, { timeout: 20000, polling: 120 }).then(() => true).catch(() => false);
+}
+
 console.log('\n[5] os botões da barra levam à etapa, e o foco vai junto');
 {
   await pg.locator('.etapa[data-etapa="3"]').click();
-  /* Espera a rolagem SUAVE assentar, e não um tempo fixo: partindo do fim da
-     página ela leva mais que os 700 ms que eu tinha chutado, e um teste que
-     depende de quanto o computador estava ocupado é um teste que reprova
-     sozinho de vez em quando. */
-  await pg.waitForFunction(() => {
-    const y = window.scrollY;
-    if (window.__ultimoY === y) return true;
-    window.__ultimoY = y; return false;
-  }, null, { timeout: 8000, polling: 250 }).catch(() => {});
+  /* Espera a rolagem SUAVE assentar, e não um tempo fixo.
+     ESTA ESPERA JÁ FOI FRACA UMA VEZ, e o comentário antigo previa o defeito
+     que ele mesmo tinha: duas leituras iguais a 250 ms de distância bastavam. Na
+     esteira em paralelo, com três Chromium disputando quatro núcleos, a rolagem
+     suave PARA no meio do caminho por mais de 250 ms — as duas leituras davam
+     iguais, o teste seguia com a barra ainda por cima do cabeçalho, e reprovava
+     sozinho. Aconteceu no Build 25, com o produto intocado.
+     Agora são QUATRO leituras iguais seguidas. E o `polling` menor deixa a
+     espera mais exigente sob carga, e não menos: quanto mais ocupado o
+     computador, mais tempo real cada leitura representa. */
+  const parou = await esperarParar(pg);
   const foco = await pg.evaluate(() => document.activeElement.id);
   /* O foco vai para o CABEÇALHO e não para o cartão: um `<div>` focado não é
      anunciado por nada, e quem navega por teclado ficaria num lugar mudo. */
@@ -304,14 +320,10 @@ console.log('\n[5] os botões da barra levam à etapa, e o foco vai junto');
     return { quem: el ? (el.id || el.className || el.tagName) : '(nada)',
              dentroDaBarra: !!(el && el.closest('#etapasFixa')) };
   });
-  ok('e o cabeçalho não ficou debaixo da barra', !emCima.dentroDaBarra, emCima.quem);
+  ok('e o cabeçalho não ficou debaixo da barra', !emCima.dentroDaBarra,
+     emCima.quem + (parou ? '' : '  (a rolagem não tinha parado — espera estourada)'));
   await pg.locator('.etapa[data-etapa="2"]').click();
-  await pg.evaluate(() => { window.__ultimoY = -1; });
-  await pg.waitForFunction(() => {
-    const y = window.scrollY;
-    if (window.__ultimoY === y) return true;
-    window.__ultimoY = y; return false;
-  }, null, { timeout: 8000, polling: 250 }).catch(() => {});
+  await esperarParar(pg);
   ok('voltar para conferir também funciona',
      (await pg.evaluate(() => document.activeElement.id)) === 'h2Conferir');
 }
