@@ -571,34 +571,6 @@
   label.opt input[type=checkbox]{flex:none}
   label.opt input[type=radio]{flex:none}
 
-  /* ---- AS DUAS OPÇÕES DE TAMANHO DA JANELINHA, COM A JANELINHA DENTRO ----
-
-     Elas eram um `<select>` com duas frases. Uma frase descreve; ela não
-     mostra QUANTA TELA a coisa ocupa — que é a pergunta inteira de quem
-     escolhe entre uma fita e uma janela.
-
-     Cada opção carrega agora a janelinha DE VERDADE, num iframe reduzido: o
-     mesmo HTML e o mesmo CSS que o navegador vai abrir. A escala é uma só, e
-     é por isso que a comparação diz alguma coisa — as duas prévias estão na
-     mesma régua, e a fita parece pequena porque ela É pequena. */
-  .pipTam{border:0;padding:0;margin:12px 0 0;display:flex;gap:14px;flex-wrap:wrap}
-  .pipTam legend{padding:0;font-size:13px;color:var(--muted);margin-bottom:6px}
-  .pipOp{--pipEsc:.46;display:flex;flex-direction:column;gap:7px;cursor:pointer;
-    border:1.5px solid var(--linha,#dfe3ea);border-radius:10px;padding:9px 10px;
-    background:var(--cardBg,#fff)}
-  .pipOp:has(input:checked){border-color:var(--acc,#3A3F9E);box-shadow:0 0 0 3px rgba(58,63,158,.12)}
-  .pipOp:focus-within{outline:2px solid var(--acc,#3A3F9E);outline-offset:2px}
-  .pipOpTop{display:flex;align-items:center;gap:8px;font-size:13.5px}
-  .pipOpTop b{font-weight:700}
-  .pipOpSub{font-size:12px;color:var(--muted);max-width:230px}
-  /* A moldura tem o TAMANHO REAL vezes a escala, e o iframe dentro dela tem o
-     tamanho real. Sem a moldura, o `scale` desenharia menor e continuaria
-     ocupando o espaço grande — e a comparação, que é sobre espaço, mentiria. */
-  .pipMold{overflow:hidden;border-radius:6px;border:1px solid var(--linha,#dfe3ea);
-    background:#12141c}
-  .pipMold iframe{border:0;display:block;transform-origin:top left;
-    transform:scale(var(--pipEsc));pointer-events:none}
-  @media (max-width:560px){ .pipOp{--pipEsc:.34} }
   /* ---- O RECURSO QUE ESTE NAVEGADOR NÃO TEM ----
      Desligado e DITO. O `usar a placa de vídeo` some quando não há WebGPU, e
      ali sumir cabe: ninguém procura por ele. Clipe e webcam a pessoa procura —
@@ -1548,41 +1520,17 @@
                é a resposta errada para "sumiu tudo". -->
           <button class="sm hide destaque" id="recPip" data-i18n="recPipBtn"></button>
         </div>
-        <!-- ---- O TAMANHO DA JANELINHA, COM A JANELINHA À VISTA ----
-
-             Ele fica AQUI, junto do botão que a reabre, e não nos ajustes: é
-             aqui que a pessoa está quando descobre que a janelinha ocupa tela
-             demais, e o conserto tem que estar onde o incômodo aparece.
-             Trocar durante a gravação vale na hora — a janelinha é fechada e
-             reaberta no novo tamanho, sem interromper a captura.
-
-             Era um `<select>` com duas frases, e a frase não responde a
-             pergunta que se faz aqui: QUANTA TELA isto vai me tomar. Agora são
-             duas opções, cada uma mostrando a janelinha de verdade — mesmo
-             HTML, mesmo CSS, reduzidos na mesma escala. Um desenho parecido
-             seria uma segunda lista: no dia em que um botão mudasse de lugar,
-             a prévia continuaria mostrando a janela antiga. -->
-        <fieldset class="pipTam" id="pipTamBox">
-          <legend data-i18n="pipTamLbl"></legend>
-          <label class="pipOp" for="pipTamFull">
-            <span class="pipOpTop">
-              <input type="radio" name="pipTamModo" id="pipTamFull" value="completa">
-              <b data-i18n="pipTamCompletaN"></b>
-            </span>
-            <span class="pipOpSub" data-i18n="pipTamCompleta"></span>
-            <span class="pipMold" id="pipMoldFull"><iframe id="pipPrevFull" tabindex="-1"
-                  aria-hidden="true" scrolling="no"></iframe></span>
-          </label>
-          <label class="pipOp" for="pipTamStrip">
-            <span class="pipOpTop">
-              <input type="radio" name="pipTamModo" id="pipTamStrip" value="min">
-              <b data-i18n="pipTamMinN"></b>
-            </span>
-            <span class="pipOpSub" data-i18n="pipTamMin"></span>
-            <span class="pipMold" id="pipMoldStrip"><iframe id="pipPrevStrip" tabindex="-1"
-                  aria-hidden="true" scrolling="no"></iframe></span>
-          </label>
-        </fieldset>
+        <!-- O TAMANHO DA JANELINHA SAIU DAQUI, e o motivo vale ficar escrito.
+             Ele foi um `<select>`, depois duas opções com a janelinha desenhada
+             ao lado de cada uma. A prévia mostrava a janela de verdade — mesmo
+             HTML, mesmo CSS — e ainda assim estava errada: ela ocupava 442px
+             de um cartão de 821, contra 45px do botão de gravar. O relato foi
+             "gravar a tela e as várias decisões se impõem somente depois".
+             A janelinha NÃO EXISTE até a pessoa gravar. Escolher o tamanho
+             dela aqui é escolher entre duas coisas que ninguém viu, e ilustrar
+             a escolha foi tratar o sintoma: some a adivinhação, fica o volume.
+             Agora o tamanho se troca DENTRO da janelinha, com um botão no
+             canto — onde o incômodo aparece, e com a coisa real na tela. -->
         <!-- ---- A CAIXA DE ANOTAÇÃO AO VIVO, DE VOLTA ----
 
              Ela já esteve aqui, saiu, e volta — e vale dizer por que das duas
@@ -1631,6 +1579,22 @@
           <i id="recBar"></i>
         </div>
         <div class="hide" id="recOpts" style="margin-top:12px">
+          <!-- ---- OS AJUSTES DA GRAVAÇÃO, RECOLHIDOS ----
+
+               "Parar sozinho depois de 45 minutos" e "Clipe do momento" são
+               ajustes: quase ninguém mexe, e os dois já vêm no valor que serve
+               para quase todo mundo. Abertos, eles ficavam entre o botão de
+               gravar e o resto da página — três controles pedindo atenção antes
+               da ação que a pessoa veio fazer.
+
+               Recolhidos, continuam a UM clique, e o resumo do `<summary>` diz
+               o estado atual sem precisar abrir: quem não mexe nunca abre, e
+               quem mexe lê o que está valendo antes de mexer. Uma gaveta que
+               não diz o que tem dentro é que seria esconder. -->
+          <details class="sub" id="recAjustes">
+            <summary><span data-i18n="recAjustesH"></span>
+              <b class="sbEst" id="recAjustesEst"></b></summary>
+            <div class="sbCorpo">
           <!-- Uma opção por linha. Elas eram cinco numa fileira que quebrava em
                duas, e uma fileira quebrada não se lê: lê-se a primeira e
                ignora-se o resto. -->
@@ -1688,9 +1652,13 @@
           <div class="hide" id="recAjudaCx" style="margin-top:8px">
             <p class="note" data-i18n="recWarn" style="margin:6px 0 0"></p>
           </div>
+            </div>
+          </details>
         </div>
 
         <!-- ---- o modal do clipe ---- -->
+        <!-- O modal do clipe fica FORA da gaveta: um diálogo dentro de um
+             `<details>` fechado é um diálogo que não abre. -->
         <div class="lente hide" id="clipeModal" role="dialog" aria-modal="true" aria-labelledby="clipeModalTit">
           <div class="modalCx" style="max-width:520px">
             <div class="lenteTopo">
@@ -3482,7 +3450,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       rotPronto:'{0} passos prontos — cada marcação já sai com o título.',
       passoTelas:'{0} telas',
       recPipBtn:'Trazer a janelinha de volta',
-      pipTamLbl:'Tamanho da janelinha de controle', pipTamCompletaN:'Completa', pipTamCompleta:'Relógio, medidor de som, caixa de anotação e todos os botões.', pipTamMinN:'Fita', pipTamMin:'Uma linha de botões, por cima do trabalho.',
+      pipVirarFita:'Virar fita — uma linha de botões por cima do trabalho', pipVirarCompleta:'Voltar ao tamanho completo — relógio, medidor de som e anotação', 
       recPausado:'PAUSADO —', recMarcado:'passo marcado.',
       pipPausado:'Pausado: nada sendo guardado.',
       micNegado:'O navegador bloqueou o microfone para este site. Clique no cadeado ao lado do endereço, permita o microfone e grave de novo.',
@@ -3814,7 +3782,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       unLbl:'Chamar cada quadro de:',
       unPasso:'Passo', unMomento:'Momento', unIa:'Trecho',
       recCountCancel:'Cancelado antes de começar. Nada foi gravado.',
-      recAutoLbl:'Parar sozinho depois de', recAutoMinLbl:'minutos',
+      recAjustesH:'Ajustes da gravação', recAjustesPara:'para sozinho em {0} min', recAjustesNaoPara:'não para sozinho', recAjustesClipe:'clipe ligado', recAjustesCam:'câmera ligada', recAutoLbl:'Parar sozinho depois de', recAutoMinLbl:'minutos',
       recAutoParou:'A gravação parou sozinha no limite de {0} minutos que você definiu. Tudo o que foi capturado até aqui está no documento.',
       atalhos:'Atalhos, quando o foco não está num campo: G grava e para, M marca a tela, P pausa.',
       recCamSemApoio:'Este navegador não abre webcam — o resto da captura funciona normalmente.',
@@ -4120,7 +4088,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       rotPronto:'{0} steps ready — every mark comes with its title.',
       passoTelas:'{0} screens',
       recPipBtn:'Bring the control window back',
-      pipTamLbl:'Control window size', pipTamCompletaN:'Full', pipTamCompleta:'Clock, sound meter, note box and every button.', pipTamMinN:'Strip', pipTamMin:'One row of buttons, over your work.',
+      pipVirarFita:'Turn into a strip — one row of buttons over your work', pipVirarCompleta:'Back to full size — clock, sound meter and note', 
       recPausado:'PAUSED —', recMarcado:'step marked.',
       pipPausado:'Paused: nothing being kept.',
       micNegado:'The browser blocked the microphone for this site. Click the padlock next to the address, allow the microphone and record again.',
@@ -4443,7 +4411,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       unLbl:'Call each frame/screenshot:',
       unPasso:'Step', unMomento:'Moment', unIa:'Segment',
       recCountCancel:'Cancelled before it started. Nothing was recorded.',
-      recAutoLbl:'Stop by itself after', recAutoMinLbl:'minutes',
+      recAjustesH:'Recording settings', recAjustesPara:'stops on its own after {0} min', recAjustesNaoPara:'does not stop on its own', recAjustesClipe:'clip on', recAjustesCam:'camera on', recAutoLbl:'Stop by itself after', recAutoMinLbl:'minutes',
       recAutoParou:'The recording stopped by itself at the {0}-minute limit you set. Everything captured up to here is in the document.',
       atalhos:'Shortcuts, when focus is not in a field: G records and stops, M marks the screen, P pauses.',
       recCamSemApoio:'This browser cannot open a webcam — the rest of the capture works normally.',
@@ -4743,7 +4711,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       rotPronto:'{0} pasos listos — cada marca ya sale con su título.',
       passoTelas:'{0} pantallas',
       recPipBtn:'Traer la ventana de control de vuelta',
-      pipTamLbl:'Tamaño de la ventana de control', pipTamCompletaN:'Completa', pipTamCompleta:'Reloj, medidor de sonido, caja de nota y todos los botones.', pipTamMinN:'Franja', pipTamMin:'Una fila de botones, sobre tu trabajo.',
+      pipVirarFita:'Convertir en franja — una fila de botones sobre tu trabajo', pipVirarCompleta:'Volver al tamaño completo — reloj, medidor de sonido y nota', 
       recPausado:'EN PAUSA —', recMarcado:'paso marcado.',
       pipPausado:'En pausa: no se guarda nada.',
       micNegado:'El navegador bloqueó el micrófono para este sitio. Pulsa el candado junto a la dirección, permite el micrófono y graba de nuevo.',
@@ -5066,7 +5034,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       unLbl:'Llamar a cada cuadro/fotograma:',
       unPasso:'Paso', unMomento:'Momento', unIa:'Fragmento',
       recCountCancel:'Cancelado antes de empezar. No se grabó nada.',
-      recAutoLbl:'Parar solo después de', recAutoMinLbl:'minutos',
+      recAjustesH:'Ajustes de la grabación', recAjustesPara:'se detiene sola en {0} min', recAjustesNaoPara:'no se detiene sola', recAjustesClipe:'clip activado', recAjustesCam:'cámara activada', recAutoLbl:'Parar solo después de', recAutoMinLbl:'minutos',
       recAutoParou:'La grabación se detuvo sola en el límite de {0} minutos que definiste. Todo lo capturado hasta aquí está en el documento.',
       atalhos:'Atajos, cuando el foco no está en un campo: G graba y detiene, M marca la pantalla, P pausa.',
       recCamSemApoio:'Este navegador no abre la webcam — el resto de la captura funciona normalmente.',
@@ -5365,7 +5333,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       rotPronto:'{0} Schritte bereit — jede Markierung kommt mit ihrem Titel.',
       passoTelas:'{0} Bildschirme',
       recPipBtn:'Steuerungsfenster zurückholen',
-      pipTamLbl:'Größe des Steuerungsfensters', pipTamCompletaN:'Vollständig', pipTamCompleta:'Uhr, Tonpegel, Notizfeld und alle Schaltflächen.', pipTamMinN:'Leiste', pipTamMin:'Eine Reihe Schaltflächen, über Ihrer Arbeit.',
+      pipVirarFita:'In eine Leiste verwandeln — eine Reihe Schaltflächen über Ihrer Arbeit', pipVirarCompleta:'Zurück zur vollen Größe — Uhr, Tonpegel und Notiz', 
       recPausado:'PAUSIERT —', recMarcado:'Schritt markiert.',
       pipPausado:'Pausiert: Es wird nichts gespeichert.',
       micNegado:'Der Browser hat das Mikrofon für diese Website blockiert. Klicken Sie auf das Schloss neben der Adresse, erlauben Sie das Mikrofon und nehmen Sie erneut auf.',
@@ -5688,7 +5656,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       unLbl:'Jedes Bild/jeden Frame nennen:',
       unPasso:'Schritt', unMomento:'Moment', unIa:'Abschnitt',
       recCountCancel:'Vor dem Start abgebrochen. Es wurde nichts aufgenommen.',
-      recAutoLbl:'Von selbst stoppen nach', recAutoMinLbl:'Minuten',
+      recAjustesH:'Aufnahme-Einstellungen', recAjustesPara:'stoppt von selbst nach {0} Min.', recAjustesNaoPara:'stoppt nicht von selbst', recAjustesClipe:'Clip an', recAjustesCam:'Kamera an', recAutoLbl:'Von selbst stoppen nach', recAutoMinLbl:'Minuten',
       recAutoParou:'Die Aufnahme wurde beim von Ihnen gesetzten Limit von {0} Minuten von selbst gestoppt. Alles bis hierher Erfasste steht im Dokument.',
       atalhos:'Tastenkürzel, wenn der Fokus nicht in einem Feld liegt: G startet und stoppt die Aufnahme, M markiert den Bildschirm, P pausiert.',
       recCamSemApoio:'Dieser Browser öffnet keine Webcam — der Rest der Aufnahme funktioniert normal.',
@@ -5993,7 +5961,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       rotPronto:'{0} étapes prêtes — chaque marque arrive avec son titre.',
       passoTelas:'{0} écrans',
       recPipBtn:'Rouvrir la fenêtre de contrôle',
-      pipTamLbl:'Taille de la fenêtre de contrôle', pipTamCompletaN:'Complète', pipTamCompleta:'Horloge, niveau sonore, zone de note et tous les boutons.', pipTamMinN:'Bandeau', pipTamMin:'Une rangée de boutons, au-dessus du travail.',
+      pipVirarFita:'Transformer en bandeau — une rangée de boutons au-dessus du travail', pipVirarCompleta:'Revenir à la taille complète — horloge, niveau sonore et note', 
       recPausado:'EN PAUSE —', recMarcado:'étape marquée.',
       pipPausado:'En pause : rien n’est conservé.',
       micNegado:'Le navigateur a bloqué le microphone pour ce site. Cliquez sur le cadenas à côté de l’adresse, autorisez le microphone et enregistrez de nouveau.',
@@ -6316,7 +6284,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       unLbl:'Appeler chaque image/capture :',
       unPasso:'Étape', unMomento:'Moment', unIa:'Segment',
       recCountCancel:'Annulé avant le début. Rien n’a été enregistré.',
-      recAutoLbl:'Arrêter tout seul après', recAutoMinLbl:'minutes',
+      recAjustesH:'Réglages de l’enregistrement', recAjustesPara:'s’arrête seul au bout de {0} min', recAjustesNaoPara:'ne s’arrête pas seul', recAjustesClipe:'clip activé', recAjustesCam:'caméra activée', recAutoLbl:'Arrêter tout seul après', recAutoMinLbl:'minutes',
       recAutoParou:'L’enregistrement s’est arrêté tout seul à la limite de {0} minutes que vous avez définie. Tout ce qui a été capturé jusqu’ici est dans le document.',
       atalhos:'Raccourcis, quand le focus n’est pas dans un champ : G lance et arrête l’enregistrement, M marque l’écran, P met en pause.',
       recCamSemApoio:'Ce navigateur n’ouvre pas de webcam — le reste de la capture fonctionne normalement.',
@@ -7213,6 +7181,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
        acerta. O que muda é que a escolha explícita ganha. */
     if (!idiomaDaFalaManual) $('lang').value = LANG;
     notaTr();
+    pintarAjustesRec();
     passos();                 // as dicas dos passos não têm data-i18n: são escritas aqui
     /* O bloco da gravação guardada também é escrito à mão, com número dentro
        ("15 telas, de …"), e por isso não tem `data-i18n` para o laço acima
@@ -9406,7 +9375,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      depois, e não tem como se atualizar sozinho. Sem carimbo, "estou com um
      problema no offline" é uma conversa sem chão — ninguém sabe de qual build
      se fala nem se o defeito já foi consertado. */
-  const VERSAO = '2026.08.27-33';
+  const VERSAO = '2026.08.27-43';
   window.__versao = () => VERSAO;
 
   const PIP_CSS = `
@@ -9515,7 +9484,30 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     body{font:13px/1.35 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
          background:#121419;color:#e9ebf1;padding:14px 13px;display:flex;
          flex-direction:column;gap:9px;justify-content:safe center;height:100vh;
-         overflow-y:auto}
+         overflow-y:auto;position:relative}
+    /* ---- O BOTAO DE TROCAR O TAMANHO ----
+       Na janela completa ele vai para o canto de cima por posicionamento
+       absoluto: um botao de tamanho nao pode custar uma linha inteira de uma
+       janela que ja estava no limite, e o canto e onde todo mundo procura por
+       minimizar. Na fita ele volta a fluir, e fecha a linha.
+       So icone, nos dois: o nome inteiro vive no title e no aria-label, que e o
+       mesmo acordo dos outros botoes daqui. */
+    .tam{position:absolute;top:6px;right:7px;width:26px;height:22px;padding:0;
+         background:transparent;border:1px solid rgba(233,235,241,.22);
+         border-radius:6px;color:#a7adbe;cursor:pointer;
+         display:flex;align-items:center;justify-content:center}
+    .tam:hover{border-color:rgba(233,235,241,.45);color:#e9ebf1}
+    .tam::before{content:'';width:13px;height:13px;background-color:currentColor;
+         -webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;
+         -webkit-mask-size:contain;mask-size:contain;
+         -webkit-mask-position:center;mask-position:center;
+         -webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M4 9h5V4H7v3H4v2zm11-5v5h5V7h-3V4h-2zM4 15v2h3v3h2v-5H4zm11 0v5h2v-3h3v-2h-5z'/%3E%3C/svg%3E");
+         mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M4 9h5V4H7v3H4v2zm11-5v5h5V7h-3V4h-2zM4 15v2h3v3h2v-5H4zm11 0v5h2v-3h3v-2h-5z'/%3E%3C/svg%3E")}
+    /* Na fita a seta aponta para FORA: dali o gesto e voltar a crescer. */
+    body.min .tam{position:static;flex:none;width:30px;height:32px;margin-left:2px}
+    body.min .tam::before{
+         -webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M9 4H4v5h2V6h3V4zm6 0v2h3v3h2V4h-5zM6 15H4v5h5v-2H6v-3zm12 0v3h-3v2h5v-5h-2z'/%3E%3C/svg%3E");
+         mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M9 4H4v5h2V6h3V4zm6 0v2h3v3h2V4h-5zM6 15H4v5h5v-2H6v-3zm12 0v3h-3v2h5v-5h-2z'/%3E%3C/svg%3E")}
     /* ---- O ROTEIRO, EM CIMA DE TUDO ----
        Quem colou a lista de passos está seguindo uma lista, e a janelinha é a
        unica coisa nossa que fica na frente durante a gravacao. Sem esta linha,
@@ -9774,17 +9766,12 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      lugar nenhum é um atalho que só quem escreveu conhece — e este mora numa
      janela de 42px onde não cabe uma legenda. O `title` é onde ele cabe. */
   const ATALHO_PIP = { recMarkBtn: 'M', recTelaBtn: 'T', recPauseBtn: 'P',
-                       recResumeBtn: 'P', pipStop: 'S' };
-  /* O `minOpc` existe por causa da PRÉVIA: as duas aparecem lado a lado, e cada
-     uma precisa dos rótulos do SEU tamanho — a fita com a palavra curta, a
-     completa com a frase inteira. Sem ele, a prévia da fita mostraria os
-     rótulos longos sempre que a escolha atual fosse a janela completa, e o
-     desenho mentiria justamente sobre o que ele existe para mostrar. */
-  function rotularPip(btn, chaveLonga, chaveCurta, minOpc){
+                       recResumeBtn: 'P', pipStop: 'S', pipTam: 'J' };
+  function rotularPip(btn, chaveLonga, chaveCurta){
     if (!btn) return;
     const longo = t(chaveLonga);
     const curto = t(chaveCurta) || longo;
-    const min = (minOpc === undefined) ? (pipModo() === 'min') : !!minOpc;
+    const min = pipModo() === 'min';
     const letra = ATALHO_PIP[chaveLonga];
     btn.textContent = min ? curto : longo;
     btn.title = longo + (letra ? '  (' + letra + ')' : '');
@@ -9808,7 +9795,12 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      navegador, e ganhou um segundo leitor: a moldura da prévia, que precisa
      ter exatamente a proporção da janela real — senão a comparação de espaço,
      que é a razão da prévia existir, sai errada. */
-  const TAM_PIP = (min) => ({ w: min ? 380 : 250,
+  /* 415 e nao 380: entrou o botao de trocar o tamanho, e o alemao ja usava 375
+     dos 380 com o que havia antes. A fita e FINA, e nao estreita — largura numa
+     faixa por cima do trabalho custa menos que altura, porque ela encosta numa
+     borda e deixa o meio da tela livre. O `janelinha.mjs` mede o estouro e foi
+     ele quem estabeleceu os 375. */
+  const TAM_PIP = (min) => ({ w: min ? 415 : 250,
                               h: min ? 44 : (roteiro.length ? 560 : 430) });
 
   function corpoDaJanelinha(){
@@ -9849,64 +9841,44 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       '<button id="pausa" class="sec" disabled></button>' +
       '<button id="calar" class="sec hide"></button>' +
       '<button id="stop" disabled></button>' +
+      /* O TAMANHO SE TROCA AQUI DENTRO, e nao no cartao da pagina.
+         Ele morava la, com uma previa desenhada ao lado de cada opcao — e o
+         relato foi direto: "gravar a tela e as varias decisoes se impoe
+         somente depois". Estava certo. A janelinha NAO EXISTE ate a pessoa
+         gravar; escolher o tamanho dela antes e escolher entre duas coisas
+         que nunca se viu, e a previa grafica era o conserto errado: ela
+         curava a adivinhacao ocupando 54% do cartao de gravar.
+         Aqui a adivinhacao nao existe. A coisa esta na tela, e o botao troca
+         na hora — que e exatamente quando o incomodo com o tamanho aparece.
+         Ultimo no corpo de proposito: na fita ele fecha a linha, e na janela
+         completa o CSS o leva para o canto de cima sem custar uma linha. */
+      '<button id="tam" class="tam"></button>' +
       '<div class="pe">' + t('pipNoVideo') + '</div>';
   }
 
-  /* ---- A REPRESENTAÇÃO GRÁFICA DAS DUAS JANELINHAS ----
-   *
-   * Ela não é um desenho: é a janelinha, dentro de um iframe, com o MESMO
-   * `PIP_CSS` e o MESMO `corpoDaJanelinha()` que o navegador vai abrir. O
-   * iframe tem o tamanho REAL da janela e é reduzido por `transform: scale`;
-   * a moldura em volta tem o tamanho reduzido, para que a comparação seja
-   * sobre o espaço que cada uma toma na tela — que é a pergunta de quem
-   * escolhe entre uma fita e uma janela.
-   *
-   * As duas aparecem em estado de GRAVAÇÃO (`body.gravando`, relógio andando,
-   * contagem de quadros): uma janelinha parada não mostra o que ela é. Os
-   * rótulos vêm do mesmo `rotularPip`, cada prévia pedindo os do seu tamanho.
-   *
-   * `srcdoc` mantém o iframe na mesma origem, então dá para escrever dentro
-   * dele sem servidor nenhum — e nada aqui vai à rede, que é a promessa que o
-   * `semrede.mjs` cobra.
-   */
-  function pintarPreviaPip(){
-    const uma = (idIframe, idMoldura, min) => {
-      const f = $(idIframe), moldura = $(idMoldura);
-      if (!f || !moldura) return;
-      const tam = TAM_PIP(min);
-      const esc = parseFloat(getComputedStyle(f).getPropertyValue('--pipEsc')) || 0.46;
-      f.style.width = tam.w + 'px'; f.style.height = tam.h + 'px';
-      moldura.style.width = Math.round(tam.w * esc) + 'px';
-      moldura.style.height = Math.round(tam.h * esc) + 'px';
-      f.srcdoc = '<!doctype html><meta charset="utf-8"><style>' + PIP_CSS +
-                 '</style><body class="' + (min ? 'min gravando' : 'gravando') + '"></body>';
-      f.onload = () => {
-        const d = f.contentDocument;
-        if (!d || !d.body) return;
-        d.body.innerHTML = corpoDaJanelinha();
-        const g = (id) => d.getElementById(id);
-        if (g('rel')) g('rel').textContent = '0:42';
-        if (g('txt')) g('txt').textContent = t('pipFrames', 3);
-        rotularPip(g('marcar'), 'recMarkBtn', 'pipCurtoMarcar', min);
-        rotularPip(g('maisTela'), 'recTelaBtn', 'pipCurtoTela', min);
-        rotularPip(g('stop'), 'pipStop', 'pipCurtoParar', min);
-        if (g('pausa')) g('pausa').textContent = t('recPauseBtn');
-        /* O rótulo sai do MESMO `passoN` do produto, e por isso ele muda de
-           palavra junto com o cenário — a unidade é "Passo" na evidência e
-           "Caso" no roteiro. Escrever "Passo 1" aqui teria a prévia mostrando
-           uma palavra que a janela real não usaria. */
-        if (g('notaLbl')) g('notaLbl').textContent = passoN(1);
-        if (g('notaOk')) g('notaOk').textContent = t('anotSalvar');
-        const nt = g('nota'); if (nt) nt.placeholder = t('anotPh');
-        /* Os medidores desenhados com alguma coisa dentro: duas barras vazias
-           não se leem como medidor de som, e a pessoa está escolhendo se abre
-           mão deles. */
-        if (g('vm')) g('vm').style.height = '55%';
-        if (g('vs')) g('vs').style.height = '30%';
-      };
-    };
-    uma('pipPrevFull', 'pipMoldFull', false);
-    uma('pipPrevStrip', 'pipMoldStrip', true);
+  /* O nome do botao de tamanho depende do que ele VAI FAZER, e nao do que se
+     esta vendo: na janela completa ele vira fita, na fita ele volta a ser
+     janela. So icone na tela; a frase inteira no title e no aria-label, com a
+     letra do atalho — o mesmo acordo dos outros botoes daqui. */
+  function rotularPipTam(btn){
+    if (!btn) return;
+    const vira = pipModo() === 'min' ? 'pipVirarCompleta' : 'pipVirarFita';
+    btn.title = t(vira) + '  (' + ATALHO_PIP.pipTam + ')';
+    btn.setAttribute('aria-label', t(vira));
+  }
+
+  /* Fechar e reabrir e o unico caminho: o tamanho de uma janela de
+     `documentPictureInPicture` e pedido na abertura e nao se redimensiona
+     depois. Era o que o seletor da pagina ja fazia, e agora e a propria
+     janelinha quem chama. */
+  async function trocarTamanhoPip(){
+    guardarPipModo(pipModo() === 'min' ? 'completa' : 'min');
+    if (!pipWin) { pintarVoltarJanelinha(); return; }
+    try { pipWin.close(); } catch (e) {}
+    pipWin = null;
+    await abrirControle();
+    if (pipWin && liveOn) controle('gravando', { seg: agora(), frames: frames.length });
+    pintarVoltarJanelinha();
   }
 
   async function abrirControle(){
@@ -9990,6 +9962,17 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     pintarRotPip();
     pipPausa.onclick  = () => { if (alternarPausa) alternarPausa(); };
 
+    /* ---- TROCAR O TAMANHO, DA PROPRIA JANELINHA ----
+       O caminho e o mesmo que o seletor da pagina usava: guarda a escolha,
+       fecha e reabre no tamanho novo. A captura nao passa por aqui, entao ela
+       nao sente — e o `pagehide` da janela velha acenderia o botao de "trazer
+       de volta", por isso ele e repintado DEPOIS que a nova ja existe. */
+    const pipTamBtn = d.getElementById('tam');
+    if (pipTamBtn) {
+      rotularPipTam(pipTamBtn);
+      pipTamBtn.onclick = () => trocarTamanhoPip();
+    }
+
     /* ---- ATALHOS DENTRO DA JANELINHA ----
      *
      * Atalho GLOBAL não existe para uma página: sem foco, o navegador não
@@ -10016,6 +9999,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       else if (k === 't') apertar(pipTela);
       else if (k === 'p') apertar(pipPausa);
       else if (k === 's') apertar(pipFrames);
+      /* `j` de janelinha. As outras quatro letras ja estavam tomadas pelo que
+         elas fazem — marcar, tela, pausar, stop — e um atalho so vale se a
+         letra lembrar a coisa. */
+      else if (k === 'j') apertar(pipTamBtn);
     });
     /* O botão da janelinha não duplica lógica: chama o mesmo `alternarMic` da
        aba, e o rótulo dos dois é repintado pela mesma função. */
@@ -12574,6 +12561,31 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
 
   /* A pergunta "quer transcrição?" agora é respondida no passo 1, antes de
      qualquer download — e é isso que permite gravar sem baixar nada. */
+  /* ---- O RESUMO DA GAVETA ----
+     Ele existe para que fechar não seja esconder: o `<summary>` diz o que está
+     valendo lá dentro, e quem não vai mexer não precisa abrir para saber.
+     Composto dos controles DE VERDADE, e não de um texto guardado à parte —
+     senão a gaveta diria "45 min" com 90 escrito no campo, que é pior do que
+     não dizer nada. */
+  function pintarAjustesRec(){
+    const est = $('recAjustesEst');
+    if (!est) return;
+    const partes = [];
+    if ($('recAuto') && $('recAuto').checked) {
+      const min = Math.max(1, Math.min(240, +($('recAutoMin') || {}).value || 45));
+      partes.push(t('recAjustesPara', min));
+    } else {
+      partes.push(t('recAjustesNaoPara'));
+    }
+    if ($('recClipe') && $('recClipe').checked) partes.push(t('recAjustesClipe'));
+    if ($('recCam') && $('recCam').checked) partes.push(t('recAjustesCam'));
+    est.textContent = partes.join(' · ');
+  }
+  for (const id of ['recAuto', 'recAutoMin', 'recClipe', 'recCam']) {
+    const el = $(id);
+    if (el) el.addEventListener(id === 'recAutoMin' ? 'input' : 'change', pintarAjustesRec);
+  }
+
   function notaTr(){
     /* O que fica ao lado da caixa é "recomendado", e não os megabytes.
 
@@ -12597,6 +12609,18 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     const sn = $('semTrNote');
     if (sn) sn.textContent = ($('semTr') && $('semTr').checked)
       ? t('semTrOn') : t('semTrOff');
+    /* ---- SÓ A NOTA DA ESCOLHIDA ----
+       As três apareciam ao mesmo tempo: 286px de explicação para uma pergunta
+       de uma linha, e três parágrafos disputando a leitura de quem já tinha
+       escolhido. A nota da opção escolhida é resposta; as outras duas são
+       argumento de venda de um caminho que a pessoa não pegou.
+       O texto das outras continua escrito e continua correto — ele volta no
+       instante em que a escolha muda. Esconder não é apagar. */
+    for (const [r, nota] of [['recTr', 'recTrNote'], ['usarPronta', 'prontaNote'],
+                             ['semTr', 'semTrNote']]) {
+      const cx = $(nota), botao = $(r);
+      if (cx && botao) cx.classList.toggle('hide', !botao.checked);
+    }
   }
 
   const tamanhoModelo = () => {
@@ -18025,26 +18049,6 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      reaberta no tamanho novo — a captura não passa por aqui, então ela não
      sente. O `pagehide` da janela antiga acenderia o botão de "trazer de
      volta"; por isso ele é repintado depois que a nova já existe. */
-  if ($('pipTamFull') && $('pipTamStrip')) {
-    const marcar = () => {
-      const m = pipModo();
-      $('pipTamFull').checked = m !== 'min';
-      $('pipTamStrip').checked = m === 'min';
-    };
-    marcar();
-    const trocou = async (ev) => {
-      guardarPipModo(ev.target.value === 'min' ? 'min' : 'completa');
-      if (!pipWin) { pintarVoltarJanelinha(); return; }
-      try { pipWin.close(); } catch (e) {}
-      pipWin = null;
-      await abrirControle();
-      if (pipWin && liveOn) controle('gravando', { seg: agora(), frames: frames.length });
-      pintarVoltarJanelinha();
-    };
-    $('pipTamFull').addEventListener('change', trocou);
-    $('pipTamStrip').addEventListener('change', trocou);
-    pintarPreviaPip();
-  }
 
   /* Quem mexeu no ritmo à mão manda: o cenário sugere, e para de sugerir a
      partir do instante em que a pessoa discordou. Sobrescrever a escolha dela
@@ -21566,6 +21570,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   $('copyPrompt').disabled = true;
   applyLang();
   notaTr();
+  pintarAjustesRec();
   ligarCabecalhos();
   passos();
   medir('abriu_ferramenta');

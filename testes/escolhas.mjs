@@ -1,27 +1,24 @@
-/* AS DUAS ESCOLHAS DO CARTÃO DE GRAVAR, COM A CARA DELAS.
+/* AS ESCOLHAS DO CARTÃO DE GRAVAR — o que se decide antes, e o que não.
  *
- * Duas mudanças do Build 26, e as duas são sobre a mesma coisa: uma escolha que
- * a pessoa faz sem ver o que está escolhendo.
+ * Este arquivo nasceu no Build 26 medindo uma prévia gráfica das duas
+ * janelinhas, desenhada dentro do cartão de gravar. O Build 27 apagou aquela
+ * prévia, e o motivo é a razão de ser desta régua:
  *
- *   1. O TAMANHO DA JANELINHA era um `<select>` com duas frases. Frase não
- *      responde "quanta tela isto vai me tomar", que é a pergunta inteira de
- *      quem escolhe entre uma fita e uma janela. Agora são duas opções, cada
- *      uma mostrando a janelinha DE VERDADE — mesmo HTML, mesmo CSS, num
- *      iframe reduzido na mesma escala.
+ *   O cartão tinha 821px, dos quais 442 (54%) eram a escolha do tamanho da
+ *   janelinha — contra 45px do botão "Gravar a tela". O relato foi direto:
+ *   "gravar a tela e as várias decisões se impõem somente depois". A
+ *   janelinha NÃO EXISTE até a pessoa gravar; escolher o tamanho dela antes é
+ *   escolher entre duas coisas que ninguém viu, e ILUSTRAR essa escolha foi
+ *   tratar o sintoma — some a adivinhação, fica o volume.
  *
- *      E é aqui que esta régua tem trabalho: uma prévia desenhada à mão seria
- *      uma segunda lista, e no dia em que um botão mudasse de lugar ela
- *      continuaria mostrando a janela antiga. O que se cobra abaixo é que a
- *      prévia mostre o que a janela mostra, e que cada uma use os rótulos do
- *      SEU tamanho — o curto na fita, a frase inteira na completa.
+ * O que esta régua cobra agora é o contrário do que ela cobrava: que o cartão
+ * NÃO peça mais o tamanho, que os ajustes fiquem recolhidos dizendo o que têm
+ * dentro, e que a pergunta da transcrição responda com UMA nota e não três.
  *
- *   2. A TRANSCRIÇÃO eram duas caixas de marcar com um terceiro estado
- *      escondido: desmarcar as duas queria dizer "não transcrever", e ninguém
- *      escreveu isso em lugar nenhum. Agora são três opções com nome, e a
- *      terceira — "só as telas" — é cobrada onde ela importa: escolhendo-a,
- *      o modelo de voz NÃO é buscado.
+ * O botão que trocou de lugar — o de virar fita, dentro da própria janelinha —
+ * é medido pelo `janelinha.mjs`, que é quem monta aquela janela.
  *
- *   node testes/previa.mjs
+ *   node testes/escolhas.mjs
  */
 import { chromium } from './_navegador.mjs';
 import http from 'http'; import fs from 'fs';
@@ -42,7 +39,7 @@ const srv = http.createServer((q, r) => {
 });
 await new Promise((r) => srv.listen(PORTA, r));
 
-/* Os rótulos saem do próprio app, e não escritos aqui: uma lista escrita na
+/* Os textos saem do próprio app, e não escritos aqui: uma lista escrita na
    régua aprova exatamente o erro que ela deveria pegar. */
 const textoDe = (chave) => {
   const m = APP.match(new RegExp(chave + ":'([^']*)'"));
@@ -73,94 +70,94 @@ await pg.waitForTimeout(900);
 await pg.evaluate(() => { const v = document.getElementById('viaRec'); if (v) v.classList.remove('hide'); });
 await pg.waitForTimeout(700);
 
-console.log('[1] as duas prévias mostram a janelinha de verdade');
+console.log('[1] o cartão de gravar não decide mais pela janelinha');
 {
-  const dentro = await pg.evaluate(() => {
-    const ler = (id) => {
-      const f = document.getElementById(id);
-      const d = f && f.contentDocument;
-      if (!d || !d.body) return null;
-      return {
-        classe: d.body.className,
-        botoes: [...d.querySelectorAll('button')].map((b) => b.textContent).filter(Boolean),
-        relogio: (d.getElementById('rel') || {}).textContent || '',
-        temMedidor: !!d.querySelector('.vus'),
-        temNota: !!d.querySelector('.notaCx'),
-        larguraPedida: parseInt(f.style.width, 10),
-        alturaPedida: parseInt(f.style.height, 10),
-        molduraLarg: Math.round(f.parentElement.getBoundingClientRect().width),
-        molduraAlt: Math.round(f.parentElement.getBoundingClientRect().height),
-      };
+  const cartao = await pg.evaluate(() => {
+    const c = document.getElementById('viaRec');
+    return {
+      escolhaDeTamanho: !!document.getElementById('pipTamBox'),
+      previa: document.querySelectorAll('#viaRec iframe').length,
+      botao: !!document.getElementById('rec'),
+      altura: Math.round(c.getBoundingClientRect().height),
+      alturaBotao: Math.round(document.getElementById('rec').getBoundingClientRect().height),
     };
-    return { completa: ler('pipPrevFull'), fita: ler('pipPrevStrip') };
   });
-  ok('a prévia da janela completa foi desenhada', !!dentro.completa, dentro.completa ? '' : '(vazia)');
-  ok('a prévia da fita foi desenhada', !!dentro.fita, dentro.fita ? '' : '(vazia)');
-  if (dentro.completa && dentro.fita) {
-    console.log(`     completa ${dentro.completa.larguraPedida}×${dentro.completa.alturaPedida}` +
-                ` na moldura ${dentro.completa.molduraLarg}×${dentro.completa.molduraAlt}`);
-    console.log(`     fita     ${dentro.fita.larguraPedida}×${dentro.fita.alturaPedida}` +
-                ` na moldura ${dentro.fita.molduraLarg}×${dentro.fita.molduraAlt}`);
-
-    /* A FITA É DEITADA E A JANELA É DE PÉ. É o que a prévia existe para
-       mostrar, e é a única coisa que não dá para errar sem que a comparação
-       perca o sentido. */
-    ok('a fita é mais larga que alta', dentro.fita.larguraPedida > dentro.fita.alturaPedida * 3);
-    ok('e a completa é mais alta que larga', dentro.completa.alturaPedida > dentro.completa.larguraPedida);
-    /* E AS DUAS ESTÃO NA MESMA RÉGUA. Escalas diferentes fariam a fita parecer
-       grande ou a janela parecer pequena — e a comparação viraria propaganda. */
-    const e1 = dentro.completa.molduraLarg / dentro.completa.larguraPedida;
-    const e2 = dentro.fita.molduraLarg / dentro.fita.larguraPedida;
-    ok('as duas reduzidas na MESMA escala', Math.abs(e1 - e2) < 0.02,
-       `${e1.toFixed(3)} × ${e2.toFixed(3)}`);
-    ok('e reduzidas de verdade — a moldura é menor que a janela', e1 < 0.9, e1.toFixed(3));
-
-    /* OS RÓTULOS DE CADA TAMANHO. Este é o coração: a fita mostra a palavra
-       curta e a completa mostra a frase inteira, e as duas aparecem ao mesmo
-       tempo na tela. Se a prévia usasse o modo escolhido em vez do próprio,
-       uma das duas estaria mentindo sempre. */
-    const curtoMarcar = textoDe('pipCurtoMarcar');
-    const longoMarcar = textoDe('recMarkBtn');
-    ok('a régua leu os dois rótulos do app', !!curtoMarcar && !!longoMarcar,
-       `${curtoMarcar} × ${longoMarcar}`);
-    ok('a fita usa o rótulo CURTO', dentro.fita.botoes.includes(curtoMarcar),
-       dentro.fita.botoes.join(' | '));
-    ok('e a completa usa a frase INTEIRA', dentro.completa.botoes.includes(longoMarcar),
-       dentro.completa.botoes.join(' | '));
-
-    /* E o que a fita ABRE MÃO aparece na prévia da completa: medidor de som e
-       caixa de anotação. A frase dizia isso; agora dá para ver. */
-    ok('a completa mostra o medidor e a caixa de anotação',
-       dentro.completa.temMedidor && dentro.completa.temNota);
-    ok('as duas mostram a janelinha gravando, e não parada',
-       /gravando/.test(dentro.completa.classe) && /gravando/.test(dentro.fita.classe),
-       `${dentro.completa.classe} × ${dentro.fita.classe}`);
-    ok('e a fita é a fita — a prévia carrega a classe `min`', /\bmin\b/.test(dentro.fita.classe),
-       dentro.fita.classe);
-  }
+  console.log(`     cartão ${cartao.altura}px, botão ${cartao.alturaBotao}px`);
+  ok('a escolha do tamanho saiu do cartão', !cartao.escolhaDeTamanho);
+  ok('e as prévias desenhadas também', cartao.previa === 0, String(cartao.previa));
+  ok('o botão de gravar continua lá', cartao.botao);
+  /* O NÚMERO É A AFIRMAÇÃO. Sem um teto, a próxima decisão que alguém achar
+     importante volta a crescer aqui dentro — foi assim que 442px de escolha
+     nasceram ao lado de um botão de 45. 620px dá folga para o cartão respirar
+     e reprova antes de ele virar formulário de novo. */
+  ok('e o cartão cabe em 620px', cartao.altura <= 620, `${cartao.altura}px`);
 }
 
-console.log('\n[2] escolher o tamanho marca, guarda e volta guardado');
+console.log('\n[2] os ajustes ficam recolhidos, e a gaveta diz o que tem dentro');
 {
-  await pg.locator('#pipTamStrip').check();
-  await pg.waitForTimeout(300);
-  const guardado = await pg.evaluate(() => {
-    const k = Object.keys(localStorage).find((k) => /janelinhaModo/.test(k));
-    return k ? localStorage.getItem(k) : '(nada)';
+  const g = await pg.evaluate(() => {
+    const d = document.getElementById('recAjustes');
+    return d ? { aberta: d.open, resumo: (document.getElementById('recAjustesEst') || {}).textContent || '',
+                 dentro: d.querySelectorAll('input, button').length } : null;
   });
-  ok('escolher a fita guarda a escolha', guardado === 'min', guardado);
-  await pg.reload();
-  await pg.waitForTimeout(800);
-  await pg.evaluate(() => { const v = document.getElementById('viaRec'); if (v) v.classList.remove('hide'); });
-  await pg.waitForTimeout(400);
-  const volta = await pg.evaluate(() => ({
-    fita: document.getElementById('pipTamStrip').checked,
-    completa: document.getElementById('pipTamFull').checked,
-  }));
-  ok('e ela volta marcada depois de recarregar', volta.fita && !volta.completa, JSON.stringify(volta));
+  ok('a gaveta existe', !!g);
+  if (g) {
+    console.log(`     resumo: ${JSON.stringify(g.resumo)}  (${g.dentro} controles dentro)`);
+    /* FECHADA — LIDO DO ARQUIVO SERVIDO, e não do DOM. O `_navegador.mjs`
+       abre TODOS os `details.sub` de propósito, para o resto da suíte poder
+       medir o que está dentro deles; perguntar ao DOM aqui responderia sobre a
+       régua, e não sobre o produto. O que decide o estado inicial é o atributo
+       `open` na marcação — e é ele que se lê. */
+    const tag = (APP.match(/<details[^>]*id="recAjustes"[^>]*>/) || [''])[0];
+    ok('  e nasce FECHADA (sem `open` na marcação)', !!tag && !/\bopen\b/.test(tag),
+       tag || '(não achei a marcação)');
+    /* FECHAR NÃO PODE SER ESCONDER. O resumo é a diferença entre as duas
+       coisas: quem não vai mexer lê o estado sem abrir. */
+    ok('  com o estado escrito no resumo', /45/.test(g.resumo), g.resumo);
+    ok('  e os controles continuam lá dentro', g.dentro >= 2, String(g.dentro));
+  }
+
+  /* E O RESUMO SAI DOS CONTROLES DE VERDADE. Se ele fosse um texto guardado à
+     parte, diria "45 min" com 90 escrito no campo — e uma gaveta que mente
+     sobre o que tem dentro é pior que uma gaveta muda. */
+  await pg.fill('#recAutoMin', '90');
+  await pg.waitForTimeout(250);
+  const depois = await pg.evaluate(() => (document.getElementById('recAjustesEst') || {}).textContent || '');
+  ok('  e ele acompanha o que está escrito no campo', /90/.test(depois), depois);
+  await pg.uncheck('#recAuto');
+  await pg.waitForTimeout(250);
+  const semParar = await pg.evaluate(() => (document.getElementById('recAjustesEst') || {}).textContent || '');
+  ok('  inclusive quando a opção é desligada',
+     semParar.trim() === textoDe('recAjustesNaoPara'), semParar);
+  await pg.check('#recAuto');
+  await pg.fill('#recAutoMin', '45');
+  await pg.waitForTimeout(200);
 }
 
-console.log('\n[3] a transcrição tem TRÊS escolhas, e são exclusivas');
+console.log('\n[3] a transcrição responde com UMA nota, e não com três');
+{
+  const notas = () => pg.evaluate(() => ['recTrNote', 'prontaNote', 'semTrNote'].map((i) => {
+    const e = document.getElementById(i);
+    return !!(e && getComputedStyle(e).display !== 'none' && e.textContent.trim());
+  }));
+  const inicio = await notas();
+  ok('só a nota da opção escolhida aparece', inicio.filter(Boolean).length === 1,
+     JSON.stringify(inicio));
+  await pg.locator('#semTr').check();
+  await pg.waitForTimeout(250);
+  const depois = await notas();
+  ok('e ela SEGUE a escolha, em vez de acender uma segunda',
+     depois.filter(Boolean).length === 1 && depois[2], JSON.stringify(depois));
+  /* Esconder não é apagar: o texto das outras continua escrito e volta no
+     instante em que a escolha muda. */
+  await pg.locator('#recTr').check();
+  await pg.waitForTimeout(250);
+  const volta = await notas();
+  ok('e a de antes volta quando a escolha volta', volta.filter(Boolean).length === 1 && volta[0],
+     JSON.stringify(volta));
+}
+
+console.log('\n[4] a transcrição tem TRÊS escolhas, e são exclusivas');
 {
   const trio = await pg.evaluate(() => ['recTr', 'usarPronta', 'semTr'].map((id) => {
     const e = document.getElementById(id);
@@ -191,7 +188,7 @@ console.log('\n[3] a transcrição tem TRÊS escolhas, e são exclusivas');
      depois.nota.slice(0, 70));
 }
 
-console.log('\n[4] e "só as telas" não busca o modelo de voz');
+console.log('\n[5] e "só as telas" não busca o modelo de voz');
 {
   const antes = modelo.length;
   await pg.locator('#semTr').check();
@@ -210,7 +207,7 @@ console.log('\n[4] e "só as telas" não busca o modelo de voz');
   ok('e voltar para "transcrever aqui" pede', comTr > 0, `+${comTr}`);
 }
 
-console.log('\n[5] e a escolha é lembrada — a próxima visita não paga o modelo');
+console.log('\n[6] e a escolha é lembrada — a próxima visita não paga o modelo');
 {
   /* ESTE BLOCO NASCEU DE UM ACHADO DA PRÓPRIA RÉGUA. O bloco [4] mostrou que
      escolher "só as telas" não pede o modelo — e, ao tentar instalar o defeito
@@ -254,5 +251,5 @@ console.log('\n[5] e a escolha é lembrada — a próxima visita não paga o mod
 ok('sem erro de JavaScript', erros.length === 0, erros.join(' | ').slice(0, 200));
 
 await br.close(); srv.close();
-console.log(falhas ? `\n${falhas} FALHA(S)` : '\nPrévia e escolhas: o que se escolhe está à vista.');
+console.log(falhas ? `\n${falhas} FALHA(S)` : '\nEscolhas do cartão: a ação primeiro, as decisões depois.');
 process.exit(falhas ? 1 : 0);

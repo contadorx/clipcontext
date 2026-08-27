@@ -78,7 +78,16 @@ await pg.waitForTimeout(200);
    cima e de baixo — e o número é o de verdade. */
 const medir = () => pg.evaluate(() => {
   const b = document.body, cs = getComputedStyle(b);
-  const vis = [...b.children].filter((e) => getComputedStyle(e).display !== 'none');
+  /* FORA DO FLUXO NÃO SOMA. O botão de trocar o tamanho é `position:absolute`
+     no canto da janela completa — ele não empurra nada para baixo, e somá-lo
+     dava 447 de conteúdo numa janela de 430 com tudo cabendo. A altura que
+     importa é a que os elementos EM FLUXO ocupam; quem sai do fluxo continua
+     sendo cobrado pela lista `vaza`, que é onde ele apareceria se estivesse
+     posicionado para fora da janela. */
+  const vis = [...b.children].filter((e) => {
+    const cs = getComputedStyle(e);
+    return cs.display !== 'none' && cs.position !== 'absolute' && cs.position !== 'fixed';
+  });
   let soma = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom);
   /* EM LINHA A SOMA É OUTRA. A fita põe os filhos lado a lado, e somar as
      alturas de quem está em linha dá o triplo do que a janela precisa — a
@@ -178,6 +187,43 @@ console.log(`\n[1] gravando: cabe em ${LARG}×${ALT}`);
      caixa vazia de 28px: um botão que não faz nada, ocupando tela da pessoa.
      Ele foi aceso lá em cima para a medida; aqui ele volta ao estado de
      nascença, que é o que esta afirmação cobra. */
+  /* E NA JANELA COMPLETA ele sai do fluxo, no canto de cima. Um botão de
+     tamanho que custasse uma linha desta janela cobraria altura de quem já
+     está no limite — e a janela reprovaria em `cabe na altura pedida`. */
+  {
+    const t2 = await pg.evaluate(() => {
+      const b = document.getElementById('tam');
+      if (!b) return null;
+      const cs = getComputedStyle(b), r = b.getBoundingClientRect();
+      /* CONTRA O RELÓGIO, E NÃO CONTRA A CAIXA DELE. `.top` ocupa a largura
+         inteira da janela; medir sobreposição com ela reprovaria qualquer
+         botão no canto direito, inclusive um que não tapa nada. O que não
+         pode ser coberto é o número. */
+      const rel = document.getElementById('rel').getBoundingClientRect();
+      return { posicao: cs.position, visivel: cs.display !== 'none' && r.width > 0,
+               noCanto: r.top < 40 && r.right > innerWidth - 40,
+               tapaORelogio: r.left < rel.right - 2 && r.right > rel.left + 2 &&
+                             r.top < rel.bottom - 2 && r.bottom > rel.top + 2 };
+    });
+    ok('a janela completa também traz o botão', !!t2 && t2.visivel);
+    if (t2) {
+      ok('  e ele sai do fluxo, no canto de cima', t2.posicao === 'absolute' && t2.noCanto,
+         `${t2.posicao}, canto=${t2.noCanto}`);
+      ok('  sem tapar o relógio', !t2.tapaORelogio);
+    }
+    /* O NOME DELE É ESCRITO PELO PRODUTO, e o produto não roda aqui: esta
+       régua monta o corpo e o CSS num documento estático, sem o JavaScript da
+       janelinha. Então a existência do nome é lida da fonte — e o que ela
+       afirma é o contrato: `rotularPipTam` põe title E aria-label, e o texto
+       depende do que o botão VAI FAZER, não do que se está vendo. As duas
+       frases existirem nos cinco idiomas é o `chaves.mjs` quem cobra. */
+    ok('e o produto dá nome a ele, porque ele é só ícone',
+       /btn\.setAttribute\('aria-label', t\(vira\)\)/.test(app) &&
+       /const vira = pipModo\(\) === 'min' \? 'pipVirarCompleta' : 'pipVirarFita'/.test(app));
+    {
+    }
+  }
+
   ok('e o botão escondido está mesmo escondido',
      await pg.evaluate(() => {
        const c = document.getElementById('calar');
@@ -242,6 +288,41 @@ console.log(`\n[1a] a fita: cabe em ${LARG_MIN}×${ALT_MIN}, e sobra só o que s
   const some = !quem.medidor && !quem.texto && !quem.nota && !quem.pausa && !quem.calar;
   ok('e some o que não se usa quarenta vezes por sessão', some,
      some ? '' : JSON.stringify(quem));
+
+  /* ---- O BOTÃO DE TROCAR O TAMANHO ----
+     Ele veio para cá no Build 27. Antes a escolha morava no cartão de gravar,
+     com um desenho de cada janela ao lado — e o relato foi que gravar a tela é
+     a ação, e as decisões deviam vir depois. A janelinha NÃO EXISTE até a
+     pessoa gravar: escolher o tamanho dela antes é escolher às cegas.
+     Na fita ele é o ÚLTIMO da linha e está em fluxo; na janela completa ele
+     sai do fluxo e vai para o canto de cima — porque uma janela que já estava
+     no limite de altura não pode pagar uma linha inteira por um botão de
+     tamanho. As duas coisas são medidas, e não lidas da fonte. */
+  const tamFita = await pg.evaluate(() => {
+    const b = document.getElementById('tam');
+    if (!b) return null;
+    const cs = getComputedStyle(b);
+    const r = b.getBoundingClientRect();
+    const outros = ['marcar', 'maisTela', 'stop']
+      .map((i) => document.getElementById(i)).filter(Boolean)
+      .map((e) => e.getBoundingClientRect());
+    return { visivel: cs.display !== 'none' && r.width > 0,
+             posicao: cs.position, alvo: Math.round(r.width) + '×' + Math.round(r.height),
+             larguraOk: r.width >= 24 && r.height >= 24,
+             ultimo: outros.every((o) => o.right <= r.left + 1),
+             sobrepoe: outros.some((o) => o.right > r.left + 1 && o.left < r.right - 1),
+             nome: b.getAttribute('aria-label') || b.title || '' };
+  });
+  ok('a fita traz o botão de trocar o tamanho', !!tamFita && tamFita.visivel,
+     tamFita ? JSON.stringify(tamFita.alvo) : '(não existe)');
+  if (tamFita) {
+    ok('  e ele fica em fluxo, fechando a linha', tamFita.posicao === 'static' && tamFita.ultimo,
+       `${tamFita.posicao}, último=${tamFita.ultimo}`);
+    ok('  sem montar em cima de nenhum outro', !tamFita.sobrepoe);
+    /* Alvo de 24px é o piso do que se acerta sem mirar, e quem está dentro do
+       sistema testado não tem atenção sobrando para mirar. */
+    ok('  com alvo que se acerta sem mirar', tamFita.larguraOk, tamFita.alvo);
+  }
 
   /* ---- A PALAVRA TEM QUE ESTAR LÁ ----
      A primeira fita era só ícone, e o relato de uso foi "ficou bom, mas não dá
@@ -313,12 +394,8 @@ console.log('\n[1a2] a palavra curta é para os olhos; o nome é a frase inteira
 
   /* Quem usa leitor de tela não ganha nada com "+ Tela". O `aria-label` vence
      o texto de dentro do botão, então o curto fica só para quem vê. */
-  /* O quarto parâmetro nasceu no Build 26: a prévia gráfica mostra as DUAS
-     janelinhas ao mesmo tempo, e cada uma precisa dos rótulos do seu tamanho.
-     Sem ele, a prévia da fita mostraria as frases longas sempre que a escolha
-     atual fosse a janela completa. */
   ok('a fita rotula por uma função só, e não botão a botão',
-     /function rotularPip\(btn, chaveLonga, chaveCurta, minOpc\)/.test(app));
+     /function rotularPip\(btn, chaveLonga, chaveCurta\)/.test(app));
   ok('o texto visível é o curto só no modo fita',
      /btn\.textContent = min \? curto : longo;/.test(app));
   /* O `title` ganhou a letra do atalho no fim; o NOME ACESSÍVEL continua sendo
@@ -372,7 +449,16 @@ console.log(`\n[1b] com roteiro colado: cabe em ${LARG}×${ALT_ROT}`);
   await pg2.waitForTimeout(150);
   const m2 = await pg2.evaluate(() => {
     const b = document.body, cs = getComputedStyle(b);
-    const vis = [...b.children].filter((e) => getComputedStyle(e).display !== 'none');
+    /* FORA DO FLUXO NÃO SOMA. O botão de trocar o tamanho é `position:absolute`
+       no canto da janela completa — ele não empurra nada para baixo, e somá-lo
+       dava 447 de conteúdo numa janela de 430 com tudo cabendo. A altura que
+       importa é a que os elementos EM FLUXO ocupam; quem sai do fluxo continua
+       sendo cobrado pela lista `vaza`, que é onde ele apareceria se estivesse
+       posicionado para fora da janela. */
+    const vis = [...b.children].filter((e) => {
+      const cs = getComputedStyle(e);
+      return cs.display !== 'none' && cs.position !== 'absolute' && cs.position !== 'fixed';
+    });
     let soma = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom);
     for (const e of vis) soma += e.getBoundingClientRect().height;
     soma += parseFloat(cs.rowGap || 0) * Math.max(0, vis.length - 1);
