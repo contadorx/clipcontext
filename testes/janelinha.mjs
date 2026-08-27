@@ -422,6 +422,20 @@ console.log(`\n[1a] a fita: cabe em ${LARG_MIN}×${ALT_MIN}, e sobra só o que s
        `${semRot.fileiras} fileiras`);
     ok('  e também não empurra ninguém para fora', semRot.fora.length === 0,
        semRot.fora.join(' '));
+
+    /* ---- O ROTEIRO PODE CHEGAR DEPOIS ----
+       O tamanho da janela é pedido na ABERTURA. Quem abre a fita, cola a lista
+       e volta a gravar via o CSS virar duas linhas numa janela que continuava
+       com os 44px de uma — a segunda linha cortada, metade dos botões fora.
+       Aqui se cobra que o produto MANDE redimensionar quando a decisão muda.
+       O `resizeTo` pode ser recusado pelo navegador numa janela de
+       picture-in-picture, e por isso ele vive dentro de um `try` — o que a
+       régua afirma é que a ordem é dada, não que o Chrome obedeceu. Está dito
+       assim de propósito: prometer o que não se pode medir daqui seria pior. */
+    const manda = /pipWin\.resizeTo\(tam\.w, tam\.h\)/.test(app);
+    const soQuandoMuda = /antes !== !!roteiro\.length && pipModo\(\) === 'min'/.test(app);
+    ok('e se o roteiro chegar depois, a janela é remedida', manda && soQuandoMuda,
+       `resizeTo=${manda} sóQuandoMuda=${soQuandoMuda}`);
   }
 
   /* ---- O BOTÃO DE TROCAR O TAMANHO ----

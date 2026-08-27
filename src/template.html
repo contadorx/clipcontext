@@ -10333,7 +10333,23 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     /* A CLASSE NO CORPO, e nao um `if` no CSS: quem decide se ha roteiro e o
        JavaScript, e o desenho da fita — passo OU contagem — segue essa decisao
        em vez de adivinhar por conta propria. */
+    /* ---- A JANELA ACOMPANHA A DECISAO, E NAO SO O CSS ----
+     *
+     * O tamanho e pedido na ABERTURA, e o roteiro pode ser colado depois: quem
+     * abre a fita, cola a lista e volta a gravar via o CSS virar duas linhas
+     * numa janela que continuava com os 44px de uma. A segunda linha ficava
+     * cortada — a fita mostrava metade dos botoes.
+     *
+     * `resizeTo` e o unico caminho, e ele pode ser recusado pelo navegador numa
+     * janela de picture-in-picture. Se for, o `catch` engole e a fita continua
+     * do tamanho que abriu: nao piora nada, e nada aqui depende de ter dado
+     * certo. O que nao pode e a janela dizer uma coisa e o desenho outra. */
+    const antes = pipWin.document.body.classList.contains('comRoteiro');
     pipWin.document.body.classList.toggle('comRoteiro', !!roteiro.length);
+    if (antes !== !!roteiro.length && pipModo() === 'min') {
+      const tam = TAM_PIP(true);
+      try { pipWin.resizeTo(tam.w, tam.h); } catch (e) {}
+    }
     if (!roteiro.length) { cx.classList.add('hide'); return; }
     cx.classList.remove('hide');
     const fim = roteiroPos >= roteiro.length;
