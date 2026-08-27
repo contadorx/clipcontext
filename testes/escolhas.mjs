@@ -157,7 +157,49 @@ console.log('\n[3] a transcrição responde com UMA nota, e não com três');
      JSON.stringify(volta));
 }
 
-console.log('\n[4] a transcrição tem TRÊS escolhas, e são exclusivas');
+console.log('\n[4] o selo "recomendado" tem UM dono, e o dono é o cenário');
+{
+  /* Ele estava em DUAS das três opções ao mesmo tempo, e um selo em dois
+     lugares não recomenda nada: vira enfeite. Qual das duas é a recomendada
+     não é gosto — depende de a pessoa ter, ou não, um arquivo pronto. E a tela
+     sabe: quem escolheu `ata` está documentando uma reunião, e reunião do Meet,
+     do Teams ou do Zoom já sai transcrita de lá, de graça e melhor. */
+  const selos = () => pg.evaluate(() => ['optTr', 'optPronta'].map((i) => {
+    const e = document.getElementById(i);
+    return !!(e && (e.textContent || '').trim());
+  }));
+  await pg.selectOption('#modelo', 'evidencia');
+  await pg.waitForTimeout(300);
+  const emEvidencia = await selos();
+  ok('numa evidência, o selo é do "transcrever aqui"',
+     emEvidencia[0] && !emEvidencia[1], JSON.stringify(emEvidencia));
+  await pg.selectOption('#modelo', 'ata');
+  await pg.waitForTimeout(300);
+  const emAta = await selos();
+  ok('numa ata de reunião, ele muda de dono',
+     !emAta[0] && emAta[1], JSON.stringify(emAta));
+  /* NUNCA OS DOIS, em cenário nenhum. É a afirmação que o defeito violava. */
+  const tudo = [];
+  for (const cen of ['evidencia', 'tutorial', 'ata', 'usabilidade', 'ia']) {
+    await pg.selectOption('#modelo', cen);
+    await pg.waitForTimeout(200);
+    const s2 = await selos();
+    tudo.push(`${cen}:${s2.filter(Boolean).length}`);
+  }
+  console.log('     ' + tudo.join('  '));
+  ok('e em nenhum cenário aparecem dois', tudo.every((x) => x.endsWith(':1')), tudo.join(' '));
+  /* E "só as telas" não leva selo em lugar nenhum: ela é o caminho de quem não
+     tem fala para documentar, e recomendá-la a quem tem seria vender a menos. */
+  const naTerceira = await pg.evaluate(() => {
+    const l = document.getElementById('semTr').closest('label');
+    return !!l && !!l.querySelector('.optNota');
+  });
+  ok('a terceira opção não leva selo nenhum', !naTerceira);
+  await pg.selectOption('#modelo', 'evidencia');
+  await pg.waitForTimeout(200);
+}
+
+console.log('\n[5] a transcrição tem TRÊS escolhas, e são exclusivas');
 {
   const trio = await pg.evaluate(() => ['recTr', 'usarPronta', 'semTr'].map((id) => {
     const e = document.getElementById(id);
@@ -188,7 +230,7 @@ console.log('\n[4] a transcrição tem TRÊS escolhas, e são exclusivas');
      depois.nota.slice(0, 70));
 }
 
-console.log('\n[5] e "só as telas" não busca o modelo de voz');
+console.log('\n[6] e "só as telas" não busca o modelo de voz');
 {
   const antes = modelo.length;
   await pg.locator('#semTr').check();
@@ -207,7 +249,7 @@ console.log('\n[5] e "só as telas" não busca o modelo de voz');
   ok('e voltar para "transcrever aqui" pede', comTr > 0, `+${comTr}`);
 }
 
-console.log('\n[6] e a escolha é lembrada — a próxima visita não paga o modelo');
+console.log('\n[7] e a escolha é lembrada — a próxima visita não paga o modelo');
 {
   /* ESTE BLOCO NASCEU DE UM ACHADO DA PRÓPRIA RÉGUA. O bloco [4] mostrou que
      escolher "só as telas" não pede o modelo — e, ao tentar instalar o defeito
@@ -238,14 +280,52 @@ console.log('\n[6] e a escolha é lembrada — a próxima visita não paga o mod
   ok('e ela NÃO busca o modelo de voz', nova === 0, `+${nova} pedidos`);
 
   /* O CONTROLE: com "transcrever aqui" guardado, a mesma visita nova PEDE. É o
-     que separa "a memória funciona" de "a régua parou de olhar". */
+     que separa "a memória funciona" de "a régua parou de olhar".
+     E ele precisa de um GESTO desde o Build 28: o adiantamento deixou de ser um
+     relógio e passou a esperar a pessoa. Sem o clique abaixo este controle
+     mediria a trava nova em vez da memória, e passaria pelo motivo errado. */
   await pg.locator('#recTr').check();
   await pg.waitForTimeout(300);
   const antes2 = modelo.length;
   await pg.reload();
+  await pg.mouse.click(400, 400);
   await pg.waitForTimeout(3000);
   const nova2 = modelo.length - antes2;
   ok('e com "transcrever aqui" guardado, ela pede', nova2 > 0, `+${nova2} pedidos`);
+}
+
+console.log('\n[8] e o modelo só desce depois que alguém mexe na página');
+{
+  /* A QUARTA RECUSA. As outras três — `saveData`, 2g e conexão medida — cuidam
+     de quem AVISOU que não quer gastar dados. Esta cuida de quem não avisou
+     nada porque acabou de chegar: quem abriu para ver o que o produto é, e
+     fechou, não deve 206 MB a ninguém.
+     Este bloco sobe uma aba NOVA e limpa, porque o resto do arquivo já mexeu
+     em tudo — e "não desce sem gesto" só se mede antes do primeiro gesto. */
+  const limpo = await br.newContext({ viewport: { width: 1280, height: 900 }, serviceWorkers: 'block' });
+  const pedidos = [];
+  await limpo.route('**/*', (rota) => {
+    const u = rota.request().url();
+    if (u.startsWith(BASE) || u.startsWith('data:') || u.startsWith('blob:')) return rota.continue();
+    if (/huggingface|hf\.co|onnx-community|whisper/i.test(u)) pedidos.push(u);
+    return rota.abort();
+  });
+  const p2 = await limpo.newPage();
+  await p2.goto(`${BASE}/app.html?lang=pt`);
+  /* Quatro segundos: o adiantamento espera 1200 ms DEPOIS do gesto, e sem
+     gesto nenhum não há relógio correndo. */
+  await p2.waitForTimeout(4000);
+  const parado = pedidos.length;
+  ok('parada, a página não busca o modelo', parado === 0, `${parado} pedidos`);
+
+  /* E O CONTROLE, que é o que dá sentido ao zero: um clique de verdade e ele
+     desce. Sem esta linha, o zero acima poderia ser a régua não olhando. */
+  await p2.mouse.click(500, 400);
+  await p2.waitForTimeout(4000);
+  const depois = pedidos.length - parado;
+  console.log(`     sem gesto: ${parado} · depois de um clique: +${depois}`);
+  ok('e ao primeiro gesto de verdade, desce', depois > 0, `+${depois}`);
+  await limpo.close();
 }
 
 ok('sem erro de JavaScript', erros.length === 0, erros.join(' | ').slice(0, 200));

@@ -143,6 +143,19 @@ await pg.waitForTimeout(500);
      da varredura, e não por um relógio. */
   await pg.waitForFunction(() => document.getElementById('auto').disabled,
                            null, { timeout: 45000 }).catch(() => {});
+  /* E ESPERA A LINHA DE ESTADO APARECER, em vez de amostrá-la no instante em
+     que o trabalho começa.
+     Desde o Build 28 o modelo só é adiantado depois de um gesto de gente
+     (`pointerdown`, `keydown`, `wheel`, `touchmove`) — e o `setInputFiles` do
+     Playwright não é gesto nenhum: ele escreve no `<input>` por baixo. Numa
+     pessoa de verdade, o clique em "Escolher o vídeo" já disparou o
+     adiantamento; aqui não dispara, então o download só começa quando a
+     transcrição pede — e a primeira linha de estado chega um instante depois.
+     Esperar por ela é medir o que a afirmação diz ("a fala COMEÇOU"); amostrar
+     no instante zero era medir a sorte do relógio. */
+  await pg.waitForFunction(
+    () => ((document.getElementById('astatus') || {}).textContent || '').trim().length > 0,
+    null, { timeout: 60000 }).catch(() => {});
   const falaAndando = await pg.evaluate(() => ({
     caixa: document.getElementById('recTr').checked,
     ocupado: document.getElementById('auto').disabled,

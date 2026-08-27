@@ -39,15 +39,33 @@ await pg.waitForTimeout(300);
   ok('e no JSON', JSON.parse(fs.readFileSync('/tmp/amb.json','utf8')).evidencia.ambiente === 'QAS');
 }
 
-console.log('\n[2] tipo do momento, só na sessão de pesquisa');
+/* ---- O QUE MUDOU AQUI, E POR QUE ----
+   Até o Build 28 este bloco afirmava "o tipo do momento SÓ na sessão de
+   pesquisa": o seletor ficava escondido na evidência. O Build 29 desfez isso, e
+   por um motivo de campo: o botão de ERRO carimba `defeito` em qualquer
+   cenário, e sem o seletor a marca entrava e não saía — nem dava para marcar na
+   revisão, que é quando se acha o erro que passou batido ao vivo.
+   O que separa os dois mundos deixou de ser esconder e passou a ser a LISTA:
+   quatro palavras de pesquisa na usabilidade, "sem tipo" e "defeito" nos
+   outros. Uma pergunta com opções que não servem ao caso é pior que pergunta
+   nenhuma — e é isso que se cobra agora. */
+console.log('\n[2] tipo do momento: o vocabulário de cada cenário');
+const opcoesDoTipo = () => pg.locator('#lenteTipo option').evaluateAll(
+  (os) => os.map((o) => o.value));
 await pg.locator('#thumbs figure').nth(0).locator('.editar').click();
 await pg.waitForSelector('#lente:not(.hide)');
-ok('escondido na evidência', await pg.locator('#lenteTipoCx').evaluate(e=>e.classList.contains('hide')));
+ok('na evidência o seletor existe', !(await pg.locator('#lenteTipoCx').evaluate(e=>e.classList.contains('hide'))));
+const naEv = await opcoesDoTipo();
+ok('  e oferece só o que serve a ela', JSON.stringify(naEv) === JSON.stringify(['', 'defeito']),
+   naEv.join('|'));
 await pg.locator('#lenteFechar').click(); await pg.waitForTimeout(200);
 await pg.selectOption('#modelo','usabilidade'); await pg.waitForTimeout(300);
 await pg.locator('#thumbs figure').nth(0).locator('.editar').click();
 await pg.waitForSelector('#lente:not(.hide)');
 ok('aparece na sessão', !(await pg.locator('#lenteTipoCx').evaluate(e=>e.classList.contains('hide'))));
+const naUx = await opcoesDoTipo();
+ok('  com as quatro palavras da pesquisa', naUx.length === 5 && naUx.includes('friccao'),
+   naUx.join('|'));
 await pg.selectOption('#lenteTipo','friccao');
 await pg.waitForTimeout(400);
 await pg.locator('#lenteFechar').click(); await pg.waitForTimeout(300);
