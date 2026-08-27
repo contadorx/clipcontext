@@ -28,15 +28,45 @@ const br = await chromium.launch({ executablePath: CHROME_WS });
 let falhas = 0;
 const ok = (n, c, extra) => { console.log((c ? '  ok   ' : '  FALHA') + '  ' + n + (extra ? '  → ' + extra : '')); if (!c) falhas++; };
 const pagina = async () => {
-  const ctx = await br.newContext({ acceptDownloads: true, permissions: ['clipboard-read','clipboard-write'] });
+  /* `serviceWorkers: 'block'` — e esta linha é o conserto de verdade.
+     O produto registra um service worker que guarda o `app.html` para a
+     ferramenta abrir sem rede. As buscas FEITAS PELO WORKER não passam pelo
+     `page.route` do Playwright: na primeira visita a régua servia o app com as
+     chaves de teste, o worker instalava e guardava o app DE PRODUÇÃO buscado
+     por ele mesmo, e na segunda visita devolvia aquele — cuja chave pública
+     não bate com a assinatura de teste.
+     O sintoma era "a licença some no F5", e passei por duas hipóteses erradas
+     (o glob da rota, o sw.js interceptado na página) antes desta. O produto
+     estava certo o tempo todo: conferido à parte, a licença persiste. */
+  const ctx = await br.newContext({ acceptDownloads: true, serviceWorkers: 'block',
+                                    permissions: ['clipboard-read','clipboard-write'] });
   const pg = await ctx.newPage();
   const erros = []; pg.on('pageerror', e => erros.push(e.message));
-  await pg.route('**/jspdf**', r => r.fulfill({status:200,headers:{'content-type':'text/javascript'},body:jspdf}));
+  /* NO CONTEXTO, e não na página: um dos blocos abre uma SEGUNDA página para
+     visitar o link que o produto acabou de montar, e rota registrada na página
+     não vale para a irmã. Aquela segunda página recebia o app de produção e a
+     licença de teste "não ativava" — o produto, de novo, estava certo. */
+  await ctx.route('**/jspdf**', r => r.fulfill({status:200,headers:{'content-type':'text/javascript'},body:jspdf}));
   /* O app servido leva as chaves PÚBLICAS de teste no lugar das de produção.
      A troca é aqui, e não no proxy, porque o proxy encaminha para o Next e
      serve o site inteiro — só o `app.html` precisa da troca. */
-  await pg.route('**/app.html*', r => r.fulfill(
+  /* Predicado, e nao glob. O glob que eu tinha escrito pegava a PRIMEIRA
+     visita e deixava a segunda passar direto para o Next — que devolve o app
+     com as chaves de producao, e a licenca de teste "nao confere". A licenca
+     parecia sumir no F5, e o produto estava certo o tempo todo.
+     (E o glob nao aparece escrito aqui de proposito: ele contem a sequencia
+     que fecha um comentario, e escreve-la aqui derruba o arquivo — foi o que
+     aconteceu na primeira tentativa deste mesmo comentario.) */
+  await ctx.route((u) => u.pathname.endsWith('/app.html'), r => r.fulfill(
     { status: 200, headers: { 'content-type': 'text/html' }, body: APP }));
+  /* E O SERVICE WORKER FICA DE FORA. Ele é real e é do produto: guarda o
+     `app.html` para a ferramenta abrir sem rede. Só que aqui a régua SUBSTITUI
+     o `app.html` por uma cópia com outras chaves públicas — e na segunda visita
+     o worker devolvia a cópia GUARDADA, a de produção, cuja chave não bate com
+     a assinatura de teste. A licença "sumia no F5", e o defeito era da régua.
+     Um `sw.js` vazio: o worker não instala e cada visita busca de verdade. */
+  await ctx.route('**/sw.js', r => r.fulfill(
+    { status: 200, headers: { 'content-type': 'text/javascript' }, body: '' }));
   return { ctx, pg, erros };
 };
 

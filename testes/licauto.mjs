@@ -5,10 +5,9 @@
    pelo que ESTE código aceita. É isso que se prova aqui. */
 import { chromium } from './_navegador.mjs';
 import http from 'http'; import fs from 'fs';
-import { execSync } from 'child_process';
 
 const ROOT = `${RAIZ_WS}/public`;
-const html = fs.readFileSync(ROOT + '/app.html', 'utf8');
+const html = appComChavesDeTeste();   // as de produção não existem nesta máquina
 const srv = http.createServer((q, r) => {
   if (q.url.startsWith('/_vercel/')) { r.writeHead(200,{'Content-Type':'text/javascript'}); return r.end('') }
   r.writeHead(200, {'Content-Type':'text/html'}); r.end(html);
@@ -39,30 +38,27 @@ await new Promise(r => srv.listen(8920, r));
  * quando o servidor devolve o plano. Estes testes ativam uma chave sem conta
  * nenhuma, então lá ele não está na tela.)
  */
-import { existsSync } from 'fs';
 import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
-if (!existsSync(`${RAIZ_WS}/emitir-licenca.py`)) {
-  /* PULADO, EM MAIÚSCULAS E NO COMEÇO DA LINHA — 23/08.
-     A palavra é a mesma; o que mudou é ela ser MÁQUINA-LEGÍVEL. Antes saía
-     "  pulado" e o processo saía 0, então a esteira registrava "ok": o arquivo
-     inteiro não rodava e o rodapé dizia "regressão verde". Três dos testes de
-     licença estavam nesse estado — quer dizer, a única régua que prova o
-     destravamento pago de ponta a ponta nunca rodou onde a esteira roda.
-     Sair 0 continua certo: uma ausência esperada não é defeito, e uma esteira
-     vermelha por ela vira uma esteira que se aprende a ignorar. O que não pode
-     é a ausência se disfarçar de aprovação. `rodar.sh` lê esta linha e conta os
-     pulados no rodapé, ao lado dos verdes e dos vermelhos. */
-  console.log('PULADO  emitir-licenca.py não está neste pacote (ele guarda as chaves privadas).');
-  console.log('        Rode este teste na máquina onde o emissor vive.');
-  process.exit(0);
-}
+import { appComChavesDeTeste, emitir, daquiADias } from './_licenca.mjs';
 
-const emissor = `${RAIZ_WS}/emitir-licenca.py`;
-const auto = (email, assentos, dias, cliente) =>
-  execSync(`python3 ${emissor} --auto "${email}" ${assentos} ${dias}` + (cliente ? ` "${cliente}"` : ''),
-           { encoding: 'utf8' }).trim();
-const mestra = execSync(`python3 ${emissor} "Cliente Exemplo — QA" 40 2030-01-01`, { encoding: 'utf8' })
-  .split('\n').find(l => l.trim().startsWith('WS1.')).trim();
+/* ---- A CHAVE DE PRODUÇÃO NÃO VIAJA, E NÃO PRECISA VIAJAR ----
+   Este arquivo pulava em toda corrida por depender de `emitir-licenca.py`, que
+   carrega as privadas Ed25519. Agora a régua gera o próprio par e assina as
+   chaves de teste — inclusive as do emissor AUTOMÁTICO, que é o assunto deste
+   arquivo. Ver `_licenca.mjs`.
+
+   O TETO CONTINUA SENDO CONFERIDO PELO PRODUTO, e é isso que importa: a régua
+   assina o que o emissor de verdade nunca assinaria (401 dias, 26 assentos) e
+   cobra que a ferramenta RECUSE. Uma regra que só existe do lado de quem
+   assina não é uma regra: é uma intenção. */
+/* O `q` da licença automática é o E-MAIL de quem pediu, e não o nome do
+   cliente: é o e-mail que a tela mostra em "Licença válida para …", e é por
+   ele que se sabe a quem aquele link foi dado. O nome do cliente é outra
+   coisa — ele viaja no `marca=` do link e vira a marca no documento. Escrevi
+   ao contrário na primeira tentativa e a régua pegou. */
+const auto = (email, assentos, dias) =>
+  emitir(email, assentos, daquiADias(dias), { auto: true });
+const mestra = emitir('Cliente Exemplo — QA', 40, '2030-01-01');
 
 const br = await chromium.launch({ executablePath: CHROME_WS });
 let falhas = 0;
@@ -71,7 +67,12 @@ const ok = (n, c, extra) => { console.log((c ? '  ok   ' : '  FALHA') + '  ' + n
    navegador, e reaproveitar a aba faria a chave RUIM do teste seguinte
    parecer aceita. */
 async function abrir(chave){
-  const ctx = await br.newContext();
+  /* Service worker bloqueado e rota no CONTEXTO, pelos dois motivos que o
+     `liclink.mjs` documenta: o worker guarda o app de produção e o serve na
+     visita seguinte, e rota registrada na página não vale para uma irmã. */
+  const ctx = await br.newContext({ serviceWorkers: 'block' });
+  await ctx.route((u) => u.pathname.endsWith('/app.html'), r => r.fulfill(
+    { status: 200, headers: { 'content-type': 'text/html' }, body: html }));
   const pg = await ctx.newPage();
   const erros = []; pg.on('pageerror', e => erros.push(e.message));
   await pg.goto(`http://localhost:8920/app.html?lang=pt&lic=${encodeURIComponent(chave)}`);
