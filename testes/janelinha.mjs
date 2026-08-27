@@ -35,15 +35,18 @@ const ok = (n, c, e) => { console.log((c ? '  ok   ' : '  FALHA') + '  ' + n + (
    régua quebra. Ela continua lendo texto porque as duas coisas vivem dentro do
    fechamento do app e não há como chamá-las de fora — mas agora lê o lugar
    único, e não uma cópia da expressão. */
-const med = app.match(/TAM_PIP = \(min\) => \(\{ w: min \? \(roteiro\.length \? (\d+) : (\d+)\) : (\d+),\s*h: min \? (\d+) : \(roteiro\.length \? (\d+) : (\d+)\)/);
-ok('a janelinha declara os quatro tamanhos', !!med, med ? '' : '(não achei)');
-/* SÃO QUATRO, e não dois: a fita também cresce quando há roteiro colado. Ela
-   ganhou o passo atual no espaço que sobrava à direita, e esse espaço não é o
-   mesmo em cinco idiomas — daí a largura da fita ter passado a ser duas. */
-const [LARG_MIN_ROT, LARG_MIN, LARG, ALT_MIN, ALT_ROT, ALT] = med
-  ? [ +med[1], +med[2], +med[3], +med[4], +med[5], +med[6] ] : [720, 480, 250, 44, 580, 450];
+/* A FITA GANHOU UMA SEGUNDA LINHA, e não largura. A primeira tentativa deste
+   build foi crescer para o lado — 720px, com o passo dividindo a linha com os
+   botões — e o relato desfez em uma frase: "eu digo em duas linhas e não em uma
+   linha somente". Com duas linhas o passo fica com a largura inteira (365px em
+   qualquer idioma, contra 208 na versão de uma linha) e a janela volta a ser
+   estreita. A largura da fita voltou a ser UMA; a altura passou a ser duas. */
+const med = app.match(/TAM_PIP = \(min\) => \(\{ w: min \? (\d+) : (\d+),\s*h: min \? \(roteiro\.length \? (\d+) : (\d+)\)\s*: \(roteiro\.length \? (\d+) : (\d+)\)/);
+ok('a janelinha declara os cinco tamanhos', !!med, med ? '' : '(não achei)');
+const [LARG_MIN, LARG, ALT_MIN_ROT, ALT_MIN, ALT_ROT, ALT] = med
+  ? [ +med[1], +med[2], +med[3], +med[4], +med[5], +med[6] ] : [480, 250, 82, 44, 580, 450];
 console.log(`     completa ${LARG}×${ALT}   com roteiro ${LARG}×${ALT_ROT}` +
-            `   fita ${LARG_MIN}×${ALT_MIN}   fita com roteiro ${LARG_MIN_ROT}×${ALT_MIN}`);
+            `   fita ${LARG_MIN}×${ALT_MIN}   fita com roteiro ${LARG_MIN}×${ALT_MIN_ROT}`);
 /* UMA FITA, E NÃO UMA JANELA MENOR. A primeira tentativa foi a mesma pilha de
    botões, mais curta — e testada em uso ainda era uma janela: o relato foi
    "não dá para reduzir mais ou fazer como um controle de mídia fininho?".
@@ -52,6 +55,13 @@ console.log(`     completa ${LARG}×${ALT}   com roteiro ${LARG}×${ALT_ROT}` +
    baixo que qualquer pilha de dois. */
 ok('e a fita é uma FITA, não uma janela menor', ALT_MIN <= 72,
    ALT_MIN <= 72 ? '' : `${ALT_MIN}px de altura`);
+/* E com roteiro ela continua sendo uma fita: DUAS linhas, e não uma janela
+   baixa. 96px é o teto — duas fileiras de 38 com respiro. Passou disso, alguém
+   empilhou uma terceira sem perceber, que foi exatamente o que aconteceu na
+   primeira tentativa: o passo não coube ao lado do relógio e quebrou sozinho
+   para uma linha própria, deixando os botões numa terceira. */
+ok('e com roteiro são DUAS linhas, não três', ALT_MIN_ROT <= 96,
+   `${ALT_MIN_ROT}px de altura`);
 
 const css = app.slice(app.indexOf('const PIP_CSS = `') + 17).split('`;')[0];
 ok('o CSS dela foi encontrado', css.length > 400, String(css.length));
@@ -316,7 +326,7 @@ console.log(`\n[1a] a fita: cabe em ${LARG_MIN}×${ALT_MIN}, e sobra só o que s
      Isto é medido NO ALEMÃO, que é a língua mais comprida: se o passo couber
      legível aqui, cabe nas outras quatro. */
   {
-    await pg.setViewportSize({ width: LARG_MIN_ROT, height: ALT_MIN });
+    await pg.setViewportSize({ width: LARG_MIN, height: ALT_MIN_ROT });
     await pg.evaluate(() => {
       document.body.classList.add('comRoteiro');
       const rot = document.getElementById('rot'); if (rot) rot.classList.remove('hide');
@@ -332,20 +342,46 @@ console.log(`\n[1a] a fita: cabe em ${LARG_MIN}×${ALT_MIN}, e sobra só o que s
       const fora = [...document.querySelectorAll('body *')]
         .filter((e) => e.getBoundingClientRect().right > innerWidth + 1)
         .map((e) => e.id || e.tagName);
+      /* QUANTAS FILEIRAS. É a afirmação de verdade deste bloco, e a que faltava:
+         instalei o defeito da primeira tentativa (o passo com base automática,
+         que quebra sozinho para uma linha própria) e a largura do texto AUMENTOU
+         — a régua aprovava três fileiras achando que media duas. Fileira é onde
+         os elementos começam; contá-las é olhar para o topo de cada um. */
+      const topos = [...document.body.children]
+        .filter((e) => getComputedStyle(e).display !== 'none' &&
+                       getComputedStyle(e).position === 'static' &&
+                       e.getBoundingClientRect().width > 0)
+        /* PELO CENTRO, e não pelo topo: numa fileira de botões de 32px o
+           relógio tem 20 e é centralizado, então o topo dele fica 6px abaixo —
+           dois elementos da MESMA fileira com topos diferentes. O centro é o
+           que não muda dentro de uma linha. */
+        .map((e) => { const r2 = e.getBoundingClientRect(); return Math.round(r2.top + r2.height / 2); });
+      const fileiras = [];
+      for (const y of topos.sort((a, b) => a - b)) {
+        if (!fileiras.length || y - fileiras[fileiras.length - 1] > 14) fileiras.push(y);
+      }
       return { passoNaTela: getComputedStyle(r).display !== 'none',
                contagemSumiu: getComputedStyle(tx).display === 'none',
                larguraDoTexto: Math.round(rt.getBoundingClientRect().width),
                cortadoComReticencia: rt.scrollWidth > rt.clientWidth + 1 &&
                                      getComputedStyle(rt).textOverflow === 'ellipsis',
-               fora };
+               fileiras: fileiras.length, fora };
     });
     console.log(`     passo visível: ${comRot.larguraDoTexto}px` +
                 (comRot.cortadoComReticencia ? ' (cortado com reticência)' : ''));
     ok('com roteiro, a fita mostra o passo atual', comRot.passoNaTela);
+    /* DUAS, e não três: o relógio e o passo em cima, os botões embaixo. Três
+       quer dizer que o passo não coube ao lado do relógio e quebrou sozinho —
+       e aí a terceira fileira sai pela borda de baixo de uma janela de 82px. */
+    ok('  em DUAS fileiras: o passo em cima, os botões embaixo',
+       comRot.fileiras === 2, `${comRot.fileiras} fileiras`);
     ok('  e a contagem de quadros dá lugar a ele', comRot.contagemSumiu);
     /* 180px é o piso do que se lê de relance: menos que isso são três palavras,
        e três palavras de um passo não dizem qual passo é. */
-    ok('  com largura de ler, e não de adivinhar', comRot.larguraDoTexto >= 180,
+    /* 300px é o piso agora que o passo tem a linha inteira: numa linha só ele
+       ficava com 208 no idioma mais comprido, e era isso que o relato dizia ser
+       pouco. Menos que 300 quer dizer que a segunda linha se perdeu. */
+    ok('  com largura de ler, e não de adivinhar', comRot.larguraDoTexto >= 300,
        `${comRot.larguraDoTexto}px`);
     ok('  e nada é empurrado para fora', comRot.fora.length === 0, comRot.fora.join(' '));
 
@@ -359,13 +395,31 @@ console.log(`\n[1a] a fita: cabe em ${LARG_MIN}×${ALT_MIN}, e sobra só o que s
       document.getElementById('txt').textContent = '12 Screenshots';
     });
     await pg.waitForTimeout(150);
-    const semRot = await pg.evaluate(() => ({
-      contagemExiste: getComputedStyle(document.getElementById('txt')).display !== 'none',
-      fora: [...document.querySelectorAll('body *')]
-        .filter((e) => e.getBoundingClientRect().right > innerWidth + 1)
-        .map((e) => e.id || e.tagName),
-    }));
+    const semRot = await pg.evaluate(() => {
+      const topos = [...document.body.children]
+        .filter((e) => getComputedStyle(e).display !== 'none' &&
+                       getComputedStyle(e).position === 'static' &&
+                       e.getBoundingClientRect().width > 0)
+        /* PELO CENTRO, e não pelo topo: numa fileira de botões de 32px o
+           relógio tem 20 e é centralizado, então o topo dele fica 6px abaixo —
+           dois elementos da MESMA fileira com topos diferentes. O centro é o
+           que não muda dentro de uma linha. */
+        .map((e) => { const r2 = e.getBoundingClientRect(); return Math.round(r2.top + r2.height / 2); });
+      const fileiras = [];
+      for (const y of topos.sort((a, b) => a - b)) {
+        if (!fileiras.length || y - fileiras[fileiras.length - 1] > 14) fileiras.push(y);
+      }
+      return {
+        contagemExiste: getComputedStyle(document.getElementById('txt')).display !== 'none',
+        fileiras: fileiras.length,
+        fora: [...document.querySelectorAll('body *')]
+          .filter((e) => e.getBoundingClientRect().right > innerWidth + 1)
+          .map((e) => e.id || e.tagName),
+      };
+    });
     ok('sem roteiro, a contagem ocupa a sobra', semRot.contagemExiste);
+    ok('  e a fita volta a ser UMA fileira', semRot.fileiras === 1,
+       `${semRot.fileiras} fileiras`);
     ok('  e também não empurra ninguém para fora', semRot.fora.length === 0,
        semRot.fora.join(' '));
   }

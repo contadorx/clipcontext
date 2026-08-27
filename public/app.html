@@ -9445,7 +9445,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      depois, e não tem como se atualizar sozinho. Sem carimbo, "estou com um
      problema no offline" é uma conversa sem chão — ninguém sabe de qual build
      se fala nem se o defeito já foi consertado. */
-  const VERSAO = '2026.08.27-74';
+  const VERSAO = '2026.08.27-84';
   window.__versao = () => VERSAO;
 
   const PIP_CSS = `
@@ -9511,18 +9511,53 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
        acha o resto. O passo entra depois dele, e os botoes ficam colados na
        borda direita, onde a mao ja sabe procura-los. */
     body.min .top{order:-1}
-    body.min .rot{flex:1 1 auto;min-width:0;border:0;padding:0;margin:0 2px 0 4px;
+    /* BASE ZERO, e nao automatica. Com base automatica o navegador mede o texto
+       inteiro do passo primeiro, ve que ele nao cabe ao lado do relogio e QUEBRA
+       a linha antes de encolher — a fita saia com tres linhas: relogio, passo,
+       botoes. Com base zero ele nasce sem largura e cresce no que sobra da
+       primeira linha, que e exatamente o comportamento que se quer. */
+    body.min .rot{flex:1 1 0;min-width:0;border:0;padding:0;margin:0 2px 0 4px;
                   display:flex;align-items:baseline;gap:6px;overflow:hidden}
     body.min .rotN{flex:none;font-size:11px}
-    body.min .rotT{font-size:12.5px;margin:0;display:block;white-space:nowrap;
+    /* A LARGURA MINIMA ZERO TAMBEM AQUI. O bloco do roteiro virou um flex, e dentro de um flex
+       cada filho nasce com largura minima igual ao proprio conteudo — o texto
+       do passo, inteiro, sem cortar. Era isso que empurrava o bloco do roteiro para 460px
+       e o fazia quebrar sozinho para uma linha propria: a reticencia so existe
+       depois que o filho pode ser menor do que o texto dele. */
+    body.min .rotT{min-width:0;font-size:12.5px;margin:0;display:block;white-space:nowrap;
                    overflow:hidden;text-overflow:ellipsis;-webkit-line-clamp:none}
     body.min .rotP{display:none !important}
-    body.min #txt{flex:1 1 auto;min-width:0;font-size:11.5px;color:#a7adbe;
+    body.min #txt{flex:1 1 0;min-width:0;font-size:11.5px;color:#a7adbe;
                   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
                   margin:0 2px 0 4px;text-align:left}
     /* Um de cada vez: com roteiro, o passo manda — a contagem de quadros vira
        ruido ao lado da frase que a pessoa tem que ler. */
     body.min.comRoteiro #txt{display:none !important}
+    /* ---- COM ROTEIRO, A FITA TEM DUAS LINHAS ----
+     *
+     * A primeira tentativa foi crescer para o lado: 720px de largura, com o
+     * passo dividindo a linha com os botoes. O relato desfez isso em uma frase:
+     * "eu digo em duas linhas e nao em uma linha somente".
+     *
+     * E ele esta certo. Numa linha so, o passo disputa espaco com cinco botoes
+     * em cinco idiomas — em alemao sobravam 208px de texto, e a janela tinha
+     * que ficar 240px mais larga para conseguir isso. Em duas linhas o passo
+     * fica com a largura INTEIRA da fita, os botoes voltam para a segunda, e a
+     * janela volta a ser estreita: 480 de largura, que e o que os botoes pedem
+     * no idioma mais comprido.
+     *
+     * Largura e altura nao custam a mesma coisa aqui: a fita encosta numa borda
+     * da tela, e uma faixa de 82px de altura por 480 de largura toma menos do
+     * trabalho da pessoa do que uma de 44 por 720. */
+    body.min.comRoteiro{flex-wrap:wrap;align-content:center;row-gap:3px}
+    /* ESCONDIDA POR PADRAO, e nao so na fita: na janela completa ela e um filho
+       do corpo em coluna, e um filho de altura zero ainda paga o respiro de 9px
+       entre irmaos. Foram dois pixels a mais numa janela que a regua mede ate o
+       ultimo — e ela reprovou, que e o trabalho dela. */
+    .quebra{display:none}
+    body.min.comRoteiro .quebra{display:block;flex-basis:100%;height:0;margin:0}
+    /* Com uma linha inteira, o passo pode ser lido de longe. */
+    body.min.comRoteiro .rotT{font-size:13.5px}
     body.min .top{flex:none;gap:5px;margin:0}
     body.min .rel{font-size:13px;min-width:38px}
     /* Alvo de 38px: e o menor que ainda se acerta com o mouse sem mirar, e a
@@ -9917,8 +9952,9 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      arredondamento come, e nada além — cada pixel daqui é um pixel a menos do
      trabalho que a pessoa está documentando.
      Com roteiro a janela sobe junto: a linha do passo já custava 545 dos 560. */
-  const TAM_PIP = (min) => ({ w: min ? (roteiro.length ? 720 : 480) : 250,
-                              h: min ? 44 : (roteiro.length ? 580 : 450) });
+  const TAM_PIP = (min) => ({ w: min ? 480 : 250,
+                              h: min ? (roteiro.length ? 82 : 44)
+                                     : (roteiro.length ? 580 : 450) });
 
   function corpoDaJanelinha(){
     return ''+
@@ -9929,6 +9965,12 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       '<div class="top"><span class="dot"></span><span class="rel" id="rel">0:00</span></div>' +
       '<div class="txt" id="txt"></div>' +
       '<div class="vus"><div class="vb"><i id="vm"></i></div><div class="vb"><i id="vs"></i></div></div>' +
+      /* A QUEBRA DE LINHA DA FITA. Ela nao aparece em lugar nenhum: e um
+         elemento de altura zero que, quando a fita tem roteiro, ocupa a largura
+         inteira e joga os botoes para a linha de baixo. E o unico jeito de
+         quebrar uma linha em flexbox sem inventar dois contêineres — e dois
+         contêineres seriam duas ordens de elementos para manter em pe. */
+      '<i class="quebra"></i>' +
       '<button id="marcar" class="sec" disabled></button>' +
       /* O SEGUNDO BOTÃO TEM QUE ESTAR AQUI TAMBÉM, e isto não é simetria: quem
          grava está dentro do sistema que está testando, não na nossa aba.
