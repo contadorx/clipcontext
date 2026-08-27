@@ -118,7 +118,7 @@ async function paginaGravando(ctx, segundos, semOpfs){
   await pg.evaluate(telaFalsa);
   await pg.selectOption('#modelo', 'evidencia');
   await pg.selectOption('#ritmo', 'tudo');
-  await pg.locator('#recTr').uncheck();
+  await pg.locator('#semTr').check();
   await pg.evaluate(() => window.__contagem(1));
   await pg.locator('#rec').click();
   await pg.waitForSelector('#recStop:visible', { timeout: 40000 });
@@ -389,7 +389,7 @@ console.log('\n[5] o que sobrou de desligar: jogar fora, e a escolha antiga resp
   await p2.evaluate(telaFalsa);
   await p2.selectOption('#modelo', 'evidencia');
   await p2.selectOption('#ritmo', 'tudo');
-  await p2.locator('#recTr').uncheck();
+  await p2.locator('#semTr').check();
   await p2.evaluate(() => window.__contagem(1));
   await p2.locator('#rec').click();
   await p2.waitForSelector('#recStop:visible', { timeout: 40000 });
@@ -441,7 +441,7 @@ console.log('\n[6] quando o disco recusa, ela FICA SABENDO');
   await pg.evaluate(telaFalsa);
   await pg.selectOption('#modelo', 'evidencia');
   await pg.selectOption('#ritmo', 'tudo');
-  await pg.locator('#recTr').uncheck();
+  await pg.locator('#semTr').check();
   await pg.evaluate(() => window.__contagem(1));
   await pg.locator('#rec').click();
   await pg.waitForSelector('#recStop:visible', { timeout: 40000 });

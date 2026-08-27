@@ -37,7 +37,7 @@ for (const [rot, espera, semTr, semImagem] of [['parar em 200 ms', 200, false, f
   await pg.goto('http://localhost:8880/app.html?lang=pt'); await pg.waitForTimeout(400);
   // o cenário virou obrigatório antes de o vídeo entrar ou de a gravação começar
   await pg.selectOption('#modelo', 'ia').catch(() => {});
-  if (semTr) await pg.uncheck('#recTr');
+  if (semTr) await pg.check('#semTr');
   /* A contagem regressiva de 3 é opção do produto e vem ligada; num teste
      que mede a gravação ela só adiciona três segundos de espera por rodada. */
   await pg.evaluate(() => window.__contagem(1));

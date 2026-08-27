@@ -1,9 +1,11 @@
 import { chromium } from './_navegador.mjs';
 import http from 'http'; import fs from 'fs';
 import { execSync } from 'child_process';
+import { appComChavesDeTeste, emitir } from './_licenca.mjs';
+import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
 
 const ROOT = `${RAIZ_WS}/public`;
-const html = fs.readFileSync(ROOT + '/app.html', 'utf8');
+const html = appComChavesDeTeste();   // as de produção não existem nesta máquina
 const jspdf = fs.readFileSync(`${RAIZ_WS}/vendor/jspdf.umd.min.js`, 'utf8');
 const srv = http.createServer((q, r) => {
   const u = q.url.split('?')[0];
@@ -16,51 +18,24 @@ const br = await chromium.launch({ executablePath: CHROME_WS });
 let falhas = 0;
 const ok = (n, c, extra) => { console.log((c ? '  ok   ' : '  FALHA') + '  ' + n + (extra ? '  → ' + extra : '')); if (!c) falhas++; };
 
-/* O EMISSOR NÃO VIAJA NO ZIP, e não pode viajar: `emitir-licenca.py` carrega as
-   duas chaves privadas Ed25519, e um pacote entregue que as levasse junto
-   entregaria o direito de assinar licença para qualquer um.
+/* ---- A CHAVE DE PRODUÇÃO NÃO VIAJA, E NÃO PRECISA VIAJAR ----
  *
- * Sem ele, este teste não tem como existir — e é isso que ele diz, em vez de
- * morrer com "Command failed" e mandar procurar defeito num produto que está
- * inteiro. Sai com 0: uma esteira vermelha por uma ausência esperada é uma
- * esteira que se aprende a ignorar. */
-/* `#licTag` MORREU NO PRODUTO — 23/08.
+ * Este arquivo PULAVA em toda corrida da esteira, junto com `liclink` e
+ * `licauto`, porque `emitir-licenca.py` carrega as duas privadas Ed25519 e um
+ * pacote entregue que as levasse entregaria o direito de assinar licença para
+ * qualquer um. A ausência era honesta e o pulo era registrado — mas o efeito
+ * era que a licença, que é o portão que a Stripe abre, era a única peça que
+ * nenhuma regressão atravessava. Se ela quebrasse, quem pagou não destravaria
+ * nada, e o rodapé continuaria dizendo "nada vermelho".
  *
- * A etiqueta do cabeçalho que dizia "Plano Time" não existe mais no `app.html`:
- * `grep licTag public/app.html` dá ZERO. O sucessor dela, `#licBtn`, também
- * saiu — o que restou no código é uma referência guardada por `if (bl)`, que
- * nunca é verdadeira.
+ * A saída não é levar a chave: é não precisar dela. O produto confere uma
+ * assinatura contra uma chave PÚBLICA escrita no HTML — então a régua gera o
+ * próprio par, assina com a privada dele e serve uma cópia do `app.html` com a
+ * pública correspondente no lugar. Ver `_licenca.mjs`.
  *
- * Onde o estado ATIVO aparece hoje, sem depender de conta: `#licMsg`, dentro da
- * caixa da licença, com a frase `licValida` — "Licença válida para {cliente} —
- * {n} pessoa(s), até {data}". Ela diz mais do que "Plano Time" dizia: para
- * quem, quantos assentos e até quando.
- *
- * (`#planoLinha` existe, mas é a linha da BARRA DA CONTA e só é desenhada
- * quando o servidor devolve o plano. Estes testes ativam uma chave sem conta
- * nenhuma, então lá ele não está na tela.)
- */
-import { existsSync } from 'fs';
-import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
-if (!existsSync(`${RAIZ_WS}/emitir-licenca.py`)) {
-  /* PULADO, EM MAIÚSCULAS E NO COMEÇO DA LINHA — 23/08.
-     A palavra é a mesma; o que mudou é ela ser MÁQUINA-LEGÍVEL. Antes saía
-     "  pulado" e o processo saía 0, então a esteira registrava "ok": o arquivo
-     inteiro não rodava e o rodapé dizia "regressão verde". Três dos testes de
-     licença estavam nesse estado — quer dizer, a única régua que prova o
-     destravamento pago de ponta a ponta nunca rodou onde a esteira roda.
-     Sair 0 continua certo: uma ausência esperada não é defeito, e uma esteira
-     vermelha por ela vira uma esteira que se aprende a ignorar. O que não pode
-     é a ausência se disfarçar de aprovação. `rodar.sh` lê esta linha e conta os
-     pulados no rodapé, ao lado dos verdes e dos vermelhos. */
-  console.log('PULADO  emitir-licenca.py não está neste pacote (ele guarda as chaves privadas).');
-  console.log('        Rode este teste na máquina onde o emissor vive.');
-  process.exit(0);
-}
-
-const emitir = (quem, n, ate) => execSync(
-  `cd ${RAIZ_WS} && python3 emitir-licenca.py ${JSON.stringify(quem)} ${n} ${ate}`,
-  { encoding: 'utf8' }).match(/^WS1\.[^\s]+$/m)[0];
+ * O que continua fora do alcance daqui, e é honesto dizer: que a pública
+ * publicada no produto corresponde à privada do Leandro. Isso é conferência de
+ * chaveiro, e se faz onde o emissor vive. */
 
 const VALIDA  = emitir('Cliente Exemplo — QA', 5, '2099-01-01');
 const VENCIDA = emitir('Cliente antigo', 3, '2020-01-01');

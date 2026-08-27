@@ -77,7 +77,7 @@ console.log('\n[2] gravando com os dois botões de captura');
 /* Sem transcrever e sem contagem: o que este arquivo prova é a anotação, e
    baixar um modelo de voz de 249 MB para isso seria trocar um teste por uma
    espera. */
-await pg.locator('#recTr').uncheck();
+await pg.locator('#semTr').check();
 await pg.evaluate(() => window.__contagem(1));
 await pg.locator('#rec').click();
 await pg.waitForSelector('#recStop:visible', { timeout: 40000 });

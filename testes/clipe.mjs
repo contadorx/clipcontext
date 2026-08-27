@@ -102,7 +102,7 @@ await pg.evaluate(() => {
 /* As constantes são `const` no escopo do módulo, então em vez de trocá-las o
    teste espera a primeira janela de verdade — mas só a metade dela. */
 await fecharModal();
-await pg.locator('#recTr').uncheck();
+await pg.locator('#semTr').check();
 await pg.evaluate(() => window.__contagem(1));
 await pg.waitForTimeout(200);
 await pg.locator('#rec').click();

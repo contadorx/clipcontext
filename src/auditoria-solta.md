@@ -9,8 +9,8 @@ cada build. Editar o `AUDITORIA-PENDENTE.md` não adianta — ele é reescrito.
 
 | A frase publicada | O teste |
 |---|---|
-| Vídeo, áudio e transcrição não saem do seu computador | `precos.mjs` prova que **a página** não chama a rede; **sem teste** para a ferramenta |
-| Cobrança anual, renova sozinha, cancela na conta | **sem teste** |
+| Vídeo, áudio e transcrição não saem do seu computador | `semrede.mjs` — a evidência sai inteira com todo pedido externo abortado, e cada corpo que o app tentou mandar é lido, pesado e impresso; `precos.mjs` continua cobrindo a página |
+| Cobrança anual, renova sozinha, cancela na conta | `renovar.mjs` (a renovação, com o aviso pintado), `cancelar.mjs` (o caminho do cancelamento, nos cinco idiomas) — **nenhum dos dois abre o portal da Stripe**, e os dois dizem isso no cabeçalho |
 | A partir de 3 pessoas, e o total mínimo anual | `precos.mjs`, `cinco.mjs`, `promessa.mjs` — o número sai de `lib/stripe.ts`, e desde o Build 4 o `build.py` o lê de lá em vez de repetir |
 | As suas colunas voltam como estavam | `roteiro.mjs` |
 | Nenhum número da calculadora sai do navegador | `precos.mjs` |
@@ -31,10 +31,13 @@ completa recolhida**, nunca num cartão — `precos.mjs` cobra que nenhum selo
 apareça nos cartões. A decisão continua sua: ou as três passam a existir de
 verdade, ou o selo fica.
 
-**O clique de compra não leva a intenção consigo.** Quem clica "Assinar o Team"
-chega à conta e escolhe de novo. O piso de 3 assentos já é recusado no servidor
-(`app/conta/acoes.ts`, saindo de `PLANOS[plano].assentos`), então ninguém compra
-1 ou 2 — o que falta é a ponte. É o primeiro item do **Build 5**, em `FILA.md`.
+~~**O clique de compra não leva a intenção consigo.**~~ **Resolvido, e este
+parágrafo estava velho.** Medido em 27/08: o `?plano=` sai do cartão nos cinco
+idiomas, a conta lê e valida o valor (uma URL é coisa que qualquer um escreve),
+a intenção atravessa o link do e-mail num campo escondido do formulário, e o
+painel destaca o plano escolhido. Os quatro elos têm régua: `compra.mjs` [1] [2]
+[3] e `entrada2.mjs` [2]. O piso de 3 assentos continua recusado no servidor,
+saindo de `PLANOS[plano].assentos`.
 
 **`npm run stripe:conferir` nunca rodou.** Sem `STRIPE_SECRET_KEY` no ambiente,
 e ele recusa chave de produção, que é o comportamento certo. Falta confirmar com
@@ -42,8 +45,16 @@ a chave de teste que o preço do Team continua `per unit`: em `tiered` ou
 `volume`, comprar 12 assentos cobra por 1. É a **DEC-14**, represada por sua
 instrução.
 
-**O vocabulário do domínio não fala alemão nem francês.** Achado no Build 4 pela
-`tabelas.mjs`. É a **DEC-17**.
+~~**O vocabulário do domínio não fala alemão nem francês.**~~ **Fala, desde o
+Build 7, e este parágrafo estava velho desde então.** A tabela é gerada de 0 a
+999 nos cinco idiomas — 8.329 formas provadas rodando o código do produto, e não
+uma cópia dele. A medição corrigiu a própria DEC-17 no caminho: não eram dois
+idiomas faltando, eram três (o inglês também não lia número a partir de cem).
+
+**O que continua aberto ali é uma lacuna menor, e você a aceitou por escrito:**
+para `de` e `fr` não houve teste com voz real. As grafias estão certas; o que
+falta é saber como o Whisper as escreve erradas — que é para isso que existe o
+`APELIDOS`. Quando alguém falar num microfone nesses idiomas, a lista cresce.
 
 > Resolvidos e tirados desta lista: o vídeo `/demo/rodada.*` que dava 404 nos
 > cinco idiomas (a figura de quatro estados entrou no lugar), o bloco de apoio

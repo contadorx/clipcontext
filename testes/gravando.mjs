@@ -69,7 +69,7 @@ console.log('[1] a contagem grande existe nos DOIS lugares');
 }
 
 console.log('\n[2] gravando: o espelho do vídeo some — e os quadros continuam vindo');
-await pg.locator('#recTr').uncheck();
+await pg.locator('#semTr').check();
 await pg.evaluate(() => window.__contagem(1));
 await pg.locator('#rec').click();
 await pg.waitForSelector('#recStop:visible', { timeout: 40000 });

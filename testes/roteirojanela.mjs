@@ -88,7 +88,7 @@ await pg.waitForTimeout(150);
 ok('sem clicar em Usar, o roteiro ainda não vale',
    (await pg.evaluate(() => document.getElementById('roteiroConta').textContent)) === '');
 
-await pg.locator('#recTr').uncheck();
+await pg.locator('#semTr').check();
 await pg.evaluate(() => window.__contagem(1));
 await pg.locator('#rec').click();
 await pg.waitForSelector('#recStop:visible', { timeout: 40000 });

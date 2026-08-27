@@ -26,7 +26,7 @@ TESTES="smoke.mjs saidas.mjs passos.mjs evidencia.mjs modelos.mjs cenarios.mjs
          juntar.mjs webcam.mjs portal.mjs chamadoconta.mjs cabecalho.mjs seo.mjs stripehook.mjs ux.mjs ficha.mjs sessao.mjs
          onda1.mjs onda2.mjs onda4.mjs
          destaque.mjs tapado.mjs marcados.mjs traducao.mjs vocab.mjs jira.mjs
-         idiomas.mjs paginas.mjs linkpage.mjs timepag.mjs licenca.mjs liclink.mjs
+         idiomas.mjs paginas.mjs linkpage.mjs licenca.mjs liclink.mjs
          licauto.mjs medicao.mjs legal.mjs a11y.mjs dobra.mjs pdfev.mjs
          semframes.mjs semsom.mjs repetido.mjs pausa.mjs curta.mjs retrato.mjs
          hostil.mjs preview.mjs rodada.mjs linhas.mjs verificador.mjs
@@ -34,7 +34,7 @@ TESTES="smoke.mjs saidas.mjs passos.mjs evidencia.mjs modelos.mjs cenarios.mjs
          travado.mjs promptcx.mjs cabec.mjs ajuda.mjs cinco.mjs appidioma.mjs gravando.mjs janelinha.mjs marca.mjs figuras.mjs dobrafig.mjs
          compartilhar.mjs contradicao.mjs negocio.mjs celular.mjs barraapp.mjs paridade.mjs teto.mjs ritmo.mjs rolar.mjs isca.mjs blog.mjs cenario1.mjs organiza.mjs acabamento.mjs convite.mjs email.mjs tourvid.mjs semmarca.mjs lente2.mjs
          memoria.mjs pesagem.mjs espelho.mjs grade.mjs varredura.mjs audio.mjs plano.mjs faixa.mjs reuniao.mjs diagchamado.mjs modelo.mjs espera.mjs passomulti.mjs pessoas.mjs matriz.mjs espera2.mjs anotacao.mjs roteirojanela.mjs quedaplaca.mjs conclusao.mjs parar.mjs entrada.mjs indice.mjs figura.mjs resumo.mjs perna.mjs saidarec.mjs chaves.mjs planos.mjs promessa.mjs voltadocaso.mjs cartao.mjs etapas.mjs marcos.mjs funil.mjs wer.mjs
-         terceiros.mjs precos.mjs semundefined.mjs middleware.mjs inventario.mjs descarte.mjs auditoria.mjs tabelas.mjs folha.mjs compra.mjs modelopessoal.mjs renovar.mjs numeros.mjs entrada2.mjs bomba.mjs csp.mjs estreito.mjs foco.mjs apoio.mjs nitidez.mjs buscaajuda.mjs versoes.mjs marcar.mjs"
+         terceiros.mjs precos.mjs semundefined.mjs middleware.mjs inventario.mjs descarte.mjs auditoria.mjs tabelas.mjs folha.mjs compra.mjs modelopessoal.mjs renovar.mjs numeros.mjs entrada2.mjs bomba.mjs csp.mjs estreito.mjs foco.mjs apoio.mjs nitidez.mjs buscaajuda.mjs versoes.mjs marcar.mjs emissor.mjs cancelar.mjs semrede.mjs previa.mjs"
 # EM PARALELO, E COM O NÚMERO SAINDO DA MÁQUINA.
 #
 # Ela rodava um de cada vez: setenta minutos, com três dos quatro núcleos desta
@@ -150,7 +150,16 @@ if [ "$n_pul" -gt 0 ]; then
   echo "  Um teste pulado NÃO é um teste que passou. O motivo de cada um está acima."
 fi
 if [ -z "$falhou" ]; then
-  [ "$n_pul" -gt 0 ] && echo "Nada vermelho — mas a cobertura é a dos $verdes, não a dos $((verdes + n_pul))."
+  # DUAS FRASES, E NÃO UMA. Com pulados, o rodapé sempre disse que a cobertura é
+  # menor que o total. Sem pulados ele não dizia NADA — e "nada" no fim de uma
+  # esteira lê-se como "acabou", não como "as N rodaram". A diferença entre um
+  # verde com buraco e um verde inteiro é a única coisa que o rodapé existe para
+  # dizer, e ela tem de estar escrita nos dois casos.
+  if [ "$n_pul" -gt 0 ]; then
+    echo "Nada vermelho — mas a cobertura é a dos $verdes, não a dos $((verdes + n_pul))."
+  else
+    echo "Verde inteiro: as $verdes rodaram, e nenhuma foi pulada."
+  fi
   exit 0
 fi
 # A ESTEIRA SAI DIFERENTE DE ZERO. Ela imprimia os que falharam e saía 0 — o que

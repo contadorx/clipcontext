@@ -136,7 +136,7 @@ await pg.fill('#count', '3');
    sozinha quando a varredura acaba — e o clique no `#auto` logo abaixo, achando
    o botão travado, esperaria a primeira terminar para disparar uma SEGUNDA. O
    teste mediria a segunda achando que media a primeira. */
-await pg.locator('#recTr').uncheck();
+await pg.locator('#semTr').check();
 await pg.waitForTimeout(300);
 
 await pg.setInputFiles('#file', '/tmp/fala-longa.webm');

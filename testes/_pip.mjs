@@ -16,7 +16,7 @@ await pg.addInitScript(()=>{
 });
 await pg.goto('http://localhost:8994/app.html?lang=pt');
 await pg.selectOption('#modelo','ia');
-await pg.locator('#recTr').uncheck();
+await pg.locator('#semTr').check();
 await pg.evaluate(()=>window.__contagem(1));
 await pg.locator('#rec').click();
 await pg.waitForSelector('#recStop:visible',{timeout:40000});

@@ -113,7 +113,7 @@ const gravar = async (pagina, comCam) => {
     await pagina.locator('#recClipe').uncheck().catch(()=>{});
   }
   await fecharModal(pagina);
-  await pagina.locator('#recTr').uncheck();
+  await pagina.locator('#semTr').check();
   await pagina.evaluate(() => window.__contagem(1));
   await pagina.waitForTimeout(200);
   await pagina.locator('#rec').click();

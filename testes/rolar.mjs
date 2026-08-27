@@ -46,7 +46,7 @@ console.log('[1] rolar uma lista e parar tem que virar quadro');
   await pg.goto('http://localhost:8937/app.html?lang=pt');
   await pg.waitForTimeout(400);
   await pg.selectOption('#modelo', 'outro');   // vira "equilibrado" sozinho
-  await pg.locator('#recTr').uncheck();
+  await pg.locator('#semTr').check();
   await pg.evaluate(() => window.__contagem(1));
   /* UMA CAIXA DE ENTRADA DE VERDADE.
      A primeira versão deste teste renumerava um texto parado em vez de rolar
@@ -164,7 +164,7 @@ console.log('\n[3] a máscara se desmancha quando a região para');
      página de vídeo com um quadro em 36 segundos. Então é aqui que se escolhe
      o ritmo em que ela existe, senão este bloco testa o nada. */
   await pg.selectOption('#ritmo', 'reuniao');
-  await pg.locator('#recTr').uncheck();
+  await pg.locator('#semTr').check();
   await pg.evaluate(() => window.__contagem(1));
   /* Metade da tela é um vídeo tocando; a outra metade fica parada. O vídeo
      enche a máscara de movimento. Depois ele CONGELA numa imagem diferente da
@@ -274,7 +274,7 @@ console.log('\n[5] uma página de vídeo não pode terminar com um quadro só');
   await pg.goto('http://localhost:8937/app.html?lang=pt');
   await pg.waitForTimeout(400);
   await pg.selectOption('#modelo', 'tutorial');   // vira "equilibrado" sozinho
-  await pg.locator('#recTr').uncheck();
+  await pg.locator('#semTr').check();
   await pg.evaluate(() => window.__contagem(1));
   /* O YouTube: o vídeo ocupa metade da tela e nunca para; em volta, título,
      sugestões e um painel — tudo parado. A cena do vídeo troca três vezes.
