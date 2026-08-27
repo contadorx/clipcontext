@@ -9711,7 +9711,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
      depois, e não tem como se atualizar sozinho. Sem carimbo, "estou com um
      problema no offline" é uma conversa sem chão — ninguém sabe de qual build
      se fala nem se o defeito já foi consertado. */
-  const VERSAO = '2026.08.27-6';
+  const VERSAO = '2026.08.27-7';
   window.__versao = () => VERSAO;
 
   const PIP_CSS = `
@@ -17994,6 +17994,21 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     };
   }
 
+  /* ---- A LINHA DO EMISSOR, DECIDIDA UMA VEZ ----
+   *
+   * A decisão "há emissor? então mostre" estava repetida em CINCO geradores —
+   * zip, Markdown, PowerPoint, Word e PDF —, cada um na sua própria língua. E
+   * no sexto, o HTML, ela simplesmente não estava: um cliente de Team que
+   * exportasse HTML recebia o documento sem o campo que ele paga, e nada
+   * reprovava, porque as réguas afirmavam sobre o TEXTO DA FONTE e não sobre o
+   * arquivo gerado.
+   *
+   * Cinco cópias de uma decisão é o desenho que produz o sexto esquecimento.
+   * O DADO passa a ser um só; o desenho continua de cada formato, porque uma
+   * linha de tabela no Word e um item de lista no Markdown não são a mesma
+   * coisa e não devem fingir que são. */
+  const linhaEmissor = (m) => (m && m.emissor) ? [[t('docEmissor'), m.emissor]] : [];
+
   function totalDePassosDe(kept){
     const r = reguaDePassos();
     return kept.filter(f => r.abre(f)).length || kept.length;
@@ -22231,7 +22246,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
           .concat(mz.classificacao ? [mz.classificacao.toUpperCase(), ''] : [])
           .concat(mz.temCliente && mz.nome ? [mz.nome, ''] : [])
           .concat(ev.linhasCompletas.map(([k, v]) => k + ': ' + v))
-          .concat(mz.emissor ? [t('docEmissor') + ': ' + mz.emissor] : [])
+          .concat(linhaEmissor(mz).map(([k, v]) => k + ': ' + v))
           .concat(ev.algum || mz.temCliente ? [''] : []);
         const RP = reguaDePassos();
         kept.forEach((f, i) => {
@@ -22516,14 +22531,17 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     const linhas = await linhasDoDoc();
     const totalPassos = totalDePassos(linhas);
     const titulo = tituloDoDoc();
-    const cab = ev.linhasCompletas.map(([k, v]) =>
+    const mh = marcaDoDoc();
+    /* O `mh` subiu para cá porque o `cab` passou a precisar dele: a linha do
+       emissor entra na MESMA tabela de identificação das outras, e não como um
+       parágrafo solto. Era este o gerador em que a linha faltava. */
+    const cab = ev.linhasCompletas.concat(linhaEmissor(mh)).map(([k, v]) =>
       `<tr><th>${esc(k)}</th><td>${esc(v)}</td></tr>`).join('');
     /* A banda da marca é uma só, e o que muda é ONDE ela entra: sem marca de
        cliente ela é o cabeçalho do documento, no alto, antes do título; com
        marca de cliente o alto é do cliente, e a nossa desce para depois da
        identificação. O alto do documento diz de quem ele é — e no caso grátis
        ele estava vazio, com a plataforma aparecendo só no rodapé. */
-    const mh = marcaDoDoc();
     const temMarcaDoCliente = mh.temCliente;
     const bandaDaMarca = `<div class="abre">${marcaSvg(46)}` +
       `<div><p class="nome"><b>Walk</b>stamp</p>` +
@@ -22643,7 +22661,7 @@ ${marcaSvg(46)}
     if (mk.temCliente && mk.nome) out.push('**' + mk.nome + '**', '');
     out.push('# ' + tituloDoDoc(), '');
     if (subtituloDoDoc()) out.push('_' + subtituloDoDoc() + '_', '');
-    if (mk.emissor) out.push('_' + t('docEmissor') + ': ' + mk.emissor + '_', '');
+    linhaEmissor(mk).forEach(([k, v]) => out.push('_' + k + ': ' + v + '_', ''));
     ev.linhasCompletas.forEach(([k, v]) => out.push('- **' + k + ':** ' + v));
     if (ev.linhasCompletas.length) out.push('');
     linhas.forEach(l => {
@@ -22890,7 +22908,7 @@ ${interno}</p:spTree></p:cSld><p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></
                [{ t: titulo, sz: 3600, b: true }]),
       pptCaixa(3, 'sub', M, 3300000, SL_W - M * 2, 1800000,
         ev.linhas.map(([k, v]) => ({ t: k + ': ' + v, sz: 1400, cor: '5C6473' }))
-          .concat(mp.emissor ? [{ t: t('docEmissor') + ': ' + mp.emissor, sz: 1300, cor: '5C6473' }] : [])
+          .concat(linhaEmissor(mp).map(([k, v]) => ({ t: k + ': ' + v, sz: 1300, cor: '5C6473' })))
           .concat([{ t: 'Walkstamp · walkstamp.com', sz: 1200, cor: '3A3F9E' }]))
     ].join('');
     slides.push(pptSlide(capa));
@@ -23195,7 +23213,7 @@ ${relsSlide[i]}</Relationships>`) });
     }
 
     fichaDoDoc(kept, dur, cues, plain)
-      .concat(mdx.emissor ? [[t('docEmissor'), mdx.emissor]] : [])
+      .concat(linhaEmissor(mdx))
       .forEach(([k, v]) => corpo.push(par(k + ': ' + v, { sz: 20, depois: 40 })));
 
     corpo.push(par(t('pNote'), { sz: 17, cor: '8A8A8A', antes: 180, depois: ev.horaVisivel ? 40 : 240 }));
@@ -23863,7 +23881,7 @@ ${relsSlide[i]}</Relationships>`) });
        linha que a duração e a resolução. Só no Team — no Personal a conta é de
        uma pessoa só e o nome já está no alto. */
     const info = ev.linhas
-      .concat(mpdf.emissor ? [[t('docEmissor'), mpdf.emissor]] : [])
+      .concat(linhaEmissor(mpdf))
       .concat(fichaDoDoc(kept, dur, cues, plain));
     info.forEach(([k,v]) => {
       doc.setTextColor(130).setFontSize(10).setFont('helvetica','normal').text(k, M, y);
