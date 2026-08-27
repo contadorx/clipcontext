@@ -1806,7 +1806,7 @@
            baixar o modelo para não usá-lo é o desperdício que esta opção
            existe para evitar. -->
       <label class="opt"><input type="radio" name="trModo" id="usarPronta" value="pronta"><span data-i18n="prontaLbl"></span>
-        <b class="optNota rec" data-i18n="recomendado"></b></label>
+        <b class="optNota rec" id="optPronta"></b></label>
       <p class="note" id="prontaNote" style="margin:6px 0 0"></p>
       <!-- A terceira, sem "recomendado" ao lado: ela não é o caminho de quem
            tem fala para documentar. É o caminho de quem NÃO tem — e para esse,
@@ -8296,11 +8296,51 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     return true;
   }
 
-  setTimeout(() => {
-    if (!podeAdiantarSozinho()) return;
-    if (liveOn || abrindoCaptura) return;        // já há coisa acontecendo
-    adiantarModelo();
-  }, 1200);
+  /* ---- A QUARTA RECUSA: NINGUÉM PEDIU AINDA ----
+   *
+   * Isto era um relógio: 1200 ms depois de a página montar, o modelo começava a
+   * descer. As três recusas acima cuidam de quem AVISOU que não quer gastar
+   * dados (`saveData`, 2g, conexão medida) — e não cuidavam de quem não avisou
+   * nada porque acabou de chegar.
+   *
+   * O relato que trouxe isto veio pelo outro lado: quem escolhe "não
+   * transcrever — só as telas" pagava o download mesmo assim, porque a escolha
+   * é feita depois do segundo e dois décimos. A memória do Build 26 resolveu da
+   * segunda visita em diante; a primeira continuava cobrando.
+   *
+   * E o remédio certo não é esperar mais tempo — é esperar a PESSOA. Quem
+   * abriu para ver o que o produto é, e fechou, não deve nada a ninguém; quem
+   * vai gravar mexe na página em segundos, e ganha o adiantamento igual. O
+   * sinal é o primeiro gesto de verdade: apontar, teclar ou rolar.
+   *
+   * `once` e `passive` em todos: o ouvinte serve uma vez só e não atrapalha a
+   * rolagem. E o relógio continua existindo POR TRÁS do gesto, com o mesmo
+   * 1200 ms, porque a página ainda está montando quando o primeiro clique
+   * chega — entrar na frente disso seria trocar uma espera por outra. */
+  {
+    let jaPediu = false;
+    const talvezAdiantar = () => {
+      if (jaPediu) return;
+      jaPediu = true;
+      setTimeout(() => {
+        if (!podeAdiantarSozinho()) return;
+        if (liveOn || abrindoCaptura) return;    // já há coisa acontecendo
+        adiantarModelo();
+      }, 1200);
+    };
+    /* ---- QUATRO EVENTOS QUE VÊM DO DISPOSITIVO ----
+       `scroll` estava nesta lista e saiu, medido: ele é disparado por MUDANÇA
+       DE LAYOUT também — abrir uma gaveta que encolhe a página gera um scroll
+       que ninguém rolou —, e o navegador o marca como confiável do mesmo jeito.
+       Um sinal que a própria página pode fabricar não é sinal de gente.
+       `wheel` e `touchmove` vêm da roda e do dedo; quem rola pelo teclado já
+       entra pelo `keydown`. E o `isTrusted` fecha a porta do evento sintético,
+       que é a distinção que este trecho existe para fazer. */
+    const doDispositivo = (e) => { if (e && e.isTrusted) talvezAdiantar(); };
+    for (const ev of ['pointerdown', 'keydown', 'wheel', 'touchmove']) {
+      window.addEventListener(ev, doDispositivo, { once: true, passive: true });
+    }
+  }
 
   /* Troca de idioma pelas siglas. Continua sem recarregar: a página inteira é
      repintada por applyLang(), e um vídeo já carregado não se perde. */
@@ -9772,7 +9812,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
      depois, e não tem como se atualizar sozinho. Sem carimbo, "estou com um
      problema no offline" é uma conversa sem chão — ninguém sabe de qual build
      se fala nem se o defeito já foi consertado. */
-  const VERSAO = '2026.08.27-45';
+  const VERSAO = '2026.08.27-49';
   window.__versao = () => VERSAO;
 
   const PIP_CSS = `
@@ -12995,8 +13035,22 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
 
        O número continua na ajuda do "?" ao lado, para quem quiser saber o que
        vai baixar antes de deixar marcado. */
+    /* ---- O SELO TEM DONO, E O DONO É O CENÁRIO ----
+       "recomendado" estava em DUAS das três opções ao mesmo tempo, e um selo em
+       dois lugares não recomenda nada: ele vira enfeite. Qual das duas é a
+       recomendada não é gosto — depende de a pessoa ter, ou não, um arquivo de
+       transcrição pronto. E a tela sabe disso melhor do que parecia: quem
+       escolheu o cenário `ata` está documentando uma REUNIÃO, e reunião no
+       Meet, no Teams ou no Zoom já sai transcrita de lá, de graça e melhor (com
+       o nome de quem falou). Nos outros cenários — evidência, tutorial,
+       usabilidade — não existe transcrição pronta para trazer.
+       "Só as telas" nunca leva selo: ela é o caminho de quem não tem fala para
+       documentar, e recomendar isso a quem tem seria vender a menos. */
+    const daReuniao = $('modelo') && $('modelo').value === 'ata';
     const mb = $('optTr');
-    if (mb) mb.textContent = ($('recTr') && $('recTr').checked) ? t('recomendado') : '';
+    if (mb) mb.textContent = daReuniao ? '' : t('recomendado');
+    const pb = $('optPronta');
+    if (pb) pb.textContent = daReuniao ? t('recomendado') : '';
     const el = $('recTrNote'); if (!el) return;
     const querTr = $('recTr') && $('recTr').checked;
     el.textContent = querTr ? t('recTrOn', tamanhoModelo()) : t('recTrOff');
@@ -18479,6 +18533,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     $('evBox').open   = m.ev;
     dicaModelo();
     pintarRotulo();                        // "Passo" vira "Momento" numa ata
+    notaTr();                              // e o selo "recomendado" muda de dono numa ata
     pintarScorm();
     pintarHesitar();
     pintarClipe();
