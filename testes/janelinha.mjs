@@ -172,13 +172,18 @@ console.log(`\n[1] gravando: cabe em ${LARG}×${ALT}`);
                   entre uma janela que se lê sem parar e uma que cobra atenção
                   no pior momento;
        486 → 560  a mesma conta com o roteiro colado, onde o passo atual passou
-                  a 16.5px e o rótulo a 12.5px.
+                  a 16.5px e o rótulo a 12.5px;
+       430 → 450  o botão de ERRO, no Build 29. Ele é uma linha a mais na
+                  janela completa, e o conteúdo passou a pedir 443. Não é
+                  respiro: é um controle que não existia, pedido do campo,
+                  e o único da janelinha que se aperta olhando para outra tela.
+       560 → 580  a mesma linha, com o roteiro colado.
 
      Cada pixel daqui é um pixel a menos do trabalho que a pessoa está
-     documentando, e ainda aparece nos quadros. A largura nunca subiu. */
+     documentando, e ainda aparece nos quadros. */
   ok('a largura não passa de 250', LARG <= 250, String(LARG));
-  ok('sem roteiro, a altura fica em 430', ALT <= 430, String(ALT));
-  ok('com roteiro ela sobe, e só até 560', ALT_ROT > ALT && ALT_ROT <= 560,
+  ok('sem roteiro, a altura fica em 450', ALT <= 450, String(ALT));
+  ok('com roteiro ela sobe, e só até 580', ALT_ROT > ALT && ALT_ROT <= 580,
      `${ALT} → ${ALT_ROT}`);
   ok('sem folga desperdiçada', ALT - m.precisa <= 24, `${m.precisa} para ${ALT}`);
 
