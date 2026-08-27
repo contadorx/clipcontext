@@ -576,6 +576,7 @@ def escrever_marca(root: pathlib.Path) -> None:
         "time":     {"pt": "time",     "en": "team",     "es": "equipo",      "de": "team",       "fr": "equipe"},
         "modelos":  {"pt": "modelos",  "en": "templates","es": "plantillas",  "de": "vorlagen",   "fr": "modeles"},
         "negocio":  {"pt": "negocio",  "en": "business", "es": "negocio",     "de": "geschaeft",  "fr": "activite"},
+        "dados":    {"pt": "dados",    "en": "your-data","es": "datos",       "de": "daten",      "fr": "donnees"},
     }
     # As abas do back-office. Elas NÃO são traduzidas, e isto é uma decisão:
     # o `/negocio` é o escritório de UMA pessoa — o dono, checado pelo
@@ -620,6 +621,11 @@ def escrever_marca(root: pathlib.Path) -> None:
          "icone": "M6 2h12v20l-3-2-3 2-3-2-3 2z M9 7h6 M9 11h6"},
         {"slug": "chamados", "rotulo": "navChamados",
          "icone": "M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"},
+        # O que o servidor guarda desta pessoa, e o botao que apaga. Sem `exige`:
+        # quem esta no plano gratuito tambem tem o que ver aqui, e e justamente
+        # quem mais precisa da resposta antes de decidir se assina.
+        {"slug": "dados", "rotulo": "navDados",
+         "icone": "M12 3c4.4 0 8 1.3 8 3s-3.6 3-8 3-8-1.3-8-3 3.6-3 8-3z M4 6v6c0 1.7 3.6 3 8 3s8-1.3 8-3V6 M4 12v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"},
         {"slug": "modelos", "rotulo": "navModelos", "exige": "time",
          "icone": "M4 4h9l4 4v12H4z M13 4v5h4 M8 13h6 M8 16h6"},
         {"slug": "time", "rotulo": "navTime", "exige": "time",

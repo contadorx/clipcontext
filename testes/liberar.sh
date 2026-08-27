@@ -58,7 +58,7 @@ read -r -d '' MAPA <<'MAPA_FIM'
 # o preço honesto de mexer no arquivo que faz tudo.
 ^src/template[.]html$ => semrede.mjs escolhas.mjs erro.mjs smoke.mjs saidas.mjs passos.mjs dobra.mjs travado.mjs gravando.mjs janelinha.mjs comentario.mjs marcados.mjs revisao.mjs marca.mjs formato.mjs promptcx.mjs appidioma.mjs compartilhar.mjs celular.mjs teto.mjs cenario1.mjs organiza.mjs acabamento.mjs lente2.mjs traducao.mjs passomulti.mjs pessoas.mjs matriz.mjs conclusao.mjs parar.mjs entrada.mjs indice.mjs figura.mjs resumo.mjs perna.mjs cartao.mjs etapas.mjs marcos.mjs semundefined.mjs reabrir.mjs juntar.mjs juntos.mjs grade.mjs anotacao.mjs trocar.mjs varredura.mjs descarte.mjs clipe.mjs numeros.mjs vocab.mjs foco.mjs apoio.mjs nitidez.mjs versoes.mjs marcar.mjs janelinha.mjs emissor.mjs
 ^src/features[.]json$ => planos.mjs promessa.mjs site:precos.mjs
-^src/i18n-conta[.]json$ => chaves.mjs site:compra.mjs site:cancelar.mjs
+^src/i18n-conta[.]json$ => chaves.mjs site:compra.mjs site:cancelar.mjs site:meusdados.mjs
 ^src/i18n-site[.]json$ => chaves.mjs site:cinco.mjs site:contradicao.mjs site:buscaajuda.mjs
 # A PÁGINA TOCADA CHAMA A RÉGUA DELA — 27/08.
 # A linha genérica abaixo era a única cobertura de `src/site/bodies/`, e ela não
@@ -81,7 +81,7 @@ read -r -d '' MAPA <<'MAPA_FIM'
 ^src/rotas[.]json$ => middleware.mjs site:idiomas.mjs site:paginas.mjs
 ^middleware[.]ts$ => middleware.mjs
 ^next[.]config[.]mjs$ => site:paginas.mjs site:seo.mjs
-^app/conta/ => site:compra.mjs site:negocio.mjs entrada2.mjs site:cancelar.mjs
+^app/conta/ => site:compra.mjs site:negocio.mjs entrada2.mjs site:cancelar.mjs site:meusdados.mjs
 ^app/ => site:paginas.mjs site:seo.mjs site:negocio.mjs
 ^public/site[.]css$ => site:estreito.mjs site:paginas.mjs site:dobra.mjs site:buscaajuda.mjs
 ^src/site/(doc|home)[.]html$ => site:estreito.mjs site:paginas.mjs site:cabecalho.mjs

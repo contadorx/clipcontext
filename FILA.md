@@ -201,6 +201,35 @@ horas para refazer.
 
 ---
 
+### DEC-19 — O que a conta paga guarda no servidor — **DECIDIDA 27/08: caminho A, e entregue no Build 34**
+
+> **Erro meu no número.** Apresentei esta decisão ao Leandro chamando-a de
+> "DEC-3". A DEC-3 desta fila é o h1 da home, e continua aberta. A decisão que
+> ele tomou é esta, e ela nasce aqui com número próprio para o registro parar de
+> apontar para a coisa errada.
+>
+> **O que foi decidido:** *"Vamos de a"* — o servidor guarda o que a feature
+> precisa, e a conta mostra o quê. É a consequência direta da DEC-1 em A, pela
+> razão que ele deu lá: *"na conta paga vou querer injetar informações para as
+> features"*.
+>
+> **Entregue no Build 34**, com o botão de apagar junto — que era a condição da
+> minha indicação: uma tela que só lista é a promessa de antes com mais palavras.
+>   - `walkstamp.prazos()` — os prazos de retenção passaram a existir uma vez só;
+>     o expurgo lê de lá e a tela mostra de lá.
+>   - `walkstamp.meus_dados(email)` — contagem, não conteúdo, do que existe.
+>   - `walkstamp.apagar_meus_dados(email, confirmacao)` — apaga, exigindo que a
+>     pessoa digite o próprio e-mail.
+>   - `/conta/<idioma>/dados` nos cinco idiomas, com as DUAS tabelas: o que sai e
+>     o que fica, com o motivo do que fica ao lado.
+>   - `meusdados.mjs`, provada por reprovação no ponto que importa: com o e-mail
+>     vindo do formulário em vez da sessão, ela reprova.
+>
+> **Fica devendo:** a política de privacidade ainda não menciona esta tela nem o
+> direito de apagar, e ainda fala da lista de aviso em pt e es. É o próximo item.
+
+---
+
 ### DEC-3 — O h1 da home
 
 Hoje ele fala com quem executa, no imperativo. "Auditoria" aparece 2× na home e
