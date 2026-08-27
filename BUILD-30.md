@@ -111,3 +111,20 @@ desta vez ele não passou do console.
 ## Regressão
 
 ```
+163 ok · 0 PULADO · 0 FALHOU        (163 réguas)
+Verde inteiro: as 163 rodaram, e nenhuma foi pulada.
+```
+
+---
+
+## O que vem depois
+
+1. **A devolução na planilha do roteiro** — um caso marcado como erro deveria
+   voltar com situação *Falhou*. É o elo que falta entre a marca do Build 29 e o
+   processo de quem compra.
+2. **Pular para o próximo erro na revisão** — o contador diz que há três; achar
+   as três ainda é rolar a grade.
+3. **A nota fiscal e o ajuste de assentos**, atrás da DEC-14.
+
+E os seus dois portões continuam onde estavam: `npm run stripe:conferir` com
+chave de teste, antes da primeira venda, e `CONVITE_SAL` na Vercel.
