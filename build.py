@@ -40,6 +40,60 @@ MARCA = "Walkstamp"
 VER_ARQ = "src/.build"
 
 
+def conferir_script(html_gerado):
+    """O SCRIPT DO APP PRECISA PELO MENOS ANALISAR.
+
+    Isto existe por um defeito que chegou num zip entregue. Um comentário
+    dentro do `PIP_CSS` — que é um template literal — levou crases em volta de
+    nomes de propriedade CSS. As crases FECHARAM a string, o script inteiro
+    parou de analisar com "Unexpected identifier width", e o app abria morto:
+    nem carregava vídeo.
+
+    Nenhuma régua pegou. A que mede a janelinha lê o `PIP_CSS` como TEXTO e o
+    injeta como CSS numa página de teste — ela nunca interpreta o JavaScript do
+    produto, então um erro de sintaxe passa por ela intacto. E as réguas que
+    abrem o app de verdade não foram rodadas antes da entrega.
+
+    A trava fica AQUI, e não numa régua, porque aqui ela impede o arquivo
+    quebrado de existir. Uma régua diria que o app está quebrado depois de ele
+    já ter sido empacotado.
+
+    São duas conferências:
+      1. a específica, que não precisa de nada instalado: nenhuma crase dentro
+         do `PIP_CSS`;
+      2. a geral, quando há `node` na máquina: o script analisa.
+    """
+    import re as _re, subprocess as _sub, tempfile as _tf, os as _os
+
+    i = html_gerado.find("const PIP_CSS = `")
+    if i >= 0:
+        corpo = html_gerado[i + 17:]
+        fim = corpo.find("`;")
+        if fim > 0 and "`" in corpo[:fim]:
+            trecho = corpo[:fim]
+            linha = trecho[:trecho.find("`")].count("\n") + 1
+            print("ERRO: crase dentro do PIP_CSS (linha ~%d do bloco). "
+                  "Ele é um template literal: uma crase ali fecha a string e "
+                  "derruba o script inteiro do produto." % linha, file=sys.stderr)
+            raise SystemExit(1)
+
+    blocos = _re.findall(r"<script>([\s\S]*?)</script>", html_gerado)
+    if not blocos:
+        return
+    maior = max(blocos, key=len)
+    try:
+        f = _tf.NamedTemporaryFile("w", suffix=".js", delete=False, encoding="utf-8")
+        f.write(maior); f.close()
+        r = _sub.run(["node", "--check", f.name], capture_output=True, text=True)
+        _os.unlink(f.name)
+    except FileNotFoundError:
+        print("  (sem node: a conferência de sintaxe do script foi pulada)")
+        return
+    if r.returncode != 0:
+        print("ERRO: o script do app não analisa:\n" + r.stderr[:600], file=sys.stderr)
+        raise SystemExit(1)
+
+
 def versao_do_build(root):
     """Data de hoje mais quantos builds já saíram hoje. Deriva, não se digita."""
     hoje = _dt.date.today().isoformat()
@@ -2139,6 +2193,7 @@ def main() -> int:
     web = web.replace("<!--__ANALYTICS__-->", ANALYTICS)
     out_web = ROOT / "public" / "app.html"
     out_web.parent.mkdir(exist_ok=True)
+    conferir_script(web)
     out_web.write_text(web, encoding="utf-8")
 
     # build offline: biblioteca embutida, sem nenhuma dependência de rede para o
