@@ -142,3 +142,56 @@ instalar defeitos, e devolvido pelo `git checkout` a cada um.
 ## Regressão
 
 ```
+161 ok · 0 PULADO · 0 FALHOU        (161 réguas)
+Verde inteiro: as 161 rodaram, e nenhuma foi pulada.
+```
+
+**Pela primeira vez desde que esta esteira existe, não há nenhum pulado.**
+
+### E a primeira corrida saiu vermelha
+
+`etapas.mjs [5]`: *"o cabeçalho ficou debaixo da barra"*. O produto **não tinha
+mudado** — o diff do `public/app.html` entre as duas corridas é o carimbo de
+versão e mais nada — e a régua passava isolada.
+
+A causa era a espera dela: aceitava **duas** leituras de `scrollY` iguais a
+250 ms de distância. Com três Chromium disputando quatro núcleos, a rolagem
+suave para no meio do caminho por mais que isso — as duas leituras dão iguais, o
+teste mede a tela **ainda andando** e culpa o produto.
+
+O comentário antigo já previa exatamente esse defeito:
+
+> *um teste que depende de quanto o computador estava ocupado é um teste que
+> reprova sozinho de vez em quando*
+
+escrito **em cima da linha que o continha**. Agora são quatro leituras iguais
+seguidas, com `polling` menor — o que deixa a espera **mais** exigente sob
+carga, e não menos: quanto mais ocupado o computador, mais tempo real cada
+leitura representa. E quando a espera estoura, a falha diz isso, em vez de
+reportar uma medida de tela em movimento.
+
+Nenhuma outra régua tem o padrão: as demais afirmam sobre limiar de rolagem, e
+não esperam ela assentar.
+
+---
+
+## O que vem depois
+
+Com as 20 promessas cobertas e a esteira sem buracos, o que sobra do meu lado é
+menor do que o que sobra do seu:
+
+1. **A nota fiscal e o ajuste de assentos** — as duas últimas linhas `sem teste`
+   da metade escrita à mão. As duas dependem da Stripe de verdade, e por isso
+   estão atrás da **DEC-14**.
+2. **O `src/auditoria-solta.md` como um todo.** Dois parágrafos dele estavam
+   velhos no Build 24 e um terceiro foi corrigido aqui. Ele envelhece porque é
+   escrito à mão, e a esteira só confere a metade **gerada**. Vale uma régua que
+   cobre cada afirmação dele contra o que o repositório diz hoje — é o mesmo
+   remédio que o `auditoria.mjs` deu para a outra metade.
+3. **O tamanho mínimo real da janelinha no Chrome de mesa**, que não dá para
+   medir daqui.
+
+E os seus dois portões continuam onde você os deixou, por sua instrução:
+`npm run stripe:conferir` com chave de teste — **antes da primeira venda de
+verdade**, porque um preço `tiered` cobraria 1 assento por 12 — e `CONVITE_SAL`
+na Vercel. Stripe (DEC-14) e Drive (DEC-15) seguem retidos.
