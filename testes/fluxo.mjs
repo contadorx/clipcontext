@@ -59,8 +59,19 @@ const estados = () => pg.evaluate((ids) => {
   return r;
 }, SAIDAS);
 
+/* OS QUATRO SUB-PASSOS, POR IDENTIDADE E NÃO POR POSIÇÃO.
+   Esta linha lia TODOS os `details.sub` da página e montava a resposta pela
+   ORDEM deles. Funcionou enquanto os quatro sub-passos eram os únicos com essa
+   classe — e quebrou no Build 27, quando os ajustes da gravação viraram uma
+   gaveta do mesmo estilo: entrou um quinto no meio, e as bolinhas passaram a
+   responder sobre outra coisa.
+   Uma lista posicional é uma lista paralela com outro nome: ela guarda "quem é
+   quem" fora do lugar onde isso está escrito. Os quatro têm id. */
 const bolinhas = () => pg.evaluate(() =>
-  [...document.querySelectorAll('details.sub')].map((d) => (d.classList.contains('feito') ? '✓' : '·')).join(''));
+  ['sb1', 'sb2', 'sb3', 'sb4'].map((i) => {
+    const d = document.getElementById(i);
+    return d && d.classList.contains('feito') ? '✓' : '·';
+  }).join(''));
 
 console.log('[1] antes de ter quadro, nada convida ao clique');
 await pg.selectOption('#modelo', 'evidencia');
