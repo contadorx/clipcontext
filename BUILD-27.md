@@ -123,3 +123,40 @@ resumo virando texto fixo.
 ## Regressão
 
 ```
+162 ok · 0 PULADO · 0 FALHOU        (162 réguas)
+Verde inteiro: as 162 rodaram, e nenhuma foi pulada.
+```
+
+### A primeira corrida saiu com duas vermelhas, e uma era defeito latente
+
+**`fluxo.mjs`** — a função `bolinhas()` lia **todos** os `details.sub` da página e
+montava a resposta pela **ordem** deles. Funcionou enquanto os quatro sub-passos
+eram os únicos com a classe; a gaveta nova entrou no meio e as bolinhas passaram
+a responder sobre outra coisa.
+
+> Uma lista posicional é uma lista paralela com outro nome: ela guarda *quem é
+> quem* fora do lugar onde isso está escrito.
+
+Os quatro têm `id`, e agora é por `id` que a régua pergunta. O defeito já estava
+lá; a gaveta só o expôs.
+
+**`webcam.mjs`** — ele sobe o Chromium pelo `playwright` direto, sem o
+`_navegador.mjs` que abre os `details.sub` para o resto da suíte. O botão do
+clipe, agora dentro da gaveta, não era clicável — **e não deve mesmo ser**.
+Abrir a gaveta é o que a pessoa faria, e é o que o `abrirModal` faz agora.
+
+---
+
+## O que vem depois
+
+1. **O selo "recomendado" está em duas das três opções de transcrição** — e um
+   selo em dois lugares não recomenda nada. Qual é o caminho recomendado depende
+   de a pessoa ter ou não o arquivo do Meet, e a tela não sabe disso. É decisão
+   sua: tirar de uma, condicionar, ou deixar.
+2. **Cancelar o download do modelo em vôo** quando a pessoa escolhe "só as
+   telas" no meio dele. A memória resolve da segunda visita em diante; o
+   primeiro minuto da primeira continua baixando.
+3. **A nota fiscal e o ajuste de assentos**, atrás da DEC-14.
+
+E os seus dois portões continuam onde estavam: `npm run stripe:conferir` com
+chave de teste, antes da primeira venda, e `CONVITE_SAL` na Vercel.
