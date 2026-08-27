@@ -30,6 +30,12 @@ await pg.waitForTimeout(400);
    ao mesmo cenário e são as que mais precisam de explicação. */
 const abrirModal = async (pagina) => {
   const q = pagina || pg;
+  /* A GAVETA PRIMEIRO. Os ajustes da gravação recolheram num `details` no Build
+     27, e este arquivo sobe o Chromium pelo `playwright` direto — sem o
+     `_navegador.mjs`, que abre os `details.sub` para o resto da suíte. Um botão
+     dentro de uma gaveta fechada não é clicável, e não deve mesmo ser: abrir a
+     gaveta é o que a pessoa faria. */
+  await q.evaluate(() => { const d = document.getElementById('recAjustes'); if (d) d.open = true; });
   if (await q.locator('#clipeModal').isHidden()) await q.locator('#clipeAbrir').click();
   await q.waitForTimeout(250);
 };
