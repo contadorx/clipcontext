@@ -167,7 +167,7 @@ await pg.waitForTimeout(500);
     const p2 = await ctx2.newPage();
     await p2.goto('http://localhost:8917/app.html?lang=pt');
     await p2.selectOption('#modelo', 'evidencia').catch(() => {});
-    await p2.locator('#recTr').uncheck();
+    await p2.locator('#semTr').check();
     await p2.setInputFiles('#file', '/tmp/amostra.webm');
     await p2.waitForFunction(() => document.querySelectorAll('#thumbs figure').length > 0,
                              null, { timeout: 60000 });

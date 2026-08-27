@@ -27,7 +27,15 @@ const ok = (n, c, e) => { console.log((c ? '  ok   ' : '  FALHA') + '  ' + n + (
    cada pixel da janelinha é um pixel a menos do trabalho documentado.
    Esta régua mede as duas, porque as duas podem transbordar — e a mínima
    transborda mais fácil, que é o ponto dela. */
-const med = app.match(/width: min \? (\d+) : (\d+), height: min \? (\d+) : \(roteiro\.length \? (\d+) : (\d+)\)/);
+/* A MEDIDA SAI DO `TAM_PIP`, que é onde ela passou a morar no Build 26. Antes
+   ela era lida de dentro do pedido ao navegador — e quando a medida virou
+   função, para a prévia gráfica poder usar a MESMA, esta régua parou de achar
+   o texto e morreu com um erro de página em vez de uma falha legível.
+   É o preço de afirmar sobre o TEXTO DA FONTE: quando a fonte melhora, a
+   régua quebra. Ela continua lendo texto porque as duas coisas vivem dentro do
+   fechamento do app e não há como chamá-las de fora — mas agora lê o lugar
+   único, e não uma cópia da expressão. */
+const med = app.match(/TAM_PIP = \(min\) => \(\{ w: min \? (\d+) : (\d+),\s*h: min \? (\d+) : \(roteiro\.length \? (\d+) : (\d+)\)/);
 ok('a janelinha declara os dois tamanhos', !!med, med ? '' : '(não achei)');
 const [LARG_MIN, LARG, ALT_MIN, ALT_ROT, ALT] = med
   ? [ +med[1], +med[2], +med[3], +med[4], +med[5] ] : [390, 250, 56, 560, 430];
@@ -44,8 +52,10 @@ ok('e a fita é uma FITA, não uma janela menor', ALT_MIN <= 72,
 const css = app.slice(app.indexOf('const PIP_CSS = `') + 17).split('`;')[0];
 ok('o CSS dela foi encontrado', css.length > 400, String(css.length));
 
-/* O corpo: as linhas de `d.body.innerHTML = ...` concatenadas. */
-const corpoSrc = app.slice(app.indexOf('d.body.innerHTML ='));
+/* O corpo: as linhas de `corpoDaJanelinha()` concatenadas. Ele virou função
+   no Build 26 porque ganhou um segundo leitor — a prévia gráfica das duas
+   opções de tamanho —, e é a mesma função que o navegador recebe. */
+const corpoSrc = app.slice(app.indexOf('function corpoDaJanelinha()'));
 const corpo = (corpoSrc.slice(0, corpoSrc.indexOf(';\n')).match(/'([^']*)'/g) || [])
   .map((x) => x.slice(1, -1)).join('');
 ok('e o corpo também', /class="top"/.test(corpo) && /id="stop"/.test(corpo), corpo.slice(0, 60));
@@ -303,8 +313,12 @@ console.log('\n[1a2] a palavra curta é para os olhos; o nome é a frase inteira
 
   /* Quem usa leitor de tela não ganha nada com "+ Tela". O `aria-label` vence
      o texto de dentro do botão, então o curto fica só para quem vê. */
+  /* O quarto parâmetro nasceu no Build 26: a prévia gráfica mostra as DUAS
+     janelinhas ao mesmo tempo, e cada uma precisa dos rótulos do seu tamanho.
+     Sem ele, a prévia da fita mostraria as frases longas sempre que a escolha
+     atual fosse a janela completa. */
   ok('a fita rotula por uma função só, e não botão a botão',
-     /function rotularPip\(btn, chaveLonga, chaveCurta\)/.test(app));
+     /function rotularPip\(btn, chaveLonga, chaveCurta, minOpc\)/.test(app));
   ok('o texto visível é o curto só no modo fita',
      /btn\.textContent = min \? curto : longo;/.test(app));
   /* O `title` ganhou a letra do atalho no fim; o NOME ACESSÍVEL continua sendo

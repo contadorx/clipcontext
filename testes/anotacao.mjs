@@ -106,7 +106,7 @@ console.log('\n[1] a caixa nasce fechada e abre quando há o que comentar');
   ok('a caixa nasce escondida', e.visivel === false);
 }
 
-await pg.locator('#recTr').uncheck();
+await pg.locator('#semTr').check();
 await pg.evaluate(() => window.__contagem(1));
 await pg.locator('#rec').click();
 await pg.waitForSelector('#recStop:visible', { timeout: 40000 });

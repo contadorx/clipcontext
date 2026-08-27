@@ -119,7 +119,7 @@ await pg.evaluate(({ w, h }) => {
 await pg.selectOption('#modelo', 'ata').catch(() => {});
 await pg.selectOption('#ritmo', 'tudo');
 await pg.locator('#maxf').fill('2000');
-await pg.locator('#recTr').uncheck();
+await pg.locator('#semTr').check();
 await pg.evaluate(() => window.__contagem(1));
 const heapAntes = await pg.evaluate(() => {
   if (window.gc) window.gc();

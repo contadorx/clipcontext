@@ -113,7 +113,7 @@ async function corrida({ ctx, semearCache }) {
      cancela o agendamento automático dela. */
   await pg.selectOption('#mode', 'count').catch(() => {});
   await pg.fill('#count', '3').catch(() => {});
-  await pg.locator('#recTr').uncheck().catch(() => {});
+  await pg.locator('#semTr').check().catch(() => {});
   await pg.setInputFiles('#file', '/tmp/amostra.webm');
   await pg.waitForFunction(() => !document.getElementById('auto').disabled,
                            null, { timeout: 120000 });
@@ -348,7 +348,7 @@ export async function pipeline(tarefa, modelo, opcoes){
   await pg2.goto('http://localhost:8973/app.html?lang=pt');
   await pg2.selectOption('#mode', 'count').catch(() => {});
   await pg2.fill('#count', '3').catch(() => {});
-  await pg2.locator('#recTr').uncheck().catch(() => {});
+  await pg2.locator('#semTr').check().catch(() => {});
   await pg2.setInputFiles('#file', '/tmp/amostra.webm');
   await pg2.waitForFunction(() => !document.getElementById('auto').disabled,
                             null, { timeout: 120000 });

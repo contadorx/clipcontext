@@ -569,6 +569,36 @@
   @media (max-width:560px){ .contagem{font-size:42px} }
   label.opt{display:flex;align-items:center;gap:9px;padding:7px 0;font-size:14.5px;cursor:pointer}
   label.opt input[type=checkbox]{flex:none}
+  label.opt input[type=radio]{flex:none}
+
+  /* ---- AS DUAS OPÇÕES DE TAMANHO DA JANELINHA, COM A JANELINHA DENTRO ----
+
+     Elas eram um `<select>` com duas frases. Uma frase descreve; ela não
+     mostra QUANTA TELA a coisa ocupa — que é a pergunta inteira de quem
+     escolhe entre uma fita e uma janela.
+
+     Cada opção carrega agora a janelinha DE VERDADE, num iframe reduzido: o
+     mesmo HTML e o mesmo CSS que o navegador vai abrir. A escala é uma só, e
+     é por isso que a comparação diz alguma coisa — as duas prévias estão na
+     mesma régua, e a fita parece pequena porque ela É pequena. */
+  .pipTam{border:0;padding:0;margin:12px 0 0;display:flex;gap:14px;flex-wrap:wrap}
+  .pipTam legend{padding:0;font-size:13px;color:var(--muted);margin-bottom:6px}
+  .pipOp{--pipEsc:.46;display:flex;flex-direction:column;gap:7px;cursor:pointer;
+    border:1.5px solid var(--linha,#dfe3ea);border-radius:10px;padding:9px 10px;
+    background:var(--cardBg,#fff)}
+  .pipOp:has(input:checked){border-color:var(--acc,#3A3F9E);box-shadow:0 0 0 3px rgba(58,63,158,.12)}
+  .pipOp:focus-within{outline:2px solid var(--acc,#3A3F9E);outline-offset:2px}
+  .pipOpTop{display:flex;align-items:center;gap:8px;font-size:13.5px}
+  .pipOpTop b{font-weight:700}
+  .pipOpSub{font-size:12px;color:var(--muted);max-width:230px}
+  /* A moldura tem o TAMANHO REAL vezes a escala, e o iframe dentro dela tem o
+     tamanho real. Sem a moldura, o `scale` desenharia menor e continuaria
+     ocupando o espaço grande — e a comparação, que é sobre espaço, mentiria. */
+  .pipMold{overflow:hidden;border-radius:6px;border:1px solid var(--linha,#dfe3ea);
+    background:#12141c}
+  .pipMold iframe{border:0;display:block;transform-origin:top left;
+    transform:scale(var(--pipEsc));pointer-events:none}
+  @media (max-width:560px){ .pipOp{--pipEsc:.34} }
   /* ---- O RECURSO QUE ESTE NAVEGADOR NÃO TEM ----
      Desligado e DITO. O `usar a placa de vídeo` some quando não há WebGPU, e
      ali sumir cabe: ninguém procura por ele. Clipe e webcam a pessoa procura —
@@ -1517,20 +1547,42 @@
                comentário, todos de uma vez. Um botão cinza entre botões cinzas
                é a resposta errada para "sumiu tudo". -->
           <button class="sm hide destaque" id="recPip" data-i18n="recPipBtn"></button>
-          <!-- ---- O TAMANHO DA JANELINHA ----
-               Ele fica AQUI, ao lado do botão que a reabre, e não nos ajustes:
-               é aqui que a pessoa está quando descobre que a janelinha ocupa
-               tela demais, e o conserto tem que estar onde o incômodo aparece.
-               Trocar durante a gravação vale na hora — a janelinha é fechada e
-               reaberta no novo tamanho, sem interromper a captura. -->
-          <label class="f pipModo" for="pipTam">
-            <span data-i18n="pipTamLbl"></span>
-            <select id="pipTam">
-              <option value="completa" data-i18n="pipTamCompleta"></option>
-              <option value="min" data-i18n="pipTamMin"></option>
-            </select>
-          </label>
         </div>
+        <!-- ---- O TAMANHO DA JANELINHA, COM A JANELINHA À VISTA ----
+
+             Ele fica AQUI, junto do botão que a reabre, e não nos ajustes: é
+             aqui que a pessoa está quando descobre que a janelinha ocupa tela
+             demais, e o conserto tem que estar onde o incômodo aparece.
+             Trocar durante a gravação vale na hora — a janelinha é fechada e
+             reaberta no novo tamanho, sem interromper a captura.
+
+             Era um `<select>` com duas frases, e a frase não responde a
+             pergunta que se faz aqui: QUANTA TELA isto vai me tomar. Agora são
+             duas opções, cada uma mostrando a janelinha de verdade — mesmo
+             HTML, mesmo CSS, reduzidos na mesma escala. Um desenho parecido
+             seria uma segunda lista: no dia em que um botão mudasse de lugar,
+             a prévia continuaria mostrando a janela antiga. -->
+        <fieldset class="pipTam" id="pipTamBox">
+          <legend data-i18n="pipTamLbl"></legend>
+          <label class="pipOp" for="pipTamFull">
+            <span class="pipOpTop">
+              <input type="radio" name="pipTamModo" id="pipTamFull" value="completa">
+              <b data-i18n="pipTamCompletaN"></b>
+            </span>
+            <span class="pipOpSub" data-i18n="pipTamCompleta"></span>
+            <span class="pipMold" id="pipMoldFull"><iframe id="pipPrevFull" tabindex="-1"
+                  aria-hidden="true" scrolling="no"></iframe></span>
+          </label>
+          <label class="pipOp" for="pipTamStrip">
+            <span class="pipOpTop">
+              <input type="radio" name="pipTamModo" id="pipTamStrip" value="min">
+              <b data-i18n="pipTamMinN"></b>
+            </span>
+            <span class="pipOpSub" data-i18n="pipTamMin"></span>
+            <span class="pipMold" id="pipMoldStrip"><iframe id="pipPrevStrip" tabindex="-1"
+                  aria-hidden="true" scrolling="no"></iframe></span>
+          </label>
+        </fieldset>
         <!-- ---- A CAIXA DE ANOTAÇÃO AO VIVO, DE VOLTA ----
 
              Ela já esteve aqui, saiu, e volta — e vale dizer por que das duas
@@ -1751,7 +1803,24 @@
          é a segunda lista ao lado da lista de verdade, e um dia elas discordam
          sobre se o modelo deve baixar. -->
     <div class="opcoesVias" id="opcoesVias">
-      <label class="opt"><input type="checkbox" id="recTr" checked><span data-i18n="recTrLbl"></span>
+      <!-- ---- TRÊS ESCOLHAS, E NÃO DUAS CAIXAS COM UM ESTADO ESCONDIDO ----
+
+           Eram dois `checkbox` que já se desligavam um ao outro por código: as
+           duas juntas descrevem alguém que baixa 206 MB para não usar. Quer
+           dizer, eram três estados — transcrever aqui, usar a pronta, e nenhuma
+           das duas — com só dois deles escritos na tela.
+
+           O terceiro existia e não tinha nome. Quem só queria as telas tinha
+           que DESMARCAR uma caixa marcada e adivinhar que aquilo bastava; e
+           "desmarquei tudo" é indistinguível de "esqueci de marcar". O pedido
+           que trouxe isto foi exatamente esse: "colocar a opção não transcrever,
+           somente frames".
+
+           Com `radio` a exclusão passa a ser do navegador, e não de um `onchange`
+           que desmarca o outro. Uma regra que o navegador já garante não precisa
+           de código — e código que repete uma garantia é o lugar onde ela um dia
+           discorda de si mesma. -->
+      <label class="opt"><input type="radio" name="trModo" id="recTr" value="auto" checked><span data-i18n="recTrLbl"></span>
         <b class="optNota rec" id="optTr" data-i18n="recomendado"></b></label>
       <p class="note" id="recTrNote" style="margin:6px 0 0"></p>
       <!-- ---- O CAMINHO CURTO, DITO ANTES DA ESPERA ----
@@ -1769,9 +1838,14 @@
            por isso que ela desliga a outra caixa em vez de disputar com ela:
            baixar o modelo para não usá-lo é o desperdício que esta opção
            existe para evitar. -->
-      <label class="opt"><input type="checkbox" id="usarPronta"><span data-i18n="prontaLbl"></span>
+      <label class="opt"><input type="radio" name="trModo" id="usarPronta" value="pronta"><span data-i18n="prontaLbl"></span>
         <b class="optNota rec" data-i18n="recomendado"></b></label>
       <p class="note" id="prontaNote" style="margin:6px 0 0"></p>
+      <!-- A terceira, sem "recomendado" ao lado: ela não é o caminho de quem
+           tem fala para documentar. É o caminho de quem NÃO tem — e para esse,
+           baixar o modelo é esperar por nada. -->
+      <label class="opt"><input type="radio" name="trModo" id="semTr" value="nenhuma"><span data-i18n="semTrLbl"></span></label>
+      <p class="note" id="semTrNote" style="margin:6px 0 0"></p>
     </div>
 
     <!-- ---- CONTINUAR NÃO É COMEÇAR ----
@@ -3408,7 +3482,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       rotPronto:'{0} passos prontos — cada marcação já sai com o título.',
       passoTelas:'{0} telas',
       recPipBtn:'Trazer a janelinha de volta',
-      pipTamLbl:'Tamanho da janelinha', pipTamCompleta:'Completa — relógio, medidor e anotação', pipTamMin:'Fita — uma linha de botões, por cima do trabalho',
+      pipTamLbl:'Tamanho da janelinha de controle', pipTamCompletaN:'Completa', pipTamCompleta:'Relógio, medidor de som, caixa de anotação e todos os botões.', pipTamMinN:'Fita', pipTamMin:'Uma linha de botões, por cima do trabalho.',
       recPausado:'PAUSADO —', recMarcado:'passo marcado.',
       pipPausado:'Pausado: nada sendo guardado.',
       micNegado:'O navegador bloqueou o microfone para este site. Clique no cadeado ao lado do endereço, permita o microfone e grave de novo.',
@@ -3453,9 +3527,9 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recMicLbl:'Incluir meu microfone',
       recTrLbl:'Transcrever enquanto gravo',
       anotPh:'O que aconteceu nesta tela? Ex.: cliquei em Salvar e o sistema devolveu a mensagem 4711.', anotSalvar:'Salvar anotação', anotSalvo:'✓ Salvo', anotDoPasso:'Anotação do {0} — descreva o que aconteceu', anotDaTela:'Tela {0} do {1} — descreva o que aconteceu', anotNomeTela:'Tela {0} do {1}', anotFeita:'Anotação salva em: {0}. Ela sai no documento.', anotVazia:'Anotação apagada — este passo sai só com a tela.', anotNaoSalvo:'Escrito, ainda não salvo. Aperte Salvar (ou Ctrl+Enter).', anotCurtoNao:'ainda não salvo', anotCurtoSim:'✓ salvo neste quadro', anotCurtoNao2:'anotação apagada',
-      prontaLbl:'Usar transcrição do Google Meet, Zoom ou Teams', prontaOn:'Mais rápido: a reunião já foi transcrita por eles, e o arquivo entra na etapa 3 — sem baixar modelo e sem esperar. Vale .docx do Meet, .vtt/.srt do Teams e do Zoom.', prontaOff:'Se a sua reunião já foi transcrita pelo Meet, pelo Teams ou pelo Zoom, marque aqui: é mais rápido do que transcrever de novo, e o texto costuma vir melhor (com o nome de quem falou).', trEnviarH:'Já tem a transcrição? Envie o arquivo.', trEnviarP:'Reconheço .docx do Google Meet (as “Anotações do Gemini”, com a aba de transcrição ou o arquivo inteiro), .vtt e .srt do Teams e do Zoom, e texto colado do painel do Drive. Com marcação de tempo, cada tela sai no documento junto do que foi dito ali.', trDeReuniao:'Google Meet, Teams ou Zoom (.docx, .vtt, .srt)', trDeLegenda:'Arquivo de legenda (.vtt, .srt, .txt)', trDoDrive:'Buscar no Google Drive', trLendo:'Lendo o arquivo…', trLeuCues:'Li o arquivo: {0} trechos com marcação de tempo.', trLeuReuniao:'Li a transcrição da reunião: {0} trechos. A minutagem é por bloco — veja a nota abaixo.', trLeuSemTempo:'Li o arquivo, mas ele não tem marcação de tempo: o texto entra inteiro e as telas não saem pareadas com a fala.', trLerErro:'Não consegui ler este arquivo: {0}', trFormato:'Este formato eu não leio. Do Google Meet use o .docx; do Teams e do Zoom, o .vtt ou o .srt. Um .doc antigo ou um PDF precisam ser salvos como .docx ou .txt antes.', trBlocos:' A minutagem veio por BLOCO, como o Meet e o Teams escrevem: um instante para várias falas. Dentro de cada bloco os trechos são distribuídos pelo tamanho da fala — é estimativa, e serve para parear as telas; para citar o minuto exato, confira no vídeo.',
+      semTrLbl:'Não transcrever — só as telas', semTrOn:'Só as imagens: o documento sai com as telas, os passos e as suas anotações. O modelo de voz não é baixado, e esta escolha fica guardada para as próximas vezes. Se a transcrição aparecer depois, dá para colá-la na etapa 3.', semTrOff:'Se esta gravação não tem fala que importe — ou se você só quer as telas —, escolha aqui: é o caminho mais rápido, e o modelo de voz não é baixado.', prontaLbl:'Usar transcrição do Google Meet, Zoom ou Teams', prontaOn:'Mais rápido: a reunião já foi transcrita por eles, e o arquivo entra na etapa 3 — sem baixar modelo e sem esperar. Vale .docx do Meet, .vtt/.srt do Teams e do Zoom.', prontaOff:'Se a sua reunião já foi transcrita pelo Meet, pelo Teams ou pelo Zoom, escolha aqui: é mais rápido do que transcrever de novo, e o texto costuma vir melhor (com o nome de quem falou).', trEnviarH:'Já tem a transcrição? Envie o arquivo.', trEnviarP:'Reconheço .docx do Google Meet (as “Anotações do Gemini”, com a aba de transcrição ou o arquivo inteiro), .vtt e .srt do Teams e do Zoom, e texto colado do painel do Drive. Com marcação de tempo, cada tela sai no documento junto do que foi dito ali.', trDeReuniao:'Google Meet, Teams ou Zoom (.docx, .vtt, .srt)', trDeLegenda:'Arquivo de legenda (.vtt, .srt, .txt)', trDoDrive:'Buscar no Google Drive', trLendo:'Lendo o arquivo…', trLeuCues:'Li o arquivo: {0} trechos com marcação de tempo.', trLeuReuniao:'Li a transcrição da reunião: {0} trechos. A minutagem é por bloco — veja a nota abaixo.', trLeuSemTempo:'Li o arquivo, mas ele não tem marcação de tempo: o texto entra inteiro e as telas não saem pareadas com a fala.', trLerErro:'Não consegui ler este arquivo: {0}', trFormato:'Este formato eu não leio. Do Google Meet use o .docx; do Teams e do Zoom, o .vtt ou o .srt. Um .doc antigo ou um PDF precisam ser salvos como .docx ou .txt antes.', trBlocos:' A minutagem veio por BLOCO, como o Meet e o Teams escrevem: um instante para várias falas. Dentro de cada bloco os trechos são distribuídos pelo tamanho da fala — é estimativa, e serve para parear as telas; para citar o minuto exato, confira no vídeo.',
       recTrOn:'A transcrição sai pronta no fim, junto com os quadros. Exige baixar o modelo de ~{0} MB antes de começar — uma vez só, e depois fica guardado no navegador.',
-      recTrOff:'Só os quadros. Nada é baixado e a gravação começa na hora. Depois dá para colar uma transcrição pronta na etapa 2.',
+      recTrOff:'Escolha aqui para a fala virar texto no seu próprio computador. O modelo de voz é baixado uma vez (~206 MB) e depois fica guardado no navegador.',
       recWarn:'Nada de vídeo é guardado: durante a gravação a ferramenta separa os quadros que importam e transcreve os dois canais de áudio — o seu microfone e o som do computador — em separado. A transcrição divide a máquina com a captura; em computador modesto a tela pode perder alguma troca.',
       recPrep:'Preparando o modelo de transcrição…',
       recNoModel:'Não consegui carregar o modelo: vou guardar os quadros sem transcrever.',
@@ -4046,7 +4120,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       rotPronto:'{0} steps ready — every mark comes with its title.',
       passoTelas:'{0} screens',
       recPipBtn:'Bring the control window back',
-      pipTamLbl:'Little window size', pipTamCompleta:'Full — clock, meter and note', pipTamMin:'Strip — one row of buttons, over your work',
+      pipTamLbl:'Control window size', pipTamCompletaN:'Full', pipTamCompleta:'Clock, sound meter, note box and every button.', pipTamMinN:'Strip', pipTamMin:'One row of buttons, over your work.',
       recPausado:'PAUSED —', recMarcado:'step marked.',
       pipPausado:'Paused: nothing being kept.',
       micNegado:'The browser blocked the microphone for this site. Click the padlock next to the address, allow the microphone and record again.',
@@ -4091,9 +4165,9 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recMicLbl:'Include my microphone',
       recTrLbl:'Transcribe while I record',
       anotPh:'What happened on this screen? E.g.: clicked Save and the system returned message 4711.', anotSalvar:'Save note', anotSalvo:'✓ Saved', anotDoPasso:'Note for {0} — describe what happened', anotDaTela:'Screen {0} of {1} — describe what happened', anotNomeTela:'Screen {0} of {1}', anotFeita:'Note saved to: {0}. It goes into the document.', anotVazia:'Note cleared — this step goes out with the screen only.', anotNaoSalvo:'Typed, not saved yet. Press Save (or Ctrl+Enter).', anotCurtoNao:'not saved yet', anotCurtoSim:'✓ saved to this frame', anotCurtoNao2:'note cleared',
-      prontaLbl:'Use the transcript from Google Meet, Zoom or Teams', prontaOn:'Faster: they already transcribed the meeting, and the file goes in at step 3 — no model download, no waiting. Works with Meet .docx and Teams/Zoom .vtt/.srt.', prontaOff:'If your meeting was already transcribed by Meet, Teams or Zoom, tick this: it is faster than transcribing again, and the text is usually better (it names who spoke).', trEnviarH:'Already have the transcript? Send the file.', trEnviarP:'I read Google Meet .docx (the “Gemini notes”, either the transcript tab or the whole file), Teams and Zoom .vtt and .srt, and text pasted from the Drive panel. With timestamps, each screen goes into the document next to what was said there.', trDeReuniao:'Google Meet, Teams or Zoom (.docx, .vtt, .srt)', trDeLegenda:'Subtitle file (.vtt, .srt, .txt)', trDoDrive:'Find it in Google Drive', trLendo:'Reading the file…', trLeuCues:'Read the file: {0} timestamped stretches.', trLeuReuniao:'Read the meeting transcript: {0} stretches. Timing is per block — see the note below.', trLeuSemTempo:'Read the file, but it has no timestamps: the text goes in whole and the screens will not be paired with the speech.', trLerErro:'I could not read this file: {0}', trFormato:'I do not read this format. From Google Meet use the .docx; from Teams and Zoom, the .vtt or .srt. An old .doc or a PDF has to be saved as .docx or .txt first.', trBlocos:' Timing came per BLOCK, the way Meet and Teams write it: one instant for several turns. Inside each block the stretches are spread by how long each turn is — that is an estimate, good enough to pair the screens; to quote an exact minute, check the video.',
+      semTrLbl:'No transcript — screens only', semTrOn:'Images only: the document comes out with the screens, the steps and your notes. The speech model is not downloaded, and this choice is remembered for next time. If a transcript turns up later, you can paste it at step 3.', semTrOff:'If this recording has no speech that matters — or you just want the screens — pick this: it is the fastest path, and the speech model is not downloaded.', prontaLbl:'Use the transcript from Google Meet, Zoom or Teams', prontaOn:'Faster: they already transcribed the meeting, and the file goes in at step 3 — no model download, no waiting. Works with Meet .docx and Teams/Zoom .vtt/.srt.', prontaOff:'If your meeting was already transcribed by Meet, Teams or Zoom, pick this: it is faster than transcribing again, and the text is usually better (it names who spoke).', trEnviarH:'Already have the transcript? Send the file.', trEnviarP:'I read Google Meet .docx (the “Gemini notes”, either the transcript tab or the whole file), Teams and Zoom .vtt and .srt, and text pasted from the Drive panel. With timestamps, each screen goes into the document next to what was said there.', trDeReuniao:'Google Meet, Teams or Zoom (.docx, .vtt, .srt)', trDeLegenda:'Subtitle file (.vtt, .srt, .txt)', trDoDrive:'Find it in Google Drive', trLendo:'Reading the file…', trLeuCues:'Read the file: {0} timestamped stretches.', trLeuReuniao:'Read the meeting transcript: {0} stretches. Timing is per block — see the note below.', trLeuSemTempo:'Read the file, but it has no timestamps: the text goes in whole and the screens will not be paired with the speech.', trLerErro:'I could not read this file: {0}', trFormato:'I do not read this format. From Google Meet use the .docx; from Teams and Zoom, the .vtt or .srt. An old .doc or a PDF has to be saved as .docx or .txt first.', trBlocos:' Timing came per BLOCK, the way Meet and Teams write it: one instant for several turns. Inside each block the stretches are spread by how long each turn is — that is an estimate, good enough to pair the screens; to quote an exact minute, check the video.',
       recTrOn:'The transcript is ready at the end, alongside the frames. It needs the ~{0} MB model downloaded first — once only, and then it stays in your browser.',
-      recTrOff:'Frames only. Nothing is downloaded and recording starts right away. You can paste a ready transcript in step 2 afterwards.',
+      recTrOff:'Pick this to turn the speech into text on your own computer. The speech model is downloaded once (~206 MB) and then stays in the browser.',
       recWarn:'No video is kept: while recording, the tool pulls out the frames that matter and transcribes the two audio channels separately — your microphone and the computer sound. Transcription shares the machine with the capture; on a modest computer the screen may miss a change.',
       recPrep:'Preparing the transcription model…',
       recNoModel:'Could not load the model: I will keep the frames without transcribing.',
@@ -4669,7 +4743,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       rotPronto:'{0} pasos listos — cada marca ya sale con su título.',
       passoTelas:'{0} pantallas',
       recPipBtn:'Traer la ventana de control de vuelta',
-      pipTamLbl:'Tamaño de la ventanita', pipTamCompleta:'Completa — reloj, medidor y nota', pipTamMin:'Franja — una fila de botones, sobre tu trabajo',
+      pipTamLbl:'Tamaño de la ventana de control', pipTamCompletaN:'Completa', pipTamCompleta:'Reloj, medidor de sonido, caja de nota y todos los botones.', pipTamMinN:'Franja', pipTamMin:'Una fila de botones, sobre tu trabajo.',
       recPausado:'EN PAUSA —', recMarcado:'paso marcado.',
       pipPausado:'En pausa: no se guarda nada.',
       micNegado:'El navegador bloqueó el micrófono para este sitio. Pulsa el candado junto a la dirección, permite el micrófono y graba de nuevo.',
@@ -4714,9 +4788,9 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recMicLbl:'Incluir mi micrófono',
       recTrLbl:'Transcribir mientras grabo',
       anotPh:'¿Qué pasó en esta pantalla? Ej.: pulsé Guardar y el sistema devolvió el mensaje 4711.', anotSalvar:'Guardar anotación', anotSalvo:'✓ Guardado', anotDoPasso:'Anotación del {0} — describe qué pasó', anotDaTela:'Pantalla {0} del {1} — describe qué pasó', anotNomeTela:'Pantalla {0} del {1}', anotFeita:'Anotación guardada en: {0}. Sale en el documento.', anotVazia:'Anotación borrada — este paso sale solo con la pantalla.', anotNaoSalvo:'Escrito, aún sin guardar. Pulsa Guardar (o Ctrl+Enter).', anotCurtoNao:'aún sin guardar', anotCurtoSim:'✓ guardado en este cuadro', anotCurtoNao2:'anotación borrada',
-      prontaLbl:'Usar la transcripción de Google Meet, Zoom o Teams', prontaOn:'Más rápido: ellos ya transcribieron la reunión, y el archivo entra en la etapa 3 — sin descargar el modelo y sin esperar. Sirve el .docx de Meet y el .vtt/.srt de Teams y Zoom.', prontaOff:'Si tu reunión ya fue transcrita por Meet, Teams o Zoom, marca aquí: es más rápido que transcribir de nuevo, y el texto suele venir mejor (con el nombre de quien habló).', trEnviarH:'¿Ya tienes la transcripción? Envía el archivo.', trEnviarP:'Leo el .docx de Google Meet (las “Notas de Gemini”, la pestaña de transcripción o el archivo entero), el .vtt y el .srt de Teams y Zoom, y texto pegado del panel de Drive. Con marcas de tiempo, cada pantalla sale en el documento junto a lo que se dijo allí.', trDeReuniao:'Google Meet, Teams o Zoom (.docx, .vtt, .srt)', trDeLegenda:'Archivo de subtítulos (.vtt, .srt, .txt)', trDoDrive:'Buscar en Google Drive', trLendo:'Leyendo el archivo…', trLeuCues:'Leí el archivo: {0} tramos con marca de tiempo.', trLeuReuniao:'Leí la transcripción de la reunión: {0} tramos. La minutación es por bloque — mira la nota de abajo.', trLeuSemTempo:'Leí el archivo, pero no tiene marcas de tiempo: el texto entra entero y las pantallas no salen emparejadas con el habla.', trLerErro:'No pude leer este archivo: {0}', trFormato:'Este formato no lo leo. De Google Meet usa el .docx; de Teams y Zoom, el .vtt o el .srt. Un .doc antiguo o un PDF hay que guardarlos antes como .docx o .txt.', trBlocos:' La minutación vino por BLOQUE, como la escriben Meet y Teams: un instante para varias intervenciones. Dentro de cada bloque los tramos se reparten según el tamaño de cada intervención — es una estimación, sirve para emparejar las pantallas; para citar el minuto exacto, compruébalo en el vídeo.',
+      semTrLbl:'No transcribir — solo las pantallas', semTrOn:'Solo las imágenes: el documento sale con las pantallas, los pasos y tus anotaciones. El modelo de voz no se descarga, y esta elección queda guardada para las próximas veces. Si la transcripción aparece después, puedes pegarla en la etapa 3.', semTrOff:'Si esta grabación no tiene habla que importe — o si solo quieres las pantallas —, elige aquí: es el camino más rápido, y el modelo de voz no se descarga.', prontaLbl:'Usar la transcripción de Google Meet, Zoom o Teams', prontaOn:'Más rápido: ellos ya transcribieron la reunión, y el archivo entra en la etapa 3 — sin descargar el modelo y sin esperar. Sirve el .docx de Meet y el .vtt/.srt de Teams y Zoom.', prontaOff:'Si tu reunión ya fue transcrita por Meet, Teams o Zoom, elige aquí: es más rápido que transcribir de nuevo, y el texto suele venir mejor (con el nombre de quien habló).', trEnviarH:'¿Ya tienes la transcripción? Envía el archivo.', trEnviarP:'Leo el .docx de Google Meet (las “Notas de Gemini”, la pestaña de transcripción o el archivo entero), el .vtt y el .srt de Teams y Zoom, y texto pegado del panel de Drive. Con marcas de tiempo, cada pantalla sale en el documento junto a lo que se dijo allí.', trDeReuniao:'Google Meet, Teams o Zoom (.docx, .vtt, .srt)', trDeLegenda:'Archivo de subtítulos (.vtt, .srt, .txt)', trDoDrive:'Buscar en Google Drive', trLendo:'Leyendo el archivo…', trLeuCues:'Leí el archivo: {0} tramos con marca de tiempo.', trLeuReuniao:'Leí la transcripción de la reunión: {0} tramos. La minutación es por bloque — mira la nota de abajo.', trLeuSemTempo:'Leí el archivo, pero no tiene marcas de tiempo: el texto entra entero y las pantallas no salen emparejadas con el habla.', trLerErro:'No pude leer este archivo: {0}', trFormato:'Este formato no lo leo. De Google Meet usa el .docx; de Teams y Zoom, el .vtt o el .srt. Un .doc antiguo o un PDF hay que guardarlos antes como .docx o .txt.', trBlocos:' La minutación vino por BLOQUE, como la escriben Meet y Teams: un instante para varias intervenciones. Dentro de cada bloque los tramos se reparten según el tamaño de cada intervención — es una estimación, sirve para emparejar las pantallas; para citar el minuto exacto, compruébalo en el vídeo.',
       recTrOn:'La transcripción sale lista al final, junto con los fotogramas. Requiere descargar el modelo de ~{0} MB antes de empezar — una sola vez, y luego queda guardado en el navegador.',
-      recTrOff:'Solo los fotogramas. No se descarga nada y la grabación empieza al instante. Después puedes pegar una transcripción ya hecha en la etapa 2.',
+      recTrOff:'Elige aquí para que el habla se convierta en texto en tu propio ordenador. El modelo de voz se descarga una vez (~206 MB) y luego queda guardado en el navegador.',
       recWarn:'No se guarda vídeo: durante la grabación la herramienta separa los fotogramas que importan y transcribe los dos canales de audio por separado — tu micrófono y el sonido del ordenador. La transcripción comparte la máquina con la captura; en un ordenador modesto la pantalla puede perder algún cambio.',
       recPrep:'Preparando el modelo de transcripción…',
       recNoModel:'No pude cargar el modelo: guardaré los fotogramas sin transcribir.',
@@ -5291,7 +5365,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       rotPronto:'{0} Schritte bereit — jede Markierung kommt mit ihrem Titel.',
       passoTelas:'{0} Bildschirme',
       recPipBtn:'Steuerungsfenster zurückholen',
-      pipTamLbl:'Größe des Steuerungsfensters', pipTamCompleta:'Vollständig — Uhr, Pegel und Notiz', pipTamMin:'Leiste — eine Reihe Schaltflächen, über Ihrer Arbeit',
+      pipTamLbl:'Größe des Steuerungsfensters', pipTamCompletaN:'Vollständig', pipTamCompleta:'Uhr, Tonpegel, Notizfeld und alle Schaltflächen.', pipTamMinN:'Leiste', pipTamMin:'Eine Reihe Schaltflächen, über Ihrer Arbeit.',
       recPausado:'PAUSIERT —', recMarcado:'Schritt markiert.',
       pipPausado:'Pausiert: Es wird nichts gespeichert.',
       micNegado:'Der Browser hat das Mikrofon für diese Website blockiert. Klicken Sie auf das Schloss neben der Adresse, erlauben Sie das Mikrofon und nehmen Sie erneut auf.',
@@ -5336,9 +5410,9 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recMicLbl:'Mein Mikrofon einbeziehen',
       recTrLbl:'Während der Aufnahme transkribieren',
       anotPh:'Was ist auf diesem Bildschirm passiert? Z. B.: Auf Speichern geklickt, das System meldete 4711.', anotSalvar:'Notiz speichern', anotSalvo:'✓ Gespeichert', anotDoPasso:'Notiz zu {0} — beschreiben Sie, was passiert ist', anotDaTela:'Bildschirm {0} von {1} — beschreiben Sie, was passiert ist', anotNomeTela:'Bildschirm {0} von {1}', anotFeita:'Notiz gespeichert bei: {0}. Sie erscheint im Dokument.', anotVazia:'Notiz gelöscht — dieser Schritt erscheint nur mit dem Bild.', anotNaoSalvo:'Geschrieben, noch nicht gespeichert. Auf Speichern drücken (oder Strg+Enter).', anotCurtoNao:'noch nicht gespeichert', anotCurtoSim:'✓ in diesem Bild gespeichert', anotCurtoNao2:'Notiz gelöscht',
-      prontaLbl:'Transkript aus Google Meet, Zoom oder Teams verwenden', prontaOn:'Schneller: die Besprechung wurde dort bereits transkribiert, und die Datei kommt in Schritt 3 hinein — ohne Modell-Download und ohne Warten. Möglich sind Meet-.docx sowie .vtt/.srt aus Teams und Zoom.', prontaOff:'Wenn Ihre Besprechung bereits von Meet, Teams oder Zoom transkribiert wurde, setzen Sie hier das Häkchen: das ist schneller als erneut zu transkribieren, und der Text ist meist besser (mit dem Namen der sprechenden Person).', trEnviarH:'Transkript schon vorhanden? Datei hochladen.', trEnviarP:'Ich lese Google-Meet-.docx (die „Gemini-Notizen“, den Transkript-Reiter oder die ganze Datei), .vtt und .srt aus Teams und Zoom sowie Text aus dem Drive-Fenster. Mit Zeitmarken erscheint jeder Screenshot im Dokument neben dem, was dort gesagt wurde.', trDeReuniao:'Google Meet, Teams oder Zoom (.docx, .vtt, .srt)', trDeLegenda:'Untertiteldatei (.vtt, .srt, .txt)', trDoDrive:'In Google Drive suchen', trLendo:'Datei wird gelesen…', trLeuCues:'Datei gelesen: {0} Abschnitte mit Zeitmarke.', trLeuReuniao:'Besprechungstranskript gelesen: {0} Abschnitte. Die Zeitangabe ist blockweise — siehe Hinweis unten.', trLeuSemTempo:'Datei gelesen, aber ohne Zeitmarken: der Text kommt vollständig hinein, und die Screenshots werden nicht der Sprache zugeordnet.', trLerErro:'Diese Datei konnte ich nicht lesen: {0}', trFormato:'Dieses Format lese ich nicht. Aus Google Meet nehmen Sie die .docx; aus Teams und Zoom die .vtt oder .srt. Eine alte .doc oder ein PDF müssen vorher als .docx oder .txt gespeichert werden.', trBlocos:' Die Zeitangabe kam BLOCKWEISE, so wie Meet und Teams sie schreiben: ein Zeitpunkt für mehrere Wortbeiträge. Innerhalb eines Blocks werden die Abschnitte nach Länge des Beitrags verteilt — das ist eine Schätzung und reicht, um die Screenshots zuzuordnen; für die exakte Minute prüfen Sie das Video.',
+      semTrLbl:'Nicht transkribieren — nur die Bildschirme', semTrOn:'Nur die Bilder: das Dokument entsteht aus den Bildschirmen, den Schritten und Ihren Notizen. Das Sprachmodell wird nicht geladen, und diese Wahl bleibt für die nächsten Male gespeichert. Taucht das Transkript später auf, können Sie es in Schritt 3 einfügen.', semTrOff:'Wenn diese Aufnahme keine wichtige Sprache enthält — oder Sie nur die Bildschirme wollen —, wählen Sie das hier: der schnellste Weg, und das Sprachmodell wird nicht geladen.', prontaLbl:'Transkript aus Google Meet, Zoom oder Teams verwenden', prontaOn:'Schneller: die Besprechung wurde dort bereits transkribiert, und die Datei kommt in Schritt 3 hinein — ohne Modell-Download und ohne Warten. Möglich sind Meet-.docx sowie .vtt/.srt aus Teams und Zoom.', prontaOff:'Wenn Ihre Besprechung bereits von Meet, Teams oder Zoom transkribiert wurde, wählen Sie das hier: das ist schneller als erneut zu transkribieren, und der Text ist meist besser (mit dem Namen der sprechenden Person).', trEnviarH:'Transkript schon vorhanden? Datei hochladen.', trEnviarP:'Ich lese Google-Meet-.docx (die „Gemini-Notizen“, den Transkript-Reiter oder die ganze Datei), .vtt und .srt aus Teams und Zoom sowie Text aus dem Drive-Fenster. Mit Zeitmarken erscheint jeder Screenshot im Dokument neben dem, was dort gesagt wurde.', trDeReuniao:'Google Meet, Teams oder Zoom (.docx, .vtt, .srt)', trDeLegenda:'Untertiteldatei (.vtt, .srt, .txt)', trDoDrive:'In Google Drive suchen', trLendo:'Datei wird gelesen…', trLeuCues:'Datei gelesen: {0} Abschnitte mit Zeitmarke.', trLeuReuniao:'Besprechungstranskript gelesen: {0} Abschnitte. Die Zeitangabe ist blockweise — siehe Hinweis unten.', trLeuSemTempo:'Datei gelesen, aber ohne Zeitmarken: der Text kommt vollständig hinein, und die Screenshots werden nicht der Sprache zugeordnet.', trLerErro:'Diese Datei konnte ich nicht lesen: {0}', trFormato:'Dieses Format lese ich nicht. Aus Google Meet nehmen Sie die .docx; aus Teams und Zoom die .vtt oder .srt. Eine alte .doc oder ein PDF müssen vorher als .docx oder .txt gespeichert werden.', trBlocos:' Die Zeitangabe kam BLOCKWEISE, so wie Meet und Teams sie schreiben: ein Zeitpunkt für mehrere Wortbeiträge. Innerhalb eines Blocks werden die Abschnitte nach Länge des Beitrags verteilt — das ist eine Schätzung und reicht, um die Screenshots zuzuordnen; für die exakte Minute prüfen Sie das Video.',
       recTrOn:'Die Transkription ist am Ende fertig, zusammen mit den Screenshots. Dafür muss vorher das Modell von ~{0} MB heruntergeladen werden — nur einmal, danach bleibt es im Browser gespeichert.',
-      recTrOff:'Nur die Screenshots. Es wird nichts heruntergeladen und die Aufnahme startet sofort. Eine fertige Transkription können Sie später in Schritt 2 einfügen.',
+      recTrOff:'Wählen Sie das hier, damit die Sprache auf Ihrem eigenen Rechner zu Text wird. Das Sprachmodell wird einmal geladen (~206 MB) und bleibt dann im Browser.',
       recWarn:'Es wird kein Video gespeichert: Während der Aufnahme trennt das Werkzeug die Screenshots heraus, die zählen, und transkribiert die beiden Tonspuren — Ihr Mikrofon und den Computerton — getrennt. Die Transkription teilt sich den Rechner mit der Aufnahme; auf einem schwächeren Computer kann ein Bildwechsel verloren gehen.',
       recPrep:'Das Transkriptionsmodell wird vorbereitet…',
       recNoModel:'Das Modell konnte nicht geladen werden: Die Screenshots werden ohne Transkription gespeichert.',
@@ -5919,7 +5993,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       rotPronto:'{0} étapes prêtes — chaque marque arrive avec son titre.',
       passoTelas:'{0} écrans',
       recPipBtn:'Rouvrir la fenêtre de contrôle',
-      pipTamLbl:'Taille de la fenêtre de contrôle', pipTamCompleta:'Complète — horloge, niveau et note', pipTamMin:'Bandeau — une rangée de boutons, au-dessus du travail',
+      pipTamLbl:'Taille de la fenêtre de contrôle', pipTamCompletaN:'Complète', pipTamCompleta:'Horloge, niveau sonore, zone de note et tous les boutons.', pipTamMinN:'Bandeau', pipTamMin:'Une rangée de boutons, au-dessus du travail.',
       recPausado:'EN PAUSE —', recMarcado:'étape marquée.',
       pipPausado:'En pause : rien n’est conservé.',
       micNegado:'Le navigateur a bloqué le microphone pour ce site. Cliquez sur le cadenas à côté de l’adresse, autorisez le microphone et enregistrez de nouveau.',
@@ -5964,9 +6038,9 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recMicLbl:'Inclure mon microphone',
       recTrLbl:'Transcrire pendant l’enregistrement',
       anotPh:'Que s’est-il passé sur cet écran ? Ex. : clic sur Enregistrer, le système a renvoyé le message 4711.', anotSalvar:'Enregistrer la note', anotSalvo:'✓ Enregistré', anotDoPasso:'Note de {0} — décrivez ce qui s’est passé', anotDaTela:'Écran {0} de {1} — décrivez ce qui s’est passé', anotNomeTela:'Écran {0} de {1}', anotFeita:'Note enregistrée dans : {0}. Elle part dans le document.', anotVazia:'Note effacée — cette étape ne sortira qu’avec l’écran.', anotNaoSalvo:'Saisi, pas encore enregistré. Appuyez sur Enregistrer (ou Ctrl+Entrée).', anotCurtoNao:'pas encore enregistré', anotCurtoSim:'✓ enregistré sur cette image', anotCurtoNao2:'note effacée',
-      prontaLbl:'Utiliser la transcription de Google Meet, Zoom ou Teams', prontaOn:'Plus rapide : la réunion a déjà été transcrite chez eux, et le fichier entre à l’étape 3 — sans téléchargement de modèle et sans attente. Fonctionne avec le .docx de Meet et le .vtt/.srt de Teams et Zoom.', prontaOff:'Si votre réunion a déjà été transcrite par Meet, Teams ou Zoom, cochez ici : c’est plus rapide que de transcrire à nouveau, et le texte est en général meilleur (il nomme qui a parlé).', trEnviarH:'Vous avez déjà la transcription ? Envoyez le fichier.', trEnviarP:'Je lis le .docx de Google Meet (les « notes Gemini », l’onglet transcription ou le fichier entier), le .vtt et le .srt de Teams et Zoom, et le texte collé depuis le panneau Drive. Avec l’horodatage, chaque écran sort dans le document à côté de ce qui a été dit à ce moment-là.', trDeReuniao:'Google Meet, Teams ou Zoom (.docx, .vtt, .srt)', trDeLegenda:'Fichier de sous-titres (.vtt, .srt, .txt)', trDoDrive:'Chercher dans Google Drive', trLendo:'Lecture du fichier…', trLeuCues:'Fichier lu : {0} passages horodatés.', trLeuReuniao:'Transcription de réunion lue : {0} passages. L’horodatage est par bloc — voir la note ci-dessous.', trLeuSemTempo:'Fichier lu, mais sans horodatage : le texte entre en entier et les écrans ne seront pas appariés à la parole.', trLerErro:'Je n’ai pas pu lire ce fichier : {0}', trFormato:'Ce format, je ne le lis pas. Depuis Google Meet, prenez le .docx ; depuis Teams et Zoom, le .vtt ou le .srt. Un ancien .doc ou un PDF doit d’abord être enregistré en .docx ou .txt.', trBlocos:' L’horodatage est venu par BLOC, comme Meet et Teams l’écrivent : un instant pour plusieurs prises de parole. Dans chaque bloc, les passages sont répartis selon la longueur de la prise de parole — c’est une estimation, suffisante pour apparier les écrans ; pour citer la minute exacte, vérifiez dans la vidéo.',
+      semTrLbl:'Ne pas transcrire — seulement les écrans', semTrOn:'Seulement les images : le document sort avec les écrans, les étapes et vos notes. Le modèle vocal n’est pas téléchargé, et ce choix est conservé pour les prochaines fois. Si la transcription arrive plus tard, vous pourrez la coller à l’étape 3.', semTrOff:'Si cet enregistrement n’a pas de parole qui compte — ou si vous ne voulez que les écrans —, choisissez ceci : c’est le chemin le plus rapide, et le modèle vocal n’est pas téléchargé.', prontaLbl:'Utiliser la transcription de Google Meet, Zoom ou Teams', prontaOn:'Plus rapide : la réunion a déjà été transcrite chez eux, et le fichier entre à l’étape 3 — sans téléchargement de modèle et sans attente. Fonctionne avec le .docx de Meet et le .vtt/.srt de Teams et Zoom.', prontaOff:'Si votre réunion a déjà été transcrite par Meet, Teams ou Zoom, choisissez ici : c’est plus rapide que de transcrire à nouveau, et le texte est en général meilleur (il nomme qui a parlé).', trEnviarH:'Vous avez déjà la transcription ? Envoyez le fichier.', trEnviarP:'Je lis le .docx de Google Meet (les « notes Gemini », l’onglet transcription ou le fichier entier), le .vtt et le .srt de Teams et Zoom, et le texte collé depuis le panneau Drive. Avec l’horodatage, chaque écran sort dans le document à côté de ce qui a été dit à ce moment-là.', trDeReuniao:'Google Meet, Teams ou Zoom (.docx, .vtt, .srt)', trDeLegenda:'Fichier de sous-titres (.vtt, .srt, .txt)', trDoDrive:'Chercher dans Google Drive', trLendo:'Lecture du fichier…', trLeuCues:'Fichier lu : {0} passages horodatés.', trLeuReuniao:'Transcription de réunion lue : {0} passages. L’horodatage est par bloc — voir la note ci-dessous.', trLeuSemTempo:'Fichier lu, mais sans horodatage : le texte entre en entier et les écrans ne seront pas appariés à la parole.', trLerErro:'Je n’ai pas pu lire ce fichier : {0}', trFormato:'Ce format, je ne le lis pas. Depuis Google Meet, prenez le .docx ; depuis Teams et Zoom, le .vtt ou le .srt. Un ancien .doc ou un PDF doit d’abord être enregistré en .docx ou .txt.', trBlocos:' L’horodatage est venu par BLOC, comme Meet et Teams l’écrivent : un instant pour plusieurs prises de parole. Dans chaque bloc, les passages sont répartis selon la longueur de la prise de parole — c’est une estimation, suffisante pour apparier les écrans ; pour citer la minute exacte, vérifiez dans la vidéo.',
       recTrOn:'La transcription est prête à la fin, en même temps que les captures. Il faut d’abord télécharger le modèle d’environ {0} Mo — une seule fois, ensuite il reste dans le navigateur.',
-      recTrOff:'Les captures seules. Rien n’est téléchargé et l’enregistrement démarre immédiatement. Vous pourrez coller une transcription toute prête à l’étape 2.',
+      recTrOff:'Choisissez ceci pour que la parole devienne du texte sur votre propre ordinateur. Le modèle vocal est téléchargé une fois (~206 Mo), puis il reste dans le navigateur.',
       recWarn:'Aucune vidéo n’est conservée : pendant l’enregistrement, l’outil isole les captures qui comptent et transcrit séparément les deux canaux audio — votre microphone et le son de l’ordinateur. La transcription partage la machine avec la capture ; sur un ordinateur modeste, l’écran peut rater un changement.',
       recPrep:'Préparation du modèle de transcription…',
       recNoModel:'Impossible de charger le modèle : les captures seront conservées sans transcription.',
@@ -7769,22 +7843,40 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     })();
   }
 
-  if ($('recTr')) $('recTr').onchange = () => {
-    /* Marcar "transcrever enquanto gravo" desliga "eu já tenho a transcrição":
-       as duas juntas descrevem uma pessoa que vai baixar 206 MB para não usar. */
-    if ($('recTr').checked && $('usarPronta')) $('usarPronta').checked = false;
-    notaTr(); adiantarModelo();
-  };
-  if ($('usarPronta')) $('usarPronta').onchange = () => {
-    if ($('usarPronta').checked && $('recTr')) {
-      $('recTr').checked = false;
-      /* `dataset.mao` porque a escolha foi DA PESSOA: sem ele a próxima
-         repintura devolveria o padrão marcado por cima do que ela decidiu. É o
-         mesmo mecanismo da caixa da placa de vídeo. */
-      $('recTr').dataset.mao = '1';
-    }
-    notaTr();
-  };
+  /* ---- A ESCOLHA DA TRANSCRIÇÃO, EM UM LUGAR SÓ ----
+     Eram dois tratadores que se desmarcavam mutuamente. Com `radio` a exclusão
+     é do navegador, então sobra o que é NOSSO: repintar as notas e começar (ou
+     não) o download do modelo.
+     E o `dataset.mao` que ficava no `recTr` saiu: ele era escrito e ninguém o
+     lia — o mecanismo existe de verdade só na caixa da placa de vídeo, que é
+     repintada por outro caminho. Uma bandeira que ninguém lê é uma promessa de
+     comportamento que não existe. */
+  /* ---- E A ESCOLHA É LEMBRADA ----
+     Isto saiu de uma medição, e não de um pedido. A régua nova mostrou que o
+     download do modelo começa 1,2 s depois de a página abrir, com "transcrever
+     aqui" marcado por padrão — e a escolha não era guardada em lugar nenhum.
+     Quer dizer: quem NUNCA quer transcrever pagava 206 MB em toda visita, e a
+     única saída era escolher a terceira opção dentro do primeiro segundo e
+     dois décimos, em toda vez.
+     Com a escolha guardada, a segunda visita já abre no que a pessoa decidiu, e
+     o adiantamento nem começa — ele consulta o `recTr`, que agora chega marcado
+     ou desmarcado conforme a última decisão dela.
+     O que esta memória NÃO faz: cancelar um download que já estava vindo. Isso
+     é outro trabalho, e prometer não fazendo seria pior do que não fazer. */
+  const TR_MODO_CHAVE = 'Walkstamp.transcricaoModo';
+  {
+    let guardado = null;
+    try { guardado = localStorage.getItem(TR_MODO_CHAVE); } catch (e) {}
+    const porValor = { auto: 'recTr', pronta: 'usarPronta', nenhuma: 'semTr' };
+    if (guardado && $(porValor[guardado])) $(porValor[guardado]).checked = true;
+  }
+  for (const id of ['recTr', 'usarPronta', 'semTr']) {
+    if ($(id)) $(id).onchange = (ev) => {
+      try { localStorage.setItem(TR_MODO_CHAVE, ev.target.value); } catch (e) {}
+      notaTr();
+      if ($('recTr') && $('recTr').checked) adiantarModelo();
+    };
+  }
   if ($('model')) $('model').addEventListener('change', () => {
     // trocar de modelo com a caixa marcada recomeça o adiantamento
     if ($('recTr') && $('recTr').checked) adiantarModelo();
@@ -9314,7 +9406,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      depois, e não tem como se atualizar sozinho. Sem carimbo, "estou com um
      problema no offline" é uma conversa sem chão — ninguém sabe de qual build
      se fala nem se o defeito já foi consertado. */
-  const VERSAO = '2026.08.27-20';
+  const VERSAO = '2026.08.27-32';
   window.__versao = () => VERSAO;
 
   const PIP_CSS = `
@@ -9683,54 +9775,44 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      janela de 42px onde não cabe uma legenda. O `title` é onde ele cabe. */
   const ATALHO_PIP = { recMarkBtn: 'M', recTelaBtn: 'T', recPauseBtn: 'P',
                        recResumeBtn: 'P', pipStop: 'S' };
-  function rotularPip(btn, chaveLonga, chaveCurta){
+  /* O `minOpc` existe por causa da PRÉVIA: as duas aparecem lado a lado, e cada
+     uma precisa dos rótulos do SEU tamanho — a fita com a palavra curta, a
+     completa com a frase inteira. Sem ele, a prévia da fita mostraria os
+     rótulos longos sempre que a escolha atual fosse a janela completa, e o
+     desenho mentiria justamente sobre o que ele existe para mostrar. */
+  function rotularPip(btn, chaveLonga, chaveCurta, minOpc){
     if (!btn) return;
     const longo = t(chaveLonga);
     const curto = t(chaveCurta) || longo;
-    const min = pipModo() === 'min';
+    const min = (minOpc === undefined) ? (pipModo() === 'min') : !!minOpc;
     const letra = ATALHO_PIP[chaveLonga];
     btn.textContent = min ? curto : longo;
     btn.title = longo + (letra ? '  (' + letra + ')' : '');
     btn.setAttribute('aria-label', longo);
   }
 
-  async function abrirControle(){
-    if (!('documentPictureInPicture' in window)) return;
-    try {
-      /* A altura acompanha o que entrou. O botão da segunda tela custou 34px;
-         a caixa de anotação (rótulo, campo de duas linhas, botão e
-         confirmação) custou uns 90. Sem esse acerto, o `justify-content:center`
-         do corpo centrava um conteúdo maior do que a janela e cortava as duas
-         pontas — e a ponta de baixo é onde ficam PAUSAR e PARAR. Daí também o
-         `safe` no alinhamento e o `overflow-y` no corpo: se um idioma mais
-         comprido estourar de novo, a janelinha rola em vez de esconder. */
-      /* Com roteiro a janela e mais alta: a linha do passo custa tres linhas
-         de texto mais a divisoria. Pedir sempre a maior desperdicaria tela de
-         quem nao colou lista nenhuma -- e cada pixel daqui e um pixel a menos
-         do trabalho que a pessoa esta documentando. */
-      /* A ALTURA DA FITA É MEDIDA, e não escolhida. Ela já foi 168 de palpite
-         (o PARAR ficava dez pixels para fora), depois 200 com os botões ainda
-         empilhados — e testada assim ainda era uma JANELA, não uma fita. Com
-         os controles em linha, `janelinha.mjs` soma 52px. São 56 aqui: quatro
-         de folga para arredondamento, e nada mais, porque cada pixel daqui é
-         um pixel a menos do trabalho que a pessoa está documentando.
-         O Chrome impõe um mínimo próprio e pode devolver uma janela maior do
-         que a pedida. Se devolver, a fita fica no topo dela e continua
-         funcionando — pedir pouco é o que se pode fazer daqui. */
-      /* A FITA É FINA, E NÃO ESTREITA. Ela precisa de 375px de largura no
-         alemão — "Markieren + Bildschirm Stopp" numa linha só — e a largura
-         numa faixa por cima do trabalho custa menos que altura: ela encosta
-         numa borda e deixa o meio da tela livre. 390 dá quinze de folga. */
-      const min = pipModo() === 'min';
-      pipWin = await documentPictureInPicture.requestWindow(
-        { width: min ? 380 : 250, height: min ? 44 : (roteiro.length ? 560 : 430) });
-    } catch (e) { pipWin = null; return; }
+  /* ---- O CORPO DA JANELINHA, EM UM LUGAR SÓ ----
+   *
+   * Ele era escrito aqui dentro, e passou a ser função porque ganhou um SEGUNDO
+   * leitor: a representação gráfica que aparece ao lado das duas opções de
+   * tamanho, no cartão de gravar. Aquela prévia mostra a janelinha DE VERDADE —
+   * o mesmo HTML e o mesmo CSS, dentro de um iframe reduzido — e não um desenho
+   * parecido.
+   *
+   * A diferença não é preciosismo. Um desenho à mão é uma segunda lista: no dia
+   * em que um botão nascer, mudar de lugar ou sumir da janela, o desenho
+   * continua mostrando a janela antiga, e quem escolhe pela prévia escolhe
+   * errado. Este projeto já pagou por listas paralelas mais vezes do que
+   * gostaria de contar. */
+  /* A MEDIDA DA JANELA, EM UM LUGAR SÓ. Ela era escrita dentro do pedido ao
+     navegador, e ganhou um segundo leitor: a moldura da prévia, que precisa
+     ter exatamente a proporção da janela real — senão a comparação de espaço,
+     que é a razão da prévia existir, sai errada. */
+  const TAM_PIP = (min) => ({ w: min ? 380 : 250,
+                              h: min ? 44 : (roteiro.length ? 560 : 430) });
 
-    const d = pipWin.document;
-    d.title = t('pipTit');
-    if (pipModo() === 'min') d.body.classList.add('min');
-    const st = d.createElement('style'); st.textContent = PIP_CSS; d.head.appendChild(st);
-    d.body.innerHTML =
+  function corpoDaJanelinha(){
+    return ''+
       /* PRIMEIRO de tudo: e o que se le antes de agir. */
       '<div class="rot hide" id="rot"><span class="rotN" id="rotN"></span>' +
         '<span class="rotT" id="rotT"></span>' +
@@ -9768,6 +9850,101 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       '<button id="calar" class="sec hide"></button>' +
       '<button id="stop" disabled></button>' +
       '<div class="pe">' + t('pipNoVideo') + '</div>';
+  }
+
+  /* ---- A REPRESENTAÇÃO GRÁFICA DAS DUAS JANELINHAS ----
+   *
+   * Ela não é um desenho: é a janelinha, dentro de um iframe, com o MESMO
+   * `PIP_CSS` e o MESMO `corpoDaJanelinha()` que o navegador vai abrir. O
+   * iframe tem o tamanho REAL da janela e é reduzido por `transform: scale`;
+   * a moldura em volta tem o tamanho reduzido, para que a comparação seja
+   * sobre o espaço que cada uma toma na tela — que é a pergunta de quem
+   * escolhe entre uma fita e uma janela.
+   *
+   * As duas aparecem em estado de GRAVAÇÃO (`body.gravando`, relógio andando,
+   * contagem de quadros): uma janelinha parada não mostra o que ela é. Os
+   * rótulos vêm do mesmo `rotularPip`, cada prévia pedindo os do seu tamanho.
+   *
+   * `srcdoc` mantém o iframe na mesma origem, então dá para escrever dentro
+   * dele sem servidor nenhum — e nada aqui vai à rede, que é a promessa que o
+   * `semrede.mjs` cobra.
+   */
+  function pintarPreviaPip(){
+    const uma = (idIframe, idMoldura, min) => {
+      const f = $(idIframe), moldura = $(idMoldura);
+      if (!f || !moldura) return;
+      const tam = TAM_PIP(min);
+      const esc = parseFloat(getComputedStyle(f).getPropertyValue('--pipEsc')) || 0.46;
+      f.style.width = tam.w + 'px'; f.style.height = tam.h + 'px';
+      moldura.style.width = Math.round(tam.w * esc) + 'px';
+      moldura.style.height = Math.round(tam.h * esc) + 'px';
+      f.srcdoc = '<!doctype html><meta charset="utf-8"><style>' + PIP_CSS +
+                 '</style><body class="' + (min ? 'min gravando' : 'gravando') + '"></body>';
+      f.onload = () => {
+        const d = f.contentDocument;
+        if (!d || !d.body) return;
+        d.body.innerHTML = corpoDaJanelinha();
+        const g = (id) => d.getElementById(id);
+        if (g('rel')) g('rel').textContent = '0:42';
+        if (g('txt')) g('txt').textContent = t('pipFrames', 3);
+        rotularPip(g('marcar'), 'recMarkBtn', 'pipCurtoMarcar', min);
+        rotularPip(g('maisTela'), 'recTelaBtn', 'pipCurtoTela', min);
+        rotularPip(g('stop'), 'pipStop', 'pipCurtoParar', min);
+        if (g('pausa')) g('pausa').textContent = t('recPauseBtn');
+        /* O rótulo sai do MESMO `passoN` do produto, e por isso ele muda de
+           palavra junto com o cenário — a unidade é "Passo" na evidência e
+           "Caso" no roteiro. Escrever "Passo 1" aqui teria a prévia mostrando
+           uma palavra que a janela real não usaria. */
+        if (g('notaLbl')) g('notaLbl').textContent = passoN(1);
+        if (g('notaOk')) g('notaOk').textContent = t('anotSalvar');
+        const nt = g('nota'); if (nt) nt.placeholder = t('anotPh');
+        /* Os medidores desenhados com alguma coisa dentro: duas barras vazias
+           não se leem como medidor de som, e a pessoa está escolhendo se abre
+           mão deles. */
+        if (g('vm')) g('vm').style.height = '55%';
+        if (g('vs')) g('vs').style.height = '30%';
+      };
+    };
+    uma('pipPrevFull', 'pipMoldFull', false);
+    uma('pipPrevStrip', 'pipMoldStrip', true);
+  }
+
+  async function abrirControle(){
+    if (!('documentPictureInPicture' in window)) return;
+    try {
+      /* A altura acompanha o que entrou. O botão da segunda tela custou 34px;
+         a caixa de anotação (rótulo, campo de duas linhas, botão e
+         confirmação) custou uns 90. Sem esse acerto, o `justify-content:center`
+         do corpo centrava um conteúdo maior do que a janela e cortava as duas
+         pontas — e a ponta de baixo é onde ficam PAUSAR e PARAR. Daí também o
+         `safe` no alinhamento e o `overflow-y` no corpo: se um idioma mais
+         comprido estourar de novo, a janelinha rola em vez de esconder. */
+      /* Com roteiro a janela e mais alta: a linha do passo custa tres linhas
+         de texto mais a divisoria. Pedir sempre a maior desperdicaria tela de
+         quem nao colou lista nenhuma -- e cada pixel daqui e um pixel a menos
+         do trabalho que a pessoa esta documentando. */
+      /* A ALTURA DA FITA É MEDIDA, e não escolhida. Ela já foi 168 de palpite
+         (o PARAR ficava dez pixels para fora), depois 200 com os botões ainda
+         empilhados — e testada assim ainda era uma JANELA, não uma fita. Com
+         os controles em linha, `janelinha.mjs` soma 52px. São 56 aqui: quatro
+         de folga para arredondamento, e nada mais, porque cada pixel daqui é
+         um pixel a menos do trabalho que a pessoa está documentando.
+         O Chrome impõe um mínimo próprio e pode devolver uma janela maior do
+         que a pedida. Se devolver, a fita fica no topo dela e continua
+         funcionando — pedir pouco é o que se pode fazer daqui. */
+      /* A FITA É FINA, E NÃO ESTREITA. Ela precisa de 375px de largura no
+         alemão — "Markieren + Bildschirm Stopp" numa linha só — e a largura
+         numa faixa por cima do trabalho custa menos que altura: ela encosta
+         numa borda e deixa o meio da tela livre. 390 dá quinze de folga. */
+      const tam = TAM_PIP(pipModo() === 'min');
+      pipWin = await documentPictureInPicture.requestWindow({ width: tam.w, height: tam.h });
+    } catch (e) { pipWin = null; return; }
+
+    const d = pipWin.document;
+    d.title = t('pipTit');
+    if (pipModo() === 'min') d.body.classList.add('min');
+    const st = d.createElement('style'); st.textContent = PIP_CSS; d.head.appendChild(st);
+    d.body.innerHTML = corpoDaJanelinha();
 
     pipRelogio = d.getElementById('rel');
     pipTexto   = d.getElementById('txt');
@@ -12417,6 +12594,9 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     const pn = $('prontaNote');
     if (pn) pn.textContent = ($('usarPronta') && $('usarPronta').checked)
       ? t('prontaOn') : t('prontaOff');
+    const sn = $('semTrNote');
+    if (sn) sn.textContent = ($('semTr') && $('semTr').checked)
+      ? t('semTrOn') : t('semTrOff');
   }
 
   const tamanhoModelo = () => {
@@ -17845,17 +18025,25 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      reaberta no tamanho novo — a captura não passa por aqui, então ela não
      sente. O `pagehide` da janela antiga acenderia o botão de "trazer de
      volta"; por isso ele é repintado depois que a nova já existe. */
-  if ($('pipTam')) {
-    $('pipTam').value = pipModo();
-    $('pipTam').addEventListener('change', async () => {
-      guardarPipModo($('pipTam').value === 'min' ? 'min' : 'completa');
+  if ($('pipTamFull') && $('pipTamStrip')) {
+    const marcar = () => {
+      const m = pipModo();
+      $('pipTamFull').checked = m !== 'min';
+      $('pipTamStrip').checked = m === 'min';
+    };
+    marcar();
+    const trocou = async (ev) => {
+      guardarPipModo(ev.target.value === 'min' ? 'min' : 'completa');
       if (!pipWin) { pintarVoltarJanelinha(); return; }
       try { pipWin.close(); } catch (e) {}
       pipWin = null;
       await abrirControle();
       if (pipWin && liveOn) controle('gravando', { seg: agora(), frames: frames.length });
       pintarVoltarJanelinha();
-    });
+    };
+    $('pipTamFull').addEventListener('change', trocou);
+    $('pipTamStrip').addEventListener('change', trocou);
+    pintarPreviaPip();
   }
 
   /* Quem mexeu no ritmo à mão manda: o cenário sugere, e para de sugerir a
