@@ -121,6 +121,15 @@ await pg.waitForTimeout(400);
 
 // ------------------------------------------------- 1. a opção do passo 1
 console.log('\n[1] a opção no passo 1');
+/* O CENÁRIO PRIMEIRO, desde o Build 28. O selo "recomendado" deixou de ser fixo
+   nas duas primeiras opções — um selo em dois lugares não recomenda nada — e
+   passou a ter um dono só, decidido pelo cenário: em `ata` a recomendação é
+   trazer a transcrição que o Meet, o Teams ou o Zoom já fizeram; nos outros, é
+   transcrever aqui.
+   Este arquivo é sobre a transcrição de REUNIÃO, então escolher `ata` não é
+   contornar a régua: é colocá-la no cenário de que ela trata. */
+await pg.selectOption('#modelo', 'ata');
+await pg.waitForTimeout(250);
 const op = await pg.evaluate(() => {
   const c = document.getElementById('usarPronta');
   return { existe: !!c, marcada: c && c.checked,
