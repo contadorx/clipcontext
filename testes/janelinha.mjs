@@ -35,11 +35,15 @@ const ok = (n, c, e) => { console.log((c ? '  ok   ' : '  FALHA') + '  ' + n + (
    régua quebra. Ela continua lendo texto porque as duas coisas vivem dentro do
    fechamento do app e não há como chamá-las de fora — mas agora lê o lugar
    único, e não uma cópia da expressão. */
-const med = app.match(/TAM_PIP = \(min\) => \(\{ w: min \? (\d+) : (\d+),\s*h: min \? (\d+) : \(roteiro\.length \? (\d+) : (\d+)\)/);
-ok('a janelinha declara os dois tamanhos', !!med, med ? '' : '(não achei)');
-const [LARG_MIN, LARG, ALT_MIN, ALT_ROT, ALT] = med
-  ? [ +med[1], +med[2], +med[3], +med[4], +med[5] ] : [390, 250, 56, 560, 430];
-console.log(`     completa ${LARG}×${ALT}   com roteiro ${LARG}×${ALT_ROT}   fita ${LARG_MIN}×${ALT_MIN}`);
+const med = app.match(/TAM_PIP = \(min\) => \(\{ w: min \? \(roteiro\.length \? (\d+) : (\d+)\) : (\d+),\s*h: min \? (\d+) : \(roteiro\.length \? (\d+) : (\d+)\)/);
+ok('a janelinha declara os quatro tamanhos', !!med, med ? '' : '(não achei)');
+/* SÃO QUATRO, e não dois: a fita também cresce quando há roteiro colado. Ela
+   ganhou o passo atual no espaço que sobrava à direita, e esse espaço não é o
+   mesmo em cinco idiomas — daí a largura da fita ter passado a ser duas. */
+const [LARG_MIN_ROT, LARG_MIN, LARG, ALT_MIN, ALT_ROT, ALT] = med
+  ? [ +med[1], +med[2], +med[3], +med[4], +med[5], +med[6] ] : [720, 480, 250, 44, 580, 450];
+console.log(`     completa ${LARG}×${ALT}   com roteiro ${LARG}×${ALT_ROT}` +
+            `   fita ${LARG_MIN}×${ALT_MIN}   fita com roteiro ${LARG_MIN_ROT}×${ALT_MIN}`);
 /* UMA FITA, E NÃO UMA JANELA MENOR. A primeira tentativa foi a mesma pilha de
    botões, mais curta — e testada em uso ainda era uma janela: o relato foi
    "não dá para reduzir mais ou fazer como um controle de mídia fininho?".
@@ -290,9 +294,81 @@ console.log(`\n[1a] a fita: cabe em ${LARG_MIN}×${ALT_MIN}, e sobra só o que s
   const fica = quem.marcar && quem.maisTela && quem.stop && quem.relogio;
   ok('sobrevivem os dois botões de captura, o relógio e o parar', fica,
      fica ? '' : JSON.stringify(quem));
-  const some = !quem.medidor && !quem.texto && !quem.nota && !quem.pausa && !quem.calar;
+  /* O QUE SOME MUDOU NO BUILD 30, e o motivo é do campo: "a janelinha tem
+     espaço do lado direito, e poderia crescer na verdade para ter o passo".
+     Medido: a fita precisa de 390px em português e de 465 em alemão — um número
+     só ou deixa 75px de vazio numa língua ou espreme os botões na outra, e ela
+     fazia as duas coisas.
+     O `#txt` deixou de sumir e passou a OCUPAR essa sobra com a contagem de
+     quadros; com roteiro colado, quem ocupa é o passo atual. Os dois são
+     elásticos: encolhem onde os botões crescem. Em alemão sem roteiro sobra
+     quase nada e a contagem simplesmente não aparece — o que não pode é ela
+     empurrar um botão para fora, e isso é a lista `vaza` quem cobra. */
+  const some = !quem.medidor && !quem.nota && !quem.pausa && !quem.calar;
   ok('e some o que não se usa quarenta vezes por sessão', some,
      some ? '' : JSON.stringify(quem));
+
+  /* ---- O PASSO NA FITA ----
+     O relato: "a janelinha tem espaço do lado direito, e poderia crescer na
+     verdade para ter o passo". Ele tinha razão duas vezes: sobrava espaço em
+     português (390 de conteúdo numa janela de 450) E faltava em alemão (465).
+     Agora a sobra leva o passo atual, e a fita cresce quando há roteiro.
+     Isto é medido NO ALEMÃO, que é a língua mais comprida: se o passo couber
+     legível aqui, cabe nas outras quatro. */
+  {
+    await pg.setViewportSize({ width: LARG_MIN_ROT, height: ALT_MIN });
+    await pg.evaluate(() => {
+      document.body.classList.add('comRoteiro');
+      const rot = document.getElementById('rot'); if (rot) rot.classList.remove('hide');
+      const n2 = document.getElementById('rotN'); if (n2) n2.textContent = '3/12';
+      const t2 = document.getElementById('rotT');
+      if (t2) t2.textContent = 'Bestellanforderung genehmigen und den Gesamtbetrag ' +
+                               'auf dem Freigabebildschirm prüfen';
+    });
+    await pg.waitForTimeout(150);
+    const comRot = await pg.evaluate(() => {
+      const r = document.getElementById('rot'), tx = document.getElementById('txt');
+      const rt = document.getElementById('rotT');
+      const fora = [...document.querySelectorAll('body *')]
+        .filter((e) => e.getBoundingClientRect().right > innerWidth + 1)
+        .map((e) => e.id || e.tagName);
+      return { passoNaTela: getComputedStyle(r).display !== 'none',
+               contagemSumiu: getComputedStyle(tx).display === 'none',
+               larguraDoTexto: Math.round(rt.getBoundingClientRect().width),
+               cortadoComReticencia: rt.scrollWidth > rt.clientWidth + 1 &&
+                                     getComputedStyle(rt).textOverflow === 'ellipsis',
+               fora };
+    });
+    console.log(`     passo visível: ${comRot.larguraDoTexto}px` +
+                (comRot.cortadoComReticencia ? ' (cortado com reticência)' : ''));
+    ok('com roteiro, a fita mostra o passo atual', comRot.passoNaTela);
+    ok('  e a contagem de quadros dá lugar a ele', comRot.contagemSumiu);
+    /* 180px é o piso do que se lê de relance: menos que isso são três palavras,
+       e três palavras de um passo não dizem qual passo é. */
+    ok('  com largura de ler, e não de adivinhar', comRot.larguraDoTexto >= 180,
+       `${comRot.larguraDoTexto}px`);
+    ok('  e nada é empurrado para fora', comRot.fora.length === 0, comRot.fora.join(' '));
+
+    /* E SEM ROTEIRO, a mesma sobra leva a contagem de quadros. Em alemão ela
+       fica com quase nada e não aparece — o que não pode é empurrar um botão
+       para fora, e é isso que se cobra. */
+    await pg.setViewportSize({ width: LARG_MIN, height: ALT_MIN });
+    await pg.evaluate(() => {
+      document.body.classList.remove('comRoteiro');
+      document.getElementById('rot').classList.add('hide');
+      document.getElementById('txt').textContent = '12 Screenshots';
+    });
+    await pg.waitForTimeout(150);
+    const semRot = await pg.evaluate(() => ({
+      contagemExiste: getComputedStyle(document.getElementById('txt')).display !== 'none',
+      fora: [...document.querySelectorAll('body *')]
+        .filter((e) => e.getBoundingClientRect().right > innerWidth + 1)
+        .map((e) => e.id || e.tagName),
+    }));
+    ok('sem roteiro, a contagem ocupa a sobra', semRot.contagemExiste);
+    ok('  e também não empurra ninguém para fora', semRot.fora.length === 0,
+       semRot.fora.join(' '));
+  }
 
   /* ---- O BOTÃO DE TROCAR O TAMANHO ----
      Ele veio para cá no Build 27. Antes a escolha morava no cartão de gravar,
