@@ -98,6 +98,33 @@ Os dois primeiros estão resolvidos neste build. O terceiro também.
 
 ---
 
+## ACHADO FECHADO — a régua forjava numa lista que ainda crescia *(28/08)*
+
+Encontrado pela esteira COMPLETA no Build 44 e **reproduzido duas vezes**,
+sempre sob contenção, nunca sozinho. O sintoma parecia defeito de produto:
+
+```
+ok     há repetidas para a limpeza tirar  → Tira 2 telas (2 repetidas)
+FALHA  e ela tirou mesmo                  → 3 depois, 3 antes
+```
+
+Uma linha prometendo tirar duas e um botão tirando zero.
+
+**Era a premissa da régua.** O `resumo.mjs` esperava "pelo menos 3 quadros" e
+mais **900 ms fixos**, e então o `forjarRepetidos()` escrevia assinaturas iguais
+para fabricar repetidas — numa lista que **ainda estava crescendo**. Com a
+máquina livre a extração já tinha acabado; com as três pistas do `rodar.sh`
+disputando CPU, um quarto quadro chegava DEPOIS da forja, e o conjunto que o
+`#dedup` olhava não era o conjunto forjado.
+
+Uma espera por relógio é uma aposta na velocidade da máquina. Passou a esperar a
+lista **parar de crescer** — quatro leituras iguais, 120 ms entre elas —, e se o
+tempo acabar ela **diz que a premissa caiu** em vez de seguir medindo o acaso. É
+o mesmo conserto que o `etapas.mjs` recebeu pelo mesmo motivo, e é por isso que
+nenhum dos dois reproduzia sozinho.
+
+---
+
 # Parte 1 — As decisões
 
 Uma por vez. Cada uma tem os caminhos, o que se ganha e o que se perde em cada
