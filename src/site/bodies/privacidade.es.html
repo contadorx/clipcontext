@@ -62,15 +62,13 @@
     dirección de medición dentro: no habla con nadie, y puedes comprobarlo buscando
     &ldquo;supabase&rdquo; en el archivo.</p>
 
-    <h2>La lista de aviso del plan de pago</h2>
-    <p>En la página de precios hay un campo opcional de correo. Si lo rellenas, la dirección y el idioma de la
-    página se guardan en una base de datos nuestra, con la fecha. Es el único dato personal que hay aquí, y:</p>
-    <ul>
-      <li>no se cruza con las mediciones anteriores — no tienen con qué cruzarse;</li>
-      <li>no se vende, cede ni se añade a listas de terceros;</li>
-      <li>sirve para una sola finalidad: avisarte cuando el plan de pago exista;</li>
-      <li>se borra en cuanto lo pidas, por el contacto al final de esta página.</li>
-    </ul>
+    <h2>La lista de aviso ya no existe</h2>
+    <p>La página de precios tuvo un campo opcional de correo, para avisarte cuando el plan de pago existiera.
+    El plan de pago existe, y el campo se ha retirado: <b>ya no hay nada aquí que recoja la dirección de quien
+    solo está visitando el sitio</b>. Las direcciones dejadas mientras el campo existió siguen guardadas hasta
+    {{prazoLista}} meses después de haber sido dejadas, y se borran antes si lo pides, por el contacto al final
+    de esta página. Nunca se cruzaron con las mediciones anteriores, nunca se vendieron ni cedieron, y no se
+    usan para nada más.</p>
 
     <h2>La cuenta del plan de pago, y el guion de casos</h2>
     <p>Quien contrata un plan de pago pasa a tener una <b>cuenta</b>. Es el único sitio donde guardamos dato
@@ -123,12 +121,19 @@
     misma cuenta; un guion <b>&ldquo;solo mío&rdquo;</b> solo lo ve quien lo creó. Quien creó el guion puede
     borrarlo en cualquier momento, y borrarlo se lleva todos sus casos — y los archivos adjuntos a
     ellos —, al instante y sin copia.</p>
-    <p><b>Al terminar la suscripción, el contenido de la cuenta se borra en un plazo de 90 días</b>, por
+    <h3>No hace falta que lo pidas: la cuenta lo borra sola</h3>
+    <p>Dentro de la cuenta hay una pantalla — <a href="{{contaDados}}" style="color:var(--accent)">Tus datos</a> — que enumera,
+    en lenguaje llano, <b>todo lo que existe en nuestro servidor a tu nombre</b>: cuántos guiones, cuántos
+    casos, cuántos archivos adjuntos, cuántas plantillas, cuántas incidencias. Y enumera, al lado y con el
+    mismo peso, <b>lo que no se va cuando borras, y por qué</b>. En la misma pantalla hay un botón que borra
+    todo lo tuyo, al momento, sin hablar con nadie y sin esperar ningún plazo. Te pide que escribas tu propio
+    correo antes, porque no tiene deshacer.</p>
+    <p><b>Al terminar la suscripción, el contenido de la cuenta se borra en un plazo de {{prazoConta}} días</b>, por
     una rutina que corre todos los días: guiones, casos, recibos, adjuntos, plantillas, configuración,
     asientos, historial de emisión y tickets. Antes de eso, a petición, por el contacto al final de esta
     página.</p>
     <p><b>Una cosa no se borra, y es justo decir cuál:</b> la <b>factura</b>. Las facturas tienen un plazo
-    de guarda fiscal mayor de 90 días, y cumplirlo es una obligación legal — no es elección nuestra ni
+    de guarda fiscal mayor de {{prazoConta}} días, y cumplirlo es una obligación legal — no es elección nuestra ni
     tuya. El registro de cliente sobrevive con ella, reducido a lo que describe la venta (plan, asientos,
     plazo): el <b>nombre y el documento se borran</b>, y no queda ningún correo, guion ni archivo.</p>
     <p>La sesión de la cuenta usa una <b>cookie</b>, y es necesaria: es lo que te mantiene con la sesión
@@ -338,7 +343,7 @@
       <tr><td>Correo de la lista de aviso</td><td>Avisarte cuando exista el plan de pago</td>
           <td>Consentimiento (LGPD art. 7 I / RGPD art. 6.1.a)</td><td>Hasta que lo revoques, o 24 meses sin uso</td></tr>
       <tr><td>Los quince hitos de uso</td><td>Saber dónde falla la herramienta y mejorarla</td>
-          <td>Dato anonimizado (LGPD art. 12); en la duda, interés legítimo</td><td>18 meses</td></tr>
+          <td>Dato anonimizado (LGPD art. 12); en la duda, interés legítimo</td><td>{{prazoEvento}} meses</td></tr>
       <tr><td>Visitas de página</td><td>Saber cuánta gente llega y por dónde</td>
           <td>Dato anonimizado (LGPD art. 12); en la duda, interés legítimo</td>
           <td>Según la política de Vercel</td></tr>
@@ -348,12 +353,12 @@
           configuración, asientos, tickets</td>
           <td>Prestar el servicio contratado</td>
           <td>Ejecución de contrato (art. 7º, V)</td>
-          <td>Mientras dure la suscripción, y <b>hasta 90 días</b> después de terminada</td></tr>
+          <td>Mientras dure la suscripción, y <b>hasta {{prazoConta}} días</b> después de terminada</td></tr>
       <tr><td>Factura y el registro de cliente ligado a ella</td>
           <td>Obligación fiscal y contable</td>
           <td>Cumplimiento de obligación legal (art. 7º, II)</td>
           <td>El plazo de guarda fiscal aplicable. El nombre y el documento se borran junto con el resto
-          de la cuenta, a los 90 días</td></tr>
+          de la cuenta, a los {{prazoConta}} días</td></tr>
     </table>
     <p class="small muted">Los hitos y las visitas se diseñaron para no identificar a nadie; si aun así alguna
     autoridad los considerara dato personal, el fundamento es el interés legítimo en mantener y mejorar el

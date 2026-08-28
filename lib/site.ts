@@ -49,6 +49,11 @@ const rotas: {
   /* E quem tem o vídeo da rodada paga, que vive na página de preços. */
   rodadaLangs?: string[];
   caminhoConta: Record<Lang, string>;
+  /* Os pedaços traduzidos das sub-rotas da conta. O tipo é declarado aqui pelo
+     mesmo motivo de todos os outros: um `dados` que sumisse do `rotas.json`
+     reprovaria no build, em vez de virar `undefined` num `href` da política de
+     privacidade — que não quebra a página, só não leva a lugar nenhum. */
+  subConta: Record<string, Record<Lang, string>>;
   slugs: Record<string, Record<Lang, string>>;
   metas: Record<string, Record<Lang, { titulo: string; desc: string }>>;
   scripts: { detectarIdioma: string; lembrarIdioma: string };
@@ -111,6 +116,10 @@ export function caminhos(lang: Lang): Dicionario {
        lugar nenhum. É a mesma tabela que o `next.config.mjs` usa para montar a
        ponte de reescrita. */
     conta: rotas.caminhoConta[lang],
+    /* O endereço da tela "Seus dados", traduzido. Escrito à mão na política de
+       privacidade, ele mandaria o leitor alemão para `/de/konto/dados` — que
+       não existe: lá é `/de/konto/daten`. */
+    contaDados: rotas.caminhoConta[lang] + '/' + rotas.subConta.dados[lang],
     /* `blog` é a mesma palavra nos cinco idiomas, então ele não entra na tabela
        de slugs traduzidos — ela existe para os casos em que a palavra muda. */
     blog: lang === 'pt' ? '/blog' : `/${lang}/blog`,
@@ -135,6 +144,13 @@ export function tokens(lang: Lang): Dicionario {
     cnpj: marca.cnpj,
     contato: marca.contato,
     encarregado: marca.encarregado,
+    /* Os prazos de retenção. Eles vêm do `marca.json`, escrito pelo `build.py`,
+       porque a política de privacidade é HTML estático e não tem como perguntar
+       ao banco. Quem impede a divergência entre este número e o do
+       `walkstamp.prazos()` é a régua `prazos.mjs`. */
+    prazoConta: marca.prazoConta,
+    prazoLista: marca.prazoLista,
+    prazoEvento: marca.prazoEvento,
     lang,
   };
 }

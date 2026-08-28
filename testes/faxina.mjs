@@ -185,13 +185,22 @@ console.log('\n[6] o disparo está configurado, e a política diz a verdade');
   const pol = fs.readFileSync(`${RAIZ_WS}/src/site/bodies/privacidade.pt.html`, 'utf8');
   ok('a política não promete mais apagar a conta INTEIRA',
      !/a conta inteira — roteiros inclusive — é apagada/.test(pol));
-  ok('ela promete o conteúdo em 90 dias', /conteúdo da conta é apagado em até 90 dias/.test(pol));
+  /* O PRAZO DEIXOU DE SER ESCRITO AQUI — 27/08. Esta régua fixava "90 dias" em
+     três idiomas, e a política fixava o mesmo 90 em cinco: uma trava que
+     exigia a cópia em vez de proibir. Trocar o prazo no banco e na política
+     faria a régua reprovar a verdade. Agora a política traz o token e a régua
+     cobra o TOKEN, não o número — quem confere se o token vale o mesmo que o
+     `walkstamp.prazos()` do banco é a `prazos.mjs`. */
+  ok('ela promete o conteúdo no prazo publicado, e não num número escrito à mão',
+     /conteúdo da conta é apagado em até \{\{prazoConta\}\} dias/.test(pol));
   ok('e diz que a fatura fica, e por quê',
      /fatura/.test(pol) && /guarda fiscal/.test(pol));
   ok('a tabela de prazos passou a listar a conta paga',
      /Conteúdo da conta paga/.test(pol));
-  for (const [L, frase] of [['en', "account's content is deleted within 90 days"],
-                            ['es', 'contenido de la cuenta se borra en un plazo de 90 días']]) {
+  for (const [L, frase] of [['en', "account's content is deleted within {{prazoConta}} days"],
+                            ['es', 'contenido de la cuenta se borra en un plazo de {{prazoConta}} días'],
+                            ['de', 'Inhalt des Kontos innerhalb von {{prazoConta}} Tagen gelöscht'],
+                            ['fr', 'contenu du compte est effacé sous {{prazoConta}} jours']]) {
     const t = fs.readFileSync(`${RAIZ_WS}/src/site/bodies/privacidade.${L}.html`, 'utf8');
     ok(`e o ${L} diz o mesmo`, t.includes(frase));
   }

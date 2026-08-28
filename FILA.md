@@ -493,7 +493,22 @@ numérico).
 
 ---
 
-### DEC-16 — A lista de aviso do plano pago ainda existe?
+### DEC-16 — A lista de aviso do plano pago ainda existe? — **RESOLVIDA 27/08**
+
+> Não existe. O campo saiu do produto, e nada mais escreve na tabela
+> `walkstamp.interesse` — medido: nenhuma rota da aplicação a chama. Sobraram 3
+> endereços do tempo em que ela existiu, cobertos pelo prazo de
+> {{prazoLista}} = 24 meses.
+>
+> **O que faltava era a política dizer isso**, e ela dizia o contrário: chamava
+> o campo de "o único dado pessoal que existe aqui" — falso duas vezes, porque o
+> campo já não existia e porque a conta paga já gravava roteiro, caso e anexo.
+> Corrigido no Build 35, nos cinco idiomas, com `legal.mjs` proibindo a frase
+> antiga e exigindo a nova.
+
+---
+
+### DEC-16 (registro original) — A lista de aviso do plano pago ainda existe?
 
 *Nasceu durante o Build 1: eu fui aplicar a migração do idioma e descobri que o
 formulário não existe em página nenhuma.*

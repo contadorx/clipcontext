@@ -67,7 +67,7 @@ read -r -d '' MAPA <<'MAPA_FIM'
 # sem a régua da calculadora rodar. O mapa acumula todas as linhas que casam,
 # então estas somam com a genérica em vez de substituí-la.
 ^src/site/bodies/precos[.] => site:precos.mjs venda.mjs
-^src/site/bodies/(termos|privacidade)[.] => site:legal.mjs
+^src/site/bodies/(termos|privacidade)[.] => site:legal.mjs prazos.mjs
 ^src/site/bodies/seguranca[.] => site:legal.mjs matriz.mjs
 ^src/site/bodies/comparativo[.] => comparar.mjs
 ^src/site/bodies/caso[A-Za-z]*[.] => site:vitrine.mjs cenarios.mjs
@@ -77,7 +77,7 @@ read -r -d '' MAPA <<'MAPA_FIM'
 ^src/site/(doc|home)[.]html$ => site:paginas.mjs site:cinco.mjs
 ^src/site/support[.]js$ => site:ficha.mjs site:paginas.mjs site:buscaajuda.mjs
 ^src/versoes[.]json$ => versoes.mjs
-^build[.]py$ => versoes.mjs figuras.mjs cartao.mjs promessa.mjs planos.mjs auditoria.mjs site:precos.mjs site:compra.mjs
+^build[.]py$ => versoes.mjs figuras.mjs cartao.mjs promessa.mjs planos.mjs auditoria.mjs site:precos.mjs site:compra.mjs prazos.mjs
 ^src/rotas[.]json$ => middleware.mjs site:idiomas.mjs site:paginas.mjs
 ^middleware[.]ts$ => middleware.mjs
 ^next[.]config[.]mjs$ => site:paginas.mjs site:seo.mjs
@@ -93,7 +93,7 @@ read -r -d '' MAPA <<'MAPA_FIM'
 ^public/sw[.]js$ => site:seo.mjs
 ^public/site[.]css$ => folha.mjs site:paginas.mjs site:dobrafig.mjs
 ^offline/ => site:medicao.mjs
-^supabase/migrations/ => modelopessoal.mjs conferir-migracoes
+^supabase/migrations/ => modelopessoal.mjs conferir-migracoes prazos.mjs
 ^testes/ => inventario.mjs
 MAPA_FIM
 

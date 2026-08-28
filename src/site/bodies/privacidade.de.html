@@ -65,15 +65,13 @@
     herunterladen — verlässt den Build ohne jede Messadresse darin: Sie spricht mit niemandem, und Sie
     können es prüfen, indem Sie in der Datei nach &bdquo;supabase&ldquo; suchen.</p>
 
-    <h2>Die Benachrichtigungsliste für den bezahlten Plan</h2>
-    <p>Auf der Preisseite gibt es ein optionales Feld für die E-Mail-Adresse. Wenn Sie es ausfüllen, werden
-    die Adresse und die Sprache der Seite mit dem Datum in einer Datenbank von uns gespeichert. Es ist das einzige personenbezogene Datum, das es hier gibt, und es:</p>
-    <ul>
-      <li>wird nicht mit den obigen Messungen verknüpft — diese haben nichts, womit sie verknüpft werden könnten;</li>
-      <li>wird nicht verkauft, abgetreten oder in einer Liste Dritter verwendet;</li>
-      <li>dient einem einzigen Zweck: zu benachrichtigen, wenn es den bezahlten Plan gibt;</li>
-      <li>wird gelöscht, sobald Sie es verlangen, über den Kontakt am Ende dieser Seite.</li>
-    </ul>
+    <h2>Die Benachrichtigungsliste gibt es nicht mehr</h2>
+    <p>Die Preisseite hatte einmal ein optionales E-Mail-Feld, um zu benachrichtigen, sobald es den bezahlten
+    Plan gibt. Den bezahlten Plan gibt es, und das Feld ist entfernt: <b>hier wird nichts mehr erfasst von
+    jemandem, der die Seite nur besucht</b>. Adressen, die hinterlassen wurden, solange es das Feld gab,
+    bleiben bis zu {{prazoLista}} Monate nach dem Hinterlassen gespeichert und werden auf Wunsch früher
+    gelöscht, über den Kontakt am Ende dieser Seite. Sie wurden nie mit den obigen Messungen verknüpft, nie
+    verkauft oder abgetreten, und sie werden für nichts anderes verwendet.</p>
 
     <h2>Das Konto des bezahlten Plans und die Testfallliste</h2>
     <p>Wer einen bezahlten Plan abschließt, erhält damit ein <b>Konto</b>. Es ist der einzige Ort, an dem wir
@@ -126,11 +124,19 @@
     selben Konto sichtbar; eine Testfallliste <b>&bdquo;nur meine&ldquo;</b> ist nur für die Person sichtbar, die
     sie angelegt hat. Wer die Testfallliste angelegt hat, kann sie jederzeit löschen, und das Löschen nimmt
     alle ihre Fälle mit — und die an sie angehängten Dateien —, sofort und ohne Kopie.</p>
-    <p><b>Nach Beendigung des Abonnements wird der Inhalt des Kontos innerhalb von 90 Tagen gelöscht</b>,
+    <h3>Sie müssen nicht fragen: das Konto löscht selbst</h3>
+    <p>Im Konto gibt es eine Seite — <a href="{{contaDados}}" style="color:var(--accent)">Ihre Daten</a> —, die in klarer
+    Sprache auflistet, <b>was auf unserem Server unter Ihrem Namen existiert</b>: wie viele Testfall-Listen,
+    wie viele Fälle, wie viele angehängte Dateien, wie viele Vorlagen, wie viele Tickets. Und sie listet
+    daneben, mit demselben Gewicht, <b>was beim Löschen bleibt, und warum</b>. Auf derselben Seite gibt es
+    eine Schaltfläche, die alles Ihre sofort löscht — ohne mit jemandem zu sprechen und ohne eine Frist
+    abzuwarten. Sie verlangt vorher die Eingabe Ihrer eigenen E-Mail-Adresse, denn es gibt kein
+    Rückgängig.</p>
+    <p><b>Nach Beendigung des Abonnements wird der Inhalt des Kontos innerhalb von {{prazoConta}} Tagen gelöscht</b>,
     durch eine Routine, die täglich läuft: Testfalllisten, Fälle, Quittungen, Anhänge, Vorlagen,
     Konfiguration, Plätze, Verlauf der erstellten Dokumente und Tickets. Vorher auf Anfrage, über den Kontakt am Ende dieser Seite.</p>
     <p><b>Eine Sache wird nicht gelöscht, und es ist fair zu sagen, welche:</b> die <b>Rechnung</b>. Für eine
-    Steuerrechnung gilt eine steuerliche Aufbewahrungsfrist von mehr als 90 Tagen, und sie einzuhalten ist
+    Steuerrechnung gilt eine steuerliche Aufbewahrungsfrist von mehr als {{prazoConta}} Tagen, und sie einzuhalten ist
     eine gesetzliche Pflicht — es ist weder unsere noch Ihre Wahl. Der Kundendatensatz bleibt zusammen mit
     ihr bestehen, reduziert auf das, was den Verkauf beschreibt (Plan, Plätze, Laufzeit): <b>Name und
     Dokumentnummer werden gelöscht</b>, und es bleiben weder E-Mail-Adresse noch Testfallliste noch Datei zurück.</p>
@@ -345,7 +351,7 @@
           <td>Einwilligung (Art. 7, I)</td><td>Bis Sie widerrufen, oder 24 Monate ohne Nutzung</td></tr>
       <tr><td>Die fünfzehn Nutzungsmeilensteine</td><td>Erkennen, wo das Werkzeug versagt, und es verbessern</td>
           <td>Anonymisierte Daten (Art. 12); im Zweifel berechtigtes Interesse (Art. 7, IX)</td>
-          <td>18 Monate</td></tr>
+          <td>{{prazoEvento}} Monate</td></tr>
       <tr><td>Seitenaufrufe</td><td>Wissen, wie viele Personen ankommen und über welchen Weg</td>
           <td>Anonymisierte Daten (Art. 12); im Zweifel berechtigtes Interesse (Art. 7, IX)</td>
           <td>Gemäß der Richtlinie von Vercel</td></tr>
@@ -361,7 +367,7 @@
           <td>Steuerliche und buchhalterische Pflicht</td>
           <td>Erfüllung einer gesetzlichen Pflicht (Art. 7, II)</td>
           <td>Die anwendbare steuerliche Aufbewahrungsfrist. Name und Dokumentnummer werden zusammen mit dem
-          Rest des Kontos nach 90 Tagen gelöscht</td></tr>
+          Rest des Kontos nach {{prazoConta}} Tagen gelöscht</td></tr>
     </table>
     <p class="small muted">Die Nutzungsmeilensteine und die Besuche sind so entworfen, dass sie niemanden
     identifizieren; sollten sie dennoch von einer Behörde als personenbezogene Daten eingestuft werden, ist

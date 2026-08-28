@@ -127,6 +127,23 @@ SITE = "https://walkstamp.com"
 CAMINHO_CONTA = {"pt": "/conta", "en": "/en/account", "es": "/es/cuenta",
                  "de": "/de/konto", "fr": "/fr/compte"}
 
+# OS PEDAÇOS TRADUZIDOS DE CADA SUB-ROTA DA CONTA.
+#
+# Estava dentro do gerador de `rotas.json`, e isso bastava enquanto só o
+# `rotas.json` precisava dele. A política de privacidade passou a apontar para a
+# tela "Seus dados", e o endereço dela é traduzido: escrito à mão no corpo da
+# página, seria a cópia que manda o leitor alemão para `/de/konto/dados` — que
+# não existe, porque lá é `/de/konto/daten`.
+sub_conta = {
+    "roteiro":  {"pt": "roteiro",  "en": "cases",    "es": "casos",       "de": "testfaelle", "fr": "cas-de-test"},
+    "faturas":  {"pt": "faturas",  "en": "invoices", "es": "facturas",    "de": "rechnungen", "fr": "factures"},
+    "chamados": {"pt": "chamados", "en": "tickets",  "es": "incidencias", "de": "tickets",    "fr": "tickets"},
+    "time":     {"pt": "time",     "en": "team",     "es": "equipo",      "de": "team",       "fr": "equipe"},
+    "modelos":  {"pt": "modelos",  "en": "templates","es": "plantillas",  "de": "vorlagen",   "fr": "modeles"},
+    "negocio":  {"pt": "negocio",  "en": "business", "es": "negocio",     "de": "geschaeft",  "fr": "activite"},
+    "dados":    {"pt": "dados",    "en": "your-data","es": "datos",       "de": "daten",      "fr": "donnees"},
+}
+
 # Versão dos ícones. O navegador guarda favicon com unhas e dentes: sem um
 # parâmetro que mude, quem já visitou o site continua vendo o ícone antigo
 # mesmo depois do deploy. Suba este número sempre que a marca mudar.
@@ -181,6 +198,24 @@ CONTATO = "privacidade@walkstamp.com"
 # Se algum dia um contrato exigir a qualificação completa do encarregado, ela
 # vai no INSTRUMENTO ASSINADO entre as partes — que é privado —, e não no site.
 ENCARREGADO = "Leandro Batista de Oliveira"
+
+# ---------------------------------------------------------------------------
+# OS PRAZOS DE RETENÇÃO — a fonte única do lado do site.
+#
+# Eles existem em DOIS lugares, e é de propósito: aqui, para a política de
+# privacidade escrever o número em prosa nos cinco idiomas; e no banco, na
+# função `walkstamp.prazos()`, de onde o expurgo lê e a tela `/conta/dados`
+# mostra. Não dá para o site ler o banco: a política é HTML estático, servido
+# sem sessão e sem chave.
+#
+# O que impede as duas cópias de divergirem NÃO é boa memória: é a régua
+# `prazos.mjs`, que lê estes três números e a migração que define
+# `walkstamp.prazos()` e reprova se discordarem. Sem ela, isto seria a lista
+# paralela de sempre — e a que ninguém confere é a que vira mentira.
+# ---------------------------------------------------------------------------
+PRAZO_CONTA_DIAS   = 90
+PRAZO_LISTA_MESES  = 24
+PRAZO_EVENTO_MESES = 18
 
 # ---------------------------------------------------------------------------
 # Google Drive e Google Docs. Os três nascem VAZIOS e é assim que devem ficar
@@ -532,6 +567,9 @@ def escrever_marca(root: pathlib.Path) -> None:
         "supaUrl": SUPA_URL, "supaKey": SUPA_KEY,
         "analytics": ANALYTICS,
         "licPub": LIC_PUB, "licPubAuto": LIC_PUB_AUTO,
+        "prazoConta": str(PRAZO_CONTA_DIAS),
+        "prazoLista": str(PRAZO_LISTA_MESES),
+        "prazoEvento": str(PRAZO_EVENTO_MESES),
     }
     arq = root / "src" / "marca.json"
     arq.write_text(json.dumps(dados, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
@@ -569,15 +607,6 @@ def escrever_marca(root: pathlib.Path) -> None:
     # saía `undefined` nas páginas em alemão e em francês, num site que fala
     # cinco idiomas há semanas. Ninguém viu porque `undefined` num `href` não
     # quebra nada: só leva a lugar nenhum.
-    sub_conta = {
-        "roteiro":  {"pt": "roteiro",  "en": "cases",    "es": "casos",       "de": "testfaelle", "fr": "cas-de-test"},
-        "faturas":  {"pt": "faturas",  "en": "invoices", "es": "facturas",    "de": "rechnungen", "fr": "factures"},
-        "chamados": {"pt": "chamados", "en": "tickets",  "es": "incidencias", "de": "tickets",    "fr": "tickets"},
-        "time":     {"pt": "time",     "en": "team",     "es": "equipo",      "de": "team",       "fr": "equipe"},
-        "modelos":  {"pt": "modelos",  "en": "templates","es": "plantillas",  "de": "vorlagen",   "fr": "modeles"},
-        "negocio":  {"pt": "negocio",  "en": "business", "es": "negocio",     "de": "geschaeft",  "fr": "activite"},
-        "dados":    {"pt": "dados",    "en": "your-data","es": "datos",       "de": "daten",      "fr": "donnees"},
-    }
     # As abas do back-office. Elas NÃO são traduzidas, e isto é uma decisão:
     # o `/negocio` é o escritório de UMA pessoa — o dono, checado pelo
     # WALKSTAMP_DONO. Traduzir "cobranças" para cinco idiomas que ninguém vai
@@ -776,6 +805,11 @@ def build_site(root: pathlib.Path) -> None:
                  # palavra "conta" para achar a própria fatura
                  # A área do cliente agora fala os cinco idiomas, como o resto.
                  "conta": CAMINHO_CONTA[L],
+                 # O endereço da tela "Seus dados" — traduzido, como o resto da
+                 # conta. Escrito à mão na política de privacidade, ele seria a
+                 # cópia que aponta para /de/konto/dados, que não existe: lá é
+                 # /de/konto/daten. O `sub_conta` já sabe disso.
+                 "contaDados": CAMINHO_CONTA[L] + "/" + sub_conta["dados"][L],
                  # `blog` é a mesma palavra nos cinco idiomas, então ele não
                  # entra na tabela de slugs traduzidos — ela existe para os
                  # casos em que a palavra muda.
@@ -801,6 +835,9 @@ def build_site(root: pathlib.Path) -> None:
         t["cnpj"] = CNPJ
         t["contato"] = CONTATO
         t["encarregado"] = ENCARREGADO
+        t["prazoConta"] = str(PRAZO_CONTA_DIAS)
+        t["prazoLista"] = str(PRAZO_LISTA_MESES)
+        t["prazoEvento"] = str(PRAZO_EVENTO_MESES)
         t["selfPath"] = caminhos[lang]["home"]
         t["switcher"] = _switcher(lang, paginas, "home")
         # o link do comparativo vai montado aqui: colocar <a> dentro do JSON de
