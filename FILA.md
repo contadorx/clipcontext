@@ -151,7 +151,21 @@ destino voluntário.**
   roteiro, e **ainda assim** o modelo de voz precisa descer uma vez. É um
   produto diferente, não uma correção do atual.
 
-> **CUMPRIDO NO BUILD 36, a metade do offline.** O artefato de arquivo único
+> **DEC-1 FECHADA NO BUILD 37.** As duas metades entregues.
+>
+> **A do hospedado (caminho A), Build 37.** A frase existe uma vez por idioma —
+> *"Nada do seu conteúdo sai sem um gesto seu"* — e a matriz de exceções é
+> MONTADA do `src/egressao.json`, no mesmo bloco da frase. Antes disso a promessa
+> estava em nove chaves do dicionário e numa dúzia de páginas, cada uma com a sua
+> redação, e a tabela de conexões da página de segurança era escrita à mão em
+> cinco idiomas, sem nada que a ligasse ao código.
+> A régua `egressao.mjs` confere a matriz contra o produto: nada escondido (todo
+> endereço do app tem linha), nada morto (toda linha existe no app), o que sai
+> sozinho é exatamente o declarado — medido com o app servido e parado nove
+> segundos —, e o que exige gesto não sai sem gesto. Provada por reprovação: um
+> `fetch` para um destino não declarado a derruba.
+>
+> > **CUMPRIDO NO BUILD 36, a metade do offline.** O artefato de arquivo único
 > deixou de ter endereço de rede dentro: nem jsDelivr, nem Hugging Face, nem
 > Google, nem LinkedIn — medido, zero ocorrências, e o `build.py` PARA se um
 > voltar. As duas escolhas que precisavam de rede (transcrever enquanto grava,

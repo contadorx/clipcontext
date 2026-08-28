@@ -47,28 +47,9 @@
     rangée dans un dépôt interne, analysée par votre équipe et distribuée sans dépendre de nous.</p>
 
     <h2>Ce qui sort de votre machine, et quand</h2>
-    <table class="legal">
-      <tr><th>Connexion</th><th>Quand cela arrive</th><th>Ce qui part</th><th>Ce qui ne part jamais</th></tr>
-      <tr><td>Vercel (hébergement)</td><td>Toujours, à l’ouverture de la page</td>
-          <td>La requête du fichier de la page, avec l’IP et le navigateur — comme sur n’importe quel site</td>
-          <td>Votre contenu</td></tr>
-      <tr><td>Vercel Web Analytics</td><td>Toujours ; rien n’est envoyé si le navigateur émet <i>Do&nbsp;Not&nbsp;Track</i> ou <i>Global Privacy Control</i></td>
-          <td>Quelle page a été vue, sans cookie et sans identifiant qui persiste</td>
-          <td>Un identifiant de personne ou de session</td></tr>
-      <tr><td>Supabase (jalons d’usage)</td><td>À quinze jalons, onze dans l’outil et quatre dans le compte — l’outil a été ouvert, une vidéo a été ouverte, un fichier a été téléchargé, un script a été importé, un paiement a été commencé, entre autres. Respecte DNT et GPC</td>
-          <td>Le nom du jalon, la langue de la page, l’origine de la vidéo, le format téléchargé, une tranche (« 4-10 », jamais le nombre exact) et le forfait</td>
-          <td>Nom de fichier, taille, durée, contenu, identifiant de session</td></tr>
-      <tr><td>jsDelivr (CDN public)</td><td>Au chargement de l’outil (la bibliothèque PDF) et à l’usage de la transcription automatique ou de la lecture du texte dans l’image</td>
-          <td>La requête de la bibliothèque</td><td>Votre audio, votre image, votre texte</td></tr>
-      <tr><td>Hugging Face</td><td>Seulement au déclenchement de la transcription automatique, et une fois par navigateur</td>
-          <td>La requête du modèle de reconnaissance vocale</td><td>Votre audio</td></tr>
-      <tr><td>Google</td><td>Seulement si vous cliquez pour ouvrir une vidéo du Drive</td>
-          <td>L’authentification et la requête du fichier que vous choisissez, avec la portée la plus restreinte qui existe (<code>drive.file</code>)</td>
-          <td>Le reste de votre Drive ; et le fichier va de Google directement à votre navigateur, sans passer par nous</td></tr>
-      <tr><td>Google Docs (envoi)</td><td>Seulement si vous cliquez sur <b>Envoyer vers Google Docs</b>, et seulement après avoir confirmé l’avertissement qui apparaît</td>
-          <td>Le document Word monté dans votre navigateur — texte et images —, pour que Google le convertisse en document du Drive</td>
-          <td>Rien d’autre que le document que vous avez envoyé ; il va de votre navigateur directement à Google, sans passer par nous</td></tr>
-    </table>
+    <p class="lead" style="margin:14px 0 4px"><b>{{promessaA}}</b></p>
+    <p style="margin:0 0 16px">{{promessaAsub}}</p>
+    {{matrizEgressao}}
     <p><b>Aucune de ces connexions ne transporte de vidéo, d’audio, d’image ou de transcription.</b>
     La bibliothèque PDF vient de jsDelivr avec la page ; c’est le paquet hors ligne qui l’intègre.</p>
     <p>Il y a une exception, et elle est dans le tableau plutôt que cachée : le bouton <b>Envoyer vers Google Docs</b>

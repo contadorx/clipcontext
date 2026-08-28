@@ -49,28 +49,9 @@
     Abhängigkeit von uns verteilt werden.</p>
 
     <h2>Was Ihren Rechner verlässt, und wann</h2>
-    <table class="legal">
-      <tr><th>Verbindung</th><th>Wann es geschieht</th><th>Was übertragen wird</th><th>Was nie übertragen wird</th></tr>
-      <tr><td>Vercel (Hosting)</td><td>Immer, beim Öffnen der Seite</td>
-          <td>Die Anfrage nach der Datei der Seite, mit IP und Browser — wie auf jeder Website</td>
-          <td>Ihre Inhalte</td></tr>
-      <tr><td>Vercel Web Analytics</td><td>Immer; sendet nichts, wenn der Browser <i>Do&nbsp;Not&nbsp;Track</i> oder <i>Global Privacy Control</i> übermittelt</td>
-          <td>Welche Seite aufgerufen wurde, ohne Cookie und ohne dauerhafte Kennung</td>
-          <td>Eine Kennung für Person oder Sitzung</td></tr>
-      <tr><td>Supabase (Nutzungsmeilensteine)</td><td>Bei fünfzehn Meilensteinen, elf im Werkzeug und vier im Konto — Werkzeug geöffnet, Video geöffnet, Datei heruntergeladen, Ablauf importiert, Zahlung begonnen, unter anderem. Beachtet DNT und GPC</td>
-          <td>Der Name des Meilensteins, die Sprache der Seite, die Herkunft des Videos, das heruntergeladene Format, eine Spanne („4-10“, nie die genaue Zahl) und der Tarif</td>
-          <td>Dateiname, Größe, Dauer, Inhalt, Sitzungskennung</td></tr>
-      <tr><td>jsDelivr (öffentliches CDN)</td><td>Beim Laden des Werkzeugs (die PDF-Bibliothek) und bei Nutzung der automatischen Transkription oder des Auslesens von Text aus dem Bild</td>
-          <td>Die Anfrage nach der Bibliothek</td><td>Ihr Audio, Ihr Bild, Ihr Text</td></tr>
-      <tr><td>Hugging Face</td><td>Nur beim Auslösen der automatischen Transkription, und einmal pro Browser</td>
-          <td>Die Anfrage nach dem Spracherkennungsmodell</td><td>Ihr Audio</td></tr>
-      <tr><td>Google</td><td>Nur wenn Sie darauf klicken, ein Video aus Drive zu öffnen</td>
-          <td>Die Authentifizierung und die Anfrage nach der Datei, die Sie auswählen, mit dem engsten Berechtigungsumfang, den es gibt (<code>drive.file</code>)</td>
-          <td>Der Rest Ihres Drive; und die Datei geht von Google direkt in Ihren Browser, ohne über uns zu laufen</td></tr>
-      <tr><td>Google Docs (Übertragung)</td><td>Nur wenn Sie auf <b>An Google Docs senden</b> klicken, und erst nachdem Sie den erscheinenden Hinweis bestätigt haben</td>
-          <td>Das in Ihrem Browser zusammengesetzte Word-Dokument — Text und Bilder —, damit Google es in ein Dokument in Drive umwandelt</td>
-          <td>Nichts außer dem Dokument, das Sie gesendet haben; es geht von Ihrem Browser direkt an Google, ohne über uns zu laufen</td></tr>
-    </table>
+    <p class="lead" style="margin:14px 0 4px"><b>{{promessaA}}</b></p>
+    <p style="margin:0 0 16px">{{promessaAsub}}</p>
+    {{matrizEgressao}}
     <p><b>Keine dieser Verbindungen überträgt Video, Audio, Bild oder Transkription.</b>
     Die PDF-Bibliothek kommt zusammen mit der Seite von jsDelivr; eingebettet wird sie erst im Offline-Paket.</p>
     <p>Es gibt eine Ausnahme, und sie steht in der Tabelle, statt versteckt zu sein: Die Schaltfläche

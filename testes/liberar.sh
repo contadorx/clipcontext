@@ -56,7 +56,7 @@ read -r -d '' MAPA <<'MAPA_FIM'
 # nem `anotacao`, que são exatamente as que afirmam sobre isso. Quem toca o
 # produto roda o grupo do produto — é o `app` do `rapido.sh`, sem servidor, e é
 # o preço honesto de mexer no arquivo que faz tudo.
-^src/template[.]html$ => offlineb.mjs semrede.mjs escolhas.mjs erro.mjs smoke.mjs saidas.mjs passos.mjs dobra.mjs travado.mjs gravando.mjs janelinha.mjs comentario.mjs marcados.mjs revisao.mjs marca.mjs formato.mjs promptcx.mjs appidioma.mjs compartilhar.mjs celular.mjs teto.mjs cenario1.mjs organiza.mjs acabamento.mjs lente2.mjs traducao.mjs passomulti.mjs pessoas.mjs matriz.mjs conclusao.mjs parar.mjs entrada.mjs indice.mjs figura.mjs resumo.mjs perna.mjs cartao.mjs etapas.mjs marcos.mjs semundefined.mjs reabrir.mjs juntar.mjs juntos.mjs grade.mjs anotacao.mjs trocar.mjs varredura.mjs descarte.mjs clipe.mjs numeros.mjs vocab.mjs foco.mjs apoio.mjs nitidez.mjs versoes.mjs marcar.mjs janelinha.mjs emissor.mjs
+^src/template[.]html$ => offlineb.mjs egressao.mjs semrede.mjs escolhas.mjs erro.mjs smoke.mjs saidas.mjs passos.mjs dobra.mjs travado.mjs gravando.mjs janelinha.mjs comentario.mjs marcados.mjs revisao.mjs marca.mjs formato.mjs promptcx.mjs appidioma.mjs compartilhar.mjs celular.mjs teto.mjs cenario1.mjs organiza.mjs acabamento.mjs lente2.mjs traducao.mjs passomulti.mjs pessoas.mjs matriz.mjs conclusao.mjs parar.mjs entrada.mjs indice.mjs figura.mjs resumo.mjs perna.mjs cartao.mjs etapas.mjs marcos.mjs semundefined.mjs reabrir.mjs juntar.mjs juntos.mjs grade.mjs anotacao.mjs trocar.mjs varredura.mjs descarte.mjs clipe.mjs numeros.mjs vocab.mjs foco.mjs apoio.mjs nitidez.mjs versoes.mjs marcar.mjs janelinha.mjs emissor.mjs
 ^src/features[.]json$ => planos.mjs promessa.mjs site:precos.mjs
 ^src/i18n-conta[.]json$ => chaves.mjs site:compra.mjs site:cancelar.mjs site:meusdados.mjs
 ^src/i18n-site[.]json$ => chaves.mjs site:cinco.mjs site:contradicao.mjs site:buscaajuda.mjs
@@ -68,7 +68,7 @@ read -r -d '' MAPA <<'MAPA_FIM'
 # então estas somam com a genérica em vez de substituí-la.
 ^src/site/bodies/precos[.] => site:precos.mjs venda.mjs
 ^src/site/bodies/(termos|privacidade)[.] => site:legal.mjs prazos.mjs
-^src/site/bodies/seguranca[.] => site:legal.mjs matriz.mjs
+^src/site/bodies/seguranca[.] => site:legal.mjs matriz.mjs egressao.mjs
 ^src/site/bodies/comparativo[.] => comparar.mjs
 ^src/site/bodies/caso[A-Za-z]*[.] => site:vitrine.mjs cenarios.mjs
 ^src/site/bodies/ajuda[.] => site:ajuda.mjs site:buscaajuda.mjs
@@ -78,6 +78,7 @@ read -r -d '' MAPA <<'MAPA_FIM'
 ^src/site/support[.]js$ => site:ficha.mjs site:paginas.mjs site:buscaajuda.mjs
 ^src/versoes[.]json$ => versoes.mjs
 ^build[.]py$ => versoes.mjs figuras.mjs cartao.mjs promessa.mjs planos.mjs auditoria.mjs site:precos.mjs site:compra.mjs prazos.mjs
+^src/egressao[.]json$ => egressao.mjs terceiros.mjs site:paginas.mjs
 ^src/rotas[.]json$ => middleware.mjs site:idiomas.mjs site:paginas.mjs
 ^middleware[.]ts$ => middleware.mjs
 ^next[.]config[.]mjs$ => site:paginas.mjs site:seo.mjs
@@ -92,7 +93,7 @@ read -r -d '' MAPA <<'MAPA_FIM'
 ^lib/ => site:paginas.mjs site:buscaajuda.mjs
 ^public/sw[.]js$ => site:seo.mjs
 ^public/site[.]css$ => folha.mjs site:paginas.mjs site:dobrafig.mjs
-^offline/ => site:medicao.mjs offlineb.mjs
+^offline/ => site:medicao.mjs offlineb.mjs egressao.mjs
 ^supabase/migrations/ => modelopessoal.mjs conferir-migracoes prazos.mjs
 ^testes/ => inventario.mjs
 MAPA_FIM
