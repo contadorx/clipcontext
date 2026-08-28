@@ -42,6 +42,7 @@ import { NextResponse } from 'next/server';
 import { createHash } from 'crypto';
 import marca from '@/src/marca.json';
 import { mandarEmail, podeMandarEmail } from '@/lib/email';
+import { moldeDeCarta } from '@/lib/carta';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -162,37 +163,12 @@ const TEXTOS: Record<Lang, {
   },
 };
 
-const esc = (v: string) =>
-  v.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-
-/* Tabela e estilo em linha, como no modelo do link mágico e pelo mesmo motivo:
-   cliente de e-mail não lê folha de estilo, não lê flex, e o Outlook não lê
-   metade do resto. A marca vai em TEXTO — metade dos clientes bloqueia imagem
-   por padrão, e uma marca que não carrega é pior do que marca nenhuma. */
-function montarHtml(t: (typeof TEXTOS)[Lang], nome: string, quem: string, url: string) {
-  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
-  style="background:#f5f6f9;margin:0;padding:28px 12px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif">
-  <tr><td align="center">
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
-      style="max-width:480px;background:#ffffff;border:1px solid #e6e8ee;border-radius:14px">
-      <tr><td style="padding:30px 32px 26px">
-        <p style="margin:0 0 24px;font-size:23px;font-weight:700;letter-spacing:-.015em;color:#1f2430">
-          Walk<span style="color:#3A3F9E">stamp</span></p>
-        <p style="margin:0 0 12px;font-size:18px;font-weight:650;color:#1f2430">${esc(t.ola(nome))}</p>
-        <p style="margin:0 0 22px;font-size:15px;line-height:1.6;color:#5C6473">${esc(t.corpo)}</p>
-        <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 22px">
-          <tr><td align="center" bgcolor="#3A3F9E" style="border-radius:9px">
-            <a href="${esc(url)}" style="display:inline-block;padding:13px 26px;font-size:15.5px;
-              font-weight:650;color:#ffffff;text-decoration:none;border-radius:9px">${esc(t.botao)}</a>
-          </td></tr>
-        </table>
-        <p style="margin:0;font-size:13px;line-height:1.55;color:#8A93A3;
-          border-top:1px solid #eceef4;padding-top:18px">${esc(t.porque(quem))}<br>${esc(t.rodape)}</p>
-      </td></tr>
-    </table>
-  </td></tr>
-</table>`;
-}
+/* O ESC E O MOLDE SAÍRAM DAQUI e viraram `lib/carta.ts` — 28/08. Havia dois
+   HTMLs de carta no produto (este e o do aviso de chamado) e o convite de
+   assento ia ser o terceiro. Em e-mail esse defeito é invisível de dentro:
+   ninguém abre as três no Outlook para comparar, e a que ficou sem a cor de
+   fundo só aparece errada na caixa de quem recebe — que não reclama, só não
+   clica. */
 
 /** Conta e registra, no banco, com a chave de serviço. Devolve `false` quando
  *  o limite estourou — e `null` quando o banco não respondeu, que é diferente:
@@ -257,7 +233,8 @@ export async function POST(req: Request) {
     para,
     nome: nome || undefined,
     assunto: t.assunto(quem),
-    html: montarHtml(t, nome, quem, url),
+    html: moldeDeCarta({ ola: t.ola(nome), corpo: [t.corpo], botao: t.botao, url,
+                         rodape: [t.porque(quem), t.rodape] }),
     texto: `${t.ola(nome)}\n\n${t.corpo}\n\n${url}\n\n${t.porque(quem)}\n${t.rodape}`,
   });
   if (!enviado.ok) return NextResponse.json({ erro: 'envio' }, { status: 502 });

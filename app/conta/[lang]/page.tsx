@@ -50,6 +50,13 @@ export default async function Pagina({ params, searchParams }: PageProps<'/conta
     <>
       {recado('erro') && <p className="aviso err">{recado('erro')}</p>}
       {recado('feito') && <p className="aviso ok">{recado('feito')}</p>}
+      {/* O MEIO-TERMO, e por que ele não é nem verde nem vermelho. O convite de
+          assento faz duas coisas: cria o assento e manda o e-mail. Quando a
+          segunda falha, "deu certo" faz o administrador ir embora achando que a
+          pessoa foi avisada, e "deu erro" o faz repetir uma criação que já
+          aconteceu. As duas leituras erradas custam caro, e cada uma para um
+          lado. */}
+      {recado('parcial') && <p className="aviso">{recado('parcial')}</p>}
       {recado('comprou') && <p className="aviso ok">{t.avisoComprou}</p>}
       {recado('cancelou') && <p className="aviso">{t.avisoCancelou}</p>}
     </>

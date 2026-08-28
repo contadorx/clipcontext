@@ -147,15 +147,20 @@ const abrir = async (rota = '/conta') => {
   await pg.waitForTimeout(400);
 };
 
-/** Clica e espera a volta do Server Action, que sempre traz `feito` ou `erro`
- *  no endereço. Esperar `networkidle` não serve: ele resolve antes do
- *  redirecionamento e o teste lê a tela velha. */
+/** Clica e espera a volta do Server Action, que sempre traz `feito`, `erro` ou
+ *  `parcial` no endereço. Esperar `networkidle` não serve: ele resolve antes do
+ *  redirecionamento e o teste lê a tela velha.
+ *
+ *  `parcial` entrou em 28/08 com o convite de assento, que faz DUAS coisas: cria
+ *  o assento e manda o e-mail. Aqui não há disparador configurado, então o
+ *  convite legítimo volta em `parcial` — o assento nasceu, a carta não saiu. É
+ *  o comportamento certo, e sem esta linha o teste esperaria para sempre. */
 async function enviar(seletor) {
   /* `.first()` porque vários botões legítimos compartilham o mesmo rótulo — dois
      modelos têm "Apagar", e o modo estrito do Playwright recusa a ambiguidade.
      Quem escolhe qual é o teste, e para estas ações o primeiro serve. */
   await pg.locator(seletor).first().click();
-  await pg.waitForURL(/[?&](feito|erro)=/, { timeout: 20000 });
+  await pg.waitForURL(/[?&](feito|erro|parcial)=/, { timeout: 20000 });
 }
 const corpo = () => pg.locator('body').innerText();
 
@@ -232,6 +237,16 @@ console.log('\n[4] convidar, e o limite de assento');
   ok('com o convidado', !!c && c.args.p_email === 'novo@teste-portal.example', c && c.args.p_email);
   ok('e o admin da sessão, nunca do formulário',
      !!c && c.args.p_admin === 'chefe@teste-portal.example', c && c.args.p_admin);
+  /* SEM DISPARADOR CONFIGURADO, A TELA NÃO DIZ "CONVIDADO" — 28/08.
+     O assento nasce no banco de qualquer jeito; o e-mail é a segunda metade e
+     falha sozinha. Uma tela que diz "convite enviado" faz o administrador ir
+     embora achando que a pessoa foi avisada — e quem fica sem saber que tem
+     assento é o convidado, que não tem como reclamar do que não recebeu.
+     Aqui não há BREVO_API_KEY, então o caminho certo é este. O e-mail saindo
+     de verdade é provado no `email.mjs`, que tem o Brevo de mentira de pé. */
+  ok('e a tela conta que o convite não saiu, em vez de dizer que saiu',
+     /[?&]parcial=/.test(pg.url()) && /assento/i.test(await corpo()),
+     pg.url().replace(/^.*\?/, '?').slice(0, 90));
 
   RECUSA = 'sem_assento';
   await abrir('/conta/time');
@@ -249,7 +264,7 @@ console.log('\n[4] convidar, e o limite de assento');
   await pg.locator('input[type="email"][name="email"]').first().fill('torto@');
   await pg.locator('button:has-text("Convidar")').click();
   await pg.waitForTimeout(800);
-  ok('e-mail torto nem sai do navegador', !/[?&](feito|erro)=/.test(pg.url()), pg.url());
+  ok('e-mail torto nem sai do navegador', !/[?&](feito|erro|parcial)=/.test(pg.url()), pg.url());
   ok('e não encosta no banco',
      !chamadas.slice(antesTorto).some((x) => x.fn === 'walkstamp_time_convidar'));
 

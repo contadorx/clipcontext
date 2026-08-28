@@ -82,7 +82,16 @@ read -r -d '' MAPA <<'MAPA_FIM'
 ^src/rotas[.]json$ => middleware.mjs site:idiomas.mjs site:paginas.mjs
 ^middleware[.]ts$ => middleware.mjs
 ^next[.]config[.]mjs$ => site:paginas.mjs site:seo.mjs
-^app/conta/ => site:compra.mjs site:negocio.mjs entrada2.mjs site:cancelar.mjs site:meusdados.mjs marcos-a11y.mjs
+# O PAINEL TOCADO CHAMA A RÉGUA DO PAINEL — 28/08.
+# O `portal.mjs` — que É a régua da área do cliente: assentos, convite,
+# faturas, padrões, modelos e histórico — não aparecia em linha nenhuma deste
+# mapa. Mexer no `app/conta/acoes.ts` saía verde sem ela rodar, que é o mesmo
+# defeito que a nota da `precos.mjs` acima descreve.
+^app/conta/ => site:compra.mjs site:negocio.mjs entrada2.mjs site:cancelar.mjs site:meusdados.mjs marcos-a11y.mjs site:portal.mjs
+# Os três e-mails do produto saem do mesmo molde desde 28/08. Tocar o molde
+# sem rodar a régua das cartas seria mudar o que chega na caixa de um cliente
+# sem nada olhar — e em e-mail o defeito é invisível de dentro.
+^lib/(carta[.]ts|email[.]ts|conta/(convite-assento|aviso-chamado)[.]ts)$ => site:email.mjs site:convite.mjs site:portal.mjs
 ^app/ => site:paginas.mjs site:seo.mjs site:negocio.mjs
 ^public/site[.]css$ => site:estreito.mjs site:paginas.mjs site:dobra.mjs site:buscaajuda.mjs
 ^src/site/(doc|home)[.]html$ => site:estreito.mjs site:paginas.mjs site:cabecalho.mjs marcos-a11y.mjs

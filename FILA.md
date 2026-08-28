@@ -125,6 +125,46 @@ nenhum dos dois reproduzia sozinho.
 
 ---
 
+## ACHADO — o corredor específico não alcança 62 das 171 réguas *(28/08)*
+
+Medido no Build 48, e ninguém tinha olhado: das 171 réguas, **62 não aparecem
+em linha nenhuma do mapa do `liberar.sh` nem na lista de contratos.** Não
+importa o que o build toque — elas só rodam no `rodar.sh` completo.
+
+Não é defeito do mapa: ele é escrito à mão de propósito, e boa parte das réguas
+de produto entra pela linha do `src/template.html`. É um **limite**, e o que
+faltava era ele estar escrito. "Esteira específica verde" quer dizer *verde no
+que o mapa alcança* — e sem este número ninguém sabia quanto era.
+
+Duas dessas 62 saíram neste build, e foram as que doeram:
+
+- **`portal.mjs`** — a régua da área do cliente (assentos, convite, faturas,
+  modelos) — não estava no mapa. Mexer no `app/conta/acoes.ts` saía verde sem
+  ela rodar. Ligada ao `^app/conta/`.
+- **as cartas** — `lib/carta.ts`, `lib/email.ts` e os dois módulos de e-mail
+  agora chamam `email.mjs`, `convite.mjs` e `portal.mjs`.
+
+O `inventario.mjs` ganhou o bloco [6] com o **teto de 62, que só desce**: uma
+régua nova que ninguém ligar ao mapa reprova no dia em que nasce, em vez de
+virar mais um nome nesta lista. Baixar o teto é o trabalho de quem for
+mapeando o resto.
+
+---
+
+## ACHADO FECHADO — o conferidor de migrações aprovava por vazio *(28/08)*
+
+`sh supabase/conferir.sh` dizia **"46 conferem, 0 faltam, 0 diferem"** e saía
+verde — com **54 migrações no disco**. As oito de fora não estavam erradas:
+estavam **invisíveis**, livres para mudar sem nada reclamar. Um portão que
+aprova por vazio é pior que portão nenhum, porque ninguém desconfia do verde.
+
+As oito entraram no `MANIFESTO.md5` (as sete antigas estão aplicadas no banco —
+conferido na lista de migrações do Supabase) e o `conferir.sh` passou a comparar
+**nos dois sentidos**: agora um arquivo no disco fora do manifesto reprova.
+Provado por falha: tirando uma linha do manifesto, ele sai com 1.
+
+---
+
 # Parte 1 — As decisões
 
 Uma por vez. Cada uma tem os caminhos, o que se ganha e o que se perde em cada

@@ -111,5 +111,40 @@ console.log('\n[5] a pista de liberação conta as MESMAS réguas');
      faltando.length ? `fora da conta do rodapé: ${faltando.join(', ')}` : '');
 }
 
+console.log('\n[6] quantas réguas o corredor específico NÃO consegue chamar');
+{
+  /* MEDIDO EM 28/08, e é um número que ninguém tinha olhado: das réguas do
+     disco, **62 não aparecem em linha nenhuma do mapa do `liberar.sh` nem na
+     lista dos contratos** (eram 64 antes de este build ligar o `portal.mjs` e as
+     cartas). Não importa o que o build toque — elas só rodam no
+     `rodar.sh` completo.
+     Isso não é um defeito do mapa: ele é escrito à mão de propósito, e muita
+     régua de produto entra pela linha do `src/template.html`. É um LIMITE, e o
+     que faltava era ele estar escrito. "Esteira específica verde" quer dizer
+     "verde no que o mapa alcança" — e sem este número ninguém sabia quanto era.
+     O TETO SÓ DESCE. Ele não obriga a mapear tudo hoje; obriga a não abrir mais
+     buraco amanhã. Uma régua nova que ninguém liga ao mapa reprova aqui, no
+     mesmo dia em que nasce, em vez de virar mais um nome nesta lista. */
+  const TETO = 62;
+  const lib = fs.readFileSync(path.join(AQUI, 'liberar.sh'), 'utf8');
+  const mapa = (lib.split("<<'MAPA_FIM'")[1] || '').split('MAPA_FIM')[0];
+  const contratos = (lib.match(/CONTRATOS="([\s\S]*?)"/) || ['', ''])[1];
+  const alcancadas = new Set([...`${mapa}\n${contratos}`.matchAll(/([a-z0-9-]+\.mjs)/g)].map((m) => m[1]));
+  const fora = disco.filter((f) => !alcancadas.has(f) && !INSTRUMENTOS.has(f)).sort();
+  ok(`o corredor específico alcança ${disco.length - fora.length} das ${disco.length} réguas`,
+     fora.length <= TETO,
+     fora.length > TETO
+       /* NÃO lista nomes aqui: a lista sai em ordem alfabética e apontaria os
+          seis primeiros como culpados, que é o contrário do que aconteceu. */
+       ? `${fora.length} fora do alcance, e o teto é ${TETO} — ligue a régua nova ` +
+         'a uma linha do mapa do liberar.sh, ou baixe o teto se ela sumiu'
+       : `${fora.length} fora do alcance, teto ${TETO}`);
+  /* O teto frouxo é teto que não segura: se o número já caiu, ele desce junto,
+     senão a folga vira espaço para um buraco novo entrar sem reprovar. */
+  ok('  e o teto está colado no número de hoje', fora.length >= TETO - 2,
+     fora.length >= TETO - 2 ? `hoje ${fora.length}, teto ${TETO}`
+                             : `hoje ${fora.length} — baixe o TETO para ${fora.length}`);
+}
+
 console.log(falhas ? `\n${falhas} FALHA(S)` : '\nInventário dos testes: os quatro números batem.');
 process.exit(falhas ? 1 : 0);
