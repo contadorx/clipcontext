@@ -754,8 +754,54 @@ function indiceDaAjuda(corpo: string, t: Dicionario): string {
 function embrulharTabelas(corpo: string): string {
   return corpo.replace(
     /<table class="legal"[\s\S]*?<\/table>/g,
-    (t) => `<div class="tabRola" tabindex="0" role="region" aria-label="tabela">${t}</div>`,
+    (t) => `<div class="tabRola" tabindex="0" role="region" aria-label="tabela">${rotularCelulas(t)}</div>`,
   );
+}
+
+/** O RÓTULO DE CADA CÉLULA, para a tabela poder EMPILHAR no telefone.
+ *
+ *  O problema, medido a 380px: a maior destas tabelas tem **3452px** — nove
+ *  telas para o lado. E o transbordo não é o pior: a PRIMEIRA COLUNA ROLA PARA
+ *  FORA, então na quarta coluna a pessoa já não sabe em que linha está. Rolar
+ *  de lado resolve o layout e não resolve a leitura.
+ *
+ *  O comentário do `.tabRola` argumenta, com razão, que a tabela não pode
+ *  ENCOLHER — quatro colunas de prazo não cabem em 380px sem virar ilegível, e
+ *  o alemão tem palavra composta que não quebra. Empilhar é outra coisa:
+ *  ninguém é espremido, cada célula ganha a linha inteira e leva o nome da
+ *  coluna junto.
+ *
+ *  E o nome vem do `<th>` da própria tabela, copiado para um `data-rot` em cada
+ *  `<td>` da coluna. Escrito à mão nas 85 páginas seriam 85 lugares onde a
+ *  próxima tabela nasce sem rótulo — e cinco idiomas onde ele nasce em
+ *  português. Aqui toda tabela que entrar já nasce rotulada, no idioma dela.
+ */
+function rotularCelulas(tabela: string): string {
+  const cab = [...tabela.matchAll(/<th\b[^>]*>([\s\S]*?)<\/th>/g)]
+    .map((m) => m[1].replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim());
+  if (!cab.length) return tabela;
+  /* A primeira linha com `<th>` é o cabeçalho; as outras são dados. O `<th>`
+     de canto de algumas tabelas fica vazio, e um rótulo vazio é pior que
+     nenhum: ele desenha um espaço em branco antes do valor. */
+  return tabela.replace(/<tr\b[^>]*>[\s\S]*?<\/tr>/g, (linha) => {
+    /* A LINHA DE CABEÇALHO GANHA UMA CLASSE, e não confio no `<thead>`: metade
+       destas tabelas escreve os `<th>` numa `<tr>` solta, sem `<thead>` nenhum.
+       Esconder só o `thead` deixava esses `<th>` de pé — e foi exatamente isso
+       que empurrou a página para 488px quando a versão empilhada entrou.
+       Podia ser `tr:has(th)` no CSS; é uma classe aqui porque assim a regra não
+       depende de o navegador de quem lê ter `:has()`. */
+    if (/<th\b/.test(linha)) {
+      return /<tr[^>]*class=/.test(linha)
+        ? linha.replace(/<tr([^>]*)class="/, '<tr$1class="cabTab ')
+        : linha.replace(/<tr/, '<tr class="cabTab"');
+    }
+    let i = -1;
+    return linha.replace(/<td\b/g, () => {
+      i += 1;
+      const r = cab[i] || '';
+      return r ? `<td data-rot="${escapar(r)}"` : '<td';
+    });
+  });
 }
 
 /** Os hreflang de uma página. O `x-default` só na home, como no site antigo:

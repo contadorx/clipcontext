@@ -1721,7 +1721,7 @@
                pode causar. O limite é generoso e desligável, e ele PARA como se
                a pessoa tivesse apertado Parar — o documento sai inteiro. -->
           <label class="opt"><input type="checkbox" id="recAuto" checked><span data-i18n="recAutoLbl"></span>
-            <input type="number" id="recAutoMin" value="45" min="1" max="240"
+            <input type="number" id="recAutoMin" value="45" min="1" max="240" data-i18n-aria="ariaRecAutoMin"
                    style="width:66px;padding:4px 7px;font-size:13px;margin-left:8px">
             <span class="status" data-i18n="recAutoMinLbl"></span></label>
           <!-- O espelho no disco TAMBÉM saiu da lista, e é padrão.
@@ -3030,9 +3030,9 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
            é de quem chamou e a reputação queimada é a nossa. -->
       <div class="hide" id="compEmailCx" style="margin:10px 0 0">
         <div class="row" style="gap:8px;flex-wrap:wrap;align-items:center">
-          <input type="email" id="compPara" autocomplete="off" maxlength="254"
+          <input type="email" id="compPara" autocomplete="off" maxlength="254" data-i18n-aria="ariaCompPara"
                  style="flex:1;min-width:200px;max-width:280px">
-          <input type="text" id="compQuem" autocomplete="off" maxlength="40"
+          <input type="text" id="compQuem" autocomplete="off" maxlength="40" data-i18n-aria="ariaCompQuem"
                  style="width:auto;max-width:170px">
           <button class="sm" id="compEnviar"></button>
         </div>
@@ -3143,7 +3143,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       <div class="row hide" id="cmpBox" style="margin-top:8px;gap:10px;align-items:center">
         <label class="chk" for="cmpCom" data-i18n="cmpCom"></label>
         <select id="cmpCom" style="width:auto"></select>
-        <input type="range" id="cmpMistura" min="0" max="100" value="50" style="width:150px">
+        <input type="range" id="cmpMistura" min="0" max="100" value="50" data-i18n-aria="ariaCmpMistura" style="width:150px">
         <span class="status" id="cmpMsg"></span>
         <button class="ghost sm" id="cmpDiff" data-i18n="cmpDiff"></button>
       </div>
@@ -3962,7 +3962,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       recBtn:'Gravar a tela', recStopBtn:'Parar gravação',
       recAdiantando:'Baixando o modelo de voz agora, para não atrasar a gravação. Pode escolher a tela quando quiser.',
       recPronto:'Modelo pronto. A gravação começa na hora.',
-      pipCurtoMarcar:'Marcar', pipCurtoTela:'+ Tela', pipCurtoErro:'Erro', pipCurtoPausa:'Pausar', pipCurtoVolta:'Retomar', pipCurtoCalar:'Mudo', pipCurtoSom:'Som', pipCurtoParar:'Parar', recErroBtn:'Marcar erro nesta tela', recErroFeito:'Erro marcado na tela {0} — descreva o que aconteceu.',
+      pipCurtoMarcar:'Marcar', pipCurtoTela:'+ Tela', pipCurtoErro:'Erro', ariaRecAutoMin:'Parar sozinho depois de quantos minutos', ariaCompPara:'E-mail de quem vai receber', ariaCompQuem:'Seu nome, para a mensagem', ariaCmpMistura:'Mistura entre o antes e o depois', pipCurtoPausa:'Pausar', pipCurtoVolta:'Retomar', pipCurtoCalar:'Mudo', pipCurtoSom:'Som', pipCurtoParar:'Parar', recErroBtn:'Marcar erro nesta tela', recErroFeito:'Erro marcado na tela {0} — descreva o que aconteceu.',
       recPauseBtn:'Pausar', recResumeBtn:'Retomar', recMarkBtn:'Marcar este passo',
       recTelaBtn:'Tela adicional a este passo',
       recTelaFeita:'Mais uma tela guardada no {0}.',
@@ -4604,7 +4604,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       recBtn:'Record the screen', recStopBtn:'Stop recording',
       recAdiantando:'Downloading the speech model now, so it does not delay the recording. Pick your screen whenever you like.',
       recPronto:'Model ready. Recording starts immediately.',
-      pipCurtoMarcar:'Mark', pipCurtoTela:'+ Screen', pipCurtoErro:'Error', pipCurtoPausa:'Pause', pipCurtoVolta:'Resume', pipCurtoCalar:'Mute', pipCurtoSom:'Sound', pipCurtoParar:'Stop', recErroBtn:'Mark an error on this screen', recErroFeito:'Error marked on screen {0} — describe what happened.',
+      pipCurtoMarcar:'Mark', pipCurtoTela:'+ Screen', pipCurtoErro:'Error', ariaRecAutoMin:'Stop by itself after how many minutes', ariaCompPara:'E-mail of whoever will receive it', ariaCompQuem:'Your name, for the message', ariaCmpMistura:'Blend between before and after', pipCurtoPausa:'Pause', pipCurtoVolta:'Resume', pipCurtoCalar:'Mute', pipCurtoSom:'Sound', pipCurtoParar:'Stop', recErroBtn:'Mark an error on this screen', recErroFeito:'Error marked on screen {0} — describe what happened.',
       recPauseBtn:'Pause', recResumeBtn:'Resume', recMarkBtn:'Mark this step',
       recTelaBtn:'Additional screen for this step',
       recTelaFeita:'One more screen saved in {0}.',
@@ -5231,7 +5231,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       recBtn:'Grabar la pantalla', recStopBtn:'Detener grabación',
       recAdiantando:'Descargando el modelo de voz ahora, para no retrasar la grabación. Elige la pantalla cuando quieras.',
       recPronto:'Modelo listo. La grabación empieza al instante.',
-      pipCurtoMarcar:'Marcar', pipCurtoTela:'+ Pantalla', pipCurtoErro:'Error', pipCurtoPausa:'Pausar', pipCurtoVolta:'Seguir', pipCurtoCalar:'Silencio', pipCurtoSom:'Sonido', pipCurtoParar:'Parar', recErroBtn:'Marcar un error en esta pantalla', recErroFeito:'Error marcado en la pantalla {0} — describe qué pasó.',
+      pipCurtoMarcar:'Marcar', pipCurtoTela:'+ Pantalla', pipCurtoErro:'Error', ariaRecAutoMin:'Parar solo después de cuántos minutos', ariaCompPara:'Correo de quien lo va a recibir', ariaCompQuem:'Tu nombre, para el mensaje', ariaCmpMistura:'Mezcla entre el antes y el después', pipCurtoPausa:'Pausar', pipCurtoVolta:'Seguir', pipCurtoCalar:'Silencio', pipCurtoSom:'Sonido', pipCurtoParar:'Parar', recErroBtn:'Marcar un error en esta pantalla', recErroFeito:'Error marcado en la pantalla {0} — describe qué pasó.',
       recPauseBtn:'Pausar', recResumeBtn:'Reanudar', recMarkBtn:'Marcar este paso',
       recTelaBtn:'Pantalla adicional de este paso',
       recTelaFeita:'Una pantalla más guardada en {0}.',
@@ -5857,7 +5857,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       recBtn:'Bildschirm aufnehmen', recStopBtn:'Aufnahme stoppen',
       recAdiantando:'Das Spracherkennungsmodell wird jetzt heruntergeladen, damit es die Aufnahme nicht verzögert. Sie können den Bildschirm jederzeit auswählen.',
       recPronto:'Modell bereit. Die Aufnahme startet sofort.',
-      pipCurtoMarcar:'Markieren', pipCurtoTela:'+ Bildschirm', pipCurtoErro:'Fehler', pipCurtoPausa:'Pause', pipCurtoVolta:'Weiter', pipCurtoCalar:'Stumm', pipCurtoSom:'Ton', pipCurtoParar:'Stopp', recErroBtn:'Fehler auf diesem Bildschirm markieren', recErroFeito:'Fehler auf Bildschirm {0} markiert — beschreiben Sie, was passiert ist.',
+      pipCurtoMarcar:'Markieren', pipCurtoTela:'+ Bildschirm', pipCurtoErro:'Fehler', ariaRecAutoMin:'Nach wie vielen Minuten von selbst stoppen', ariaCompPara:'E-Mail der empfangenden Person', ariaCompQuem:'Ihr Name, für die Nachricht', ariaCmpMistura:'Übergang zwischen Vorher und Nachher', pipCurtoPausa:'Pause', pipCurtoVolta:'Weiter', pipCurtoCalar:'Stumm', pipCurtoSom:'Ton', pipCurtoParar:'Stopp', recErroBtn:'Fehler auf diesem Bildschirm markieren', recErroFeito:'Fehler auf Bildschirm {0} markiert — beschreiben Sie, was passiert ist.',
       recPauseBtn:'Pause', recResumeBtn:'Fortsetzen', recMarkBtn:'Diesen Schritt markieren',
       recTelaBtn:'Zusätzlicher Bildschirm zu diesem Schritt',
       recTelaFeita:'Noch ein Bildschirm in {0} gespeichert.',
@@ -6489,7 +6489,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       recBtn:'Enregistrer l’écran', recStopBtn:'Arrêter l’enregistrement',
       recAdiantando:'Téléchargement du modèle de reconnaissance vocale maintenant, pour ne pas retarder l’enregistrement. Vous pouvez choisir l’écran quand vous voulez.',
       recPronto:'Modèle prêt. L’enregistrement démarre immédiatement.',
-      pipCurtoMarcar:'Marquer', pipCurtoTela:'+ Écran', pipCurtoErro:'Erreur', pipCurtoPausa:'Pause', pipCurtoVolta:'Reprendre', pipCurtoCalar:'Muet', pipCurtoSom:'Son', pipCurtoParar:'Arrêter', recErroBtn:'Marquer une erreur sur cet écran', recErroFeito:'Erreur marquée sur l’écran {0} — décrivez ce qui s’est passé.',
+      pipCurtoMarcar:'Marquer', pipCurtoTela:'+ Écran', pipCurtoErro:'Erreur', ariaRecAutoMin:'S’arrêter tout seul après combien de minutes', ariaCompPara:'E-mail de la personne qui recevra', ariaCompQuem:'Votre nom, pour le message', ariaCmpMistura:'Fondu entre l’avant et l’après', pipCurtoPausa:'Pause', pipCurtoVolta:'Reprendre', pipCurtoCalar:'Muet', pipCurtoSom:'Son', pipCurtoParar:'Arrêter', recErroBtn:'Marquer une erreur sur cet écran', recErroFeito:'Erreur marquée sur l’écran {0} — décrivez ce qui s’est passé.',
       recPauseBtn:'Pause', recResumeBtn:'Reprendre', recMarkBtn:'Marquer cette étape',
       recTelaBtn:'Écran supplémentaire pour cette étape',
       recTelaFeita:'Un écran de plus enregistré dans {0}.',
@@ -9406,6 +9406,12 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     if (semQuadros()) return;
     $('capPacote').disabled = true; emUso.add('capPacote');
     $('pdfStatus').textContent = t('pkgBuilding');
+    /* O PACOTE DE TAREFAS NÃO GANHOU O AGUARDE NESTE BUILD, e é decisão.
+       O `finally` dele fecha um bloco INTERNO — a restauração dos quadros — e
+       o zip é montado depois, fora dele. Soltar o aviso ali o apagaria antes
+       de o arquivo existir; deixá-lo sem par o prenderia para sempre. Meia
+       fiação é pior que nenhuma: um aguarde que mente sobre estar acabado, ou
+       um que nunca acaba. Fica na fila, com o motivo. */
     await new Promise(r => setTimeout(r, 40));
     await aplicarTarjas(kept);
     await calcularHashes(kept);
@@ -10051,7 +10057,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
      depois, e não tem como se atualizar sozinho. Sem carimbo, "estou com um
      problema no offline" é uma conversa sem chão — ninguém sabe de qual build
      se fala nem se o defeito já foi consertado. */
-  const VERSAO = '2026.08.28-64';
+  const VERSAO = '2026.08.28-84';
   window.__versao = () => VERSAO;
 
   const PIP_CSS = `
@@ -22290,6 +22296,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     if (semQuadros()) return;
     $('scorm').disabled = true; emUso.add('scorm');
     $('pdfStatus').textContent = t('pkgBuilding');
+    trabalhando(true, 'saida');
     await new Promise(r => setTimeout(r, 40));
     try {
       await aplicarTarjas(kept);
@@ -22310,7 +22317,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       $('pdfStatus').innerHTML = `<span class="ok">${t('scormOk')}</span>`;
     } catch (e) {
       $('pdfStatus').innerHTML = `<span class="err">${t('pkgErr', (e && e.message) || e)}</span>`;
-    } finally { emUso.delete('scorm'); $('scorm').disabled = false; }
+    } finally { trabalhando(false, 'saida'); emUso.delete('scorm'); $('scorm').disabled = false; }
   };
 
   /* ================= reabrir um documento =================
@@ -23165,6 +23172,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     if (semQuadros()) return;
     $('zip').disabled = true; emUso.add('zip');
     $('pdfStatus').textContent = t('pkgBuilding');
+    trabalhando(true, 'saida');
     // sem ceder a vez, o navegador não chega a pintar a mensagem antes de
     // congelar no trabalho síncrono — que com 400 frames leva segundos
     await new Promise(r => setTimeout(r, 40));
@@ -23257,7 +23265,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       $('pdfStatus').innerHTML = `<span class="ok">${t('zipDone', kept.length)}</span>`;
     } catch (e) {
       $('pdfStatus').innerHTML = `<span class="err">${t('pkgErr', (e && e.message) || e)}</span>`;
-    } finally { emUso.delete('zip'); $('zip').disabled = false; }
+    } finally { trabalhando(false, 'saida'); emUso.delete('zip'); $('zip').disabled = false; }
   };
 
   /* ================= HTML, Markdown e CSV =================
@@ -23683,6 +23691,7 @@ ${marcaSvg(46)}
     const kept = frames.filter(f => f.keep);
     if (semQuadros()) return;
     $('pdfStatus').textContent = t('pkgBuilding');
+    trabalhando(true, 'saida');
     await new Promise(r => setTimeout(r, 40));
     try {
       await aplicarTarjas(kept);
@@ -23693,6 +23702,11 @@ ${marcaSvg(46)}
       $('pdfStatus').innerHTML = `<span class="ok">${t('saiuArq', ext.toUpperCase(), kept.length)}</span>`;
     } catch (e) {
       $('pdfStatus').innerHTML = `<span class="err">${t('pkgErr', (e && e.message) || e)}</span>`;
+    } finally {
+      /* Sem este `finally` o aviso de "não feche esta aba" ficaria aceso para
+         sempre quando a geração falhasse — e um aguarde preso é pior que nenhum,
+         porque ele afirma que ainda há trabalho onde já não há. */
+      trabalhando(false, 'saida');
     }
   }
 
@@ -24086,6 +24100,7 @@ ${relsSlide[i]}</Relationships>`) });
     if (semQuadros()) return;
     $('pptx').disabled = true; emUso.add('pptx');
     $('pdfStatus').textContent = t('pkgBuilding');
+    trabalhando(true, 'saida');
     await new Promise(r => setTimeout(r, 40));
     try {
       await aplicarTarjas(kept);
@@ -24099,7 +24114,7 @@ ${relsSlide[i]}</Relationships>`) });
       $('pdfStatus').innerHTML = `<span class="ok">${t('pptxOk', kept.length)}</span>`;
     } catch (e) {
       $('pdfStatus').innerHTML = `<span class="err">${t('pkgErr', (e && e.message) || e)}</span>`;
-    } finally { emUso.delete('pptx'); $('pptx').disabled = false; }
+    } finally { trabalhando(false, 'saida'); emUso.delete('pptx'); $('pptx').disabled = false; }
   };
 
   async function montarDocx(){
@@ -24349,6 +24364,7 @@ ${relsSlide[i]}</Relationships>`) });
     if (semQuadros()) return;
     $('docx').disabled = true; emUso.add('docx');
     $('pdfStatus').textContent = t('pkgBuilding');
+    trabalhando(true, 'saida');
     await new Promise(r => setTimeout(r, 40));    // deixa a mensagem aparecer
     try {
       await aplicarTarjas(kept); await calcularHashes(kept);
@@ -24357,7 +24373,7 @@ ${relsSlide[i]}</Relationships>`) });
       $('pdfStatus').innerHTML = `<span class="ok">${t('docxDone', kept.length)}</span>`;
     } catch (e) {
       $('pdfStatus').innerHTML = `<span class="err">${t('pkgErr', (e && e.message) || e)}</span>`;
-    } finally { emUso.delete('docx'); $('docx').disabled = false; }
+    } finally { trabalhando(false, 'saida'); emUso.delete('docx'); $('docx').disabled = false; }
   };
 
   /* --------- Resumo para o Jira ---------
@@ -24675,9 +24691,29 @@ ${relsSlide[i]}</Relationships>`) });
     let layout = $('layout').value;
     if (layout === 'auto') layout = cues.length ? 'full' : 'grid';
 
+    /* ---- O AGUARDE DO PDF ----
+
+       Relato de campo: "falta um aguarde quando baixar um arquivo grande como
+       por exemplo pdf".
+
+       Está certo, e o buraco tem nome. Transcrição, varredura, OCR, gravação,
+       reabertura e Drive chamam `trabalhando()`, e por causa disso mostram
+       "Processando. Não feche esta aba", avisam no TÍTULO DA ABA quando
+       terminam e acendem o botão de parar. O PDF não chamava: ele escrevia
+       "Montando o PDF…" numa linha de status pequena e mais nada.
+
+       Num documento de quarenta telas com imagem e hash por página isso são
+       dezenas de segundos olhando para um botão desabilitado, sem saber se
+       fechar a aba estraga alguma coisa — e estraga.
+
+       `'saida'` é o nome do trabalho, e não `'pdf'`: quem também gera arquivo
+       grande por aqui é o pacote e o SCORM, e um nome por formato multiplicaria
+       o mesmo aviso em quatro. */
     $('go').disabled = true; emUso.add('go');
+    trabalhando(true, 'saida');
     $('pdfStatus').textContent = t('pdfBuilding');
     await new Promise(r => setTimeout(r, 40));
+    try {
     await aplicarTarjas(kept); await calcularHashes(kept);
 
     const { jsPDF } = window.jspdf;
@@ -25164,7 +25200,15 @@ ${relsSlide[i]}</Relationships>`) });
     if (casoDoRoteiro) oferecerVoltaDoRoteiro(base + '.pdf');
     medir('baixou_saida', { p_formato: 'pdf' });
     $('pdfStatus').innerHTML = `<span class="ok">${t('pdfDone')}</span>${t('pdfDone2', kept.length, page)}`;
-    emUso.delete('go'); $('go').disabled = false;
+    } finally {
+      /* E ELE SOLTA O BOTÃO ACONTEÇA O QUE ACONTECER. Este caminho não tinha
+         `try/finally` nenhum: um erro no meio da montagem deixava o `#go`
+         desabilitado para sempre, e a pessoa ficava sem poder nem tentar de
+         novo — sem mensagem, porque a linha de status tinha ficado no
+         "Montando o PDF…". As outras cinco saídas já fechavam assim. */
+      trabalhando(false, 'saida');
+      emUso.delete('go'); $('go').disabled = false;
+    }
   };
 })();
 </script>

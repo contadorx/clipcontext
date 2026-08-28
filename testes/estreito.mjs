@@ -113,7 +113,7 @@ console.log(`[1] nada rola para o lado a ${LARGURA}px`);
      String(medidas));
 }
 
-console.log('\n[2] a tabela larga rola dentro dela, e é alcançável pelo teclado');
+console.log('\n[2] no telefone a tabela empilha; na tela larga ela volta a ser tabela');
 {
   /* A `/de/privacidade` é a pior das setenta: quatro tabelas, e o alemão. */
   await pg.goto(ALVO + endereco('privacidade', 'de'), { waitUntil: 'domcontentloaded' });
@@ -130,10 +130,69 @@ console.log('\n[2] a tabela larga rola dentro dela, e é alcançável pelo tecla
   });
   ok('as tabelas estão embrulhadas', m.quantas >= 2, String(m.quantas));
   ok('e nenhuma ficou solta', m.soltas === 0, String(m.soltas));
-  /* Se nenhuma rola, a caixa não está fazendo nada — e a régua estaria
-     medindo um embrulho decorativo. */
-  ok('a caixa realmente rola (senão ela não serve para nada)', m.rolam >= 1,
-     String(m.rolam));
+  /* ---- A 380px A TABELA EMPILHA, E POR ISSO NADA ROLA ----
+
+     Esta afirmação era o contrário: `m.rolam >= 1`, "se nenhuma rola, a caixa
+     não está fazendo nada". Ela estava certa enquanto rolar era o desenho —
+     e o desenho mudou porque rolar resolvia o TRANSBORDO e não a LEITURA:
+     medido, a pior destas tabelas tinha 3452px numa tela de 380, nove telas
+     para o lado, e a primeira coluna rolava para fora, de modo que na quarta
+     coluna ninguém sabia mais em que linha estava.
+
+     Agora, no telefone, cada linha vira um cartão e cada célula leva o nome da
+     coluna junto. Rolar ali passou a ser sintoma: se rolou, alguma coisa não
+     empilhou. A caixa continua existindo, e continua rolando ACIMA de 640px —
+     é o que o bloco seguinte cobra. */
+  ok('a 380px nenhuma tabela rola para o lado — elas empilham', m.rolam === 0,
+     m.rolam === 0 ? '' : `${m.rolam} ainda rolam`);
+  /* E empilhar de verdade: `display:block` nas células, com o rótulo da coluna
+     dentro de cada uma. Sem esta segunda afirmação, um `overflow:hidden` que
+     apenas CORTASSE a tabela passaria na primeira — e cortar é pior que rolar,
+     porque some com a informação sem dizer que sumiu. */
+  const emp = await pg.evaluate(() => {
+    const td = document.querySelector('.tabRola td');
+    const cab = document.querySelector('.tabRola tr.cabTab, .tabRola thead');
+    return { display: td ? getComputedStyle(td).display : '',
+             rotulo: td ? (td.getAttribute('data-rot') || '') : '',
+             comRotulo: document.querySelectorAll('.tabRola td[data-rot]').length,
+             /* O NOME DESENHADO, e não o atributo. A primeira versão conferia
+                só a presença do `data-rot` — e passou inteira com o `content`
+                do `::before` trocado por vazio, ou seja, com a tabela empilhada
+                e SEM nome de coluna nenhum, que é exatamente o estado que este
+                bloco existe para impedir. Atributo é intenção; `content` é o
+                que a pessoa lê. */
+             desenhado: td ? getComputedStyle(td, '::before').content : '',
+             cabForaDaTela: cab ? Math.round(cab.getBoundingClientRect().right) < 0 : null };
+  });
+  ok('  as células viram blocos', emp.display === 'block', emp.display);
+  ok('  cada uma leva o nome da coluna junto', emp.comRotulo >= 8 && emp.rotulo.length > 0,
+     `${emp.comRotulo} com rótulo; a primeira diz "${emp.rotulo}"`);
+  ok('  e o nome é DESENHADO, não só declarado no atributo',
+     emp.desenhado.includes(emp.rotulo) && emp.desenhado.length > 2, emp.desenhado.slice(0, 40));
+  /* O cabeçalho sai da tela por POSIÇÃO, e não com `display:none`: ele continua
+     existindo para o leitor de tela, que ainda pode querer a estrutura. */
+  ok('  e o cabeçalho sai da tela sem deixar de existir', emp.cabForaDaTela === true,
+     String(emp.cabForaDaTela));
+
+  /* ---- E ACIMA DE 640px ELA VOLTA A SER TABELA ----
+     Sem esta afirmação, empilhar em TODA largura passaria — e aí quem lê num
+     computador perderia a comparação entre colunas, que é a razão de a tabela
+     existir. O embrulho que rola continua sendo o que segura os casos largos
+     lá em cima; é aqui que se prova que ele ainda tem serviço. */
+  await pg.setViewportSize({ width: 1100, height: 800 });
+  await pg.waitForTimeout(200);
+  const larga = await pg.evaluate(() => {
+    const t = document.querySelector('.tabRola table');
+    const td = t && t.querySelector('td');
+    const cab = document.querySelector('.tabRola tr.cabTab, .tabRola thead');
+    return { tabela: t ? getComputedStyle(t).display : '',
+             celula: td ? getComputedStyle(td).display : '',
+             cabNaTela: cab ? Math.round(cab.getBoundingClientRect().right) > 0 : null };
+  });
+  ok('a 1100px ela volta a ser tabela', larga.tabela === 'table', larga.tabela);
+  ok('  com as células lado a lado', larga.celula === 'table-cell', larga.celula);
+  ok('  e o cabeçalho de volta na tela', larga.cabNaTela === true, String(larga.cabNaTela));
+  await pg.setViewportSize({ width: LARGURA, height: 800 });
   ok('e o teclado alcança a caixa que rola', m.alcancaveis === m.quantas,
      `${m.alcancaveis} de ${m.quantas}`);
   ok('com nome, para o leitor de tela anunciar', m.comNome === m.quantas,

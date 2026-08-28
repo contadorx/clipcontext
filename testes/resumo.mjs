@@ -60,7 +60,58 @@ await pg.selectOption('#modelo', 'evidencia').catch(() => {});
 await pg.setInputFiles('#file', '/tmp/amostra.webm');
 await pg.waitForFunction(() => document.querySelectorAll('#thumbs figure').length >= 3,
                          null, { timeout: 90000 });
-await pg.waitForTimeout(900);
+
+/* ---- ESPERAR A EXTRAÇÃO PARAR, E NÃO 900 ms ----
+
+   Aqui estava um `waitForTimeout(900)` depois de "pelo menos 3 quadros", e ele
+   fez esta régua reprovar DUAS VEZES na esteira completa do Build 44 — sempre
+   sob contenção, nunca sozinha. O sintoma era estranho o bastante para parecer
+   defeito de produto:
+
+     ok     há repetidas para a limpeza tirar  → Tira 2 telas (2 repetidas)
+     FALHA  e ela tirou mesmo                  → 3 depois, 3 antes
+
+   Uma linha prometendo tirar duas e um botão tirando zero.
+
+   A CAUSA É A PREMISSA DESTA RÉGUA, e não o produto. O `forjarRepetidos()`
+   escreve assinaturas iguais nos quadros PARES para fabricar repetidas — e ele
+   escreve numa lista que ainda está crescendo. Com a máquina livre, a extração
+   já acabou quando ele roda; com as três pistas do `rodar.sh` disputando CPU,
+   novecentos milissegundos não bastam, um quarto quadro chega DEPOIS da forja,
+   e aí o conjunto que o `#dedup` olha não é o conjunto que foi forjado.
+
+   Uma espera por relógio é uma aposta na velocidade da máquina. A condição
+   certa é a lista PARAR de crescer: quatro leituras iguais, 120 ms entre elas.
+   É o mesmo conserto que o `etapas.mjs` recebeu quando reprovava só sob
+   contenção — e é o mesmo motivo de nunca reproduzir sozinho.
+
+   Se o tempo acabar, ela DIZ que acabou, em vez de seguir com uma lista que
+   ainda mexe: uma régua que continua depois de a premissa dela falhar não está
+   medindo o produto, está medindo o acaso. */
+{
+  const quantos = () => pg.evaluate(() => document.querySelectorAll('#thumbs figure').length);
+  /* SEIS leituras iguais, 200 ms entre elas — 1,2 s de imobilidade.
+     A primeira versão pedia quatro a 120 ms (360 ms), e não bastou: numa
+     rodada da esteira completa a extração "parou" em 3 quadros e um quarto
+     chegou depois, o que fez o bloco reprovar lá embaixo, no desfazer, com
+     "4 vs 3" — um sintoma três passos distante da causa. Sob contenção o
+     intervalo entre dois quadros passa de meio segundo com facilidade. */
+  let iguais = 0, ultimo = -1, parou = false;
+  for (let i = 0; i < 120; i++) {
+    const n = await quantos();
+    iguais = (n === ultimo) ? iguais + 1 : 0;
+    ultimo = n;
+    if (iguais >= 5) { parou = true; break; }
+    await pg.waitForTimeout(200);
+  }
+  if (!parou) {
+    console.log('  FALHA  a extração não parou de crescer em 12 s — a premissa desta régua caiu');
+    console.log('         (o forjarRepetidos escreveria numa lista em movimento)');
+    process.exit(1);
+  }
+  console.log(`     a extração parou em ${ultimo} quadros`);
+  globalThis.__quadrosNoInicio = ultimo;
+}
 
 const ler = () => pg.evaluate(() => ({
   visivel: !document.getElementById('resumoRev').classList.contains('hide'),
@@ -159,6 +210,17 @@ let antes = 0;
   const ultima = await pg.evaluate(() => {
     const q = window.__quadros(); return q[q.length - 1].keep;
   });
+  /* A PREMISSA, COBRADA ANTES DO RESULTADO. Se a extração continuou depois de
+     o `forjarRepetidos()` ter corrido, o conjunto que o `#dedup` olhou não é o
+     conjunto forjado, e tudo o que se afirmar daqui para baixo é sobre outra
+     coisa. Dizer isso é diferente de reprovar "4 vs 3" três passos adiante,
+     que foi o que aconteceu e custou duas rodadas da esteira para entender. */
+  {
+    const agora = await pg.evaluate(() => document.querySelectorAll('#thumbs figure').length);
+    ok('a extração não voltou a crescer durante o bloco', agora === globalThis.__quadrosNoInicio,
+       agora === globalThis.__quadrosNoInicio ? ''
+         : `${globalThis.__quadrosNoInicio} no início, ${agora} agora — a premissa caiu`);
+  }
   console.log('     mantidos depois de desfazer: ' + r.mantidos + '   (antes da limpeza: ' + (antes - 1) + ')');
   ok('o que a limpeza tirou voltou', r.mantidos === antes - 1,
      r.mantidos + ' vs ' + (antes - 1));
