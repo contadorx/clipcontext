@@ -94,6 +94,7 @@ read -r -d '' MAPA <<'MAPA_FIM'
 ^public/sw[.]js$ => site:seo.mjs
 ^public/site[.]css$ => folha.mjs site:paginas.mjs site:dobrafig.mjs
 ^offline/ => site:medicao.mjs offlineb.mjs egressao.mjs
+^supabase/functions/ => edge.mjs
 ^supabase/migrations/ => modelopessoal.mjs conferir-migracoes prazos.mjs
 ^testes/ => inventario.mjs
 MAPA_FIM
