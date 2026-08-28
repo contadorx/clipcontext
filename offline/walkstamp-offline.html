@@ -3962,7 +3962,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       recBtn:'Gravar a tela', recStopBtn:'Parar gravação',
       recAdiantando:'Baixando o modelo de voz agora, para não atrasar a gravação. Pode escolher a tela quando quiser.',
       recPronto:'Modelo pronto. A gravação começa na hora.',
-      pipCurtoMarcar:'Marcar', pipCurtoTela:'+ Tela', pipCurtoErro:'Erro', pipCurtoParar:'Parar', recErroBtn:'Marcar erro nesta tela', recErroFeito:'Erro marcado na tela {0} — descreva o que aconteceu.',
+      pipCurtoMarcar:'Marcar', pipCurtoTela:'+ Tela', pipCurtoErro:'Erro', pipCurtoPausa:'Pausar', pipCurtoVolta:'Retomar', pipCurtoCalar:'Mudo', pipCurtoSom:'Som', pipCurtoParar:'Parar', recErroBtn:'Marcar erro nesta tela', recErroFeito:'Erro marcado na tela {0} — descreva o que aconteceu.',
       recPauseBtn:'Pausar', recResumeBtn:'Retomar', recMarkBtn:'Marcar este passo',
       recTelaBtn:'Tela adicional a este passo',
       recTelaFeita:'Mais uma tela guardada no {0}.',
@@ -4315,6 +4315,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       recCamSemApoio:'Este navegador não abre webcam — o resto da captura funciona normalmente.',
       recClipeSemApoio:'Este navegador não grava clipe — o resto da captura funciona normalmente.',
       recCamNao:'Não consegui abrir a webcam; a gravação continua sem ela.',
+      recCamNegada:'A câmera está bloqueada para este site. Libere na barra do navegador — no cadeado ao lado do endereço — e esta opção volta sozinha, sem recarregar.', recCamSemCamera:'Nenhuma câmera foi encontrada neste computador. Ligue uma e esta opção volta.',
       recCamNota:'O rosto é desenhado por cima da tela, nos quadros e nos clipes. Ele NÃO participa da detecção de mudança — senão cada respiração viraria um passo novo. Como todo o resto, a imagem não sai do seu computador; e como é rosto, peça permissão a quem está sendo filmado.',
       camTD:'canto de cima, à direita', camTE:'canto de cima, à esquerda', camP:'pequena', camM:'média', camG:'grande',
       recCamLbl:'Webcam num canto do quadro', camBD:'canto de baixo, à direita', camBE:'canto de baixo, à esquerda',
@@ -4603,7 +4604,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       recBtn:'Record the screen', recStopBtn:'Stop recording',
       recAdiantando:'Downloading the speech model now, so it does not delay the recording. Pick your screen whenever you like.',
       recPronto:'Model ready. Recording starts immediately.',
-      pipCurtoMarcar:'Mark', pipCurtoTela:'+ Screen', pipCurtoErro:'Error', pipCurtoParar:'Stop', recErroBtn:'Mark an error on this screen', recErroFeito:'Error marked on screen {0} — describe what happened.',
+      pipCurtoMarcar:'Mark', pipCurtoTela:'+ Screen', pipCurtoErro:'Error', pipCurtoPausa:'Pause', pipCurtoVolta:'Resume', pipCurtoCalar:'Mute', pipCurtoSom:'Sound', pipCurtoParar:'Stop', recErroBtn:'Mark an error on this screen', recErroFeito:'Error marked on screen {0} — describe what happened.',
       recPauseBtn:'Pause', recResumeBtn:'Resume', recMarkBtn:'Mark this step',
       recTelaBtn:'Additional screen for this step',
       recTelaFeita:'One more screen saved in {0}.',
@@ -4947,6 +4948,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       recCamSemApoio:'This browser cannot open a webcam — the rest of the capture works normally.',
       recClipeSemApoio:'This browser cannot record a clip — the rest of the capture works normally.',
       recCamNao:'I could not open the webcam; the recording continues without it.',
+      recCamNegada:'The camera is blocked for this site. Allow it in the browser bar — the padlock next to the address — and this option comes back on its own, without reloading.', recCamSemCamera:'No camera was found on this computer. Plug one in and this option comes back.',
       recCamNota:'The face is drawn on top of the screen, in the frames and in the clips. It does NOT take part in change detection — otherwise every breath would become a new step. Like everything else, the image never leaves your computer; and because it is a face, ask permission from whoever is being filmed.',
       camTD:'top right', camTE:'top left', camP:'small', camM:'medium', camG:'large',
       recCamLbl:'Webcam in a corner of the frame', camBD:'bottom right', camBE:'bottom left',
@@ -5229,7 +5231,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       recBtn:'Grabar la pantalla', recStopBtn:'Detener grabación',
       recAdiantando:'Descargando el modelo de voz ahora, para no retrasar la grabación. Elige la pantalla cuando quieras.',
       recPronto:'Modelo listo. La grabación empieza al instante.',
-      pipCurtoMarcar:'Marcar', pipCurtoTela:'+ Pantalla', pipCurtoErro:'Error', pipCurtoParar:'Parar', recErroBtn:'Marcar un error en esta pantalla', recErroFeito:'Error marcado en la pantalla {0} — describe qué pasó.',
+      pipCurtoMarcar:'Marcar', pipCurtoTela:'+ Pantalla', pipCurtoErro:'Error', pipCurtoPausa:'Pausar', pipCurtoVolta:'Seguir', pipCurtoCalar:'Silencio', pipCurtoSom:'Sonido', pipCurtoParar:'Parar', recErroBtn:'Marcar un error en esta pantalla', recErroFeito:'Error marcado en la pantalla {0} — describe qué pasó.',
       recPauseBtn:'Pausar', recResumeBtn:'Reanudar', recMarkBtn:'Marcar este paso',
       recTelaBtn:'Pantalla adicional de este paso',
       recTelaFeita:'Una pantalla más guardada en {0}.',
@@ -5573,6 +5575,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       recCamSemApoio:'Este navegador no abre la webcam — el resto de la captura funciona normalmente.',
       recClipeSemApoio:'Este navegador no graba clip — el resto de la captura funciona normalmente.',
       recCamNao:'No he podido abrir la webcam; la grabación continúa sin ella.',
+      recCamNegada:'La cámara está bloqueada para este sitio. Permítela en la barra del navegador — en el candado junto a la dirección — y esta opción vuelve sola, sin recargar.', recCamSemCamera:'No se encontró ninguna cámara en este ordenador. Conecta una y esta opción vuelve.',
       recCamNota:'La cara se dibuja encima de la pantalla, en los fotogramas y en los clips. NO participa en la detección de cambio — si no, cada respiración sería un paso nuevo. Como todo lo demás, la imagen no sale de tu ordenador; y como es una cara, pide permiso a quien está siendo filmado.',
       camTD:'arriba a la derecha', camTE:'arriba a la izquierda', camP:'pequeña', camM:'mediana', camG:'grande',
       recCamLbl:'Webcam en una esquina del fotograma', camBD:'abajo a la derecha', camBE:'abajo a la izquierda',
@@ -5854,7 +5857,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       recBtn:'Bildschirm aufnehmen', recStopBtn:'Aufnahme stoppen',
       recAdiantando:'Das Spracherkennungsmodell wird jetzt heruntergeladen, damit es die Aufnahme nicht verzögert. Sie können den Bildschirm jederzeit auswählen.',
       recPronto:'Modell bereit. Die Aufnahme startet sofort.',
-      pipCurtoMarcar:'Markieren', pipCurtoTela:'+ Bildschirm', pipCurtoErro:'Fehler', pipCurtoParar:'Stopp', recErroBtn:'Fehler auf diesem Bildschirm markieren', recErroFeito:'Fehler auf Bildschirm {0} markiert — beschreiben Sie, was passiert ist.',
+      pipCurtoMarcar:'Markieren', pipCurtoTela:'+ Bildschirm', pipCurtoErro:'Fehler', pipCurtoPausa:'Pause', pipCurtoVolta:'Weiter', pipCurtoCalar:'Stumm', pipCurtoSom:'Ton', pipCurtoParar:'Stopp', recErroBtn:'Fehler auf diesem Bildschirm markieren', recErroFeito:'Fehler auf Bildschirm {0} markiert — beschreiben Sie, was passiert ist.',
       recPauseBtn:'Pause', recResumeBtn:'Fortsetzen', recMarkBtn:'Diesen Schritt markieren',
       recTelaBtn:'Zusätzlicher Bildschirm zu diesem Schritt',
       recTelaFeita:'Noch ein Bildschirm in {0} gespeichert.',
@@ -6198,6 +6201,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       recCamSemApoio:'Dieser Browser öffnet keine Webcam — der Rest der Aufnahme funktioniert normal.',
       recClipeSemApoio:'Dieser Browser nimmt keinen Clip auf — der Rest der Aufnahme funktioniert normal.',
       recCamNao:'Die Webcam konnte nicht geöffnet werden; die Aufnahme läuft ohne sie weiter.',
+      recCamNegada:'Die Kamera ist für diese Seite blockiert. Erlauben Sie sie in der Browserleiste — im Schloss neben der Adresse — und diese Option kommt von selbst zurück, ohne Neuladen.', recCamSemCamera:'Auf diesem Rechner wurde keine Kamera gefunden. Schließen Sie eine an, und diese Option kommt zurück.',
       recCamNota:'Das Gesicht wird über den Bildschirm gezeichnet, in den Screenshots und in den Clips. Es nimmt NICHT an der Änderungserkennung teil — sonst würde jeder Atemzug zu einem neuen Schritt. Wie alles andere verlässt das Bild Ihren Computer nicht; und weil es ein Gesicht ist, holen Sie die Erlaubnis der gefilmten Person ein.',
       camTD:'oben rechts', camTE:'oben links', camP:'klein', camM:'mittel', camG:'groß',
       recCamLbl:'Webcam in einer Ecke des Bildes', camBD:'unten rechts', camBE:'unten links',
@@ -6485,7 +6489,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       recBtn:'Enregistrer l’écran', recStopBtn:'Arrêter l’enregistrement',
       recAdiantando:'Téléchargement du modèle de reconnaissance vocale maintenant, pour ne pas retarder l’enregistrement. Vous pouvez choisir l’écran quand vous voulez.',
       recPronto:'Modèle prêt. L’enregistrement démarre immédiatement.',
-      pipCurtoMarcar:'Marquer', pipCurtoTela:'+ Écran', pipCurtoErro:'Erreur', pipCurtoParar:'Arrêter', recErroBtn:'Marquer une erreur sur cet écran', recErroFeito:'Erreur marquée sur l’écran {0} — décrivez ce qui s’est passé.',
+      pipCurtoMarcar:'Marquer', pipCurtoTela:'+ Écran', pipCurtoErro:'Erreur', pipCurtoPausa:'Pause', pipCurtoVolta:'Reprendre', pipCurtoCalar:'Muet', pipCurtoSom:'Son', pipCurtoParar:'Arrêter', recErroBtn:'Marquer une erreur sur cet écran', recErroFeito:'Erreur marquée sur l’écran {0} — décrivez ce qui s’est passé.',
       recPauseBtn:'Pause', recResumeBtn:'Reprendre', recMarkBtn:'Marquer cette étape',
       recTelaBtn:'Écran supplémentaire pour cette étape',
       recTelaFeita:'Un écran de plus enregistré dans {0}.',
@@ -6829,6 +6833,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       recCamSemApoio:'Ce navigateur n’ouvre pas de webcam — le reste de la capture fonctionne normalement.',
       recClipeSemApoio:'Ce navigateur n’enregistre pas de clip — le reste de la capture fonctionne normalement.',
       recCamNao:'Impossible d’ouvrir la webcam ; l’enregistrement continue sans elle.',
+      recCamNegada:'La caméra est bloquée pour ce site. Autorisez-la dans la barre du navigateur — le cadenas à côté de l’adresse — et cette option revient d’elle-même, sans recharger.', recCamSemCamera:'Aucune caméra n’a été trouvée sur cet ordinateur. Branchez-en une et cette option revient.',
       recCamNota:'Le visage est dessiné par-dessus l’écran, dans les captures et dans les clips. Il ne participe PAS à la détection de changement — sinon chaque respiration deviendrait une nouvelle étape. Comme tout le reste, l’image ne quitte pas votre ordinateur ; et comme il s’agit d’un visage, demandez l’autorisation à la personne filmée.',
       camTD:'en haut à droite', camTE:'en haut à gauche', camP:'petite', camM:'moyenne', camG:'grande',
       recCamLbl:'Webcam dans un coin de la capture', camBD:'en bas à droite', camBE:'en bas à gauche',
@@ -7763,6 +7768,12 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
        um botão ensina a não ler o que está ao lado dos botões. */
     const oc = $('ocrCusto');
     if (oc) oc.classList.toggle('hide', !!window.Tesseract);
+    /* O estado da câmera é ASSÍNCRONO — `permissions.query` e
+       `enumerateDevices` devolvem promessa. Ele não pode segurar o
+       `applyLang()`, que pinta a tela inteira: disparado e esquecido, ele se
+       corrige sozinho alguns milissegundos depois, e o `.catch` existe porque
+       uma promessa rejeitada aqui derrubaria a repintura de tudo. */
+    if (typeof pintarApoio === 'function') { pintarApoio().catch(() => {}); }
     /* O resumo da conferência também: sem telas o `render()` não roda, e sem
        ele os dois botões do resumo ficariam mudos esperando para aparecer. */
     if (typeof pintarResumoRev === 'function') { try { pintarResumoRev(); } catch (e) {} }
@@ -10040,7 +10051,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
      depois, e não tem como se atualizar sozinho. Sem carimbo, "estou com um
      problema no offline" é uma conversa sem chão — ninguém sabe de qual build
      se fala nem se o defeito já foi consertado. */
-  const VERSAO = '2026.08.28-47';
+  const VERSAO = '2026.08.28-64';
   window.__versao = () => VERSAO;
 
   const PIP_CSS = `
@@ -10912,7 +10923,15 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       }
       if (pipPausa)  {
         pipPausa.disabled = false;
-        pipPausa.textContent = pausado ? t('recResumeBtn') : t('recPauseBtn');
+        /* PELO `rotularPip`, como os outros quatro. Estes dois pintavam a
+           FRASE INTEIRA na fita — "Fechar meu microfone", "Mein Mikrofon
+           wieder öffnen" —, e eram os dois que a esticavam: medido, o
+           português precisava de 397px e o alemão de 472, contra um teto de
+           480. Na prática a fita nunca encolhia em alemão.
+           A régua não pegava porque ela INJETAVA um rótulo curto inventado
+           para medir — media uma fita que o produto nunca pintou. */
+        rotularPip(pipPausa, pausado ? 'recResumeBtn' : 'recPauseBtn',
+                             pausado ? 'pipCurtoVolta' : 'pipCurtoPausa');
         pipPausa.classList.toggle('off', pausado);
       }
       /* A MEDIDA DA FITA ACONTECE AQUI, e nao na abertura: e neste estado que os
@@ -11060,7 +11079,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     if (!alternarMic) { pipCalar.classList.add('hide'); return; }
     const on = micAberto();
     pipCalar.classList.remove('hide');
-    pipCalar.textContent = on ? t('micMudo') : t('micVolta');
+    rotularPip(pipCalar, on ? 'micMudo' : 'micVolta', on ? 'pipCurtoCalar' : 'pipCurtoSom');
     pipCalar.classList.toggle('off', !on);
   }
 
@@ -19143,7 +19162,55 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
      não há como saber se alguém vai negar a permissão sem pedir a permissão.
      O que dá para saber antes é se o navegador tem a porta — e é isso que esta
      função responde. */
-  function pintarApoio(){
+  /* ---- A WEBCAM: TRÊS "NÃOS" DIFERENTES, E ELES NÃO SE TRATAM IGUAL ----
+
+     O clipe tem uma pergunta só: este navegador grava? A webcam tem três, e
+     juntá-las num "não disponível" seria trocar um defeito por outro.
+
+       `semApi`      o navegador não tem `getUserMedia`. Não há conceito, e não
+                     há o que explicar — a opção SOME, como a da placa de vídeo.
+       `negada`      a pessoa bloqueou a câmera para este site. Esconder aqui
+                     seria cruel: ela negou, talvez sem querer, e a opção sumir
+                     sem dizer por quê a deixa sem saber que existe um caminho
+                     de volta. Fica visível, desabilitada, com o motivo.
+       `semCamera`   não há nenhum dispositivo de vídeo. Também fica visível:
+                     "sumiu" não ensina a plugar uma câmera.
+       `indeterminado` o navegador não responde a `permissions.query` para a
+                     câmera (o Firefox é assim). Aqui NÃO se afirma nada: a
+                     opção fica normal e o "não dá" continua chegando na hora
+                     de gravar, como sempre chegou. Uma régua que adivinha é
+                     pior que uma que cala.
+
+     E UMA CORREÇÃO DO QUE EU MESMO TINHA ESCRITO NA FILA: `enumerateDevices()`
+     NÃO dispara pedido de permissão. O que ele faz sem permissão é devolver os
+     dispositivos com o `label` VAZIO — dá para contar, não dá para nomear. Era
+     essa a cautela certa, e ela não impede a contagem.
+
+     `permissions.query` é assíncrono e pode não existir; por isso tudo aqui
+     está em try/catch e o padrão é o `indeterminado`, que não afirma nada. */
+  async function estadoDaCamera(){
+    const md = navigator.mediaDevices;
+    if (!(md && md.getUserMedia)) return 'semApi';
+    let perm = null;
+    try {
+      if (navigator.permissions && navigator.permissions.query) {
+        const st = await navigator.permissions.query({ name: 'camera' });
+        perm = st.state;
+        /* Se a pessoa liberar a câmera na barra do navegador, a tela se
+           corrige sozinha — sem recarregar e sem ela ter que descobrir que
+           precisa recarregar. */
+        if (!st.__ligado) { st.__ligado = true; st.onchange = () => { pintarApoio().catch(() => {}); }; }
+      }
+    } catch (e) { /* nome não suportado: segue sem afirmar nada */ }
+    if (perm === 'denied') return 'negada';
+    try {
+      const ds = await md.enumerateDevices();
+      if (ds && ds.length && !ds.some((d) => d.kind === 'videoinput')) return 'semCamera';
+    } catch (e) { /* sem lista, não se afirma nada */ }
+    return perm === 'granted' || perm === 'prompt' ? 'ok' : 'indeterminado';
+  }
+
+  async function pintarApoio(){
     const marcar = (idCaixa, apoia, motivo) => {
       const cx = $(idCaixa); if (!cx) return;
       const rot = cx.closest('label');
@@ -19164,10 +19231,45 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       const nota = $(idCaixa + 'Aviso');
       if (nota) { nota.textContent = apoia ? '' : t(motivo); nota.classList.toggle('hide', apoia); }
     };
-    marcar('recClipe', clipeSuportado(), 'recClipeSemApoio');
-    marcar('recCam',
-           !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia),
-           'recCamSemApoio');
+    /* O CLIPE tem duas perguntas, e a segunda faltava: ter `MediaRecorder` não
+       é gravar — é preciso um formato que ele aceite. `clipeTipoBom()` é
+       síncrono e já existia; ele só nunca tinha sido perguntado antes da hora. */
+    marcar('recClipe', clipeDaPara(), 'recClipeSemApoio');
+
+    /* A CÂMERA TEM TRÊS "NÃOS", e juntá-los num só seria trocar um defeito por
+       outro:
+         `semApi`     o navegador não tem `getUserMedia`. Não há conceito e não
+                      há o que explicar — some, como a opção da placa de vídeo.
+         `negada`     a pessoa bloqueou a câmera para este site. Esconder aqui
+                      seria cruel: ela negou, talvez sem querer, e a opção sumir
+                      sem dizer por quê a deixa sem saber que há volta.
+         `semCamera`  não há dispositivo de vídeo. "Sumiu" não ensina a plugar
+                      uma câmera.
+       E há um quarto caso, que é o de NÃO AFIRMAR NADA: quando o navegador não
+       responde a `permissions.query` para a câmera — o Firefox é assim —, o
+       controle fica normal e o "não dá" continua chegando no uso, como sempre
+       chegou. Uma régua que adivinha é pior que uma que cala.
+
+       O comentário acima desta função dizia que a câmera recusada "continua
+       sendo descoberta no uso, e está certo assim, porque não há como saber se
+       alguém vai negar sem pedir". Isso é verdade para quem AINDA NÃO decidiu —
+       e falso para quem JÁ negou: aí a resposta está guardada, e dá para lê-la
+       sem pedir nada. É essa metade que entra agora. */
+    /* E A OPÇÃO NÃO SOME EM NENHUM DOS TRÊS — nem quando o navegador não tem a
+       porta. Eu a tinha escondido no caso `semApi`, por analogia com a placa de
+       vídeo, e a esteira completa me reprovou com a régua que já guardava a
+       decisão: clipe e webcam são recursos que a pessoa VEIO BUSCAR, e quem
+       procura e não acha nada conclui "isto não existe no produto", não "o meu
+       navegador não faz". O WebGPU some porque ninguém procura por ele — é
+       ajuste de motor, e a diferença é deliberada.
+       Desligado e dito é informação; ausente é mistério. */
+    const est = await estadoDaCamera();
+    marcar('recCam', est === 'ok' || est === 'indeterminado',
+           est === 'negada' ? 'recCamNegada'
+         : est === 'semCamera' ? 'recCamSemCamera' : 'recCamSemApoio');
+    if (est !== 'ok' && est !== 'indeterminado' && $('camOpts')) {
+      $('camOpts').classList.add('hide');
+    }
   }
 
   const abrirClipeModal = (abrir) => {
@@ -19219,19 +19321,15 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
 
   function pintarBotaoClipe(){
     const b2 = $('clipeAbrir'); if (!b2) return;
+    /* ESTE AQUI PINTA SÓ O RÓTULO DO BOTÃO. Quem liga e desliga a caixa, e quem
+       escreve o motivo, é o `pintarApoio()` — ele já era o dono disso, já punha
+       o `title` e o `aria-label` no rótulo, e eu quase entreguei um segundo
+       pintor ao lado dele. Foi a medição que pegou: com a webcam negada, o meu
+       pintava e o dele repintava por cima, e o resultado era nenhum dos dois.
+       Dois donos do mesmo estado é a lista paralela de sempre, e desta vez fui
+       eu que a escrevi. */
     const pode = clipeDaPara();
     const cx = $('recClipe');
-    if (cx && !pode) {
-      /* Desmarcar é parte do conserto, e não zelo: marcada e desabilitada, ela
-         continuaria dizendo ao `recAjustesEst` que o clipe está ligado. */
-      cx.checked = false;
-      cx.disabled = true;
-    } else if (cx) {
-      cx.disabled = false;
-    }
-    const nota = $('recClipeNota');
-    if (nota) nota.textContent = pode ? t('recClipeNota') : t('recClipeNao');
-
     const cl = cx && cx.checked;
     const cam = $('recCam') && $('recCam').checked;
     b2.textContent = !pode ? t('clipeBotaoNao')
