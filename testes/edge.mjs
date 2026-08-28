@@ -16,6 +16,8 @@
  *     regenerar o manifesto reprova, o que obriga a decidir sobre reimplantar;
  *   - a trava de identidade de cada uma: quem valida a sessão, quem não aceita
  *     e-mail vindo do corpo, e quem é a única com `verify_jwt` desligado;
+ *   - que o `walkstamp-time` serve UMA ação, `modelo`, e que nenhum chamador
+ *     do produto pede a ela nenhuma das cinco que foram aposentadas;
  *   - e que a DIVERGÊNCIA do `walkstamp-stripe` está DECLARADA no LEIA-ME.
  *
  * O QUE ELA NÃO PROVA: que o que está no ar é o que está no disco. Nenhuma
@@ -124,5 +126,75 @@ console.log('\n[4] a divergência conhecida está DECLARADA');
   ok('  e ensina a regenerar o manifesto', /sha256sum/.test(leia));
 }
 
-console.log('\n' + (falhas ? falhas + ' FALHA(S)' : 'as quatro funções existem, batem, e a divergência está dita'));
+console.log('\n[5] o walkstamp-time serve UMA ação, e é a única que alguém pede');
+{
+  /* POR QUE ESTE BLOCO EXISTE. A função nasceu com seis ações — listar,
+     bloquear, ajustar, convidar, config e modelo — e cinco delas ficaram sem
+     um único chamador quando o painel do time saiu da `/time` e virou a
+     `/conta`, que é Next e chama as mesmas RPCs direto (o `portal.mjs` conta
+     essa mudança). Código morto com `service_role` na mão não é neutro: é
+     superfície que ninguém revisa porque ninguém exercita.
+
+     A régua trava os dois lados, e o segundo é o que importa:
+       - a função só despacha `modelo`;
+       - e NENHUM chamador no produto pede outra coisa a ela.
+     O primeiro é leitura de fonte, e fonte só prova que alguém escreveu a
+     linha. O segundo é o que pega a regressão de verdade: escrever um cliente
+     novo para `listar` contra uma função que não serve mais `listar` daria um
+     400 mudo em produção, e é justamente o tipo de silêncio que o LEIA-ME
+     deste diretório existe para acabar. */
+  const APOSENTADAS = ['listar', 'bloquear', 'ajustar', 'convidar', 'config'];
+  const s = fs.readFileSync(path.join(DIR, 'walkstamp-time', 'index.ts'), 'utf8');
+
+  ok('ela recusa tudo que não for `modelo`', /acao\s*!==\s*["']modelo["']/.test(s));
+  for (const a of APOSENTADAS) {
+    /* Só conta como despacho: `acao === "listar"`, `case "listar"`. O nome
+       dentro do comentário que explica a remoção não pode reprovar — senão a
+       régua obrigaria a apagar a explicação. */
+    const despacha = new RegExp('(acao\\s*===\\s*|case\\s+)["\']' + a + '["\']').test(s);
+    ok(`  e não despacha \`${a}\``, !despacha);
+  }
+
+  /* AGORA O LADO DE CÁ: todo chamador da função, no produto inteiro. */
+  const FONTES = ['src/template.html', 'app', 'lib'];
+  const arquivos = [];
+  const varrer = (alvo) => {
+    const abs = path.join(RAIZ_WS, alvo);
+    if (!fs.existsSync(abs)) return;
+    if (fs.statSync(abs).isDirectory()) {
+      for (const n of fs.readdirSync(abs)) varrer(path.join(alvo, n));
+    } else if (/\.(ts|tsx|js|mjs|html)$/.test(alvo)) arquivos.push(alvo);
+  };
+  FONTES.forEach(varrer);
+
+  const pedidos = [];
+  for (const rel of arquivos) {
+    const txt = fs.readFileSync(path.join(RAIZ_WS, rel), 'utf8');
+    let i = 0;
+    for (;;) {
+      const k = txt.indexOf('/functions/v1/walkstamp-time', i);
+      if (k < 0) break;
+      i = k + 1;
+      /* A ação viaja no corpo do mesmo `fetch`; 1200 caracteres cobrem o
+         bloco inteiro com folga e não alcançam a chamada seguinte. */
+      const trecho = txt.slice(k, k + 1200);
+      const m = trecho.match(/acao\s*:\s*["']([a-z_]+)["']/);
+      pedidos.push({ arquivo: rel, linha: txt.slice(0, k).split('\n').length,
+                     acao: m ? m[1] : '(não achei a ação)' });
+    }
+  }
+
+  /* Zero chamador seria régua vazia passando: se ninguém chama, o bloco acima
+     não prova nada e a função não deveria existir. */
+  ok('o produto chama a função em algum lugar', pedidos.length > 0,
+     `${pedidos.length} chamada(s)`);
+  const fora = pedidos.filter((p) => p.acao !== 'modelo');
+  ok('  e nenhuma chamada pede ação aposentada', fora.length === 0,
+     fora.map((p) => `${p.arquivo}:${p.linha} pede ${p.acao}`).join('; '));
+  for (const p of pedidos) {
+    ok(`  ${p.arquivo}:${p.linha} pede \`${p.acao}\``, p.acao === 'modelo');
+  }
+}
+
+console.log('\n' + (falhas ? falhas + ' FALHA(S)' : 'as quatro existem e batem; o time serve só `modelo`; a divergência está dita'));
 process.exit(falhas ? 1 : 0);

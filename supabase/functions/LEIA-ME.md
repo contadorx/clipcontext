@@ -29,6 +29,29 @@ Quando editar uma função:
     # 3. implante, e só então
     # 4. atualize a DIVERGÊNCIA abaixo se ela mudar
 
+## O `walkstamp-time` serve UMA ação
+
+Ela nasceu com seis — `listar`, `bloquear`, `ajustar`, `convidar`, `config` e
+`modelo`. Medido em 28/08, no repositório inteiro: **cinco não tinham um único
+chamador.** O painel do time saiu da `/time` e virou a `/conta`, que é Next e
+chama as mesmas RPCs direto (`app/conta/acoes.ts`); a Edge Function ficou como
+uma segunda implementação do mesmo portal que ninguém exercitava. Código morto
+com `service_role` na mão não é neutro — é superfície que ninguém revisa.
+
+Sobrou o `modelo`, e ele **não** podia virar rota do Next: a sessão da
+ferramenta vem do FRAGMENTO do link mágico, que por ser fragmento nunca chega a
+servidor nenhum, então não existe cookie para uma rota ler. O `verify_jwt` do
+Supabase já confere o token antes de a função rodar.
+
+A `testes/edge.mjs` trava os dois lados: que a função só despacha `modelo`, e
+que **nenhum chamador do produto pede a ela outra coisa** — este segundo é o que
+pega a regressão de verdade, porque um cliente novo para `listar` receberia um
+400 mudo em produção.
+
+**No ar:** `version 3`, publicada em 28/08 a partir deste arquivo e relida logo
+depois pela API do Supabase. Como está dito acima, nenhuma régua confere isso —
+quem reimplantar tem que reler.
+
 ## DIVERGÊNCIA DECLARADA — `walkstamp-stripe`
 
 **O disco e a produção não são a mesma coisa aqui, e é de propósito.**

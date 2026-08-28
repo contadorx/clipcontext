@@ -51,35 +51,39 @@ Deno.serve(async (req) => {
   if (!admin) return json({ erro: "sem_sessao" }, 401);
 
   let c: Record<string, unknown> = {};
-  try { c = await req.json(); } catch { /* corpo vazio é "listar" */ }
-  const acao = String(c.acao || "listar");
+  try { c = await req.json(); } catch { /* corpo vazio não é ação nenhuma */ }
+  const acao = String(c.acao || "");
 
   try {
-    let p: unknown;
-    if (acao === "listar") {
-      p = await rpc("walkstamp_time_painel", { p_admin: admin });
-      return json(p ?? { erro: "nao_admin" }, p ? 200 : 403);
-    } else if (acao === "bloquear") {
-      p = await rpc("walkstamp_time_bloquear", {
-        p_admin: admin, p_email: String(c.email || ""), p_bloquear: c.bloquear !== false });
-    } else if (acao === "ajustar") {
-      p = await rpc("walkstamp_time_ajustar", {
-        p_admin: admin, p_dias: Number(c.dias) || 90, p_assentos: Number(c.assentos) || 25 });
-    } else if (acao === "convidar") {
-      p = await rpc("walkstamp_time_convidar", { p_admin: admin, p_email: String(c.email || "") });
-    } else if (acao === "config") {
-      p = await rpc("walkstamp_time_config", { p_admin: admin, p_config: c.config || {} });
-    } else if (acao === "modelo") {
-      p = await rpc("walkstamp_time_modelo", {
-        p_admin: admin,
-        p_id: c.id == null ? null : Number(c.id),
-        p_nome: c.nome == null ? null : String(c.nome),
-        p_escopo: c.escopo === "personal" ? "personal" : "time",
-        p_dados: c.dados || {},
-        p_apagar: c.apagar === true });
-    } else {
-      return json({ erro: "acao" }, 400);
-    }
+    /* ---- SOBROU UMA AÇÃO, E É A ÚNICA QUE ALGUÉM CHAMA ----
+
+       Esta função nasceu com seis: listar, bloquear, ajustar, convidar, config
+       e modelo. Medido em 28/08, no repositório inteiro: **cinco delas não têm
+       um único chamador.** Quem administra o time faz isso no painel da conta,
+       que é Next e chama as mesmas RPCs direto — `walkstamp_time_ajustar`,
+       `_bloquear`, `_config`, `_convidar`, `_modelo`.
+
+       Ou seja: eram duas implementações do mesmo portal, e uma delas nunca era
+       usada. Código morto com `service_role` na mão não é neutro — é superfície
+       de ataque que ninguém revisa, porque ninguém a exercita.
+
+       Sobrou o `modelo`, que a ferramenta chama de verdade: ela salva um modelo
+       de documento do próprio usuário, e não tem como falar com o painel — a
+       sessão dela vem do FRAGMENTO do link mágico, que nunca chega a servidor
+       nenhum, então não há cookie para uma rota do Next ler. É por isso que
+       esta função continua existindo em vez de virar rota: o `verify_jwt` do
+       Supabase já confere o token antes de ela rodar, de graça e certo. */
+    if (acao !== "modelo") return json({ erro: "acao" }, 400);
+    const p = await rpc("walkstamp_time_modelo", {
+      p_admin: admin,
+      p_id: c.id == null ? null : Number(c.id),
+      p_nome: c.nome == null ? null : String(c.nome),
+      /* `personal` é o padrão, e `time` exige ser dito: um modelo salvo DA
+         ferramenta é de quem salvou. Empurrar o padrão para a equipe inteira é
+         decisão de quem administra, e ela se toma no painel. */
+      p_escopo: c.escopo === "time" ? "time" : "personal",
+      p_dados: c.dados || {},
+      p_apagar: c.apagar === true });
     return json(p, p && (p as any).erro ? 400 : 200);
   } catch (e) {
     return json({ erro: "falha", detalhe: String(e).slice(0, 200) }, 500);

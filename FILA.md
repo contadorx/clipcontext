@@ -1055,11 +1055,14 @@ promessa sem porta em vez de consertar o terceiro.
   eu recomendo antecipar, e são 15 minutos.
 - **Google Drive** — por último *(DEC-15)*.
 - **Leitor de tela de verdade** (NVDA, VoiceOver) — depende de máquina física.
-- **Três Edge Functions que o produto chama e não existem no repositório**:
-  `walkstamp-licenca`, `walkstamp-time`, `walkstamp-meus`. Onde a cadeia passa
-  por elas, há um elo que não é auditável a partir do pacote. **Isto é um
-  impedimento de verdade** e não tem build porque não tenho o código — me diga
-  onde ele mora e ele entra no Build 6.
+- ~~**Três Edge Functions que o produto chama e não existem no repositório**~~
+  — **resolvido no Build 46**. As quatro estão em `supabase/functions/`, com
+  `MANIFESTO.sha256` e a régua `testes/edge.mjs`. **O que sobrou do
+  impedimento:** nenhuma régua compara o disco com o ar, de propósito (régua que
+  só roda com rede é régua que não roda), então a comparação continua sendo um
+  passo manual documentado no `LEIA-ME.md` daquele diretório — que é onde mora a
+  divergência declarada do `walkstamp-stripe`, cujo passo 1 é seu, no painel da
+  Stripe *(DEC-14)*.
 
 ---
 
