@@ -437,6 +437,58 @@ table.legal td:first-child .small,table.legal td:first-child .muted{font-weight:
     radial-gradient(farthest-side at 100% 50%,rgba(0,0,0,.14),transparent) right/10px 100% no-repeat;
   background-attachment:local,local,scroll,scroll}
 
+/* ---- E NO TELEFONE ELA EMPILHA, EM VEZ DE ROLAR NOVE TELAS ----
+
+   Medido a 380px: a maior destas tabelas tem 3452px — nove telas para o lado.
+   O `.tabRola` acima resolve o TRANSBORDO, e resolve bem: a página não rola,
+   só a caixa. O que ele não resolve é a LEITURA — a primeira coluna rola para
+   fora, e na quarta a pessoa já não sabe em que linha está.
+
+   Empilhar não contradiz o argumento de cima. Ele é contra ENCOLHER: quatro
+   colunas de prazo não cabem em 380px sem virar ilegível, e o alemão tem
+   palavra composta que não quebra. Aqui ninguém encolhe — cada célula ganha a
+   linha inteira e leva o nome da coluna junto, vindo do `<th>` da própria
+   tabela pelo `data-rot` que o `lib/site.ts` escreve.
+
+   640px é onde a tabela de quatro colunas ainda se lê: acima disso ela volta a
+   ser tabela, com a caixa que rola para os casos largos.
+
+   O `<thead>` some porque os nomes passaram para dentro de cada célula; sem
+   isso ele viraria uma pilha de títulos soltos antes da primeira linha. */
+@media (max-width:640px){
+  .tabRola{overflow-x:visible;background:none;tabindex:none}
+  .tabRola>table.legal{min-width:0;width:100%}
+  .doc table.legal,.doc table.legal tbody,.doc table.legal tr,.doc table.legal td{
+    display:block;width:auto}
+  /* Fora da tela, e não `display:none`: o cabeçalho continua existindo para o
+     leitor de tela, que é quem ainda pode querer a estrutura da tabela. A
+     classe vem do `lib/site.ts` porque metade destas tabelas escreve os `<th>`
+     numa `<tr>` solta, sem `<thead>` — e esconder só o `thead` deixava esses
+     de pé, empurrando a página para 488px. */
+  .doc table.legal thead,.doc table.legal tr.cabTab{position:absolute;left:-9999px}
+  .doc table.legal tr{border:1px solid var(--line);border-radius:10px;
+    padding:10px 12px;margin:0 0 10px;background:var(--panel)}
+  .doc table.legal td{border:0;padding:6px 0}
+  .doc table.legal td+td{border-top:1px solid var(--line)}
+  /* O nome da coluna acima do valor, e não ao lado: lado a lado devolveria o
+     problema das duas colunas espremidas, um andar abaixo. */
+  .doc table.legal td[data-rot]::before{
+    content:attr(data-rot);display:block;font-size:12px;font-weight:600;
+    color:var(--muted);margin-bottom:2px}
+  /* O ✓ e o ✕ da tabela de comparação continuam antes do valor, na mesma
+     linha dele — e não antes do RÓTULO, que é onde o `::before` os poria. */
+  .doc table.legal td.sim::before,.doc table.legal td.nao::before{
+    content:attr(data-rot);color:var(--muted);font-weight:600}
+  .doc table.legal td.sim{color:var(--accent)}
+  .doc table.legal td.nao{color:var(--err)}
+  /* O DESTAQUE DA SEGUNDA COLUNA SAI AQUI. Ele existe na tabela de comparação
+     para dizer "esta é a nossa" entre seis concorrentes — uma pergunta que só
+     faz sentido quando as colunas estão LADO A LADO. Empilhado, ele vira um
+     fundo colorido na segunda linha de cada cartão, sem significar nada, e nas
+     tabelas de privacidade ele nunca significou. */
+  .doc table.legal td:nth-child(2){background:none}
+}
+
 /* os dois usos, lado a lado */
 .duo{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:18px;margin-top:28px}
 .via{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:26px}
