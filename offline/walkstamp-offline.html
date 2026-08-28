@@ -1037,6 +1037,10 @@
      mais abaixo e vencia por ordem de origem. O tipo de defeito que não dá
      erro, não aparece em revisão de código e só se vê na tela. */
   .hide{display:none !important}
+  /* O `.hide` é `!important`, então a caixa de guardar não pode declarar o
+     `display` no atributo de estilo: lá ele venceria a regra e o controle
+     apareceria no plano gratuito, onde não faz nada. */
+  #vocGuardarRow{display:flex}
   .note{font-size:13px;color:var(--muted);border-left:3px solid var(--line);padding:2px 0 2px 12px;margin-top:14px}
   .note b{color:var(--warn)}
   /* ---- O LINK DE PULAR ----
@@ -2648,6 +2652,24 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       <p class="status" data-i18n="vocComo" style="max-width:660px;margin:0 0 6px"></p>
       <textarea id="vocLista" rows="3" spellcheck="false"
         data-i18n-ph="vocPh" style="font:13px ui-monospace,Menlo,Consolas,monospace"></textarea>
+      <!-- GUARDAR A LISTA É OPT-IN, E NASCE DESMARCADO.
+
+           A lista carrega termos do SEU cliente: nome de sistema, de projeto,
+           código de transação. Não é conteúdo de gravação, mas em muita empresa
+           o nome do projeto é justamente o que está sob confidencialidade.
+           Marcar manda isso para o nosso servidor, e é a única coisa da caixa
+           de transcrição que sai da máquina — por isso a escolha é da pessoa,
+           dita em uma frase, e não um padrão que ela descobre depois.
+
+           Aparece só com sessão de plano pago: no gratuito a lista continua
+           viva na aba, como sempre foi, e um controle que não faz nada é pior
+           do que controle nenhum. -->
+      <label class="hide" id="vocGuardarRow"
+             style="gap:7px;align-items:flex-start;margin-top:9px;max-width:660px;cursor:pointer">
+        <input type="checkbox" id="vocGuardar" style="margin-top:3px;flex:none">
+        <span class="status" data-i18n="vocGuardarLabel"></span>
+      </label>
+      <span class="status" id="vocGuardarMsg"></span>
       <div class="row" style="margin-top:8px">
         <button class="ghost sm" id="vocAplicar" data-i18n="vocAplicar"></button>
         <button class="ghost sm hide" id="vocDesfazer" data-i18n="vocDesfazer"></button>
@@ -4064,6 +4086,10 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       vocComo:'Um termo por linha. O reconhecimento de voz não conhece o seu sistema e devolve "ME21N" como "eme vinte e um ene" — liste os códigos e os nomes próprios que aparecem no seu dia, e eu procuro a forma falada de cada um na transcrição e nas anotações.',
       vocPh:'ME21N\nKI235\nS/4HANA\nFiori',
       vocAplicar:'Corrigir os termos',
+      vocGuardarLabel:'Guardar esta lista na minha conta, para ela voltar na próxima visita e em outra máquina. Ela sai do seu computador e fica no nosso servidor — é a única coisa desta caixa que faz isso. Desmarcar apaga o que estiver guardado.',
+      vocGuardarOn:'Guardada na sua conta.',
+      vocGuardarOff:'Só nesta aba.',
+      vocGuardarErro:'Não consegui guardar agora — a lista continua valendo nesta aba.',
       vocDesfazer:'desfazer',
       vocFeito:'{0} correção(ões) feita(s).',
       vocNada:'Nenhum desses termos apareceu falado por extenso. Nada foi mudado.',
@@ -4706,6 +4732,10 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       vocComo:'One term per line. Speech recognition does not know your system and returns "ME21N" as "em twenty one en" — list the codes and proper names that show up in your day, and I look for the spoken form of each one in the transcript and in the notes.',
       vocPh:'ME21N\nKI235\nS/4HANA\nFiori',
       vocAplicar:'Fix the terms',
+      vocGuardarLabel:'Keep this list in my account, so it comes back next visit and on another machine. It leaves your computer and stays on our server — the only thing in this box that does. Unchecking deletes whatever is kept.',
+      vocGuardarOn:'Kept in your account.',
+      vocGuardarOff:'This tab only.',
+      vocGuardarErro:'I could not keep it right now — the list still works in this tab.',
       vocDesfazer:'undo',
       vocFeito:'{0} correction(s) made.',
       vocNada:'None of those terms showed up spelled out. Nothing was changed.',
@@ -5333,6 +5363,10 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       vocComo:'Un término por línea. El reconocimiento de voz no conoce tu sistema y devuelve "ME21N" como "eme veintiuno ene" — lista los códigos y nombres propios que aparecen en tu día, y yo busco la forma hablada de cada uno en la transcripción y en las anotaciones.',
       vocPh:'ME21N\nKI235\nS/4HANA\nFiori',
       vocAplicar:'Corregir los términos',
+      vocGuardarLabel:'Guardar esta lista en mi cuenta, para que vuelva en la próxima visita y en otro equipo. Sale de tu ordenador y queda en nuestro servidor — es lo único de esta caja que lo hace. Desmarcar borra lo que esté guardado.',
+      vocGuardarOn:'Guardada en tu cuenta.',
+      vocGuardarOff:'Solo en esta pestaña.',
+      vocGuardarErro:'No pude guardarla ahora — la lista sigue valiendo en esta pestaña.',
       vocDesfazer:'deshacer',
       vocFeito:'{0} corrección(es) hecha(s).',
       vocNada:'Ninguno de esos términos apareció escrito por extenso. No se cambió nada.',
@@ -5959,6 +5993,10 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       vocComo:'Ein Begriff pro Zeile. Die Spracherkennung kennt Ihr System nicht und gibt "ME21N" als "em e einundzwanzig en" zurück — listen Sie die Codes und Eigennamen auf, die in Ihrem Alltag vorkommen, und die gesprochene Form jedes Begriffs wird in der Transkription und in den Notizen gesucht.',
       vocPh:'ME21N\nKI235\nS/4HANA\nFiori',
       vocAplicar:'Begriffe korrigieren',
+      vocGuardarLabel:'Diese Liste in meinem Konto speichern, damit sie beim nächsten Besuch und auf einem anderen Rechner zurückkommt. Sie verlässt Ihren Computer und liegt auf unserem Server — als Einziges in diesem Feld. Abwählen löscht das Gespeicherte.',
+      vocGuardarOn:'In Ihrem Konto gespeichert.',
+      vocGuardarOff:'Nur in diesem Tab.',
+      vocGuardarErro:'Speichern hat gerade nicht geklappt — die Liste gilt weiter in diesem Tab.',
       vocDesfazer:'rückgängig',
       vocFeito:'{0} Korrektur(en) vorgenommen.',
       vocNada:'Keiner dieser Begriffe kam in ausgesprochener Form vor. Es wurde nichts geändert.',
@@ -6591,6 +6629,10 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       vocComo:'Un terme par ligne. La reconnaissance vocale ne connaît pas votre système et rend « ME21N » sous la forme « èm-e vingt-et-un ène » — listez les codes et les noms propres qui reviennent dans votre quotidien, et l’outil cherche la forme parlée de chacun dans la transcription et dans les notes.',
       vocPh:'ME21N\nKI235\nS/4HANA\nFiori',
       vocAplicar:'Corriger les termes',
+      vocGuardarLabel:'Conserver cette liste dans mon compte, pour qu’elle revienne à la prochaine visite et sur une autre machine. Elle quitte votre ordinateur et reste sur notre serveur — la seule chose de cette boîte qui le fasse. Décocher efface ce qui est conservé.',
+      vocGuardarOn:'Conservée dans votre compte.',
+      vocGuardarOff:'Cet onglet seulement.',
+      vocGuardarErro:'Je n’ai pas pu la conserver — la liste reste valable dans cet onglet.',
       vocDesfazer:'annuler',
       vocFeito:'{0} correction(s) effectuée(s).',
       vocNada:'Aucun de ces termes n’est apparu en toutes lettres. Rien n’a été changé.',
@@ -10057,7 +10099,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
      depois, e não tem como se atualizar sozinho. Sem carimbo, "estou com um
      problema no offline" é uma conversa sem chão — ninguém sabe de qual build
      se fala nem se o defeito já foi consertado. */
-  const VERSAO = '2026.08.28-89';
+  const VERSAO = '2026.08.28-98';
   window.__versao = () => VERSAO;
 
   const PIP_CSS = `
@@ -15550,6 +15592,11 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     }
     if (typeof pintarMarcaCliente === 'function') pintarMarcaCliente();
     pintarModelosDoCliente();
+    /* UMA CHAMADA SÓ, e de propósito. A caixa do vocabulário mora bem mais
+       abaixo neste arquivo, com o `VOC_CHAVE` num `const` — tocar nele daqui
+       seria ler antes da declaração no dia em que este trecho rodasse cedo.
+       Quem conhece a caixa é a caixa. */
+    if (typeof aplicarVocDoPerfil === 'function') aplicarVocDoPerfil(pf);
   }
 
   /* Os modelos de documento do cliente. Escolher um preenche o que ele define;
@@ -24437,6 +24484,8 @@ ${relsSlide[i]}</Relationships>`) });
       if (v) sessionStorage.setItem(VOC_CHAVE, v);
       else sessionStorage.removeItem(VOC_CHAVE);
     } catch (e) {}
+    /* E, se a pessoa pediu, também no servidor — mas não a cada tecla. */
+    if ($('vocGuardar') && $('vocGuardar').checked) agendarVocNoServidor();
   }
   try {
     const v = sessionStorage.getItem(VOC_CHAVE);
@@ -24444,6 +24493,77 @@ ${relsSlide[i]}</Relationships>`) });
   } catch (e) {}
 
   $('vocLista').addEventListener('input', guardarVoc);
+
+  /* ---- guardar entre visitas, se a pessoa pedir (DEC-5, caminho A) ----
+
+     A lista carrega termos do cliente. Guardá-la é a única coisa desta caixa
+     que sai da máquina, então é escolha explícita, desmarcada por padrão, e
+     desmarcar APAGA o que estava guardado — "pare de guardar" e "esqueça o que
+     guardou" são a mesma frase para quem marca e depois se arrepende.
+
+     O controle só existe com sessão de plano pago. No gratuito a lista continua
+     vivendo na aba, como sempre viveu: um controle que não faz nada é pior do
+     que controle nenhum. */
+  let vocRelogio = null;
+
+  /* O que a conta devolveu, aplicado à caixa. Só sobrescreve caixa VAZIA: quem
+     já digitou nesta aba antes de a sessão responder não pode perder o que
+     digitou — a resposta da conta chega depois, e vencer a pessoa aqui é o
+     mesmo defeito que o `formatoManual` lá em cima existe para evitar. */
+  function aplicarVocDoPerfil(pf){
+    if (pf && pf.vocabulario && $('vocLista') && !($('vocLista').value || '').trim()) {
+      $('vocLista').value = pf.vocabulario;
+      try { sessionStorage.setItem(VOC_CHAVE, pf.vocabulario); } catch (e) {}
+    }
+    pintarVocGuardar();
+  }
+
+  function pintarVocGuardar(){
+    const cx = $('vocGuardarRow'); if (!cx) return;
+    const dentro = !!(sessao && perfilDoCliente && perfilDoCliente.cliente);
+    cx.classList.toggle('hide', !dentro);
+    if (!dentro) { $('vocGuardarMsg').textContent = ''; return; }
+    $('vocGuardar').checked = !!(perfilDoCliente && perfilDoCliente.vocGuardar);
+    $('vocGuardarMsg').textContent = $('vocGuardar').checked ? t('vocGuardarOn') : t('vocGuardarOff');
+  }
+
+  /* Digitar dispara uma gravação por tecla se ninguém segurar. Um segundo de
+     silêncio é o suficiente para virar uma só, e curto o bastante para a lista
+     estar guardada quando a pessoa fecha a aba logo depois. */
+  function agendarVocNoServidor(){
+    clearTimeout(vocRelogio);
+    vocRelogio = setTimeout(() => mandarVocParaOServidor(true), 1000);
+  }
+
+  async function mandarVocParaOServidor(guardar){
+    if (!sessao || !MEDIR_URL) return;
+    const texto = ($('vocLista').value || '').trim();
+    try {
+      const r = await fetch(MEDIR_URL + '/functions/v1/walkstamp-meus', {
+        method: 'POST',
+        headers: { apikey: MEDIR_KEY, Authorization: 'Bearer ' + sessao.token,
+                   'Content-Type': 'application/json' },
+        body: JSON.stringify({ acao: 'vocabulario', texto, guardar: !!guardar })
+      });
+      const d = await r.json().catch(() => null);
+      if (!r.ok || !d || d.erro) throw new Error((d && d.erro) || 'falha');
+      /* O perfil em memória acompanha: sem isso, um `aplicarPerfil` posterior
+         repintaria a caixa com o estado velho. */
+      if (perfilDoCliente) perfilDoCliente.vocGuardar = !!guardar;
+      $('vocGuardarMsg').textContent = guardar ? t('vocGuardarOn') : t('vocGuardarOff');
+    } catch (e) {
+      /* A lista não se perde por causa disto: ela continua na aba, e a frase
+         diz exatamente isso em vez de um "erro" que não explica o que sobrou. */
+      $('vocGuardarMsg').textContent = t('vocGuardarErro');
+    }
+  }
+
+  if ($('vocGuardar')) {
+    $('vocGuardar').addEventListener('change', () => {
+      clearTimeout(vocRelogio);
+      mandarVocParaOServidor($('vocGuardar').checked);
+    });
+  }
   $('vocModo').onclick = () => $('vocBox').classList.toggle('hide');
 
   /* ---- tirar hesitações ----

@@ -290,7 +290,8 @@
     "pular": "Pular para o conteúdo",
     "timeConviteEnviado": "Convite enviado para {email}.",
     "timeConviteNaoSaiu": "O assento de {email} foi criado, mas o convite por e-mail não saiu. Avise a pessoa: ela entra na conta com este mesmo endereço, e a licença chega sozinha.",
-    "timeConviteLimite": "O assento de {email} foi criado, mas o convite não saiu: já foram enviados dois convites para esse endereço hoje."
+    "timeConviteLimite": "O assento de {email} foi criado, mas o convite não saiu: já foram enviados dois convites para esse endereço hoje.",
+    "dadosVocabulario": "Lista de termos guardada"
   },
   "en": {
     "tituloAba": "Your account",
@@ -582,7 +583,8 @@
     "pular": "Skip to content",
     "timeConviteEnviado": "Invitation sent to {email}.",
     "timeConviteNaoSaiu": "The seat for {email} was created, but the invitation email did not go out. Let them know: they sign in to the account with this same address, and the licence arrives on its own.",
-    "timeConviteLimite": "The seat for {email} was created, but the invitation did not go out: two invitations have already been sent to that address today."
+    "timeConviteLimite": "The seat for {email} was created, but the invitation did not go out: two invitations have already been sent to that address today.",
+    "dadosVocabulario": "Saved term list"
   },
   "es": {
     "tituloAba": "Tu cuenta",
@@ -874,7 +876,8 @@
     "pular": "Saltar al contenido",
     "timeConviteEnviado": "Invitación enviada a {email}.",
     "timeConviteNaoSaiu": "El asiento de {email} se creó, pero el correo de invitación no salió. Avísale: entra en la cuenta con esta misma dirección y la licencia llega sola.",
-    "timeConviteLimite": "El asiento de {email} se creó, pero la invitación no salió: ya se enviaron dos invitaciones a esa dirección hoy."
+    "timeConviteLimite": "El asiento de {email} se creó, pero la invitación no salió: ya se enviaron dos invitaciones a esa dirección hoy.",
+    "dadosVocabulario": "Lista de términos guardada"
   },
   "de": {
     "tituloAba": "Ihr Konto",
@@ -1166,7 +1169,8 @@
     "pular": "Zum Inhalt springen",
     "timeConviteEnviado": "Einladung an {email} gesendet.",
     "timeConviteNaoSaiu": "Der Platz für {email} wurde angelegt, aber die Einladungs-E-Mail ging nicht raus. Sagen Sie der Person Bescheid: Sie meldet sich mit genau dieser Adresse im Konto an, und die Lizenz kommt von selbst.",
-    "timeConviteLimite": "Der Platz für {email} wurde angelegt, aber die Einladung ging nicht raus: an diese Adresse wurden heute bereits zwei Einladungen gesendet."
+    "timeConviteLimite": "Der Platz für {email} wurde angelegt, aber die Einladung ging nicht raus: an diese Adresse wurden heute bereits zwei Einladungen gesendet.",
+    "dadosVocabulario": "Gespeicherte Begriffsliste"
   },
   "fr": {
     "tituloAba": "Votre compte",
@@ -1458,6 +1462,7 @@
     "pular": "Aller au contenu",
     "timeConviteEnviado": "Invitation envoyée à {email}.",
     "timeConviteNaoSaiu": "Le siège de {email} a été créé, mais l’e-mail d’invitation n’est pas parti. Prévenez la personne : elle se connecte au compte avec cette même adresse, et la licence arrive toute seule.",
-    "timeConviteLimite": "Le siège de {email} a été créé, mais l’invitation n’est pas partie : deux invitations ont déjà été envoyées à cette adresse aujourd’hui."
+    "timeConviteLimite": "Le siège de {email} a été créé, mais l’invitation n’est pas partie : deux invitations ont déjà été envoyées à cette adresse aujourd’hui.",
+    "dadosVocabulario": "Liste de termes conservée"
   }
 }

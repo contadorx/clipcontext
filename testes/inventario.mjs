@@ -114,8 +114,8 @@ console.log('\n[5] a pista de liberação conta as MESMAS réguas');
 console.log('\n[6] quantas réguas o corredor específico NÃO consegue chamar');
 {
   /* MEDIDO EM 28/08, e é um número que ninguém tinha olhado: das réguas do
-     disco, **62 não aparecem em linha nenhuma do mapa do `liberar.sh` nem na
-     lista dos contratos** (eram 64 antes de este build ligar o `portal.mjs` e as
+     disco, **61 não aparecem em linha nenhuma do mapa do `liberar.sh` nem na
+     lista dos contratos** (eram 64 antes de o Build 48 ligar o `portal.mjs` e as
      cartas). Não importa o que o build toque — elas só rodam no
      `rodar.sh` completo.
      Isso não é um defeito do mapa: ele é escrito à mão de propósito, e muita
@@ -125,7 +125,7 @@ console.log('\n[6] quantas réguas o corredor específico NÃO consegue chamar')
      O TETO SÓ DESCE. Ele não obriga a mapear tudo hoje; obriga a não abrir mais
      buraco amanhã. Uma régua nova que ninguém liga ao mapa reprova aqui, no
      mesmo dia em que nasce, em vez de virar mais um nome nesta lista. */
-  const TETO = 62;
+  const TETO = 61;
   const lib = fs.readFileSync(path.join(AQUI, 'liberar.sh'), 'utf8');
   const mapa = (lib.split("<<'MAPA_FIM'")[1] || '').split('MAPA_FIM')[0];
   const contratos = (lib.match(/CONTRATOS="([\s\S]*?)"/) || ['', ''])[1];

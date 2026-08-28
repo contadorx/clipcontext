@@ -104,7 +104,11 @@ read -r -d '' MAPA <<'MAPA_FIM'
 ^public/site[.]css$ => folha.mjs site:paginas.mjs site:dobrafig.mjs
 ^offline/ => site:medicao.mjs offlineb.mjs egressao.mjs
 ^supabase/functions/ => edge.mjs
-^supabase/migrations/ => modelopessoal.mjs conferir-migracoes prazos.mjs
+# A migração do vocabulário trouxe dado NOVO para o servidor, e dado novo é
+# assunto de duas telas que já existiam: a sessão dentro da ferramenta e a
+# página que diz o que guardamos de alguém. Esquecer a segunda é o jeito
+# silencioso de a política de privacidade virar mentira.
+^supabase/migrations/ => modelopessoal.mjs conferir-migracoes prazos.mjs site:meusdados.mjs sessao.mjs
 ^testes/ => inventario.mjs
 MAPA_FIM
 

@@ -47,7 +47,32 @@ Deno.serve(async (req) => {
   const email = emailDoToken(req);
   if (!email) return json({ erro: "sem_sessao" }, 401);
 
+  let c: Record<string, unknown> = {};
+  try { c = await req.json(); } catch { /* corpo vazio é o pedido de leitura */ }
+
   try {
+    /* ---- A ÚNICA ESCRITA DESTA FUNÇÃO, e por que ela mora aqui ----
+
+       Guardar o vocabulário é o único caso em que a ferramenta escreve uma
+       preferência da PESSOA (o `modelo` de documento vai pela outra função,
+       porque é do cliente). Ela vem para cá e não para uma rota do Next pelo
+       mesmo motivo de sempre: a sessão da ferramenta chega no FRAGMENTO do link
+       mágico, que nunca chega a servidor nenhum, então não há cookie para uma
+       rota ler — e o `verify_jwt` daqui já confere o token de graça.
+
+       A LISTA CARREGA TERMOS DO CLIENTE: nome de sistema, de projeto, código de
+       transação. Por isso o `p_guardar` é obrigatório e explícito: sem a marca
+       da pessoa, o banco não só deixa de guardar como apaga o que estava lá. */
+    if (c.acao === "vocabulario") {
+      const p = await rpc("walkstamp_voc_guardar", {
+        p_email: email,
+        p_texto: c.texto == null ? null : String(c.texto),
+        p_guardar: c.guardar === true,
+      });
+      return json(p, p && (p as any).erro ? 400 : 200);
+    }
+    if (c.acao != null && c.acao !== "") return json({ erro: "acao" }, 400);
+
     /* Os dois numa chamada só: a ferramenta pede isto uma vez, na abertura da
        sessão, e duas viagens de rede aí são duas chances de meia resposta. */
     const [chamados, perfil] = await Promise.all([

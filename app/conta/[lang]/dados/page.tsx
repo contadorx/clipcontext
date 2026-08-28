@@ -27,9 +27,26 @@ type Dados = {
   erro?: string;
   email: string;
   prazos: { conta_dias: number; lista_meses: number; evento_meses: number };
-  apagavel: { roteiros: number; casos: number; anexos: number; modelos: number; chamados: number };
+  /* NÃO é uma lista de campos escritos aqui — 28/08. Era, e a tabela abaixo
+     repetia os cinco nomes um por um. Aí o vocabulário guardado virou dado no
+     servidor e esta tela não o conhecia: a página que existe para dizer TUDO o
+     que guardamos de alguém passaria a esconder uma coisa, em silêncio, e
+     ninguém reprovaria. Dado novo no `meus_dados` aparece aqui sozinho. */
+  apagavel: Record<string, number>;
   fica: { faturas: number; emissoes: number };
   total_apagavel: number;
+};
+
+/* O rótulo de cada coisa que o `meus_dados` conta. É um MAPA, e não a ordem da
+   tabela: a ordem vem do banco, que é quem sabe o que existe. Chave nova sem
+   linha aqui aparece crua na tela — e a régua `meusdados.mjs` reprova antes. */
+const ROTULO_APAGAVEL: Record<string, string> = {
+  roteiros: 'dadosRoteiros',
+  casos: 'dadosCasos',
+  anexos: 'dadosAnexos',
+  modelos: 'dadosModelos',
+  chamados: 'dadosChamados',
+  vocabulario: 'dadosVocabulario',
 };
 
 export default async function Pagina(
@@ -79,11 +96,15 @@ export default async function Pagina(
             <h3>{t.dadosApagavel}</h3>
             <table className="dados">
               <tbody>
-                <tr><td>{t.dadosRoteiros}</td><td className="n">{d.apagavel.roteiros}</td></tr>
-                <tr><td>{t.dadosCasos}</td><td className="n">{d.apagavel.casos}</td></tr>
-                <tr><td>{t.dadosAnexos}</td><td className="n">{d.apagavel.anexos}</td></tr>
-                <tr><td>{t.dadosModelos}</td><td className="n">{d.apagavel.modelos}</td></tr>
-                <tr><td>{t.dadosChamados}</td><td className="n">{d.apagavel.chamados}</td></tr>
+                {Object.entries(d.apagavel).map(([chave, quantos]) => (
+                  <tr key={chave}>
+                    {/* Sem rótulo, sai a CHAVE CRUA. É feio de propósito: uma
+                        linha feia aparece e alguém conserta; uma linha que
+                        some não aparece para ninguém. */}
+                    <td>{t[ROTULO_APAGAVEL[chave]] || chave}</td>
+                    <td className="n">{quantos}</td>
+                  </tr>
+                ))}
               </tbody>
             </table>
 
