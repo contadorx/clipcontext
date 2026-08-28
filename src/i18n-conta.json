@@ -286,7 +286,8 @@
   "dadosFeito": "Pronto. Apagamos o que era seu.",
   "dadosNaoBate": "O e-mail digitado não é o da sua conta.",
   "dadosNadaPara": "Não há nada seu guardado aqui agora.",
-  "dadosErro": "Não deu para apagar agora. Tente de novo em instantes."
+  "dadosErro": "Não deu para apagar agora. Tente de novo em instantes.",
+  "pular": "Pular para o conteúdo"
  },
  "en": {
   "tituloAba": "Your account",
@@ -574,7 +575,8 @@
   "dadosFeito": "Done. What was yours has been deleted.",
   "dadosNaoBate": "The e-mail you typed is not the one on your account.",
   "dadosNadaPara": "Nothing of yours is stored here right now.",
-  "dadosErro": "It could not be deleted right now. Try again in a moment."
+  "dadosErro": "It could not be deleted right now. Try again in a moment.",
+  "pular": "Skip to content"
  },
  "es": {
   "tituloAba": "Tu cuenta",
@@ -862,7 +864,8 @@
   "dadosFeito": "Listo. Hemos borrado lo que era tuyo.",
   "dadosNaoBate": "El correo que escribiste no es el de tu cuenta.",
   "dadosNadaPara": "Ahora mismo no hay nada tuyo guardado aquí.",
-  "dadosErro": "No se pudo borrar ahora. Inténtalo de nuevo en un momento."
+  "dadosErro": "No se pudo borrar ahora. Inténtalo de nuevo en un momento.",
+  "pular": "Saltar al contenido"
  },
  "de": {
   "tituloAba": "Ihr Konto",
@@ -1150,7 +1153,8 @@
   "dadosFeito": "Fertig. Was Ihnen gehörte, wurde gelöscht.",
   "dadosNaoBate": "Die eingegebene E-Mail-Adresse ist nicht die Ihres Kontos.",
   "dadosNadaPara": "Im Moment ist hier nichts von Ihnen gespeichert.",
-  "dadosErro": "Löschen war gerade nicht möglich. Versuchen Sie es gleich noch einmal."
+  "dadosErro": "Löschen war gerade nicht möglich. Versuchen Sie es gleich noch einmal.",
+  "pular": "Zum Inhalt springen"
  },
  "fr": {
   "tituloAba": "Votre compte",
@@ -1438,6 +1442,7 @@
   "dadosFeito": "C’est fait. Ce qui était à vous a été supprimé.",
   "dadosNaoBate": "L’e-mail saisi n’est pas celui de votre compte.",
   "dadosNadaPara": "Rien de vous n’est stocké ici pour le moment.",
-  "dadosErro": "La suppression n’a pas pu se faire. Réessayez dans un instant."
+  "dadosErro": "La suppression n’a pas pu se faire. Réessayez dans un instant.",
+  "pular": "Aller au contenu"
  }
 }

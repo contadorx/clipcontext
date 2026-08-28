@@ -1040,6 +1040,21 @@
   .hide{display:none !important}
   .note{font-size:13px;color:var(--muted);border-left:3px solid var(--line);padding:2px 0 2px 12px;margin-top:14px}
   .note b{color:var(--warn)}
+  /* ---- O LINK DE PULAR ----
+     O mesmo desenho do `public/site.css`, e é de propósito que seja o mesmo: o
+     site e a ferramenta são o mesmo produto, e quem aprendeu a pular num não
+     pode ter que reaprender no outro.
+     `display:none` o tiraria da ordem de tabulação, que é o contrário do que
+     ele existe para fazer. Ele sai por posição e volta quando é focado. */
+  .pular{position:absolute;left:-9999px;top:0;z-index:100;
+    background:var(--accent);color:#fff;padding:11px 16px;border-radius:0 0 8px 0;
+    font-weight:600;text-decoration:none}
+  .pular:focus{left:0}
+  /* O alvo do pulo não pode nascer embaixo do cabeçalho, que é grudado. */
+  #conteudo{scroll-margin-top:16px}
+  /* Ver a nota do `tabindex` no `main`: o contorno em volta da página inteira
+     leria como erro, e o pulo já é dito pela rolagem. */
+  #conteudo:focus{outline:none}
   /* ---- A LINHA DE ESTADO DA TRANSCRIÇÃO, DENTRO DA FICHA ----
      Ela NÃO é um controle: é a leitura do que já está escolhido, ao lado do
      botão que consome a escolha. Por isso o `b` dela não herda o amarelo de
@@ -1176,6 +1191,27 @@
 </style>
 </head>
 <body>
+<!-- ---- O LINK DE PULAR, E O `main` QUE ELE ALCANÇA ----
+
+     A ferramenta tinha `<header>`, cinco `<nav>` e dois `<footer>` — todos os
+     marcos, menos o único que importa. Sem `<main>`, o comando "pular para o
+     conteúdo principal" do leitor de tela simplesmente NÃO EXISTE nesta página:
+     não é que ele leve ao lugar errado, é que ele não é oferecido.
+
+     E para quem enxerga mas não usa mouse, o custo estava medido: 14 Tabs até o
+     primeiro controle de verdade — logotipo, quatro links do menu, a conta,
+     cinco idiomas e os três botões de etapa —, em TODA visita. São 102
+     elementos focáveis nesta página.
+
+     `display:none` tiraria o link da ordem de tabulação, que é o contrário do
+     que ele existe para fazer. Ele sai da tela por POSIÇÃO e volta quando é
+     focado — o mesmo desenho que o `doc.html` do site já usa, e de propósito:
+     duas telas do mesmo produto não podem ter dois jeitos de pular.
+
+     O texto é pintado pelo `applyLang()`, e não escrito aqui: a ferramenta
+     troca de idioma SEM RECARREGAR, e escrito no HTML ele ficaria em português
+     numa tela em alemão — a mentira pequena de sempre. -->
+<a class="pular" href="#conteudo" data-i18n="pular"></a>
 <!-- O cabeçalho é uma FAIXA, como no site.
      Ele era uma fileira solta dentro do miolo: sem fundo, sem borda, 37px de
      altura contra os 62 do site, e a marca começando 32px mais à esquerda. Duas
@@ -1286,7 +1322,7 @@
 
      É a mesma lição que o `.painelMenu` do site já tinha aprendido com o `nav`
      nu: um seletor sem dono é um defeito esperando a próxima tela existir. -->
-<div class="wrap corpo">
+<main class="wrap corpo" id="conteudo" tabindex="-1">
   <!-- A BARRA DA CONTA.
 
        Ela nasce vazia e escondida, e só existe se o `/api/menu` responder — o
@@ -3304,7 +3340,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     <span data-i18n="supportLine"></span>
   </p>
 
-</div>
+</main>
 
 <!-- O RODAPE, o mesmo do site e o mesmo da area do cliente.
 
@@ -3566,6 +3602,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recSemFrames:'Nenhuma tela foi guardada: a imagem não mudou o suficiente durante a captura. A gravação só guarda a tela quando ela muda — se você ficou numa tela só, ou se compartilhou uma janela que o navegador entrega em preto, não há o que guardar. Grave de novo percorrendo as telas que quer documentar.',
       recMicLbl:'Incluir meu microfone',
       recTrLbl:'Transcrever enquanto gravo',
+      pular:'Pular para o conteúdo',
       fichaTrAuto:'Vai transcrever enquanto grava', fichaTrCusto:' · ~{0} MB de modelo, uma vez só', fichaTrPronta:'Você vai trazer a transcrição pronta', fichaTrNada:'Sem transcrição — só as telas', fichaTrTrocar:'trocar',
       soRedeTit:'Este é o pacote offline', soRede:'Duas escolhas não aparecem aqui: <b>transcrever enquanto gravo</b> e <b>ler o texto da imagem</b>. As duas precisam baixar um modelo da internet na primeira vez, e este arquivo foi feito para não falar com servidor nenhum — não há endereço de rede dentro dele. Trazer uma transcrição já pronta funciona normalmente. Para transcrever aqui dentro, use a versão do site.',
       anotPh:'O que aconteceu nesta tela? Ex.: cliquei em Salvar e o sistema devolveu a mensagem 4711.', anotSalvar:'Salvar anotação', anotSalvo:'✓ Salvo', anotDoPasso:'Anotação do {0} — descreva o que aconteceu', anotDaTela:'Tela {0} do {1} — descreva o que aconteceu', anotNomeTela:'Tela {0} do {1}', anotFeita:'Anotação salva em: {0}. Ela sai no documento.', anotVazia:'Anotação apagada — este passo sai só com a tela.', anotNaoSalvo:'Escrito, ainda não salvo. Aperte Salvar (ou Ctrl+Enter).', anotCurtoNao:'ainda não salvo', anotCurtoSim:'✓ salvo neste quadro', anotCurtoNao2:'anotação apagada',
@@ -4206,6 +4243,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recSemFrames:'No screen was kept: the image did not change enough during the capture. Recording only keeps the screen when it changes — if you stayed on a single screen, or shared a window the browser hands over as black, there is nothing to keep. Record again, walking through the screens you want to document.',
       recMicLbl:'Include my microphone',
       recTrLbl:'Transcribe while I record',
+      pular:'Skip to content',
       fichaTrAuto:'Will transcribe while you record', fichaTrCusto:' · ~{0} MB model, once only', fichaTrPronta:'You will bring the transcript yourself', fichaTrNada:'No transcript — screens only', fichaTrTrocar:'change',
       soRedeTit:'This is the offline package', soRede:'Two choices are missing here: <b>transcribe while I record</b> and <b>read the text in the image</b>. Both need to download a model from the internet the first time, and this file was built not to talk to any server — there is no network address inside it. Bringing a ready-made transcript works normally. To transcribe in here, use the version on the website.',
       anotPh:'What happened on this screen? E.g.: clicked Save and the system returned message 4711.', anotSalvar:'Save note', anotSalvo:'✓ Saved', anotDoPasso:'Note for {0} — describe what happened', anotDaTela:'Screen {0} of {1} — describe what happened', anotNomeTela:'Screen {0} of {1}', anotFeita:'Note saved to: {0}. It goes into the document.', anotVazia:'Note cleared — this step goes out with the screen only.', anotNaoSalvo:'Typed, not saved yet. Press Save (or Ctrl+Enter).', anotCurtoNao:'not saved yet', anotCurtoSim:'✓ saved to this frame', anotCurtoNao2:'note cleared',
@@ -4831,6 +4869,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recSemFrames:'No se guardó ninguna pantalla: la imagen no cambió lo suficiente durante la captura. La grabación solo guarda la pantalla cuando cambia — si te quedaste en una sola, o compartiste una ventana que el navegador entrega en negro, no hay nada que guardar. Graba de nuevo recorriendo las pantallas que quieres documentar.',
       recMicLbl:'Incluir mi micrófono',
       recTrLbl:'Transcribir mientras grabo',
+      pular:'Saltar al contenido',
       fichaTrAuto:'Transcribirá mientras grabas', fichaTrCusto:' · ~{0} MB de modelo, una sola vez', fichaTrPronta:'Traerás la transcripción ya hecha', fichaTrNada:'Sin transcripción — solo las pantallas', fichaTrTrocar:'cambiar',
       soRedeTit:'Este es el paquete offline', soRede:'Dos opciones no aparecen aquí: <b>transcribir mientras grabo</b> y <b>leer el texto de la imagen</b>. Las dos necesitan descargar un modelo de internet la primera vez, y este archivo se hizo para no hablar con ningún servidor — no hay ninguna dirección de red dentro de él. Traer una transcripción ya hecha funciona con normalidad. Para transcribir aquí dentro, usa la versión del sitio.',
       anotPh:'¿Qué pasó en esta pantalla? Ej.: pulsé Guardar y el sistema devolvió el mensaje 4711.', anotSalvar:'Guardar anotación', anotSalvo:'✓ Guardado', anotDoPasso:'Anotación del {0} — describe qué pasó', anotDaTela:'Pantalla {0} del {1} — describe qué pasó', anotNomeTela:'Pantalla {0} del {1}', anotFeita:'Anotación guardada en: {0}. Sale en el documento.', anotVazia:'Anotación borrada — este paso sale solo con la pantalla.', anotNaoSalvo:'Escrito, aún sin guardar. Pulsa Guardar (o Ctrl+Enter).', anotCurtoNao:'aún sin guardar', anotCurtoSim:'✓ guardado en este cuadro', anotCurtoNao2:'anotación borrada',
@@ -5455,6 +5494,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recSemFrames:'Es wurde kein Bildschirm gespeichert: Das Bild hat sich während der Aufnahme nicht genug verändert. Die Aufnahme speichert den Bildschirm nur, wenn er sich ändert — wenn Sie auf einem einzigen Bildschirm geblieben sind oder ein Fenster freigegeben haben, das der Browser schwarz ausliefert, gibt es nichts zu speichern. Nehmen Sie erneut auf und gehen Sie die Bildschirme durch, die Sie dokumentieren wollen.',
       recMicLbl:'Mein Mikrofon einbeziehen',
       recTrLbl:'Während der Aufnahme transkribieren',
+      pular:'Zum Inhalt springen',
       fichaTrAuto:'Transkribiert während der Aufnahme', fichaTrCusto:' · ~{0} MB Modell, nur einmal', fichaTrPronta:'Sie bringen das Transkript selbst mit', fichaTrNada:'Kein Transkript — nur die Bildschirme', fichaTrTrocar:'ändern',
       soRedeTit:'Dies ist das Offline-Paket', soRede:'Zwei Optionen fehlen hier: <b>während der Aufnahme transkribieren</b> und <b>Text im Bild lesen</b>. Beide müssen beim ersten Mal ein Modell aus dem Internet laden, und diese Datei wurde gebaut, um mit keinem Server zu sprechen — es gibt keine Netzwerkadresse darin. Ein fertiges Transkript mitzubringen funktioniert normal. Zum Transkribieren hier drin nutzen Sie die Version auf der Website.',
       anotPh:'Was ist auf diesem Bildschirm passiert? Z. B.: Auf Speichern geklickt, das System meldete 4711.', anotSalvar:'Notiz speichern', anotSalvo:'✓ Gespeichert', anotDoPasso:'Notiz zu {0} — beschreiben Sie, was passiert ist', anotDaTela:'Bildschirm {0} von {1} — beschreiben Sie, was passiert ist', anotNomeTela:'Bildschirm {0} von {1}', anotFeita:'Notiz gespeichert bei: {0}. Sie erscheint im Dokument.', anotVazia:'Notiz gelöscht — dieser Schritt erscheint nur mit dem Bild.', anotNaoSalvo:'Geschrieben, noch nicht gespeichert. Auf Speichern drücken (oder Strg+Enter).', anotCurtoNao:'noch nicht gespeichert', anotCurtoSim:'✓ in diesem Bild gespeichert', anotCurtoNao2:'Notiz gelöscht',
@@ -6085,6 +6125,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recSemFrames:'Aucun écran n’a été conservé : l’image n’a pas assez changé pendant la capture. L’enregistrement ne conserve l’écran que lorsqu’il change — si vous êtes resté sur un seul écran, ou si vous avez partagé une fenêtre que le navigateur rend en noir, il n’y a rien à conserver. Enregistrez de nouveau en parcourant les écrans que vous voulez documenter.',
       recMicLbl:'Inclure mon microphone',
       recTrLbl:'Transcrire pendant l’enregistrement',
+      pular:'Aller au contenu',
       fichaTrAuto:'Transcrira pendant l’enregistrement', fichaTrCusto:' · ~{0} MB de modèle, une seule fois', fichaTrPronta:'Vous apporterez la transcription vous-même', fichaTrNada:'Sans transcription — seulement les écrans', fichaTrTrocar:'changer',
       soRedeTit:'Ceci est le paquet hors ligne', soRede:'Deux choix n’apparaissent pas ici : <b>transcrire pendant l’enregistrement</b> et <b>lire le texte de l’image</b>. Les deux doivent télécharger un modèle depuis internet la première fois, et ce fichier a été fabriqué pour ne parler à aucun serveur — il n’y a aucune adresse réseau dedans. Apporter une transcription déjà faite fonctionne normalement. Pour transcrire ici, utilisez la version du site.',
       anotPh:'Que s’est-il passé sur cet écran ? Ex. : clic sur Enregistrer, le système a renvoyé le message 4711.', anotSalvar:'Enregistrer la note', anotSalvo:'✓ Enregistré', anotDoPasso:'Note de {0} — décrivez ce qui s’est passé', anotDaTela:'Écran {0} de {1} — décrivez ce qui s’est passé', anotNomeTela:'Écran {0} de {1}', anotFeita:'Note enregistrée dans : {0}. Elle part dans le document.', anotVazia:'Note effacée — cette étape ne sortira qu’avec l’écran.', anotNaoSalvo:'Saisi, pas encore enregistré. Appuyez sur Enregistrer (ou Ctrl+Entrée).', anotCurtoNao:'pas encore enregistré', anotCurtoSim:'✓ enregistré sur cette image', anotCurtoNao2:'note effacée',
