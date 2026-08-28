@@ -151,6 +151,18 @@ destino voluntário.**
   roteiro, e **ainda assim** o modelo de voz precisa descer uma vez. É um
   produto diferente, não uma correção do atual.
 
+> **CUMPRIDO NO BUILD 36, a metade do offline.** O artefato de arquivo único
+> deixou de ter endereço de rede dentro: nem jsDelivr, nem Hugging Face, nem
+> Google, nem LinkedIn — medido, zero ocorrências, e o `build.py` PARA se um
+> voltar. As duas escolhas que precisavam de rede (transcrever enquanto grava,
+> ler o texto da imagem) sumiram da tela quando o protocolo é `file:`, com o
+> aviso explicando nos cinco idiomas; as duas que funcionam sem rede ficaram.
+> É o que a página de segurança já vendia desde antes.
+>
+> **Falta a metade do hospedado:** a frase única do caminho A, escrita uma vez
+> só, com a matriz de exceções nomeada no mesmo bloco, e a régua que a prova
+> contra o que o produto realmente chama.
+
 > **Minha indicação: A para o produto hospedado; B só para o artefato offline.**
 > O offline já é vendido como B — e hoje **não é**: medido, ele chama
 > `cdn.jsdelivr.net` 1,7 s depois de abrir, sem gesto nenhum. Lá a escolha não é

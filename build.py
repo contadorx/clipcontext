@@ -897,6 +897,16 @@ def build_site(root: pathlib.Path) -> None:
             t["cnpj"] = CNPJ
             t["contato"] = CONTATO
             t["encarregado"] = ENCARREGADO
+            # Os prazos de retenção. Este laço não escreve arquivo — quem serve
+            # estas páginas é o Next —, mas ele CONFERE se falta valor, e sem
+            # estas três linhas ele acusava `prazoConta` como sem valor em cinco
+            # idiomas a cada build. Quinze linhas de aviso falso escondem o aviso
+            # verdadeiro que aparecer no meio, que é a razão de o conferente
+            # existir.
+            t["prazoConta"] = str(PRAZO_CONTA_DIAS)
+            t["prazoLista"] = str(PRAZO_LISTA_MESES)
+            t["prazoEvento"] = str(PRAZO_EVENTO_MESES)
+            t["contaDados"] = CAMINHO_CONTA[lang] + "/" + sub_conta["dados"][lang]
             t["lang"] = lang
             t["docTitle"], t["docDesc"] = metas[lang]
             t["selfPath"] = caminhos[lang][pagina]
@@ -2252,6 +2262,101 @@ def main() -> int:
     # origem para existir ali, e um <link> apontando para /manifest.webmanifest
     # só produziria um 404 no console de quem o abrir
     offline = offline.replace('<link rel="manifest" href="/manifest.webmanifest">\n', "")
+    # ---- O PACOTE OFFLINE PERDE OS ENDEREÇOS, E NÃO SÓ O CAMINHO ATÉ ELES ----
+    #
+    # A DEC-1 foi decidida em 27/08: caminho A no produto hospedado, caminho B
+    # — zero egressão literal — no artefato offline. B é o que a página de
+    # segurança JÁ VENDE há tempos, com todas as letras: "nada nele fala com
+    # servidor nenhum", e "na versão offline você perde a transcrição automática
+    # e a leitura de texto da imagem". O que faltava era o arquivo obedecer.
+    #
+    # DUAS METADES, e uma sem a outra não serve.
+    #
+    # O template esconde as duas escolhas quando `location.protocol` é `file:`
+    # — isso impede o CLIQUE. Mas o endereço continuaria escrito dentro do
+    # arquivo, e a mesma página de segurança convida a pessoa a CONFERIR
+    # procurando no arquivo baixado. Um avaliador de fornecedor que abre o HTML
+    # e encontra `cdn.jsdelivr.net` não vai ler o `if` que o protege: ele vai
+    # ler o endereço. Aqui os endereços saem do texto.
+    #
+    # As listas viram vazias e as duas sondagens viram string vazia. Os
+    # `acharTess`/`findWasmBase` já tratam "nenhum endereço respondeu" — é o
+    # caminho que existe desde que a fila de reserva foi escrita —, então a
+    # lista vazia cai no mesmo lugar em que cairia uma rede bloqueada.
+    #
+    # Cada troca é uma TRAVA: se o template mudar e um bloco deixar de casar, o
+    # build PARA. Um "offline" publicado com um endereço a mais seria a
+    # promessa quebrada em silêncio, que é como ela chegou a treze.
+    # A fila de bibliotecas de transcricao e montada a partir do `bases`, entao o
+    # corte dela e calculado do mesmo valor — nao de um texto repetido aqui, que
+    # seria a copia que fica para tras quando alguem trocar uma versao.
+    #
+    # E ela vira `[]`, e nao tres strings vazias: uma base vazia resolve para o
+    # proprio diretorio do arquivo, e o carregador sairia tentando importar de
+    # `file:` tres vezes antes de desistir. Lista vazia cai direto no caminho de
+    # "nenhum endereco respondeu", que existe desde que a fila de reserva foi
+    # escrita.
+    CORTES_OFFLINE = [
+        (f"  const TJS_BASES = {json.dumps(bases, ensure_ascii=False)};",
+         "  const TJS_BASES = [];  /* pacote offline: sem endereco de rede */"),
+        ("""  const WASM_BASES = [
+    'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.26.0-dev.20260416-b7804b056c/dist/',
+    'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.23.0/dist/',
+    'https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/'
+  ];""", "  const WASM_BASES = [];  /* pacote offline: sem endereco de rede */"),
+        ("""  const TESS_BASES = [
+    'https://cdn.jsdelivr.net/npm/tesseract.js@6/dist/',
+    'https://cdn.jsdelivr.net/npm/tesseract.js@6.1.2/dist/',
+    'https://cdn.jsdelivr.net/npm/tesseract.js/dist/'
+  ];""", "  const TESS_BASES = [];  /* pacote offline: sem endereco de rede */"),
+        ("""  const TESS_CORES = [
+    'https://cdn.jsdelivr.net/npm/tesseract.js-core@6',
+    'https://cdn.jsdelivr.net/npm/tesseract.js-core@6.1.2',
+    'https://cdn.jsdelivr.net/npm/tesseract.js-core'
+  ];""", "  const TESS_CORES = [];  /* pacote offline: sem endereco de rede */"),
+        ("  const TESS_LANG = 'https://cdn.jsdelivr.net/gh/naptha/tessdata@main/4.0.0';",
+         "  const TESS_LANG = '';  /* pacote offline: sem endereco de rede */"),
+    ]
+    for velho, novo in CORTES_OFFLINE:
+        if velho not in offline:
+            print("o corte do offline nao casou com o template — um endereco de "
+                  "rede ficaria dentro do arquivo unico:\n"
+                  f"  {velho.strip().splitlines()[0]}", file=sys.stderr)
+            return 1
+        offline = offline.replace(velho, novo)
+
+    # As bases da biblioteca de transcricao e as duas sondagens do Hugging Face
+    # sao montadas em linha; aqui a troca e por endereco, um a um.
+    ENDERECOS_OFFLINE = [
+        "https://huggingface.co/onnx-community/whisper-base/resolve/main/onnx/encoder_model.onnx",
+        "https://huggingface.co/onnx-community/whisper-base/resolve/main/config.json",
+        # E o Drive. Os três tokens de credencial ja saem vazios acima, entao
+        # nenhum botao do Google e desenhado no pacote — mas os ENDERECOS
+        # continuavam escritos, e a pagina de seguranca convida a pessoa a
+        # conferir procurando no arquivo baixado. Quem abre o HTML e acha
+        # `googleapis.com` nao vai ler o `if` que o protege: vai ler o endereco.
+        "https://www.googleapis.com/auth/drive.file",
+        "https://www.googleapis.com/upload/drive/v3/files",
+        "https://www.googleapis.com/drive/v3/files/",
+        # Os dois scripts que o Google carrega sozinho quando ha credencial, e o
+        # endereco do documento criado. Sem credencial nada disso roda; sem
+        # estas linhas, tudo isso continuava escrito no arquivo.
+        "https://accounts.google.com/gsi/client",
+        "https://apis.google.com/js/api.js",
+        "https://docs.google.com/document/d/",
+        # E o compartilhar. Ele ja cai no mailto quando o protocolo e `file:`,
+        # entao o endereco era codigo morto dentro do pacote — mas codigo morto
+        # com nome de rede social continua sendo o que um avaliador encontra.
+        "https://www.linkedin.com/sharing/share-offsite/?url=",
+    ]
+    for endereco in ENDERECOS_OFFLINE:
+        if endereco not in offline:
+            print(f"o endereco {endereco!r} sumiu do template — o corte do "
+                  "offline ficou desatualizado e precisa ser revisto",
+                  file=sys.stderr)
+            return 1
+        offline = offline.replace(endereco, "")
+
     # Trava, não conferência: se um dia alguém colar um endereço direto no
     # template, o build quebra em vez de publicar um "offline" que telefona.
     #
@@ -2275,7 +2380,7 @@ def main() -> int:
     # servidor nenhum" é falsa e não pode ser publicada. Quando a decisão do
     # offline for tomada (embutir tudo, ou declarar que ele não transcreve),
     # baixe os tetos junto — o build avisa quando eles ficarem folgados.
-    TETO_CDN_OFFLINE = {"cdn.jsdelivr.net": 13, "huggingface.co": 2}
+    TETO_CDN_OFFLINE = {"cdn.jsdelivr.net": 0, "huggingface.co": 0}
     for endereco, teto in TETO_CDN_OFFLINE.items():
         achou = offline.count(endereco)
         if achou > teto:

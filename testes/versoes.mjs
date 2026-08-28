@@ -89,14 +89,25 @@ console.log('[1] o que o PRODUTO carrega');
        distintas ? '' : versoes.join(','));
   }
 
-  /* O offline é o mesmo produto num arquivo só, e ele é o que vai para quem
-     não pode falar com a nossa rede — se alguma versão ficasse para trás ali,
-     seria justamente na cópia que ninguém reconstrói. */
+  /* O OFFLINE INVERTEU, E É DE PROPÓSITO — 28/08.
+     Esta afirmação exigia que o pacote offline carregasse a MESMA fila de
+     bibliotecas do app: se uma versão ficasse para trás, seria na cópia que
+     ninguém reconstrói. Era a pergunta certa enquanto o offline ainda buscava
+     biblioteca na rede.
+     A DEC-1 foi decidida em B para o artefato offline — zero egressão literal —,
+     e o Build 36 tirou os endereços de dentro dele. A fila lá é VAZIA agora, e
+     exigir que ela seja igual à do app seria exigir que o pacote volte a
+     telefonar. A pergunta virou a oposta, e continua sendo uma pergunta: a fila
+     do offline tem que estar vazia, e a do app tem que continuar cheia — senão
+     alguém cortou a transcrição do produto inteiro achando que cortava só o
+     pacote. */
   const off = fs.readFileSync(`${RAIZ_WS}/offline/walkstamp-offline.html`, 'utf8');
   const mo = off.match(/const TJS_BASES = (\[[^\]]*\]);/);
-  const offIgual = !!mo && !!m && mo[1] === m[1];
-  ok('o pacote offline carrega exatamente as mesmas', offIgual,
-     offIgual ? '' : 'a lista do offline não é a do app');
+  ok('a fila de bibliotecas existe no pacote offline', !!mo, mo ? mo[1] : '(não achei)');
+  ok('  e ela está VAZIA — o pacote não busca biblioteca em lugar nenhum',
+     !!mo && JSON.parse(mo[1]).length === 0, mo ? mo[1].slice(0, 60) : '');
+  ok('  enquanto a do app continua cheia — o corte é do pacote, não do produto',
+     !!m && JSON.parse(m[1]).length > 0, m ? String(JSON.parse(m[1]).length) : '');
 }
 
 console.log('\n[2] o que o npm diz — a única pergunta que sai para a rede');
