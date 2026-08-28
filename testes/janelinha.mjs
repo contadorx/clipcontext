@@ -262,6 +262,85 @@ console.log(`\n[1a] a fita: cabe em ${LARG_MIN}×${ALT_MIN}, e sobra só o que s
      existir; o relógio, que é como se sabe que ainda está gravando; e o parar,
      que é a única outra coisa que não pode exigir alt-tab. */
   await pg.setViewportSize({ width: LARG_MIN, height: ALT_MIN });
+/* ---- A LARGURA DA FITA, POR IDIOMA, COM OS RÓTULOS DE VERDADE ----
+
+   O RELATO: "a janelinha está maior no português que no nosso build original".
+   Está, e a história confirma: o teto do modo fita foi 380 no Build 26, 415 no
+   Build 27 e 480 no Build 30, quando ela ganhou a segunda linha e o passo. Ele
+   subiu três vezes sem que nada cobrasse o número.
+
+   E ESTA RÉGUA NÃO PODIA PEGAR ISSO, porque ela media com rótulos INVENTADOS:
+   o bloco abaixo injeta 'Markieren', '+ Bildschirm', 'Mikrofon schließen' à mão
+   — e 'Mikrofon schließen' o produto nunca pintou, ele pinta 'Mein Mikrofon
+   schließen'. Uma fita medida com um texto que o produto não usa é uma fita
+   medida em outro produto.
+
+   Aqui os rótulos saem do DICIONÁRIO do próprio app, nos cinco idiomas, e a
+   largura de cada um fica ESCRITA. Não é para congelar o desenho: é para que
+   crescer apareça no diff, com nome e idioma, em vez de aparecer no relato de
+   quem usa. Se um botão novo entrar, estes números sobem — e subir tudo bem,
+   subir calado não. */
+{
+  const dicionario = (L, chave) => {
+    const i = app.indexOf(`\n    ${L}: {`);
+    if (i < 0) return '';
+    const m = app.slice(i, i + 95000).match(new RegExp(chave + ":'([^']*)'"));
+    return m ? m[1] : '';
+  };
+  /* Medido em 28/08, com os rótulos que o produto pinta. O teto é o do
+     `TAM_PIP(true).w`; passar dele significa que a fita não encolhe naquele
+     idioma — que foi o que aconteceu com o alemão, a oito pixels do limite. */
+  const LARGURA = { pt: 397, en: 402, es: 427, de: 472, fr: 440 };
+  const FOLGA = 12;   /* fonte e arredondamento variam entre máquinas */
+
+  for (const L of Object.keys(LARGURA)) {
+    await pg.setContent(`<!doctype html><html><head><meta charset="utf-8">` +
+      `<style>${css}</style></head><body>${corpo}</body></html>`);
+    await pg.evaluate((rot) => {
+      document.body.className = 'min gravando';
+      for (const [id, txt] of Object.entries(rot)) {
+        const b = document.getElementById(id);
+        if (b && txt) { b.textContent = txt; b.disabled = false; b.classList.remove('hide'); }
+      }
+      const r = document.getElementById('rel'); if (r) r.textContent = '12:34';
+    }, { stop: dicionario(L, 'pipCurtoParar'), marcar: dicionario(L, 'pipCurtoMarcar'),
+         erro: dicionario(L, 'pipCurtoErro'), maisTela: dicionario(L, 'pipCurtoTela') });
+    await pg.waitForTimeout(120);
+    /* A MESMA CONTA do `encolherFita()`: preenchimento dos dois lados, cada
+       filho visível, o respiro entre eles, e o contador entrando com ZERO
+       porque ele é o elástico. Replicada e não importada — se ela mudar lá e
+       não aqui, é aqui que se descobre. */
+    const largura = await pg.evaluate(() => {
+      const b = document.body, cs = getComputedStyle(b), txt = document.getElementById('txt');
+      const vis = [...b.children].filter((e) => {
+        const s2 = getComputedStyle(e);
+        return s2.display !== 'none' && s2.position === 'static';
+      });
+      const gap = parseFloat(cs.columnGap || 0) || 0;
+      let n = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight) + gap * Math.max(0, vis.length - 1);
+      for (const e of vis) n += (e === txt) ? 0 : e.getBoundingClientRect().width;
+      return Math.ceil(n) + 2;
+    });
+    /* O DETALHE SÓ SAI QUANDO REPROVA. Impresso sempre, ele escrevia
+       "397 > 480 — neste idioma a fita não encolhe" ao lado de um `ok` — um
+       rótulo contradizendo a própria linha, que é o defeito que estas réguas
+       existem para não deixar passar. É a terceira vez que ele aparece nesta
+       sessão, e das três esta é a única em que o texto era ALARMANTE. */
+    const esperado = LARGURA[L];
+    const bate = Math.abs(largura - esperado) <= FOLGA;
+    ok(`${L}: a fita mede ${esperado}px`, bate,
+       bate ? '' : `medido ${largura}px, escrito ${esperado}px`);
+    const cabe = largura <= LARG_MIN;
+    ok(`  ${L}: e não passa do teto de ${LARG_MIN}px`, cabe,
+       cabe ? '' : `${largura} > ${LARG_MIN} — neste idioma a fita não encolhe`);
+  }
+  /* E o alemão é o que manda: se ele passar do teto, a fita nunca encolhe onde
+     mais precisaria. Oito pixels de margem é pouco, e está dito aqui para que
+     o próximo botão saiba que vai custar isso. */
+  ok('o alemão ainda cabe, e é ele que decide o teto',
+     LARGURA.de <= LARG_MIN, `${LARGURA.de} de ${LARG_MIN} — sobram ${LARG_MIN - LARGURA.de}px`);
+}
+
   await pg.evaluate(() => {
     document.body.className = 'min gravando';
     /* OS RÓTULOS CURTOS, E EM ALEMÃO. Na fita o botão mostra a palavra curta e
@@ -821,7 +900,11 @@ console.log('\n[4] o nome do segundo botão, nos cinco idiomas');
     fr: 'Écran supplémentaire pour cette étape',
   };
   for (const [L, txt] of Object.entries(ESPERADO)) {
-    ok(`${L}: ${txt}`, app.includes(`recTelaBtn:'${txt}'`), '(não achei)');
+    /* Mesmo caso, e este é anterior a mim: o "(não achei)" saía ao lado das
+       linhas que passavam. Quem lê a saída aprende a não confiar no detalhe, e
+       aí o detalhe deixa de servir para o dia em que ele estiver certo. */
+    const achou = app.includes(`recTelaBtn:'${txt}'`);
+    ok(`${L}: ${txt}`, achou, achou ? '' : '(não achei)');
   }
   ok('e o nome antigo não sobrou em lugar nenhum',
      !/recTelaBtn:'[^']*(ais uma tela|ne more screen|na pantalla más|och ein Bildschirm|e plus pour)/
