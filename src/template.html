@@ -2410,6 +2410,25 @@
         <button class="ghost sm hide" id="ocrStop" data-i18n="stopBtn"></button>
         <button class="ghost sm" id="falaNota" data-i18n="falaNota"></button>
       </div>
+      <!-- ---- O CUSTO DO OCR, DITO ANTES DO CLIQUE ----
+
+           Este é o terceiro dos quatro recursos que dependem de algo que pode
+           não estar aí — e o conserto dele NÃO é sondar antes, como o clipe e o
+           WebGPU fazem. Aqui a pergunta "o leitor carrega?" É o download: não
+           existe sondagem barata, e tentar sondar seria pagar o custo que a
+           sondagem existiria para anunciar.
+
+           Então o conserto é o do Build 38: dizer antes, no lugar onde se
+           clica. A pessoa descobria a espera depois do clique, na mensagem de
+           "procurando…", que é indistinguível de um botão lento.
+
+           SEM NÚMERO, e é de propósito. O tamanho do leitor não está declarado
+           em lugar nenhum do projeto, e a rede desta máquina não alcança o CDN
+           para medir. Escrever "~10 MB" aqui seria um chute vestido de medição
+           — exatamente o defeito que o Build 33 tirou da calculadora de preços.
+           Quando alguém medir, o número entra; até lá, a frase diz o que é
+           certo: que baixa, que é uma vez só, e que depois fica guardado. -->
+      <p class="note" id="ocrCusto" data-i18n="ocrCusto" style="margin:8px 0 0"></p>
     </div>
     <!-- Revisar quadro a quadro mora aqui, e não no cartão do vídeo: é o que se
          faz COM os quadros que já estão na tela, não uma forma de trazê-los.
@@ -3844,7 +3863,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       proxFim:'Documento baixado. Dá para baixar de novo, ou guardar o projeto para reabrir depois.',
       lockBaixar:'O documento é montado a partir das telas — ele aparece aqui quando elas existirem.',
       dropQuiet:'Descartar sem fala',
-      ocrBtn:'Ler o texto da tela',
+      ocrBtn:'Ler o texto da tela', ocrCusto:'Ler o texto da tela baixa um leitor na primeira vez — depois ele fica guardado no navegador e as próximas são imediatas. A imagem não sai daqui: o leitor é que vem.',
       ocrLoad:'Carregando o leitor de texto (só na primeira vez)…',
       ocrRun:'Lendo o texto das imagens: {0}% ({1} de {2}){3}',
       ocrDone:'Texto lido em {0} de {1} quadros. Vai junto no PDF e no JSON.',
@@ -3945,7 +3964,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       sbOk1:'Pronto — ir para a fala', sbOk2:'Pronto — ir para a identificação', sbOk3:'Pronto — ir para gerar', sbOk4:'Pronto — ir para o prompt',
       sb1H:'Conferir os quadros', sb2H:'Revisar a fala', sb3H:'Identificar o documento', sb4H:'Gerar',
       clipeBotaoOn:'Clipe de {0} s ligado', clipeBotaoCam:' · com webcam',
-      clipeModalTit:'Clipe e webcam', clipeBotaoOff:'Clipe do momento: desligado',
+      clipeModalTit:'Clipe e webcam', clipeBotaoOff:'Clipe do momento: desligado', clipeBotaoNao:'Clipe do momento: este navegador não grava',
       lenteCap:'Começa aqui uma tarefa / um caso',
       lenteCapNota:'Deixe em branco se este passo continua a tarefa anterior. Escrevendo um nome, a gravação passa a ter capítulos: cada documento ganha o título da tarefa, e a planilha ganha o tempo gasto em cada uma.',
       capTempo:'{0} nesta tarefa', capCol:'Tarefa', capTempoCol:'Tempo na tarefa',
@@ -4476,7 +4495,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       proxFim:'Document downloaded. You can download it again, or save the project to reopen later.',
       lockBaixar:'The document is built from the screens — it shows up here once they exist.',
       dropQuiet:'Discard silent ones',
-      ocrBtn:'Read the on-screen text',
+      ocrBtn:'Read the on-screen text', ocrCusto:'Reading the on-screen text downloads a reader the first time — after that it stays in the browser and the next ones are immediate. The image does not leave: the reader is what comes in.',
       ocrLoad:'Loading the text reader (first time only)…',
       ocrRun:'Reading text from the images: {0}% ({1} of {2}){3}',
       ocrDone:'Text read from {0} of {1} frames. It goes into the PDF and the JSON.',
@@ -4571,7 +4590,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       sbOk1:'Done — go to the speech', sbOk2:'Done — go to identification', sbOk3:'Done — go to generate', sbOk4:'Done — go to the prompt',
       sb1H:'Check the frames', sb2H:'Review the speech', sb3H:'Identify the document', sb4H:'Generate',
       clipeBotaoOn:'{0} s clip on', clipeBotaoCam:' · with webcam',
-      clipeModalTit:'Clip and webcam', clipeBotaoOff:'Moment clip: off',
+      clipeModalTit:'Clip and webcam', clipeBotaoOff:'Moment clip: off', clipeBotaoNao:'Moment clip: this browser cannot record it',
       lenteCap:'A task / case starts here',
       lenteCapNota:'Leave it blank if this step continues the previous task. Type a name and the recording gains chapters: each document gets the task title, and the spreadsheet gains the time spent on each one.',
       capTempo:'{0} on this task', capCol:'Task', capTempoCol:'Time on task',
@@ -5102,7 +5121,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       proxFim:'Documento descargado. Puedes descargarlo otra vez, o guardar el proyecto para reabrirlo después.',
       lockBaixar:'El documento se arma a partir de las pantallas — aparece aquí cuando existan.',
       dropQuiet:'Descartar sin habla',
-      ocrBtn:'Leer el texto de la pantalla',
+      ocrBtn:'Leer el texto de la pantalla', ocrCusto:'Leer el texto de la pantalla descarga un lector la primera vez — después queda guardado en el navegador y las siguientes son inmediatas. La imagen no sale de aquí: lo que viene es el lector.',
       ocrLoad:'Cargando el lector de texto (solo la primera vez)…',
       ocrRun:'Leyendo el texto de las imágenes: {0}% ({1} de {2}){3}',
       ocrDone:'Texto leído en {0} de {1} fotogramas. Va en el PDF y en el JSON.',
@@ -5197,7 +5216,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       sbOk1:'Listo — ir al habla', sbOk2:'Listo — ir a la identificación', sbOk3:'Listo — ir a generar', sbOk4:'Listo — ir al prompt',
       sb1H:'Revisar los fotogramas', sb2H:'Revisar el habla', sb3H:'Identificar el documento', sb4H:'Generar',
       clipeBotaoOn:'Clip de {0} s activado', clipeBotaoCam:' · con webcam',
-      clipeModalTit:'Clip y webcam', clipeBotaoOff:'Clip del momento: apagado',
+      clipeModalTit:'Clip y webcam', clipeBotaoOff:'Clip del momento: apagado', clipeBotaoNao:'Clip del momento: este navegador no lo graba',
       lenteCap:'Aquí empieza una tarea / un caso',
       lenteCapNota:'Déjalo en blanco si este paso continúa la tarea anterior. Al escribir un nombre, la grabación pasa a tener capítulos: cada documento recibe el título de la tarea y la hoja de cálculo gana el tiempo dedicado a cada una.',
       capTempo:'{0} en esta tarea', capCol:'Tarea', capTempoCol:'Tiempo en la tarea',
@@ -5727,7 +5746,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       proxFim:'Dokument heruntergeladen. Sie können es erneut herunterladen oder das Projekt zum späteren Öffnen sichern.',
       lockBaixar:'Das Dokument entsteht aus den Bildschirmen — es erscheint hier, sobald sie existieren.',
       dropQuiet:'Ohne Sprache verwerfen',
-      ocrBtn:'Text auf dem Bildschirm lesen',
+      ocrBtn:'Text auf dem Bildschirm lesen', ocrCusto:'Text auf dem Bildschirm zu lesen lädt beim ersten Mal einen Leser herunter — danach bleibt er im Browser und die nächsten Male gehen sofort. Das Bild geht nicht hinaus: der Leser kommt herein.',
       ocrLoad:'Die Texterkennung wird geladen (nur beim ersten Mal)…',
       ocrRun:'Text wird aus den Bildern gelesen: {0} % ({1} von {2}){3}',
       ocrDone:'Text aus {0} von {1} Screenshots gelesen. Er kommt in das PDF und in das JSON.',
@@ -5828,7 +5847,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       sbOk1:'Fertig — weiter zur Transkription', sbOk2:'Fertig — weiter zur Identifikation', sbOk3:'Fertig — weiter zum Erzeugen', sbOk4:'Fertig — weiter zum Prompt',
       sb1H:'Screenshots prüfen', sb2H:'Transkription prüfen', sb3H:'Dokument identifizieren', sb4H:'Erzeugen',
       clipeBotaoOn:'Clip von {0} s aktiv', clipeBotaoCam:' · mit Webcam',
-      clipeModalTit:'Clip und Webcam', clipeBotaoOff:'Clip zum Moment: aus',
+      clipeModalTit:'Clip und Webcam', clipeBotaoOff:'Clip zum Moment: aus', clipeBotaoNao:'Clip zum Moment: dieser Browser nimmt ihn nicht auf',
       lenteCap:'Hier beginnt eine Aufgabe / ein Fall',
       lenteCapNota:'Lassen Sie das Feld leer, wenn dieser Schritt die vorherige Aufgabe fortsetzt. Wenn Sie einen Namen eintragen, erhält die Aufnahme Kapitel: Jedes Dokument bekommt den Titel der Aufgabe, und die Tabelle bekommt die je Aufgabe aufgewendete Zeit.',
       capTempo:'{0} in dieser Aufgabe', capCol:'Aufgabe', capTempoCol:'Zeit in der Aufgabe',
@@ -6358,7 +6377,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       proxFim:'Document téléchargé. Vous pouvez le télécharger à nouveau, ou enregistrer le projet pour le rouvrir plus tard.',
       lockBaixar:'Le document est construit à partir des écrans — il apparaît ici dès qu’ils existent.',
       dropQuiet:'Écarter les captures sans parole',
-      ocrBtn:'Lire le texte à l’écran',
+      ocrBtn:'Lire le texte à l’écran', ocrCusto:'Lire le texte à l’écran télécharge un lecteur la première fois — ensuite il reste dans le navigateur et les suivantes sont immédiates. L’image ne sort pas d’ici : c’est le lecteur qui entre.',
       ocrLoad:'Chargement du lecteur de texte (seulement la première fois)…',
       ocrRun:'Lecture du texte des images : {0} % ({1} sur {2}){3}',
       ocrDone:'Texte lu dans {0} captures sur {1}. Il entre dans le PDF et dans le JSON.',
@@ -6459,7 +6478,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       sbOk1:'Terminé — passer à la parole', sbOk2:'Terminé — passer à l’identification', sbOk3:'Terminé — passer à la génération', sbOk4:'Terminé — passer au prompt',
       sb1H:'Vérifier les captures', sb2H:'Réviser la parole', sb3H:'Identifier le document', sb4H:'Générer',
       clipeBotaoOn:'Clip de {0} s activé', clipeBotaoCam:' · avec webcam',
-      clipeModalTit:'Clip et webcam', clipeBotaoOff:'Clip du moment : désactivé',
+      clipeModalTit:'Clip et webcam', clipeBotaoOff:'Clip du moment : désactivé', clipeBotaoNao:'Clip du moment : ce navigateur ne l’enregistre pas',
       lenteCap:'Une tâche / un cas commence ici',
       lenteCapNota:'Laissez vide si cette étape poursuit la tâche précédente. En saisissant un nom, l’enregistrement gagne des chapitres : chaque document reçoit le titre de la tâche, et le tableur reçoit le temps passé sur chacune.',
       capTempo:'{0} sur cette tâche', capCol:'Tâche', capTempoCol:'Temps sur la tâche',
@@ -7341,6 +7360,12 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
        Passa por aqui porque é por aqui que todo carregamento e toda troca de
        idioma passam — e o aviso precisa estar no idioma de quem lê. */
     if (typeof pintarSoOffline === 'function') { try { pintarSoOffline(); } catch (e) {} }
+    /* O aviso do OCR some depois que o leitor já veio: na segunda vez não há
+       download nenhum, e a frase passaria a anunciar uma espera que não existe
+       mais. Um aviso que sobrevive ao motivo dele é ruído — e ruído ao lado de
+       um botão ensina a não ler o que está ao lado dos botões. */
+    const oc = $('ocrCusto');
+    if (oc) oc.classList.toggle('hide', !!window.Tesseract);
     /* O resumo da conferência também: sem telas o `render()` não roda, e sem
        ele os dois botões do resumo ficariam mudos esperando para aparecer. */
     if (typeof pintarResumoRev === 'function') { try { pintarResumoRev(); } catch (e) {} }
@@ -18778,13 +18803,51 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
 
   /* O botão diz o estado, e não só o nome: "clipe de 15 s" já responde a
      pergunta que o rótulo antigo deixava aberta — quanto tempo é o clipe. */
+  /* ---- O CLIPE DIZ "NÃO DÁ" ANTES, E NÃO NO MEIO DA GRAVAÇÃO ----
+
+     A sondagem já existia: `clipeSuportado()` e `clipeTipoBom()` são síncronas,
+     não pedem permissão nenhuma e custam microssegundos. O que não existia era
+     chamá-las na hora certa. Elas eram consultadas dentro do `clipeAbrir()`,
+     que roda DEPOIS de o relógio zerar — ou seja, a pessoa marcava a caixa,
+     escolhia o cenário, clicava em Gravar, escolhia a tela no diálogo do
+     navegador, esperava a contagem de três segundos, a gravação COMEÇAVA, e só
+     então o "este navegador não grava clipe" entrava na lista de avisos da
+     gravação em curso. Ela está gravando; parar para entender custa a tomada.
+
+     O texto do "não dá" já existia nos cinco idiomas. Ele só nunca foi dito na
+     hora em que ainda dava para fazer alguma coisa a respeito.
+
+     A caixa fica VISÍVEL e desabilitada, e não escondida: o clipe é anunciado
+     na página de recursos, e uma opção que some sem explicação vira "sumiu o
+     recurso que eu vim usar". Escondido é para quando o navegador nem tem o
+     conceito — é o caso do WebGPU, que some porque `navigator.gpu` não existe e
+     não há o que explicar. */
+  const clipeDaPara = () => clipeSuportado() && !!clipeTipoBom();
+
   function pintarBotaoClipe(){
     const b2 = $('clipeAbrir'); if (!b2) return;
-    const cl = $('recClipe') && $('recClipe').checked;
+    const pode = clipeDaPara();
+    const cx = $('recClipe');
+    if (cx && !pode) {
+      /* Desmarcar é parte do conserto, e não zelo: marcada e desabilitada, ela
+         continuaria dizendo ao `recAjustesEst` que o clipe está ligado. */
+      cx.checked = false;
+      cx.disabled = true;
+    } else if (cx) {
+      cx.disabled = false;
+    }
+    const nota = $('recClipeNota');
+    if (nota) nota.textContent = pode ? t('recClipeNota') : t('recClipeNao');
+
+    const cl = cx && cx.checked;
     const cam = $('recCam') && $('recCam').checked;
-    b2.textContent = cl ? t('clipeBotaoOn', CLIPE_JANELA) + (cam ? t('clipeBotaoCam') : '')
+    b2.textContent = !pode ? t('clipeBotaoNao')
+                   : cl ? t('clipeBotaoOn', CLIPE_JANELA) + (cam ? t('clipeBotaoCam') : '')
                         : t('clipeBotaoOff');
     b2.classList.toggle('ghost', !cl);
+    /* O botão continua clicável quando não dá: dentro do modal está o MOTIVO.
+       Um botão morto não explica nada, e "não disponível" sem porquê é a mesma
+       coisa que o silêncio de antes. */
   }
 
   if ($('recCam')) $('recCam').onchange = () => {
@@ -21294,6 +21357,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     try {
       if (!window.Tesseract) {
         $('status').textContent = t('ocrLoad');
+        /* Some assim que o download termina, sem esperar a próxima repintura:
+           a pessoa está olhando para esta parte da tela agora. */
+        setTimeout(() => { const c = $('ocrCusto');
+          if (c && window.Tesseract) c.classList.add('hide'); }, 0);
         const base = await acharTess();
         if (!base) throw new Error(t('ocrSemCdn'));
         await carregarScript(base + 'tesseract.min.js');
