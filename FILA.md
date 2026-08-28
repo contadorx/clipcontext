@@ -44,8 +44,17 @@ ensina a pular a régua.
 
 | | quando | quanto |
 |---|---|---:|
-| `bash testes/liberar.sh` | **libera um build** | ~1–3 min |
-| `bash testes/rodar.sh` | **libera uma entrega** — antes de publicar | ~70 min |
+| `bash testes/liberar.sh` | **cada build** | ~1–3 min |
+| `bash testes/rodar.sh` | **a cada cinco builds**, e antes de publicar | ~50–70 min |
+
+**A cadência mudou em 27/08, por instrução do Leandro:** a pista específica em
+todo build, a esteira inteira a cada cinco. O motivo é o custo medido — dos
+Builds 23 ao 31, a esteira completa rodou onze vezes e reprovou seis, e todas as
+seis foram apanhadas pelo diff (a pista específica cobre as réguas que o build
+toca). O que a esteira inteira pega, e a específica não, é o efeito colateral em
+régua que o mapa do diff não liga — foi o caso do `fluxo.mjs` no Build 27 e do
+`miudos.mjs` no Build 29. Cinco builds é a distância que ele aceitou carregar
+desse risco.
 
 A pista de liberação roda em três partes: o chão (`build.py` e o TypeScript),
 os doze contratos estáticos — sem navegador e sem servidor, catorze segundos —,
@@ -97,7 +106,25 @@ responder**.
 
 ---
 
-### DEC-1 — Qual é a promessa oficial de residência de dados
+### DEC-1 — Qual é a promessa oficial de residência de dados — **DECIDIDA 27/08: A no hospedado, B no offline**
+
+> **O que foi decidido.** No produto hospedado vale o caminho A: *"nada do seu
+> conteúdo sai sem um gesto seu"*, com a matriz de exceções nomeada no mesmo
+> bloco. No artefato offline vale o caminho B, literal — e hoje ele **não
+> cumpre**: referencia `cdn.jsdelivr.net` em onze lugares. Ou as bibliotecas
+> entram no arquivo, ou as funções que dependem delas degradam sem rede e a
+> página de download diz isso.
+>
+> **Por que A e não B no hospedado, nas palavras de quem decidiu:** *"na conta
+> paga vou querer injetar informações para as features"*. Ou seja, a matriz de
+> exceções não é só a lista de hoje — ela precisa nascer com espaço para o
+> conteúdo que a conta paga vai mandar de propósito. O que **não** entra na
+> matriz, e continua absoluto nas duas pontas: **vídeo e áudio não saem**.
+>
+> Vira trabalho: (a) escrever a frase uma vez só e fazer copy, termos e
+> privacidade citarem ela; (b) uma régua que prove a matriz contra o que o
+> produto realmente chama; (c) o item do offline cumprir B.
+
 
 Tudo depende desta. Copy, teste, integração e termos se contradizem hoje porque
 ninguém escreveu a frase verdadeira uma vez só.
@@ -124,6 +151,32 @@ destino voluntário.**
   roteiro, e **ainda assim** o modelo de voz precisa descer uma vez. É um
   produto diferente, não uma correção do atual.
 
+> **DEC-1 FECHADA NO BUILD 37.** As duas metades entregues.
+>
+> **A do hospedado (caminho A), Build 37.** A frase existe uma vez por idioma —
+> *"Nada do seu conteúdo sai sem um gesto seu"* — e a matriz de exceções é
+> MONTADA do `src/egressao.json`, no mesmo bloco da frase. Antes disso a promessa
+> estava em nove chaves do dicionário e numa dúzia de páginas, cada uma com a sua
+> redação, e a tabela de conexões da página de segurança era escrita à mão em
+> cinco idiomas, sem nada que a ligasse ao código.
+> A régua `egressao.mjs` confere a matriz contra o produto: nada escondido (todo
+> endereço do app tem linha), nada morto (toda linha existe no app), o que sai
+> sozinho é exatamente o declarado — medido com o app servido e parado nove
+> segundos —, e o que exige gesto não sai sem gesto. Provada por reprovação: um
+> `fetch` para um destino não declarado a derruba.
+>
+> > **CUMPRIDO NO BUILD 36, a metade do offline.** O artefato de arquivo único
+> deixou de ter endereço de rede dentro: nem jsDelivr, nem Hugging Face, nem
+> Google, nem LinkedIn — medido, zero ocorrências, e o `build.py` PARA se um
+> voltar. As duas escolhas que precisavam de rede (transcrever enquanto grava,
+> ler o texto da imagem) sumiram da tela quando o protocolo é `file:`, com o
+> aviso explicando nos cinco idiomas; as duas que funcionam sem rede ficaram.
+> É o que a página de segurança já vendia desde antes.
+>
+> **Falta a metade do hospedado:** a frase única do caminho A, escrita uma vez
+> só, com a matriz de exceções nomeada no mesmo bloco, e a régua que a prova
+> contra o que o produto realmente chama.
+
 > **Minha indicação: A para o produto hospedado; B só para o artefato offline.**
 > O offline já é vendido como B — e hoje **não é**: medido, ele chama
 > `cdn.jsdelivr.net` 1,7 s depois de abrir, sem gesto nenhum. Lá a escolha não é
@@ -134,7 +187,20 @@ destino voluntário.**
 
 ---
 
-### DEC-2 — A calculadora de ROI da página de preços
+### DEC-2 — A calculadora de ROI da página de preços — **DECIDIDA 27/08: caminho A, 45 minutos**
+
+> **O que foi decidido:** *"A estou usando no real, 45 minutos"*. A premissa
+> deixou de ser chute: o campo "minutos de trabalho manual por caso" começa em
+> **45**, que é o tempo medido em uso real para montar uma evidência à mão, e a
+> página **diz de onde vem o número** nos cinco idiomas. Nasceu em 12 — um chute
+> com cara de medição na frente de quem vai comprar.
+>
+> A régua `precos.mjs` ganhou o bloco `[8b]`: fixa o 45 e a frase de proveniência
+> nos cinco idiomas. Provada por reprovação — com 44 em pt, ela reprova.
+>
+> Continua verdade o que a página já dizia: os quatro números são do usuário,
+> não saem do navegador, e a conta não se compara com o nosso preço de propósito.
+
 
 Ela é o argumento de tempo inteiro, em forma de widget — 30 das 75 ocorrências
 de "tempo" na página.
@@ -158,6 +224,35 @@ horas para refazer.
 > **Se você não responder:** faço **B** no Build 8 — porque é reversível e
 > impede o pior caso (a régua argumentando contra a compra) — e deixo A escrito
 > e pronto para você aprovar.
+
+---
+
+### DEC-19 — O que a conta paga guarda no servidor — **DECIDIDA 27/08: caminho A, e entregue no Build 34**
+
+> **Erro meu no número.** Apresentei esta decisão ao Leandro chamando-a de
+> "DEC-3". A DEC-3 desta fila é o h1 da home, e continua aberta. A decisão que
+> ele tomou é esta, e ela nasce aqui com número próprio para o registro parar de
+> apontar para a coisa errada.
+>
+> **O que foi decidido:** *"Vamos de a"* — o servidor guarda o que a feature
+> precisa, e a conta mostra o quê. É a consequência direta da DEC-1 em A, pela
+> razão que ele deu lá: *"na conta paga vou querer injetar informações para as
+> features"*.
+>
+> **Entregue no Build 34**, com o botão de apagar junto — que era a condição da
+> minha indicação: uma tela que só lista é a promessa de antes com mais palavras.
+>   - `walkstamp.prazos()` — os prazos de retenção passaram a existir uma vez só;
+>     o expurgo lê de lá e a tela mostra de lá.
+>   - `walkstamp.meus_dados(email)` — contagem, não conteúdo, do que existe.
+>   - `walkstamp.apagar_meus_dados(email, confirmacao)` — apaga, exigindo que a
+>     pessoa digite o próprio e-mail.
+>   - `/conta/<idioma>/dados` nos cinco idiomas, com as DUAS tabelas: o que sai e
+>     o que fica, com o motivo do que fica ao lado.
+>   - `meusdados.mjs`, provada por reprovação no ponto que importa: com o e-mail
+>     vindo do formulário em vez da sessão, ela reprova.
+>
+> **Fica devendo:** a política de privacidade ainda não menciona esta tela nem o
+> direito de apagar, e ainda fala da lista de aviso em pt e es. É o próximo item.
 
 ---
 
@@ -350,7 +445,17 @@ estudos de caso — no site inteiro.
 
 ---
 
-### DEC-11 — Reembolso e garantia
+### DEC-11 — Reembolso e garantia — **DECIDIDA 27/08: caminho B, sem reembolso**
+
+> **O que foi decidido:** *"o reembolso na B não existe"*. A cláusula 14 dos
+> termos, nos cinco idiomas, passou a dizer: cobrança anual pela Stripe, preço
+> o da página no momento da contratação, renovação automática, **14 dias com
+> tudo sem cartão** antes de qualquer cobrança, cancelamento na própria conta,
+> acesso até o fim do período pago e **sem devolução proporcional** — ressalvado
+> o que a legislação consumerista garante a pessoa física, inclusive o art. 49
+> do CDC, porque a cláusula 15 elege a lei brasileira. A régua `legal.mjs`
+> exige as quatro frases nos cinco idiomas e proíbe as duas antigas.
+
 
 Zero ocorrências no site. O que existe responde ao *cancelamento*, não ao
 *arrependimento*.
@@ -414,7 +519,22 @@ numérico).
 
 ---
 
-### DEC-16 — A lista de aviso do plano pago ainda existe?
+### DEC-16 — A lista de aviso do plano pago ainda existe? — **RESOLVIDA 27/08**
+
+> Não existe. O campo saiu do produto, e nada mais escreve na tabela
+> `walkstamp.interesse` — medido: nenhuma rota da aplicação a chama. Sobraram 3
+> endereços do tempo em que ela existiu, cobertos pelo prazo de
+> {{prazoLista}} = 24 meses.
+>
+> **O que faltava era a política dizer isso**, e ela dizia o contrário: chamava
+> o campo de "o único dado pessoal que existe aqui" — falso duas vezes, porque o
+> campo já não existia e porque a conta paga já gravava roteiro, caso e anexo.
+> Corrigido no Build 35, nos cinco idiomas, com `legal.mjs` proibindo a frase
+> antiga e exigindo a nova.
+
+---
+
+### DEC-16 (registro original) — A lista de aviso do plano pago ainda existe?
 
 *Nasceu durante o Build 1: eu fui aplicar a migração do idioma e descobri que o
 formulário não existe em página nenhuma.*

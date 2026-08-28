@@ -1040,6 +1040,20 @@
   .hide{display:none !important}
   .note{font-size:13px;color:var(--muted);border-left:3px solid var(--line);padding:2px 0 2px 12px;margin-top:14px}
   .note b{color:var(--warn)}
+  /* ---- A LINHA DE ESTADO DA TRANSCRIÇÃO, DENTRO DA FICHA ----
+     Ela NÃO é um controle: é a leitura do que já está escolhido, ao lado do
+     botão que consome a escolha. Por isso o `b` dela não herda o amarelo de
+     aviso do `.note b` — não há nada de errado acontecendo; há uma decisão
+     tomada sendo dita antes de ser cobrada. */
+  .trEstado b{color:var(--ink);font-weight:600}
+  .trEstado span{color:var(--muted)}
+  /* O "trocar" é um BOTÃO, e não um `<a href="#...">`: âncora empurra a página
+     e escreve no histórico, e voltar depois disso leva a pessoa para fora da
+     ferramenta. O que ele faz é levar o foco para o rádio, que é o gesto que
+     um leitor de tela também entende. Parece link porque age como link. */
+  .comoLink{background:none;border:0;padding:0;margin-left:8px;font:inherit;
+    font-size:13px;color:var(--accent);text-decoration:underline;cursor:pointer}
+  .comoLink:hover{filter:brightness(1.15)}
   .ok{color:var(--accent);font-weight:550}
   .err{color:var(--err);font-weight:550}
   /* O degrau entre "deu certo" e "deu errado": uma observação. Cor de aviso, sem
@@ -1591,6 +1605,34 @@
           </div>
         </div>
         <span class="status" id="recMsg" data-i18n="recHint"></span>
+        <!-- ---- O ESTADO DA TRANSCRIÇÃO, AO LADO DO BOTÃO ----
+
+             A escolha de transcrever vive ABAIXO dos dois cartões, e é ali que
+             ela tem que ficar: ela vale igual para quem grava, para quem envia
+             arquivo e para quem abre do Drive. Ela já morou dentro desta ficha
+             e saiu de propósito — duas caixas para a mesma pergunta é a segunda
+             lista ao lado da lista de verdade, e um dia elas discordam sobre se
+             o modelo deve baixar.
+
+             O problema não era o lugar dela. Era a ORDEM. Medido: o botão de
+             Gravar fica em y=603 e os três rádios em y=946 — 343 px abaixo, na
+             ordem de leitura DEPOIS da ação que os consome. E o padrão marcado
+             baixa ~206 MB. Quem clica em Gravar assim que vê o botão nunca leu
+             a escolha que já estava tomada por ele.
+
+             Então o que sobe para cá é o ESTADO, e nunca o controle. Uma linha
+             que diz o que vai acontecer e um "trocar" que leva ao lugar onde se
+             troca. É o mesmo desenho do `<summary>` dos Ajustes, que já mostra
+             "para sozinho em 45 min" sem precisar abrir — um estado visível não
+             é um segundo controle.
+
+             De quebra ele ocupa o vazio da ficha: ela é esticada até a altura
+             do cartão da direita, que é mais denso, e com os Ajustes fechados
+             sobravam ~230 px de nada. -->
+        <p class="note trEstado" id="trEstadoFicha" style="margin:8px 0 0;flex-basis:100%">
+          <b id="trEstadoTxt"></b><span id="trEstadoCusto"></span>
+          <button type="button" class="comoLink" id="trTrocar" data-i18n="fichaTrTrocar"></button>
+        </p>
         <!-- A barra do modelo, AQUI.
 
              O download escrevia numa barra do passo 2 — o cartão do áudio, que
@@ -3524,6 +3566,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recSemFrames:'Nenhuma tela foi guardada: a imagem não mudou o suficiente durante a captura. A gravação só guarda a tela quando ela muda — se você ficou numa tela só, ou se compartilhou uma janela que o navegador entrega em preto, não há o que guardar. Grave de novo percorrendo as telas que quer documentar.',
       recMicLbl:'Incluir meu microfone',
       recTrLbl:'Transcrever enquanto gravo',
+      fichaTrAuto:'Vai transcrever enquanto grava', fichaTrCusto:' · ~{0} MB de modelo, uma vez só', fichaTrPronta:'Você vai trazer a transcrição pronta', fichaTrNada:'Sem transcrição — só as telas', fichaTrTrocar:'trocar',
+      soRedeTit:'Este é o pacote offline', soRede:'Duas escolhas não aparecem aqui: <b>transcrever enquanto gravo</b> e <b>ler o texto da imagem</b>. As duas precisam baixar um modelo da internet na primeira vez, e este arquivo foi feito para não falar com servidor nenhum — não há endereço de rede dentro dele. Trazer uma transcrição já pronta funciona normalmente. Para transcrever aqui dentro, use a versão do site.',
       anotPh:'O que aconteceu nesta tela? Ex.: cliquei em Salvar e o sistema devolveu a mensagem 4711.', anotSalvar:'Salvar anotação', anotSalvo:'✓ Salvo', anotDoPasso:'Anotação do {0} — descreva o que aconteceu', anotDaTela:'Tela {0} do {1} — descreva o que aconteceu', anotNomeTela:'Tela {0} do {1}', anotFeita:'Anotação salva em: {0}. Ela sai no documento.', anotVazia:'Anotação apagada — este passo sai só com a tela.', anotNaoSalvo:'Escrito, ainda não salvo. Aperte Salvar (ou Ctrl+Enter).', anotCurtoNao:'ainda não salvo', anotCurtoSim:'✓ salvo neste quadro', anotCurtoNao2:'anotação apagada',
       semTrLbl:'Não transcrever — só as telas', semTrOn:'Só as imagens: o documento sai com as telas, os passos e as suas anotações. O modelo de voz não é baixado, e esta escolha fica guardada para as próximas vezes. Se a transcrição aparecer depois, dá para colá-la na etapa 3.', semTrOff:'Se esta gravação não tem fala que importe — ou se você só quer as telas —, escolha aqui: é o caminho mais rápido, e o modelo de voz não é baixado.', prontaLbl:'Usar transcrição do Google Meet, Zoom ou Teams', prontaOn:'Mais rápido: a reunião já foi transcrita por eles, e o arquivo entra na etapa 3 — sem baixar modelo e sem esperar. Vale .docx do Meet, .vtt/.srt do Teams e do Zoom.', prontaOff:'Se a sua reunião já foi transcrita pelo Meet, pelo Teams ou pelo Zoom, escolha aqui: é mais rápido do que transcrever de novo, e o texto costuma vir melhor (com o nome de quem falou).', trEnviarH:'Já tem a transcrição? Envie o arquivo.', trEnviarP:'Reconheço .docx do Google Meet (as “Anotações do Gemini”, com a aba de transcrição ou o arquivo inteiro), .vtt e .srt do Teams e do Zoom, e texto colado do painel do Drive. Com marcação de tempo, cada tela sai no documento junto do que foi dito ali.', trDeReuniao:'Google Meet, Teams ou Zoom (.docx, .vtt, .srt)', trDeLegenda:'Arquivo de legenda (.vtt, .srt, .txt)', trDoDrive:'Buscar no Google Drive', trLendo:'Lendo o arquivo…', trLeuCues:'Li o arquivo: {0} trechos com marcação de tempo.', trLeuReuniao:'Li a transcrição da reunião: {0} trechos. A minutagem é por bloco — veja a nota abaixo.', trLeuSemTempo:'Li o arquivo, mas ele não tem marcação de tempo: o texto entra inteiro e as telas não saem pareadas com a fala.', trLerErro:'Não consegui ler este arquivo: {0}', trFormato:'Este formato eu não leio. Do Google Meet use o .docx; do Teams e do Zoom, o .vtt ou o .srt. Um .doc antigo ou um PDF precisam ser salvos como .docx ou .txt antes.', trBlocos:' A minutagem veio por BLOCO, como o Meet e o Teams escrevem: um instante para várias falas. Dentro de cada bloco os trechos são distribuídos pelo tamanho da fala — é estimativa, e serve para parear as telas; para citar o minuto exato, confira no vídeo.',
       recTrOn:'A transcrição sai pronta no fim, junto com os quadros. Exige baixar o modelo de ~{0} MB antes de começar — uma vez só, e depois fica guardado no navegador.',
@@ -4162,6 +4206,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recSemFrames:'No screen was kept: the image did not change enough during the capture. Recording only keeps the screen when it changes — if you stayed on a single screen, or shared a window the browser hands over as black, there is nothing to keep. Record again, walking through the screens you want to document.',
       recMicLbl:'Include my microphone',
       recTrLbl:'Transcribe while I record',
+      fichaTrAuto:'Will transcribe while you record', fichaTrCusto:' · ~{0} MB model, once only', fichaTrPronta:'You will bring the transcript yourself', fichaTrNada:'No transcript — screens only', fichaTrTrocar:'change',
+      soRedeTit:'This is the offline package', soRede:'Two choices are missing here: <b>transcribe while I record</b> and <b>read the text in the image</b>. Both need to download a model from the internet the first time, and this file was built not to talk to any server — there is no network address inside it. Bringing a ready-made transcript works normally. To transcribe in here, use the version on the website.',
       anotPh:'What happened on this screen? E.g.: clicked Save and the system returned message 4711.', anotSalvar:'Save note', anotSalvo:'✓ Saved', anotDoPasso:'Note for {0} — describe what happened', anotDaTela:'Screen {0} of {1} — describe what happened', anotNomeTela:'Screen {0} of {1}', anotFeita:'Note saved to: {0}. It goes into the document.', anotVazia:'Note cleared — this step goes out with the screen only.', anotNaoSalvo:'Typed, not saved yet. Press Save (or Ctrl+Enter).', anotCurtoNao:'not saved yet', anotCurtoSim:'✓ saved to this frame', anotCurtoNao2:'note cleared',
       semTrLbl:'No transcript — screens only', semTrOn:'Images only: the document comes out with the screens, the steps and your notes. The speech model is not downloaded, and this choice is remembered for next time. If a transcript turns up later, you can paste it at step 3.', semTrOff:'If this recording has no speech that matters — or you just want the screens — pick this: it is the fastest path, and the speech model is not downloaded.', prontaLbl:'Use the transcript from Google Meet, Zoom or Teams', prontaOn:'Faster: they already transcribed the meeting, and the file goes in at step 3 — no model download, no waiting. Works with Meet .docx and Teams/Zoom .vtt/.srt.', prontaOff:'If your meeting was already transcribed by Meet, Teams or Zoom, pick this: it is faster than transcribing again, and the text is usually better (it names who spoke).', trEnviarH:'Already have the transcript? Send the file.', trEnviarP:'I read Google Meet .docx (the “Gemini notes”, either the transcript tab or the whole file), Teams and Zoom .vtt and .srt, and text pasted from the Drive panel. With timestamps, each screen goes into the document next to what was said there.', trDeReuniao:'Google Meet, Teams or Zoom (.docx, .vtt, .srt)', trDeLegenda:'Subtitle file (.vtt, .srt, .txt)', trDoDrive:'Find it in Google Drive', trLendo:'Reading the file…', trLeuCues:'Read the file: {0} timestamped stretches.', trLeuReuniao:'Read the meeting transcript: {0} stretches. Timing is per block — see the note below.', trLeuSemTempo:'Read the file, but it has no timestamps: the text goes in whole and the screens will not be paired with the speech.', trLerErro:'I could not read this file: {0}', trFormato:'I do not read this format. From Google Meet use the .docx; from Teams and Zoom, the .vtt or .srt. An old .doc or a PDF has to be saved as .docx or .txt first.', trBlocos:' Timing came per BLOCK, the way Meet and Teams write it: one instant for several turns. Inside each block the stretches are spread by how long each turn is — that is an estimate, good enough to pair the screens; to quote an exact minute, check the video.',
       recTrOn:'The transcript is ready at the end, alongside the frames. It needs the ~{0} MB model downloaded first — once only, and then it stays in your browser.',
@@ -4785,6 +4831,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recSemFrames:'No se guardó ninguna pantalla: la imagen no cambió lo suficiente durante la captura. La grabación solo guarda la pantalla cuando cambia — si te quedaste en una sola, o compartiste una ventana que el navegador entrega en negro, no hay nada que guardar. Graba de nuevo recorriendo las pantallas que quieres documentar.',
       recMicLbl:'Incluir mi micrófono',
       recTrLbl:'Transcribir mientras grabo',
+      fichaTrAuto:'Transcribirá mientras grabas', fichaTrCusto:' · ~{0} MB de modelo, una sola vez', fichaTrPronta:'Traerás la transcripción ya hecha', fichaTrNada:'Sin transcripción — solo las pantallas', fichaTrTrocar:'cambiar',
+      soRedeTit:'Este es el paquete offline', soRede:'Dos opciones no aparecen aquí: <b>transcribir mientras grabo</b> y <b>leer el texto de la imagen</b>. Las dos necesitan descargar un modelo de internet la primera vez, y este archivo se hizo para no hablar con ningún servidor — no hay ninguna dirección de red dentro de él. Traer una transcripción ya hecha funciona con normalidad. Para transcribir aquí dentro, usa la versión del sitio.',
       anotPh:'¿Qué pasó en esta pantalla? Ej.: pulsé Guardar y el sistema devolvió el mensaje 4711.', anotSalvar:'Guardar anotación', anotSalvo:'✓ Guardado', anotDoPasso:'Anotación del {0} — describe qué pasó', anotDaTela:'Pantalla {0} del {1} — describe qué pasó', anotNomeTela:'Pantalla {0} del {1}', anotFeita:'Anotación guardada en: {0}. Sale en el documento.', anotVazia:'Anotación borrada — este paso sale solo con la pantalla.', anotNaoSalvo:'Escrito, aún sin guardar. Pulsa Guardar (o Ctrl+Enter).', anotCurtoNao:'aún sin guardar', anotCurtoSim:'✓ guardado en este cuadro', anotCurtoNao2:'anotación borrada',
       semTrLbl:'No transcribir — solo las pantallas', semTrOn:'Solo las imágenes: el documento sale con las pantallas, los pasos y tus anotaciones. El modelo de voz no se descarga, y esta elección queda guardada para las próximas veces. Si la transcripción aparece después, puedes pegarla en la etapa 3.', semTrOff:'Si esta grabación no tiene habla que importe — o si solo quieres las pantallas —, elige aquí: es el camino más rápido, y el modelo de voz no se descarga.', prontaLbl:'Usar la transcripción de Google Meet, Zoom o Teams', prontaOn:'Más rápido: ellos ya transcribieron la reunión, y el archivo entra en la etapa 3 — sin descargar el modelo y sin esperar. Sirve el .docx de Meet y el .vtt/.srt de Teams y Zoom.', prontaOff:'Si tu reunión ya fue transcrita por Meet, Teams o Zoom, elige aquí: es más rápido que transcribir de nuevo, y el texto suele venir mejor (con el nombre de quien habló).', trEnviarH:'¿Ya tienes la transcripción? Envía el archivo.', trEnviarP:'Leo el .docx de Google Meet (las “Notas de Gemini”, la pestaña de transcripción o el archivo entero), el .vtt y el .srt de Teams y Zoom, y texto pegado del panel de Drive. Con marcas de tiempo, cada pantalla sale en el documento junto a lo que se dijo allí.', trDeReuniao:'Google Meet, Teams o Zoom (.docx, .vtt, .srt)', trDeLegenda:'Archivo de subtítulos (.vtt, .srt, .txt)', trDoDrive:'Buscar en Google Drive', trLendo:'Leyendo el archivo…', trLeuCues:'Leí el archivo: {0} tramos con marca de tiempo.', trLeuReuniao:'Leí la transcripción de la reunión: {0} tramos. La minutación es por bloque — mira la nota de abajo.', trLeuSemTempo:'Leí el archivo, pero no tiene marcas de tiempo: el texto entra entero y las pantallas no salen emparejadas con el habla.', trLerErro:'No pude leer este archivo: {0}', trFormato:'Este formato no lo leo. De Google Meet usa el .docx; de Teams y Zoom, el .vtt o el .srt. Un .doc antiguo o un PDF hay que guardarlos antes como .docx o .txt.', trBlocos:' La minutación vino por BLOQUE, como la escriben Meet y Teams: un instante para varias intervenciones. Dentro de cada bloque los tramos se reparten según el tamaño de cada intervención — es una estimación, sirve para emparejar las pantallas; para citar el minuto exacto, compruébalo en el vídeo.',
       recTrOn:'La transcripción sale lista al final, junto con los fotogramas. Requiere descargar el modelo de ~{0} MB antes de empezar — una sola vez, y luego queda guardado en el navegador.',
@@ -5407,6 +5455,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recSemFrames:'Es wurde kein Bildschirm gespeichert: Das Bild hat sich während der Aufnahme nicht genug verändert. Die Aufnahme speichert den Bildschirm nur, wenn er sich ändert — wenn Sie auf einem einzigen Bildschirm geblieben sind oder ein Fenster freigegeben haben, das der Browser schwarz ausliefert, gibt es nichts zu speichern. Nehmen Sie erneut auf und gehen Sie die Bildschirme durch, die Sie dokumentieren wollen.',
       recMicLbl:'Mein Mikrofon einbeziehen',
       recTrLbl:'Während der Aufnahme transkribieren',
+      fichaTrAuto:'Transkribiert während der Aufnahme', fichaTrCusto:' · ~{0} MB Modell, nur einmal', fichaTrPronta:'Sie bringen das Transkript selbst mit', fichaTrNada:'Kein Transkript — nur die Bildschirme', fichaTrTrocar:'ändern',
+      soRedeTit:'Dies ist das Offline-Paket', soRede:'Zwei Optionen fehlen hier: <b>während der Aufnahme transkribieren</b> und <b>Text im Bild lesen</b>. Beide müssen beim ersten Mal ein Modell aus dem Internet laden, und diese Datei wurde gebaut, um mit keinem Server zu sprechen — es gibt keine Netzwerkadresse darin. Ein fertiges Transkript mitzubringen funktioniert normal. Zum Transkribieren hier drin nutzen Sie die Version auf der Website.',
       anotPh:'Was ist auf diesem Bildschirm passiert? Z. B.: Auf Speichern geklickt, das System meldete 4711.', anotSalvar:'Notiz speichern', anotSalvo:'✓ Gespeichert', anotDoPasso:'Notiz zu {0} — beschreiben Sie, was passiert ist', anotDaTela:'Bildschirm {0} von {1} — beschreiben Sie, was passiert ist', anotNomeTela:'Bildschirm {0} von {1}', anotFeita:'Notiz gespeichert bei: {0}. Sie erscheint im Dokument.', anotVazia:'Notiz gelöscht — dieser Schritt erscheint nur mit dem Bild.', anotNaoSalvo:'Geschrieben, noch nicht gespeichert. Auf Speichern drücken (oder Strg+Enter).', anotCurtoNao:'noch nicht gespeichert', anotCurtoSim:'✓ in diesem Bild gespeichert', anotCurtoNao2:'Notiz gelöscht',
       semTrLbl:'Nicht transkribieren — nur die Bildschirme', semTrOn:'Nur die Bilder: das Dokument entsteht aus den Bildschirmen, den Schritten und Ihren Notizen. Das Sprachmodell wird nicht geladen, und diese Wahl bleibt für die nächsten Male gespeichert. Taucht das Transkript später auf, können Sie es in Schritt 3 einfügen.', semTrOff:'Wenn diese Aufnahme keine wichtige Sprache enthält — oder Sie nur die Bildschirme wollen —, wählen Sie das hier: der schnellste Weg, und das Sprachmodell wird nicht geladen.', prontaLbl:'Transkript aus Google Meet, Zoom oder Teams verwenden', prontaOn:'Schneller: die Besprechung wurde dort bereits transkribiert, und die Datei kommt in Schritt 3 hinein — ohne Modell-Download und ohne Warten. Möglich sind Meet-.docx sowie .vtt/.srt aus Teams und Zoom.', prontaOff:'Wenn Ihre Besprechung bereits von Meet, Teams oder Zoom transkribiert wurde, wählen Sie das hier: das ist schneller als erneut zu transkribieren, und der Text ist meist besser (mit dem Namen der sprechenden Person).', trEnviarH:'Transkript schon vorhanden? Datei hochladen.', trEnviarP:'Ich lese Google-Meet-.docx (die „Gemini-Notizen“, den Transkript-Reiter oder die ganze Datei), .vtt und .srt aus Teams und Zoom sowie Text aus dem Drive-Fenster. Mit Zeitmarken erscheint jeder Screenshot im Dokument neben dem, was dort gesagt wurde.', trDeReuniao:'Google Meet, Teams oder Zoom (.docx, .vtt, .srt)', trDeLegenda:'Untertiteldatei (.vtt, .srt, .txt)', trDoDrive:'In Google Drive suchen', trLendo:'Datei wird gelesen…', trLeuCues:'Datei gelesen: {0} Abschnitte mit Zeitmarke.', trLeuReuniao:'Besprechungstranskript gelesen: {0} Abschnitte. Die Zeitangabe ist blockweise — siehe Hinweis unten.', trLeuSemTempo:'Datei gelesen, aber ohne Zeitmarken: der Text kommt vollständig hinein, und die Screenshots werden nicht der Sprache zugeordnet.', trLerErro:'Diese Datei konnte ich nicht lesen: {0}', trFormato:'Dieses Format lese ich nicht. Aus Google Meet nehmen Sie die .docx; aus Teams und Zoom die .vtt oder .srt. Eine alte .doc oder ein PDF müssen vorher als .docx oder .txt gespeichert werden.', trBlocos:' Die Zeitangabe kam BLOCKWEISE, so wie Meet und Teams sie schreiben: ein Zeitpunkt für mehrere Wortbeiträge. Innerhalb eines Blocks werden die Abschnitte nach Länge des Beitrags verteilt — das ist eine Schätzung und reicht, um die Screenshots zuzuordnen; für die exakte Minute prüfen Sie das Video.',
       recTrOn:'Die Transkription ist am Ende fertig, zusammen mit den Screenshots. Dafür muss vorher das Modell von ~{0} MB heruntergeladen werden — nur einmal, danach bleibt es im Browser gespeichert.',
@@ -6035,6 +6085,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recSemFrames:'Aucun écran n’a été conservé : l’image n’a pas assez changé pendant la capture. L’enregistrement ne conserve l’écran que lorsqu’il change — si vous êtes resté sur un seul écran, ou si vous avez partagé une fenêtre que le navigateur rend en noir, il n’y a rien à conserver. Enregistrez de nouveau en parcourant les écrans que vous voulez documenter.',
       recMicLbl:'Inclure mon microphone',
       recTrLbl:'Transcrire pendant l’enregistrement',
+      fichaTrAuto:'Transcrira pendant l’enregistrement', fichaTrCusto:' · ~{0} MB de modèle, une seule fois', fichaTrPronta:'Vous apporterez la transcription vous-même', fichaTrNada:'Sans transcription — seulement les écrans', fichaTrTrocar:'changer',
+      soRedeTit:'Ceci est le paquet hors ligne', soRede:'Deux choix n’apparaissent pas ici : <b>transcrire pendant l’enregistrement</b> et <b>lire le texte de l’image</b>. Les deux doivent télécharger un modèle depuis internet la première fois, et ce fichier a été fabriqué pour ne parler à aucun serveur — il n’y a aucune adresse réseau dedans. Apporter une transcription déjà faite fonctionne normalement. Pour transcrire ici, utilisez la version du site.',
       anotPh:'Que s’est-il passé sur cet écran ? Ex. : clic sur Enregistrer, le système a renvoyé le message 4711.', anotSalvar:'Enregistrer la note', anotSalvo:'✓ Enregistré', anotDoPasso:'Note de {0} — décrivez ce qui s’est passé', anotDaTela:'Écran {0} de {1} — décrivez ce qui s’est passé', anotNomeTela:'Écran {0} de {1}', anotFeita:'Note enregistrée dans : {0}. Elle part dans le document.', anotVazia:'Note effacée — cette étape ne sortira qu’avec l’écran.', anotNaoSalvo:'Saisi, pas encore enregistré. Appuyez sur Enregistrer (ou Ctrl+Entrée).', anotCurtoNao:'pas encore enregistré', anotCurtoSim:'✓ enregistré sur cette image', anotCurtoNao2:'note effacée',
       semTrLbl:'Ne pas transcrire — seulement les écrans', semTrOn:'Seulement les images : le document sort avec les écrans, les étapes et vos notes. Le modèle vocal n’est pas téléchargé, et ce choix est conservé pour les prochaines fois. Si la transcription arrive plus tard, vous pourrez la coller à l’étape 3.', semTrOff:'Si cet enregistrement n’a pas de parole qui compte — ou si vous ne voulez que les écrans —, choisissez ceci : c’est le chemin le plus rapide, et le modèle vocal n’est pas téléchargé.', prontaLbl:'Utiliser la transcription de Google Meet, Zoom ou Teams', prontaOn:'Plus rapide : la réunion a déjà été transcrite chez eux, et le fichier entre à l’étape 3 — sans téléchargement de modèle et sans attente. Fonctionne avec le .docx de Meet et le .vtt/.srt de Teams et Zoom.', prontaOff:'Si votre réunion a déjà été transcrite par Meet, Teams ou Zoom, choisissez ici : c’est plus rapide que de transcrire à nouveau, et le texte est en général meilleur (il nomme qui a parlé).', trEnviarH:'Vous avez déjà la transcription ? Envoyez le fichier.', trEnviarP:'Je lis le .docx de Google Meet (les « notes Gemini », l’onglet transcription ou le fichier entier), le .vtt et le .srt de Teams et Zoom, et le texte collé depuis le panneau Drive. Avec l’horodatage, chaque écran sort dans le document à côté de ce qui a été dit à ce moment-là.', trDeReuniao:'Google Meet, Teams ou Zoom (.docx, .vtt, .srt)', trDeLegenda:'Fichier de sous-titres (.vtt, .srt, .txt)', trDoDrive:'Chercher dans Google Drive', trLendo:'Lecture du fichier…', trLeuCues:'Fichier lu : {0} passages horodatés.', trLeuReuniao:'Transcription de réunion lue : {0} passages. L’horodatage est par bloc — voir la note ci-dessous.', trLeuSemTempo:'Fichier lu, mais sans horodatage : le texte entre en entier et les écrans ne seront pas appariés à la parole.', trLerErro:'Je n’ai pas pu lire ce fichier : {0}', trFormato:'Ce format, je ne le lis pas. Depuis Google Meet, prenez le .docx ; depuis Teams et Zoom, le .vtt ou le .srt. Un ancien .doc ou un PDF doit d’abord être enregistré en .docx ou .txt.', trBlocos:' L’horodatage est venu par BLOC, comme Meet et Teams l’écrivent : un instant pour plusieurs prises de parole. Dans chaque bloc, les passages sont répartis selon la longueur de la prise de parole — c’est une estimation, suffisante pour apparier les écrans ; pour citer la minute exacte, vérifiez dans la vidéo.',
       recTrOn:'La transcription est prête à la fin, en même temps que les captures. Il faut d’abord télécharger le modèle d’environ {0} Mo — une seule fois, ensuite il reste dans le navigateur.',
@@ -7133,6 +7185,55 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   let idiomaDaFalaManual = false;
   if ($('lang')) $('lang').addEventListener('change', () => { idiomaDaFalaManual = true; });
 
+  /* ---- O QUE O ARQUIVO ÚNICO NÃO OFERECE, E POR QUÊ ----
+
+     `file:` é o carimbo, e não um sinal novo do build: é de lá que o pacote de
+     arquivo único é aberto, e é o mesmo teste que a antecipação do modelo, o
+     `compartilhar` e a licença já usam. Na web nada muda.
+
+     Some a escolha de TRANSCREVER (baixa o modelo de voz) e o botão de LER O
+     TEXTO DA IMAGEM (baixa o Tesseract). Ficam de pé, e é o ponto, as duas que
+     funcionam sem rede: trazer uma transcrição já pronta, e não transcrever.
+     E se a que sumiu era a marcada, a escolha cai para a transcrição pronta —
+     um rádio marcado e invisível é a pior das duas metades. */
+  function pintarSoOffline(){
+    if (location.protocol !== 'file:') return;
+    const escondeLabel = (id) => {
+      const el = $(id);
+      const cx = el && el.closest('label.opt');
+      if (cx) cx.style.display = 'none';
+      return el;
+    };
+    const rec = escondeLabel('recTr');
+    if ($('recTrNote')) $('recTrNote').style.display = 'none';
+    if (rec && rec.checked) {
+      const pronta = $('usarPronta');
+      if (pronta) { pronta.checked = true; pronta.dispatchEvent(new Event('change', { bubbles: true })); }
+    }
+    const ocr = $('ocr');
+    if (ocr) ocr.style.display = 'none';
+    const stop = $('ocrStop');
+    if (stop) stop.style.display = 'none';
+
+    /* O aviso é escrito uma vez e reescrito a cada troca de idioma. Ele explica
+       o que sumiu e o que continua funcionando — sem isso, a ausência das duas
+       escolhas lê como defeito. */
+    let av = $('avisoOffline');
+    if (!av) {
+      av = document.createElement('p');
+      av.id = 'avisoOffline';
+      av.className = 'note';
+      av.style.margin = '6px 0 12px';
+      const semTr = $('semTr') && $('semTr').closest('label.opt');
+      if (semTr && semTr.parentNode) semTr.parentNode.insertBefore(av, semTr.nextSibling);
+      else if (rec && rec.closest('label.opt')) {
+        const c = rec.closest('label.opt');
+        c.parentNode.insertBefore(av, c);
+      }
+    }
+    av.innerHTML = '<b>' + t('soRedeTit') + '</b> ' + t('soRede');
+  }
+
   function applyLang(){
     document.documentElement.lang = LANG;
     document.title = t('docTitle');
@@ -7188,6 +7289,17 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
        roteiro precisa ser decidida uma vez ao abrir — e é por aqui que todo
        carregamento passa. */
     if (typeof pintarPartes === 'function') { try { pintarPartes(); } catch (e) {} }
+    /* O PACOTE OFFLINE NÃO OFERECE O QUE NÃO PODE FAZER.
+       Ele é vendido como "nada nele fala com servidor nenhum", e a página de
+       segurança já diz, com todas as letras, que nele você perde a transcrição
+       automática e a leitura de texto da imagem. Faltava o produto obedecer:
+       as duas escolhas continuavam na tela, e clicar numa delas ia buscar 206 MB
+       no jsDelivr — de dentro do arquivo que promete não buscar nada.
+       Oferecer o que não se pode entregar é pior que não oferecer: a pessoa
+       escolhe, espera, e recebe um erro que não sabe ler.
+       Passa por aqui porque é por aqui que todo carregamento e toda troca de
+       idioma passam — e o aviso precisa estar no idioma de quem lê. */
+    if (typeof pintarSoOffline === 'function') { try { pintarSoOffline(); } catch (e) {} }
     /* O resumo da conferência também: sem telas o `render()` não roda, e sem
        ele os dois botões do resumo ficariam mudos esperando para aparecer. */
     if (typeof pintarResumoRev === 'function') { try { pintarResumoRev(); } catch (e) {} }
@@ -7869,6 +7981,23 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     const porValor = { auto: 'recTr', pronta: 'usarPronta', nenhuma: 'semTr' };
     if (guardado && $(porValor[guardado])) $(porValor[guardado]).checked = true;
   }
+  /* ---- O "TROCAR" DA FICHA ----
+     Ele leva o FOCO para a escolha que está marcada, e não para o topo do
+     bloco: quem clica em "trocar" quer mexer no que está valendo, e chegar com
+     o foco no primeiro rádio faria a tecla de espaço mudar a escolha antes de
+     a pessoa ler as outras.
+     `preventScroll` + `scrollIntoView({block:'center'})`: o foco sozinho
+     encosta o elemento na borda da janela, e um rádio colado no rodapé com as
+     três opções cortadas é pior do que não rolar. */
+  if ($('trTrocar')) $('trTrocar').onclick = () => {
+    const marcado = ['recTr', 'usarPronta', 'semTr'].map($).find((e) => e && e.checked)
+                 || $('recTr') || $('usarPronta');
+    if (!marcado) return;
+    const cx = marcado.closest('label.opt') || marcado;
+    try { cx.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) { cx.scrollIntoView(); }
+    try { marcado.focus({ preventScroll: true }); } catch (e) { marcado.focus(); }
+  };
+
   for (const id of ['recTr', 'usarPronta', 'semTr']) {
     if ($(id)) $(id).onchange = (ev) => {
       try { localStorage.setItem(TR_MODO_CHAVE, ev.target.value); } catch (e) {}
@@ -9176,6 +9305,9 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   }
   let pipWin = null, pipTexto = null, pipRelogio = null, pipFrames = null;
   let pipVm = null, pipVs = null, pipCalar = null, pipMarcar = null, pipTela = null, pipPausa = null, pipErro = null;
+  /* Uma medida por janela. Ela nasce falsa a cada abertura, inclusive na
+     reabertura que troca o tamanho — a fita nova precisa ser medida de novo. */
+  let fitaMedida = false;
   let pipErroTic = null;
   /* Pausa e marcação vivem fora do bloco da gravação porque a janelinha e o
      cartão precisam alcançá-las, e as duas são recriadas a cada captura. */
@@ -9445,7 +9577,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      depois, e não tem como se atualizar sozinho. Sem carimbo, "estou com um
      problema no offline" é uma conversa sem chão — ninguém sabe de qual build
      se fala nem se o defeito já foi consertado. */
-  const VERSAO = '2026.08.27-85';
+  const VERSAO = '2026.08.28-35';
   window.__versao = () => VERSAO;
 
   const PIP_CSS = `
@@ -10032,6 +10164,65 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     btn.setAttribute('aria-label', t(vira));
   }
 
+  /* ---- A LARGURA DA FITA SAI DA MEDIDA, E NAO DE UMA TABELA ----
+   *
+   * O relato: "nao da para a janela ser variavel conforme lingua? ela fica
+   * muito grande no portugues, com um espaco que pode ser aproveitado".
+   *
+   * Da — e a tentacao errada seria uma tabela de largura por idioma. Isso e uma
+   * lista paralela: no dia em que um rotulo mudar, a tabela continua com o
+   * numero velho e a fita volta a sobrar ou a espremer. O numero tem que sair
+   * do que esta DESENHADO.
+   *
+   * Entao a janela e pedida na largura do idioma mais comprido (480, que e o
+   * que o alemao precisa) e, com a fita ja montada e rotulada, o conteudo e
+   * medido e a janela encolhe ate ele. Em portugues isso e 390.
+   *
+   * COMO SE MEDE O QUE E ELASTICO: o contador de quadros tem flex de crescer, e
+   * perguntar a largura dele devolveria a da janela. Ele e congelado no tamanho
+   * do proprio texto por um instante, o corpo passa a `max-content`, le-se o
+   * `scrollWidth`, e tudo volta. Nenhum quadro e pintado no meio disso.
+   *
+   * COM ROTEIRO NAO SE ENCOLHE: ali a largura inteira e do passo, e apertar a
+   * janela seria cortar justamente o que ela existe para mostrar.
+   *
+   * E `resizeTo` pode ser recusado numa janela de picture-in-picture. Se for, a
+   * fita fica com os 480 com que abriu: e o tamanho que serve a todos os
+   * idiomas, entao nada quebra — o que se perde e a economia. */
+  function encolherFita(){
+    if (!pipWin || pipModo() !== 'min') return;
+    const d = pipWin.document, b = d.body;
+    if (!b || b.classList.contains('comRoteiro')) return;
+    try {
+      const cs = pipWin.getComputedStyle(b);
+      const txt = d.getElementById('txt');
+      /* A SOMA EXPLICITA DOS FILHOS, e nao um truque de `max-content`.
+         Tentei primeiro por `scrollWidth` (ele ignora o preenchimento da
+         direita: a fita saia sete pixels curta) e depois pela caixa do corpo em
+         `max-content` (ainda quatro pixels curta, e o ultimo botao ficava para
+         fora). A regua pegou as duas, medindo a janela na largura que a conta
+         mandava.
+         Esta conta nao tem truque: preenchimento dos dois lados, mais a largura
+         de cada filho visivel, mais o respiro entre eles. O contador entra com
+         ZERO — ele e o elastico, existe para ocupar a sobra, e numa janela
+         medida nao sobra nada. */
+      const vis = [...b.children].filter((e) => {
+        const s2 = pipWin.getComputedStyle(e);
+        return s2.display !== 'none' && s2.position === 'static';
+      });
+      const respiro = parseFloat(cs.columnGap || 0) || 0;
+      let preciso = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight) +
+                    respiro * Math.max(0, vis.length - 1);
+      for (const e of vis) preciso += (e === txt) ? 0 : e.getBoundingClientRect().width;
+      preciso = Math.ceil(preciso) + 2;
+      const teto = TAM_PIP(true).w;
+      /* Nunca CRESCE: o teto e o que foi pedido na abertura, e uma janela que
+         cresce sozinha por cima do trabalho da pessoa e pior que uma que sobra.
+         E um piso de 300 para nao virar um risco se a medida vier estranha. */
+      if (preciso >= 300 && preciso < teto) pipWin.resizeTo(preciso, TAM_PIP(true).h);
+    } catch (e) {}
+  }
+
   /* Fechar e reabrir e o unico caminho: o tamanho de uma janela de
      `documentPictureInPicture` e pedido na abertura e nao se redimensiona
      depois. Era o que o seletor da pagina ja fazia, e agora e a propria
@@ -10139,6 +10330,9 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       rotularPipTam(pipTamBtn);
       pipTamBtn.onclick = () => trocarTamanhoPip();
     }
+    /* A MEDIDA ESPERA OS ROTULOS, que chegam no estado `gravando`. Aqui so se
+       zera a marca: janela nova, medida nova. */
+    fitaMedida = false;
 
     /* ---- ATALHOS DENTRO DA JANELINHA ----
      *
@@ -10258,6 +10452,11 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
         pipPausa.textContent = pausado ? t('recResumeBtn') : t('recPauseBtn');
         pipPausa.classList.toggle('off', pausado);
       }
+      /* A MEDIDA DA FITA ACONTECE AQUI, e nao na abertura: e neste estado que os
+         botoes recebem os rotulos, e uma fita de botoes vazios cabe em qualquer
+         lugar. Uma vez por janela — `resizeTo` a cada segundo seria uma janela
+         piscando por cima do trabalho da pessoa. */
+      if (!fitaMedida) { fitaMedida = true; encolherFita(); }
       if (pipTexto) pipTexto.classList.remove('contando');
       if (pipWin) { pipWin.document.body.classList.remove('contando');
                     pipWin.document.body.classList.add('gravando'); }
@@ -10333,7 +10532,23 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     /* A CLASSE NO CORPO, e nao um `if` no CSS: quem decide se ha roteiro e o
        JavaScript, e o desenho da fita — passo OU contagem — segue essa decisao
        em vez de adivinhar por conta propria. */
+    /* ---- A JANELA ACOMPANHA A DECISAO, E NAO SO O CSS ----
+     *
+     * O tamanho e pedido na ABERTURA, e o roteiro pode ser colado depois: quem
+     * abre a fita, cola a lista e volta a gravar via o CSS virar duas linhas
+     * numa janela que continuava com os 44px de uma. A segunda linha ficava
+     * cortada — a fita mostrava metade dos botoes.
+     *
+     * `resizeTo` e o unico caminho, e ele pode ser recusado pelo navegador numa
+     * janela de picture-in-picture. Se for, o `catch` engole e a fita continua
+     * do tamanho que abriu: nao piora nada, e nada aqui depende de ter dado
+     * certo. O que nao pode e a janela dizer uma coisa e o desenho outra. */
+    const antes = pipWin.document.body.classList.contains('comRoteiro');
     pipWin.document.body.classList.toggle('comRoteiro', !!roteiro.length);
+    if (antes !== !!roteiro.length && pipModo() === 'min') {
+      const tam = TAM_PIP(true);
+      try { pipWin.resizeTo(tam.w, tam.h); } catch (e) {}
+    }
     if (!roteiro.length) { cx.classList.add('hide'); return; }
     cx.classList.remove('hide');
     const fim = roteiroPos >= roteiro.length;
@@ -12852,6 +13067,30 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
                              ['semTr', 'semTrNote']]) {
       const cx = $(nota), botao = $(r);
       if (cx && botao) cx.classList.toggle('hide', !botao.checked);
+    }
+
+    /* ---- E A MESMA VERDADE, DENTRO DA FICHA DE GRAVAR ----
+       Pintada AQUI, e não numa função própria: `notaTr()` já é o único lugar
+       que lê qual rádio está marcado. Uma segunda função lendo o mesmo rádio
+       seria a segunda lista de sempre — e o dia em que ela discordasse desta é
+       o dia em que a ficha diria "não transcreve" enquanto 206 MB desciam. */
+    const est = $('trEstadoTxt');
+    if (est) {
+      const custo = $('trEstadoCusto');
+      if (querTr) {
+        est.textContent = t('fichaTrAuto');
+        if (custo) custo.textContent = t('fichaTrCusto', tamanhoModelo());
+      } else {
+        est.textContent = ($('usarPronta') && $('usarPronta').checked)
+          ? t('fichaTrPronta') : t('fichaTrNada');
+        if (custo) custo.textContent = '';
+      }
+      /* NO PACOTE OFFLINE ELA FICA, e a primeira versão desta linha a escondia.
+         Lá a escolha de transcrever não é oferecida e `usarPronta` é a marcada
+         — então a linha diz "você vai trazer a transcrição pronta", que é
+         verdade e é exatamente o que quem abriu o arquivo precisa saber antes
+         de gravar. Esconder tiraria informação certa por causa de uma regra
+         que era sobre a outra opção. */
     }
   }
 

@@ -91,15 +91,13 @@
     endereço nenhum de medição dentro: ela não fala com ninguém, e dá para conferir procurando por
     &ldquo;supabase&rdquo; no arquivo.</p>
 
-    <h2>A lista de aviso do plano pago</h2>
-    <p>Na página de preços há um campo opcional de e-mail. Se você preencher, o endereço e o idioma da página
-    são guardados num banco de dados nosso, com a data. É o único dado pessoal que existe aqui, e ele:</p>
-    <ul>
-      <li>não é cruzado com as medições acima — elas não têm com o que ser cruzadas;</li>
-      <li>não é vendido, cedido ou usado em lista de terceiro;</li>
-      <li>serve para uma finalidade só: avisar quando o plano pago existir;</li>
-      <li>é apagado assim que você pedir, pelo contato no fim desta página.</li>
-    </ul>
+    <h2>A lista de aviso não existe mais</h2>
+    <p>A página de preços já teve um campo opcional de e-mail, para avisar quando o plano pago existisse. O
+    plano pago existe, e o campo foi removido: <b>não há mais nada aqui que recolha endereço de quem só está
+    visitando o site</b>. Os endereços deixados enquanto o campo existiu continuam guardados até
+    {{prazoLista}} meses depois de terem sido deixados, e são apagados antes disso a pedido, pelo contato no
+    fim desta página. Eles nunca foram cruzados com as medições acima, nunca foram vendidos nem cedidos, e
+    não são usados para mais nada.</p>
 
     <h2>A conta do plano pago, e o roteiro de casos</h2>
     <p>Quem contrata um plano pago passa a ter uma <b>conta</b>. Ela é o único lugar em que guardamos dado
@@ -152,11 +150,18 @@
     mesma conta; um roteiro <b>&ldquo;só meu&rdquo;</b> é visível apenas para quem o criou. Quem criou o
     roteiro pode apagá-lo a qualquer momento, e apagar leva junto todos os casos dele — e os arquivos
     anexados a eles —, na hora e sem cópia.</p>
-    <p><b>Encerrada a assinatura, o conteúdo da conta é apagado em até 90 dias</b>, por uma rotina que
+    <h3>Você não precisa pedir: a conta apaga sozinha</h3>
+    <p>Dentro da conta há uma tela — <a href="{{contaDados}}" style="color:var(--accent)">Seus dados</a> — que lista, em
+    português, <b>tudo o que existe no nosso servidor com o seu nome</b>: quantos roteiros, quantos casos,
+    quantos arquivos anexados, quantos modelos, quantos chamados. E lista, ao lado e com o mesmo peso, <b>o
+    que não sai quando você apaga, e por quê</b>. Na mesma tela há um botão que apaga tudo o que é seu, na
+    hora, sem falar com ninguém e sem esperar prazo nenhum. Ele pede que você digite o próprio e-mail antes,
+    porque não tem desfazer.</p>
+    <p><b>Encerrada a assinatura, o conteúdo da conta é apagado em até {{prazoConta}} dias</b>, por uma rotina que
     roda todo dia: roteiros, casos, recibos, anexos, modelos, configuração, assentos, histórico de
     emissão e chamados. Antes disso, a pedido, pelo contato no fim desta página.</p>
     <p><b>Uma coisa não é apagada, e é justo dizer qual:</b> a <b>fatura</b>. Nota fiscal tem prazo de
-    guarda fiscal maior que 90 dias, e cumpri-lo é obrigação legal — não é escolha nossa nem sua. O
+    guarda fiscal maior que {{prazoConta}} dias, e cumpri-lo é obrigação legal — não é escolha nossa nem sua. O
     registro do cliente sobrevive junto com ela, reduzido ao que descreve a venda (plano, assentos,
     prazo): o <b>nome e o documento são apagados</b>, e nenhum e-mail, roteiro ou arquivo permanece.</p>
     <p>A sessão da conta usa um <b>cookie</b>, e ele é necessário: é o que mantém você logado. Ele não serve
@@ -383,7 +388,7 @@
           <td>Consentimento (art. 7º, I)</td><td>Até você revogar, ou 24 meses sem uso</td></tr>
       <tr><td>Os quinze marcos de uso</td><td>Saber onde a ferramenta falha e melhorar</td>
           <td>Dado anonimizado (art. 12); na dúvida, legítimo interesse (art. 7º, IX)</td>
-          <td>18 meses</td></tr>
+          <td>{{prazoEvento}} meses</td></tr>
       <tr><td>Visitas de página</td><td>Saber quantas pessoas chegam e por onde</td>
           <td>Dado anonimizado (art. 12); na dúvida, legítimo interesse (art. 7º, IX)</td>
           <td>Conforme a política da Vercel</td></tr>
@@ -394,12 +399,12 @@
           assentos, chamados</td>
           <td>Prestar o serviço contratado</td>
           <td>Execução de contrato (art. 7º, V)</td>
-          <td>Enquanto a assinatura durar, e <b>até 90 dias</b> depois de encerrada</td></tr>
+          <td>Enquanto a assinatura durar, e <b>até {{prazoConta}} dias</b> depois de encerrada</td></tr>
       <tr><td>Fatura e o registro de cliente ligado a ela</td>
           <td>Obrigação fiscal e contábil</td>
           <td>Cumprimento de obrigação legal (art. 7º, II)</td>
           <td>O prazo de guarda fiscal aplicável. Nome e documento são apagados junto com o resto da
-          conta, aos 90 dias</td></tr>
+          conta, aos {{prazoConta}} dias</td></tr>
     </table>
     <p class="small muted">Os marcos de uso e as visitas foram desenhados para não identificar ninguém; se
     ainda assim forem considerados dado pessoal por alguma autoridade, o fundamento é o legítimo interesse

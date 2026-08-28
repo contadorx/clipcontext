@@ -62,15 +62,13 @@
     measurement address inside it at all: it talks to nobody, and you can check that by searching the file for
     &ldquo;supabase&rdquo;.</p>
 
-    <h2>The paid-plan notification list</h2>
-    <p>The pricing page has an optional e-mail field. If you fill it in, the address and the page language are
-    stored in a database of ours, with the date. It is the only personal data here, and it:</p>
-    <ul>
-      <li>is never cross-referenced with the measurements above — they have nothing to cross-reference with;</li>
-      <li>is never sold, shared or added to a third-party list;</li>
-      <li>serves one purpose only: telling you when the paid plan exists;</li>
-      <li>is deleted as soon as you ask, through the contact at the end of this page.</li>
-    </ul>
+    <h2>The notification list no longer exists</h2>
+    <p>The pricing page once had an optional e-mail field, to tell you when the paid plan existed. The paid
+    plan exists, and the field is gone: <b>there is nothing here any more that collects the address of someone
+    who is only visiting the site</b>. Addresses left while the field existed are kept for up to
+    {{prazoLista}} months after they were left, and are deleted sooner on request, through the contact at the
+    end of this page. They were never cross-referenced with the measurements above, never sold or shared, and
+    are used for nothing else.</p>
 
     <h2>The paid-plan account, and the test run</h2>
     <p>Anyone on a paid plan gets an <b>account</b>. It is the only place where we store data of yours by
@@ -121,11 +119,18 @@
     <b>&ldquo;mine only&rdquo;</b> run is visible only to whoever created it. Whoever created a run can
     delete it at any time, and deleting takes all of its cases — and the files attached to them — with it,
     immediately and with no copy.</p>
-    <p><b>When the subscription ends, the account's content is deleted within 90 days</b>, by a routine
+    <h3>You do not have to ask: the account deletes it itself</h3>
+    <p>Inside the account there is a screen — <a href="{{contaDados}}" style="color:var(--accent)">Your data</a> — that lists,
+    in plain language, <b>everything that exists on our server under your name</b>: how many case scripts, how
+    many cases, how many attached files, how many templates, how many tickets. And it lists, beside it and
+    with the same weight, <b>what does not go when you delete, and why</b>. On the same screen there is a
+    button that deletes everything of yours, right away, without talking to anyone and without waiting for any
+    period to run. It asks you to type your own e-mail first, because there is no undo.</p>
+    <p><b>When the subscription ends, the account's content is deleted within {{prazoConta}} days</b>, by a routine
     that runs every day: runs, cases, receipts, attachments, templates, configuration, seats, issuance
     history and support tickets. Before that, on request, through the contact at the end of this page.</p>
     <p><b>One thing is not deleted, and it is fair to say which:</b> the <b>invoice</b>. Invoices carry a
-    statutory retention period longer than 90 days, and meeting it is a legal obligation — not our choice
+    statutory retention period longer than {{prazoConta}} days, and meeting it is a legal obligation — not our choice
     nor yours. The customer record survives alongside it, reduced to what describes the sale (plan, seats,
     term): the <b>name and the tax ID are deleted</b>, and no e-mail, run or file remains.</p>
     <p>The account session uses a <b>cookie</b>, and it is necessary: it is what keeps you signed in. It is
@@ -329,7 +334,7 @@
       <tr><td>Notification-list e-mail</td><td>Telling you when the paid plan exists</td>
           <td>Consent (LGPD art. 7 I / GDPR art. 6(1)(a))</td><td>Until you withdraw it, or 24 months unused</td></tr>
       <tr><td>The fifteen usage milestones</td><td>Knowing where the tool fails, and improving it</td>
-          <td>Anonymised data (LGPD art. 12); if in doubt, legitimate interest</td><td>18 months</td></tr>
+          <td>Anonymised data (LGPD art. 12); if in doubt, legitimate interest</td><td>{{prazoEvento}} months</td></tr>
       <tr><td>Page views</td><td>Knowing how many people arrive, and from where</td>
           <td>Anonymised data (LGPD art. 12); if in doubt, legitimate interest</td>
           <td>As per Vercel's policy</td></tr>
@@ -339,12 +344,12 @@
           seats, tickets</td>
           <td>Providing the contracted service</td>
           <td>Performance of a contract (art. 7, V)</td>
-          <td>For as long as the subscription lasts, and <b>up to 90 days</b> after it ends</td></tr>
+          <td>For as long as the subscription lasts, and <b>up to {{prazoConta}} days</b> after it ends</td></tr>
       <tr><td>Invoices and the customer record attached to them</td>
           <td>Tax and accounting obligation</td>
           <td>Compliance with a legal obligation (art. 7, II)</td>
           <td>The applicable statutory retention period. Name and tax ID are deleted along with the rest
-          of the account, at 90 days</td></tr>
+          of the account, at {{prazoConta}} days</td></tr>
     </table>
     <p class="small muted">The milestones and page views were designed not to identify anyone; should an
     authority nonetheless treat them as personal data, the basis is our legitimate interest in maintaining and

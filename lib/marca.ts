@@ -16,6 +16,12 @@ export const marca: {
   empresa: string; cnpj: string; contato: string; encarregado: string;
   supaUrl: string; supaKey: string; analytics: string;
   licPub: string; licPubAuto: string;
+  /* Os prazos de retenção, como texto — é assim que eles entram na frase da
+     política de privacidade. A verdade em tempo de execução é a função
+     `walkstamp.prazos()` no banco; estes existem porque a política é HTML
+     estático e não tem como perguntar. Quem impede as duas de divergirem é a
+     régua `testes/prazos.mjs`. */
+  prazoConta: string; prazoLista: string; prazoEvento: string;
 } = dados;
 
 /* O endereço do serviço de autenticação.

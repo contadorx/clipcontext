@@ -63,15 +63,13 @@
     aucune adresse de mesure à l’intérieur : elle ne parle à personne, et cela se vérifie en cherchant
     &laquo;&nbsp;supabase&nbsp;&raquo; dans le fichier.</p>
 
-    <h2>La liste de notification de l’offre payante</h2>
-    <p>Sur la page des tarifs, il y a un champ e-mail optionnel. Si vous le remplissez, l’adresse et la langue de la page
-    sont conservées dans une base de données à nous, avec la date. C’est la seule donnée personnelle qui existe ici, et elle :</p>
-    <ul>
-      <li>n’est pas croisée avec les mesures ci-dessus — elles n’ont rien avec quoi être croisées ;</li>
-      <li>n’est pas vendue, cédée ni utilisée dans une liste de tiers ;</li>
-      <li>sert à une seule finalité : prévenir quand l’offre payante existera ;</li>
-      <li>est effacée dès que vous le demandez, par le contact en bas de cette page.</li>
-    </ul>
+    <h2>La liste de notification n’existe plus</h2>
+    <p>La page des tarifs a eu un champ e-mail optionnel, pour prévenir quand l’offre payante existerait.
+    L’offre payante existe, et le champ a été retiré : <b>il n’y a plus rien ici qui recueille l’adresse de
+    quelqu’un qui ne fait que visiter le site</b>. Les adresses laissées pendant que le champ existait sont
+    conservées jusqu’à {{prazoLista}} mois après avoir été laissées, et sont effacées plus tôt sur demande,
+    par le contact en bas de cette page. Elles n’ont jamais été croisées avec les mesures ci-dessus, jamais
+    vendues ni cédées, et ne servent à rien d’autre.</p>
 
     <h2>Le compte de l’offre payante, et la liste de cas de test</h2>
     <p>Qui souscrit une offre payante obtient un <b>compte</b>. C’est le seul endroit où nous conservons une donnée
@@ -124,11 +122,18 @@
     même compte ; une liste <b>&laquo;&nbsp;à moi seul&nbsp;&raquo;</b> n’est visible que pour qui l’a créée. Qui a créé la
     liste peut la supprimer à tout moment, et supprimer emporte tous ses cas — et les fichiers qui y sont
     joints —, sur-le-champ et sans copie.</p>
-    <p><b>Une fois l’abonnement clos, le contenu du compte est effacé sous 90 jours</b>, par une routine qui
+    <h3>Vous n’avez pas à demander : le compte efface lui-même</h3>
+    <p>Dans le compte, il y a un écran — <a href="{{contaDados}}" style="color:var(--accent)">Vos données</a> — qui énumère, en
+    langage clair, <b>tout ce qui existe sur notre serveur à votre nom</b> : combien de listes de cas, combien
+    de cas, combien de fichiers joints, combien de modèles, combien de tickets. Et il énumère, à côté et avec
+    le même poids, <b>ce qui reste quand vous effacez, et pourquoi</b>. Sur le même écran, un bouton efface
+    tout ce qui est à vous, immédiatement, sans parler à personne et sans attendre le moindre délai. Il vous
+    demande de saisir votre propre e-mail avant, parce qu’il n’y a pas d’annulation.</p>
+    <p><b>Une fois l’abonnement clos, le contenu du compte est effacé sous {{prazoConta}} jours</b>, par une routine qui
     tourne tous les jours : listes, cas, reçus, pièces jointes, modèles, configuration, sièges, historique
     d’émission et tickets. Avant cela, sur demande, par le contact en bas de cette page.</p>
     <p><b>Une chose n’est pas effacée, et il est juste de dire laquelle :</b> la <b>facture</b>. Une facture a une durée de
-    conservation fiscale supérieure à 90 jours, et la respecter est une obligation légale — ce n’est ni notre choix ni le vôtre. L’enregistrement
+    conservation fiscale supérieure à {{prazoConta}} jours, et la respecter est une obligation légale — ce n’est ni notre choix ni le vôtre. L’enregistrement
     du client survit avec elle, réduit à ce qui décrit la vente (offre, sièges,
     durée) : le <b>nom et le numéro d’identification sont effacés</b>, et aucun e-mail, aucune liste et aucun fichier ne subsistent.</p>
     <p>La session du compte utilise un <b>cookie</b>, et il est nécessaire : c’est ce qui vous garde connecté. Il ne sert
@@ -338,7 +343,7 @@
           <td>Consentement (art. 7, I)</td><td>Jusqu’à votre révocation, ou 24 mois sans usage</td></tr>
       <tr><td>Les quinze jalons d’usage</td><td>Savoir où l’outil échoue et l’améliorer</td>
           <td>Donnée anonymisée (art. 12) ; en cas de doute, intérêt légitime (art. 7, IX)</td>
-          <td>18 mois</td></tr>
+          <td>{{prazoEvento}} mois</td></tr>
       <tr><td>Visites de page</td><td>Savoir combien de personnes arrivent et par où</td>
           <td>Donnée anonymisée (art. 12) ; en cas de doute, intérêt légitime (art. 7, IX)</td>
           <td>Selon la politique de Vercel</td></tr>
@@ -349,12 +354,12 @@
           sièges, tickets</td>
           <td>Fournir le service souscrit</td>
           <td>Exécution d’un contrat (art. 7, V)</td>
-          <td>Tant que l’abonnement dure, et <b>jusqu’à 90 jours</b> après sa clôture</td></tr>
+          <td>Tant que l’abonnement dure, et <b>jusqu’à {{prazoConta}} jours</b> après sa clôture</td></tr>
       <tr><td>La facture et l’enregistrement client qui y est lié</td>
           <td>Obligation fiscale et comptable</td>
           <td>Exécution d’une obligation légale (art. 7, II)</td>
           <td>La durée de conservation fiscale applicable. Le nom et le numéro d’identification sont effacés avec le reste du
-          compte, à 90 jours</td></tr>
+          compte, à {{prazoConta}} jours</td></tr>
     </table>
     <p class="small muted">Les jalons d’usage et les visites ont été conçus pour n’identifier personne ; si
     malgré tout ils étaient considérés comme des données personnelles par une autorité, le fondement est l’intérêt légitime

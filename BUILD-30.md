@@ -117,6 +117,29 @@ Verde inteiro: as 163 rodaram, e nenhuma foi pulada.
 
 ---
 
+## E um caso que a pergunta seguinte destravou
+
+> *"pode dar uma olhada no build, não está com as duas linhas"* — e não era
+> defeito: a sessão estava **sem roteiro colado**, e ali uma linha é o certo.
+
+Mas conferir isso mostrou um caso que eu não tinha coberto. **O tamanho da
+janela é pedido na abertura.** Quem abre a fita, cola a lista e volta a gravar
+via o CSS virar duas linhas numa janela que continuava com os 44 px de uma — a
+segunda linha cortada, metade dos botões fora.
+
+Agora, quando a decisão muda com a fita aberta, o produto manda redimensionar.
+`resizeTo` **pode ser recusado** pelo navegador numa janela de
+picture-in-picture, e por isso vive dentro de um `try`: se for recusado, a fita
+continua do tamanho com que abriu — não piora nada, e nada depende de ter dado
+certo.
+
+E a régua diz exatamente isso: ela afirma que a **ordem é dada**, e não que o
+Chrome obedeceu. Medir a obediência exige uma janela de PiP de verdade, que não
+abre nesta máquina — e prometer o que não se pode medir daqui seria pior do que
+não medir.
+
+---
+
 ## O que vem depois
 
 1. **A devolução na planilha do roteiro** — um caso marcado como erro deveria

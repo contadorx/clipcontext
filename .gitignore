@@ -81,6 +81,12 @@ PLANO-TIME.md
 
 # Next.js
 .next/
+# O cache incremental do TypeScript. Ele estava RASTREADO, e um cache commitado
+# faz o `tsc --noEmit` da esteira responder sobre um estado que não é o do disco:
+# nesta build ele reprovou uma rota que existe, e o mesmo mecanismo aprova
+# código que ele não reconferiu. Uma porta de liberação que erra para o lado do
+# 'passou' é pior que porta nenhuma.
+tsconfig.tsbuildinfo
 node_modules/
 next-env.d.ts
 

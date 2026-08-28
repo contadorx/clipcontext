@@ -49,6 +49,11 @@ const rotas: {
   /* E quem tem o vídeo da rodada paga, que vive na página de preços. */
   rodadaLangs?: string[];
   caminhoConta: Record<Lang, string>;
+  /* Os pedaços traduzidos das sub-rotas da conta. O tipo é declarado aqui pelo
+     mesmo motivo de todos os outros: um `dados` que sumisse do `rotas.json`
+     reprovaria no build, em vez de virar `undefined` num `href` da política de
+     privacidade — que não quebra a página, só não leva a lugar nenhum. */
+  subConta: Record<string, Record<Lang, string>>;
   slugs: Record<string, Record<Lang, string>>;
   metas: Record<string, Record<Lang, { titulo: string; desc: string }>>;
   scripts: { detectarIdioma: string; lembrarIdioma: string };
@@ -111,6 +116,10 @@ export function caminhos(lang: Lang): Dicionario {
        lugar nenhum. É a mesma tabela que o `next.config.mjs` usa para montar a
        ponte de reescrita. */
     conta: rotas.caminhoConta[lang],
+    /* O endereço da tela "Seus dados", traduzido. Escrito à mão na política de
+       privacidade, ele mandaria o leitor alemão para `/de/konto/dados` — que
+       não existe: lá é `/de/konto/daten`. */
+    contaDados: rotas.caminhoConta[lang] + '/' + rotas.subConta.dados[lang],
     /* `blog` é a mesma palavra nos cinco idiomas, então ele não entra na tabela
        de slugs traduzidos — ela existe para os casos em que a palavra muda. */
     blog: lang === 'pt' ? '/blog' : `/${lang}/blog`,
@@ -135,6 +144,13 @@ export function tokens(lang: Lang): Dicionario {
     cnpj: marca.cnpj,
     contato: marca.contato,
     encarregado: marca.encarregado,
+    /* Os prazos de retenção. Eles vêm do `marca.json`, escrito pelo `build.py`,
+       porque a política de privacidade é HTML estático e não tem como perguntar
+       ao banco. Quem impede a divergência entre este número e o do
+       `walkstamp.prazos()` é a régua `prazos.mjs`. */
+    prazoConta: marca.prazoConta,
+    prazoLista: marca.prazoLista,
+    prazoEvento: marca.prazoEvento,
     lang,
   };
 }
@@ -158,6 +174,45 @@ function seletor(lang: Lang, pagina: string): string {
   });
   return '<span style="display:inline-flex;gap:9px;border-left:1px solid var(--line);' +
     'padding-left:12px">' + itens.join('') + '</span>';
+}
+
+/* ------------------------------------------------- a matriz de egressão */
+
+type Destino = {
+  id: string; hosts: string[]; quando: 'sozinho' | 'gesto';
+  onde: string[]; conteudo: boolean;
+} & Record<string, { quem: string; leva: string; gesto: string; nunca: string } | unknown>;
+
+const egressao: { destinos: Destino[] } = JSON.parse(ler('egressao.json'));
+
+/** A tabela que acompanha a frase. Duas colunas de verdade: QUANDO sai, e O QUE
+ *  vai junto — e a linha que leva conteúdo é marcada, porque é dela que a
+ *  promessa fala. Ordenada com as automáticas primeiro: quem lê quer saber o
+ *  que acontece sem ele fazer nada, e depois o que depende dele. */
+function matrizDeEgressao(lang: Lang, t: Dicionario): string {
+  const ordem = [...egressao.destinos].sort((a, b) =>
+    (a.quando === b.quando ? 0 : a.quando === 'sozinho' ? -1 : 1));
+  const linhas = ordem.map((d) => {
+    const txt = d[lang] as { quem: string; leva: string; gesto: string; nunca: string };
+    const marca = d.conteudo
+      ? ` <b style="color:var(--err)">${escapar(t.egrConteudo || '')}</b>`
+      : '';
+    /* `leva` e `nunca` entram como HTML de propósito: são o texto da matriz, e
+       ele traz <b>, <code> e <i> escritos à mão no `egressao.json` — o escopo
+       `drive.file` em `<code>` e o DNT em `<i>` são a diferença entre uma
+       tabela que informa e uma que só tranquiliza. `quem` e `gesto` são
+       escapados: ali não há marcação nenhuma para preservar. */
+    return `<tr><td><b>${escapar(txt.quem)}</b>${marca}</td>` +
+           `<td>${escapar(txt.gesto)}</td>` +
+           `<td>${txt.leva}</td>` +
+           `<td>${txt.nunca}</td></tr>`;
+  }).join('\n');
+  return `<table class="legal"><thead><tr>` +
+    `<th>${escapar(t.egrQuem || '')}</th>` +
+    `<th>${escapar(t.egrQuando || '')}</th>` +
+    `<th>${escapar(t.egrLeva || '')}</th>` +
+    `<th>${escapar(t.egrNunca || '')}</th>` +
+    `</tr></thead><tbody>\n${linhas}\n</tbody></table>`;
 }
 
 /* ------------------------------------------------ a tabela de funcionalidades */
@@ -459,6 +514,15 @@ export function paginaHtml(pagina: string, lang: Lang): string {
   t.tiraSaidas = pagina === 'precos' ? tiraDeSaidas(t) : '';
   t.tiraDestaque = pagina === 'home' ? tiraDestaque(t) : '';
   t.tiraResto = pagina === 'home' ? tiraResto(t) : '';
+  /* A MATRIZ DE EGRESSÃO. Ela é o segundo metade do caminho A da DEC-1: a frase
+     "nada do seu conteúdo sai sem um gesto seu" só é defensável se as exceções
+     estiverem nomeadas NO MESMO BLOCO — um absoluto que o F12 do navegador
+     desmente em dez segundos vale menos que uma exceção declarada.
+     Ela é MONTADA do `src/egressao.json`, e não escrita nas páginas: a promessa
+     estava em nove chaves do dicionário e numa dúzia de páginas, cada uma com a
+     sua redação. Quem confere se esta lista bate com o que o produto realmente
+     chama é `testes/egressao.mjs`. */
+  t.matrizEgressao = matrizDeEgressao(lang, t);
   t.quantasSaidas = String(quantasSaidas);
   /* O vídeo da rodada mora na página de PREÇOS, e por isso o token nasce aqui
      e não no ramo da home — onde a primeira versão dele ficou, derrubando o

@@ -18,6 +18,7 @@ let falhas=0; const ok=(n,c,e)=>{console.log((c?'  ok   ':'  FALHA')+'  '+n+(e?'
 const EMPRESA='Produtize Produtos e Serviços Inteligentes Ltda.';
 const CNPJ='48.417.292/0001-99';
 const MAIL='privacidade@walkstamp.com';
+const ROTAS=JSON.parse(fs.readFileSync(`${RAIZ_WS}/src/rotas.json`,'utf8'));
 
 /* QUANTOS MARCOS A POLÍTICA DIZ QUE EXISTEM — contra quantos o produto emite.
  *
@@ -39,19 +40,45 @@ function marcosQueOProdutoEmite(){
 }
 
 const paginas = {
- '/privacidade.html':    {tem:['Quem é responsável','Bases legais','Onde os dados ficam','Seus direitos','ANPD','São Paulo','art. 33','Marco Civil'], nao:['não há informação\nsua para acessar','Como não coletamos dados, não há informação']},
- '/en/privacidade.html': {tem:['Who is responsible','Legal bases','Where the data lives','Your rights','ANPD','São Paulo','art. 33','Internet Civil Framework'], nao:['there is no information of yours to access','Since we collect no data']},
- '/es/privacidade.html': {tem:['Quién es responsable','Bases legales','Dónde están los datos','Tus derechos','ANPD','São Paulo','art. 33','Marco Civil'], nao:['no hay información tuya que acceder','Como no recogemos datos']},
+ /* A LISTA DE AVISO MORREU, E A TELA DE APAGAR NASCEU — 27/08.
+    A política descrevia um campo de e-mail na página de preços como "o único
+    dado pessoal que existe aqui". Esse campo foi removido do produto pela
+    DEC-16, e o dado pessoal que existe hoje é o e-mail da conta. Um documento
+    legal que descreve uma coleta que não acontece mais é tão errado quanto um
+    que esconde a que acontece — e este errava para os dois lados ao mesmo
+    tempo, porque a conta paga já gravava roteiro, caso e anexo.
+    O `nao` proíbe a frase antiga; o `tem` exige a nova, e exige o LINK para a
+    tela onde a pessoa apaga sozinha — que é o que separa um direito escrito de
+    um direito exercível. */
+ '/privacidade.html':    {tem:['Quem é responsável','Bases legais','Onde os dados ficam','Seus direitos','ANPD','São Paulo','art. 33','Marco Civil','A lista de aviso não existe mais','a conta apaga sozinha','Seus dados'], nao:['não há informação\nsua para acessar','Como não coletamos dados, não há informação','É o único dado pessoal que existe aqui']},
+ '/en/privacidade.html': {tem:['Who is responsible','Legal bases','Where the data lives','Your rights','ANPD','São Paulo','art. 33','Internet Civil Framework','The notification list no longer exists','the account deletes it itself','Your data'], nao:['there is no information of yours to access','Since we collect no data','It is the only personal data here']},
+ '/es/privacidade.html': {tem:['Quién es responsable','Bases legales','Dónde están los datos','Tus derechos','ANPD','São Paulo','art. 33','Marco Civil','La lista de aviso ya no existe','la cuenta lo borra sola','Tus datos'], nao:['no hay información tuya que acceder','Como no recogemos datos','Es el único dato personal que hay aquí']},
  /* ALEMÃO E FRANCÊS ENTRARAM — 23/08.
     Esta lista tinha três idiomas num site que fala cinco, e os dois que
     faltavam são justamente os dois mercados que fazem avaliação de fornecedor:
     a régua de razão social, ANPD e Marco Civil não olhava para nenhum deles.
     `Art. 33` com maiúscula em alemão, e é assim que ele está na página. */
- '/de/privacidade.html': {tem:['Wer verantwortlich ist','Wo die Daten liegen','Ihre Rechte','ANPD','São Paulo','Art. 33','Marco Civil'], nao:['gibt es keine Information von Ihnen']},
- '/fr/privacidade.html': {tem:['Qui est responsable','Où les données se trouvent','Vos droits','ANPD','São Paulo','art. 33','Marco Civil'], nao:['il n’y a aucune information vous concernant']},
- '/termos.html':         {tem:['Quem oferece o serviço','Privacidade','lista de aviso','não há nada à venda','Lei aplicável','Contato'], nao:[]},
- '/en/termos.html':      {tem:['Who provides the service','Privacy','notification list','nothing is for sale','Governing law','Contact'], nao:[]},
- '/es/termos.html':      {tem:['Quién ofrece el servicio','Privacidad','lista de aviso','no hay nada a la venta','Ley aplicable','Contacto'], nao:[]},
+ '/de/privacidade.html': {tem:['Wer verantwortlich ist','Wo die Daten liegen','Ihre Rechte','ANPD','São Paulo','Art. 33','Marco Civil','Die Benachrichtigungsliste gibt es nicht mehr','das Konto löscht selbst','Ihre Daten'], nao:['gibt es keine Information von Ihnen','das einzige personenbezogene Datum, das es hier gibt']},
+ '/fr/privacidade.html': {tem:['Qui est responsable','Où les données se trouvent','Vos droits','ANPD','São Paulo','art. 33','Marco Civil','La liste de notification n’existe plus','le compte efface lui-même','Vos données'], nao:['il n’y a aucune information vous concernant','la seule donnée personnelle qui existe ici']},
+ /* OS TERMOS PASSARAM A VENDER — 27/08.
+    Até aqui a cláusula 14 dizia "não há nada à venda" e o único dado pessoal
+    do site era o e-mail da lista de aviso. Os dois viraram mentira no dia em
+    que a conta, a degustação de 14 dias e o cancelamento na conta entraram no
+    produto. A régua agora exige as quatro frases que sustentam a venda —
+    está à venda, degustação, cancelar na conta, sem devolução proporcional —
+    e PROÍBE as duas antigas, para que a volta atrás caia aqui e não no
+    contrato de alguém. Alemão e francês entraram junto: os termos falavam
+    cinco idiomas e esta lista olhava para três. */
+ '/termos.html':         {tem:['Quem oferece o serviço','Privacidade','estão à venda','14 dias com tudo','Cancelar se faz na sua conta','não há devolução','art. 49','Lei aplicável','Contato'],
+                          nao:['lista de aviso','não há nada à venda']},
+ '/en/termos.html':      {tem:['Who provides the service','Privacy','are for sale','14 days with everything','Cancelling is done in your account','no pro-rata refund','art. 49','Governing law','Contact'],
+                          nao:['notification list','nothing is for sale']},
+ '/es/termos.html':      {tem:['Quién ofrece el servicio','Privacidad','están a la venta','14 días con todo','Cancelar se hace en tu cuenta','devolución proporcional','art. 49','Ley aplicable','Contacto'],
+                          nao:['lista de aviso','no hay nada a la venta']},
+ '/de/termos.html':      {tem:['Wer den Dienst anbietet','Datenschutz','stehen zum Verkauf','14 Tage mit allem','Gekündigt wird im eigenen Konto','keine anteilige Erstattung','Art. 49','Anwendbares Recht','Kontakt'],
+                          nao:['Benachrichtigungsliste','steht nichts zum Verkauf']},
+ '/fr/termos.html':      {tem:['Qui propose le service','Confidentialité','sont en vente','14 jours avec','La résiliation se fait dans votre compte','pas de remboursement au prorata','art. 49','Loi applicable','Contact'],
+                          nao:['liste de notification','rien n’est en vente']},
 };
 
 for (const [rota, {tem, nao}] of Object.entries(paginas)) {
@@ -66,6 +93,17 @@ for (const [rota, {tem, nao}] of Object.entries(paginas)) {
      (await pg.locator(`a[href^="mailto:"]`).count()) + ' links mailto');
   for (const t of tem) ok(`traz "${t}"`, txt.includes(t));
   for (const n of nao) ok(`não afirma mais: "${n.slice(0,40)}"`, !txt.includes(n));
+  /* O LINK para a tela de apagar, e no endereço TRADUZIDO. Um `href` escrito à
+     mão na política mandaria o leitor alemão para `/de/konto/dados`, que não
+     existe — lá é `/de/konto/daten`. A régua lê o endereço do `rotas.json`, que
+     é de onde a página o tira, para não aprovar a cópia que ela deveria pegar. */
+  if (rota.includes('privacidade')) {
+    const L = rota.startsWith('/en') ? 'en' : rota.startsWith('/es') ? 'es'
+            : rota.startsWith('/de') ? 'de' : rota.startsWith('/fr') ? 'fr' : 'pt';
+    const alvoDados = ROTAS.caminhoConta[L] + '/' + ROTAS.subConta.dados[L];
+    ok('leva à tela onde a pessoa apaga sozinha',
+       (await pg.locator(`a[href="${alvoDados}"]`).count()) > 0, alvoDados);
+  }
   // numeração dos termos sem buraco nem repetição
   if (rota.includes('termos')) {
     const ns=[...txt.matchAll(/^(\d+)\.\s/gm)].map(m=>+m[1]);

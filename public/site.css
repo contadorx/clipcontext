@@ -920,3 +920,27 @@ table.cmpCurta td.nao{color:var(--muted);font-weight:700;font-size:17px}
    rolagem, não por uma moldura. */
 .doc h2[id^="tema-"]:focus{outline:none}
 .doc h2[id^="tema-"]{scroll-margin-top:18px}
+
+/* ---- A tela "Seus dados" (DEC-3, caminho A) --------------------------------
+   Duas tabelas na mesma altura: o que o botão apaga e o que fica, com o motivo
+   do que fica escrito ao lado. Se a segunda tabela parecer nota de rodapé, a
+   página vira propaganda de privacidade em vez de prestação de contas. */
+table.dados{width:100%;border-collapse:collapse;margin:8px 0 18px}
+table.dados td{border-bottom:1px solid var(--line);padding:9px 4px;vertical-align:top}
+table.dados td.n{text-align:right;font-variant-numeric:tabular-nums;
+  font-weight:600;white-space:nowrap;width:6ch}
+table.dados td span.small{display:block;margin-top:3px}
+
+/* O recado da ação. `.aviso` já era usado pela raiz do painel sem nunca ter
+   sido desenhado — ficava indistinguível de um parágrafo comum, que é o pior
+   destino de uma confirmação. */
+p.ok,p.aviso,p.erro{border-radius:8px;padding:10px 12px;margin:0 0 14px;font-size:15px}
+p.ok,p.aviso{border:1px solid var(--line);background:var(--bg)}
+p.erro{border:1px solid var(--err);color:var(--err);background:transparent}
+
+/* A gaveta do apagar nasce fechada, e o botão dela não pode parecer o botão
+   de salvar da tela ao lado: é o único do produto que não tem desfazer. */
+details.apagarDados{margin-top:20px;border-top:1px solid var(--line);padding-top:16px}
+details.apagarDados > summary{cursor:pointer;color:var(--err);font-weight:600}
+.btn.perigo{background:var(--err);color:#fff;border:1px solid var(--err)}
+.btn.perigo:disabled{opacity:.45;cursor:not-allowed;filter:none}

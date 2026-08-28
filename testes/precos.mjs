@@ -185,8 +185,33 @@ console.log('\n[8] a calculadora conta no navegador e não conta para ninguém')
   /* 80 casos × 15 min × 4 rodadas ÷ 60 = 80 horas. Uma calculadora que não
      confere é pior do que nenhuma: ela tem casas decimais. */
   ok('  e a conta está certa', Math.abs(Number(horas) - 80) < 0.05, horas);
-  const nota = (await pg.locator('.roiNota').innerText()).toLowerCase();
+  const nota = (await pg.locator('.roiNota').first().innerText()).toLowerCase();
   ok('  e o resultado está rotulado como estimativa', nota.includes('estimativa'), nota.slice(0, 60));
+}
+
+/* ---- [8b] a premissa da calculadora ---------------------------------------
+   O campo de minutos é a única PREMISSA NOSSA no meio de quatro números do
+   usuário: os outros três ele sabe de cabeça, este ele aceita porque já veio
+   preenchido. Ele nasceu em 12 — um chute com cara de medição, na frente de
+   quem vai comprar. Em 27/08 virou 45, que é o que leva montar uma evidência
+   à mão em uso real, e a página passou a DIZER de onde vem o número.
+   A régua fixa as duas coisas nos cinco idiomas, porque um default é
+   exatamente o tipo de coisa que volta a ser chute sem ninguém notar. */
+console.log('\n[8b] a premissa que já vem preenchida diz de onde veio');
+{
+  const rotas = { pt: '/precos', en: '/en/precos', es: '/es/precos',
+                  de: '/de/preise', fr: '/fr/tarifs' };
+  const marca = { pt: 'uso real', en: 'real use', es: 'uso real',
+                  de: 'echten Einsatz', fr: 'usage réel' };
+  for (const [lang, rota] of Object.entries(rotas)) {
+    await pg.goto(SITE + rota, { waitUntil: 'networkidle' });
+    const v = await pg.locator('#roiMin').inputValue();
+    ok(`${lang}: os minutos por caso começam em 45`, v === '45', v);
+    const notas = (await pg.locator('.roiNota').allInnerTexts()).join(' ');
+    ok(`  ${lang}: e a página diz que o 45 foi medido`,
+       notas.includes('45') && notas.includes(marca[lang]),
+       notas.replace(/\s+/g, ' ').slice(0, 90));
+  }
 }
 
 /* ---- [9] acessibilidade --------------------------------------------------- */

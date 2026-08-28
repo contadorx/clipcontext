@@ -49,28 +49,9 @@
     be stored in an internal repository, scanned by your team, and distributed without depending on us.</p>
 
     <h2>What leaves your machine, and when</h2>
-    <table class="legal">
-      <tr><th>Connection</th><th>When it happens</th><th>What goes</th><th>What never goes</th></tr>
-      <tr><td>Vercel (hosting)</td><td>Always, when the page loads</td>
-          <td>The request for the page file, with IP and browser — as on any website</td>
-          <td>Your content</td></tr>
-      <tr><td>Vercel Web Analytics</td><td>Always; not sent if the browser signals <i>Do&nbsp;Not&nbsp;Track</i> or <i>Global Privacy Control</i></td>
-          <td>Which page was viewed, with no cookie and no identifier that persists</td>
-          <td>Any person or session identifier</td></tr>
-      <tr><td>Supabase (usage milestones)</td><td>At fifteen milestones, eleven in the tool and four in the account — tool opened, video opened, output downloaded, script imported, payment started, among others. Respects DNT and GPC</td>
-          <td>The milestone name, the page language, where the video came from, the format downloaded, a bracket (“4-10”, never the exact number) and the plan</td>
-          <td>File name, size, duration, content, session identifier</td></tr>
-      <tr><td>jsDelivr (public CDN)</td><td>When the tool loads (the PDF library) and when using automatic transcription or text recognition</td>
-          <td>The request for the library</td><td>Your audio, your images, your text</td></tr>
-      <tr><td>Hugging Face</td><td>Only when you start automatic transcription, and once per browser</td>
-          <td>The request for the speech model</td><td>Your audio</td></tr>
-      <tr><td>Google</td><td>Only if you click to open a video from Drive</td>
-          <td>Authentication and the request for the file you pick, with the narrowest scope available (<code>drive.file</code>)</td>
-          <td>The rest of your Drive; and the file goes from Google straight to your browser, never through us</td></tr>
-      <tr><td>Google Docs (upload)</td><td>Only if you click <b>Send to Google Docs</b>, and only after confirming the warning that appears</td>
-          <td>The Word document assembled in your browser — text and images — for Google to convert into a Drive document</td>
-          <td>Anything beyond the document you sent; it goes from your browser straight to Google, never through us</td></tr>
-    </table>
+    <p class="lead" style="margin:14px 0 4px"><b>{{promessaA}}</b></p>
+    <p style="margin:0 0 16px">{{promessaAsub}}</p>
+    {{matrizEgressao}}
     <p><b>None of these connections carries video, audio, images or transcripts.</b>
     The PDF library comes from jsDelivr along with the page; it is the offline package that embeds it.</p>
     <p>There is one exception, and it is in the table rather than hidden: the <b>Send to Google Docs</b>

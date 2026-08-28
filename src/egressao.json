@@ -1,0 +1,425 @@
+{
+  "_leia": [
+    "A MATRIZ DE EGRESSÃO. É a fonte única da promessa do caminho A da DEC-1:",
+    "'nada do seu conteúdo sai sem um gesto seu', com as exceções nomeadas no",
+    "mesmo bloco.",
+    "",
+    "POR QUE ELA EXISTE. A promessa estava escrita em nove chaves do dicionário",
+    "e numa dúzia de páginas, cada uma com uma redação própria — 'não sai do seu",
+    "computador', 'fica no seu navegador', 'não é enviada'. Doze frases para uma",
+    "verdade só é o defeito de sempre: a que ninguém confere é a que vira",
+    "mentira, e aqui a mentira seria a frase que o F12 do navegador desmente em",
+    "dez segundos na frente de quem avalia fornecedor.",
+    "",
+    "O QUE É 'sozinho' E O QUE É 'gesto'. Medido, não declarado: o app servido e",
+    "deixado parado nove segundos faz QUATRO pedidos, e nenhum deles leva",
+    "conteúdo. Todo o resto espera um gesto — um clique, uma escolha, um envio.",
+    "É essa separação que faz a frase ser verdade, e é ela que a régua",
+    "'testes/egressao.mjs' confere contra o arquivo construído e contra o",
+    "navegador de verdade.",
+    "",
+    "COMO MEXER. Um destino novo no produto sem uma linha aqui REPROVA a régua.",
+    "Uma linha aqui sem o destino no produto também — entrada morta numa matriz",
+    "de privacidade é tão ruim quanto destino escondido.",
+    "",
+    "'onde' diz em qual artefato o destino existe. O pacote offline é o caminho",
+    "B da mesma decisão: nenhum destino, e o build para se um voltar.",
+    "",
+    "'ehAPagina' marca a hospedagem: ela não é um pedido a mais, é o pedido que",
+    "traz a página — e a régua confere isso à parte, senão ela exigiria que o",
+    "carregamento aparecesse na lista de pedidos que o carregamento produziu.",
+    "'nossoDominio' diz se o ENDEREÇO é o nosso — e não se a empresa é terceira.",
+    "A Vercel é suboperadora, mas o endereço da hospedagem é `walkstamp.com`, e o",
+    "do menu é relativo. A primeira versão chamou esse campo de 'terceiro' e ele",
+    "fazia dois trabalhos ao mesmo tempo: quem é outra empresa, e qual endereço",
+    "não pode sobrar no pacote offline. São perguntas diferentes, e o campo",
+    "responde só a segunda — quem responde a primeira é o nome escrito na linha."
+  ],
+  "destinos": [
+    {
+      "id": "hospedagem",
+      "hosts": [
+        "walkstamp.com"
+      ],
+      "quando": "sozinho",
+      "onde": [
+        "web"
+      ],
+      "conteudo": false,
+      "pt": {
+        "quem": "Vercel (hospedagem)",
+        "gesto": "Sempre, ao abrir a página",
+        "leva": "O pedido do arquivo da página, com IP e navegador — como em qualquer site.",
+        "nunca": "Seu conteúdo"
+      },
+      "en": {
+        "quem": "Vercel (hosting)",
+        "gesto": "Always, on opening the page",
+        "leva": "The request for the page file, with IP and browser — as on any website.",
+        "nunca": "Your content"
+      },
+      "es": {
+        "quem": "Vercel (alojamiento)",
+        "gesto": "Siempre, al abrir la página",
+        "leva": "La petición del archivo de la página, con IP y navegador — como en cualquier sitio.",
+        "nunca": "Tu contenido"
+      },
+      "de": {
+        "quem": "Vercel (Hosting)",
+        "gesto": "Immer, beim Öffnen der Seite",
+        "leva": "Die Anfrage der Seitendatei, mit IP und Browser — wie auf jeder Website.",
+        "nunca": "Ihre Inhalte"
+      },
+      "fr": {
+        "quem": "Vercel (hébergement)",
+        "gesto": "Toujours, à l’ouverture de la page",
+        "leva": "La requête du fichier de la page, avec IP et navigateur — comme sur tout site.",
+        "nunca": "Votre contenu"
+      },
+      "ehAPagina": true,
+      "nossoDominio": true
+    },
+    {
+      "id": "medicao",
+      "hosts": [
+        "_vercel/insights"
+      ],
+      "quando": "sozinho",
+      "onde": [
+        "web"
+      ],
+      "conteudo": false,
+      "pt": {
+        "quem": "Medição de uso",
+        "leva": "Em quinze marcos — onze na ferramenta e quatro na conta —, o nome do marco, o idioma da página, a origem do vídeo, o formato baixado, uma faixa (“4-10”, e nunca o número exato) e o plano. Sem cookie e sem identificador que persista. Respeita <i>Do&nbsp;Not&nbsp;Track</i> e <i>Global&nbsp;Privacy&nbsp;Control</i>.",
+        "gesto": "Abrir a página",
+        "nunca": "Identificador de pessoa ou de sessão; nome de arquivo, tamanho, duração, conteúdo"
+      },
+      "en": {
+        "quem": "Usage measurement",
+        "leva": "At fifteen milestones — eleven in the tool and four in the account —, the milestone name, the page language, the video source, the format downloaded, a band (“4-10”, never the exact number) and the plan. No cookie and no persistent identifier. Honours <i>Do&nbsp;Not&nbsp;Track</i> and <i>Global&nbsp;Privacy&nbsp;Control</i>.",
+        "gesto": "Opening the page",
+        "nunca": "Any person or session identifier; file name, size, duration, content"
+      },
+      "es": {
+        "quem": "Medición de uso",
+        "leva": "En quince hitos — once en la herramienta y cuatro en la cuenta —, el nombre del hito, el idioma de la página, el origen del vídeo, el formato descargado, un rango («4-10», nunca el número exacto) y el plan. Sin cookie y sin identificador persistente. Respeta <i>Do&nbsp;Not&nbsp;Track</i> y <i>Global&nbsp;Privacy&nbsp;Control</i>.",
+        "gesto": "Abrir la página",
+        "nunca": "Identificador de persona o de sesión; nombre de archivo, tamaño, duración, contenido"
+      },
+      "de": {
+        "quem": "Nutzungsmessung",
+        "leva": "Bei fünfzehn Marken — elf im Werkzeug und vier im Konto —, der Name der Marke, die Sprache der Seite, die Herkunft des Videos, das heruntergeladene Format, eine Spanne („4-10“, nie die genaue Zahl) und der Plan. Ohne Cookie und ohne bleibende Kennung. Beachtet <i>Do&nbsp;Not&nbsp;Track</i> und <i>Global&nbsp;Privacy&nbsp;Control</i>.",
+        "gesto": "Die Seite öffnen",
+        "nunca": "Personen- oder Sitzungskennung; Dateiname, Größe, Dauer, Inhalt"
+      },
+      "fr": {
+        "quem": "Mesure d’usage",
+        "leva": "À quinze jalons — onze dans l’outil et quatre dans le compte —, le nom du jalon, la langue de la page, l’origine de la vidéo, le format téléchargé, une tranche (« 4-10 », jamais le nombre exact) et l’offre. Sans cookie et sans identifiant persistant. Respecte <i>Do&nbsp;Not&nbsp;Track</i> et <i>Global&nbsp;Privacy&nbsp;Control</i>.",
+        "gesto": "Ouvrir la page",
+        "nunca": "Identifiant de personne ou de session ; nom de fichier, taille, durée, contenu"
+      },
+      "nossoDominio": false
+    },
+    {
+      "id": "menu",
+      "hosts": [
+        "/api/menu"
+      ],
+      "quando": "sozinho",
+      "onde": [
+        "web"
+      ],
+      "conteudo": false,
+      "pt": {
+        "quem": "O menu da conta",
+        "leva": "O idioma da página, para desenhar a barra da conta. Nada mais.",
+        "gesto": "Abrir a página",
+        "nunca": "Qualquer coisa sua"
+      },
+      "en": {
+        "quem": "The account menu",
+        "leva": "The page language, to draw the account bar. Nothing else.",
+        "gesto": "Opening the page",
+        "nunca": "Anything of yours"
+      },
+      "es": {
+        "quem": "El menú de la cuenta",
+        "leva": "El idioma de la página, para dibujar la barra de la cuenta. Nada más.",
+        "gesto": "Abrir la página",
+        "nunca": "Cualquier cosa tuya"
+      },
+      "de": {
+        "quem": "Das Kontomenü",
+        "leva": "Die Sprache der Seite, um die Kontoleiste zu zeichnen. Sonst nichts.",
+        "gesto": "Die Seite öffnen",
+        "nunca": "Irgendetwas von Ihnen"
+      },
+      "fr": {
+        "quem": "Le menu du compte",
+        "leva": "La langue de la page, pour dessiner la barre du compte. Rien d’autre.",
+        "gesto": "Ouvrir la page",
+        "nunca": "Quoi que ce soit à vous"
+      },
+      "nossoDominio": true
+    },
+    {
+      "id": "pdf",
+      "hosts": [
+        "cdn.jsdelivr.net/npm/jspdf"
+      ],
+      "quando": "sozinho",
+      "onde": [
+        "web"
+      ],
+      "conteudo": false,
+      "pt": {
+        "quem": "A biblioteca que gera o PDF",
+        "leva": "Nada. É um download: o CDN fica sabendo que alguém abriu a página, e nada mais. No pacote offline ela vem embutida.",
+        "gesto": "Abrir a página",
+        "nunca": "Seu áudio, sua imagem, seu texto"
+      },
+      "en": {
+        "quem": "The library that makes the PDF",
+        "leva": "Nothing. It is a download: the CDN learns that someone opened the page, and nothing more. In the offline package it comes embedded.",
+        "gesto": "Opening the page",
+        "nunca": "Your audio, your image, your text"
+      },
+      "es": {
+        "quem": "La biblioteca que genera el PDF",
+        "leva": "Nada. Es una descarga: el CDN se entera de que alguien abrió la página, y nada más. En el paquete offline viene incrustada.",
+        "gesto": "Abrir la página",
+        "nunca": "Tu audio, tu imagen, tu texto"
+      },
+      "de": {
+        "quem": "Die Bibliothek, die das PDF erzeugt",
+        "leva": "Nichts. Es ist ein Download: das CDN erfährt, dass jemand die Seite geöffnet hat, mehr nicht. Im Offline-Paket ist sie eingebettet.",
+        "gesto": "Die Seite öffnen",
+        "nunca": "Ihr Ton, Ihr Bild, Ihr Text"
+      },
+      "fr": {
+        "quem": "La bibliothèque qui produit le PDF",
+        "leva": "Rien. C’est un téléchargement : le CDN apprend que quelqu’un a ouvert la page, et rien de plus. Dans le paquet hors ligne, elle est intégrée.",
+        "gesto": "Ouvrir la page",
+        "nunca": "Votre audio, votre image, votre texte"
+      },
+      "nossoDominio": false
+    },
+    {
+      "id": "modelo",
+      "hosts": [
+        "cdn.jsdelivr.net/npm/@huggingface/transformers",
+        "cdn.jsdelivr.net/npm/onnxruntime-web",
+        "huggingface.co"
+      ],
+      "quando": "gesto",
+      "onde": [
+        "web"
+      ],
+      "conteudo": false,
+      "pt": {
+        "quem": "O modelo de voz",
+        "leva": "Nada sai. O modelo é BAIXADO e roda no seu computador; o áudio não é enviado a lugar nenhum.",
+        "gesto": "Escolher “transcrever enquanto gravo”",
+        "nunca": "Seu áudio"
+      },
+      "en": {
+        "quem": "The speech model",
+        "leva": "Nothing leaves. The model is DOWNLOADED and runs on your computer; the audio is not sent anywhere.",
+        "gesto": "Choosing “transcribe while I record”",
+        "nunca": "Your audio"
+      },
+      "es": {
+        "quem": "El modelo de voz",
+        "leva": "No sale nada. El modelo se DESCARGA y se ejecuta en tu ordenador; el audio no se envía a ninguna parte.",
+        "gesto": "Elegir «transcribir mientras grabo»",
+        "nunca": "Tu audio"
+      },
+      "de": {
+        "quem": "Das Sprachmodell",
+        "leva": "Nichts geht hinaus. Das Modell wird GELADEN und läuft auf Ihrem Rechner; der Ton wird nirgendwohin gesendet.",
+        "gesto": "„Während der Aufnahme transkribieren“ wählen",
+        "nunca": "Ihr Ton"
+      },
+      "fr": {
+        "quem": "Le modèle vocal",
+        "leva": "Rien ne sort. Le modèle est TÉLÉCHARGÉ et tourne sur votre ordinateur ; l’audio n’est envoyé nulle part.",
+        "gesto": "Choisir « transcrire pendant l’enregistrement »",
+        "nunca": "Votre audio"
+      },
+      "nossoDominio": false
+    },
+    {
+      "id": "ocr",
+      "hosts": [
+        "cdn.jsdelivr.net/npm/tesseract.js",
+        "cdn.jsdelivr.net/gh/naptha/tessdata"
+      ],
+      "quando": "gesto",
+      "onde": [
+        "web"
+      ],
+      "conteudo": false,
+      "pt": {
+        "quem": "A leitura de texto da imagem",
+        "leva": "Nada sai. O leitor é BAIXADO e roda no seu computador; a imagem não é enviada.",
+        "gesto": "Clicar em “ler o texto da imagem”",
+        "nunca": "Sua imagem"
+      },
+      "en": {
+        "quem": "Reading the text in the image",
+        "leva": "Nothing leaves. The reader is DOWNLOADED and runs on your computer; the image is not sent.",
+        "gesto": "Clicking “read the text in the image”",
+        "nunca": "Your image"
+      },
+      "es": {
+        "quem": "La lectura de texto de la imagen",
+        "leva": "No sale nada. El lector se DESCARGA y se ejecuta en tu ordenador; la imagen no se envía.",
+        "gesto": "Pulsar «leer el texto de la imagen»",
+        "nunca": "Tu imagen"
+      },
+      "de": {
+        "quem": "Das Lesen von Text im Bild",
+        "leva": "Nichts geht hinaus. Der Leser wird GELADEN und läuft auf Ihrem Rechner; das Bild wird nicht gesendet.",
+        "gesto": "Auf „Text im Bild lesen“ klicken",
+        "nunca": "Ihr Bild"
+      },
+      "fr": {
+        "quem": "La lecture du texte de l’image",
+        "leva": "Rien ne sort. Le lecteur est TÉLÉCHARGÉ et tourne sur votre ordinateur ; l’image n’est pas envoyée.",
+        "gesto": "Cliquer sur « lire le texte de l’image »",
+        "nunca": "Votre image"
+      },
+      "nossoDominio": false
+    },
+    {
+      "id": "conta",
+      "hosts": [
+        ".supabase.co"
+      ],
+      "quando": "gesto",
+      "onde": [
+        "web"
+      ],
+      "conteudo": true,
+      "pt": {
+        "quem": "A sua conta",
+        "leva": "<b>Conteúdo seu</b>: o e-mail da conta, e o roteiro de casos que você salvar — nomes de caso, sistema, chamado, observações e os arquivos que você anexar. Nunca vídeo, áudio nem transcrição.",
+        "gesto": "Entrar na conta e salvar um roteiro",
+        "nunca": "Vídeo, áudio e transcrição"
+      },
+      "en": {
+        "quem": "Your account",
+        "leva": "<b>Content of yours</b>: the account e-mail, and the case script you save — case names, system, ticket, notes and the files you attach. Never video, audio or transcript.",
+        "gesto": "Signing in and saving a case script",
+        "nunca": "Video, audio and transcript"
+      },
+      "es": {
+        "quem": "Tu cuenta",
+        "leva": "<b>Contenido tuyo</b>: el correo de la cuenta y el guion de casos que guardes — nombres de caso, sistema, incidencia, observaciones y los archivos que adjuntes. Nunca vídeo, audio ni transcripción.",
+        "gesto": "Entrar en la cuenta y guardar un guion",
+        "nunca": "Vídeo, audio y transcripción"
+      },
+      "de": {
+        "quem": "Ihr Konto",
+        "leva": "<b>Inhalte von Ihnen</b>: die Konto-E-Mail und die Testfall-Liste, die Sie speichern — Fallnamen, System, Ticket, Notizen und die Dateien, die Sie anhängen. Nie Video, Audio oder Transkript.",
+        "gesto": "Anmelden und eine Testfall-Liste speichern",
+        "nunca": "Video, Ton und Transkript"
+      },
+      "fr": {
+        "quem": "Votre compte",
+        "leva": "<b>Du contenu à vous</b> : l’e-mail du compte et la liste de cas que vous enregistrez — noms de cas, système, ticket, remarques et les fichiers que vous joignez. Jamais de vidéo, d’audio ni de transcription.",
+        "gesto": "Se connecter et enregistrer une liste de cas",
+        "nunca": "Vidéo, audio et transcription"
+      },
+      "nossoDominio": false
+    },
+    {
+      "id": "drive",
+      "hosts": [
+        "accounts.google.com",
+        "apis.google.com",
+        "www.googleapis.com",
+        "docs.google.com"
+      ],
+      "quando": "gesto",
+      "onde": [
+        "web"
+      ],
+      "conteudo": true,
+      "pt": {
+        "quem": "O Google Drive",
+        "leva": "<b>Conteúdo seu</b>: o documento montado no seu navegador — texto e imagens —, para o Google convertê-lo em documento do Drive. A autenticação usa o escopo mais restrito que existe (<code>drive.file</code>). Só depois de você confirmar o aviso.",
+        "gesto": "Clicar em “enviar para o Google Docs”",
+        "nunca": "O restante do seu Drive; e o arquivo vai do seu navegador direto ao Google, sem passar por nós"
+      },
+      "en": {
+        "quem": "Google Drive",
+        "leva": "<b>Content of yours</b>: the document assembled in your browser — text and images —, for Google to turn it into a Drive document. Authentication uses the narrowest scope there is (<code>drive.file</code>). Only after you confirm the notice.",
+        "gesto": "Clicking “send to Google Docs”",
+        "nunca": "The rest of your Drive; and the file goes from your browser straight to Google, without passing through us"
+      },
+      "es": {
+        "quem": "Google Drive",
+        "leva": "<b>Contenido tuyo</b>: el documento montado en tu navegador — texto e imágenes —, para que Google lo convierta en documento de Drive. La autenticación usa el ámbito más restringido que existe (<code>drive.file</code>). Solo después de que confirmes el aviso.",
+        "gesto": "Pulsar «enviar a Google Docs»",
+        "nunca": "El resto de tu Drive; y el archivo va de tu navegador directo a Google, sin pasar por nosotros"
+      },
+      "de": {
+        "quem": "Google Drive",
+        "leva": "<b>Inhalte von Ihnen</b>: das in Ihrem Browser erzeugte Dokument — Text und Bilder —, damit Google daraus ein Drive-Dokument macht. Die Anmeldung nutzt den engsten Geltungsbereich, den es gibt (<code>drive.file</code>). Erst nachdem Sie den Hinweis bestätigt haben.",
+        "gesto": "Auf „an Google Docs senden“ klicken",
+        "nunca": "Der Rest Ihres Drive; und die Datei geht von Ihrem Browser direkt zu Google, ohne über uns zu laufen"
+      },
+      "fr": {
+        "quem": "Google Drive",
+        "leva": "<b>Du contenu à vous</b> : le document assemblé dans votre navigateur — texte et images —, pour que Google en fasse un document Drive. L’authentification utilise la portée la plus restreinte qui existe (<code>drive.file</code>). Seulement après que vous ayez confirmé l’avis.",
+        "gesto": "Cliquer sur « envoyer vers Google Docs »",
+        "nunca": "Le reste de votre Drive ; et le fichier va de votre navigateur directement à Google, sans passer par nous"
+      },
+      "nossoDominio": false
+    },
+    {
+      "id": "compartilhar",
+      "hosts": [
+        "www.linkedin.com/sharing"
+      ],
+      "quando": "gesto",
+      "onde": [
+        "web"
+      ],
+      "conteudo": false,
+      "pt": {
+        "quem": "Compartilhar um link",
+        "leva": "O endereço do site, e só. Nenhuma parte do seu documento vai junto. No pacote offline este botão vira um e-mail.",
+        "gesto": "Clicar em compartilhar",
+        "nunca": "Qualquer parte do seu documento"
+      },
+      "en": {
+        "quem": "Sharing a link",
+        "leva": "The website address, and that is all. No part of your document goes with it. In the offline package this button becomes an e-mail.",
+        "gesto": "Clicking share",
+        "nunca": "Any part of your document"
+      },
+      "es": {
+        "quem": "Compartir un enlace",
+        "leva": "La dirección del sitio, y nada más. Ninguna parte de tu documento va con él. En el paquete offline este botón se convierte en un correo.",
+        "gesto": "Pulsar compartir",
+        "nunca": "Cualquier parte de tu documento"
+      },
+      "de": {
+        "quem": "Einen Link teilen",
+        "leva": "Die Adresse der Website, mehr nicht. Kein Teil Ihres Dokuments geht mit. Im Offline-Paket wird aus dieser Schaltfläche eine E-Mail.",
+        "gesto": "Auf Teilen klicken",
+        "nunca": "Irgendein Teil Ihres Dokuments"
+      },
+      "fr": {
+        "quem": "Partager un lien",
+        "leva": "L’adresse du site, et rien d’autre. Aucune partie de votre document ne part avec. Dans le paquet hors ligne, ce bouton devient un e-mail.",
+        "gesto": "Cliquer sur partager",
+        "nunca": "Toute partie de votre document"
+      },
+      "nossoDominio": false
+    }
+  ]
+}

@@ -127,6 +127,23 @@ SITE = "https://walkstamp.com"
 CAMINHO_CONTA = {"pt": "/conta", "en": "/en/account", "es": "/es/cuenta",
                  "de": "/de/konto", "fr": "/fr/compte"}
 
+# OS PEDAÇOS TRADUZIDOS DE CADA SUB-ROTA DA CONTA.
+#
+# Estava dentro do gerador de `rotas.json`, e isso bastava enquanto só o
+# `rotas.json` precisava dele. A política de privacidade passou a apontar para a
+# tela "Seus dados", e o endereço dela é traduzido: escrito à mão no corpo da
+# página, seria a cópia que manda o leitor alemão para `/de/konto/dados` — que
+# não existe, porque lá é `/de/konto/daten`.
+sub_conta = {
+    "roteiro":  {"pt": "roteiro",  "en": "cases",    "es": "casos",       "de": "testfaelle", "fr": "cas-de-test"},
+    "faturas":  {"pt": "faturas",  "en": "invoices", "es": "facturas",    "de": "rechnungen", "fr": "factures"},
+    "chamados": {"pt": "chamados", "en": "tickets",  "es": "incidencias", "de": "tickets",    "fr": "tickets"},
+    "time":     {"pt": "time",     "en": "team",     "es": "equipo",      "de": "team",       "fr": "equipe"},
+    "modelos":  {"pt": "modelos",  "en": "templates","es": "plantillas",  "de": "vorlagen",   "fr": "modeles"},
+    "negocio":  {"pt": "negocio",  "en": "business", "es": "negocio",     "de": "geschaeft",  "fr": "activite"},
+    "dados":    {"pt": "dados",    "en": "your-data","es": "datos",       "de": "daten",      "fr": "donnees"},
+}
+
 # Versão dos ícones. O navegador guarda favicon com unhas e dentes: sem um
 # parâmetro que mude, quem já visitou o site continua vendo o ícone antigo
 # mesmo depois do deploy. Suba este número sempre que a marca mudar.
@@ -181,6 +198,24 @@ CONTATO = "privacidade@walkstamp.com"
 # Se algum dia um contrato exigir a qualificação completa do encarregado, ela
 # vai no INSTRUMENTO ASSINADO entre as partes — que é privado —, e não no site.
 ENCARREGADO = "Leandro Batista de Oliveira"
+
+# ---------------------------------------------------------------------------
+# OS PRAZOS DE RETENÇÃO — a fonte única do lado do site.
+#
+# Eles existem em DOIS lugares, e é de propósito: aqui, para a política de
+# privacidade escrever o número em prosa nos cinco idiomas; e no banco, na
+# função `walkstamp.prazos()`, de onde o expurgo lê e a tela `/conta/dados`
+# mostra. Não dá para o site ler o banco: a política é HTML estático, servido
+# sem sessão e sem chave.
+#
+# O que impede as duas cópias de divergirem NÃO é boa memória: é a régua
+# `prazos.mjs`, que lê estes três números e a migração que define
+# `walkstamp.prazos()` e reprova se discordarem. Sem ela, isto seria a lista
+# paralela de sempre — e a que ninguém confere é a que vira mentira.
+# ---------------------------------------------------------------------------
+PRAZO_CONTA_DIAS   = 90
+PRAZO_LISTA_MESES  = 24
+PRAZO_EVENTO_MESES = 18
 
 # ---------------------------------------------------------------------------
 # Google Drive e Google Docs. Os três nascem VAZIOS e é assim que devem ficar
@@ -532,6 +567,9 @@ def escrever_marca(root: pathlib.Path) -> None:
         "supaUrl": SUPA_URL, "supaKey": SUPA_KEY,
         "analytics": ANALYTICS,
         "licPub": LIC_PUB, "licPubAuto": LIC_PUB_AUTO,
+        "prazoConta": str(PRAZO_CONTA_DIAS),
+        "prazoLista": str(PRAZO_LISTA_MESES),
+        "prazoEvento": str(PRAZO_EVENTO_MESES),
     }
     arq = root / "src" / "marca.json"
     arq.write_text(json.dumps(dados, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
@@ -569,14 +607,6 @@ def escrever_marca(root: pathlib.Path) -> None:
     # saía `undefined` nas páginas em alemão e em francês, num site que fala
     # cinco idiomas há semanas. Ninguém viu porque `undefined` num `href` não
     # quebra nada: só leva a lugar nenhum.
-    sub_conta = {
-        "roteiro":  {"pt": "roteiro",  "en": "cases",    "es": "casos",       "de": "testfaelle", "fr": "cas-de-test"},
-        "faturas":  {"pt": "faturas",  "en": "invoices", "es": "facturas",    "de": "rechnungen", "fr": "factures"},
-        "chamados": {"pt": "chamados", "en": "tickets",  "es": "incidencias", "de": "tickets",    "fr": "tickets"},
-        "time":     {"pt": "time",     "en": "team",     "es": "equipo",      "de": "team",       "fr": "equipe"},
-        "modelos":  {"pt": "modelos",  "en": "templates","es": "plantillas",  "de": "vorlagen",   "fr": "modeles"},
-        "negocio":  {"pt": "negocio",  "en": "business", "es": "negocio",     "de": "geschaeft",  "fr": "activite"},
-    }
     # As abas do back-office. Elas NÃO são traduzidas, e isto é uma decisão:
     # o `/negocio` é o escritório de UMA pessoa — o dono, checado pelo
     # WALKSTAMP_DONO. Traduzir "cobranças" para cinco idiomas que ninguém vai
@@ -620,6 +650,11 @@ def escrever_marca(root: pathlib.Path) -> None:
          "icone": "M6 2h12v20l-3-2-3 2-3-2-3 2z M9 7h6 M9 11h6"},
         {"slug": "chamados", "rotulo": "navChamados",
          "icone": "M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"},
+        # O que o servidor guarda desta pessoa, e o botao que apaga. Sem `exige`:
+        # quem esta no plano gratuito tambem tem o que ver aqui, e e justamente
+        # quem mais precisa da resposta antes de decidir se assina.
+        {"slug": "dados", "rotulo": "navDados",
+         "icone": "M12 3c4.4 0 8 1.3 8 3s-3.6 3-8 3-8-1.3-8-3 3.6-3 8-3z M4 6v6c0 1.7 3.6 3 8 3s8-1.3 8-3V6 M4 12v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"},
         {"slug": "modelos", "rotulo": "navModelos", "exige": "time",
          "icone": "M4 4h9l4 4v12H4z M13 4v5h4 M8 13h6 M8 16h6"},
         {"slug": "time", "rotulo": "navTime", "exige": "time",
@@ -770,6 +805,11 @@ def build_site(root: pathlib.Path) -> None:
                  # palavra "conta" para achar a própria fatura
                  # A área do cliente agora fala os cinco idiomas, como o resto.
                  "conta": CAMINHO_CONTA[L],
+                 # O endereço da tela "Seus dados" — traduzido, como o resto da
+                 # conta. Escrito à mão na política de privacidade, ele seria a
+                 # cópia que aponta para /de/konto/dados, que não existe: lá é
+                 # /de/konto/daten. O `sub_conta` já sabe disso.
+                 "contaDados": CAMINHO_CONTA[L] + "/" + sub_conta["dados"][L],
                  # `blog` é a mesma palavra nos cinco idiomas, então ele não
                  # entra na tabela de slugs traduzidos — ela existe para os
                  # casos em que a palavra muda.
@@ -795,6 +835,9 @@ def build_site(root: pathlib.Path) -> None:
         t["cnpj"] = CNPJ
         t["contato"] = CONTATO
         t["encarregado"] = ENCARREGADO
+        t["prazoConta"] = str(PRAZO_CONTA_DIAS)
+        t["prazoLista"] = str(PRAZO_LISTA_MESES)
+        t["prazoEvento"] = str(PRAZO_EVENTO_MESES)
         t["selfPath"] = caminhos[lang]["home"]
         t["switcher"] = _switcher(lang, paginas, "home")
         # o link do comparativo vai montado aqui: colocar <a> dentro do JSON de
@@ -854,6 +897,16 @@ def build_site(root: pathlib.Path) -> None:
             t["cnpj"] = CNPJ
             t["contato"] = CONTATO
             t["encarregado"] = ENCARREGADO
+            # Os prazos de retenção. Este laço não escreve arquivo — quem serve
+            # estas páginas é o Next —, mas ele CONFERE se falta valor, e sem
+            # estas três linhas ele acusava `prazoConta` como sem valor em cinco
+            # idiomas a cada build. Quinze linhas de aviso falso escondem o aviso
+            # verdadeiro que aparecer no meio, que é a razão de o conferente
+            # existir.
+            t["prazoConta"] = str(PRAZO_CONTA_DIAS)
+            t["prazoLista"] = str(PRAZO_LISTA_MESES)
+            t["prazoEvento"] = str(PRAZO_EVENTO_MESES)
+            t["contaDados"] = CAMINHO_CONTA[lang] + "/" + sub_conta["dados"][lang]
             t["lang"] = lang
             t["docTitle"], t["docDesc"] = metas[lang]
             t["selfPath"] = caminhos[lang][pagina]
@@ -2209,6 +2262,101 @@ def main() -> int:
     # origem para existir ali, e um <link> apontando para /manifest.webmanifest
     # só produziria um 404 no console de quem o abrir
     offline = offline.replace('<link rel="manifest" href="/manifest.webmanifest">\n', "")
+    # ---- O PACOTE OFFLINE PERDE OS ENDEREÇOS, E NÃO SÓ O CAMINHO ATÉ ELES ----
+    #
+    # A DEC-1 foi decidida em 27/08: caminho A no produto hospedado, caminho B
+    # — zero egressão literal — no artefato offline. B é o que a página de
+    # segurança JÁ VENDE há tempos, com todas as letras: "nada nele fala com
+    # servidor nenhum", e "na versão offline você perde a transcrição automática
+    # e a leitura de texto da imagem". O que faltava era o arquivo obedecer.
+    #
+    # DUAS METADES, e uma sem a outra não serve.
+    #
+    # O template esconde as duas escolhas quando `location.protocol` é `file:`
+    # — isso impede o CLIQUE. Mas o endereço continuaria escrito dentro do
+    # arquivo, e a mesma página de segurança convida a pessoa a CONFERIR
+    # procurando no arquivo baixado. Um avaliador de fornecedor que abre o HTML
+    # e encontra `cdn.jsdelivr.net` não vai ler o `if` que o protege: ele vai
+    # ler o endereço. Aqui os endereços saem do texto.
+    #
+    # As listas viram vazias e as duas sondagens viram string vazia. Os
+    # `acharTess`/`findWasmBase` já tratam "nenhum endereço respondeu" — é o
+    # caminho que existe desde que a fila de reserva foi escrita —, então a
+    # lista vazia cai no mesmo lugar em que cairia uma rede bloqueada.
+    #
+    # Cada troca é uma TRAVA: se o template mudar e um bloco deixar de casar, o
+    # build PARA. Um "offline" publicado com um endereço a mais seria a
+    # promessa quebrada em silêncio, que é como ela chegou a treze.
+    # A fila de bibliotecas de transcricao e montada a partir do `bases`, entao o
+    # corte dela e calculado do mesmo valor — nao de um texto repetido aqui, que
+    # seria a copia que fica para tras quando alguem trocar uma versao.
+    #
+    # E ela vira `[]`, e nao tres strings vazias: uma base vazia resolve para o
+    # proprio diretorio do arquivo, e o carregador sairia tentando importar de
+    # `file:` tres vezes antes de desistir. Lista vazia cai direto no caminho de
+    # "nenhum endereco respondeu", que existe desde que a fila de reserva foi
+    # escrita.
+    CORTES_OFFLINE = [
+        (f"  const TJS_BASES = {json.dumps(bases, ensure_ascii=False)};",
+         "  const TJS_BASES = [];  /* pacote offline: sem endereco de rede */"),
+        ("""  const WASM_BASES = [
+    'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.26.0-dev.20260416-b7804b056c/dist/',
+    'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.23.0/dist/',
+    'https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/'
+  ];""", "  const WASM_BASES = [];  /* pacote offline: sem endereco de rede */"),
+        ("""  const TESS_BASES = [
+    'https://cdn.jsdelivr.net/npm/tesseract.js@6/dist/',
+    'https://cdn.jsdelivr.net/npm/tesseract.js@6.1.2/dist/',
+    'https://cdn.jsdelivr.net/npm/tesseract.js/dist/'
+  ];""", "  const TESS_BASES = [];  /* pacote offline: sem endereco de rede */"),
+        ("""  const TESS_CORES = [
+    'https://cdn.jsdelivr.net/npm/tesseract.js-core@6',
+    'https://cdn.jsdelivr.net/npm/tesseract.js-core@6.1.2',
+    'https://cdn.jsdelivr.net/npm/tesseract.js-core'
+  ];""", "  const TESS_CORES = [];  /* pacote offline: sem endereco de rede */"),
+        ("  const TESS_LANG = 'https://cdn.jsdelivr.net/gh/naptha/tessdata@main/4.0.0';",
+         "  const TESS_LANG = '';  /* pacote offline: sem endereco de rede */"),
+    ]
+    for velho, novo in CORTES_OFFLINE:
+        if velho not in offline:
+            print("o corte do offline nao casou com o template — um endereco de "
+                  "rede ficaria dentro do arquivo unico:\n"
+                  f"  {velho.strip().splitlines()[0]}", file=sys.stderr)
+            return 1
+        offline = offline.replace(velho, novo)
+
+    # As bases da biblioteca de transcricao e as duas sondagens do Hugging Face
+    # sao montadas em linha; aqui a troca e por endereco, um a um.
+    ENDERECOS_OFFLINE = [
+        "https://huggingface.co/onnx-community/whisper-base/resolve/main/onnx/encoder_model.onnx",
+        "https://huggingface.co/onnx-community/whisper-base/resolve/main/config.json",
+        # E o Drive. Os três tokens de credencial ja saem vazios acima, entao
+        # nenhum botao do Google e desenhado no pacote — mas os ENDERECOS
+        # continuavam escritos, e a pagina de seguranca convida a pessoa a
+        # conferir procurando no arquivo baixado. Quem abre o HTML e acha
+        # `googleapis.com` nao vai ler o `if` que o protege: vai ler o endereco.
+        "https://www.googleapis.com/auth/drive.file",
+        "https://www.googleapis.com/upload/drive/v3/files",
+        "https://www.googleapis.com/drive/v3/files/",
+        # Os dois scripts que o Google carrega sozinho quando ha credencial, e o
+        # endereco do documento criado. Sem credencial nada disso roda; sem
+        # estas linhas, tudo isso continuava escrito no arquivo.
+        "https://accounts.google.com/gsi/client",
+        "https://apis.google.com/js/api.js",
+        "https://docs.google.com/document/d/",
+        # E o compartilhar. Ele ja cai no mailto quando o protocolo e `file:`,
+        # entao o endereco era codigo morto dentro do pacote — mas codigo morto
+        # com nome de rede social continua sendo o que um avaliador encontra.
+        "https://www.linkedin.com/sharing/share-offsite/?url=",
+    ]
+    for endereco in ENDERECOS_OFFLINE:
+        if endereco not in offline:
+            print(f"o endereco {endereco!r} sumiu do template — o corte do "
+                  "offline ficou desatualizado e precisa ser revisto",
+                  file=sys.stderr)
+            return 1
+        offline = offline.replace(endereco, "")
+
     # Trava, não conferência: se um dia alguém colar um endereço direto no
     # template, o build quebra em vez de publicar um "offline" que telefona.
     #
@@ -2232,7 +2380,7 @@ def main() -> int:
     # servidor nenhum" é falsa e não pode ser publicada. Quando a decisão do
     # offline for tomada (embutir tudo, ou declarar que ele não transcreve),
     # baixe os tetos junto — o build avisa quando eles ficarem folgados.
-    TETO_CDN_OFFLINE = {"cdn.jsdelivr.net": 13, "huggingface.co": 2}
+    TETO_CDN_OFFLINE = {"cdn.jsdelivr.net": 0, "huggingface.co": 0}
     for endereco, teto in TETO_CDN_OFFLINE.items():
         achou = offline.count(endereco)
         if achou > teto:

@@ -49,28 +49,9 @@
     guardar en un repositorio interno, analizar por tu equipo y distribuir sin depender de nosotros.</p>
 
     <h2>Qué sale de tu equipo, y cuándo</h2>
-    <table class="legal">
-      <tr><th>Conexión</th><th>Cuándo ocurre</th><th>Qué va</th><th>Qué nunca va</th></tr>
-      <tr><td>Vercel (alojamiento)</td><td>Siempre, al abrir la página</td>
-          <td>La petición del archivo de la página, con IP y navegador — como en cualquier web</td>
-          <td>Tu contenido</td></tr>
-      <tr><td>Vercel Web Analytics</td><td>Siempre; no se envía si el navegador manda <i>Do&nbsp;Not&nbsp;Track</i> o <i>Global Privacy Control</i></td>
-          <td>Qué página se vio, sin cookie y sin identificador que persista</td>
-          <td>Identificador de persona o de sesión</td></tr>
-      <tr><td>Supabase (hitos de uso)</td><td>En quince hitos, once en la herramienta y cuatro en la cuenta — se abrió la herramienta, se abrió un vídeo, se descargó un archivo, se importó un guion, se inició un pago, entre otros. Respeta DNT y GPC</td>
-          <td>El nombre del hito, el idioma de la página, el origen del vídeo, el formato descargado, un tramo (“4-10”, nunca el número exacto) y el plan</td>
-          <td>Nombre de archivo, tamaño, duración, contenido, identificador de sesión</td></tr>
-      <tr><td>jsDelivr (CDN público)</td><td>Al cargar la herramienta (la biblioteca de PDF) y al usar transcripción automática o lectura de texto de la imagen</td>
-          <td>La petición de la biblioteca</td><td>Tu audio, tu imagen, tu texto</td></tr>
-      <tr><td>Hugging Face</td><td>Solo al activar la transcripción automática, y una vez por navegador</td>
-          <td>La petición del modelo de voz</td><td>Tu audio</td></tr>
-      <tr><td>Google</td><td>Solo si haces clic en abrir un vídeo de Drive</td>
-          <td>Autenticación y la petición del archivo que elijas, con el permiso más restringido que existe (<code>drive.file</code>)</td>
-          <td>El resto de tu Drive; y el archivo va de Google directo a tu navegador, sin pasar por nosotros</td></tr>
-      <tr><td>Google Docs (envío)</td><td>Solo si pulsas <b>Enviar a Google Docs</b>, y solo tras confirmar el aviso que aparece</td>
-          <td>El documento de Word montado en tu navegador — texto e imágenes — para que Google lo convierta en documento de Drive</td>
-          <td>Nada más allá del documento que enviaste; va de tu navegador directo a Google, sin pasar por nosotros</td></tr>
-    </table>
+    <p class="lead" style="margin:14px 0 4px"><b>{{promessaA}}</b></p>
+    <p style="margin:0 0 16px">{{promessaAsub}}</p>
+    {{matrizEgressao}}
     <p><b>Ninguna de estas conexiones lleva vídeo, audio, imagen ni transcripción.</b>
     La biblioteca de PDF viene de jsDelivr junto con la página; es el paquete sin conexión el que la incrusta.</p>
     <p>Hay una excepción, y está en la tabla en lugar de escondida: el botón <b>Enviar a Google Docs</b> es

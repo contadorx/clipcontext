@@ -41,26 +41,48 @@ TUDO=0
 # jeito: a régua simplesmente não rodava.
 # Uma régua com o prefixo `site:` precisa do Next de pé — e é a presença de UMA
 # delas que decide se vale pagar os dois minutos do `next build`.
-MAPA="
+# NADA AQUI DENTRO É EXPANDIDO PELO SHELL — 27/08.
+# Este mapa era uma string entre aspas duplas, e as crases dos comentários eram
+# substituição de comando: o bash executava `src/template.html`, `reabrir`,
+# `juntar`, `indice`, `grade`, `anotacao`, `app` e `rapido.sh` toda vez que a
+# esteira subia. Não quebrou nada porque nenhum deles existe como comando — e
+# esse é exatamente o problema: bastava um comentário citar um comando que
+# existe para a porta de liberação rodá-lo. O heredoc com o delimitador entre
+# aspas simples não expande crase, $ nem nada.
+read -r -d '' MAPA <<'MAPA_FIM'
 # `src/template.html` É O PRODUTO. Seis réguas não o cobrem — este mapa nasceu
 # com elas e o Build 2 provou a falha: mexer nos quatro caminhos destrutivos e na
 # largura do índice do .zip não acionou `reabrir`, `juntar`, `indice`, `grade`
 # nem `anotacao`, que são exatamente as que afirmam sobre isso. Quem toca o
 # produto roda o grupo do produto — é o `app` do `rapido.sh`, sem servidor, e é
 # o preço honesto de mexer no arquivo que faz tudo.
-^src/template[.]html$ => semrede.mjs escolhas.mjs erro.mjs smoke.mjs saidas.mjs passos.mjs dobra.mjs travado.mjs gravando.mjs janelinha.mjs comentario.mjs marcados.mjs revisao.mjs marca.mjs formato.mjs promptcx.mjs appidioma.mjs compartilhar.mjs celular.mjs teto.mjs cenario1.mjs organiza.mjs acabamento.mjs lente2.mjs traducao.mjs passomulti.mjs pessoas.mjs matriz.mjs conclusao.mjs parar.mjs entrada.mjs indice.mjs figura.mjs resumo.mjs perna.mjs cartao.mjs etapas.mjs marcos.mjs semundefined.mjs reabrir.mjs juntar.mjs juntos.mjs grade.mjs anotacao.mjs trocar.mjs varredura.mjs descarte.mjs clipe.mjs numeros.mjs vocab.mjs foco.mjs apoio.mjs nitidez.mjs versoes.mjs marcar.mjs janelinha.mjs emissor.mjs
+^src/template[.]html$ => offlineb.mjs egressao.mjs semrede.mjs escolhas.mjs erro.mjs smoke.mjs saidas.mjs passos.mjs dobra.mjs travado.mjs gravando.mjs janelinha.mjs comentario.mjs marcados.mjs revisao.mjs marca.mjs formato.mjs promptcx.mjs appidioma.mjs compartilhar.mjs celular.mjs teto.mjs cenario1.mjs organiza.mjs acabamento.mjs lente2.mjs traducao.mjs passomulti.mjs pessoas.mjs matriz.mjs conclusao.mjs parar.mjs entrada.mjs indice.mjs figura.mjs resumo.mjs perna.mjs cartao.mjs etapas.mjs marcos.mjs semundefined.mjs reabrir.mjs juntar.mjs juntos.mjs grade.mjs anotacao.mjs trocar.mjs varredura.mjs descarte.mjs clipe.mjs numeros.mjs vocab.mjs foco.mjs apoio.mjs nitidez.mjs versoes.mjs marcar.mjs janelinha.mjs emissor.mjs
 ^src/features[.]json$ => planos.mjs promessa.mjs site:precos.mjs
-^src/i18n-conta[.]json$ => chaves.mjs site:compra.mjs site:cancelar.mjs
+^src/i18n-conta[.]json$ => chaves.mjs site:compra.mjs site:cancelar.mjs site:meusdados.mjs
 ^src/i18n-site[.]json$ => chaves.mjs site:cinco.mjs site:contradicao.mjs site:buscaajuda.mjs
+# A PÁGINA TOCADA CHAMA A RÉGUA DELA — 27/08.
+# A linha genérica abaixo era a única cobertura de `src/site/bodies/`, e ela não
+# nomeia `precos.mjs` — a régua da página que tem mais afirmação por metro
+# quadrado do site. Mexer na calculadora de ROI nos cinco idiomas saía verde
+# sem a régua da calculadora rodar. O mapa acumula todas as linhas que casam,
+# então estas somam com a genérica em vez de substituí-la.
+^src/site/bodies/precos[.] => site:precos.mjs venda.mjs
+^src/site/bodies/(termos|privacidade)[.] => site:legal.mjs prazos.mjs
+^src/site/bodies/seguranca[.] => site:legal.mjs matriz.mjs egressao.mjs
+^src/site/bodies/comparativo[.] => comparar.mjs
+^src/site/bodies/caso[A-Za-z]*[.] => site:vitrine.mjs cenarios.mjs
+^src/site/bodies/ajuda[.] => site:ajuda.mjs site:buscaajuda.mjs
+^src/site/bodies/verificar[.] => verificador.mjs
 ^src/site/bodies/ => folha.mjs site:paginas.mjs site:legal.mjs site:ajuda.mjs site:vitrine.mjs site:compra.mjs site:buscaajuda.mjs
 ^src/site/(doc|home)[.]html$ => site:paginas.mjs site:cinco.mjs
 ^src/site/support[.]js$ => site:ficha.mjs site:paginas.mjs site:buscaajuda.mjs
 ^src/versoes[.]json$ => versoes.mjs
-^build[.]py$ => versoes.mjs figuras.mjs cartao.mjs promessa.mjs planos.mjs auditoria.mjs site:precos.mjs site:compra.mjs
+^build[.]py$ => versoes.mjs figuras.mjs cartao.mjs promessa.mjs planos.mjs auditoria.mjs site:precos.mjs site:compra.mjs prazos.mjs
+^src/egressao[.]json$ => egressao.mjs terceiros.mjs site:paginas.mjs
 ^src/rotas[.]json$ => middleware.mjs site:idiomas.mjs site:paginas.mjs
 ^middleware[.]ts$ => middleware.mjs
 ^next[.]config[.]mjs$ => site:paginas.mjs site:seo.mjs
-^app/conta/ => site:compra.mjs site:negocio.mjs entrada2.mjs site:cancelar.mjs
+^app/conta/ => site:compra.mjs site:negocio.mjs entrada2.mjs site:cancelar.mjs site:meusdados.mjs
 ^app/ => site:paginas.mjs site:seo.mjs site:negocio.mjs
 ^public/site[.]css$ => site:estreito.mjs site:paginas.mjs site:dobra.mjs site:buscaajuda.mjs
 ^src/site/(doc|home)[.]html$ => site:estreito.mjs site:paginas.mjs site:cabecalho.mjs
@@ -71,10 +93,10 @@ MAPA="
 ^lib/ => site:paginas.mjs site:buscaajuda.mjs
 ^public/sw[.]js$ => site:seo.mjs
 ^public/site[.]css$ => folha.mjs site:paginas.mjs site:dobrafig.mjs
-^offline/ => site:medicao.mjs
-^supabase/migrations/ => modelopessoal.mjs conferir-migracoes
+^offline/ => site:medicao.mjs offlineb.mjs egressao.mjs
+^supabase/migrations/ => modelopessoal.mjs conferir-migracoes prazos.mjs
 ^testes/ => inventario.mjs
-"
+MAPA_FIM
 
 # ---- 1. os contratos: sempre, e são catorze segundos ------------------------
 CONTRATOS="auditoria.mjs folha.mjs modelopessoal.mjs renovar.mjs numeros.mjs chaves.mjs faxina.mjs figura.mjs funil.mjs inventario.mjs middleware.mjs
@@ -166,7 +188,7 @@ else
     echo
     echo "[2] subindo o Next em :8802 — alguma régua deste diff fala com o site"
     if npx next build > /tmp/liberar-next.log 2>&1; then
-      fuser -k 8802/tcp 2>/dev/null; sleep 1
+      fuser -k 8802/tcp >/dev/null 2>&1; sleep 1
       npx next start -p 8802 > /tmp/liberar-next-run.log 2>&1 &
       NEXT=$!
       trap 'kill $NEXT 2>/dev/null' EXIT
