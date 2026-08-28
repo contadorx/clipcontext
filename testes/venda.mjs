@@ -19,6 +19,7 @@ import http from 'http';
 import fs from 'fs';
 
 import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+import { garantirPortaLivre } from './_porta.mjs';
 const SEGREDO = 'whsec_um_segredo_de_teste';
 const PORTA_NEXT = 8803;
 const PORTA_BANCO = 8804;
@@ -41,6 +42,9 @@ const banco = http.createServer((q, r) => {
   });
 });
 await new Promise((r) => banco.listen(PORTA_BANCO, r));
+
+/* A porta é nossa antes de qualquer coisa — o porquê está no `_porta.mjs`. */
+await garantirPortaLivre(PORTA_NEXT, 'o venda.mjs');
 
 const next = spawn('npx', ['next', 'start', '-p', String(PORTA_NEXT)], {
   cwd: `${RAIZ_WS}`,

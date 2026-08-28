@@ -96,7 +96,14 @@ read -r -d '' MAPA <<'MAPA_FIM'
 ^public/site[.]css$ => site:estreito.mjs site:paginas.mjs site:dobra.mjs site:buscaajuda.mjs
 ^src/site/(doc|home)[.]html$ => site:estreito.mjs site:paginas.mjs site:cabecalho.mjs marcos-a11y.mjs
 ^next[.]config[.]mjs$ => site:csp.mjs site:cabecalho.mjs site:paginas.mjs
+# O IMPORTADOR, O VOCABULÁRIO DELE E A PONTE PARA A FERRAMENTA — 28/08.
+# As colunas de condição atravessam quatro arquivos: quem adivinha o mapa, quem
+# normaliza a reexecução, quem monta o link do caso e a régua que prova as três
+# coisas. Mexer num sem rodar a `roteiro.mjs` foi como o índice posicional da
+# planilha de volta sobreviveu até quatro colunas novas o empurrarem de lugar.
 ^lib/planilha[.]ts$ => bomba.mjs site:roteiro.mjs
+^lib/(reexecucao[.]ts|conta/roteiro[.]ts)$ => site:roteiro.mjs bomba.mjs
+^app/conta/(planilha/|roteiro-acoes[.]ts)|^app/conta/\[lang\]/roteiro/ => site:roteiro.mjs site:roteirojanela.mjs
 ^lib/stripe[.]ts$ => site:precos.mjs promessa.mjs site:compra.mjs renovar.mjs site:cancelar.mjs
 ^app/api/convite/ => site:convite.mjs site:email.mjs
 ^lib/ => site:paginas.mjs site:buscaajuda.mjs

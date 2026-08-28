@@ -33,13 +33,22 @@ export async function GET(req: Request) {
      o banco já respondeu `sem_acesso` antes de a linha chegar aqui. */
   if (!r || r.erro) return new NextResponse(t.rotErroSemAcesso, { status: 403 });
 
+  /* A ORDEM CONTA UMA HISTÓRIA: identificação, depois CONDIÇÃO, depois
+     execução. Quem abre a planilha de volta lê da esquerda para a direita — e
+     a condição vindo antes do resultado é a diferença entre uma planilha que
+     documenta o cenário e uma que só carimba "passou". */
   const cab = [
     t.rotCampoCaso, t.rotCampoTitulo, t.rotCampoSistema, t.rotCampoChamado,
-    t.rotCampoResponsavel, t.rotColSit, t.rotColQuando, t.rotColQuem,
+    t.rotCampoResponsavel,
+    t.rotCampoPrecondicao, t.rotCampoEsperado, t.rotCampoReexecucao, t.rotCampoDepende_de,
+    t.rotColSit, t.rotColQuando, t.rotColQuem,
     t.rotColArq, t.rotColImp, t.rotObservacao,
   ];
+  const reexec = (v: string | null) =>
+    v === 'repetivel' ? t.rotReexecRepetivel : v === 'queima' ? t.rotReexecQueima : '';
   const linhas = [cab].concat(r.casos.map((c) => [
     c.caso, c.titulo || '', c.sistema || '', c.chamado || '', c.responsavel || '',
+    c.precondicao || '', c.esperado || '', reexec(c.reexecucao), c.depende_de || '',
     c.feito_em ? t.rotFeitoSit : '',
     c.feito_em ? c.feito_em.slice(0, 16).replace('T', ' ') : '',
     c.feito_por || '', c.arquivo || '', c.impressao || '', c.observacao || '',

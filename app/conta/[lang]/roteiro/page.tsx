@@ -401,6 +401,24 @@ function Linha(
         {(c.sistema || c.chamado) && (
           <div className="small muted">{[c.sistema, c.chamado].filter(Boolean).join(' · ')}</div>
         )}
+        {/* A CONDIÇÃO, numa gaveta fechada. Ela é o que importa e é longa: uma
+            pré-condição de três linhas aberta em cada uma de duzentas linhas
+            transforma a tabela num muro de texto, e aí ninguém lê nenhuma.
+            Fechada, ela se anuncia — quem precisa, abre. */}
+        {(c.precondicao || c.esperado || c.reexecucao || c.depende_de) && (
+          <details className="small" style={{ marginTop: 6 }}>
+            <summary style={{ cursor: 'pointer' }}>{t.rotCondicaoResumo}</summary>
+            <div className="muted" style={{ marginTop: 5, display: 'grid', gap: 4 }}>
+              {c.precondicao && <div><b>{t.rotCampoPrecondicao}:</b> {c.precondicao}</div>}
+              {c.esperado && <div><b>{t.rotCampoEsperado}:</b> {c.esperado}</div>}
+              {c.reexecucao && (
+                <div><b>{t.rotCampoReexecucao}:</b>{' '}
+                  {c.reexecucao === 'queima' ? t.rotReexecQueima : t.rotReexecRepetivel}</div>
+              )}
+              {c.depende_de && <div><b>{t.rotCampoDepende_de}:</b> {c.depende_de}</div>}
+            </div>
+          </details>
+        )}
       </td>
 
       {r.escopo === 'time' && (

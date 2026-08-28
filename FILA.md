@@ -165,6 +165,37 @@ Provado por falha: tirando uma linha do manifesto, ele sai com 1.
 
 ---
 
+## ACHADO FECHADO — a régua falava com um servidor que não era o dela *(28/08)*
+
+Uma esteira interrompida deixou um `next start` velho segurando a **8807**. O
+`roteiro.mjs` subiu o dele, o segundo morreu com `EADDRINUSE` **em silêncio**, e
+o teste seguiu falando com o servidor ANTIGO — de outro build. Reprovou por um
+defeito que não existia no código, e eu passei uma hora caçando um erro que não
+tinha cometido.
+
+**Reprovar errado é ruim; aprovar errado é pior.** Um servidor velho que
+casualmente passe em tudo dá verde sobre código que ninguém rodou.
+
+Medido: dos **16** arquivos de régua que sobem o Next, **dois** (`roteiro.mjs` e
+`venda.mjs`) não liberavam a porta antes, e **nenhum** dos dezesseis percebia o
+`EADDRINUSE`.
+
+E a primeira tentativa de conserto **não bastou, e isso está medido**: ler o log
+do `next` atrás de "EADDRINUSE" parece suficiente e não é — quem responde o
+primeiro `fetch` é o servidor velho, na hora, e o laço de espera sai satisfeito
+antes de o novo sequer ter reclamado. Com a leitura do log ligada, o teste
+passou inteiro contra o servidor errado.
+
+O que funciona é não perguntar a ninguém: **tentar ocupar a porta.** Se der, ela
+estava livre. Está em `testes/_porta.mjs`, com o ramo de desistência provado por
+falha (kill desligado + porta ocupada → `FALHA` e saída 1).
+
+**O que sobra:** os outros catorze liberam a porta com `fuser -k`, o que fecha o
+caso comum, mas nenhum PROVA que ela ficou livre. Adotar o `garantirPortaLivre`
+neles é uma linha em cada um, e é trabalho de um build futuro.
+
+---
+
 # Parte 1 — As decisões
 
 Uma por vez. Cada uma tem os caminhos, o que se ganha e o que se perde em cada

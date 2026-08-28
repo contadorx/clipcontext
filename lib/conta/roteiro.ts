@@ -26,6 +26,14 @@ export type Caso = {
   caso: string;
   titulo: string | null;
   cenario: string | null;
+  /* As quatro de condição. `cenario` acima é OUTRA coisa — é o cenário de
+     DOCUMENTO do Walkstamp (evidência, instrução, ata…), que vira o `?modelo=`
+     do link. A mesma palavra com dois sentidos na mesma linha é herança, e o
+     comentário fica até ela ser desfeita. */
+  precondicao: string | null;
+  esperado: string | null;
+  reexecucao: string | null;
+  depende_de: string | null;
   chamado: string | null;
   sistema: string | null;
   responsavel: string | null;
@@ -97,6 +105,17 @@ export function linkDoCaso(c: Caso, lang: Lang, cenarioPadrao = 'evidencia'): st
   p.set('caso', c.caso + (c.titulo ? ' — ' + c.titulo : ''));
   if (c.sistema) p.set('sistema', c.sistema);
   if (c.chamado) p.set('chamado', c.chamado);
+  /* A CONDIÇÃO VIAJA JUNTO — 28/08. Guardá-la só na tela de controle resolvia
+     metade: a outra é ela chegar na ficha ENQUANTO a pessoa grava, para o
+     documento carregar as duas — a condição que alguém ESCREVEU e a que de
+     fato aconteceu nas telas. Sem isso, o documento continua sendo, nas
+     palavras do post, "a pré-condição que ninguém escreveu".
+
+     Cortadas em 400 e 300: um endereço tem teto prático, e a pré-condição
+     inteira continua na tela de controle e na planilha de volta. O que viaja é
+     o suficiente para quem executa saber o que montar. */
+  if (c.precondicao) p.set('pre', c.precondicao.slice(0, 400));
+  if (c.esperado) p.set('esperado', c.esperado.slice(0, 300));
   p.set('rot', String(c.id));
   return `/app?${p.toString()}`;
 }

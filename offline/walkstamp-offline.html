@@ -1041,6 +1041,10 @@
      `display` no atributo de estilo: lá ele venceria a regra e o controle
      apareceria no plano gratuito, onde não faz nada. */
   #vocGuardarRow{display:flex}
+  /* A condição fica FORA da grade de duas colunas: ela é um parágrafo, e
+     um parágrafo numa célula estreita vira um resumo. */
+  .evCond{display:grid;gap:10px;margin-top:10px}
+  .evCond textarea{width:100%;resize:vertical;min-height:44px}
   .note{font-size:13px;color:var(--muted);border-left:3px solid var(--line);padding:2px 0 2px 12px;margin-top:14px}
   .note b{color:var(--warn)}
   /* ---- O LINK DE PULAR ----
@@ -2805,6 +2809,26 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
                <option value="SBX">SBX</option>
              </select></div>
       </div>
+      <!-- A CONDIÇÃO — pré-condição e resultado esperado.
+
+           Fora da grade de propósito: as outras são de uma linha e cabem em
+           duas colunas; a pré-condição é um parágrafo — "cliente com bloqueio
+           parcial de crédito, material sujeito a ST, entrega interestadual" —
+           e espremê-la numa célula estreita é convidar a pessoa a resumir
+           justamente a parte que precisa ser específica.
+
+           Só a evidência de teste as pede. Numa ata ou numa instrução de
+           trabalho, "pré-condição" não quer dizer nada.
+
+           Elas chegam preenchidas quando o link vem do roteiro, e é aí que o
+           desenho fecha: o documento passa a carregar a condição que alguém
+           ESCREVEU ao lado da que de fato aconteceu nas telas. -->
+      <div class="evCond hide" id="cxCond">
+        <div><label for="evPre" data-i18n="evPre"></label>
+             <textarea id="evPre" rows="2" maxlength="2000" data-i18n-ph="evPrePh"></textarea></div>
+        <div><label for="evEsperado" data-i18n="evEsperado"></label>
+             <textarea id="evEsperado" rows="2" maxlength="1000" data-i18n-ph="evEsperadoPh"></textarea></div>
+      </div>
       <p class="evPe hide" id="evEst" data-i18n="evEstimado"></p>
       <p class="evPe" id="cxHash"><label><input type="checkbox" id="evHash"><span data-i18n="evHash"></span></label></p>
       <!-- Numeração automática. Não é obrigatória e não inventa nada: é um
@@ -4466,6 +4490,10 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       ataH:'Dados da reunião', ataHsub:'— opcional: assunto, local, quem conduziu, participantes',
       ataAssunto:'Assunto', ataLocal:'Local / plataforma', ataOrg:'Conduzida por',
       ataPart:'Participantes', ataIni:'Início da reunião',
+      evPre:'Pré-condição',
+      evPrePh:'O estado antes: dados mestres nomeados, com as características que fazem o cenário existir. Ex.: cliente 4711 com bloqueio parcial de crédito, material MAT-9 sujeito a ST, entrega interestadual.',
+      evEsperado:'Resultado esperado',
+      evEsperadoPh:'Um documento, um status, um valor, uma mensagem. Nunca “corretamente”.',
       evCaso:'Caso de teste', evSis:'Sistema / mandante', evQuem:'Executado por',
       evChamado:'Chamado / mudança', evRes:'Resultado', evIni:'Início da gravação',
       evR0:'— não informado', evR1:'Passou', evR2:'Falhou', evR3:'Bloqueado',
@@ -5097,6 +5125,10 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       ataH:'Meeting details', ataHsub:'— optional: subject, place, who chaired it, attendees',
       ataAssunto:'Subject', ataLocal:'Place / platform', ataOrg:'Chaired by',
       ataPart:'Attendees', ataIni:'Meeting started at',
+      evPre:'Precondition',
+      evPrePh:'The state before: named master data, with the characteristics that make the scenario exist. E.g.: customer 4711 with partial credit block, material MAT-9 under tax substitution, interstate delivery.',
+      evEsperado:'Expected result',
+      evEsperadoPh:'A document, a status, a value, a message. Never “correctly”.',
       evCaso:'Test case', evSis:'System / client', evQuem:'Executed by',
       evChamado:'Ticket / change', evRes:'Result', evIni:'Recording started at',
       evR0:'— not stated', evR1:'Passed', evR2:'Failed', evR3:'Blocked',
@@ -5728,6 +5760,10 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       ataH:'Datos de la reunión', ataHsub:'— opcional: asunto, lugar, quién la condujo, participantes',
       ataAssunto:'Asunto', ataLocal:'Lugar / plataforma', ataOrg:'Conducida por',
       ataPart:'Participantes', ataIni:'Inicio de la reunión',
+      evPre:'Precondición',
+      evPrePh:'El estado antes: datos maestros nombrados, con las características que hacen existir el escenario. Ej.: cliente 4711 con bloqueo parcial de crédito, material MAT-9 sujeto a sustitución tributaria, entrega interestatal.',
+      evEsperado:'Resultado esperado',
+      evEsperadoPh:'Un documento, un estado, un valor, un mensaje. Nunca “correctamente”.',
       evCaso:'Caso de prueba', evSis:'Sistema / mandante', evQuem:'Ejecutado por',
       evChamado:'Ticket / cambio', evRes:'Resultado', evIni:'Inicio de la grabación',
       evR0:'— sin indicar', evR1:'Aprobado', evR2:'Fallido', evR3:'Bloqueado',
@@ -6364,6 +6400,10 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       ataH:'Daten der Besprechung', ataHsub:'— optional: Thema, Ort, Leitung, Teilnehmer',
       ataAssunto:'Thema', ataLocal:'Ort / Plattform', ataOrg:'Geleitet von',
       ataPart:'Teilnehmer', ataIni:'Beginn der Besprechung',
+      evPre:'Vorbedingung',
+      evPrePh:'Der Zustand davor: benannte Stammdaten mit den Merkmalen, die das Szenario überhaupt entstehen lassen. Z. B.: Kunde 4711 mit teilweiser Kreditsperre, Material MAT-9 mit Steuerersetzung, Lieferung in ein anderes Bundesland.',
+      evEsperado:'Erwartetes Ergebnis',
+      evEsperadoPh:'Ein Beleg, ein Status, ein Wert, eine Meldung. Niemals „korrekt“.',
       evCaso:'Testfall', evSis:'System / Mandant', evQuem:'Ausgeführt von',
       evChamado:'Ticket / Änderung', evRes:'Ergebnis', evIni:'Beginn der Aufnahme',
       evR0:'— nicht angegeben', evR1:'Bestanden', evR2:'Fehlgeschlagen', evR3:'Blockiert',
@@ -7000,6 +7040,10 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       ataH:'Données de la réunion', ataHsub:'— facultatif : sujet, lieu, animateur, participants',
       ataAssunto:'Sujet', ataLocal:'Lieu / plateforme', ataOrg:'Animée par',
       ataPart:'Participants', ataIni:'Début de la réunion',
+      evPre:'Précondition',
+      evPrePh:'L’état avant : données de base nommées, avec les caractéristiques qui font exister le scénario. Ex. : client 4711 avec blocage partiel de crédit, article MAT-9 soumis à substitution fiscale, livraison interétatique.',
+      evEsperado:'Résultat attendu',
+      evEsperadoPh:'Un document, un statut, une valeur, un message. Jamais « correctement ».',
       evCaso:'Cas de test', evSis:'Système / mandant', evQuem:'Exécuté par',
       evChamado:'Ticket / changement', evRes:'Résultat', evIni:'Début de l’enregistrement',
       evR0:'— non renseigné', evR1:'Réussi', evR2:'Échoué', evR3:'Bloqué',
@@ -10099,7 +10143,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
      depois, e não tem como se atualizar sozinho. Sem carimbo, "estou com um
      problema no offline" é uma conversa sem chão — ninguém sabe de qual build
      se fala nem se o defeito já foi consertado. */
-  const VERSAO = '2026.08.28-98';
+  const VERSAO = '2026.08.28-107';
   window.__versao = () => VERSAO;
 
   const PIP_CSS = `
@@ -19014,7 +19058,10 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
      rótulos e quais aparecem. */
   const BLOCOS = {
     evidencia: { h:'evH',   sub:'evHsub',   caso:'evCaso',    sis:'evSis',   quem:'evQuem',
-                 chamado:'evChamado', ini:'evIni',  res:true,  hash:true,  temIni:true, amb:true },
+                 chamado:'evChamado', ini:'evIni',  res:true,  hash:true,  temIni:true, amb:true,
+                 /* Só a evidência de teste pede condição. Numa ata ou numa
+                    instrução de trabalho, "pré-condição" não quer dizer nada. */
+                 cond:true },
     tutorial:  { h:'guiaH', sub:'guiaHsub', caso:'guiaTit',   sis:'guiaSis', quem:'guiaAutor',
                  chamado:'guiaVer',   ini:'evIni',  res:false, hash:false, temIni:false, amb:true, proc:true },
     ata:       { h:'ataH',  sub:'ataHsub',  caso:'ataAssunto',sis:'ataLocal',quem:'ataOrg',
@@ -19037,6 +19084,11 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     $('lblChamado').textContent = t(b.chamado);
     $('lblIni').textContent     = t(b.ini);
     $('cxRes').classList.toggle('hide', !b.res);
+    $('cxCond').classList.toggle('hide', !b.cond);
+    /* Escondido é o mesmo que não existir: trocar de cenário sem limpar deixaria
+       a pré-condição de um teste dentro de uma ata, invisível na tela e visível
+       no documento — que é a pior das duas. */
+    if (!b.cond) { $('evPre').value = ''; $('evEsperado').value = ''; }
     $('cxAmb').classList.toggle('hide', !b.amb);
     if (!b.amb) $('evAmb').value = '';
     $('cxDono').classList.toggle('hide', !b.proc);
@@ -19468,7 +19520,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
      acabou. Só o que descreve a PESSOA é guardado; caso de teste, chamado e
      resultado descrevem o CASO, e um chamado velho reaparecendo no caso
      seguinte seria um defeito de evidência, não uma comodidade. */
-  const evCampos = ['evCaso','evSis','evQuem','evChamado','evRes','evInicio'];
+  const evCampos = ['evCaso','evSis','evQuem','evChamado','evRes','evInicio','evPre','evEsperado'];
   const PERFIL_CHAVE = 'Walkstamp.perfil';
   /* ================= vocabulário do domínio =================
 
@@ -19971,8 +20023,12 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
   function lerDaUrl(){
     let q;
     try { q = new URLSearchParams(location.search); } catch (e) { return; }
+    /* `pre` e `esperado` chegam do link do caso, montado pelo roteiro. São a
+       CONDIÇÃO que alguém escreveu na planilha; o resto do documento é a que
+       aconteceu. Ter as duas lado a lado é o ponto inteiro. */
     const mapa = { caso:'evCaso', chamado:'evChamado', sistema:'evSis',
-                   quem:'evQuem', resultado:'evRes' };
+                   quem:'evQuem', resultado:'evRes',
+                   pre:'evPre', esperado:'evEsperado' };
     let veio = 0;
     const md = q.get('modelo');
     if (md && $('modelo') && [...$('modelo').options].some(o => o.value === md)) {
@@ -19985,7 +20041,12 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       if (!v || !el) continue;
       if (el.tagName === 'SELECT') {
         if ([...el.options].some(o => o.value === v)) { el.value = v; veio++; }
-      } else { el.value = v.slice(0, 120); veio++; }
+      } else {
+        /* A pré-condição é um parágrafo, e cortá-la em 120 seria entregar meia
+           condição — pior do que nenhuma, porque parece completa. */
+        const teto = (el.tagName === 'TEXTAREA') ? 2000 : 120;
+        el.value = v.slice(0, teto); veio++;
+      }
     }
     if (veio) {
       /* Dizer que veio do link, e não deixar a pessoa achar que a ferramenta
@@ -20061,6 +20122,11 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       [t('guiaValido'), b.proc && $('evValido').value ? dataLegivel($('evValido').value) : ''],
       [t(b.quem),    v('evQuem')],
       [t(b.chamado), v('evChamado')],
+      /* A CONDIÇÃO VEM ANTES DO RESULTADO, e a ordem é o argumento: quem lê a
+         evidência precisa saber em que situação a regra deveria valer antes de
+         ler se ela valeu. Um resultado sem condição é uma opinião. */
+      [t('evPre'),      b.cond ? v('evPre') : ''],
+      [t('evEsperado'), b.cond ? v('evEsperado') : ''],
       [t('evRes'),   res ? t({ ok:'evR1', nok:'evR2', blq:'evR3' }[res]) : ''],
       // a hora só entra na identificação se o modelo pedir hora: num passo a
       // passo, "Início da gravação" é dado que ninguém foi buscar
@@ -20080,6 +20146,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     return {
       caso: v('evCaso'), sistema: v('evSis'), quem: v('evQuem'),
       chamado: v('evChamado'), resultado: res, ambiente: amb, inicio: origemReal(),
+      precondicao: b.cond ? v('evPre') : '', esperado: b.cond ? v('evEsperado') : '',
       horaVisivel: origemReal() != null && querHora(),
       hash: b.hash && $('evHash').checked,
       linhas,                       // o que entra na primeira página do documento
@@ -20094,6 +20161,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
          `digitado` é a outra pergunta, e é a que a bolinha faz: a pessoa
          escreveu ou escolheu alguma coisa aqui? Datas deduzidas não contam. */
       digitado: [v('evCaso'), v('evSis'), v('evQuem'), v('evChamado'), res, amb,
+                 b.cond ? v('evPre') : '', b.cond ? v('evEsperado') : '',
                  b.proc ? v('evDono') : '', b.proc ? $('evValido').value : '']
                 .filter(Boolean).length
     };
@@ -21985,6 +22053,12 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
         sistema: ev.sistema || null,
         executadoPor: ev.quem || null,
         chamado: ev.chamado || null,
+        /* A CONDIÇÃO VAI NO ARQUIVO. Sem isto, reabrir um documento devolveria
+           tudo menos a parte que diz em que situação a regra deveria valer — e
+           quem reabre para juntar sessões ou corrigir um passo perderia a
+           condição sem nenhum aviso. */
+        precondicao: ev.precondicao || null,
+        resultadoEsperado: ev.esperado || null,
         resultado: ev.resultado || null,
         ambiente: ev.ambiente || null,
         // ISO com fuso: quem consome o arquivo não precisa adivinhar o horário local
@@ -22496,7 +22570,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       $('modelo').dispatchEvent(new Event('change'));
     }
     const e = j.evidencia || {};
-    const por = { evCaso:'casoDeTeste', evSis:'sistema', evQuem:'executadoPor', evChamado:'chamado' };
+    const por = { evCaso:'casoDeTeste', evSis:'sistema', evQuem:'executadoPor', evChamado:'chamado',
+                  evPre:'precondicao', evEsperado:'resultadoEsperado' };
     if (e.ambiente && $('evAmb')) $('evAmb').value = e.ambiente;
     for (const id in por) if (e[por[id]]) $(id).value = e[por[id]];
     if (e.resultado && $('evRes')) $('evRes').value = e.resultado;

@@ -27,6 +27,7 @@ import http from 'http';
 import fs from 'fs';
 
 import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+import { garantirPortaLivre } from './_porta.mjs';
 const PORTA_NEXT = 8807;
 const PORTA_BANCO = 8808;
 const BASE = `http://localhost:${PORTA_NEXT}`;
@@ -43,10 +44,17 @@ let CONTA = null;                            // o que `conta_do_usuario` devolve
 const CASOS = [
   { id: 11, ordem: 1, caso: 'CT-01', titulo: 'Entrar no sistema', cenario: null,
     chamado: 'NAT-1234', sistema: 'Portal', responsavel: 'ana@teste-roteiro.example',
+    /* A CONDIÇÃO. Ela existe aqui porque o post "Cenário não é roteiro" diz
+       que é ela que decide se o teste vale alguma coisa — e até 28/08 o
+       importador não tinha onde guardá-la. */
+    precondicao: 'Cliente 4711 com bloqueio parcial de crédito, material MAT-9 com ST',
+    esperado: 'Pedido criado com bloqueio de remessa e sem ICMS-ST próprio',
+    reexecucao: 'queima', depende_de: null,
     feito_em: null, feito_por: null, arquivo: null, impressao: null, observacao: null,
     recibo: null, anexo: null },
   { id: 12, ordem: 2, caso: 'CT-02', titulo: 'Sair', cenario: null,
     chamado: null, sistema: 'Portal', responsavel: null,
+    precondicao: null, esperado: null, reexecucao: 'repetivel', depende_de: 'CT-01',
     feito_em: '2026-08-16T10:20:00Z', feito_por: 'ana@teste-roteiro.example',
     arquivo: 'CT-02.pdf', impressao: 'a1b2c3d4e5f6a7b8', observacao: 'passou',
     recibo: { g: 'Walkstamp', v: 1, caso: 'CT-02', cen: 'evidencia', n: 4,
@@ -150,6 +158,10 @@ const banco = http.createServer((q, r) => {
 await new Promise((r) => banco.listen(PORTA_BANCO, r));
 
 /* -------------------------------------------------------------- o Next real */
+
+/* A porta é nossa antes de qualquer coisa. O porquê inteiro está no
+   `_porta.mjs`, e ele custou uma hora de caçada a um defeito que não existia. */
+await garantirPortaLivre(PORTA_NEXT, 'o roteiro.mjs');
 
 const next = spawn('npx', ['next', 'start', '-p', String(PORTA_NEXT)], {
   cwd: `${RAIZ_WS}`,
@@ -341,16 +353,25 @@ let pg, ctx;
      rolando && !rolando.precisa, JSON.stringify(rolando));
 }
 
+let hrefDoCaso = '';
 console.log('\n[5] o link do caso é a ponte para a ferramenta');
 {
   await pg.goto(`${BASE}/conta/roteiro?id=7`);
   const href = await pg.locator('table a[href^="/app?"]').first().getAttribute('href');
+  hrefDoCaso = href;
   const u = new URL(href, BASE);
   ok('leva para a ferramenta', u.pathname === '/app', u.pathname);
   ok('com o caso dentro', (u.searchParams.get('caso') || '').startsWith('CT-01'), u.searchParams.get('caso'));
   ok('com o sistema', u.searchParams.get('sistema') === 'Portal', u.searchParams.get('sistema'));
   ok('com o chamado', u.searchParams.get('chamado') === 'NAT-1234', u.searchParams.get('chamado'));
   ok('e com o número do caso, que é o que traz a volta', u.searchParams.get('rot') === '11', u.searchParams.get('rot'));
+  /* A CONDIÇÃO VIAJA JUNTO — 28/08. Guardá-la só na tela de controle resolvia
+     metade: a outra é ela chegar na ficha enquanto a pessoa grava, para o
+     documento carregar a condição ESCRITA ao lado da que aconteceu nas telas. */
+  ok('com a pré-condição dentro',
+     (u.searchParams.get('pre') || '').startsWith('Cliente 4711'), u.searchParams.get('pre'));
+  ok('e com o resultado esperado',
+     (u.searchParams.get('esperado') || '').startsWith('Pedido criado'), u.searchParams.get('esperado'));
   /* O caso já feito não ganha link de execução: convidar a refazer o que está
      pronto é o caminho mais curto para duas evidências do mesmo caso. */
   const links = await pg.locator('table a[href^="/app?"]').count();
@@ -364,11 +385,20 @@ console.log('\n[6] a ferramenta recebe o link e prepara a volta');
   const pgApp = await ctx.newPage();
   const erros = []; pgApp.on('pageerror', (e) => erros.push(e.message));
   await pgApp.route('**/rpc/**', (r) => r.fulfill({ status: 200, body: 'null' }));
-  await pgApp.goto(`${BASE}/app?lang=pt&modelo=evidencia&caso=CT-01%20-%20Entrar&sistema=Portal&chamado=NAT-1234&rot=11`);
+  /* O endereço é o MESMO que a tela de controle monta — copiado do `href`
+     lido no bloco [5], e não escrito à mão aqui. Escrito à mão, este teste
+     provaria que a ferramenta lê o que o teste escreve, e não o que o
+     produto manda. */
+  await pgApp.goto(new URL(hrefDoCaso, BASE).toString());
   await pgApp.waitForTimeout(1200);
   ok('o caso chegou preenchido', (await pgApp.inputValue('#evCaso')).startsWith('CT-01'), await pgApp.inputValue('#evCaso'));
   ok('o sistema chegou', (await pgApp.inputValue('#evSis')) === 'Portal');
   ok('o chamado chegou', (await pgApp.inputValue('#evChamado')) === 'NAT-1234');
+  ok('a pré-condição chegou na ficha, e é a do link',
+     (await pgApp.inputValue('#evPre')).startsWith('Cliente 4711'), await pgApp.inputValue('#evPre'));
+  ok('  e o resultado esperado também',
+     (await pgApp.inputValue('#evEsperado')).startsWith('Pedido criado'), await pgApp.inputValue('#evEsperado'));
+  ok('  e a caixa da condição está à vista', await pgApp.locator('#cxCond').isVisible());
   ok('a tela avisa de onde a pessoa veio', await pgApp.locator('#rotVindo').isVisible());
   ok('e o botão de "feito" ainda NÃO existe — não há documento',
      !(await pgApp.locator('#rotVolta').isVisible()));
@@ -452,7 +482,40 @@ print(json.dumps({'cab': linhas[0], 'corpo': linhas[1:]}, ensure_ascii=False))
   ok('com o cabeçalho traduzido', p.cab.includes('Caso') && p.cab.includes('Situação'), p.cab.join('|'));
   ok('o caso feito veio marcado', p.corpo[1].includes('feito'), p.corpo[1].join('|'));
   ok('com a impressão digital junto', p.corpo[1].includes('a1b2c3d4e5f6a7b8'), p.corpo[1].join('|'));
-  ok('e o caso não feito veio em branco na situação', p.corpo[0][5] === '', JSON.stringify(p.corpo[0]));
+
+  /* PELO NOME DA COLUNA, E NÃO PELO ÍNDICE. Esta linha era `p.corpo[0][5]`, e
+     em 28/08 a planilha ganhou quatro colunas de condição ANTES da situação —
+     o 5 passou a apontar para outra coisa. Um índice escrito à mão numa
+     planilha que cresce é um teste que continua verde afirmando sobre a coluna
+     errada, que é pior do que um que quebra. */
+  const col = (nome) => p.cab.indexOf(nome);
+  ok('e o caso não feito veio em branco na situação',
+     col('Situação') >= 0 && p.corpo[0][col('Situação')] === '',
+     `coluna ${col('Situação')} = ${JSON.stringify(p.corpo[0][col('Situação')])}`);
+
+  /* AS QUATRO DE CONDIÇÃO VOLTAM NA PLANILHA — 28/08. Sem isto, quem exporta
+     para replanejar a regressão receberia de volta uma planilha sem a coluna
+     que diz quais casos queimam a massa, que é a informação que reorganiza o
+     planejamento inteiro. */
+  for (const nome of ['Pré-condição', 'Resultado esperado', 'Reexecução', 'Depende de']) {
+    ok(`  a coluna "${nome}" existe na volta`, col(nome) >= 0, p.cab.join(' | '));
+  }
+  ok('  com a pré-condição escrita por extenso',
+     col('Pré-condição') >= 0 && (p.corpo[0][col('Pré-condição')] || '').startsWith('Cliente 4711'),
+     p.corpo[0][col('Pré-condição')]);
+  /* `queima` é o valor do banco; a planilha é para gente ler. */
+  ok('  e a reexecução traduzida, e não o código do banco',
+     col('Reexecução') >= 0 && p.corpo[0][col('Reexecução')] === 'queima a massa'
+       && p.corpo[1][col('Reexecução')] === 'repetível',
+     `${p.corpo[0][col('Reexecução')]} / ${p.corpo[1][col('Reexecução')]}`);
+  ok('  e a dependência do segundo caso',
+     col('Depende de') >= 0 && p.corpo[1][col('Depende de')] === 'CT-01',
+     p.corpo[1][col('Depende de')]);
+  /* A ORDEM CONTA UMA HISTÓRIA: identificação, condição, execução. Quem lê da
+     esquerda para a direita tem que encontrar em que situação a regra deveria
+     valer ANTES de encontrar se ela valeu. */
+  ok('  e a condição vem ANTES do resultado, que é o argumento do post',
+     col('Pré-condição') < col('Situação'), `${col('Pré-condição')} < ${col('Situação')}`);
 
   /* Quem não pode ver não pode baixar — e a recusa vem do servidor, não da
      ausência do botão. */
