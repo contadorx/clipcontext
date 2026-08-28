@@ -157,6 +157,72 @@ console.log('\n[3] a transcrição responde com UMA nota, e não com três');
      JSON.stringify(volta));
 }
 
+console.log('\n[3b] a ficha DIZ o que foi escolhido, sem virar um segundo controle');
+{
+  /* O PROBLEMA QUE ESTE BLOCO GUARDA. Medido: o botão "Gravar a tela" fica em
+     y=603 e os três rádios em y=946 — 343 px abaixo, na ordem de leitura DEPOIS
+     da ação que os consome. E o padrão marcado baixa ~206 MB. Quem clica assim
+     que vê o botão nunca leu a escolha que já estava tomada por ele.
+
+     A saída NÃO foi mover a escolha para dentro da ficha: ela já morou lá e
+     saiu de propósito, porque vale igual para quem chega com arquivo ou com um
+     link do Drive, e duas caixas para a mesma pergunta é a segunda lista ao
+     lado da lista de verdade. O que subiu foi o ESTADO.
+
+     Por isso a afirmação mais importante deste bloco é a última: a ficha
+     continua sem NENHUM controle de transcrição. Se um dia alguém "melhorar"
+     isto pondo um rádio aqui dentro, é aqui que reprova. */
+  const linha = pg.locator('#trEstadoFicha');
+  ok('a ficha traz a linha de estado', (await linha.count()) === 1);
+
+  const pos = await pg.evaluate(() => {
+    const y = (id) => { const e = document.getElementById(id); if (!e) return null;
+      return Math.round(e.getBoundingClientRect().top + scrollY); };
+    return { botao: y('rec'), linha: y('trEstadoFicha'), ajustes: y('recAjustes'), radios: y('opcoesVias') };
+  });
+  ok('  e ela fica ABAIXO do botão de gravar', pos.linha > pos.botao,
+     `botão ${pos.botao} · linha ${pos.linha}`);
+  ok('  e ACIMA dos rádios, que continuam fora da ficha', pos.linha < pos.radios,
+     `linha ${pos.linha} · rádios ${pos.radios}`);
+
+  /* O estado tem que MUDAR com a escolha, e o custo só aparece em uma delas —
+     anunciar megabytes ao lado de "só as telas" seria assustar por um download
+     que essa escolha existe para evitar. */
+  const ler = async () => (await linha.innerText()).replace(/\s+/g, ' ').trim();
+  const vistos = {};
+  for (const id of ['recTr', 'usarPronta', 'semTr']) {
+    await pg.evaluate((i) => { const e = document.getElementById(i);
+      e.checked = true; e.dispatchEvent(new Event('change', { bubbles: true })); }, id);
+    await pg.waitForTimeout(150);
+    vistos[id] = await ler();
+    ok(`  ${id}: a linha diz alguma coisa`, vistos[id].length > 10, vistos[id].slice(0, 48));
+  }
+  ok('  e as três dizem coisas DIFERENTES', new Set(Object.values(vistos)).size === 3,
+     `${new Set(Object.values(vistos)).size} de 3`);
+  ok('  o custo do modelo aparece em "transcrever"', /MB/.test(vistos.recTr), vistos.recTr.slice(0, 52));
+  ok('  e NÃO aparece nas outras duas',
+     !/MB/.test(vistos.usarPronta) && !/MB/.test(vistos.semTr));
+
+  /* O "trocar" leva o foco para o rádio MARCADO, e não para o primeiro: chegar
+     com o foco no primeiro faria a barra de espaço mudar a escolha antes de a
+     pessoa ler as outras duas. */
+  await pg.evaluate(() => { const e = document.getElementById('usarPronta');
+    e.checked = true; e.dispatchEvent(new Event('change', { bubbles: true })); });
+  await pg.locator('#trTrocar').click();
+  await pg.waitForTimeout(400);
+  const focado = await pg.evaluate(() => document.activeElement && document.activeElement.id);
+  ok('  o "trocar" leva o foco para a escolha MARCADA', focado === 'usarPronta', focado);
+
+  /* A AFIRMAÇÃO QUE SEGURA O DESENHO. */
+  const controles = await pg.evaluate(() => {
+    const ficha = document.getElementById('viaRec');
+    if (!ficha) return -1;
+    return ficha.querySelectorAll('input[name="trModo"]').length;
+  });
+  ok('a ficha continua SEM nenhum controle de transcrição dentro', controles === 0,
+     String(controles));
+}
+
 console.log('\n[4] o selo "recomendado" tem UM dono, e o dono é o cenário');
 {
   /* Ele estava em DUAS das três opções ao mesmo tempo, e um selo em dois
