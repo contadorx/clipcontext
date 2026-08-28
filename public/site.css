@@ -200,6 +200,10 @@ h1,h2,h3,h4{overflow-wrap:break-word;hyphens:auto}
 .pular:focus{left:0}
 /* O alvo do pulo não pode ficar embaixo do cabeçalho colado. */
 #conteudo{scroll-margin-top:12px}
+/* O `main` recebe foco pelo link de pular (`tabindex="-1"`). Um contorno em
+   volta da página inteira leria como erro: o pulo é dito pela rolagem e pelo
+   leitor de tela, não por uma moldura. */
+#conteudo:focus{outline:none}
 
 /* vídeo de demonstração */
 .tour{margin:34px 0 0;max-width:820px}

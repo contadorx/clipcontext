@@ -35,6 +35,15 @@ export default function Painel({
   const itens = menuDe(lang, tem);
   return (
     <section className="painelCx">
+      {/* ---- O LINK DE PULAR ----
+          O painel abre com o menu inteiro — quem está logado, sete itens, o
+          plano e a saída para a ferramenta — antes de qualquer conteúdo. Para
+          quem navega por teclado isso é a mesma mobília em toda página da conta.
+          `display:none` tiraria o link da ordem de tabulação, que é o contrário
+          do que ele existe para fazer: ele sai por posição e volta no foco. É o
+          mesmo desenho do `doc.html` do site e o mesmo da ferramenta — três
+          telas do mesmo produto não podem ter três jeitos de pular. */}
+      <a className="pular" href="#conteudo">{t.pular}</a>
       <div className="wrap painelGrade">
         <nav className="painelMenu" aria-label={t.painelMenu}>
           {/* Quem está logado, no alto do menu. Numa área que trata de fatura e
@@ -82,7 +91,11 @@ export default function Painel({
               para a ferramenta faz a pessoa procurar o logo do cabeçalho. */}
           <a className="painelSai" href={`/app?lang=${lang}`}>{t.painelFerramenta}</a>
         </nav>
-        <div className="painelCorpo">{children}</div>
+        {/* `main`, e não `div`: sem ele o leitor de tela anuncia a navegação e o
+            rodapé e nenhuma região é o conteúdo — o comando "pular para o
+            principal" nem é oferecido. Os seletores do `painelCorpo` são todos
+            por classe, então trocar a tag não mexe em layout nenhum. */}
+        <main className="painelCorpo" id="conteudo" tabIndex={-1}>{children}</main>
       </div>
     </section>
   );

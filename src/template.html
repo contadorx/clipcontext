@@ -1040,6 +1040,21 @@
   .hide{display:none !important}
   .note{font-size:13px;color:var(--muted);border-left:3px solid var(--line);padding:2px 0 2px 12px;margin-top:14px}
   .note b{color:var(--warn)}
+  /* ---- O LINK DE PULAR ----
+     O mesmo desenho do `public/site.css`, e é de propósito que seja o mesmo: o
+     site e a ferramenta são o mesmo produto, e quem aprendeu a pular num não
+     pode ter que reaprender no outro.
+     `display:none` o tiraria da ordem de tabulação, que é o contrário do que
+     ele existe para fazer. Ele sai por posição e volta quando é focado. */
+  .pular{position:absolute;left:-9999px;top:0;z-index:100;
+    background:var(--accent);color:#fff;padding:11px 16px;border-radius:0 0 8px 0;
+    font-weight:600;text-decoration:none}
+  .pular:focus{left:0}
+  /* O alvo do pulo não pode nascer embaixo do cabeçalho, que é grudado. */
+  #conteudo{scroll-margin-top:16px}
+  /* Ver a nota do `tabindex` no `main`: o contorno em volta da página inteira
+     leria como erro, e o pulo já é dito pela rolagem. */
+  #conteudo:focus{outline:none}
   /* ---- A LINHA DE ESTADO DA TRANSCRIÇÃO, DENTRO DA FICHA ----
      Ela NÃO é um controle: é a leitura do que já está escolhido, ao lado do
      botão que consome a escolha. Por isso o `b` dela não herda o amarelo de
@@ -1176,6 +1191,27 @@
 </style>
 </head>
 <body>
+<!-- ---- O LINK DE PULAR, E O `main` QUE ELE ALCANÇA ----
+
+     A ferramenta tinha `<header>`, cinco `<nav>` e dois `<footer>` — todos os
+     marcos, menos o único que importa. Sem `<main>`, o comando "pular para o
+     conteúdo principal" do leitor de tela simplesmente NÃO EXISTE nesta página:
+     não é que ele leve ao lugar errado, é que ele não é oferecido.
+
+     E para quem enxerga mas não usa mouse, o custo estava medido: 14 Tabs até o
+     primeiro controle de verdade — logotipo, quatro links do menu, a conta,
+     cinco idiomas e os três botões de etapa —, em TODA visita. São 102
+     elementos focáveis nesta página.
+
+     `display:none` tiraria o link da ordem de tabulação, que é o contrário do
+     que ele existe para fazer. Ele sai da tela por POSIÇÃO e volta quando é
+     focado — o mesmo desenho que o `doc.html` do site já usa, e de propósito:
+     duas telas do mesmo produto não podem ter dois jeitos de pular.
+
+     O texto é pintado pelo `applyLang()`, e não escrito aqui: a ferramenta
+     troca de idioma SEM RECARREGAR, e escrito no HTML ele ficaria em português
+     numa tela em alemão — a mentira pequena de sempre. -->
+<a class="pular" href="#conteudo" data-i18n="pular"></a>
 <!-- O cabeçalho é uma FAIXA, como no site.
      Ele era uma fileira solta dentro do miolo: sem fundo, sem borda, 37px de
      altura contra os 62 do site, e a marca começando 32px mais à esquerda. Duas
@@ -1286,7 +1322,7 @@
 
      É a mesma lição que o `.painelMenu` do site já tinha aprendido com o `nav`
      nu: um seletor sem dono é um defeito esperando a próxima tela existir. -->
-<div class="wrap corpo">
+<main class="wrap corpo" id="conteudo" tabindex="-1">
   <!-- A BARRA DA CONTA.
 
        Ela nasce vazia e escondida, e só existe se o `/api/menu` responder — o
@@ -2374,6 +2410,25 @@
         <button class="ghost sm hide" id="ocrStop" data-i18n="stopBtn"></button>
         <button class="ghost sm" id="falaNota" data-i18n="falaNota"></button>
       </div>
+      <!-- ---- O CUSTO DO OCR, DITO ANTES DO CLIQUE ----
+
+           Este é o terceiro dos quatro recursos que dependem de algo que pode
+           não estar aí — e o conserto dele NÃO é sondar antes, como o clipe e o
+           WebGPU fazem. Aqui a pergunta "o leitor carrega?" É o download: não
+           existe sondagem barata, e tentar sondar seria pagar o custo que a
+           sondagem existiria para anunciar.
+
+           Então o conserto é o do Build 38: dizer antes, no lugar onde se
+           clica. A pessoa descobria a espera depois do clique, na mensagem de
+           "procurando…", que é indistinguível de um botão lento.
+
+           SEM NÚMERO, e é de propósito. O tamanho do leitor não está declarado
+           em lugar nenhum do projeto, e a rede desta máquina não alcança o CDN
+           para medir. Escrever "~10 MB" aqui seria um chute vestido de medição
+           — exatamente o defeito que o Build 33 tirou da calculadora de preços.
+           Quando alguém medir, o número entra; até lá, a frase diz o que é
+           certo: que baixa, que é uma vez só, e que depois fica guardado. -->
+      <p class="note" id="ocrCusto" data-i18n="ocrCusto" style="margin:8px 0 0"></p>
     </div>
     <!-- Revisar quadro a quadro mora aqui, e não no cartão do vídeo: é o que se
          faz COM os quadros que já estão na tela, não uma forma de trazê-los.
@@ -3304,7 +3359,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     <span data-i18n="supportLine"></span>
   </p>
 
-</div>
+</main>
 
 <!-- O RODAPE, o mesmo do site e o mesmo da area do cliente.
 
@@ -3566,6 +3621,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recSemFrames:'Nenhuma tela foi guardada: a imagem não mudou o suficiente durante a captura. A gravação só guarda a tela quando ela muda — se você ficou numa tela só, ou se compartilhou uma janela que o navegador entrega em preto, não há o que guardar. Grave de novo percorrendo as telas que quer documentar.',
       recMicLbl:'Incluir meu microfone',
       recTrLbl:'Transcrever enquanto gravo',
+      pular:'Pular para o conteúdo',
       fichaTrAuto:'Vai transcrever enquanto grava', fichaTrCusto:' · ~{0} MB de modelo, uma vez só', fichaTrPronta:'Você vai trazer a transcrição pronta', fichaTrNada:'Sem transcrição — só as telas', fichaTrTrocar:'trocar',
       soRedeTit:'Este é o pacote offline', soRede:'Duas escolhas não aparecem aqui: <b>transcrever enquanto gravo</b> e <b>ler o texto da imagem</b>. As duas precisam baixar um modelo da internet na primeira vez, e este arquivo foi feito para não falar com servidor nenhum — não há endereço de rede dentro dele. Trazer uma transcrição já pronta funciona normalmente. Para transcrever aqui dentro, use a versão do site.',
       anotPh:'O que aconteceu nesta tela? Ex.: cliquei em Salvar e o sistema devolveu a mensagem 4711.', anotSalvar:'Salvar anotação', anotSalvo:'✓ Salvo', anotDoPasso:'Anotação do {0} — descreva o que aconteceu', anotDaTela:'Tela {0} do {1} — descreva o que aconteceu', anotNomeTela:'Tela {0} do {1}', anotFeita:'Anotação salva em: {0}. Ela sai no documento.', anotVazia:'Anotação apagada — este passo sai só com a tela.', anotNaoSalvo:'Escrito, ainda não salvo. Aperte Salvar (ou Ctrl+Enter).', anotCurtoNao:'ainda não salvo', anotCurtoSim:'✓ salvo neste quadro', anotCurtoNao2:'anotação apagada',
@@ -3807,7 +3863,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       proxFim:'Documento baixado. Dá para baixar de novo, ou guardar o projeto para reabrir depois.',
       lockBaixar:'O documento é montado a partir das telas — ele aparece aqui quando elas existirem.',
       dropQuiet:'Descartar sem fala',
-      ocrBtn:'Ler o texto da tela',
+      ocrBtn:'Ler o texto da tela', ocrCusto:'Ler o texto da tela baixa um leitor na primeira vez — depois ele fica guardado no navegador e as próximas são imediatas. A imagem não sai daqui: o leitor é que vem.',
       ocrLoad:'Carregando o leitor de texto (só na primeira vez)…',
       ocrRun:'Lendo o texto das imagens: {0}% ({1} de {2}){3}',
       ocrDone:'Texto lido em {0} de {1} quadros. Vai junto no PDF e no JSON.',
@@ -3908,7 +3964,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       sbOk1:'Pronto — ir para a fala', sbOk2:'Pronto — ir para a identificação', sbOk3:'Pronto — ir para gerar', sbOk4:'Pronto — ir para o prompt',
       sb1H:'Conferir os quadros', sb2H:'Revisar a fala', sb3H:'Identificar o documento', sb4H:'Gerar',
       clipeBotaoOn:'Clipe de {0} s ligado', clipeBotaoCam:' · com webcam',
-      clipeModalTit:'Clipe e webcam', clipeBotaoOff:'Clipe do momento: desligado',
+      clipeModalTit:'Clipe e webcam', clipeBotaoOff:'Clipe do momento: desligado', clipeBotaoNao:'Clipe do momento: este navegador não grava',
       lenteCap:'Começa aqui uma tarefa / um caso',
       lenteCapNota:'Deixe em branco se este passo continua a tarefa anterior. Escrevendo um nome, a gravação passa a ter capítulos: cada documento ganha o título da tarefa, e a planilha ganha o tempo gasto em cada uma.',
       capTempo:'{0} nesta tarefa', capCol:'Tarefa', capTempoCol:'Tempo na tarefa',
@@ -4206,6 +4262,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recSemFrames:'No screen was kept: the image did not change enough during the capture. Recording only keeps the screen when it changes — if you stayed on a single screen, or shared a window the browser hands over as black, there is nothing to keep. Record again, walking through the screens you want to document.',
       recMicLbl:'Include my microphone',
       recTrLbl:'Transcribe while I record',
+      pular:'Skip to content',
       fichaTrAuto:'Will transcribe while you record', fichaTrCusto:' · ~{0} MB model, once only', fichaTrPronta:'You will bring the transcript yourself', fichaTrNada:'No transcript — screens only', fichaTrTrocar:'change',
       soRedeTit:'This is the offline package', soRede:'Two choices are missing here: <b>transcribe while I record</b> and <b>read the text in the image</b>. Both need to download a model from the internet the first time, and this file was built not to talk to any server — there is no network address inside it. Bringing a ready-made transcript works normally. To transcribe in here, use the version on the website.',
       anotPh:'What happened on this screen? E.g.: clicked Save and the system returned message 4711.', anotSalvar:'Save note', anotSalvo:'✓ Saved', anotDoPasso:'Note for {0} — describe what happened', anotDaTela:'Screen {0} of {1} — describe what happened', anotNomeTela:'Screen {0} of {1}', anotFeita:'Note saved to: {0}. It goes into the document.', anotVazia:'Note cleared — this step goes out with the screen only.', anotNaoSalvo:'Typed, not saved yet. Press Save (or Ctrl+Enter).', anotCurtoNao:'not saved yet', anotCurtoSim:'✓ saved to this frame', anotCurtoNao2:'note cleared',
@@ -4438,7 +4495,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       proxFim:'Document downloaded. You can download it again, or save the project to reopen later.',
       lockBaixar:'The document is built from the screens — it shows up here once they exist.',
       dropQuiet:'Discard silent ones',
-      ocrBtn:'Read the on-screen text',
+      ocrBtn:'Read the on-screen text', ocrCusto:'Reading the on-screen text downloads a reader the first time — after that it stays in the browser and the next ones are immediate. The image does not leave: the reader is what comes in.',
       ocrLoad:'Loading the text reader (first time only)…',
       ocrRun:'Reading text from the images: {0}% ({1} of {2}){3}',
       ocrDone:'Text read from {0} of {1} frames. It goes into the PDF and the JSON.',
@@ -4533,7 +4590,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       sbOk1:'Done — go to the speech', sbOk2:'Done — go to identification', sbOk3:'Done — go to generate', sbOk4:'Done — go to the prompt',
       sb1H:'Check the frames', sb2H:'Review the speech', sb3H:'Identify the document', sb4H:'Generate',
       clipeBotaoOn:'{0} s clip on', clipeBotaoCam:' · with webcam',
-      clipeModalTit:'Clip and webcam', clipeBotaoOff:'Moment clip: off',
+      clipeModalTit:'Clip and webcam', clipeBotaoOff:'Moment clip: off', clipeBotaoNao:'Moment clip: this browser cannot record it',
       lenteCap:'A task / case starts here',
       lenteCapNota:'Leave it blank if this step continues the previous task. Type a name and the recording gains chapters: each document gets the task title, and the spreadsheet gains the time spent on each one.',
       capTempo:'{0} on this task', capCol:'Task', capTempoCol:'Time on task',
@@ -4831,6 +4888,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recSemFrames:'No se guardó ninguna pantalla: la imagen no cambió lo suficiente durante la captura. La grabación solo guarda la pantalla cuando cambia — si te quedaste en una sola, o compartiste una ventana que el navegador entrega en negro, no hay nada que guardar. Graba de nuevo recorriendo las pantallas que quieres documentar.',
       recMicLbl:'Incluir mi micrófono',
       recTrLbl:'Transcribir mientras grabo',
+      pular:'Saltar al contenido',
       fichaTrAuto:'Transcribirá mientras grabas', fichaTrCusto:' · ~{0} MB de modelo, una sola vez', fichaTrPronta:'Traerás la transcripción ya hecha', fichaTrNada:'Sin transcripción — solo las pantallas', fichaTrTrocar:'cambiar',
       soRedeTit:'Este es el paquete offline', soRede:'Dos opciones no aparecen aquí: <b>transcribir mientras grabo</b> y <b>leer el texto de la imagen</b>. Las dos necesitan descargar un modelo de internet la primera vez, y este archivo se hizo para no hablar con ningún servidor — no hay ninguna dirección de red dentro de él. Traer una transcripción ya hecha funciona con normalidad. Para transcribir aquí dentro, usa la versión del sitio.',
       anotPh:'¿Qué pasó en esta pantalla? Ej.: pulsé Guardar y el sistema devolvió el mensaje 4711.', anotSalvar:'Guardar anotación', anotSalvo:'✓ Guardado', anotDoPasso:'Anotación del {0} — describe qué pasó', anotDaTela:'Pantalla {0} del {1} — describe qué pasó', anotNomeTela:'Pantalla {0} del {1}', anotFeita:'Anotación guardada en: {0}. Sale en el documento.', anotVazia:'Anotación borrada — este paso sale solo con la pantalla.', anotNaoSalvo:'Escrito, aún sin guardar. Pulsa Guardar (o Ctrl+Enter).', anotCurtoNao:'aún sin guardar', anotCurtoSim:'✓ guardado en este cuadro', anotCurtoNao2:'anotación borrada',
@@ -5063,7 +5121,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       proxFim:'Documento descargado. Puedes descargarlo otra vez, o guardar el proyecto para reabrirlo después.',
       lockBaixar:'El documento se arma a partir de las pantallas — aparece aquí cuando existan.',
       dropQuiet:'Descartar sin habla',
-      ocrBtn:'Leer el texto de la pantalla',
+      ocrBtn:'Leer el texto de la pantalla', ocrCusto:'Leer el texto de la pantalla descarga un lector la primera vez — después queda guardado en el navegador y las siguientes son inmediatas. La imagen no sale de aquí: lo que viene es el lector.',
       ocrLoad:'Cargando el lector de texto (solo la primera vez)…',
       ocrRun:'Leyendo el texto de las imágenes: {0}% ({1} de {2}){3}',
       ocrDone:'Texto leído en {0} de {1} fotogramas. Va en el PDF y en el JSON.',
@@ -5158,7 +5216,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       sbOk1:'Listo — ir al habla', sbOk2:'Listo — ir a la identificación', sbOk3:'Listo — ir a generar', sbOk4:'Listo — ir al prompt',
       sb1H:'Revisar los fotogramas', sb2H:'Revisar el habla', sb3H:'Identificar el documento', sb4H:'Generar',
       clipeBotaoOn:'Clip de {0} s activado', clipeBotaoCam:' · con webcam',
-      clipeModalTit:'Clip y webcam', clipeBotaoOff:'Clip del momento: apagado',
+      clipeModalTit:'Clip y webcam', clipeBotaoOff:'Clip del momento: apagado', clipeBotaoNao:'Clip del momento: este navegador no lo graba',
       lenteCap:'Aquí empieza una tarea / un caso',
       lenteCapNota:'Déjalo en blanco si este paso continúa la tarea anterior. Al escribir un nombre, la grabación pasa a tener capítulos: cada documento recibe el título de la tarea y la hoja de cálculo gana el tiempo dedicado a cada una.',
       capTempo:'{0} en esta tarea', capCol:'Tarea', capTempoCol:'Tiempo en la tarea',
@@ -5455,6 +5513,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recSemFrames:'Es wurde kein Bildschirm gespeichert: Das Bild hat sich während der Aufnahme nicht genug verändert. Die Aufnahme speichert den Bildschirm nur, wenn er sich ändert — wenn Sie auf einem einzigen Bildschirm geblieben sind oder ein Fenster freigegeben haben, das der Browser schwarz ausliefert, gibt es nichts zu speichern. Nehmen Sie erneut auf und gehen Sie die Bildschirme durch, die Sie dokumentieren wollen.',
       recMicLbl:'Mein Mikrofon einbeziehen',
       recTrLbl:'Während der Aufnahme transkribieren',
+      pular:'Zum Inhalt springen',
       fichaTrAuto:'Transkribiert während der Aufnahme', fichaTrCusto:' · ~{0} MB Modell, nur einmal', fichaTrPronta:'Sie bringen das Transkript selbst mit', fichaTrNada:'Kein Transkript — nur die Bildschirme', fichaTrTrocar:'ändern',
       soRedeTit:'Dies ist das Offline-Paket', soRede:'Zwei Optionen fehlen hier: <b>während der Aufnahme transkribieren</b> und <b>Text im Bild lesen</b>. Beide müssen beim ersten Mal ein Modell aus dem Internet laden, und diese Datei wurde gebaut, um mit keinem Server zu sprechen — es gibt keine Netzwerkadresse darin. Ein fertiges Transkript mitzubringen funktioniert normal. Zum Transkribieren hier drin nutzen Sie die Version auf der Website.',
       anotPh:'Was ist auf diesem Bildschirm passiert? Z. B.: Auf Speichern geklickt, das System meldete 4711.', anotSalvar:'Notiz speichern', anotSalvo:'✓ Gespeichert', anotDoPasso:'Notiz zu {0} — beschreiben Sie, was passiert ist', anotDaTela:'Bildschirm {0} von {1} — beschreiben Sie, was passiert ist', anotNomeTela:'Bildschirm {0} von {1}', anotFeita:'Notiz gespeichert bei: {0}. Sie erscheint im Dokument.', anotVazia:'Notiz gelöscht — dieser Schritt erscheint nur mit dem Bild.', anotNaoSalvo:'Geschrieben, noch nicht gespeichert. Auf Speichern drücken (oder Strg+Enter).', anotCurtoNao:'noch nicht gespeichert', anotCurtoSim:'✓ in diesem Bild gespeichert', anotCurtoNao2:'Notiz gelöscht',
@@ -5687,7 +5746,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       proxFim:'Dokument heruntergeladen. Sie können es erneut herunterladen oder das Projekt zum späteren Öffnen sichern.',
       lockBaixar:'Das Dokument entsteht aus den Bildschirmen — es erscheint hier, sobald sie existieren.',
       dropQuiet:'Ohne Sprache verwerfen',
-      ocrBtn:'Text auf dem Bildschirm lesen',
+      ocrBtn:'Text auf dem Bildschirm lesen', ocrCusto:'Text auf dem Bildschirm zu lesen lädt beim ersten Mal einen Leser herunter — danach bleibt er im Browser und die nächsten Male gehen sofort. Das Bild geht nicht hinaus: der Leser kommt herein.',
       ocrLoad:'Die Texterkennung wird geladen (nur beim ersten Mal)…',
       ocrRun:'Text wird aus den Bildern gelesen: {0} % ({1} von {2}){3}',
       ocrDone:'Text aus {0} von {1} Screenshots gelesen. Er kommt in das PDF und in das JSON.',
@@ -5788,7 +5847,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       sbOk1:'Fertig — weiter zur Transkription', sbOk2:'Fertig — weiter zur Identifikation', sbOk3:'Fertig — weiter zum Erzeugen', sbOk4:'Fertig — weiter zum Prompt',
       sb1H:'Screenshots prüfen', sb2H:'Transkription prüfen', sb3H:'Dokument identifizieren', sb4H:'Erzeugen',
       clipeBotaoOn:'Clip von {0} s aktiv', clipeBotaoCam:' · mit Webcam',
-      clipeModalTit:'Clip und Webcam', clipeBotaoOff:'Clip zum Moment: aus',
+      clipeModalTit:'Clip und Webcam', clipeBotaoOff:'Clip zum Moment: aus', clipeBotaoNao:'Clip zum Moment: dieser Browser nimmt ihn nicht auf',
       lenteCap:'Hier beginnt eine Aufgabe / ein Fall',
       lenteCapNota:'Lassen Sie das Feld leer, wenn dieser Schritt die vorherige Aufgabe fortsetzt. Wenn Sie einen Namen eintragen, erhält die Aufnahme Kapitel: Jedes Dokument bekommt den Titel der Aufgabe, und die Tabelle bekommt die je Aufgabe aufgewendete Zeit.',
       capTempo:'{0} in dieser Aufgabe', capCol:'Aufgabe', capTempoCol:'Zeit in der Aufgabe',
@@ -6085,6 +6144,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       recSemFrames:'Aucun écran n’a été conservé : l’image n’a pas assez changé pendant la capture. L’enregistrement ne conserve l’écran que lorsqu’il change — si vous êtes resté sur un seul écran, ou si vous avez partagé une fenêtre que le navigateur rend en noir, il n’y a rien à conserver. Enregistrez de nouveau en parcourant les écrans que vous voulez documenter.',
       recMicLbl:'Inclure mon microphone',
       recTrLbl:'Transcrire pendant l’enregistrement',
+      pular:'Aller au contenu',
       fichaTrAuto:'Transcrira pendant l’enregistrement', fichaTrCusto:' · ~{0} MB de modèle, une seule fois', fichaTrPronta:'Vous apporterez la transcription vous-même', fichaTrNada:'Sans transcription — seulement les écrans', fichaTrTrocar:'changer',
       soRedeTit:'Ceci est le paquet hors ligne', soRede:'Deux choix n’apparaissent pas ici : <b>transcrire pendant l’enregistrement</b> et <b>lire le texte de l’image</b>. Les deux doivent télécharger un modèle depuis internet la première fois, et ce fichier a été fabriqué pour ne parler à aucun serveur — il n’y a aucune adresse réseau dedans. Apporter une transcription déjà faite fonctionne normalement. Pour transcrire ici, utilisez la version du site.',
       anotPh:'Que s’est-il passé sur cet écran ? Ex. : clic sur Enregistrer, le système a renvoyé le message 4711.', anotSalvar:'Enregistrer la note', anotSalvo:'✓ Enregistré', anotDoPasso:'Note de {0} — décrivez ce qui s’est passé', anotDaTela:'Écran {0} de {1} — décrivez ce qui s’est passé', anotNomeTela:'Écran {0} de {1}', anotFeita:'Note enregistrée dans : {0}. Elle part dans le document.', anotVazia:'Note effacée — cette étape ne sortira qu’avec l’écran.', anotNaoSalvo:'Saisi, pas encore enregistré. Appuyez sur Enregistrer (ou Ctrl+Entrée).', anotCurtoNao:'pas encore enregistré', anotCurtoSim:'✓ enregistré sur cette image', anotCurtoNao2:'note effacée',
@@ -6317,7 +6377,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       proxFim:'Document téléchargé. Vous pouvez le télécharger à nouveau, ou enregistrer le projet pour le rouvrir plus tard.',
       lockBaixar:'Le document est construit à partir des écrans — il apparaît ici dès qu’ils existent.',
       dropQuiet:'Écarter les captures sans parole',
-      ocrBtn:'Lire le texte à l’écran',
+      ocrBtn:'Lire le texte à l’écran', ocrCusto:'Lire le texte à l’écran télécharge un lecteur la première fois — ensuite il reste dans le navigateur et les suivantes sont immédiates. L’image ne sort pas d’ici : c’est le lecteur qui entre.',
       ocrLoad:'Chargement du lecteur de texte (seulement la première fois)…',
       ocrRun:'Lecture du texte des images : {0} % ({1} sur {2}){3}',
       ocrDone:'Texte lu dans {0} captures sur {1}. Il entre dans le PDF et dans le JSON.',
@@ -6418,7 +6478,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       sbOk1:'Terminé — passer à la parole', sbOk2:'Terminé — passer à l’identification', sbOk3:'Terminé — passer à la génération', sbOk4:'Terminé — passer au prompt',
       sb1H:'Vérifier les captures', sb2H:'Réviser la parole', sb3H:'Identifier le document', sb4H:'Générer',
       clipeBotaoOn:'Clip de {0} s activé', clipeBotaoCam:' · avec webcam',
-      clipeModalTit:'Clip et webcam', clipeBotaoOff:'Clip du moment : désactivé',
+      clipeModalTit:'Clip et webcam', clipeBotaoOff:'Clip du moment : désactivé', clipeBotaoNao:'Clip du moment : ce navigateur ne l’enregistre pas',
       lenteCap:'Une tâche / un cas commence ici',
       lenteCapNota:'Laissez vide si cette étape poursuit la tâche précédente. En saisissant un nom, l’enregistrement gagne des chapitres : chaque document reçoit le titre de la tâche, et le tableur reçoit le temps passé sur chacune.',
       capTempo:'{0} sur cette tâche', capCol:'Tâche', capTempoCol:'Temps sur la tâche',
@@ -7300,6 +7360,12 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
        Passa por aqui porque é por aqui que todo carregamento e toda troca de
        idioma passam — e o aviso precisa estar no idioma de quem lê. */
     if (typeof pintarSoOffline === 'function') { try { pintarSoOffline(); } catch (e) {} }
+    /* O aviso do OCR some depois que o leitor já veio: na segunda vez não há
+       download nenhum, e a frase passaria a anunciar uma espera que não existe
+       mais. Um aviso que sobrevive ao motivo dele é ruído — e ruído ao lado de
+       um botão ensina a não ler o que está ao lado dos botões. */
+    const oc = $('ocrCusto');
+    if (oc) oc.classList.toggle('hide', !!window.Tesseract);
     /* O resumo da conferência também: sem telas o `render()` não roda, e sem
        ele os dois botões do resumo ficariam mudos esperando para aparecer. */
     if (typeof pintarResumoRev === 'function') { try { pintarResumoRev(); } catch (e) {} }
@@ -18737,13 +18803,51 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
 
   /* O botão diz o estado, e não só o nome: "clipe de 15 s" já responde a
      pergunta que o rótulo antigo deixava aberta — quanto tempo é o clipe. */
+  /* ---- O CLIPE DIZ "NÃO DÁ" ANTES, E NÃO NO MEIO DA GRAVAÇÃO ----
+
+     A sondagem já existia: `clipeSuportado()` e `clipeTipoBom()` são síncronas,
+     não pedem permissão nenhuma e custam microssegundos. O que não existia era
+     chamá-las na hora certa. Elas eram consultadas dentro do `clipeAbrir()`,
+     que roda DEPOIS de o relógio zerar — ou seja, a pessoa marcava a caixa,
+     escolhia o cenário, clicava em Gravar, escolhia a tela no diálogo do
+     navegador, esperava a contagem de três segundos, a gravação COMEÇAVA, e só
+     então o "este navegador não grava clipe" entrava na lista de avisos da
+     gravação em curso. Ela está gravando; parar para entender custa a tomada.
+
+     O texto do "não dá" já existia nos cinco idiomas. Ele só nunca foi dito na
+     hora em que ainda dava para fazer alguma coisa a respeito.
+
+     A caixa fica VISÍVEL e desabilitada, e não escondida: o clipe é anunciado
+     na página de recursos, e uma opção que some sem explicação vira "sumiu o
+     recurso que eu vim usar". Escondido é para quando o navegador nem tem o
+     conceito — é o caso do WebGPU, que some porque `navigator.gpu` não existe e
+     não há o que explicar. */
+  const clipeDaPara = () => clipeSuportado() && !!clipeTipoBom();
+
   function pintarBotaoClipe(){
     const b2 = $('clipeAbrir'); if (!b2) return;
-    const cl = $('recClipe') && $('recClipe').checked;
+    const pode = clipeDaPara();
+    const cx = $('recClipe');
+    if (cx && !pode) {
+      /* Desmarcar é parte do conserto, e não zelo: marcada e desabilitada, ela
+         continuaria dizendo ao `recAjustesEst` que o clipe está ligado. */
+      cx.checked = false;
+      cx.disabled = true;
+    } else if (cx) {
+      cx.disabled = false;
+    }
+    const nota = $('recClipeNota');
+    if (nota) nota.textContent = pode ? t('recClipeNota') : t('recClipeNao');
+
+    const cl = cx && cx.checked;
     const cam = $('recCam') && $('recCam').checked;
-    b2.textContent = cl ? t('clipeBotaoOn', CLIPE_JANELA) + (cam ? t('clipeBotaoCam') : '')
+    b2.textContent = !pode ? t('clipeBotaoNao')
+                   : cl ? t('clipeBotaoOn', CLIPE_JANELA) + (cam ? t('clipeBotaoCam') : '')
                         : t('clipeBotaoOff');
     b2.classList.toggle('ghost', !cl);
+    /* O botão continua clicável quando não dá: dentro do modal está o MOTIVO.
+       Um botão morto não explica nada, e "não disponível" sem porquê é a mesma
+       coisa que o silêncio de antes. */
   }
 
   if ($('recCam')) $('recCam').onchange = () => {
@@ -21253,6 +21357,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     try {
       if (!window.Tesseract) {
         $('status').textContent = t('ocrLoad');
+        /* Some assim que o download termina, sem esperar a próxima repintura:
+           a pessoa está olhando para esta parte da tela agora. */
+        setTimeout(() => { const c = $('ocrCusto');
+          if (c && window.Tesseract) c.classList.add('hide'); }, 0);
         const base = await acharTess();
         if (!base) throw new Error(t('ocrSemCdn'));
         await carregarScript(base + 'tesseract.min.js');

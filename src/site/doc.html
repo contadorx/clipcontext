@@ -56,7 +56,19 @@
 <!-- O MARCO DO CONTEÚDO. A página tinha `header`, `nav` e `footer`, e nenhum
      `main`: o leitor de tela anunciava três regiões e nenhuma delas era o
      texto. É também o alvo do link de pular logo acima. -->
-<main id="conteudo">
+<!-- `tabindex="-1"` NÃO é enfeite, e sem ele este link é meia solução.
+
+     Medido: com o link focado, Enter muda o hash e ROLA — e o foco fica no
+     `body`. Quem enxerga vê a página andar e não percebe; quem usa leitor de
+     tela continua lendo do topo, e a próxima tecla Tab recomeça do cabeçalho.
+     Um `main` sem `tabindex="-1"` não pode receber foco programático, e o
+     navegador não tem para onde levá-lo.
+
+     `-1` tira da ordem de tabulação e permite o foco por script e por
+     fragmento: exatamente o que se quer aqui, e nada além. O contorno some
+     porque um retângulo em volta da página inteira lê como erro — o pulo é
+     dito pela rolagem e pelo leitor, não por uma moldura de 900px. -->
+<main id="conteudo" tabindex="-1">
 {{body}}
 </main>
 
