@@ -111,39 +111,40 @@ console.log('\n[5] a pista de liberação conta as MESMAS réguas');
      faltando.length ? `fora da conta do rodapé: ${faltando.join(', ')}` : '');
 }
 
-console.log('\n[6] quantas réguas o corredor específico NÃO consegue chamar');
+console.log('\n[6] nenhuma régua fica fora do alcance do corredor específico');
 {
-  /* MEDIDO EM 28/08, e é um número que ninguém tinha olhado: das réguas do
-     disco, **59 não aparecem em linha nenhuma do mapa do `liberar.sh` nem na
-     lista dos contratos** (eram 64 antes de o Build 48 ligar o `portal.mjs` e as
-     cartas). Não importa o que o build toque — elas só rodam no
-     `rodar.sh` completo.
-     Isso não é um defeito do mapa: ele é escrito à mão de propósito, e muita
-     régua de produto entra pela linha do `src/template.html`. É um LIMITE, e o
-     que faltava era ele estar escrito. "Esteira específica verde" quer dizer
-     "verde no que o mapa alcança" — e sem este número ninguém sabia quanto era.
-     O TETO SÓ DESCE. Ele não obriga a mapear tudo hoje; obriga a não abrir mais
-     buraco amanhã. Uma régua nova que ninguém liga ao mapa reprova aqui, no
-     mesmo dia em que nasce, em vez de virar mais um nome nesta lista. */
-  const TETO = 59;
+  /* A HISTÓRIA DESTE BLOCO, porque ela mudou de forma duas vezes.
+     Ele nasceu no Build 48 como um TETO: 62 réguas que nenhum padrão do
+     `liberar.sh` alcançava, e um número que só podia descer. O teto não obrigava
+     a mapear tudo; obrigava a não abrir mais buraco.
+     No Build 53 o buraco fechou. A linha do `src/template.html` listava 61 nomes
+     à mão e estava errada dos DOIS lados — sete que nem leem o produto, e 54 que
+     leem e ficaram de fora. Ela virou `grupo:produto`, que é uma pergunta ao
+     disco, e as oito que sobraram ganharam padrão próprio.
+     Então o teto virou ZERO, e um teto de zero não é teto: é invariante. Régua
+     nova sem lugar no mapa reprova no dia em que nasce. */
   const lib = fs.readFileSync(path.join(AQUI, 'liberar.sh'), 'utf8');
   const mapa = (lib.split("<<'MAPA_FIM'")[1] || '').split('MAPA_FIM')[0];
   const contratos = (lib.match(/CONTRATOS="([\s\S]*?)"/) || ['', ''])[1];
   const alcancadas = new Set([...`${mapa}\n${contratos}`.matchAll(/([a-z0-9-]+\.mjs)/g)].map((m) => m[1]));
+  /* `grupo:produto` não é um nome, é uma PERGUNTA AO DISCO: quem lê `app.html`
+     ou o pacote offline. A regra é repetida aqui de propósito, e não importada
+     do shell — se ela mudar lá e não aqui, é aqui que se descobre, que é o
+     mesmo acordo do `janelinha.mjs` com a conta da largura da fita. */
+  if (/grupo:produto/.test(mapa)) {
+    for (const f of disco) {
+      if (INSTRUMENTOS.has(f)) continue;
+      const t = fs.readFileSync(path.join(AQUI, f), 'utf8');
+      if (/app\.html|walkstamp-offline\.html/.test(t)) alcancadas.add(f);
+    }
+  }
   const fora = disco.filter((f) => !alcancadas.has(f) && !INSTRUMENTOS.has(f)).sort();
-  ok(`o corredor específico alcança ${disco.length - fora.length} das ${disco.length} réguas`,
-     fora.length <= TETO,
-     fora.length > TETO
-       /* NÃO lista nomes aqui: a lista sai em ordem alfabética e apontaria os
-          seis primeiros como culpados, que é o contrário do que aconteceu. */
-       ? `${fora.length} fora do alcance, e o teto é ${TETO} — ligue a régua nova ` +
-         'a uma linha do mapa do liberar.sh, ou baixe o teto se ela sumiu'
-       : `${fora.length} fora do alcance, teto ${TETO}`);
-  /* O teto frouxo é teto que não segura: se o número já caiu, ele desce junto,
-     senão a folga vira espaço para um buraco novo entrar sem reprovar. */
-  ok('  e o teto está colado no número de hoje', fora.length >= TETO - 2,
-     fora.length >= TETO - 2 ? `hoje ${fora.length}, teto ${TETO}`
-                             : `hoje ${fora.length} — baixe o TETO para ${fora.length}`);
+  ok(`o corredor específico alcança as ${disco.length - fora.length} réguas`,
+     fora.length === 0,
+     /* NÃO lista em ordem alfabética o começo da lista: apontaria os primeiros
+        como culpados, que é o contrário do que aconteceu. */
+     fora.length === 0 ? '' :
+       `${fora.length} fora do alcance — ligue ao mapa do liberar.sh: ${fora.join(', ')}`);
 }
 
 console.log('\n[7] duas réguas nunca disputam a mesma porta');

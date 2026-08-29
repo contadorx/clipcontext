@@ -50,13 +50,21 @@ TUDO=0
 # existe para a porta de liberação rodá-lo. O heredoc com o delimitador entre
 # aspas simples não expande crase, $ nem nada.
 read -r -d '' MAPA <<'MAPA_FIM'
-# `src/template.html` É O PRODUTO. Seis réguas não o cobrem — este mapa nasceu
-# com elas e o Build 2 provou a falha: mexer nos quatro caminhos destrutivos e na
-# largura do índice do .zip não acionou `reabrir`, `juntar`, `indice`, `grade`
-# nem `anotacao`, que são exatamente as que afirmam sobre isso. Quem toca o
-# produto roda o grupo do produto — é o `app` do `rapido.sh`, sem servidor, e é
-# o preço honesto de mexer no arquivo que faz tudo.
-^src/template[.]html$ => offlineb.mjs egressao.mjs marcos-a11y.mjs recursos.mjs nomes-a11y.mjs semrede.mjs escolhas.mjs erro.mjs smoke.mjs saidas.mjs passos.mjs dobra.mjs travado.mjs gravando.mjs janelinha.mjs comentario.mjs marcados.mjs revisao.mjs marca.mjs formato.mjs promptcx.mjs appidioma.mjs compartilhar.mjs celular.mjs teto.mjs cenario1.mjs organiza.mjs acabamento.mjs lente2.mjs traducao.mjs passomulti.mjs pessoas.mjs matriz.mjs conclusao.mjs parar.mjs entrada.mjs indice.mjs figura.mjs resumo.mjs perna.mjs cartao.mjs etapas.mjs marcos.mjs semundefined.mjs reabrir.mjs juntar.mjs juntos.mjs grade.mjs anotacao.mjs trocar.mjs varredura.mjs descarte.mjs clipe.mjs numeros.mjs vocab.mjs foco.mjs apoio.mjs nitidez.mjs versoes.mjs marcar.mjs janelinha.mjs emissor.mjs
+# `src/template.html` É O PRODUTO, e o grupo dele é PERGUNTADO AO DISCO.
+#
+# Esta linha listava SESSENTA E UM nomes à mão, e a lista estava errada dos dois
+# lados — medido em 29/08: sete dos listados nem leem o produto, e CINQUENTA E
+# QUATRO réguas que leem ficaram de fora. Era a lista paralela de sempre, com a
+# agravante de morar no corredor que decide se um build sai.
+#
+# `grupo:produto` se expande em quem lê `app.html` ou o pacote offline, menos os
+# instrumentos. São 124 das 175, e sim: mexer no arquivo que faz tudo custa ~15
+# minutos em vez de ~8. É o preço honesto de mexer no arquivo que faz tudo, e
+# agora ele é o preço CERTO — antes eram 8 minutos sobre a lista errada.
+#
+# Quem quiser o corredor curto tem `bash testes/liberar.sh --tudo` para o
+# oposto, e o `rapido.sh app` para um pedaço.
+^src/template[.]html$ => grupo:produto
 ^src/features[.]json$ => planos.mjs promessa.mjs site:precos.mjs
 ^src/i18n-conta[.]json$ => chaves.mjs site:compra.mjs site:cancelar.mjs site:meusdados.mjs marcos-a11y.mjs
 ^src/i18n-site[.]json$ => chaves.mjs site:cinco.mjs site:contradicao.mjs site:buscaajuda.mjs
@@ -116,6 +124,19 @@ read -r -d '' MAPA <<'MAPA_FIM'
 # página que diz o que guardamos de alguém. Esquecer a segunda é o jeito
 # silencioso de a política de privacidade virar mentira.
 ^supabase/migrations/ => modelopessoal.mjs conferir-migracoes prazos.mjs site:meusdados.mjs sessao.mjs
+# AS OITO QUE SOBRARAM — 29/08.
+# Depois de o grupo do produto virar pergunta ao disco, restaram oito réguas que
+# nenhum padrão alcançava. Elas não leem `app.html`: falam com o SITE e com o
+# painel, e cada uma tem um dono claro quando se pergunta sobre o que ela afirma.
+# O que sobra de verdade agora é zero — e o teto do `inventario.mjs` guarda isso.
+^app/conta/\[lang\]/chamados|^lib/conta/aviso-chamado[.]ts$ => site:chamadoconta.mjs
+^app/(blog|conta/\[lang\]/negocio)/|^lib/blog[.]ts$ => site:blog.mjs
+^src/i18n-site[.]json$ => site:tabelas.mjs
+^public/site[.]css$|^src/site/doc[.]html$ => site:paridade.mjs
+^src/rotas[.]json$ => site:isca.mjs
+^public/sw[.]js$|^app/manifest|^src/site/ => site:linkpage.mjs
+^public/demo/|^lib/site[.]ts$ => site:tourvid.mjs
+^vendor/ => onda4.mjs
 ^testes/ => inventario.mjs
 MAPA_FIM
 
@@ -181,6 +202,19 @@ while read -r linha; do
   else casou=0; printf '%s\n' "$TOCADOS" | grep -qE "$padrao" && casou=1; fi
   [ "$casou" = 0 ] && continue
   for r in $reguas; do
+    # O GRUPO DO PRODUTO É DERIVADO, e não escrito. Quem lê `app.html` ou o
+    # pacote offline afirma sobre o produto; os instrumentos ficam de fora
+    # porque não afirmam nada. E o servidor sobe junto: parte deles precisa
+    # dele, e subir um Next que ninguém usa custa segundos — não subir o que
+    # alguém usa custa um vermelho que não é defeito.
+    if [ "$r" = "grupo:produto" ]; then
+      PRECISA_SITE=1
+      for g in $(grep -l -E "app\.html|walkstamp-offline\.html" "$AQUI"/*.mjs \
+                 | xargs -n1 basename | grep -vE '^(_|shot|proxy|regua|gerar-dpa|capturar)'); do
+        case " $DERIVADAS " in *" $g "*) ;; *) DERIVADAS="$DERIVADAS $g" ;; esac
+      done
+      continue
+    fi
     case "$r" in site:*) PRECISA_SITE=1; r="${r#site:}" ;; esac
     case " $DERIVADAS " in *" $r "*) ;; *) DERIVADAS="$DERIVADAS $r" ;; esac
   done

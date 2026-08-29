@@ -264,6 +264,27 @@ dele.
 
 ---
 
+## ITEM VENCIDO — o `encolherFita()` com roteiro não era defeito *(29/08)*
+
+Ele esteve na minha lista de pendências como *"a janelinha fica em 480 em toda
+língua quando há roteiro"*. Medido: **é a decisão, e ela já estava escrita no
+código** — o que faltava era ela ter virado número.
+
+Com roteiro o passo ganha a linha inteira, e essa linha é **uma só**, cortada
+com reticências. Cada pixel de largura é literalmente mais texto do passo antes
+do "…". Encolher a fita para os 397px que os botões pedem em português cortaria
+justamente o que a segunda linha existe para mostrar.
+
+**Quanto custa, medido:** 480px mostram **49 caracteres** do passo; 397px
+mostram **39**. Dez caracteres.
+
+A `janelinha.mjs` passou a travar as duas metades do argumento — que a linha é
+única e com reticências, e quanto texto os 480 compram. Se alguém quiser
+"otimizar" a largura, o número diz o preço. E se ele virar zero, a decisão pode
+ser revista com dado em vez de opinião.
+
+---
+
 # Parte 1 — As decisões
 
 Uma por vez. Cada uma tem os caminhos, o que se ganha e o que se perde em cada

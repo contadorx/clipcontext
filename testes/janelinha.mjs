@@ -334,6 +334,73 @@ console.log(`\n[1a] a fita: cabe em ${LARG_MIN}×${ALT_MIN}, e sobra só o que s
     ok(`  ${L}: e não passa do teto de ${LARG_MIN}px`, cabe,
        cabe ? '' : `${largura} > ${LARG_MIN} — neste idioma a fita não encolhe`);
   }
+  /* ---- E COM ROTEIRO ELA NÃO ENCOLHE, DE PROPÓSITO ----
+
+     Isto esteve na minha lista de pendências como se fosse defeito: "a
+     janelinha fica em 480 em toda língua quando há roteiro". Medido em 29/08,
+     não é defeito — é a decisão, e ela estava escrita no código sem nunca ter
+     virado número.
+
+     Com roteiro o passo ganha a linha inteira, e a linha do passo é UMA SÓ, com
+     reticências no fim (`white-space:nowrap; text-overflow:ellipsis`). Ou seja:
+     cada pixel de largura é literalmente mais texto do passo visível antes do
+     "…". Encolher a fita para os 397px que os botões pedem em português seria
+     cortar justamente aquilo que a segunda linha existe para mostrar.
+
+     A régua trava as duas metades do argumento — que a linha é única e cortada
+     por reticências, e quanto texto a mais os 480 compram. Se alguém "otimizar"
+     a largura no futuro, o número aqui diz o que ela custa. */
+  {
+    await pg.setContent(`<!doctype html><html><head><meta charset="utf-8">` +
+      `<style>${css}</style></head><body>${corpo}</body></html>`);
+    const r = await pg.evaluate((larguras) => {
+      const b = document.body;
+      b.className = 'min gravando comRoteiro';
+      const t = document.querySelector('.rotT');
+      if (!t) return { erro: 'sem .rotT' };
+      t.classList.remove('hide');
+      const pai = t.closest('.rot') || t.parentElement;
+      if (pai) pai.classList.remove('hide');
+      const cs = getComputedStyle(t);
+      /* Quanto passo cabe: uma frase longa, e conta-se onde ela é cortada. */
+      const frase = 'Entrar na transação ME21N e abrir o pedido de compra do fornecedor com bloqueio parcial de crédito';
+      t.textContent = frase;
+      const cabeEm = (largura) => {
+        b.style.width = largura + 'px';
+        /* O texto cortado não é legível do DOM; o que se mede é quantos
+           caracteres cabem antes de o conteúdo transbordar a caixa. */
+        const medida = document.createElement('span');
+        medida.style.cssText = `position:absolute;visibility:hidden;white-space:nowrap;font:${cs.font}`;
+        document.body.appendChild(medida);
+        const disponivel = t.getBoundingClientRect().width;
+        let n = 0;
+        for (let i = 1; i <= frase.length; i++) {
+          medida.textContent = frase.slice(0, i);
+          if (medida.getBoundingClientRect().width > disponivel) break;
+          n = i;
+        }
+        medida.remove();
+        return n;
+      };
+      const largo = cabeEm(larguras.teto);
+      const estreito = cabeEm(larguras.pt);
+      b.style.width = '';
+      return { umaLinha: cs.whiteSpace === 'nowrap', reticencias: cs.textOverflow === 'ellipsis',
+               largo, estreito };
+    }, { teto: LARG_MIN, pt: LARGURA.pt });
+
+    /* O detalhe só quando reprova — é a quarta vez nesta sessão que um texto
+       impresso ao lado de um `ok` dizia mais do que a linha afirmava. */
+    ok('com roteiro, a linha do passo é UMA só', r.umaLinha === true,
+       r.umaLinha === true ? '' : JSON.stringify(r));
+    ok('  e o que não cabe sai com reticências', r.reticencias === true);
+    /* O NÚMERO QUE FECHA O ARGUMENTO. Se ele virar zero ou negativo, encolher
+       deixou de custar e a decisão pode ser revista — com dado, e não com
+       opinião. */
+    ok(`  e os ${LARG_MIN}px mostram mais passo que os ${LARGURA.pt}px do português`,
+       r.largo > r.estreito, `${r.largo} caracteres contra ${r.estreito}`);
+  }
+
   /* E o alemão é o que manda: se ele passar do teto, a fita nunca encolhe onde
      mais precisaria. Oito pixels de margem é pouco, e está dito aqui para que
      o próximo botão saiba que vai custar isso. */
