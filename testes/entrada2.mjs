@@ -33,7 +33,7 @@ import { chromium } from 'playwright';
 import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
 import { garantirPortaLivre } from './_porta.mjs';
 
-const P = 8800, B = 8824;
+const P = 8800, B = 8860;
 const BASE = `http://localhost:${P}`;
 
 let falhas = 0;

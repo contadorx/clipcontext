@@ -24,7 +24,7 @@ import fs from 'fs';
 
 import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
 import { garantirPortaLivre } from './_porta.mjs';
-const P = 8801, B = 8824;
+const P = 8801, B = 8862;
 const BASE = `http://localhost:${P}`;
 const DONO = 'dono@walkstamp.example';
 

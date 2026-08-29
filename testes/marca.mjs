@@ -53,7 +53,7 @@ console.log('\n[2] o nome ao lado do símbolo, do mesmo tamanho nos dois');
     if (u === '/sw.js') { r.writeHead(200,{'Content-Type':'text/javascript'}); return r.end(fs.readFileSync(ROOT+'/sw.js')) }
     r.writeHead(200, {'Content-Type':'text/html'}); r.end(app);
   });
-  await new Promise((r) => srv.listen(8824, r));
+  await new Promise((r) => srv.listen(8861, r));
   const br = await chromium.launch({ executablePath: CHROME_WS });
   const pg = await (await br.newContext({ viewport: { width: 1200, height: 500 } })).newPage();
 
@@ -68,7 +68,7 @@ console.log('\n[2] o nome ao lado do símbolo, do mesmo tamanho nos dois');
     }, sel);
   };
 
-  const naFerramenta = await medir('http://localhost:8824/app.html?lang=pt', 'svg');
+  const naFerramenta = await medir('http://localhost:8861/app.html?lang=pt', 'svg');
   ok('a ferramenta escreve o nome ao lado do símbolo',
      naFerramenta && naFerramenta.txt === 'Walkstamp', JSON.stringify(naFerramenta));
 
@@ -95,7 +95,7 @@ console.log('\n[2] o nome ao lado do símbolo, do mesmo tamanho nos dois');
                  borda: c.borderBottomWidth, pos: c.position };
       }, sel);
     };
-    await pg.goto('http://localhost:8824/app.html?lang=pt', { waitUntil: 'domcontentloaded' });
+    await pg.goto('http://localhost:8861/app.html?lang=pt', { waitUntil: 'domcontentloaded' });
     const fApp = await faixa(pg, 'header.topo');
     await pg.goto('http://localhost:8802/', { waitUntil: 'domcontentloaded' });
     const fSite = await faixa(pg, 'header');

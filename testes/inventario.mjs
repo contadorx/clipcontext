@@ -164,13 +164,29 @@ console.log('\n[7] duas réguas nunca disputam a mesma porta');
   const COMPARTILHADA = new Set([8802]);
   const dono = new Map();
   const colisoes = [];
+
+  /* O LEITOR DE PORTAS, e por que ele é assim.
+     A primeira versão casava `const <NOME DE PORTA> = 8xxx` — e era CEGA para
+     `const P = 8806, B = 8842;`, a lista de declaradores, onde só o primeiro
+     era visto. Foi assim que a desconflitação deste mesmo build atribuiu a 8842
+     a uma segunda régua e criou uma colisão nova, que o `seo.mjs` reprovou com
+     EADDRINUSE. Agora a lista é partida na vírgula, o nome não importa, e o
+     endereço escrito à mão (`localhost:8xxx`) conta também.
+     Comentário não é código: sem tirá-los, a prosa que EXPLICA uma porta velha
+     vira uma colisão inventada. */
+  const semComentarios = (t) => t.replace(/\/\*[\s\S]*?\*\//g, '')
+                                 .replace(/(^|[^:\w])\/\/[^\n]*/g, '$1');
   for (const f of disco.concat([...INSTRUMENTOS])) {
-    const txt = fs.readFileSync(path.join(AQUI, f), 'utf8');
+    const txt = semComentarios(fs.readFileSync(path.join(AQUI, f), 'utf8'));
     const portas = new Set();
-    for (const m of txt.matchAll(/\b(?:const|let)\s+(?:P|B|E|PORTA[A-Z_]*|P\d|PORT)\s*=\s*(8\d{3})\b/g)) {
-      portas.add(Number(m[1]));
+    for (const m of txt.matchAll(/\b(?:const|let|var)\s+([^;\n]+?);/g)) {
+      for (const parte of m[1].split(',')) {
+        const mm = parte.match(/^\s*[A-Za-z_$][\w$]*\s*=\s*(8\d{3})\s*$/);
+        if (mm) portas.add(Number(mm[1]));
+      }
     }
-    for (const m of txt.matchAll(/\.listen\((8\d{3})\b/g)) portas.add(Number(m[1]));
+    for (const m of txt.matchAll(/\.listen\(\s*(8\d{3})\b/g)) portas.add(Number(m[1]));
+    for (const m of txt.matchAll(/localhost(?::|%3A)(8\d{3})\b/g)) portas.add(Number(m[1]));
     for (const porta of portas) {
       if (COMPARTILHADA.has(porta)) continue;
       if (dono.has(porta)) colisoes.push(`${porta}: ${dono.get(porta)} e ${f}`);

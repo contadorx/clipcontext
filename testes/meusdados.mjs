@@ -35,7 +35,7 @@ import fs from 'fs';
 import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
 import { garantirPortaLivre } from './_porta.mjs';
 
-const P = 8805, B = 8830;
+const P = 8805, B = 8864;
 const BASE = `http://localhost:${P}`;
 const EMAIL = 'dono@cliente.example';
 const OUTRO = 'vitima@cliente.example';

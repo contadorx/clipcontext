@@ -35,7 +35,7 @@ const srv = http.createServer((q, r) => {
   }
   r.writeHead(200, { 'Content-Type': 'text/html' }); r.end(html);
 });
-await new Promise(r => srv.listen(8855, r));
+await new Promise(r => srv.listen(8871, r));
 
 let falhas = 0;
 const ok = (n, c, e) => {
@@ -93,7 +93,7 @@ async function corrida({ ctx, semearCache }) {
   });
   await pg.route('**/@huggingface/transformers**', r => r.fulfill({
     status: 200, headers: { 'content-type': 'text/javascript' }, body: BIBLIOTECA_FALSA }));
-  await pg.goto('http://localhost:8855/app.html?lang=pt');
+  await pg.goto('http://localhost:8871/app.html?lang=pt');
 
   /* O CACHE QUENTE, SEMEADO À MÃO. A biblioteca falsa não escreve na Cache
      Storage — ela nem baixa nada de verdade —, então o único jeito honesto de
@@ -345,7 +345,7 @@ export async function pipeline(tarefa, modelo, opcoes){
     r.fulfill({ status: 200, headers: { 'access-control-allow-origin': '*' }, body: 'null' }));
   await pg2.route('**/@huggingface/transformers**', (r) => r.fulfill({
     status: 200, headers: { 'content-type': 'text/javascript' }, body: SEM_MEMORIA }));
-  await pg2.goto('http://localhost:8855/app.html?lang=pt');
+  await pg2.goto('http://localhost:8871/app.html?lang=pt');
   await pg2.selectOption('#mode', 'count').catch(() => {});
   await pg2.fill('#count', '3').catch(() => {});
   await pg2.locator('#semTr').check().catch(() => {});

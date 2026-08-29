@@ -43,7 +43,7 @@ const srv = http.createServer((q, r) => {
   }
   r.writeHead(200, { 'Content-Type': 'text/html' }); r.end(html);
 });
-await new Promise(r => srv.listen(8838, r));
+await new Promise(r => srv.listen(8867, r));
 
 let falhas = 0;
 const ok = (n, c, e) => {
@@ -64,7 +64,7 @@ const ctx = await br.newContext({ viewport: { width: 1280, height: 1000 },
 const pg = await ctx.newPage();
 const erros = [];
 pg.on('pageerror', e => erros.push(e.message));
-await pg.goto('http://localhost:8838/app.html?lang=pt');
+await pg.goto('http://localhost:8867/app.html?lang=pt');
 await pg.waitForTimeout(400);
 
 /* A tela falsa: 1920×1080 trocando três vezes por segundo, com moldura parada

@@ -28,7 +28,7 @@ import http from 'http';
 
 import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
 import { garantirPortaLivre } from './_porta.mjs';
-const P = 8806, B = 8842;
+const P = 8806, B = 8868;
 const BASE = `http://localhost:${P}`;
 const RAIZ = process.env.RAIZ || `${RAIZ_WS}`;
 const CHROME = process.env.CHROME || CHROME_WS;
