@@ -71,6 +71,14 @@ function recusa(lang: Lang, erro: string): string {
     ja_de_outro: t.erroJaDeOutro,
     sem_assento: t.erroSemAssento,
     nao_a_si: t.erroNaoASi,
+    /* As recusas do domínio. Cada uma tem frase própria porque cada uma pede
+       uma ação diferente de quem lê: trocar o endereço, falar com quem já
+       reivindicou, ou desistir. Um "erro" só mandaria a pessoa adivinhar. */
+    nao_e_seu_dominio: t.erroDominioNaoESeu,
+    dominio_publico: t.erroDominioPublico,
+    ja_reivindicado: t.erroDominioJaReivindicado,
+    dominio_invalido: t.erroDominioInvalido,
+    nao_e_seu: t.erroDominioNaoCadastrado,
   } as Record<string, string>)[erro] || t.erroLeitura;
 }
 
@@ -261,6 +269,29 @@ export async function convidar(form: FormData) {
   if (saida === 'enviado') return volta(lang, 'feito', preencher(t.timeConviteEnviado, { email }));
   return volta(lang, 'parcial',
                preencher(saida === 'limite' ? t.timeConviteLimite : t.timeConviteNaoSaiu, { email }));
+}
+
+/* O DOMÍNIO, AGORA SEM PASSAR POR NÓS.
+ *
+ * A regra de posse mora no banco e é a mesma daqui: o domínio tem que ser o do
+ * e-mail de quem pede. Escrevê-la também aqui seria a segunda cópia — e a
+ * segunda cópia é a que fica para trás. O que esta função faz é levar o pedido
+ * com o e-mail da SESSÃO, que é a única coisa que o banco não tem como saber.
+ */
+export async function cadastrarDominio(form: FormData) {
+  const lang = idioma(form);
+  return comoAdmin(lang, 'walkstamp_time_dominio', {
+    p_dominio: String(form.get('dominio') || '').trim().slice(0, 253),
+    p_remover: false,
+  });
+}
+
+export async function removerDominio(form: FormData) {
+  const lang = idioma(form);
+  return comoAdmin(lang, 'walkstamp_time_dominio', {
+    p_dominio: String(form.get('dominio') || '').trim().slice(0, 253),
+    p_remover: true,
+  });
 }
 
 export async function bloquear(form: FormData) {

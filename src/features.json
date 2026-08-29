@@ -889,7 +889,6 @@
         },
         {
           "id": "dominioAutomatico",
-          "estado": "beta",
           "planos": "t",
           "pt": "Entrada automática por domínio de e-mail",
           "en": "Automatic enrolment by email domain",

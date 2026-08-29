@@ -16,7 +16,7 @@ import type { Conta } from '@/lib/supabase/servico';
 import { PLANOS, temStripe } from '@/lib/stripe';
 import { LOCALE, preencher, type Lang, type Textos } from '@/lib/conta/textos';
 import { CAMINHO_ROTEIRO } from '@/lib/conta/roteiro';
-import { ajustar, apagarModelo, bloquear, comprar, configurar, convidar, gerenciar } from '../acoes';
+import { ajustar, apagarModelo, bloquear, cadastrarDominio, comprar, configurar, convidar, gerenciar, removerDominio } from '../acoes';
 import Licenca from './Licenca';
 
 
@@ -36,6 +36,7 @@ export function Plano({ conta, lang, t, quer }:
   const legenda: Record<string, string> = {
     conta: t.motivoConta, dominio: t.motivoDominio, teste: t.motivoTeste,
     teste_usado: t.motivoTesteUsado, suspensa: t.motivoSuspensa,
+    sem_assento: t.motivoSemAssento,
   };
   const nome = conta.plano === 'time' ? t.planoTeam : conta.plano ? t.planoPersonal : t.planoFree;
   const semVenda = !temStripe || !PLANOS.personal.preco();
@@ -233,6 +234,51 @@ export function Time({ conta, lang, t }: { conta: Conta; lang: Lang; t: Textos }
           ))}
         </tbody>
       </table>
+
+      {/* ---- O DOMÍNIO DA EMPRESA, e por que ele fica logo abaixo do convite ----
+
+          São as duas portas de entrada, e elas competem: convidar um a um, ou
+          deixar quem tem o e-mail da empresa entrar sozinho. Separá-las na tela
+          faria alguém convidar quarenta pessoas sem descobrir a segunda.
+
+          A regra de posse é do banco e a tela não a repete: quem entrou como
+          fulano@empresa.com só reivindica empresa.com. Provedor público nunca,
+          e domínio de outro cliente também não — cada recusa com a sua frase,
+          porque cada uma pede uma ação diferente de quem lê. */}
+      <div style={{ marginTop: 18, borderTop: '1px solid var(--line)', paddingTop: 14 }}>
+        <p className="small" style={{ margin: '0 0 4px' }}><b>{t.timeDominioTit}</b></p>
+        <p className="small muted" style={{ margin: '0 0 9px', maxWidth: 640 }}>{t.timeDominioTexto}</p>
+
+        {(p.dominios || []).length > 0 && (
+          <ul className="small" style={{ margin: '0 0 10px', paddingLeft: 0, listStyle: 'none', display: 'grid', gap: 5 }}>
+            {(p.dominios || []).map((d) => (
+              <li key={d} style={{ display: 'flex', gap: 9, alignItems: 'center', flexWrap: 'wrap' }}>
+                <code>@{d}</code>
+                <form action={removerDominio}>
+                  <input type="hidden" name="lang" value={lang} />
+                  <input type="hidden" name="dominio" value={d} />
+                  <button className="btn ghost" type="submit" style={{ padding: '2px 8px', fontSize: 12.5 }}>
+                    {t.timeDominioSoltar}
+                  </button>
+                </form>
+              </li>
+            ))}
+          </ul>
+        )}
+
+        <form action={cadastrarDominio} style={{ display: 'flex', gap: 9, flexWrap: 'wrap', alignItems: 'center' }}>
+          <input type="hidden" name="lang" value={lang} />
+          <input type="text" name="dominio" placeholder={t.timeDominioPlaceholder}
+                 aria-label={t.timeDominioTit} style={{ minWidth: 230 }} />
+          <button className="btn ghost" type="submit">{t.timeDominioCadastrar}</button>
+        </form>
+        {/* O TETO DITO NA CARA. A entrada por domínio para quando os assentos
+            acabam — e quem não souber disso vai achar que o produto quebrou
+            para a quadragésima pessoa. */}
+        <p className="small muted" style={{ margin: '9px 0 0', maxWidth: 640 }}>
+          {preencher(t.timeDominioTeto, { assentos: p.assentos ?? conta.assentos })}
+        </p>
+      </div>
 
       <form action={convidar} style={{ display: 'flex', gap: 9, flexWrap: 'wrap', alignItems: 'center', marginTop: 16 }}>
         <input type="hidden" name="lang" value={lang} />

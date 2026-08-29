@@ -279,6 +279,88 @@ console.log('\n[4] convidar, e o limite de assento');
      (await corpo()).split('\n').find((l) => l.length > 20) || '');
 }
 
+console.log('\n[4b] o domínio da empresa, cadastrado por quem administra');
+{
+  /* O item `dominioAutomatico` do catálogo esteve em `beta` até o Build 51 por
+     um motivo honesto: a entrada por domínio FUNCIONAVA, mas quem cadastrava o
+     domínio éramos nós, na mão, por chamado. Isto é o que tirou o selo.
+
+     A REGRA DE POSSE MORA NO BANCO e é provada lá — só o domínio do próprio
+     e-mail, nunca um provedor público, nunca um já reivindicado. O que esta
+     régua guarda é o outro lado: que a tela existe, que ela manda o pedido com
+     o e-mail da SESSÃO, e que a recusa do banco vira frase e não código. */
+  await abrir('/conta/time');
+  const corpoTxt = await corpo();
+  ok('a caixa do domínio está na tela', /Entrada autom[áa]tica por dom[íi]nio/i.test(corpoTxt),
+     corpoTxt.slice(0, 60).replace(/\n/g, ' '));
+  ok('  e o domínio já cadastrado aparece', /teste-portal\.example/.test(corpoTxt));
+  /* O TETO DITO NA CARA: a entrada por domínio para quando os assentos acabam,
+     e quem não souber vai achar que o produto quebrou na quadragésima pessoa. */
+  ok('  e a tela avisa que a entrada para quando os assentos acabam',
+     /assentos acabam/i.test(corpoTxt),
+     (corpoTxt.match(/.{0,40}assentos acabam.{0,30}/) || [''])[0]);
+
+  const antes = chamadas.length;
+  await pg.locator('input[name="dominio"]').last().fill('empresa-nova.test');
+  await enviar('button:has-text("Cadastrar")');
+  const c = chamadas.slice(antes).find((x) => x.fn === 'walkstamp_time_dominio');
+  ok('o cadastro chega ao banco', !!c);
+  ok('  com o domínio digitado', !!c && c.args.p_dominio === 'empresa-nova.test', c && c.args.p_dominio);
+  ok('  e o admin da SESSÃO, nunca do formulário',
+     !!c && c.args.p_admin === 'chefe@teste-portal.example', c && c.args.p_admin);
+  ok('  e sem pedir remoção', !!c && c.args.p_remover === false, c && JSON.stringify(c.args.p_remover));
+
+  /* Soltar é o outro lado, e ele manda o MESMO nome com `p_remover` — não uma
+     segunda função com metade da regra. */
+  const antesSoltar = chamadas.length;
+  await abrir('/conta/time');
+  await enviar('button:has-text("Soltar")');
+  const s2 = chamadas.slice(antesSoltar).find((x) => x.fn === 'walkstamp_time_dominio');
+  ok('soltar usa a mesma porta, com o pedido de remoção',
+     !!s2 && s2.args.p_remover === true && s2.args.p_dominio === 'teste-portal.example',
+     s2 && JSON.stringify(s2.args));
+
+  /* A RECUSA VIRA FRASE. Cada uma pede uma ação diferente de quem lê — trocar
+     o endereço, falar com quem já reivindicou, desistir —, e um código na tela
+     mandaria a pessoa adivinhar qual. */
+  for (const [erro, esperado] of [
+    ['dominio_publico', /provedor de e-mail p[úu]blico/i],
+    ['nao_e_seu_dominio', /dom[íi]nio do seu pr[óo]prio e-mail/i],
+    ['ja_reivindicado', /outro cliente/i],
+  ]) {
+    RECUSA = erro;
+    await abrir('/conta/time');
+    await pg.locator('input[name="dominio"]').last().fill('qualquer-coisa.test');
+    await enviar('button:has-text("Cadastrar")');
+    const txt = await corpo();
+    /* O detalhe mostra O RECADO, e não os primeiros setenta caracteres da
+       página — que era "Walkstamp", o cabeçalho, e não dizia nada sobre a
+       afirmação ao lado. */
+    const recado = (txt.match(/[^\n]*(p[úu]blico|pr[óo]prio e-mail|outro cliente)[^\n]*/i) || [''])[0];
+    ok(`  "${erro}" vira frase, e não código`, esperado.test(txt) && !txt.includes(erro),
+       recado.slice(0, 90) || txt.slice(0, 60).replace(/\n/g, ' '));
+  }
+}
+
+console.log('\n[4c] assento cheio: a tela diz o que aconteceu, e não um código');
+{
+  /* O Build 51 fez o assento virar LIMITE de verdade — antes a entrada por
+     domínio dava o plano do cliente a qualquer e-mail daquele domínio, sem
+     contar quantos já estavam dentro. Quem comprasse 3 podia dar o plano a 500.
+
+     A trava mora no `plano_de` e é provada no banco. Aqui é a outra metade: o
+     motivo novo tem que ter frase. Um `sem_assento` cru na tela de quem paga é
+     o produto falando em nome de tabela. */
+  CONTA = conta();
+  CONTA.motivo = 'sem_assento';
+  await abrir('/conta');
+  const txt = await corpo();
+  ok('"sem_assento" vira frase na tela do plano',
+     /assentos acabaram/i.test(txt) && !txt.includes('sem_assento'),
+     (txt.match(/[^\n]*assentos acabaram[^\n]*/i) || [''])[0].slice(0, 80));
+  CONTA = conta();
+}
+
 console.log('\n[5] bloquear, e o prazo como controle real');
 {
   CONTA = conta({ pessoas: PESSOAS().map((p) => (p.email.startsWith('ana') ? { ...p, ativo: false } : p)) });

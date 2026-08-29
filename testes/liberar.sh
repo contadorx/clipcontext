@@ -87,7 +87,7 @@ read -r -d '' MAPA <<'MAPA_FIM'
 # faturas, padrões, modelos e histórico — não aparecia em linha nenhuma deste
 # mapa. Mexer no `app/conta/acoes.ts` saía verde sem ela rodar, que é o mesmo
 # defeito que a nota da `precos.mjs` acima descreve.
-^app/conta/ => site:compra.mjs site:negocio.mjs entrada2.mjs site:cancelar.mjs site:meusdados.mjs marcos-a11y.mjs site:portal.mjs
+^app/conta/ => site:compra.mjs site:negocio.mjs entrada2.mjs site:cancelar.mjs site:meusdados.mjs marcos-a11y.mjs site:portal.mjs site:licauto.mjs
 # Os três e-mails do produto saem do mesmo molde desde 28/08. Tocar o molde
 # sem rodar a régua das cartas seria mudar o que chega na caixa de um cliente
 # sem nada olhar — e em e-mail o defeito é invisível de dentro.

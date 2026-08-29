@@ -196,6 +196,41 @@ neles é uma linha em cada um, e é trabalho de um build futuro.
 
 ---
 
+## ACHADO FECHADO — o assento não limitava nada *(29/08)*
+
+Abrir o cadastro de domínio obrigou a olhar o que ele destrava, e ali estava um
+buraco que ninguém tinha medido: **a entrada por domínio não olhava assentos.**
+O `plano_de` concedia o plano do cliente a QUALQUER e-mail daquele domínio, sem
+contar quantos já estavam dentro. Quem comprasse 3 assentos podia dar o plano a
+500 pessoas — e o número que o cartão Team vende era decoração.
+
+Enquanto o cadastro passava por nós, era um risco que a gente via chegar.
+Self-service, viraria o desenho do produto. Por isso as duas coisas andaram
+juntas no Build 51: entregar a primeira sem a segunda seria transformar um
+descuido em funcionalidade.
+
+Atinge só a PRIMEIRA entrada de cada pessoa por domínio. Quem já tem assento
+nominal sai pelo ramo `conta` e nem chega lá — inclusive quem entrou por domínio
+antes, porque a `registrar_emissao` grava o `cliente_id` na primeira emissão.
+Ninguém que já está dentro perde a renovação.
+
+---
+
+## ACHADO FECHADO — a régua exigia que o produto ficasse inacabado *(29/08)*
+
+A `promessa.mjs` afirmava **"o catálogo usa mais de um estado"**. Fazia sentido
+enquanto havia item com selo, e virou uma exigência de que houvesse um: quando o
+`dominioAutomatico` saiu do `beta` e o catálogo ficou inteiro em produção, a
+régua **reprovou o produto por estar pronto**.
+
+Ela guardava algo real — se nenhum item usa selo, a maquinaria do selo vira
+código morto e ninguém percebe quando quebra. Então a pergunta mudou: as três
+palavras (`beta`, `construcao`, `descoberta`) têm que existir nos cinco idiomas,
+**usadas ou não**. No dia em que um item voltar a precisar de selo — e vai —, a
+palavra já está lá, e não sai em português numa página alemã.
+
+---
+
 # Parte 1 — As decisões
 
 Uma por vez. Cada uma tem os caminhos, o que se ganha e o que se perde em cada

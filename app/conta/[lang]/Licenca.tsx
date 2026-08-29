@@ -23,6 +23,7 @@ export default function Licenca({ lang, t }: { lang: string; t: Textos }) {
 
   const motivo: Record<string, string> = {
     teste_usado: t.licTesteUsado,
+    sem_assento: t.licSemAssento,
     suspensa: t.licSuspensa,
     sem_segredo: t.licSemSegredo,
     sem_sessao: t.erroEntrePrimeiro,

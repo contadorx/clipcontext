@@ -299,7 +299,20 @@
     "rotReexecRepetivel": "repetível",
     "rotReexecQueima": "queima a massa",
     "rotCondicaoAjuda": "Estas quatro colunas descrevem a CONDIÇÃO do caso, e não a instrução. A pré-condição e o resultado esperado viajam no link e aparecem na ficha de quem grava — o documento passa a carregar a condição escrita ao lado da que aconteceu nas telas.",
-    "rotCondicaoResumo": "Condição do caso"
+    "rotCondicaoResumo": "Condição do caso",
+    "timeDominioTit": "Entrada automática por domínio",
+    "timeDominioTexto": "Quem tiver e-mail deste domínio entra sozinho, sem convite e sem digitar chave. Você só pode cadastrar o domínio do seu próprio endereço — provedores públicos (gmail, outlook e afins) não valem, porque cadastrar um deles daria o plano ao mundo.",
+    "timeDominioPlaceholder": "empresa.com",
+    "timeDominioCadastrar": "Cadastrar",
+    "timeDominioSoltar": "Soltar",
+    "timeDominioTeto": "A entrada por domínio para quando os {assentos} assentos acabam. Quem já está dentro continua; quem chegar depois vê o aviso de assento cheio.",
+    "erroDominioNaoESeu": "Só dá para cadastrar o domínio do seu próprio e-mail. Entre com um endereço desse domínio e tente de novo.",
+    "erroDominioPublico": "Esse é um provedor de e-mail público. Cadastrá-lo daria o plano a qualquer pessoa do mundo que tenha um endereço lá.",
+    "erroDominioJaReivindicado": "Esse domínio já está cadastrado por outro cliente. Se ele é seu, fale com quem administra a conta que o cadastrou.",
+    "erroDominioInvalido": "Isso não parece um domínio. Escreva só a parte depois do arroba, como empresa.com.",
+    "erroDominioNaoCadastrado": "Esse domínio não está cadastrado nesta conta.",
+    "motivoSemAssento": "os assentos acabaram",
+    "licSemAssento": "Os assentos deste time acabaram. Peça a quem administra para liberar um, ou para aumentar o número."
   },
   "en": {
     "tituloAba": "Your account",
@@ -600,7 +613,20 @@
     "rotReexecRepetivel": "repeatable",
     "rotReexecQueima": "burns the data",
     "rotCondicaoAjuda": "These four columns describe the CONDITION of the case, not the instruction. The precondition and the expected result travel in the link and show up on the recorder’s form — the document then carries the written condition next to the one that actually happened on screen.",
-    "rotCondicaoResumo": "Case condition"
+    "rotCondicaoResumo": "Case condition",
+    "timeDominioTit": "Automatic entry by domain",
+    "timeDominioTexto": "Anyone with an email at this domain gets in on their own, with no invitation and no key to type. You can only register the domain of your own address — public providers (gmail, outlook and the like) are refused, because registering one would hand the plan to the world.",
+    "timeDominioPlaceholder": "company.com",
+    "timeDominioCadastrar": "Register",
+    "timeDominioSoltar": "Release",
+    "timeDominioTeto": "Entry by domain stops when the {assentos} seats run out. Whoever is already in stays; whoever arrives later sees the seats-full notice.",
+    "erroDominioNaoESeu": "You can only register the domain of your own email. Sign in with an address at that domain and try again.",
+    "erroDominioPublico": "That is a public email provider. Registering it would give the plan to anyone in the world with an address there.",
+    "erroDominioJaReivindicado": "That domain is already registered by another customer. If it is yours, talk to whoever administers the account that registered it.",
+    "erroDominioInvalido": "That does not look like a domain. Write only the part after the at sign, like company.com.",
+    "erroDominioNaoCadastrado": "That domain is not registered on this account.",
+    "motivoSemAssento": "the seats ran out",
+    "licSemAssento": "This team has run out of seats. Ask whoever administers it to free one, or to raise the number."
   },
   "es": {
     "tituloAba": "Tu cuenta",
@@ -901,7 +927,20 @@
     "rotReexecRepetivel": "repetible",
     "rotReexecQueima": "quema los datos",
     "rotCondicaoAjuda": "Estas cuatro columnas describen la CONDICIÓN del caso, no la instrucción. La precondición y el resultado esperado viajan en el enlace y aparecen en la ficha de quien graba — el documento pasa a llevar la condición escrita junto a la que de verdad ocurrió en las pantallas.",
-    "rotCondicaoResumo": "Condición del caso"
+    "rotCondicaoResumo": "Condición del caso",
+    "timeDominioTit": "Entrada automática por dominio",
+    "timeDominioTexto": "Quien tenga correo de este dominio entra solo, sin invitación y sin escribir clave. Solo puedes registrar el dominio de tu propia dirección — los proveedores públicos (gmail, outlook y similares) no valen, porque registrar uno daría el plan al mundo entero.",
+    "timeDominioPlaceholder": "empresa.com",
+    "timeDominioCadastrar": "Registrar",
+    "timeDominioSoltar": "Soltar",
+    "timeDominioTeto": "La entrada por dominio se detiene cuando se acaban los {assentos} asientos. Quien ya está dentro sigue; quien llegue después ve el aviso de asientos llenos.",
+    "erroDominioNaoESeu": "Solo puedes registrar el dominio de tu propio correo. Entra con una dirección de ese dominio e inténtalo de nuevo.",
+    "erroDominioPublico": "Ese es un proveedor de correo público. Registrarlo daría el plan a cualquier persona del mundo con una dirección allí.",
+    "erroDominioJaReivindicado": "Ese dominio ya está registrado por otro cliente. Si es tuyo, habla con quien administra la cuenta que lo registró.",
+    "erroDominioInvalido": "Eso no parece un dominio. Escribe solo la parte después de la arroba, como empresa.com.",
+    "erroDominioNaoCadastrado": "Ese dominio no está registrado en esta cuenta.",
+    "motivoSemAssento": "se acabaron los asientos",
+    "licSemAssento": "Este equipo se quedó sin asientos. Pide a quien lo administra que libere uno o que aumente el número."
   },
   "de": {
     "tituloAba": "Ihr Konto",
@@ -1202,7 +1241,20 @@
     "rotReexecRepetivel": "wiederholbar",
     "rotReexecQueima": "verbraucht die Daten",
     "rotCondicaoAjuda": "Diese vier Spalten beschreiben die BEDINGUNG des Falls, nicht die Anweisung. Vorbedingung und erwartetes Ergebnis reisen im Link mit und erscheinen im Formular der aufnehmenden Person — das Dokument trägt dann die geschriebene Bedingung neben der, die tatsächlich auf dem Bildschirm passiert ist.",
-    "rotCondicaoResumo": "Bedingung des Falls"
+    "rotCondicaoResumo": "Bedingung des Falls",
+    "timeDominioTit": "Automatischer Zugang per Domain",
+    "timeDominioTexto": "Wer eine E-Mail-Adresse dieser Domain hat, kommt allein hinein — ohne Einladung und ohne Schlüssel. Sie können nur die Domain Ihrer eigenen Adresse eintragen; öffentliche Anbieter (gmail, outlook und Ähnliche) sind ausgeschlossen, denn einer davon würde den Plan der ganzen Welt geben.",
+    "timeDominioPlaceholder": "firma.com",
+    "timeDominioCadastrar": "Eintragen",
+    "timeDominioSoltar": "Freigeben",
+    "timeDominioTeto": "Der Zugang per Domain endet, wenn die {assentos} Plätze aufgebraucht sind. Wer schon drin ist, bleibt; wer später kommt, sieht den Hinweis, dass die Plätze voll sind.",
+    "erroDominioNaoESeu": "Sie können nur die Domain Ihrer eigenen E-Mail-Adresse eintragen. Melden Sie sich mit einer Adresse dieser Domain an und versuchen Sie es erneut.",
+    "erroDominioPublico": "Das ist ein öffentlicher E-Mail-Anbieter. Ihn einzutragen würde den Plan jedem auf der Welt geben, der dort eine Adresse hat.",
+    "erroDominioJaReivindicado": "Diese Domain ist bereits von einem anderen Kunden eingetragen. Wenn sie Ihnen gehört, sprechen Sie mit der Person, die jenes Konto verwaltet.",
+    "erroDominioInvalido": "Das sieht nicht nach einer Domain aus. Schreiben Sie nur den Teil nach dem At-Zeichen, etwa firma.com.",
+    "erroDominioNaoCadastrado": "Diese Domain ist in diesem Konto nicht eingetragen.",
+    "motivoSemAssento": "die Plätze sind aufgebraucht",
+    "licSemAssento": "Diesem Team sind die Plätze ausgegangen. Bitten Sie die verwaltende Person, einen freizugeben oder die Zahl zu erhöhen."
   },
   "fr": {
     "tituloAba": "Votre compte",
@@ -1503,6 +1555,19 @@
     "rotReexecRepetivel": "répétable",
     "rotReexecQueima": "consomme les données",
     "rotCondicaoAjuda": "Ces quatre colonnes décrivent la CONDITION du cas, et non l’instruction. La précondition et le résultat attendu voyagent dans le lien et apparaissent sur la fiche de la personne qui enregistre — le document porte alors la condition écrite à côté de celle qui s’est réellement produite à l’écran.",
-    "rotCondicaoResumo": "Condition du cas"
+    "rotCondicaoResumo": "Condition du cas",
+    "timeDominioTit": "Entrée automatique par domaine",
+    "timeDominioTexto": "Toute personne ayant une adresse e-mail de ce domaine entre seule, sans invitation et sans clé à saisir. Vous ne pouvez enregistrer que le domaine de votre propre adresse — les fournisseurs publics (gmail, outlook et consorts) sont refusés, car en enregistrer un donnerait le plan au monde entier.",
+    "timeDominioPlaceholder": "entreprise.com",
+    "timeDominioCadastrar": "Enregistrer",
+    "timeDominioSoltar": "Libérer",
+    "timeDominioTeto": "L’entrée par domaine s’arrête quand les {assentos} sièges sont épuisés. Qui est déjà entré reste ; qui arrive après voit l’avis de sièges complets.",
+    "erroDominioNaoESeu": "Vous ne pouvez enregistrer que le domaine de votre propre e-mail. Connectez-vous avec une adresse de ce domaine et réessayez.",
+    "erroDominioPublico": "C’est un fournisseur d’e-mail public. L’enregistrer donnerait le plan à n’importe qui dans le monde y ayant une adresse.",
+    "erroDominioJaReivindicado": "Ce domaine est déjà enregistré par un autre client. S’il est à vous, parlez à la personne qui administre ce compte.",
+    "erroDominioInvalido": "Cela ne ressemble pas à un domaine. N’écrivez que la partie après l’arobase, comme entreprise.com.",
+    "erroDominioNaoCadastrado": "Ce domaine n’est pas enregistré sur ce compte.",
+    "motivoSemAssento": "les sièges sont épuisés",
+    "licSemAssento": "Cette équipe n’a plus de sièges. Demandez à la personne qui l’administre d’en libérer un, ou d’augmenter le nombre."
   }
 }
