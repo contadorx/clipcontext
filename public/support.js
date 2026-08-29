@@ -344,27 +344,38 @@ const FICHA_TXT = {
   $('fichaEnviar').onclick = async () => {
     const txt = ($('fichaTexto').value || '').trim();
     if (!txt) { $('fichaMsg').textContent = T.vazio; return; }
-    if (!SUPA || !ANON) { $('fichaMsg').textContent = T.semRede; return; }
+    /* A TRAVA AQUI DEIXOU DE SER SOBRE O SUPABASE — 29/08. O chamado passou
+       a ir pela nossa rota, que fala com o banco do lado de cá; se o segredo
+       faltar, quem responde 503 é ela, e a mensagem sai do `erro`. Manter a
+       conferência do `SUPA` aqui recusaria o envio por um motivo que não é
+       mais o certo — e as outras chamadas desta página, que continuam indo
+       direto ao Supabase, seguem com a delas. */
     $('fichaEnviar').disabled = true;
     $('fichaMsg').textContent = T.indo;
     try {
-      const r = await fetch(SUPA + '/rest/v1/rpc/walkstamp_recado', {
+      /* PELA NOSSA ROTA — 29/08. O limite de abrir chamado morava no banco, e
+         ali não há IP: a única chave possível era o ALVO. Quem soubesse o seu
+         e-mail queimava a sua cota, e o balde anônimo era um só para o mundo. */
+      const r = await fetch('/api/chamado', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', apikey: ANON, Authorization: 'Bearer ' + ANON },
-        body: JSON.stringify({ p_tipo: tipo, p_texto: txt,
-          p_email: ($('fichaEmail').value || '').trim() || null,
-          p_nota: nota, p_idioma: lang, p_origem: 'site',
-          p_diag: location.href + '\n' + navigator.userAgent.slice(0, 160) })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tipo: tipo, texto: txt,
+          email: ($('fichaEmail').value || '').trim() || null,
+          nota: nota, idioma: lang, origem: 'site',
+          diag: location.href + '\n' + navigator.userAgent.slice(0, 160) })
       });
-      const resp = await r.json().catch(() => null);
+      /* A rota devolve `{numero}` ou `{erro}`, e o `erro` carrega a MESMA
+         palavra que o banco usava — para a tela continuar dizendo a coisa
+         certa em vez de um "erro" genérico. */
+      const resp = (await r.json().catch(() => null)) || {};
       $('fichaEnviar').disabled = false;
-      if (!r.ok || resp === 'vazio') { $('fichaMsg').textContent = T.erro; return; }
-      if (resp === 'muitos') { $('fichaMsg').textContent = T.muitos; return; }
+      if (resp.erro === 'muitos' || r.status === 429) { $('fichaMsg').textContent = T.muitos; return; }
+      if (!r.ok || !resp.numero) { $('fichaMsg').textContent = T.erro; return; }
       $('fichaTexto').value = '';
       /* O número é o que a pessoa anota. Sem e-mail ela não consulta depois, e
          é melhor dizer isso agora do que deixar descobrir quando precisar. */
       const temEmail = !!($('fichaEmail').value || '').trim();
-      $('fichaMsg').textContent = T.enviado.replace('{0}', resp) +
+      $('fichaMsg').textContent = T.enviado.replace('{0}', resp.numero) +
         (temEmail ? '' : ' ' + T.semEmail);
       if (T.evento) T.evento('recado', tipo);
     } catch (e) {

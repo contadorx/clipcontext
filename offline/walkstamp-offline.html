@@ -10143,7 +10143,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
      depois, e não tem como se atualizar sozinho. Sem carimbo, "estou com um
      problema no offline" é uma conversa sem chão — ninguém sabe de qual build
      se fala nem se o defeito já foi consertado. */
-  const VERSAO = '2026.08.29-12';
+  const VERSAO = '2026.08.29-18';
   window.__versao = () => VERSAO;
 
   const PIP_CSS = `
@@ -16356,7 +16356,11 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       if (!txt) { $('fbMsg').innerHTML = `<span class="err">${t('fbVazio')}</span>`; return; }
       if (!MEDIR_URL || !MEDIR_KEY) {
         /* Build offline: não há para onde mandar, e dizer isso é melhor que um
-           botão que finge ter enviado. */
+           botão que finge ter enviado.
+           A conferência continua sendo do `MEDIR_URL` mesmo depois de o chamado
+           passar a ir por `https://walkstamp.com/api/chamado`: o que ela pergunta é "esta
+           build tem servidor?", e a resposta é a mesma para os dois caminhos.
+           No pacote offline ela é vazia, e o `file://` nem chega a tentar. */
         $('fbMsg').innerHTML = `<span class="err">${t('fbSemRede', CONTATO)}</span>`;
         return;
       }
@@ -16373,34 +16377,44 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       }
       $('fbMsg').textContent = t('fbIndo');
       try {
-        const r = await fetch(MEDIR_URL + '/rest/v1/rpc/walkstamp_recado', {
+        /* PELA NOSSA ROTA, E NÃO DIRETO NO BANCO — 29/08.
+           O limite de abrir chamado morava no Postgres, e ali não há IP: a
+           única chave que ele podia inventar era o ALVO. Quem soubesse o seu
+           e-mail queimava a sua cota, e o balde anônimo era um só para o mundo
+           inteiro. A rota tem IP, e o banco perdeu a porta de abrir. */
+        const r = await fetch('https://walkstamp.com/api/chamado', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json',
-                     apikey: MEDIR_KEY, Authorization: 'Bearer ' + MEDIR_KEY },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            p_tipo: fbTipo, p_texto: txt,
-            p_email: ($('fbEmail').value || '').trim() || null,
-            p_idioma: LANG, p_cenario: $('modelo').value, p_origem: 'app',
+            tipo: fbTipo, texto: txt,
+            email: ($('fbEmail').value || '').trim() || null,
+            idioma: LANG, cenario: $('modelo').value, origem: 'app',
             /* O diagnóstico só vai se a caixa estiver marcada — e vai o TEXTO
                COLETADO, não o que estiver no elemento da tela. Ler a tela foi o
                defeito: enquanto a coleta corria, o que estava lá era a mensagem
                de espera, e era ela que chegava ao banco. */
-            p_diag: diag || null
+            diag: diag || null
           })
         });
-        const resp = (await r.json().catch(() => null));
+        /* A ROTA DEVOLVE OBJETO, e o banco devolvia uma palavra crua. A
+           diferença importa: `{numero}` quando abriu, `{erro}` quando não —
+           e o `erro` carrega a MESMA palavra que o banco usava, para a tela
+           continuar dizendo a coisa certa em vez de um "erro" genérico. */
+        const resp = (await r.json().catch(() => null)) || {};
         $('fbEnviar').disabled = false;
-        if (!r.ok || resp === 'vazio') {
+        if (resp.erro === 'muitos' || r.status === 429) {
+          $('fbMsg').innerHTML = `<span class="err">${t('fbMuitos')}</span>`; return;
+        }
+        if (!r.ok || !resp.numero) {
           $('fbMsg').innerHTML = `<span class="err">${t('fbErro', CONTATO)}</span>`;
           return;
         }
-        if (resp === 'muitos') { $('fbMsg').innerHTML = `<span class="err">${t('fbMuitos')}</span>`; return; }
         $('fbTexto').value = '';
         /* O número é o que a pessoa anota. Sem ele, "mandei um problema" não
            tem como virar "e aquele problema?" — e nós não temos como responder
            sem inventar contexto. */
         const temEmail = !!($('fbEmail').value || '').trim();
-        $('fbMsg').innerHTML = `<span class="ok">${t('fbFeito', resp)}</span>` +
+        $('fbMsg').innerHTML = `<span class="ok">${t('fbFeito', resp.numero)}</span>` +
           (temEmail ? '' : ` <span class="err">${t('fbSemEmail')}</span>`);
         medir('recado', { p_origem: fbTipo });
       } catch (e) {

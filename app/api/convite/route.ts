@@ -43,6 +43,7 @@ import { createHash } from 'crypto';
 import marca from '@/src/marca.json';
 import { mandarEmail, podeMandarEmail } from '@/lib/email';
 import { moldeDeCarta } from '@/lib/carta';
+import { daCasa } from '@/lib/daCasa';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -86,35 +87,9 @@ const pareceEmail = (v: string) =>
 const idiomaDe = (v: unknown): Lang =>
   IDIOMAS.includes(String(v) as Lang) ? (String(v) as Lang) : 'en';
 
-/* Só do nosso site. O `Origin` é posto pelo navegador e não pelo JavaScript da
-   página, então ele serve para isto — não como segurança contra um script
-   fora do navegador (que manda o cabeçalho que quiser), mas para impedir que
-   qualquer página na internet embutida use o nosso remetente. Contra o resto,
-   valem as travas 1 a 3. */
-/* `*.vercel.app` era curinga de UM PROVEDOR INTEIRO, e não do nosso projeto.
-   Qualquer pessoa cria um projeto na Vercel de graça, e a página dela passava
-   nesta conferência — com o nosso remetente. O curinga existia por um motivo
-   real (o botão é testado em prévia), e o que ele queria dizer é "a prévia
-   DESTE deployment": é isso que `VERCEL_URL` diz, e a Vercel a escreve sozinha
-   em cada prévia. Quem precisar de um host a mais o declara em `PREVIA_HOSTS`,
-   separado por vírgula — explícito e revisável, em vez de aberto. */
-const PREVIA = new Set(
-  [process.env.VERCEL_URL, process.env.VERCEL_BRANCH_URL,
-   process.env.VERCEL_PROJECT_PRODUCTION_URL,
-   ...(process.env.PREVIA_HOSTS || '').split(',')]
-    .map((h) => (h || '').trim().replace(/^https?:\/\//, '').replace(/\/.*$/, ''))
-    .filter(Boolean),
-);
-
-function daCasa(req: Request): boolean {
-  const origem = req.headers.get('origin') || '';
-  if (!origem) return false;
-  try {
-    const meu = new URL(marca.site).host;
-    const dele = new URL(origem).host;
-    return dele === meu || dele === `www.${meu}` || PREVIA.has(dele);
-  } catch { return false; }
-}
+/* O `daCasa` saiu daqui e virou `lib/daCasa.ts` — 29/08. A rota do chamado
+   precisou da mesma conferência, e duas cópias desta função são duas listas de
+   hosts de prévia: a segunda é a que esquece de ser corrigida. */
 
 const TEXTOS: Record<Lang, {
   assunto: (quem: string) => string;

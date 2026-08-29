@@ -71,9 +71,21 @@ console.log('\n[5] o recado vai para o servidor, não para o mailto');
 {
   const pg5 = await (await br.newContext({viewport:{width:1200,height:900}})).newPage();
   const enviados = [];
-  await pg5.route('**/rest/v1/rpc/walkstamp_recado', r => {
+  /* A ROTA É NOSSA DESDE 29/08. O limite de abrir chamado morava no Postgres, e
+     ali não há IP: a única chave que ele podia inventar era o ALVO — quem
+     soubesse o seu e-mail queimava a sua cota, e o balde anônimo era um só para
+     o mundo inteiro. Aqui existe IP. */
+  await pg5.route('**/api/chamado', r => {
     enviados.push(JSON.parse(r.request().postData() || '{}'));
-    r.fulfill({ status:200, contentType:'application/json', body:'"ok"' });
+    r.fulfill({ status:200, contentType:'application/json', body:'{"numero":"WS-0042"}' });
+  });
+  /* E O CAMINHO VELHO NÃO PODE MAIS SER USADO: se alguém voltar a falar com o
+     Supabase direto, o limite por ator vira decoração. Esta rota existe para
+     PEGAR isso, e não para servir — ela conta e reprova lá embaixo. */
+  const pelaPortaVelha = [];
+  await pg5.route('**/rest/v1/rpc/walkstamp_recado', r => {
+    pelaPortaVelha.push(1);
+    r.fulfill({ status:200, contentType:'application/json', body:'"WS-0000"' });
   });
   await pg5.goto(BASE + '/?lang=pt'); await pg5.waitForTimeout(600);
   await pg5.locator('#fichaAba').click(); await pg5.waitForTimeout(250);
@@ -83,12 +95,14 @@ console.log('\n[5] o recado vai para o servidor, não para o mailto');
   await pg5.locator('#fichaEnviar').click(); await pg5.waitForTimeout(700);
   ok('o recado foi por HTTP, não abrindo programa de e-mail', enviados.length === 1,
      String(enviados.length));
+  ok('  e pela NOSSA rota, não direto no banco', pelaPortaVelha.length === 0,
+     pelaPortaVelha.length ? `${pelaPortaVelha.length} chamada(s) a walkstamp_recado` : '');
   const e = enviados[0] || {};
   console.log('     ' + JSON.stringify(e).slice(0,150));
-  ok('com o texto', /Firefox/.test(e.p_texto || ''));
-  ok('com o tipo certo — nota baixa é problema', e.p_tipo === 'problema', e.p_tipo);
-  ok('com a nota do NPS junto', e.p_nota === 3, String(e.p_nota));
-  ok('e o e-mail de quem escreveu', e.p_email === 'fulano@empresa.com', e.p_email);
+  ok('com o texto', /Firefox/.test(e.texto || ''));
+  ok('com o tipo certo — nota baixa é problema', e.tipo === 'problema', e.tipo);
+  ok('com a nota do NPS junto', e.nota === 3, String(e.nota));
+  ok('e o e-mail de quem escreveu', e.email === 'fulano@empresa.com', e.email);
   ok('a tela confirma o recebimento', /Recebido/.test(await pg5.locator('#fichaMsg').textContent()),
      await pg5.locator('#fichaMsg').textContent());
   ok('e a caixa esvazia, para não mandar duas vezes',
@@ -99,8 +113,8 @@ console.log('\n[5] o recado vai para o servidor, não para o mailto');
 console.log('\n[6] o chamado tem número, e dá para consultar');
 {
   const pg6 = await (await br.newContext({viewport:{width:1200,height:900}})).newPage();
-  await pg6.route('**/rest/v1/rpc/walkstamp_recado', r =>
-    r.fulfill({ status:200, contentType:'application/json', body:'"WS-0042"' }));
+  await pg6.route('**/api/chamado', r =>
+    r.fulfill({ status:200, contentType:'application/json', body:'{"numero":"WS-0042"}' }));
   await pg6.route('**/rest/v1/rpc/walkstamp_chamado_ver', r => {
     const c = JSON.parse(r.request().postData() || '{}');
     /* O e-mail é a fechadura: número certo com e-mail errado não abre. */

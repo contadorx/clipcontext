@@ -114,6 +114,10 @@ read -r -d '' MAPA <<'MAPA_FIM'
 ^app/conta/(planilha/|roteiro-acoes[.]ts)|^app/conta/\[lang\]/roteiro/ => site:roteiro.mjs site:roteirojanela.mjs
 ^lib/stripe[.]ts$ => site:precos.mjs promessa.mjs site:compra.mjs renovar.mjs site:cancelar.mjs
 ^app/api/convite/ => site:convite.mjs site:email.mjs
+# O chamado ganhou rota própria em 29/08, e ela tem as mesmas travas do
+# convite: origem antes de segredo, limite por quem chama. Quem toca a rota,
+# a fonte que a chama ou a migração que fechou o caminho velho, roda a régua.
+^app/api/chamado/|^lib/daCasa[.]ts$|^src/site/support[.]js$ => site:chamadorota.mjs site:ficha.mjs site:convite.mjs
 ^lib/ => site:paginas.mjs site:buscaajuda.mjs
 ^public/sw[.]js$ => site:seo.mjs
 ^public/site[.]css$ => folha.mjs site:paginas.mjs site:dobrafig.mjs
