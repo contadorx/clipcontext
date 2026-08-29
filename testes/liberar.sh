@@ -209,10 +209,21 @@ while read -r linha; do
     # alguém usa custa um vermelho que não é defeito.
     if [ "$r" = "grupo:produto" ]; then
       PRECISA_SITE=1
+      antes_do_grupo=$(printf '%s' "$DERIVADAS" | wc -w)
       for g in $(grep -l -E "app\.html|walkstamp-offline\.html" "$AQUI"/*.mjs \
                  | xargs -n1 basename | grep -vE '^(_|shot|proxy|regua|gerar-dpa|capturar)'); do
         case " $DERIVADAS " in *" $g "*) ;; *) DERIVADAS="$DERIVADAS $g" ;; esac
       done
+      # UM GRUPO VAZIO É MAPA QUEBRADO, E NÃO DIFF PEQUENO. Se o `grep` acima
+      # deixar de casar — um caminho que mudou, uma aspa a mais —, o corredor
+      # rodaria os contratos e diria "verde" sobre o arquivo que faz tudo. É a
+      # mesma aprovação por vazio que o conferidor de migrações fazia, e ela não
+      # pode voltar por uma linha de shell.
+      if [ "$(printf '%s' "$DERIVADAS" | wc -w)" -le "$antes_do_grupo" ]; then
+        echo "o grupo do produto expandiu para NADA — o mapa está quebrado."
+        echo "  confira o grep de 'app.html' em $AQUI/*.mjs dentro do liberar.sh."
+        exit 1
+      fi
       continue
     fi
     case "$r" in site:*) PRECISA_SITE=1; r="${r#site:}" ;; esac
