@@ -1038,6 +1038,14 @@
      mais abaixo e vencia por ordem de origem. O tipo de defeito que não dá
      erro, não aparece em revisão de código e só se vê na tela. */
   .hide{display:none !important}
+  /* O `.hide` é `!important`, então a caixa de guardar não pode declarar o
+     `display` no atributo de estilo: lá ele venceria a regra e o controle
+     apareceria no plano gratuito, onde não faz nada. */
+  #vocGuardarRow{display:flex}
+  /* A condição fica FORA da grade de duas colunas: ela é um parágrafo, e
+     um parágrafo numa célula estreita vira um resumo. */
+  .evCond{display:grid;gap:10px;margin-top:10px}
+  .evCond textarea{width:100%;resize:vertical;min-height:44px}
   .note{font-size:13px;color:var(--muted);border-left:3px solid var(--line);padding:2px 0 2px 12px;margin-top:14px}
   .note b{color:var(--warn)}
   /* ---- O LINK DE PULAR ----
@@ -2649,6 +2657,24 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       <p class="status" data-i18n="vocComo" style="max-width:660px;margin:0 0 6px"></p>
       <textarea id="vocLista" rows="3" spellcheck="false"
         data-i18n-ph="vocPh" style="font:13px ui-monospace,Menlo,Consolas,monospace"></textarea>
+      <!-- GUARDAR A LISTA É OPT-IN, E NASCE DESMARCADO.
+
+           A lista carrega termos do SEU cliente: nome de sistema, de projeto,
+           código de transação. Não é conteúdo de gravação, mas em muita empresa
+           o nome do projeto é justamente o que está sob confidencialidade.
+           Marcar manda isso para o nosso servidor, e é a única coisa da caixa
+           de transcrição que sai da máquina — por isso a escolha é da pessoa,
+           dita em uma frase, e não um padrão que ela descobre depois.
+
+           Aparece só com sessão de plano pago: no gratuito a lista continua
+           viva na aba, como sempre foi, e um controle que não faz nada é pior
+           do que controle nenhum. -->
+      <label class="hide" id="vocGuardarRow"
+             style="gap:7px;align-items:flex-start;margin-top:9px;max-width:660px;cursor:pointer">
+        <input type="checkbox" id="vocGuardar" style="margin-top:3px;flex:none">
+        <span class="status" data-i18n="vocGuardarLabel"></span>
+      </label>
+      <span class="status" id="vocGuardarMsg"></span>
       <div class="row" style="margin-top:8px">
         <button class="ghost sm" id="vocAplicar" data-i18n="vocAplicar"></button>
         <button class="ghost sm hide" id="vocDesfazer" data-i18n="vocDesfazer"></button>
@@ -2783,6 +2809,26 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
                <option value="PRD">PRD</option>
                <option value="SBX">SBX</option>
              </select></div>
+      </div>
+      <!-- A CONDIÇÃO — pré-condição e resultado esperado.
+
+           Fora da grade de propósito: as outras são de uma linha e cabem em
+           duas colunas; a pré-condição é um parágrafo — "cliente com bloqueio
+           parcial de crédito, material sujeito a ST, entrega interestadual" —
+           e espremê-la numa célula estreita é convidar a pessoa a resumir
+           justamente a parte que precisa ser específica.
+
+           Só a evidência de teste as pede. Numa ata ou numa instrução de
+           trabalho, "pré-condição" não quer dizer nada.
+
+           Elas chegam preenchidas quando o link vem do roteiro, e é aí que o
+           desenho fecha: o documento passa a carregar a condição que alguém
+           ESCREVEU ao lado da que de fato aconteceu nas telas. -->
+      <div class="evCond hide" id="cxCond">
+        <div><label for="evPre" data-i18n="evPre"></label>
+             <textarea id="evPre" rows="2" maxlength="2000" data-i18n-ph="evPrePh"></textarea></div>
+        <div><label for="evEsperado" data-i18n="evEsperado"></label>
+             <textarea id="evEsperado" rows="2" maxlength="1000" data-i18n-ph="evEsperadoPh"></textarea></div>
       </div>
       <p class="evPe hide" id="evEst" data-i18n="evEstimado"></p>
       <p class="evPe" id="cxHash"><label><input type="checkbox" id="evHash"><span data-i18n="evHash"></span></label></p>
@@ -3667,6 +3713,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       vocComo:'Um termo por linha. O reconhecimento de voz não conhece o seu sistema e devolve "ME21N" como "eme vinte e um ene" — liste os códigos e os nomes próprios que aparecem no seu dia, e eu procuro a forma falada de cada um na transcrição e nas anotações.',
       vocPh:'ME21N\nKI235\nS/4HANA\nFiori',
       vocAplicar:'Corrigir os termos',
+      vocGuardarLabel:'Guardar esta lista na minha conta, para ela voltar na próxima visita e em outra máquina. Ela sai do seu computador e fica no nosso servidor — é a única coisa desta caixa que faz isso. Desmarcar apaga o que estiver guardado.',
+      vocGuardarOn:'Guardada na sua conta.',
+      vocGuardarOff:'Só nesta aba.',
+      vocGuardarErro:'Não consegui guardar agora — a lista continua valendo nesta aba.',
       vocDesfazer:'desfazer',
       vocFeito:'{0} correção(ões) feita(s).',
       vocNada:'Nenhum desses termos apareceu falado por extenso. Nada foi mudado.',
@@ -4043,6 +4093,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       ataH:'Dados da reunião', ataHsub:'— opcional: assunto, local, quem conduziu, participantes',
       ataAssunto:'Assunto', ataLocal:'Local / plataforma', ataOrg:'Conduzida por',
       ataPart:'Participantes', ataIni:'Início da reunião',
+      evPre:'Pré-condição',
+      evPrePh:'O estado antes: dados mestres nomeados, com as características que fazem o cenário existir. Ex.: cliente 4711 com bloqueio parcial de crédito, material MAT-9 sujeito a ST, entrega interestadual.',
+      evEsperado:'Resultado esperado',
+      evEsperadoPh:'Um documento, um status, um valor, uma mensagem. Nunca “corretamente”.',
       evCaso:'Caso de teste', evSis:'Sistema / mandante', evQuem:'Executado por',
       evChamado:'Chamado / mudança', evRes:'Resultado', evIni:'Início da gravação',
       evR0:'— não informado', evR1:'Passou', evR2:'Falhou', evR3:'Bloqueado',
@@ -4309,6 +4363,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       vocComo:'One term per line. Speech recognition does not know your system and returns "ME21N" as "em twenty one en" — list the codes and proper names that show up in your day, and I look for the spoken form of each one in the transcript and in the notes.',
       vocPh:'ME21N\nKI235\nS/4HANA\nFiori',
       vocAplicar:'Fix the terms',
+      vocGuardarLabel:'Keep this list in my account, so it comes back next visit and on another machine. It leaves your computer and stays on our server — the only thing in this box that does. Unchecking deletes whatever is kept.',
+      vocGuardarOn:'Kept in your account.',
+      vocGuardarOff:'This tab only.',
+      vocGuardarErro:'I could not keep it right now — the list still works in this tab.',
       vocDesfazer:'undo',
       vocFeito:'{0} correction(s) made.',
       vocNada:'None of those terms showed up spelled out. Nothing was changed.',
@@ -4670,6 +4728,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       ataH:'Meeting details', ataHsub:'— optional: subject, place, who chaired it, attendees',
       ataAssunto:'Subject', ataLocal:'Place / platform', ataOrg:'Chaired by',
       ataPart:'Attendees', ataIni:'Meeting started at',
+      evPre:'Precondition',
+      evPrePh:'The state before: named master data, with the characteristics that make the scenario exist. E.g.: customer 4711 with partial credit block, material MAT-9 under tax substitution, interstate delivery.',
+      evEsperado:'Expected result',
+      evEsperadoPh:'A document, a status, a value, a message. Never “correctly”.',
       evCaso:'Test case', evSis:'System / client', evQuem:'Executed by',
       evChamado:'Ticket / change', evRes:'Result', evIni:'Recording started at',
       evR0:'— not stated', evR1:'Passed', evR2:'Failed', evR3:'Blocked',
@@ -4936,6 +4998,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       vocComo:'Un término por línea. El reconocimiento de voz no conoce tu sistema y devuelve "ME21N" como "eme veintiuno ene" — lista los códigos y nombres propios que aparecen en tu día, y yo busco la forma hablada de cada uno en la transcripción y en las anotaciones.',
       vocPh:'ME21N\nKI235\nS/4HANA\nFiori',
       vocAplicar:'Corregir los términos',
+      vocGuardarLabel:'Guardar esta lista en mi cuenta, para que vuelva en la próxima visita y en otro equipo. Sale de tu ordenador y queda en nuestro servidor — es lo único de esta caja que lo hace. Desmarcar borra lo que esté guardado.',
+      vocGuardarOn:'Guardada en tu cuenta.',
+      vocGuardarOff:'Solo en esta pestaña.',
+      vocGuardarErro:'No pude guardarla ahora — la lista sigue valiendo en esta pestaña.',
       vocDesfazer:'deshacer',
       vocFeito:'{0} corrección(es) hecha(s).',
       vocNada:'Ninguno de esos términos apareció escrito por extenso. No se cambió nada.',
@@ -5297,6 +5363,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       ataH:'Datos de la reunión', ataHsub:'— opcional: asunto, lugar, quién la condujo, participantes',
       ataAssunto:'Asunto', ataLocal:'Lugar / plataforma', ataOrg:'Conducida por',
       ataPart:'Participantes', ataIni:'Inicio de la reunión',
+      evPre:'Precondición',
+      evPrePh:'El estado antes: datos maestros nombrados, con las características que hacen existir el escenario. Ej.: cliente 4711 con bloqueo parcial de crédito, material MAT-9 sujeto a sustitución tributaria, entrega interestatal.',
+      evEsperado:'Resultado esperado',
+      evEsperadoPh:'Un documento, un estado, un valor, un mensaje. Nunca “correctamente”.',
       evCaso:'Caso de prueba', evSis:'Sistema / mandante', evQuem:'Ejecutado por',
       evChamado:'Ticket / cambio', evRes:'Resultado', evIni:'Inicio de la grabación',
       evR0:'— sin indicar', evR1:'Aprobado', evR2:'Fallido', evR3:'Bloqueado',
@@ -5562,6 +5632,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       vocComo:'Ein Begriff pro Zeile. Die Spracherkennung kennt Ihr System nicht und gibt "ME21N" als "em e einundzwanzig en" zurück — listen Sie die Codes und Eigennamen auf, die in Ihrem Alltag vorkommen, und die gesprochene Form jedes Begriffs wird in der Transkription und in den Notizen gesucht.',
       vocPh:'ME21N\nKI235\nS/4HANA\nFiori',
       vocAplicar:'Begriffe korrigieren',
+      vocGuardarLabel:'Diese Liste in meinem Konto speichern, damit sie beim nächsten Besuch und auf einem anderen Rechner zurückkommt. Sie verlässt Ihren Computer und liegt auf unserem Server — als Einziges in diesem Feld. Abwählen löscht das Gespeicherte.',
+      vocGuardarOn:'In Ihrem Konto gespeichert.',
+      vocGuardarOff:'Nur in diesem Tab.',
+      vocGuardarErro:'Speichern hat gerade nicht geklappt — die Liste gilt weiter in diesem Tab.',
       vocDesfazer:'rückgängig',
       vocFeito:'{0} Korrektur(en) vorgenommen.',
       vocNada:'Keiner dieser Begriffe kam in ausgesprochener Form vor. Es wurde nichts geändert.',
@@ -5929,6 +6003,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       ataH:'Daten der Besprechung', ataHsub:'— optional: Thema, Ort, Leitung, Teilnehmer',
       ataAssunto:'Thema', ataLocal:'Ort / Plattform', ataOrg:'Geleitet von',
       ataPart:'Teilnehmer', ataIni:'Beginn der Besprechung',
+      evPre:'Vorbedingung',
+      evPrePh:'Der Zustand davor: benannte Stammdaten mit den Merkmalen, die das Szenario überhaupt entstehen lassen. Z. B.: Kunde 4711 mit teilweiser Kreditsperre, Material MAT-9 mit Steuerersetzung, Lieferung in ein anderes Bundesland.',
+      evEsperado:'Erwartetes Ergebnis',
+      evEsperadoPh:'Ein Beleg, ein Status, ein Wert, eine Meldung. Niemals „korrekt“.',
       evCaso:'Testfall', evSis:'System / Mandant', evQuem:'Ausgeführt von',
       evChamado:'Ticket / Änderung', evRes:'Ergebnis', evIni:'Beginn der Aufnahme',
       evR0:'— nicht angegeben', evR1:'Bestanden', evR2:'Fehlgeschlagen', evR3:'Blockiert',
@@ -6194,6 +6272,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       vocComo:'Un terme par ligne. La reconnaissance vocale ne connaît pas votre système et rend « ME21N » sous la forme « èm-e vingt-et-un ène » — listez les codes et les noms propres qui reviennent dans votre quotidien, et l’outil cherche la forme parlée de chacun dans la transcription et dans les notes.',
       vocPh:'ME21N\nKI235\nS/4HANA\nFiori',
       vocAplicar:'Corriger les termes',
+      vocGuardarLabel:'Conserver cette liste dans mon compte, pour qu’elle revienne à la prochaine visite et sur une autre machine. Elle quitte votre ordinateur et reste sur notre serveur — la seule chose de cette boîte qui le fasse. Décocher efface ce qui est conservé.',
+      vocGuardarOn:'Conservée dans votre compte.',
+      vocGuardarOff:'Cet onglet seulement.',
+      vocGuardarErro:'Je n’ai pas pu la conserver — la liste reste valable dans cet onglet.',
       vocDesfazer:'annuler',
       vocFeito:'{0} correction(s) effectuée(s).',
       vocNada:'Aucun de ces termes n’est apparu en toutes lettres. Rien n’a été changé.',
@@ -6561,6 +6643,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       ataH:'Données de la réunion', ataHsub:'— facultatif : sujet, lieu, animateur, participants',
       ataAssunto:'Sujet', ataLocal:'Lieu / plateforme', ataOrg:'Animée par',
       ataPart:'Participants', ataIni:'Début de la réunion',
+      evPre:'Précondition',
+      evPrePh:'L’état avant : données de base nommées, avec les caractéristiques qui font exister le scénario. Ex. : client 4711 avec blocage partiel de crédit, article MAT-9 soumis à substitution fiscale, livraison interétatique.',
+      evEsperado:'Résultat attendu',
+      evEsperadoPh:'Un document, un statut, une valeur, un message. Jamais « correctement ».',
       evCaso:'Cas de test', evSis:'Système / mandant', evQuem:'Exécuté par',
       evChamado:'Ticket / changement', evRes:'Résultat', evIni:'Début de l’enregistrement',
       evR0:'— non renseigné', evR1:'Réussi', evR2:'Échoué', evR3:'Bloqué',
@@ -15157,6 +15243,11 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     }
     if (typeof pintarMarcaCliente === 'function') pintarMarcaCliente();
     pintarModelosDoCliente();
+    /* UMA CHAMADA SÓ, e de propósito. A caixa do vocabulário mora bem mais
+       abaixo neste arquivo, com o `VOC_CHAVE` num `const` — tocar nele daqui
+       seria ler antes da declaração no dia em que este trecho rodasse cedo.
+       Quem conhece a caixa é a caixa. */
+    if (typeof aplicarVocDoPerfil === 'function') aplicarVocDoPerfil(pf);
   }
 
   /* Os modelos de documento do cliente. Escolher um preenche o que ele define;
@@ -15872,7 +15963,11 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       if (!txt) { $('fbMsg').innerHTML = `<span class="err">${t('fbVazio')}</span>`; return; }
       if (!MEDIR_URL || !MEDIR_KEY) {
         /* Build offline: não há para onde mandar, e dizer isso é melhor que um
-           botão que finge ter enviado. */
+           botão que finge ter enviado.
+           A conferência continua sendo do `MEDIR_URL` mesmo depois de o chamado
+           passar a ir por `__SITE__/api/chamado`: o que ela pergunta é "esta
+           build tem servidor?", e a resposta é a mesma para os dois caminhos.
+           No pacote offline ela é vazia, e o `file://` nem chega a tentar. */
         $('fbMsg').innerHTML = `<span class="err">${t('fbSemRede', CONTATO)}</span>`;
         return;
       }
@@ -15889,34 +15984,44 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       }
       $('fbMsg').textContent = t('fbIndo');
       try {
-        const r = await fetch(MEDIR_URL + '/rest/v1/rpc/walkstamp_recado', {
+        /* PELA NOSSA ROTA, E NÃO DIRETO NO BANCO — 29/08.
+           O limite de abrir chamado morava no Postgres, e ali não há IP: a
+           única chave que ele podia inventar era o ALVO. Quem soubesse o seu
+           e-mail queimava a sua cota, e o balde anônimo era um só para o mundo
+           inteiro. A rota tem IP, e o banco perdeu a porta de abrir. */
+        const r = await fetch('__SITE__/api/chamado', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json',
-                     apikey: MEDIR_KEY, Authorization: 'Bearer ' + MEDIR_KEY },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            p_tipo: fbTipo, p_texto: txt,
-            p_email: ($('fbEmail').value || '').trim() || null,
-            p_idioma: LANG, p_cenario: $('modelo').value, p_origem: 'app',
+            tipo: fbTipo, texto: txt,
+            email: ($('fbEmail').value || '').trim() || null,
+            idioma: LANG, cenario: $('modelo').value, origem: 'app',
             /* O diagnóstico só vai se a caixa estiver marcada — e vai o TEXTO
                COLETADO, não o que estiver no elemento da tela. Ler a tela foi o
                defeito: enquanto a coleta corria, o que estava lá era a mensagem
                de espera, e era ela que chegava ao banco. */
-            p_diag: diag || null
+            diag: diag || null
           })
         });
-        const resp = (await r.json().catch(() => null));
+        /* A ROTA DEVOLVE OBJETO, e o banco devolvia uma palavra crua. A
+           diferença importa: `{numero}` quando abriu, `{erro}` quando não —
+           e o `erro` carrega a MESMA palavra que o banco usava, para a tela
+           continuar dizendo a coisa certa em vez de um "erro" genérico. */
+        const resp = (await r.json().catch(() => null)) || {};
         $('fbEnviar').disabled = false;
-        if (!r.ok || resp === 'vazio') {
+        if (resp.erro === 'muitos' || r.status === 429) {
+          $('fbMsg').innerHTML = `<span class="err">${t('fbMuitos')}</span>`; return;
+        }
+        if (!r.ok || !resp.numero) {
           $('fbMsg').innerHTML = `<span class="err">${t('fbErro', CONTATO)}</span>`;
           return;
         }
-        if (resp === 'muitos') { $('fbMsg').innerHTML = `<span class="err">${t('fbMuitos')}</span>`; return; }
         $('fbTexto').value = '';
         /* O número é o que a pessoa anota. Sem ele, "mandei um problema" não
            tem como virar "e aquele problema?" — e nós não temos como responder
            sem inventar contexto. */
         const temEmail = !!($('fbEmail').value || '').trim();
-        $('fbMsg').innerHTML = `<span class="ok">${t('fbFeito', resp)}</span>` +
+        $('fbMsg').innerHTML = `<span class="ok">${t('fbFeito', resp.numero)}</span>` +
           (temEmail ? '' : ` <span class="err">${t('fbSemEmail')}</span>`);
         medir('recado', { p_origem: fbTipo });
       } catch (e) {
@@ -18574,7 +18679,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      rótulos e quais aparecem. */
   const BLOCOS = {
     evidencia: { h:'evH',   sub:'evHsub',   caso:'evCaso',    sis:'evSis',   quem:'evQuem',
-                 chamado:'evChamado', ini:'evIni',  res:true,  hash:true,  temIni:true, amb:true },
+                 chamado:'evChamado', ini:'evIni',  res:true,  hash:true,  temIni:true, amb:true,
+                 /* Só a evidência de teste pede condição. Numa ata ou numa
+                    instrução de trabalho, "pré-condição" não quer dizer nada. */
+                 cond:true },
     tutorial:  { h:'guiaH', sub:'guiaHsub', caso:'guiaTit',   sis:'guiaSis', quem:'guiaAutor',
                  chamado:'guiaVer',   ini:'evIni',  res:false, hash:false, temIni:false, amb:true, proc:true },
     ata:       { h:'ataH',  sub:'ataHsub',  caso:'ataAssunto',sis:'ataLocal',quem:'ataOrg',
@@ -18597,6 +18705,11 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     $('lblChamado').textContent = t(b.chamado);
     $('lblIni').textContent     = t(b.ini);
     $('cxRes').classList.toggle('hide', !b.res);
+    $('cxCond').classList.toggle('hide', !b.cond);
+    /* Escondido é o mesmo que não existir: trocar de cenário sem limpar deixaria
+       a pré-condição de um teste dentro de uma ata, invisível na tela e visível
+       no documento — que é a pior das duas. */
+    if (!b.cond) { $('evPre').value = ''; $('evEsperado').value = ''; }
     $('cxAmb').classList.toggle('hide', !b.amb);
     if (!b.amb) $('evAmb').value = '';
     $('cxDono').classList.toggle('hide', !b.proc);
@@ -19028,7 +19141,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      acabou. Só o que descreve a PESSOA é guardado; caso de teste, chamado e
      resultado descrevem o CASO, e um chamado velho reaparecendo no caso
      seguinte seria um defeito de evidência, não uma comodidade. */
-  const evCampos = ['evCaso','evSis','evQuem','evChamado','evRes','evInicio'];
+  const evCampos = ['evCaso','evSis','evQuem','evChamado','evRes','evInicio','evPre','evEsperado'];
   const PERFIL_CHAVE = '__MARCA__.perfil';
   /* ================= vocabulário do domínio =================
 
@@ -19531,8 +19644,12 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   function lerDaUrl(){
     let q;
     try { q = new URLSearchParams(location.search); } catch (e) { return; }
+    /* `pre` e `esperado` chegam do link do caso, montado pelo roteiro. São a
+       CONDIÇÃO que alguém escreveu na planilha; o resto do documento é a que
+       aconteceu. Ter as duas lado a lado é o ponto inteiro. */
     const mapa = { caso:'evCaso', chamado:'evChamado', sistema:'evSis',
-                   quem:'evQuem', resultado:'evRes' };
+                   quem:'evQuem', resultado:'evRes',
+                   pre:'evPre', esperado:'evEsperado' };
     let veio = 0;
     const md = q.get('modelo');
     if (md && $('modelo') && [...$('modelo').options].some(o => o.value === md)) {
@@ -19545,7 +19662,12 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       if (!v || !el) continue;
       if (el.tagName === 'SELECT') {
         if ([...el.options].some(o => o.value === v)) { el.value = v; veio++; }
-      } else { el.value = v.slice(0, 120); veio++; }
+      } else {
+        /* A pré-condição é um parágrafo, e cortá-la em 120 seria entregar meia
+           condição — pior do que nenhuma, porque parece completa. */
+        const teto = (el.tagName === 'TEXTAREA') ? 2000 : 120;
+        el.value = v.slice(0, teto); veio++;
+      }
     }
     if (veio) {
       /* Dizer que veio do link, e não deixar a pessoa achar que a ferramenta
@@ -19621,6 +19743,11 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       [t('guiaValido'), b.proc && $('evValido').value ? dataLegivel($('evValido').value) : ''],
       [t(b.quem),    v('evQuem')],
       [t(b.chamado), v('evChamado')],
+      /* A CONDIÇÃO VEM ANTES DO RESULTADO, e a ordem é o argumento: quem lê a
+         evidência precisa saber em que situação a regra deveria valer antes de
+         ler se ela valeu. Um resultado sem condição é uma opinião. */
+      [t('evPre'),      b.cond ? v('evPre') : ''],
+      [t('evEsperado'), b.cond ? v('evEsperado') : ''],
       [t('evRes'),   res ? t({ ok:'evR1', nok:'evR2', blq:'evR3' }[res]) : ''],
       // a hora só entra na identificação se o modelo pedir hora: num passo a
       // passo, "Início da gravação" é dado que ninguém foi buscar
@@ -19640,6 +19767,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     return {
       caso: v('evCaso'), sistema: v('evSis'), quem: v('evQuem'),
       chamado: v('evChamado'), resultado: res, ambiente: amb, inicio: origemReal(),
+      precondicao: b.cond ? v('evPre') : '', esperado: b.cond ? v('evEsperado') : '',
       horaVisivel: origemReal() != null && querHora(),
       hash: b.hash && $('evHash').checked,
       linhas,                       // o que entra na primeira página do documento
@@ -19654,6 +19782,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
          `digitado` é a outra pergunta, e é a que a bolinha faz: a pessoa
          escreveu ou escolheu alguma coisa aqui? Datas deduzidas não contam. */
       digitado: [v('evCaso'), v('evSis'), v('evQuem'), v('evChamado'), res, amb,
+                 b.cond ? v('evPre') : '', b.cond ? v('evEsperado') : '',
                  b.proc ? v('evDono') : '', b.proc ? $('evValido').value : '']
                 .filter(Boolean).length
     };
@@ -21553,6 +21682,12 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
         sistema: ev.sistema || null,
         executadoPor: ev.quem || null,
         chamado: ev.chamado || null,
+        /* A CONDIÇÃO VAI NO ARQUIVO. Sem isto, reabrir um documento devolveria
+           tudo menos a parte que diz em que situação a regra deveria valer — e
+           quem reabre para juntar sessões ou corrigir um passo perderia a
+           condição sem nenhum aviso. */
+        precondicao: ev.precondicao || null,
+        resultadoEsperado: ev.esperado || null,
         resultado: ev.resultado || null,
         ambiente: ev.ambiente || null,
         // ISO com fuso: quem consome o arquivo não precisa adivinhar o horário local
@@ -22064,7 +22199,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       $('modelo').dispatchEvent(new Event('change'));
     }
     const e = j.evidencia || {};
-    const por = { evCaso:'casoDeTeste', evSis:'sistema', evQuem:'executadoPor', evChamado:'chamado' };
+    const por = { evCaso:'casoDeTeste', evSis:'sistema', evQuem:'executadoPor', evChamado:'chamado',
+                  evPre:'precondicao', evEsperado:'resultadoEsperado' };
     if (e.ambiente && $('evAmb')) $('evAmb').value = e.ambiente;
     for (const id in por) if (e[por[id]]) $(id).value = e[por[id]];
     if (e.resultado && $('evRes')) $('evRes').value = e.resultado;
@@ -24052,6 +24188,8 @@ ${relsSlide[i]}</Relationships>`) });
       if (v) sessionStorage.setItem(VOC_CHAVE, v);
       else sessionStorage.removeItem(VOC_CHAVE);
     } catch (e) {}
+    /* E, se a pessoa pediu, também no servidor — mas não a cada tecla. */
+    if ($('vocGuardar') && $('vocGuardar').checked) agendarVocNoServidor();
   }
   try {
     const v = sessionStorage.getItem(VOC_CHAVE);
@@ -24059,6 +24197,77 @@ ${relsSlide[i]}</Relationships>`) });
   } catch (e) {}
 
   $('vocLista').addEventListener('input', guardarVoc);
+
+  /* ---- guardar entre visitas, se a pessoa pedir (DEC-5, caminho A) ----
+
+     A lista carrega termos do cliente. Guardá-la é a única coisa desta caixa
+     que sai da máquina, então é escolha explícita, desmarcada por padrão, e
+     desmarcar APAGA o que estava guardado — "pare de guardar" e "esqueça o que
+     guardou" são a mesma frase para quem marca e depois se arrepende.
+
+     O controle só existe com sessão de plano pago. No gratuito a lista continua
+     vivendo na aba, como sempre viveu: um controle que não faz nada é pior do
+     que controle nenhum. */
+  let vocRelogio = null;
+
+  /* O que a conta devolveu, aplicado à caixa. Só sobrescreve caixa VAZIA: quem
+     já digitou nesta aba antes de a sessão responder não pode perder o que
+     digitou — a resposta da conta chega depois, e vencer a pessoa aqui é o
+     mesmo defeito que o `formatoManual` lá em cima existe para evitar. */
+  function aplicarVocDoPerfil(pf){
+    if (pf && pf.vocabulario && $('vocLista') && !($('vocLista').value || '').trim()) {
+      $('vocLista').value = pf.vocabulario;
+      try { sessionStorage.setItem(VOC_CHAVE, pf.vocabulario); } catch (e) {}
+    }
+    pintarVocGuardar();
+  }
+
+  function pintarVocGuardar(){
+    const cx = $('vocGuardarRow'); if (!cx) return;
+    const dentro = !!(sessao && perfilDoCliente && perfilDoCliente.cliente);
+    cx.classList.toggle('hide', !dentro);
+    if (!dentro) { $('vocGuardarMsg').textContent = ''; return; }
+    $('vocGuardar').checked = !!(perfilDoCliente && perfilDoCliente.vocGuardar);
+    $('vocGuardarMsg').textContent = $('vocGuardar').checked ? t('vocGuardarOn') : t('vocGuardarOff');
+  }
+
+  /* Digitar dispara uma gravação por tecla se ninguém segurar. Um segundo de
+     silêncio é o suficiente para virar uma só, e curto o bastante para a lista
+     estar guardada quando a pessoa fecha a aba logo depois. */
+  function agendarVocNoServidor(){
+    clearTimeout(vocRelogio);
+    vocRelogio = setTimeout(() => mandarVocParaOServidor(true), 1000);
+  }
+
+  async function mandarVocParaOServidor(guardar){
+    if (!sessao || !MEDIR_URL) return;
+    const texto = ($('vocLista').value || '').trim();
+    try {
+      const r = await fetch(MEDIR_URL + '/functions/v1/walkstamp-meus', {
+        method: 'POST',
+        headers: { apikey: MEDIR_KEY, Authorization: 'Bearer ' + sessao.token,
+                   'Content-Type': 'application/json' },
+        body: JSON.stringify({ acao: 'vocabulario', texto, guardar: !!guardar })
+      });
+      const d = await r.json().catch(() => null);
+      if (!r.ok || !d || d.erro) throw new Error((d && d.erro) || 'falha');
+      /* O perfil em memória acompanha: sem isso, um `aplicarPerfil` posterior
+         repintaria a caixa com o estado velho. */
+      if (perfilDoCliente) perfilDoCliente.vocGuardar = !!guardar;
+      $('vocGuardarMsg').textContent = guardar ? t('vocGuardarOn') : t('vocGuardarOff');
+    } catch (e) {
+      /* A lista não se perde por causa disto: ela continua na aba, e a frase
+         diz exatamente isso em vez de um "erro" que não explica o que sobrou. */
+      $('vocGuardarMsg').textContent = t('vocGuardarErro');
+    }
+  }
+
+  if ($('vocGuardar')) {
+    $('vocGuardar').addEventListener('change', () => {
+      clearTimeout(vocRelogio);
+      mandarVocParaOServidor($('vocGuardar').checked);
+    });
+  }
   $('vocModo').onclick = () => $('vocBox').classList.toggle('hide');
 
   /* ---- tirar hesitações ----

@@ -3,11 +3,11 @@ import http from 'http'; import fs from 'fs';
 import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
 const html=fs.readFileSync(`${RAIZ_WS}/public/app.html`,'utf8');
 const srv=http.createServer((q,r)=>{r.writeHead(200,{'Content-Type':'text/html'});r.end(html)});
-await new Promise(r=>srv.listen(8885,r));
+await new Promise(r=>srv.listen(8809,r));
 const br=await chromium.launch({executablePath:CHROME_WS});
 const ctx=await br.newContext({acceptDownloads:true}); const pg=await ctx.newPage();
 const erros=[]; pg.on('pageerror',e=>erros.push(e.message));
-await pg.goto('http://localhost:8885/app.html?lang=pt'); await pg.waitForTimeout(400);
+await pg.goto('http://localhost:8809/app.html?lang=pt'); await pg.waitForTimeout(400);
 // o cenário de uso passou a ser obrigatório: sem ele o Gravar e o envio de vídeo cobram a escolha
 await pg.selectOption('#modelo', 'ia').catch(() => {});
 await pg.setInputFiles('#file','/tmp/retrato.webm'); await pg.waitForTimeout(2500);

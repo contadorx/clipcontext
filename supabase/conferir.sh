@@ -11,5 +11,22 @@ while read -r md5 arq; do
   if [ "$got" = "$md5" ]; then ok=$((ok+1))
   else printf '  DIFERE %s\n     esperado %s\n     obtido   %s\n' "$arq" "$md5" "$got"; mau=$((mau+1)); fi
 done < MANIFESTO.md5
-printf '\n%d conferem, %d faltam, %d diferem\n' "$ok" "$falta" "$mau"
-[ "$falta" -eq 0 ] && [ "$mau" -eq 0 ]
+# E O QUE O MANIFESTO NEM OLHA — 28/08.
+#
+# Medido: 46 linhas no manifesto para 54 migrações no disco. As oito de fora
+# não eram "erradas", eram INVISÍVEIS: o conferidor dizia "46 conferem, 0
+# faltam, 0 diferem" e ia embora verde, enquanto oito arquivos podiam mudar à
+# vontade. Um portão que aprova por vazio é pior do que portão nenhum, porque
+# ninguém desconfia do verde.
+#
+# Agora o disco é comparado com o manifesto nos DOIS sentidos.
+fora=0
+for f in migrations/*.sql; do
+  a=$(basename "$f")
+  if ! cut -d' ' -f3- MANIFESTO.md5 | grep -qxF "$a"; then
+    printf '  FORA   %s  (no disco, e o manifesto não olha)\n' "$a"; fora=$((fora+1))
+  fi
+done
+
+printf '\n%d conferem, %d faltam, %d diferem, %d fora do manifesto\n' "$ok" "$falta" "$mau" "$fora"
+[ "$falta" -eq 0 ] && [ "$mau" -eq 0 ] && [ "$fora" -eq 0 ]

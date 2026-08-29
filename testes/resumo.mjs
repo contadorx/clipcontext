@@ -80,32 +80,40 @@ await pg.waitForFunction(() => document.querySelectorAll('#thumbs figure').lengt
    novecentos milissegundos não bastam, um quarto quadro chega DEPOIS da forja,
    e aí o conjunto que o `#dedup` olha não é o conjunto que foi forjado.
 
-   Uma espera por relógio é uma aposta na velocidade da máquina. A condição
-   certa é a lista PARAR de crescer: quatro leituras iguais, 120 ms entre elas.
-   É o mesmo conserto que o `etapas.mjs` recebeu quando reprovava só sob
-   contenção — e é o mesmo motivo de nunca reproduzir sozinho.
+   Uma espera por relógio é uma aposta na velocidade da máquina — e esperar a
+   lista PARAR de crescer é a mesma aposta com outra roupa: imobilidade não é
+   fim, é o intervalo entre dois quadros visto de fora. A condição certa é
+   perguntar ao produto se a varredura ainda está correndo.
 
    Se o tempo acabar, ela DIZ que acabou, em vez de seguir com uma lista que
    ainda mexe: uma régua que continua depois de a premissa dela falhar não está
    medindo o produto, está medindo o acaso. */
 {
   const quantos = () => pg.evaluate(() => document.querySelectorAll('#thumbs figure').length);
-  /* SEIS leituras iguais, 200 ms entre elas — 1,2 s de imobilidade.
-     A primeira versão pedia quatro a 120 ms (360 ms), e não bastou: numa
-     rodada da esteira completa a extração "parou" em 3 quadros e um quarto
-     chegou depois, o que fez o bloco reprovar lá embaixo, no desfazer, com
-     "4 vs 3" — um sintoma três passos distante da causa. Sob contenção o
-     intervalo entre dois quadros passa de meio segundo com facilidade. */
-  let iguais = 0, ultimo = -1, parou = false;
-  for (let i = 0; i < 120; i++) {
+
+  /* PERGUNTAR AO PRODUTO, EM VEZ DE ADIVINHAR PELA IMOBILIDADE — 28/08.
+     As duas versões anteriores esperavam a lista PARAR de crescer: quatro
+     leituras iguais a 120 ms, depois seis a 200 ms. As duas erram do mesmo
+     jeito, e nesta máquina a segunda errou sempre: a extração ficou parada em
+     3 quadros por mais de 1,2 s, o bloco seguiu, e dois quadros chegaram
+     durante os blocos [1] a [3] — a premissa caía três passos adiante.
+     Imobilidade não é fim: é o intervalo entre dois quadros visto de fora.
+     O produto SABE quando terminou — `window.__trabalhos()` lista o que está
+     correndo, e `varredura` é a varredura de telas. Perguntar a ele acaba com
+     a aposta na velocidade da máquina. A contagem estável continua junto, para
+     o caso de o quadro já achado ainda estar sendo desenhado. */
+  let ultimo = -1, parou = false;
+  for (let i = 0; i < 200; i++) {
+    const varrendo = await pg.evaluate(() => {
+      try { return (window.__trabalhos() || []).includes('varredura'); } catch (e) { return false; }
+    });
     const n = await quantos();
-    iguais = (n === ultimo) ? iguais + 1 : 0;
+    if (!varrendo && n === ultimo && n > 0) { parou = true; break; }
     ultimo = n;
-    if (iguais >= 5) { parou = true; break; }
-    await pg.waitForTimeout(200);
+    await pg.waitForTimeout(150);
   }
   if (!parou) {
-    console.log('  FALHA  a extração não parou de crescer em 12 s — a premissa desta régua caiu');
+    console.log('  FALHA  a varredura não terminou em 30 s — a premissa desta régua caiu');
     console.log('         (o forjarRepetidos escreveria numa lista em movimento)');
     process.exit(1);
   }

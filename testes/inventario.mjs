@@ -111,5 +111,112 @@ console.log('\n[5] a pista de liberação conta as MESMAS réguas');
      faltando.length ? `fora da conta do rodapé: ${faltando.join(', ')}` : '');
 }
 
+console.log('\n[6] nenhuma régua fica fora do alcance do corredor específico');
+{
+  /* A HISTÓRIA DESTE BLOCO, porque ela mudou de forma duas vezes.
+     Ele nasceu no Build 48 como um TETO: 62 réguas que nenhum padrão do
+     `liberar.sh` alcançava, e um número que só podia descer. O teto não obrigava
+     a mapear tudo; obrigava a não abrir mais buraco.
+     No Build 53 o buraco fechou. A linha do `src/template.html` listava 61 nomes
+     à mão e estava errada dos DOIS lados — sete que nem leem o produto, e 54 que
+     leem e ficaram de fora. Ela virou `grupo:produto`, que é uma pergunta ao
+     disco, e as oito que sobraram ganharam padrão próprio.
+     Então o teto virou ZERO, e um teto de zero não é teto: é invariante. Régua
+     nova sem lugar no mapa reprova no dia em que nasce. */
+  const lib = fs.readFileSync(path.join(AQUI, 'liberar.sh'), 'utf8');
+  const mapa = (lib.split("<<'MAPA_FIM'")[1] || '').split('MAPA_FIM')[0];
+  const contratos = (lib.match(/CONTRATOS="([\s\S]*?)"/) || ['', ''])[1];
+  const alcancadas = new Set([...`${mapa}\n${contratos}`.matchAll(/([a-z0-9-]+\.mjs)/g)].map((m) => m[1]));
+  /* `grupo:produto` não é um nome, é uma PERGUNTA AO DISCO: quem lê `app.html`
+     ou o pacote offline. A regra é repetida aqui de propósito, e não importada
+     do shell — se ela mudar lá e não aqui, é aqui que se descobre, que é o
+     mesmo acordo do `janelinha.mjs` com a conta da largura da fita. */
+  if (/grupo:produto/.test(mapa)) {
+    for (const f of disco) {
+      if (INSTRUMENTOS.has(f)) continue;
+      const t = fs.readFileSync(path.join(AQUI, f), 'utf8');
+      if (/app\.html|walkstamp-offline\.html/.test(t)) alcancadas.add(f);
+    }
+  }
+  const fora = disco.filter((f) => !alcancadas.has(f) && !INSTRUMENTOS.has(f)).sort();
+  ok(`o corredor específico alcança as ${disco.length - fora.length} réguas`,
+     fora.length === 0,
+     /* NÃO lista em ordem alfabética o começo da lista: apontaria os primeiros
+        como culpados, que é o contrário do que aconteceu. */
+     fora.length === 0 ? '' :
+       `${fora.length} fora do alcance — ligue ao mapa do liberar.sh: ${fora.join(', ')}`);
+}
+
+console.log('\n[7] duas réguas nunca disputam a mesma porta');
+{
+  /* O QUE ISTO IMPEDE, e já aconteceu. O `rodar.sh` roda várias ao mesmo tempo
+     com `xargs -P`, que é uma FILA: qualquer duas podem cair juntas. Medido em
+     29/08: **33 portas eram usadas por mais de uma régua** — três arquivos na
+     8918, três na 8921, três na 8931, três na 8934, três na 8937, três na 8951,
+     três na 8953.
+     Duas réguas na mesma porta não dão erro barulhento: a segunda encontra a
+     porta ocupada, e daí em diante ou fala com o servidor da PRIMEIRA — de
+     outro teste, com outro conteúdo — ou derruba o dela no meio. Verde falso
+     nos dois casos, e o próprio `rodar.sh` já tem no cabeçalho a cicatriz de
+     uma execução medida contra uma build velha.
+
+     A exceção é UMA, e é declarada: a 8802 é o Next que o `rodar.sh` sobe uma
+     vez para todas as réguas de site. Ali o compartilhamento é o desenho. */
+  const COMPARTILHADA = new Set([8802]);
+  const dono = new Map();
+  const colisoes = [];
+
+  /* O LEITOR DE PORTAS, e por que ele é assim.
+     A primeira versão casava `const <NOME DE PORTA> = 8xxx` — e era CEGA para
+     `const P = 8806, B = 8842;`, a lista de declaradores, onde só o primeiro
+     era visto. Foi assim que a desconflitação deste mesmo build atribuiu a 8842
+     a uma segunda régua e criou uma colisão nova, que o `seo.mjs` reprovou com
+     EADDRINUSE. Agora a lista é partida na vírgula, o nome não importa, e o
+     endereço escrito à mão (`localhost:8xxx`) conta também.
+     Comentário não é código: sem tirá-los, a prosa que EXPLICA uma porta velha
+     vira uma colisão inventada. */
+  const semComentarios = (t) => t.replace(/\/\*[\s\S]*?\*\//g, '')
+                                 .replace(/(^|[^:\w])\/\/[^\n]*/g, '$1');
+  for (const f of disco.concat([...INSTRUMENTOS])) {
+    const txt = semComentarios(fs.readFileSync(path.join(AQUI, f), 'utf8'));
+    const portas = new Set();
+    for (const m of txt.matchAll(/\b(?:const|let|var)\s+([^;\n]+?);/g)) {
+      for (const parte of m[1].split(',')) {
+        const mm = parte.match(/^\s*[A-Za-z_$][\w$]*\s*=\s*(8\d{3})\s*$/);
+        if (mm) portas.add(Number(mm[1]));
+      }
+    }
+    for (const m of txt.matchAll(/\.listen\(\s*(8\d{3})\b/g)) portas.add(Number(m[1]));
+    for (const m of txt.matchAll(/localhost(?::|%3A)(8\d{3})\b/g)) portas.add(Number(m[1]));
+    for (const porta of portas) {
+      if (COMPARTILHADA.has(porta)) continue;
+      if (dono.has(porta)) colisoes.push(`${porta}: ${dono.get(porta)} e ${f}`);
+      else dono.set(porta, f);
+    }
+  }
+  ok(`as ${dono.size} portas próprias são de uma régua cada`, colisoes.length === 0,
+     colisoes.slice(0, 4).join(' | '));
+}
+
+console.log('\n[8] toda régua que sobe o Next PROVA que a porta é dela');
+{
+  /* ESTA AFIRMAÇÃO NASCEU DE UM ERRO MEU, no mesmo build. Eu acrescentei a
+     garantia de porta às catorze réguas que faltavam com uma edição em massa
+     que casava `const next = spawn(...)`. Duas tinham outra forma — o
+     `email.mjs` chama de `const n`, dentro de uma função; o `faxina.mjs` sobe o
+     Next duas vezes num `comNext()`. As duas ganharam o `import` e NENHUMA
+     chamada: ficaram com cara de prontas e sem a trava.
+     Contar o `import` seria repetir o meu erro. O que se cobra aqui é a
+     CHAMADA. */
+  const semGarantia = [];
+  for (const f of disco.concat([...INSTRUMENTOS])) {
+    const txt = fs.readFileSync(path.join(AQUI, f), 'utf8');
+    if (!/spawn\('npx',\s*\['next',\s*'start'/.test(txt)) continue;
+    if (!/garantirPortaLivre\(/.test(txt)) semGarantia.push(f);
+  }
+  ok('nenhuma sobe o Next sem garantir a porta antes', semGarantia.length === 0,
+     semGarantia.join(', '));
+}
+
 console.log(falhas ? `\n${falhas} FALHA(S)` : '\nInventário dos testes: os quatro números batem.');
 process.exit(falhas ? 1 : 0);

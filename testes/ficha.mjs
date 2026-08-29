@@ -9,12 +9,20 @@ const tipos={'.css':'text/css','.js':'text/javascript','.svg':'image/svg+xml'};
    O servidorzinho estático daqui virou um encaminhador para o Next — mesma
    porta, mesmas URLs no teste, e quem responde é o produto de verdade. */
 const srv = criarProxy();
-await new Promise(r=>srv.listen(8961,r));
+/* A PORTA TEM NOME — 29/08. Ela estava escrita à mão em nove lugares, e num
+   deles CODIFICADA: `localhost%3A8961`, dentro de um regex. Quando as portas
+   foram desconflitadas, a troca não alcançou aquele ali (o `%3A` cola no
+   número e não há fronteira de palavra), e a régua passou a afirmar sobre uma
+   porta que não existia mais. Falhou alto, que foi sorte: uma afirmação que
+   casa `walkstamp` OU a porta poderia ter continuado verde pelo outro lado. */
+const P = 8852;
+const BASE = `http://localhost:${P}`;
+await new Promise(r=>srv.listen(P,r));
 const br=await chromium.launch({executablePath:CHROME_WS});
 let falhas=0; const ok=(n,c,e)=>{console.log((c?'  ok   ':'  FALHA')+'  '+n+(e?'  → '+e:''));if(!c)falhas++};
 const ctx=await br.newContext({viewport:{width:1200,height:900}});
 const pg=await ctx.newPage(); const erros=[]; pg.on('pageerror',e=>erros.push(e.message));
-await pg.goto('http://localhost:8961/?lang=pt'); await pg.waitForTimeout(700);
+await pg.goto(BASE + '/?lang=pt'); await pg.waitForTimeout(700);
 
 console.log('[1] a aba existe e abre');
 ok('a aba está na borda', await pg.locator('#fichaAba').isVisible());
@@ -34,21 +42,21 @@ ok('já marcado como problema', await pg.locator('.fichaTipo[data-t="problema"]'
 console.log('\n[3] nota alta: pede o compartilhamento');
 {
   const pg2 = await (await br.newContext({viewport:{width:1200,height:900}})).newPage();
-  await pg2.goto('http://localhost:8961/?lang=pt'); await pg2.waitForTimeout(600);
+  await pg2.goto(BASE + '/?lang=pt'); await pg2.waitForTimeout(600);
   await pg2.locator('#fichaAba').click(); await pg2.waitForTimeout(250);
   await pg2.locator('.fichaNota[data-n="9"]').click(); await pg2.waitForTimeout(300);
   ok('agradece e oferece o LinkedIn', await pg2.locator('#fichaPasso3').isVisible());
   const href = await pg2.locator('#fichaLinkedin').getAttribute('href');
   console.log('     ' + href);
   ok('o link é o compartilhador do LinkedIn', /linkedin\.com\/sharing\/share-offsite/.test(href), href);
-  ok('com o endereço do site dentro', /localhost%3A8961|walkstamp/i.test(href));
+  ok('com o endereço do site dentro', new RegExp(`localhost%3A${P}|walkstamp`, 'i').test(href));
   ok('e a caixa de texto não aparece junto', await pg2.locator('#fichaPasso2').isHidden());
   await pg2.close();
 }
 console.log('\n[4] a nota 7 já conta como quem indica');
 {
   const pg3 = await (await br.newContext({viewport:{width:1200,height:900}})).newPage();
-  await pg3.goto('http://localhost:8961/?lang=pt'); await pg3.waitForTimeout(600);
+  await pg3.goto(BASE + '/?lang=pt'); await pg3.waitForTimeout(600);
   await pg3.locator('#fichaAba').click(); await pg3.waitForTimeout(250);
   await pg3.locator('.fichaNota[data-n="7"]').click(); await pg3.waitForTimeout(300);
   ok('7 recebe o pedido', await pg3.locator('#fichaPasso3').isVisible());
@@ -63,11 +71,26 @@ console.log('\n[5] o recado vai para o servidor, não para o mailto');
 {
   const pg5 = await (await br.newContext({viewport:{width:1200,height:900}})).newPage();
   const enviados = [];
-  await pg5.route('**/rest/v1/rpc/walkstamp_recado', r => {
+  /* A ROTA É NOSSA DESDE 29/08. O limite de abrir chamado morava no Postgres, e
+     ali não há IP: a única chave que ele podia inventar era o ALVO — quem
+     soubesse o seu e-mail queimava a sua cota, e o balde anônimo era um só para
+     o mundo inteiro. Aqui existe IP. */
+  await pg5.route('**/api/chamado', r => {
     enviados.push(JSON.parse(r.request().postData() || '{}'));
-    r.fulfill({ status:200, contentType:'application/json', body:'"ok"' });
+    r.fulfill({ status:200, contentType:'application/json', body:'{"numero":"WS-0042"}' });
   });
-  await pg5.goto('http://localhost:8961/?lang=pt'); await pg5.waitForTimeout(600);
+  /* E O CAMINHO VELHO NÃO PODE MAIS SER USADO: se alguém voltar a falar com o
+     Supabase direto, o limite por ator vira decoração. Esta rota existe para
+     PEGAR isso, e não para servir — ela conta e reprova lá embaixo.
+     porta-velha-de-proposito — a marca que diz ao `chamadorota.mjs` que este
+     grampo é intencional. Sem ela, a varredura que procura réguas esquecidas
+     na porta antiga acusaria justamente a que guarda a porta antiga. */
+  const pelaPortaVelha = [];
+  await pg5.route('**/rest/v1/rpc/walkstamp_recado', r => {
+    pelaPortaVelha.push(1);
+    r.fulfill({ status:200, contentType:'application/json', body:'"WS-0000"' });
+  });
+  await pg5.goto(BASE + '/?lang=pt'); await pg5.waitForTimeout(600);
   await pg5.locator('#fichaAba').click(); await pg5.waitForTimeout(250);
   await pg5.locator('.fichaNota[data-n="3"]').click(); await pg5.waitForTimeout(300);
   await pg5.fill('#fichaTexto','o botão de gerar não aparece no meu Firefox');
@@ -75,12 +98,14 @@ console.log('\n[5] o recado vai para o servidor, não para o mailto');
   await pg5.locator('#fichaEnviar').click(); await pg5.waitForTimeout(700);
   ok('o recado foi por HTTP, não abrindo programa de e-mail', enviados.length === 1,
      String(enviados.length));
+  ok('  e pela NOSSA rota, não direto no banco', pelaPortaVelha.length === 0,
+     pelaPortaVelha.length ? `${pelaPortaVelha.length} chamada(s) a walkstamp_recado` : '');
   const e = enviados[0] || {};
   console.log('     ' + JSON.stringify(e).slice(0,150));
-  ok('com o texto', /Firefox/.test(e.p_texto || ''));
-  ok('com o tipo certo — nota baixa é problema', e.p_tipo === 'problema', e.p_tipo);
-  ok('com a nota do NPS junto', e.p_nota === 3, String(e.p_nota));
-  ok('e o e-mail de quem escreveu', e.p_email === 'fulano@empresa.com', e.p_email);
+  ok('com o texto', /Firefox/.test(e.texto || ''));
+  ok('com o tipo certo — nota baixa é problema', e.tipo === 'problema', e.tipo);
+  ok('com a nota do NPS junto', e.nota === 3, String(e.nota));
+  ok('e o e-mail de quem escreveu', e.email === 'fulano@empresa.com', e.email);
   ok('a tela confirma o recebimento', /Recebido/.test(await pg5.locator('#fichaMsg').textContent()),
      await pg5.locator('#fichaMsg').textContent());
   ok('e a caixa esvazia, para não mandar duas vezes',
@@ -91,8 +116,8 @@ console.log('\n[5] o recado vai para o servidor, não para o mailto');
 console.log('\n[6] o chamado tem número, e dá para consultar');
 {
   const pg6 = await (await br.newContext({viewport:{width:1200,height:900}})).newPage();
-  await pg6.route('**/rest/v1/rpc/walkstamp_recado', r =>
-    r.fulfill({ status:200, contentType:'application/json', body:'"WS-0042"' }));
+  await pg6.route('**/api/chamado', r =>
+    r.fulfill({ status:200, contentType:'application/json', body:'{"numero":"WS-0042"}' }));
   await pg6.route('**/rest/v1/rpc/walkstamp_chamado_ver', r => {
     const c = JSON.parse(r.request().postData() || '{}');
     /* O e-mail é a fechadura: número certo com e-mail errado não abre. */
@@ -102,7 +127,7 @@ console.log('\n[6] o chamado tem número, e dá para consultar');
       numero:'WS-0042', tipo:'problema', status:'respondido',
       texto:'o PDF sai sem a capa', resposta:'corrigido na versão de hoje' }) });
   });
-  await pg6.goto('http://localhost:8961/?lang=pt'); await pg6.waitForTimeout(600);
+  await pg6.goto(BASE + '/?lang=pt'); await pg6.waitForTimeout(600);
   await pg6.locator('#fichaAba').click(); await pg6.waitForTimeout(250);
   await pg6.locator('.fichaNota[data-n="4"]').click(); await pg6.waitForTimeout(300);
   await pg6.fill('#fichaTexto','o PDF sai sem a capa');
@@ -134,7 +159,7 @@ console.log('\n[6] o chamado tem número, e dá para consultar');
 console.log('\n[7] a ficha está nas três línguas');
 for (const [u, marca] of [['/en/','Give feedback'],['/es/','Dar tu opinión']]) {
   const p4 = await (await br.newContext({viewport:{width:1100,height:800}})).newPage();
-  const r = await p4.goto('http://localhost:8961'+u);
+  const r = await p4.goto(BASE+u);
   await p4.waitForTimeout(400);
   ok(u+': a aba está traduzida', (await p4.locator('#fichaAba').textContent()) === marca,
      await p4.locator('#fichaAba').textContent());
@@ -158,7 +183,7 @@ console.log('\n[tempo] o prazo de resposta é medido, nunca prometido');
       status: 200, headers: { 'content-type': 'application/json',
                               'access-control-allow-origin': '*' },
       body: JSON.stringify(c.resposta) }));
-    await p5.goto('http://localhost:8961/?lang=pt'); await p5.waitForTimeout(500);
+    await p5.goto(BASE + '/?lang=pt'); await p5.waitForTimeout(500);
     await p5.locator('#fichaAba').click(); await p5.waitForTimeout(600);
     const t = await p5.locator('#fichaTempo').textContent();
     ok(c.nome, c.espera.test(t || ''), (t || '(vazio)').slice(0, 90));
@@ -177,7 +202,7 @@ console.log('\n[tempo] o prazo de resposta é medido, nunca prometido');
   for (const c of calados) {
     const p6 = await (await br.newContext({viewport:{width:1200,height:900}})).newPage();
     await p6.route('**/rpc/walkstamp_chamado_resposta', c.rota);
-    await p6.goto('http://localhost:8961/?lang=pt'); await p6.waitForTimeout(500);
+    await p6.goto(BASE + '/?lang=pt'); await p6.waitForTimeout(500);
     await p6.locator('#fichaAba').click(); await p6.waitForTimeout(700);
     ok(c.nome, await p6.locator('#fichaTempo').isHidden(),
        await p6.locator('#fichaTempo').textContent());
@@ -190,7 +215,7 @@ console.log('\n[tempo] o prazo de resposta é medido, nunca prometido');
     await p7.route('**/rpc/walkstamp_chamado_resposta', r => r.fulfill({ status: 200,
       headers: { 'content-type': 'application/json', 'access-control-allow-origin': '*' },
       body: JSON.stringify({ horas: 8, quantos: 11 }) }));
-    await p7.goto('http://localhost:8961' + rota); await p7.waitForTimeout(500);
+    await p7.goto(BASE + rota); await p7.waitForTimeout(500);
     await p7.locator('#fichaAba').click(); await p7.waitForTimeout(600);
     const t = await p7.locator('#fichaTempo').textContent();
     ok(rota + ': traduzido', esperado.test(t || ''), (t || '(vazio)').slice(0, 90));

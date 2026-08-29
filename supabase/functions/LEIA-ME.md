@@ -52,6 +52,23 @@ pega a regressão de verdade, porque um cliente novo para `listar` receberia um
 depois pela API do Supabase. Como está dito acima, nenhuma régua confere isso —
 quem reimplantar tem que reler.
 
+## O `walkstamp-meus` ganhou a única escrita da ferramenta
+
+Ela sempre foi só leitura: os chamados da pessoa e os padrões do cliente, numa
+chamada só. Em 28/08 ganhou a ação `vocabulario` — a lista de termos do sistema,
+guardada entre visitas *(DEC-5, caminho A)*.
+
+Ela veio para cá, e não para uma rota do Next, pelo mesmo motivo do `modelo` na
+`walkstamp-time`: a sessão da ferramenta chega no **fragmento** do link mágico e
+nunca alcança servidor nenhum, então não há cookie para uma rota ler.
+
+A lista carrega termos do cliente — nome de sistema, de projeto, código de
+transação. Por isso o `p_guardar` é explícito: **sem a marca da pessoa o banco
+não só deixa de guardar como apaga o que estava lá.** Desmarcar significa "tire
+isso do servidor", e não "pare de atualizar o que ficou".
+
+**No ar:** `version 3`, publicada em 28/08 a partir deste arquivo.
+
 ## DIVERGÊNCIA DECLARADA — `walkstamp-stripe`
 
 **O disco e a produção não são a mesma coisa aqui, e é de propósito.**

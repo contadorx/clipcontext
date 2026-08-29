@@ -300,12 +300,44 @@ export function montarXlsx(linhas: string[][], nomeAba: string): Buffer {
 /* Que coluna é qual. Adivinhar erra às vezes, e por isso a tela mostra o que
    foi adivinhado ANTES de salvar — quem confere é quem sabe. */
 const PISTAS: Record<string, RegExp> = {
-  caso: /^(caso|id|c[oó]digo|codigo|case|test\s*case|ct|cen[aá]rio)\b/i,
+  caso: /^(caso|id|c[oó]digo|codigo|case|test\s*case|ct)\b/i,
   titulo: /(t[ií]tulo|titulo|title|descri|resumo|summary|nome|passo)/i,
   sistema: /(sistema|system|aplica|app|m[oó]dulo|modulo|produto)/i,
   chamado: /(chamado|ticket|issue|jira|hist[oó]ria|story|requisito|demanda)/i,
   responsavel: /(respons|quem|executor|owner|assignee|testador|tester)/i,
+  /* ---- AS QUATRO COLUNAS DE CONDIÇÃO — 28/08 ----
+
+     As cinco de cima são de INSTRUÇÃO: quem, onde, qual chamado. O post
+     "Cenário não é roteiro" diz que a parte que decide se o teste vale alguma
+     coisa é outra — a condição — e que ela some da planilha para reaparecer
+     como três horas de garimpo na mesa de quem executa. Estas são as quatro que
+     ele manda acrescentar. A quinta da lista dele, o registro da massa usada em
+     cada execução, é o documento de evidência, e já existia. */
+  precondicao: /(pr[eé].?condi|precondi|pr[eé].?requisito|massa|dados?\s*mestre|setup|given|ausgangs|condici[oó]n\s*previa)/i,
+  esperado: /(esperado|expected|resultado\s*esperado|erwartet|attendu|then)/i,
+  reexecucao: /(reexecu|reexecut|repet|repeat|rerun|queima|consome|wiederhol|r[eé]ex[eé]cut)/i,
+  depende_de: /(depend|prerequisit|bloqueado\s*por|blocked\s*by|abh[aä]ngig|d[eé]pend)/i,
 };
+
+/* A pista FRACA do `caso`, e por que ela é separada.
+ *
+ * O regex de cima aceitava `cen[aá]rio` como sinônimo de "caso". Muita planilha
+ * chama a coluna do identificador de "Cenário", então tirar isso quebraria
+ * importações que funcionam — mas deixá-lo junto dos fortes tinha um risco pior
+ * e silencioso: numa planilha com "Caso" E "Cenário", ganhava a que aparecesse
+ * PRIMEIRO na folha, e não a certa.
+ *
+ * Agora ele é fallback: só vale se nenhuma coluna casou com as pistas fortes.
+ * E a ambiguidade tem dono — a tela mostra o mapa adivinhado antes de salvar,
+ * e quem confere é quem sabe. */
+const PISTA_FRACA_CASO = /^(cen[aá]rio|cenario|scenario|szenario|sc[eé]nario)\b/i;
+
+/* O `normalizarReexecucao` saiu daqui e virou `lib/reexecucao.ts` — 28/08.
+   Este arquivo lê xlsx: ele usa `Buffer` e `zlib`, e por isso é de servidor. A
+   tela de conferência do mapa é componente de cliente e precisa da MESMA
+   normalização, para a prévia mostrar o que vai ser guardado em vez da célula
+   crua. Duas cópias da regra seria a lista paralela de sempre; o que se move é
+   a regra, que não depende de nada do Node. */
 
 export type Mapa = Record<string, number | null>;
 /* A aplicação do mapa (pegar a coluna pelo índice) mora na TELA, e não aqui:
@@ -313,6 +345,7 @@ export type Mapa = Record<string, number | null>;
    Duas cópias de cinco linhas seria pior do que uma cópia só no lugar certo. */
 export type CasoCru = {
   caso: string; titulo?: string; sistema?: string; chamado?: string; responsavel?: string;
+  precondicao?: string; esperado?: string; reexecucao?: string; depende_de?: string;
 };
 
 export function adivinharMapa(cab: string[]): Mapa {
@@ -322,6 +355,9 @@ export function adivinharMapa(cab: string[]): Mapa {
   };
   const m: Mapa = {};
   for (const [k, re] of Object.entries(PISTAS)) m[k] = achar(re);
+  /* Só agora a pista fraca: "Cenário" vira o identificador do caso quando não
+     há coluna melhor, e nunca por chegar antes na folha. */
+  if (m.caso == null) m.caso = achar(PISTA_FRACA_CASO);
   if (m.caso == null) m.caso = 0;
   return m;
 }

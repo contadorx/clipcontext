@@ -16,6 +16,7 @@ import { lerRecibo } from '@/lib/conta/recibo';
 import { medirConta } from '@/lib/conta/medir';
 import { TETO_ANEXO, apagarAnexo, subirAnexo } from '@/lib/supabase/arquivo';
 import { type CasoCru, adivinharMapa, separar, textoParaLinhas, xlsxParaLinhas } from '@/lib/planilha';
+import { normalizarReexecucao } from '@/lib/reexecucao';
 
 /* O que toda função do roteiro devolve: ou uma recusa, ou o roteiro salvo com
    o id — que é para onde a tela volta. O tipo é escrito uma vez porque o
@@ -162,6 +163,15 @@ export async function salvarRoteiro(form: FormData) {
       sistema: String(c?.sistema ?? '').slice(0, 120),
       chamado: String(c?.chamado ?? '').slice(0, 120),
       responsavel: String(c?.responsavel ?? '').slice(0, 160),
+      /* As quatro de CONDIÇÃO. Tetos generosos na pré-condição de propósito:
+         ela costuma ser um parágrafo, e cortar a condição no meio é pior do
+         que guardá-la inteira. */
+      precondicao: String(c?.precondicao ?? '').slice(0, 2000),
+      esperado: String(c?.esperado ?? '').slice(0, 1000),
+      /* O que chega do formulário é o que a tela já normalizou; normalizar de
+         novo aqui é barato e fecha o caminho de quem postar à mão. */
+      reexecucao: normalizarReexecucao(c?.reexecucao) ?? '',
+      depende_de: String(c?.depende_de ?? '').slice(0, 120),
     }));
   } catch {
     return volta(lang, 'erro', t.rotErroLer);

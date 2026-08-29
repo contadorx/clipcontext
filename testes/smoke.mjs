@@ -23,7 +23,7 @@ const srv=http.createServer((q,r)=>{
     return r.end(fs.readFileSync(`${RAIZ_WS}/public/sw.js`));
   }
   r.writeHead(200,{'Content-Type':'text/html'});r.end(atual)});
-await new Promise(r=>srv.listen(8896,r));
+await new Promise(r=>srv.listen(8811,r));
 const br=await chromium.launch({executablePath:CHROME_WS});
 let falhas=0;
 const ok=(nome,cond)=>{ console.log((cond?'  ok   ':'  FALHA')+'  '+nome); if(!cond) falhas++; };
@@ -40,7 +40,7 @@ async function pagina(){
 console.log('\n[1] sem configuracao');
 atual=desligado;
 let {pg,erros,google,ctx}=await pagina();
-await pg.goto('http://localhost:8896/app.html?lang=pt'); await pg.waitForTimeout(700);
+await pg.goto('http://localhost:8811/app.html?lang=pt'); await pg.waitForTimeout(700);
 // o cenário de uso passou a ser obrigatório: sem ele o botão Gravar cobra a escolha
 await pg.selectOption('#modelo', 'ia').catch(() => {});
 ok('sem as três constantes, a linha do Drive não existe',
@@ -54,7 +54,7 @@ await ctx.close();
 console.log('\n[2] configurado');
 atual=cfg;
 ({pg,erros,google,ctx}=await pagina());
-await pg.goto('http://localhost:8896/app.html?lang=pt'); await pg.waitForTimeout(700);
+await pg.goto('http://localhost:8811/app.html?lang=pt'); await pg.waitForTimeout(700);
 // o cenário de uso passou a ser obrigatório: sem ele o botão Gravar cobra a escolha
 await pg.selectOption('#modelo', 'ia').catch(() => {});
 ok('linha do Drive visivel', await pg.locator('#driveRow').isVisible());

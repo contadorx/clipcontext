@@ -32,7 +32,7 @@ const srv = http.createServer((q, r) => {
   if (q.url.startsWith('/_vercel/')) { r.writeHead(200, { 'Content-Type': 'text/javascript' }); return r.end(''); }
   r.writeHead(200, { 'Content-Type': 'text/html' }); r.end(html);
 });
-await new Promise((r) => srv.listen(8917, r));
+await new Promise((r) => srv.listen(8819, r));
 
 let falhas = 0;
 const ok = (n, c, extra) => {
@@ -62,7 +62,7 @@ const pg = await ctx.newPage();
    costumam quebrar. Rodar os cinco custa segundos; rodar um custa um chamado. */
 for (const L of ['pt', 'en', 'es', 'de', 'fr']) {
   console.log(`\n[${L}] o material sai limpo`);
-  await pg.goto(`http://localhost:8917/app.html?lang=${L}&modelo=evidencia` +
+  await pg.goto(`http://localhost:8819/app.html?lang=${L}&modelo=evidencia` +
                 '&caso=CT-014&chamado=UAT-4711&sistema=S4P%2F100&quem=Leandro&resultado=ok');
   await pg.waitForTimeout(400);
   await pg.setInputFiles('#file', '/tmp/amostra.webm');

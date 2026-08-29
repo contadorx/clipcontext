@@ -13,7 +13,7 @@ const jspdf = fs.readFileSync(`${RAIZ_WS}/vendor/jspdf.umd.min.js`, 'utf8');
    O servidorzinho estático daqui virou um encaminhador para o Next — mesma
    porta, mesmas URLs no teste, e quem responde é o produto de verdade. */
 const srv = criarProxy();
-await new Promise(r => srv.listen(8918, r));
+await new Promise(r => srv.listen(8820, r));
 
 /* ---- A CHAVE DE PRODUÇÃO NÃO VIAJA, E NÃO PRECISA VIAJAR ----
    Este arquivo pulava em toda corrida por depender de `emitir-licenca.py`, que
@@ -85,7 +85,7 @@ console.log('[1] o emissor entrega um link, não só uma chave');
 console.log('\n[2] abrir o link ativa o plano — sem ninguém colar nada');
 {
   const { ctx, pg, erros } = await pagina();
-  await pg.goto(`http://localhost:8918/app.html?lang=pt&lic=${encodeURIComponent(VALIDA)}&marca=${encodeURIComponent('Cliente Exemplo S.A.')}`);
+  await pg.goto(`http://localhost:8820/app.html?lang=pt&lic=${encodeURIComponent(VALIDA)}&marca=${encodeURIComponent('Cliente Exemplo S.A.')}`);
   await pg.waitForTimeout(700);
   ok('o plano está ativo', /Licen[çc]a v[áa]lida/.test(await pg.locator('#licMsg').textContent()),
      (await pg.locator('#licMsg').textContent()).slice(0, 70));
@@ -110,9 +110,9 @@ console.log('\n[2] abrir o link ativa o plano — sem ninguém colar nada');
 console.log('\n[3] o F5 mantém: a chave ficou no navegador, não no endereço');
 {
   const { ctx, pg } = await pagina();
-  await pg.goto(`http://localhost:8918/app.html?lang=pt&lic=${encodeURIComponent(VALIDA)}`);
+  await pg.goto(`http://localhost:8820/app.html?lang=pt&lic=${encodeURIComponent(VALIDA)}`);
   await pg.waitForTimeout(600);
-  await pg.goto('http://localhost:8918/app.html?lang=pt');
+  await pg.goto('http://localhost:8820/app.html?lang=pt');
   await pg.waitForTimeout(700);
   ok('continua no plano Time depois de abrir sem o link',
      /Licen[çc]a v[áa]lida/.test(await pg.locator('#licMsg').textContent()));
@@ -122,7 +122,7 @@ console.log('\n[3] o F5 mantém: a chave ficou no navegador, não no endereço')
 console.log('\n[4] link com chave ruim não engole o erro');
 {
   const { ctx, pg } = await pagina();
-  await pg.goto(`http://localhost:8918/app.html?lang=pt&lic=${encodeURIComponent(VALIDA.slice(0, -4) + 'AAAA')}`);
+  await pg.goto(`http://localhost:8820/app.html?lang=pt&lic=${encodeURIComponent(VALIDA.slice(0, -4) + 'AAAA')}`);
   await pg.waitForTimeout(700);
   ok('não ativou', !/Licen[çc]a v[áa]lida/.test(await pg.locator('#licMsg').textContent()));
   ok('a caixa abriu sozinha para mostrar o motivo', await pg.locator('#licBox').isVisible());
@@ -136,7 +136,7 @@ console.log('\n[4] link com chave ruim não engole o erro');
 console.log('\n[5] marca sem licença não passa (é feature paga)');
 {
   const { ctx, pg } = await pagina();
-  await pg.goto('http://localhost:8918/app.html?lang=pt&marca=Empresa%20Qualquer');
+  await pg.goto('http://localhost:8820/app.html?lang=pt&marca=Empresa%20Qualquer');
   await pg.waitForTimeout(600);
   ok('a marca do cliente continua escondida', !(await pg.locator('#marcaBox').isVisible()));
   ok('e o nome não foi para o campo', (await pg.locator('#mcNome').inputValue()) === '');
@@ -146,7 +146,7 @@ console.log('\n[5] marca sem licença não passa (é feature paga)');
 console.log('\n[6] o construtor de /link monta o link do Time');
 {
   const { ctx, pg, erros } = await pagina();
-  await pg.goto('http://localhost:8918/link');
+  await pg.goto('http://localhost:8820/link');
   await pg.waitForTimeout(400);
   ok('o bloco do Time existe e começa fechado',
      (await pg.locator('#lkTimeCx').count()) === 1 &&
@@ -175,7 +175,7 @@ console.log('\n[6] o construtor de /link monta o link do Time');
 
   /* O link montado tem que funcionar de verdade, e não só parecer certo. */
   const pg2 = await ctx.newPage();
-  await pg2.goto('http://localhost:8918' + url.replace(/^https?:\/\/[^/]+/, '').replace('/app?', '/app.html?'));
+  await pg2.goto('http://localhost:8820' + url.replace(/^https?:\/\/[^/]+/, '').replace('/app?', '/app.html?'));
   await pg2.waitForTimeout(700);
   /* Sem ?lang= o app segue o idioma do navegador — então a prova é a feature
      paga estar na tela, e não a palavra "Plano Time". */
@@ -197,7 +197,7 @@ console.log('\n[6] o construtor de /link monta o link do Time');
 console.log('\n[7] a chave à mão continua existindo, discreta');
 {
   const { ctx, pg } = await pagina();
-  await pg.goto('http://localhost:8918/app.html?lang=pt');
+  await pg.goto('http://localhost:8820/app.html?lang=pt');
   await pg.waitForTimeout(400);
   // o botão de vender saiu do rodapé; a caixa abre pelo link do e-mail
   await pg.evaluate(() => document.getElementById('licBox').classList.remove('hide'));

@@ -125,9 +125,13 @@ ok('o estado do segundo acompanha', /1 trechos com tempo/.test(await pg.locator(
 console.log('\n[5] o recado sai por HTTP, com o diagnóstico anexado');
 {
   const enviados = [];
-  await pg.route('**/rest/v1/rpc/walkstamp_recado', r => {
+  /* A PORTA MUDOU EM 29/08: o chamado passou a ir por `/api/chamado`, e não
+     mais direto ao Supabase — o limite morava no banco, e ali não há IP, então
+     a única chave possível era o ALVO. Quem interceptasse a porta velha veria
+     zero envios e diria que o produto quebrou. */
+  await pg.route('**/api/chamado', r => {
     enviados.push(JSON.parse(r.request().postData() || '{}'));
-    r.fulfill({ status:200, contentType:'application/json', body:'"ok"' });
+    r.fulfill({ status:200, contentType:'application/json', body:'{"numero":"WS-0042"}' });
   });
   await pg.locator('#avisar').click();
   await pg.waitForFunction(() => {
@@ -145,8 +149,8 @@ console.log('\n[5] o recado sai por HTTP, com o diagnóstico anexado');
   await pg.locator('#fbEnviar').click(); await pg.waitForTimeout(700);
   ok('foi por HTTP, e não abrindo o programa de e-mail', enviados.length === 1, String(enviados.length));
   const e = enviados[0] || {};
-  ok('com o diagnóstico junto', (e.p_diag || '').length > 40, String((e.p_diag||'').length));
-  ok('e a origem marcada como app', e.p_origem === 'app', e.p_origem);
+  ok('com o diagnóstico junto', (e.diag || '').length > 40, String((e.diag||'').length));
+  ok('e a origem marcada como app', e.origem === 'app', e.origem);
   ok('a tela confirma', /Recebido/.test(await pg.locator('#fbMsg').textContent()),
      await pg.locator('#fbMsg').textContent());
   /* Desmarcar a caixa tem que realmente tirar o relatório do envio. */

@@ -20,6 +20,7 @@ import { CAMINHO, LOCALE_STRIPE, type Lang, ehLang, preencher, textos } from '@/
 import { enderecoDoItem } from '@/lib/conta/nav';
 import { type Chave, emitirChave } from '@/lib/conta/licenca';
 import { medirConta } from '@/lib/conta/medir';
+import { convidarParaAssento } from '@/lib/conta/convite-assento';
 
 /** O idioma vem do formulário de propósito: ele decide só em que língua a
  *  resposta é escrita, e não dá acesso a nada. */
@@ -70,6 +71,14 @@ function recusa(lang: Lang, erro: string): string {
     ja_de_outro: t.erroJaDeOutro,
     sem_assento: t.erroSemAssento,
     nao_a_si: t.erroNaoASi,
+    /* As recusas do domínio. Cada uma tem frase própria porque cada uma pede
+       uma ação diferente de quem lê: trocar o endereço, falar com quem já
+       reivindicou, ou desistir. Um "erro" só mandaria a pessoa adivinhar. */
+    nao_e_seu_dominio: t.erroDominioNaoESeu,
+    dominio_publico: t.erroDominioPublico,
+    ja_reivindicado: t.erroDominioJaReivindicado,
+    dominio_invalido: t.erroDominioInvalido,
+    nao_e_seu: t.erroDominioNaoCadastrado,
   } as Record<string, string>)[erro] || t.erroLeitura;
 }
 
@@ -224,11 +233,65 @@ async function comoAdmin(lang: Lang, funcao: string, args: Record<string, unknow
   return volta(lang, 'feito', textos(lang).timeSalvo);
 }
 
+/** Convidar tem DUAS metades, e é a única ação de time que não passa pelo
+ *  `comoAdmin`.
+ *
+ *  As outras quatro terminam no banco: gravou, acabou. Esta continua depois —
+ *  o assento nasce e um e-mail tem que sair. E a segunda metade falha sozinha:
+ *  sem a chave do Brevo, sem o `CONVITE_SAL`, ou com o limite de destino
+ *  estourado, o assento existe e a carta não saiu.
+ *
+ *  Dizer "convidado" nos três casos seria a falha que o `lib/email.ts` inteiro
+ *  existe para evitar, escrita na tela: ninguém procura o e-mail que o sistema
+ *  jurou ter mandado — e aqui quem não procura é o convidado, que fica sem
+ *  saber que tem assento. Por isso o recado do meio-termo é NEUTRO e diz as
+ *  duas coisas: o assento está lá, avise a pessoa por fora.
+ */
 export async function convidar(form: FormData) {
   const lang = idioma(form);
   const email = String(form.get('email') || '').trim().toLowerCase();
   if (!email) return volta(lang, 'erro', textos(lang).erroEmailInvalido);
-  return comoAdmin(lang, 'walkstamp_time_convidar', { p_email: email });
+
+  const quem = await emailDaSessao();
+  if (!quem) return volta(lang, 'erro', textos(lang).erroEntrePrimeiro);
+  let r: { erro?: string; cliente?: string | null } | null;
+  try {
+    r = await rpc<{ erro?: string; cliente?: string | null } | null>(
+      'walkstamp_time_convidar', { p_admin: quem, p_email: email });
+  } catch {
+    return volta(lang, 'erro', textos(lang).erroLeitura);
+  }
+  if (r && r.erro) return volta(lang, 'erro', recusa(lang, r.erro));
+
+  const t = textos(lang);
+  const saida = await convidarParaAssento({
+    para: email, quem, cliente: (r && r.cliente) || null, lang });
+  if (saida === 'enviado') return volta(lang, 'feito', preencher(t.timeConviteEnviado, { email }));
+  return volta(lang, 'parcial',
+               preencher(saida === 'limite' ? t.timeConviteLimite : t.timeConviteNaoSaiu, { email }));
+}
+
+/* O DOMÍNIO, AGORA SEM PASSAR POR NÓS.
+ *
+ * A regra de posse mora no banco e é a mesma daqui: o domínio tem que ser o do
+ * e-mail de quem pede. Escrevê-la também aqui seria a segunda cópia — e a
+ * segunda cópia é a que fica para trás. O que esta função faz é levar o pedido
+ * com o e-mail da SESSÃO, que é a única coisa que o banco não tem como saber.
+ */
+export async function cadastrarDominio(form: FormData) {
+  const lang = idioma(form);
+  return comoAdmin(lang, 'walkstamp_time_dominio', {
+    p_dominio: String(form.get('dominio') || '').trim().slice(0, 253),
+    p_remover: false,
+  });
+}
+
+export async function removerDominio(form: FormData) {
+  const lang = idioma(form);
+  return comoAdmin(lang, 'walkstamp_time_dominio', {
+    p_dominio: String(form.get('dominio') || '').trim().slice(0, 253),
+    p_remover: true,
+  });
 }
 
 export async function bloquear(form: FormData) {

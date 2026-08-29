@@ -291,13 +291,27 @@ const CHAVE = { beta: 'tpBeta', construcao: 'tpBreve', descoberta: 'tpDescoberta
   const fora = itens.map(estadoDe).filter((e) => !ESTADOS.includes(e));
   ok('nenhum estado fora do vocabulário', fora.length === 0, [...new Set(fora)].join(', '));
 
+  /* ---- ESTA AFIRMAÇÃO MUDOU DE PERGUNTA — 29/08 ----
+
+     Ela era `usados.length > 0`: "o catálogo usa mais de um estado". Fazia
+     sentido enquanto havia item inacabado, e passou a EXIGIR que houvesse um.
+     No Build 51 o último selo caiu — o `dominioAutomatico` saiu do `beta` — e
+     a régua reprovou o produto por estar pronto.
+
+     Mas ela guardava uma coisa de verdade, e essa continua: se nenhum item usa
+     selo, a maquinaria do selo vira código morto e ninguém percebe quando ela
+     quebra. Então a pergunta virou outra: as TRÊS palavras existem nos cinco
+     idiomas, usadas ou não. Assim o dia em que um item voltar a precisar de
+     selo — e vai voltar — a palavra dele já está lá, e não sai em português
+     numa página alemã. */
   const usados = [...new Set(itens.map(estadoDe))].filter((e) => e !== 'producao');
-  ok('o catálogo usa mais de um estado', usados.length > 0, usados.join(', '));
+  console.log(`     estados em uso hoje: ${usados.length ? usados.join(', ') : 'nenhum — o catálogo está inteiro em produção'}`);
 
   const dic = JSON.parse(fs.readFileSync(`${RAIZ_WS}/src/i18n-site.json`, 'utf8'));
-  for (const e of usados) {
+  for (const e of Object.keys(CHAVE)) {
     const sem = LINGUAS.filter((lg) => !String(dic[lg]?.[CHAVE[e]] || '').trim());
-    ok(`o estado "${e}" tem palavra nos cinco idiomas`, sem.length === 0, sem.join(', '));
+    ok(`o estado "${e}" tem palavra nos cinco idiomas${usados.includes(e) ? '' : ' (guardada para quando voltar)'}`,
+       sem.length === 0, sem.join(', '));
   }
   /* E a legenda que explica os selos está na página, nos cinco. "Beta" numa
      tabela de preço sem explicação é a palavra que faz a avaliação de

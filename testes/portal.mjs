@@ -21,6 +21,7 @@ import { spawn, execSync } from 'child_process';
 import http from 'http';
 import fs from 'fs';
 import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+import { garantirPortaLivre } from './_porta.mjs';
 /* O menu sai do `rotas.json`, a mesma tabela que o painel usa. Escrito aqui,
    seria a lista de mentira ao lado da de verdade. */
 const MENU_CONTA = JSON.parse(
@@ -102,6 +103,10 @@ const matarPorta = () => { try { execSync(`fuser -k ${P}/tcp 2>/dev/null`); } ca
 matarPorta();
 await new Promise((r) => setTimeout(r, 500));
 
+/* A porta é nossa antes de qualquer coisa — o porquê está no `_porta.mjs`,
+   e ele custou uma hora de caçada a um defeito que não existia. */
+await garantirPortaLivre(P, 'o portal.mjs');
+
 const next = spawn('npx', ['next', 'start', '-p', String(P)], {
   cwd: `${RAIZ_WS}`, stdio: 'ignore',
   env: { ...process.env,
@@ -147,15 +152,20 @@ const abrir = async (rota = '/conta') => {
   await pg.waitForTimeout(400);
 };
 
-/** Clica e espera a volta do Server Action, que sempre traz `feito` ou `erro`
- *  no endereço. Esperar `networkidle` não serve: ele resolve antes do
- *  redirecionamento e o teste lê a tela velha. */
+/** Clica e espera a volta do Server Action, que sempre traz `feito`, `erro` ou
+ *  `parcial` no endereço. Esperar `networkidle` não serve: ele resolve antes do
+ *  redirecionamento e o teste lê a tela velha.
+ *
+ *  `parcial` entrou em 28/08 com o convite de assento, que faz DUAS coisas: cria
+ *  o assento e manda o e-mail. Aqui não há disparador configurado, então o
+ *  convite legítimo volta em `parcial` — o assento nasceu, a carta não saiu. É
+ *  o comportamento certo, e sem esta linha o teste esperaria para sempre. */
 async function enviar(seletor) {
   /* `.first()` porque vários botões legítimos compartilham o mesmo rótulo — dois
      modelos têm "Apagar", e o modo estrito do Playwright recusa a ambiguidade.
      Quem escolhe qual é o teste, e para estas ações o primeiro serve. */
   await pg.locator(seletor).first().click();
-  await pg.waitForURL(/[?&](feito|erro)=/, { timeout: 20000 });
+  await pg.waitForURL(/[?&](feito|erro|parcial)=/, { timeout: 20000 });
 }
 const corpo = () => pg.locator('body').innerText();
 
@@ -232,6 +242,16 @@ console.log('\n[4] convidar, e o limite de assento');
   ok('com o convidado', !!c && c.args.p_email === 'novo@teste-portal.example', c && c.args.p_email);
   ok('e o admin da sessão, nunca do formulário',
      !!c && c.args.p_admin === 'chefe@teste-portal.example', c && c.args.p_admin);
+  /* SEM DISPARADOR CONFIGURADO, A TELA NÃO DIZ "CONVIDADO" — 28/08.
+     O assento nasce no banco de qualquer jeito; o e-mail é a segunda metade e
+     falha sozinha. Uma tela que diz "convite enviado" faz o administrador ir
+     embora achando que a pessoa foi avisada — e quem fica sem saber que tem
+     assento é o convidado, que não tem como reclamar do que não recebeu.
+     Aqui não há BREVO_API_KEY, então o caminho certo é este. O e-mail saindo
+     de verdade é provado no `email.mjs`, que tem o Brevo de mentira de pé. */
+  ok('e a tela conta que o convite não saiu, em vez de dizer que saiu',
+     /[?&]parcial=/.test(pg.url()) && /assento/i.test(await corpo()),
+     pg.url().replace(/^.*\?/, '?').slice(0, 90));
 
   RECUSA = 'sem_assento';
   await abrir('/conta/time');
@@ -249,7 +269,7 @@ console.log('\n[4] convidar, e o limite de assento');
   await pg.locator('input[type="email"][name="email"]').first().fill('torto@');
   await pg.locator('button:has-text("Convidar")').click();
   await pg.waitForTimeout(800);
-  ok('e-mail torto nem sai do navegador', !/[?&](feito|erro)=/.test(pg.url()), pg.url());
+  ok('e-mail torto nem sai do navegador', !/[?&](feito|erro|parcial)=/.test(pg.url()), pg.url());
   ok('e não encosta no banco',
      !chamadas.slice(antesTorto).some((x) => x.fn === 'walkstamp_time_convidar'));
 
@@ -262,6 +282,88 @@ console.log('\n[4] convidar, e o limite de assento');
   ok('a recusa do banco vira frase, não código',
      !/ja_de_outro/.test(await corpo()) && (await corpo()).length > 100,
      (await corpo()).split('\n').find((l) => l.length > 20) || '');
+}
+
+console.log('\n[4b] o domínio da empresa, cadastrado por quem administra');
+{
+  /* O item `dominioAutomatico` do catálogo esteve em `beta` até o Build 51 por
+     um motivo honesto: a entrada por domínio FUNCIONAVA, mas quem cadastrava o
+     domínio éramos nós, na mão, por chamado. Isto é o que tirou o selo.
+
+     A REGRA DE POSSE MORA NO BANCO e é provada lá — só o domínio do próprio
+     e-mail, nunca um provedor público, nunca um já reivindicado. O que esta
+     régua guarda é o outro lado: que a tela existe, que ela manda o pedido com
+     o e-mail da SESSÃO, e que a recusa do banco vira frase e não código. */
+  await abrir('/conta/time');
+  const corpoTxt = await corpo();
+  ok('a caixa do domínio está na tela', /Entrada autom[áa]tica por dom[íi]nio/i.test(corpoTxt),
+     corpoTxt.slice(0, 60).replace(/\n/g, ' '));
+  ok('  e o domínio já cadastrado aparece', /teste-portal\.example/.test(corpoTxt));
+  /* O TETO DITO NA CARA: a entrada por domínio para quando os assentos acabam,
+     e quem não souber vai achar que o produto quebrou na quadragésima pessoa. */
+  ok('  e a tela avisa que a entrada para quando os assentos acabam',
+     /assentos acabam/i.test(corpoTxt),
+     (corpoTxt.match(/.{0,40}assentos acabam.{0,30}/) || [''])[0]);
+
+  const antes = chamadas.length;
+  await pg.locator('input[name="dominio"]').last().fill('empresa-nova.test');
+  await enviar('button:has-text("Cadastrar")');
+  const c = chamadas.slice(antes).find((x) => x.fn === 'walkstamp_time_dominio');
+  ok('o cadastro chega ao banco', !!c);
+  ok('  com o domínio digitado', !!c && c.args.p_dominio === 'empresa-nova.test', c && c.args.p_dominio);
+  ok('  e o admin da SESSÃO, nunca do formulário',
+     !!c && c.args.p_admin === 'chefe@teste-portal.example', c && c.args.p_admin);
+  ok('  e sem pedir remoção', !!c && c.args.p_remover === false, c && JSON.stringify(c.args.p_remover));
+
+  /* Soltar é o outro lado, e ele manda o MESMO nome com `p_remover` — não uma
+     segunda função com metade da regra. */
+  const antesSoltar = chamadas.length;
+  await abrir('/conta/time');
+  await enviar('button:has-text("Soltar")');
+  const s2 = chamadas.slice(antesSoltar).find((x) => x.fn === 'walkstamp_time_dominio');
+  ok('soltar usa a mesma porta, com o pedido de remoção',
+     !!s2 && s2.args.p_remover === true && s2.args.p_dominio === 'teste-portal.example',
+     s2 && JSON.stringify(s2.args));
+
+  /* A RECUSA VIRA FRASE. Cada uma pede uma ação diferente de quem lê — trocar
+     o endereço, falar com quem já reivindicou, desistir —, e um código na tela
+     mandaria a pessoa adivinhar qual. */
+  for (const [erro, esperado] of [
+    ['dominio_publico', /provedor de e-mail p[úu]blico/i],
+    ['nao_e_seu_dominio', /dom[íi]nio do seu pr[óo]prio e-mail/i],
+    ['ja_reivindicado', /outro cliente/i],
+  ]) {
+    RECUSA = erro;
+    await abrir('/conta/time');
+    await pg.locator('input[name="dominio"]').last().fill('qualquer-coisa.test');
+    await enviar('button:has-text("Cadastrar")');
+    const txt = await corpo();
+    /* O detalhe mostra O RECADO, e não os primeiros setenta caracteres da
+       página — que era "Walkstamp", o cabeçalho, e não dizia nada sobre a
+       afirmação ao lado. */
+    const recado = (txt.match(/[^\n]*(p[úu]blico|pr[óo]prio e-mail|outro cliente)[^\n]*/i) || [''])[0];
+    ok(`  "${erro}" vira frase, e não código`, esperado.test(txt) && !txt.includes(erro),
+       recado.slice(0, 90) || txt.slice(0, 60).replace(/\n/g, ' '));
+  }
+}
+
+console.log('\n[4c] assento cheio: a tela diz o que aconteceu, e não um código');
+{
+  /* O Build 51 fez o assento virar LIMITE de verdade — antes a entrada por
+     domínio dava o plano do cliente a qualquer e-mail daquele domínio, sem
+     contar quantos já estavam dentro. Quem comprasse 3 podia dar o plano a 500.
+
+     A trava mora no `plano_de` e é provada no banco. Aqui é a outra metade: o
+     motivo novo tem que ter frase. Um `sem_assento` cru na tela de quem paga é
+     o produto falando em nome de tabela. */
+  CONTA = conta();
+  CONTA.motivo = 'sem_assento';
+  await abrir('/conta');
+  const txt = await corpo();
+  ok('"sem_assento" vira frase na tela do plano',
+     /assentos acabaram/i.test(txt) && !txt.includes('sem_assento'),
+     (txt.match(/[^\n]*assentos acabaram[^\n]*/i) || [''])[0].slice(0, 80));
+  CONTA = conta();
 }
 
 console.log('\n[5] bloquear, e o prazo como controle real');

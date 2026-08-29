@@ -17,7 +17,7 @@ const srv = http.createServer((q, r) => {
   }
   r.writeHead(200, { 'Content-Type': 'text/html' }); r.end(html);
 });
-await new Promise(r => srv.listen(8907, r));
+await new Promise(r => srv.listen(8812, r));
 
 const br = await chromium.launch({
   executablePath: CHROME_WS,
@@ -81,7 +81,7 @@ await pg.addInitScript(() => {
   navigator.mediaDevices.getUserMedia = async () => tom(440);
 });
 
-await pg.goto('http://localhost:8907/app.html?lang=pt');
+await pg.goto('http://localhost:8812/app.html?lang=pt');
 // o cenário de uso passou a ser obrigatório: sem ele o Gravar e o envio de vídeo cobram a escolha
 await pg.selectOption('#modelo', 'ia').catch(() => {});
 await pg.waitForTimeout(600);

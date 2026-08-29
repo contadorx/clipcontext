@@ -12,7 +12,7 @@ const ROOT=`${RAIZ_WS}/public`;
 const html=fs.readFileSync(ROOT+'/app.html','utf8');
 const jspdf=fs.readFileSync(`${RAIZ_WS}/vendor/jspdf.umd.min.js`,'utf8');
 const srv=http.createServer((q,r)=>{if(q.url.startsWith('/_vercel/')){r.writeHead(200,{'Content-Type':'text/javascript'});return r.end('')}r.writeHead(200,{'Content-Type':'text/html'});r.end(html)});
-await new Promise(r=>srv.listen(8918,r));
+await new Promise(r=>srv.listen(8859,r));
 const br=await chromium.launch({executablePath:CHROME_WS});
 let falhas=0; const ok=(n,c,e)=>{console.log((c?'  ok   ':'  FALHA')+'  '+n+(e?'  → '+e:''));if(!c)falhas++};
 function lerZip(caminho){
@@ -28,7 +28,7 @@ const ctx=await br.newContext({acceptDownloads:true});
 const pg=await ctx.newPage();
 const erros=[]; pg.on('pageerror',e=>erros.push(e.message));
 await pg.route('**/jspdf**',r=>r.fulfill({status:200,headers:{'content-type':'text/javascript','access-control-allow-origin':'*'},body:jspdf}));
-await pg.goto('http://localhost:8918/app.html?lang=pt');
+await pg.goto('http://localhost:8859/app.html?lang=pt');
 // o cenário virou obrigatório ANTES de o vídeo entrar; a escolha específica
 // de cada bloco continua mais abaixo e ganha desta.
 await pg.selectOption('#modelo', 'ia').catch(() => {});

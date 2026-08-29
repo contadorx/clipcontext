@@ -24,6 +24,7 @@ import http from 'http';
 import fs from 'fs';
 
 import { RAIZ_WS } from './_caminhos.mjs';
+import { garantirPortaLivre } from './_porta.mjs';
 const P = 8821, B = 8822;
 const BASE = `http://localhost:${P}`;
 const SEGREDO = 'segredo-de-cron-de-teste';
@@ -63,8 +64,11 @@ const matarPorta = () => { try { execSync(`fuser -k ${P}/tcp 2>/dev/null`); } ca
 
 /** Sobe um Next com (ou sem) o segredo, roda o que for pedido, e desce. */
 async function comNext(env, corpo) {
-  matarPorta();
-  await new Promise((r) => setTimeout(r, 600));
+  /* Matar a porta não é o mesmo que ela ficar livre — o `_porta.mjs` conta o
+     caso em que isso custou uma hora. Aqui vale dobrado: este arquivo sobe o
+     Next DUAS vezes, e o segundo bloco já conversou com o servidor do primeiro
+     uma vez, dizendo "falta CRON_SECRET" numa rodada que tinha o segredo. */
+  await garantirPortaLivre(P, 'o faxina.mjs');
   const n = spawn('npx', ['next', 'start', '-p', String(P)], {
     cwd: `${RAIZ_WS}`, stdio: 'ignore',
     env: { ...process.env,

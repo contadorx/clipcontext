@@ -11,7 +11,7 @@ const jspdf=fs.readFileSync(`${RAIZ_WS}/vendor/jspdf.umd.min.js`,'utf8');
    O servidorzinho estático daqui virou um encaminhador para o Next — mesma
    porta, mesmas URLs no teste, e quem responde é o produto de verdade. */
 const srv = criarProxy();
-await new Promise(r=>srv.listen(8921,r));
+await new Promise(r=>srv.listen(8863,r));
 const br=await chromium.launch({executablePath:CHROME_WS});
 let falhas=0; const ok=(n,c,e)=>{console.log((c?'  ok   ':'  FALHA')+'  '+n+(e?'  → '+e:''));if(!c)falhas++};
 const ctx=await br.newContext({acceptDownloads:true});
@@ -20,7 +20,7 @@ const erros=[]; pg.on('pageerror',e=>erros.push(e.message));
 await pg.route('**/jspdf**',r=>r.fulfill({status:200,headers:{'content-type':'text/javascript','access-control-allow-origin':'*'},body:jspdf}));
 
 console.log('\n[1] gerar um pacote com impressão digital');
-await pg.goto('http://localhost:8921/app?lang=pt');
+await pg.goto('http://localhost:8863/app?lang=pt');
 // o cenário virou obrigatório ANTES de o vídeo entrar
 await pg.selectOption('#modelo', 'ia').catch(() => {});
 await pg.setInputFiles('#file','/tmp/amostra.webm');
@@ -45,7 +45,7 @@ await pg.waitForTimeout(200);
 }
 
 const verificar = async (arquivo) => {
-  await pg.goto('http://localhost:8921/verificar');
+  await pg.goto('http://localhost:8863/verificar');
   await pg.setInputFiles('#verArq', arquivo);
   await pg.waitForFunction(()=>{
     const t=document.getElementById('verSaida').textContent;
@@ -83,7 +83,7 @@ console.log('\n[3] pacote adulterado é pego');
 
 console.log('\n[4] pacote sem impressão digital diz o que fazer');
 {
-  await pg.goto('http://localhost:8921/app?lang=pt');
+  await pg.goto('http://localhost:8863/app?lang=pt');
   // o cenário virou obrigatório ANTES de o vídeo entrar
   await pg.selectOption('#modelo', 'ia').catch(() => {});
   await pg.setInputFiles('#file','/tmp/amostra.webm');
@@ -100,11 +100,11 @@ console.log('\n[4] pacote sem impressão digital diz o que fazer');
 
 console.log('\n[5] a página existe nos três idiomas e está no rodapé');
 for (const rota of ['/verificar','/en/verify','/es/verificar']) {
-  const resp = await pg.goto('http://localhost:8921'+rota);
+  const resp = await pg.goto('http://localhost:8863'+rota);
   ok(rota+' responde 200', resp.status()===200, String(resp.status()));
 }
 {
-  await pg.goto('http://localhost:8921/?lang=pt');
+  await pg.goto('http://localhost:8863/?lang=pt');
   const links = await pg.locator('footer a').evaluateAll(as=>as.map(a=>a.getAttribute('href')));
   ok('o rodapé leva ao verificador', links.includes('/verificar'), links.join(' '));
 }

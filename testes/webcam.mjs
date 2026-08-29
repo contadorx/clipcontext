@@ -10,7 +10,7 @@ import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
 const html = fs.readFileSync(`${RAIZ_WS}/public/app.html`,'utf8');
 const jspdf = fs.readFileSync(`${RAIZ_WS}/vendor/jspdf.umd.min.js`,'utf8');
 const srv = http.createServer((q,r)=>{ if(q.url.startsWith('/_vercel/')){r.writeHead(200,{'Content-Type':'text/javascript'});return r.end('')} r.writeHead(200,{'Content-Type':'text/html'}); r.end(html); });
-await new Promise(r=>srv.listen(8938,r));
+await new Promise(r=>srv.listen(8869,r));
 const br = await chromium.launch({
   executablePath:CHROME_WS,
   args:['--use-fake-ui-for-media-stream','--use-fake-device-for-media-stream',
@@ -23,7 +23,7 @@ const ctx = await br.newContext({ acceptDownloads:true, viewport:{width:1300,hei
 const pg = await ctx.newPage();
 const erros=[]; pg.on('pageerror', e=>erros.push(e.message));
 await pg.route('**/jspdf**', r=>r.fulfill({status:200,headers:{'content-type':'text/javascript'},body:jspdf}));
-await pg.goto('http://localhost:8938/app.html?lang=pt');
+await pg.goto('http://localhost:8869/app.html?lang=pt');
 await pg.waitForTimeout(400);
 
 /* A webcam saiu da lista de opções e foi para o modal do clipe: as duas servem
@@ -155,7 +155,7 @@ const branco = async (pagina) => pagina.evaluate(async () => {
 
 const semCam = await ctx.newPage();
 await semCam.route('**/jspdf**', r=>r.fulfill({status:200,headers:{'content-type':'text/javascript'},body:jspdf}));
-await semCam.goto('http://localhost:8938/app.html?lang=pt');
+await semCam.goto('http://localhost:8869/app.html?lang=pt');
 await semCam.waitForTimeout(400);
 console.log('     gravando 12 s sem webcam…');
 const baseQuadros = await gravar(semCam, false);

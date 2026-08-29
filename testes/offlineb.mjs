@@ -157,8 +157,8 @@ console.log('\n[5] e a versão da WEB continua com tudo — o corte é do pacote
     r.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
     r.end(fs.readFileSync(`${RAIZ_WS}/public/app.html`));
   });
-  await new Promise((r) => srv.listen(8834, r));
-  await pg2.goto('http://localhost:8834/app.html');
+  await new Promise((r) => srv.listen(8866, r));
+  await pg2.goto('http://localhost:8866/app.html');
   await pg2.waitForTimeout(1500);
   ok('  servida por http, a escolha de transcrever está de pé',
      await pg2.locator('#recTr').isVisible().catch(() => false));

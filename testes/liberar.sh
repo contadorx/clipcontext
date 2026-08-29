@@ -50,13 +50,21 @@ TUDO=0
 # existe para a porta de liberação rodá-lo. O heredoc com o delimitador entre
 # aspas simples não expande crase, $ nem nada.
 read -r -d '' MAPA <<'MAPA_FIM'
-# `src/template.html` É O PRODUTO. Seis réguas não o cobrem — este mapa nasceu
-# com elas e o Build 2 provou a falha: mexer nos quatro caminhos destrutivos e na
-# largura do índice do .zip não acionou `reabrir`, `juntar`, `indice`, `grade`
-# nem `anotacao`, que são exatamente as que afirmam sobre isso. Quem toca o
-# produto roda o grupo do produto — é o `app` do `rapido.sh`, sem servidor, e é
-# o preço honesto de mexer no arquivo que faz tudo.
-^src/template[.]html$ => offlineb.mjs egressao.mjs marcos-a11y.mjs recursos.mjs nomes-a11y.mjs semrede.mjs escolhas.mjs erro.mjs smoke.mjs saidas.mjs passos.mjs dobra.mjs travado.mjs gravando.mjs janelinha.mjs comentario.mjs marcados.mjs revisao.mjs marca.mjs formato.mjs promptcx.mjs appidioma.mjs compartilhar.mjs celular.mjs teto.mjs cenario1.mjs organiza.mjs acabamento.mjs lente2.mjs traducao.mjs passomulti.mjs pessoas.mjs matriz.mjs conclusao.mjs parar.mjs entrada.mjs indice.mjs figura.mjs resumo.mjs perna.mjs cartao.mjs etapas.mjs marcos.mjs semundefined.mjs reabrir.mjs juntar.mjs juntos.mjs grade.mjs anotacao.mjs trocar.mjs varredura.mjs descarte.mjs clipe.mjs numeros.mjs vocab.mjs foco.mjs apoio.mjs nitidez.mjs versoes.mjs marcar.mjs janelinha.mjs emissor.mjs
+# `src/template.html` É O PRODUTO, e o grupo dele é PERGUNTADO AO DISCO.
+#
+# Esta linha listava SESSENTA E UM nomes à mão, e a lista estava errada dos dois
+# lados — medido em 29/08: sete dos listados nem leem o produto, e CINQUENTA E
+# QUATRO réguas que leem ficaram de fora. Era a lista paralela de sempre, com a
+# agravante de morar no corredor que decide se um build sai.
+#
+# `grupo:produto` se expande em quem lê `app.html` ou o pacote offline, menos os
+# instrumentos. São 124 das 175, e sim: mexer no arquivo que faz tudo custa ~15
+# minutos em vez de ~8. É o preço honesto de mexer no arquivo que faz tudo, e
+# agora ele é o preço CERTO — antes eram 8 minutos sobre a lista errada.
+#
+# Quem quiser o corredor curto tem `bash testes/liberar.sh --tudo` para o
+# oposto, e o `rapido.sh app` para um pedaço.
+^src/template[.]html$ => grupo:produto
 ^src/features[.]json$ => planos.mjs promessa.mjs site:precos.mjs
 ^src/i18n-conta[.]json$ => chaves.mjs site:compra.mjs site:cancelar.mjs site:meusdados.mjs marcos-a11y.mjs
 ^src/i18n-site[.]json$ => chaves.mjs site:cinco.mjs site:contradicao.mjs site:buscaajuda.mjs
@@ -82,20 +90,57 @@ read -r -d '' MAPA <<'MAPA_FIM'
 ^src/rotas[.]json$ => middleware.mjs site:idiomas.mjs site:paginas.mjs
 ^middleware[.]ts$ => middleware.mjs
 ^next[.]config[.]mjs$ => site:paginas.mjs site:seo.mjs
-^app/conta/ => site:compra.mjs site:negocio.mjs entrada2.mjs site:cancelar.mjs site:meusdados.mjs marcos-a11y.mjs
+# O PAINEL TOCADO CHAMA A RÉGUA DO PAINEL — 28/08.
+# O `portal.mjs` — que É a régua da área do cliente: assentos, convite,
+# faturas, padrões, modelos e histórico — não aparecia em linha nenhuma deste
+# mapa. Mexer no `app/conta/acoes.ts` saía verde sem ela rodar, que é o mesmo
+# defeito que a nota da `precos.mjs` acima descreve.
+^app/conta/ => site:compra.mjs site:negocio.mjs entrada2.mjs site:cancelar.mjs site:meusdados.mjs marcos-a11y.mjs site:portal.mjs site:licauto.mjs
+# Os três e-mails do produto saem do mesmo molde desde 28/08. Tocar o molde
+# sem rodar a régua das cartas seria mudar o que chega na caixa de um cliente
+# sem nada olhar — e em e-mail o defeito é invisível de dentro.
+^lib/(carta[.]ts|email[.]ts|conta/(convite-assento|aviso-chamado)[.]ts)$ => site:email.mjs site:convite.mjs site:portal.mjs
 ^app/ => site:paginas.mjs site:seo.mjs site:negocio.mjs
 ^public/site[.]css$ => site:estreito.mjs site:paginas.mjs site:dobra.mjs site:buscaajuda.mjs
 ^src/site/(doc|home)[.]html$ => site:estreito.mjs site:paginas.mjs site:cabecalho.mjs marcos-a11y.mjs
 ^next[.]config[.]mjs$ => site:csp.mjs site:cabecalho.mjs site:paginas.mjs
+# O IMPORTADOR, O VOCABULÁRIO DELE E A PONTE PARA A FERRAMENTA — 28/08.
+# As colunas de condição atravessam quatro arquivos: quem adivinha o mapa, quem
+# normaliza a reexecução, quem monta o link do caso e a régua que prova as três
+# coisas. Mexer num sem rodar a `roteiro.mjs` foi como o índice posicional da
+# planilha de volta sobreviveu até quatro colunas novas o empurrarem de lugar.
 ^lib/planilha[.]ts$ => bomba.mjs site:roteiro.mjs
+^lib/(reexecucao[.]ts|conta/roteiro[.]ts)$ => site:roteiro.mjs bomba.mjs
+^app/conta/(planilha/|roteiro-acoes[.]ts)|^app/conta/\[lang\]/roteiro/ => site:roteiro.mjs site:roteirojanela.mjs
 ^lib/stripe[.]ts$ => site:precos.mjs promessa.mjs site:compra.mjs renovar.mjs site:cancelar.mjs
 ^app/api/convite/ => site:convite.mjs site:email.mjs
+# O chamado ganhou rota própria em 29/08, e ela tem as mesmas travas do
+# convite: origem antes de segredo, limite por quem chama. Quem toca a rota,
+# a fonte que a chama ou a migração que fechou o caminho velho, roda a régua.
+^app/api/chamado/|^lib/daCasa[.]ts$|^src/site/support[.]js$ => site:chamadorota.mjs site:ficha.mjs site:convite.mjs
 ^lib/ => site:paginas.mjs site:buscaajuda.mjs
 ^public/sw[.]js$ => site:seo.mjs
 ^public/site[.]css$ => folha.mjs site:paginas.mjs site:dobrafig.mjs
 ^offline/ => site:medicao.mjs offlineb.mjs egressao.mjs
 ^supabase/functions/ => edge.mjs
-^supabase/migrations/ => modelopessoal.mjs conferir-migracoes prazos.mjs
+# A migração do vocabulário trouxe dado NOVO para o servidor, e dado novo é
+# assunto de duas telas que já existiam: a sessão dentro da ferramenta e a
+# página que diz o que guardamos de alguém. Esquecer a segunda é o jeito
+# silencioso de a política de privacidade virar mentira.
+^supabase/migrations/ => modelopessoal.mjs conferir-migracoes prazos.mjs site:meusdados.mjs sessao.mjs
+# AS OITO QUE SOBRARAM — 29/08.
+# Depois de o grupo do produto virar pergunta ao disco, restaram oito réguas que
+# nenhum padrão alcançava. Elas não leem `app.html`: falam com o SITE e com o
+# painel, e cada uma tem um dono claro quando se pergunta sobre o que ela afirma.
+# O que sobra de verdade agora é zero — e o teto do `inventario.mjs` guarda isso.
+^app/conta/\[lang\]/chamados|^lib/conta/aviso-chamado[.]ts$ => site:chamadoconta.mjs
+^app/(blog|conta/\[lang\]/negocio)/|^lib/blog[.]ts$ => site:blog.mjs
+^src/i18n-site[.]json$ => site:tabelas.mjs
+^public/site[.]css$|^src/site/doc[.]html$ => site:paridade.mjs
+^src/rotas[.]json$ => site:isca.mjs
+^public/sw[.]js$|^app/manifest|^src/site/ => site:linkpage.mjs
+^public/demo/|^lib/site[.]ts$ => site:tourvid.mjs
+^vendor/ => onda4.mjs
 ^testes/ => inventario.mjs
 MAPA_FIM
 
@@ -128,7 +173,21 @@ else
   TOCADOS="$(git diff --name-only "$BASE" 2>/dev/null; git diff --name-only --cached 2>/dev/null; git ls-files --others --exclude-standard 2>/dev/null)"
   TOCADOS="$(printf '%s\n' "$TOCADOS" | sort -u | grep -v '^$')"
   echo
-  echo "[·] $(printf '%s\n' "$TOCADOS" | grep -c . ) arquivo(s) tocados desde $BASE"
+  N_TOCADOS=$(printf '%s\n' "$TOCADOS" | grep -c .)
+  echo "[·] $N_TOCADOS arquivo(s) tocados desde $BASE"
+  # ---- DIFF VAZIO NÃO É BUILD VERDE — 29/08 ----
+  # Comitar antes de rodar esta esteira faz o diff contra `HEAD` encolher para
+  # quase nada, e ela responde "verde" sobre um punhado de réguas em vez de
+  # sobre o build. Aconteceu comigo: comitei para não deixar trabalho solto, a
+  # pista disse "3 arquivos tocados", e eu quase levei aquele verde.
+  # O conserto é dizer, e não adivinhar: quem já comitou passa a base.
+  if [ "$N_TOCADOS" -eq 0 ]; then
+    echo
+    echo "não há nada a comparar com $BASE — provavelmente o build já foi comitado."
+    echo "rode contra o commit anterior:  bash testes/liberar.sh HEAD~1"
+    echo "ou o corredor inteiro:          bash testes/liberar.sh --tudo"
+    exit 1
+  fi
 fi
 
 # ---- monta a lista derivada do mapa ----------------------------------------
@@ -147,6 +206,30 @@ while read -r linha; do
   else casou=0; printf '%s\n' "$TOCADOS" | grep -qE "$padrao" && casou=1; fi
   [ "$casou" = 0 ] && continue
   for r in $reguas; do
+    # O GRUPO DO PRODUTO É DERIVADO, e não escrito. Quem lê `app.html` ou o
+    # pacote offline afirma sobre o produto; os instrumentos ficam de fora
+    # porque não afirmam nada. E o servidor sobe junto: parte deles precisa
+    # dele, e subir um Next que ninguém usa custa segundos — não subir o que
+    # alguém usa custa um vermelho que não é defeito.
+    if [ "$r" = "grupo:produto" ]; then
+      PRECISA_SITE=1
+      antes_do_grupo=$(printf '%s' "$DERIVADAS" | wc -w)
+      for g in $(grep -l -E "app\.html|walkstamp-offline\.html" "$AQUI"/*.mjs \
+                 | xargs -n1 basename | grep -vE '^(_|shot|proxy|regua|gerar-dpa|capturar)'); do
+        case " $DERIVADAS " in *" $g "*) ;; *) DERIVADAS="$DERIVADAS $g" ;; esac
+      done
+      # UM GRUPO VAZIO É MAPA QUEBRADO, E NÃO DIFF PEQUENO. Se o `grep` acima
+      # deixar de casar — um caminho que mudou, uma aspa a mais —, o corredor
+      # rodaria os contratos e diria "verde" sobre o arquivo que faz tudo. É a
+      # mesma aprovação por vazio que o conferidor de migrações fazia, e ela não
+      # pode voltar por uma linha de shell.
+      if [ "$(printf '%s' "$DERIVADAS" | wc -w)" -le "$antes_do_grupo" ]; then
+        echo "o grupo do produto expandiu para NADA — o mapa está quebrado."
+        echo "  confira o grep de 'app.html' em $AQUI/*.mjs dentro do liberar.sh."
+        exit 1
+      fi
+      continue
+    fi
     case "$r" in site:*) PRECISA_SITE=1; r="${r#site:}" ;; esac
     case " $DERIVADAS " in *" $r "*) ;; *) DERIVADAS="$DERIVADAS $r" ;; esac
   done

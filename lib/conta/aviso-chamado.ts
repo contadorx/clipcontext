@@ -16,6 +16,7 @@
  */
 import 'server-only';
 import { mandarEmail } from '@/lib/email';
+import { moldeDeCarta } from '@/lib/carta';
 import marca from '@/src/marca.json';
 
 const TXT: Record<string, { assunto: (n: string) => string; ola: string;
@@ -55,12 +56,10 @@ export async function avisarChamadoRespondido(
     para: email,
     assunto: t.assunto(numero),
     responderPara: marca.contato,
-    html:
-      `<div style="font:15px/1.6 -apple-system,Segoe UI,Roboto,sans-serif;color:#15171C">` +
-      `<p>${t.ola}</p><p>${t.corpo}</p>` +
-      `<p><a href="${url}" style="display:inline-block;background:#3A3F9E;color:#fff;` +
-      `text-decoration:none;padding:10px 18px;border-radius:8px;font-weight:600">${t.botao}</a></p>` +
-      `<p style="color:#5C6473;font-size:13px">${t.rodape}</p></div>`,
+    /* O HTML SAIU DAQUI — 28/08. Era o segundo molde de carta do produto, e
+       diferente do primeiro: sem a moldura, sem a marca em texto e sem o fundo.
+       Agora os três e-mails saem do mesmo `lib/carta.ts`. */
+    html: moldeDeCarta({ ola: t.ola, corpo: [t.corpo], botao: t.botao, url, rodape: [t.rodape] }),
     texto: `${t.ola}\n\n${t.corpo}\n\n${url}\n\n${t.rodape}`,
   });
 }

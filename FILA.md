@@ -125,6 +125,166 @@ nenhum dos dois reproduzia sozinho.
 
 ---
 
+## ACHADO — o corredor específico não alcança 62 das 171 réguas *(28/08)*
+
+Medido no Build 48, e ninguém tinha olhado: das 171 réguas, **62 não aparecem
+em linha nenhuma do mapa do `liberar.sh` nem na lista de contratos.** Não
+importa o que o build toque — elas só rodam no `rodar.sh` completo.
+
+Não é defeito do mapa: ele é escrito à mão de propósito, e boa parte das réguas
+de produto entra pela linha do `src/template.html`. É um **limite**, e o que
+faltava era ele estar escrito. "Esteira específica verde" quer dizer *verde no
+que o mapa alcança* — e sem este número ninguém sabia quanto era.
+
+Duas dessas 62 saíram neste build, e foram as que doeram:
+
+- **`portal.mjs`** — a régua da área do cliente (assentos, convite, faturas,
+  modelos) — não estava no mapa. Mexer no `app/conta/acoes.ts` saía verde sem
+  ela rodar. Ligada ao `^app/conta/`.
+- **as cartas** — `lib/carta.ts`, `lib/email.ts` e os dois módulos de e-mail
+  agora chamam `email.mjs`, `convite.mjs` e `portal.mjs`.
+
+O `inventario.mjs` ganhou o bloco [6] com o **teto de 62, que só desce**: uma
+régua nova que ninguém ligar ao mapa reprova no dia em que nasce, em vez de
+virar mais um nome nesta lista. Baixar o teto é o trabalho de quem for
+mapeando o resto.
+
+---
+
+## ACHADO FECHADO — o conferidor de migrações aprovava por vazio *(28/08)*
+
+`sh supabase/conferir.sh` dizia **"46 conferem, 0 faltam, 0 diferem"** e saía
+verde — com **54 migrações no disco**. As oito de fora não estavam erradas:
+estavam **invisíveis**, livres para mudar sem nada reclamar. Um portão que
+aprova por vazio é pior que portão nenhum, porque ninguém desconfia do verde.
+
+As oito entraram no `MANIFESTO.md5` (as sete antigas estão aplicadas no banco —
+conferido na lista de migrações do Supabase) e o `conferir.sh` passou a comparar
+**nos dois sentidos**: agora um arquivo no disco fora do manifesto reprova.
+Provado por falha: tirando uma linha do manifesto, ele sai com 1.
+
+---
+
+## ACHADO FECHADO — a régua falava com um servidor que não era o dela *(28/08)*
+
+Uma esteira interrompida deixou um `next start` velho segurando a **8807**. O
+`roteiro.mjs` subiu o dele, o segundo morreu com `EADDRINUSE` **em silêncio**, e
+o teste seguiu falando com o servidor ANTIGO — de outro build. Reprovou por um
+defeito que não existia no código, e eu passei uma hora caçando um erro que não
+tinha cometido.
+
+**Reprovar errado é ruim; aprovar errado é pior.** Um servidor velho que
+casualmente passe em tudo dá verde sobre código que ninguém rodou.
+
+Medido: dos **16** arquivos de régua que sobem o Next, **dois** (`roteiro.mjs` e
+`venda.mjs`) não liberavam a porta antes, e **nenhum** dos dezesseis percebia o
+`EADDRINUSE`.
+
+E a primeira tentativa de conserto **não bastou, e isso está medido**: ler o log
+do `next` atrás de "EADDRINUSE" parece suficiente e não é — quem responde o
+primeiro `fetch` é o servidor velho, na hora, e o laço de espera sai satisfeito
+antes de o novo sequer ter reclamado. Com a leitura do log ligada, o teste
+passou inteiro contra o servidor errado.
+
+O que funciona é não perguntar a ninguém: **tentar ocupar a porta.** Se der, ela
+estava livre. Está em `testes/_porta.mjs`, com o ramo de desistência provado por
+falha (kill desligado + porta ocupada → `FALHA` e saída 1).
+
+**O que sobra:** os outros catorze liberam a porta com `fuser -k`, o que fecha o
+caso comum, mas nenhum PROVA que ela ficou livre. Adotar o `garantirPortaLivre`
+neles é uma linha em cada um, e é trabalho de um build futuro.
+
+---
+
+## ACHADO FECHADO — o assento não limitava nada *(29/08)*
+
+Abrir o cadastro de domínio obrigou a olhar o que ele destrava, e ali estava um
+buraco que ninguém tinha medido: **a entrada por domínio não olhava assentos.**
+O `plano_de` concedia o plano do cliente a QUALQUER e-mail daquele domínio, sem
+contar quantos já estavam dentro. Quem comprasse 3 assentos podia dar o plano a
+500 pessoas — e o número que o cartão Team vende era decoração.
+
+Enquanto o cadastro passava por nós, era um risco que a gente via chegar.
+Self-service, viraria o desenho do produto. Por isso as duas coisas andaram
+juntas no Build 51: entregar a primeira sem a segunda seria transformar um
+descuido em funcionalidade.
+
+Atinge só a PRIMEIRA entrada de cada pessoa por domínio. Quem já tem assento
+nominal sai pelo ramo `conta` e nem chega lá — inclusive quem entrou por domínio
+antes, porque a `registrar_emissao` grava o `cliente_id` na primeira emissão.
+Ninguém que já está dentro perde a renovação.
+
+---
+
+## ACHADO FECHADO — a régua exigia que o produto ficasse inacabado *(29/08)*
+
+A `promessa.mjs` afirmava **"o catálogo usa mais de um estado"**. Fazia sentido
+enquanto havia item com selo, e virou uma exigência de que houvesse um: quando o
+`dominioAutomatico` saiu do `beta` e o catálogo ficou inteiro em produção, a
+régua **reprovou o produto por estar pronto**.
+
+Ela guardava algo real — se nenhum item usa selo, a maquinaria do selo vira
+código morto e ninguém percebe quando quebra. Então a pergunta mudou: as três
+palavras (`beta`, `construcao`, `descoberta`) têm que existir nos cinco idiomas,
+**usadas ou não**. No dia em que um item voltar a precisar de selo — e vai —, a
+palavra já está lá, e não sai em português numa página alemã.
+
+---
+
+## ACHADO FECHADO — 33 portas eram disputadas por mais de uma régua *(29/08)*
+
+O `rodar.sh` roda várias ao mesmo tempo com `xargs -P`, que é uma **fila**:
+qualquer duas podem cair juntas. Medido: **33 portas eram usadas por mais de uma
+régua** — três arquivos na 8918, três na 8921, três na 8931, três na 8934, três
+na 8937, três na 8951, três na 8953.
+
+Duas réguas na mesma porta não dão erro barulhento. A segunda encontra a porta
+ocupada e, daí em diante, ou fala com o servidor da PRIMEIRA — de outro teste,
+com outro conteúdo — ou derruba o dela no meio. **Verde falso nos dois casos.**
+O cabeçalho do próprio `rodar.sh` já carregava a cicatriz de uma execução medida
+contra uma build velha.
+
+41 arquivos renumerados, zero colisões, e o `inventario.mjs` ganhou o bloco [7]
+que recalcula isso a cada rodada. A única exceção é declarada: a **8802**, que é
+o Next que o `rodar.sh` sobe uma vez para todas as réguas de site.
+
+**E as dezesseis que sobem o próprio Next** passaram a chamar
+`garantirPortaLivre` — matar quem estava lá não é o mesmo que a porta ter ficado
+livre. O bloco [8] cobra a CHAMADA, e não o `import`: a edição em massa que
+acrescentou a garantia **pulou duas** (`email.mjs` e `faxina.mjs`, que sobem o
+Next com outra forma), e elas ficaram com cara de prontas e sem a trava. Contar
+o `import` seria repetir o erro.
+
+**Sobra pequeno e vale dizer:** o `ficha.mjs` guardava a porta escrita à mão em
+nove lugares, e num deles **codificada** — `localhost%3A8961`, dentro de um
+regex, onde a troca não alcançou porque o `%3A` cola no número. A régua falhou
+alto, que foi sorte: a afirmação casava `walkstamp` OU a porta, e podia ter
+continuado verde pelo outro lado. Agora a porta tem nome e todo endereço sai
+dele.
+
+---
+
+## ITEM VENCIDO — o `encolherFita()` com roteiro não era defeito *(29/08)*
+
+Ele esteve na minha lista de pendências como *"a janelinha fica em 480 em toda
+língua quando há roteiro"*. Medido: **é a decisão, e ela já estava escrita no
+código** — o que faltava era ela ter virado número.
+
+Com roteiro o passo ganha a linha inteira, e essa linha é **uma só**, cortada
+com reticências. Cada pixel de largura é literalmente mais texto do passo antes
+do "…". Encolher a fita para os 397px que os botões pedem em português cortaria
+justamente o que a segunda linha existe para mostrar.
+
+**Quanto custa, medido:** 480px mostram **49 caracteres** do passo; 397px
+mostram **39**. Dez caracteres.
+
+A `janelinha.mjs` passou a travar as duas metades do argumento — que a linha é
+única e com reticências, e quanto texto os 480 compram. Se alguém quiser
+"otimizar" a largura, o número diz o preço. E se ele virar zero, a decisão pode
+ser revista com dado em vez de opinião.
+
+---
+
 # Parte 1 — As decisões
 
 Uma por vez. Cada uma tem os caminhos, o que se ganha e o que se perde em cada

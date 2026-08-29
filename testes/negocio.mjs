@@ -23,7 +23,8 @@ import http from 'http';
 import fs from 'fs';
 
 import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
-const P = 8823, B = 8824;
+import { garantirPortaLivre } from './_porta.mjs';
+const P = 8801, B = 8862;
 const BASE = `http://localhost:${P}`;
 const DONO = 'dono@walkstamp.example';
 
@@ -141,6 +142,10 @@ await new Promise((r) => banco.listen(B, r));
 const matarPorta = () => { try { execSync(`fuser -k ${P}/tcp 2>/dev/null`); } catch {} };
 matarPorta();
 await new Promise((r) => setTimeout(r, 500));
+
+/* A porta é nossa antes de qualquer coisa — o porquê está no `_porta.mjs`,
+   e ele custou uma hora de caçada a um defeito que não existia. */
+await garantirPortaLivre(P, 'o negocio.mjs');
 
 const next = spawn('npx', ['next', 'start', '-p', String(P)], {
   cwd: `${RAIZ_WS}`, stdio: 'ignore',

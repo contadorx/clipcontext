@@ -35,7 +35,7 @@ const srv = http.createServer((q, r) => {
   if (!fs.existsSync(f)) { r.writeHead(404); return r.end(); }
   r.writeHead(200,{'Content-Type':T[path.extname(f)]||'application/octet-stream'}); r.end(fs.readFileSync(f));
 });
-await new Promise(r => srv.listen(8951, r));
+await new Promise(r => srv.listen(8847, r));
 
 let falhas = 0;
 const ok = (n, c, e) => { console.log((c ? '  ok   ' : '  FALHA') + '  ' + n + (e ? '  → ' + e : '')); if (!c) falhas++; };
@@ -148,7 +148,7 @@ async function rodar({ adiantar }) {
       return d0.apply(this, a).then(r => { window.__marca('audio:fim'); return r; });
     };
   });
-  await pg.goto('http://localhost:8951/app.html?lang=pt');
+  await pg.goto('http://localhost:8847/app.html?lang=pt');
   await pg.waitForTimeout(400);
   await pg.selectOption('#modelo', 'evidencia').catch(() => {});
   /* Marcar "transcrever ao vivo" é o que dispara o adiantamento do modelo. */
@@ -241,7 +241,7 @@ ok('o último tempo passa da duração do áudio compactado',
 const pg = await br.newPage();
 const erros4 = []; pg.on('pageerror', e => erros4.push(e.message));
 await pg.route('**/rpc/*stamp_*', r => r.fulfill({status:200,headers:{'access-control-allow-origin':'*'},body:'null'}));
-await pg.goto('http://localhost:8951/app.html?lang=pt');
+await pg.goto('http://localhost:8847/app.html?lang=pt');
 await pg.waitForTimeout(300);
 
 const r4 = await pg.evaluate(() => {

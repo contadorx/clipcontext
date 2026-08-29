@@ -16,7 +16,7 @@ const srv = http.createServer((q, r) => {
   if (u === '/sw.js') { r.writeHead(200,{'Content-Type':'text/javascript'}); return r.end(fs.readFileSync(ROOT+'/sw.js')) }
   r.writeHead(200, {'Content-Type':'text/html'}); r.end(html);
 });
-await new Promise(r => srv.listen(8909, r));
+await new Promise(r => srv.listen(8814, r));
 
 const br = await chromium.launch({ executablePath: CHROME_WS });
 let falhas = 0;
@@ -25,7 +25,7 @@ const ok = (n, c, e) => { console.log((c ? '  ok   ' : '  FALHA') + '  ' + n + (
 const ctx = await br.newContext({ viewport: { width: 1200, height: 950 } });
 const pg = await ctx.newPage();
 const erros = []; pg.on('pageerror', e => erros.push(e.message));
-await pg.goto('http://localhost:8909/app.html?lang=pt');
+await pg.goto('http://localhost:8814/app.html?lang=pt');
 // o cenário de uso passou a ser obrigatório: sem ele o botão Gravar cobra a escolha
 await pg.selectOption('#modelo', 'ia').catch(() => {});
 await pg.waitForTimeout(700);

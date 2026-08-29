@@ -42,7 +42,7 @@ const srv = http.createServer((q, r) => {
   }
   r.writeHead(200, { 'Content-Type': 'text/html' }); r.end(html);
 });
-await new Promise(r => srv.listen(8949, r));
+await new Promise(r => srv.listen(8845, r));
 
 let falhas = 0;
 const ok = (n, c, e) => {
@@ -125,7 +125,7 @@ await pg.route('**/rpc/walkstamp_evento', r => {
 await pg.route('**/@huggingface/transformers**', r => r.fulfill({
   status: 200, headers: { 'content-type': 'text/javascript' }, body: BIBLIOTECA_FALSA }));
 
-await pg.goto('http://localhost:8949/app.html?lang=pt');
+await pg.goto('http://localhost:8845/app.html?lang=pt');
 await pg.selectOption('#modelo', 'evidencia').catch(() => {});
 /* A varredura automática em modo cena faria 120 saltos num vídeo de dois
    minutos e meio. Ela não é o assunto aqui: três quadros bastam para o
@@ -404,7 +404,7 @@ console.log('\n[12] os cinco idiomas têm o rótulo, e nenhum mostra chave crua'
 {
   for (const L of ['en', 'es', 'de', 'fr']) {
     const p2 = await ctx.newPage();
-    await p2.goto('http://localhost:8949/app.html?lang=' + L);
+    await p2.goto('http://localhost:8845/app.html?lang=' + L);
     await p2.waitForTimeout(400);
     /* O rótulo do parar não vem de `data-i18n`: ele tem dois textos e um
        terceiro estado, e por isso é escrito à mão. Uma chave esquecida aqui

@@ -42,7 +42,7 @@ const srv = http.createServer((q, r) => {
   }
   r.writeHead(200, { 'Content-Type': 'text/html' }); r.end(html);
 });
-await new Promise(r => srv.listen(8953, r));
+await new Promise(r => srv.listen(8848, r));
 
 let falhas = 0;
 const ok = (n, c, e) => {
@@ -54,7 +54,7 @@ const br = await chromium.launch({ executablePath: CHROME_WS });
 const ctx = await br.newContext({ viewport: { width: 1250, height: 980 } });
 const pg = await ctx.newPage();
 const erros = []; pg.on('pageerror', e => erros.push(e.message));
-await pg.goto('http://localhost:8953/app.html?lang=pt');
+await pg.goto('http://localhost:8848/app.html?lang=pt');
 await pg.selectOption('#modelo', 'evidencia').catch(() => {});
 await pg.setInputFiles('#file', '/tmp/amostra.webm');
 await pg.waitForFunction(() => document.querySelectorAll('#thumbs figure').length >= 3,

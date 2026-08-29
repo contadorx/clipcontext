@@ -31,8 +31,9 @@ import { spawn, execSync } from 'child_process';
 
 import { chromium } from 'playwright';
 import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+import { garantirPortaLivre } from './_porta.mjs';
 
-const P = 8823, B = 8824;
+const P = 8800, B = 8860;
 const BASE = `http://localhost:${P}`;
 
 let falhas = 0;
@@ -81,6 +82,10 @@ await new Promise((r) => banco.listen(B, r));
 const matarPorta = () => { try { execSync(`fuser -k ${P}/tcp 2>/dev/null`); } catch {} };
 matarPorta();
 await new Promise((r) => setTimeout(r, 500));
+
+/* A porta é nossa antes de qualquer coisa — o porquê está no `_porta.mjs`,
+   e ele custou uma hora de caçada a um defeito que não existia. */
+await garantirPortaLivre(P, 'o entrada2.mjs');
 
 const next = spawn('npx', ['next', 'start', '-p', String(P)], {
   cwd: `${RAIZ_WS}`, stdio: 'ignore',

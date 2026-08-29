@@ -44,6 +44,7 @@ import http from 'http';
 import fs from 'fs';
 
 import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+import { garantirPortaLivre } from './_porta.mjs';
 
 const P = 8825, B = 8826;
 const BASE = `http://localhost:${P}`;
@@ -88,6 +89,10 @@ await new Promise((r) => setTimeout(r, 400));
    dessas só existe se o código do servidor rodou. Com uma chave de mentira, a
    biblioteca da Stripe tentaria a rede e o teste mediria o tempo de espera de
    um DNS em vez de medir o produto. */
+/* A porta é nossa antes de qualquer coisa — o porquê está no `_porta.mjs`,
+   e ele custou uma hora de caçada a um defeito que não existia. */
+await garantirPortaLivre(P, 'o cancelar.mjs');
+
 const next = spawn('npx', ['next', 'start', '-p', String(P)], {
   cwd: RAIZ_WS, stdio: 'ignore',
   env: { ...process.env,

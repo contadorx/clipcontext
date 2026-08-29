@@ -27,7 +27,7 @@ const srv = http.createServer((q, r) => {
   if (q.url.startsWith('/_vercel/')) { r.writeHead(200, {'Content-Type':'text/javascript'}); return r.end('') }
   r.writeHead(200, { 'Content-Type': 'text/html' }); r.end(html);
 });
-await new Promise(r => srv.listen(8933, r));
+await new Promise(r => srv.listen(8835, r));
 
 let falhas = 0;
 const ok = (n, c, e) => { console.log((c ? '  ok   ' : '  FALHA') + '  ' + n + (e ? '  → ' + e : '')); if (!c) falhas++; };
@@ -42,7 +42,7 @@ const br = await chromium.launch({
    quatro quadradinhos de câmera que mudam a cada tique — que é exatamente o que
    uma chamada de vídeo faz. */
 async function gravar(pg, ritmo, roteiro, segundos) {
-  await pg.goto('http://localhost:8933/app.html?lang=pt');
+  await pg.goto('http://localhost:8835/app.html?lang=pt');
   await pg.waitForTimeout(400);
   await pg.selectOption('#modelo', 'outro');
   await pg.selectOption('#ritmo', ritmo);
@@ -123,7 +123,7 @@ console.log('\n[3] tela que NUNCA para não termina com zero quadros');
 {
   const ctx = await br.newContext({ viewport: { width: 1280, height: 950 } });
   const pg = await ctx.newPage();
-  await pg.goto('http://localhost:8933/app.html?lang=pt');
+  await pg.goto('http://localhost:8835/app.html?lang=pt');
   await pg.waitForTimeout(400);
   await pg.selectOption('#modelo', 'outro');
   await pg.selectOption('#ritmo', 'reuniao');
@@ -164,7 +164,7 @@ console.log('\n[4] o cenário escolhe o ritmo, e quem discorda manda');
 {
   const ctx = await br.newContext({ viewport: { width: 1280, height: 950 } });
   const pg = await ctx.newPage();
-  await pg.goto('http://localhost:8933/app.html?lang=pt');
+  await pg.goto('http://localhost:8835/app.html?lang=pt');
   await pg.waitForTimeout(400);
   await pg.selectOption('#modelo', 'ata');
   ok('ata de reunião escolhe o ritmo de reunião',

@@ -5,7 +5,7 @@ import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
 const html = fs.readFileSync(`${RAIZ_WS}/public/app.html`,'utf8');
 const jspdf = fs.readFileSync(`${RAIZ_WS}/vendor/jspdf.umd.min.js`,'utf8');
 const srv = http.createServer((q,r)=>{ if(q.url.startsWith('/_vercel/')){r.writeHead(200,{'Content-Type':'text/javascript'});return r.end('')} r.writeHead(200,{'Content-Type':'text/html'}); r.end(html); });
-await new Promise(r=>srv.listen(8937,r));
+await new Promise(r=>srv.listen(8839,r));
 const br = await chromium.launch({ executablePath:CHROME_WS });
 let falhas = 0;
 const ok = (n,c,e2)=>{console.log((c?'  ok   ':'  FALHA')+'  '+n+(e2?'  → '+e2:''));if(!c)falhas++};
@@ -24,7 +24,7 @@ const pg = await ctx.newPage();
 pg.on('dialog', d => d.accept());
 const erros=[]; pg.on('pageerror', e=>erros.push(e.message));
 await pg.route('**/jspdf**', r=>r.fulfill({status:200,headers:{'content-type':'text/javascript'},body:jspdf}));
-await pg.goto('http://localhost:8937/app.html?lang=pt');
+await pg.goto('http://localhost:8839/app.html?lang=pt');
 
 /* Três sessões, cada uma exportada como o produto exporta. */
 console.log('[1] gerar três sessões de participantes diferentes');

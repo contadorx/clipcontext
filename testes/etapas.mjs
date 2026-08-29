@@ -32,7 +32,7 @@ const srv = http.createServer((q, r) => {
   if (q.url.startsWith('/_vercel/')) { r.writeHead(200,{'Content-Type':'text/javascript'}); return r.end('') }
   r.writeHead(200, {'Content-Type':'text/html'}); r.end(html);
 });
-await new Promise(r => srv.listen(8934, r));
+await new Promise(r => srv.listen(8836, r));
 
 const br = await chromium.launch({ executablePath: CHROME_WS });
 let falhas = 0;
@@ -41,7 +41,7 @@ const ok = (n, c, e) => { console.log((c ? '  ok   ' : '  FALHA') + '  ' + n + (
 const ctx = await br.newContext({ acceptDownloads: true, viewport: { width: 1150, height: 950 } });
 const pg = await ctx.newPage();
 const erros = []; pg.on('pageerror', e => erros.push(e.message));
-await pg.goto('http://localhost:8934/app.html?lang=pt');
+await pg.goto('http://localhost:8836/app.html?lang=pt');
 await pg.waitForTimeout(400);
 
 /* O estado da barra, lido como a pessoa o vê: qual está marcada como atual,

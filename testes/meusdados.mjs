@@ -33,8 +33,9 @@ import http from 'http';
 import fs from 'fs';
 
 import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+import { garantirPortaLivre } from './_porta.mjs';
 
-const P = 8829, B = 8830;
+const P = 8805, B = 8864;
 const BASE = `http://localhost:${P}`;
 const EMAIL = 'dono@cliente.example';
 const OUTRO = 'vitima@cliente.example';
@@ -54,7 +55,7 @@ const DADOS_EM = (L) => `${CONTA_EM[L]}/${SUB[L]}`;
 /* ----------------------------------------------------------- o banco falso */
 
 let PRAZOS = { conta_dias: 90, lista_meses: 24, evento_meses: 18 };
-let CONTAGEM = { roteiros: 7, casos: 41, anexos: 3, modelos: 2, chamados: 1 };
+let CONTAGEM = { roteiros: 7, casos: 41, anexos: 3, modelos: 2, chamados: 1, vocabulario: 1 };
 /** O que o servidor MANDOU para o banco. É a única testemunha de que o e-mail
  *  usado foi o da sessão, e não o que veio do formulário. */
 const chamadas = [];
@@ -63,7 +64,8 @@ const meus = () => ({
   email: EMAIL, prazos: PRAZOS,
   apagavel: CONTAGEM,
   fica: { faturas: 4, emissoes: 12 },
-  total_apagavel: CONTAGEM.roteiros + CONTAGEM.casos + CONTAGEM.modelos + CONTAGEM.chamados,
+  total_apagavel: CONTAGEM.roteiros + CONTAGEM.casos + CONTAGEM.modelos
+                  + CONTAGEM.chamados + CONTAGEM.vocabulario,
 });
 
 const conta = () => ({
@@ -103,6 +105,10 @@ await new Promise((r) => banco.listen(B, r));
 const matarPorta = () => { try { execSync(`fuser -k ${P}/tcp 2>/dev/null`); } catch {} };
 matarPorta();
 await new Promise((r) => setTimeout(r, 400));
+
+/* A porta é nossa antes de qualquer coisa — o porquê está no `_porta.mjs`,
+   e ele custou uma hora de caçada a um defeito que não existia. */
+await garantirPortaLivre(P, 'o meusdados.mjs');
 
 const next = spawn('npx', ['next', 'start', '-p', String(P)], {
   cwd: RAIZ_WS, stdio: 'ignore',
@@ -162,7 +168,7 @@ for (const L of IDIOMAS) {
 
 console.log('\n[2] as contagens são as do banco — a tela não inventa número');
 {
-  CONTAGEM = { roteiros: 7, casos: 41, anexos: 3, modelos: 2, chamados: 1 };
+  CONTAGEM = { roteiros: 7, casos: 41, anexos: 3, modelos: 2, chamados: 1, vocabulario: 1 };
   const { ctx, pg } = await tela('pt');
   const linha = await pg.locator('table.dados').first().innerText();
   for (const [rot, v] of [[I18N.pt.dadosRoteiros, 7], [I18N.pt.dadosCasos, 41]]) {
@@ -170,6 +176,36 @@ console.log('\n[2] as contagens são as do banco — a tela não inventa número
     ok(`"${rot}" mostra ${v}`, l.includes(String(v)), l);
   }
   await ctx.close();
+}
+
+console.log('\n[2b] a tabela é DERIVADA do que o banco conta — não uma lista escrita na tela');
+{
+  /* O DEFEITO QUE ISTO FECHA. A tabela tinha as cinco linhas escritas uma a
+     uma. Quando o vocabulário guardado virou dado no servidor (Build 49), a
+     página que existe para dizer TUDO o que guardamos de alguém passaria a
+     esconder uma coisa — em silêncio, e sem nada reprovar. Justamente a página
+     onde esconder é o pior defeito possível.
+
+     Agora ela percorre o que o `meus_dados` devolveu. Esta régua manda uma
+     chave que a tela nunca viu: se ela sumir, a tela voltou a ter lista
+     própria; se aparecer, a tela mostra o que existe, com rótulo ou sem. */
+  CONTAGEM = { roteiros: 1, casos: 2, anexos: 0, modelos: 0, chamados: 0,
+               vocabulario: 1, coisaNovaDoBanco: 9 };
+  const { ctx, pg } = await tela('pt');
+  const tabela = await pg.locator('table.dados').first().innerText();
+
+  ok('o vocabulário guardado aparece, com o rótulo dele',
+     tabela.includes(I18N.pt.dadosVocabulario), I18N.pt.dadosVocabulario);
+  /* Sem rótulo sai a chave crua, e é de propósito: linha feia alguém conserta,
+     linha que some não aparece para ninguém. */
+  ok('e uma chave que a tela não conhece aparece assim mesmo',
+     /coisaNovaDoBanco/.test(tabela) && /\b9\b/.test(tabela),
+     tabela.split('\n').filter((l) => /coisaNova|9/.test(l)).join(' | ').slice(0, 70));
+  ok('  com uma linha por coisa que o banco contou',
+     tabela.split('\n').filter((l) => l.trim()).length >= Object.keys(CONTAGEM).length,
+     `${tabela.split('\n').filter((l) => l.trim()).length} linha(s) para ${Object.keys(CONTAGEM).length} chave(s)`);
+  await ctx.close();
+  CONTAGEM = { roteiros: 7, casos: 41, anexos: 3, modelos: 2, chamados: 1, vocabulario: 1 };
 }
 
 console.log('\n[3] os PRAZOS vêm do banco, e não escritos na tela');

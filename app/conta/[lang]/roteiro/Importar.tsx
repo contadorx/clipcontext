@@ -15,10 +15,16 @@
 import { useActionState, useRef, useState } from 'react';
 import { lerPlanilha, salvarRoteiro } from '../../roteiro-acoes';
 import type { Lido } from '../../roteiro-acoes';
+import { normalizarReexecucao } from '@/lib/reexecucao';
 
 type Textos = Record<string, string>;
 
-const CAMPOS = ['caso', 'titulo', 'sistema', 'chamado', 'responsavel'] as const;
+/* A ORDEM É A HISTÓRIA: identificação primeiro, CONDIÇÃO depois. As quatro do
+   fim entraram em 28/08 — antes o importador só lia instrução, e o post
+   "Cenário não é roteiro" diz que é a condição que decide se o teste vale
+   alguma coisa. */
+const CAMPOS = ['caso', 'titulo', 'sistema', 'chamado', 'responsavel',
+                'precondicao', 'esperado', 'reexecucao', 'depende_de'] as const;
 type Campo = (typeof CAMPOS)[number];
 
 export default function Importar(
@@ -99,6 +105,13 @@ function Conferir(
     chamado: val(l, 'chamado'),
     responsavel: /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(val(l, 'responsavel'))
       ? val(l, 'responsavel').toLowerCase() : '',
+    precondicao: val(l, 'precondicao'),
+    esperado: val(l, 'esperado'),
+    /* Normalizado ANTES de a pessoa conferir: a prévia mostra o que vai ser
+       guardado, e não a célula crua. Uma prévia que mostra "Sim" e um banco
+       que guarda `repetivel` são duas verdades para o mesmo dado. */
+    reexecucao: normalizarReexecucao(val(l, 'reexecucao')) || '',
+    depende_de: val(l, 'depende_de'),
   }));
 
   const repetidos = new Set(
@@ -125,9 +138,14 @@ function Conferir(
 
       <div style={{ maxHeight: 260, overflow: 'auto', border: '1px solid var(--line)', borderRadius: 8, marginTop: 12 }}>
         <table className="legal" style={{ margin: 0 }}>
+          {/* DERIVADA DO `CAMPOS`, e não escrita a seguir. Eram cinco `<th>` à
+              mão ao lado de cinco leituras à mão: acrescentar uma coluna
+              exigia lembrar dos dois lugares, e o segundo é o que se
+              esquece. */}
           <thead><tr>
-            <th>{t.rotCampoCaso}</th><th>{t.rotCampoTitulo}</th>
-            <th>{t.rotCampoSistema}</th><th>{t.rotCampoChamado}</th><th>{t.rotCampoResponsavel}</th>
+            {CAMPOS.map((k) => (
+              <th key={k}>{t['rotCampo' + k[0].toUpperCase() + k.slice(1)]}</th>
+            ))}
           </tr></thead>
           <tbody>
             {casos.slice(0, 60).map((c, i) => (
@@ -135,7 +153,13 @@ function Conferir(
                 <td style={repetidos.has(c.caso.toLowerCase()) ? { color: 'var(--err, #b4232a)' } : undefined}>
                   {c.caso}
                 </td>
-                <td>{c.titulo}</td><td>{c.sistema}</td><td>{c.chamado}</td><td>{c.responsavel}</td>
+                {CAMPOS.slice(1).map((k) => (
+                  <td key={k}>
+                    {k === 'reexecucao' && c.reexecucao
+                      ? (c.reexecucao === 'queima' ? t.rotReexecQueima : t.rotReexecRepetivel)
+                      : (c as Record<string, string>)[k]}
+                  </td>
+                ))}
               </tr>
             ))}
           </tbody>

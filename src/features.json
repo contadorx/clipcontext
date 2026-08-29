@@ -252,7 +252,6 @@
         },
         {
           "id": "termosGuardados",
-          "estado": "construcao",
           "planos": "pt",
           "pt": "E a lista de termos guardada: volta na próxima visita, em qualquer máquina",
           "en": "And the term list kept: it comes back next visit, on any machine",
@@ -262,7 +261,6 @@
         },
         {
           "planos": "pt",
-          "estado": "construcao",
           "pt": "… e a lista fica GRAVADA: não se redigita a cada visita",
           "en": "… and the list is SAVED: no retyping on every visit",
           "es": "… y la lista queda GUARDADA: no se reescribe en cada visita",
@@ -605,6 +603,24 @@
           "fr": "Vérifier et corriger quelle colonne est quoi avant d’enregistrer"
         },
         {
+          "id": "roteiroCondicao",
+          "planos": "pt",
+          "pt": "Colunas de condição: pré-condição, resultado esperado, reexecução e dependência",
+          "en": "Condition columns: precondition, expected result, re-execution and dependency",
+          "es": "Columnas de condición: precondición, resultado esperado, reejecución y dependencia",
+          "de": "Bedingungsspalten: Vorbedingung, erwartetes Ergebnis, Wiederholbarkeit und Abhängigkeit",
+          "fr": "Colonnes de condition : précondition, résultat attendu, réexécution et dépendance"
+        },
+        {
+          "id": "roteiroCondicaoNaFicha",
+          "planos": "pt",
+          "pt": "A pré-condição e o resultado esperado chegam na ficha de quem grava",
+          "en": "The precondition and the expected result arrive on the recorder’s form",
+          "es": "La precondición y el resultado esperado llegan a la ficha de quien graba",
+          "de": "Vorbedingung und erwartetes Ergebnis erscheinen im Formular der aufnehmenden Person",
+          "fr": "La précondition et le résultat attendu arrivent sur la fiche de la personne qui enregistre"
+        },
+        {
           "planos": "pt",
           "pt": "Cada caso vira um link que abre a ferramenta já preenchida",
           "en": "Each case becomes a link that opens the tool already filled in",
@@ -873,7 +889,6 @@
         },
         {
           "id": "dominioAutomatico",
-          "estado": "beta",
           "planos": "t",
           "pt": "Entrada automática por domínio de e-mail",
           "en": "Automatic enrolment by email domain",

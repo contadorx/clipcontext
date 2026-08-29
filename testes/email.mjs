@@ -9,13 +9,17 @@
  *      cabeçalho `api-key` — e não mais com o Resend;
  *   3. responder um chamado avisa quem escreveu, na LÍNGUA dele;
  *   4. e a falha do aviso NÃO desfaz a resposta: a resposta é o trabalho, o
- *      e-mail é a notícia.
+ *      e-mail é a notícia;
+ *   5. o convite de ASSENTO manda a carta de verdade — era a promessa sem
+ *      porta do cartão Team, vendida como pronta e sem régua nenhuma;
+ *   6. e quando ela não pode sair, o assento fica e a tela DIZ que não saiu.
  */
 import { chromium } from 'playwright';
 import { spawn, execSync } from 'child_process';
 import http from 'http';
 
 import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+import { garantirPortaLivre } from './_porta.mjs';
 const P = 8853, B = 8854, E = 8855;
 const BASE = `http://localhost:${P}`;
 const DONO = 'dono@email.example';
@@ -38,6 +42,7 @@ const brevo = http.createServer((q, r) => {
 await new Promise((r) => brevo.listen(E, r));
 
 let RESPOSTA = { ok: true, numero: 'CH-9', email: 'quem@escreveu.example' };
+let LIMITE_ASSENTO = true;
 const chamadas = [];
 const banco = http.createServer((q, r) => {
   const b = []; q.on('data', (d) => b.push(d));
@@ -48,10 +53,16 @@ const banco = http.createServer((q, r) => {
     const a = JSON.parse(Buffer.concat(b).toString('utf8') || '{}');
     chamadas.push({ fn, a });
     if (fn === 'walkstamp_conta_do_usuario') {
-      return j({ email: DONO, plano: 'time', assentos: 3, dias: 90, cliente: 'C', motivo: 'conta',
-                 papel: 'admin', vence_em: null, emissoes: 0, assinante: true,
-                 perfil: { cliente: null, config: null, modelos: [] },
-                 faturas: [], chamados: [], resposta: null, time: null });
+      return j({ email: DONO, plano: 'time', assentos: 3, dias: 90, cliente: 'Cliente de Teste',
+                 motivo: 'conta', papel: 'admin', vence_em: null, emissoes: 0, assinante: true,
+                 perfil: { cliente: 'Cliente de Teste', config: null, modelos: [] },
+                 faturas: [], chamados: [], resposta: null,
+                 /* Com `time: null` a seção do convite nem é desenhada, e o
+                    bloco [5] passaria por não achar o formulário — que é o
+                    jeito mais silencioso de um teste morrer. */
+                 time: { cliente: 'Cliente de Teste', assentos: 3, usados: 2, dias: 90,
+                         dominio: 'email.example', config: null, pessoas: [], modelos: [],
+                         emissoes: [] } });
     }
     if (fn === 'walkstamp_negocio_painel') {
       return j({ resumo: { contas: 0, contas30: 0, clientes: 0, clientesAtivos: 0,
@@ -71,14 +82,23 @@ const banco = http.createServer((q, r) => {
     /* A trava de limite mora no banco e devolve booleano. Sem responder aqui, o
        `{}` vira "nao pode" e o convite para em 429 antes de chegar ao Brevo. */
     if (fn === 'walkstamp_convite_pode') return j(true);
+    /* O convite de ASSENTO tem limite próprio (60/hora por administrador em vez
+       de 5, senão um time de 25 levaria cinco horas para ser montado). Sem esta
+       linha o `{}` vira "não pode" e a carta para antes do Brevo. */
+    if (fn === 'walkstamp_convite_assento_pode') return j(LIMITE_ASSENTO);
+    /* O que a `time_convidar` devolve de verdade é o painel do time, e é de lá
+       que sai o nome do cliente que vai no assunto do e-mail. */
+    if (fn === 'walkstamp_time_convidar') return j({ cliente: 'Cliente de Teste', assentos: 3, usados: 2 });
     if (fn === 'walkstamp_blog_todos') return j([]);
     j({});
   });
 });
 await new Promise((r) => banco.listen(B, r));
 
-function subir(env) {
-  try { execSync(`fuser -k ${P}/tcp 2>/dev/null`); } catch {}
+/* `async` por causa da garantia da porta: matar quem estava lá não é o mesmo
+   que ela ter ficado livre, e este arquivo sobe o Next duas vezes. */
+async function subir(env) {
+  await garantirPortaLivre(P, 'o email.mjs');
   const n = spawn('npx', ['next', 'start', '-p', String(P)], {
     cwd: `${RAIZ_WS}`, stdio: 'ignore',
     env: { ...process.env, SUPABASE_URL: `http://localhost:${B}`,
@@ -99,7 +119,7 @@ process.on('exit', () => { try { proc && proc.kill('SIGKILL'); } catch {} banco.
 
 console.log('[1] sem chave do Brevo, o convite RECUSA — e não finge');
 {
-  proc = subir({});
+  proc = await subir({});
   await esperar();
   const r = await fetch(`${BASE}/api/convite`, {
     method: 'POST',
@@ -117,7 +137,7 @@ console.log('[1] sem chave do Brevo, o convite RECUSA — e não finge');
 
 console.log('\n[2] com a chave, o convite fala BREVO — não Resend');
 {
-  proc = subir({ BREVO_API_KEY: 'chave-brevo-de-teste',
+  proc = await subir({ BREVO_API_KEY: 'chave-brevo-de-teste',
                  EMAIL_DE: 'ola@walkstamp.com', EMAIL_DE_NOME: 'Walkstamp',
                  WALKSTAMP_BREVO_BASE: `http://localhost:${E}` });
   await esperar();
@@ -204,6 +224,97 @@ console.log('\n[4] o disparador cai, e a resposta continua gravada');
      depoisRpc === antesRpc + 1, `${antesRpc} → ${depoisRpc}`);
   ok('e a tela diz que deu certo, porque deu', /feito=CH-9/.test(pg.url()), pg.url());
   brevoStatus = 201;
+  await ctx.close();
+}
+
+/* Uma sessão de administrador, montada como nos blocos acima. */
+async function comoAdmin() {
+  const ctx = await br.newContext({ viewport: { width: 1300, height: 1200 } });
+  const b64 = (o) => Buffer.from(JSON.stringify(o)).toString('base64url');
+  const jwt = [b64({ alg: 'HS256', typ: 'JWT' }),
+    b64({ role: 'authenticated', email: DONO, exp: Math.floor(Date.now() / 1000) + 3600 }), 'x'].join('.');
+  await ctx.addCookies([{ name: 'sb-localhost-auth-token',
+    value: 'base64-' + Buffer.from(JSON.stringify({ access_token: jwt, token_type: 'bearer',
+      expires_in: 3600, expires_at: Math.floor(Date.now() / 1000) + 3600,
+      refresh_token: 'r', user: { id: 'u', email: DONO } })).toString('base64'),
+    domain: 'localhost', path: '/', httpOnly: false, secure: false, sameSite: 'Lax' }]);
+  return ctx;
+}
+
+console.log('\n[5] convidar para um assento MANDA a carta — era a promessa sem porta');
+{
+  /* O cartão Team vende, em cinco idiomas, "convidar por e-mail, sem ninguém
+     digitar chave". Medido em 28/08: o assento era criado e NENHUM e-mail saía.
+     Ninguém percebia porque nada olhava — o painel dizia "Salvo." e ia embora. */
+  const ctx = await comoAdmin();
+  const pg = await ctx.newPage();
+  await pg.goto(`${BASE}/conta/time`, { waitUntil: 'networkidle' });
+  const antes = CARTAS.length;
+  await pg.locator('input[type="email"][name="email"]').first().fill('nova@empresa.example');
+  await pg.locator('button:has-text("Convidar")').first().click();
+  await pg.waitForURL(/[?&](feito|erro|parcial)=/, { timeout: 20000 });
+
+  /* A CARTA VEM PRIMEIRO, E POR EXPERIÊNCIA. Este bloco nasceu com a tela em
+     cima e `CARTAS[CARTAS.length - 1]` embaixo — e quando eu desliguei o envio
+     para provar a régua por falha, quatro afirmações continuaram VERDES: a tela
+     dizia "enviado" (era o defeito, não a prova) e as outras liam a carta
+     ANTERIOR, do bloco [3], que nada tinha a ver com este convite.
+     Uma afirmação que passa lendo o artefato de outro é pior do que afirmação
+     nenhuma: ela dá o verde e cala. Agora a carta é a DESTE bloco, ou é nula —
+     e nula reprova tudo que depende dela. */
+  const c = CARTAS.length === antes + 1 ? CARTAS[antes] : null;
+  ok('saiu exatamente uma carta, e é desta ação', !!c, `${antes} → ${CARTAS.length}`);
+  ok('  e a tela diz que o convite foi enviado', /[?&]feito=/.test(pg.url()),
+     pg.url().replace(/^.*\?/, '?').slice(0, 80));
+  ok('  para quem foi convidado, e não para quem convidou',
+     !!c && c.corpo.to[0].email === 'nova@empresa.example', c && JSON.stringify(c.corpo.to));
+  /* O nome do cliente vem do painel que a própria `time_convidar` devolveu —
+     escrito no teste, seria o teste provando o teste. */
+  ok('  com o nome do cliente no assunto', !!c && /Cliente de Teste/.test(c.corpo.subject),
+     c && c.corpo.subject);
+  /* A CARTA NÃO CARREGA ACESSO. Um convite com chave dentro vira acesso
+     encaminhável: quem recebesse o e-mail repassado entraria no lugar da
+     pessoa. O que ela carrega é o endereço da conta, e a entrada é a de
+     sempre — o link mágico, pedido pelo próprio convidado. */
+  const tudo = (c ? c.corpo.htmlContent + c.corpo.textContent : '');
+  ok('  e não leva chave, token nem link de sessão dentro',
+     !/access_token|WS-|licen[çc]a=|[?&]token=/i.test(tudo));
+  ok('  com resposta apontando para o contato de gente',
+     !!c && !!c.corpo.replyTo && /@/.test(c.corpo.replyTo.email), c && JSON.stringify(c.corpo.replyTo));
+  /* Mesma moldura das outras duas cartas: desde 28/08 elas saem do
+     `lib/carta.ts`. Em e-mail, o molde que divergiu só aparece errado na caixa
+     de quem recebe — e essa pessoa não reclama, ela só não clica. */
+  ok('  na mesma moldura das outras cartas do produto',
+     !!c && /role="presentation"/.test(c.corpo.htmlContent)
+         && /Walk<span/.test(c.corpo.htmlContent));
+  await ctx.close();
+}
+
+console.log('\n[6] estourado o limite do destino, o assento fica e a tela NÃO mente');
+{
+  /* Reconvidar o mesmo endereço não gasta assento — o insert é `on conflict do
+     update` —, então sem limite por destino o convite viraria jeito de
+     incomodar alguém. Quando ele trava, o assento continua criado: dizer
+     "enviado" faria o administrador ir embora achando que avisou. */
+  LIMITE_ASSENTO = false;
+  const ctx = await comoAdmin();
+  const pg = await ctx.newPage();
+  await pg.goto(`${BASE}/conta/time`, { waitUntil: 'networkidle' });
+  const antes = CARTAS.length;
+  const antesRpc = chamadas.filter((c) => c.fn === 'walkstamp_time_convidar').length;
+  await pg.locator('input[type="email"][name="email"]').first().fill('demais@empresa.example');
+  await pg.locator('button:has-text("Convidar")').first().click();
+  await pg.waitForURL(/[?&](feito|erro|parcial)=/, { timeout: 20000 });
+
+  ok('o assento foi criado assim mesmo',
+     chamadas.filter((c) => c.fn === 'walkstamp_time_convidar').length === antesRpc + 1);
+  ok('  e nenhuma carta saiu', CARTAS.length === antes, `${antes} → ${CARTAS.length}`);
+  ok('  e a tela não diz "enviado"', !/[?&]feito=/.test(pg.url()),
+     pg.url().replace(/^.*\?/, '?').slice(0, 80));
+  ok('  e conta as duas coisas: o assento existe, o convite não saiu',
+     /[?&]parcial=/.test(pg.url()) && /assento/i.test(await pg.locator('body').innerText()),
+     pg.url().replace(/^.*\?/, '?').slice(0, 80));
+  LIMITE_ASSENTO = true;
   await ctx.close();
 }
 

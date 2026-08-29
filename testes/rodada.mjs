@@ -9,7 +9,7 @@ const srv = http.createServer((q, r) => {
   if (q.url.startsWith('/_vercel/')) { r.writeHead(200,{'Content-Type':'text/javascript'}); return r.end('') }
   r.writeHead(200, {'Content-Type':'text/html'}); r.end(html);
 });
-await new Promise(r => srv.listen(8916, r));
+await new Promise(r => srv.listen(8858, r));
 
 const br = await chromium.launch({ executablePath: CHROME_WS });
 let falhas = 0;
@@ -20,7 +20,7 @@ const pg = await ctx.newPage();
 const erros = [];
 pg.on('pageerror', e => erros.push(e.message));
 await pg.route('**/jspdf**', r => r.fulfill({status:200,headers:{'content-type':'text/javascript'},body:jspdf}));
-await pg.goto('http://localhost:8916/app.html?lang=pt');
+await pg.goto('http://localhost:8858/app.html?lang=pt');
 // o cenário virou obrigatório antes de o vídeo entrar ou de a gravação começar
 await pg.selectOption('#modelo', 'ia').catch(() => {});
 await pg.waitForTimeout(400);

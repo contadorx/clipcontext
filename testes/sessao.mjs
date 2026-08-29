@@ -10,7 +10,7 @@ import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
 const html = fs.readFileSync(`${RAIZ_WS}/public/app.html`,'utf8');
 const jspdf = fs.readFileSync(`${RAIZ_WS}/vendor/jspdf.umd.min.js`,'utf8');
 const srv = http.createServer((q,r)=>{ if(q.url.startsWith('/_vercel/')){r.writeHead(200,{'Content-Type':'text/javascript'});return r.end('')} r.writeHead(200,{'Content-Type':'text/html'}); r.end(html); });
-await new Promise(r=>srv.listen(8942,r));
+await new Promise(r=>srv.listen(8843,r));
 const br = await chromium.launch({ executablePath:CHROME_WS });
 let falhas = 0;
 const ok = (n,c,e)=>{console.log((c?'  ok   ':'  FALHA')+'  '+n+(e?'  → '+e:''));if(!c)falhas++};
@@ -37,8 +37,20 @@ const pagina = async (opc) => {
     r.fulfill({ status: (opc && opc.otpFalha) ? 500 : 200, contentType:'application/json', body:'{}' });
   });
   await pg.route('**/functions/v1/walkstamp-meus', r => {
-    pedidos.push({ tipo:'meus', auth: r.request().headers()['authorization'] || '' });
+    const corpo = JSON.parse(r.request().postData() || '{}');
+    pedidos.push({ tipo:'meus', corpo, auth: r.request().headers()['authorization'] || '' });
     if (opc && opc.meusFalha) return r.abort();
+    /* A MESMA PORTA SERVE À LEITURA E À GRAVAÇÃO do vocabulário — é assim na
+       função de verdade, e um duplo aqui esconderia se a ferramenta mandasse
+       para o lugar errado. */
+    if (corpo.acao === 'vocabulario') {
+      if (opc && opc.vocFalha) {
+        return r.fulfill({ status:500, contentType:'application/json', body:'{"erro":"falha"}' });
+      }
+      return r.fulfill({ status:200, contentType:'application/json',
+        body: JSON.stringify({ guardar: corpo.guardar === true,
+                               vocabulario: corpo.guardar ? corpo.texto : null }) });
+    }
     r.fulfill({ status:200, contentType:'application/json',
                 body: JSON.stringify({ email:'fulano@empresa.com', chamados: CHAMADOS,
                   perfil: (opc && opc.semPerfil) ? { cliente:null, config:null, modelos:[] } : {
@@ -49,7 +61,12 @@ const pagina = async (opc) => {
                       { id:1, nome:'Padrão de auditoria', escopo:'time',
                         dados:{ cenario:'evidencia', rotulo:'Etapa', ambiente:'QAS', sistema:'S4P / 100' } },
                       { id:2, nome:'Capa do cliente X', escopo:'personal', dados:{ layout:'grid' } }
-                    ] } }) });
+                    ],
+                    /* O vocabulário guardado chega junto do resto do perfil, na
+                       mesma resposta: pedir em duas viagens faria a caixa
+                       aparecer vazia por um instante e a pessoa redigitar. */
+                    vocabulario: (opc && opc.vocGuardado) || null,
+                    vocGuardar: !!(opc && opc.vocGuardado) } }) });
   });
   await pg.route('**/functions/v1/walkstamp-time', r => {
     const corpo = JSON.parse(r.request().postData() || '{}');
@@ -65,7 +82,7 @@ const pagina = async (opc) => {
 console.log('[1] sem sessão, a ferramenta é a de sempre');
 {
   const { pg, erros } = await pagina();
-  await pg.goto('http://localhost:8942/app.html?lang=pt');
+  await pg.goto('http://localhost:8843/app.html?lang=pt');
   // o cenário virou obrigatório ANTES de o vídeo entrar; a escolha específica
   // de cada bloco continua mais abaixo e ganha desta.
   await pg.selectOption('#modelo', 'ia').catch(() => {});
@@ -107,7 +124,7 @@ console.log('[1] sem sessão, a ferramenta é a de sempre');
 console.log('\n[2] pedir o link');
 {
   const { pg, pedidos } = await pagina();
-  await pg.goto('http://localhost:8942/app.html?lang=pt');
+  await pg.goto('http://localhost:8843/app.html?lang=pt');
   // o cenário virou obrigatório ANTES de o vídeo entrar; a escolha específica
   // de cada bloco continua mais abaixo e ganha desta.
   await pg.selectOption('#modelo', 'ia').catch(() => {});
@@ -136,7 +153,7 @@ console.log('\n[2] pedir o link');
 console.log('\n[3] a volta do link abre a sessão e lista os chamados');
 {
   const { pg, pedidos, erros } = await pagina();
-  await pg.goto('http://localhost:8942/app.html?lang=pt#access_token=' + jwt('fulano@empresa.com') + '&type=magiclink');
+  await pg.goto('http://localhost:8843/app.html?lang=pt#access_token=' + jwt('fulano@empresa.com') + '&type=magiclink');
   // o cenário virou obrigatório ANTES de o vídeo entrar; a escolha específica
   // de cada bloco continua mais abaixo e ganha desta.
   await pg.selectOption('#modelo', 'ia').catch(() => {});
@@ -180,7 +197,7 @@ console.log('\n[3] a volta do link abre a sessão e lista os chamados');
 console.log('\n[4b] a sessão traz os padrões do cliente, e não impõe nada');
 {
   const { pg, erros } = await pagina();
-  await pg.goto('http://localhost:8942/app.html?lang=pt#access_token=' + jwt('fulano@empresa.com'));
+  await pg.goto('http://localhost:8843/app.html?lang=pt#access_token=' + jwt('fulano@empresa.com'));
   // o cenário virou obrigatório ANTES de o vídeo entrar; a escolha específica
   // de cada bloco continua mais abaixo e ganha desta.
   await pg.selectOption('#modelo', 'ia').catch(() => {});
@@ -212,7 +229,7 @@ console.log('\n[4c] o que a pessoa escreveu manda sobre o padrão da conta');
   /* Sobrescrever o trabalho de alguém na volta de um link de e-mail seria a
      pior hora possível para fazer isso. */
   const { pg } = await pagina();
-  await pg.goto('http://localhost:8942/app.html?lang=pt');
+  await pg.goto('http://localhost:8843/app.html?lang=pt');
   // o cenário virou obrigatório ANTES de o vídeo entrar; a escolha específica
   // de cada bloco continua mais abaixo e ganha desta.
   await pg.selectOption('#modelo', 'ia').catch(() => {});
@@ -223,7 +240,7 @@ console.log('\n[4c] o que a pessoa escreveu manda sobre o padrão da conta');
     const u = document.getElementById('unNome');
     u.value = 'Print'; u.dispatchEvent(new Event('input'));
   });
-  await pg.goto('http://localhost:8942/app.html?lang=pt#access_token=' + jwt('fulano@empresa.com'));
+  await pg.goto('http://localhost:8843/app.html?lang=pt#access_token=' + jwt('fulano@empresa.com'));
   // o cenário virou obrigatório ANTES de o vídeo entrar; a escolha específica
   // de cada bloco continua mais abaixo e ganha desta.
   await pg.selectOption('#modelo', 'ia').catch(() => {});
@@ -245,7 +262,7 @@ console.log('\n[5] token vencido é o mesmo que sessão nenhuma');
 {
   const { pg } = await pagina();
   const velho = jwt('fulano@empresa.com', Math.floor(Date.now()/1000) - 60);
-  await pg.goto('http://localhost:8942/app.html?lang=pt');
+  await pg.goto('http://localhost:8843/app.html?lang=pt');
   // o cenário virou obrigatório ANTES de o vídeo entrar; a escolha específica
   // de cada bloco continua mais abaixo e ganha desta.
   await pg.selectOption('#modelo', 'ia').catch(() => {});
@@ -262,7 +279,7 @@ console.log('\n[6] servidor fora do ar não derruba a ferramenta');
 {
   /* Esta é a regra inteira: aditiva, nunca requisito. */
   const { pg, erros } = await pagina({ meusFalha: true });
-  await pg.goto('http://localhost:8942/app.html?lang=pt#access_token=' + jwt('fulano@empresa.com'));
+  await pg.goto('http://localhost:8843/app.html?lang=pt#access_token=' + jwt('fulano@empresa.com'));
   // o cenário virou obrigatório ANTES de o vídeo entrar; a escolha específica
   // de cada bloco continua mais abaixo e ganha desta.
   await pg.selectOption('#modelo', 'ia').catch(() => {});
@@ -288,7 +305,7 @@ console.log('\n[modelos] salvar da ferramenta é o único jeito de um modelo ter
      sistema, layout e papel, e nunca havia quem os escrevesse. Quem pagava
      criava "Evidência Cliente Exemplo", escolhia na lista, e não acontecia nada. */
   const { pg, pedidos, erros } = await pagina();
-  await pg.goto('http://localhost:8942/app.html?lang=pt#access_token=' + jwt('fulano@empresa.com'));
+  await pg.goto('http://localhost:8843/app.html?lang=pt#access_token=' + jwt('fulano@empresa.com'));
   // o cenário virou obrigatório ANTES de o vídeo entrar; a escolha específica
   // de cada bloco continua mais abaixo e ganha desta.
   await pg.selectOption('#modelo', 'ia').catch(() => {});
@@ -327,6 +344,114 @@ console.log('\n[modelos] salvar da ferramenta é o único jeito de um modelo ter
   ok('e a lista de modelos volta com ele', /Evidência Cliente Exemplo/.test(await pg.locator('#modeloCliente').innerHTML()));
   ok('a tela confirma', /salvo/i.test(await pg.locator('#modelosMsg').textContent()),
      await pg.locator('#modelosMsg').textContent());
+  ok('sem erro de JS', erros.length === 0, erros.join(' | ').slice(0, 140));
+  await pg.close();
+}
+
+/* A caixa do vocabulário mora no passo 3, que fica trancado enquanto não há
+   vídeo — a mesma trava que impede clicar em "gerar PDF" sem ter o que gerar.
+   Um vídeo aberto destrava, e é o que a pessoa faz antes de listar os termos do
+   sistema de qualquer jeito. */
+async function abrirCaixaDeTermos(pg){
+  await pg.selectOption('#modelo', 'ia').catch(() => {});
+  await pg.setInputFiles('#file', '/tmp/amostra.webm');
+  await pg.waitForTimeout(2500);
+  await pg.locator('#vocModo').click();
+  await pg.waitForTimeout(250);
+}
+
+console.log('\n[voc] a lista de termos só sai da máquina se a pessoa marcar');
+{
+  /* DEC-5, caminho A. Duas linhas do catálogo vendiam isto com selo de "em
+     construção": `vocLista` morava em `sessionStorage` e morria com a aba.
+     A lista carrega termos do cliente — nome de sistema, de projeto, código de
+     transação —, então guardar é escolha explícita e desmarcada por padrão. */
+  const { pg, pedidos, erros } = await pagina();
+  await pg.goto('http://localhost:8843/app.html?lang=pt#access_token=' + jwt('fulano@empresa.com'));
+  await abrirCaixaDeTermos(pg);
+
+  ok('com sessão paga, a escolha de guardar aparece', await pg.locator('#vocGuardarRow').isVisible());
+  ok('  e nasce DESMARCADA', (await pg.locator('#vocGuardar').isChecked()) === false);
+  ok('  e a tela diz onde a lista está', /aba/i.test(await pg.locator('#vocGuardarMsg').textContent()),
+     await pg.locator('#vocGuardarMsg').textContent());
+
+  /* SEM A MARCA, DIGITAR NÃO MANDA NADA. É a afirmação que mais importa deste
+     bloco: a caixa é de transcrição, e nada dela sai da máquina por padrão. */
+  const antes = pedidos.filter(x => x.tipo === 'meus' && x.corpo && x.corpo.acao === 'vocabulario').length;
+  await pg.fill('#vocLista', 'ME21N\nS/4HANA');
+  await pg.waitForTimeout(1600);
+  const desmarcado = pedidos.filter(x => x.tipo === 'meus' && x.corpo && x.corpo.acao === 'vocabulario');
+  ok('desmarcada, digitar não manda a lista para lugar nenhum',
+     desmarcado.length === antes, `${antes} → ${desmarcado.length}`);
+
+  await pg.locator('#vocGuardar').check();
+  await pg.waitForTimeout(900);
+  const env = pedidos.filter(x => x.tipo === 'meus' && x.corpo && x.corpo.acao === 'vocabulario').pop();
+  ok('marcada, ela vai — e vai pela sessão, não pela chave anônima',
+     !!env && /Bearer ey/.test(env.auth), env && env.auth.slice(0, 20));
+  ok('  com os termos que a pessoa digitou', !!env && /ME21N/.test(env.corpo.texto || ''),
+     env && (env.corpo.texto || '').replace(/\n/g, ' / ').slice(0, 40));
+  ok('  e com o pedido de guardar dito por extenso', !!env && env.corpo.guardar === true,
+     env && JSON.stringify(env.corpo.guardar));
+  ok('  e a tela passa a dizer que está na conta',
+     /conta/i.test(await pg.locator('#vocGuardarMsg').textContent()),
+     await pg.locator('#vocGuardarMsg').textContent());
+
+  /* DESMARCAR É APAGAR, e não "parar de atualizar": quem se arrepende quer o
+     termo fora do servidor, não congelado nele. */
+  await pg.locator('#vocGuardar').uncheck();
+  await pg.waitForTimeout(900);
+  const off = pedidos.filter(x => x.tipo === 'meus' && x.corpo && x.corpo.acao === 'vocabulario').pop();
+  ok('desmarcar manda o pedido de NÃO guardar', !!off && off.corpo.guardar === false,
+     off && JSON.stringify(off.corpo.guardar));
+  ok('  e a lista continua na tela, porque ela é do trabalho de agora',
+     /ME21N/.test(await pg.locator('#vocLista').inputValue()));
+  ok('sem erro de JS', erros.length === 0, erros.join(' | ').slice(0, 140));
+  await pg.close();
+}
+
+console.log('\n[voc2] a lista guardada volta na visita seguinte');
+{
+  const { pg, erros } = await pagina({ vocGuardado: 'ME21N\nKI235' });
+  await pg.goto('http://localhost:8843/app.html?lang=pt#access_token=' + jwt('fulano@empresa.com'));
+  await abrirCaixaDeTermos(pg);
+  ok('a lista veio da conta para a caixa', /KI235/.test(await pg.locator('#vocLista').inputValue()),
+     (await pg.locator('#vocLista').inputValue()).replace(/\n/g, ' '));
+  ok('  e a escolha volta marcada', (await pg.locator('#vocGuardar').isChecked()) === true);
+  ok('sem erro de JS', erros.length === 0, erros.join(' | ').slice(0, 140));
+  await pg.close();
+}
+
+console.log('\n[voc3] sem plano pago, a escolha nem existe — e nada sai da máquina');
+{
+  /* O controle só aparece com conta de cliente. No gratuito a lista continua
+     vivendo na aba, como sempre viveu: um controle que não faz nada é pior do
+     que controle nenhum, e um que faz sem plano seria promessa falsa. */
+  const { pg, pedidos, erros } = await pagina({ semPerfil: true });
+  await pg.goto('http://localhost:8843/app.html?lang=pt#access_token=' + jwt('fulano@empresa.com'));
+  await abrirCaixaDeTermos(pg);
+  await pg.fill('#vocLista', 'ME21N');
+  await pg.waitForTimeout(1600);
+  ok('a escolha de guardar não aparece', (await pg.locator('#vocGuardarRow').isVisible()) === false);
+  ok('  e nada foi mandado ao servidor',
+     pedidos.filter(x => x.tipo === 'meus' && x.corpo && x.corpo.acao === 'vocabulario').length === 0);
+  ok('  e a lista continua valendo na aba', /ME21N/.test(await pg.locator('#vocLista').inputValue()));
+  ok('sem erro de JS', erros.length === 0, erros.join(' | ').slice(0, 140));
+  await pg.close();
+}
+
+console.log('\n[voc4] o servidor recusa, e a lista não se perde');
+{
+  /* Aditiva, nunca requisito — a regra que atravessa este arquivo inteiro. */
+  const { pg, erros } = await pagina({ vocFalha: true });
+  await pg.goto('http://localhost:8843/app.html?lang=pt#access_token=' + jwt('fulano@empresa.com'));
+  await abrirCaixaDeTermos(pg);
+  await pg.fill('#vocLista', 'ME21N');
+  await pg.locator('#vocGuardar').check();
+  await pg.waitForTimeout(1200);
+  ok('a tela conta que não guardou', /não consegui|continua/i.test(await pg.locator('#vocGuardarMsg').textContent()),
+     await pg.locator('#vocGuardarMsg').textContent());
+  ok('  e a lista continua na caixa', /ME21N/.test(await pg.locator('#vocLista').inputValue()));
   ok('sem erro de JS', erros.length === 0, erros.join(' | ').slice(0, 140));
   await pg.close();
 }

@@ -48,7 +48,18 @@ console.log('[1] a exceção está escrita, e é só o endereço de destino');
 
 console.log('\n[2] as travas do servidor');
 {
-  ok('recusa quem não vem do nosso site', /function daCasa/.test(rota));
+  /* A CONFERÊNCIA MUDOU DE ARQUIVO, E A AFIRMAÇÃO SEGUIU — 29/08.
+     Isto era `/function daCasa/.test(rota)`: procurava a FUNÇÃO dentro da rota.
+     Quando ela saiu para `lib/daCasa.ts` — porque a rota do chamado precisou da
+     mesma conferência, e duas cópias são duas listas de hosts de prévia —, a
+     régua reprovou uma melhoria.
+     Procurar texto de fonte prova que alguém escreveu a linha, e nada mais. O
+     que garante de verdade é o bloco [3] logo abaixo, que bate na rota de pé e
+     recebe 403. Aqui fica só o que o texto pode dizer: que a rota USA a
+     conferência, e que ela vem antes dos segredos. */
+  ok('recusa quem não vem do nosso site', /daCasa\(req\)/.test(rota));
+  ok('  e a conferência mora num lugar só',
+     /export function daCasa/.test(fs.readFileSync(`${RAIZ_WS}/lib/daCasa.ts`, 'utf8')));
   /* E a origem vem ANTES dos segredos: responder 503 para quem não é da casa
      entrega de graça que existe um serviço aqui esperando uma chave. */
   ok('e confere a origem antes de conferir os segredos',
