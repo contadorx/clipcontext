@@ -148,7 +148,21 @@ else
   TOCADOS="$(git diff --name-only "$BASE" 2>/dev/null; git diff --name-only --cached 2>/dev/null; git ls-files --others --exclude-standard 2>/dev/null)"
   TOCADOS="$(printf '%s\n' "$TOCADOS" | sort -u | grep -v '^$')"
   echo
-  echo "[·] $(printf '%s\n' "$TOCADOS" | grep -c . ) arquivo(s) tocados desde $BASE"
+  N_TOCADOS=$(printf '%s\n' "$TOCADOS" | grep -c .)
+  echo "[·] $N_TOCADOS arquivo(s) tocados desde $BASE"
+  # ---- DIFF VAZIO NÃO É BUILD VERDE — 29/08 ----
+  # Comitar antes de rodar esta esteira faz o diff contra `HEAD` encolher para
+  # quase nada, e ela responde "verde" sobre um punhado de réguas em vez de
+  # sobre o build. Aconteceu comigo: comitei para não deixar trabalho solto, a
+  # pista disse "3 arquivos tocados", e eu quase levei aquele verde.
+  # O conserto é dizer, e não adivinhar: quem já comitou passa a base.
+  if [ "$N_TOCADOS" -eq 0 ]; then
+    echo
+    echo "não há nada a comparar com $BASE — provavelmente o build já foi comitado."
+    echo "rode contra o commit anterior:  bash testes/liberar.sh HEAD~1"
+    echo "ou o corredor inteiro:          bash testes/liberar.sh --tudo"
+    exit 1
+  fi
 fi
 
 # ---- monta a lista derivada do mapa ----------------------------------------
