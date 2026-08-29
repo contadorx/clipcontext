@@ -231,6 +231,39 @@ palavra já está lá, e não sai em português numa página alemã.
 
 ---
 
+## ACHADO FECHADO — 33 portas eram disputadas por mais de uma régua *(29/08)*
+
+O `rodar.sh` roda várias ao mesmo tempo com `xargs -P`, que é uma **fila**:
+qualquer duas podem cair juntas. Medido: **33 portas eram usadas por mais de uma
+régua** — três arquivos na 8918, três na 8921, três na 8931, três na 8934, três
+na 8937, três na 8951, três na 8953.
+
+Duas réguas na mesma porta não dão erro barulhento. A segunda encontra a porta
+ocupada e, daí em diante, ou fala com o servidor da PRIMEIRA — de outro teste,
+com outro conteúdo — ou derruba o dela no meio. **Verde falso nos dois casos.**
+O cabeçalho do próprio `rodar.sh` já carregava a cicatriz de uma execução medida
+contra uma build velha.
+
+41 arquivos renumerados, zero colisões, e o `inventario.mjs` ganhou o bloco [7]
+que recalcula isso a cada rodada. A única exceção é declarada: a **8802**, que é
+o Next que o `rodar.sh` sobe uma vez para todas as réguas de site.
+
+**E as dezesseis que sobem o próprio Next** passaram a chamar
+`garantirPortaLivre` — matar quem estava lá não é o mesmo que a porta ter ficado
+livre. O bloco [8] cobra a CHAMADA, e não o `import`: a edição em massa que
+acrescentou a garantia **pulou duas** (`email.mjs` e `faxina.mjs`, que sobem o
+Next com outra forma), e elas ficaram com cara de prontas e sem a trava. Contar
+o `import` seria repetir o erro.
+
+**Sobra pequeno e vale dizer:** o `ficha.mjs` guardava a porta escrita à mão em
+nove lugares, e num deles **codificada** — `localhost%3A8961`, dentro de um
+regex, onde a troca não alcançou porque o `%3A` cola no número. A régua falhou
+alto, que foi sorte: a afirmação casava `walkstamp` OU a porta, e podia ter
+continuado verde pelo outro lado. Agora a porta tem nome e todo endereço sai
+dele.
+
+---
+
 # Parte 1 — As decisões
 
 Uma por vez. Cada uma tem os caminhos, o que se ganha e o que se perde em cada

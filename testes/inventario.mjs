@@ -146,5 +146,60 @@ console.log('\n[6] quantas réguas o corredor específico NÃO consegue chamar')
                              : `hoje ${fora.length} — baixe o TETO para ${fora.length}`);
 }
 
+console.log('\n[7] duas réguas nunca disputam a mesma porta');
+{
+  /* O QUE ISTO IMPEDE, e já aconteceu. O `rodar.sh` roda várias ao mesmo tempo
+     com `xargs -P`, que é uma FILA: qualquer duas podem cair juntas. Medido em
+     29/08: **33 portas eram usadas por mais de uma régua** — três arquivos na
+     8918, três na 8921, três na 8931, três na 8934, três na 8937, três na 8951,
+     três na 8953.
+     Duas réguas na mesma porta não dão erro barulhento: a segunda encontra a
+     porta ocupada, e daí em diante ou fala com o servidor da PRIMEIRA — de
+     outro teste, com outro conteúdo — ou derruba o dela no meio. Verde falso
+     nos dois casos, e o próprio `rodar.sh` já tem no cabeçalho a cicatriz de
+     uma execução medida contra uma build velha.
+
+     A exceção é UMA, e é declarada: a 8802 é o Next que o `rodar.sh` sobe uma
+     vez para todas as réguas de site. Ali o compartilhamento é o desenho. */
+  const COMPARTILHADA = new Set([8802]);
+  const dono = new Map();
+  const colisoes = [];
+  for (const f of disco.concat([...INSTRUMENTOS])) {
+    const txt = fs.readFileSync(path.join(AQUI, f), 'utf8');
+    const portas = new Set();
+    for (const m of txt.matchAll(/\b(?:const|let)\s+(?:P|B|E|PORTA[A-Z_]*|P\d|PORT)\s*=\s*(8\d{3})\b/g)) {
+      portas.add(Number(m[1]));
+    }
+    for (const m of txt.matchAll(/\.listen\((8\d{3})\b/g)) portas.add(Number(m[1]));
+    for (const porta of portas) {
+      if (COMPARTILHADA.has(porta)) continue;
+      if (dono.has(porta)) colisoes.push(`${porta}: ${dono.get(porta)} e ${f}`);
+      else dono.set(porta, f);
+    }
+  }
+  ok(`as ${dono.size} portas próprias são de uma régua cada`, colisoes.length === 0,
+     colisoes.slice(0, 4).join(' | '));
+}
+
+console.log('\n[8] toda régua que sobe o Next PROVA que a porta é dela');
+{
+  /* ESTA AFIRMAÇÃO NASCEU DE UM ERRO MEU, no mesmo build. Eu acrescentei a
+     garantia de porta às catorze réguas que faltavam com uma edição em massa
+     que casava `const next = spawn(...)`. Duas tinham outra forma — o
+     `email.mjs` chama de `const n`, dentro de uma função; o `faxina.mjs` sobe o
+     Next duas vezes num `comNext()`. As duas ganharam o `import` e NENHUMA
+     chamada: ficaram com cara de prontas e sem a trava.
+     Contar o `import` seria repetir o meu erro. O que se cobra aqui é a
+     CHAMADA. */
+  const semGarantia = [];
+  for (const f of disco.concat([...INSTRUMENTOS])) {
+    const txt = fs.readFileSync(path.join(AQUI, f), 'utf8');
+    if (!/spawn\('npx',\s*\['next',\s*'start'/.test(txt)) continue;
+    if (!/garantirPortaLivre\(/.test(txt)) semGarantia.push(f);
+  }
+  ok('nenhuma sobe o Next sem garantir a porta antes', semGarantia.length === 0,
+     semGarantia.join(', '));
+}
+
 console.log(falhas ? `\n${falhas} FALHA(S)` : '\nInventário dos testes: os quatro números batem.');
 process.exit(falhas ? 1 : 0);

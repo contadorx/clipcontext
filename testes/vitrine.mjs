@@ -12,8 +12,8 @@ import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
 await exigirNext();
 
 const srv = criarProxy();
-await new Promise((r) => srv.listen(8967, r));
-const BASE = 'http://localhost:8967';
+await new Promise((r) => srv.listen(8854, r));
+const BASE = 'http://localhost:8854';
 const br = await chromium.launch({ executablePath: CHROME_WS });
 let falhas = 0;
 const ok = (n, c, e) => { console.log((c ? '  ok   ' : '  FALHA') + '  ' + n + (e ? '  → ' + e : '')); if (!c) falhas++; };

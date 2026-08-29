@@ -10,7 +10,7 @@ import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
 const html = fs.readFileSync(`${RAIZ_WS}/public/app.html`,'utf8');
 const jspdf = fs.readFileSync(`${RAIZ_WS}/vendor/jspdf.umd.min.js`,'utf8');
 const srv = http.createServer((q,r)=>{ if(q.url.startsWith('/_vercel/')){r.writeHead(200,{'Content-Type':'text/javascript'});return r.end('')} r.writeHead(200,{'Content-Type':'text/html'}); r.end(html); });
-await new Promise(r=>srv.listen(8942,r));
+await new Promise(r=>srv.listen(8843,r));
 const br = await chromium.launch({ executablePath:CHROME_WS });
 let falhas = 0;
 const ok = (n,c,e)=>{console.log((c?'  ok   ':'  FALHA')+'  '+n+(e?'  → '+e:''));if(!c)falhas++};
@@ -82,7 +82,7 @@ const pagina = async (opc) => {
 console.log('[1] sem sessão, a ferramenta é a de sempre');
 {
   const { pg, erros } = await pagina();
-  await pg.goto('http://localhost:8942/app.html?lang=pt');
+  await pg.goto('http://localhost:8843/app.html?lang=pt');
   // o cenário virou obrigatório ANTES de o vídeo entrar; a escolha específica
   // de cada bloco continua mais abaixo e ganha desta.
   await pg.selectOption('#modelo', 'ia').catch(() => {});
@@ -124,7 +124,7 @@ console.log('[1] sem sessão, a ferramenta é a de sempre');
 console.log('\n[2] pedir o link');
 {
   const { pg, pedidos } = await pagina();
-  await pg.goto('http://localhost:8942/app.html?lang=pt');
+  await pg.goto('http://localhost:8843/app.html?lang=pt');
   // o cenário virou obrigatório ANTES de o vídeo entrar; a escolha específica
   // de cada bloco continua mais abaixo e ganha desta.
   await pg.selectOption('#modelo', 'ia').catch(() => {});
@@ -153,7 +153,7 @@ console.log('\n[2] pedir o link');
 console.log('\n[3] a volta do link abre a sessão e lista os chamados');
 {
   const { pg, pedidos, erros } = await pagina();
-  await pg.goto('http://localhost:8942/app.html?lang=pt#access_token=' + jwt('fulano@empresa.com') + '&type=magiclink');
+  await pg.goto('http://localhost:8843/app.html?lang=pt#access_token=' + jwt('fulano@empresa.com') + '&type=magiclink');
   // o cenário virou obrigatório ANTES de o vídeo entrar; a escolha específica
   // de cada bloco continua mais abaixo e ganha desta.
   await pg.selectOption('#modelo', 'ia').catch(() => {});
@@ -197,7 +197,7 @@ console.log('\n[3] a volta do link abre a sessão e lista os chamados');
 console.log('\n[4b] a sessão traz os padrões do cliente, e não impõe nada');
 {
   const { pg, erros } = await pagina();
-  await pg.goto('http://localhost:8942/app.html?lang=pt#access_token=' + jwt('fulano@empresa.com'));
+  await pg.goto('http://localhost:8843/app.html?lang=pt#access_token=' + jwt('fulano@empresa.com'));
   // o cenário virou obrigatório ANTES de o vídeo entrar; a escolha específica
   // de cada bloco continua mais abaixo e ganha desta.
   await pg.selectOption('#modelo', 'ia').catch(() => {});
@@ -229,7 +229,7 @@ console.log('\n[4c] o que a pessoa escreveu manda sobre o padrão da conta');
   /* Sobrescrever o trabalho de alguém na volta de um link de e-mail seria a
      pior hora possível para fazer isso. */
   const { pg } = await pagina();
-  await pg.goto('http://localhost:8942/app.html?lang=pt');
+  await pg.goto('http://localhost:8843/app.html?lang=pt');
   // o cenário virou obrigatório ANTES de o vídeo entrar; a escolha específica
   // de cada bloco continua mais abaixo e ganha desta.
   await pg.selectOption('#modelo', 'ia').catch(() => {});
@@ -240,7 +240,7 @@ console.log('\n[4c] o que a pessoa escreveu manda sobre o padrão da conta');
     const u = document.getElementById('unNome');
     u.value = 'Print'; u.dispatchEvent(new Event('input'));
   });
-  await pg.goto('http://localhost:8942/app.html?lang=pt#access_token=' + jwt('fulano@empresa.com'));
+  await pg.goto('http://localhost:8843/app.html?lang=pt#access_token=' + jwt('fulano@empresa.com'));
   // o cenário virou obrigatório ANTES de o vídeo entrar; a escolha específica
   // de cada bloco continua mais abaixo e ganha desta.
   await pg.selectOption('#modelo', 'ia').catch(() => {});
@@ -262,7 +262,7 @@ console.log('\n[5] token vencido é o mesmo que sessão nenhuma');
 {
   const { pg } = await pagina();
   const velho = jwt('fulano@empresa.com', Math.floor(Date.now()/1000) - 60);
-  await pg.goto('http://localhost:8942/app.html?lang=pt');
+  await pg.goto('http://localhost:8843/app.html?lang=pt');
   // o cenário virou obrigatório ANTES de o vídeo entrar; a escolha específica
   // de cada bloco continua mais abaixo e ganha desta.
   await pg.selectOption('#modelo', 'ia').catch(() => {});
@@ -279,7 +279,7 @@ console.log('\n[6] servidor fora do ar não derruba a ferramenta');
 {
   /* Esta é a regra inteira: aditiva, nunca requisito. */
   const { pg, erros } = await pagina({ meusFalha: true });
-  await pg.goto('http://localhost:8942/app.html?lang=pt#access_token=' + jwt('fulano@empresa.com'));
+  await pg.goto('http://localhost:8843/app.html?lang=pt#access_token=' + jwt('fulano@empresa.com'));
   // o cenário virou obrigatório ANTES de o vídeo entrar; a escolha específica
   // de cada bloco continua mais abaixo e ganha desta.
   await pg.selectOption('#modelo', 'ia').catch(() => {});
@@ -305,7 +305,7 @@ console.log('\n[modelos] salvar da ferramenta é o único jeito de um modelo ter
      sistema, layout e papel, e nunca havia quem os escrevesse. Quem pagava
      criava "Evidência Cliente Exemplo", escolhia na lista, e não acontecia nada. */
   const { pg, pedidos, erros } = await pagina();
-  await pg.goto('http://localhost:8942/app.html?lang=pt#access_token=' + jwt('fulano@empresa.com'));
+  await pg.goto('http://localhost:8843/app.html?lang=pt#access_token=' + jwt('fulano@empresa.com'));
   // o cenário virou obrigatório ANTES de o vídeo entrar; a escolha específica
   // de cada bloco continua mais abaixo e ganha desta.
   await pg.selectOption('#modelo', 'ia').catch(() => {});
@@ -367,7 +367,7 @@ console.log('\n[voc] a lista de termos só sai da máquina se a pessoa marcar');
      A lista carrega termos do cliente — nome de sistema, de projeto, código de
      transação —, então guardar é escolha explícita e desmarcada por padrão. */
   const { pg, pedidos, erros } = await pagina();
-  await pg.goto('http://localhost:8942/app.html?lang=pt#access_token=' + jwt('fulano@empresa.com'));
+  await pg.goto('http://localhost:8843/app.html?lang=pt#access_token=' + jwt('fulano@empresa.com'));
   await abrirCaixaDeTermos(pg);
 
   ok('com sessão paga, a escolha de guardar aparece', await pg.locator('#vocGuardarRow').isVisible());
@@ -413,7 +413,7 @@ console.log('\n[voc] a lista de termos só sai da máquina se a pessoa marcar');
 console.log('\n[voc2] a lista guardada volta na visita seguinte');
 {
   const { pg, erros } = await pagina({ vocGuardado: 'ME21N\nKI235' });
-  await pg.goto('http://localhost:8942/app.html?lang=pt#access_token=' + jwt('fulano@empresa.com'));
+  await pg.goto('http://localhost:8843/app.html?lang=pt#access_token=' + jwt('fulano@empresa.com'));
   await abrirCaixaDeTermos(pg);
   ok('a lista veio da conta para a caixa', /KI235/.test(await pg.locator('#vocLista').inputValue()),
      (await pg.locator('#vocLista').inputValue()).replace(/\n/g, ' '));
@@ -428,7 +428,7 @@ console.log('\n[voc3] sem plano pago, a escolha nem existe — e nada sai da má
      vivendo na aba, como sempre viveu: um controle que não faz nada é pior do
      que controle nenhum, e um que faz sem plano seria promessa falsa. */
   const { pg, pedidos, erros } = await pagina({ semPerfil: true });
-  await pg.goto('http://localhost:8942/app.html?lang=pt#access_token=' + jwt('fulano@empresa.com'));
+  await pg.goto('http://localhost:8843/app.html?lang=pt#access_token=' + jwt('fulano@empresa.com'));
   await abrirCaixaDeTermos(pg);
   await pg.fill('#vocLista', 'ME21N');
   await pg.waitForTimeout(1600);
@@ -444,7 +444,7 @@ console.log('\n[voc4] o servidor recusa, e a lista não se perde');
 {
   /* Aditiva, nunca requisito — a regra que atravessa este arquivo inteiro. */
   const { pg, erros } = await pagina({ vocFalha: true });
-  await pg.goto('http://localhost:8942/app.html?lang=pt#access_token=' + jwt('fulano@empresa.com'));
+  await pg.goto('http://localhost:8843/app.html?lang=pt#access_token=' + jwt('fulano@empresa.com'));
   await abrirCaixaDeTermos(pg);
   await pg.fill('#vocLista', 'ME21N');
   await pg.locator('#vocGuardar').check();

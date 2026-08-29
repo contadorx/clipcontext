@@ -26,6 +26,7 @@ import { chromium } from 'playwright';
 import { spawn, execSync } from 'child_process';
 
 import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+import { garantirPortaLivre } from './_porta.mjs';
 const P = 8831;
 const BASE = `http://localhost:${P}`;
 const RAIZ = process.env.RAIZ || `${RAIZ_WS}`;
@@ -37,6 +38,10 @@ const ok = (n, c, e) => { console.log((c ? '  ok   ' : '  FALHA') + '  ' + n + (
 const matarPorta = () => { try { execSync(`fuser -k ${P}/tcp 2>/dev/null`); } catch {} };
 matarPorta();
 await new Promise(r => setTimeout(r, 400));
+/* A porta é nossa antes de qualquer coisa — o porquê está no `_porta.mjs`,
+   e ele custou uma hora de caçada a um defeito que não existia. */
+await garantirPortaLivre(P, 'o cabecalho.mjs');
+
 const next = spawn('npx', ['next', 'start', '-p', String(P)], { cwd: RAIZ, stdio: 'ignore' });
 process.on('exit', () => { try { next.kill('SIGKILL'); } catch {} matarPorta(); });
 for (let i = 0; i < 60; i++) {

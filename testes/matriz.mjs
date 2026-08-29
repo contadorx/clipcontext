@@ -137,7 +137,7 @@ const srv = http.createServer((q, r) => {
   }
   r.writeHead(200, { 'Content-Type': 'text/html' }); r.end(html);
 });
-await new Promise(r => srv.listen(8953, r));
+await new Promise(r => srv.listen(8850, r));
 
 const br = await chromium.launch({
   executablePath: CHROME_WS,
@@ -146,7 +146,7 @@ const ctx = await br.newContext({ acceptDownloads: true, viewport: { width: 1250
 const pg = await ctx.newPage();
 const erros = [];
 pg.on('pageerror', e => erros.push(e.message));
-await pg.goto('http://localhost:8953/app.html?lang=pt');
+await pg.goto('http://localhost:8850/app.html?lang=pt');
 await pg.selectOption('#modelo', 'evidencia');
 
 {

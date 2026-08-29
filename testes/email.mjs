@@ -19,6 +19,7 @@ import { spawn, execSync } from 'child_process';
 import http from 'http';
 
 import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
+import { garantirPortaLivre } from './_porta.mjs';
 const P = 8853, B = 8854, E = 8855;
 const BASE = `http://localhost:${P}`;
 const DONO = 'dono@email.example';
@@ -94,8 +95,10 @@ const banco = http.createServer((q, r) => {
 });
 await new Promise((r) => banco.listen(B, r));
 
-function subir(env) {
-  try { execSync(`fuser -k ${P}/tcp 2>/dev/null`); } catch {}
+/* `async` por causa da garantia da porta: matar quem estava lá não é o mesmo
+   que ela ter ficado livre, e este arquivo sobe o Next duas vezes. */
+async function subir(env) {
+  await garantirPortaLivre(P, 'o email.mjs');
   const n = spawn('npx', ['next', 'start', '-p', String(P)], {
     cwd: `${RAIZ_WS}`, stdio: 'ignore',
     env: { ...process.env, SUPABASE_URL: `http://localhost:${B}`,
@@ -116,7 +119,7 @@ process.on('exit', () => { try { proc && proc.kill('SIGKILL'); } catch {} banco.
 
 console.log('[1] sem chave do Brevo, o convite RECUSA — e não finge');
 {
-  proc = subir({});
+  proc = await subir({});
   await esperar();
   const r = await fetch(`${BASE}/api/convite`, {
     method: 'POST',
@@ -134,7 +137,7 @@ console.log('[1] sem chave do Brevo, o convite RECUSA — e não finge');
 
 console.log('\n[2] com a chave, o convite fala BREVO — não Resend');
 {
-  proc = subir({ BREVO_API_KEY: 'chave-brevo-de-teste',
+  proc = await subir({ BREVO_API_KEY: 'chave-brevo-de-teste',
                  EMAIL_DE: 'ola@walkstamp.com', EMAIL_DE_NOME: 'Walkstamp',
                  WALKSTAMP_BREVO_BASE: `http://localhost:${E}` });
   await esperar();

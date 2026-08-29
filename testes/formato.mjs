@@ -19,7 +19,7 @@ const srv=http.createServer((q,r)=>{const u=decodeURIComponent(q.url.split('?')[
  const f=path.join(ROOT,u==='/'?'index.html':u);
  if(!fs.existsSync(f)){r.writeHead(404);return r.end()}
  r.writeHead(200,{'Content-Type':T[path.extname(f)]||'application/octet-stream'});r.end(fs.readFileSync(f))});
-await new Promise(r=>srv.listen(8993,r));
+await new Promise(r=>srv.listen(8857,r));
 
 const br=await chromium.launch({executablePath:CHROME_WS});
 let falhas=0;
@@ -62,7 +62,7 @@ async function comConta(config, atraso = 0) {
       }));
     } catch (e) {}
   }, [jwt('chefe@formato.test'), Math.floor(Date.now() / 1000) + 3600]);
-  await pg.goto('http://localhost:8993/app.html?lang=pt');
+  await pg.goto('http://localhost:8857/app.html?lang=pt');
   return { pg, ctx, erros, soltarPerfil };
 }
 

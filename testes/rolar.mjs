@@ -27,7 +27,7 @@ const srv = http.createServer((q, r) => {
   if (q.url.startsWith('/_vercel/')) { r.writeHead(200,{'Content-Type':'text/javascript'}); return r.end('') }
   r.writeHead(200, { 'Content-Type': 'text/html' }); r.end(html);
 });
-await new Promise(r => srv.listen(8937, r));
+await new Promise(r => srv.listen(8840, r));
 
 let falhas = 0;
 const ok = (n, c, e) => { console.log((c ? '  ok   ' : '  FALHA') + '  ' + n + (e ? '  → ' + e : '')); if (!c) falhas++; };
@@ -43,7 +43,7 @@ console.log('[1] rolar uma lista e parar tem que virar quadro');
   const ctx = await br.newContext({ viewport: { width: 1280, height: 950 } });
   const pg = await ctx.newPage();
   const erros = []; pg.on('pageerror', e => erros.push(e.message));
-  await pg.goto('http://localhost:8937/app.html?lang=pt');
+  await pg.goto('http://localhost:8840/app.html?lang=pt');
   await pg.waitForTimeout(400);
   await pg.selectOption('#modelo', 'outro');   // vira "equilibrado" sozinho
   await pg.locator('#semTr').check();
@@ -129,7 +129,7 @@ console.log('\n[2] a gagueira do modelo não entra na transcrição');
 {
   const ctx = await br.newContext();
   const pg = await ctx.newPage();
-  await pg.goto('http://localhost:8937/app.html?lang=pt');
+  await pg.goto('http://localhost:8840/app.html?lang=pt');
   await pg.waitForTimeout(300);
   const casos = await pg.evaluate(() => {
     const f = window.__semGagueira;
@@ -157,7 +157,7 @@ console.log('\n[3] a máscara se desmancha quando a região para');
   const ctx = await br.newContext({ viewport: { width: 1280, height: 950 } });
   const pg = await ctx.newPage();
   const erros = []; pg.on('pageerror', e => erros.push(e.message));
-  await pg.goto('http://localhost:8937/app.html?lang=pt');
+  await pg.goto('http://localhost:8840/app.html?lang=pt');
   await pg.waitForTimeout(400);
   await pg.selectOption('#modelo', 'outro');
   /* A máscara é da REUNIÃO e só dela: no ritmo de todo dia ela deixava uma
@@ -271,7 +271,7 @@ console.log('\n[5] uma página de vídeo não pode terminar com um quadro só');
   const ctx = await br.newContext({ viewport: { width: 1280, height: 950 } });
   const pg = await ctx.newPage();
   const erros = []; pg.on('pageerror', e => erros.push(e.message));
-  await pg.goto('http://localhost:8937/app.html?lang=pt');
+  await pg.goto('http://localhost:8840/app.html?lang=pt');
   await pg.waitForTimeout(400);
   await pg.selectOption('#modelo', 'tutorial');   // vira "equilibrado" sozinho
   await pg.locator('#semTr').check();

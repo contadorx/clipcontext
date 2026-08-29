@@ -11,7 +11,7 @@ const srv=http.createServer((q,r)=>{
   // produção se a hospedagem errasse o tipo do arquivo
   if(q.url.split('?')[0]==='/sw.js'){r.writeHead(404);return r.end()}
   r.writeHead(200,{'Content-Type':'text/html'});r.end(html);});
-await new Promise(r=>srv.listen(8915,r));
+await new Promise(r=>srv.listen(8816,r));
 const br=await chromium.launch({executablePath:CHROME_WS});
 let falhas=0; const ok=(n,c,e)=>{console.log((c?'  ok   ':'  FALHA')+'  '+n+(e?'  → '+e:''));if(!c)falhas++};
 
@@ -22,7 +22,7 @@ console.log('\n[1] sem o tradutor embutido, a linha some e explica a alternativa
   const ctx0=await br.newContext();
   await ctx0.addInitScript(() => { try { delete window.Translator; } catch(e) { window.Translator = undefined; } });
   const pg=await ctx0.newPage();
-  await pg.goto('http://localhost:8915/app.html?lang=pt');
+  await pg.goto('http://localhost:8816/app.html?lang=pt');
   // o cenário de uso passou a ser obrigatório: sem ele o Gravar e o envio de vídeo cobram a escolha
   await pg.selectOption('#modelo', 'ia').catch(() => {});
   /* O texto mora na revisão, e a revisão só abre com material — como no uso
@@ -62,7 +62,7 @@ console.log('\n[2] com o tradutor embutido');
   });
   const pg=await ctx.newPage();
   const erros=[]; pg.on('pageerror',e=>erros.push(e.message));
-  await pg.goto('http://localhost:8915/app.html?lang=pt');
+  await pg.goto('http://localhost:8816/app.html?lang=pt');
   // o cenário de uso passou a ser obrigatório: sem ele o Gravar e o envio de vídeo cobram a escolha
   await pg.selectOption('#modelo', 'ia').catch(() => {});
   await pg.setInputFiles('#file','/tmp/amostra.webm');

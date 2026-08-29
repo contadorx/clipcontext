@@ -35,7 +35,7 @@ const srv = http.createServer((q, r) => {
   }
   r.writeHead(200, { 'Content-Type': 'text/html' }); r.end(html);
 });
-await new Promise(r => srv.listen(8946, r));
+await new Promise(r => srv.listen(8844, r));
 
 let falhas = 0;
 const ok = (n, c, e) => {
@@ -52,7 +52,7 @@ const erros = [];
 pg.on('pageerror', e => erros.push(e.message));
 await pg.route('**/jspdf**', r => r.fulfill({
   status: 200, headers: { 'content-type': 'text/javascript' }, body: jspdf }));
-await pg.goto('http://localhost:8946/app.html?lang=pt');
+await pg.goto('http://localhost:8844/app.html?lang=pt');
 await pg.selectOption('#modelo', 'evidencia');
 
 /* Um redesenho pelo caminho da pessoa: descartar e devolver o mesmo quadro. Não
@@ -319,7 +319,7 @@ console.log('\n[6] reabrir um documento antigo, sem a bandeira, volta como antes
   const p2 = await ctx.newPage();
   const e2 = [];
   p2.on('pageerror', e => e2.push(e.message));
-  await p2.goto('http://localhost:8946/app.html?lang=pt');
+  await p2.goto('http://localhost:8844/app.html?lang=pt');
   await p2.waitForTimeout(400);
   await p2.setInputFiles('#reabrirArq', '/tmp/pm-antigo.json');
   await p2.waitForFunction(() => document.querySelectorAll('#thumbs figure').length >= 5,

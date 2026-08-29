@@ -23,7 +23,7 @@ const srv = http.createServer((q, r) => {
   if (q.url.startsWith('/_vercel/')) { r.writeHead(200, {'Content-Type':'text/javascript'}); return r.end('') }
   r.writeHead(200, { 'Content-Type': 'text/html' }); r.end(html);
 });
-await new Promise(r => srv.listen(8931, r));
+await new Promise(r => srv.listen(8832, r));
 
 let falhas = 0;
 const ok = (n, c, e) => { console.log((c ? '  ok   ' : '  FALHA') + '  ' + n + (e ? '  → ' + e : '')); if (!c) falhas++; };
@@ -37,7 +37,7 @@ const ctx = await br.newContext({ viewport: { width: 1280, height: 1000 },
                                   permissions: ['microphone'] });
 const pg = await ctx.newPage();
 const erros = []; pg.on('pageerror', e => erros.push(e.message));
-await pg.goto('http://localhost:8931/app.html?lang=pt');
+await pg.goto('http://localhost:8832/app.html?lang=pt');
 await pg.waitForTimeout(400);
 
 console.log('[1] o padrão do campo deixou de ser 60');

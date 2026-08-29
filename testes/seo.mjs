@@ -27,7 +27,8 @@ import { spawn, execSync } from 'child_process';
 import http from 'http';
 
 import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
-const P = 8841, B = 8842;
+import { garantirPortaLivre } from './_porta.mjs';
+const P = 8806, B = 8842;
 const BASE = `http://localhost:${P}`;
 const RAIZ = process.env.RAIZ || `${RAIZ_WS}`;
 const CHROME = process.env.CHROME || CHROME_WS;
@@ -91,6 +92,10 @@ const banco = http.createServer((q, r) => {
 await new Promise((r) => banco.listen(B, r));
 try { execSync(`fuser -k ${P}/tcp 2>/dev/null`); } catch {}
 await new Promise((r) => setTimeout(r, 400));
+/* A porta é nossa antes de qualquer coisa — o porquê está no `_porta.mjs`,
+   e ele custou uma hora de caçada a um defeito que não existia. */
+await garantirPortaLivre(P, 'o seo.mjs');
+
 const next = spawn('npx', ['next', 'start', '-p', String(P)], {
   cwd: RAIZ, stdio: 'ignore',
   env: { ...process.env, SUPABASE_URL: `http://localhost:${B}`,

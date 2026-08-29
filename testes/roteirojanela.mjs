@@ -28,7 +28,7 @@ const srv = http.createServer((q, r) => {
   if (u === '/sw.js') { r.writeHead(200,{'Content-Type':'text/javascript'}); return r.end(fs.readFileSync(RAIZ+'/sw.js')); }
   r.writeHead(200, { 'Content-Type':'text/html' }); r.end(html);
 });
-await new Promise(r => srv.listen(8974, r));
+await new Promise(r => srv.listen(8856, r));
 
 function lerZip(caminho){
   const b = fs.readFileSync(caminho); const saida = {}; let i = 0;
@@ -60,7 +60,7 @@ await pg.addInitScript(() => {
   navigator.mediaDevices.getDisplayMedia = async () => tela();
   navigator.mediaDevices.getUserMedia = async () => { throw new Error('sem mic'); };
 });
-await pg.goto('http://localhost:8974/app.html?lang=pt');
+await pg.goto('http://localhost:8856/app.html?lang=pt');
 await pg.selectOption('#modelo', 'evidencia').catch(() => {});
 await pg.waitForTimeout(500);
 

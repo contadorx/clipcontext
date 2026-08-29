@@ -24,7 +24,7 @@ const srv = http.createServer((q, r) => {
   if (u === '/sw.js') { r.writeHead(200,{'Content-Type':'text/javascript'}); return r.end(fs.readFileSync(ROOT+'/sw.js')) }
   r.writeHead(200, {'Content-Type':'text/html'}); r.end(html);
 });
-await new Promise(r => srv.listen(8908, r));
+await new Promise(r => srv.listen(8813, r));
 
 const br = await chromium.launch({
   executablePath: CHROME_WS,
@@ -56,7 +56,7 @@ const dica = (id) => pg.evaluate((i) => {
   return el && !el.classList.contains('hide') ? el.textContent.trim() : '';
 }, id);
 
-await pg.goto('http://localhost:8908/app.html?lang=pt');
+await pg.goto('http://localhost:8813/app.html?lang=pt');
 // o cenário de uso passou a ser obrigatório: sem ele o botão Gravar cobra a escolha
 await pg.selectOption('#modelo', 'ia').catch(() => {});
 await pg.waitForTimeout(600);

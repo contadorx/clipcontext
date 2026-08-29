@@ -30,7 +30,7 @@ const srv = http.createServer((q, r) => {
   if (u === '/sw.js') { r.writeHead(200,{'Content-Type':'text/javascript'}); return r.end(fs.readFileSync(ROOT+'/sw.js')) }
   r.writeHead(200, {'Content-Type':'text/html'}); r.end(html);
 });
-await new Promise(r => srv.listen(8957, r));
+await new Promise(r => srv.listen(8851, r));
 
 const br = await chromium.launch({
   executablePath: CHROME_WS,
@@ -43,7 +43,7 @@ const ctx = await br.newContext({ viewport: { width: 1150, height: 980 } });
 const pg = await ctx.newPage();
 const erros = [];
 pg.on('pageerror', e => erros.push(e.message));
-await pg.goto('http://localhost:8957/app.html?lang=pt');
+await pg.goto('http://localhost:8851/app.html?lang=pt');
 await pg.waitForTimeout(500);
 
 console.log('[1] o exemplo escolhe o cenário — e DIZ que escolheu');

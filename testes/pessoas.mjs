@@ -36,7 +36,7 @@ const srv = http.createServer((q, r) => {
   }
   r.writeHead(200, { 'Content-Type': 'text/html' }); r.end(html);
 });
-await new Promise(r => srv.listen(8951, r));
+await new Promise(r => srv.listen(8846, r));
 
 let falhas = 0;
 const ok = (n, c, e) => {
@@ -50,7 +50,7 @@ const br = await chromium.launch({
 const pg = await (await br.newContext({ viewport: { width: 1250, height: 980 } })).newPage();
 const erros = [];
 pg.on('pageerror', e => erros.push(e.message));
-await pg.goto('http://localhost:8951/app.html?lang=pt');
+await pg.goto('http://localhost:8846/app.html?lang=pt');
 
 const visivel = () => pg.locator('#pessoasAviso').isVisible();
 const texto = () => pg.locator('#pessoasAviso').textContent();
