@@ -25,6 +25,7 @@
  */
 import fs from 'fs';
 import { RAIZ_WS } from './_caminhos.mjs';
+const AQUI = `${RAIZ_WS}/testes`;
 
 const BASE = 'http://localhost:8802';
 let falhas = 0;
@@ -108,6 +109,29 @@ console.log('\n[3] o caminho velho morreu — e é isto que fecha o buraco');
   }).map((p) => p.replace(RAIZ_WS + '/', ''));
   ok('ninguém no produto chama `walkstamp_recado` direto', culpados.length === 0,
      culpados.join(', '));
+
+  /* E NENHUMA RÉGUA INTERCEPTA A PORTA VELHA — 29/08, e esta linha nasceu de um
+     erro que custou uma esteira completa.
+     Trocar o chamador foi metade do trabalho; a outra metade eram as réguas que
+     grampeavam `rpc/walkstamp_recado` para ver o que o produto mandava. Eu
+     consertei as que lembrei (`ficha.mjs`) e esqueci duas (`ux.mjs`,
+     `diagchamado.mjs`). Elas passaram a ver ZERO envios e a reprovar dizendo
+     que o produto tinha quebrado — vermelho que não é defeito, que é o pior
+     tipo, porque manda procurar no lugar errado.
+     Perguntar ao disco é mais barato do que confiar na minha memória. */
+  const reguasVelhas = fs.readdirSync(AQUI)
+    .filter((f) => f.endsWith('.mjs') && f !== 'chamadorota.mjs')
+    .filter((f) => {
+      const t = fs.readFileSync(`${AQUI}/${f}`, 'utf8');
+      /* Uma régua PODE grampear a porta velha de propósito — o `ficha.mjs` faz
+         isso para provar que ninguém bate nela. A marca declara a intenção, e
+         separar intenção de esquecimento é a coisa inteira: sem ela, a
+         varredura acusaria justamente quem guarda a porta. */
+      if (/porta-velha-de-proposito/.test(t)) return false;
+      return /rpc\/walkstamp_recado/.test(t);
+    });
+  ok('e nenhuma régua grampeia a porta velha', reguasVelhas.length === 0,
+     reguasVelhas.join(', '));
 }
 
 console.log('\n[4] e o limitador de LER só gasta quando erra');

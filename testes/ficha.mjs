@@ -81,7 +81,10 @@ console.log('\n[5] o recado vai para o servidor, não para o mailto');
   });
   /* E O CAMINHO VELHO NÃO PODE MAIS SER USADO: se alguém voltar a falar com o
      Supabase direto, o limite por ator vira decoração. Esta rota existe para
-     PEGAR isso, e não para servir — ela conta e reprova lá embaixo. */
+     PEGAR isso, e não para servir — ela conta e reprova lá embaixo.
+     porta-velha-de-proposito — a marca que diz ao `chamadorota.mjs` que este
+     grampo é intencional. Sem ela, a varredura que procura réguas esquecidas
+     na porta antiga acusaria justamente a que guarda a porta antiga. */
   const pelaPortaVelha = [];
   await pg5.route('**/rest/v1/rpc/walkstamp_recado', r => {
     pelaPortaVelha.push(1);

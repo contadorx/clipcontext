@@ -63,9 +63,11 @@ async function abrir({ lentidao, comSessao }) {
     headers:{'access-control-allow-origin':'*','content-type':'text/javascript'},
     body:'export const env={allowLocalModels:true,allowRemoteModels:true,backends:{onnx:{wasm:{}}}};export async function pipeline(){}' }));
   /* O recado: guardamos o que o navegador MANDOU, que é a única pergunta. */
-  await pg.route('**/rpc/walkstamp_recado', async r => {
+  /* A PORTA MUDOU EM 29/08: `/api/chamado`, e não mais o Supabase direto. */
+  await pg.route('**/api/chamado', async r => {
     enviados.push(JSON.parse(r.request().postData() || '{}'));
-    await r.fulfill({ status:200, headers:{'access-control-allow-origin':'*'}, body:'"WS-9999"' });
+    await r.fulfill({ status:200, headers:{'access-control-allow-origin':'*'},
+                      contentType:'application/json', body:'{"numero":"WS-9999"}' });
   });
   await pg.route('**/functions/v1/walkstamp-meus', r => r.fulfill({ status:200,
     headers:{'access-control-allow-origin':'*'}, body: JSON.stringify({ chamados: [], perfil: null }) }));
@@ -132,9 +134,9 @@ const semearSessao = (pg) => pg.addInitScript(([chave, dados]) => {
                            null, { timeout: 90000 });
   const ms = Date.now() - t0;
   const env = enviados[enviados.length - 1] || {};
-  const diag = env.p_diag || '';
+  const diag = env.diag || '';
   console.log('     esperou ' + ms + ' ms, mandou ' + diag.length + ' caracteres de relatório');
-  ok('mandou um recado', !!env.p_texto);
+  ok('mandou um recado', !!env.texto);
   /* A AFIRMAÇÃO QUE PEGA O DEFEITO. Sem o conserto isto vale 1 — o "…" que
      chegou no WS-0005 — ou o tamanho da mensagem de espera. */
   ok('o relatório vai INTEIRO, e não o texto de espera',
@@ -159,7 +161,7 @@ const semearSessao = (pg) => pg.addInitScript(([chave, dados]) => {
   const ms = Date.now() - t0;
   const env = enviados[enviados.length - 1] || {};
   console.log('     esperou ' + ms + ' ms');
-  ok('o recado saiu sem relatório', env.p_diag === null || env.p_diag === undefined, String(env.p_diag).slice(0,40));
+  ok('o recado saiu sem relatório', env.diag === null || env.diag === undefined, String(env.diag).slice(0,40));
   ok('e saiu sem esperar a coleta', ms < LENTO, ms + ' ms contra ' + LENTO + ' ms de sondagem');
   ok('sem erro de página', erros.length === 0, erros[0]);
   await pg.close();
