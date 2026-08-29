@@ -57,17 +57,46 @@ antes de chegar ao `rodar.sh`. `next[-]server` resolve.
 
 Três vezes neste build a coisa medida se pareceu com a coisa que mede.
 
+## O defeito que eu cometi DENTRO do conserto
+
+A primeira desconflitação passou na minha conferência e **reprovou na esteira
+completa**: o `seo.mjs` morreu com `EADDRINUSE` na 8842. A causa:
+
+```js
+const P = 8806, B = 8842;
+```
+
+**Lista de declaradores.** Meu leitor de portas casava `const <NOME> = 8xxx` e
+era cego para o segundo — então a `B = 8842` não existia para ele, e eu atribuí
+a 8842 ao `webcam.mjs`, **criando uma colisão nova**. O mesmo defeito que este
+build inteiro existe para fechar, cometido por mim, dentro do fechamento.
+
+Com o leitor corrigido — lista partida na vírgula, o nome não importa, o
+endereço escrito à mão conta, e comentário não é código — apareceram **mais 10
+colisões**, quase todas obra da minha própria renumeração. Mais 14 trocas: **156
+portas, zero colisões**.
+
+A régua ganhou o mesmo leitor. Se ela tivesse ficado com o meu, teria dado verde
+sobre a colisão que eu acabara de criar — que é a definição do defeito que ela
+existe para pegar.
+
+**E é por isso que o zip não saiu quando foi pedido.** Ele teria ido com a
+colisão dentro e a régua cega para ela.
+
 ## Provado por falha
 
 - duas réguas na mesma porta → `FALHA as 140 portas próprias são de uma régua
   cada → 8847: pessoas.mjs e plano.mjs`;
 - uma régua que sobe o Next sem a garantia → `FALHA nenhuma sobe o Next sem
-  garantir a porta antes → blog.mjs`.
+  garantir a porta antes → blog.mjs`;
+- e a colisão no SEGUNDO declarador, que é a que me escapou → `FALHA as 155
+  portas próprias são de uma régua cada → 8869: seo.mjs e webcam.mjs`.
 
 ## Esteira
 
-Completa — `bash testes/rodar.sh`, as 171. Depois de mexer em sessenta arquivos
-de régua, nada menos que isso seria honesto.
+Completa — `bash testes/rodar.sh`: **171 ok · 0 PULADO · 0 FALHOU.** Depois de
+mexer em 55 arquivos de régua, nada menos que isso seria honesto — e a primeira
+rodada provou o ponto, reprovando o meu próprio conserto.
 
 ## O que sobrou da minha lista
 
