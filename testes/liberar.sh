@@ -184,9 +184,25 @@ else
   # sobre o build. Aconteceu comigo: comitei para não deixar trabalho solto, a
   # pista disse "3 arquivos tocados", e eu quase levei aquele verde.
   # O conserto é dizer, e não adivinhar: quem já comitou passa a base.
-  if [ "$N_TOCADOS" -eq 0 ]; then
+  # E UM DIFF SÓ DE ARTEFATO É A MESMA COISA — 02/09.
+  # A trava acima pegava o diff VAZIO. Mas a própria esteira roda o `build.py`
+  # antes de tudo, e ele reescreve o carimbo de hora, o `app.html` e o pacote
+  # offline. Então um build já comitado não aparece com zero arquivos: aparece
+  # com TRÊS, todos gerados aqui dentro.
+  # Foi assim que a pista deu verde sobre 20 réguas sem rodar a régua nova que
+  # aquele build inteiro existia para criar. A trava do vazio não pegou porque
+  # o diff não estava vazio — estava cheio do que ela mesma acabara de escrever.
+  GERADOS='^(src/[.]build|public/app[.]html|offline/walkstamp-offline[.]html|public/sitemap[^/]*[.]xml|src/(marca|rotas)[.]json)$'
+  N_DE_VERDADE=$(printf '%s\n' "$TOCADOS" | grep -vE "$GERADOS" | grep -c .)
+  if [ "$N_TOCADOS" -eq 0 ] || [ "$N_DE_VERDADE" -eq 0 ]; then
     echo
-    echo "não há nada a comparar com $BASE — provavelmente o build já foi comitado."
+    if [ "$N_TOCADOS" -eq 0 ]; then
+      echo "não há nada a comparar com $BASE — provavelmente o build já foi comitado."
+    else
+      echo "os $N_TOCADOS arquivo(s) tocados são TODOS gerados pela própria esteira"
+      echo "(carimbo de hora, app.html, pacote offline). Isso não é um build:"
+      echo "é o rastro de quem já comitou antes de rodar."
+    fi
     echo "rode contra o commit anterior:  bash testes/liberar.sh HEAD~1"
     echo "ou o corredor inteiro:          bash testes/liberar.sh --tudo"
     exit 1
