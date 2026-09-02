@@ -72,6 +72,19 @@ const CSP = [
     'https://*.huggingface.co https://cdn-lfs.huggingface.co https://cdn-lfs-us-1.huggingface.co ' +
     'https://*.supabase.co https://www.googleapis.com https://accounts.google.com',
   "frame-src 'self' https://accounts.google.com https://docs.google.com",
+  /* ONDE OS AVISOS CHEGAM — e sem isto o `Report-Only` não relatava a ninguém.
+     Medido em 02/09: a política estava em `Report-Only` desde 24/08 e **sem
+     endereço de relatório**. O navegador conferia, montava o aviso e jogava
+     fora. Uma semana que devia ter virado dados virou trabalho de CPU na
+     máquina dos outros — e a segunda metade da DEC-12 dependia justamente
+     desses dados para não ser aposta.
+
+     Os DOIS nomes, porque os navegadores não concordam: `report-uri` é o antigo
+     e é o que a maioria ainda manda; `report-to` é o novo e precisa do
+     cabeçalho `Reporting-Endpoints` ao lado. Manter só um é perder metade dos
+     relatórios, e a metade que falta é sempre a que tinha a resposta. */
+  'report-uri /api/csp',
+  'report-to csp',
 ].join('; ');
 const paginas = Object.keys(slugs);
 
@@ -170,6 +183,10 @@ const config = {
            `Report-Only` e não travando. */
         { key: 'X-Frame-Options', value: 'DENY' },
         { key: 'Content-Security-Policy-Report-Only', value: CSP },
+        /* O `report-to` da CSP é só um NOME; é este cabeçalho que diz a que
+           endereço o nome corresponde. Sem ele, a diretiva não aponta para
+           lugar nenhum — e o navegador não avisa que não avisou. */
+        { key: 'Reporting-Endpoints', value: 'csp="/api/csp"' },
         { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' },
         { key: 'Permissions-Policy',
           value: 'geolocation=(), payment=(), usb=(), magnetometer=(), gyroscope=(), ' +

@@ -103,7 +103,10 @@ read -r -d '' MAPA <<'MAPA_FIM'
 ^app/ => site:paginas.mjs site:seo.mjs site:negocio.mjs
 ^public/site[.]css$ => site:estreito.mjs site:paginas.mjs site:dobra.mjs site:buscaajuda.mjs
 ^src/site/(doc|home)[.]html$ => site:estreito.mjs site:paginas.mjs site:cabecalho.mjs marcos-a11y.mjs
-^next[.]config[.]mjs$ => site:csp.mjs site:cabecalho.mjs site:paginas.mjs
+^next[.]config[.]mjs$ => site:csp.mjs site:cabecalho.mjs site:paginas.mjs site:csprelato.mjs
+# A política e o endereço de relatório são uma coisa só: a política pode existir
+# e não apontar para lugar nenhum — foi exatamente o defeito de origem.
+^app/api/csp/ => site:csprelato.mjs
 # O IMPORTADOR, O VOCABULÁRIO DELE E A PONTE PARA A FERRAMENTA — 28/08.
 # As colunas de condição atravessam quatro arquivos: quem adivinha o mapa, quem
 # normaliza a reexecução, quem monta o link do caso e a régua que prova as três
