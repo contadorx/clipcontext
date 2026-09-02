@@ -1155,20 +1155,38 @@ O item que trava a aprovação no dossiê de fornecedor.
 
 ## Build 9 — Segurança de servidor *(3–4 d)*
 
-- **Zip bomb** no leitor de `.xlsx`: `inflateRawSync` sem teto de saída, e o laço
-  infla **todas** as entradas ao mesmo tempo. Alcançável com qualquer e-mail,
-  pelos 14 dias de degustação
-- Consulta de chamado **sem login**, com número sequencial de 4 dígitos e sem
-  limite de tentativa. *(Confirmado hoje em produção: `walkstamp_chamado_ver`
-  é executável por `anon`.)* Devolve texto, resposta e datas
-- O limite de abertura de chamado é **global** — um ator sozinho tranca a caixa
-  de todo mundo
-- CSP *(DEC-12 caminho A)*
-- `CRON_SECRET` reaproveitado como sal do hash do convite: girar o segredo zera
-  todas as contagens de limite
-- O link do roteiro leva caso, sistema e chamado na query string
-- O `app/api/faxina/route.ts` — o endereço que **apaga dado de cliente** —
-  nunca foi auditado
+**MEDIDO EM 29/08 E 02/09 — cinco dos sete estavam vencidos ou foram fechados.**
+
+- ~~**Zip bomb** no leitor de `.xlsx`~~ — **vencido.** Tem teto desde então:
+  `maxOutputLength` por entrada, 24 MB por entrada, 64 MB no total e 512
+  entradas.
+- ~~Consulta de chamado sem login, número de 4 dígitos, sem limite~~ —
+  **meio vencido, e o resto fechado no Build 54.** Hoje exige número **e**
+  e-mail. O que sobrava era pior do que a fila dizia: o limitador estava keyed
+  na **vítima**, então quem soubesse o seu endereço te trancava fora do seu
+  próprio chamado. Agora ele **só gasta quando erra**.
+- ~~O limite de abertura de chamado é global~~ — **fechado no Build 54.** O
+  limite saiu do banco (que não sabe quem chamou) e foi para `/api/chamado`,
+  que tem IP. O navegador perdeu a porta.
+- ~~`CRON_SECRET` reaproveitado como sal do convite~~ — **vencido**, o
+  `CONVITE_SAL` ganhou sal próprio em 24/08.
+- ~~O `app/api/faxina/route.ts` nunca foi auditado~~ — **auditado em 02/09, e
+  está saudável.** Exige `CRON_SECRET`, recusa com 503 quando ele falta, tem
+  modo seco. E, mais importante que a tranca: ela **está rodando** — 16
+  execuções reais no banco, a última hoje às 04:17 UTC, com a fila do balde
+  vazia. Os prazos que a política promete estão sendo cumpridos.
+
+**O QUE CONTINUA ABERTO, e é o que sobrou deste bloco:**
+
+- **CSP travando** *(DEC-12 caminho A, segunda metade)*. Ela está em
+  `Report-Only` desde 24/08, com a régua `csp.mjs` medindo violações. Travar tem
+  um risco medido e escrito no `next.config.mjs`: **o caminho da transcrição não
+  é mensurável daqui** — o modelo vem de CDN, e a CDN não é alcançável da
+  máquina onde a régua roda. Travar sem medir esse caminho é arriscar desligar
+  a transcrição, que é o produto.
+- O link do roteiro leva caso, sistema e chamado na query string — e agora
+  também a pré-condição e o resultado esperado *(Build 50)*. Endereço vai para
+  histórico, referrer e log de servidor.
 
 ---
 
