@@ -98,6 +98,69 @@ Os dois primeiros estão resolvidos neste build. O terceiro também.
 
 ---
 
+## DEC-16 — Apontar na tela durante a gravação *(decidida 06/09, entregue no Build 56)*
+
+**O pedido, do campo e de muita gente:** "queria abrir determinada tela e já
+fazer a marcação — setas, um retângulo — para não esquecer". Marcar depois já
+existia, na lente. Marcar **agora** não, e o "depois" custa caro: quarenta telas
+adiante ninguém lembra qual campo da tela 12 estava errado.
+
+**O que foi medido antes de decidir:**
+
+- a marcação já era **vetor**, e não pixel: `f.marcas` normalizado de 0 a 1,
+  queimado só na exportação (`queimarTarjas`). Anotar ao vivo custa um `push`
+  num array, e não um canvas de 1920 redesenhado no meio da captura;
+- a prévia já era um SVG `viewBox="0 0 1000 1000"` com
+  `preserveAspectRatio="none"` — desenha igual numa figura de 300px e numa de
+  1920, então a janelinha pode ser pequena sem que a marca saia do lugar;
+- a janelinha **já sabia crescer e voltar a encolher**: `trocarTamanhoPip()`
+  fecha e reabre, e a gravação sobrevive porque não passa por ali.
+
+**As três decisões que o build tomou:**
+
+1. **A captura PARA enquanto se aponta.** O editor é uma janela por cima da tela
+   compartilhada, e o padrão desta ferramenta é gravar o monitor inteiro: sem a
+   pausa, os quadros seguintes sairiam com a nossa ferramenta desenhada em cima
+   do sistema do cliente. A pausa é a que já existe — o relógio segue correndo,
+   porque a hora de parede tem que continuar verdadeira. Quem já estava pausado
+   continua pausado ao fechar.
+2. **Só seta, retângulo e caneta.** Tarja e recorte MUDAM a figura, e mudar
+   figura no meio de uma gravação numa janela pequena é o gesto que não se pode
+   errar. Eles ficam na revisão, com a imagem grande e o engano reversível.
+3. **A marcação vai para o espelho em disco.** A imagem já sobrevivia a uma
+   queda do navegador; a seta feita ao vivo passou a sobreviver também. A imagem
+   no espelho continua **limpa** — a marca vai como lista, porque um espelho já
+   queimado é uma cópia que ninguém desfaz.
+
+**E uma correção minha, do que eu tinha dito antes de medir:** eu disse que a
+edição ao vivo entraria no catálogo pago "como as outras marcações". Está
+errado, e o próprio código desmente: seta, retângulo e caneta são **grátis** na
+lente desde sempre. O que é pago é *acabamento* — a tarja de classificação, o
+campo de emissor, a contagem de erros na identificação. Marcar uma tela é
+**prova**, e prova não se cobra. O recurso nasceu grátis.
+
+---
+
+## ACHADO FECHADO — trocar o tamanho da janelinha estourava durante a gravação *(06/09)*
+
+Desenterrado pela régua nova do Build 56, e **antigo**. `reabrirPip()` — o
+caminho do botão de tamanho da janelinha, e do atalho `J` — chamava `agora()`,
+que é um apelido criado **dentro** da função que grava e que daqui nunca
+existiu. Quem apertasse o botão de tamanho no meio de uma gravação recebia um
+`agora is not defined`, e a janelinha voltava dizendo *"preparando"* com o
+relógio parado em 0:00.
+
+O erro morria em silêncio porque acontecia **depois** de a janela já estar
+montada: tudo parecia funcionar, só o estado não chegava. Nenhuma régua cobria o
+gesto — `janelinha.mjs` mede o desenho da janelinha, não o que acontece quando
+se troca de tamanho com a gravação correndo.
+
+Consertado (`liveAgora()`, a mesma função no escopo de fora) e coberto pelo
+bloco [9] de `testes/edicaoaovivo.mjs`, que agora exige o relógio **andando**
+depois da troca — um `count()` de botão não teria pego isto.
+
+---
+
 ## ACHADO FECHADO — a régua forjava numa lista que ainda crescia *(28/08)*
 
 Encontrado pela esteira COMPLETA no Build 44 e **reproduzido duas vezes**,
