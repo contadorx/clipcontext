@@ -10154,7 +10154,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
      depois, e não tem como se atualizar sozinho. Sem carimbo, "estou com um
      problema no offline" é uma conversa sem chão — ninguém sabe de qual build
      se fala nem se o defeito já foi consertado. */
-  const VERSAO = '2026.09.06-21';
+  const VERSAO = '2026.09.06-24';
   window.__versao = () => VERSAO;
 
   const PIP_CSS = `
@@ -10982,15 +10982,60 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
      Este número e o CSS têm que continuar iguais: se um andar sozinho, a
      figura sai cortada ou sobra faixa preta na janela. */
   const CROMO_ED = 144;
+
+  /* ---- O EDITOR ABRE GRANDE, E LEMBRA O TAMANHO QUE A PESSOA DEU ----
+   *
+   * Ele nascia com 72% da tela, e o argumento era "a janela precisa ficar POR
+   * CIMA de algo: se cobrir tudo, a pessoa perde a referência do que estava
+   * documentando". O relato desfez isso em uma frase: "minha ação foi abrir ela
+   * inteira e me perdi".
+   *
+   * E O ARGUMENTO TINHA CAÍDO ANTES DISSO, sem eu perceber. Ele valia enquanto
+   * o editor disputava tela com a captura; desde que a captura PARA enquanto se
+   * aponta, não há nada acontecendo atrás para se manter à vista. O que importa
+   * agora é enxergar o campo que se quer circular — e num ERP em tela cheia,
+   * numa janela de 72%, o campo tem quatro pixels.
+   *
+   * Então: 94% da tela disponível, e o resto é margem para a janela continuar
+   * parecendo uma janela (uma que cobre a tela inteira vira modo cheio, e aí
+   * some a borda que diz como sair).
+   *
+   * E O TAMANHO QUE A PESSOA DER FICA. Quem arrastou o canto uma vez não quer
+   * arrastar quarenta. `documentPictureInPicture` não redimensiona depois de
+   * aberto, mas o `innerWidth` da janela ao fechar diz o que ela virou — e é
+   * isso que se guarda. Preferência de tela, como o tamanho da lente e o
+   * idioma; fica no `localStorage`, e está descrito na política.
+   *
+   * COM PISO E COM TETO. Sem piso, um arrasto sem querer deixa o editor
+   * inutilizável para sempre e sem nenhuma pista do porquê. Sem teto, um
+   * tamanho guardado num monitor de 4K abre fora da tela no notebook. */
+  const ED_TAM_CHAVE = 'Walkstamp.editorTam';
+  const guardarTamEd = (w, h) => {
+    if (!(w > 0 && h > 0)) return;
+    try { localStorage.setItem(ED_TAM_CHAVE, Math.round(w) + 'x' + Math.round(h)); } catch (e) {}
+  };
   const TAM_PIP_ED = (f) => {
     let telaW = 1280, telaH = 800;
     try { telaW = screen.availWidth || telaW; telaH = screen.availHeight || telaH; } catch (e) {}
-    const maxW = Math.max(480, Math.floor(telaW * 0.72));
-    const maxH = Math.max(360, Math.floor(telaH * 0.72));
+    const maxW = Math.max(480, Math.floor(telaW * 0.94));
+    const maxH = Math.max(360, Math.floor(telaH * 0.94));
+    /* O que ficou da última vez, se couber nesta tela. */
+    let guardado = null;
+    try {
+      const m = (localStorage.getItem(ED_TAM_CHAVE) || '').match(/^(\d+)x(\d+)$/);
+      if (m) guardado = { w: +m[1], h: +m[2] };
+    } catch (e) {}
+    if (guardado) {
+      return { w: Math.min(maxW, Math.max(520, guardado.w)),
+               h: Math.min(maxH, Math.max(380, guardado.h)) };
+    }
+    /* Da primeira vez, a proporção do quadro manda: um editor 16:9 num monitor
+       vertical sobraria dos dois lados, e um quadrado numa tela larga
+       desperdiçaria metade. */
     const prop = (f && f.img && f.img.h) ? (f.img.w / f.img.h) : (16 / 9);
     let w = maxW, h = Math.round(w / prop) + CROMO_ED;
     if (h > maxH) { h = maxH; w = Math.round((h - CROMO_ED) * prop); }
-    return { w: Math.max(420, w), h: Math.max(320, h) };
+    return { w: Math.max(520, w), h: Math.max(380, h) };
   };
 
   async function abrirEdicaoAoVivo(){
@@ -11070,6 +11115,9 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
        campo. Uma frase escrita durante a gravação e sumida no fechamento é a
        perda silenciosa que este produto não aceita. */
     if (anotSujo) { try { anotGuardar(); } catch (e) {} }
+    /* O TAMANHO EM QUE ELA ESTÁ AGORA é o que a pessoa quis. Lido antes de
+       fechar, porque depois a janela não responde mais nada. */
+    try { if (pipWin) guardarTamEd(pipWin.innerWidth, pipWin.innerHeight); } catch (e) {}
     /* Zerar `pipEditando` ANTES de fechar a janela: o `pagehide` dela também
        restaura a gravação — ele existe para quem fecha no X do navegador — e
        sem esta linha ele restauraria de novo. */
@@ -11218,6 +11266,9 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       if (e.key === 'Escape') { e.preventDefault(); fecharEdicaoAoVivo(); }
     });
     pipWin.addEventListener('pagehide', () => {
+      /* Fechada no X, o tamanho também conta: quem maximizou e fechou pelo
+         canto quis o mesmo que quem maximizou e apertou salvar. */
+      try { if (pipWin) guardarTamEd(pipWin.innerWidth, pipWin.innerHeight); } catch (e) {}
       pipWin = null;
       restaurarDaEdicao();
       pintarVoltarJanelinha();
