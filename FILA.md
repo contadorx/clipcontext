@@ -141,6 +141,35 @@ campo de emissor, a contagem de erros na identificação. Marcar uma tela é
 
 ---
 
+## ACHADO FECHADO — pedir o tamanho na abertura não bastava *(06/09)*
+
+**O relato:** *"ficou do mesmo tamanho a janelinha"*, depois do Build 58 ter
+subido o pedido de 72% para 94% da tela.
+
+**Medido no artefato: o pedido estava certo.** `TAM_PIP_ED` calculava 94%,
+`requestWindow` recebia o número novo, e a janela voltava igual. Quem não
+obedeceu foi o navegador — o Chrome guarda o tamanho da janela de
+picture-in-picture **por site** e reabre no que a pessoa deixou, ignorando o que
+se pediu. Do lado de cá isso é **indistinguível de um teto**: a janela volta do
+mesmo jeito e sem erro nenhum.
+
+**O outro lado da mesma janela funciona.** `resizeTo` é o que o `encolherFita`
+já usa para apertar a fita até o conteúdo medido; aqui ele serve para o
+contrário. Agora o produto manda o tamanho **depois** de aberta — e fica sendo a
+nossa preferência que manda, e não a do navegador. Isso é de propósito: a nossa
+é guardada do mesmo jeito, no tamanho em que a pessoa fechou; a diferença é que
+a nossa está escrita.
+
+**E o que voltou fica anotado no diagnóstico** (`pediu 1203x821, veio …`). Sem
+número, *"abriu pequeno"* é uma conversa sem medida — que foi exatamente como
+este defeito chegou, duas vezes.
+
+Uma armadilha no caminho, e quem a pegou foi o bloco de erro de página da régua,
+não a leitura: `const tam` vivia dentro do `try` da abertura, e o `resizeTo` do
+lado de fora recebia `tam is not defined`.
+
+---
+
 ## DEC-16 (continuação) — o editor abre grande, e lembra o tamanho *(Build 58)*
 
 **O relato:** *"minha ação foi abrir ela inteira e me perdi"*. Ele nascia com 72%

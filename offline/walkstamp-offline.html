@@ -10154,7 +10154,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
      depois, e não tem como se atualizar sozinho. Sem carimbo, "estou com um
      problema no offline" é uma conversa sem chão — ninguém sabe de qual build
      se fala nem se o defeito já foi consertado. */
-  const VERSAO = '2026.09.06-24';
+  const VERSAO = '2026.09.06-27';
   window.__versao = () => VERSAO;
 
   const PIP_CSS = `
@@ -11038,6 +11038,48 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     return { w: Math.max(520, w), h: Math.max(380, h) };
   };
 
+  /* ---- PEDIR NÃO BASTA: TEM QUE MANDAR DEPOIS DE ABERTO ----
+   *
+   * O relato: "ficou do mesmo tamanho a janelinha". Medido no artefato, o
+   * pedido estava certo — 94% da tela, `requestWindow` recebendo o número
+   * novo. Quem não obedeceu foi o navegador: o Chrome guarda o tamanho da
+   * janela de picture-in-picture POR SITE e reabre no que a pessoa deixou,
+   * ignorando o que se pediu. Do lado de cá isso é indistinguível de um teto —
+   * a janela volta do mesmo jeito, sem erro nenhum.
+   *
+   * `resizeTo` é o outro lado da mesma janela, e ele funciona: é o que o
+   * `encolherFita` já usa para apertar a fita até o conteúdo medido. Aqui ele
+   * serve para o contrário — mandar a janela ficar do tamanho que ESTA
+   * ferramenta escolheu, ou do que a pessoa deixou da última vez.
+   *
+   * FICA SENDO A NOSSA PREFERÊNCIA QUE MANDA, e não a do navegador, e isso é
+   * de propósito: a nossa é guardada do mesmo jeito, no tamanho em que a
+   * pessoa fechou. A diferença é que a nossa está escrita e a do navegador não.
+   *
+   * PODE SER RECUSADO. Se for, a janela fica no tamanho que veio e tudo
+   * continua funcionando — o que se perde é o espaço, não o recurso. E o que
+   * veio fica anotado no diagnóstico: sem isso, "abriu pequeno" seria de novo
+   * uma conversa sem número. */
+  function esticarEditor(tam){
+    if (!pipWin || !tam) return;
+    try { pipWin.resizeTo(tam.w, tam.h); } catch (e) {}
+    /* Medido DEPOIS, e num quadro seguinte: o redimensionamento não é
+       instantâneo, e perguntar na mesma linha devolveria o tamanho velho. */
+    try {
+      setTimeout(() => {
+        try {
+          if (!pipWin) return;
+          ultimoTamEditor = { pediu: tam.w + 'x' + tam.h,
+                              veio: pipWin.innerWidth + 'x' + pipWin.innerHeight };
+          if (motivosFrame) motivosFrame.editor_tam = ultimoTamEditor;
+          try { window.__editorTam = () => ultimoTamEditor; } catch (e2) {}
+        } catch (e2) {}
+      }, 250);
+    } catch (e) {}
+  }
+  let ultimoTamEditor = null;
+  try { window.__editorTam = () => ultimoTamEditor; } catch (e) {}
+
   async function abrirEdicaoAoVivo(){
     /* SEM JANELINHA NÃO SE ABRE O EDITOR. Hoje o botão só existe dentro dela,
        então isto não acontece — mas `reabrirPip` desiste quando não há janela,
@@ -11313,6 +11355,11 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
 
   async function abrirControle(){
     if (!('documentPictureInPicture' in window)) return;
+    /* FORA DO `try`: o tamanho pedido é lido depois que a janela abre, para
+       ser MANDADO de novo por `resizeTo` — e um `const` dentro do bloco morre
+       ali. Ficou `tam is not defined` na primeira tentativa, e quem desempatou
+       foi o bloco de erro de página da régua, não a leitura. */
+    let tamPedido = null;
     try {
       /* A altura acompanha o que entrou. O botão da segunda tela custou 34px;
          a caixa de anotação (rótulo, campo de duas linhas, botão e
@@ -11338,8 +11385,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
          alemão — "Markieren + Bildschirm Stopp" numa linha só — e a largura
          numa faixa por cima do trabalho custa menos que altura: ela encosta
          numa borda e deixa o meio da tela livre. 390 dá quinze de folga. */
-      const tam = pipEditando ? TAM_PIP_ED(pipEditando) : TAM_PIP(pipModo() === 'min');
-      pipWin = await documentPictureInPicture.requestWindow({ width: tam.w, height: tam.h });
+      tamPedido = pipEditando ? TAM_PIP_ED(pipEditando) : TAM_PIP(pipModo() === 'min');
+      pipWin = await documentPictureInPicture.requestWindow({ width: tamPedido.w, height: tamPedido.h });
     } catch (e) { pipWin = null; return; }
 
     const d = pipWin.document;
@@ -11352,7 +11399,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
        e uma janela cheia de coisa escondida é a que volta com um botão morto
        que ninguém percebeu. O que os dois compartilham é a folha de estilo, que
        é onde o compartilhamento não custa nada. */
-    if (pipEditando) { montarEdicao(d); return; }
+    if (pipEditando) { montarEdicao(d); esticarEditor(tamPedido); return; }
     d.body.innerHTML = corpoDaJanelinha();
 
     pipRelogio = d.getElementById('rel');
