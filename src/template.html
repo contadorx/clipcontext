@@ -10989,7 +10989,27 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
          numa faixa por cima do trabalho custa menos que altura: ela encosta
          numa borda e deixa o meio da tela livre. 390 dá quinze de folga. */
       tamPedido = pipEditando ? TAM_PIP_ED(pipEditando) : TAM_PIP(pipModo() === 'min');
-      pipWin = await documentPictureInPicture.requestWindow({ width: tamPedido.w, height: tamPedido.h });
+      /* ---- `preferInitialWindowPlacement`: A CHAVE QUE FALTAVA ----
+       *
+       * O relato veio duas vezes: "ficou do mesmo tamanho a janelinha". E o
+       * pedido estava certo nas duas — medido no artefato.
+       *
+       * O QUE ACONTECE: o Chrome guarda a posição e o tamanho da janela de
+       * picture-in-picture POR SITE e, na próxima abertura, RESTAURA o que a
+       * pessoa deixou — descartando `width` e `height` sem avisar. Do lado de
+       * cá isso é indistinguível de um teto: a janela volta igual, sem erro
+       * nenhum, e nenhuma tentativa de pedir maior muda coisa alguma.
+       *
+       * Esta opção existe exatamente para isso: com ela, a abertura usa o
+       * tamanho PEDIDO em vez do lembrado. É o que faz a nossa preferência
+       * valer — e a nossa é guardada do mesmo jeito, no tamanho em que a
+       * pessoa fechou, com a diferença de estar escrita.
+       *
+       * Um navegador que não conheça a opção ignora a propriedade a mais e
+       * continua exatamente como está hoje. */
+      pipWin = await documentPictureInPicture.requestWindow({
+        width: tamPedido.w, height: tamPedido.h,
+        preferInitialWindowPlacement: true });
     } catch (e) { pipWin = null; return; }
 
     const d = pipWin.document;
@@ -16156,6 +16176,19 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     say('endereço      : ' + location.protocol);
     say('navegador     : ' + navigator.userAgent.slice(0, 110));
     say('WebGPU        : ' + (navigator.gpu ? 'disponível' : 'ausente'));
+    /* ---- O TAMANHO DA JANELINHA, ONDE DÁ PARA LER ----
+       Ele estava indo para o relatório da captura, que só é gravado quando a
+       gravação PARA — e chegou de volta como "não achei o erro". Uma medida
+       que só existe depois do fato não serve para conferir o fato.
+       Aqui ela sai a qualquer hora, pelo botão de diagnóstico, e diz as duas
+       coisas: o que foi pedido e o que o navegador devolveu. */
+    say('janela PiP    : ' + (
+      !('documentPictureInPicture' in window) ? 'não existe neste navegador'
+      : ultimoTamEditor ? ('editor pediu ' + ultimoTamEditor.pediu +
+                           ', veio ' + ultimoTamEditor.veio)
+      : 'existe; o editor ainda não foi aberto nesta aba') +
+      '   tela=' + (function(){ try { return screen.availWidth + 'x' + screen.availHeight; }
+                                catch (e) { return '?'; } })());
     say('cache/isolam. : caches=' + (typeof caches !== 'undefined') +
         ' crossOriginIsolated=' + (window.crossOriginIsolated === true));
     try { const m = await loadLib();

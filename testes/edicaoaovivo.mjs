@@ -92,8 +92,11 @@ console.log('\n[1] o botão existe nas cinco línguas, e não repete o rótulo d
 const shimPip = () => {
   window.__pipPedidos = [];
   window.__pipResizes = [];
+  window.__pipOpcoes = [];
   const dpip = {
-    requestWindow: async ({ width, height }) => {
+    requestWindow: async (opcoes) => {
+      const { width, height } = opcoes;
+      window.__pipOpcoes.push(opcoes);
       const velho = document.getElementById('pipFake');
       if (velho) velho.remove();
       const fr = document.createElement('iframe');
@@ -247,6 +250,18 @@ let iEditado = -1;
      Então o produto manda um `resizeTo` DEPOIS de aberta. É o mesmo caminho
      que o `encolherFita` já usa para apertar a fita; aqui ele serve para o
      contrário. */
+  /* ---- A CHAVE QUE FAZ O NAVEGADOR OBEDECER ----
+     O Chrome guarda a posição e o tamanho da janela de picture-in-picture POR
+     SITE e, na abertura seguinte, RESTAURA o que a pessoa deixou — descartando
+     `width` e `height` sem avisar. Do lado de cá é indistinguível de um teto: a
+     janela volta igual, sem erro, e pedir maior não muda nada. Foi por isso que
+     o relato "ficou do mesmo tamanho" veio duas vezes com o pedido correto no
+     artefato. `preferInitialWindowPlacement` é o que manda usar o tamanho
+     PEDIDO em vez do lembrado. */
+  const opcoes = await pg.evaluate(() => window.__pipOpcoes);
+  ok('a abertura pede para ignorar o tamanho que o navegador lembrou',
+     opcoes.every(o => o.preferInitialWindowPlacement === true),
+     JSON.stringify(opcoes[opcoes.length - 1]));
   const resizes = await pg.evaluate(() => window.__pipResizes);
   const ult = resizes[resizes.length - 1];
   ok('e o produto ainda MANDA o tamanho depois de aberta',
