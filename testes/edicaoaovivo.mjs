@@ -91,6 +91,7 @@ console.log('\n[1] o botão existe nas cinco línguas, e não repete o rótulo d
  * edição foi pedida maior que a fita, que é metade do recurso. */
 const shimPip = () => {
   window.__pipPedidos = [];
+  window.__pipResizes = [];
   const dpip = {
     requestWindow: async ({ width, height }) => {
       const velho = document.getElementById('pipFake');
@@ -109,7 +110,15 @@ const shimPip = () => {
         try { w.dispatchEvent(new Event('pagehide')); } catch (e) {}
         fr.remove();
       };
-      w.resizeTo = (a, b) => { fr.style.width = a + 'px'; fr.style.height = b + 'px'; };
+      /* O NAVEGADOR DE VERDADE PODE IGNORAR O TAMANHO PEDIDO NA ABERTURA — o
+         Chrome guarda o da janela de picture-in-picture por site e reabre no
+         que a pessoa deixou. Por isso o produto manda um `resizeTo` depois de
+         aberta, e por isso o remendo anota as chamadas: é o que a régua tem
+         para afirmar que ele mandou, e com que números. */
+      w.resizeTo = (a, b) => {
+        fr.style.width = a + 'px'; fr.style.height = b + 'px';
+        window.__pipResizes.push({ w: a, h: b });
+      };
       return w;
     },
   };
@@ -230,6 +239,26 @@ let iEditado = -1;
   ok('e ela ocupa quase toda a tela disponível',
      edP.width >= tela.w * 0.9,
      `${edP.width} de ${tela.w} de largura disponível`);
+  /* ---- E PEDIR NA ABERTURA NÃO BASTA ----
+     O relato foi "ficou do mesmo tamanho a janelinha", com o pedido correto no
+     artefato: o Chrome guarda o tamanho da janela de picture-in-picture POR
+     SITE e reabre no que a pessoa deixou, ignorando o pedido — e do lado de cá
+     isso é indistinguível de um teto, porque a janela volta igual e sem erro.
+     Então o produto manda um `resizeTo` DEPOIS de aberta. É o mesmo caminho
+     que o `encolherFita` já usa para apertar a fita; aqui ele serve para o
+     contrário. */
+  const resizes = await pg.evaluate(() => window.__pipResizes);
+  const ult = resizes[resizes.length - 1];
+  ok('e o produto ainda MANDA o tamanho depois de aberta',
+     !!ult && ult.w === edP.width && ult.h === edP.height,
+     ult ? `${ult.w}×${ult.h} contra ${edP.width}×${edP.height} pedidos` : '(não mandou)');
+  /* E o que voltou fica anotado: sem número, "abriu pequeno" é uma conversa
+     sem medida — foi assim que este defeito chegou. */
+  await pg.waitForTimeout(400);
+  const anotado = await pg.evaluate(() => window.__editorTam && window.__editorTam());
+  ok('e o que o navegador devolveu fica anotado para o diagnóstico',
+     !!(anotado && anotado.pediu && anotado.veio),
+     anotado ? `pediu ${anotado.pediu}, veio ${anotado.veio}` : '(nada anotado)');
 }
 
 /* ---------------------------------------------------------------- [3] ----
