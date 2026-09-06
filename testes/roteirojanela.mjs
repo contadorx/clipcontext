@@ -22,6 +22,23 @@ import { CHROME_WS } from './_caminhos.mjs';
 const RAIZ = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..', 'public');
 const CHROME = process.env.CHROME || CHROME_WS;
 const html = fs.readFileSync(RAIZ + '/app.html', 'utf8');
+
+/* ---- A ALTURA VEM DO PRODUTO, E NÃO ESCRITA AQUI ----
+ *
+ * Ela era `const ALT = 486` em dois lugares deste arquivo — um número copiado
+ * à mão que já não era o do produto quando foi escrito, e que continuou
+ * envelhecendo sozinho: no Build 56 a janela com roteiro passou a pedir 600, e
+ * a régua seguiu cobrando 486. Ela reprovou um desenho que cabia.
+ *
+ * Isto é a lista paralela de sempre, e o conserto é o mesmo de sempre: o número
+ * sai do `TAM_PIP` do artefato. Se não achar, a régua PARA — um padrão
+ * silencioso aqui seria voltar exatamente ao defeito. */
+const ALT_ROT = (() => {
+  const m = html.match(/TAM_PIP = \(min\) => \(\{ w: min \? \d+ : \d+,\s*h: min \? \(roteiro\.length \? \d+ : \d+\)\s*: \(roteiro\.length \? (\d+) : \d+\)/);
+  if (!m) { console.log('  FALHA  não achei a altura da janelinha no artefato'); process.exit(1); }
+  return +m[1];
+})();
+console.log(`     a janelinha com roteiro pede ${ALT_ROT}px — lido do produto`);
 const srv = http.createServer((q, r) => {
   const u = q.url.split('?')[0];
   if (u.startsWith('/_vercel/')) { r.writeHead(200,{'Content-Type':'text/javascript'}); return r.end(''); }
@@ -179,34 +196,37 @@ else {
      da pessoa. Se ela empurrar PARAR para fora da borda, o preço da comodidade
      foi o botão irreversível — que é o pior lugar possível para cobrar. */
   {
-    const m = await jn.evaluate(() => {
-      /* A janelinha COM roteiro pede 486px; o navegador de teste entrega a
-         página com a altura do contexto, e nessa altura tudo cabe — a régua
-         mediria sempre verde. A altura de verdade é imposta aqui. */
-      const ALT = 486;
+    const m = await jn.evaluate((ALT) => {
+      /* O navegador de teste entrega a página com a altura do contexto, e
+         nessa altura tudo cabe — a régua mediria sempre verde. A altura de
+         verdade, a que o produto pede, é imposta aqui. */
       document.body.style.height = ALT + 'px';
       document.body.getBoundingClientRect();
       const fim = el => el ? el.getBoundingClientRect().bottom : 0;
       return { alt: ALT, conteudo: document.body.scrollHeight,
                parar: fim(document.getElementById('stop')),
                pausa: fim(document.getElementById('pausa')) };
-    });
+    }, ALT_ROT);
     console.log('     janela ' + m.alt + 'px  |  conteúdo ' + Math.round(m.conteudo) +
                 '  |  PARAR termina em ' + Math.round(m.parar));
+    /* O DETALHE SÓ SAI QUANDO REPROVA. Impresso sempre, ele escrevia
+       "600 > 600" ao lado de um `ok` — um rótulo alarmante contradizendo a
+       própria linha. Quem lê a saída aprende a não confiar no detalhe, e aí o
+       detalhe deixa de servir para o dia em que ele estiver certo. */
+    const passou = (v) => v > 0 && v <= m.alt + 1;
     ok('com roteiro, o conteúdo ainda cabe', m.conteudo <= m.alt + 1,
-       Math.round(m.conteudo) + ' > ' + m.alt);
-    ok('PARAR continua dentro da janela', m.parar > 0 && m.parar <= m.alt + 1,
-       Math.round(m.parar) + ' > ' + m.alt);
-    ok('PAUSAR também', m.pausa > 0 && m.pausa <= m.alt + 1,
-       Math.round(m.pausa) + ' > ' + m.alt);
+       m.conteudo <= m.alt + 1 ? '' : Math.round(m.conteudo) + ' > ' + m.alt);
+    ok('PARAR continua dentro da janela', passou(m.parar),
+       passou(m.parar) ? '' : Math.round(m.parar) + ' > ' + m.alt);
+    ok('PAUSAR também', passou(m.pausa),
+       passou(m.pausa) ? '' : Math.round(m.pausa) + ' > ' + m.alt);
   }
   /* E com o PIOR texto possível: um passo de roteiro pode ser uma frase
      inteira. O corte em três linhas é o que garante o encaixe — sem ele, uma
      frase comprida empurraria PARAR para fora e o defeito só apareceria no
      computador de quem escreve roteiro detalhado. */
   {
-    const m = await jn.evaluate(() => {
-      const ALT = 486;
+    const m = await jn.evaluate((ALT) => {
       document.body.style.height = ALT + 'px';
       const cx = document.getElementById('rot');
       cx.classList.remove('hide', 'fim');
@@ -217,10 +237,11 @@ else {
       p.textContent = 'A seguir: preencher o campo de referencia com o numero do chamado e anexar o comprovante digitalizado do fornecedor';
       document.body.getBoundingClientRect();
       return { alt: ALT, parar: document.getElementById('stop').getBoundingClientRect().bottom };
-    });
+    }, ALT_ROT);
     console.log('     com frase longa: PARAR termina em ' + Math.round(m.parar) + ' de ' + m.alt);
-    ok('mesmo com passo longo, PARAR cabe', m.parar > 0 && m.parar <= m.alt + 1,
-       Math.round(m.parar) + ' > ' + m.alt);
+    const cabe2 = m.parar > 0 && m.parar <= m.alt + 1;
+    ok('mesmo com passo longo, PARAR cabe', cabe2,
+       cabe2 ? '' : Math.round(m.parar) + ' > ' + m.alt);
   }
   ok('sem erro na janelinha', erros.filter(e => /janelinha/.test(e)).length === 0);
 }

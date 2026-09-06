@@ -196,8 +196,14 @@ console.log(`\n[1] gravando: cabe em ${LARG}×${ALT}`);
      Cada pixel daqui é um pixel a menos do trabalho que a pessoa está
      documentando, e ainda aparece nos quadros. */
   ok('a largura não passa de 250', LARG <= 250, String(LARG));
-  ok('sem roteiro, a altura fica em 450', ALT <= 450, String(ALT));
-  ok('com roteiro ela sobe, e só até 580', ALT_ROT > ALT && ALT_ROT <= 580,
+  /* 470, E NÃO 450. O teto subiu no Build 56, quando a janelinha ganhou o
+     botão de apontar na tela durante a gravação: empilhada, ela passou a medir
+     454 de conteúdo. Subir tudo bem; subir calado não — por isso o número está
+     aqui e o motivo também. */
+  ok('sem roteiro, a altura fica em 470', ALT <= 470, String(ALT));
+  /* 600 pelo mesmo motivo dos 470: o botão de apontar entrou na pilha, e com o
+     roteiro colado ela passou a medir 583. */
+  ok('com roteiro ela sobe, e só até 600', ALT_ROT > ALT && ALT_ROT <= 600,
      `${ALT} → ${ALT_ROT}`);
   ok('sem folga desperdiçada', ALT - m.precisa <= 24, `${m.precisa} para ${ALT}`);
 
@@ -290,7 +296,10 @@ console.log(`\n[1a] a fita: cabe em ${LARG_MIN}×${ALT_MIN}, e sobra só o que s
   /* Medido em 28/08, com os rótulos que o produto pinta. O teto é o do
      `TAM_PIP(true).w`; passar dele significa que a fita não encolhe naquele
      idioma — que foi o que aconteceu com o alemão, a oito pixels do limite. */
-  const LARGURA = { pt: 397, en: 402, es: 427, de: 472, fr: 440 };
+  /* Remedido em 06/09, no Build 56, com o botão de apontar dentro. Os números
+     anteriores eram pt 397, en 402, es 427, de 472, fr 440 — o botão custou
+     entre 54 e 70px por idioma, e foi ele que levou o teto de 480 para 560. */
+  const LARGURA = { pt: 467, en: 456, es: 495, de: 536, fr: 506 };
   const FOLGA = 12;   /* fonte e arredondamento variam entre máquinas */
 
   for (const L of Object.keys(LARGURA)) {
@@ -303,8 +312,15 @@ console.log(`\n[1a] a fita: cabe em ${LARG_MIN}×${ALT_MIN}, e sobra só o que s
         if (b && txt) { b.textContent = txt; b.disabled = false; b.classList.remove('hide'); }
       }
       const r = document.getElementById('rel'); if (r) r.textContent = '12:34';
+    /* BOTÃO NOVO ENTRA AQUI NO MESMO DIA EM QUE NASCE. O "apontar" entrou na
+       fita e esta lista não sabia dele: a régua media um botão SEM RÓTULO, dava
+       23px de padding a mais em todos os idiomas e chamava aquilo de largura da
+       fita. Uma lista de rótulos escrita à mão é a lista paralela de sempre —
+       o que a segura é este comentário e o número escrito logo abaixo, que
+       muda quando o desenho muda. */
     }, { stop: dicionario(L, 'pipCurtoParar'), marcar: dicionario(L, 'pipCurtoMarcar'),
-         erro: dicionario(L, 'pipCurtoErro'), maisTela: dicionario(L, 'pipCurtoTela') });
+         erro: dicionario(L, 'pipCurtoErro'), maisTela: dicionario(L, 'pipCurtoTela'),
+         anotar: dicionario(L, 'pipCurtoAnotar') });
     await pg.waitForTimeout(120);
     /* A MESMA CONTA do `encolherFita()`: preenchimento dos dois lados, cada
        filho visível, o respiro entre eles, e o contador entrando com ZERO

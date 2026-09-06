@@ -4021,6 +4021,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       passoTelas:'{0} telas',
       recPipBtn:'Trazer a janelinha de volta',
       pipVirarFita:'Virar fita — uma linha de botões por cima do trabalho', pipVirarCompleta:'Voltar ao tamanho completo — relógio, medidor de som e anotação', 
+      pipAnotar:'Apontar nesta tela', pipCurtoAnotar:'Apontar', edTit:'Apontando no passo {0}', edPausado:'gravação pausada enquanto você aponta',
+      edSalvar:'Salvar e voltar a gravar', edComo:'Arraste sobre a tela para apontar o que importa.', edFeitas:'{0} no quadro', edSemQuadro:'Não deu para capturar a tela agora — tente de novo.',
       recPausado:'PAUSADO —', recMarcado:'passo marcado.',
       pipPausado:'Pausado: nada sendo guardado.',
       micNegado:'O navegador bloqueou o microfone para este site. Clique no cadeado ao lado do endereço, permita o microfone e grave de novo.',
@@ -4671,6 +4673,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       passoTelas:'{0} screens',
       recPipBtn:'Bring the control window back',
       pipVirarFita:'Turn into a strip — one row of buttons over your work', pipVirarCompleta:'Back to full size — clock, sound meter and note', 
+      pipAnotar:'Point at this screen', pipCurtoAnotar:'Point', edTit:'Pointing at step {0}', edPausado:'recording paused while you point',
+      edSalvar:'Save and keep recording', edComo:'Drag over the screen to point at what matters.', edFeitas:'{0} on this frame', edSemQuadro:'Could not capture the screen just now — try again.',
       recPausado:'PAUSED —', recMarcado:'step marked.',
       pipPausado:'Paused: nothing being kept.',
       micNegado:'The browser blocked the microphone for this site. Click the padlock next to the address, allow the microphone and record again.',
@@ -5306,6 +5310,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       passoTelas:'{0} pantallas',
       recPipBtn:'Traer la ventana de control de vuelta',
       pipVirarFita:'Convertir en franja — una fila de botones sobre tu trabajo', pipVirarCompleta:'Volver al tamaño completo — reloj, medidor de sonido y nota', 
+      pipAnotar:'Señalar en esta pantalla', pipCurtoAnotar:'Señalar', edTit:'Señalando el paso {0}', edPausado:'grabación en pausa mientras señalas',
+      edSalvar:'Guardar y seguir grabando', edComo:'Arrastra sobre la pantalla para señalar lo que importa.', edFeitas:'{0} en esta captura', edSemQuadro:'No se pudo capturar la pantalla ahora — inténtalo de nuevo.',
       recPausado:'EN PAUSA —', recMarcado:'paso marcado.',
       pipPausado:'En pausa: no se guarda nada.',
       micNegado:'El navegador bloqueó el micrófono para este sitio. Pulsa el candado junto a la dirección, permite el micrófono y graba de nuevo.',
@@ -5940,6 +5946,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       passoTelas:'{0} Bildschirme',
       recPipBtn:'Steuerungsfenster zurückholen',
       pipVirarFita:'In eine Leiste verwandeln — eine Reihe Schaltflächen über Ihrer Arbeit', pipVirarCompleta:'Zurück zur vollen Größe — Uhr, Tonpegel und Notiz', 
+      pipAnotar:'Auf diesen Bildschirm zeigen', pipCurtoAnotar:'Zeigen', edTit:'Zeigen in Schritt {0}', edPausado:'Aufnahme pausiert, während Sie zeigen',
+      edSalvar:'Speichern und weiter aufnehmen', edComo:'Ziehen Sie über den Bildschirm, um das Wichtige zu zeigen.', edFeitas:'{0} in diesem Bild', edSemQuadro:'Der Bildschirm konnte gerade nicht erfasst werden — bitte erneut versuchen.',
       recPausado:'PAUSIERT —', recMarcado:'Schritt markiert.',
       pipPausado:'Pausiert: Es wird nichts gespeichert.',
       micNegado:'Der Browser hat das Mikrofon für diese Website blockiert. Klicken Sie auf das Schloss neben der Adresse, erlauben Sie das Mikrofon und nehmen Sie erneut auf.',
@@ -6580,6 +6588,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       passoTelas:'{0} écrans',
       recPipBtn:'Rouvrir la fenêtre de contrôle',
       pipVirarFita:'Transformer en bandeau — une rangée de boutons au-dessus du travail', pipVirarCompleta:'Revenir à la taille complète — horloge, niveau sonore et note', 
+      pipAnotar:'Pointer sur cet écran', pipCurtoAnotar:'Pointer', edTit:'Pointage à l’étape {0}', edPausado:'enregistrement en pause pendant le pointage',
+      edSalvar:'Enregistrer et continuer', edComo:'Faites glisser sur l’écran pour montrer ce qui compte.', edFeitas:'{0} sur cette capture', edSemQuadro:'Impossible de capturer l’écran maintenant — réessayez.',
       recPausado:'EN PAUSE —', recMarcado:'étape marquée.',
       pipPausado:'En pause : rien n’est conservé.',
       micNegado:'Le navigateur a bloqué le microphone pour ce site. Cliquez sur le cadenas à côté de l’adresse, autorisez le microphone et enregistrez de nouveau.',
@@ -9871,6 +9881,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
   }
   let pipWin = null, pipTexto = null, pipRelogio = null, pipFrames = null;
   let pipVm = null, pipVs = null, pipCalar = null, pipMarcar = null, pipTela = null, pipPausa = null, pipErro = null;
+  let pipAnotar = null;
   /* Uma medida por janela. Ela nasce falsa a cada abertura, inclusive na
      reabertura que troca o tamanho — a fita nova precisa ser medida de novo. */
   let fitaMedida = false;
@@ -10143,7 +10154,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
      depois, e não tem como se atualizar sozinho. Sem carimbo, "estou com um
      problema no offline" é uma conversa sem chão — ninguém sabe de qual build
      se fala nem se o defeito já foi consertado. */
-  const VERSAO = '2026.08.29-20';
+  const VERSAO = '2026.09.06-11';
   window.__versao = () => VERSAO;
 
   const PIP_CSS = `
@@ -10284,7 +10295,12 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
        template literal. O script inteiro do produto parou de carregar com
        "Unexpected identifier width", e o app abria morto. O aviso ja estava
        escrito trinta linhas acima, e eu o li depois de quebrar. */
-    body.min #marcar,body.min #maisTela,body.min #stop,
+    /* O APONTAR ENTRA NESTA LISTA, e nao herda o botao padrao. Sem esta
+       linha ele ficava com o width:100% de la de baixo e virava um botao de
+       153px no meio da fita, empurrando o resto — e nenhuma regua pegava,
+       porque a que mede a largura injetava rotulo so nos quatro que ja
+       existiam. Botao novo entra aqui no mesmo dia em que nasce. */
+    body.min #marcar,body.min #maisTela,body.min #stop,body.min #anotar,
     body.min #pausa,body.min #calar{flex:none;width:auto;height:32px;
                     padding:0 8px;font-size:10.5px;font-weight:600;gap:5px;
                     border-radius:7px;white-space:nowrap;
@@ -10296,8 +10312,10 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
        aceso e um pouco maior — e um pouco maior num alvo de 38 e a diferenca
        entre acertar e mirar. */
     body.min #marcar{background:#737cf0;color:#121419;border:0;font-size:11.5px}
-    body.min #maisTela{background:rgba(115,124,240,.20);color:#a9b2ff;
-                    border:1px solid rgba(115,124,240,.55)}
+    /* Apontar tem o mesmo peso do MAIS TELA: os dois sao gestos do caso
+       especifico, e nenhum dos dois disputa com o marcar. */
+    body.min #maisTela,body.min #anotar{background:rgba(115,124,240,.20);
+                    color:#a9b2ff;border:1px solid rgba(115,124,240,.55)}
     /* Os icones que faltavam. Pausar, calar e parar ja tinham; marcar e mais
        tela nunca precisaram, porque ate aqui sempre tiveram rotulo do lado. */
     body.min #marcar::before,body.min #maisTela::before{
@@ -10562,6 +10580,60 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
        obrigariam a escolher entre iguais no pior momento possível. */
     button.fina{font-size:11.5px;padding:5px 8px;opacity:.85}
     button.fina:hover:not(:disabled){opacity:1}
+    /* NA JANELA COMPLETA ELE E UMA LINHA FINA, e nao mais um botao cheio.
+       Cheio ele custava 14px de altura numa janela que ja media 464 para os
+       450 pedidos — e altura aqui e trabalho tapado. Fino, ele custa 30 e
+       continua legivel. */
+    body:not(.min) #anotar{height:30px;padding:0 10px;font-size:12px;
+                    background:rgba(115,124,240,.16);color:#a9b2ff;
+                    border:1px solid rgba(115,124,240,.40);border-radius:8px}
+    /* ---- O EDITOR AO VIVO ----
+       Nenhuma crase aqui dentro tambem: este bloco continua sendo o mesmo
+       template literal, e a regra vale ate a ultima linha.
+
+       A FIGURA MANDA NO ESPACO. Cabecalho e barra somam 104px — que e o
+       CROMO_ED que a conta do tamanho usa, e os dois numeros tem que continuar
+       iguais: se um mudar sozinho, a figura sai cortada ou sobra faixa preta.
+       O resto e a figura, e ela e centralizada em vez de esticada: uma tela de
+       ERP esticada para preencher a janela desloca as marcas em relacao ao que
+       a pessoa esta vendo, e a marca tem que cair onde o dedo caiu.
+
+       O SVG cobre exatamente a figura, e nao a caixa: com object-fit contain a
+       figura pode nao ocupar a caixa inteira, e um SVG do tamanho da caixa
+       poria a seta alguns pixels fora do lugar. Por isso a caixa e uma grade de
+       uma celula so, e os dois ocupam a mesma celula com a mesma proporcao. */
+    body.editando{display:flex;flex-direction:column;gap:0;padding:0;height:100vh;
+                  overflow:hidden;justify-content:flex-start}
+    .edTop{display:flex;align-items:center;gap:10px;padding:8px 12px;height:36px;
+           border-bottom:1px solid #2a2f3a;flex:0 0 auto}
+    .edTit{font-size:12.5px;font-weight:600;color:#e6e9ef;white-space:nowrap}
+    .edPausa{font-size:11.5px;color:#ffcc00;white-space:nowrap;overflow:hidden;
+             text-overflow:ellipsis}
+    .edCx{position:relative;flex:1 1 auto;min-height:0;display:grid;
+          place-items:center;overflow:hidden;touch-action:none;cursor:crosshair;
+          background:#0b0d11}
+    .edCx > img,.edCx > svg{grid-area:1/1;max-width:100%;max-height:100%;
+                            width:auto;height:auto;object-fit:contain}
+    .edCx > img{display:block}
+    .edCx > svg{pointer-events:none;width:100%;height:100%}
+    .edBar{display:flex;align-items:center;gap:7px;padding:9px 12px;height:52px;
+           border-top:1px solid #2a2f3a;flex:0 0 auto;overflow-x:auto}
+    button.edFer{font-size:12px;padding:6px 10px;background:#1b1f27;color:#cfd5e0;
+                 border:1px solid #333a47;border-radius:7px;cursor:pointer}
+    button.edFer:hover{background:#232833}
+    button.edFer.sel{background:#737cf0;border-color:#737cf0;color:#fff}
+    .mkCores{display:inline-flex;gap:5px;margin:0 3px}
+    .mkCores button{width:20px;height:20px;padding:0;border-radius:50%;
+                    border:2px solid #333a47;cursor:pointer}
+    .mkCores button.sel{border-color:#fff}
+    .edComo{flex:1 1 auto;font-size:11px;color:#8a93a3;white-space:nowrap;
+            overflow:hidden;text-overflow:ellipsis;min-width:0}
+    /* O SALVAR e o unico botao cheio da janela: e o gesto que devolve a pessoa
+       ao trabalho dela, e depois de anotar e o unico que ela quer achar. */
+    button.edSalvar{font-size:12.5px;font-weight:600;padding:7px 14px;
+                    background:#737cf0;color:#fff;border:0;border-radius:7px;
+                    cursor:pointer;white-space:nowrap;flex:0 0 auto}
+    button.edSalvar:hover{background:#8189f3}
   `;
 
   /* ---- OS DOIS TAMANHOS DA JANELINHA ----
@@ -10609,7 +10681,11 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
      lugar nenhum é um atalho que só quem escreveu conhece — e este mora numa
      janela de 42px onde não cabe uma legenda. O `title` é onde ele cabe. */
   const ATALHO_PIP = { recMarkBtn: 'M', recTelaBtn: 'T', recPauseBtn: 'P',
-                       recResumeBtn: 'P', pipStop: 'S', pipTam: 'J', recErroBtn: 'E' };
+                       recResumeBtn: 'P', pipStop: 'S', pipTam: 'J', recErroBtn: 'E',
+                       /* `a` de anotar: as outras letras já estavam tomadas
+                          pelo que elas fazem, e um atalho só vale se a letra
+                          lembrar a coisa. */
+                       pipAnotar: 'A' };
   function rotularPip(btn, chaveLonga, chaveCurta){
     if (!btn) return;
     const longo = t(chaveLonga);
@@ -10650,9 +10726,22 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
      arredondamento come, e nada além — cada pixel daqui é um pixel a menos do
      trabalho que a pessoa está documentando.
      Com roteiro a janela sobe junto: a linha do passo já custava 545 dos 560. */
-  const TAM_PIP = (min) => ({ w: min ? 480 : 250,
+  /* O TETO SUBIU DE 480 PARA 560 porque a fita ganhou um sexto botão — o
+     "apontar nesta tela". O teto não é uma preferência: é a largura de que o
+     idioma mais comprido precisa para não espremer, e o alemão passou de 472
+     para além de 480 no dia em que o botão entrou. Deixar 480 seria a fita
+     nunca mais encolher em alemão, que é o oposto do que `encolherFita` existe
+     para fazer.
+     E ele não custa nada a quem não precisa: a janela é PEDIDA no teto e
+     ENCOLHIDA até o conteúdo medido. Em português a fita continua saindo no
+     tamanho que os botões dela pedem, e não neste número. */
+  /* E A JANELA COMPLETA SUBIU DE 450 PARA 470 pelo mesmo botão: empilhada, ela
+     mede 454 de conteúdo com ele dentro, e uma janela que pede menos do que
+     desenha corta a própria ponta de baixo — que é onde ficam PAUSAR e PARAR.
+     Vinte pixels, escritos, e não um `overflow` que esconde o custo. */
+  const TAM_PIP = (min) => ({ w: min ? 560 : 250,
                               h: min ? (roteiro.length ? 82 : 44)
-                                     : (roteiro.length ? 580 : 450) });
+                                     : (roteiro.length ? 600 : 470) });
 
   function corpoDaJanelinha(){
     return ''+
@@ -10682,6 +10771,13 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
          nao existe durante a gravacao — e o erro e justamente o que nao espera:
          a tela de erro some quando a pessoa clica em qualquer coisa. */
       '<button id="erro" class="err" disabled></button>' +
+      /* ---- ANOTAR ESTA TELA, AGORA ----
+         Ele mora na fita pelo mesmo argumento dos outros três: quem grava está
+         DENTRO do sistema que testa, e a nossa aba está atrás da tela
+         compartilhada. Um botão que só existisse na página seria um botão que
+         não existe na hora em que a pessoa vê o problema — que é a hora
+         inteira do pedido: "para não esquecer". */
+      '<button id="anotar" class="sec fina" disabled></button>' +
       /* ---- A CAIXA DE ANOTAÇÃO, AQUI TAMBÉM ----
          Durante a gravação a aba do produto está ATRÁS da tela compartilhada.
          Um campo que só existe lá é um campo que não existe — foi o argumento
@@ -10793,14 +10889,259 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
      `documentPictureInPicture` e pedido na abertura e nao se redimensiona
      depois. Era o que o seletor da pagina ja fazia, e agora e a propria
      janelinha quem chama. */
-  async function trocarTamanhoPip(){
-    guardarPipModo(pipModo() === 'min' ? 'completa' : 'min');
+  /* `liveAgora`, E NÃO `agora`. Este é um defeito ANTIGO que a régua da edição
+     ao vivo desenterrou: `agora` é um apelido criado DENTRO da função que
+     grava, e daqui ele nunca existiu. Trocar o tamanho da janelinha no meio de
+     uma gravação estourava um `agora is not defined` — a janela voltava dizendo
+     "preparando", com o relógio parado, e ninguém entendia por quê. O erro era
+     silencioso porque acontecia depois da janela já ter sido montada.
+     `liveAgora` é a mesma função, no escopo de fora, e é o que a linha sempre
+     quis dizer. */
+  async function reabrirPip(){
     if (!pipWin) { pintarVoltarJanelinha(); return; }
     try { pipWin.close(); } catch (e) {}
     pipWin = null;
     await abrirControle();
-    if (pipWin && liveOn) controle('gravando', { seg: agora(), frames: frames.length });
+    if (pipWin && liveOn) controle('gravando', { seg: liveAgora(), frames: frames.length });
     pintarVoltarJanelinha();
+  }
+
+  async function trocarTamanhoPip(){
+    guardarPipModo(pipModo() === 'min' ? 'completa' : 'min');
+    await reabrirPip();
+  }
+
+  /* ================= ANOTAR A TELA DURANTE A GRAVAÇÃO =================
+   *
+   * O relato de campo, e ele veio de muita gente: "queria abrir determinada
+   * tela e já fazer a marcação — setas, um retângulo — para não esquecer".
+   * Marcar depois já existia, na lente, com a figura grande na frente; o que
+   * não existia era marcar AGORA, no segundo em que se vê o problema. E o
+   * "depois" custa caro: quarenta telas adiante ninguém lembra qual campo da
+   * tela 12 estava errado.
+   *
+   * TRÊS DECISÕES QUE VALE DEIXAR ESCRITAS:
+   *
+   * 1. A JANELA CRESCE E VOLTA A ENCOLHER, e isso não é truque novo: é o mesmo
+   *    caminho do botão de tamanho — fecha e reabre. A gravação não passa por
+   *    aqui e não sente; `reabrirPip` reemite o estado logo depois.
+   *
+   * 2. A CAPTURA PARA ENQUANTO SE ANOTA. Este editor é uma janela de verdade
+   *    por cima da tela compartilhada, e o padrão desta ferramenta é gravar o
+   *    monitor inteiro. Sem a pausa, os quadros dos próximos segundos sairiam
+   *    com o nosso editor desenhado em cima do sistema do cliente — e uma
+   *    evidência de auditoria com a ferramenta dentro dela não prova nada.
+   *    A pausa é a que já existe: o relógio segue correndo, porque a hora de
+   *    parede tem que continuar verdadeira.
+   *
+   * 3. SÓ RETÂNGULO, SETA E CANETA. Tarja e recorte MUDAM a figura, e mudar
+   *    figura no meio de uma gravação, numa janela pequena, é o gesto que não
+   *    se pode errar — eles continuam na revisão, onde a imagem é grande e o
+   *    engano se desfaz. Estas três só apontam, e apontar é o que a pessoa
+   *    pediu para não esquecer. */
+  let pipEditando = null;          // o quadro em edição ao vivo, ou null
+  let euPauseiParaEditar = false;
+
+  /* O TAMANHO SAI DA TELA DE QUEM GRAVA E DA PROPORÇÃO DO QUADRO, e não de um
+     número redondo: um editor 16:9 num monitor vertical sobra dos dois lados, e
+     um quadrado numa tela larga desperdiça metade. 72% da tela disponível
+     porque a janela precisa ficar POR CIMA de algo — se ela cobrir tudo, a
+     pessoa perde a referência do que estava documentando.
+     O Chrome pode devolver uma janela diferente da pedida, e isso não quebra
+     nada: as marcas são fração, não pixel, e o SVG acompanha o tamanho que
+     vier. O que se perde é conforto. */
+  /* Cabeçalho (36) mais barra de ferramentas (52) — e a borda de cada um já
+     está DENTRO desses números, porque o CSS da janelinha é `border-box`. Foi
+     onde eu errei primeiro: somei as bordas por fora e declarei 90 para um
+     cromo de 88. Quem desempatou foi a régua, medindo o desenho.
+     Este número e o CSS logo abaixo têm que continuar iguais: se um andar
+     sozinho, a figura sai cortada ou sobra faixa preta na janela. */
+  const CROMO_ED = 88;
+  const TAM_PIP_ED = (f) => {
+    let telaW = 1280, telaH = 800;
+    try { telaW = screen.availWidth || telaW; telaH = screen.availHeight || telaH; } catch (e) {}
+    const maxW = Math.max(480, Math.floor(telaW * 0.72));
+    const maxH = Math.max(360, Math.floor(telaH * 0.72));
+    const prop = (f && f.img && f.img.h) ? (f.img.w / f.img.h) : (16 / 9);
+    let w = maxW, h = Math.round(w / prop) + CROMO_ED;
+    if (h > maxH) { h = maxH; w = Math.round((h - CROMO_ED) * prop); }
+    return { w: Math.max(420, w), h: Math.max(320, h) };
+  };
+
+  async function abrirEdicaoAoVivo(){
+    /* SEM JANELINHA NÃO SE ABRE O EDITOR. Hoje o botão só existe dentro dela,
+       então isto não acontece — mas `reabrirPip` desiste quando não há janela,
+       e sem esta linha a captura ficaria pausada sem nada na tela para
+       despausar. Uma gravação parada em silêncio é o pior que este produto
+       pode fazer. */
+    if (!liveOn || pipEditando || !pipWin) return;
+    /* O QUADRO É CAPTURADO AGORA, e não escolhido numa lista. "Abrir
+       determinada tela" é sempre esta, a que está na frente — e um seletor de
+       telas dentro de uma fita de 44px seria o desenho errado de uma pergunta
+       que ninguém faz. O gesto é o `marcar` de sempre: mesma captura, mesmo
+       título do roteiro, mesma contagem. */
+    const antes = frames.length;
+    if (marcarAgora) marcarAgora();
+    /* SE A CAPTURA NÃO VEIO, NÃO SE ABRE NADA. `capturar` devolve falso quando
+       a imagem não pôde ser lida — e abrir o editor sobre o quadro anterior
+       seria deixar a pessoa marcando uma tela que ela não pediu, achando que
+       marcou a que estava vendo. Contar a lista é a única resposta honesta:
+       perguntar "tem quadro?" diria sim, e o quadro seria o velho. */
+    if (frames.length !== antes + 1) {
+      pipAviso = t('edSemQuadro'); pipAvisoDe = 'marcar';
+      pipAvisoAte = performance.now() + 3000;
+      controle('gravando', { seg: liveAgora(), frames: frames.length });
+      return;
+    }
+    pipEditando = frames[antes];
+    /* QUEM JÁ ESTAVA PAUSADO CONTINUA PAUSADO ao fechar. `alternarPausa` é um
+       alternador, e chamá-lo nos dois cantos despausaria quem tinha pausado de
+       propósito antes de abrir o editor. */
+    euPauseiParaEditar = !pausado;
+    if (euPauseiParaEditar && alternarPausa) alternarPausa();
+    /* Já entra com uma ferramenta escolhida: um editor que abre sem ferramenta
+       é um editor onde o primeiro arrasto não faz nada, e o primeiro arrasto é
+       o que a pessoa veio fazer. A seta é o padrão porque é o que "não
+       esquecer" quer dizer na prática — apontar o campo. */
+    if (!mkFerramenta) modoMarca('seta');
+    await reabrirPip();
+  }
+
+  async function fecharEdicaoAoVivo(){
+    if (!pipEditando) return;
+    /* A ORDEM IMPORTA: zerar `pipEditando` ANTES de fechar a janela. O
+       `pagehide` da janela de edição também restaura a gravação — ele existe
+       para quem fecha no X do navegador — e sem esta linha ele restauraria de
+       novo, despausando duas vezes o que só foi pausado uma. */
+    pipEditando = null;
+    supPip = null;
+    modoMarca(null);
+    if (euPauseiParaEditar && alternarPausa) alternarPausa();
+    euPauseiParaEditar = false;
+    await reabrirPip();
+  }
+
+  /* Fechada no X, e não no botão: a gravação tem que voltar do mesmo jeito. Um
+     editor que deixasse a captura pausada para sempre porque a pessoa fechou
+     pelo canto seria a pior forma de perder uma sessão — em silêncio. */
+  function restaurarDaEdicao(){
+    if (!pipEditando) return;
+    pipEditando = null;
+    supPip = null;
+    modoMarca(null);
+    if (euPauseiParaEditar && alternarPausa) alternarPausa();
+    euPauseiParaEditar = false;
+  }
+
+  function corpoDaEdicao(){
+    return ''+
+      '<div class="edTop"><span class="edTit" id="edTit"></span>' +
+        '<span class="edPausa" id="edPausa"></span></div>' +
+      /* A figura e o SVG na mesma caixa, do mesmo jeito da lente: o SVG tem
+         viewBox 0–1000 e não sabe o tamanho de nada. */
+      '<div class="edCx" id="edCx"><img id="edImg" alt="">' +
+        '<svg class="marcas" id="edMarcas" viewBox="0 0 1000 1000" preserveAspectRatio="none"></svg>' +
+      '</div>' +
+      '<div class="edBar">' +
+        '<button id="edSeta" class="edFer"></button>' +
+        '<button id="edRet" class="edFer"></button>' +
+        '<button id="edCaneta" class="edFer"></button>' +
+        '<span class="mkCores" id="edCores"></span>' +
+        '<button id="edDesfazer" class="edFer hide"></button>' +
+        '<span class="edComo" id="edComo"></span>' +
+        '<button id="edSalvar" class="edSalvar"></button>' +
+      '</div>';
+  }
+
+  function pintarEdicao(d){
+    if (!d || !pipEditando) return;
+    pintarMarcasEm(d.getElementById('edMarcas'), pipEditando.marcas,
+                   supPip && supPip.emCurso());
+    const n = pipEditando.marcas ? pipEditando.marcas.length : 0;
+    const b = d.getElementById('edDesfazer');
+    if (b) b.classList.toggle('hide', !n);
+    const c = d.getElementById('edComo');
+    if (c) c.textContent = n ? t('edFeitas', n) : t('edComo');
+  }
+
+  function montarEdicao(d){
+    const f = pipEditando;
+    d.body.classList.add('editando');
+    d.body.innerHTML = corpoDaEdicao();
+    pintarEm(d.getElementById('edImg'), telaDe(f));
+    d.getElementById('edTit').textContent = t('edTit', numeroDoQuadro(f));
+    d.getElementById('edPausa').textContent = t('edPausado');
+
+    /* UMA TABELA, e não três listas: o id do botão, a ferramenta e a chave do
+       rótulo andam juntos. Uma ferramenta nova entra numa linha só. */
+    const FERS = [['edSeta', 'seta', 'mkSeta'],
+                  ['edRet', 'ret', 'mkRet'],
+                  ['edCaneta', 'caneta', 'mkCaneta']];
+    const pintarFers = () => FERS.forEach(([id, k]) => {
+      const b = d.getElementById(id); if (!b) return;
+      b.classList.toggle('sel', mkFerramenta === k);
+      b.setAttribute('aria-pressed', String(mkFerramenta === k));
+    });
+    FERS.forEach(([id, k, chave]) => {
+      const b = d.getElementById(id); if (!b) return;
+      b.textContent = t(chave);
+      /* `modoMarca` é a função da lente, e é ela que se chama de propósito: a
+         escolha de ferramenta é UMA, e quem escolheu a caneta aqui encontra a
+         caneta escolhida na revisão. Duas seleções para a mesma coisa seria
+         pedir a escolha de novo por ter mudado de janela. */
+      b.onclick = () => { modoMarca(k); pintarFers(); };
+    });
+    pintarFers();
+
+    const cores = d.getElementById('edCores');
+    MK_CORES.forEach((cor) => {
+      const b = d.createElement('button');
+      b.style.background = cor;
+      b.className = cor === mkCor ? 'sel' : '';
+      b.title = t('mkCor');
+      b.setAttribute('aria-label', t('mkCor'));
+      b.onclick = () => {
+        mkCor = cor;
+        [...cores.children].forEach((x, i) => x.className = MK_CORES[i] === mkCor ? 'sel' : '');
+        pintarCores();
+      };
+      cores.appendChild(b);
+    });
+
+    const desf = d.getElementById('edDesfazer');
+    desf.textContent = t('mkDesfazer');
+    desf.onclick = () => {
+      if (!pipEditando || !pipEditando.marcas || !pipEditando.marcas.length) return;
+      pipEditando.marcas.pop();
+      espelharMarca(pipEditando);
+      pintarEdicao(d);
+    };
+
+    const salvar = d.getElementById('edSalvar');
+    salvar.textContent = t('edSalvar');
+    salvar.onclick = () => fecharEdicaoAoVivo();
+
+    supPip = ligarMarcacao({
+      cx: () => d.getElementById('edCx'),
+      img: () => d.getElementById('edImg'),
+      quadro: () => pipEditando,
+      pintar: () => pintarEdicao(d),
+      /* NÃO QUEIMA AQUI. Queimar é redesenhar a figura inteira num canvas, e
+         durante a gravação a máquina já está capturando tela a cada intervalo.
+         A marca é vetor e sobrevive; `aplicarTarjas` queima tudo o que faltar
+         antes de qualquer exportação, que é a única hora em que pixel importa. */
+      aoSoltar: async (f2) => { espelharMarca(f2); pintarEdicao(d); }
+    });
+    pintarEdicao(d);
+
+    d.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') { e.preventDefault(); fecharEdicaoAoVivo(); }
+    });
+    pipWin.addEventListener('pagehide', () => {
+      pipWin = null;
+      restaurarDaEdicao();
+      pintarVoltarJanelinha();
+    });
   }
 
   async function abrirControle(){
@@ -10830,14 +11171,21 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
          alemão — "Markieren + Bildschirm Stopp" numa linha só — e a largura
          numa faixa por cima do trabalho custa menos que altura: ela encosta
          numa borda e deixa o meio da tela livre. 390 dá quinze de folga. */
-      const tam = TAM_PIP(pipModo() === 'min');
+      const tam = pipEditando ? TAM_PIP_ED(pipEditando) : TAM_PIP(pipModo() === 'min');
       pipWin = await documentPictureInPicture.requestWindow({ width: tam.w, height: tam.h });
     } catch (e) { pipWin = null; return; }
 
     const d = pipWin.document;
     d.title = t('pipTit');
-    if (pipModo() === 'min') d.body.classList.add('min');
+    if (!pipEditando && pipModo() === 'min') d.body.classList.add('min');
     const st = d.createElement('style'); st.textContent = PIP_CSS; d.head.appendChild(st);
+    /* ---- O EDITOR É OUTRO CORPO, E SAI AQUI ----
+       Ele não tem relógio, nem medidor de som, nem marcar, nem parar. Montar os
+       dois no mesmo caminho exigiria esconder metade dos elementos por classe —
+       e uma janela cheia de coisa escondida é a que volta com um botão morto
+       que ninguém percebeu. O que os dois compartilham é a folha de estilo, que
+       é onde o compartilhamento não custa nada. */
+    if (pipEditando) { montarEdicao(d); return; }
     d.body.innerHTML = corpoDaJanelinha();
 
     pipRelogio = d.getElementById('rel');
@@ -10848,6 +11196,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     pipCalar   = d.getElementById('calar');
     pipMarcar  = d.getElementById('marcar');
     pipTela    = d.getElementById('maisTela');
+    pipAnotar  = d.getElementById('anotar');
     pipPausa   = d.getElementById('pausa');
     rotularPip(pipFrames, 'pipStop', 'pipCurtoParar');
     pipFrames.onclick = () => { if (pararLive) pararLive(); };
@@ -10858,6 +11207,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     pipErro = d.getElementById('erro');
     if (pipErro) pipErro.onclick = () => { if (errarAgora) errarAgora(); };
     if (pipTela) pipTela.onclick = () => { if (maisUmaTela) maisUmaTela(); };
+    if (pipAnotar) pipAnotar.onclick = () => abrirEdicaoAoVivo();
     /* A caixa da janelinha chama as MESMAS funções do cartão. Nenhuma lógica
        duplicada: o que existe em dois lugares é o campo, não a regra. */
     {
@@ -10933,6 +11283,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       /* `e` de erro. E ele nao pode exigir mira: a tela de erro some quando a
          pessoa clica em qualquer coisa, e procurar o botao custa a prova. */
       else if (k === 'e') apertar(pipErro);
+      /* `a` de anotar. */
+      else if (k === 'a') apertar(pipAnotar);
     });
     /* O botão da janelinha não duplica lógica: chama o mesmo `alternarMic` da
        aba, e o rótulo dos dois é repintado pela mesma função. */
@@ -10946,7 +11298,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
        destruir uma reunião de uma hora. O botão da aba continua valendo. */
     pipWin.addEventListener('pagehide', () => {
       pipWin = null; pipRelogio = pipTexto = pipFrames = pipVm = pipVs = pipCalar = null;
-      pipMarcar = pipTela = pipPausa = null;
+      pipMarcar = pipTela = pipPausa = pipAnotar = null;
       /* Fechada por engano, e a gravação continua: some o relógio, o medidor,
          o marcar, o pausar e a caixa de comentário — tudo que existe DURANTE a
          gravação. Sem um jeito de trazer de volta, a única saída era parar e
@@ -11007,6 +11359,10 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
         pipErro.disabled = pausado;
         rotularPip(pipErro, 'recErroBtn', 'pipCurtoErro');
         pipErro.classList.toggle('piscou', !!aviso && pipAvisoDe === 'erro');
+      }
+      if (pipAnotar) {
+        pipAnotar.disabled = pausado;
+        rotularPip(pipAnotar, 'pipAnotar', 'pipCurtoAnotar');
       }
       if (pipTela) {
         pipTela.disabled = pausado;
@@ -11078,6 +11434,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       /* Os botões param de convidar: não há o que marcar nem o que pausar. */
       if (pipMarcar) pipMarcar.disabled = true;
       if (pipTela) pipTela.disabled = true;
+      if (pipAnotar) pipAnotar.disabled = true;
       if (pipPausa)  pipPausa.disabled  = true;
       if (pipFrames) pipFrames.disabled = true;
       return;
@@ -11190,7 +11547,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
        campo de um documento morto, e `notaMoraNaJanelinha()` respondia "sim"
        para uma janela que não existe mais: o cartão escondia o campo dele e a
        pessoa ficava sem os dois. */
-    pipMarcar = pipTela = pipPausa = null;
+    pipMarcar = pipTela = pipPausa = pipAnotar = null;
   }
   let liveAgora = () => 0;
 
@@ -16981,6 +17338,29 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
                    .catch(err => falhouOEspelho(e, err));
   }
 
+  /* A MARCAÇÃO FEITA AO VIVO TAMBÉM VAI PARA O DISCO, pelo mesmo argumento da
+     nota — e nela o argumento é mais forte. O espelho existe para o dia em que
+     o navegador cai no meio de uma gravação de duas horas. Se a imagem
+     sobrevive e a seta não, a pessoa recupera a tela sem aquilo que ela abriu
+     o editor justamente para não esquecer: qual campo estava errado.
+
+     A imagem no disco continua LIMPA, e isso é de propósito: a marca é vetor,
+     não pixel, e um espelho que já viesse queimado seria uma cópia que ninguém
+     consegue mais desfazer. O que vai é a lista — a mesma que o documento
+     queima na exportação.
+
+     `n` é a posição do quadro em `frames`, que é o número com que ele foi
+     espelhado. Durante a gravação nada é removido da lista, então perguntar
+     agora dá a mesma resposta de quando ele entrou. */
+  function espelharMarca(f){
+    if (!espelho || !f) return;
+    const n = frames.indexOf(f) + 1;
+    if (!n) return;
+    const e = espelho;
+    e.fila = e.fila.then(() => anexarAoIndice(e, { n, marcas: f.marcas || [] }))
+                   .catch(err => falhouOEspelho(e, err));
+  }
+
   /* O documento saiu: o espelho cumpriu o trabalho e vai embora. Chamado de
      `baixarBlob` e de `baixar`, que são as duas portas por onde um arquivo sai
      daqui — e não de cada botão, que seria a lista à mão de sempre. */
@@ -20757,14 +21137,39 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
   /* ---- destaque na lente ---- */
   let mkFerramenta = null;          // null | 'ret' | 'seta' | 'caneta'
   const marcando = () => !!mkFerramenta;
+  /* As duas superfícies de marcação, criadas mais abaixo por `ligarMarcacao`.
+     A da lente existe desde que a página carrega; a da janelinha nasce e morre
+     com a janela de edição. Cada uma guarda o PRÓPRIO arrasto: uma variável só
+     para as duas funcionaria hoje — não dá para arrastar nas duas ao mesmo
+     tempo — e seria um defeito esperando o dia em que der. */
+  let supLente = null, supPip = null;
 
-  function pintarMarcas(){
-    const f = frames[lenteI];
-    const sv = $('lenteMarcas'); if (!sv) return;
+  /* ---- O DESENHO DAS MARCAS, SEM SABER EM QUE DOCUMENTO ESTÁ ----
+   *
+   * Ele era escrito contra o `document` da aba e contra `frames[lenteI]`, e
+   * isso bastava enquanto existia UMA superfície de marcação: a lente, na
+   * revisão. Agora são duas — a lente e a janelinha, durante a gravação.
+   *
+   * A saída barata seria copiar estas trinta linhas para a segunda. Isso é a
+   * lista paralela de sempre: no dia em que uma ferramenta nova nascer, ela
+   * nasce numa superfície e não na outra, e o defeito só aparece quando alguém
+   * tenta usá-la do lado errado.
+   *
+   * O VIEWBOX É 0–1000 e o `preserveAspectRatio` é `none`: a mesma marca
+   * desenha igual numa figura de 300px e numa de 1920. É por isso que a
+   * janelinha pode ser pequena sem que a marcação saia errada — ela guarda
+   * fração, e não pixel. */
+  function pintarMarcasEm(sv, marcas, emCurso){
+    if (!sv) return;
+    /* O DOCUMENTO SAI DO ELEMENTO, e não do `document` global. Um nó criado
+       pelo documento da aba e enxertado no documento da janelinha é um nó de
+       outro documento — e `ownerDocument` responde sempre pelo lugar onde o
+       desenho vai morar, seja qual for a janela. */
+    const doc = sv.ownerDocument;
     sv.innerHTML = '';
     const NS = 'http://www.w3.org/2000/svg';
     const cria = (tag, attrs) => {
-      const el = document.createElementNS(NS, tag);
+      const el = doc.createElementNS(NS, tag);
       for (const k in attrs) el.setAttribute(k, attrs[k]);
       /* Sem isto o preserveAspectRatio="none" esticaria o traço junto com a
          imagem, e um destaque numa tela 16:9 sairia com a linha vertical fina e
@@ -20772,8 +21177,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       el.setAttribute('vector-effect', 'non-scaling-stroke');
       return el;
     };
-    const todas = (f && f.marcas ? f.marcas.slice() : []);
-    if (arrastoMk && arrastoMk.marca) todas.push(arrastoMk.marca);
+    const todas = (marcas || []).slice();
+    if (emCurso) todas.push(emCurso);
     todas.forEach(m => {
       const cor = m.cor || MK_CORES[0];
       if (m.tipo === 'ret') {
@@ -20795,6 +21200,14 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
           'stroke-linecap': 'round', 'stroke-linejoin': 'round' }));
       }
     });
+  }
+
+  /* A LENTE É UMA DAS DUAS SUPERFÍCIES, e não mais a dona do desenho. O que
+     sobra aqui é o que só existe nela: os dois botões que aparecem quando há
+     marca para desfazer ou limpar. */
+  function pintarMarcas(){
+    const f = frames[lenteI];
+    pintarMarcasEm($('lenteMarcas'), f && f.marcas, supLente && supLente.emCurso());
     const n = f && f.marcas ? f.marcas.length : 0;
     $('mkDesfazer').classList.toggle('hide', !n);
     $('mkLimpar').classList.toggle('hide', !n);
@@ -20972,35 +21385,54 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     queimarTarjas(f).then(() => { pintarLente(); render(); });
   };
 
-  const normal = e => {
-    const r = $('lenteImg').getBoundingClientRect();
-    return { x: Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)),
-             y: Math.min(1, Math.max(0, (e.clientY - r.top) / r.height)) };
-  };
-  let arrastoMk = null;
-
-  $('lenteImgCx').addEventListener('pointerdown', e => {
-    if (marcando()) {
+  /* ---- UM GESTO DE MARCAÇÃO, DUAS JANELAS ----
+   *
+   * `sup` diz ONDE: o contêiner que recebe o ponteiro, a figura que define o
+   * sistema de coordenadas (a caixa DELA, e não a do contêiner — o contêiner
+   * pode ter borda), o SVG onde a prévia é desenhada, e qual quadro está sendo
+   * marcado. O que ele não diz é a REGRA do gesto: o que conta como arrasto, o
+   * que é clique parado, de quanto em quanto a caneta guarda um ponto. Isso
+   * mora aqui, uma vez, e as duas janelas obedecem.
+   *
+   * A FERRAMENTA E A COR SÃO AS MESMAS VARIÁVEIS nas duas: quem escolheu a
+   * seta vermelha ao vivo continua com a seta vermelha na revisão. Duas
+   * seleções para a mesma escolha seria pedir à pessoa que a fizesse de novo
+   * por ter mudado de janela.
+   *
+   * `aoSoltar` é o que cada janela faz depois que a marca vale, e só isso
+   * difere: a lente queima a figura e repinta a grade; a janelinha manda para
+   * o espelho e não queima nada — durante a gravação a máquina está capturando
+   * tela, e queimar uma imagem de 1920 a cada seta é o custo que não se pode
+   * pagar ali. A queima acontece de qualquer jeito antes de qualquer
+   * exportação, em `aplicarTarjas`. */
+  function ligarMarcacao(sup){
+    let arr = null;
+    const ponto = (e) => {
+      const im = sup.img();
+      const r = im ? im.getBoundingClientRect() : { left:0, top:0, width:1, height:1 };
+      return { x: Math.min(1, Math.max(0, (e.clientX - r.left) / (r.width  || 1))),
+               y: Math.min(1, Math.max(0, (e.clientY - r.top)  / (r.height || 1))) };
+    };
+    const cx = sup.cx();
+    if (!cx) return null;
+    cx.addEventListener('pointerdown', (e) => {
+      if (!marcando() || !sup.quadro()) return;
       e.preventDefault();
-      $('lenteImgCx').setPointerCapture(e.pointerId);
-      const p0 = normal(e);
-      arrastoMk = { de: p0, marca: mkFerramenta === 'caneta'
+      /* Numa janela de picture-in-picture a captura de ponteiro pode ser
+         recusada. Se for, o arrasto ainda funciona enquanto o dedo estiver
+         sobre a figura — que é onde ele está — e o `pointerup` do contêiner
+         fecha a marca. Perder o traço é melhor que derrubar o gesto inteiro. */
+      try { cx.setPointerCapture(e.pointerId); } catch (x) {}
+      const p0 = ponto(e);
+      arr = { de: p0, marca: mkFerramenta === 'caneta'
         ? { tipo:'caneta', cor: mkCor, pts: [[p0.x, p0.y]] }
         : { tipo: mkFerramenta, cor: mkCor,
             x: p0.x, y: p0.y, w: 0, h: 0, x1: p0.x, y1: p0.y, x2: p0.x, y2: p0.y } };
-      pintarMarcas();
-      return;
-    }
-    if ((!tarjando && !cortando) || (tarjando && e.target.tagName === 'I')) return;
-    e.preventDefault();
-    $('lenteImgCx').setPointerCapture(e.pointerId);
-    arrasto = { de: normal(e), el: document.createElement('i') };
-    arrasto.el.className = 'nova';
-    $('lenteTarjas').appendChild(arrasto.el);
-  });
-  $('lenteImgCx').addEventListener('pointermove', e => {
-    if (arrastoMk) {
-      const a2 = arrastoMk.de, b2 = normal(e), m = arrastoMk.marca;
+      sup.pintar();
+    });
+    cx.addEventListener('pointermove', (e) => {
+      if (!arr) return;
+      const a2 = arr.de, b2 = ponto(e), m = arr.marca;
       if (m.tipo === 'caneta') {
         /* Um ponto a cada 0,4% da largura: mais que isso vira um polígono
            gigante dentro do JSON e do documento, sem diferença no traço. */
@@ -21012,9 +21444,51 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
         m.x = Math.min(a2.x, b2.x); m.y = Math.min(a2.y, b2.y);
         m.w = Math.abs(b2.x - a2.x); m.h = Math.abs(b2.y - a2.y);
       }
-      pintarMarcas();
-      return;
-    }
+      sup.pintar();
+    });
+    cx.addEventListener('pointerup', async () => {
+      if (!arr) return;
+      const m = arr.marca, f = sup.quadro();
+      arr = null;
+      /* Um clique parado não vira destaque de tamanho zero. */
+      const vale = m.tipo === 'caneta' ? m.pts.length > 2
+        : m.tipo === 'seta' ? (Math.abs(m.x2-m.x1) + Math.abs(m.y2-m.y1)) > 0.02
+        : (m.w > 0.012 && m.h > 0.012);
+      if (!vale || !f) { sup.pintar(); return; }
+      f.marcas = (f.marcas || []).concat(m);
+      await sup.aoSoltar(f);
+    });
+    return { pintar: () => sup.pintar(), emCurso: () => arr && arr.marca };
+  }
+
+  supLente = ligarMarcacao({
+    cx: () => $('lenteImgCx'),
+    img: () => $('lenteImg'),
+    quadro: () => frames[lenteI],
+    pintar: () => pintarMarcas(),
+    aoSoltar: async (f) => { await queimarTarjas(f); pintarLente(); render(); }
+  });
+
+  /* A tarja e o corte continuam com o arrasto DELES, e continuam só na lente:
+     os dois mudam a figura, e mudar figura durante a gravação é o oposto do
+     que a edição ao vivo existe para fazer. O ponteiro é o mesmo elemento, mas
+     os dois ouvintes não brigam — `soEste` garante que só um modo está ligado,
+     e cada um sai na primeira linha quando o modo não é o seu. */
+  const normal = e => {
+    const r = $('lenteImg').getBoundingClientRect();
+    return { x: Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)),
+             y: Math.min(1, Math.max(0, (e.clientY - r.top) / r.height)) };
+  };
+
+  $('lenteImgCx').addEventListener('pointerdown', e => {
+    if ((!tarjando && !cortando) || (tarjando && e.target.tagName === 'I')) return;
+    e.preventDefault();
+    $('lenteImgCx').setPointerCapture(e.pointerId);
+    arrasto = { de: normal(e), el: document.createElement('i') };
+    arrasto.el.className = 'nova';
+    $('lenteTarjas').appendChild(arrasto.el);
+  });
+  $('lenteImgCx').addEventListener('pointermove', e => {
     if (!arrasto) return;
     const a = arrasto.de, b = normal(e);
     arrasto.caixa = { x: Math.min(a.x,b.x), y: Math.min(a.y,b.y),
@@ -21023,19 +21497,6 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     arrasto.el.style.cssText = `left:${c.x*100}%;top:${c.y*100}%;width:${c.w*100}%;height:${c.h*100}%`;
   });
   $('lenteImgCx').addEventListener('pointerup', async () => {
-    if (arrastoMk) {
-      const m = arrastoMk.marca, f = frames[lenteI];
-      arrastoMk = null;
-      /* Um clique parado não vira destaque de tamanho zero. */
-      const vale = m.tipo === 'caneta' ? m.pts.length > 2
-        : m.tipo === 'seta' ? (Math.abs(m.x2-m.x1) + Math.abs(m.y2-m.y1)) > 0.02
-        : (m.w > 0.012 && m.h > 0.012);
-      if (!vale || !f) { pintarMarcas(); return; }
-      f.marcas = (f.marcas || []).concat(m);
-      await queimarTarjas(f);
-      pintarLente(); render();
-      return;
-    }
     if (!arrasto) return;
     const c = arrasto.caixa;
     const f = frames[lenteI];
