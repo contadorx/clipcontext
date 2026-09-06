@@ -9757,7 +9757,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      depois, e não tem como se atualizar sozinho. Sem carimbo, "estou com um
      problema no offline" é uma conversa sem chão — ninguém sabe de qual build
      se fala nem se o defeito já foi consertado. */
-  const VERSAO = '2026.09.06-11';
+  const VERSAO = '2026.09.06-21';
   window.__versao = () => VERSAO;
 
   const PIP_CSS = `
@@ -10221,7 +10221,14 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     .edCx > svg{pointer-events:none;width:100%;height:100%}
     .edBar{display:flex;align-items:center;gap:7px;padding:9px 12px;height:52px;
            border-top:1px solid #2a2f3a;flex:0 0 auto;overflow-x:auto}
-    button.edFer{font-size:12px;padding:6px 10px;background:#1b1f27;color:#cfd5e0;
+    /* width:auto E flex:none, E OS DOIS SAO NECESSARIOS. O botao padrao
+       desta folha e width:100% — ele foi escrito para a janela completa, que
+       empilha. Sem desfazer isso aqui, o SALVAR esticava por cima da barra
+       inteira e saia pela direita, e as ferramentas iam junto. Chegou como
+       "o botao de salvar e voltar ficou quebrado", numa tela real. E o mesmo
+       tropeco do #anotar na fita: botao novo nesta folha comeca com 100%. */
+    button.edFer{width:auto;flex:none;font-size:12px;padding:6px 10px;
+                 background:#1b1f27;color:#cfd5e0;
                  border:1px solid #333a47;border-radius:7px;cursor:pointer}
     button.edFer:hover{background:#232833}
     button.edFer.sel{background:#737cf0;border-color:#737cf0;color:#fff}
@@ -10233,10 +10240,27 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
             overflow:hidden;text-overflow:ellipsis;min-width:0}
     /* O SALVAR e o unico botao cheio da janela: e o gesto que devolve a pessoa
        ao trabalho dela, e depois de anotar e o unico que ela quer achar. */
-    button.edSalvar{font-size:12.5px;font-weight:600;padding:7px 14px;
+    button.edSalvar{width:auto;font-size:12.5px;font-weight:600;padding:7px 14px;
                     background:#737cf0;color:#fff;border:0;border-radius:7px;
                     cursor:pointer;white-space:nowrap;flex:0 0 auto}
     button.edSalvar:hover{background:#8189f3}
+    /* A CAIXA DE ESCREVER, DEITADA. Na fita completa ela e uma pilha — rotulo,
+       campo, botao — porque la a janela e estreita e alta. Aqui e o contrario:
+       a janela e larga, e a altura toda que esta caixa tomar sai da figura.
+       Entao rotulo, campo, botao e confirmacao dividem uma fileira de 56px.
+       O campo cresce e os outros tres nao: e ele que recebe a frase. */
+    .edNota{display:flex;align-items:center;gap:8px;padding:8px 12px;height:56px;
+            border-top:1px solid #2a2f3a;flex:0 0 auto}
+    body.editando .notaLbl{flex:0 0 auto;font-size:11.5px;color:#8a93a3;
+            white-space:nowrap;max-width:130px;overflow:hidden;text-overflow:ellipsis}
+    body.editando textarea.nota{flex:1 1 auto;min-width:0;height:40px;resize:none;
+            font:12.5px/1.35 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+            padding:6px 8px;border-radius:7px;background:#15181e;color:#e9ebf1;
+            border:1px solid #3a4150}
+    body.editando textarea.nota:focus{outline:0;border-color:#737cf0}
+    body.editando #notaOk{flex:0 0 auto}
+    body.editando .notaMsg{flex:0 0 auto;font-size:10.5px;color:#8ecf9c;
+            white-space:nowrap;max-width:110px;overflow:hidden;text-overflow:ellipsis}
   `;
 
   /* ---- OS DOIS TAMANHOS DA JANELINHA ----
@@ -10553,13 +10577,14 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      O Chrome pode devolver uma janela diferente da pedida, e isso não quebra
      nada: as marcas são fração, não pixel, e o SVG acompanha o tamanho que
      vier. O que se perde é conforto. */
-  /* Cabeçalho (36) mais barra de ferramentas (52) — e a borda de cada um já
-     está DENTRO desses números, porque o CSS da janelinha é `border-box`. Foi
-     onde eu errei primeiro: somei as bordas por fora e declarei 90 para um
-     cromo de 88. Quem desempatou foi a régua, medindo o desenho.
-     Este número e o CSS logo abaixo têm que continuar iguais: se um andar
-     sozinho, a figura sai cortada ou sobra faixa preta na janela. */
-  const CROMO_ED = 88;
+  /* Cabeçalho (36) mais a caixa de escrever (56) mais a barra de ferramentas
+     (52) — e a borda de cada um já está DENTRO desses números, porque o CSS da
+     janelinha é `border-box`. Foi onde eu errei primeiro: somei as bordas por
+     fora e declarei 90 para um cromo de 88; depois a caixa de nota entrou e
+     levou para 144. Quem desempata é a régua, medindo o desenho.
+     Este número e o CSS têm que continuar iguais: se um andar sozinho, a
+     figura sai cortada ou sobra faixa preta na janela. */
+  const CROMO_ED = 144;
   const TAM_PIP_ED = (f) => {
     let telaW = 1280, telaH = 800;
     try { telaW = screen.availWidth || telaW; telaH = screen.availHeight || telaH; } catch (e) {}
@@ -10610,30 +10635,67 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     await reabrirPip();
   }
 
+  /* ---- A CAPTURA SÓ VOLTA DEPOIS QUE O EDITOR SAI DA TELA ----
+   *
+   * O DEFEITO, e ele chegou por uma tela real: o passo seguinte saiu com a
+   * NOSSA janela de edição desenhada por cima do sistema do cliente. A
+   * evidência mostrava o Walkstamp, e não o que estava sendo documentado.
+   *
+   * A causa não era a pausa — a pausa funcionava. Era a ORDEM. `fechar`
+   * despausava e só depois fechava a janela, e `alternarPausa` faz uma captura
+   * FORÇADA no instante em que despausa ("depois de uma espera a tela mudou, e
+   * é esse estado que a pessoa esperava documentar"). Essa captura acontecia
+   * com o editor ainda aberto, na frente de tudo.
+   *
+   * E FECHAR NÃO É SUMIR DA TELA. Entre o `close()` e o compositor do sistema
+   * apagar a janela do monitor há alguns quadros — e a captura lê do monitor.
+   * Por isso a espera: ela não é um "por via das dúvidas", é o tempo que o
+   * sistema leva para tirar uma janela da frente. 320ms é folgado para isso e
+   * imperceptível para quem acabou de largar o mouse.
+   *
+   * O relógio não para nessa espera: a hora de parede continua verdadeira. */
+  const SAIU_DA_TELA_MS = 320;
+  async function voltarAGravar(){
+    if (!euPauseiParaEditar) return;
+    /* Zerado ANTES da espera: dois fechamentos em sequência (o botão e o
+       `pagehide` que ele mesmo dispara) chamariam isto duas vezes, e a segunda
+       despausaria o que a primeira acabou de despausar. */
+    euPauseiParaEditar = false;
+    await new Promise((r) => setTimeout(r, SAIU_DA_TELA_MS));
+    if (liveOn && pausado && alternarPausa) alternarPausa();
+  }
+
   async function fecharEdicaoAoVivo(){
     if (!pipEditando) return;
-    /* A ORDEM IMPORTA: zerar `pipEditando` ANTES de fechar a janela. O
-       `pagehide` da janela de edição também restaura a gravação — ele existe
-       para quem fecha no X do navegador — e sem esta linha ele restauraria de
-       novo, despausando duas vezes o que só foi pausado uma. */
+    /* O QUE ESTAVA ESCRITO E NÃO FOI SALVO SE PERDE AQUI, SE NINGUÉM GUARDAR.
+       O campo guarda sozinho ao perder o foco — mas fechar a janela não é
+       perder o foco de forma confiável, e o Esc fecha com o cursor dentro do
+       campo. Uma frase escrita durante a gravação e sumida no fechamento é a
+       perda silenciosa que este produto não aceita. */
+    if (anotSujo) { try { anotGuardar(); } catch (e) {} }
+    /* Zerar `pipEditando` ANTES de fechar a janela: o `pagehide` dela também
+       restaura a gravação — ele existe para quem fecha no X do navegador — e
+       sem esta linha ele restauraria de novo. */
     pipEditando = null;
     supPip = null;
     modoMarca(null);
-    if (euPauseiParaEditar && alternarPausa) alternarPausa();
-    euPauseiParaEditar = false;
+    /* PRIMEIRO A JANELA SAI, DEPOIS A CAPTURA VOLTA. Na ordem contrária, o
+       primeiro quadro da retomada é uma foto do nosso editor. */
     await reabrirPip();
+    await voltarAGravar();
   }
 
   /* Fechada no X, e não no botão: a gravação tem que voltar do mesmo jeito. Um
      editor que deixasse a captura pausada para sempre porque a pessoa fechou
-     pelo canto seria a pior forma de perder uma sessão — em silêncio. */
+     pelo canto seria a pior forma de perder uma sessão — em silêncio.
+     Aqui a janela já está indo embora, e a espera do `voltarAGravar` cobre o
+     resto do caminho até ela sair do monitor. */
   function restaurarDaEdicao(){
     if (!pipEditando) return;
     pipEditando = null;
     supPip = null;
     modoMarca(null);
-    if (euPauseiParaEditar && alternarPausa) alternarPausa();
-    euPauseiParaEditar = false;
+    voltarAGravar();
   }
 
   function corpoDaEdicao(){
@@ -10644,6 +10706,21 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
          viewBox 0–1000 e não sabe o tamanho de nada. */
       '<div class="edCx" id="edCx"><img id="edImg" alt="">' +
         '<svg class="marcas" id="edMarcas" viewBox="0 0 1000 1000" preserveAspectRatio="none"></svg>' +
+      '</div>' +
+      /* ---- ESCREVER, E NÃO SÓ APONTAR ----
+         O pedido do campo era "colocando marcações setas E ESCREVENDO para não
+         se esquecerem", e a primeira versão deste editor entregou só a metade
+         que desenha. A seta diz ONDE; ela não diz por quê — e "por quê" é o que
+         some da cabeça quarenta telas adiante.
+         OS IDS SÃO OS MESMOS DA FITA de propósito: `anotCampos()` procura o
+         campo por `getElementById('nota')` na janela do picture-in-picture, e
+         com os mesmos ids esta caixa já é encontrada por todo o resto — pintar,
+         guardar, espelhar — sem uma linha nova. O texto mora no QUADRO. */
+      '<div class="edNota">' +
+        '<label class="notaLbl" id="notaLbl"></label>' +
+        '<textarea id="nota" class="nota" rows="2" maxlength="600"></textarea>' +
+        '<button id="notaOk" class="edFer"></button>' +
+        '<span class="notaMsg" id="notaMsg"></span>' +
       '</div>' +
       '<div class="edBar">' +
         '<button id="edSeta" class="edFer"></button>' +
@@ -10724,6 +10801,9 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     salvar.textContent = t('edSalvar');
     salvar.onclick = () => fecharEdicaoAoVivo();
 
+    /* A MESMA ligação da fita, e não uma cópia dela. */
+    ligarCaixaDeNota(d);
+
     supPip = ligarMarcacao({
       cx: () => d.getElementById('edCx'),
       img: () => d.getElementById('edImg'),
@@ -10745,6 +10825,42 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       restaurarDaEdicao();
       pintarVoltarJanelinha();
     });
+  }
+
+  /* ---- A CAIXA DE NOTA DE UMA JANELA QUALQUER ----
+   *
+   * Ela era escrita dentro do `abrirControle`, e isso bastava enquanto a
+   * janelinha tinha UM corpo. Com o editor ao vivo são dois, e a segunda cópia
+   * destas quinze linhas seria a lista paralela de sempre: o dia em que o campo
+   * ganhar uma regra nova, ele a ganha num corpo e não no outro.
+   *
+   * O QUE NÃO PRECISOU MUDAR, e é o que faz isto ser barato: `anotCampos()`
+   * procura o campo por `pipWin.document.getElementById('nota')`. Qualquer
+   * corpo que use os mesmos ids já é encontrado pelo `anotPintar`, pelo
+   * `anotGuardar` e pelo `anotDigitou` sem uma linha de mudança. O texto mora
+   * no QUADRO, e os campos são só janelas para ele. */
+  function ligarCaixaDeNota(d){
+    const nt = d.getElementById('nota'), ok = d.getElementById('notaOk');
+    if (nt) {
+      nt.placeholder = t('anotPh');
+      nt.oninput = anotDigitou;
+      nt.onblur = () => { if (anotSujo) anotGuardar(); };
+      nt.onkeydown = e => {
+        if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+          e.preventDefault(); anotGuardarEContinuar(nt);
+        }
+      };
+    }
+    /* Salvar devolve o cursor ao campo DESTA janela. Devolvê-lo ao campo do
+       cartão mandaria o teclado para a aba que está atrás da tela gravada. */
+    if (ok) {
+      ok.textContent = t('anotSalvar');
+      ok.onmousedown = e => e.preventDefault();
+      ok.onclick = () => anotGuardarEContinuar(nt);
+    }
+    /* A janela nasceu no meio de uma gravação: se já há quadro em comentário,
+       ela abre mostrando o texto dele. */
+    anotApontar(anotAlvo);
   }
 
   async function abrirControle(){
@@ -10811,31 +10927,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     if (pipErro) pipErro.onclick = () => { if (errarAgora) errarAgora(); };
     if (pipTela) pipTela.onclick = () => { if (maisUmaTela) maisUmaTela(); };
     if (pipAnotar) pipAnotar.onclick = () => abrirEdicaoAoVivo();
-    /* A caixa da janelinha chama as MESMAS funções do cartão. Nenhuma lógica
-       duplicada: o que existe em dois lugares é o campo, não a regra. */
-    {
-      const nt = d.getElementById('nota'), ok = d.getElementById('notaOk');
-      if (nt) {
-        nt.placeholder = t('anotPh');
-        nt.oninput = anotDigitou;
-        nt.onblur = () => { if (anotSujo) anotGuardar(); };
-        nt.onkeydown = e => {
-          if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
-            e.preventDefault(); anotGuardarEContinuar(nt);
-          }
-        };
-      }
-      /* Salvar devolve o cursor ao campo DESTA janela. Devolvê-lo ao campo do
-         cartão mandaria o teclado para a aba que está atrás da tela gravada. */
-      if (ok) {
-        ok.textContent = t('anotSalvar');
-        ok.onmousedown = e => e.preventDefault();
-        ok.onclick = () => anotGuardarEContinuar(nt);
-      }
-      /* A janelinha nasceu no meio de uma gravação: se já há quadro em
-         comentário, ela abre mostrando o texto dele. */
-      anotApontar(anotAlvo);
-    }
+    ligarCaixaDeNota(d);
     pintarRotPip();
     pipPausa.onclick  = () => { if (alternarPausa) alternarPausa(); };
 
@@ -12929,6 +13021,23 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       $('playerBox').classList.remove('soCaptura');
 
       frames.sort((a, b) => a.t - b.t);
+      /* ---- A MARCAÇÃO FEITA AO VIVO VIRA PIXEL AQUI, E NÃO ANTES ----
+       *
+       * Durante a gravação ela não queima de propósito: queimar é redesenhar
+       * uma figura de 1920 num canvas, e a máquina está capturando tela a cada
+       * intervalo. A marca é vetor, sobrevive, e `aplicarTarjas` a queima antes
+       * de qualquer exportação — o documento sempre saiu certo.
+       *
+       * O QUE ESTAVA ERRADO ERA A REVISÃO. A miniatura da grade mostra
+       * `telaDe(f)`, que é a figura queimada ou a original — e sem queimar,
+       * quem apontou dez telas ao vivo voltava para quarenta miniaturas
+       * idênticas. O recurso existe para NÃO ESQUECER, e a grade esquecia.
+       *
+       * Aqui é a hora certa: a captura acabou, a cauda da transcrição já
+       * passou, e ninguém está esperando o próximo quadro. É barato quando não
+       * há marca nenhuma — `aplicarTarjas` sai na primeira linha de cada
+       * quadro sem sobreposição. */
+      try { await aplicarTarjas(frames); } catch (e) {}
       $('rec').classList.remove('hide');
       $('recStop').classList.add('hide'); $('recStop').disabled = false;
       // os controles da gravação somem junto com ela, e a pausa não pode

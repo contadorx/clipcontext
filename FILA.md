@@ -141,6 +141,64 @@ campo de emissor, a contagem de erros na identificação. Marcar uma tela é
 
 ---
 
+## ACHADO FECHADO — a evidência saía com o nosso editor por cima do cliente *(06/09)*
+
+**Chegou por uma tela real**, no primeiro uso do Build 56: o passo seguinte saiu
+com a janela de edição do Walkstamp desenhada por cima do sistema que estava
+sendo documentado. Numa evidência de auditoria, isso não prova nada.
+
+**A pausa funcionava. A ORDEM é que estava errada.** `fecharEdicaoAoVivo`
+despausava e só depois fechava a janela — e `alternarPausa` faz uma captura
+**forçada** no instante em que despausa (ela existe desde sempre, e por um bom
+motivo: "depois de uma espera a tela mudou, e é esse estado que a pessoa
+esperava documentar"). Essa foto saía com o editor na frente de tudo.
+
+E **fechar não é sumir da tela**: entre o `close()` e o compositor do sistema
+apagar a janela do monitor há alguns quadros, e a captura lê do monitor. Por
+isso a correção é a ordem **mais** uma espera de 320ms — a janela sai, depois a
+captura volta.
+
+**Por que a régua do Build 56 não pegou:** ela contava quadros. Via "voltou a
+guardar tela" e dava verde. O que ela não perguntava era **o que estava na
+frente** quando o quadro entrou. Agora ela amostra as duas coisas juntas a cada
+8ms e reprova qualquer quadro que tenha entrado com o editor vivo — e foi
+conferida revertendo a ordem de propósito: reprova, dizendo *1 de 2 quadros*.
+
+---
+
+## ACHADO FECHADO — o botão de salvar do editor esticava por cima da barra *(06/09)*
+
+Relatado como *"o botão de salvar e voltar ficou quebrado"*, com a tela junto.
+O botão padrão da folha de estilo da janelinha é `width:100%` — ela foi escrita
+para a janela **completa**, que empilha —, e o `edSalvar` nasceu herdando isso:
+esticava por cima da barra inteira e saía pela direita.
+
+É o **mesmo tropeço** que o `#anotar` deu na fita duas semanas atrás, e a lição
+não tinha virado régua: nenhuma media larguras dentro do editor. Agora mede, e a
+afirmação é sobre a **barra**, não sobre o salvar — um botão novo amanhã cai na
+mesma linha sem ninguém lembrar de acrescentá-lo.
+
+---
+
+## DEC-16 (continuação) — escrever, e não só apontar *(entregue no Build 57)*
+
+O pedido original dizia *"colocando marcações setas **e escrevendo** para não se
+esquecerem"*, e o Build 56 entregou só a metade que desenha: a seta diz ONDE, e
+não diz por quê. O editor ganhou o campo de texto.
+
+**Os ids são os mesmos da fita de propósito.** `anotCampos()` procura o campo
+por `getElementById('nota')` na janela do picture-in-picture — com os mesmos ids,
+a caixa nova já é encontrada por pintar, guardar e espelhar sem uma linha a mais.
+O texto mora no QUADRO; os campos são janelas para ele.
+
+E **a marcação passou a queimar ao PARAR a gravação**. Durante, não queima de
+propósito (é redesenhar 1920px enquanto a máquina captura). Mas a miniatura da
+grade mostra `telaDe(f)` — sem queimar, quem apontou dez telas ao vivo voltava
+para quarenta miniaturas idênticas. O recurso existe para não esquecer, e a
+grade esquecia.
+
+---
+
 ## ACHADO FECHADO — trocar o tamanho da janelinha estourava durante a gravação *(06/09)*
 
 Desenterrado pela régua nova do Build 56, e **antigo**. `reabrirPip()` — o
