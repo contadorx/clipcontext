@@ -141,6 +141,32 @@ campo de emissor, a contagem de erros na identificação. Marcar uma tela é
 
 ---
 
+## DEC-16 (continuação) — o editor abre grande, e lembra o tamanho *(Build 58)*
+
+**O relato:** *"minha ação foi abrir ela inteira e me perdi"*. Ele nascia com 72%
+da tela.
+
+**O argumento dos 72% já tinha caído antes disso, e eu não percebi.** Ele era:
+*"a janela precisa ficar por cima de algo — se cobrir tudo, a pessoa perde a
+referência do que estava documentando"*. Isso valia enquanto o editor disputava
+tela com a captura. Desde que a captura **para** enquanto se aponta, não há nada
+acontecendo atrás para manter à vista — e num ERP em tela cheia, numa janela de
+72%, o campo que se quer circular tem quatro pixels.
+
+Agora abre com **94%** da tela disponível, e **o tamanho que a pessoa der fica**:
+`documentPictureInPicture` não redimensiona depois de aberto, mas o `innerWidth`
+ao fechar diz no que ela virou. Com piso (520×380) e teto (a tela atual) — sem
+piso, um arrasto sem querer deixa o editor inútil para sempre e sem pista do
+porquê; sem teto, um tamanho guardado num monitor de 4K abre fora da tela no
+notebook.
+
+**E a política de privacidade passou a declarar as preferências de tela.** Ela
+enumera o que fica no navegador, item por item, e o tamanho da lente e o modo da
+janelinha já estavam guardados sem constar ali — o editor seria o terceiro. Um
+parágrafo nas cinco línguas fechou a lacuna, que era anterior a este build.
+
+---
+
 ## ACHADO FECHADO — a evidência saía com o nosso editor por cima do cliente *(06/09)*
 
 **Chegou por uma tela real**, no primeiro uso do Build 56: o passo seguinte saiu

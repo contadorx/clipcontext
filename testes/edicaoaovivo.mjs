@@ -219,6 +219,17 @@ let iEditado = -1;
   ok('a janela de edição foi pedida MAIOR que a fita',
      edP.width > fitaP.width && edP.height > fitaP.height,
      `fita ${fitaP.width}×${fitaP.height}  ·  edição ${edP.width}×${edP.height}`);
+  /* ---- E ELA ABRE GRANDE, e não numa janela de espiar ----
+     Ela nascia com 72% da tela, com o argumento de "não perder a referência do
+     que está atrás". O relato desfez: "minha ação foi abrir ela inteira e me
+     perdi". E o argumento já tinha caído antes disso — ele valia enquanto o
+     editor disputava tela com a captura, e a captura PARA desde o Build 56.
+     Num ERP em tela cheia, o campo que se quer circular tem quatro pixels numa
+     janela de 72%. */
+  const tela = await pg.evaluate(() => ({ w: screen.availWidth, h: screen.availHeight }));
+  ok('e ela ocupa quase toda a tela disponível',
+     edP.width >= tela.w * 0.9,
+     `${edP.width} de ${tela.w} de largura disponível`);
 }
 
 /* ---------------------------------------------------------------- [3] ----
@@ -330,6 +341,61 @@ console.log('\n[3b] nada na barra de ferramentas estica nem sai pela direita');
   const gordo = m.filhos.filter(f => f.id !== 'edComo' && f.w > m.barra * 0.5);
   ok('e nenhum outro toma metade da barra sozinho', gordo.length === 0,
      gordo.map(f => `${f.id} ${f.w}`).join(' '));
+}
+
+/* --------------------------------------------------------------- [3c] ----
+   O TAMANHO QUE A PESSOA DER FICA. Quem arrastou o canto uma vez não quer
+   arrastar quarenta. `documentPictureInPicture` não redimensiona depois de
+   aberto, mas o `innerWidth` ao fechar diz no que ela virou — e é isso que se
+   guarda, como o tamanho da lente e o modo da fita.
+   COM PISO E COM TETO: sem piso, um arrasto sem querer deixa o editor
+   inutilizável para sempre; sem teto, um tamanho guardado num monitor de 4K
+   abre fora da tela no notebook. */
+console.log('\n[3c] o tamanho que a pessoa der ao editor fica para a próxima');
+{
+  const ESCOLHIDO = { w: 760, h: 540 };
+  await pg.evaluate((t) => {
+    const fr = document.getElementById('pipFake');
+    fr.contentWindow.resizeTo(t.w, t.h);
+  }, ESCOLHIDO);
+  await pg.waitForTimeout(200);
+  await fita().locator('#edSalvar').click();
+  await pg.waitForTimeout(2200);
+  const guardado = await pg.evaluate(() => {
+    try { return localStorage.getItem('Walkstamp.editorTam'); } catch (e) { return null; }
+  });
+  ok('o tamanho foi guardado ao fechar', guardado === `${ESCOLHIDO.w}x${ESCOLHIDO.h}`, String(guardado));
+
+  await fita().locator('#anotar').click();
+  await pg.waitForTimeout(1200);
+  const p2 = await pg.evaluate(() => window.__pipPedidos);
+  const ed2 = p2[p2.length - 1];
+  ok('e a próxima abertura usa esse tamanho, e não o padrão',
+     ed2.width === ESCOLHIDO.w && ed2.height === ESCOLHIDO.h,
+     `${ed2.width}×${ed2.height}`);
+
+  /* O PISO. Um tamanho absurdo guardado não pode deixar o editor inútil para
+     sempre — e sem nenhuma pista do porquê, porque ele abriria assim toda vez. */
+  await pg.evaluate(() => {
+    const fr = document.getElementById('pipFake');
+    fr.contentWindow.resizeTo(120, 90);
+  });
+  await pg.waitForTimeout(200);
+  await fita().locator('#edSalvar').click();
+  await pg.waitForTimeout(2200);
+  await fita().locator('#anotar').click();
+  await pg.waitForTimeout(1200);
+  const p3 = await pg.evaluate(() => window.__pipPedidos);
+  const ed3 = p3[p3.length - 1];
+  ok('um tamanho absurdo guardado não deixa o editor inútil',
+     ed3.width >= 520 && ed3.height >= 380, `${ed3.width}×${ed3.height}`);
+  /* E volta ao grande para os blocos seguintes medirem o que a pessoa vê. */
+  await pg.evaluate(() => { try { localStorage.removeItem('Walkstamp.editorTam'); } catch (e) {} });
+  /* `iEditado` NÃO MUDA AQUI, e isto já custou uma rodada vermelha. Este bloco
+     abre e fecha o editor duas vezes, então há quadros novos — mas a seta e a
+     frase continuam no quadro de [3] e [3a], e é sobre ELE que os blocos
+     seguintes afirmam. Apontar a variável para o último quadro fez quatro
+     réguas reprovarem por estarem olhando para um quadro em branco. */
 }
 
 /* ---------------------------------------------------------------- [4] ----
