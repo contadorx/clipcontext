@@ -261,6 +261,77 @@ console.log('\n[3] o arrasto escreve no quadro certo, e com a ferramenta escolhi
   ok('e ele tira a última', (await marcasDe(iEditado)).length === 1);
 }
 
+/* --------------------------------------------------------------- [3a] ----
+   ESCREVER, E NÃO SÓ APONTAR. O pedido do campo era "colocando marcações setas
+   E ESCREVENDO para não se esquecerem", e a primeira versão deste editor
+   entregou só a metade que desenha: a seta diz ONDE, e não diz por quê.
+
+   O QUE ESTE BLOCO NÃO REFAZ: que `f.nota` sai no documento. Isso é o que
+   `anotacao.mjs` já cobra, de ponta a ponta, e é literalmente o mesmo campo do
+   mesmo quadro. Reprovar duas vezes a mesma coisa não é rigor — é uma segunda
+   régua para manter em pé. O que falta provar aqui é o pedaço novo: que o
+   texto escrito DENTRO do editor cai no quadro CERTO e sobrevive à gravação. */
+console.log('\n[3a] dá para escrever, e o texto vai para o quadro que está aberto');
+{
+  const campo = fita().locator('#nota');
+  ok('o editor tem um campo de texto', await campo.count() === 1);
+  ok('e ele já está ligado, apontando para esta tela', await campo.isEnabled());
+  const rot = (await fita().locator('#notaLbl').textContent() || '').trim();
+  ok('com o rótulo dizendo de qual passo se trata', /passo/i.test(rot), rot);
+
+  const FRASE = 'centro de custo veio vazio';
+  await campo.click();
+  await campo.fill(FRASE);
+  await fita().locator('#notaOk').click();
+  await pg.waitForTimeout(400);
+
+  const notas = await pg.evaluate(() => (window.__quadros() || []).map(f => f.nota || ''));
+  ok('o texto entrou no quadro que está sendo apontado',
+     notas[iEditado] === FRASE, JSON.stringify(notas[iEditado]));
+  ok('e em NENHUM outro', notas.filter((n, i) => i !== iEditado && n).length === 0,
+     JSON.stringify(notas));
+  const msg = (await fita().locator('#notaMsg').textContent() || '').trim();
+  ok('e a janela diz, em palavras, que guardou', msg.length > 0, msg);
+}
+
+/* --------------------------------------------------------------- [3b] ----
+   NADA NA BARRA ESTICA NEM SAI PELA DIREITA.
+
+   O relato veio de uma tela real: "o botão de salvar e voltar ficou quebrado".
+   O botão padrão desta folha de estilo é `width:100%` — ela foi escrita para a
+   janela completa, que empilha —, e o SALVAR nasceu herdando isso: esticava por
+   cima da barra inteira e saía pela direita. É o MESMO tropeço que o `#anotar`
+   deu na fita, duas semanas atrás, e nenhuma régua olhava para larguras aqui.
+
+   A afirmação não é sobre o salvar: é sobre a barra. Um botão novo amanhã cai
+   nesta mesma linha sem ninguém lembrar de acrescentá-lo. */
+console.log('\n[3b] nada na barra de ferramentas estica nem sai pela direita');
+{
+  const cx = await fita().locator('#edBarMedida').count();
+  const m = await pg.evaluate(() => {
+    const fr = document.getElementById('pipFake');
+    const d = fr.contentDocument;
+    const bar = d.querySelector('.edBar');
+    const r = bar.getBoundingClientRect();
+    const filhos = [...bar.children].filter(e => getComputedStyle(e).display !== 'none')
+      .map(e => { const b = e.getBoundingClientRect();
+                  return { id: e.id || e.className, w: Math.round(b.width),
+                           saiu: b.right > r.right + 1 || b.left < r.left - 1 }; });
+    return { barra: Math.round(r.width), filhos };
+  });
+  console.log('     barra ' + m.barra + 'px  |  ' +
+              m.filhos.map(f => `${f.id} ${f.w}`).join('  '));
+  const saiu = m.filhos.filter(f => f.saiu).map(f => f.id);
+  ok('nenhum botão sai pela direita da barra', saiu.length === 0, saiu.join(' '));
+  const salvar = m.filhos.find(f => f.id === 'edSalvar');
+  ok('o salvar tem a largura do texto dele, e não a da janela',
+     salvar && salvar.w > 0 && salvar.w < m.barra * 0.5,
+     salvar ? `${salvar.w} de ${m.barra}` : '(não achei)');
+  const gordo = m.filhos.filter(f => f.id !== 'edComo' && f.w > m.barra * 0.5);
+  ok('e nenhum outro toma metade da barra sozinho', gordo.length === 0,
+     gordo.map(f => `${f.id} ${f.w}`).join(' '));
+}
+
 /* ---------------------------------------------------------------- [4] ----
    A AFIRMAÇÃO MAIS IMPORTANTE DESTE ARQUIVO. */
 console.log('\n[4] a captura PAROU enquanto a janela de edição está aberta');
@@ -281,14 +352,65 @@ console.log('\n[4] a captura PAROU enquanto a janela de edição está aberta');
 /* ---------------------------------------------------------------- [5] ---- */
 console.log('\n[5] salvar fecha a janela, devolve a fita e RETOMA a gravação');
 {
+  /* ---- E A RETOMADA NÃO PODE FOTOGRAFAR O PRÓPRIO EDITOR ----
+   *
+   * O DEFEITO, e ele chegou numa tela real: o passo seguinte saiu com a NOSSA
+   * janela de edição desenhada por cima do sistema do cliente. A pausa
+   * funcionava; a ORDEM é que estava errada. `fechar` despausava antes de
+   * fechar a janela, e `alternarPausa` faz uma captura FORÇADA no instante em
+   * que despausa. A foto saía com o editor na frente.
+   *
+   * A régua anterior não pegava porque contava quadros: ela via "voltou a
+   * guardar tela" e dava verde. O que ela não perguntava era O QUE estava na
+   * frente quando o quadro entrou. Agora ela amostra as duas coisas juntas, a
+   * cada 20ms, e reprova qualquer quadro que tenha entrado com o editor vivo. */
+  await pg.evaluate(() => {
+    window.__amostras = [];
+    window.__amostraTic = setInterval(() => {
+      try {
+        const fr = document.getElementById('pipFake');
+        const doc = fr && fr.contentDocument;
+        window.__amostras.push({
+          ed: !!(doc && doc.getElementById('edImg')),
+          n: (window.__quadros() || []).length,
+        });
+      } catch (e) { window.__amostraErro = String(e && e.message || e); }
+    }, 8);
+  });
   await fita().locator('#edSalvar').click();
-  await pg.waitForTimeout(900);
+  await pg.waitForTimeout(2500);
+  const veredito = await pg.evaluate(() => {
+    clearInterval(window.__amostraTic);
+    const a = window.__amostras;
+    let comEditor = 0, total = 0, viuEditor = 0;
+    /* A CONTAGEM DO EDITOR COMEÇA NO ZERO. A primeira versão começava em 1 —
+       o índice de onde a COMPARAÇÃO de quadros precisa começar — e perdia
+       justamente a amostra que via o editor aberto, que costuma ser a única.
+       São duas contagens diferentes no mesmo laço, e cada uma tem o seu começo. */
+    if (a.length && a[0].ed) viuEditor++;
+    for (let i = 1; i < a.length; i++) {
+      if (a[i].ed) viuEditor++;
+      if (a[i].n > a[i - 1].n) { total++; if (a[i - 1].ed || a[i].ed) comEditor++; }
+    }
+    return { comEditor, total, viuEditor, amostras: a.length,
+             erro: window.__amostraErro || '' };
+  });
+  /* SEM TER VISTO O EDITOR, A AMOSTRAGEM NÃO PROVA NADA — seria aprovar por
+     vazio: "nenhum quadro entrou com o editor aberto" é trivialmente verdadeiro
+     numa amostragem que começou depois de ele fechar. */
+  ok('a amostragem pegou o editor ainda aberto', veredito.viuEditor > 0,
+     `${veredito.viuEditor} de ${veredito.amostras} amostras${veredito.erro ? ' · ' + veredito.erro : ''}`);
+  ok('e NENHUM quadro entrou com o editor na frente', veredito.comEditor === 0,
+     `${veredito.comEditor} de ${veredito.total} quadros — sairiam com o Walkstamp por cima do cliente`);
+  await pg.waitForTimeout(600);
   ok('a figura saiu', await fita().locator('#edImg').count() === 0);
   ok('e a fita voltou com os botões dela', await fita().locator('#anotar').count() === 1);
   ok('a gravação não está mais pausada', !(await pausado()));
   const voltou = await ganhouEm(JANELA);
   ok('e voltou a guardar tela', voltou > 0, `${voltou} quadros em ${JANELA/1000}s`);
   ok('a marcação feita ao vivo continua no quadro', (await marcasDe(iEditado)).length === 1);
+  ok('e o texto escrito ao vivo também',
+     await pg.evaluate((i) => !!(window.__quadros()[i] || {}).nota, iEditado));
 }
 
 /* ---------------------------------------------------------------- [6] ---- */
@@ -308,6 +430,36 @@ console.log('\n[6] quem já estava pausado continua pausado depois de apontar');
   await pg.locator('#recPause').click();
   await pg.waitForTimeout(400);
   ok('despausei, e ele voltou', await fita().locator('#anotar').isEnabled());
+}
+
+/* --------------------------------------------------------------- [6a] ----
+   FECHAR NO ESC, COM TEXTO POR SALVAR. O campo guarda sozinho ao perder o
+   foco — mas fechar a janela não é perder o foco de forma confiável, e o Esc
+   fecha com o cursor dentro do campo. Uma frase escrita durante a gravação e
+   sumida no fechamento é a perda silenciosa que este produto não aceita. */
+console.log('\n[6a] fechar no Esc não engole o que estava escrito');
+{
+  const antes = await quantos();
+  await fita().locator('#anotar').click();
+  await pg.waitForTimeout(900);
+  ok('o editor abriu de novo', await fita().locator('#edImg').count() === 1);
+  const i2 = antes;
+  const FRASE2 = 'o botao Salvar ficou cinza';
+  await fita().locator('#nota').click();
+  /* Digitado de verdade, tecla a tecla: `fill` não dispara o `input` da mesma
+     forma que uma pessoa digitando, e é o `input` que marca o texto como não
+     salvo. Sem isso a régua testaria um estado que não existe. */
+  await fita().locator('#nota').type(FRASE2, { delay: 8 });
+  await pg.waitForTimeout(200);
+  ok('o botão de salvar está aceso: há texto por guardar',
+     await fita().locator('#notaOk').isEnabled());
+  await pg.keyboard.press('Escape');
+  await pg.waitForTimeout(1200);
+  ok('o Esc fechou o editor', await fita().locator('#edImg').count() === 0);
+  ok('e o texto foi guardado antes de fechar',
+     await pg.evaluate((i) => (window.__quadros()[i] || {}).nota, i2) === FRASE2,
+     JSON.stringify(await pg.evaluate((i) => (window.__quadros()[i] || {}).nota, i2)));
+  ok('e a gravação voltou a correr', !(await pausado()));
 }
 
 /* ---------------------------------------------------------------- [7] ---- */
@@ -355,8 +507,31 @@ console.log('\n[7] a marcação feita ao vivo foi para o espelho em disco');
 console.log('\n[8] há UM gesto de marcação, e a marca ao vivo é a mesma da revisão');
 {
   const antes = await marcasDe(iEditado);
+  const queimadoAntes = await pg.evaluate((i) => !!(window.__quadros()[i] || {}).tarjado, iEditado);
+  /* Queimar é redesenhar 1920px num canvas, e é o custo que não se paga no
+     meio da captura. O detalhe fica no comentário e não ao lado do `ok`: um
+     texto alarmante junto de uma linha que passou ensina a não ler o detalhe. */
+  ok('durante a gravação a figura NÃO foi queimada', !queimadoAntes);
   await pg.locator('#recStop').click({ force: true }).catch(() => {});
-  await pg.waitForTimeout(2500);
+  await pg.waitForTimeout(4000);
+  /* ---- E A MINIATURA DA REVISÃO TEM QUE MOSTRAR O QUE FOI APONTADO ----
+     A grade pinta `telaDe(f)`, que é a figura QUEIMADA ou a original. Sem
+     queimar ao parar, quem apontou dez telas ao vivo voltava para quarenta
+     miniaturas idênticas — e o recurso existe justamente para não esquecer.
+     Foi assim que o Build 56 saiu, e é isto que o 57 conserta. */
+  const queimadoDepois = await pg.evaluate((i) => {
+    const f = window.__quadros()[i] || {};
+    return { tem: !!f.tarjado, url: f.tarjado ? f.tarjado.url : '', orig: f.img ? f.img.url : '' };
+  }, iEditado);
+  ok('parada a gravação, a figura marcada foi queimada', queimadoDepois.tem);
+  ok('e a miniatura passa a mostrar a queimada, e não a limpa',
+     !!queimadoDepois.url && queimadoDepois.url !== queimadoDepois.orig);
+  /* E quem não tem marca nenhuma não ganha uma queima à toa: queimar tudo
+     custaria uma figura redesenhada por quadro numa gravação de duas horas. */
+  const semMarca = await pg.evaluate(() =>
+    (window.__quadros() || []).filter(f => !(f.marcas || []).length && !(f.tarjas || []).length)
+      .every(f => !f.tarjado));
+  ok('e quem não foi marcado não foi queimado à toa', semMarca);
   const depois = await marcasDe(iEditado);
   ok('a marca sobreviveu ao fim da gravação',
      depois && depois.length === antes.length && depois[0].tipo === antes[0].tipo &&
@@ -413,28 +588,39 @@ console.log('\n[10] o cromo declarado na conta é o cromo desenhado no CSS');
 {
   const declarado = +(app.match(/CROMO_ED = (\d+)/) || [])[1];
   ok('a conta declara o cromo', !!declarado, String(declarado));
+  /* O CORPO DE VERDADE, e não três seletores escritos aqui. A primeira versão
+     somava `.edTop + .edBar` à mão; a caixa de escrever entrou entre os dois e
+     a régua seguiu somando dois de três — reprovou um cromo que estava certo.
+     Agora ela monta o corpo que o produto monta e soma TUDO o que não é a
+     figura. Uma fileira nova amanhã entra na conta sozinha. */
+  const src = app.slice(app.indexOf('function corpoDaEdicao()'));
+  const corpoEd = (src.slice(0, src.indexOf(';\n')).match(/'([^']*)'/g) || [])
+    .map((x) => x.slice(1, -1)).join('');
+  ok('o corpo do editor foi encontrado no artefato',
+     /id="edCx"/.test(corpoEd) && /id="nota"/.test(corpoEd), corpoEd.slice(0, 50));
   const pg3 = await ctx.newPage();
   pg3.on('dialog', d => d.accept());
   await pg3.goto(`http://localhost:${PORTA}/app.html?lang=pt`);
-  const medido = await pg3.evaluate(() => {
+  const medido = await pg3.evaluate(({ corpo2 }) => {
     const css = [...document.querySelectorAll('script')].map(s2 => s2.textContent).join('\n')
       .match(/const PIP_CSS = `([\s\S]*?)`;/)[1];
     const d = document.createElement('iframe');
-    d.style.cssText = 'position:fixed;left:-9999px;width:800px;height:600px;border:0';
+    d.style.cssText = 'position:fixed;left:-9999px;width:900px;height:600px;border:0';
     document.body.appendChild(d);
     const doc = d.contentDocument;
     doc.head.innerHTML = '<style>*{box-sizing:border-box;margin:0}' + css + '</style>';
     doc.body.className = 'editando';
-    doc.body.innerHTML = '<div class="edTop"><span class="edTit">x</span></div>' +
-                         '<div class="edCx"></div><div class="edBar"><button class="edFer">x</button></div>';
-    const t2 = doc.querySelector('.edTop').offsetHeight;
-    const b2 = doc.querySelector('.edBar').offsetHeight;
+    doc.body.innerHTML = corpo2;
+    const fileiras = [...doc.body.children]
+      .filter((e) => e.id !== 'edCx' && getComputedStyle(e).display !== 'none')
+      .map((e) => ({ cls: e.className || e.id, h: e.offsetHeight }));
     d.remove();
-    return { t: t2, b: b2 };
-  });
-  ok('e ele bate com o cabeçalho mais a barra, medidos no desenho',
-     medido.t + medido.b === declarado,
-     `cabeçalho ${medido.t} + barra ${medido.b} = ${medido.t + medido.b}, declarado ${declarado}`);
+    return fileiras;
+  }, { corpo2: corpoEd });
+  const soma = medido.reduce((a, r) => a + r.h, 0);
+  console.log('     ' + medido.map(r => `${r.cls} ${r.h}`).join('  +  ') + '  =  ' + soma);
+  ok('e ele bate com tudo o que não é a figura, medido no desenho',
+     soma === declarado, soma === declarado ? '' : `medido ${soma}, declarado ${declarado}`);
   await pg3.close();
 }
 
