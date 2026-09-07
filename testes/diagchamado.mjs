@@ -111,11 +111,22 @@ const semearSessao = (pg) => pg.addInitScript(([chave, dados]) => {
   const dep = await pg.evaluate(() => ({
     linhas: (document.getElementById('meusDiagOut').textContent || '').split('\n').length,
     versao: /versão/.test(document.getElementById('meusDiagOut').textContent || ''),
+    pip: ((document.getElementById('meusDiagOut').textContent || '')
+           .split('\n').find(l => /janela PiP/.test(l)) || ''),
     chamarVisivel: !document.getElementById('meusChamar').classList.contains('hide'),
   }));
   console.log('     relatório com ' + dep.linhas + ' linhas');
   ok('o relatório aparece no painel', dep.linhas > 20, dep.linhas + ' linhas');
   ok('e começa pela versão, que é a primeira pergunta', dep.versao);
+  /* ---- O TAMANHO DA JANELINHA SAI AQUI, e não só depois de parar ----
+     Ele morava no relatório da CAPTURA, que só é gravado quando a gravação
+     para — e voltou do campo como "não achei o erro". Uma medida que só existe
+     depois do fato não serve para conferir o fato. Aqui ela sai a qualquer
+     hora, e diz as duas coisas: o que foi pedido e o que o navegador devolveu.
+     Sem o editor aberto ela ainda tem que dizer ALGO — um relatório com uma
+     linha em branco no lugar de um número é o mesmo que não ter a linha. */
+  ok('o relatório diz o estado da janelinha de picture-in-picture',
+     /janela PiP/.test(dep.pip) && /tela=\d+x\d+/.test(dep.pip), dep.pip.trim());
   ok('agora dá para abrir o chamado com ele', dep.chamarVisivel);
   ok('sem erro de página', erros.length === 0, erros[0]);
   await pg.close();

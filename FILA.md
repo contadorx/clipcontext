@@ -141,6 +141,37 @@ campo de emissor, a contagem de erros na identificação. Marcar uma tela é
 
 ---
 
+## ACHADO FECHADO — o Chrome descartava o tamanho pedido, e a medida estava fora de alcance *(06/09)*
+
+**Duas voltas com o mesmo relato** — *"ficou do mesmo tamanho a janelinha"* —,
+e nas duas o pedido estava correto no artefato. A causa não era a nossa conta.
+
+**`preferInitialWindowPlacement` era a chave que faltava.** O Chrome guarda a
+posição e o tamanho da janela de picture-in-picture **por site** e, na abertura
+seguinte, **restaura** o que a pessoa deixou, descartando `width` e `height` sem
+avisar. Daqui isso é indistinguível de um teto: a janela volta igual, sem erro
+nenhum, e pedir maior não muda nada — foi por isso que subir de 72% para 94% (o
+Build 58) e depois mandar um `resizeTo` (o 59) não mudaram uma vírgula na tela
+de quem usa. Com a opção, a abertura usa o tamanho pedido em vez do lembrado.
+Um navegador que não a conheça ignora a propriedade a mais.
+
+**E a segunda metade do relato era minha:** *"não achei o erro"*. Eu tinha posto
+a medida em `motivosFrame`, que só é gravado quando a gravação **para**. Uma
+medida que só existe depois do fato não serve para conferir o fato. Agora ela
+sai no **diagnóstico**, que abre a qualquer hora, dizendo as duas coisas:
+`janela PiP : editor pediu 1203x821, veio … tela=…`. Sem editor aberto ela diz
+isso também — um relatório com uma linha em branco no lugar de um número é o
+mesmo que não ter a linha.
+
+**A lição, e ela é sobre a régua:** as três tentativas passaram por uma esteira
+verde. Nenhuma régua reprovou porque nenhuma podia — o `documentPictureInPicture`
+não existe no navegador de teste, e o remendo que o substitui obedece a tudo o
+que se pede. O que o remendo pode afirmar é **o que foi pedido**, e é isso que
+ele afirma agora: que a opção vai junto. O resto — se o navegador de verdade
+obedece — só a tela real responde, e por isso o número foi para o diagnóstico.
+
+---
+
 ## ACHADO FECHADO — pedir o tamanho na abertura não bastava *(06/09)*
 
 **O relato:** *"ficou do mesmo tamanho a janelinha"*, depois do Build 58 ter
