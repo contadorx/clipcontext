@@ -102,7 +102,13 @@ const shimPip = () => {
       const fr = document.createElement('iframe');
       fr.id = 'pipFake';
       fr.style.cssText = 'position:fixed;right:0;bottom:0;z-index:2147483647;border:0;background:#0b0d11';
-      fr.style.width = width + 'px'; fr.style.height = height + 'px';
+      /* O NAVEGADOR PODE DEVOLVER MENOS DO QUE FOI PEDIDO — é o que o Chrome
+         faz quando restaura o tamanho que a pessoa deixou. `__pipEncolhe` deixa
+         a régua reproduzir isso: sem ele o remendo obedece a tudo, e um remendo
+         obediente nunca prova o caso em que o produto precisa avisar. */
+      const enc = window.__pipEncolhe || 1;
+      fr.style.width = Math.round(width * enc) + 'px';
+      fr.style.height = Math.round(height * enc) + 'px';
       document.documentElement.appendChild(fr);
       const w = fr.contentWindow;
       w.document.open();
@@ -118,8 +124,15 @@ const shimPip = () => {
          que a pessoa deixou. Por isso o produto manda um `resizeTo` depois de
          aberta, e por isso o remendo anota as chamadas: é o que a régua tem
          para afirmar que ele mandou, e com que números. */
+      /* O `__pipEncolhe` vale AQUI TAMBÉM. Um navegador que restaura o tamanho
+         lembrado na abertura costuma recusar o `resizeTo` junto — e um remendo
+         que obedece ao segundo depois de desobedecer ao primeiro descreve um
+         navegador que não existe. Foi o que fez a primeira versão deste bloco
+         dar verde sobre nada. */
       w.resizeTo = (a, b) => {
-        fr.style.width = a + 'px'; fr.style.height = b + 'px';
+        const enc2 = window.__pipEncolhe || 1;
+        fr.style.width = Math.round(a * enc2) + 'px';
+        fr.style.height = Math.round(b * enc2) + 'px';
         window.__pipResizes.push({ w: a, h: b });
       };
       return w;
@@ -440,6 +453,40 @@ console.log('\n[3c] o tamanho que a pessoa der ao editor fica para a próxima');
      frase continuam no quadro de [3] e [3a], e é sobre ELE que os blocos
      seguintes afirmam. Apontar a variável para o último quadro fez quatro
      réguas reprovarem por estarem olhando para um quadro em branco. */
+}
+
+/* --------------------------------------------------------------- [3d] ----
+   QUANDO O NAVEGADOR NÃO DÁ O TAMANHO PEDIDO, A JANELA DIZ ISSO.
+
+   Três voltas deste recurso foram gastas às cegas — "ficou do mesmo tamanho",
+   "continua do mesmo jeito" — porque o tamanho que o navegador devolveu não
+   estava em lugar nenhum que quem usa pudesse ler. Estava num relatório gravado
+   quando a gravação PARA, e uma medida que só existe depois do fato não serve
+   para conferir o fato.
+
+   Agora a própria janela diz, e diz o que fazer: arrastar o canto uma vez
+   resolve, porque o tamanho que a pessoa deixar é o que fica. Só aparece quando
+   há discrepância — nos outros casos seria ruído numa janela que já é apertada. */
+console.log('\n[3d] se o navegador der menos do que foi pedido, a janela avisa');
+{
+  ok('com o tamanho obedecido, o aviso NÃO aparece',
+     !(await fita().locator('#edTam').isVisible()));
+
+  await fita().locator('#edSalvar').click();
+  await pg.waitForTimeout(1800);
+  /* O navegador passa a devolver 60% do pedido, como o Chrome faz quando
+     restaura o tamanho lembrado. */
+  await pg.evaluate(() => { window.__pipEncolhe = 0.6; });
+  await fita().locator('#anotar').click();
+  await pg.waitForTimeout(1500);
+  const av = fita().locator('#edTam');
+  ok('devolvendo menos, o aviso aparece', await av.isVisible());
+  const txt = (await av.textContent() || '').trim();
+  ok('e ele traz os DOIS números, o que veio e o que foi pedido',
+     (txt.match(/\d+x\d+/g) || []).length === 2, txt);
+  ok('e diz o que fazer a respeito', /arraste|canto/i.test(txt), txt);
+  /* De volta ao normal para os blocos seguintes. */
+  await pg.evaluate(() => { window.__pipEncolhe = 1; });
 }
 
 /* ---------------------------------------------------------------- [4] ----

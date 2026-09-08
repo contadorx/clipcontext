@@ -4022,6 +4022,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       recPipBtn:'Trazer a janelinha de volta',
       pipVirarFita:'Virar fita — uma linha de botões por cima do trabalho', pipVirarCompleta:'Voltar ao tamanho completo — relógio, medidor de som e anotação', 
       pipAnotar:'Apontar nesta tela', pipCurtoAnotar:'Apontar', edTit:'Apontando no passo {0}', edPausado:'gravação pausada enquanto você aponta',
+      edTamMenor:'o navegador abriu {0} em vez de {1} — arraste o canto uma vez e este tamanho fica',
       edSalvar:'Salvar e voltar a gravar', edComo:'Arraste sobre a tela para apontar o que importa.', edFeitas:'{0} no quadro', edSemQuadro:'Não deu para capturar a tela agora — tente de novo.',
       recPausado:'PAUSADO —', recMarcado:'passo marcado.',
       pipPausado:'Pausado: nada sendo guardado.',
@@ -4674,6 +4675,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       recPipBtn:'Bring the control window back',
       pipVirarFita:'Turn into a strip — one row of buttons over your work', pipVirarCompleta:'Back to full size — clock, sound meter and note', 
       pipAnotar:'Point at this screen', pipCurtoAnotar:'Point', edTit:'Pointing at step {0}', edPausado:'recording paused while you point',
+      edTamMenor:'the browser opened {0} instead of {1} — drag the corner once and this size sticks',
       edSalvar:'Save and keep recording', edComo:'Drag over the screen to point at what matters.', edFeitas:'{0} on this frame', edSemQuadro:'Could not capture the screen just now — try again.',
       recPausado:'PAUSED —', recMarcado:'step marked.',
       pipPausado:'Paused: nothing being kept.',
@@ -5311,6 +5313,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       recPipBtn:'Traer la ventana de control de vuelta',
       pipVirarFita:'Convertir en franja — una fila de botones sobre tu trabajo', pipVirarCompleta:'Volver al tamaño completo — reloj, medidor de sonido y nota', 
       pipAnotar:'Señalar en esta pantalla', pipCurtoAnotar:'Señalar', edTit:'Señalando el paso {0}', edPausado:'grabación en pausa mientras señalas',
+      edTamMenor:'el navegador abrió {0} en vez de {1} — arrastra la esquina una vez y este tamaño se queda',
       edSalvar:'Guardar y seguir grabando', edComo:'Arrastra sobre la pantalla para señalar lo que importa.', edFeitas:'{0} en esta captura', edSemQuadro:'No se pudo capturar la pantalla ahora — inténtalo de nuevo.',
       recPausado:'EN PAUSA —', recMarcado:'paso marcado.',
       pipPausado:'En pausa: no se guarda nada.',
@@ -5947,6 +5950,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       recPipBtn:'Steuerungsfenster zurückholen',
       pipVirarFita:'In eine Leiste verwandeln — eine Reihe Schaltflächen über Ihrer Arbeit', pipVirarCompleta:'Zurück zur vollen Größe — Uhr, Tonpegel und Notiz', 
       pipAnotar:'Auf diesen Bildschirm zeigen', pipCurtoAnotar:'Zeigen', edTit:'Zeigen in Schritt {0}', edPausado:'Aufnahme pausiert, während Sie zeigen',
+      edTamMenor:'der Browser öffnete {0} statt {1} — ziehen Sie einmal an der Ecke, und diese Größe bleibt',
       edSalvar:'Speichern und weiter aufnehmen', edComo:'Ziehen Sie über den Bildschirm, um das Wichtige zu zeigen.', edFeitas:'{0} in diesem Bild', edSemQuadro:'Der Bildschirm konnte gerade nicht erfasst werden — bitte erneut versuchen.',
       recPausado:'PAUSIERT —', recMarcado:'Schritt markiert.',
       pipPausado:'Pausiert: Es wird nichts gespeichert.',
@@ -6589,6 +6593,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       recPipBtn:'Rouvrir la fenêtre de contrôle',
       pipVirarFita:'Transformer en bandeau — une rangée de boutons au-dessus du travail', pipVirarCompleta:'Revenir à la taille complète — horloge, niveau sonore et note', 
       pipAnotar:'Pointer sur cet écran', pipCurtoAnotar:'Pointer', edTit:'Pointage à l’étape {0}', edPausado:'enregistrement en pause pendant le pointage',
+      edTamMenor:'le navigateur a ouvert {0} au lieu de {1} — tirez le coin une fois et cette taille est conservée',
       edSalvar:'Enregistrer et continuer', edComo:'Faites glisser sur l’écran pour montrer ce qui compte.', edFeitas:'{0} sur cette capture', edSemQuadro:'Impossible de capturer l’écran maintenant — réessayez.',
       recPausado:'EN PAUSE —', recMarcado:'étape marquée.',
       pipPausado:'En pause : rien n’est conservé.',
@@ -10154,7 +10159,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
      depois, e não tem como se atualizar sozinho. Sem carimbo, "estou com um
      problema no offline" é uma conversa sem chão — ninguém sabe de qual build
      se fala nem se o defeito já foi consertado. */
-  const VERSAO = '2026.09.06-31';
+  const VERSAO = '2026.09.08-2';
   window.__versao = () => VERSAO;
 
   const PIP_CSS = `
@@ -10609,6 +10614,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     .edTit{font-size:12.5px;font-weight:600;color:#e6e9ef;white-space:nowrap}
     .edPausa{font-size:11.5px;color:#ffcc00;white-space:nowrap;overflow:hidden;
              text-overflow:ellipsis}
+    .edTam{font-size:11px;color:#8a93a3;white-space:nowrap;overflow:hidden;
+           text-overflow:ellipsis;margin-left:auto;min-width:0}
     .edCx{position:relative;flex:1 1 auto;min-height:0;display:grid;
           place-items:center;overflow:hidden;touch-action:none;cursor:crosshair;
           background:#0b0d11}
@@ -11073,6 +11080,14 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
                               veio: pipWin.innerWidth + 'x' + pipWin.innerHeight };
           if (motivosFrame) motivosFrame.editor_tam = ultimoTamEditor;
           try { window.__editorTam = () => ultimoTamEditor; } catch (e2) {}
+          /* 90%: abaixo disso não é arredondamento, é o navegador tendo
+             decidido outra coisa — e é o que a pessoa está vendo. */
+          const menor = pipWin.innerWidth < tam.w * 0.9;
+          const el = pipWin.document.getElementById('edTam');
+          if (el) {
+            el.textContent = menor ? t('edTamMenor', ultimoTamEditor.veio, ultimoTamEditor.pediu) : '';
+            el.classList.toggle('hide', !menor);
+          }
         } catch (e2) {}
       }, 250);
     } catch (e) {}
@@ -11188,7 +11203,17 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
   function corpoDaEdicao(){
     return ''+
       '<div class="edTop"><span class="edTit" id="edTit"></span>' +
-        '<span class="edPausa" id="edPausa"></span></div>' +
+        '<span class="edPausa" id="edPausa"></span>' +
+        /* ---- QUANDO O NAVEGADOR NÃO DÁ O TAMANHO PEDIDO ----
+           Ele nasce escondido e só aparece nesse caso, que é o único em que a
+           frase é informação e não ruído. Três voltas deste recurso foram
+           gastas às cegas porque o tamanho que o navegador devolveu não estava
+           em lugar nenhum que a pessoa usando pudesse ler — só num relatório
+           gravado quando a gravação PARA. Uma medida que só existe depois do
+           fato não serve para conferir o fato.
+           E ela não é só diagnóstico: diz o que fazer. Arrastar o canto uma vez
+           resolve, porque o tamanho que a pessoa deixar é o que fica. */
+        '<span class="edTam hide" id="edTam"></span></div>' +
       /* A figura e o SVG na mesma caixa, do mesmo jeito da lente: o SVG tem
          viewBox 0–1000 e não sabe o tamanho de nada. */
       '<div class="edCx" id="edCx"><img id="edImg" alt="">' +

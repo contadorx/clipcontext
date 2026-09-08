@@ -141,6 +141,36 @@ campo de emissor, a contagem de erros na identificação. Marcar uma tela é
 
 ---
 
+## LIMITE DECLARADO — a esteira é cega para a janelinha de verdade *(06/09)*
+
+Três consertos do tamanho do editor (Builds 58, 59 e 60) **passaram por esteira
+verde e não mudaram nada na tela de quem usa**. Não foi descuido de nenhum
+deles: é um limite da esteira, e ele precisa ficar escrito.
+
+**O `documentPictureInPicture` não existe no navegador de teste.** Conferido
+nesta rodada nas três formas — padrão, com
+`--enable-features=DocumentPictureInPictureAPI`, e com `--headless=new` mais a
+feature: `'documentPictureInPicture' in window` dá **false** nas três. O que a
+régua usa é um remendo que devolve a janela de um `iframe`, e **um remendo
+obedece a tudo o que se pede**. Ele nunca vai reproduzir um navegador que
+descarta o tamanho pedido.
+
+**O que a régua PODE afirmar é o que o produto PEDE** — e é isso que ela afirma
+agora: que a opção `preferInitialWindowPlacement` vai junto, que o `resizeTo`
+sai depois de aberta, com que números. Se o navegador de verdade obedece, só a
+tela real responde.
+
+**Por isso o conserto desta rodada não é outro palpite: é fechar o buraco pelo
+lado de quem usa.** A janela de edição passa a dizer, na própria testeira,
+quando o navegador não deu o tamanho pedido — com os dois números e com o que
+resolve (*"arraste o canto uma vez e este tamanho fica"*). Só aparece nesse
+caso. E o remendo ganhou um `__pipEncolhe`, que o faz devolver menos do que foi
+pedido: sem ele, um remendo obediente nunca provaria o caso em que o produto
+precisa avisar — e a primeira versão do bloco deu verde sobre nada até eu fazer
+o `resizeTo` desobedecer junto.
+
+---
+
 ## ACHADO FECHADO — o Chrome descartava o tamanho pedido, e a medida estava fora de alcance *(06/09)*
 
 **Duas voltas com o mesmo relato** — *"ficou do mesmo tamanho a janelinha"* —,
