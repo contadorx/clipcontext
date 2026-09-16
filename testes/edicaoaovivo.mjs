@@ -115,6 +115,16 @@ const shimPip = () => {
       w.document.write('<!doctype html><html><head></head><body></body></html>');
       w.document.close();
       window.__pipPedidos.push({ width, height });
+      /* ---- SUMIR COM UM ELEMENTO, COMO UM DESENHO QUEBRADO FARIA ----
+         O sintoma relatado foi um botão VISÍVEL que não fazia nada — e é isso
+         que acontece quando a montagem estoura no meio: tudo dali para baixo
+         nasce sem `onclick`, e a tela não diz nada. Um `getElementById` que
+         devolve nulo para um id é a forma mais fiel de reproduzir isso sem
+         pôr um gancho de teste dentro do produto. */
+      if (window.__pipSemId) {
+        const achar = w.document.getElementById.bind(w.document);
+        w.document.getElementById = (id) => (id === window.__pipSemId ? null : achar(id));
+      }
       w.close = () => {
         try { w.dispatchEvent(new Event('pagehide')); } catch (e) {}
         fr.remove();
@@ -189,6 +199,14 @@ await pg.waitForSelector('#recStop:visible', { timeout: 40000 });
 await pg.waitForTimeout(1500);
 
 const fita = () => pg.frameLocator('#pipFake');
+/* Um rótulo do dicionário do PRÓPRIO app, em português. Medir uma barra com
+   palavras inventadas é medir outro produto — foi o que `janelinha.mjs` já
+   pagou uma vez. */
+const dic = (chave) => {
+  const i = app.indexOf('\n    pt: {');
+  const m = i < 0 ? null : app.slice(i, i + 95000).match(new RegExp(chave + ":'([^']*)'"));
+  return m ? m[1] : '';
+};
 /* A janela de medida: dois ciclos da tela falsa e uma folga. Menos que isso e a
    linha de base fica na sorte do relógio. */
 const JANELA = 7000;
@@ -373,31 +391,68 @@ console.log('\n[3a] dá para escrever, e o texto vai para o quadro que está abe
 
    A afirmação não é sobre o salvar: é sobre a barra. Um botão novo amanhã cai
    nesta mesma linha sem ninguém lembrar de acrescentá-lo. */
-console.log('\n[3b] nada na barra de ferramentas estica nem sai pela direita');
+console.log('\n[3b] o salvar está à vista em QUALQUER largura de janela');
 {
-  const cx = await fita().locator('#edBarMedida').count();
-  const m = await pg.evaluate(() => {
-    const fr = document.getElementById('pipFake');
-    const d = fr.contentDocument;
-    const bar = d.querySelector('.edBar');
-    const r = bar.getBoundingClientRect();
-    const filhos = [...bar.children].filter(e => getComputedStyle(e).display !== 'none')
-      .map(e => { const b = e.getBoundingClientRect();
-                  return { id: e.id || e.className, w: Math.round(b.width),
-                           saiu: b.right > r.right + 1 || b.left < r.left - 1 }; });
-    return { barra: Math.round(r.width), filhos };
-  });
-  console.log('     barra ' + m.barra + 'px  |  ' +
-              m.filhos.map(f => `${f.id} ${f.w}`).join('  '));
-  const saiu = m.filhos.filter(f => f.saiu).map(f => f.id);
-  ok('nenhum botão sai pela direita da barra', saiu.length === 0, saiu.join(' '));
-  const salvar = m.filhos.find(f => f.id === 'edSalvar');
-  ok('o salvar tem a largura do texto dele, e não a da janela',
-     salvar && salvar.w > 0 && salvar.w < m.barra * 0.5,
-     salvar ? `${salvar.w} de ${m.barra}` : '(não achei)');
-  const gordo = m.filhos.filter(f => f.id !== 'edComo' && f.w > m.barra * 0.5);
-  ok('e nenhum outro toma metade da barra sozinho', gordo.length === 0,
-     gordo.map(f => `${f.id} ${f.w}`).join(' '));
+  /* ---- MEDIDO EM VÁRIAS LARGURAS, E NÃO SÓ NA QUE CALHOU ----
+   *
+   * A primeira versão deste bloco media a janela que estava aberta — 1203px —
+   * e dava verde. O relato chegou assim: "o botão de salvar e voltar a gravar
+   * não está funcionando". Ele funcionava; NÃO ESTAVA NA TELA. A barra tinha
+   * `overflow-x:auto` numa fileira única, e abaixo de uns 700px o salvar ficava
+   * à direita do que se vê — alcançável só rolando a barra na horizontal, que
+   * ninguém faz numa barra de botões.
+   *
+   * Uma largura só nunca ia pegar isso. Aqui o corpo do editor é montado com o
+   * CSS do produto em cinco larguras, da mais folgada ao piso que o próprio
+   * produto aceita (520), e o salvar tem que estar dentro da barra em todas.
+   *
+   * E O PISO SAI DO PRODUTO, não escrito aqui: se alguém baixar o mínimo
+   * amanhã, a régua passa a medir o mínimo novo sozinha. */
+  const piso = +(app.match(/Math\.max\(520, guardado\.w\)/) ? 520 : 0) ||
+               +(app.match(/w: Math\.max\((\d+), w\)/) || [])[1];
+  ok('o produto declara o piso de largura do editor', piso >= 300, String(piso));
+
+  const src = app.slice(app.indexOf('function corpoDaEdicao()'));
+  const corpoEd = (src.slice(0, src.indexOf(';\n')).match(/'([^']*)'/g) || [])
+    .map((x) => x.slice(1, -1)).join('');
+  const pgB = await ctx.newPage();
+  pgB.on('dialog', d => d.accept());
+  await pgB.goto(`http://localhost:${PORTA}/app.html?lang=pt`);
+  const cssEd = await pgB.evaluate(() =>
+    [...document.querySelectorAll('script')].map(s2 => s2.textContent).join('\n')
+      .match(/const PIP_CSS = `([\s\S]*?)`;/)[1]);
+
+  const LARGURAS = [1203, 900, 700, 620, piso];
+  for (const L of LARGURAS) {
+    await pgB.setViewportSize({ width: L, height: 620 });
+    await pgB.setContent('<!doctype html><html><head><meta charset="utf-8">' +
+      '<style>*{box-sizing:border-box;margin:0}' + cssEd + '</style></head>' +
+      '<body class="editando">' + corpoEd + '</body></html>');
+    /* Com os RÓTULOS QUE O PRODUTO PINTA, e não com texto inventado: uma barra
+       medida com palavras que ninguém vê é uma barra medida em outro produto. */
+    await pgB.evaluate((rot) => {
+      for (const [id, txt] of Object.entries(rot)) {
+        const e = document.getElementById(id);
+        if (e && txt) { e.textContent = txt; e.classList.remove('hide'); }
+      }
+      const c = document.getElementById('edCores');
+      for (let i = 0; i < 3; i++) {
+        const b = document.createElement('button'); b.style.background = '#e0281e'; c.appendChild(b);
+      }
+    }, {
+      edSeta: dic('mkSeta'), edRet: dic('mkRet'), edCaneta: dic('mkCaneta'),
+      edDesfazer: dic('mkDesfazer'), edSalvar: dic('edSalvar'), edComo: dic('edComo'),
+    });
+    const m = await pgB.evaluate(() => {
+      const bar = document.querySelector('.edBar'), rb = bar.getBoundingClientRect();
+      const sv = document.getElementById('edSalvar'), rs = sv.getBoundingClientRect();
+      return { dentro: rs.right <= rb.right + 1 && rs.left >= rb.left - 1 && rs.width > 0,
+               dir: Math.round(rs.right), fim: Math.round(rb.right) };
+    });
+    ok(`  ${L}px: o salvar está dentro da barra`, m.dentro,
+       m.dentro ? '' : `termina em ${m.dir}, a barra vai até ${m.fim}`);
+  }
+  await pgB.close();
 }
 
 /* --------------------------------------------------------------- [3c] ----
@@ -487,6 +542,57 @@ console.log('\n[3d] se o navegador der menos do que foi pedido, a janela avisa')
   ok('e diz o que fazer a respeito', /arraste|canto/i.test(txt), txt);
   /* De volta ao normal para os blocos seguintes. */
   await pg.evaluate(() => { window.__pipEncolhe = 1; });
+}
+
+/* --------------------------------------------------------------- [3e] ----
+   UM BOTÃO QUE FALHA TEM QUE DIZER QUE FALHOU.
+
+   O relato foi "o botão de salvar e voltar a gravar não está funcionando", com
+   o botão À VISTA. Um clique que entra numa função que estoura no meio é
+   indistinguível, na tela, de um clique que não chegou — e é isso que
+   transforma um defeito de uma linha em várias voltas às cegas.
+
+   Aqui o erro é FABRICADO de propósito: sem quebrar o caminho, esta afirmação
+   seria sobre um socorro que ninguém nunca viu funcionar. */
+console.log('\n[3e] se o caminho do salvar estourar, a janela diz — e não fica muda');
+{
+  ok('sem falha nenhuma, a testeira não acusa erro',
+     !(await fita().locator('#edTam.ruim').count()));
+
+  /* Fecha e reabre o editor com um elemento SUMIDO no meio da montagem — que
+     é o que produz o sintoma relatado: botão visível, clique sem efeito. */
+  await fita().locator('#edSalvar').click();
+  await pg.waitForTimeout(1500);
+  await pg.evaluate(() => { window.__pipSemId = 'edDesfazer'; });
+  await fita().locator('#anotar').click();
+  await pg.waitForTimeout(1500);
+
+  const av = fita().locator('#edTam');
+  ok('com a montagem quebrada, a testeira acusa', await av.isVisible());
+  const txt = (await av.textContent() || '');
+  ok('e diz QUAL foi o erro, e não só que houve um',
+     /edDesfazer|null|undefined|propert/i.test(txt), txt.trim());
+  ok('e o erro fica guardado para o diagnóstico',
+     !!(await pg.evaluate(() => window.__erroEditor && window.__erroEditor())));
+
+  /* ---- E A SAÍDA CONTINUA FUNCIONANDO, que é a metade que importa ----
+     O salvar e o Esc são ligados ANTES de qualquer coisa que possa falhar,
+     justamente para que um desenho quebrado não prenda a pessoa com a gravação
+     pausada e o X do navegador como única porta. */
+  await fita().locator('#edSalvar').click();
+  await pg.waitForTimeout(1500);
+  ok('e o SALVAR ainda leva de volta, mesmo com a montagem quebrada',
+     await fita().locator('#anotar').count() === 1);
+  ok('e a gravação voltou a correr', !(await pausado()));
+
+  /* Desfeita a sabotagem: senão os blocos seguintes dariam verde sobre um
+     editor quebrado, que é outro estado. */
+  await pg.evaluate(() => { window.__pipSemId = ''; });
+  await fita().locator('#anotar').click();
+  await pg.waitForTimeout(1500);
+  ok('e desfeita a sabotagem o editor volta inteiro',
+     await fita().locator('#edSalvar').count() === 1 &&
+     !(await fita().locator('#edTam.ruim').count()));
 }
 
 /* ---------------------------------------------------------------- [4] ----

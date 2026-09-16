@@ -4023,6 +4023,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       pipVirarFita:'Virar fita — uma linha de botões por cima do trabalho', pipVirarCompleta:'Voltar ao tamanho completo — relógio, medidor de som e anotação', 
       pipAnotar:'Apontar nesta tela', pipCurtoAnotar:'Apontar', edTit:'Apontando no passo {0}', edPausado:'gravação pausada enquanto você aponta',
       edTamMenor:'o navegador abriu {0} em vez de {1} — arraste o canto uma vez e este tamanho fica',
+      edFalhou:'não consegui voltar a gravar: {0}',
       edSalvar:'Salvar e voltar a gravar', edComo:'Arraste sobre a tela para apontar o que importa.', edFeitas:'{0} no quadro', edSemQuadro:'Não deu para capturar a tela agora — tente de novo.',
       recPausado:'PAUSADO —', recMarcado:'passo marcado.',
       pipPausado:'Pausado: nada sendo guardado.',
@@ -4676,6 +4677,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       pipVirarFita:'Turn into a strip — one row of buttons over your work', pipVirarCompleta:'Back to full size — clock, sound meter and note', 
       pipAnotar:'Point at this screen', pipCurtoAnotar:'Point', edTit:'Pointing at step {0}', edPausado:'recording paused while you point',
       edTamMenor:'the browser opened {0} instead of {1} — drag the corner once and this size sticks',
+      edFalhou:'could not get back to recording: {0}',
       edSalvar:'Save and keep recording', edComo:'Drag over the screen to point at what matters.', edFeitas:'{0} on this frame', edSemQuadro:'Could not capture the screen just now — try again.',
       recPausado:'PAUSED —', recMarcado:'step marked.',
       pipPausado:'Paused: nothing being kept.',
@@ -5314,6 +5316,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       pipVirarFita:'Convertir en franja — una fila de botones sobre tu trabajo', pipVirarCompleta:'Volver al tamaño completo — reloj, medidor de sonido y nota', 
       pipAnotar:'Señalar en esta pantalla', pipCurtoAnotar:'Señalar', edTit:'Señalando el paso {0}', edPausado:'grabación en pausa mientras señalas',
       edTamMenor:'el navegador abrió {0} en vez de {1} — arrastra la esquina una vez y este tamaño se queda',
+      edFalhou:'no pude volver a grabar: {0}',
       edSalvar:'Guardar y seguir grabando', edComo:'Arrastra sobre la pantalla para señalar lo que importa.', edFeitas:'{0} en esta captura', edSemQuadro:'No se pudo capturar la pantalla ahora — inténtalo de nuevo.',
       recPausado:'EN PAUSA —', recMarcado:'paso marcado.',
       pipPausado:'En pausa: no se guarda nada.',
@@ -5951,6 +5954,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       pipVirarFita:'In eine Leiste verwandeln — eine Reihe Schaltflächen über Ihrer Arbeit', pipVirarCompleta:'Zurück zur vollen Größe — Uhr, Tonpegel und Notiz', 
       pipAnotar:'Auf diesen Bildschirm zeigen', pipCurtoAnotar:'Zeigen', edTit:'Zeigen in Schritt {0}', edPausado:'Aufnahme pausiert, während Sie zeigen',
       edTamMenor:'der Browser öffnete {0} statt {1} — ziehen Sie einmal an der Ecke, und diese Größe bleibt',
+      edFalhou:'Aufnahme konnte nicht fortgesetzt werden: {0}',
       edSalvar:'Speichern und weiter aufnehmen', edComo:'Ziehen Sie über den Bildschirm, um das Wichtige zu zeigen.', edFeitas:'{0} in diesem Bild', edSemQuadro:'Der Bildschirm konnte gerade nicht erfasst werden — bitte erneut versuchen.',
       recPausado:'PAUSIERT —', recMarcado:'Schritt markiert.',
       pipPausado:'Pausiert: Es wird nichts gespeichert.',
@@ -6594,6 +6598,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       pipVirarFita:'Transformer en bandeau — une rangée de boutons au-dessus du travail', pipVirarCompleta:'Revenir à la taille complète — horloge, niveau sonore et note', 
       pipAnotar:'Pointer sur cet écran', pipCurtoAnotar:'Pointer', edTit:'Pointage à l’étape {0}', edPausado:'enregistrement en pause pendant le pointage',
       edTamMenor:'le navigateur a ouvert {0} au lieu de {1} — tirez le coin une fois et cette taille est conservée',
+      edFalhou:'impossible de reprendre l’enregistrement : {0}',
       edSalvar:'Enregistrer et continuer', edComo:'Faites glisser sur l’écran pour montrer ce qui compte.', edFeitas:'{0} sur cette capture', edSemQuadro:'Impossible de capturer l’écran maintenant — réessayez.',
       recPausado:'EN PAUSE —', recMarcado:'étape marquée.',
       pipPausado:'En pause : rien n’est conservé.',
@@ -10159,7 +10164,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
      depois, e não tem como se atualizar sozinho. Sem carimbo, "estou com um
      problema no offline" é uma conversa sem chão — ninguém sabe de qual build
      se fala nem se o defeito já foi consertado. */
-  const VERSAO = '2026.09.08-2';
+  const VERSAO = '2026.09.16-9';
   window.__versao = () => VERSAO;
 
   const PIP_CSS = `
@@ -10616,6 +10621,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
              text-overflow:ellipsis}
     .edTam{font-size:11px;color:#8a93a3;white-space:nowrap;overflow:hidden;
            text-overflow:ellipsis;margin-left:auto;min-width:0}
+    .edTam.ruim{color:#ff8a80}
     .edCx{position:relative;flex:1 1 auto;min-height:0;display:grid;
           place-items:center;overflow:hidden;touch-action:none;cursor:crosshair;
           background:#0b0d11}
@@ -10623,8 +10629,14 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
                             width:auto;height:auto;object-fit:contain}
     .edCx > img{display:block}
     .edCx > svg{pointer-events:none;width:100%;height:100%}
-    .edBar{display:flex;align-items:center;gap:7px;padding:9px 12px;height:52px;
-           border-top:1px solid #2a2f3a;flex:0 0 auto;overflow-x:auto}
+    .edBar{display:flex;align-items:center;gap:8px;padding:9px 12px;height:52px;
+           border-top:1px solid #2a2f3a;flex:0 0 auto;overflow:hidden}
+    /* O QUE ROLA SAO AS FERRAMENTAS, e nao a barra inteira. Com a barra
+       rolando, o ultimo elemento dela — o salvar — saia da vista numa janela
+       estreita e ficava inalcancavel. */
+    .edFerros{flex:1 1 auto;min-width:0;display:flex;align-items:center;gap:7px;
+              overflow-x:auto;overflow-y:hidden;scrollbar-width:none}
+    .edFerros::-webkit-scrollbar{display:none}
     /* width:auto E flex:none, E OS DOIS SAO NECESSARIOS. O botao padrao
        desta folha e width:100% — ele foi escrito para a janela completa, que
        empilha. Sem desfazer isso aqui, o SALVAR esticava por cima da barra
@@ -10640,7 +10652,11 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     .mkCores button{width:20px;height:20px;padding:0;border-radius:50%;
                     border:2px solid #333a47;cursor:pointer}
     .mkCores button.sel{border-color:#fff}
-    .edComo{flex:1 1 auto;font-size:11px;color:#8a93a3;white-space:nowrap;
+    /* flex:0 1 auto e nao 1 1 auto: ele CEDE espaco, e nao toma. Numa
+       janela estreita ele some inteiro antes de o salvar perder um pixel —
+       uma dica que ninguem le vale menos que o botao que devolve a pessoa ao
+       trabalho dela. */
+    .edComo{flex:0 1 auto;font-size:11px;color:#8a93a3;white-space:nowrap;
             overflow:hidden;text-overflow:ellipsis;min-width:0}
     /* O SALVAR e o unico botao cheio da janela: e o gesto que devolve a pessoa
        ao trabalho dela, e depois de anotar e o unico que ela quer achar. */
@@ -11077,17 +11093,11 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
         try {
           if (!pipWin) return;
           ultimoTamEditor = { pediu: tam.w + 'x' + tam.h,
-                              veio: pipWin.innerWidth + 'x' + pipWin.innerHeight };
+                              veio: pipWin.innerWidth + 'x' + pipWin.innerHeight,
+                              pedidoW: tam.w, veioW: pipWin.innerWidth };
           if (motivosFrame) motivosFrame.editor_tam = ultimoTamEditor;
           try { window.__editorTam = () => ultimoTamEditor; } catch (e2) {}
-          /* 90%: abaixo disso não é arredondamento, é o navegador tendo
-             decidido outra coisa — e é o que a pessoa está vendo. */
-          const menor = pipWin.innerWidth < tam.w * 0.9;
-          const el = pipWin.document.getElementById('edTam');
-          if (el) {
-            el.textContent = menor ? t('edTamMenor', ultimoTamEditor.veio, ultimoTamEditor.pediu) : '';
-            el.classList.toggle('hide', !menor);
-          }
+          pintarTesteira();
         } catch (e2) {}
       }, 250);
     } catch (e) {}
@@ -11234,15 +11244,64 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
         '<button id="notaOk" class="edFer"></button>' +
         '<span class="notaMsg" id="notaMsg"></span>' +
       '</div>' +
+      /* ---- O SALVAR FICA FORA DO QUE ROLA ----
+         O relato: "o botão de salvar e voltar a gravar não está funcionando".
+         Ele funcionava; não estava NA TELA. A barra tinha `overflow-x:auto` e
+         uma fileira única, e abaixo de uns 700px de janela o salvar ficava à
+         direita do que se vê — só apareceria rolando a barra na horizontal,
+         que ninguém faz numa barra de botões.
+         Agora as ferramentas moram num contêiner que rola, e o salvar fica de
+         fora dele: seja qual for a largura, ele está lá. O texto de ajuda é o
+         primeiro a encolher, porque é o que menos custa perder. */
       '<div class="edBar">' +
-        '<button id="edSeta" class="edFer"></button>' +
-        '<button id="edRet" class="edFer"></button>' +
-        '<button id="edCaneta" class="edFer"></button>' +
-        '<span class="mkCores" id="edCores"></span>' +
-        '<button id="edDesfazer" class="edFer hide"></button>' +
+        '<div class="edFerros" id="edFerros">' +
+          '<button id="edSeta" class="edFer"></button>' +
+          '<button id="edRet" class="edFer"></button>' +
+          '<button id="edCaneta" class="edFer"></button>' +
+          '<span class="mkCores" id="edCores"></span>' +
+          '<button id="edDesfazer" class="edFer hide"></button>' +
+        '</div>' +
         '<span class="edComo" id="edComo"></span>' +
         '<button id="edSalvar" class="edSalvar"></button>' +
       '</div>';
+  }
+
+  /* ---- UM DONO SÓ PARA A TESTEIRA DO EDITOR ----
+   *
+   * Ela mostra duas coisas — que o navegador não deu o tamanho pedido, e que
+   * alguma coisa falhou — e na primeira versão cada uma escrevia por conta
+   * própria no mesmo `#edTam`. O resultado: a mensagem de erro aparecia e a
+   * medida do tamanho a APAGAVA 250ms depois, porque chegava por último. Um
+   * erro que pisca e some é pior que erro nenhum.
+   *
+   * Agora quem escreve ali é esta função, e só ela. O erro vence a medida: se
+   * algo quebrou, saber o tamanho não interessa mais. */
+  function pintarTesteira(){
+    let el = null;
+    try { el = pipWin && pipWin.document.getElementById('edTam'); } catch (e) {}
+    if (!el) return;
+    if (erroEditor) {
+      el.textContent = t('edFalhou', erroEditor.slice(0, 90));
+      el.classList.remove('hide'); el.classList.add('ruim');
+      return;
+    }
+    el.classList.remove('ruim');
+    const tm = ultimoTamEditor;
+    /* 90%: abaixo disso não é arredondamento, é o navegador tendo decidido
+       outra coisa — e é o que a pessoa está vendo. */
+    const menor = !!(tm && tm.pedidoW && tm.veioW < tm.pedidoW * 0.9);
+    el.textContent = menor ? t('edTamMenor', tm.veio, tm.pediu) : '';
+    el.classList.toggle('hide', !menor);
+  }
+
+  /* A falha aparece onde a pessoa está: na testeira do editor, e guardada para
+     o diagnóstico. Nunca engolida — um erro engolido aqui custa a sessão. */
+  let erroEditor = '';
+  try { window.__erroEditor = () => erroEditor; } catch (e) {}
+  function mostrarFalhaDoEditor(e){
+    erroEditor = (e && (e.message || e.stack)) || String(e);
+    try { if (motivosFrame) motivosFrame.editor_erro = erroEditor; } catch (x) {}
+    pintarTesteira();
   }
 
   function pintarEdicao(d){
@@ -11258,8 +11317,37 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
 
   function montarEdicao(d){
     const f = pipEditando;
+    erroEditor = '';
     d.body.classList.add('editando');
     d.body.innerHTML = corpoDaEdicao();
+
+    /* ---- AS SAÍDAS PRIMEIRO, ANTES DE QUALQUER COISA QUE POSSA FALHAR ----
+     *
+     * O relato: "o botão de salvar e voltar a gravar não está funcionando",
+     * com o botão À VISTA. É o que acontece quando a montagem estoura no meio:
+     * tudo dali para baixo nasce sem `onclick` — e o salvar e o Esc eram as
+     * ÚLTIMAS linhas daqui. Um desenho quebrado numa ferramenta e uma pessoa
+     * presa com a gravação pausada e nenhuma saída a não ser o X do navegador.
+     *
+     * A regra que fica: o caminho de VOLTA nunca depende do resto ter dado
+     * certo. Ele é ligado na primeira linha depois do corpo existir. */
+    const salvar = d.getElementById('edSalvar');
+    if (salvar) {
+      salvar.textContent = t('edSalvar');
+      salvar.onclick = () => { fecharEdicaoAoVivo().catch((e) => mostrarFalhaDoEditor(e)); };
+    }
+    d.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') { e.preventDefault(); fecharEdicaoAoVivo().catch((x) => mostrarFalhaDoEditor(x)); }
+    });
+    pipWin.addEventListener('pagehide', () => {
+      /* Fechada no X, o tamanho também conta: quem maximizou e fechou pelo
+         canto quis o mesmo que quem maximizou e apertou salvar. */
+      try { if (pipWin) guardarTamEd(pipWin.innerWidth, pipWin.innerHeight); } catch (e) {}
+      pipWin = null;
+      restaurarDaEdicao();
+      pintarVoltarJanelinha();
+    });
+
     pintarEm(d.getElementById('edImg'), telaDe(f));
     d.getElementById('edTit').textContent = t('edTit', numeroDoQuadro(f));
     d.getElementById('edPausa').textContent = t('edPausado');
@@ -11309,10 +11397,6 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       pintarEdicao(d);
     };
 
-    const salvar = d.getElementById('edSalvar');
-    salvar.textContent = t('edSalvar');
-    salvar.onclick = () => fecharEdicaoAoVivo();
-
     /* A MESMA ligação da fita, e não uma cópia dela. */
     ligarCaixaDeNota(d);
 
@@ -11328,18 +11412,6 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       aoSoltar: async (f2) => { espelharMarca(f2); pintarEdicao(d); }
     });
     pintarEdicao(d);
-
-    d.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') { e.preventDefault(); fecharEdicaoAoVivo(); }
-    });
-    pipWin.addEventListener('pagehide', () => {
-      /* Fechada no X, o tamanho também conta: quem maximizou e fechou pelo
-         canto quis o mesmo que quem maximizou e apertou salvar. */
-      try { if (pipWin) guardarTamEd(pipWin.innerWidth, pipWin.innerHeight); } catch (e) {}
-      pipWin = null;
-      restaurarDaEdicao();
-      pintarVoltarJanelinha();
-    });
   }
 
   /* ---- A CAIXA DE NOTA DE UMA JANELA QUALQUER ----
@@ -11444,7 +11516,15 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
        e uma janela cheia de coisa escondida é a que volta com um botão morto
        que ninguém percebeu. O que os dois compartilham é a folha de estilo, que
        é onde o compartilhamento não custa nada. */
-    if (pipEditando) { montarEdicao(d); esticarEditor(tamPedido); return; }
+    if (pipEditando) {
+      /* Se a MONTAGEM estourar no meio, os botões daqui para baixo nascem sem
+         `onclick` — visíveis e mortos, sem nada na tela dizendo por quê. Era
+         exatamente o sintoma relatado. */
+      try { montarEdicao(d); }
+      catch (e) { mostrarFalhaDoEditor(e); }
+      esticarEditor(tamPedido);
+      return;
+    }
     d.body.innerHTML = corpoDaJanelinha();
 
     pipRelogio = d.getElementById('rel');
@@ -16600,6 +16680,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
        que só existe depois do fato não serve para conferir o fato.
        Aqui ela sai a qualquer hora, pelo botão de diagnóstico, e diz as duas
        coisas: o que foi pedido e o que o navegador devolveu. */
+    say('erro no editor: ' + (erroEditor || 'nenhum'));
     say('janela PiP    : ' + (
       !('documentPictureInPicture' in window) ? 'não existe neste navegador'
       : ultimoTamEditor ? ('editor pediu ' + ultimoTamEditor.pediu +
