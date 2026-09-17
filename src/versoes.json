@@ -18,7 +18,8 @@
         "nota": "a 3.x anterior. Terceira entrada com VERSÃO DIFERENTE das outras duas: aqui morava `latest` sem versão, que hoje resolve para a mesma 4.2.0 da segunda linha — um salva-vidas que era uma cópia."
       }
     ],
-    "conferido_ate": "4.2.0",
+    "conferido_ate": "4.3.0",
+    "_conferido_em": "16/09/2026 — a 4.3.0 saiu NESTE DIA e virou `latest`. Olhada e NÃO adotada: a fila continua 3.8.1 → 4.2.0 → 3.8.0. O motivo é o mesmo de sempre e não mudou — o que pôs a 4.x atrás foi uma medição numa máquina Windows/Chrome real (`MatMulNBits Missing required scale`), e adotar uma 4.x no dia em que ela sai, sem refazer aquela medição na mesma máquina, seria trocar o que funciona por idade. Quando houver um Windows/Chrome de verdade à mão, é a 4.3.0 que vale testar primeiro: se ela montar, a fila muda e este campo muda junto.",
     "_conferido": "A MAIOR VERSÃO QUE ALGUÉM JÁ OLHOU E DECIDIU. A régua `versoes.mjs` consulta o npm e reprova quando existe versão publicada MAIOR que esta — não maior que a fixada. A diferença é o que separa um aviso de um alarme: sem este campo, o dia em que a Hugging Face publicasse uma 4.3 a esteira ficaria vermelha por uma coisa que não é defeito do produto, e uma régua que fica vermelha sozinha é uma régua que se aprende a ignorar. Com ele, a reprovação diz 'existe versão nova que ninguém olhou' — e limpá-la é olhar, decidir, e escrever a decisão aqui. Subir este número SEM trocar a fila é uma decisão legítima e registrada: quer dizer 'vi a 4.3 e fico na 3.8.1'."
   }
 }

@@ -141,6 +141,89 @@ campo de emissor, a contagem de erros na identificação. Marcar uma tela é
 
 ---
 
+## ACHADO FECHADO — o salvar do editor nascia visível e morto *(16/09)*
+
+**O relato:** *"o botão de salvar e voltar a gravar não está funcionando"* —
+com o botão **à vista**, o que foi a informação que resolveu. Ela eliminou o
+defeito que eu tinha acabado de medir (abaixo de ~700px de janela o salvar saía
+da vista, dentro de um `overflow-x:auto`; real, consertado, mas não era o dele)
+e sobrou o clique chegando e a função morrendo no caminho.
+
+**Três coisas, e a terceira é a causa:**
+
+1. **O caminho engolia tudo.** `pipWin.close()` e `abrirControle()` vivem dentro
+   de `try{}catch{}` vazios. Um erro ali não estoura — vira silêncio, que na
+   tela é indistinguível de um clique que não chegou.
+2. **Dois donos para o mesmo espaço.** A mensagem de erro que eu acabara de
+   criar aparecia e era apagada 250ms depois pela medida do tamanho, que
+   escrevia no mesmo `#edTam` e chegava por último. Um erro que pisca e some é
+   pior que erro nenhum. Agora `pintarTesteira()` é o único dono, e o erro vence
+   a medida.
+3. **A saída dependia do resto da montagem dar certo.** O `onclick` do salvar e
+   o Esc eram as **últimas** linhas de `montarEdicao`. Qualquer linha antes
+   deles estourando — uma cor, o desfazer, a caixa de texto — e o botão nasce
+   visível e morto, junto com o Esc, deixando a pessoa presa com a gravação
+   pausada e o X do navegador como única porta.
+
+**A regra que fica escrita no código: o caminho de VOLTA nunca depende do resto
+ter dado certo.** Ele é ligado na primeira linha depois de o corpo existir.
+
+**E a régua sabota de propósito:** um `getElementById` que devolve nulo para um
+id no meio da montagem — a forma mais fiel de reproduzir o sintoma sem pôr
+gancho de teste dentro do produto. Ela cobra que a testeira acuse **com o nome
+do erro**, e que o salvar **ainda leve de volta**.
+
+**A outra metade, a da barra estreita,** foi medida em cinco larguras (1203,
+900, 700, 620 e o piso de 520, lido do próprio produto) e conferida revertendo o
+desenho antigo: reprova em 620 e 520, passa nas largas. As ferramentas passaram
+a morar num contêiner que rola; o salvar fica fora dele.
+
+---
+
+## MANUTENÇÃO — `@huggingface/transformers` 4.3.0 olhada e não adotada *(16/09)*
+
+A 4.3.0 saiu em **16/09/2026** e virou `latest`; `versoes.mjs` reprovou pedindo
+a decisão, que é o trabalho dela. **Decisão: fica a fila atual** (3.8.1 → 4.2.0
+→ 3.8.0), com `conferido_ate` em 4.3.0.
+
+O motivo não mudou: o que pôs a 4.x atrás foi uma medição numa máquina
+Windows/Chrome real (`MatMulNBits Missing required scale`), e adotar uma 4.x no
+dia em que ela sai, sem refazer aquela medição na mesma máquina, seria trocar o
+que funciona por idade. Quando houver um Windows/Chrome de verdade à mão, é a
+4.3.0 que vale testar primeiro.
+
+---
+
+## LIMITE DECLARADO — a esteira é cega para a janelinha de verdade *(06/09)*
+
+Três consertos do tamanho do editor (Builds 58, 59 e 60) **passaram por esteira
+verde e não mudaram nada na tela de quem usa**. Não foi descuido de nenhum
+deles: é um limite da esteira, e ele precisa ficar escrito.
+
+**O `documentPictureInPicture` não existe no navegador de teste.** Conferido
+nesta rodada nas três formas — padrão, com
+`--enable-features=DocumentPictureInPictureAPI`, e com `--headless=new` mais a
+feature: `'documentPictureInPicture' in window` dá **false** nas três. O que a
+régua usa é um remendo que devolve a janela de um `iframe`, e **um remendo
+obedece a tudo o que se pede**. Ele nunca vai reproduzir um navegador que
+descarta o tamanho pedido.
+
+**O que a régua PODE afirmar é o que o produto PEDE** — e é isso que ela afirma
+agora: que a opção `preferInitialWindowPlacement` vai junto, que o `resizeTo`
+sai depois de aberta, com que números. Se o navegador de verdade obedece, só a
+tela real responde.
+
+**Por isso o conserto desta rodada não é outro palpite: é fechar o buraco pelo
+lado de quem usa.** A janela de edição passa a dizer, na própria testeira,
+quando o navegador não deu o tamanho pedido — com os dois números e com o que
+resolve (*"arraste o canto uma vez e este tamanho fica"*). Só aparece nesse
+caso. E o remendo ganhou um `__pipEncolhe`, que o faz devolver menos do que foi
+pedido: sem ele, um remendo obediente nunca provaria o caso em que o produto
+precisa avisar — e a primeira versão do bloco deu verde sobre nada até eu fazer
+o `resizeTo` desobedecer junto.
+
+---
+
 ## ACHADO FECHADO — o Chrome descartava o tamanho pedido, e a medida estava fora de alcance *(06/09)*
 
 **Duas voltas com o mesmo relato** — *"ficou do mesmo tamanho a janelinha"* —,
