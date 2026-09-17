@@ -141,6 +141,48 @@ campo de emissor, a contagem de erros na identificação. Marcar uma tela é
 
 ---
 
+## DEC-17 — Copiar a tela para a área de transferência *(decidida e entregue no Build 63)*
+
+**O pedido, do uso:** apontar o defeito e colar a figura num chamado ou num chat
+**na hora**, sem esperar o documento. O documento continua sendo a prova; isto é
+o recado que se manda enquanto ela fica pronta.
+
+**Decidido:** copia para a área de transferência (e não "captura outra tela"), e
+entra **nos dois lugares** — o editor ao vivo e a lente da revisão — com **uma
+função só**, `copiarTela`. Grátis, pelo critério de sempre: é prova, não
+acabamento.
+
+**Três coisas que a função precisou resolver, e nenhuma é óbvia:**
+
+1. **Copia a figura COM as marcas**, não a limpa — copiar a tela sem as setas é
+   copiar exatamente o que não interessa. Ao vivo as marcas são vetor, então
+   queima **este** quadro, agora: o custo de um canvas de 1920 num gesto
+   explícito, e não a cada seta. E não se perde — o quadro fica queimado,
+   adiantando o que o "parar" faria.
+2. **PNG, e não o formato do quadro.** Os quadros nascem WebP (ver `FORMATO`), e
+   a área de transferência do Chrome só aceita `image/png` para imagem. Um WebP
+   ali é recusado sem explicação.
+3. **A promessa vai DENTRO do `ClipboardItem`.** Queimar e reencodar levam mais
+   tempo que a ativação do clique, e um `await` antes da escrita perderia o
+   gesto. `ClipboardItem` aceita uma promessa de blob exatamente para isto.
+
+**A régua afirma sobre os BYTES, e não sobre o tipo declarado:** confere a
+assinatura `89 50 4E 47`. Dizer `image/png` e mandar um WebP é o erro que essa
+linha existe para pegar. E confere que copiar **queimou** a figura — que é a
+diferença entre copiar a tela apontada e copiar a tela vazia.
+
+**Desvio do que foi descrito antes de construir:** eu disse que a recusa do
+navegador apareceria na testeira. Foi para a **linha de recado da barra**, ao
+lado do botão — é onde a pessoa está olhando quando aperta, e a testeira ficou
+com um dono só (erro fatal e tamanho), que é a regra do Build 62.
+
+**E o mesmo defeito mordeu esta feature pela TERCEIRA vez:** na lente eu
+escrevia a confirmação e o `pintarLente()` seguinte a apagava. Dois escritores
+no mesmo espaço, o último vence. Das três, esta foi a única que a régua pegou
+sozinha antes de chegar ao uso.
+
+---
+
 ## ACHADO FECHADO — o salvar do editor nascia visível e morto *(16/09)*
 
 **O relato:** *"o botão de salvar e voltar a gravar não está funcionando"* —

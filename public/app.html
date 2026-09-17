@@ -3168,6 +3168,11 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
         <!-- Duplicar: a mesma tela provando duas coisas (antes e depois de uma
              ação), sem truque de exportar e reanexar. -->
         <button class="ghost sm" id="duplicar" data-i18n="dupBtn"></button>
+        <!-- Copiar a tela: o mesmo gesto do editor ao vivo, e a MESMA função.
+             Aqui ele serve a quem revisa no fim do dia e precisa colar uma tela
+             num chamado agora, sem exportar o documento inteiro para tirar uma
+             figura de dentro. -->
+        <button class="ghost sm" id="copiarImg" data-i18n="copiarBtn"></button>
         <!-- "O que mudou entre estes dois?" Numa revisão de instrução reaberta
              seis meses depois, é a pergunta inteira: a tela parece a mesma e um
              campo saiu do lugar. Duas imagens lado a lado não respondem — o
@@ -3627,6 +3632,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       pipAnotar:'Apontar nesta tela', pipCurtoAnotar:'Apontar', edTit:'Apontando no passo {0}', edPausado:'gravação pausada enquanto você aponta',
       edTamMenor:'o navegador abriu {0} em vez de {1} — arraste o canto uma vez e este tamanho fica',
       edFalhou:'não consegui voltar a gravar: {0}',
+      copiarBtn:'Copiar a tela', copIndo:'copiando…', copFeito:'✓ copiado — é só colar',
+      copFalhou:'não consegui copiar: {0}', copSemSuporte:'este navegador não copia imagem',
       edSalvar:'Salvar e voltar a gravar', edComo:'Arraste sobre a tela para apontar o que importa.', edFeitas:'{0} no quadro', edSemQuadro:'Não deu para capturar a tela agora — tente de novo.',
       recPausado:'PAUSADO —', recMarcado:'passo marcado.',
       pipPausado:'Pausado: nada sendo guardado.',
@@ -4281,6 +4288,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       pipAnotar:'Point at this screen', pipCurtoAnotar:'Point', edTit:'Pointing at step {0}', edPausado:'recording paused while you point',
       edTamMenor:'the browser opened {0} instead of {1} — drag the corner once and this size sticks',
       edFalhou:'could not get back to recording: {0}',
+      copiarBtn:'Copy the screen', copIndo:'copying…', copFeito:'✓ copied — just paste it',
+      copFalhou:'could not copy: {0}', copSemSuporte:'this browser does not copy images',
       edSalvar:'Save and keep recording', edComo:'Drag over the screen to point at what matters.', edFeitas:'{0} on this frame', edSemQuadro:'Could not capture the screen just now — try again.',
       recPausado:'PAUSED —', recMarcado:'step marked.',
       pipPausado:'Paused: nothing being kept.',
@@ -4920,6 +4929,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       pipAnotar:'Señalar en esta pantalla', pipCurtoAnotar:'Señalar', edTit:'Señalando el paso {0}', edPausado:'grabación en pausa mientras señalas',
       edTamMenor:'el navegador abrió {0} en vez de {1} — arrastra la esquina una vez y este tamaño se queda',
       edFalhou:'no pude volver a grabar: {0}',
+      copiarBtn:'Copiar la pantalla', copIndo:'copiando…', copFeito:'✓ copiado — solo pégalo',
+      copFalhou:'no pude copiar: {0}', copSemSuporte:'este navegador no copia imágenes',
       edSalvar:'Guardar y seguir grabando', edComo:'Arrastra sobre la pantalla para señalar lo que importa.', edFeitas:'{0} en esta captura', edSemQuadro:'No se pudo capturar la pantalla ahora — inténtalo de nuevo.',
       recPausado:'EN PAUSA —', recMarcado:'paso marcado.',
       pipPausado:'En pausa: no se guarda nada.',
@@ -5558,6 +5569,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       pipAnotar:'Auf diesen Bildschirm zeigen', pipCurtoAnotar:'Zeigen', edTit:'Zeigen in Schritt {0}', edPausado:'Aufnahme pausiert, während Sie zeigen',
       edTamMenor:'der Browser öffnete {0} statt {1} — ziehen Sie einmal an der Ecke, und diese Größe bleibt',
       edFalhou:'Aufnahme konnte nicht fortgesetzt werden: {0}',
+      copiarBtn:'Bildschirm kopieren', copIndo:'wird kopiert…', copFeito:'✓ kopiert — einfach einfügen',
+      copFalhou:'Kopieren nicht möglich: {0}', copSemSuporte:'dieser Browser kopiert keine Bilder',
       edSalvar:'Speichern und weiter aufnehmen', edComo:'Ziehen Sie über den Bildschirm, um das Wichtige zu zeigen.', edFeitas:'{0} in diesem Bild', edSemQuadro:'Der Bildschirm konnte gerade nicht erfasst werden — bitte erneut versuchen.',
       recPausado:'PAUSIERT —', recMarcado:'Schritt markiert.',
       pipPausado:'Pausiert: Es wird nichts gespeichert.',
@@ -6202,6 +6215,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       pipAnotar:'Pointer sur cet écran', pipCurtoAnotar:'Pointer', edTit:'Pointage à l’étape {0}', edPausado:'enregistrement en pause pendant le pointage',
       edTamMenor:'le navigateur a ouvert {0} au lieu de {1} — tirez le coin une fois et cette taille est conservée',
       edFalhou:'impossible de reprendre l’enregistrement : {0}',
+      copiarBtn:'Copier l’écran', copIndo:'copie…', copFeito:'✓ copié — il suffit de coller',
+      copFalhou:'impossible de copier : {0}', copSemSuporte:'ce navigateur ne copie pas les images',
       edSalvar:'Enregistrer et continuer', edComo:'Faites glisser sur l’écran pour montrer ce qui compte.', edFeitas:'{0} sur cette capture', edSemQuadro:'Impossible de capturer l’écran maintenant — réessayez.',
       recPausado:'EN PAUSE —', recMarcado:'étape marquée.',
       pipPausado:'En pause : rien n’est conservé.',
@@ -9767,7 +9782,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      depois, e não tem como se atualizar sozinho. Sem carimbo, "estou com um
      problema no offline" é uma conversa sem chão — ninguém sabe de qual build
      se fala nem se o defeito já foi consertado. */
-  const VERSAO = '2026.09.16-9';
+  const VERSAO = '2026.09.17-3';
   window.__versao = () => VERSAO;
 
   const PIP_CSS = `
@@ -10261,6 +10276,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
        trabalho dela. */
     .edComo{flex:0 1 auto;font-size:11px;color:#8a93a3;white-space:nowrap;
             overflow:hidden;text-overflow:ellipsis;min-width:0}
+    .edComo.ruim{color:#ff8a80}
     /* O SALVAR e o unico botao cheio da janela: e o gesto que devolve a pessoa
        ao trabalho dela, e depois de anotar e o unico que ela quer achar. */
     button.edSalvar{width:auto;font-size:12.5px;font-weight:600;padding:7px 14px;
@@ -10863,6 +10879,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
           '<button id="edCaneta" class="edFer"></button>' +
           '<span class="mkCores" id="edCores"></span>' +
           '<button id="edDesfazer" class="edFer hide"></button>' +
+          /* Copiar fica com as ferramentas porque age sobre a FIGURA, e não com
+             o salvar, que age sobre a gravação. O salvar continua sendo o único
+             botão cheio: ele é o que devolve a pessoa ao trabalho dela. */
+          '<button id="edCopiar" class="edFer"></button>' +
         '</div>' +
         '<span class="edComo" id="edComo"></span>' +
         '<button id="edSalvar" class="edSalvar"></button>' +
@@ -10907,6 +10927,22 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     pintarTesteira();
   }
 
+  /* A LINHA DE RECADO DA BARRA, com um dono só e com prazo.
+     Ela diz três coisas em momentos diferentes — como se usa, quantas marcas há,
+     e o que acabou de acontecer — e a terceira não pode ser apagada pela
+     repintagem seguinte. Foi o defeito que a testeira já pagou neste mesmo
+     arquivo: dois escritores no mesmo espaço, e o último vence. */
+  let recadoEd = '', recadoEdAte = 0, recadoEdRuim = false;
+  function recadoDoEditor(txt, ruim){
+    recadoEd = txt; recadoEdRuim = !!ruim;
+    recadoEdAte = performance.now() + (ruim ? 6000 : 2600);
+    if (pipWin) pintarEdicao(pipWin.document);
+    /* Repinta quando o prazo vence, senão o recado ficaria até o próximo
+       arrasto — e um "copiado" parado na tela mente sobre o último gesto. */
+    setTimeout(() => { if (pipWin && pipEditando) pintarEdicao(pipWin.document); },
+               (ruim ? 6000 : 2600) + 60);
+  }
+
   function pintarEdicao(d){
     if (!d || !pipEditando) return;
     pintarMarcasEm(d.getElementById('edMarcas'), pipEditando.marcas,
@@ -10915,7 +10951,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     const b = d.getElementById('edDesfazer');
     if (b) b.classList.toggle('hide', !n);
     const c = d.getElementById('edComo');
-    if (c) c.textContent = n ? t('edFeitas', n) : t('edComo');
+    if (!c) return;
+    const vale = recadoEd && performance.now() < recadoEdAte;
+    c.classList.toggle('ruim', !!(vale && recadoEdRuim));
+    c.textContent = vale ? recadoEd : (n ? t('edFeitas', n) : t('edComo'));
   }
 
   function montarEdicao(d){
@@ -10990,6 +11029,21 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       };
       cores.appendChild(b);
     });
+
+    const copiar = d.getElementById('edCopiar');
+    if (copiar) {
+      copiar.textContent = t('copiarBtn');
+      copiar.onclick = () => {
+        recadoDoEditor(t('copIndo'), false);
+        copiarTela(pipEditando)
+          .then(() => recadoDoEditor(t('copFeito'), false))
+          /* A ÁREA DE TRANSFERÊNCIA EXIGE JANELA EM FOCO, e uma janela de
+             picture-in-picture nem sempre conta para o navegador. Quando ele
+             recusa, o motivo aparece aqui do lado do botão — mudo seria a
+             pessoa apertando de novo sem saber por quê. */
+          .catch((e) => recadoDoEditor(t('copFalhou', (e && e.message) || String(e)), true));
+      };
+    }
 
     const desf = d.getElementById('edDesfazer');
     desf.textContent = t('mkDesfazer');
@@ -20932,6 +20986,51 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
 
   const temSobreposicao = f => (f.tarjas && f.tarjas.length) || (f.marcas && f.marcas.length);
 
+  /* ================= COPIAR A TELA =================
+   *
+   * O pedido veio do uso: apontar o defeito e colar a figura num chamado ou num
+   * chat NA HORA, sem esperar o documento. O documento continua sendo a prova;
+   * isto é o recado que se manda enquanto ela fica pronta.
+   *
+   * TRÊS COISAS QUE ESTA FUNÇÃO PRECISA RESOLVER, e nenhuma é óbvia:
+   *
+   * 1. COPIA A FIGURA COM AS MARCAS, e não a limpa. Copiar a tela sem as setas
+   *    seria copiar exatamente o que não interessa. Ao vivo as marcas são vetor
+   *    e não estão queimadas — então queima ESTE quadro, agora. É o custo de um
+   *    canvas de 1920 num gesto explícito, e não a cada seta; e não se perde:
+   *    o quadro fica queimado, adiantando o que o "parar" faria.
+   *
+   * 2. PNG, E NÃO O FORMATO DO QUADRO. Os quadros nascem WebP (ver `FORMATO`),
+   *    e a área de transferência do Chrome só aceita `image/png` para imagem.
+   *    Um WebP ali é recusado sem explicação.
+   *
+   * 3. A PROMESSA VAI DENTRO DO `ClipboardItem`. Queimar e reencodar levam mais
+   *    tempo que a ativação do clique, e um `await` antes da escrita perderia o
+   *    gesto — o navegador recusa com "not allowed". `ClipboardItem` aceita uma
+   *    promessa de blob exatamente para isto: a escrita é PEDIDA no clique e o
+   *    trabalho acontece dentro dela. */
+  async function pngDoQuadro(f){
+    if (temSobreposicao(f) && !f.tarjado) await queimarTarjas(f);
+    const im = telaDe(f);
+    await im.pronta;
+    const bitmap = await carregarImagem(im.url);
+    const c = document.createElement('canvas');
+    c.width = im.w; c.height = im.h;
+    c.getContext('2d').drawImage(bitmap, 0, 0, c.width, c.height);
+    return await new Promise((ok, err) => {
+      c.toBlob((b) => (b ? ok(b) : err(new Error('PNG'))), 'image/png');
+    });
+  }
+
+  function copiarTela(f){
+    if (!f) return Promise.reject(new Error('sem quadro'));
+    if (!(navigator.clipboard && navigator.clipboard.write && window.ClipboardItem))
+      return Promise.reject(new Error(t('copSemSuporte')));
+    return navigator.clipboard.write([
+      new ClipboardItem({ 'image/png': pngDoQuadro(f) })
+    ]);
+  }
+
   async function queimarTarjas(f){
     if (!temSobreposicao(f)) { f.tarjado = null; f.hash = null; f.ocr = f.ocr || ''; recolherImagens(); return; }
     await f.img.pronta;
@@ -21332,6 +21431,27 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     pintarLente(); render();
     $('tarjaMsg').textContent = t('cropSaiu');
   };
+  /* A MESMA `copiarTela` do editor ao vivo. O que muda é de onde vem o quadro e
+     onde a resposta é escrita — a regra de copiar mora num lugar só. */
+  if ($('copiarImg')) $('copiarImg').onclick = () => {
+    const f = frames[lenteI]; if (!f) return;
+    $('tarjaMsg').textContent = t('copIndo');
+    copiarTela(f)
+      .then(() => {
+        /* A grade repinta: copiar queimou a figura, e a miniatura passa a
+           mostrar as marcas. Sem isto a pessoa copiaria a tela apontada e veria
+           a miniatura limpa do lado, o que se lê como defeito. */
+        pintarLente(); render();
+        /* A CONFIRMAÇÃO VEM DEPOIS DA REPINTAGEM, e não antes: `pintarLente`
+           chama `pintarTarjas`, que é dona de `#tarjaMsg` e reescreve a linha.
+           Escrita antes, a confirmação sumia no mesmo instante — é a terceira
+           vez que dois escritores no mesmo espaço mordem esta feature, e das
+           três esta foi a que a régua pegou sozinha. */
+        $('tarjaMsg').textContent = t('copFeito');
+      })
+      .catch((e) => { $('tarjaMsg').textContent = t('copFalhou', (e && e.message) || String(e)); });
+  };
+
   $('tarjaLimpar').onclick = () => {
     const f = frames[lenteI]; if (!f) return;
     f.tarjas = [];

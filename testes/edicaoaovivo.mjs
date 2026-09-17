@@ -178,6 +178,37 @@ const ctx = await br.newContext({ viewport: { width: 1280, height: 1000 } });
    à primeira, a segunda subia sem tela para gravar e o teste morria com um
    tempo esgotado que não dizia nada sobre o produto. */
 await ctx.route('**/rpc/*stamp_*', r => r.fulfill({ status: 200, headers: {'access-control-allow-origin':'*'}, body: 'null' }));
+/* ---- A ÁREA DE TRANSFERÊNCIA, ESPIADA E NÃO SIMULADA ----
+   O Chromium de teste não dá permissão de escrita na área de transferência sem
+   gesto de confiança, e pedir permissão aqui testaria o Playwright e não o
+   produto. Então `write` é substituído por um espião que GUARDA o que recebeu —
+   os tipos, e o blob de verdade, resolvido da promessa. É o que permite afirmar
+   o que foi copiado, e não só que alguém chamou a função.
+   `__copiaFalha` faz o navegador recusar, como um sem foco faria. */
+await ctx.addInitScript(() => {
+  window.__copias = [];
+  window.__copiaFalha = '';
+  try {
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: {
+        write: async (itens) => {
+          if (window.__copiaFalha) throw new Error(window.__copiaFalha);
+          const it = itens[0];
+          const tipos = it.types.slice();
+          const b = await it.getType(tipos[0]);
+          const buf = new Uint8Array(await b.arrayBuffer());
+          window.__copias.push({ tipos, bytes: buf.length,
+            /* A assinatura do PNG: 89 50 4E 47. Afirmar sobre o TIPO declarado
+               provaria só que alguém escreveu a string certa. */
+            png: buf[0] === 0x89 && buf[1] === 0x50 && buf[2] === 0x4E && buf[3] === 0x47 });
+          return true;
+        },
+        writeText: async () => true,
+      },
+    });
+  } catch (e) {}
+});
 await ctx.addInitScript(shimPip);
 await ctx.addInitScript(telaFalsa);
 const pg = await ctx.newPage();
@@ -593,6 +624,66 @@ console.log('\n[3e] se o caminho do salvar estourar, a janela diz — e não fic
   ok('e desfeita a sabotagem o editor volta inteiro',
      await fita().locator('#edSalvar').count() === 1 &&
      !(await fita().locator('#edTam.ruim').count()));
+}
+
+/* --------------------------------------------------------------- [3f] ----
+   COPIAR A TELA APONTADA. O pedido veio do uso: apontar o defeito e colar a
+   figura num chamado ou num chat NA HORA, sem esperar o documento.
+
+   O QUE PRECISA SER PROVADO não é que o botão existe — é O QUE SAI dele:
+   um PNG (a área de transferência do Chrome recusa WebP, que é como os quadros
+   nascem) e COM AS MARCAS QUEIMADAS, porque copiar a tela sem as setas é copiar
+   exatamente o que não interessa. */
+console.log('\n[3f] copiar a tela manda um PNG, e com as marcas dentro');
+{
+  const bt = fita().locator('#edCopiar');
+  ok('o editor tem o botão de copiar', await bt.count() === 1);
+
+  /* O quadro em edição já tem marcas dos blocos anteriores? Garante uma. */
+  const cx = await fita().locator('#edImg').boundingBox();
+  await pg.mouse.move(cx.x + cx.width * 0.3, cx.y + cx.height * 0.3);
+  await pg.mouse.down();
+  await pg.mouse.move(cx.x + cx.width * 0.7, cx.y + cx.height * 0.7, { steps: 10 });
+  await pg.mouse.up();
+  await pg.waitForTimeout(300);
+  const iAgora = await pg.evaluate(() => window.__quadros().length - 1);
+  ok('há marca no quadro antes de copiar',
+     (await pg.evaluate((i) => (window.__quadros()[i].marcas || []).length, iAgora)) > 0);
+  /* E ele ainda NÃO está queimado: ao vivo a marca é vetor. É o que torna a
+     próxima afirmação interessante. */
+  ok('e a figura ainda não estava queimada',
+     !(await pg.evaluate((i) => !!window.__quadros()[i].tarjado, iAgora)));
+
+  await bt.click();
+  await pg.waitForFunction(() => (window.__copias || []).length > 0, null, { timeout: 15000 });
+  const c = await pg.evaluate(() => window.__copias[window.__copias.length - 1]);
+  ok('a área de transferência recebeu UM item', !!c, JSON.stringify(c));
+  ok('declarado como image/png', c.tipos.length === 1 && c.tipos[0] === 'image/png',
+     JSON.stringify(c.tipos));
+  /* A ASSINATURA, e não o tipo declarado: dizer 'image/png' e mandar um WebP é
+     exatamente o erro que esta linha existe para pegar. */
+  ok('e os bytes são mesmo de um PNG', c.png === true);
+  ok('com tamanho de imagem de verdade, e não um arquivo vazio', c.bytes > 2000,
+     c.bytes + ' bytes');
+  ok('e copiar QUEIMOU a figura — é a tela com as setas que vai',
+     await pg.evaluate((i) => !!window.__quadros()[i].tarjado, iAgora));
+
+  const msg = (await fita().locator('#edComo').textContent() || '').trim();
+  ok('e a barra diz que copiou', /copiado/i.test(msg), msg);
+
+  /* ---- RECUSADO PELO NAVEGADOR, A BARRA DIZ O MOTIVO ----
+     A área de transferência exige janela em foco, e uma janela de
+     picture-in-picture nem sempre conta. Mudo, a pessoa aperta de novo sem
+     saber por quê. */
+  await pg.evaluate(() => { window.__copiaFalha = 'sem-foco-da-regua'; });
+  await bt.click();
+  await pg.waitForTimeout(1200);
+  const err = fita().locator('#edComo');
+  const txt = (await err.textContent() || '');
+  ok('recusado, a barra diz o motivo', /sem-foco-da-regua/.test(txt), txt.trim());
+  ok('e o recado sai marcado como problema, e não como confirmação',
+     await fita().locator('#edComo.ruim').count() === 1);
+  await pg.evaluate(() => { window.__copiaFalha = ''; });
 }
 
 /* ---------------------------------------------------------------- [4] ----
