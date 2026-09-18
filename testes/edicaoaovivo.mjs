@@ -93,10 +93,20 @@ const shimPip = () => {
   window.__pipPedidos = [];
   window.__pipResizes = [];
   window.__pipOpcoes = [];
+  window.__pipTeto = null;
   const dpip = {
     requestWindow: async (opcoes) => {
       const { width, height } = opcoes;
       window.__pipOpcoes.push(opcoes);
+      /* ---- UM NAVEGADOR QUE RECUSA, e não um que obedece a tudo ----
+         O Chrome tem teto próprio para janela de picture-in-picture, e recusar
+         é um comportamento que o remendo precisa saber imitar: sem isso, o
+         caminho em que a fita já foi fechada e a janela nova não abre nunca é
+         exercitado — e é justamente onde a pessoa fica sem janelinha nenhuma no
+         meio de uma gravação. */
+      if (window.__pipTeto && (width > window.__pipTeto.w || height > window.__pipTeto.h)) {
+        throw new Error('teto-do-navegador');
+      }
       const velho = document.getElementById('pipFake');
       if (velho) velho.remove();
       const fr = document.createElement('iframe');
@@ -178,6 +188,37 @@ const ctx = await br.newContext({ viewport: { width: 1280, height: 1000 } });
    à primeira, a segunda subia sem tela para gravar e o teste morria com um
    tempo esgotado que não dizia nada sobre o produto. */
 await ctx.route('**/rpc/*stamp_*', r => r.fulfill({ status: 200, headers: {'access-control-allow-origin':'*'}, body: 'null' }));
+/* ---- A ÁREA DE TRANSFERÊNCIA, ESPIADA E NÃO SIMULADA ----
+   O Chromium de teste não dá permissão de escrita na área de transferência sem
+   gesto de confiança, e pedir permissão aqui testaria o Playwright e não o
+   produto. Então `write` é substituído por um espião que GUARDA o que recebeu —
+   os tipos, e o blob de verdade, resolvido da promessa. É o que permite afirmar
+   o que foi copiado, e não só que alguém chamou a função.
+   `__copiaFalha` faz o navegador recusar, como um sem foco faria. */
+await ctx.addInitScript(() => {
+  window.__copias = [];
+  window.__copiaFalha = '';
+  try {
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: {
+        write: async (itens) => {
+          if (window.__copiaFalha) throw new Error(window.__copiaFalha);
+          const it = itens[0];
+          const tipos = it.types.slice();
+          const b = await it.getType(tipos[0]);
+          const buf = new Uint8Array(await b.arrayBuffer());
+          window.__copias.push({ tipos, bytes: buf.length,
+            /* A assinatura do PNG: 89 50 4E 47. Afirmar sobre o TIPO declarado
+               provaria só que alguém escreveu a string certa. */
+            png: buf[0] === 0x89 && buf[1] === 0x50 && buf[2] === 0x4E && buf[3] === 0x47 });
+          return true;
+        },
+        writeText: async () => true,
+      },
+    });
+  } catch (e) {}
+});
 await ctx.addInitScript(shimPip);
 await ctx.addInitScript(telaFalsa);
 const pg = await ctx.newPage();
@@ -593,6 +634,136 @@ console.log('\n[3e] se o caminho do salvar estourar, a janela diz — e não fic
   ok('e desfeita a sabotagem o editor volta inteiro',
      await fita().locator('#edSalvar').count() === 1 &&
      !(await fita().locator('#edTam.ruim').count()));
+}
+
+/* --------------------------------------------------------------- [3f] ----
+   COPIAR A TELA APONTADA. O pedido veio do uso: apontar o defeito e colar a
+   figura num chamado ou num chat NA HORA, sem esperar o documento.
+
+   O QUE PRECISA SER PROVADO não é que o botão existe — é O QUE SAI dele:
+   um PNG (a área de transferência do Chrome recusa WebP, que é como os quadros
+   nascem) e COM AS MARCAS QUEIMADAS, porque copiar a tela sem as setas é copiar
+   exatamente o que não interessa. */
+console.log('\n[3f] copiar a tela manda um PNG, e com as marcas dentro');
+{
+  const bt = fita().locator('#edCopiar');
+  ok('o editor tem o botão de copiar', await bt.count() === 1);
+
+  /* O quadro em edição já tem marcas dos blocos anteriores? Garante uma. */
+  const cx = await fita().locator('#edImg').boundingBox();
+  await pg.mouse.move(cx.x + cx.width * 0.3, cx.y + cx.height * 0.3);
+  await pg.mouse.down();
+  await pg.mouse.move(cx.x + cx.width * 0.7, cx.y + cx.height * 0.7, { steps: 10 });
+  await pg.mouse.up();
+  await pg.waitForTimeout(300);
+  const iAgora = await pg.evaluate(() => window.__quadros().length - 1);
+  ok('há marca no quadro antes de copiar',
+     (await pg.evaluate((i) => (window.__quadros()[i].marcas || []).length, iAgora)) > 0);
+  /* E ele ainda NÃO está queimado: ao vivo a marca é vetor. É o que torna a
+     próxima afirmação interessante. */
+  ok('e a figura ainda não estava queimada',
+     !(await pg.evaluate((i) => !!window.__quadros()[i].tarjado, iAgora)));
+
+  await bt.click();
+  await pg.waitForFunction(() => (window.__copias || []).length > 0, null, { timeout: 15000 });
+  const c = await pg.evaluate(() => window.__copias[window.__copias.length - 1]);
+  ok('a área de transferência recebeu UM item', !!c, JSON.stringify(c));
+  ok('declarado como image/png', c.tipos.length === 1 && c.tipos[0] === 'image/png',
+     JSON.stringify(c.tipos));
+  /* A ASSINATURA, e não o tipo declarado: dizer 'image/png' e mandar um WebP é
+     exatamente o erro que esta linha existe para pegar. */
+  ok('e os bytes são mesmo de um PNG', c.png === true);
+  ok('com tamanho de imagem de verdade, e não um arquivo vazio', c.bytes > 2000,
+     c.bytes + ' bytes');
+  ok('e copiar QUEIMOU a figura — é a tela com as setas que vai',
+     await pg.evaluate((i) => !!window.__quadros()[i].tarjado, iAgora));
+
+  const msg = (await fita().locator('#edComo').textContent() || '').trim();
+  ok('e a barra diz que copiou', /copiado/i.test(msg), msg);
+
+  /* ---- RECUSADO PELO NAVEGADOR, A BARRA DIZ O MOTIVO ----
+     A área de transferência exige janela em foco, e uma janela de
+     picture-in-picture nem sempre conta. Mudo, a pessoa aperta de novo sem
+     saber por quê. */
+  await pg.evaluate(() => { window.__copiaFalha = 'sem-foco-da-regua'; });
+  await bt.click();
+  await pg.waitForTimeout(1200);
+  const err = fita().locator('#edComo');
+  const txt = (await err.textContent() || '');
+  ok('recusado, a barra diz o motivo', /sem-foco-da-regua/.test(txt), txt.trim());
+  ok('e o recado sai marcado como problema, e não como confirmação',
+     await fita().locator('#edComo.ruim').count() === 1);
+  await pg.evaluate(() => { window.__copiaFalha = ''; });
+}
+
+/* --------------------------------------------------------------- [3g] ----
+   O NAVEGADOR RECUSANDO O TAMANHO — e a pessoa não ficando sem janelinha.
+
+   O relato: "o apontar não está abrindo a tela". Medido no caminho: abrir o
+   editor FECHA a fita antes de pedir a janela nova. Recusado o pedido, o
+   `catch` zerava tudo e voltava em silêncio — fita sumida, editor não aberto,
+   gravação pausada, nada na tela dizendo por quê. E há motivo para recusar:
+   desde o Build 58 o editor pede 94% da tela, e o Chrome tem teto próprio.
+
+   Duas afirmações, e a segunda é a que importa: ele TENTA MENOR, e se nem assim
+   der, A FITA VOLTA e a gravação volta a correr. */
+console.log('\n[3g] recusado o tamanho, ele tenta menor — e a fita nunca some');
+{
+  await fita().locator('#edSalvar').click();
+  await pg.waitForTimeout(1500);
+
+  /* ---- O TAMANHO GUARDADO POR OUTRO BLOCO TEM QUE SAIR DAQUI ----
+     O bloco [3d] deixa o editor num tamanho encolhido, e ele FICA guardado: o
+     primeiro pedido nascia já pequeno, passava no teto de primeira, e a
+     afirmação "tentou o grande antes do pequeno" media outra coisa. Estado de
+     um bloco vazando para o seguinte é um verde que não quer dizer nada. */
+  await pg.evaluate(() => {
+    try { localStorage.removeItem('Walkstamp.editorTam'); } catch (e) {}
+    window.__pipTeto = { w: 800, h: 600 };
+    window.__pipOpcoes = [];
+  });
+  await fita().locator('#anotar').click();
+  await pg.waitForTimeout(2000);
+  ok('o editor abriu mesmo assim', await fita().locator('#edImg').count() === 1);
+  const ops = await pg.evaluate(() => window.__pipOpcoes);
+  ok('e ele tentou o tamanho grande ANTES do pequeno',
+     ops.length >= 2 && ops[0].width > 800, JSON.stringify(ops.map(o => o.width)));
+  const usado = ops[ops.length - 1];
+  ok('a janela usada cabe no teto do navegador',
+     usado.width <= 800 && usado.height <= 600, `${usado.width}x${usado.height}`);
+  ok('e a gravação segue pausada, como em qualquer edição', await pausado());
+  await fita().locator('#edSalvar').click();
+  await pg.waitForTimeout(2000);
+
+  /* ---- E O CASO CRU: nem o menor passa ---- */
+  await pg.evaluate(() => { window.__pipTeto = { w: 10, h: 10 }; });
+  await fita().locator('#anotar').click();
+  await pg.waitForTimeout(2500);
+  await pg.evaluate(() => { window.__pipTeto = null; });
+  ok('não abrindo de jeito nenhum, o erro fica guardado',
+     /recusou|teto-do-navegador/i.test(
+       await pg.evaluate(() => (window.__erroEditor && window.__erroEditor()) || '')),
+     await pg.evaluate(() => (window.__erroEditor && window.__erroEditor()) || ''));
+  /* A METADE QUE IMPORTA: a pessoa não pode ficar sem janelinha e com a
+     captura pausada no meio de uma gravação. */
+  await pg.waitForTimeout(1500);
+  ok('e a gravação voltou a correr sozinha', !(await pausado()));
+  const voltou = await ganhouEm(JANELA);
+  ok('e voltou a guardar tela', voltou > 0, `${voltou} quadros em ${JANELA / 1000}s`);
+  /* ---- E O ESTADO É DEVOLVIDO, senão o bloco seguinte mede outra coisa ----
+     Com o teto em 10x10 nem a fita abriu, e a janelinha ficou fora do ar — o
+     que é o comportamento certo: a aba mostra o botão de trazer de volta. Aqui
+     ela é trazida, e o editor reaberto, porque [4] fala do editor ABERTO.
+     Um bloco que deixa o estado pior do que achou faz o seguinte reprovar por
+     um motivo que não é dele — foi o que aconteceu na primeira tentativa. */
+  ok('sem janelinha, a aba oferece trazer de volta',
+     await pg.locator('#recPip').isVisible());
+  await pg.locator('#recPip').click();
+  await pg.waitForTimeout(1500);
+  ok('e ela volta', await fita().locator('#anotar').count() === 1);
+  await fita().locator('#anotar').click();
+  await pg.waitForTimeout(1800);
+  ok('e o editor volta a abrir normalmente', await fita().locator('#edImg').count() === 1);
 }
 
 /* ---------------------------------------------------------------- [4] ----

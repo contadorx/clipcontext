@@ -75,6 +75,47 @@ ok('a caneta entrou', (await pg.locator('#lenteMarcas polyline').count()) === 1)
 const cores = await pg.locator('#lenteMarcas polyline').getAttribute('stroke');
 ok('a caneta usou a cor escolhida', cores === '#ffcc00', cores);
 
+/* ---- COPIAR A TELA, DAQUI TAMBÉM ----
+ *
+ * O gesto nasceu no editor ao vivo — apontar o defeito e colar a figura num
+ * chamado NA HORA — e vale igual na revisão: quem acha o erro no fim do dia
+ * também precisa colar a tela em algum lugar sem exportar o documento inteiro
+ * para tirar uma figura de dentro.
+ *
+ * A FUNÇÃO É UMA SÓ (`copiarTela`), e é por isso que aqui se cobra pouco: que o
+ * botão exista, que chegue UM PNG, e que a figura copiada seja a QUEIMADA. O
+ * resto da regra — a promessa dentro do `ClipboardItem`, a recusa do navegador
+ * aparecendo na tela — é cobrado uma vez, em `edicaoaovivo.mjs`. Duas réguas
+ * cobrando a mesma coisa são duas para manter em pé. */
+console.log('\n[2a] copiar a tela, da lente');
+{
+  /* A área de transferência é ESPIADA e não simulada: o Chromium de teste não
+     dá permissão de escrita sem gesto de confiança, e pedir permissão aqui
+     testaria o Playwright e não o produto. */
+  await pg.evaluate(() => {
+    window.__copias = [];
+    Object.defineProperty(navigator, 'clipboard', { configurable: true, value: {
+      write: async (itens) => {
+        const it = itens[0], tipos = it.types.slice();
+        const buf = new Uint8Array(await (await it.getType(tipos[0])).arrayBuffer());
+        window.__copias.push({ tipos, bytes: buf.length,
+          png: buf[0] === 0x89 && buf[1] === 0x50 && buf[2] === 0x4E && buf[3] === 0x47 });
+        return true;
+      }, writeText: async () => true } });
+  });
+  ok('a lente tem o botão de copiar', await pg.locator('#copiarImg').count() === 1);
+  await pg.locator('#copiarImg').click();
+  await pg.waitForFunction(() => (window.__copias || []).length > 0, null, { timeout: 15000 });
+  const c = await pg.evaluate(() => window.__copias[0]);
+  ok('chegou um item image/png', c.tipos.length === 1 && c.tipos[0] === 'image/png',
+     JSON.stringify(c.tipos));
+  /* A assinatura, e não o tipo declarado: dizer image/png e mandar um WebP é o
+     erro que esta linha existe para pegar. */
+  ok('e os bytes são mesmo de um PNG', c.png === true, c.bytes + ' bytes');
+  const msg = (await pg.locator('#tarjaMsg').textContent() || '').trim();
+  ok('e a tela diz que copiou', /copiado/i.test(msg), msg);
+}
+
 console.log('\n[3] o destaque é queimado na imagem, não é camada');
 const dados = await pg.evaluate(() => {
   const f = window.__frames ? window.__frames[0] : null;
