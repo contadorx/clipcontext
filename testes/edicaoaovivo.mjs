@@ -93,10 +93,20 @@ const shimPip = () => {
   window.__pipPedidos = [];
   window.__pipResizes = [];
   window.__pipOpcoes = [];
+  window.__pipTeto = null;
   const dpip = {
     requestWindow: async (opcoes) => {
       const { width, height } = opcoes;
       window.__pipOpcoes.push(opcoes);
+      /* ---- UM NAVEGADOR QUE RECUSA, e não um que obedece a tudo ----
+         O Chrome tem teto próprio para janela de picture-in-picture, e recusar
+         é um comportamento que o remendo precisa saber imitar: sem isso, o
+         caminho em que a fita já foi fechada e a janela nova não abre nunca é
+         exercitado — e é justamente onde a pessoa fica sem janelinha nenhuma no
+         meio de uma gravação. */
+      if (window.__pipTeto && (width > window.__pipTeto.w || height > window.__pipTeto.h)) {
+        throw new Error('teto-do-navegador');
+      }
       const velho = document.getElementById('pipFake');
       if (velho) velho.remove();
       const fr = document.createElement('iframe');
@@ -684,6 +694,76 @@ console.log('\n[3f] copiar a tela manda um PNG, e com as marcas dentro');
   ok('e o recado sai marcado como problema, e não como confirmação',
      await fita().locator('#edComo.ruim').count() === 1);
   await pg.evaluate(() => { window.__copiaFalha = ''; });
+}
+
+/* --------------------------------------------------------------- [3g] ----
+   O NAVEGADOR RECUSANDO O TAMANHO — e a pessoa não ficando sem janelinha.
+
+   O relato: "o apontar não está abrindo a tela". Medido no caminho: abrir o
+   editor FECHA a fita antes de pedir a janela nova. Recusado o pedido, o
+   `catch` zerava tudo e voltava em silêncio — fita sumida, editor não aberto,
+   gravação pausada, nada na tela dizendo por quê. E há motivo para recusar:
+   desde o Build 58 o editor pede 94% da tela, e o Chrome tem teto próprio.
+
+   Duas afirmações, e a segunda é a que importa: ele TENTA MENOR, e se nem assim
+   der, A FITA VOLTA e a gravação volta a correr. */
+console.log('\n[3g] recusado o tamanho, ele tenta menor — e a fita nunca some');
+{
+  await fita().locator('#edSalvar').click();
+  await pg.waitForTimeout(1500);
+
+  /* ---- O TAMANHO GUARDADO POR OUTRO BLOCO TEM QUE SAIR DAQUI ----
+     O bloco [3d] deixa o editor num tamanho encolhido, e ele FICA guardado: o
+     primeiro pedido nascia já pequeno, passava no teto de primeira, e a
+     afirmação "tentou o grande antes do pequeno" media outra coisa. Estado de
+     um bloco vazando para o seguinte é um verde que não quer dizer nada. */
+  await pg.evaluate(() => {
+    try { localStorage.removeItem('Walkstamp.editorTam'); } catch (e) {}
+    window.__pipTeto = { w: 800, h: 600 };
+    window.__pipOpcoes = [];
+  });
+  await fita().locator('#anotar').click();
+  await pg.waitForTimeout(2000);
+  ok('o editor abriu mesmo assim', await fita().locator('#edImg').count() === 1);
+  const ops = await pg.evaluate(() => window.__pipOpcoes);
+  ok('e ele tentou o tamanho grande ANTES do pequeno',
+     ops.length >= 2 && ops[0].width > 800, JSON.stringify(ops.map(o => o.width)));
+  const usado = ops[ops.length - 1];
+  ok('a janela usada cabe no teto do navegador',
+     usado.width <= 800 && usado.height <= 600, `${usado.width}x${usado.height}`);
+  ok('e a gravação segue pausada, como em qualquer edição', await pausado());
+  await fita().locator('#edSalvar').click();
+  await pg.waitForTimeout(2000);
+
+  /* ---- E O CASO CRU: nem o menor passa ---- */
+  await pg.evaluate(() => { window.__pipTeto = { w: 10, h: 10 }; });
+  await fita().locator('#anotar').click();
+  await pg.waitForTimeout(2500);
+  await pg.evaluate(() => { window.__pipTeto = null; });
+  ok('não abrindo de jeito nenhum, o erro fica guardado',
+     /recusou|teto-do-navegador/i.test(
+       await pg.evaluate(() => (window.__erroEditor && window.__erroEditor()) || '')),
+     await pg.evaluate(() => (window.__erroEditor && window.__erroEditor()) || ''));
+  /* A METADE QUE IMPORTA: a pessoa não pode ficar sem janelinha e com a
+     captura pausada no meio de uma gravação. */
+  await pg.waitForTimeout(1500);
+  ok('e a gravação voltou a correr sozinha', !(await pausado()));
+  const voltou = await ganhouEm(JANELA);
+  ok('e voltou a guardar tela', voltou > 0, `${voltou} quadros em ${JANELA / 1000}s`);
+  /* ---- E O ESTADO É DEVOLVIDO, senão o bloco seguinte mede outra coisa ----
+     Com o teto em 10x10 nem a fita abriu, e a janelinha ficou fora do ar — o
+     que é o comportamento certo: a aba mostra o botão de trazer de volta. Aqui
+     ela é trazida, e o editor reaberto, porque [4] fala do editor ABERTO.
+     Um bloco que deixa o estado pior do que achou faz o seguinte reprovar por
+     um motivo que não é dele — foi o que aconteceu na primeira tentativa. */
+  ok('sem janelinha, a aba oferece trazer de volta',
+     await pg.locator('#recPip').isVisible());
+  await pg.locator('#recPip').click();
+  await pg.waitForTimeout(1500);
+  ok('e ela volta', await fita().locator('#anotar').count() === 1);
+  await fita().locator('#anotar').click();
+  await pg.waitForTimeout(1800);
+  ok('e o editor volta a abrir normalmente', await fita().locator('#edImg').count() === 1);
 }
 
 /* ---------------------------------------------------------------- [4] ----

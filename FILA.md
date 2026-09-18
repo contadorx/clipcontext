@@ -141,6 +141,44 @@ campo de emissor, a contagem de erros na identificação. Marcar uma tela é
 
 ---
 
+## ACHADO FECHADO — o editor não abria, e sumia a fita junto *(18/09)*
+
+**O relato:** *"o apontar não está abrindo a tela"*.
+
+**O buraco, medido no caminho:** abrir o editor **fecha a fita primeiro** e só
+então pede a janela nova. Recusado o pedido, `abrirControle` fazia
+`catch { pipWin = null; return; }` — em silêncio. Resultado: fita sumida, editor
+não aberto, gravação pausada, e nada na tela dizendo por quê. A pessoa fica sem
+janelinha nenhuma no meio de uma gravação, olhando para a tela do cliente.
+
+**E havia motivo para o navegador recusar, criado por mim:** desde o Build 58 o
+editor pede **94% da tela** — num monitor de 1920 isso é perto de 1548×1015 —, e
+o Chrome tem teto próprio para janela de picture-in-picture. Aparar é o
+comportamento educado; recusar é o que não se controla, e eu tratava só o
+educado.
+
+**Agora são tentativas**, da melhor para a que certamente cabe: tamanho cheio →
+1000×700 → sem `preferInitialWindowPlacement` → 640×480. E o sistema **aprende**:
+o tamanho que funcionou é o que fica guardado, então a partir da segunda vez ele
+começa pelo que aquele Chrome aceita.
+
+**A metade que mais importa:** se nem o menor passar, **a fita volta e a gravação
+volta a correr sozinha**. Pior que não abrir o editor é ficar sem o que já
+funcionava. O motivo de cada recusa vai para o diagnóstico, com os números.
+
+**E o remendo da régua ganhou um navegador que RECUSA** (`__pipTeto`). Sem isso
+esse caminho nunca era exercitado — um remendo que obedece a tudo descreve um
+navegador que não existe, que é a mesma lição do Build 61. A régua prova a
+escada de tentativas e prova que, no caso cru, a gravação retoma e a aba oferece
+trazer a janelinha de volta.
+
+**Um defeito da própria régua, achado no caminho:** o bloco [3d] deixava um
+tamanho guardado que fazia o primeiro pedido do [3g] nascer pequeno — passava no
+teto de primeira e a afirmação media outra coisa. Estado vazando entre blocos é
+um verde que não quer dizer nada.
+
+---
+
 ## DEC-17 — Copiar a tela para a área de transferência *(decidida e entregue no Build 63)*
 
 **O pedido, do uso:** apontar o defeito e colar a figura num chamado ou num chat
