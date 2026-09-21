@@ -141,6 +141,69 @@ campo de emissor, a contagem de erros na identificação. Marcar uma tela é
 
 ---
 
+## ACHADO FECHADO — o PDF dependia do jsdelivr, e falhava mudo *(21/09)*
+
+**De um QA usando a ferramenta de verdade:** *"algumas vezes o PDF não foi
+gerado, e embora existam instruções para conversão, acabei utilizando apenas o
+HTML gerado"*. Ele tratou como incômodo. **Eram dois defeitos.**
+
+**1. O endereço.** A versão hospedada carregava o jsPDF do jsdelivr, num
+`<script>` **sem queda nenhuma**, e o gerador fazia `window.jspdf` direto. Um
+proxy corporativo que bloqueie o CDN — rotina no ambiente de quem testa
+software — derrubava o PDF **e só o PDF**, porque o HTML não usa biblioteca.
+Daí o sintoma ser "às vezes". **Não era às vezes: era determinístico por
+ambiente.** O conserto já estava no repositório: `vendor/jspdf.umd.min.js` é o
+mesmo arquivo que o pacote offline embute.
+
+**2. O silêncio.** O gerador tinha `try/finally` **sem `catch`**: a linha de
+status ficava parada em *"Montando o PDF…"* para sempre e o erro virava
+rejeição não tratada. A pessoa não sabia se tinha perdido a gravação. O
+`finally` consertava o botão; ele não consertava a frase.
+
+**E a esteira cobrou o preço da primeira tentativa:** trocar o CDN pelo nosso
+endereço **mantendo a tag fixa** fez **24 réguas** acusarem
+`Unexpected token '<'` — os servidorezinhos delas respondem a página HTML para
+qualquer endereço, e o navegador tentava executar HTML como script. Consertar 24
+réguas seria tratar o sintoma. **A tag fixa era a causa**, e tirá-la é melhor
+produto por dois motivos que não têm nada a ver com teste: 365KB deixam de ser
+cobrados de todo mundo que abre a ferramenta por um formato que boa parte nunca
+exporta, e um endereço que não responde deixa de virar erro de página em toda
+visita. Agora a biblioteca só é buscada quando alguém aperta **Gerar PDF** — de
+casa primeiro, CDN como queda.
+
+**E isso melhorou a promessa de rede.** A matriz de egressão declarava o jsPDF
+como `quando: "sozinho"`, gesto *"Abrir a página"* — verdade até aqui. Agora
+abrir a ferramenta **não contata terceiro nenhum**: `egressao.mjs` mede
+*2 pedidos em 9s parado: localhost*. A linha virou `quando: "gesto"` nas cinco
+línguas.
+
+**E uma régua que mentia:** `cabec.mjs` é a única que serve o service worker de
+verdade — e requisição feita de dentro de um service worker **não passa pelo
+`pg.route()`** do Playwright. O servidor dela devolvia HTML para o endereço da
+biblioteca. Quem mentia era o teste, não o produto: em produção o arquivo
+existe. Passou a existir lá também.
+
+---
+
+## O QUE O RELATO PEDIU E JÁ EXISTIA *(21/09)*
+
+Dos quatro pontos do mesmo QA, **dois já estão construídos** e ele não achou —
+o que é falha de descoberta, não de capacidade, e o conserto é outro:
+
+- **"mostrar só os prints marcados"**: existe *"Manter só as marcadas (N)"*,
+  mas como **ação destrutiva opt-in**. Ele pede **ordem de exibição**. A dele é
+  melhor: a tela abre pedindo uma decisão em vez de reconhecer o trabalho que a
+  pessoa já fez ao vivo.
+- **"agrupar prints de um passo"**: existe inteiro — *"Tela adicional a este
+  passo"* na gravação, *"Abre um passo / Junta ao anterior"* na revisão, e o
+  documento já diz "Tela 2 do Passo 3".
+
+E **um que não existe em lugar nenhum**: o índice clicável. Pior do que ele
+disse — o *"Índice do vídeo"* só é gerado no **PDF e no DOCX**; no **HTML, que
+é o que ele acabou usando, não há índice algum**.
+
+---
+
 ## ACHADO FECHADO — o editor não abria, e sumia a fita junto *(18/09)*
 
 **O relato:** *"o apontar não está abrindo a tela"*.

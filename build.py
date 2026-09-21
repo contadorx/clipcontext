@@ -2,7 +2,7 @@
 """
 Gera os dois builds a partir de src/template.html.
 
-  public/app.html                   -> a ferramenta, com jsPDF vindo do CDN
+  public/app.html                   -> a ferramenta, com jsPDF servido de casa
   offline/walkstamp-offline.html  -> jsPDF embutido, arquivo único, funciona sem internet
 
 Edite sempre src/template.html. Os arquivos gerados são descartáveis.
@@ -17,6 +17,22 @@ import sys
 
 ROOT = pathlib.Path(__file__).parent
 MARKER = "<script>/*__JSPDF__*/</script>"
+# ---------------------------------------------------------------------------
+# O jsPDF VEM DE CASA, e não do CDN.
+#
+# O relato de campo: "algumas vezes o PDF não foi gerado, e acabei utilizando
+# apenas o HTML". Medido: a versão hospedada carregava a biblioteca do jsdelivr
+# num `<script>` sem queda nenhuma, e o gerador fazia `window.jspdf` direto. Se
+# a rede falhasse — ou se o proxy corporativo bloqueasse o jsdelivr, que é
+# ROTINA no ambiente de quem testa software — a biblioteca não existia e o PDF
+# morria. O HTML seguia funcionando porque não usa biblioteca nenhuma: por isso
+# o sintoma era "às vezes o PDF", e não "às vezes a ferramenta".
+#
+# Não era "às vezes": era determinístico por ambiente. E o conserto já estava no
+# repositório — `vendor/jspdf.umd.min.js` é o mesmo arquivo que o pacote offline
+# embute há tempo. Agora ele é COPIADO para `public/` e servido do nosso próprio
+# endereço; o CDN fica só como queda, para o caso de um deploy incompleto.
+JSPDF_LOCAL = "/jspdf.umd.min.js"
 CDN = "https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"
 
 # Nome de exibição da marca. Trocar de nome é trocar ESTA linha e o SITE abaixo.
@@ -2235,8 +2251,9 @@ def main() -> int:
         print(f"marcador {MARKER} não encontrado em src/template.html", file=sys.stderr)
         return 1
 
-    # build web: metadados de SEO + jsPDF do CDN + medição
-    web = src.replace(MARKER, f'<script src="{CDN}"></script>')
+    # build web: metadados de SEO + medição. O jsPDF NÃO entra por `<script>`:
+    # ele é buscado sob demanda, quando alguém pede o PDF (ver `garantirJsPDF`).
+    web = src.replace(MARKER, "")
     if PLAIN_TITLE in web:
         web = web.replace(PLAIN_TITLE, META)
     web = web.replace("__SUPAURL__", SUPA_URL).replace("__SUPAKEY__", SUPA_KEY)
@@ -2244,16 +2261,28 @@ def main() -> int:
               .replace("__GKEY__", G_KEY)
               .replace("__GAPP__", G_APP))
     web = web.replace("<!--__ANALYTICS__-->", ANALYTICS)
+    # A QUEDA do jsPDF, só na versão hospedada: se o arquivo de casa faltar
+    # (deploy incompleto), ela busca no CDN antes de desistir.
+    web = web.replace("__JSPDFLOCAL__", JSPDF_LOCAL).replace("__JSPDFCDN__", CDN)
     out_web = ROOT / "public" / "app.html"
     out_web.parent.mkdir(exist_ok=True)
     conferir_script(web)
     out_web.write_text(web, encoding="utf-8")
+
+    # A BIBLIOTECA DO PDF VAI JUNTO, servida do nosso endereço. É o mesmo
+    # arquivo que o pacote offline embute — copiado, e não um segundo download:
+    # duas cópias do jsPDF em versões diferentes seria a lista paralela mais
+    # cara desta casa, porque só apareceria no PDF de quem exportasse.
+    (ROOT / "public" / "jspdf.umd.min.js").write_bytes(vendor.read_bytes())
 
     # build offline: biblioteca embutida, sem nenhuma dependência de rede para o
     # PDF — e sem endereço de medição nenhum. As strings vazias fazem o `medir()`
     # sair pelo primeiro `if` e o snippet do Vercel simplesmente não existir.
     lib = vendor.read_text(encoding="utf-8")
     offline = src.replace(MARKER, f"<script>{lib}</script>")
+    # Sem queda nenhuma no offline: a biblioteca já está embutida, e um
+    # endereço de CDN dentro deste arquivo quebraria a promessa dele.
+    offline = offline.replace("__JSPDFLOCAL__", "").replace("__JSPDFCDN__", "")
     offline = offline.replace("__SUPAURL__", "").replace("__SUPAKEY__", "")
     for tok in ("__GCLIENT__", "__GKEY__", "__GAPP__"):
         offline = offline.replace(tok, "")

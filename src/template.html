@@ -3633,6 +3633,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       edTamMenor:'o navegador abriu {0} em vez de {1} — arraste o canto uma vez e este tamanho fica',
       edFalhou:'não consegui voltar a gravar: {0}',
       copiarBtn:'Copiar a tela', copIndo:'copiando…', copFeito:'✓ copiado — é só colar',
+      pdfSemLib:'a biblioteca que monta o PDF não carregou (costuma ser bloqueio de rede da empresa)',
+      pdfFalhou:'O PDF não saiu: {0}. O HTML e o Word saem do mesmo documento e não dependem dela — e a sua gravação continua aqui.',
       pipRecusada:'O navegador recusou abrir a janela de apontar. Motivos: {0}',
       copFalhou:'não consegui copiar: {0}', copSemSuporte:'este navegador não copia imagem',
       edSalvar:'Salvar e voltar a gravar', edComo:'Arraste sobre a tela para apontar o que importa.', edFeitas:'{0} no quadro', edSemQuadro:'Não deu para capturar a tela agora — tente de novo.',
@@ -4290,6 +4292,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       edTamMenor:'the browser opened {0} instead of {1} — drag the corner once and this size sticks',
       edFalhou:'could not get back to recording: {0}',
       copiarBtn:'Copy the screen', copIndo:'copying…', copFeito:'✓ copied — just paste it',
+      pdfSemLib:'the library that builds the PDF did not load (usually a corporate network block)',
+      pdfFalhou:'The PDF did not come out: {0}. The HTML and the Word file come from the same document and do not need it — and your recording is still here.',
       pipRecusada:'The browser refused to open the pointing window. Reasons: {0}',
       copFalhou:'could not copy: {0}', copSemSuporte:'this browser does not copy images',
       edSalvar:'Save and keep recording', edComo:'Drag over the screen to point at what matters.', edFeitas:'{0} on this frame', edSemQuadro:'Could not capture the screen just now — try again.',
@@ -4932,6 +4936,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       edTamMenor:'el navegador abrió {0} en vez de {1} — arrastra la esquina una vez y este tamaño se queda',
       edFalhou:'no pude volver a grabar: {0}',
       copiarBtn:'Copiar la pantalla', copIndo:'copiando…', copFeito:'✓ copiado — solo pégalo',
+      pdfSemLib:'la biblioteca que arma el PDF no cargó (suele ser un bloqueo de red de la empresa)',
+      pdfFalhou:'El PDF no salió: {0}. El HTML y el Word salen del mismo documento y no dependen de ella — y tu grabación sigue aquí.',
       pipRecusada:'El navegador rechazó abrir la ventana para señalar. Motivos: {0}',
       copFalhou:'no pude copiar: {0}', copSemSuporte:'este navegador no copia imágenes',
       edSalvar:'Guardar y seguir grabando', edComo:'Arrastra sobre la pantalla para señalar lo que importa.', edFeitas:'{0} en esta captura', edSemQuadro:'No se pudo capturar la pantalla ahora — inténtalo de nuevo.',
@@ -5573,6 +5579,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       edTamMenor:'der Browser öffnete {0} statt {1} — ziehen Sie einmal an der Ecke, und diese Größe bleibt',
       edFalhou:'Aufnahme konnte nicht fortgesetzt werden: {0}',
       copiarBtn:'Bildschirm kopieren', copIndo:'wird kopiert…', copFeito:'✓ kopiert — einfach einfügen',
+      pdfSemLib:'die Bibliothek für das PDF wurde nicht geladen (meist eine Netzsperre der Firma)',
+      pdfFalhou:'Das PDF kam nicht heraus: {0}. HTML und Word entstehen aus demselben Dokument und brauchen sie nicht — und Ihre Aufnahme ist noch hier.',
       pipRecusada:'Der Browser hat das Fenster zum Zeigen abgelehnt. Gründe: {0}',
       copFalhou:'Kopieren nicht möglich: {0}', copSemSuporte:'dieser Browser kopiert keine Bilder',
       edSalvar:'Speichern und weiter aufnehmen', edComo:'Ziehen Sie über den Bildschirm, um das Wichtige zu zeigen.', edFeitas:'{0} in diesem Bild', edSemQuadro:'Der Bildschirm konnte gerade nicht erfasst werden — bitte erneut versuchen.',
@@ -6220,6 +6228,8 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       edTamMenor:'le navigateur a ouvert {0} au lieu de {1} — tirez le coin une fois et cette taille est conservée',
       edFalhou:'impossible de reprendre l’enregistrement : {0}',
       copiarBtn:'Copier l’écran', copIndo:'copie…', copFeito:'✓ copié — il suffit de coller',
+      pdfSemLib:'la bibliothèque qui fabrique le PDF n’a pas chargé (souvent un blocage réseau de l’entreprise)',
+      pdfFalhou:'Le PDF n’est pas sorti : {0}. Le HTML et le Word viennent du même document et n’en dépendent pas — et votre enregistrement est toujours là.',
       pipRecusada:'Le navigateur a refusé d’ouvrir la fenêtre de pointage. Motifs : {0}',
       copFalhou:'impossible de copier : {0}', copSemSuporte:'ce navigateur ne copie pas les images',
       edSalvar:'Enregistrer et continuer', edComo:'Faites glisser sur l’écran pour montrer ce qui compte.', edFeitas:'{0} sur cette capture', edSemQuadro:'Impossible de capturer l’écran maintenant — réessayez.',
@@ -24223,6 +24233,57 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       frames.filter(f => f.keep), parseTranscript($('tr').value).cues, duracaoTotal());
   } catch (e) {}
 
+  /* ---- A BIBLIOTECA DO PDF, E O QUE FAZER QUANDO ELA NÃO ESTÁ LÁ ----
+   *
+   * O relato: "algumas vezes o PDF não foi gerado, e acabei utilizando apenas
+   * o HTML". O gerador fazia `window.jspdf` direto — e quando a biblioteca não
+   * tinha carregado, isso estourava um
+   * "Cannot destructure property 'jsPDF' of 'window.jspdf'" que não diz nada a
+   * ninguém, dentro de um `try` que virava uma falha genérica.
+   *
+   * A causa era o endereço: ela vinha do jsdelivr, num `<script>` sem queda. Um
+   * proxy corporativo que bloqueie o CDN — rotina no ambiente de quem testa
+   * software — derrubava o PDF e só o PDF, porque o HTML não usa biblioteca
+   * nenhuma. Agora ela é servida de casa, e o CDN é a queda.
+   *
+   * E ELA É BUSCADA SÓ QUANDO O PDF É PEDIDO. O `<script>` fixo custava 365KB
+   * a TODO mundo que abre a ferramenta, para um formato que boa parte nunca
+   * exporta — e transformava um endereço que não responde num erro de página
+   * em TODA visita: vinte e quatro réguas acusaram "Unexpected token '<'"
+   * quando o servidor delas devolveu HTML no lugar do script. Aqui a
+   * biblioteca só existe se alguém apertar Gerar PDF.
+   *
+   * E se as duas falharem, a frase diz O QUE ACONTECEU e o que fazer: o HTML e
+   * o Word saem do mesmo documento e não dependem de nada. Uma exportação que
+   * falha sem explicação faz a pessoa achar que perdeu a gravação. */
+  let jspdfIndo = null;
+  function garantirJsPDF(){
+    if (window.jspdf && window.jspdf.jsPDF) return Promise.resolve(window.jspdf);
+    if (jspdfIndo) return jspdfIndo;
+    jspdfIndo = new Promise((ok, err) => {
+      /* OS ENDEREÇOS SÃO INJETADOS PELO BUILD, e não escritos aqui. O pacote
+         offline não pode citar endereço nenhum — é a promessa dele, e
+         `TETO_CDN_OFFLINE` derruba o build quando alguém a quebra. Lá os dois
+         chegam vazios e esta função nem é alcançada: a biblioteca já veio
+         embutida, e a primeira linha devolve `window.jspdf`.
+         DE CASA PRIMEIRO, CDN DEPOIS: o nosso endereço é o que um proxy
+         corporativo não bloqueia; o CDN cobre o deploy incompleto. */
+      const enderecos = ['__JSPDFLOCAL__', '__JSPDFCDN__'].filter(Boolean);
+      let i = 0;
+      const tentar = () => {
+        if (i >= enderecos.length) { err(new Error(t('pdfSemLib'))); return; }
+        const tag = document.createElement('script');
+        tag.src = enderecos[i++];
+        tag.onload = () => (window.jspdf && window.jspdf.jsPDF)
+          ? ok(window.jspdf) : tentar();
+        tag.onerror = () => tentar();
+        document.head.appendChild(tag);
+      };
+      tentar();
+    }).catch((e) => { jspdfIndo = null; throw e; });
+    return jspdfIndo;
+  }
+
   async function montarHtml(){
     const ev = evDados();
     const tut = ehTutorial();
@@ -25530,7 +25591,7 @@ ${relsSlide[i]}</Relationships>`) });
     try {
     await aplicarTarjas(kept); await calcularHashes(kept);
 
-    const { jsPDF } = window.jspdf;
+    const { jsPDF } = await garantirJsPDF();
     /* Carta para quem entrega a empresa americana. As medidas do PDF inteiro
        saem daqui, e não de constantes: o rodapé, a tabulação do número da
        página e a quebra dos blocos já eram calculados a partir de PW e PH. */
@@ -26014,6 +26075,21 @@ ${relsSlide[i]}</Relationships>`) });
     if (casoDoRoteiro) oferecerVoltaDoRoteiro(base + '.pdf');
     medir('baixou_saida', { p_formato: 'pdf' });
     $('pdfStatus').innerHTML = `<span class="ok">${t('pdfDone')}</span>${t('pdfDone2', kept.length, page)}`;
+    } catch (e) {
+      /* ---- SEM ESTE `catch`, A LINHA MENTE ATÉ O FIM ----
+       *
+       * O `finally` abaixo soltava o botão, mas ninguém dizia o que tinha
+       * acontecido: a linha de status ficava parada em "Montando o PDF…" para
+       * sempre e o erro virava uma rejeição não tratada, que só aparece no
+       * console do navegador. Do lado de quem usa isso é exatamente o relato
+       * que chegou do campo — "algumas vezes o PDF não foi gerado" —, sem
+       * nenhuma pista do porquê e sem saber se a gravação se perdeu.
+       *
+       * O `finally` conserta o botão; ele não conserta a frase. São duas
+       * coisas, e faltava a segunda. */
+      $('pdfStatus').innerHTML = '<span class="err">' +
+        esc(t('pdfFalhou', (e && e.message) || String(e))) + '</span>';
+      throw e;
     } finally {
       /* E ELE SOLTA O BOTÃO ACONTEÇA O QUE ACONTECER. Este caminho não tinha
          `try/finally` nenhum: um erro no meio da montagem deixava o `#go`

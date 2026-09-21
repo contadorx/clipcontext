@@ -24,6 +24,16 @@ const srv = http.createServer((q, r) => {
   const u = q.url.split('?')[0];
   if (u.startsWith('/_vercel/')) { r.writeHead(200,{'Content-Type':'text/javascript'}); return r.end('') }
   if (u === '/sw.js') { r.writeHead(200,{'Content-Type':'text/javascript'}); return r.end(fs.readFileSync(ROOT+'/sw.js')) }
+  /* ---- A BIBLIOTECA DO PDF TEM QUE SER SERVIDA DE VERDADE AQUI ----
+     Esta é a única régua que serve o SERVICE WORKER de verdade. Com ele ativo,
+     o pedido do jsPDF passa pelo service worker — e requisição feita de dentro
+     de um service worker NÃO passa pelo `pg.route()` do Playwright. O servidor
+     abaixo respondia a página HTML para qualquer endereço, e o navegador tentava
+     executar HTML como script: "Unexpected token '<'".
+     Quem mentia era o servidor de teste, não o produto: em produção o arquivo
+     existe. Então ele passa a existir aqui também. */
+  if (/jspdf/i.test(u)) { r.writeHead(200,{'Content-Type':'text/javascript'});
+                          return r.end(fs.readFileSync(ROOT+'/jspdf.umd.min.js')) }
   r.writeHead(200, {'Content-Type':'text/html'}); r.end(html);
 });
 await new Promise(r => srv.listen(8910, r));
