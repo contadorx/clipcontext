@@ -10194,7 +10194,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
      depois, e não tem como se atualizar sozinho. Sem carimbo, "estou com um
      problema no offline" é uma conversa sem chão — ninguém sabe de qual build
      se fala nem se o defeito já foi consertado. */
-  const VERSAO = '2026.09.21-15';
+  const VERSAO = '2026.10.05-4';
   window.__versao = () => VERSAO;
 
   const PIP_CSS = `
@@ -11407,10 +11407,17 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     d.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') { e.preventDefault(); fecharEdicaoAoVivo().catch((x) => mostrarFalhaDoEditor(x)); }
     });
-    pipWin.addEventListener('pagehide', () => {
+    /* ---- O `pagehide` SÓ VALE PARA A JANELA QUE ELE FECHA ----
+     * Ele zerava `pipWin` sem perguntar de quem era o evento. No Chrome o
+     * `pagehide` de uma janela fechada chega DEPOIS de a troca terminar — e
+     * zerava a referência da janela NOVA. Ver o comentário completo no
+     * `pagehide` da fita, que é o mesmo defeito do outro lado da troca. */
+    const estaJanela = pipWin;
+    estaJanela.addEventListener('pagehide', () => {
+      if (pipWin !== estaJanela) return;
       /* Fechada no X, o tamanho também conta: quem maximizou e fechou pelo
          canto quis o mesmo que quem maximizou e apertou salvar. */
-      try { if (pipWin) guardarTamEd(pipWin.innerWidth, pipWin.innerHeight); } catch (e) {}
+      try { guardarTamEd(estaJanela.innerWidth, estaJanela.innerHeight); } catch (e) {}
       pipWin = null;
       restaurarDaEdicao();
       pintarVoltarJanelinha();
@@ -11738,7 +11745,32 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
 
     /* Fechar a janelinha NÃO para a gravação: fechar sem querer não pode
        destruir uma reunião de uma hora. O botão da aba continua valendo. */
-    pipWin.addEventListener('pagehide', () => {
+    /* ---- O `pagehide` SÓ VALE PARA A JANELA QUE ELE FECHA ----
+     *
+     * O relato chegou três vezes, com três frases diferentes: "o apontar não
+     * está abrindo a tela", "o botão de salvar e voltar a gravar não está
+     * funcionando", e de novo "salvar e voltar a gravar não funciona". Três
+     * builds consertaram três coisas reais em volta — e o defeito ficou,
+     * porque a causa era esta linha, e ela não aparecia em teste nenhum.
+     *
+     * Trocar a fita pelo editor (e de volta) é: fechar a janela atual, pedir a
+     * nova, guardar a nova em `pipWin`. O `pagehide` da janela VELHA zerava
+     * `pipWin` incondicionalmente. Na régua ele disparava dentro do `close()`,
+     * ANTES da troca, e o zero não fazia mal. No Chrome de verdade ele chega
+     * numa tarefa seguinte — DEPOIS de `pipWin` já ser a janela nova — e
+     * zerava a nova. Daí em diante tudo que pergunta por `pipWin` desiste:
+     *
+     *   - o salvar chama `reabrirPip`, que vê `!pipWin` e não fecha nada; a
+     *     gravação volta a correr com o editor na frente do cliente;
+     *   - o apontar vê `!pipWin` e não abre;
+     *   - a caixa de anotação do editor não é achada, e o botão dela não acende;
+     *   - o relógio da fita para, porque `controle` sai na primeira linha.
+     *
+     * Uma causa, quatro sintomas, nenhum erro no console. O conserto é a pergunta
+     * que faltava: este evento é da janela que está valendo agora? */
+    const estaJanela = pipWin;
+    estaJanela.addEventListener('pagehide', () => {
+      if (pipWin !== estaJanela) return;
       pipWin = null; pipRelogio = pipTexto = pipFrames = pipVm = pipVs = pipCalar = null;
       pipMarcar = pipTela = pipPausa = pipAnotar = null;
       /* Fechada por engano, e a gravação continua: some o relógio, o medidor,

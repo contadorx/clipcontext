@@ -141,6 +141,50 @@ campo de emissor, a contagem de erros na identificação. Marcar uma tela é
 
 ---
 
+## ACHADO FECHADO — a causa de "salvar não funciona" e "apontar não abre" era uma só *(05/10)*
+
+**O relato chegou três vezes**, com três frases: *"o apontar não está abrindo a
+tela"* (18/09), *"o botão de salvar e voltar a gravar não está funcionando"*
+(16/09) e de novo *"botão salvar e voltar a gravar não funciona"* (05/10). Os
+Builds 62, 63 e 64 consertaram coisas reais em volta — a saída ligada por
+último, a barra estreita, a janela recusada — e o defeito ficou.
+
+**A causa:** os dois `pagehide` da janelinha (o da fita e o do editor) faziam
+`pipWin = null` **sem perguntar de quem era o evento**. Trocar fita por editor
+é: fechar a atual, pedir a nova, guardar a nova em `pipWin`. No Chrome de
+verdade o `pagehide` da janela fechada chega **numa tarefa seguinte** — depois
+da troca — e zerava a referência da janela **nova**. Daí em diante, tudo que
+pergunta por `pipWin` desiste em silêncio:
+
+- o **salvar** chama `reabrirPip`, que vê `!pipWin` e não fecha nada — e a
+  gravação volta a correr **com o editor na frente do cliente**;
+- o **apontar** vê `!pipWin` e não abre;
+- a **caixa de anotação** do editor não é achada, e o botão dela não acende;
+- o **relógio** da fita para, porque `controle` sai na primeira linha.
+
+Uma causa, quatro sintomas, nenhum erro no console. O conserto é uma pergunta:
+*este evento é da janela que está valendo agora?*
+
+**POR QUE TRÊS BUILDS NÃO VIRAM — e esta é a parte que precisa ficar.** O
+remendo da régua disparava o `pagehide` **dentro do `close()`**, na mesma
+linha. Com isso o zero acontecia **antes** da troca e não fazia mal nenhum. O
+remendo era mais **síncrono** que o navegador, e um remendo mais síncrono que
+o real esconde exatamente as corridas que só existem por causa da assincronia.
+É a terceira lição da mesma família nesta feature:
+
+1. Build 61 — o remendo **obedecia** ao tamanho pedido; o Chrome não.
+2. Build 64 — o remendo **nunca recusava** a janela; o Chrome recusa.
+3. Build 66 — o remendo **disparava eventos na hora**; o Chrome dispara depois.
+
+Agora o `pagehide` do remendo chega 80ms depois do `close()`, a janela velha sai
+do seletor na hora mas continua na tela até lá, e pedir uma janela nova com
+outra aberta fecha a outra do mesmo jeito — antes ela era apagada sem `pagehide`
+nenhum. **Medido nos dois sentidos:** o código anterior, contra o remendo fiel,
+reprova (*"nada anotado"*, e trava no botão de salvar anotação que nunca
+acende); o código consertado passa inteiro.
+
+---
+
 ## ACHADO FECHADO — o PDF dependia do jsdelivr, e falhava mudo *(21/09)*
 
 **De um QA usando a ferramenta de verdade:** *"algumas vezes o PDF não foi
