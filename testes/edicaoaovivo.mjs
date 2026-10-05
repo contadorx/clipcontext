@@ -92,6 +92,33 @@ console.log('\n[1] o botão existe nas cinco línguas, e não repete o rótulo d
 const shimPip = () => {
   window.__pipPedidos = [];
   window.__pipResizes = [];
+  /* ---- O `pagehide` CHEGA DEPOIS, COMO NO CHROME DE VERDADE ----
+   *
+   * Este remendo disparava o `pagehide` DENTRO do `close()`, na mesma linha.
+   * No Chrome não é assim: fechar uma janela agenda o fechamento, e o
+   * `pagehide` dela chega numa tarefa seguinte — depois de o produto já ter
+   * pedido a janela nova e guardado a referência dela.
+   *
+   * Essa diferença escondeu um defeito por TRÊS builds. Os dois `pagehide` da
+   * janelinha zeravam `pipWin` sem conferir de quem era o evento; com o
+   * `pagehide` síncrono, o zero acontecia ANTES da troca e não fazia mal. No
+   * Chrome ele chega DEPOIS e zera a referência da janela NOVA: o salvar passa
+   * a não fechar nada, e o apontar deixa de abrir. Foi exatamente o que chegou
+   * do campo, duas vezes, com esteira verde.
+   *
+   * A janela velha sai do seletor `#pipFake` na hora — para a régua achar a
+   * nova — mas continua na tela até o `pagehide`, como a de verdade continua
+   * no monitor até o sistema apagá-la. */
+  window.__pipAtrasoPagehide = 80;
+  window.fecharDeVerdade = (w, fr) => {
+    if (fr.dataset.fechando) return;
+    fr.dataset.fechando = '1';
+    fr.id = 'pipFechando';
+    setTimeout(() => {
+      try { w.dispatchEvent(new Event('pagehide')); } catch (e) {}
+      fr.remove();
+    }, window.__pipAtrasoPagehide);
+  };
   window.__pipOpcoes = [];
   window.__pipTeto = null;
   const dpip = {
@@ -107,8 +134,12 @@ const shimPip = () => {
       if (window.__pipTeto && (width > window.__pipTeto.w || height > window.__pipTeto.h)) {
         throw new Error('teto-do-navegador');
       }
+      /* Pedir uma janela nova com outra aberta FECHA a outra — é o que o Chrome
+         faz, e com o mesmo `pagehide` atrasado de um `close()`. A versão
+         anterior deste remendo apagava o iframe velho em silêncio, sem
+         `pagehide` nenhum: descrevia um navegador que não existe. */
       const velho = document.getElementById('pipFake');
-      if (velho) velho.remove();
+      if (velho && velho.contentWindow) fecharDeVerdade(velho.contentWindow, velho);
       const fr = document.createElement('iframe');
       fr.id = 'pipFake';
       fr.style.cssText = 'position:fixed;right:0;bottom:0;z-index:2147483647;border:0;background:#0b0d11';
@@ -135,10 +166,7 @@ const shimPip = () => {
         const achar = w.document.getElementById.bind(w.document);
         w.document.getElementById = (id) => (id === window.__pipSemId ? null : achar(id));
       }
-      w.close = () => {
-        try { w.dispatchEvent(new Event('pagehide')); } catch (e) {}
-        fr.remove();
-      };
+      w.close = () => fecharDeVerdade(w, fr);
       /* O NAVEGADOR DE VERDADE PODE IGNORAR O TAMANHO PEDIDO NA ABERTURA — o
          Chrome guarda o da janela de picture-in-picture por site e reabre no
          que a pessoa deixou. Por isso o produto manda um `resizeTo` depois de
@@ -802,10 +830,16 @@ console.log('\n[5] salvar fecha a janela, devolve a fita e RETOMA a gravação')
     window.__amostras = [];
     window.__amostraTic = setInterval(() => {
       try {
-        const fr = document.getElementById('pipFake');
-        const doc = fr && fr.contentDocument;
+        /* QUALQUER janela que ainda esteja na tela com o editor dentro — e não
+           só a do seletor. A que está fechando sai do `#pipFake` na hora, mas
+           continua no monitor até o `pagehide`: é ali que a captura não pode
+           encostar. */
+        const ed = [...document.querySelectorAll('iframe')].some((fr) => {
+          try { return !!(fr.contentDocument && fr.contentDocument.getElementById('edImg')); }
+          catch (e) { return false; }
+        });
         window.__amostras.push({
-          ed: !!(doc && doc.getElementById('edImg')),
+          ed,
           n: (window.__quadros() || []).length,
         });
       } catch (e) { window.__amostraErro = String(e && e.message || e); }

@@ -168,39 +168,39 @@
       "hosts": [
         "cdn.jsdelivr.net/npm/jspdf"
       ],
-      "quando": "sozinho",
+      "quando": "gesto",
       "onde": [
         "web"
       ],
       "conteudo": false,
       "pt": {
         "quem": "A biblioteca que gera o PDF",
-        "leva": "Nada. É um download: o CDN fica sabendo que alguém abriu a página, e nada mais. No pacote offline ela vem embutida.",
-        "gesto": "Abrir a página",
+        "leva": "Nada. Ela é servida pelo MESMO endereço que serviu esta página, e só quando você pede o PDF — abrir a ferramenta não busca nada. O jsdelivr só entra se o nosso arquivo faltar, e mesmo aí é um download: ele fica sabendo que alguém pediu um PDF, e nada mais. No pacote offline ela vem embutida.",
+        "gesto": "Clicar em “Gerar PDF”",
         "nunca": "Seu áudio, sua imagem, seu texto"
       },
       "en": {
         "quem": "The library that makes the PDF",
-        "leva": "Nothing. It is a download: the CDN learns that someone opened the page, and nothing more. In the offline package it comes embedded.",
-        "gesto": "Opening the page",
+        "leva": "Nothing. It is served by the SAME address that served this page, and only when you ask for the PDF — opening the tool fetches nothing. jsdelivr only steps in if our file is missing, and even then it is a download: it learns that someone asked for a PDF, and nothing more. In the offline package it comes embedded.",
+        "gesto": "Clicking “Generate PDF”",
         "nunca": "Your audio, your image, your text"
       },
       "es": {
         "quem": "La biblioteca que genera el PDF",
-        "leva": "Nada. Es una descarga: el CDN se entera de que alguien abrió la página, y nada más. En el paquete offline viene incrustada.",
-        "gesto": "Abrir la página",
+        "leva": "Nada. La sirve la MISMA dirección que sirvió esta página, y solo cuando pides el PDF — abrir la herramienta no busca nada. jsdelivr solo entra si falta nuestro archivo, y aun así es una descarga: se entera de que alguien pidió un PDF, y nada más. En el paquete offline viene incrustada.",
+        "gesto": "Pulsar «Generar PDF»",
         "nunca": "Tu audio, tu imagen, tu texto"
       },
       "de": {
         "quem": "Die Bibliothek, die das PDF erzeugt",
-        "leva": "Nichts. Es ist ein Download: das CDN erfährt, dass jemand die Seite geöffnet hat, mehr nicht. Im Offline-Paket ist sie eingebettet.",
-        "gesto": "Die Seite öffnen",
+        "leva": "Nichts. Sie wird von DERSELBEN Adresse ausgeliefert, die diese Seite ausgeliefert hat, und nur wenn Sie das PDF anfordern — das Öffnen des Werkzeugs lädt nichts. jsdelivr springt nur ein, wenn unsere Datei fehlt, und selbst dann ist es ein Download: es erfährt, dass jemand ein PDF angefordert hat, mehr nicht. Im Offline-Paket ist sie eingebettet.",
+        "gesto": "Auf „PDF erzeugen“ klicken",
         "nunca": "Ihr Ton, Ihr Bild, Ihr Text"
       },
       "fr": {
         "quem": "La bibliothèque qui produit le PDF",
-        "leva": "Rien. C’est un téléchargement : le CDN apprend que quelqu’un a ouvert la page, et rien de plus. Dans le paquet hors ligne, elle est intégrée.",
-        "gesto": "Ouvrir la page",
+        "leva": "Rien. Elle est servie par la MÊME adresse que cette page, et seulement quand vous demandez le PDF — ouvrir l’outil ne va rien chercher. jsdelivr n’intervient que si notre fichier manque, et même alors c’est un téléchargement : il apprend que quelqu’un a demandé un PDF, et rien de plus. Dans le paquet hors ligne, elle est intégrée.",
+        "gesto": "Cliquer sur « Générer le PDF »",
         "nunca": "Votre audio, votre image, votre texte"
       },
       "nossoDominio": false

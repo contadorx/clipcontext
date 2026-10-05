@@ -141,6 +141,113 @@ campo de emissor, a contagem de erros na identificação. Marcar uma tela é
 
 ---
 
+## ACHADO FECHADO — a causa de "salvar não funciona" e "apontar não abre" era uma só *(05/10)*
+
+**O relato chegou três vezes**, com três frases: *"o apontar não está abrindo a
+tela"* (18/09), *"o botão de salvar e voltar a gravar não está funcionando"*
+(16/09) e de novo *"botão salvar e voltar a gravar não funciona"* (05/10). Os
+Builds 62, 63 e 64 consertaram coisas reais em volta — a saída ligada por
+último, a barra estreita, a janela recusada — e o defeito ficou.
+
+**A causa:** os dois `pagehide` da janelinha (o da fita e o do editor) faziam
+`pipWin = null` **sem perguntar de quem era o evento**. Trocar fita por editor
+é: fechar a atual, pedir a nova, guardar a nova em `pipWin`. No Chrome de
+verdade o `pagehide` da janela fechada chega **numa tarefa seguinte** — depois
+da troca — e zerava a referência da janela **nova**. Daí em diante, tudo que
+pergunta por `pipWin` desiste em silêncio:
+
+- o **salvar** chama `reabrirPip`, que vê `!pipWin` e não fecha nada — e a
+  gravação volta a correr **com o editor na frente do cliente**;
+- o **apontar** vê `!pipWin` e não abre;
+- a **caixa de anotação** do editor não é achada, e o botão dela não acende;
+- o **relógio** da fita para, porque `controle` sai na primeira linha.
+
+Uma causa, quatro sintomas, nenhum erro no console. O conserto é uma pergunta:
+*este evento é da janela que está valendo agora?*
+
+**POR QUE TRÊS BUILDS NÃO VIRAM — e esta é a parte que precisa ficar.** O
+remendo da régua disparava o `pagehide` **dentro do `close()`**, na mesma
+linha. Com isso o zero acontecia **antes** da troca e não fazia mal nenhum. O
+remendo era mais **síncrono** que o navegador, e um remendo mais síncrono que
+o real esconde exatamente as corridas que só existem por causa da assincronia.
+É a terceira lição da mesma família nesta feature:
+
+1. Build 61 — o remendo **obedecia** ao tamanho pedido; o Chrome não.
+2. Build 64 — o remendo **nunca recusava** a janela; o Chrome recusa.
+3. Build 66 — o remendo **disparava eventos na hora**; o Chrome dispara depois.
+
+Agora o `pagehide` do remendo chega 80ms depois do `close()`, a janela velha sai
+do seletor na hora mas continua na tela até lá, e pedir uma janela nova com
+outra aberta fecha a outra do mesmo jeito — antes ela era apagada sem `pagehide`
+nenhum. **Medido nos dois sentidos:** o código anterior, contra o remendo fiel,
+reprova (*"nada anotado"*, e trava no botão de salvar anotação que nunca
+acende); o código consertado passa inteiro.
+
+---
+
+## ACHADO FECHADO — o PDF dependia do jsdelivr, e falhava mudo *(21/09)*
+
+**De um QA usando a ferramenta de verdade:** *"algumas vezes o PDF não foi
+gerado, e embora existam instruções para conversão, acabei utilizando apenas o
+HTML gerado"*. Ele tratou como incômodo. **Eram dois defeitos.**
+
+**1. O endereço.** A versão hospedada carregava o jsPDF do jsdelivr, num
+`<script>` **sem queda nenhuma**, e o gerador fazia `window.jspdf` direto. Um
+proxy corporativo que bloqueie o CDN — rotina no ambiente de quem testa
+software — derrubava o PDF **e só o PDF**, porque o HTML não usa biblioteca.
+Daí o sintoma ser "às vezes". **Não era às vezes: era determinístico por
+ambiente.** O conserto já estava no repositório: `vendor/jspdf.umd.min.js` é o
+mesmo arquivo que o pacote offline embute.
+
+**2. O silêncio.** O gerador tinha `try/finally` **sem `catch`**: a linha de
+status ficava parada em *"Montando o PDF…"* para sempre e o erro virava
+rejeição não tratada. A pessoa não sabia se tinha perdido a gravação. O
+`finally` consertava o botão; ele não consertava a frase.
+
+**E a esteira cobrou o preço da primeira tentativa:** trocar o CDN pelo nosso
+endereço **mantendo a tag fixa** fez **24 réguas** acusarem
+`Unexpected token '<'` — os servidorezinhos delas respondem a página HTML para
+qualquer endereço, e o navegador tentava executar HTML como script. Consertar 24
+réguas seria tratar o sintoma. **A tag fixa era a causa**, e tirá-la é melhor
+produto por dois motivos que não têm nada a ver com teste: 365KB deixam de ser
+cobrados de todo mundo que abre a ferramenta por um formato que boa parte nunca
+exporta, e um endereço que não responde deixa de virar erro de página em toda
+visita. Agora a biblioteca só é buscada quando alguém aperta **Gerar PDF** — de
+casa primeiro, CDN como queda.
+
+**E isso melhorou a promessa de rede.** A matriz de egressão declarava o jsPDF
+como `quando: "sozinho"`, gesto *"Abrir a página"* — verdade até aqui. Agora
+abrir a ferramenta **não contata terceiro nenhum**: `egressao.mjs` mede
+*2 pedidos em 9s parado: localhost*. A linha virou `quando: "gesto"` nas cinco
+línguas.
+
+**E uma régua que mentia:** `cabec.mjs` é a única que serve o service worker de
+verdade — e requisição feita de dentro de um service worker **não passa pelo
+`pg.route()`** do Playwright. O servidor dela devolvia HTML para o endereço da
+biblioteca. Quem mentia era o teste, não o produto: em produção o arquivo
+existe. Passou a existir lá também.
+
+---
+
+## O QUE O RELATO PEDIU E JÁ EXISTIA *(21/09)*
+
+Dos quatro pontos do mesmo QA, **dois já estão construídos** e ele não achou —
+o que é falha de descoberta, não de capacidade, e o conserto é outro:
+
+- **"mostrar só os prints marcados"**: existe *"Manter só as marcadas (N)"*,
+  mas como **ação destrutiva opt-in**. Ele pede **ordem de exibição**. A dele é
+  melhor: a tela abre pedindo uma decisão em vez de reconhecer o trabalho que a
+  pessoa já fez ao vivo.
+- **"agrupar prints de um passo"**: existe inteiro — *"Tela adicional a este
+  passo"* na gravação, *"Abre um passo / Junta ao anterior"* na revisão, e o
+  documento já diz "Tela 2 do Passo 3".
+
+E **um que não existe em lugar nenhum**: o índice clicável. Pior do que ele
+disse — o *"Índice do vídeo"* só é gerado no **PDF e no DOCX**; no **HTML, que
+é o que ele acabou usando, não há índice algum**.
+
+---
+
 ## ACHADO FECHADO — o editor não abria, e sumia a fita junto *(18/09)*
 
 **O relato:** *"o apontar não está abrindo a tela"*.
