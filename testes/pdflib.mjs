@@ -162,6 +162,18 @@ ok('e aponta o caminho que funciona', /HTML/i.test(st.txt), st.txt.slice(0, 120)
 /* E o botão volta: sem isso a pessoa não pode nem tentar de novo. */
 ok('o botão de exportar volta a funcionar',
    await pg.evaluate(() => !document.getElementById('go').disabled));
+/* E VOLTA A DIZER O QUE FAZ. Durante a montagem ele diz "Montando o PDF…"
+   e fica listrado; um erro no meio não pode deixá-lo assim — um botão que
+   continua dizendo "montando" depois do erro é a mesma mentira da linha de
+   status, só que maior e mais no meio da tela. */
+const bt = await pg.evaluate(() => {
+  const g = document.getElementById('go'), w = document.getElementById('pdfBarWrap');
+  return { txt: g.textContent.trim(), listrado: g.classList.contains('montando'),
+           ocupado: g.getAttribute('aria-busy'), barra: !!w && !w.classList.contains('hide') };
+});
+ok('  e volta a se chamar "Gerar PDF", sem as listras de trabalhando',
+   bt.txt === 'Gerar PDF' && !bt.listrado && !bt.ocupado, JSON.stringify(bt));
+ok('  e a barra do PDF some junto', !bt.barra);
 
 await br.close(); srv.close();
 console.log(falhas ? `\n${falhas} FALHA(S)` : '\nA biblioteca do PDF: tudo passou.');

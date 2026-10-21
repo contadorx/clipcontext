@@ -244,7 +244,9 @@ console.log(`\n[1] gravando: cabe em ${LARG}×${ALT}`);
        frases existirem nos cinco idiomas é o `chaves.mjs` quem cobra. */
     ok('e o produto dá nome a ele, porque ele é só ícone',
        /btn\.setAttribute\('aria-label', t\(vira\)\)/.test(app) &&
-       /const vira = pipModo\(\) === 'min' \? 'pipVirarCompleta' : 'pipVirarFita'/.test(app));
+       /* Três tamanhos desde o Build 67: o nome sai de UMA tabela, que diz
+          ao mesmo tempo para onde o botão vai e como ele se chama. */
+       /const vira = CICLO_PIP\[pipModo\(\)\]\[1\]/.test(app));
     {
     }
   }
@@ -642,9 +644,12 @@ console.log(`\n[1a] a fita: cabe em ${LARG_MIN}×${ALT_MIN}, e sobra só o que s
     ok('o produto mede com o contador FORA da conta',
        /preciso \+= \(e === txt\) \? 0 :/.test(app));
     ok('  e só encolhe: nunca cresce além do que pediu',
-       /preciso >= 300 && preciso < teto/.test(app));
+       /preciso >= piso && preciso < teto/.test(app) &&
+       /const piso = micro \? 100 : 300;/.test(app));
+    /* Na mínima o roteiro está escondido — não há linha do passo para
+       proteger, e ela encolhe com ou sem lista colada. */
     ok('  e não encolhe quando há roteiro, que é quem usa a largura',
-       /if \(!b \|\| b\.classList\.contains\('comRoteiro'\)\) return;/.test(app));
+       /if \(!b \|\| \(b\.classList\.contains\('comRoteiro'\) && !micro\)\) return;/.test(app));
 
     const manda = /pipWin\.resizeTo\(tam\.w, tam\.h\)/.test(app);
     const soQuandoMuda = /antes !== !!roteiro\.length && pipModo\(\) === 'min'/.test(app);
@@ -729,6 +734,164 @@ console.log(`\n[1a] a fita: cabe em ${LARG_MIN}×${ALT_MIN}, e sobra só o que s
   await pg.setViewportSize({ width: LARG, height: ALT });
   await pg.evaluate(() => { document.body.className = 'gravando'; });
   await pg.waitForTimeout(120);
+}
+
+console.log('\n[1m] a janela mínima: marcar, apontar, tamanho e o ponto');
+{
+  /* O PEDIDO: "uma janela muito minúscula, com somente o botão marcar". O
+     combinado foi marcar, apontar, o botão de tamanho e um ponto vermelho que
+     pisca enquanto grava — e mais nada na tela.
+     Ela é a fita com mais coisa escondida, então o que esta régua cobra é a
+     SUBTRAÇÃO: quem fica, quem sai, e que quem sai continua no documento (a
+     tecla S aperta o parar escondido). Página própria, para não herdar nem
+     deixar estado para os blocos de cima e de baixo. */
+  const mm = app.match(/TAM_PIP_MICRO = \{ w: (\d+), h: (\d+) \}/);
+  ok('a mínima declara o tamanho dela', !!mm, mm ? `${mm[1]}×${mm[2]}` : '(não achei)');
+  const [MW, MH] = mm ? [+mm[1], +mm[2]] : [200, 44];
+  ok('  e ela é mais estreita que a fita, e não mais alta', MW < LARG_MIN && MH <= ALT_MIN,
+     `${MW}×${MH} contra ${LARG_MIN}×${ALT_MIN}`);
+  ok('o botão de tamanho dá a volta inteira: completa, fita, mínima',
+     /completa: \['min', 'pipVirarFita'\]/.test(app) &&
+     /min:\s+\['micro', 'pipVirarMinima'\]/.test(app) &&
+     /micro:\s+\['completa', 'pipVirarCompleta'\]/.test(app));
+  ok('  e a mínima abre com a classe dela', /d\.body\.classList\.add\('micro'\)/.test(app));
+
+  const dic = (L, chave) => {
+    const i = app.indexOf(`\n    ${L}: {`);
+    if (i < 0) return '';
+    const m = app.slice(i, i + 95000).match(new RegExp(chave + ":'([^']*)'"));
+    return m ? m[1] : '';
+  };
+  const pm = await (await br.newContext({ viewport: { width: MW, height: MH } })).newPage();
+  const larguras = {};
+  for (const L of ['pt', 'en', 'es', 'de', 'fr']) {
+    await pm.setContent(`<!doctype html><html><head><meta charset="utf-8">` +
+      `<style>${css}</style></head><body>${corpo}</body></html>`);
+    /* Os rótulos do dicionário, como o produto pinta na fita: a palavra
+       curta dentro e a frase inteira no aria-label. Na mínima a palavra não
+       aparece — e é justamente por isso que ela tem que estar lá. */
+    await pm.evaluate((rot) => {
+      document.body.className = 'min micro gravando';
+      for (const [id, [curto, longo]] of Object.entries(rot)) {
+        const b = document.getElementById(id);
+        if (b) { b.textContent = curto; b.setAttribute('aria-label', longo); b.disabled = false; }
+      }
+      const r = document.getElementById('rel'); if (r) r.textContent = '12:34';
+    }, { stop: [dic(L, 'pipCurtoParar'), dic(L, 'pipStop')],
+         marcar: [dic(L, 'pipCurtoMarcar'), dic(L, 'recMarkBtn')],
+         erro: [dic(L, 'pipCurtoErro'), dic(L, 'recErroBtn')],
+         maisTela: [dic(L, 'pipCurtoTela'), dic(L, 'recTelaBtn')],
+         anotar: [dic(L, 'pipCurtoAnotar'), dic(L, 'pipAnotar')] });
+    await pm.waitForTimeout(80);
+    const r = await pm.evaluate(() => {
+      const vis = (e) => !!e && getComputedStyle(e).display !== 'none' &&
+                         e.getBoundingClientRect().width > 0;
+      const b = document.body, cs = getComputedStyle(b), txt = document.getElementById('txt');
+      const filhos = [...b.children].filter((e) => {
+        const s2 = getComputedStyle(e);
+        return s2.display !== 'none' && s2.position === 'static';
+      });
+      const gap = parseFloat(cs.columnGap || 0) || 0;
+      let n = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight) + gap * Math.max(0, filhos.length - 1);
+      for (const e of filhos) n += (e === txt) ? 0 : e.getBoundingClientRect().width;
+      const ids = ['marcar', 'anotar', 'tam', 'stop', 'maisTela', 'erro', 'pausa', 'calar'];
+      const ve = {}; for (const i of ids) ve[i] = vis(document.getElementById(i));
+      const icone = (id) => {
+        const m = getComputedStyle(document.getElementById(id), '::before');
+        return /url\(/.test(m.maskImage || m.webkitMaskImage || '');
+      };
+      const alvo = (id) => { const q = document.getElementById(id).getBoundingClientRect();
+                             return q.width >= 28 && q.height >= 28; };
+      const fora = [...document.querySelectorAll('body *')].filter((e) => {
+        if (!vis(e)) return false;
+        const q = e.getBoundingClientRect();
+        return q.right > innerWidth + 1 || q.bottom > innerHeight + 1;
+      }).map((e) => e.id || e.className || e.tagName);
+      return { largura: Math.ceil(n) + 2, ve,
+               ponto: vis(document.querySelector('.dot')),
+               pisca: getComputedStyle(document.querySelector('.dot')).animationName,
+               relogio: vis(document.getElementById('rel')), texto: vis(txt),
+               icones: icone('marcar') && icone('anotar'),
+               alvos: alvo('marcar') && alvo('anotar') && alvo('tam'),
+               nomes: ['marcar', 'anotar'].every((i) => {
+                 const e = document.getElementById(i);
+                 return (e.textContent || '').trim().length > 0 &&
+                        (e.getAttribute('aria-label') || '').length > 3; }),
+               parar: !!document.getElementById('stop'), fora };
+    });
+    larguras[L] = r.largura;
+    if (L === 'pt') {
+      ok('na tela ficam só marcar, apontar e o tamanho',
+         r.ve.marcar && r.ve.anotar && r.ve.tam &&
+         !r.ve.stop && !r.ve.maisTela && !r.ve.erro && !r.ve.pausa && !r.ve.calar,
+         JSON.stringify(r.ve));
+      ok('  e o ponto, que pisca', r.ponto && r.pisca === 'pulsa', r.pisca);
+      ok('  sem relógio e sem a contagem de quadros', !r.relogio && !r.texto);
+      ok('os dois botões são desenho, e cada um tem o seu', r.icones);
+      ok('  com alvo que se acerta sem mirar', r.alvos);
+      ok('  e a palavra continua lá para o leitor de tela', r.nomes);
+      ok('o parar saiu da tela, e não do documento: a tecla S ainda o acha', r.parar);
+    }
+    const cabe = r.largura <= MW && r.fora.length === 0;
+    ok(`  ${L}: ${r.largura}px, dentro dos ${MW}×${MH} pedidos`, cabe,
+       cabe ? '' : `largura ${r.largura}, para fora: ${r.fora.join(' ')}`);
+  }
+  /* SÓ DESENHO QUER DIZER A MESMA LARGURA NOS CINCO. Se um idioma sair mais
+     largo, alguma palavra voltou a aparecer — e numa janela de 200px uma
+     palavra é o que não cabe. */
+  const ls = Object.values(larguras);
+  ok('e ela mede o mesmo nos cinco idiomas', Math.max(...ls) - Math.min(...ls) <= 1,
+     JSON.stringify(larguras));
+  ok('  e o produto encolhe até essa medida, com piso que não a impede',
+     Math.max(...ls) >= 100 && /const tam = micro \? TAM_PIP_MICRO : TAM_PIP\(true\);/.test(app),
+     String(Math.max(...ls)));
+
+  /* ANTES DE GRAVAR: o texto volta e os botões saem. Preparando, baixando,
+     o erro que impediu de começar — na mínima não há outro lugar para isso, e
+     um ponto vermelho piscando durante o preparando diria gravando antes da
+     hora. */
+  const antes = await pm.evaluate(() => {
+    document.body.className = 'min micro';
+    const t = document.getElementById('txt'); t.textContent = 'Preparando…';
+    const vis = (e) => getComputedStyle(e).display !== 'none' && e.getBoundingClientRect().width > 0;
+    const d = getComputedStyle(document.querySelector('.dot'));
+    return { texto: vis(t), larguraTexto: Math.round(t.getBoundingClientRect().width),
+             marcar: vis(document.getElementById('marcar')),
+             anotar: vis(document.getElementById('anotar')),
+             pisca: d.animationName, cor: d.backgroundColor };
+  });
+  ok('antes de gravar, a frase aparece e tem onde caber', antes.texto && antes.larguraTexto >= 90,
+     `${antes.larguraTexto}px`);
+  ok('  e os botões apagados saem da frente', !antes.marcar && !antes.anotar);
+  ok('  e o ponto fica parado e cinza', antes.pisca === 'none' && !/239, 132, 132/.test(antes.cor),
+     `${antes.pisca} ${antes.cor}`);
+
+  /* NA CONTAGEM sobra só o número. O corpo esconde tudo menos o parar — e na
+     mínima o parar também saiu. Sem a regra dela a janela ficaria vazia
+     durante os três segundos em que a pessoa mais olha para ela. */
+  const conta = await pm.evaluate(() => {
+    document.body.className = 'min micro contando';
+    const t = document.getElementById('txt'); t.textContent = '3'; t.classList.add('contando');
+    const q = t.getBoundingClientRect();
+    return { vis: getComputedStyle(t).display !== 'none' && q.width > 0,
+             px: parseFloat(getComputedStyle(t).fontSize), cabe: q.bottom <= innerHeight + 1 };
+  });
+  ok('na contagem o número aparece, grande e dentro da janela',
+     conta.vis && conta.px >= 20 && conta.cabe, `${conta.px}px, cabe=${conta.cabe}`);
+
+  /* O DESENHO DO TAMANHO diz para onde ele leva: da fita o próximo é MENOR,
+     da mínima o próximo é maior. */
+  const setas = await pm.evaluate(() => {
+    const m = () => { const s2 = getComputedStyle(document.getElementById('tam'), '::before');
+                      return s2.maskImage || s2.webkitMaskImage; };
+    document.body.className = 'gravando'; const completa = m();
+    document.body.className = 'min gravando'; const fita = m();
+    document.body.className = 'min micro gravando'; const micro = m();
+    return { completa, fita, micro };
+  });
+  ok('o desenho do tamanho: encolher na completa e na fita, crescer na mínima',
+     setas.completa === setas.fita && setas.fita !== setas.micro && /url\(/.test(setas.micro));
+  await pm.context().close();
 }
 
 console.log('\n[1a2] a palavra curta é para os olhos; o nome é a frase inteira');
