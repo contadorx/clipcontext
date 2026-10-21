@@ -1048,6 +1048,116 @@ console.log('\n[9] trocar o tamanho da janelinha durante a gravação não estou
   await pg2.close();
 }
 
+/* --------------------------------------------------------------- [9a] ----
+   A JANELA MÍNIMA, EM USO. A régua `janelinha.mjs` mede o desenho dela parado;
+   aqui ela grava: o que aparece, se encolhe até o conteúdo, se o apontar sai
+   dela e volta para ela, se o botão de tamanho dá a volta inteira, e se a
+   tecla S encerra com o parar fora da tela — que foi o custo combinado de
+   tirá-lo dali. Página própria e modo próprio, porque o modo mora no
+   `localStorage` e é a mesma origem das outras páginas deste contexto. */
+console.log('\n[9a] a janela mínima: grava, aponta, volta mínima e para no S');
+{
+  const pg4 = await ctx.newPage();
+  pg4.on('dialog', d => d.accept());
+  const err4 = []; pg4.on('pageerror', e => err4.push(e.message));
+  await pg4.addInitScript(() => {
+    try { if (!sessionStorage.getItem('jaFoi')) {
+      localStorage.setItem('Walkstamp.janelinhaModo', 'micro');
+      sessionStorage.setItem('jaFoi', '1'); } } catch (e) {}
+  });
+  await pg4.goto(`http://localhost:${PORTA}/app.html?lang=pt`);
+  await pg4.selectOption('#modelo', 'evidencia').catch(() => {});
+  await pg4.locator('#semTr').check();
+  await pg4.evaluate(() => window.__contagem(1));
+  await pg4.locator('#rec').click();
+  await pg4.waitForSelector('#recStop:visible', { timeout: 40000 });
+  await pg4.waitForTimeout(1500);
+  const f4 = () => pg4.frameLocator('#pipFake');
+  const estado = () => pg4.evaluate(() => {
+    const fr = document.getElementById('pipFake');
+    const d = fr && fr.contentDocument;
+    if (!d || !d.body) return null;
+    const vis = (id) => { const e = d.getElementById(id);
+      return !!e && fr.contentWindow.getComputedStyle(e).display !== 'none' &&
+             e.getBoundingClientRect().width > 0; };
+    const dot = d.querySelector('.dot');
+    return { classe: d.body.className,
+             ve: { marcar: vis('marcar'), anotar: vis('anotar'), tam: vis('tam'),
+                   stop: vis('stop'), maisTela: vis('maisTela'), erro: vis('erro'),
+                   rel: vis('rel') },
+             pisca: dot ? fr.contentWindow.getComputedStyle(dot).animationName : '',
+             largura: fr.getBoundingClientRect().width,
+             altura: fr.getBoundingClientRect().height };
+  });
+  const tecla = (k) => pg4.evaluate((k2) => {
+    const d = document.getElementById('pipFake').contentDocument;
+    d.dispatchEvent(new KeyboardEvent('keydown', { key: k2, bubbles: true }));
+  }, k);
+
+  const e1 = await estado();
+  ok('a janelinha abriu mínima', !!e1 && /\bmicro\b/.test(e1.classe) && /\bmin\b/.test(e1.classe),
+     e1 ? e1.classe : '(sem janela)');
+  ok('  com marcar, apontar e tamanho, e só eles',
+     !!e1 && e1.ve.marcar && e1.ve.anotar && e1.ve.tam &&
+     !e1.ve.stop && !e1.ve.maisTela && !e1.ve.erro && !e1.ve.rel,
+     e1 ? JSON.stringify(e1.ve) : '');
+  ok('  e o ponto pisca, porque está gravando', !!e1 && e1.pisca === 'pulsa', e1 && e1.pisca);
+  const pedido = await pg4.evaluate(() => window.__pipPedidos[0]);
+  ok('ela foi pedida no tamanho da mínima', !!pedido && pedido.width === 200 && pedido.height === 44,
+     JSON.stringify(pedido));
+  const enc = await pg4.evaluate(() => window.__pipResizes.slice());
+  const apertou = enc.find((r) => r.h === 44 && r.w < 200 && r.w >= 100);
+  ok('  e encolheu até o conteúdo medido', !!apertou && e1.largura < 200,
+     JSON.stringify(enc) + ` · janela ${e1 && e1.largura}px`);
+  const anot = await pg4.evaluate(() => window.__fitaTam && window.__fitaTam());
+  ok('o diagnóstico sabe o que foi pedido e o que veio',
+     !!anot && anot.modo === 'micro' && /^\d+x44$/.test(anot.pediu) && /^\d+x\d+$/.test(anot.veio),
+     JSON.stringify(anot));
+
+  /* M marca, como na fita: o atalho aperta o botão, que está à vista. */
+  const manuais = () => pg4.evaluate(() => (window.__quadros() || []).filter(f => f.manual).length);
+  const m0 = await manuais();
+  await tecla('m');
+  await pg4.waitForTimeout(700);
+  ok('a tecla M marca o passo', (await manuais()) === m0 + 1, `${m0} → ${await manuais()}`);
+
+  /* APONTAR SAI DA MÍNIMA E VOLTA PARA ELA. O editor é outro corpo, e a
+     volta passa pelo mesmo `reabrirPip` — se ele lesse o modo errado, a
+     pessoa voltaria numa janela que não escolheu. */
+  await f4().locator('#anotar').click();
+  await pg4.waitForTimeout(900);
+  ok('o apontar abre o editor a partir da mínima', await f4().locator('#edImg').count() === 1);
+  await f4().locator('#edSalvar').click();
+  await pg4.waitForTimeout(1500);
+  const e2 = await estado();
+  ok('  e salvar devolve a MÍNIMA, e não outra', !!e2 && /\bmicro\b/.test(e2.classe) &&
+     e2.ve.anotar && !e2.ve.stop, e2 ? e2.classe : '(sem janela)');
+
+  /* A VOLTA INTEIRA DO BOTÃO DE TAMANHO: mínima → completa → fita → mínima. */
+  const voltas = [];
+  for (let i = 0; i < 3; i++) {
+    await f4().locator('#tam').click();
+    await pg4.waitForTimeout(1300);
+    const e3 = await estado();
+    voltas.push(!e3 ? 'nada' : /\bmicro\b/.test(e3.classe) ? 'micro'
+                : /\bmin\b/.test(e3.classe) ? 'min' : 'completa');
+  }
+  ok('o botão de tamanho dá a volta: completa, fita, mínima',
+     voltas.join(',') === 'completa,min,micro', voltas.join(' → '));
+  ok('  e o relógio continua andando atrás da janela',
+     /[1-9]/.test((await f4().locator('#rel').textContent() || '')));
+
+  /* O PARAR ESTÁ FORA DA TELA, e a tecla S tem que achá-lo. Foi o custo
+     combinado: sem ela, encerrar na mínima exigiria voltar para a aba —
+     que está atrás da tela compartilhada. */
+  await tecla('s');
+  await pg4.waitForTimeout(1500);
+  ok('a tecla S encerra a gravação com o parar escondido',
+     await pg4.locator('#recStop:visible').count() === 0);
+  ok('sem erro de página na mínima', err4.length === 0, err4.slice(0, 2).join(' | '));
+  await pg4.close();
+}
+
 /* --------------------------------------------------------------- [10] ----
    O CROMO DA JANELA DE EDIÇÃO. O tamanho pedido reserva `CROMO_ED` pixels para
    cabeçalho e barra; se o CSS crescer e o número não, a figura sai cortada — e

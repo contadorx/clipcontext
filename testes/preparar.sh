@@ -41,6 +41,19 @@ if [ -z "$NAV" ]; then
   echo "  ou aponte o seu:  export CHROME=/caminho/do/chrome"
 fi
 
+# A FONTE EM QUE AS LARGURAS FORAM MEDIDAS. As réguas da janelinha escrevem a
+# largura da fita em pixels, e pixel de texto depende da fonte que o sistema
+# entrega para `system-ui`. Numa máquina que trocou a DejaVu pela Inter, a
+# fita mediu 26 a 37px a menos em todos os idiomas — cinco falhas sem defeito
+# nenhum, e iguais no build anterior. Não se troca a fonte da máquina de
+# ninguém daqui; se avisa, com o comando.
+FONTE="$(fc-match -f '%{family}' system-ui 2>/dev/null || true)"
+case "$FONTE" in
+  *DejaVu\ Sans*) ;;
+  *) echo "  aviso  system-ui é \"${FONTE:-?}\", e as larguras foram medidas em DejaVu Sans."
+     echo "         Para medir igual: preferir DejaVu Sans em ~/.config/fontconfig/fonts.conf" ;;
+esac
+
 # Os vídeos de amostra que sete testes carregam de /tmp. Sem eles a esteira
 # acusa ENOENT — e ENOENT na saída da esteira é indistinguível de defeito do
 # produto para quem acabou de abrir o zip.

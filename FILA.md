@@ -141,6 +141,92 @@ campo de emissor, a contagem de erros na identificação. Marcar uma tela é
 
 ---
 
+## ACHADO FECHADO — "não dá para entender que está montando o PDF" *(21/10, Build 67)*
+
+**O relato:** *"quando baixa em PDF ele não fica com um comportamento que dê para
+entender que está montando o PDF"*. O aguarde de antes (o `trabalhando()` com o
+"não feche esta aba") existia — e não bastava. **Medido, eram três buracos:**
+
+1. **O botão clicado não mudava.** Para a evidência o clique é quase sempre no
+   **recomendado**, no topo do cartão, que aperta o `#go` de verdade — e o `#go`
+   mora na gaveta fechada. O recomendado continuava dizendo *"Gerar PDF"*, aceso.
+2. **Uma frase só**, *"Montando o PDF…"*, do primeiro ao último segundo. Numa
+   evidência de quarenta telas, meio minuto da mesma frase lê como travado.
+3. **A montagem é síncrona.** O jsPDF desenha tudo sem devolver a vez ao
+   navegador: nem frase nem barra eram repintadas até o fim.
+
+**O conserto:** o botão clicado e o espelho dele dizem *"Montando o PDF… 30%"*,
+ficam **listrados** (aceso, e não apagado como desligado) e com `aria-busy`; uma
+barra de verdade aparece com *"Montando o PDF — quadro 12 de 40"*, e a faixa do
+rodapé repete a mesma frase para quem rolou a página; a montagem **respira** a
+cada 150ms de trabalho (um quadro de tela, ~16ms — e numa aba escondida não
+espera nada). O `save`, que é o trecho mais longo num PDF grande, avisa
+**antes**: *"Salvando o arquivo PDF — pode levar alguns segundos…"*. No erro, o
+botão volta a se chamar *"Gerar PDF"* e a barra some.
+
+**De passagem:** o laço da **grade** era um `forEach`, e `await` dentro de
+`forEach` não espera nada. Virou `for`.
+
+**Régua nova, `pdfaguarde.mjs`:** grava, multiplica para **40 quadros** (com três
+a montagem cabe num respiro só e não haveria "meio" para provar), aperta o
+**recomendado** e amostra de dentro da página a cada 15ms. A amostragem é a prova
+do respiro: um intervalo que não dispara durante a montagem é uma tela que não é
+pintada. Ela cobra a porcentagem andando, a contagem só para a frente, o salvar
+avisando antes, a volta ao normal, as páginas que a frase diz batendo com o
+`pdfinfo`, e **40 figuras de 40** no `pdfimages`, na página cheia e na grade. O
+caminho de erro ganhou três linhas em `pdflib.mjs`.
+
+---
+
+## DEC-18 — A janela mínima: marcar, apontar e o ponto *(decidida e entregue no Build 67)*
+
+**O pedido:** *"tem como criar uma opção de janela muito minúscula com somente
+o botão marcar?"*. Combinado com quem pediu: **Marcar + Apontar**, o botão de
+tamanho e um **ponto vermelho piscando** como sinal de gravação. Sem o parar.
+
+**O que ela é:** um terceiro tamanho na volta do botão de tamanho —
+completa → fita → **mínima** → completa. Ela **não é um quarto desenho**: é a
+fita com mais coisa escondida por uma classe (`body.micro`), e por isso todo o
+resto (rótulos, atalhos, encolher até o conteúdo, a troca pelo editor) é o
+mesmo código. Pedida em **200×44** e encolhida até o conteúdo: **140px, igual
+nos cinco idiomas**, porque ali os botões são só desenho (obturador e seta de
+cursor) — o nome inteiro fica no `title` e no `aria-label`.
+
+**Os custos, ditos:**
+
+- **Sem o parar na tela**, por escolha de quem pediu. A tecla **S** continua
+  encerrando com a janelinha em foco (o atalho aperta o botão escondido), e a
+  régua cobra isso. O mesmo vale para o erro (**E**) e a tela adicional (**T**).
+- **O Chrome tem um mínimo próprio** para janela de picture-in-picture, que
+  daqui não se mede. Se a mínima vier maior que 140, ela continua funcionando
+  — e o que foi pedido e o que veio passa a sair no **diagnóstico**, numa linha
+  nova (`janelinha : micro pediu 140x44, veio …`).
+- **Antes de gravar** (preparando, baixando, o erro que impediu de começar) os
+  dois botões saem e a frase volta; o ponto fica **cinza e parado** até a
+  gravação começar de verdade. Na contagem sobra só o número.
+
+**O que a régua ao vivo pegou, e a do desenho não:** a medida da fita acontecia
+um instante **antes** de a janela ganhar a classe `gravando` — e na mínima é
+essa classe que traz os botões para a tela. Medida antes, a mínima media só o
+ponto e o botão de tamanho, dava menos que o piso, e ficava nos 200 pedidos. A
+régua estática montava a classe na mão e passava. Agora a medida vem depois.
+
+**E uma correção de desenho que veio junto:** o ícone do botão de tamanho na
+fita era "crescer", porque com dois tamanhos da fita só se ia para cima. Com
+três, da fita se vai para a mínima — o ícone agora diz para onde o botão leva.
+
+**Réguas:** `janelinha.mjs [1m]` (o desenho parado: quem fica, quem sai,
+largura nos cinco idiomas, antes de gravar, contagem, ícone do tamanho) e
+`edicaoaovivo.mjs [9a]` (em uso: abre mínima, encolhe, M marca, apontar sai e
+volta mínima, a volta inteira do tamanho, S encerra).
+
+**Ambiente:** depois de um reinício, o contêiner passou a entregar **Inter**
+para `system-ui`, e a fita mediu 26 a 37px a menos em todos os idiomas — cinco
+falhas que o Build 66 também dava, sem defeito nenhum. As larguras escritas são
+de **DejaVu Sans**; o `preparar.sh` agora avisa quando a fonte é outra.
+
+---
+
 ## ACHADO FECHADO — a causa de "salvar não funciona" e "apontar não abre" era uma só *(05/10)*
 
 **O relato chegou três vezes**, com três frases: *"o apontar não está abrindo a
