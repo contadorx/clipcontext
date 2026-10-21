@@ -258,77 +258,39 @@ console.log('\n[6] a janelinha não corta os botões');
        produto declara, soma os filhos de verdade, e mede as DUAS janelas (com e
        sem roteiro) com o botão do microfone aceso. Aqui fica o que é deste
        arquivo: a caixa de anotação. */
-    const m = await jn.evaluate(() => ({
-      nota: !!document.getElementById('nota'),
-      notaOn: !document.getElementById('nota').disabled,
-    }));
-    ok('a caixa de anotação está na janelinha', m.nota);
-    ok('e liga quando há passo marcado', m.notaOn);
-
-    /* ---- DIGITAR NA JANELINHA, COM TECLADO DE VERDADE ----
-       Aqui morava o defeito que impedia de escrever: a regra lia SEMPRE o
-       campo do cartão, e durante a gravação o cartão está atrás da tela
-       compartilhada. Cada tecla digitada na janelinha era sobrescrita pelo
-       vazio do outro campo — o botão acendia, dizia "ainda não salvo", e
-       salvava nada. `fill()` não pegaria: ele atribui o valor de uma vez, e o
-       defeito estava no caminho de UMA TECLA. */
-    await jn.locator('#nota').click();
-    await jn.keyboard.type('digitado na janelinha 9182');
-    await jn.waitForTimeout(250);
-    const v = await jn.evaluate(() => document.getElementById('nota').value);
-    ok('o que se digita na janelinha FICA no campo', v === 'digitado na janelinha 9182', v);
-    await jn.locator('#notaOk').click();
-    await jn.waitForTimeout(400);
-    const gv = await pg.evaluate(() => window.__quadros().map(f => f.nota || '').filter(Boolean));
-    ok('e chega ao quadro ao salvar', gv.some(x => /janelinha 9182/.test(x)), JSON.stringify(gv));
-    /* Os dois campos contam a mesma história: dois textos diferentes sobre o
-       mesmo quadro seria pior do que não ter o segundo campo. */
-    const naAba = await pg.evaluate(() => document.getElementById('anotTxt').value);
-    ok('e o campo do cartão mostra o mesmo texto', /janelinha 9182/.test(naAba), naAba);
-
-    /* ---- SALVAR NÃO PODE TIRAR O TECLADO DA PESSOA ----
-       O relato: "o texto depois de salvo não libera para um novo texto". E não
-       estava em nenhum dos estados — o campo continuava ligado, o botão voltava
-       a acender ao primeiro toque, e o robô que digitava clicando no campo
-       antes passava. Estava no FOCO.
-
-       Clicar em Salvar tira o foco do campo antes de o clique chegar. O `blur`
-       guarda, o repintar DESLIGA o botão, e um botão desligado não dispara
-       clique: o `onclick` nunca rodava, e o foco ficava no `body` — que é o
-       lugar onde as teclas não vão para nenhum campo. Quem tinha acabado de
-       salvar continuava digitando e via o texto antigo parado na tela.
-
-       Na janelinha isso é pior do que na aba: não há para onde clicar de volta
-       sem sair da tela que está sendo gravada.
-
-       A régua digita SEM clicar no campo de novo, que é o gesto de quem
-       acabou de salvar e continua escrevendo. `fill()` não serviria: ele
-       atribui o valor sem passar pelo teclado, e o defeito era do teclado. */
-    const foco = () => jn.evaluate(() =>
-      document.activeElement ? (document.activeElement.id || document.activeElement.tagName) : '');
-    ok('depois de salvar, o cursor continua no campo', (await foco()) === 'nota', await foco());
-    await jn.keyboard.type(' e continuei escrevendo 7766');
-    await jn.waitForTimeout(250);
-    const seguiu = await jn.evaluate(() => document.getElementById('nota').value);
-    ok('e o que se digita depois de salvar ENTRA no campo',
-       /7766/.test(seguiu) && /janelinha 9182/.test(seguiu), seguiu);
-    /* O botão volta a acender: há coisa nova para guardar outra vez. Sem isto o
-       texto novo entraria no campo e não teria como sair dele. */
-    const bt = await jn.evaluate(() => {
-      const b = document.getElementById('notaOk');
-      return { ligado: !b.disabled, texto: b.textContent.trim() };
+    /* ---- A CAIXA SAIU DA JANELINHA (Build 68) ----
+       O pedido foi juntar a janela grande com a fita "no menor formato
+       possível", e na escolha do que entrava a caixa de anotação ficou de
+       fora — o Apontar já tem campo de texto. Ela não aparece na janela nem
+       na mínima.
+       Antes, este bloco digitava DENTRO da janelinha e cobrava o foco depois
+       de salvar. Aquele caminho não existe mais na tela; o que segue valendo
+       é o do cartão — e ele é cobrado logo abaixo, com a janelinha aberta e
+       depois fechada. O campo de texto do editor (o do Apontar) é cobrado em
+       `edicaoaovivo.mjs` [3a]. */
+    const m = await jn.evaluate(() => {
+      const cx = document.querySelector('.notaCx');
+      return { existe: !!cx, visivel: !!cx && getComputedStyle(cx).display !== 'none' &&
+                                       cx.getBoundingClientRect().height > 0 };
     });
-    ok('e o botão de salvar volta a acender', bt.ligado === true, JSON.stringify(bt));
-    /* Com prazo curto, pelo mesmo motivo do clique lá embaixo: com o defeito
-       instalado o botão está desligado aqui, e a espera padrão de trinta
-       segundos transformaria uma reprovação legível num TimeoutError. */
-    let salvouDeNovo = true;
-    try { await jn.locator('#notaOk').click({ timeout: 4000 }); }
-    catch (e) { salvouDeNovo = false; }
-    await jn.waitForTimeout(400);
-    const gv2 = await pg.evaluate(() => window.__quadros().map(f => f.nota || '').filter(Boolean));
-    ok('e o texto continuado chega ao quadro',
-       salvouDeNovo && gv2.some(x => /7766/.test(x)), JSON.stringify(gv2));
+    ok('a caixa de anotação não aparece na janelinha, como escolhido', !m.visivel, JSON.stringify(m));
+
+    /* COM A JANELINHA ABERTA, O CAMPO DO CARTÃO CONTINUA VALENDO. É o único
+       lugar de anotação rápida que sobrou além do Apontar — e um campo que
+       sumisse do cartão enquanto a janelinha está aberta deixaria a pessoa
+       sem onde escrever. */
+    const cartao = await pg.evaluate(() => {
+      const cx = document.getElementById('anotCx');
+      return !!cx && !cx.classList.contains('hide');
+    });
+    ok('com a janelinha aberta, o campo do cartão está à vista', cartao);
+    await pg.locator('#anotTxt').click();
+    await pg.keyboard.type('escrito com a janelinha aberta 5151');
+    await pg.waitForTimeout(150);
+    await pg.locator('#anotSalvar').click({ timeout: 4000 }).catch(() => {});
+    await pg.waitForTimeout(400);
+    const gv = await pg.evaluate(() => window.__quadros().map(f => f.nota || '').filter(Boolean));
+    ok('  e o que se escreve nele chega ao quadro', gv.some(x => /5151/.test(x)), JSON.stringify(gv));
 
     /* O outro campo, o do cartão, tem o mesmo defeito e o mesmo conserto — e
        ele só pode ser medido COM A JANELINHA FECHADA. Com ela aberta o campo
