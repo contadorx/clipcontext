@@ -23,22 +23,16 @@ const RAIZ = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..',
 const CHROME = process.env.CHROME || CHROME_WS;
 const html = fs.readFileSync(RAIZ + '/app.html', 'utf8');
 
-/* ---- A ALTURA VEM DO PRODUTO, E NÃO ESCRITA AQUI ----
+/* ---- A ALTURA VEM DO PEDIDO QUE O PRODUTO FAZ, E NÃO ESCRITA AQUI ----
  *
- * Ela era `const ALT = 486` em dois lugares deste arquivo — um número copiado
- * à mão que já não era o do produto quando foi escrito, e que continuou
- * envelhecendo sozinho: no Build 56 a janela com roteiro passou a pedir 600, e
- * a régua seguiu cobrando 486. Ela reprovou um desenho que cabia.
- *
- * Isto é a lista paralela de sempre, e o conserto é o mesmo de sempre: o número
- * sai do `TAM_PIP` do artefato. Se não achar, a régua PARA — um padrão
- * silencioso aqui seria voltar exatamente ao defeito. */
-const ALT_ROT = (() => {
-  const m = html.match(/TAM_PIP = \(min\) => \(\{ w: min \? \d+ : \d+,\s*h: min \? \(roteiro\.length \? \d+ : \d+\)\s*: \(roteiro\.length \? (\d+) : \d+\)/);
-  if (!m) { console.log('  FALHA  não achei a altura da janelinha no artefato'); process.exit(1); }
-  return +m[1];
-})();
-console.log(`     a janelinha com roteiro pede ${ALT_ROT}px — lido do produto`);
+ * Ela era `const ALT = 486` escrito à mão, depois lida do `TAM_PIP` do
+ * artefato. Desde o Build 68 o tamanho é MEDIDO pelo produto antes de abrir a
+ * janela, então não há mais número escrito para ler: a régua escuta o pedido
+ * que o produto faz ao `requestWindow` — o mesmo número que o Chrome recebe.
+ * Sem pedido anotado, a régua PARA: um padrão silencioso aqui seria voltar
+ * exatamente ao defeito. */
+let ALT_ROT = 0;
+
 const srv = http.createServer((q, r) => {
   const u = q.url.split('?')[0];
   if (u.startsWith('/_vercel/')) { r.writeHead(200,{'Content-Type':'text/javascript'}); return r.end(''); }
@@ -76,6 +70,14 @@ await pg.addInitScript(() => {
   }
   navigator.mediaDevices.getDisplayMedia = async () => tela();
   navigator.mediaDevices.getUserMedia = async () => { throw new Error('sem mic'); };
+  /* O pedido de tamanho, anotado ANTES de chegar ao navegador — e passado
+     adiante intacto: a janela que abre é a de verdade. */
+  window.__pedidosPip = [];
+  try {
+    const dp = window.documentPictureInPicture;
+    const orig = dp.requestWindow.bind(dp);
+    dp.requestWindow = (o) => { window.__pedidosPip.push({ w: o.width, h: o.height }); return orig(o); };
+  } catch (e) {}
 });
 await pg.goto('http://localhost:8856/app.html?lang=pt');
 await pg.selectOption('#modelo', 'evidencia').catch(() => {});
@@ -112,6 +114,12 @@ await pg.waitForSelector('#recStop:visible', { timeout: 40000 });
 await pg.waitForTimeout(2500);
 
 const jn = ctx.pages().find(p => p !== pg);
+{
+  const pedidos = await pg.evaluate(() => window.__pedidosPip || []);
+  ALT_ROT = pedidos.length ? pedidos[pedidos.length - 1].h : 0;
+  if (!ALT_ROT) { console.log('  FALHA  não achei o pedido de tamanho da janelinha'); process.exit(1); }
+  console.log(`     a janelinha com roteiro pediu ${pedidos[pedidos.length - 1].w}×${ALT_ROT}px — escutado no pedido`);
+}
 if (!jn) { ok('a janelinha abriu', false); }
 else {
   jn.on('pageerror', e => erros.push('janelinha: ' + e.message));
@@ -129,7 +137,10 @@ else {
              fonteProx: parseFloat(getComputedStyle(px).fontSize),
              fonte: parseFloat(cs.fontSize), fonteCorpo: parseFloat(corpo),
              topo: Math.round(cx.getBoundingClientRect().top),
-             topoRelogio: Math.round(document.querySelector('.top').getBoundingClientRect().top) };
+             topoRelogio: Math.round(document.querySelector('.top').getBoundingClientRect().top),
+             /* A FRASE INTEIRA mora no `title` desde que a janela é fita: na
+                tela vai o rótulo curto ("1/3"), que é o acordo dos botões. */
+             titulo: cx.title || '' };
   });
 
   console.log('\n[2] a janelinha diz qual é o próximo passo');
@@ -142,10 +153,15 @@ else {
        capturado sozinho ao começar consumia a primeira linha: o número andava
        sem ninguém ter feito nada. Um contador que anda sozinho não é um
        roteiro, é um relógio. */
-    ok('ela começa no passo 1', /Passo 1 de 3/.test(r.n), r.n);
+    ok('ela começa no passo 1', /^1\/3$/.test(r.n) && /Passo 1 de 3/.test(r.titulo),
+       r.n + ' · ' + r.titulo);
     ok('e mostra o texto do passo 1', r.txt === PASSOS[0], r.txt);
     /* "a primeira informação, com uma fonte um pouco maior" */
-    ok('vem ANTES do relógio', r.topo < r.topoRelogio, r.topo + ' vs ' + r.topoRelogio);
+    /* NA PRIMEIRA FILEIRA, AO LADO DO RELÓGIO. Era "antes do relógio" na
+       janela empilhada; na de três fileiras o passo ocupa o lugar da contagem
+       de quadros, e o que importa é estar na fileira que se lê primeiro. */
+    ok('vem na primeira fileira, ao lado do relógio', Math.abs(r.topo - r.topoRelogio) <= 6,
+       r.topo + ' vs ' + r.topoRelogio);
     ok('e é maior que o corpo da janelinha', r.fonte > r.fonteCorpo,
        r.fonte + 'px vs ' + r.fonteCorpo + 'px');
     /* O SEGUINTE, MENOR. Descobrir o próximo passo no instante em que se
@@ -162,7 +178,7 @@ else {
   {
     const r = await rot();
     console.log('     ' + r.n + '  |  ' + r.txt);
-    ok('agora é o passo 2', /Passo 2 de 3/.test(r.n), r.n);
+    ok('agora é o passo 2', /^2\/3$/.test(r.n) && /Passo 2 de 3/.test(r.titulo), r.n + ' · ' + r.titulo);
     ok('com o texto do passo 2', r.txt === PASSOS[1], r.txt);
     /* A primeira marcação COMPLETA o passo 1 em vez de abrir o 2: a tela antes
        da ação e a tela depois dela são as duas telas do mesmo passo. Por isso
@@ -177,7 +193,8 @@ else {
   {
     const r = await rot();
     console.log('     ' + r.n + '  |  ' + r.txt);
-    ok('depois da segunda marcação, o passo 3', /Passo 3 de 3/.test(r.n), r.n);
+    ok('depois da segunda marcação, o passo 3', /^3\/3$/.test(r.n) && /Passo 3 de 3/.test(r.titulo),
+       r.n + ' · ' + r.titulo);
     /* No último passo não há seguinte: inventar um travessão ali só gastaria
        altura de uma janela que fica por cima do trabalho da pessoa. */
     ok('no último passo, o "a seguir" some', r.prox === '', r.prox);
