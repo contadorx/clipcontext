@@ -453,6 +453,17 @@ a morar num contêiner que rola; o salvar fica fora dele.
 
 ---
 
+## MANUTENÇÃO — `@huggingface/transformers` 4.3.1 olhada e não adotada *(21/10)*
+
+A 4.3.1 saiu no npm em **06/10/2026**; `versoes.mjs` reprovou na esteira do
+Build 67 pedindo a decisão. A nota de lançamento tem **uma linha só**: suporte
+ao EmbeddingGemma 2, um modelo de embeddings que este produto não carrega. Nada
+sobre Whisper, WebGPU, onnxruntime ou `MatMulNBits`. **Decisão: fica a fila**
+(3.8.1 → 4.2.0 → 3.8.0), `conferido_ate` em 4.3.1. O teste que vale continua o
+mesmo: a 4.3.x num Windows/Chrome de verdade.
+
+---
+
 ## MANUTENÇÃO — `@huggingface/transformers` 4.3.0 olhada e não adotada *(16/09)*
 
 A 4.3.0 saiu em **16/09/2026** e virou `latest`; `versoes.mjs` reprovou pedindo
