@@ -177,7 +177,18 @@ const shimPip = () => {
          que obedece ao segundo depois de desobedecer ao primeiro descreve um
          navegador que não existe. Foi o que fez a primeira versão deste bloco
          dar verde sobre nada. */
+      /* ---- E O `resizeTo` EXIGE UM CLIQUE DENTRO DELA ----
+         Medido no Chromium 141 de verdade, no Build 68: o `resizeTo` de uma
+         janela de picture-in-picture é RECUSADO sem ativação do usuário
+         naquela janela — "resizeTo() requires user activation". Este remendo
+         obedecia sempre, e foi assim que a fita "encolhia até o conteúdo" em
+         todas as esteiras e em nenhuma tela de verdade. Um clique do
+         Playwright dentro da janela dá a ativação, como um clique de gente. */
       w.resizeTo = (a, b) => {
+        if (!(w.navigator.userActivation && w.navigator.userActivation.isActive)) {
+          window.__pipResizesRecusados = (window.__pipResizesRecusados || 0) + 1;
+          throw new Error("Failed to execute 'resizeTo' on 'Window': resizeTo() requires user activation in document picture-in-picture");
+        }
         const enc2 = window.__pipEncolhe || 1;
         fr.style.width = Math.round(a * enc2) + 'px';
         fr.style.height = Math.round(b * enc2) + 'px';
@@ -347,9 +358,9 @@ let iEditado = -1;
      artefato: o Chrome guarda o tamanho da janela de picture-in-picture POR
      SITE e reabre no que a pessoa deixou, ignorando o pedido — e do lado de cá
      isso é indistinguível de um teto, porque a janela volta igual e sem erro.
-     Então o produto manda um `resizeTo` DEPOIS de aberta. É o mesmo caminho
-     que o `encolherFita` já usa para apertar a fita; aqui ele serve para o
-     contrário. */
+     A resposta de então foi mandar um `resizeTo` depois de aberta — e ela não
+     funciona no Chrome sem um clique dentro da janela (ver duas linhas abaixo).
+     O que funciona é a chave da abertura, que vem a seguir. */
   /* ---- A CHAVE QUE FAZ O NAVEGADOR OBEDECER ----
      O Chrome guarda a posição e o tamanho da janela de picture-in-picture POR
      SITE e, na abertura seguinte, RESTAURA o que a pessoa deixou — descartando
@@ -362,11 +373,20 @@ let iEditado = -1;
   ok('a abertura pede para ignorar o tamanho que o navegador lembrou',
      opcoes.every(o => o.preferInitialWindowPlacement === true),
      JSON.stringify(opcoes[opcoes.length - 1]));
-  const resizes = await pg.evaluate(() => window.__pipResizes);
-  const ult = resizes[resizes.length - 1];
-  ok('e o produto ainda MANDA o tamanho depois de aberta',
-     !!ult && ult.w === edP.width && ult.h === edP.height,
-     ult ? `${ult.w}×${ult.h} contra ${edP.width}×${edP.height} pedidos` : '(não mandou)');
+  /* ---- E O "MANDAR DEPOIS DE ABERTA" NÃO EXISTE NO CHROME ----
+     Esta linha afirmava que o produto mandava um `resizeTo` depois de aberta,
+     e passava — porque o remendo obedecia. Medido no Build 68 no Chromium 141
+     de verdade: sem um clique DENTRO da janela, o `resizeTo` é recusado. O
+     editor acabou de nascer; o clique foi na fita, que já fechou. Agora o
+     remendo recusa como o Chrome, e a régua afirma o que é verdade: o tamanho
+     do editor é o PEDIDO DA ABERTURA, e o resto é tentativa recusada. */
+  const r2 = await pg.evaluate(() => ({ feitos: window.__pipResizes.length,
+                                        recusados: window.__pipResizesRecusados || 0 }));
+  const fr = await pg.evaluate(() => { const f = document.getElementById('pipFake');
+    return f ? { w: parseInt(f.style.width, 10), h: parseInt(f.style.height, 10) } : null; });
+  ok('o tamanho do editor é o do pedido da abertura — o resizeTo sem clique é recusado, como no Chrome',
+     r2.feitos === 0 && r2.recusados >= 1 && !!fr && fr.w === edP.width && fr.h === edP.height,
+     JSON.stringify(r2) + ` · janela ${fr && fr.w}×${fr && fr.h}, pedido ${edP.width}×${edP.height}`);
   /* E o que voltou fica anotado: sem número, "abriu pequeno" é uma conversa
      sem medida — foi assim que este defeito chegou. */
   await pg.waitForTimeout(400);
@@ -1097,21 +1117,27 @@ console.log('\n[9a] a janela mínima: grava, aponta, volta mínima e para no S')
   const e1 = await estado();
   ok('a janelinha abriu mínima', !!e1 && /\bmicro\b/.test(e1.classe) && /\bmin\b/.test(e1.classe),
      e1 ? e1.classe : '(sem janela)');
-  ok('  com marcar, apontar e tamanho, e só eles',
-     !!e1 && e1.ve.marcar && e1.ve.anotar && e1.ve.tam &&
-     !e1.ve.stop && !e1.ve.maisTela && !e1.ve.erro && !e1.ve.rel,
+  /* O PARAR VOLTOU no Build 68: "na telinha pequena coloque o botão parar". */
+  ok('  com marcar, apontar, PARAR e tamanho, e só eles',
+     !!e1 && e1.ve.marcar && e1.ve.anotar && e1.ve.tam && e1.ve.stop &&
+     !e1.ve.maisTela && !e1.ve.erro && !e1.ve.rel,
      e1 ? JSON.stringify(e1.ve) : '');
   ok('  e o ponto pisca, porque está gravando', !!e1 && e1.pisca === 'pulsa', e1 && e1.pisca);
+  /* O TAMANHO É O QUE O PRODUTO MEDIU ANTES DE ABRIR — a mesma função, chamada
+     de fora —, e não um número escrito aqui. */
   const pedido = await pg4.evaluate(() => window.__pipPedidos[0]);
-  ok('ela foi pedida no tamanho da mínima', !!pedido && pedido.width === 200 && pedido.height === 44,
-     JSON.stringify(pedido));
-  const enc = await pg4.evaluate(() => window.__pipResizes.slice());
-  const apertou = enc.find((r) => r.h === 44 && r.w < 200 && r.w >= 100);
-  ok('  e encolheu até o conteúdo medido', !!apertou && e1.largura < 200,
-     JSON.stringify(enc) + ` · janela ${e1 && e1.largura}px`);
+  const medida = await pg4.evaluate(() => window.__medirJanelinha('micro'));
+  ok('ela foi pedida do tamanho que o produto mediu', !!pedido && !!medida &&
+     pedido.width === medida.w && pedido.height === medida.h,
+     JSON.stringify(pedido) + ' · medida ' + JSON.stringify(medida));
+  /* E NINGUÉM TENTA ENCOLHER DEPOIS: no Chrome isso é recusado sem clique. */
+  const enc = await pg4.evaluate(() => ({ feitos: window.__pipResizes.length,
+                                          recusados: window.__pipResizesRecusados || 0 }));
+  ok('  e ninguém tenta encolher a janela depois de aberta', enc.feitos === 0 && enc.recusados === 0,
+     JSON.stringify(enc));
   const anot = await pg4.evaluate(() => window.__fitaTam && window.__fitaTam());
   ok('o diagnóstico sabe o que foi pedido e o que veio',
-     !!anot && anot.modo === 'micro' && /^\d+x44$/.test(anot.pediu) && /^\d+x\d+$/.test(anot.veio),
+     !!anot && anot.modo === 'micro' && anot.pediu === `${medida.w}x${medida.h}` && /^\d+x\d+$/.test(anot.veio),
      JSON.stringify(anot));
 
   /* M marca, como na fita: o atalho aperta o botão, que está à vista. */
@@ -1131,28 +1157,36 @@ console.log('\n[9a] a janela mínima: grava, aponta, volta mínima e para no S')
   await pg4.waitForTimeout(1500);
   const e2 = await estado();
   ok('  e salvar devolve a MÍNIMA, e não outra', !!e2 && /\bmicro\b/.test(e2.classe) &&
-     e2.ve.anotar && !e2.ve.stop, e2 ? e2.classe : '(sem janela)');
+     e2.ve.anotar && e2.ve.stop && !e2.ve.maisTela, e2 ? e2.classe : '(sem janela)');
 
-  /* A VOLTA INTEIRA DO BOTÃO DE TAMANHO: mínima → completa → fita → mínima. */
+  /* A VOLTA INTEIRA DO BOTÃO DE TAMANHO: mínima → janela → mínima. Eram três
+     tamanhos no Build 67; no 68 sobraram dois. */
   const voltas = [];
-  for (let i = 0; i < 3; i++) {
+  for (let i = 0; i < 2; i++) {
     await f4().locator('#tam').click();
     await pg4.waitForTimeout(1300);
     const e3 = await estado();
     voltas.push(!e3 ? 'nada' : /\bmicro\b/.test(e3.classe) ? 'micro'
                 : /\bmin\b/.test(e3.classe) ? 'min' : 'completa');
   }
-  ok('o botão de tamanho dá a volta: completa, fita, mínima',
-     voltas.join(',') === 'completa,min,micro', voltas.join(' → '));
+  ok('o botão de tamanho dá a volta: janela, mínima', voltas.join(',') === 'min,micro', voltas.join(' → '));
+  /* E A JANELA É PEDIDA DO TAMANHO QUE O PRODUTO MEDE PARA ELA — três
+     fileiras, e não a fita de 560 nem a pilha de 470. */
+  const pedJan = await pg4.evaluate(() => {
+    const p = window.__pipPedidos, m = window.__medirJanelinha('min');
+    const j = p[p.length - 2];
+    return { pedido: j, medida: m };
+  });
+  ok('  e a janela foi pedida do tamanho medido', !!pedJan.pedido && !!pedJan.medida &&
+     pedJan.pedido.width === pedJan.medida.w && pedJan.pedido.height === pedJan.medida.h,
+     JSON.stringify(pedJan));
   ok('  e o relógio continua andando atrás da janela',
      /[1-9]/.test((await f4().locator('#rel').textContent() || '')));
 
-  /* O PARAR ESTÁ FORA DA TELA, e a tecla S tem que achá-lo. Foi o custo
-     combinado: sem ela, encerrar na mínima exigiria voltar para a aba —
-     que está atrás da tela compartilhada. */
+  /* A TECLA S continua valendo, agora com o parar À VISTA na mínima. */
   await tecla('s');
   await pg4.waitForTimeout(1500);
-  ok('a tecla S encerra a gravação com o parar escondido',
+  ok('a tecla S encerra a gravação na mínima',
      await pg4.locator('#recStop:visible').count() === 0);
   ok('sem erro de página na mínima', err4.length === 0, err4.slice(0, 2).join(' | '));
   await pg4.close();

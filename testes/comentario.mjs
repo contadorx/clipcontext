@@ -92,9 +92,14 @@ const jn = janela();
      alt-tab — e o alt-tab muda a tela que ela ia capturar. */
   ok('e ela tem os dois botões de captura',
      (await jn.locator('#marcar').count()) === 1 && (await jn.locator('#maisTela').count()) === 1);
-  ok('o "mais uma tela" não repete o "+" no rótulo',
-     !/^\s*\+/.test(await jn.locator('#maisTela').textContent()),
-     (await jn.locator('#maisTela').textContent()).slice(0, 40));
+  /* O "+" NÃO PODE REPETIR O "MAIS" — e isto vale para o NOME INTEIRO. A
+     regra nasceu na janela grande, que mostrava a frase inteira na tela. Desde
+     o Build 68 as duas janelas são fita e mostram a palavra curta ("+ Tela"),
+     em que o "+" é a palavra "mais" — não uma repetição dela. A frase inteira
+     mora no `aria-label` e no `title`, e é lá que a repetição voltaria. */
+  const nomeTela = (await jn.locator('#maisTela').getAttribute('aria-label')) || '';
+  ok('o "mais uma tela" não repete o "+" no nome inteiro',
+     nomeTela.length > 3 && !/^\s*\+/.test(nomeTela), nomeTela.slice(0, 40));
 }
 
 console.log('\n[3] apertar um botão destaca ELE, e não o outro');

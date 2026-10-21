@@ -141,6 +141,72 @@ campo de emissor, a contagem de erros na identificação. Marcar uma tela é
 
 ---
 
+## DEC-19 — De três janelas para duas *(decidida e entregue no Build 68)*
+
+**O pedido:** *"são três telas, vamos racionalizar — na telinha pequena coloque
+o botão parar, e faça uma junção entre a tela grande e a tira, no menor formato
+possível"*. Decidido com quem pediu, no desenho:
+
+- **A janela** (a junção): a fita mais **pausar e microfone, só desenho**, em
+  **três fileiras estreitas** — relógio e passo; Marcar, + Tela, Erro, Apontar;
+  pausar, microfone, Parar e o tamanho. Medida: **294×100** em português,
+  **360×100** em alemão. Medidor de som e caixa de anotação ficaram de fora (o
+  Apontar já tem campo de texto). Com roteiro, o passo entra na primeira
+  fileira no lugar da contagem: a mesma altura.
+- **A mínima:** ponto, Marcar, Apontar, **Parar** (vermelho, no fim, longe do
+  Marcar) e o tamanho. Mede 178×44; o Chrome a entrega com o mínimo dele.
+
+A completa e a fita de uma linha deixaram de existir. Quem tinha guardado
+qualquer uma das duas abre na janela. O botão de tamanho alterna entre as duas.
+
+**Desvio do combinado, dito:** na pergunta eu estimei **82 px** de altura para
+o formato escolhido; o desenho escolhido tem três fileiras e mede **100**.
+
+---
+
+## ACHADO FECHADO — a janelinha nunca encolheu na tela de ninguém *(21/10, Build 68)*
+
+**O Chromium do contêiner passou a ter o `documentPictureInPicture`** (141), e
+com a janela de verdade deu para medir o que a régua falsa escondia:
+
+| | Chrome 141 |
+|---|---|
+| `resizeTo` sem clique dentro da janelinha | **recusado sempre** |
+| `resizeTo` logo depois de um clique dentro dela | aceito |
+| abrir janela nova a partir de um clique nela | funciona |
+| `resizeTo` na janela recém-aberta | **recusado** |
+| menor tamanho de conteúdo | **240×52** |
+
+Consequências:
+
+1. **O "encolher até o conteúdo" da fita e da mínima nunca funcionou** — era
+   feito no primeiro segundo de gravação, sem clique. A régua falsa obedecia.
+   **Conserto:** o produto monta a janela escondida na aba (mesmo CSS, mesmo
+   corpo, mesmos rótulos), mede, e **pede já do tamanho certo** na abertura,
+   que é o pedido que o Chrome aceita. O encolher saiu.
+2. **O `resizeTo` do editor depois de aberto também é recusado.** O tamanho do
+   editor é o pedido da abertura e o teto do navegador. A chamada ficou (ela
+   agenda a medida do que veio, que vai para o diagnóstico) e o comentário que
+   dizia "e ele funciona" foi corrigido no lugar.
+3. **A régua falsa ficou fiel:** em `edicaoaovivo.mjs` o `resizeTo` agora é
+   recusado sem ativação, como no Chrome. Uma afirmação que cobrava o produto
+   "mandar o tamanho depois de aberta" foi trocada pela verdade.
+4. **O teto do editor** não deu para medir firme aqui: o Chromium sem tela não
+   emula o tamanho do monitor de verdade. Quem responde é o diagnóstico num
+   Chrome real (`janela PiP : editor pediu …, veio …`).
+
+**De passagem:** os botões da janelinha nasciam vazios até o primeiro segundo
+de gravação (o Erro era uma pílula vermelha sem palavra durante o preparando).
+Agora os nomes são pintados na abertura.
+
+**Réguas:** `janelinha.mjs` reescrita para as duas janelas (a completa saiu, e
+uma régua que mede um desenho que ninguém vê é verde sobre nada);
+`roteirojanela.mjs` passa a ler a altura do pedido real ao Chrome e cobra o
+rótulo curto na tela com a frase inteira na dica; `edicaoaovivo.mjs [9a]`
+cobra a mínima com Parar, o pedido do tamanho medido e a volta de dois tamanhos.
+
+---
+
 ## ACHADO FECHADO — "não dá para entender que está montando o PDF" *(21/10, Build 67)*
 
 **O relato:** *"quando baixa em PDF ele não fica com um comportamento que dê para
@@ -479,6 +545,14 @@ que funciona por idade. Quando houver um Windows/Chrome de verdade à mão, é a
 ---
 
 ## LIMITE DECLARADO — a esteira é cega para a janelinha de verdade *(06/09)*
+
+> **Atualizado em 21/10 (Build 68):** deixou de valer como estava escrito. O
+> Chromium 141 do contêiner TEM o `documentPictureInPicture`, e a régua do
+> roteiro já abria a janela de verdade. O limite que sobra é o tamanho: sem
+> tela de verdade, o Chromium reporta o conteúdo da janelinha como 1280×720 e
+> não emula o monitor — então o desenho continua sendo medido num documento do
+> tamanho pedido, e o comportamento (recusas, cliques) na janela de verdade.
+
 
 Três consertos do tamanho do editor (Builds 58, 59 e 60) **passaram por esteira
 verde e não mudaram nada na tela de quem usa**. Não foi descuido de nenhum
