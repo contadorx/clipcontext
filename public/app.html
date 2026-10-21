@@ -9566,7 +9566,13 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      tela compartilhada, é para ela que a pessoa está olhando. O cartão recolhe
      o campo e deixa uma linha dizendo onde ele foi. Fechou a janelinha, o
      campo volta para o cartão — e volta com o texto, porque o texto nunca
-     morou no campo: mora no quadro. */
+     morou no campo: mora no quadro.
+
+     (Corrigido no Build 68: o parágrafo acima descreve uma versão que não
+     está mais no código — o cartão NÃO recolhe o campo, e é bom que não
+     recolha. Desde o 68 a caixa de anotação saiu da janelinha, por escolha de
+     quem usa; o campo do cartão e o do editor do Apontar são os dois lugares
+     de escrever, e o texto continua morando no quadro.) */
   /* ================= A ANOTAÇÃO AO VIVO =================
 
      Ela comenta o ÚLTIMO quadro capturado, e o texto mora no quadro (`f.nota`)
@@ -9806,7 +9812,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      depois, e não tem como se atualizar sozinho. Sem carimbo, "estou com um
      problema no offline" é uma conversa sem chão — ninguém sabe de qual build
      se fala nem se o defeito já foi consertado. */
-  const VERSAO = '2026.10.21-14';
+  const VERSAO = '2026.10.21-15';
   window.__versao = () => VERSAO;
 
   const PIP_CSS = `
@@ -11486,9 +11492,6 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
        aba, e o rótulo dos dois é repintado pela mesma função. */
     pipCalar.onclick = () => { if (alternarMic) alternarMic(); };
     controle('prep');
-    /* A janelinha nasceu: o cartão recolhe o campo dele agora, e não no
-       próximo "marcar". Dois campos iguais na tela ao mesmo tempo, mesmo por
-       dez segundos, já é tempo de a pessoa digitar no errado. */
 
     /* Fechar a janelinha NÃO para a gravação: fechar sem querer não pode
        destruir uma reunião de uma hora. O botão da aba continua valendo. */
