@@ -157,10 +157,11 @@ else {
        r.n + ' · ' + r.titulo);
     ok('e mostra o texto do passo 1', r.txt === PASSOS[0], r.txt);
     /* "a primeira informação, com uma fonte um pouco maior" */
-    /* NA PRIMEIRA FILEIRA, AO LADO DO RELÓGIO. Era "antes do relógio" na
-       janela empilhada; na de três fileiras o passo ocupa o lugar da contagem
-       de quadros, e o que importa é estar na fileira que se lê primeiro. */
-    ok('vem na primeira fileira, ao lado do relógio', Math.abs(r.topo - r.topoRelogio) <= 6,
+    /* NA FILEIRA DE BAIXO, INTEIRA. Era "antes do relógio" na janela
+       empilhada. Na de três fileiras ele foi primeiro para o lado do relógio,
+       e depois, pelo relato "poderia ter o passo na parte de baixo que
+       sobra", para a fileira de baixo — onde ele tem a largura inteira. */
+    ok('vem na fileira de baixo, depois do relógio e dos botões', r.topo > r.topoRelogio + 20,
        r.topo + ' vs ' + r.topoRelogio);
     ok('e é maior que o corpo da janelinha', r.fonte > r.fonteCorpo,
        r.fonte + 'px vs ' + r.fonteCorpo + 'px');

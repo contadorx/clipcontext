@@ -11,8 +11,9 @@
  * pequena coloque o botão parar, e faça uma junção entre a tela grande e a
  * tira, no menor formato possível". Ficaram duas, e as duas são a mesma fita:
  *
- *   - a JANELA: três fileiras estreitas — relógio e passo; marcar, mais tela,
- *     erro e apontar; pausar, microfone, parar e o tamanho;
+ *   - a JANELA: três fileiras estreitas — relógio, pausar, microfone, parar e
+ *     o tamanho; marcar, mais tela, erro e apontar; e o passo do roteiro (ou a
+ *     contagem de quadros) com a fileira de baixo inteira;
  *   - a MÍNIMA: ponto, marcar, apontar, parar e o tamanho.
  *
  * Esta régua media a completa em quatro blocos. A completa não existe mais, e
@@ -121,18 +122,22 @@ const fora = () => pg.evaluate(() => [...document.querySelectorAll('body *')].fi
   const q = e.getBoundingClientRect();
   return q.right > innerWidth + 1 || q.bottom > innerHeight + 1;
 }).map((e) => e.id || e.className || e.tagName));
-/* A fileira de cada elemento: o topo arredondado. */
+/* A fileira de cada elemento: o CENTRO vertical arredondado. O topo não
+   serve — o relógio é mais baixo que um botão e fica centrado na fileira, e
+   pelo topo ele pareceria estar em outra. */
 const fileiras = () => pg.evaluate(() => {
   const vis = (e) => e && getComputedStyle(e).display !== 'none' && e.getBoundingClientRect().width > 0;
+  const meio = (e) => { const q = e.getBoundingClientRect(); return Math.round(q.top + q.height / 2); };
   const f = {};
   for (const id of ['marcar', 'maisTela', 'erro', 'anotar', 'pausa', 'calar', 'stop', 'tam', 'txt', 'rot']) {
     const e = document.getElementById(id);
-    f[id] = vis(e) ? Math.round(e.getBoundingClientRect().top) : null;
+    f[id] = vis(e) ? meio(e) : null;
   }
   const t = document.querySelector('.top');
-  f.relogio = vis(t) ? Math.round(t.getBoundingClientRect().top) : null;
+  f.relogio = vis(t) ? meio(t) : null;
   return f;
 });
+const mesma = (ys) => ys.every((y) => y != null && Math.abs(y - ys[0]) <= 4);
 
 console.log('\n[1] o tamanho é medido pelo produto, antes de abrir');
 {
@@ -172,14 +177,15 @@ console.log('\n[2] a janela: três fileiras estreitas, nos cinco idiomas');
     ok(`${L}: ${tam.w}×${tam.h}, e nada fica para fora`, bate && vaza.length === 0,
        (bate ? '' : `escrito ${LARGURA[L]}×${ALTURA}; `) + (vaza.length ? 'para fora: ' + vaza.join(' ') : ''));
     if (L === 'pt' || L === 'de') {
+      /* AS FILEIRAS DEPOIS DO RELATO "o passo na parte de baixo que sobra":
+         os comandos da gravação junto do relógio, os gestos de captura no
+         meio, e o passo (ou a contagem) com a fileira de baixo inteira. */
+      const linha1 = ['relogio', 'pausa', 'calar', 'stop', 'tam'].map((i) => f[i]);
       const linha2 = ['marcar', 'maisTela', 'erro', 'anotar'].map((i) => f[i]);
-      const linha3 = ['pausa', 'calar', 'stop', 'tam'].map((i) => f[i]);
-      ok(`  ${L}: relógio e contagem na primeira fileira`, f.relogio != null && f.txt != null &&
-         Math.abs(f.relogio - f.txt) <= 4, JSON.stringify(f));
-      ok(`  ${L}: marcar, mais tela, erro e apontar na segunda`,
-         linha2.every((y) => y != null && y === linha2[0]) && linha2[0] > f.relogio);
-      ok(`  ${L}: pausar, microfone, parar e o tamanho na terceira`,
-         linha3.every((y) => y != null && y === linha3[0]) && linha3[0] > linha2[0]);
+      ok(`  ${L}: relógio, pausar, microfone, parar e tamanho na primeira fileira`, mesma(linha1),
+         JSON.stringify(f));
+      ok(`  ${L}: marcar, mais tela, erro e apontar na segunda`, mesma(linha2) && linha2[0] > linha1[0]);
+      ok(`  ${L}: e a contagem de quadros na de baixo`, f.txt != null && f.txt > linha2[0] + 10);
     }
   }
   /* A RESERVA tem que caber no idioma mais comprido, e ser estreita. */
@@ -190,7 +196,7 @@ console.log('\n[2] a janela: três fileiras estreitas, nos cinco idiomas');
   ok('e ela continua sendo três fileiras, e não uma pilha', ALTURA <= 110 && maior <= 380,
      `${maior}×${ALTURA}`);
 
-  /* O DETALHE DA FILEIRA DE BAIXO, medido em português. */
+  /* O DETALHE DOS COMANDOS, medido em português. */
   await montar('pt', 'min gravando', MEDIDA.pt.min);
   const baixo = await pg.evaluate(() => {
     const r = (id) => document.getElementById(id).getBoundingClientRect();
@@ -210,7 +216,7 @@ console.log('\n[2] a janela: três fileiras estreitas, nos cinco idiomas');
         .every((i) => r(i).width >= 28 && r(i).height >= 28),
     };
   });
-  ok('o tamanho fecha a fileira de baixo, no canto direito', baixo.tamNoCanto);
+  ok('o tamanho fecha a fileira de cima, no canto direito', baixo.tamNoCanto);
   ok('pausar e microfone são só desenho, como o pedido', baixo.pausaSoDesenho && baixo.calarSoDesenho,
      JSON.stringify(baixo));
   ok('o parar continua com a palavra — é o irreversível', baixo.pararTemPalavra);
@@ -242,14 +248,19 @@ console.log('\n[3] com roteiro colado: o passo entra na primeira fileira, na mes
     });
     const vaza = await fora();
     const r = await pg.evaluate(() => {
-      const t = document.getElementById('rotT'), rel = document.querySelector('.top');
+      const t = document.getElementById('rotT'), rot = document.getElementById('rot');
+      const m = document.getElementById('marcar').getBoundingClientRect();
+      const q = rot.getBoundingClientRect();
       return { corta: t.scrollWidth > t.clientWidth,
-               mesmaFileira: Math.abs(t.getBoundingClientRect().top - rel.getBoundingClientRect().top) <= 6,
+               embaixo: q.top >= m.bottom - 1,
+               largura: Math.round(q.width), janela: innerWidth,
                contagem: getComputedStyle(document.getElementById('txt')).display };
     });
     ok(`${L}: nada fica para fora, com o passo mais comprido`, vaza.length === 0, vaza.join(' '));
-    ok(`  ${L}: o passo fica ao lado do relógio, e corta com reticências`, r.mesmaFileira && r.corta,
-       JSON.stringify(r));
+    /* A FILEIRA DE BAIXO INTEIRA: era o pedido, e é o que dá ao passo o
+       triplo do texto que caberia no vão ao lado do parar. */
+    ok(`  ${L}: o passo fica embaixo, com a fileira inteira, e corta com reticências`,
+       r.embaixo && r.largura >= r.janela * 0.85 && r.corta, JSON.stringify(r));
     ok(`  ${L}: e a contagem de quadros sai, para o passo ter o lugar`, r.contagem === 'none');
   }
 }

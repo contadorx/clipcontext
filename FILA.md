@@ -141,18 +141,25 @@ campo de emissor, a contagem de erros na identificação. Marcar uma tela é
 
 ---
 
-## DEC-19 — De três janelas para duas *(decidida e entregue no Build 68)*
+## DEC-21 — De três janelas para duas *(decidida e entregue no Build 68)*
 
 **O pedido:** *"são três telas, vamos racionalizar — na telinha pequena coloque
 o botão parar, e faça uma junção entre a tela grande e a tira, no menor formato
 possível"*. Decidido com quem pediu, no desenho:
 
 - **A janela** (a junção): a fita mais **pausar e microfone, só desenho**, em
-  **três fileiras estreitas** — relógio e passo; Marcar, + Tela, Erro, Apontar;
-  pausar, microfone, Parar e o tamanho. Medida: **294×100** em português,
-  **360×100** em alemão. Medidor de som e caixa de anotação ficaram de fora (o
-  Apontar já tem campo de texto). Com roteiro, o passo entra na primeira
-  fileira no lugar da contagem: a mesma altura.
+  **três fileiras estreitas** — relógio, pausar, microfone, Parar e o tamanho;
+  Marcar, + Tela, Erro, Apontar; e o **passo do roteiro com a fileira de baixo
+  inteira** (sem roteiro, a contagem de quadros). Medida: **294×100** em
+  português, **360×100** em alemão (102 com roteiro). Medidor de som e caixa de
+  anotação ficaram de fora (o Apontar já tem campo de texto; o campo do cartão
+  continua valendo).
+- **A ordem das fileiras mudou uma vez, no mesmo build.** A primeira versão
+  tinha relógio e passo em cima e os comandos embaixo, com um vão do tamanho de
+  três botões entre o Parar e o tamanho. Olhando a foto: *"poderia ter o passo
+  na parte de baixo que sobra"*. Escolhido entre duas formas: o passo só no vão
+  (~90–125 px de texto) ou **trocar as fileiras** (o passo com a largura
+  inteira, ~280 px). Ficou a troca — o vão some dos dois lados.
 - **A mínima:** ponto, Marcar, Apontar, **Parar** (vermelho, no fim, longe do
   Marcar) e o tamanho. Mede 178×44; o Chrome a entrega com o mínimo dele.
 
@@ -244,7 +251,7 @@ caminho de erro ganhou três linhas em `pdflib.mjs`.
 
 ---
 
-## DEC-18 — A janela mínima: marcar, apontar e o ponto *(decidida e entregue no Build 67)*
+## DEC-20 — A janela mínima: marcar, apontar e o ponto *(decidida e entregue no Build 67)*
 
 **O pedido:** *"tem como criar uma opção de janela muito minúscula com somente
 o botão marcar?"*. Combinado com quem pediu: **Marcar + Apontar**, o botão de

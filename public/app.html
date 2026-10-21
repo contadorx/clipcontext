@@ -9812,7 +9812,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      depois, e não tem como se atualizar sozinho. Sem carimbo, "estou com um
      problema no offline" é uma conversa sem chão — ninguém sabe de qual build
      se fala nem se o defeito já foi consertado. */
-  const VERSAO = '2026.10.21-15';
+  const VERSAO = '2026.10.21-18';
   window.__versao = () => VERSAO;
 
   const PIP_CSS = `
@@ -10349,11 +10349,30 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
        Pausar e microfone entram so desenho: as duas barras e o microfone sao
        desenhos que todo mundo ja leu num tocador, e com palavra a terceira
        fileira passaria da largura das outras. O nome inteiro fica no title e
-       no aria-label, como nos outros. O tamanho fecha a fileira de baixo, no
+       no aria-label, como nos outros. O tamanho fecha a fileira de cima, no
        canto direito — o canto e onde se procura minimizar. */
     body.min #pausa,body.min #calar{font-size:0;gap:0;padding:0;width:32px}
     body.min #pausa::before,body.min #calar::before{width:15px;height:15px}
     body.min:not(.micro) .tam{margin-left:auto}
+    /* ---- AS FILEIRAS, NA ORDEM QUE O OLHO PEDE ----
+       A primeira versao da juncao punha relogio e passo em cima e pausar,
+       microfone e parar embaixo — e a fileira de baixo ficava com um vao do
+       tamanho de tres botoes entre o parar e o tamanho. O relato, olhando a
+       foto: "poderia ter o passo na parte de baixo que sobra". Trocadas as
+       fileiras, o vao some dos dois lados: os comandos da gravacao sobem para
+       junto do relogio (e o relogio e deles), e o passo ganha a fileira de
+       baixo INTEIRA, que e o triplo do texto que caberia no vao.
+       Por ORDER, e nao mudando o corpo: o corpo e o mesmo da minima, e a
+       minima continua lendo os filhos na ordem em que eles estao escritos. */
+    body.min:not(.micro) .top,body.min:not(.micro) #pausa,
+    body.min:not(.micro) #calar,body.min:not(.micro) #stop,
+    body.min:not(.micro) .tam{order:1}
+    body.min:not(.micro) .quebra{order:2}
+    body.min:not(.micro) #marcar,body.min:not(.micro) #maisTela,
+    body.min:not(.micro) #erro,body.min:not(.micro) #anotar{order:3}
+    body.min:not(.micro) .quebra.q2{order:4}
+    body.min:not(.micro) .rot,body.min:not(.micro) #txt{order:5}
+    body.min:not(.micro) .top{margin-right:4px}
     /* A CONTAGEM, na janela: o numero entra na primeira fileira e e grande.
        Com roteiro ele divide a fileira com o passo 1 — e a hora em que a
        pessoa le o primeiro passo. A regra que esconde a contagem de quadros
@@ -10435,9 +10454,10 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
    *
    *   - a JANELA (`min`): a fita mais o que só a grande tinha e ainda se usa
    *     gravando — pausar e o microfone, só desenho. Em três fileiras
-   *     estreitas, e não numa linha comprida: relógio e passo; marcar, mais
-   *     tela, erro e apontar; pausar, microfone, parar e o tamanho. Escolhido
-   *     no desenho, por quem pediu;
+   *     estreitas, e não numa linha comprida: relógio, pausar, microfone,
+   *     parar e o tamanho; marcar, mais tela, erro e apontar; e o passo do
+   *     roteiro (ou a contagem) com a fileira de baixo inteira. Escolhido no
+   *     desenho, por quem pediu — duas vezes;
    *   - a MÍNIMA (`micro`): ponto, marcar, apontar, PARAR e o tamanho.
    *
    * Medidor de som e caixa de anotação ficaram de fora, também por escolha:
@@ -10567,8 +10587,9 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
          inteira do pedido: "para não esquecer". */
       '<button id="anotar" class="sec fina" disabled></button>' +
       /* A SEGUNDA QUEBRA: a janela tem três fileiras, e esta fecha a dos
-         gestos de captura. Pausar, microfone e parar ficam na de baixo — o
-         parar longe do marcar, que é o que se aperta quarenta vezes. */
+         gestos de captura. A ORDEM NA TELA é do CSS (`order`), e não desta
+         lista: pausar, microfone e parar sobem para junto do relógio, longe
+         do marcar, e o passo desce para a fileira de baixo inteira. */
       '<i class="quebra q2"></i>' +
       /* ---- A CAIXA DE ANOTAÇÃO, AQUI TAMBÉM ----
          Durante a gravação a aba do produto está ATRÁS da tela compartilhada.
@@ -10674,7 +10695,13 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
         if (fileira.length) maior = Math.max(maior, n);
         fileira = [];
       };
-      for (const e of b.children) {
+      /* NA ORDEM EM QUE ELES APARECEM, e não na ordem em que estão escritos:
+         a janela reordena as fileiras pelo CSS (`order`), e medir na ordem do
+         corpo somaria o relógio com os botões de captura. */
+      const filhos = [...b.children]
+        .map((e, i) => ({ e, i, o: parseInt(w.getComputedStyle(e).order, 10) || 0 }))
+        .sort((x, y) => x.o - y.o || x.i - y.i).map((x) => x.e);
+      for (const e of filhos) {
         const s2 = w.getComputedStyle(e);
         if (s2.display === 'none' || s2.position !== 'static') continue;
         if (e.classList.contains('quebra')) { fechar(); continue; }
