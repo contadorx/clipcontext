@@ -105,9 +105,7 @@ nav a.btnTop:hover{color:var(--accent-ink);filter:brightness(1.08)}
   nav a{font-size:13.5px}
   nav > span{padding-left:11px !important;gap:7px !important}
 }
-/* No telefone estreito o menu vira só o que importa: abrir a ferramenta e
-   trocar de idioma. Preços continua no rodapé e no botão dos planos. */
-@media (max-width:430px){ nav a.hide-xs{display:none} }
+
 /* Abaixo de 400 nem isso cabia: sobravam 9px para fora, e a página inteira
    ganhava rolagem lateral por causa deles. O seletor de idioma encolhe. */
 @media (max-width:400px){
@@ -153,7 +151,8 @@ nav a.btnTop:hover{color:var(--accent-ink);filter:brightness(1.08)}
    e sai — fica so a margem, que e a unica coisa que varia de um para outro. */
 .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 
-/* A LINHA DE AVISO ao lado de um recurso que pede plano ou conta.
+/* A LINHA DE AVISO ao lado de um recurso que tem uma ressalva (até o Build 70,
+   a de pedir plano ou conta).
    Ela ja estava visualmente pronta — porque os vinte e um usos carregavam o
    estilo inteiro no `style` inline, copiado de um para o outro. Nada estava
    quebrado; o que existia era a mesma decisao escrita vinte e uma vezes, e
@@ -227,42 +226,6 @@ h1,h2,h3,h4{overflow-wrap:break-word;hyphens:auto}
 .faq details[open] summary::after{content:'–'}
 .faq p{margin:12px 0 0;color:var(--muted);font-size:15.5px}
 
-/* preços */
-.plans{display:grid;grid-template-columns:repeat(auto-fit,minmax(255px,1fr));gap:18px;margin-top:30px;align-items:start}
-/* Três cartões da MESMA altura, com o botão sempre na mesma linha.
-
-   Com altura livre, o cartão do meio ficava um palmo mais alto que os outros só
-   porque tinha uma frase a mais — e o olho lê isso como "este é maior", que é
-   exatamente a informação errada quando o do meio é o mais barato. Grade que
-   estica, coluna flex por dentro, lista que empurra o botão para baixo. */
-.plans.tres{grid-template-columns:repeat(auto-fit,minmax(272px,1fr));align-items:stretch}
-.plans.tres .plan{display:flex;flex-direction:column}
-.plans.tres .plan ul{flex:1 0 auto}
-.plans.tres .plan .btn{width:100%;text-align:center;box-sizing:border-box;margin-top:auto}
-.plan{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:26px}
-/* O mesmo preço nas três moedas, sem conversão ao vivo: quem lê de fora do
-   Brasil não precisa abrir a calculadora, e a página continua sem chamar rede. */
-/* O que ainda não existe fica dito na própria linha. Listar sem marcar seria
-   vender o que não foi construído; esconder seria esconder o plano. */
-/* Também na tabela de planos, que fica fora de `.plan`. */
-.plan .soon{display:inline-block;font-size:11px;text-transform:uppercase;letter-spacing:.06em;
-      font-weight:650;color:var(--muted);border:1px solid var(--line);border-radius:99px;
-      padding:1px 7px;margin-left:5px;vertical-align:1px;white-space:nowrap}
-.plan .pe{margin:10px 0 0;font-size:13px;color:var(--muted);text-align:center}
-.plan .pe a{color:var(--accent)}
-.plan ul a{color:var(--accent)}
-.plan .price{font-size:clamp(25px,2.4vw,33px);font-weight:680;letter-spacing:-.02em;margin:10px 0 2px;white-space:nowrap}
-.plan .price span{font-size:14.5px;font-weight:450;color:var(--muted);letter-spacing:0;white-space:nowrap}
-.plan ul{list-style:none;padding:0;margin:18px 0 22px;display:grid;gap:9px;font-size:14.8px}
-.plan li{padding-left:22px;position:relative;color:var(--muted)}
-.plan li::before{content:'';position:absolute;left:0;top:8px;width:11px;height:6px;border-left:2px solid var(--accent);
-      border-bottom:2px solid var(--accent);transform:rotate(-45deg)}
-.plan li.no{opacity:.55}
-.plan li.no::before{border-color:var(--muted);transform:none;top:11px;height:0;width:10px;border-left:0}
-.badge{display:inline-block;font-size:11.5px;text-transform:uppercase;letter-spacing:.07em;font-weight:650;
-       background:color-mix(in srgb,var(--accent) 15%,transparent);color:var(--accent);
-       padding:4px 10px;border-radius:99px}
-
 /* documento legal */
 .doc{max-width:720px}
 .doc h2{margin-top:38px}
@@ -312,38 +275,6 @@ footer a:hover{color:var(--ink)}
    para leitor de tela — a palavra vai junto, escondida dos olhos. */
 .soLeitor{position:absolute;width:1px;height:1px;padding:0;margin:-1px;
       overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
-
-/* A lista de funcionalidades, em grupos que abrem e fecham.
-   Era uma tabela de 87 linhas por 4 colunas — uma parede que ninguém lê numa
-   página de preço. Como 71 das 87 estão no gratuito, a tabela gastava 213
-   vistos para dizer "de graça" e escondia no meio deles as dezesseis linhas
-   que decidem uma compra. Agora o padrão é o silêncio: sem selo = gratuito. */
-.tpRegra{margin:22px 0 14px}
-.listaF{display:grid;gap:10px;margin:0 0 8px}
-.grpF{border:1px solid var(--line);border-radius:12px;background:var(--panel);
-      padding:0 16px}
-.grpF>summary{cursor:pointer;list-style:none;padding:13px 0;font-size:15px;
-      display:flex;align-items:center;gap:10px;color:var(--ink)}
-.grpF>summary::-webkit-details-marker{display:none}
-/* A setinha é desenhada: o marcador nativo é diferente em cada navegador e
-   some no Safari quando `list-style:none` entra. */
-.grpF>summary::before{content:"";width:7px;height:7px;flex:none;
-      border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);
-      transform:rotate(-45deg);transition:transform .15s;margin-right:2px}
-.grpF[open]>summary::before{transform:rotate(45deg)}
-.grpF>summary:hover{color:var(--accent)}
-.grpF .cont{font-size:12.5px;color:var(--muted);font-weight:400}
-.fts{margin:0 0 14px;padding:0 0 0 19px;
-     columns:2;column-gap:34px;font-size:14.2px;color:var(--muted)}
-.fts li{margin:0 0 7px;line-height:1.5;break-inside:avoid}
-/* O selo do plano. Só aparece onde há algo a pagar — é a informação que a
-   pessoa veio buscar, e ela some se estiver ao lado de 71 irmãos iguais. */
-.pl{display:inline-block;font-size:10.5px;text-transform:uppercase;
-    letter-spacing:.06em;font-weight:700;padding:1px 6px;border-radius:5px;
-    vertical-align:1px;white-space:nowrap}
-.pl.p{background:color-mix(in srgb,var(--accent) 14%,transparent);color:var(--accent)}
-.pl.t{background:color-mix(in srgb,var(--ink) 10%,transparent);color:var(--ink)}
-@media (max-width:720px){ .fts{columns:1} }
 
 /* As saídas como fichas, na home. É a coisa que mais gente pergunta e que
    estava escondida numa frase no meio de um parágrafo. */
@@ -505,7 +436,6 @@ table.legal td:first-child .small,table.legal td:first-child .muted{font-weight:
 .ponte{border-left:3px solid var(--accent);padding:2px 0 2px 15px;color:var(--muted);
        font-size:15.5px;margin:26px 0 0;max-width:720px}
 
-
 /* ---- os cinco cenários, na home ----
    Cartões que são LINK inteiro, e não um título com um "saiba mais" embaixo: o
    alvo de toque de um cartão inteiro é o cartão inteiro. */
@@ -598,135 +528,6 @@ table.legal td:first-child .small,table.legal td:first-child .muted{font-weight:
   .heroDuo{grid-template-columns:1fr;gap:30px}
   .heroDuo .figDobra svg{margin:0 auto;max-width:330px} }
 
-/* ==========================================================================
-   O PAINEL DA CONTA
-
-   Menu de um lado, trabalho do outro. A área do cliente era uma página com
-   sete seções empilhadas — quem entrava para ver uma fatura rolava por cima do
-   plano, da chave de licença e da lista de assentos até achar, e quem entrava
-   para bloquear um assento não descobria que dava, porque aquilo estava no fim
-   de uma página que ninguém termina de ler.
-
-   O menu não é enfeite: ele é a única coisa que diz O QUE EXISTE.
-   ========================================================================== */
-.painelCx{padding:34px 0 64px;border-bottom:0}
-/* 1220, e não os 1080 originais — nem os 940 do resto do site.
-
-   A conta, medida no navegador e não no olho: 1220 de grade, menos 44 de
-   respiro lateral, menos 214 do menu, menos 34 do vão = 928 de corpo; menos o
-   forro do cartão sobram ~882 para a tabela de casos do roteiro, que tem
-   `min-width:860`.
-
-   Em 1080 sobravam 822, e a tabela nascia com barra de rolagem horizontal
-   SEMPRE — a coluna de ações cortada em toda visita, numa tela larga, num
-   painel que não tinha por que estar apertado. O `--max:940` do site vale para
-   texto corrido, onde linha curta é virtude; aqui dentro é tabela, onde ela é
-   defeito. */
-.painelGrade{display:grid;grid-template-columns:214px minmax(0,1fr);gap:34px;
-      align-items:start;max-width:1220px}
-
-/* `display:block`, e isto NÃO é redundante.
-
-   O menu do painel é um `<nav>`, e lá em cima existe `nav{display:flex;gap:20px;
-   align-items:center}` — a regra do cabeçalho do site, escrita quando `<nav>`
-   só existia num lugar. Ela pegou este também: o e-mail virou uma coluna de
-   20px, a lista virou um item de linha e o "abrir a ferramenta" foi parar
-   flutuando entre o menu e o conteúdo.
-
-   Um seletor de elemento nu é uma regra que alcança tudo o que ainda não foi
-   escrito. */
-.painelMenu{display:block;position:sticky;top:78px}
-/* Quem está logado, no alto. Numa área que trata de fatura e de assento, "em
-   nome de quem estou vendo isto" é a primeira pergunta — e ela ficava perdida
-   no meio do conteúdo. Corta com reticências: um e-mail corporativo longo
-   quebraria o menu inteiro. */
-.painelQuem{margin:0 0 14px;font-size:12.5px;color:var(--muted);font-weight:550;
-      overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 10px}
-.painelMenu ul{list-style:none;margin:0;padding:0;display:grid;gap:2px}
-.painelMenu a{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;
-      color:var(--muted);text-decoration:none;font-size:14.5px;font-weight:550;
-      transition:background .12s,color .12s}
-.painelMenu a svg{width:17px;height:17px;flex:none;opacity:.8}
-.painelMenu a:hover{background:color-mix(in srgb,var(--ink) 5%,transparent);color:var(--ink)}
-/* O item aberto é o único com fundo E cor de marca: um menu em que o ativo se
-   distingue só por peso de fonte não se lê de relance, que é o único jeito que
-   um menu é lido. */
-.painelMenu a.on{background:color-mix(in srgb,var(--accent) 11%,transparent);
-      color:var(--accent);font-weight:650}
-.painelMenu a.on svg{opacity:1}
-.painelSai{display:block !important;margin-top:16px;padding:9px 10px;border-top:1px solid var(--line);
-      padding-top:15px;color:var(--accent);text-decoration:none;font-size:13.5px;font-weight:600}
-.painelSai:hover{text-decoration:underline}
-
-.painelCorpo > h1{font-size:25px;margin:0 0 6px}
-.painelCorpo > .lead{font-size:15.5px;margin-bottom:26px}
-/* Os blocos do painel. Antes cada seção era um <h2> solto separado por espaço;
-   com o menu ao lado, elas viraram cartões — o que estava numa página só agora
-   está em várias, e uma página com um bloco flutuando no vazio parece
-   inacabada. */
-.painelCorpo .bloco{background:var(--panel);border:1px solid var(--line);border-radius:12px;
-      padding:22px 24px;margin-bottom:16px}
-.painelCorpo .bloco > h2{font-size:17px;margin:0 0 4px}
-.painelCorpo .bloco > .status:first-of-type{margin-top:0}
-
-/* No telefone o menu vira uma fileira que rola. Uma coluna de 214px numa tela
-   de 390 come metade do espaço de trabalho, e um menu de seis itens não
-   justifica uma gaveta com botão de abrir. */
-@media (max-width:820px){
-  .painelGrade{grid-template-columns:1fr;gap:20px}
-  .painelMenu{position:static}
-  .painelQuem{padding:0 2px}
-  .painelMenu ul{grid-auto-flow:column;grid-auto-columns:max-content;overflow-x:auto;
-        gap:6px;padding-bottom:4px;scrollbar-width:thin}
-  .painelMenu a{white-space:nowrap;padding:8px 12px;background:var(--panel);
-        border:1px solid var(--line)}
-  .painelMenu a.on{border-color:var(--accent)}
-  .painelSai{margin-top:12px;padding-top:12px}
-}
-
-/* ---------------------------------------------------------- o back-office
-   A faixa de abas, os números e as barras do `/conta/negocio`. Tudo aqui só
-   aparece para uma pessoa — o dono —, então é deliberadamente pouco: nenhuma
-   biblioteca de gráfico, nenhum JavaScript, nada que precise ser mantido. */
-.negAbas{display:flex;gap:2px;overflow-x:auto;border-bottom:1px solid var(--line);margin:0 0 22px}
-.negAbas a{white-space:nowrap;padding:9px 14px;font-size:14px;font-weight:500;color:var(--muted);text-decoration:none}
-.negAbas a:hover{color:var(--ink)}
-.negAbas a.on{margin-bottom:-1px;border-bottom:2px solid var(--accent);color:var(--ink);font-weight:650}
-
-.negNums{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px}
-.negNum{border:1px solid var(--line);border-radius:10px;padding:12px 14px;background:var(--panel)}
-.negNum.alerta{border-color:#EF6E6E}
-.negNumRot{display:block;font-size:12px;color:var(--muted);letter-spacing:.02em}
-.negNum strong{display:block;font-size:23px;line-height:1.25;margin-top:2px;font-variant-numeric:tabular-nums}
-.negNumNota{display:block;font-size:12px;color:var(--muted);margin-top:2px}
-
-.negTrio{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:22px}
-.negBarras{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:6px}
-.negBarras li{display:grid;grid-template-columns:1fr 3fr auto;align-items:center;gap:8px;font-size:13px}
-.negBarraNome{color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.negBarraTrilho{height:8px;border-radius:4px;background:color-mix(in srgb, var(--ink) 8%, transparent)}
-.negBarraCheia{display:block;height:8px;border-radius:4px;background:var(--accent)}
-.negBarraN{font-variant-numeric:tabular-nums;color:var(--muted)}
-
-.negLista{list-style:none;margin:14px 0 0;padding:0;display:grid;gap:14px}
-.negLista li{border:1px solid var(--line);border-radius:10px;padding:12px 14px}
-.negLista li.aberto{border-left:3px solid #EF6E6E}
-.negListaTopo{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-.badge.alerta{border-color:#EF6E6E;color:#C0392B}
-
-@media(max-width:760px){
-  .negTrio{grid-template-columns:1fr}
-}
-
-/* O cadeado do menu. Ele é discreto de propósito: o item tem que continuar
-   parecendo um caminho, não um aviso. Um item pago desenhado como erro faz a
-   pessoa desviar dele — e o ponto de mostrá-lo é o contrário disso. */
-.painelMenu a.trancado{color:var(--muted)}
-.painelMenu a.trancado svg{opacity:.55}
-.painelTranca{display:block;font-size:10.5px;font-style:normal;font-weight:600;
-  letter-spacing:.02em;color:var(--accent);opacity:.85;margin-top:1px}
-.painelMenu a.trancado span{line-height:1.15}
-
 /* ------------------------------------------------------------------ blog */
 .postList{list-style:none;margin:28px 0 0;padding:0;display:grid;gap:26px}
 .postList li{border-bottom:1px solid var(--line);padding-bottom:22px}
@@ -769,23 +570,6 @@ table.legal td:first-child .small,table.legal td:first-child .muted{font-weight:
   .partilhar a,.partilharCopiar{padding:9px 11px}
 }
 
-/* O editor do blog. Campos largos, porque o que se escreve neles é texto longo
-   — e um campo de 260px para um post inteiro é o motivo de ninguém escrever. */
-.painelCorpo form label.small{display:block}
-.painelCorpo form label.small input,
-.painelCorpo form label.small textarea{display:block;width:100%;margin-top:4px}
-.painelCorpo form textarea{font:14px/1.6 ui-monospace,Menlo,Consolas,monospace;resize:vertical}
-.painelCorpo details summary{padding:6px 0}
-
-/* A galeria de figuras do post, no back-office. */
-.figLista{list-style:none;margin:16px 0 0;padding:0;display:grid;gap:14px}
-.figLista li{display:grid;grid-template-columns:120px minmax(0,1fr);gap:14px;align-items:start;
-  border:1px solid var(--line);border-radius:10px;padding:10px}
-.figLista img{width:120px;height:80px;object-fit:cover;border-radius:6px;border:1px solid var(--line)}
-.figMd{display:block;font-size:12.5px;word-break:break-all;background:var(--panel);
-  border-radius:6px;padding:6px 8px}
-@media(max-width:620px){ .figLista li{grid-template-columns:1fr} .figLista img{width:100%} }
-
 /* A capa, na lista e no post. */
 .postList a.comCapa{display:grid;grid-template-columns:180px minmax(0,1fr);gap:18px;align-items:start}
 .postList a.comCapa img{width:180px;height:112px;object-fit:cover;border-radius:10px;
@@ -813,133 +597,6 @@ table.legal td:first-child .small,table.legal td:first-child .muted{font-weight:
 ol.passos{margin:14px 0 0;padding-left:22px;max-width:64ch}
 ol.passos li{margin:0 0 6px;color:var(--ink)}
 ol.passos li::marker{color:var(--accent);font-weight:600}
-
-/* OS SELOS DE ESTADO, ao lado do nome da funcionalidade.
-   `soon` ja existia. `beta` e `descoberta` sao irmaos dele e nao concorrentes:
-   a mesma forma, cores diferentes, e nenhuma delas vermelha — estado nao e
-   defeito. Beta puxa para o acento (funciona), descoberta para o silencio
-   (ainda nao e uma promessa). */
-.fts .beta,.fts .descoberta{
-  font-family:inherit;font-size:11px;letter-spacing:.03em;
-  padding:1px 6px;border-radius:3px;margin-left:6px;white-space:nowrap;
-  border:1px solid var(--line);vertical-align:1px;
-}
-.fts .beta{color:var(--accent);border-color:color-mix(in srgb,var(--accent) 38%,transparent)}
-.fts .descoberta{color:var(--muted)}
-
-/* ===========================================================================
-   A PÁGINA DE PREÇOS REFEITA — os blocos que passaram a existir nesta rodada.
-
-   A página vendia quantidade de recurso: uma lista de noventa e quatro itens
-   com vistos, aberta, no meio do caminho. Passa a vender resultado, e a lista
-   vira prova secundária, recolhida no fim. O que muda aqui é o peso visual de
-   cada coisa, na ordem em que a decisão acontece.
-   =========================================================================== */
-
-/* O hero não tem botão: o primeiro CTA é o do cartão do Free. Sem um botão para
-   competir, o h1 pode ser maior sem gritar. */
-.doc h1.precoH1{font-size:clamp(27px,3.2vw,38px);letter-spacing:-.02em;max-width:22ch}
-.doc .privHero{margin-top:10px;max-width:62ch}
-
-/* O NOME DO PLANO É O SUBTÍTULO, e o resultado é o título. É a inversão que
-   sustenta a página inteira: ninguém compra "Personal", compra parar de refazer
-   quarenta vezes a mesma coisa à mão. Por isso o h3 é o resultado e isto aqui,
-   menor e apagado, é que carrega Free/Personal/Team. */
-.plan .planoNome{margin:4px 0 0;font-size:13.5px;color:var(--muted);font-weight:600;
-      text-transform:uppercase;letter-spacing:.05em}
-
-/* O MÍNIMO ANDA COLADO NO PREÇO POR PESSOA.
-   Preço por assento sozinho é uma promessa de "a partir de 65" que o checkout
-   desmente na linha seguinte. O total mínimo ao lado é o que evita a surpresa. */
-.plan .minimo{margin:6px 0 0;font-size:13.5px;color:var(--accent);font-weight:600}
-.plan .minimoTotal{margin:2px 0 0;font-size:14px;color:var(--muted);font-weight:550}
-.doc .cobranca{margin-top:16px;max-width:70ch}
-
-/* A COMPARAÇÃO CURTA. Cinco linhas, e o sinal precisa ser legível antes da
-   palavra: quem decide passa o olho pela coluna, não lê a linha. */
-.doc h2.cmpH{margin-top:52px}
-/* A caixa que rola, e o motivo de ela existir: quatro colunas mais um rótulo
-   de linha por extenso não cabem em 380 px. Sem esta caixa a tabela empurrava o
-   DOCUMENTO para o lado — a página inteira andava na horizontal e o hero saía
-   da tela junto. Em inglês cabia por sorte; as outras quatro escrevem mais. */
-/* A caixa fica como rede de segurança, mas a tabela não tem largura mínima:
-   ela quebra a linha do rótulo em vez de empurrar o documento para o lado. */
-.cmpEnvolve{overflow-x:auto;margin:18px 0 0}
-table.cmpCurta{width:100%;border-collapse:collapse;font-size:15px}
-table.cmpCurta th,table.cmpCurta td{border-bottom:1px solid var(--line);padding:11px 10px;text-align:left}
-table.cmpCurta thead th{font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
-table.cmpCurta th:not(:first-child),table.cmpCurta td:not(:first-child){text-align:center;width:16%}
-table.cmpCurta tbody th{font-weight:550}
-/* `--err` para o "não", e ele existe: já houve meses em que a variável não
-   estava declarada e a célula do "não" ficava da cor do texto — a tabela
-   inteira parecia dizer que sim. */
-table.cmpCurta td.sim{color:var(--accent);font-weight:700;font-size:17px}
-/* O QUE O PLANO NÃO TEM NÃO É UM ERRO — DEC-18, 24/08.
-   Esta célula saía em `var(--err)`: o mesmo vermelho de "falhou". São seis
-   delas na tabela, e elas descrevem o NOSSO plano Free e o Personal, não um
-   concorrente. Vermelho ali convida a ler o Free como uma versão quebrada, e o
-   Free é a porta de entrada inteira deste produto.
-   Quem achou isso não fui eu: foi o autor desta folha, num bloco `table.cmpPlanos`
-   que existia para consertar exatamente isto e nunca pegou, porque o gerador
-   emite a tabela como `cmpCurta`. O argumento dele, palavra por palavra:
-   "vermelho ali leria como defeito, e o que a célula diz é 'isto é do plano de
-   cima'". O bloco morto saiu no Build 4-A; o argumento virou decisão, e a
-   decisão foi esta.
-   O SÍMBOLO FICA. Tirar o ✕ junto com a cor deixaria a varredura visual da
-   tabela pior — e mostrar a diferença entre planos é o trabalho dela.
-   A `/steps` continua com o vermelho, e lá está certo: ela compara com o Steps
-   Recorder, que é de outra pessoa. */
-table.cmpCurta td.nao{color:var(--muted);font-weight:700;font-size:17px}
-
-/* A figura de quatro estados, no lugar do vídeo que apontava para arquivos que
-   não existem. Ela rola dentro da própria caixa: a 380 px de largura, forçar
-   904 px de desenho na página daria rolagem lateral no documento inteiro. */
-/* SEM `min-width`, e isso é uma regra do projeto e não uma preferência:
-   `vitrine.mjs` cobra que NADA fique pendurado para fora da tela — nem o que
-   rola por dentro. Uma tabela com 560 px de largura mínima já tinha ensinado
-   isso. Então a figura encolhe junto com a coluna; num telefone ela vira uma
-   tira pequena, e os quatro estados continuam ditos no parágrafo acima dela. */
-.figRodada{margin:20px 0 0}
-.figRodada svg{display:block;width:100%;height:auto}
-.figRodada figcaption{margin-top:10px;font-size:14px;color:var(--muted);max-width:62ch}
-
-/* A CALCULADORA. `hidden` no HTML; o script a destrava. Sem JS ela não aparece,
-   em vez de aparecer com quatro campos que não somam nada. */
-.roi{margin-top:52px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:24px}
-.roi[hidden]{display:none}
-.roiCampos{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;margin:18px 0 0}
-.roiCampos p{margin:0;display:flex;flex-direction:column;gap:6px}
-.roiCampos label{font-size:13.5px;color:var(--muted);font-weight:550}
-.roiCampos input{font:inherit;font-size:16px;padding:9px 11px;border:1px solid var(--line);
-      border-radius:9px;background:var(--bg);color:var(--ink);width:100%;box-sizing:border-box}
-.roiCampos input:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
-.roiSaida{list-style:none;padding:0;margin:20px 0 0;display:grid;
-      grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px}
-.roiSaida li{display:flex;flex-direction:column;gap:3px}
-.roiSaida span{font-size:13px;color:var(--muted)}
-.roiSaida b{font-size:21px;font-weight:680;letter-spacing:-.01em}
-.roi .roiNota{margin:16px 0 0;max-width:62ch}
-
-/* A LISTA COMPLETA, RECOLHIDA. Nasce aberta — <details> fechado esconde o texto
-   do Ctrl+F e do buscador, e esta lista é a página inteira em palavras. Quem
-   fecha no telefone é o script. */
-.listaCompleta{margin-top:18px;border:1px solid var(--line);border-radius:14px;padding:0 20px}
-.listaCompleta>summary{cursor:pointer;padding:16px 0;font-weight:620;font-size:15.5px;list-style-position:inside}
-.listaCompleta>summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
-.listaCompleta[open]>summary{border-bottom:1px solid var(--line);margin-bottom:14px}
-
-/* O FAQ de compra. `dl` e não uma pilha de h3: são pares pergunta/resposta, e
-   um leitor de tela que anuncia "lista de definições, 6 itens" já dá o mapa. */
-.faqCompra{margin:18px 0 0;display:grid;gap:16px}
-.faqCompra dt{font-weight:620;font-size:15.5px}
-.faqCompra dd{margin:5px 0 0;color:var(--muted);max-width:74ch}
-
-/* No telefone, aperta o respiro da tabela antes de deixar rolar: rolagem que
-   existe mas não precisa ser usada é melhor do que rolagem obrigatória. */
-@media (max-width:520px){
-  table.cmpCurta th,table.cmpCurta td{padding:9px 5px;font-size:14px}
-  table.cmpCurta thead th{font-size:11.5px;letter-spacing:.03em}
-}
 
 /* ---- O ÍNDICE E A BUSCA DA BASE DE CONHECIMENTO ----
    Nove temas e um campo, no topo de 45 painéis. O bloco inteiro é montado por
@@ -994,9 +651,3 @@ p.ok,p.aviso,p.erro{border-radius:8px;padding:10px 12px;margin:0 0 14px;font-siz
 p.ok,p.aviso{border:1px solid var(--line);background:var(--bg)}
 p.erro{border:1px solid var(--err);color:var(--err);background:transparent}
 
-/* A gaveta do apagar nasce fechada, e o botão dela não pode parecer o botão
-   de salvar da tela ao lado: é o único do produto que não tem desfazer. */
-details.apagarDados{margin-top:20px;border-top:1px solid var(--line);padding-top:16px}
-details.apagarDados > summary{cursor:pointer;color:var(--err);font-weight:600}
-.btn.perigo{background:var(--err);color:#fff;border:1px solid var(--err)}
-.btn.perigo:disabled{opacity:.45;cursor:not-allowed;filter:none}

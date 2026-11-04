@@ -135,7 +135,7 @@ read -r -d '' MAPA <<'MAPA_FIM'
 MAPA_FIM
 
 # ---- 1. os contratos: sempre, e são catorze segundos ------------------------
-CONTRATOS="auditoria.mjs folha.mjs numeros.mjs chaves.mjs inventario.mjs
+CONTRATOS="folha.mjs numeros.mjs chaves.mjs inventario.mjs
  promessa.mjs semmarca.mjs terceiros.mjs wer.mjs"
 
 # ----------------------------------------------------------------------------

@@ -19,20 +19,18 @@ const erros=[]; pg.on('pageerror',e=>erros.push(e.message));
 
 const SEG = {
  '/seguranca':    ['ISO/IEC 27001','SOC 2','21 CFR Part 11','GAMP 5','SOX / ITGC','HIPAA','LGPD / GDPR',
-                   /* A frase de abertura mudou porque a conta paga passou a existir e o
-                      anexo da sessão passou a ser possível. O que se cobra aqui é o que
-                      CONTINUA verdade — o vídeo e o áudio nunca saem — e a existência da
-                      exceção escrita. Cobrar a frase velha era cobrar uma promessa que
-                      deixou de ser cumprida. */
-                   'não recebe o seu vídeo','única exceção','apagar apaga o arquivo',
+                   /* A "única exceção" era a conta paga, e ela saiu no Build 71. O que se
+                      cobra agora é o que continua verdade — o vídeo e o áudio nunca saem
+                      — e o caminho que substituiu a conta: o arquivo de padrões. */
+                   'não recebe o seu vídeo','arquivo de padrões',
                    'versão offline','Do','responsabilidade sua',
                    'Produtize','48.417.292/0001-99'],
  '/en/security':  ['ISO/IEC 27001','SOC 2','21 CFR Part 11','GAMP 5','SOX / ITGC','HIPAA','LGPD / GDPR',
-                   'never receives your video','one exception','deleting removes the file',
+                   'never receives your video','defaults file',
                    'offline version','your responsibility',
                    'Produtize','48.417.292/0001-99'],
  '/es/seguridad': ['ISO/IEC 27001','SOC 2','21 CFR Part 11','GAMP 5','SOX / ITGC','HIPAA','LGPD / RGPD',
-                   'no recibe tu vídeo','única excepción','borrar borra el archivo',
+                   'no recibe tu vídeo','archivo de ajustes',
                    'versión offline','responsabilidad tuya',
                    'Produtize','48.417.292/0001-99'],
 };

@@ -133,7 +133,9 @@ console.log('\n[4] a data de revisão andou — sem isso a mudança não vale pa
 for (const [L, termos] of PAGINAS) {
   await pg.goto(BASE + termos);
   const t = (await pg.locator('.updated').first().textContent() || '').trim();
-  ok(`${L}: a data é a nova`, /17/.test(t) && /2026/.test(t), t.slice(0, 60));
+  /* Era o "17" da revisão do §7. Os termos foram reescritos de novo em
+     04/11/2026, quando o produto ficou grátis e sem conta (Build 71). */
+  ok(`${L}: a data é a nova`, /\b4\b/.test(t) && /2026/.test(t) && !/\b17\b/.test(t), t.slice(0, 60));
 }
 
 console.log('\n[5] a ressalva da MIT continua — uma licença concedida não se retira');

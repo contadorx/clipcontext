@@ -51,56 +51,6 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en"/>
   </url>
   <url>
-    <loc>https://walkstamp.com/precos</loc>
-    <lastmod>2026-11-04</lastmod>
-    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/precos"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/precos"/>
-    <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/precos"/>
-    <xhtml:link rel="alternate" hreflang="de" href="https://walkstamp.com/de/preise"/>
-    <xhtml:link rel="alternate" hreflang="fr" href="https://walkstamp.com/fr/tarifs"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/precos"/>
-  </url>
-  <url>
-    <loc>https://walkstamp.com/en/precos</loc>
-    <lastmod>2026-11-04</lastmod>
-    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/precos"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/precos"/>
-    <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/precos"/>
-    <xhtml:link rel="alternate" hreflang="de" href="https://walkstamp.com/de/preise"/>
-    <xhtml:link rel="alternate" hreflang="fr" href="https://walkstamp.com/fr/tarifs"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/precos"/>
-  </url>
-  <url>
-    <loc>https://walkstamp.com/es/precos</loc>
-    <lastmod>2026-11-04</lastmod>
-    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/precos"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/precos"/>
-    <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/precos"/>
-    <xhtml:link rel="alternate" hreflang="de" href="https://walkstamp.com/de/preise"/>
-    <xhtml:link rel="alternate" hreflang="fr" href="https://walkstamp.com/fr/tarifs"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/precos"/>
-  </url>
-  <url>
-    <loc>https://walkstamp.com/de/preise</loc>
-    <lastmod>2026-11-04</lastmod>
-    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/precos"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/precos"/>
-    <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/precos"/>
-    <xhtml:link rel="alternate" hreflang="de" href="https://walkstamp.com/de/preise"/>
-    <xhtml:link rel="alternate" hreflang="fr" href="https://walkstamp.com/fr/tarifs"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/precos"/>
-  </url>
-  <url>
-    <loc>https://walkstamp.com/fr/tarifs</loc>
-    <lastmod>2026-11-04</lastmod>
-    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/precos"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://walkstamp.com/en/precos"/>
-    <xhtml:link rel="alternate" hreflang="es" href="https://walkstamp.com/es/precos"/>
-    <xhtml:link rel="alternate" hreflang="de" href="https://walkstamp.com/de/preise"/>
-    <xhtml:link rel="alternate" hreflang="fr" href="https://walkstamp.com/fr/tarifs"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://walkstamp.com/en/precos"/>
-  </url>
-  <url>
     <loc>https://walkstamp.com/privacidade</loc>
     <lastmod>2026-11-04</lastmod>
     <xhtml:link rel="alternate" hreflang="pt-BR" href="https://walkstamp.com/privacidade"/>

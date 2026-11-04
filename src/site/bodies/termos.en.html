@@ -1,31 +1,50 @@
 <section style="padding-top:60px">
   <div class="wrap doc">
     <h1 style="font-size:32px">Terms of Use</h1>
-    <p class="updated">Last updated: 17 August 2026 (ownership of the code and the offline version).</p>
+    <p class="updated">Last updated: 4 November 2026 ({{marca}} becomes entirely free of charge and has no
+    account).</p>
 
-    <p class="lockHint" style="margin:0 0 26px">
-    Until 14 August 2026 this service was called <b>ClipContext</b> and lived at clipcontext.app.
-    The name changed; the controller, the data processing and the terms did not.</p>
+    <!-- `testes/legal.mjs` checks the same section `id`s in all five
+         languages, numbering from 1 to N with no gaps, and that plans,
+         billing, Stripe and Supabase only appear inside `data-antigo`
+         elements — the system that ceased to exist on 04/11/2026. -->
 
-    <h2>1. Who provides the service</h2>
+    <p class="lockHint" style="margin:0 0 26px" data-antigo>
+    On 4 November 2026 {{marca}} became <b>entirely free of charge</b>: accounts, paid plans, licences and
+    billing ceased to exist, and these terms were rewritten to describe the service as it is now. Anyone who
+    had an account before that date will find what changed in section 14.<br>
+    Until 14 August 2026 this service was called <b>ClipContext</b> and lived at clipcontext.app.</p>
+
+    <h2 id="quem">1. Who provides the service</h2>
     <p>{{marca}} is provided by <b>{{empresa}}</b>, a company registered in Brazil under CNPJ
-    <b>{{cnpj}}</b> (&ldquo;we&rdquo;). Contact:
-    <a href="mailto:{{contato}}" style="color:var(--accent)">{{contato}}</a>.</p>
+    <b>{{cnpj}}</b> (&ldquo;we&rdquo;). Support:
+    <a href="mailto:suporte@walkstamp.com" style="color:var(--accent)">suporte@walkstamp.com</a>.
+    Privacy: <a href="mailto:{{contato}}" style="color:var(--accent)">{{contato}}</a>.</p>
 
-    <h2>2. What the service is</h2>
-    <p>{{marca}} is a free tool that runs in the browser and converts a video file into a document — PDF,
-    Word, or a package of images — containing the frames where the screen changes and, optionally, a
-    transcript of the audio. <b>Processing happens entirely on the user's device:</b> the video, the audio and
-    the transcript are never sent to us, and we have no way to access them.</p>
+    <h2 id="servico">2. What the service is</h2>
+    <p>{{marca}} is a tool that runs in the browser and turns a screen recording or a video file into a
+    document — PDF, Word, or a package of images — with the screens where something changes and,
+    optionally, a transcript of the audio. <b>Processing happens entirely on the user's device:</b> the
+    video, the audio, the screens, the transcript and the generated documents are never sent to us, and we
+    have no way to access them.</p>
+    <p>The site and the tool are pages hosted on Vercel, with no server of ours that receives what you
+    record.</p>
 
-    <h2>3. Acceptance</h2>
+    <h2 id="aceitacao">3. Acceptance</h2>
     <p>By using the service, you agree to these terms. If you do not agree, do not use it.</p>
 
-    <h2>4. Permitted use</h2>
-    <p>You may use {{marca}} for personal or commercial purposes, at no cost. You are responsible for
-    ensuring you hold the necessary rights over the videos you process.</p>
+    <h2 id="gratuito">4. Free of charge, with no account</h2>
+    <p>{{marca}} is <b>free of charge</b>. There is no account, sign-in, registration or payment, and every
+    feature is available to everyone. Using the service creates no obligation to pay anything.</p>
 
-    <h2>5. Prohibited use</h2>
+    <h2 id="permitido">5. Permitted use, and your responsibility</h2>
+    <p>You may use {{marca}} for personal or commercial purposes, at no cost.</p>
+    <p><b>You are responsible for what you record and process</b>: for having the right to record that
+    screen, that audio and those people — including any consent required by applicable law —, for
+    respecting your organisation's confidentiality rules and for holding the necessary rights over the
+    videos you process.</p>
+
+    <h2 id="proibido">6. Prohibited use</h2>
     <ul>
       <li>Processing content whose possession or distribution is unlawful</li>
       <li>Infringing copyright, image rights or the privacy of third parties</li>
@@ -34,11 +53,11 @@
     </ul>
     <p>Since we have no access to what you process, responsibility for these limits is entirely yours.</p>
 
-    <h2>6. Ownership of your content</h2>
-    <p>Your videos and the PDFs generated are yours. We claim no rights over them, and could not: none of it
-    passes through us.</p>
+    <h2 id="conteudo">7. Ownership of your content</h2>
+    <p>Your recordings and the documents generated are yours. We claim no rights over them, and could not:
+    none of it passes through us.</p>
 
-    <h2>7. Ownership of the code</h2>
+    <h2 id="codigo">8. Ownership of the code</h2>
     <p>The {{marca}} code is ours and is not distributed under a free licence. You may use the tool as
     much as you like, personally or commercially, and what it produces is yours — but copying,
     redistributing or publishing the code is not authorised, with one exception, set out below.</p>
@@ -46,66 +65,75 @@
     licence, under the name ClipContext. <b>Anyone who obtained those versions keeps the rights MIT
     granted over them</b> — a licence already granted cannot be taken back. The change applies from this
     version onwards.</p>
-
     <p>The exception, and it is deliberate: <b>the offline version — the single file you download — may be
-    kept, scanned, versioned and distributed inside your organisation</b>, without asking anyone for permission. It is what
-    lets a team put {{marca}} in the middle of a procedure without depending on this site continuing to
-    exist. What the exception does not authorise is publishing the file outside your organisation,
-    reselling it, or presenting it as your own product.</p>
+    kept, scanned, versioned and distributed inside your organisation</b>, without asking anyone for
+    permission. It is what lets a team put {{marca}} in the middle of a procedure without depending on this
+    site continuing to exist. What the exception does not authorise is publishing the file outside your
+    organisation, reselling it, or presenting it as your own product.</p>
 
-    <h2>8. No warranty</h2>
-    <p>The service is provided "as is". We do not warrant that the extracted images, the transcript or the PDF
-    are correct, complete or fit for any particular purpose. Automatic transcription is produced by a
-    statistical model and contains errors. The extracted frames are samples of the video, and moments between
-    two captures do not appear in the document.</p>
+    <h2 id="garantia">9. No warranty</h2>
+    <p>The service is provided &ldquo;as is&rdquo;, with no warranty and no service level agreement, beyond
+    what the law requires. We do not warrant that the extracted screens, the transcript or the documents are
+    correct, complete or fit for any particular purpose. Automatic transcription is produced by a
+    statistical model and contains errors. The extracted screens are samples of the video, and moments
+    between two captures do not appear in the document.</p>
     <p>Important decisions should not rely solely on the tool's output without checking against the original
     video.</p>
 
-    <h2>9. Limitation of liability</h2>
+    <h2 id="responsabilidade">10. Limitation of liability</h2>
     <p>To the fullest extent permitted by law, we are not liable for losses or damages arising from the use of
-    or inability to use the service, including data loss, lost profits or business interruption. As a free
-    service that collects no data, use is at the user's own risk.</p>
+    or inability to use the service, including data loss, lost profits or business interruption. This
+    includes what the tool keeps in your browser — templates, brand, vocabulary and the copy of a recording
+    in progress —, which may be erased by you, by the browser itself or by clearing the site data. As a free
+    service that runs on your device, use is at the user's own risk.</p>
+    <p>Nothing in these terms removes rights that the law guarantees and that cannot be waived by contract,
+    including those of the Brazilian Consumer Protection Code, where applicable.</p>
 
-    <h2>10. Availability</h2>
+    <h2 id="disponibilidade">11. Availability</h2>
     <p>We do not guarantee uninterrupted operation. The service may be changed, suspended or discontinued at
     any time. The insurance against this paragraph is the <b>offline version</b>: the single file you
     downloaded keeps working on your machine, without contacting any server, even if this site
-    disappears — and section 7 authorises you to keep it and to distribute it inside your
+    disappears — and section 8 authorises you to keep it and to distribute it inside your
     organisation.</p>
 
-    <h2>11. Third-party services</h2>
-    <p>The tool loads third-party libraries and models over the internet. We are not responsible for the
+    <h2 id="terceiros">12. Third-party services</h2>
+    <p>The tool downloads third-party libraries and models over the internet, such as the transcription
+    model. Optional features, such as opening a video from Google Drive or sending a document to Google
+    Docs, use third-party services, which follow their own terms and policies. The complete list is in the
+    <a href="{{privacidade}}" style="color:var(--accent)">Privacy Policy</a>. We are not responsible for the
     availability or the content of those services.</p>
 
-    <h2>12. Changes</h2>
-    <p>These terms may be updated. The date at the top indicates the latest revision, and continued use after
-    changes means acceptance of the new version.</p>
-
-    <h2>13. Privacy</h2>
+    <h2 id="privacidade">13. Privacy</h2>
     <p>The processing of personal data is described in the
     <a href="{{privacidade}}" style="color:var(--accent)">Privacy Policy</a>, which forms part of these terms.
-    In short: your videos never reach us, usage measurement is anonymous, and the personal data that exists
-    is your account e-mail and, for subscribers, what Stripe needs in order to bill.</p>
+    In short: your recordings never reach us, the site sets no cookies, and the personal data we process is
+    the technical data every host receives and the e-mail you decide to send us.</p>
 
-    <h2>14. Paid plans, renewal and cancellation</h2>
-    <p>The plans described on the pricing page <b>are for sale</b>. Billing is annual and handled by Stripe;
-    the price is the one published on the pricing page at the time of purchase, and the subscription renews
-    by itself at the end of each period.</p>
-    <p>Before any charge, whoever signs in for the first time gets <b>14 days with everything</b>, with no
-    card and no checkout. When the 14 days are over nothing is charged: the account returns to the free plan.</p>
-    <p><b>Cancelling is done in your account</b>, at any time and without talking to anyone. Cancellation
-    applies to the next renewal: access continues until the end of the period already paid for, and there is
-    <b>no pro-rata refund</b> of what has been charged — the 14-day trial exists precisely so the decision is
-    made before payment. This does not remove the rights that consumer protection law grants to individuals,
-    including the withdrawal period of art. 49 of the Brazilian Consumer Protection Code.</p>
-    <p>The free plan described here does not lose features because of the paid plans.</p>
+    <h2 id="contaAntiga">14. Who had an account before 4 November 2026</h2>
+    <div data-antigo>
+    <p>Until 4 November 2026 {{marca}} offered an optional account and paid plans, billed through Stripe.
+    <b>The paid plans are no longer offered and there will be no further charges.</b> The features that were
+    paid became free for everyone, and the licences issued before that date are no longer needed to use any
+    feature.</p>
+    <p>What happens to the data of the former account is in the section
+    <a href="{{privacidade}}#contaAntiga" style="color:var(--accent)">Who had an account before 4 November
+    2026</a> of the Privacy Policy. Questions about a charge made before that date:
+    <a href="mailto:suporte@walkstamp.com" style="color:var(--accent)">suporte@walkstamp.com</a>. This does
+    not remove the rights that consumer protection law grants to those who contracted as individuals.</p>
+    </div>
 
-    <h2>15. Governing law</h2>
+    <h2 id="alteracoes">15. Changes</h2>
+    <p>These terms may be updated. The date at the top indicates the latest revision, and the change is
+    announced on this page — as there is no registration, we have no way of notifying anyone by e-mail.
+    Continued use after the changes means acceptance of the new version.</p>
+
+    <h2 id="lei">16. Governing law</h2>
     <p>These terms are governed by Brazilian law. Where consumer protection legislation applies, the courts of
     the user's domicile are elected to settle disputes.</p>
 
-    <h2>16. Contact</h2>
-    <p>{{empresa}} — CNPJ {{cnpj}} —
-    <a href="mailto:{{contato}}" style="color:var(--accent)">{{contato}}</a>.</p>
+    <h2 id="contato">17. Contact</h2>
+    <p>{{empresa}} — CNPJ {{cnpj}}.<br>
+    Support: <a href="mailto:suporte@walkstamp.com" style="color:var(--accent)">suporte@walkstamp.com</a>.<br>
+    Privacy: <a href="mailto:{{contato}}" style="color:var(--accent)">{{contato}}</a>.</p>
   </div>
 </section>

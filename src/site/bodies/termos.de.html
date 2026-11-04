@@ -1,116 +1,153 @@
 <section style="padding-top:60px">
   <div class="wrap doc">
     <h1 style="font-size:32px">Nutzungsbedingungen</h1>
-    <p class="updated">Letzte Aktualisierung: 17. August 2026 (Eigentum am Code und Offline-Version).</p>
+    <p class="updated">Letzte Aktualisierung: 4. November 2026 ({{marca}} wird vollständig kostenlos und
+    ohne Konto).</p>
 
-    <p class="lockHint" style="margin:0 0 26px">
-    Bis zum 14. August 2026 hieß dieser Dienst <b>ClipContext</b> und lag unter clipcontext.app.
-    Der Name hat sich geändert; die Verantwortliche, die Verarbeitung der Daten und die Bedingungen bleiben dieselben.</p>
+    <!-- `testes/legal.mjs` prüft dieselben Abschnitts-`id` in allen fünf
+         Sprachen, die Nummerierung von 1 bis N ohne Lücke und dass Pläne,
+         Abrechnung, Stripe und Supabase nur innerhalb von Elementen mit
+         `data-antigo` vorkommen — dem System, das es seit 04/11/2026 nicht
+         mehr gibt. -->
 
-    <h2>1. Wer den Dienst anbietet</h2>
+    <p class="lockHint" style="margin:0 0 26px" data-antigo>
+    Am 4. November 2026 wurde {{marca}} <b>vollständig kostenlos</b>: Konto, bezahlte Pläne, Lizenzen und
+    Abrechnung gibt es nicht mehr, und diese Bedingungen wurden neu geschrieben, um den Dienst so zu
+    beschreiben, wie er jetzt ist. Wer vor diesem Datum ein Konto hatte, findet die Änderungen in Abschnitt
+    14.<br>
+    Bis zum 14. August 2026 hieß dieser Dienst <b>ClipContext</b> und lag unter clipcontext.app.</p>
+
+    <h2 id="quem">1. Wer den Dienst anbietet</h2>
     <p>{{marca}} wird angeboten von <b>{{empresa}}</b>, eingetragen im CNPJ unter der Nr. <b>{{cnpj}}</b>
-    (&bdquo;wir&ldquo;). Kontakt: <a href="mailto:{{contato}}" style="color:var(--accent)">{{contato}}</a>.</p>
+    (&bdquo;wir&ldquo;). Support:
+    <a href="mailto:suporte@walkstamp.com" style="color:var(--accent)">suporte@walkstamp.com</a>.
+    Datenschutz: <a href="mailto:{{contato}}" style="color:var(--accent)">{{contato}}</a>.</p>
 
-    <h2>2. Was der Dienst ist</h2>
-    <p>{{marca}} ist ein kostenloses Werkzeug, das im Browser läuft und eine Videodatei in ein Dokument
-    umwandelt — PDF, Word oder ein Paket von Bildern — mit den Screenshots, in denen sich der Bildschirm
-    ändert, und optional der Transkription des Audios. <b>Die Verarbeitung findet vollständig auf dem Gerät
-    der nutzenden Person statt:</b> Video, Audio und Transkription werden nicht an uns gesendet, und wir haben keine Möglichkeit, darauf zuzugreifen.</p>
+    <h2 id="servico">2. Was der Dienst ist</h2>
+    <p>{{marca}} ist ein Werkzeug, das im Browser läuft und eine Bildschirmaufnahme oder eine Videodatei in
+    ein Dokument umwandelt — PDF, Word oder ein Paket von Bildern — mit den Bildschirmen, auf denen sich
+    etwas ändert, und optional der Transkription des Audios. <b>Die Verarbeitung findet vollständig auf dem
+    Gerät der nutzenden Person statt:</b> Video, Audio, Bildschirme, Transkription und erzeugte Dokumente
+    werden nicht an uns gesendet, und wir haben keine Möglichkeit, darauf zuzugreifen.</p>
+    <p>Website und Werkzeug sind Seiten, die bei Vercel gehostet werden, ohne einen Server von uns, der
+    empfängt, was Sie aufnehmen.</p>
 
-    <h2>3. Annahme</h2>
-    <p>Mit der Nutzung des Dienstes stimmen Sie diesen Bedingungen zu. Wenn Sie nicht zustimmen, nutzen Sie ihn nicht.</p>
+    <h2 id="aceitacao">3. Annahme</h2>
+    <p>Mit der Nutzung des Dienstes stimmen Sie diesen Bedingungen zu. Wenn Sie nicht zustimmen, nutzen Sie
+    ihn nicht.</p>
 
-    <h2>4. Erlaubte Nutzung</h2>
-    <p>Sie dürfen {{marca}} für private oder gewerbliche Zwecke nutzen, ohne Kosten. Sie sind dafür
-    verantwortlich, sicherzustellen, dass Sie die erforderlichen Rechte an den Videos besitzen, die Sie verarbeiten.</p>
+    <h2 id="gratuito">4. Kostenlos und ohne Konto</h2>
+    <p>{{marca}} ist <b>kostenlos</b>. Es gibt kein Konto, keine Anmeldung, keine Registrierung und keine
+    Zahlung, und alle Funktionen stehen allen zur Verfügung. Die Nutzung des Dienstes begründet keine
+    Zahlungspflicht.</p>
 
-    <h2>5. Verbotene Nutzung</h2>
+    <h2 id="permitido">5. Erlaubte Nutzung, und Ihre Verantwortung</h2>
+    <p>Sie dürfen {{marca}} für private oder gewerbliche Zwecke nutzen, ohne Kosten.</p>
+    <p><b>Sie sind verantwortlich für das, was Sie aufnehmen und verarbeiten</b>: dafür, dass Sie diesen
+    Bildschirm, dieses Audio und diese Personen aufnehmen dürfen — einschließlich der nach dem anwendbaren
+    Recht erforderlichen Einwilligung —, dass Sie die Vertraulichkeitsregeln Ihrer Organisation einhalten
+    und dass Sie die erforderlichen Rechte an den Videos besitzen, die Sie verarbeiten.</p>
+
+    <h2 id="proibido">6. Verbotene Nutzung</h2>
     <ul>
       <li>Inhalte verarbeiten, deren Besitz oder Verbreitung rechtswidrig ist</li>
       <li>Urheber-, Bild- oder Persönlichkeitsrechte Dritter verletzen</li>
       <li>Personen ohne die nach dem anwendbaren Recht erforderliche Einwilligung aufnehmen oder verarbeiten</li>
       <li>Versuchen, die Verfügbarkeit oder die Integrität der Website zu beeinträchtigen</li>
     </ul>
-    <p>Da wir keinen Zugriff auf das haben, was Sie verarbeiten, liegt die Verantwortung für diese Grenzen vollständig bei Ihnen.</p>
+    <p>Da wir keinen Zugriff auf das haben, was Sie verarbeiten, liegt die Verantwortung für diese Grenzen
+    vollständig bei Ihnen.</p>
 
-    <h2>6. Eigentum an Ihren Inhalten</h2>
-    <p>Ihre Videos und die erzeugten PDFs gehören Ihnen. Wir erheben keinerlei Anspruch darauf, und wir hätten
-    auch keine Möglichkeit dazu: Nichts davon läuft über uns.</p>
+    <h2 id="conteudo">7. Eigentum an Ihren Inhalten</h2>
+    <p>Ihre Aufnahmen und die erzeugten Dokumente gehören Ihnen. Wir erheben keinerlei Anspruch darauf, und
+    wir hätten auch keine Möglichkeit dazu: Nichts davon läuft über uns.</p>
 
-    <h2>7. Eigentum am Code</h2>
+    <h2 id="codigo">8. Eigentum am Code</h2>
     <p>Der Code von {{marca}} gehört uns und wird nicht unter einer freien Lizenz verbreitet. Sie dürfen das
     Werkzeug frei nutzen, für private oder gewerbliche Zwecke, und was es erzeugt, gehört Ihnen — aber den
     Code zu kopieren, weiterzuverbreiten oder zu veröffentlichen ist nicht gestattet, mit einer unten
     genannten Ausnahme.</p>
     <p>Ein ehrlicher Vorbehalt: Bis zum 14. August 2026 wurden frühere Versionen dieses Werkzeugs
     unter der MIT-Lizenz veröffentlicht, unter dem Namen ClipContext. <b>Wer jene Versionen erhalten hat,
-    behält die Rechte, die die MIT-Lizenz daran eingeräumt hat</b> — eine bereits erteilte Lizenz lässt sich nicht
-    zurücknehmen. Die Änderung gilt ab dieser Version.</p>
-
+    behält die Rechte, die die MIT-Lizenz daran eingeräumt hat</b> — eine bereits erteilte Lizenz lässt sich
+    nicht zurücknehmen. Die Änderung gilt ab dieser Version.</p>
     <p>Die Ausnahme, und sie ist gewollt: <b>Die Offline-Version — die einzelne Datei, die Sie
     herunterladen — darf aufbewahrt, geprüft, versioniert und innerhalb Ihrer Organisation verteilt
     werden</b>, ohne jemanden um Erlaubnis zu fragen. Genau das erlaubt es einem Team, {{marca}} in ein
-    Verfahren einzubauen, ohne darauf angewiesen zu sein, dass es diese Website noch gibt. Nicht gestattet ist
-    es, die Datei außerhalb Ihrer Organisation zu veröffentlichen, sie weiterzuverkaufen oder sie als
+    Verfahren einzubauen, ohne darauf angewiesen zu sein, dass es diese Website noch gibt. Nicht gestattet
+    ist es, die Datei außerhalb Ihrer Organisation zu veröffentlichen, sie weiterzuverkaufen oder sie als
     eigenes Produkt auszugeben.</p>
 
-    <h2>8. Fehlen einer Gewährleistung</h2>
-    <p>Der Dienst wird &bdquo;wie besehen&ldquo; bereitgestellt. Wir gewährleisten nicht, dass die Extraktion der
-    Bilder, die Transkription oder das PDF richtig, vollständig oder für einen bestimmten Zweck geeignet sind.
-    Die automatische Transkription wird von einem statistischen Modell erzeugt und enthält Fehler. Die
-    extrahierten Screenshots sind Stichproben des Videos, und Momente zwischen zwei Aufnahmen erscheinen nicht im Dokument.</p>
+    <h2 id="garantia">9. Fehlen einer Gewährleistung</h2>
+    <p>Der Dienst wird &bdquo;wie besehen&ldquo; bereitgestellt, ohne Gewährleistung und ohne
+    Service-Level-Vereinbarung, über das gesetzlich Vorgeschriebene hinaus. Wir gewährleisten nicht, dass
+    die herausgelösten Bildschirme, die Transkription oder die Dokumente richtig, vollständig oder für einen
+    bestimmten Zweck geeignet sind. Die automatische Transkription wird von einem statistischen Modell
+    erzeugt und enthält Fehler. Die herausgelösten Bildschirme sind Stichproben des Videos, und Momente
+    zwischen zwei Aufnahmen erscheinen nicht im Dokument.</p>
     <p>Wesentliche Entscheidungen sollten sich nicht ausschließlich auf das Ergebnis des Werkzeugs stützen,
     ohne Abgleich mit dem ursprünglichen Video.</p>
 
-    <h2>9. Haftungsbeschränkung</h2>
+    <h2 id="responsabilidade">10. Haftungsbeschränkung</h2>
     <p>Im größtmöglichen gesetzlich zulässigen Umfang haften wir nicht für Verluste oder Schäden, die aus der
     Nutzung oder der Unmöglichkeit der Nutzung des Dienstes entstehen, einschließlich Datenverlust,
-    entgangenem Gewinn oder Betriebsunterbrechung. Da es sich um einen kostenlosen Dienst ohne Datenerhebung handelt, erfolgt die Nutzung auf eigene Gefahr der nutzenden Person.</p>
+    entgangenem Gewinn oder Betriebsunterbrechung. Das gilt auch für das, was das Werkzeug in Ihrem Browser
+    speichert — Vorlagen, Marke, Vokabular und die Kopie einer laufenden Aufnahme —, das von Ihnen, vom
+    Browser selbst oder durch das Löschen der Website-Daten gelöscht werden kann. Da es sich um einen
+    kostenlosen Dienst handelt, der auf Ihrem Gerät läuft, erfolgt die Nutzung auf eigene Gefahr der
+    nutzenden Person.</p>
+    <p>Nichts in diesen Bedingungen schließt Rechte aus, die das Gesetz gewährt und die vertraglich nicht
+    ausgeschlossen werden können, einschließlich derer aus dem brasilianischen Verbraucherschutzgesetz,
+    soweit anwendbar.</p>
 
-    <h2>10. Verfügbarkeit</h2>
+    <h2 id="disponibilidade">11. Verfügbarkeit</h2>
     <p>Wir gewährleisten keinen unterbrechungsfreien Betrieb. Der Dienst kann jederzeit geändert, ausgesetzt
     oder eingestellt werden. Die Absicherung gegen diesen Absatz ist die <b>Offline-Version</b>: Die einzelne
     Datei, die Sie heruntergeladen haben, funktioniert auf Ihrem Rechner weiter, ohne einen Server zu
-    befragen, auch wenn es diese Website nicht mehr gibt — und Abschnitt 7 gestattet Ihnen, sie
+    befragen, auch wenn es diese Website nicht mehr gibt — und Abschnitt 8 gestattet Ihnen, sie
     aufzubewahren und innerhalb Ihrer Organisation zu verteilen.</p>
 
-    <h2>11. Dienste Dritter</h2>
-    <p>Das Werkzeug lädt Bibliotheken und Modelle Dritter über das Internet. Wir haften weder für die
+    <h2 id="terceiros">12. Dienste Dritter</h2>
+    <p>Das Werkzeug lädt Bibliotheken und Modelle Dritter über das Internet, etwa das
+    Transkriptionsmodell. Optionale Funktionen, wie das Öffnen eines Videos aus Google Drive oder das Senden
+    eines Dokuments an Google Docs, nutzen Dienste Dritter, die deren eigenen Bedingungen und Richtlinien
+    folgen. Die vollständige Liste steht in der
+    <a href="{{privacidade}}" style="color:var(--accent)">Datenschutzerklärung</a>. Wir haften weder für die
     Verfügbarkeit noch für den Inhalt dieser Dienste.</p>
 
-    <h2>12. Änderungen</h2>
-    <p>Diese Bedingungen können aktualisiert werden. Das Datum oben gibt die letzte Überarbeitung an, und die
-    fortgesetzte Nutzung nach Änderungen bedeutet Zustimmung zur neuen Fassung.</p>
-
-    <h2>13. Datenschutz</h2>
+    <h2 id="privacidade">13. Datenschutz</h2>
     <p>Die Verarbeitung personenbezogener Daten ist in der
     <a href="{{privacidade}}" style="color:var(--accent)">Datenschutzerklärung</a> beschrieben, die
-    Bestandteil dieser Bedingungen ist. Kurz gefasst: Ihre Videos gelangen nicht zu uns, die Messung der
-    Nutzung ist anonym, und die personenbezogenen Daten, die es gibt, sind die E-Mail-Adresse Ihres Kontos
-    und, bei einem Abonnement, das, was Stripe zur Abrechnung benötigt.</p>
+    Bestandteil dieser Bedingungen ist. Kurz gefasst: Ihre Aufnahmen gelangen nicht zu uns, die Website setzt
+    keine Cookies, und die personenbezogenen Daten, die wir verarbeiten, sind die technischen Daten, die
+    jedes Hosting erhält, und die E-Mail, die Sie uns schicken wollen.</p>
 
-    <h2>14. Bezahlte Pläne, Verlängerung und Kündigung</h2>
-    <p>Die auf der Preisseite beschriebenen Pläne <b>stehen zum Verkauf</b>. Die Abrechnung erfolgt jährlich
-    über Stripe; es gilt der zum Zeitpunkt des Abschlusses auf der Preisseite veröffentlichte Preis, und das
-    Abo verlängert sich am Ende jedes Zeitraums von selbst.</p>
-    <p>Vor jeder Abrechnung erhält, wer sich zum ersten Mal anmeldet, <b>14 Tage mit allem</b> — ohne Karte
-    und ohne Checkout. Nach den 14 Tagen wird nichts berechnet: das Konto kehrt zum kostenlosen Plan zurück.</p>
-    <p><b>Gekündigt wird im eigenen Konto</b>, jederzeit und ohne mit jemandem sprechen zu müssen. Die
-    Kündigung gilt für die nächste Verlängerung: der Zugang bleibt bis zum Ende des bereits bezahlten
-    Zeitraums bestehen, und es gibt <b>keine anteilige Erstattung</b> des bereits Berechneten — die
-    14-tägige Testphase besteht gerade dafür, dass die Entscheidung vor der Zahlung fällt. Rechte, die das
-    Verbraucherrecht natürlichen Personen einräumt, bleiben davon unberührt, einschließlich der
-    Widerrufsfrist nach Art. 49 des brasilianischen Verbraucherschutzgesetzes.</p>
-    <p>Der hier beschriebene kostenlose Plan verliert wegen der bezahlten Pläne keine Funktionen.</p>
+    <h2 id="contaAntiga">14. Wer vor dem 4. November 2026 ein Konto hatte</h2>
+    <div data-antigo>
+    <p>Bis zum 4. November 2026 bot {{marca}} ein optionales Konto und bezahlte Pläne an, abgerechnet über
+    Stripe. <b>Die bezahlten Pläne werden nicht mehr angeboten, und es wird keine weitere Abbuchung
+    geben.</b> Die Funktionen, die bezahlt waren, sind für alle kostenlos geworden, und die vor diesem Datum
+    ausgestellten Lizenzen werden für keine Funktion mehr benötigt.</p>
+    <p>Was mit den Daten des früheren Kontos geschieht, steht im Abschnitt
+    <a href="{{privacidade}}#contaAntiga" style="color:var(--accent)">Wer vor dem 4. November 2026 ein Konto
+    hatte</a> der Datenschutzerklärung. Fragen zu einer vor diesem Datum vorgenommenen Abbuchung:
+    <a href="mailto:suporte@walkstamp.com" style="color:var(--accent)">suporte@walkstamp.com</a>. Rechte, die
+    das Verbraucherrecht natürlichen Personen einräumt, die den Vertrag geschlossen haben, bleiben davon
+    unberührt.</p>
+    </div>
 
-    <h2>15. Anwendbares Recht</h2>
+    <h2 id="alteracoes">15. Änderungen</h2>
+    <p>Diese Bedingungen können aktualisiert werden. Das Datum oben gibt die letzte Überarbeitung an, und die
+    Änderung wird auf dieser Seite angekündigt — da es keine Registrierung gibt, können wir nicht per E-Mail
+    benachrichtigen. Die fortgesetzte Nutzung nach Änderungen bedeutet Zustimmung zur neuen Fassung.</p>
+
+    <h2 id="lei">16. Anwendbares Recht</h2>
     <p>Diese Bedingungen unterliegen brasilianischem Recht; als Gerichtsstand zur Beilegung von
     Streitigkeiten wird der Wohnsitz der nutzenden Person gewählt, soweit das Verbraucherrecht anwendbar ist.</p>
 
-    <h2>16. Kontakt</h2>
-    <p>{{empresa}} — CNPJ {{cnpj}} —
-    <a href="mailto:{{contato}}" style="color:var(--accent)">{{contato}}</a>.</p>
-
-
+    <h2 id="contato">17. Kontakt</h2>
+    <p>{{empresa}} — CNPJ {{cnpj}}.<br>
+    Support: <a href="mailto:suporte@walkstamp.com" style="color:var(--accent)">suporte@walkstamp.com</a>.<br>
+    Datenschutz: <a href="mailto:{{contato}}" style="color:var(--accent)">{{contato}}</a>.</p>
   </div>
 </section>

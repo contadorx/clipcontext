@@ -1,51 +1,73 @@
 <section style="padding-top:60px">
   <div class="wrap doc">
     <h1 style="font-size:32px">Conditions d’utilisation</h1>
-    <p class="updated">Dernière mise à jour : 17 août 2026 (propriété du code et version hors ligne).</p>
+    <p class="updated">Dernière mise à jour : 4 novembre 2026 ({{marca}} devient entièrement gratuit et sans
+    compte).</p>
 
-    <p class="lockHint" style="margin:0 0 26px">
-    Jusqu’au 14 août 2026, ce service s’appelait <b>ClipContext</b> et se trouvait sur clipcontext.app.
-    Le nom a changé ; le responsable de traitement, le traitement des données et les conditions restent les mêmes.</p>
+    <!-- `testes/legal.mjs` vérifie les mêmes `id` de section dans les cinq
+         langues, la numérotation de 1 à N sans trou et que les offres, la
+         facturation, Stripe et Supabase n’apparaissent que dans des éléments
+         `data-antigo` — le système qui a cessé d’exister le 04/11/2026. -->
 
-    <h2>1. Qui propose le service</h2>
+    <p class="lockHint" style="margin:0 0 26px" data-antigo>
+    Le 4 novembre 2026, {{marca}} est devenu <b>entièrement gratuit</b> : le compte, les offres payantes, les
+    licences et la facturation ont cessé d’exister, et les présentes conditions ont été réécrites pour
+    décrire le service tel qu’il est aujourd’hui. Ceux qui avaient un compte avant cette date trouveront ce
+    qui a changé à la section 14.<br>
+    Jusqu’au 14 août 2026, ce service s’appelait <b>ClipContext</b> et se trouvait sur clipcontext.app.</p>
+
+    <h2 id="quem">1. Qui propose le service</h2>
     <p>{{marca}} est proposé par <b>{{empresa}}</b>, immatriculée au CNPJ sous le n° <b>{{cnpj}}</b>
-    (&laquo;&nbsp;nous&nbsp;&raquo;). Contact : <a href="mailto:{{contato}}" style="color:var(--accent)">{{contato}}</a>.</p>
+    (&laquo;&nbsp;nous&nbsp;&raquo;). Support :
+    <a href="mailto:suporte@walkstamp.com" style="color:var(--accent)">suporte@walkstamp.com</a>.
+    Confidentialité : <a href="mailto:{{contato}}" style="color:var(--accent)">{{contato}}</a>.</p>
 
-    <h2>2. Ce qu’est le service</h2>
-    <p>{{marca}} est un outil gratuit qui tourne dans le navigateur et convertit un fichier vidéo en un
-    document — PDF, Word ou un paquet d’images — avec les captures aux moments où l’écran change et, en option, la
-    transcription de l’audio. <b>Le traitement a lieu intégralement sur l’appareil de l’utilisateur :</b> la vidéo,
-    l’audio et la transcription ne nous sont pas envoyés, et nous n’avons aucun moyen d’y accéder.</p>
+    <h2 id="servico">2. Ce qu’est le service</h2>
+    <p>{{marca}} est un outil qui tourne dans le navigateur et transforme un enregistrement d’écran ou un
+    fichier vidéo en un document — PDF, Word ou un paquet d’images — avec les écrans où quelque chose change
+    et, en option, la transcription de l’audio. <b>Le traitement a lieu intégralement sur l’appareil de
+    l’utilisateur :</b> la vidéo, l’audio, les écrans, la transcription et les documents produits ne nous
+    sont pas envoyés, et nous n’avons aucun moyen d’y accéder.</p>
+    <p>Le site et l’outil sont des pages hébergées chez Vercel, sans serveur de notre part qui reçoive ce que
+    vous enregistrez.</p>
 
-    <h2>3. Acceptation</h2>
-    <p>En utilisant le service, vous acceptez les présentes conditions. Si vous ne les acceptez pas, ne l’utilisez pas.</p>
+    <h2 id="aceitacao">3. Acceptation</h2>
+    <p>En utilisant le service, vous acceptez les présentes conditions. Si vous ne les acceptez pas, ne
+    l’utilisez pas.</p>
 
-    <h2>4. Usage autorisé</h2>
-    <p>Vous pouvez utiliser {{marca}} à des fins personnelles ou commerciales, sans frais. Il vous revient de
-    garantir que vous détenez les droits nécessaires sur les vidéos que vous traitez.</p>
+    <h2 id="gratuito">4. Gratuit et sans compte</h2>
+    <p>{{marca}} est <b>gratuit</b>. Il n’y a ni compte, ni connexion, ni inscription, ni paiement, et toutes
+    les fonctions sont accessibles à tous. Utiliser le service ne crée aucune obligation de payer.</p>
 
-    <h2>5. Usage interdit</h2>
+    <h2 id="permitido">5. Usage autorisé, et votre responsabilité</h2>
+    <p>Vous pouvez utiliser {{marca}} à des fins personnelles ou commerciales, sans frais.</p>
+    <p><b>Vous êtes responsable de ce que vous enregistrez et traitez</b> : d’avoir le droit d’enregistrer
+    cet écran, cet audio et ces personnes — y compris le consentement exigé par la loi applicable —, de
+    respecter les règles de confidentialité de votre organisation et de détenir les droits nécessaires sur
+    les vidéos que vous traitez.</p>
+
+    <h2 id="proibido">6. Usage interdit</h2>
     <ul>
       <li>Traiter un contenu dont la possession ou la distribution est illégale</li>
       <li>Violer les droits d’auteur, le droit à l’image ou la vie privée de tiers</li>
       <li>Enregistrer ou traiter des personnes sans le consentement exigé par la loi applicable</li>
       <li>Tenter de compromettre la disponibilité ou l’intégrité du site</li>
     </ul>
-    <p>Comme nous n’avons pas accès à ce que vous traitez, la responsabilité de ces limites vous incombe entièrement.</p>
+    <p>Comme nous n’avons pas accès à ce que vous traitez, la responsabilité de ces limites vous incombe
+    entièrement.</p>
 
-    <h2>6. Propriété de votre contenu</h2>
-    <p>Vos vidéos et les PDF générés sont à vous. Nous ne revendiquons aucun droit sur eux, et nous n’aurions
-    même pas les moyens de le faire : rien de tout cela ne passe par nous.</p>
+    <h2 id="conteudo">7. Propriété de votre contenu</h2>
+    <p>Vos enregistrements et les documents produits sont à vous. Nous ne revendiquons aucun droit sur eux,
+    et nous n’aurions même pas les moyens de le faire : rien de tout cela ne passe par nous.</p>
 
-    <h2>7. Propriété du code</h2>
-    <p>Le code de {{marca}} est le nôtre et n’est pas distribué sous licence libre. Vous pouvez utiliser l’outil
-    à volonté, à des fins personnelles ou commerciales, et ce qu’il produit est à vous — mais copier, redistribuer ou
-    publier le code n’est pas autorisé, à une exception près, énoncée ci-dessous.</p>
+    <h2 id="codigo">8. Propriété du code</h2>
+    <p>Le code de {{marca}} est le nôtre et n’est pas distribué sous licence libre. Vous pouvez utiliser
+    l’outil à volonté, à des fins personnelles ou commerciales, et ce qu’il produit est à vous — mais copier,
+    redistribuer ou publier le code n’est pas autorisé, à une exception près, énoncée ci-dessous.</p>
     <p>Une réserve, en toute honnêteté : jusqu’au 14 août 2026, des versions antérieures de cet outil ont été
     publiées sous licence MIT, sous le nom ClipContext. <b>Quiconque a obtenu ces versions conserve les
-    droits que la licence MIT a concédés sur celles-ci</b> — une licence déjà concédée ne se retire pas. Le changement vaut
-    pour la présente version et les suivantes.</p>
-
+    droits que la licence MIT a concédés sur celles-ci</b> — une licence déjà concédée ne se retire pas. Le
+    changement vaut pour la présente version et les suivantes.</p>
     <p>L’exception, et elle est délibérée : <b>la version hors ligne — le fichier unique que vous
     téléchargez — peut être conservée, analysée, versionnée et distribuée au sein de votre
     organisation</b>, sans demander l’autorisation à quiconque. C’est ce qui permet à une équipe
@@ -53,63 +75,76 @@
     l’exception n’autorise pas : publier le fichier en dehors de votre organisation, le revendre, ou le
     présenter comme votre propre produit.</p>
 
-    <h2>8. Absence de garantie</h2>
-    <p>Le service est fourni &laquo;&nbsp;en l’état&nbsp;&raquo;. Nous ne garantissons pas que l’extraction des images, la transcription ou le PDF
-    soient corrects, complets ou adaptés à une finalité particulière. La transcription automatique est
-    produite par un modèle statistique et contient des erreurs. Les captures extraites sont des échantillons de la vidéo, et les moments
-    situés entre deux captures n’apparaissent pas dans le document.</p>
-    <p>Les décisions importantes ne doivent pas s’appuyer exclusivement sur le résultat de l’outil sans vérification
-    dans la vidéo d’origine.</p>
+    <h2 id="garantia">9. Absence de garantie</h2>
+    <p>Le service est fourni &laquo;&nbsp;en l’état&nbsp;&raquo;, sans garantie et sans engagement de niveau
+    de service, au-delà de ce qu’exige la loi. Nous ne garantissons pas que les écrans extraits, la
+    transcription ou les documents soient corrects, complets ou adaptés à une finalité particulière. La
+    transcription automatique est produite par un modèle statistique et contient des erreurs. Les écrans
+    extraits sont des échantillons de la vidéo, et les moments situés entre deux captures n’apparaissent pas
+    dans le document.</p>
+    <p>Les décisions importantes ne doivent pas s’appuyer exclusivement sur le résultat de l’outil sans
+    vérification dans la vidéo d’origine.</p>
 
-    <h2>9. Limitation de responsabilité</h2>
-    <p>Dans toute la mesure permise par la loi, nous ne répondons pas des pertes ou dommages résultant de l’usage
-    ou de l’impossibilité d’usage du service, y compris la perte de données, le manque à gagner ou l’interruption
-    d’activité. S’agissant d’un service gratuit et sans collecte de données, l’usage se fait aux risques et périls de l’utilisateur.</p>
+    <h2 id="responsabilidade">10. Limitation de responsabilité</h2>
+    <p>Dans toute la mesure permise par la loi, nous ne répondons pas des pertes ou dommages résultant de
+    l’usage ou de l’impossibilité d’usage du service, y compris la perte de données, le manque à gagner ou
+    l’interruption d’activité. Cela inclut ce que l’outil conserve dans votre navigateur — modèles, marque,
+    vocabulaire et la copie d’un enregistrement en cours —, qui peut être effacé par vous, par le navigateur
+    lui-même ou par un effacement des données du site. S’agissant d’un service gratuit, qui tourne sur votre
+    appareil, l’usage se fait aux risques et périls de l’utilisateur.</p>
+    <p>Rien dans les présentes conditions n’écarte des droits que la loi garantit et qui ne peuvent être
+    écartés par contrat, y compris ceux du Code de défense du consommateur brésilien, lorsqu’il est
+    applicable.</p>
 
-    <h2>10. Disponibilité</h2>
-    <p>Nous ne garantissons pas un fonctionnement ininterrompu. Le service peut être modifié, suspendu ou arrêté à
-    tout moment. L’assurance contre ce paragraphe, c’est la <b>version hors ligne</b> : le fichier
+    <h2 id="disponibilidade">11. Disponibilité</h2>
+    <p>Nous ne garantissons pas un fonctionnement ininterrompu. Le service peut être modifié, suspendu ou
+    arrêté à tout moment. L’assurance contre ce paragraphe, c’est la <b>version hors ligne</b> : le fichier
     unique que vous avez téléchargé continue de fonctionner sur votre machine, sans interroger aucun
-    serveur, même si ce site disparaît — et la section 7 vous autorise à le conserver et à le
-    distribuer au sein de votre organisation.</p>
+    serveur, même si ce site disparaît — et la section 8 vous autorise à le conserver et à le distribuer au
+    sein de votre organisation.</p>
 
-    <h2>11. Services de tiers</h2>
-    <p>L’outil charge des bibliothèques et des modèles de tiers depuis internet. Nous ne répondons ni de la
-    disponibilité ni du contenu de ces services.</p>
+    <h2 id="terceiros">12. Services de tiers</h2>
+    <p>L’outil télécharge des bibliothèques et des modèles de tiers depuis internet, comme le modèle de
+    transcription. Les fonctions facultatives, comme ouvrir une vidéo depuis Google Drive ou envoyer un
+    document vers Google Docs, utilisent des services de tiers, qui suivent leurs propres conditions et
+    politiques. La liste complète figure dans la
+    <a href="{{privacidade}}" style="color:var(--accent)">Politique de confidentialité</a>. Nous ne
+    répondons ni de la disponibilité ni du contenu de ces services.</p>
 
-    <h2>12. Modifications</h2>
-    <p>Les présentes conditions peuvent être mises à jour. La date en haut de page indique la dernière révision, et
-    la poursuite de l’usage après des modifications vaut acceptation de la nouvelle version.</p>
-
-    <h2>13. Confidentialité</h2>
+    <h2 id="privacidade">13. Confidentialité</h2>
     <p>Le traitement des données personnelles est décrit dans la
-    <a href="{{privacidade}}" style="color:var(--accent)">Politique de confidentialité</a>, qui fait partie intégrante des présentes
-    conditions. En résumé : vos vidéos ne nous parviennent pas, la mesure d’usage est anonyme, et les données
-    personnelles qui existent sont l’e-mail de votre compte et, pour les abonnés, ce dont Stripe a besoin pour facturer.</p>
+    <a href="{{privacidade}}" style="color:var(--accent)">Politique de confidentialité</a>, qui fait partie
+    intégrante des présentes conditions. En résumé : vos enregistrements ne nous parviennent pas, le site ne
+    dépose aucun cookie, et les données personnelles que nous traitons sont les données techniques que reçoit
+    tout hébergeur et l’e-mail que vous décidez de nous envoyer.</p>
 
-    <h2>14. Offres payantes, renouvellement et résiliation</h2>
-    <p>Les offres décrites sur la page des tarifs <b>sont en vente</b>. La facturation est annuelle et assurée
-    par Stripe ; le prix est celui publié sur la page des tarifs au moment de la souscription, et l’abonnement
-    se renouvelle de lui-même à la fin de chaque période.</p>
-    <p>Avant toute facturation, la personne qui se connecte pour la première fois reçoit <b>14 jours avec
-    tout</b>, sans carte et sans paiement. Les 14 jours écoulés, rien n’est facturé : le compte revient à
-    l’offre gratuite.</p>
-    <p><b>La résiliation se fait dans votre compte</b>, à tout moment et sans parler à personne. Elle vaut
-    pour le renouvellement suivant : l’accès continue jusqu’à la fin de la période déjà payée, et il n’y a
-    <b>pas de remboursement au prorata</b> de ce qui a été facturé — les 14 jours d’essai existent justement
-    pour que la décision soit prise avant le paiement. Cela n’écarte pas les droits que le droit de la
-    consommation garantit aux personnes physiques, y compris le délai de rétractation de l’art. 49 du Code
-    de défense du consommateur brésilien.</p>
-    <p>L’offre gratuite décrite ici ne perd pas de fonctions à cause des offres payantes.</p>
+    <h2 id="contaAntiga">14. Qui avait un compte avant le 4 novembre 2026</h2>
+    <div data-antigo>
+    <p>Jusqu’au 4 novembre 2026, {{marca}} proposait un compte facultatif et des offres payantes, facturées
+    par Stripe. <b>Les offres payantes ne sont plus proposées et il n’y aura pas de nouveau
+    prélèvement.</b> Les fonctions qui étaient payantes sont devenues gratuites pour tous, et les licences
+    émises avant cette date ne sont plus nécessaires pour utiliser aucune fonction.</p>
+    <p>Ce que deviennent les données de l’ancien compte figure à la section
+    <a href="{{privacidade}}#contaAntiga" style="color:var(--accent)">Qui avait un compte avant le 4 novembre
+    2026</a> de la Politique de confidentialité. Questions sur un prélèvement effectué avant cette date :
+    <a href="mailto:suporte@walkstamp.com" style="color:var(--accent)">suporte@walkstamp.com</a>. Cela
+    n’écarte pas les droits que le droit de la consommation garantit à ceux qui ont contracté en tant que
+    personnes physiques.</p>
+    </div>
 
-    <h2>15. Loi applicable</h2>
-    <p>Les présentes conditions sont régies par la loi brésilienne, le for du domicile de l’utilisateur étant élu pour trancher
-    les litiges, lorsque la législation de protection du consommateur est applicable.</p>
+    <h2 id="alteracoes">15. Modifications</h2>
+    <p>Les présentes conditions peuvent être mises à jour. La date en haut de page indique la dernière
+    révision, et la modification est annoncée sur cette page — comme il n’y a pas d’inscription, nous n’avons
+    aucun moyen de prévenir par e-mail. La poursuite de l’usage après des modifications vaut acceptation de
+    la nouvelle version.</p>
 
-    <h2>16. Contact</h2>
-    <p>{{empresa}} — CNPJ {{cnpj}} —
-    <a href="mailto:{{contato}}" style="color:var(--accent)">{{contato}}</a>.</p>
+    <h2 id="lei">16. Loi applicable</h2>
+    <p>Les présentes conditions sont régies par la loi brésilienne, le for du domicile de l’utilisateur étant
+    élu pour trancher les litiges, lorsque la législation de protection du consommateur est applicable.</p>
 
-
+    <h2 id="contato">17. Contact</h2>
+    <p>{{empresa}} — CNPJ {{cnpj}}.<br>
+    Support : <a href="mailto:suporte@walkstamp.com" style="color:var(--accent)">suporte@walkstamp.com</a>.<br>
+    Confidentialité : <a href="mailto:{{contato}}" style="color:var(--accent)">{{contato}}</a>.</p>
   </div>
 </section>

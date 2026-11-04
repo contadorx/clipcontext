@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <title>Personal Data Processing Annex — {{marca}}</title>
-<!-- versao: 2026-08-19 -->
+<!-- versao: 2026-11-04 -->
 <!-- A DATA É ESCRITA AQUI, e não `hoje` no build.
 
      Um documento jurídico cuja versão muda a cada `python3 build.py` não tem
@@ -11,18 +11,18 @@
      com datas diferentes, e ninguém saberia dizer qual mudou. Esta linha muda
      quando alguém edita o documento de propósito — que é o que "versão" quer
      dizer num contrato. -->
-<!-- ESTE ARQUIVO É FONTE, e o que circula é o PDF gerado dele.
+<!-- ESTE ARQUIVO É FONTE, e o que circula é o PDF gerado dele
+     (`node testes/gerar-dpa.mjs`).
 
-     Ele existe aqui, dentro do projeto e com os mesmos marcadores de identidade
-     do resto do site, por um motivo só: um DPA em Word na pasta de alguém
-     envelhece à parte da política. Quando a política ganhar um suboperador
-     novo, este documento tem que ganhar junto — e a maneira de isso acontecer é
-     os dois lerem a mesma identidade (`src/marca.json`, emitido pelo build).
+     04/11/2026: o produto ficou grátis, sem conta e sem servidor. O anexo
+     deixou de regular "os dados da conta paga" — eles não existem mais — e
+     passou a dizer a verdade que sobra: a empresa não trata dado pessoal por
+     conta do cliente, porque o conteúdo não sai do navegador.
 
-     `testes/terceiros.mjs` cobra que a tabela de suboperadores daqui e a da
-     política digam a MESMA coisa, e que nenhuma das duas esqueça um terceiro
-     que o código conhece. Uma tabela que diverge da política publicada é pior
-     do que não ter tabela: ela vira contradição assinada. -->
+     `testes/terceiros.mjs` cobra que a tabela `#terceiros` daqui e a da
+     política tenham uma linha por destino de `src/egressao.json`, nos cinco
+     idiomas. `testes/legal.mjs` cobra os mesmos `id` de seção nos cinco, e que
+     Stripe, Supabase e Brevo só apareçam dentro de `data-antigo`. -->
 <style>
   @page { size: A4; margin: 18mm 16mm 16mm; }
   * { box-sizing: border-box }
@@ -50,168 +50,176 @@
 <body>
 
 <h1>Personal Data Processing Annex</h1>
-<p class="sub">Annex to the <b>{{marca}}</b> subscription agreement &middot; Law 13.709/2018 (LGPD)
+<p class="sub">Annex to the <b>{{marca}}</b> Terms of Use &middot; Law 13.709/2018 (LGPD)
 &middot; version of {{dataDpa}}</p>
 
 <div class="caixa" style="border-left-color:#9c4a1c;background:#faf0e7"><p style="margin:0"><b>Courtesy translation.</b> This Annex is executed under <b>Brazilian law</b> — Law 13.709/2018 (LGPD) — and the <b>Portuguese version governs</b>: it is the one that is signed, and it prevails in case of any divergence. This translation exists so that a security or legal review can read the document without waiting for one. If your organisation requires an annex drafted under the GDPR instead, ask us before signing — the applicable law is a decision, not a translation.</p></div>
 
-<p>This Annex forms part of the subscription agreement entered into between <b>{{empresa}}</b>, company
-register (CNPJ) {{cnpj}} (the &ldquo;<b>Processor</b>&rdquo;), and the subscribing customer identified in
-the signature block (the &ldquo;<b>Controller</b>&rdquo;), and governs the processing of personal data
-arising from the use of {{marca}}.</p>
+<p>This Annex supplements the {{marca}} Terms of Use and describes, for the organisation that uses the tool
+(the &ldquo;<b>Customer</b>&rdquo;), how personal data is processed in that use. It is offered by
+<b>{{empresa}}</b>, company register (CNPJ) {{cnpj}} (the &ldquo;<b>Provider</b>&rdquo;). {{marca}} is free
+of charge and has no account.</p>
 
 <div class="caixa">
-  <p style="margin:0"><b>The point that changes the scope of this Annex.</b> {{marca}} is a tool that runs
-  <b>entirely in the user's browser</b>. Video, audio, screen images and transcripts are <b>never
-  transmitted to the Processor</b> — there is no processing server. The processing governed here reaches
-  only the data of the <b>paid account</b>, listed in section 2. Vendor-review questions about retention,
-  encryption or destruction of the audiovisual content do not apply because that content never reaches the
-  Processor, and the Controller can verify this itself with the browser's network inspector open on the
-  Network tab.</p>
+  <p style="margin:0"><b>The point that defines this Annex.</b> The Provider <b>does not process personal data on
+  behalf of the Customer</b>. {{marca}} runs <b>entirely in the user's browser</b>: video, audio, screen images,
+  transcripts and generated documents are <b>never transmitted to the Provider</b>. There is no processing
+  server, no account and no Customer database. Vendor-review questions about retention, encryption or
+  destruction of that content do not apply, because it never reaches the Provider — and the Customer can
+  verify this itself with the browser's network inspector open on the Network tab.</p>
 </div>
 
-<h2>1. Roles</h2>
+<h2 id="papeis">1. Roles</h2>
 <ol>
-  <li>The <b>Controller</b> decides the purposes and the means of processing the data described in section 2
-  and is responsible for the lawfulness of the collection and for the applicable legal basis.</li>
-  <li>The <b>Processor</b> processes that data <b>exclusively</b> in accordance with the Controller's
-  documented instructions — the subscription agreement, this Annex and the ordinary use of the product's
-  functions being the initial documented instructions.</li>
-  <li>The Processor does <b>not</b> use that data for its own purposes, does <b>not</b> combine it with
-  other databases, does <b>not</b> transfer or sell it, and does <b>not</b> use it to train artificial
-  intelligence models, whether its own or a third party's.</li>
-  <li>For commercial contact data, billing, anonymous usage measurement and website access logs, the
-  Processor acts as a <b>controller</b> in its own name, as set out in its Privacy Policy. That data falls
-  outside the scope of this Annex.</li>
+  <li>The <b>Customer</b> is the <b>controller</b> of what it records and processes with the tool: it decides
+  what is recorded, for what purpose and on what legal basis, and is responsible for informing the people who
+  appear in the recordings.</li>
+  <li>The <b>Provider</b> does not receive, access or store that content, and therefore <b>does not act as a
+  processor</b> of it (LGPD art. 5, VII). It provides the software, which the Customer runs in its own
+  browser.</li>
+  <li>The Provider acts as <b>controller</b>, in its own name, only of the data described in its Privacy
+  Policy — the technical access data the site's hosting receives, the aggregate visit count and the e-mails
+  it receives. That data is outside the scope of this Annex.</li>
+  <li>No Customer content is used to train artificial intelligence models, the Provider's own or third
+  parties': it never reaches the Provider.</li>
 </ol>
 
-<h2>2. Subject matter of the processing</h2>
-<table>
-  <tr><th>Categories of data</th><th>Categories of data subjects</th><th>Nature and purpose</th><th>Duration</th></tr>
-  <tr>
-    <td>List of cases to execute (the script), test cases, support tickets, document templates, account
-    configuration, team seats, receipts, and <b><code>.json</code> session attachments</b> where the user
-    chooses to attach them — which may contain screen images of the Controller's environment</td>
-    <td>Employees, contractors and users of the Controller holding a seat on the account; and any data
-    subjects whose data appears on the screens captured by the Controller</td>
-    <td>Storage, organisation and provision, by automated means, for the sole purpose of providing the
-    contracted service</td>
-    <td>For the term of the subscription, and <b>up to 90 days</b> after it ends</td>
-  </tr>
+<h2 id="objeto">2. Where processing happens</h2>
+<ol>
+  <li><b>Content of the recordings</b> — screens, audio, transcripts, annotations and generated documents:
+  processed in the user's browser, on the Customer's device. It does not leave it, except through the optional
+  features described in section 3, triggered by the user.</li>
+  <li><b>Settings kept in the browser</b> — preferences, templates, client brand, the &ldquo;Issued by&rdquo;
+  field and, if the user ticks the option, the vocabulary list: kept in the browser's local storage, under the
+  Customer's control, and erased when the site data is cleared in the browser.</li>
+  <li><b>Copy of a recording in progress</b> — the captured screens are mirrored to the browser's private
+  file storage (<i>Origin Private File System</i>), so that a crash does not lose the work. The copy is
+  deleted when a document is generated, after seven days or when the user discards it.</li>
+</ol>
+
+<h2 id="terceiros">3. Sub-processors and third parties</h2>
+<p><b>There is no sub-processor:</b> no third party engaged by the Provider receives Customer content. The
+user's browser connects directly to the third parties below. The list is the same one published in the
+Privacy Policy, and the published version prevails:</p>
+<table id="terceiros">
+  <tr><th>Third party</th><th>When</th><th>What it receives</th><th>What it never receives</th></tr>
+  <tr data-destino="hospedagem"><td>Vercel — hosting of the site and the tool</td>
+      <td>Always, when any page opens</td>
+      <td>The request for each file of the page, with IP address, browser and address requested, in Vercel's
+      access logs</td>
+      <td>Customer content</td></tr>
+  <tr data-destino="medicao"><td>Vercel Web Analytics — visit counting</td>
+      <td>When a page of the site or the tool opens</td>
+      <td>On each page opened: the page address, where the visit came from, the country and the type of
+      browser and device, for an aggregate count, with no cookie and no identifier that lasts beyond the
+      day</td>
+      <td>Any person identifier, cookies, use of the tool, Customer content</td></tr>
+  <tr data-destino="pdf"><td>jsDelivr — PDF library</td>
+      <td>When the PDF is generated, and only if the file served by the page itself is missing</td>
+      <td>The download request for the library</td>
+      <td>The Customer's audio, image or text</td></tr>
+  <tr data-destino="modelo"><td>jsDelivr and Hugging Face — transcription model</td>
+      <td>When the user turns transcription on, or builds the technical report of the message</td>
+      <td>The download request for the program (jsDelivr) and for the model weights (huggingface.co and its
+      file network). The model runs in the browser</td>
+      <td>The Customer's audio</td></tr>
+  <tr data-destino="ocr"><td>jsDelivr — reading on-screen text</td>
+      <td>When the user asks to read the text of a screen</td>
+      <td>The download request for the reader and the language data. The reader runs in the browser</td>
+      <td>The Customer's image</td></tr>
+  <tr data-destino="drive"><td>Google — Google Drive and Google Docs, optional</td>
+      <td>Only if the user opens a video from Drive or sends a document to Google Docs, after
+      confirmation</td>
+      <td>Authentication to the user's Google account, with the <code>drive.file</code> scope. When sending to
+      Docs: <b>Customer content</b> — the generated document, which goes from the browser straight to the
+      user's Google account</td>
+      <td>The rest of the Drive; nothing passes through the Provider</td></tr>
+  <tr data-destino="compartilhar"><td>LinkedIn and the other share buttons</td>
+      <td>Only when the user clicks</td>
+      <td>The address of the site or the article, in an ordinary link</td>
+      <td>Any part of a Customer document</td></tr>
 </table>
-<p>The Processor does <b>not determine</b> what appears on the captured screens. It is for the Controller
-not to capture unnecessary personal data and to use the redaction and cropping functions available in the
-tool before attaching a session.</p>
+<p>Sending to Google Docs is the only feature in which Customer content leaves the browser. The destination
+is the user's own Google account, and processing from then on follows the relationship between the
+Customer, or the user, and Google. It is for the Customer to decide whether that feature is allowed in its
+environment.</p>
 
-<h2>3. Obligations of the Processor</h2>
+<h2 id="cliente">4. Customer responsibilities</h2>
 <ol>
-  <li><b>Confidentiality.</b> Restrict access to personnel who need it, under a confidentiality obligation
-  that survives the end of their engagement.</li>
-  <li><b>Security.</b> Maintain the technical and administrative measures in section 5, suitable to protect
-  the data from unauthorised access and from accidental or unlawful situations (LGPD art. 46).</li>
-  <li><b>Assistance to the Controller.</b> Assist it, to a reasonable extent, in responding to data subject
-  requests (arts. 18 and 19), in carrying out impact assessments (art. 38) and in complying with
-  determinations of the ANPD.</li>
-  <li><b>Data subject requests received directly.</b> Forward them to the Controller within <b>5 business
-  days</b>, without answering them on its own initiative.</li>
-  <li><b>Records.</b> Keep records of the processing operations carried out on behalf of the Controller
-  (art. 37) and make them available upon request.</li>
-  <li><b>Return and deletion.</b> On termination, delete the data within the period in section 2, save for
-  a legal retention obligation. Export in <code>.json</code> and <code>.csv</code> is available to the
-  Controller at any time, inside the product, without depending on a request.</li>
+  <li>To have a legal basis for the recordings and to inform the people recorded, as applicable law
+  requires.</li>
+  <li>Not to capture unnecessary personal data, and to use the tool's redaction and cropping features before
+  sharing a document.</li>
+  <li>To look after the devices and browsers on which the tool is used: what it keeps stays in that
+  browser's storage until the site data is cleared.</li>
+  <li>To decide which optional features — Google Drive, Google Docs, sharing — are allowed in its
+  environment.</li>
 </ol>
 
-<h2>4. Sub-processors</h2>
-<p>The Controller grants general authorisation to the sub-processors below. The list is the same one
-published in the Privacy Policy, and the published version prevails:</p>
-<table>
-  <tr><th>Sub-processor</th><th>Role</th><th>Data it receives</th><th>Country</th><th>Safeguard</th></tr>
-  <tr><td>Supabase</td><td>Database and attachment storage</td>
-      <td>All paid-account content. Never video, audio or transcripts</td>
-      <td>Brazil (São Paulo)</td><td>Vendor data-processing agreement</td></tr>
-  <tr><td>Vercel</td><td>Application hosting</td>
-      <td>Technical access logs</td>
-      <td>Global network</td><td>Standard contractual clauses (art. 33, II)</td></tr>
-  <tr><td>Stripe</td><td>Subscription billing</td>
-      <td>Name, e-mail and payment details of the subscriber</td>
-      <td>United States and European Union</td><td>Standard contractual clauses; PCI-DSS</td></tr>
-  <tr><td>Brevo</td><td>Sending the sign-in link and the e-mail invitation</td>
-      <td>Recipient e-mail address and message text</td>
-      <td>European Union (France)</td><td>Standard contractual clauses</td></tr>
-</table>
-<p><b>Change of sub-processor.</b> The Processor will notify the Controller by e-mail, <b>30 days in
-advance</b>, of the replacement or addition of any sub-processor that processes the data in section 2.
-Within that period the Controller may object on reasoned grounds; where the objection cannot be
-accommodated, the Controller may terminate the subscription without penalty, with the right to export the
-data beforehand.</p>
-
-<h2>5. Technical and administrative measures</h2>
+<h2 id="medidas">5. Technical measures</h2>
 <ol>
-  <li><b>In transit:</b> TLS across all application traffic and server calls.</li>
-  <li><b>At rest:</b> database and attachment storage encrypted at rest by the infrastructure provider, in
-  the São Paulo region. The encryption is the provider's; the choice of region is the Processor's.</li>
-  <li><b>Authentication:</b> access by a single-use link sent by e-mail, with limited validity and
-  invalidation after first use. No password is stored.</li>
-  <li><b>Database access control:</b> the tables live in their own schema, unreachable from the browser.
-  Execute permission on the exposed functions is revoked from the public roles and granted only to the
-  service role, which exists solely on the server.</li>
-  <li><b>Attachments:</b> stored in a private repository, with no public read. Delivery is made by the
-  server after an authorisation check, through a signed address valid for <b>two minutes</b>.</li>
-  <li><b>Credential segregation:</b> service keys kept only in server environment variables, never embedded
-  in the code delivered to the browser.</li>
-  <li><b>Web server access logs</b> kept for 6 months (art. 15 of the Brazilian Civil Rights Framework for
-  the Internet) and then discarded.</li>
-  <li><b>Minimisation by architecture:</b> the audiovisual content is never transmitted to the Processor —
-  the strongest security measure in this Annex is the absence of the data.</li>
+  <li><b>Minimisation by architecture:</b> processing is local, in the browser. The strongest security measure
+  in this Annex is the absence of the data on the Provider's side.</li>
+  <li><b>No application server, account or Customer database:</b> the site and the tool are served as pages
+  by the hosting.</li>
+  <li><b>In transit:</b> the site, the tool and the downloads of libraries and models use an encrypted
+  connection (HTTPS).</li>
+  <li><b>Local storage under the Customer's control:</b> nothing the tool keeps in the browser is sent to the
+  Provider; the copy of a recording in progress is deleted under the conditions of section 2.</li>
+  <li><b>Offline version:</b> the single file the Customer downloads contains none of the external addresses
+  in section 3, and can be kept, scanned and versioned by the Customer.</li>
+  <li><b>Google:</b> <code>drive.file</code> scope, limited to the files chosen by the user and those created
+  by the tool, and explicit confirmation before any sending.</li>
 </ol>
-<p>The Processor does <b>not</b> hold SOC 2 or ISO 27001 certification and does not claim to.</p>
+<p>The Provider does <b>not</b> hold SOC 2 or ISO 27001 certification and does not claim to.</p>
 
-<h2>6. Security incidents</h2>
-<ol>
-  <li>On becoming aware of an incident that may give rise to relevant risk or harm, the Processor will
-  notify the Controller within <b>48 hours</b>, at the account's contact e-mail.</li>
-  <li>The notification will state: the data affected, the data subjects involved or their order of
-  magnitude, the technical measures already taken, the risks and the recommendations — and will be updated
-  as the investigation advances, rather than waiting to be complete.</li>
-  <li>The Processor will cooperate with the Controller and with the ANPD in the investigation, the
-  mitigation and the communications required by art. 48 of the LGPD.</li>
-</ol>
+<h2 id="incidentes">6. Security incidents</h2>
+<p>As the Provider keeps no Customer content, an incident on its side cannot expose that content. If the
+Provider becomes aware of an incident affecting the site or the tool that may cause relevant risk or harm to
+the Customer — for example, an unauthorised change to the code served —, it will publish a notice on the
+site and make the notifications required by LGPD art. 48.</p>
 
-<h2>7. Requests from public authorities</h2>
-<p>The Processor will only comply with requests from public authorities supported by a valid legal basis,
-delivering only what is expressly requested, and will <b>notify the Controller</b> so that it may exercise
-its defence, save where expressly prohibited by law. The Processor holds no video, audio or transcript of
-the Controller and therefore has no way of delivering them to any authority.</p>
+<h2 id="autoridades">7. Requests from authorities</h2>
+<p>The Provider holds no video, audio, screens, transcripts or documents of the Customer and therefore
+cannot hand them over to any authority. A request about that content must be addressed to the
+Customer.</p>
 
-<h2>8. Audit</h2>
-<p>The Processor will provide the Controller, upon written request and at most once a year, with the
-information needed to demonstrate compliance with this Annex, including the completed security
-questionnaire and the description of the measures in section 5. On-site audit at third-party facilities
-(infrastructure providers) will follow what those vendors' contracts allow.</p>
+<h2 id="verificacao">8. Verification</h2>
+<p>The Customer can verify what this Annex states with the browser's network inspector and with the offline
+version. Upon written request to {{contato}}, the Provider will give the information reasonably necessary to
+demonstrate what this Annex states.</p>
 
-<h2>9. International transfers</h2>
-<p>The data in section 2 is stored <b>in Brazil</b>. International transfers occur, restricted to the
-sub-processors in section 4 whose operation is global or foreign, supported by standard contractual clauses
-(LGPD art. 33, II).</p>
+<h2 id="transferencia">9. International transfer</h2>
+<p>The Provider does not transfer Customer content, because it does not receive it. The third parties in
+section 3 that the browser connects to may be located outside Brazil, and process the technical data of the
+connection under their own policies.</p>
 
-<h2>10. Term and precedence</h2>
-<p>This Annex remains in force for the term of the subscription and, as to the deletion and confidentiality
-obligations, until they are fully performed. In case of conflict between this Annex and the subscription
-agreement as to the processing of personal data, <b>this Annex prevails</b>.</p>
+<h2 id="contaAntiga">10. Who had an account before 4 November 2026</h2>
+<div data-antigo>
+<p>Earlier versions of this Annex governed the data of the paid account, kept at Supabase, with Stripe for
+billing and Brevo for sending e-mails. That system was shut down on 4 November 2026. Account data is erased
+when the database of the former system is deleted; invoices and tax records are kept for the period
+Brazilian law requires; and the confidentiality and erasure obligations of those versions remain in force
+until fulfilled.</p>
+</div>
+
+<h2 id="vigencia">11. Term and precedence</h2>
+<p>This Annex is in force while the Customer uses {{marca}}. In case of divergence between this Annex and the
+published Privacy Policy, the published version prevails.</p>
 
 <table class="assina">
   <tr>
-    <td><div class="linha"></div><b>{{empresa}}</b><br>CNPJ {{cnpj}} — Processor<br>
+    <td><div class="linha"></div><b>{{empresa}}</b><br>CNPJ {{cnpj}} — Provider<br>
         Name:<br>Title:<br>Date:</td>
-    <td><div class="linha"></div><b>Subscribing customer</b><br>Company register / tax ID: — Controller<br>
+    <td><div class="linha"></div><b>Customer</b><br>Company register / tax ID: — Controller<br>
         Name:<br>Title:<br>Date:</td>
   </tr>
 </table>
 
 <p class="pe">{{empresa}} — CNPJ {{cnpj}} &middot; Data protection officer: {{encarregado}} — {{contato}}
-&middot; Privacy Policy at {{siteDom}}/privacidade &middot; This document is generated from the same source
-as the published Privacy Policy; in case of divergence, the published version prevails. Courtesy
-translation — the Portuguese version governs.</p>
+&middot; Support: suporte@walkstamp.com &middot; Privacy Policy at {{siteDom}}/privacidade &middot; This
+document is generated from the same source as the published Privacy Policy; in case of divergence, the
+published version prevails. Courtesy translation — the Portuguese version governs.</p>
 
 </body>
 </html>

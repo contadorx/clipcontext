@@ -300,8 +300,10 @@ console.log('\n[6] o editor saiu de verdade');
 {
   ok('a página do editor não existe mais',
      !fs.existsSync(path.join(RAIZ_WS, 'app', 'conta', '[lang]', 'negocio', 'blog')));
+  /* O back-office inteiro saiu no Build 71, com a conta: não há aba nenhuma. */
   const rotas = JSON.parse(fs.readFileSync(path.join(RAIZ_WS, 'src', 'rotas.json'), 'utf8'));
-  ok('nem a aba Blog do back-office', !rotas.abasNegocio.includes('blog'), rotas.abasNegocio.join(', '));
+  ok('nem a aba Blog do back-office', !(rotas.abasNegocio || []).includes('blog'),
+     (rotas.abasNegocio || ['(sem back-office)']).join(', '));
   const lib = fs.readFileSync(path.join(RAIZ_WS, 'lib', 'blog.ts'), 'utf8');
   const sobra = ['salvar', 'publicar', 'apagar', 'figuraAdd', 'figuraDel', 'definirCapa', 'todos']
     .filter((f) => new RegExp(`export (const|async function|function) ${f}\\b`).test(lib));

@@ -141,6 +141,118 @@ campo de emissor, a contagem de erros na identificação. Marcar uma tela é
 
 ---
 
+## DEC-24 — O site sem cobrança e sem conta *(decidida 04/11, Build 71)*
+
+**O pedido:** o terceiro dos quatro builds que tiram o Supabase. Ele foi
+descrito antes e aprovado com quem pediu (*"Pode seguir"*), com duas escolhas:
+
+- o **roteiro de casos** sai junto com a conta, porque depende de servidor;
+- quem chegar na página de preços vai para a **home** do idioma.
+
+**O que saiu:**
+
+- **A área do cliente inteira (`/conta`):**
+  - painel, faturas, time, chamados, "Seus dados" e modelos;
+  - o roteiro de casos, com o importador de planilha;
+  - o back-office.
+- **As rotas `/api`:** chamado, convite, csp, faxina, menu e o webhook da
+  Stripe. O cron da faxina saiu do `vercel.json`.
+- **O código de servidor:**
+  - o `middleware.ts`;
+  - `lib/stripe`, `lib/email` (o Brevo), `lib/carta`, `lib/daCasa`,
+    `lib/planilha` e `lib/reexecucao`;
+  - as pastas `lib/conta/` e `lib/supabase/`;
+  - as dependências `stripe` e `@supabase/*`.
+  - O site depende agora só de Next e React.
+- **A página de preços** nos cinco idiomas, e com ela no `build.py`: os
+  cartões, a comparação curta, os preços em três moedas, a figura da "rodada",
+  a leitura do `lib/stripe.ts` e o `AUDITORIA-PENDENTE.md`.
+- **O texto de planos e de conta em todo o site**, nos cinco idiomas: home,
+  moldura, casos de uso, ajuda, segurança, link, comparativo e Steps
+  Recorder. O dicionário foi de 176 para 141 chaves.
+- **Na ferramenta,** a "volta do roteiro" (marcar o caso como feito na
+  conta).
+- **Do `<body>` do site,** o endereço e a chave do Supabase.
+
+**O que ficou no lugar:**
+
+- **308** de `/precos` (e `preise`, `tarifs` e os outros), de `/time` e de
+  tudo abaixo de `/conta`, nos cinco idiomas, **para a home do idioma**. O
+  `cinco.mjs` [6] cobra dez desses endereços.
+- **A aba "Dar retorno" do site manda o recado por e-mail,** como a
+  ferramenta. Saíram o número de chamado, a consulta e o "tempo médio de
+  resposta".
+- **A página `/link`** perdeu o campo da chave do plano e ganhou o nome do
+  cliente (`?marca=`), que a ferramenta lê.
+- **A matriz de egressão:** a linha "medição" descrevia quinze marcos com
+  plano e conta. Era falsa desde o Build 69, que tirou os eventos; agora
+  descreve a contagem de visitas da Vercel (agregada, sem cookie). **Esse
+  erro passou pelo Build 69** e só apareceu agora, ao revisar o texto do
+  site inteiro.
+
+**Os 887 avisos de CSP**, lidos antes de a rota sair (02/09 a 04/11):
+
+| avisos | o que eram | o que se fez |
+|---|---|---|
+| 838 | script inline (detecção de idioma da home, trecho do Vercel Analytics) | é o que precisa de hash antes de a política travar; continua na lista do `csp.mjs` |
+| 28 | pesos do modelo redirecionados pelo Hugging Face para `*.hf.co` | **entrou no `connect-src`**. Em Report-Only nada quebrou; travando, a transcrição não baixaria o modelo |
+| 20 | capas do blog vindas do Supabase | o Build 70 as trouxe para o site |
+| 1 | barra de prévia da Vercel | não é do produto |
+
+A política continua em Report-Only, sem endereço de relatório (a rota saiu).
+
+**Mais três coisas que o build achou e consertou:**
+
+- **147 regras mortas no `site.css`** (12 KB de 60): cartões e calculadora
+  de preço, painel da conta e back-office. O `folha.mjs` reprovou, porque
+  nenhuma página as escreve mais. Saíram com os comentários que só as
+  descreviam; as réguas de leiaute (estreito, dobra, a11y, cabeçalho,
+  páginas) passaram de novo.
+- **A linha do Google Drive na matriz** só falava em "enviar para o Google
+  Docs", e a ferramenta também tem "Abrir do Google Drive". Entrou nos cinco
+  idiomas, como os textos legais já descreviam.
+- **Os PDFs do DPA** foram gerados de novo a partir do texto novo (versão
+  2026-11-04).
+
+**Réguas:**
+
+- **25 saíram, por falta de assunto:**
+  - conta e cobrança: `roteiro`, `portal`, `negocio`, `isca`, `compra`,
+    `cancelar`, `stripehook`, `venda`, `planos`, `precos`, `entrada2`,
+    `meusdados`, `chamadoconta`, `voltadocaso`;
+  - servidor e banco: `faxina`, `prazos`, `email`, `chamadorota`,
+    `csprelato`, `middleware`, `edge`, `modelopessoal`, `funil`, `bomba`;
+  - promessas: `auditoria`.
+- **Cerca de 15 foram ajustadas:**
+  - sem página de preços: `cinco`, `figuras`, `vitrine`, `tourvid`,
+    `paginas`, `estreito`, `linkpage`, `proxy`;
+  - sem a conta: `cabecalho`, `paridade`, `marcos-a11y`, `convite`;
+  - a ficha por e-mail: `ficha`;
+  - a política nova: `csp`, `medicao`;
+  - o que deixou de ser proibido: `chaves` ("não há conta" voltou a ser
+    verdade) e `promessa`.
+- **Total: 145.**
+
+**O que é seu, nos painéis** (o `CONFIGURAR-TUDO.md` tem o passo a passo):
+
+- **Na Stripe:** desligar o webhook, cancelar a assinatura em aberto, se
+  houver, e arquivar os produtos.
+- **Na Vercel:** apagar as variáveis antigas depois do deploy.
+- **No Brevo:** pode ser cancelado.
+
+**Revisão jurídica:** os termos, a política de privacidade e o DPA foram
+reescritos nos cinco idiomas. O que pede a sua decisão está em
+`REVISAR-JURIDICO.md`. **Não publicar antes dessa revisão.**
+
+**O que fica para o Build 72:**
+
+- a cópia dos dados;
+- a pausa e, com confirmação, a exclusão do projeto do Supabase;
+- a pasta `supabase/` (migrações e funções) sai junto;
+- **as figuras do blog têm de estar no projeto antes** (DEC-23).
+
+---
+
 ## DEC-23 — O blog virou arquivo no projeto *(decidida 04/11, Build 70)*
 
 **O pedido:** *"tenho hostgator, dá para usar o banco deles para o blog?"*.

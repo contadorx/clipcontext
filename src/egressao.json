@@ -94,34 +94,34 @@
       ],
       "conteudo": false,
       "pt": {
-        "quem": "Medição de uso",
-        "leva": "Em quinze marcos — onze na ferramenta e quatro na conta —, o nome do marco, o idioma da página, a origem do vídeo, o formato baixado, uma faixa (“4-10”, e nunca o número exato) e o plano. Sem cookie e sem identificador que persista. Respeita <i>Do&nbsp;Not&nbsp;Track</i> e <i>Global&nbsp;Privacy&nbsp;Control</i>.",
+        "quem": "Contagem de visitas",
+        "leva": "A cada página aberta, para o Vercel Web Analytics: o endereço da página, de onde a pessoa veio, o país e o tipo de navegador e de aparelho. Sem cookie e sem identificador que dure de um dia para o outro — é contagem agregada, e não acompanha ninguém.",
         "gesto": "Abrir a página",
-        "nunca": "Identificador de pessoa ou de sessão; nome de arquivo, tamanho, duração, conteúdo"
+        "nunca": "Identificador de pessoa; nada do que você grava ou gera — vídeo, áudio, transcrição, nome de arquivo, conteúdo"
       },
       "en": {
-        "quem": "Usage measurement",
-        "leva": "At fifteen milestones — eleven in the tool and four in the account —, the milestone name, the page language, the video source, the format downloaded, a band (“4-10”, never the exact number) and the plan. No cookie and no persistent identifier. Honours <i>Do&nbsp;Not&nbsp;Track</i> and <i>Global&nbsp;Privacy&nbsp;Control</i>.",
+        "quem": "Visit counting",
+        "leva": "On each page opened, to Vercel Web Analytics: the page address, where the visitor came from, the country, and the type of browser and device. No cookie and no identifier that lasts from one day to the next — it is an aggregate count and follows no one.",
         "gesto": "Opening the page",
-        "nunca": "Any person or session identifier; file name, size, duration, content"
+        "nunca": "Any person identifier; nothing you record or produce — video, audio, transcript, file name, content"
       },
       "es": {
-        "quem": "Medición de uso",
-        "leva": "En quince hitos — once en la herramienta y cuatro en la cuenta —, el nombre del hito, el idioma de la página, el origen del vídeo, el formato descargado, un rango («4-10», nunca el número exacto) y el plan. Sin cookie y sin identificador persistente. Respeta <i>Do&nbsp;Not&nbsp;Track</i> y <i>Global&nbsp;Privacy&nbsp;Control</i>.",
+        "quem": "Recuento de visitas",
+        "leva": "En cada página abierta, para Vercel Web Analytics: la dirección de la página, de dónde vino la persona, el país y el tipo de navegador y de dispositivo. Sin cookie y sin identificador que dure de un día para otro — es un recuento agregado y no sigue a nadie.",
         "gesto": "Abrir la página",
-        "nunca": "Identificador de persona o de sesión; nombre de archivo, tamaño, duración, contenido"
+        "nunca": "Identificador de persona; nada de lo que grabas o generas — vídeo, audio, transcripción, nombre de archivo, contenido"
       },
       "de": {
-        "quem": "Nutzungsmessung",
-        "leva": "Bei fünfzehn Marken — elf im Werkzeug und vier im Konto —, der Name der Marke, die Sprache der Seite, die Herkunft des Videos, das heruntergeladene Format, eine Spanne („4-10“, nie die genaue Zahl) und der Plan. Ohne Cookie und ohne bleibende Kennung. Beachtet <i>Do&nbsp;Not&nbsp;Track</i> und <i>Global&nbsp;Privacy&nbsp;Control</i>.",
-        "gesto": "Die Seite öffnen",
-        "nunca": "Personen- oder Sitzungskennung; Dateiname, Größe, Dauer, Inhalt"
+        "quem": "Besuchszählung",
+        "leva": "Bei jeder geöffneten Seite, an Vercel Web Analytics: die Adresse der Seite, woher die Person kam, das Land sowie die Art von Browser und Gerät. Kein Cookie und keine Kennung, die über den Tag hinaus besteht — eine zusammengefasste Zählung, die niemandem folgt.",
+        "gesto": "Seite öffnen",
+        "nunca": "Kennung einer Person; nichts von dem, was Sie aufnehmen oder erzeugen — Video, Audio, Transkript, Dateiname, Inhalt"
       },
       "fr": {
-        "quem": "Mesure d’usage",
-        "leva": "À quinze jalons — onze dans l’outil et quatre dans le compte —, le nom du jalon, la langue de la page, l’origine de la vidéo, le format téléchargé, une tranche (« 4-10 », jamais le nombre exact) et l’offre. Sans cookie et sans identifiant persistant. Respecte <i>Do&nbsp;Not&nbsp;Track</i> et <i>Global&nbsp;Privacy&nbsp;Control</i>.",
+        "quem": "Comptage des visites",
+        "leva": "À chaque page ouverte, vers Vercel Web Analytics : l’adresse de la page, la provenance du visiteur, le pays et le type de navigateur et d’appareil. Sans cookie et sans identifiant qui dure d’un jour à l’autre — c’est un comptage agrégé, qui ne suit personne.",
         "gesto": "Ouvrir la page",
-        "nunca": "Identifiant de personne ou de session ; nom de fichier, taille, durée, contenu"
+        "nunca": "Identifiant de personne ; rien de ce que vous enregistrez ou produisez — vidéo, audio, transcription, nom de fichier, contenu"
       },
       "nossoDominio": false
     },
@@ -269,32 +269,32 @@
       "conteudo": true,
       "pt": {
         "quem": "O Google Drive",
-        "leva": "<b>Conteúdo seu</b>: o documento montado no seu navegador — texto e imagens —, para o Google convertê-lo em documento do Drive. A autenticação usa o escopo mais restrito que existe (<code>drive.file</code>). Só depois de você confirmar o aviso.",
-        "gesto": "Clicar em “enviar para o Google Docs”",
+        "leva": "<b>Conteúdo seu</b>: o documento montado no seu navegador — texto e imagens —, para o Google convertê-lo em documento do Drive. A autenticação usa o escopo mais restrito que existe (<code>drive.file</code>). Só depois de você confirmar o aviso. Para abrir um vídeo do Drive, o navegador só baixa do Google o arquivo que você escolher.",
+        "gesto": "Clicar em “enviar para o Google Docs” ou em “Abrir do Google Drive”",
         "nunca": "O restante do seu Drive; e o arquivo vai do seu navegador direto ao Google, sem passar por nós"
       },
       "en": {
         "quem": "Google Drive",
-        "leva": "<b>Content of yours</b>: the document assembled in your browser — text and images —, for Google to turn it into a Drive document. Authentication uses the narrowest scope there is (<code>drive.file</code>). Only after you confirm the notice.",
-        "gesto": "Clicking “send to Google Docs”",
+        "leva": "<b>Content of yours</b>: the document assembled in your browser — text and images —, for Google to turn it into a Drive document. Authentication uses the narrowest scope there is (<code>drive.file</code>). Only after you confirm the notice. To open a video from Drive, the browser only downloads from Google the file you pick.",
+        "gesto": "Clicking “send to Google Docs” or “Open from Google Drive”",
         "nunca": "The rest of your Drive; and the file goes from your browser straight to Google, without passing through us"
       },
       "es": {
         "quem": "Google Drive",
-        "leva": "<b>Contenido tuyo</b>: el documento montado en tu navegador — texto e imágenes —, para que Google lo convierta en documento de Drive. La autenticación usa el ámbito más restringido que existe (<code>drive.file</code>). Solo después de que confirmes el aviso.",
-        "gesto": "Pulsar «enviar a Google Docs»",
+        "leva": "<b>Contenido tuyo</b>: el documento montado en tu navegador — texto e imágenes —, para que Google lo convierta en documento de Drive. La autenticación usa el ámbito más restringido que existe (<code>drive.file</code>). Solo después de que confirmes el aviso. Para abrir un vídeo de Drive, el navegador solo descarga de Google el archivo que elijas.",
+        "gesto": "Pulsar «enviar a Google Docs» o «Abrir desde Google Drive»",
         "nunca": "El resto de tu Drive; y el archivo va de tu navegador directo a Google, sin pasar por nosotros"
       },
       "de": {
         "quem": "Google Drive",
-        "leva": "<b>Inhalte von Ihnen</b>: das in Ihrem Browser erzeugte Dokument — Text und Bilder —, damit Google daraus ein Drive-Dokument macht. Die Anmeldung nutzt den engsten Geltungsbereich, den es gibt (<code>drive.file</code>). Erst nachdem Sie den Hinweis bestätigt haben.",
-        "gesto": "Auf „an Google Docs senden“ klicken",
+        "leva": "<b>Inhalte von Ihnen</b>: das in Ihrem Browser erzeugte Dokument — Text und Bilder —, damit Google daraus ein Drive-Dokument macht. Die Anmeldung nutzt den engsten Geltungsbereich, den es gibt (<code>drive.file</code>). Erst nachdem Sie den Hinweis bestätigt haben. Um ein Video aus Drive zu öffnen, lädt der Browser nur die Datei von Google herunter, die Sie auswählen.",
+        "gesto": "Auf „an Google Docs senden“ oder „Aus Google Drive öffnen“ klicken",
         "nunca": "Der Rest Ihres Drive; und die Datei geht von Ihrem Browser direkt zu Google, ohne über uns zu laufen"
       },
       "fr": {
         "quem": "Google Drive",
-        "leva": "<b>Du contenu à vous</b> : le document assemblé dans votre navigateur — texte et images —, pour que Google en fasse un document Drive. L’authentification utilise la portée la plus restreinte qui existe (<code>drive.file</code>). Seulement après que vous ayez confirmé l’avis.",
-        "gesto": "Cliquer sur « envoyer vers Google Docs »",
+        "leva": "<b>Du contenu à vous</b> : le document assemblé dans votre navigateur — texte et images —, pour que Google en fasse un document Drive. L’authentification utilise la portée la plus restreinte qui existe (<code>drive.file</code>). Seulement après que vous ayez confirmé l’avis. Pour ouvrir une vidéo depuis Drive, le navigateur télécharge seulement depuis Google le fichier que vous choisissez.",
+        "gesto": "Cliquer sur « envoyer vers Google Docs » ou « Ouvrir depuis Google Drive »",
         "nunca": "Le reste de votre Drive ; et le fichier va de votre navigateur directement à Google, sans passer par nous"
       },
       "nossoDominio": false

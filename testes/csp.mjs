@@ -142,7 +142,8 @@ const resumir = (v) => {
  */
 const CONHECIDOS = [
   { marca: 'window.va=', quem: 'medição da Vercel', saida: 'hash' },
-  { marca: 'Os dois comportamentos', quem: 'nosso, na página', saida: 'hash' },
+  /* 'Os dois comportamentos' saiu daqui no Build 71: era o script da página de
+     preços, e saiu com ela. */
   { marca: 'const $ = id => document', quem: 'nosso, na ferramenta', saida: 'hash' },
   { marca: 'Só registra a escolha', quem: 'nosso, o idioma lembrado', saida: 'hash' },
   { marca: '(self.__next_f=', quem: 'arranque do Next', saida: 'hash' },

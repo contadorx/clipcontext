@@ -175,9 +175,11 @@ console.log('\n[M6] a manchete nova, nos três idiomas');
    * hierarquia mas não sumiram. E a voz antiga sobrevive como subtítulo mais
    * abaixo — o que esta lista NÃO cobra é ela na manchete. */
   const esperado = {
-    '/':   ['Execute os casos', 'organiza a prova', 'roteiro de casos', '3.600', 'Evidência de teste', 'Contexto para IA'],
-    '/en': ['Run the cases', 'organises the proof', 'case script', '3,600', 'Test evidence', 'Context for AI'],
-    '/es': ['Ejecuta los casos', 'organiza la prueba', 'guion de casos', '3.600', 'Evidencia de prueba', 'Contexto para IA'],
+    /* O "roteiro de casos" saiu da manchete no Build 71, com a conta que o
+       guardava. No lugar dele, o link que abre a ferramenta com o caso. */
+    '/':   ['Execute os casos', 'organiza a prova', 'um link abre a ferramenta', '3.600', 'Evidência de teste', 'Contexto para IA'],
+    '/en': ['Run the cases', 'organises the proof', 'a link opens the tool', '3,600', 'Test evidence', 'Context for AI'],
+    '/es': ['Ejecuta los casos', 'organiza la prueba', 'un enlace abre la herramienta', '3.600', 'Evidencia de prueba', 'Contexto para IA'],
   };
   for (const [rota, termos] of Object.entries(esperado)) {
     const ctx = await br.newContext(); const pg = await ctx.newPage();
@@ -194,12 +196,16 @@ console.log('\n[M6] a manchete nova, nos três idiomas');
   }
 }
 
-console.log('\n[M7] a política de privacidade conta o que passou a existir');
+console.log('\n[M7] a política de privacidade conta o que existe');
 {
+  /* Até o Build 70 ela contava os marcos de uso gravados no Supabase, a lista
+     de aviso e o Do Not Track que eles respeitavam. Os marcos saíram no Build
+     69 e o banco no 71; o que sobra é a contagem de visitas da Vercel, e é
+     ela que a política tem de nomear. */
   for (const [rota, termos] of Object.entries({
-    '/privacidade.html':    ['O que é medido', 'Do Not Track', 'Supabase', 'lista de aviso'],
-    '/en/privacidade.html': ['What is measured', 'Do Not Track', 'Supabase', 'notification list'],
-    '/es/privacidade.html': ['Qué se mide', 'Do Not Track', 'Supabase', 'lista de aviso'],
+    '/privacidade.html':    ['Vercel Web Analytics', 'Contagem de visitas', 'sem cookie'],
+    '/en/privacidade.html': ['Vercel Web Analytics', 'Visit counting', 'no cookies'],
+    '/es/privacidade.html': ['Vercel Web Analytics', 'Recuento de visitas', 'sin cookie'],
   })) {
     const ctx = await br.newContext(); const pg = await ctx.newPage();
     await pg.route('**/_vercel/insights/**', r => r.fulfill({ status: 200, body: '' }));
