@@ -65,8 +65,7 @@ read -r -d '' MAPA <<'MAPA_FIM'
 # Quem quiser o corredor curto tem `bash testes/liberar.sh --tudo` para o
 # oposto, e o `rapido.sh app` para um pedaço.
 ^src/template[.]html$ => grupo:produto
-^src/features[.]json$ => planos.mjs promessa.mjs site:precos.mjs
-^src/i18n-conta[.]json$ => chaves.mjs site:compra.mjs site:cancelar.mjs site:meusdados.mjs marcos-a11y.mjs
+^src/features[.]json$ => promessa.mjs
 ^src/i18n-site[.]json$ => chaves.mjs site:cinco.mjs site:contradicao.mjs site:buscaajuda.mjs
 # A PÁGINA TOCADA CHAMA A RÉGUA DELA — 27/08.
 # A linha genérica abaixo era a única cobertura de `src/site/bodies/`, e ela não
@@ -74,75 +73,61 @@ read -r -d '' MAPA <<'MAPA_FIM'
 # quadrado do site. Mexer na calculadora de ROI nos cinco idiomas saía verde
 # sem a régua da calculadora rodar. O mapa acumula todas as linhas que casam,
 # então estas somam com a genérica em vez de substituí-la.
-^src/site/bodies/precos[.] => site:precos.mjs venda.mjs
-^src/site/bodies/(termos|privacidade)[.] => site:legal.mjs prazos.mjs
+^src/site/bodies/(termos|privacidade)[.] => site:legal.mjs
 ^src/site/bodies/seguranca[.] => site:legal.mjs matriz.mjs egressao.mjs
 ^src/site/bodies/comparativo[.] => comparar.mjs
 ^src/site/bodies/caso[A-Za-z]*[.] => site:vitrine.mjs cenarios.mjs
 ^src/site/bodies/ajuda[.] => site:ajuda.mjs site:buscaajuda.mjs
 ^src/site/bodies/verificar[.] => verificador.mjs
-^src/site/bodies/ => folha.mjs site:paginas.mjs site:legal.mjs site:ajuda.mjs site:vitrine.mjs site:compra.mjs site:buscaajuda.mjs
+^src/site/bodies/ => folha.mjs site:paginas.mjs site:legal.mjs site:ajuda.mjs site:vitrine.mjs site:buscaajuda.mjs
 ^src/site/(doc|home)[.]html$ => site:paginas.mjs site:cinco.mjs
 ^src/site/support[.]js$ => site:ficha.mjs site:paginas.mjs site:buscaajuda.mjs
 ^src/versoes[.]json$ => versoes.mjs
-^build[.]py$ => versoes.mjs figuras.mjs cartao.mjs promessa.mjs planos.mjs auditoria.mjs site:precos.mjs site:compra.mjs prazos.mjs
+^build[.]py$ => versoes.mjs figuras.mjs cartao.mjs promessa.mjs
 ^src/egressao[.]json$ => egressao.mjs terceiros.mjs site:paginas.mjs
-^src/rotas[.]json$ => middleware.mjs site:idiomas.mjs site:paginas.mjs
-^middleware[.]ts$ => middleware.mjs
+^src/rotas[.]json$ => site:idiomas.mjs site:paginas.mjs
 ^next[.]config[.]mjs$ => site:paginas.mjs site:seo.mjs
 # O PAINEL TOCADO CHAMA A RÉGUA DO PAINEL — 28/08.
 # O `portal.mjs` — que É a régua da área do cliente: assentos, convite,
 # faturas, padrões, modelos e histórico — não aparecia em linha nenhuma deste
 # mapa. Mexer no `app/conta/acoes.ts` saía verde sem ela rodar, que é o mesmo
 # defeito que a nota da `precos.mjs` acima descreve.
-^app/conta/ => site:compra.mjs site:negocio.mjs entrada2.mjs site:cancelar.mjs site:meusdados.mjs marcos-a11y.mjs site:portal.mjs
 # Os três e-mails do produto saem do mesmo molde desde 28/08. Tocar o molde
 # sem rodar a régua das cartas seria mudar o que chega na caixa de um cliente
 # sem nada olhar — e em e-mail o defeito é invisível de dentro.
-^lib/(carta[.]ts|email[.]ts|conta/(convite-assento|aviso-chamado)[.]ts)$ => site:email.mjs site:convite.mjs site:portal.mjs
-^app/ => site:paginas.mjs site:seo.mjs site:negocio.mjs
+^app/ => site:paginas.mjs site:seo.mjs
 ^public/site[.]css$ => site:estreito.mjs site:paginas.mjs site:dobra.mjs site:buscaajuda.mjs
 ^src/site/(doc|home)[.]html$ => site:estreito.mjs site:paginas.mjs site:cabecalho.mjs marcos-a11y.mjs
-^next[.]config[.]mjs$ => site:csp.mjs site:cabecalho.mjs site:paginas.mjs site:csprelato.mjs
+^next[.]config[.]mjs$ => site:csp.mjs site:cabecalho.mjs site:paginas.mjs
 # A política e o endereço de relatório são uma coisa só: a política pode existir
 # e não apontar para lugar nenhum — foi exatamente o defeito de origem.
-^app/api/csp/ => site:csprelato.mjs
 # O IMPORTADOR, O VOCABULÁRIO DELE E A PONTE PARA A FERRAMENTA — 28/08.
 # As colunas de condição atravessam quatro arquivos: quem adivinha o mapa, quem
 # normaliza a reexecução, quem monta o link do caso e a régua que prova as três
 # coisas. Mexer num sem rodar a `roteiro.mjs` foi como o índice posicional da
 # planilha de volta sobreviveu até quatro colunas novas o empurrarem de lugar.
-^lib/planilha[.]ts$ => bomba.mjs site:roteiro.mjs
-^lib/(reexecucao[.]ts|conta/roteiro[.]ts)$ => site:roteiro.mjs bomba.mjs
-^app/conta/(planilha/|roteiro-acoes[.]ts)|^app/conta/\[lang\]/roteiro/ => site:roteiro.mjs site:roteirojanela.mjs
-^lib/stripe[.]ts$ => site:precos.mjs promessa.mjs site:compra.mjs site:cancelar.mjs
-^app/api/convite/ => site:convite.mjs site:email.mjs
 # O chamado ganhou rota própria em 29/08, e ela tem as mesmas travas do
 # convite: origem antes de segredo, limite por quem chama. Quem toca a rota,
 # a fonte que a chama ou a migração que fechou o caminho velho, roda a régua.
-^app/api/chamado/|^lib/daCasa[.]ts$|^src/site/support[.]js$ => site:chamadorota.mjs site:ficha.mjs site:convite.mjs
 ^lib/ => site:paginas.mjs site:buscaajuda.mjs
 ^public/sw[.]js$ => site:seo.mjs
 ^public/site[.]css$ => folha.mjs site:paginas.mjs site:dobrafig.mjs
 ^offline/ => site:medicao.mjs offlineb.mjs egressao.mjs
-^supabase/functions/ => edge.mjs
 # A migração do vocabulário trouxe dado NOVO para o servidor, e dado novo é
 # assunto de duas telas que já existiam: a sessão dentro da ferramenta e a
 # página que diz o que guardamos de alguém. Esquecer a segunda é o jeito
 # silencioso de a política de privacidade virar mentira.
-^supabase/migrations/ => modelopessoal.mjs conferir-migracoes prazos.mjs site:meusdados.mjs
+^supabase/migrations/ => conferir-migracoes
 # AS OITO QUE SOBRARAM — 29/08.
 # Depois de o grupo do produto virar pergunta ao disco, restaram oito réguas que
 # nenhum padrão alcançava. Elas não leem `app.html`: falam com o SITE e com o
 # painel, e cada uma tem um dono claro quando se pergunta sobre o que ela afirma.
 # O que sobra de verdade agora é zero — e o teto do `inventario.mjs` guarda isso.
-^app/conta/\[lang\]/chamados|^lib/conta/aviso-chamado[.]ts$ => site:chamadoconta.mjs
-^app/(blog|conta/\[lang\]/negocio)/|^lib/blog[.]ts$ => site:blog.mjs site:seo.mjs
+^app/\[lang\]/blog/|^lib/blog[.]ts$ => site:blog.mjs site:seo.mjs
 # O BLOG VIROU ARQUIVO no Build 70: o post, o JSON gerado e as figuras.
 ^conteudo/|^src/blog[.]json$|^public/img/blog/ => site:blog.mjs site:seo.mjs
 ^src/i18n-site[.]json$ => site:tabelas.mjs
 ^public/site[.]css$|^src/site/doc[.]html$ => site:paridade.mjs
-^src/rotas[.]json$ => site:isca.mjs
 ^public/sw[.]js$|^app/manifest|^src/site/ => site:linkpage.mjs
 ^public/demo/|^lib/site[.]ts$ => site:tourvid.mjs
 ^vendor/ => onda4.mjs
@@ -150,8 +135,8 @@ read -r -d '' MAPA <<'MAPA_FIM'
 MAPA_FIM
 
 # ---- 1. os contratos: sempre, e são catorze segundos ------------------------
-CONTRATOS="auditoria.mjs folha.mjs modelopessoal.mjs numeros.mjs chaves.mjs faxina.mjs funil.mjs inventario.mjs middleware.mjs
-           planos.mjs promessa.mjs semmarca.mjs stripehook.mjs terceiros.mjs wer.mjs"
+CONTRATOS="auditoria.mjs folha.mjs numeros.mjs chaves.mjs inventario.mjs
+ promessa.mjs semmarca.mjs terceiros.mjs wer.mjs"
 
 # ----------------------------------------------------------------------------
 falhou=""

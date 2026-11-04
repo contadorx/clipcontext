@@ -37,7 +37,6 @@ export default async function CascaDoBlog({ children, params }: LayoutProps<'/[l
           <nav>
             <a href={`${home}#como`} className="hide-sm">{t.navHow}</a>
             <a href={rota('comparativo')} className="hide-sm">{t.navComp}</a>
-            <a href={rota('precos')} className="hide-xs">{t.navPrice}</a>
             {/* O Blog no menu do próprio blog. Faltava aqui e nas outras
                 telas — e faltar JUSTO aqui é o pior dos casos: quem está lendo
                 um post não tem como voltar para a lista sem o botão de voltar
@@ -67,11 +66,9 @@ export default async function CascaDoBlog({ children, params }: LayoutProps<'/[l
             <div>
               <h3>{t.fColProduto}</h3>
               <a href={`/app?lang=${L}`}>{t.navApp}</a>
-              <a href={rota('precos')}>{t.navPrice}</a>
               <a href={rota('ajuda')}>{t.fAjuda}</a>
               <a href={t.blog}>{t.fBlog}</a>
               <a href={rota('comparativo')}>{t.fComp}</a>
-              <a href={t.conta}>{t.fConta}</a>
             </div>
             <div>
               <h3>{t.fColCasos}</h3>

@@ -43,13 +43,6 @@ for (const L of ROTAS.idiomas) {
     ok(`${L}: ${tipo}.${ext}`, existe, existe ? '' : 'falta ou está vazio');
   }
 }
-for (const L of ROTAS.rodadaLangs) {
-  for (const ext of ['webm', 'mp4', 'jpg']) {
-    const f = `${DEMO}/rodada.${L}.${ext}`;
-    const existe = fs.existsSync(f) && fs.statSync(f).size > 400;
-    ok(`${L}: rodada.${ext}`, existe, existe ? '' : 'falta ou está vazio');
-  }
-}
 
 console.log('\n[2] a lista de quem tem tour é DERIVADA do disco');
 {
@@ -66,34 +59,6 @@ console.log('\n[2] a lista de quem tem tour é DERIVADA do disco');
   ok('os cinco entraram no rotas.json',
      JSON.stringify(ROTAS.demoLangs) === JSON.stringify(ROTAS.idiomas),
      JSON.stringify(ROTAS.demoLangs));
-}
-
-console.log('\n[2b] e a lista de quem tem o vídeo da rodada, do mesmo jeito');
-{
-  /* O vídeo da rodada paga nasceu nos cinco de uma vez. A lista sai do disco
-     pelo mesmo motivo do tour: a próxima língua a entrar no site vai entrar
-     antes de entrar no estúdio, e um `<video>` apontando para um 404 numa
-     página de PREÇOS é pior do que na home — é a página onde a pessoa decide. */
-  const site = fs.readFileSync(`${RAIZ_WS}/lib/site.ts`, 'utf8');
-  ok('o site lê o que o build.py apurou', /rotas\.rodadaLangs/.test(site));
-  const build = fs.readFileSync(`${RAIZ_WS}/build.py`, 'utf8');
-  ok('e o build.py apura olhando o disco',
-     /com_rodada = \[L for L in IDIOMAS if \(root \/ "public" \/ "demo"/.test(build));
-  /* E A RÉGUA COBRA A DERIVAÇÃO, NÃO O NÚMERO CINCO.
-     Ela exigia `rodadaLangs === idiomas` — quer dizer, exigia que os cinco
-     vídeos existissem. Eles NUNCA existiram: `public/demo/rodada.*.webm` são
-     quinze arquivos que nenhum commit trouxe, e a página de preços já pôs uma
-     figura no lugar. O que a régua tem de cobrar é o que o comentário acima
-     diz: que a lista saia do disco. Se os vídeos forem gravados um dia, ela
-     volta a cobrá-los sozinha, sem ninguém editar este arquivo. */
-  const noDisco = ROTAS.idiomas.filter(
-    (L) => fs.existsSync(`${DEMO}/rodada.${L}.webm`));
-  ok('o rotas.json diz exatamente o que está no disco',
-     JSON.stringify(ROTAS.rodadaLangs) === JSON.stringify(noDisco),
-     `rotas=${JSON.stringify(ROTAS.rodadaLangs)} disco=${JSON.stringify(noDisco)}`);
-  if (!noDisco.length) {
-    console.log('  nota    nenhum rodada.*.webm no disco: a página de preços usa a figura.');
-  }
 }
 
 console.log('\n[3] cada home mostra o tour da própria língua');
@@ -147,35 +112,8 @@ for (const L of ROTAS.idiomas) {
   ok(`${L}: e o exemplo em 1 MB`, e < 1024 * 1024, `${(e/1048576).toFixed(2)} MB`);
 }
 
-console.log('\n[7] a página de preços mostra a rodada da própria língua');
-{
-  /* O endereço da página de preços é traduzido — `preise` em alemão, `tarifs`
-     em francês. Ele sai do `rotas.json`: escrever `/de/precos` aqui daria 404
-     e o teste diria "o vídeo não está lá" sobre uma página que não existe. */
-  const slug = ROTAS.slugs?.precos || {};
-  /* Sobre `rodadaLangs`, e não sobre `idiomas`: cobrar o vídeo de uma língua
-     cujo arquivo não existe é cobrar do produto uma coisa que o estúdio ainda
-     não entregou. Hoje a lista é vazia e este laço não roda — quando o
-     primeiro vídeo entrar no disco, ele passa a rodar sozinho. */
-  for (const L of ROTAS.rodadaLangs) {
-    const u = L === 'pt' ? '/' + (slug.pt || 'precos') : `/${L}/${slug[L] || 'precos'}`;
-    const r = await fetch(BASE + u);
-    ok(`${L}: ${u} responde 200`, r.ok, String(r.status));
-    const html = await r.text();
-    const achou = (html.match(/demo\/rodada\.([a-z]{2})\.webm/) || [])[1];
-    ok(`${L}: mostra a rodada em ${L}`, achou === L, achou || 'nenhum vídeo da rodada');
-    /* `preload="none"`: a rodada é um vídeo de 1,7 MB numa página que já carrega
-       a tabela de noventa e três linhas. Baixar sozinho o que quase ninguém vai
-       abrir é cobrar de todo mundo o interesse de poucos. */
-    ok(`${L}: e não baixa sozinho`, /rodada[\s\S]{0,400}?preload="none"|preload="none"[\s\S]{0,400}?rodada/.test(html));
-  }
-  for (const L of ROTAS.rodadaLangs) {
-    const t = fs.statSync(`${DEMO}/rodada.${L}.webm`).size;
-    /* Mais folga que o tour: este não roda em laço nem começa sozinho — só
-       baixa quando alguém aperta o play. */
-    ok(`${L}: a rodada cabe em 3 MB`, t < 3 * 1024 * 1024, `${(t / 1048576).toFixed(2)} MB`);
-  }
-}
+/* [7] saiu no Build 71: o vídeo da "rodada" paga morava na página de preços,
+   e os dois saíram juntos (o `rotas.json` não traz mais `rodadaLangs`). */
 
 console.log(falhas ? `\n${falhas} FALHA(S)` : '\nVídeos do site: tudo passou.');
 process.exit(falhas ? 1 : 0);

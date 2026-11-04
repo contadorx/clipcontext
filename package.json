@@ -9,12 +9,9 @@
     "stripe:conferir": "node conferir-stripe.mjs"
   },
   "dependencies": {
-    "@supabase/ssr": "^0.12.4",
-    "@supabase/supabase-js": "^2.112.3",
     "next": "^16.3.1",
     "react": "^19.2.8",
-    "react-dom": "^19.2.8",
-    "stripe": "^22.5.0"
+    "react-dom": "^19.2.8"
   },
   "devDependencies": {
     "@types/node": "^26.2.0",

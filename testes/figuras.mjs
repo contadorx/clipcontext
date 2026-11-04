@@ -110,41 +110,10 @@ console.log('\n[5] a home mostra o fluxo, e não só conta');
      await pg.locator('.figFluxo svg [opacity=".45"]').count() > 0);
 }
 
-console.log('\n[5b] a rodada em quatro estados, na página de preços');
-{
-  /* Esta figura entrou no lugar de um `<video>` que apontava para
-     `/demo/rodada.*` — quinze arquivos que não existem no repositório. Nos
-     cinco idiomas a página servia um `poster` 404 e um vídeo sem fonte, e nada
-     reprovava: um `<video>` quebrado não derruba página, só decepciona.
-     O desenho não tem esse jeito de falhar — ou nasce no build, ou o build cai. */
-  const desenhos = new Set(), legendas = new Set();
-  let bytes = 0, externas = 0, altura = 0;
-  for (const L of idiomas) {
-    await pg.goto(SITE + pre(L) + '/' + slugs.precos[L], { waitUntil: 'domcontentloaded' });
-    ok(`${L}: a figura da rodada está lá`, (await pg.locator('.figRodada svg').count()) === 1);
-    const svg = pg.locator('.figRodada svg');
-    desenhos.add(await svg.evaluate((e) => e.innerHTML.replace(/<title[^>]*>.*?<\/title>/, '')));
-    legendas.add((await pg.locator('.figRodada figcaption').textContent() || '').trim());
-    bytes = Math.max(bytes, (await svg.evaluate((e) => e.outerHTML)).length);
-    externas += await pg.locator('.figRodada image, .figRodada img').count();
-    /* Altura calculada e não zero: um SVG sem altura resolvida colapsa para
-       nada em alguns navegadores, e a figura some sem erro nenhum. */
-    altura = Math.max(altura, await svg.evaluate((e) => e.getBoundingClientRect().height));
-  }
-  ok('um desenho só para os cinco', desenhos.size === 1, String(desenhos.size));
-  ok('e cinco textos de legenda', legendas.size === 5, String(legendas.size));
-  ok('a altura é calculada, e não zero', altura > 40, `${Math.round(altura)}px`);
-  ok('não referencia nada externo', externas === 0, String(externas));
-  ok('e cabe em poucos quilobytes', bytes < 20000, `${(bytes / 1024).toFixed(1)} KB`);
-  /* Os quatro estados são o argumento da figura: sem os quatro, ela vira um
-     desenho bonito de uma planilha. */
-  await pg.goto(SITE + '/precos', { waitUntil: 'domcontentloaded' });
-  const passos = await pg.locator('.figRodada svg text').allTextContents();
-  ok('os quatro estados estão numerados', ['1', '2', '3', '4'].every((n) => passos.includes(n)),
-     passos.slice(0, 8).join(' '));
-}
+/* [5b] saiu no Build 71: a figura da "rodada" paga morava na página de
+   preços, e as duas saíram juntas. */
 
-console.log('\n[6] a página de preços diz o que SAI');
+console.log('\n[6] a home diz o que SAI');
 {
   /* O NÚMERO SAI DO CATÁLOGO, e não de um piso escrito aqui.
      Era `>= 10`, e a tira tinha 13 selos escritos à mão em seis cópias — cinco
@@ -158,12 +127,8 @@ console.log('\n[6] a página de preços diz o que SAI');
   ok('e toda saída tem selo — sem isso a tira encolhe em silêncio',
      saidas.every((i) => i.selo), saidas.filter((i) => !i.selo).map((i) => i.pt).join(' | '));
 
-  for (const L of idiomas) {
-    await pg.goto(SITE + pre(L) + '/' + slugs.precos[L], { waitUntil: 'domcontentloaded' });
-    const n = await pg.locator('.saidas .saida').count();
-    ok(`${L}: a tira mostra as ${saidas.length} saídas do catálogo`, n === saidas.length, String(n));
-  }
-
+  /* A tira inteira morava também na página de preços, nos cinco idiomas; a
+     página saiu no Build 71, e a home é a única que a mostra. */
   /* A HOME É DUAS METADES, e a soma tem de fechar com o catálogo: quatro em
      destaque e o resto na gaveta. Elas eram a sexta e a sétima cópia à mão. */
   await pg.goto(SITE + '/', { waitUntil: 'domcontentloaded' });
@@ -175,8 +140,10 @@ console.log('\n[6] a página de preços diz o que SAI');
   ok('e o resto na gaveta, sem perder nenhuma',
      emCima + naGaveta === saidas.length, `${emCima} + ${naGaveta}`);
   /* Nomes de formato não se traduzem — é a mesma tira nos cinco. */
-  await pg.goto(SITE + '/de/preise', { waitUntil: 'domcontentloaded' });
-  const t = await pg.locator('.saidas').innerText();
+  await pg.goto(SITE + '/de', { waitUntil: 'domcontentloaded' });
+  await pg.evaluate(() => document.querySelectorAll('details.maisSaidas').forEach((d) => { d.open = true; }));
+  const t = await pg.locator('.saidas').first().innerText() + ' ' +
+            (await pg.locator('details.maisSaidas').innerText().catch(() => ''));
   ok('com PDF, Word, slides, SCORM e o JSON que traz o documento de volta',
      ['PDF','DOCX','PPTX','SCORM','JSON'].every((x) => t.includes(x)), t.replace(/\n/g,' ').slice(0,70));
 }

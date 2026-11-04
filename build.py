@@ -140,25 +140,12 @@ SITE = "https://walkstamp.com"
 # `undefined` nas páginas em alemão e em francês, num site que fala cinco
 # idiomas há semanas. Ninguém viu porque `undefined` num `href` não quebra
 # nada: só leva a lugar nenhum.
+#
+# BUILD 71: a conta saiu. A tabela fica, e só para isto: o `next.config.mjs`
+# manda quem chegar por estes endereços (e por tudo abaixo deles) para a home.
 CAMINHO_CONTA = {"pt": "/conta", "en": "/en/account", "es": "/es/cuenta",
                  "de": "/de/konto", "fr": "/fr/compte"}
 
-# OS PEDAÇOS TRADUZIDOS DE CADA SUB-ROTA DA CONTA.
-#
-# Estava dentro do gerador de `rotas.json`, e isso bastava enquanto só o
-# `rotas.json` precisava dele. A política de privacidade passou a apontar para a
-# tela "Seus dados", e o endereço dela é traduzido: escrito à mão no corpo da
-# página, seria a cópia que manda o leitor alemão para `/de/konto/dados` — que
-# não existe, porque lá é `/de/konto/daten`.
-sub_conta = {
-    "roteiro":  {"pt": "roteiro",  "en": "cases",    "es": "casos",       "de": "testfaelle", "fr": "cas-de-test"},
-    "faturas":  {"pt": "faturas",  "en": "invoices", "es": "facturas",    "de": "rechnungen", "fr": "factures"},
-    "chamados": {"pt": "chamados", "en": "tickets",  "es": "incidencias", "de": "tickets",    "fr": "tickets"},
-    "time":     {"pt": "time",     "en": "team",     "es": "equipo",      "de": "team",       "fr": "equipe"},
-    "modelos":  {"pt": "modelos",  "en": "templates","es": "plantillas",  "de": "vorlagen",   "fr": "modeles"},
-    "negocio":  {"pt": "negocio",  "en": "business", "es": "negocio",     "de": "geschaeft",  "fr": "activite"},
-    "dados":    {"pt": "dados",    "en": "your-data","es": "datos",       "de": "daten",      "fr": "donnees"},
-}
 
 # Versão dos ícones. O navegador guarda favicon com unhas e dentes: sem um
 # parâmetro que mude, quem já visitou o site continua vendo o ícone antigo
@@ -220,24 +207,6 @@ SUPORTE = "suporte@walkstamp.com"
 ENCARREGADO = "Leandro Batista de Oliveira"
 
 # ---------------------------------------------------------------------------
-# OS PRAZOS DE RETENÇÃO — a fonte única do lado do site.
-#
-# Eles existem em DOIS lugares, e é de propósito: aqui, para a política de
-# privacidade escrever o número em prosa nos cinco idiomas; e no banco, na
-# função `walkstamp.prazos()`, de onde o expurgo lê e a tela `/conta/dados`
-# mostra. Não dá para o site ler o banco: a política é HTML estático, servido
-# sem sessão e sem chave.
-#
-# O que impede as duas cópias de divergirem NÃO é boa memória: é a régua
-# `prazos.mjs`, que lê estes três números e a migração que define
-# `walkstamp.prazos()` e reprova se discordarem. Sem ela, isto seria a lista
-# paralela de sempre — e a que ninguém confere é a que vira mentira.
-# ---------------------------------------------------------------------------
-PRAZO_CONTA_DIAS   = 90
-PRAZO_LISTA_MESES  = 24
-PRAZO_EVENTO_MESES = 18
-
-# ---------------------------------------------------------------------------
 # Google Drive e Google Docs. Os três nascem VAZIOS e é assim que devem ficar
 # em qualquer cópia que não seja a sua: com eles vazios, nenhum botão do Google
 # é renderizado e nenhum endereço do Google é requisitado.
@@ -255,40 +224,12 @@ PRAZO_EVENTO_MESES = 18
 # Nada disso entra no build offline: lá os três viram string vazia, como os
 # tokens de medição.
 # ---------------------------------------------------------------------------
-# ---------------------------------------------------------------------------
-# Licença do plano Time. Esta é a chave PÚBLICA — ela só sabe CONFERIR uma
-# assinatura, nunca produzir uma. Pode ir para o HTML e para o repositório
-# público sem risco nenhum; quem assina é a privada, que fica no
-# emitir-licenca.py e nunca entra aqui.
-#
-# Trocar o par derruba todas as licenças já emitidas. Só faça isso se a privada
-# vazar — e aí é justamente o que se quer.
-# ---------------------------------------------------------------------------
-LIC_PUB = "sVXqPeioW7lkGRM2EPNSOadXCQNFGTBXLtzTknMSeYE"
-# A segunda chave pública: a do emissor AUTOMÁTICO (a função da Supabase que
-# manda o link por e-mail). São duas de propósito. A de cima assina qualquer
-# licença e a privada dela nunca sai da máquina do Leandro; a de baixo vive num
-# segredo da Supabase, e o navegador só aceita dela licenças curtas (até 100
-# dias) e pequenas (até 25 assentos). Se o servidor for comprometido, o estrago
-# máximo é um punhado de licenças de teste — nunca uma licença perpétua.
-LIC_PUB_AUTO = "XTO_Xcc5mByFV3tIcijyhjIaJZR-8cyf_HCb1npPtMs"
+# A licença do plano Time e as duas chaves públicas dela saíram no Build 69; o
+# endereço do Supabase e os prazos de retenção da conta, no Build 71.
 
 G_CLIENT = "184815388097-6aki8j9sfgat025onau4alnsu6vqje0b.apps.googleusercontent.com"
 G_KEY    = "AIzaSyBsXkxGvHeiSlj4U42wMNDAd-GdlrO18QM"
 G_APP    = "184815388097"
-
-# Projeto PRÓPRIO do Walkstamp, na organização Softaria (região sa-east-1).
-# Antes era o projeto do SalaVox, emprestado: dois produtos no mesmo banco, na
-# mesma conta de e-mail e nos mesmos limites. Separado, cada um cresce sem
-# atropelar o outro — e o dia em que um for vendido, migrado ou desligado não
-# arrasta o outro junto.
-#
-# Estas duas linhas são PÚBLICAS por construção: a chave publicável é a chave
-# anônima, e só consegue chamar duas funções que apenas INSEREM (medição e lista
-# de aviso). Ler a lista de e-mails ou a tabela de licenças é privilégio do
-# service_role, que nunca sai do servidor.
-SUPA_URL = "https://kjlnyyblhanficgpends.supabase.co"
-SUPA_KEY = "sb_publishable_J78bnm05t_zuzcLQ65pW-A_9K3HtU81"
 
 # Snippet oficial do Vercel para site em HTML puro. O `window.va` enfileira
 # chamadas feitas antes do script chegar; o script cuida do resto.
@@ -385,7 +326,6 @@ def chaves_do_render():
 
 
 SLUGS = {
-    "precos":      {"pt": "precos",      "en": "precos",      "es": "precos", "de": "preise", "fr": "tarifs"},
     "privacidade": {"pt": "privacidade", "en": "privacidade", "es": "privacidade", "de": "privacidade", "fr": "privacidade"},
     "termos":      {"pt": "termos",      "en": "termos",      "es": "termos", "de": "termos", "fr": "termos"},
     "seguranca":   {"pt": "seguranca",   "en": "security",    "es": "seguridad", "de": "informationssicherheit", "fr": "securite-de-l-information"},
@@ -424,8 +364,15 @@ SLUGS = {
 # Esta tabela vira `rotas.aposentadas`, e o `next.config.mjs` monta os
 # redirecionamentos a partir dela. Escrever a lista lá também seria a mesma lista
 # em dois lugares.
+# `precos` saiu no Build 71: o produto ficou inteiramente grátis, e uma página
+# de preços sem preço nenhum é uma página que mente pelo título. Ela e a `time`,
+# que já apontava para ela, vão para a home de cada idioma — a home é onde está
+# escrito que é grátis.
 APOSENTADAS = {
-    "time": {"para": "precos",
+    "precos": {"para": "home",
+               "slugs": {"pt": "precos", "en": "precos", "es": "precos",
+                         "de": "preise", "fr": "tarifs"}},
+    "time": {"para": "home",
              "slugs": {"pt": "time", "en": "team", "es": "equipo",
                        "de": "team", "fr": "equipe"}},
 }
@@ -435,11 +382,6 @@ APOSENTADAS = {
 # gerador; subiram para cá quando o site virou Next.js, porque agora quem os
 # lê é o TypeScript — e continuam saindo daqui, de um lugar só.
 METAS = {
-    "precos": {"pt": (f"Preços — {MARCA}", "A ferramenta no navegador é gratuita e sempre será: não há custo de servidor."),
-               "en": (f"Pricing — {MARCA}", "The browser tool is free and always will be: there is no server cost."),
-               "es": (f"Precios — {MARCA}", "La herramienta del navegador es gratuita y siempre lo será: no hay coste de servidor."),
-              "de": (f"Preise — Walkstamp", "Was im Browser kostenlos bleibt und was die bezahlten Pläne enthalten: Konto, eigenes Logo im Dokument und Einstellungen für das Team."),
-              "fr": (f"Tarifs — Walkstamp", "Ce qui reste gratuit dans le navigateur et ce que contiennent les offres payantes : compte, logo du client dans le document et réglages d’équipe.")},
     "privacidade": {"pt": (f"Política de Privacidade — {MARCA}", f"O {MARCA} não coleta dados pessoais e não recebe seus vídeos."),
                     "en": (f"Privacy Policy — {MARCA}", f"{MARCA} collects no personal data and never receives your videos."),
                     "es": (f"Política de Privacidad — {MARCA}", f"{MARCA} no recoge datos personales y no recibe tus vídeos."),
@@ -712,12 +654,7 @@ def escrever_marca(root: pathlib.Path) -> None:
         "site": SITE, "iconV": ICON_V,
         "empresa": EMPRESA, "cnpj": CNPJ, "contato": CONTATO,
         "encarregado": ENCARREGADO,
-        "supaUrl": SUPA_URL, "supaKey": SUPA_KEY,
         "analytics": ANALYTICS,
-        "licPub": LIC_PUB, "licPubAuto": LIC_PUB_AUTO,
-        "prazoConta": str(PRAZO_CONTA_DIAS),
-        "prazoLista": str(PRAZO_LISTA_MESES),
-        "prazoEvento": str(PRAZO_EVENTO_MESES),
     }
     arq = root / "src" / "marca.json"
     arq.write_text(json.dumps(dados, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
@@ -738,84 +675,10 @@ def escrever_marca(root: pathlib.Path) -> None:
     # de o vídeo deles existir: o build.py conferia o arquivo e o lib/site.ts
     # tinha ['pt','en','es'] escrito dentro.
     com_tour = [L for L in IDIOMAS if (root / "public" / "demo" / f"tour.{L}.webm").exists()]
-    # E o mesmo para o vídeo da RODADA PAGA, que vive na página de preços. Ele
-    # nasceu nos cinco de uma vez, mas a lista sai do disco pelo mesmo motivo:
-    # a próxima língua a entrar no site vai entrar antes de entrar no estúdio.
-    com_rodada = [L for L in IDIOMAS if (root / "public" / "demo" / f"rodada.{L}.webm").exists()]
-    # As sub-rotas do painel da conta, traduzidas. Elas são lidas pelo
-    # `next.config.mjs` (que monta a ponte de reescrita) E pelo `lib/conta/nav.ts`
-    # (que monta o menu). Duas tabelas para a mesma coisa é exatamente como o
-    # alemão ficou sem hreflang e depois vendo o tour em inglês — então a tabela
-    # mora aqui, e os dois lados leem.
-    # O endereço da área do cliente em cada idioma.
-    #
-    # Ele existia escrito à mão em TRÊS lugares: no `lib/conta/textos.ts`, no
-    # `next.config.mjs` e no `lib/site.ts`. Os dois primeiros tinham cinco
-    # idiomas; o terceiro tinha três — e por isso o link "Sua conta" do rodapé
-    # saía `undefined` nas páginas em alemão e em francês, num site que fala
-    # cinco idiomas há semanas. Ninguém viu porque `undefined` num `href` não
-    # quebra nada: só leva a lugar nenhum.
-    # As abas do back-office. Elas NÃO são traduzidas, e isto é uma decisão:
-    # o `/negocio` é o escritório de UMA pessoa — o dono, checado pelo
-    # WALKSTAMP_DONO. Traduzir "cobranças" para cinco idiomas que ninguém vai
-    # abrir seria manutenção paga em cinco lugares para uma tela que tem um
-    # leitor. O que é traduzido é o item do MENU (`navNegocio`), porque ele
-    # divide a barra com itens que clientes leem.
-    #
-    # A lista mora aqui pelo mesmo motivo de todas as outras: o
-    # `next.config.mjs` precisa dela para montar a ponte de reescrita de
-    # `/conta/negocio/<aba>`, e o `lib/conta/negocio.ts` precisa dela para
-    # montar a faixa de abas. Escrita nos dois, é uma aba que existe no menu e
-    # dá 404 no clique.
-    # A aba "blog" saiu no Build 70: o post virou arquivo em `conteudo/blog/`,
-    # e o editor do painel não tem mais o que editar.
-    abas_negocio = ["contas", "cobrancas", "chamados", "interesse"]
-    # OS ITENS DA BARRA LATERAL, na ordem em que aparecem.
-    #
-    # Eles moravam no `lib/conta/nav.ts`, e isso bastava enquanto a barra
-    # existia num lugar só. Agora ela existe em DOIS: no painel, desenhado pelo
-    # Next no servidor, e dentro da própria ferramenta, desenhada em JavaScript
-    # no navegador. Duas listas para o mesmo menu é este projeto de novo: foi
-    # assim que o alemão ficou sem `hreflang` e depois vendo o tour em inglês.
-    #
-    # `rotulo` é a CHAVE do dicionário (`src/i18n-conta.json`), nunca o texto.
-    # Duas palavras diferentes, e a diferença é a estratégia inteira:
-    #
-    #   `exige`   o item APARECE para todo mundo, com cadeado para quem não tem.
-    #             Um recurso escondido não é desejado: quem nunca viu o roteiro
-    #             de casos no menu não tem por que querer o plano que o libera.
-    #             Clicar leva a uma tela que explica o recurso e leva aos preços.
-    #
-    #   `quando`  o item NÃO EXISTE para quem não se encaixa. É só o `negocio`, e
-    #             é outra coisa: uma aba de administração com cadeado anuncia a
-    #             todo visitante que ela existe, e isso é o contrário de uma
-    #             trava. Esconder ali não é venda, é segurança.
-    # `icone` é `path` de SVG 24×24, separado por " M" quando tem mais de um.
-    menu_conta = [
-        {"slug": "", "rotulo": "navInicio",
-         "icone": "M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"},
-        {"slug": "roteiro", "rotulo": "navRoteiro", "exige": "plano",
-         "icone": "M4 4h16v16H4z M8 9h8 M8 13h8 M8 17h5"},
-        {"slug": "faturas", "rotulo": "navFaturas",
-         "icone": "M6 2h12v20l-3-2-3 2-3-2-3 2z M9 7h6 M9 11h6"},
-        {"slug": "chamados", "rotulo": "navChamados",
-         "icone": "M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"},
-        # O que o servidor guarda desta pessoa, e o botao que apaga. Sem `exige`:
-        # quem esta no plano gratuito tambem tem o que ver aqui, e e justamente
-        # quem mais precisa da resposta antes de decidir se assina.
-        {"slug": "dados", "rotulo": "navDados",
-         "icone": "M12 3c4.4 0 8 1.3 8 3s-3.6 3-8 3-8-1.3-8-3 3.6-3 8-3z M4 6v6c0 1.7 3.6 3 8 3s8-1.3 8-3V6 M4 12v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"},
-        {"slug": "modelos", "rotulo": "navModelos", "exige": "time",
-         "icone": "M4 4h9l4 4v12H4z M13 4v5h4 M8 13h6 M8 16h6"},
-        {"slug": "time", "rotulo": "navTime", "exige": "time",
-         "icone": "M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2 M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8 M23 21v-2a4 4 0 0 0-3-3.87 M16 3.13a4 4 0 0 1 0 7.75"},
-        {"slug": "negocio", "rotulo": "navNegocio", "quando": "dono",
-         "icone": "M3 3v18h18 M7 15l4-4 3 3 5-6"},
-    ]
-    rotas = {"idiomas": IDIOMAS, "demoLangs": com_tour, "rodadaLangs": com_rodada,
-             "subConta": sub_conta,
-             "abasNegocio": abas_negocio, "menuConta": menu_conta,
-             "caminhoConta": CAMINHO_CONTA, "slugs": SLUGS,
+    rotas = {"idiomas": IDIOMAS, "demoLangs": com_tour,
+             # A conta saiu no Build 71; o endereço dela fica só para o
+             # `next.config.mjs` mandar quem chegar por ele para a home.
+             "contaAposentada": CAMINHO_CONTA, "slugs": SLUGS,
              "aposentadas": APOSENTADAS,
              "metas": {pg: {L: {"titulo": m[L][0], "desc": m[L][1]} for L in IDIOMAS}
                        for pg, m in METAS.items()},
@@ -824,101 +687,14 @@ def escrever_marca(root: pathlib.Path) -> None:
     figs = {pg: figura_documento(c) for pg, c in CENARIO_DA_PAGINA.items()}
     figs["fluxo"] = figura_fluxo()
     figs["dobra"] = figura_dobra()
-    figs["rodada"] = figura_rodada()
     (root / "src" / "figuras.json").write_text(
         json.dumps(figs, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print("src/figuras.json  (as figuras dos casos de uso, sem uma palavra dentro)")
 
-    precos = {L: blocos_de_precos(L, ROTULOS_PRECOS[L]) for L in IDIOMAS}
-    (root / "src" / "precos.json").write_text(
-        json.dumps(precos, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    print("src/precos.json  (cartões e comparação curta, dos mesmos dados nos cinco idiomas)")
 
     arq = root / "src" / "rotas.json"
     arq.write_text(json.dumps(rotas, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(f"{arq.relative_to(root)}  (endereços para o Next)")
-
-
-def escrever_auditoria(root: pathlib.Path) -> None:
-    """O `AUDITORIA-PENDENTE.md`, gerado — e não escrito à mão.
-
-    O comentário do `CARTOES` prometia isto há meses: "é essa lista que vira o
-    AUDITORIA-PENDENTE.md". Nada gerava. O arquivo era escrito à mão, e já tinha
-    divergido dos comentários do próprio build — o comentário ficou com a frase
-    velha e um teste que a .md já não creditava.
-
-    UMA MARCA DE VISTO NUMA TABELA DE PREÇO É UMA PROMESSA. Este arquivo é a
-    lista de quais delas têm trava e quais não têm, e ele só vale se ninguém
-    precisar lembrar de atualizá-lo.
-
-    O QUE ELE NÃO GERA, e diz que não gera: as afirmações soltas dentro dos
-    cinco `precos.<idioma>.html`. Elas moram no HTML, não aqui — e prometer
-    gerar o que não se gera seria repetir, em código, o defeito que este
-    gerador veio consertar. A seção continua escrita à mão, marcada como tal.
-    """
-    linhas = [
-        "# Auditoria pendente — a página de preços",
-        "",
-        "> **GERADO POR `build.py`. Não edite à mão.**",
-        "> Uma linha por promessa que os cartões e a comparação publicam: a frase,",
-        "> e o teste que a comprova — ou `sem teste`, com todas as letras.",
-        "> Onde está `sem teste`, **não quer dizer que não funcione**: quer dizer",
-        "> que nada no repositório reprova se parar de funcionar.",
-        "",
-    ]
-    sem = 0
-    for c in CARTOES:
-        linhas += [f"## Cartão — {c['titulo']['pt']} ({c['sub']['pt'].split(' · ')[0]})", "",
-                   "| A frase publicada | O teste |", "|---|---|"]
-        for b in c["bullets"]:
-            teste = b.get("teste") or ""
-            if teste:
-                col = ", ".join(f"`{x.strip()}`" for x in teste.split(","))
-            else:
-                sem += 1
-                col = "**sem teste**"
-                if b.get("semTestePorque"):
-                    col += " — " + b["semTestePorque"]
-            linhas.append(f"| {b['pt']} | {col} |")
-        linhas.append("")
-
-    linhas += ["## A comparação curta", "",
-               "| A linha | O teste |", "|---|---|"]
-    for r in COMPARACAO:
-        teste = r.get("teste") or ""
-        col = ", ".join(f"`{x.strip()}`" for x in teste.split(",")) if teste else "**sem teste**"
-        if not teste:
-            sem += 1
-        linhas.append(f"| {r['rot']['pt']} | {col} |")
-
-    linhas += ["", "---", "",
-               f"**{sem} promessa(s) sem trava** de "
-               f"{sum(len(c['bullets']) for c in CARTOES) + len(COMPARACAO)}.",
-               ""]
-
-    # A METADE ESCRITA À MÃO, COLADA — e não perdida.
-    #
-    # As afirmações soltas da página moram dentro dos cinco
-    # `precos.<idioma>.html`, e não nesta lista de dados; a lista de pendências
-    # também é prosa. A primeira versão deste gerador simplesmente as deixou de
-    # fora e escreveu, no lugar delas, um parágrafo dizendo que não as gerava.
-    # Estava certo sobre o que não gerava e errado sobre o resto: apagou onze
-    # linhas de auditoria que não tinham outro lugar para morar.
-    #
-    # Então a metade escrita à mão ganhou arquivo próprio, e o gerador a cola.
-    # O `AUDITORIA-PENDENTE.md` continua sendo gerado inteiro — quem edita, edita
-    # `src/auditoria-solta.md`.
-    # `ROOT`, e não `root`: o argumento diz ONDE ESCREVER — a régua
-    # `auditoria.mjs` regenera num diretório temporário para comparar com o que
-    # está publicado. A metade escrita à mão é fonte do projeto, e mora sempre
-    # aqui.
-    solta = ROOT / "src" / "auditoria-solta.md"
-    if not solta.exists():
-        raise SystemExit("build.py: falta src/auditoria-solta.md — a metade "
-                         "escrita à mão do AUDITORIA-PENDENTE.md")
-    linhas += ["---", "", solta.read_text(encoding="utf-8").rstrip(), ""]
-    (root / "AUDITORIA-PENDENTE.md").write_text("\n".join(linhas) + "\n", encoding="utf-8")
-    print(f"AUDITORIA-PENDENTE.md  ({sem} sem trava)")
 
 
 def build_site(root: pathlib.Path) -> None:
@@ -950,16 +726,6 @@ def build_site(root: pathlib.Path) -> None:
         # página em português — e a pessoa achava que era defeito.
         L: dict({"home": pre[L] or "/", "app": "/app?lang=" + L,
                  "root": "/",
-                 # a área do cliente tem endereço traduzido como o resto do
-                 # site: quem lê em espanhol não deveria ter que reconhecer a
-                 # palavra "conta" para achar a própria fatura
-                 # A área do cliente agora fala os cinco idiomas, como o resto.
-                 "conta": CAMINHO_CONTA[L],
-                 # O endereço da tela "Seus dados" — traduzido, como o resto da
-                 # conta. Escrito à mão na política de privacidade, ele seria a
-                 # cópia que aponta para /de/konto/dados, que não existe: lá é
-                 # /de/konto/daten. O `sub_conta` já sabe disso.
-                 "contaDados": CAMINHO_CONTA[L] + "/" + sub_conta["dados"][L],
                  # `blog` é a mesma palavra nos cinco idiomas, então ele não
                  # entra na tabela de slugs traduzidos — ela existe para os
                  # casos em que a palavra muda.
@@ -979,15 +745,10 @@ def build_site(root: pathlib.Path) -> None:
         t["marcaA"], t["marcaB"] = MARCA_A, MARCA_B
         t["ICONV"] = ICON_V
         t["analytics"] = ANALYTICS
-        t["supaUrl"] = SUPA_URL
-        t["supaKey"] = SUPA_KEY
         t["empresa"] = EMPRESA
         t["cnpj"] = CNPJ
         t["contato"] = CONTATO
         t["encarregado"] = ENCARREGADO
-        t["prazoConta"] = str(PRAZO_CONTA_DIAS)
-        t["prazoLista"] = str(PRAZO_LISTA_MESES)
-        t["prazoEvento"] = str(PRAZO_EVENTO_MESES)
         t["selfPath"] = caminhos[lang]["home"]
         t["switcher"] = _switcher(lang, paginas, "home")
         # o link do comparativo vai montado aqui: colocar <a> dentro do JSON de
@@ -1041,22 +802,10 @@ def build_site(root: pathlib.Path) -> None:
             t["marcaA"], t["marcaB"] = MARCA_A, MARCA_B
             t["ICONV"] = ICON_V
             t["analytics"] = ANALYTICS
-            t["supaUrl"] = SUPA_URL
-            t["supaKey"] = SUPA_KEY
             t["empresa"] = EMPRESA
             t["cnpj"] = CNPJ
             t["contato"] = CONTATO
             t["encarregado"] = ENCARREGADO
-            # Os prazos de retenção. Este laço não escreve arquivo — quem serve
-            # estas páginas é o Next —, mas ele CONFERE se falta valor, e sem
-            # estas três linhas ele acusava `prazoConta` como sem valor em cinco
-            # idiomas a cada build. Quinze linhas de aviso falso escondem o aviso
-            # verdadeiro que aparecer no meio, que é a razão de o conferente
-            # existir.
-            t["prazoConta"] = str(PRAZO_CONTA_DIAS)
-            t["prazoLista"] = str(PRAZO_LISTA_MESES)
-            t["prazoEvento"] = str(PRAZO_EVENTO_MESES)
-            t["contaDados"] = CAMINHO_CONTA[lang] + "/" + sub_conta["dados"][lang]
             t["lang"] = lang
             t["docTitle"], t["docDesc"] = metas[lang]
             t["selfPath"] = caminhos[lang][pagina]
@@ -1216,6 +965,7 @@ self.addEventListener('fetch', e => {
     # com o token {{marca}} e é estampado aqui, como todo o resto.
     sup = (root / "src" / "site" / "support.js").read_text(encoding="utf-8")
     sup = sup.replace("{{marca}}", MARCA)
+    sup = sup.replace("{{suporte}}", SUPORTE)
     (root / "public" / "support.js").write_text(sup, encoding="utf-8")
     print(f"public/support.js  {len(sup)/1024:.1f} KB")
 
@@ -1653,608 +1403,11 @@ def gerar_og(root: pathlib.Path, textos_por_idioma: dict) -> None:
     print(f"public/og/  ({len(textos_por_idioma)} imagens de compartilhamento)")
 
 
-# ---------------------------------------------------------------------------
-# A PÁGINA DE PREÇOS, EM DADOS.
-#
-# Por que isto mora aqui e não dentro de cada `precos.<idioma>.html`:
-#
-# A página vendia QUANTIDADE — uma lista de noventa e quatro itens com vistos.
-# Passa a vender RESULTADO, e a lista vira prova secundária, recolhida. Nessa
-# virada, o benefício de cartão e a linha de comparação deixam de ser enfeite e
-# viram promessa comercial: cada um deles é uma coisa que alguém compra por
-# acreditar.
-#
-# Promessa escrita à mão dentro de cinco arquivos de HTML é promessa que sai do
-# ar em um idioma e continua no ar em quatro. Tirar uma linha da comparação
-# custaria cinco edições e uma caçada; aqui custa apagar uma entrada.
-#
-# Cada benefício carrega um campo `teste` com a régua que prova que ele existe,
-# e `escrever_auditoria()` publica essa lista no `AUDITORIA-PENDENTE.md` a cada
-# build. Campo vazio quer dizer promessa sem trava, e sai no arquivo com todas
-# as letras — com o `semTestePorque` ao lado, quando existe uma régua parecida
-# que NÃO prova aquilo (é a confusão que o campo vazio sozinho convidaria).
-#
-# O campo é um CAMPO, e não um comentário, porque comentário não é lido por
-# ninguém a não ser por quem já está olhando para a linha. Até este build eram
-# as duas coisas: um comentário `# "frase" ← teste.mjs` em cima de cada bala,
-# mais o `.md` escrito à mão embaixo. As duas cópias divergiram — o comentário
-# ficou com a frase velha ("hash", "vocabulário", "status") e creditava
-# `vocab.mjs` a uma promessa que a página já não faz. Os comentários foram
-# apagados; o que sobrou deles foi o campo, que é o que o arquivo lê.
-# ---------------------------------------------------------------------------
-
-# A moeda de cada idioma, e o preço em cada moeda. Os números não são inventados
-# aqui: são os que a página já publicava.
-MOEDA_DO_IDIOMA = {"pt": "BRL", "en": "USD", "es": "USD", "de": "EUR", "fr": "EUR"}
-
-
-def _team_minimo() -> int:
-    """O mínimo de assentos do Team, LIDO de `lib/stripe.ts`.
-
-    O comentário de lá diz, em maiúsculas, "O MÍNIMO DO TEAM MORA AQUI, E SÓ
-    AQUI" — e este arquivo repetia o `3` logo abaixo de um comentário dizendo
-    que ele mora lá. Duas cópias, uma delas se declarando cópia: é o defeito
-    inteiro em duas linhas. Era 5 antes desta rodada, e as duas desceram juntas
-    só porque quem mexeu lembrou das duas.
-
-    Falta o número, o build PARA. Uma vitrine que anuncia "a partir de 3
-    pessoas" enquanto o checkout cobra o mínimo de 5 é pior do que uma build
-    vermelha — a régua `promessa.mjs` lê o mesmo arquivo e cobra que as duas
-    páginas digam a mesma palavra nos cinco idiomas, mas ela só roda depois.
-    """
-    fonte = (ROOT / "lib" / "stripe.ts").read_text(encoding="utf-8")
-    time = fonte.split("time: {", 1)
-    if len(time) < 2:
-        raise SystemExit("build.py: não achei o bloco `time:` em lib/stripe.ts")
-    achado = re.search(r"assentos:\s*(\d+)", time[1])
-    if not achado:
-        raise SystemExit("build.py: não achei `assentos:` no bloco `time:` de lib/stripe.ts")
-    return int(achado.group(1))
-
-
-TEAM_MINIMO = _team_minimo()
-
-
-def _planos_do_codigo() -> set:
-    """Os planos que `lib/stripe.ts` conhece, lidos de lá.
-
-    A vitrine chama o plano de `team`; o código chama de `time`. Os dois nomes
-    são legítimos — um é palavra de venda, o outro é chave da Stripe — e a
-    tradução entre eles tem de morar em UM lugar declarado, e não num `if`
-    escondido no meio de um gerador de HTML.
-    Ela mora no campo `planoCodigo` de cada cartão, e esta função existe para
-    conferi-lo: um `planoCodigo` que a Stripe não conhece derruba o build, em
-    vez de virar um `?plano=team` que a conta recebe e ignora em silêncio.
-    """
-    fonte = (ROOT / "lib" / "stripe.ts").read_text(encoding="utf-8")
-    bloco = re.search(r"export const PLANOS = \{(.*?)\n\} as const;", fonte, re.S)
-    if not bloco:
-        raise SystemExit("build.py: não achei `export const PLANOS` em lib/stripe.ts")
-    return set(re.findall(r"^  ([a-z][\w]*): \{", bloco.group(1), re.M))
-
-
-PLANOS_DO_CODIGO = _planos_do_codigo()
-
-
-def _intencao(cartao: dict) -> str:
-    """O `?plano=` que o botão de compra leva consigo.
-
-    O CLIQUE TEM DE CARREGAR O QUE A PESSOA QUIS. Sem isto, quem clicava
-    "Assinar o Team" chegava à conta e escolhia de novo — e entre o clique e a
-    chegada ainda havia um link de e-mail, que é onde a intenção morria de vez.
-    Três telas para dizer duas vezes a mesma coisa.
-
-    O cartão gratuito não leva nada: ele vai para a ferramenta, e não há o que
-    comprar. Um `?plano=free` seria um parâmetro que ninguém lê, e parâmetro que
-    ninguém lê é o começo de um que alguém lê errado.
-    """
-    codigo = cartao.get("planoCodigo")
-    if not codigo:
-        return ""
-    if codigo not in PLANOS_DO_CODIGO:
-        raise SystemExit(
-            f"build.py: o cartão '{cartao['id']}' declara planoCodigo={codigo!r}, "
-            f"que lib/stripe.ts não conhece. Conhecidos: {sorted(PLANOS_DO_CODIGO)}. "
-            "Um plano que a conta não reconhece vira um clique que se perde em silêncio.")
-    return f"?plano={codigo}"
-
-PRECO = {
-    "free":     {"BRL": "R$ 0",   "USD": "US$ 0",  "EUR": "€ 0"},
-    "personal": {"BRL": "R$ 149", "USD": "US$ 29", "EUR": "€ 27"},
-    "team":     {"BRL": "R$ 349", "USD": "US$ 69", "EUR": "€ 65"},
-    # 3 × o preço por pessoa. Escrito por extenso e não calculado em tempo de
-    # execução porque a separação de milhar muda com a língua, e um `1047` cru
-    # numa página em alemão é um erro que ninguém vê até um cliente escrever.
-    "teamMin":  {"BRL": "R$ 1.047", "USD": "US$ 207", "EUR": "€ 195"},
-}
-
-# O período, por idioma. O alemão e o francês precisam da flexão certa em
-# "por pessoa", e é por isso que isto não é uma string montada com `+`.
-PERIODO = {
-    "free":     {"pt": "/ para sempre", "en": "/ forever", "es": "/ para siempre",
-                 "de": "/ für immer", "fr": "/ pour toujours"},
-    "personal": {"pt": "/ ano", "en": "/ year", "es": "/ año",
-                 "de": "/ Jahr", "fr": "/ an"},
-    "team":     {"pt": "/ pessoa / ano", "en": "/ person / year", "es": "/ persona / año",
-                 "de": "/ Person / Jahr", "fr": "/ personne / an"},
-}
-
-# ---------------------------------------------------------------------------
-# OS TRÊS CARTÕES.
-#
-# O título é o RESULTADO e o nome do plano é o subtítulo — e não o contrário.
-# Quem chega à página não está comprando "Personal": está comprando parar de
-# refazer quarenta vezes a mesma coisa à mão.
-# ---------------------------------------------------------------------------
-CARTOES = [
-    {
-        "id": "free",
-        "titulo": {"pt": "Crie a evidência", "en": "Create the evidence",
-                   "es": "Cree la evidencia", "de": "Erstellen Sie den Nachweis",
-                   "fr": "Créez la preuve"},
-        "sub": {"pt": "Free · sem cadastro, sem cartão, sem limite",
-                "en": "Free · no sign-up, no card, no limit",
-                "es": "Free · sin registro, sin tarjeta, sin límite",
-                "de": "Free · ohne Registrierung, ohne Karte, ohne Limit",
-                "fr": "Free · sans inscription, sans carte, sans limite"},
-        "cta": {"pt": "Criar uma evidência grátis", "en": "Create evidence for free",
-                "es": "Crear una evidencia gratis", "de": "Kostenlos einen Nachweis erstellen",
-                "fr": "Créer une preuve gratuitement"},
-        "destino": "app",
-        "bullets": [
-            {"teste": 'evidencia.mjs', "pt": "Evidência completa, com impressão digital e tarja de dado sensível",
-             "en": "Complete evidence, with a fingerprint and sensitive-data redaction",
-             "es": "Evidencia completa, con huella digital y tarjado de dato sensible",
-             "de": "Vollständiger Nachweis, mit Fingerabdruck und Schwärzung sensibler Daten",
-             "fr": "Preuve complète, avec empreinte et masquage des données sensibles"},
-            {"teste": 'semrede.mjs', "pt": "Tudo processado no seu computador",
-             "en": "Everything processed on your own computer",
-             "es": "Todo procesado en su computadora",
-             "de": "Alles auf Ihrem eigenen Rechner verarbeitet",
-             "fr": "Tout est traité sur votre propre ordinateur"},
-            {"teste": 'saidas.mjs', "pt": "Todos os formatos de saída",
-             "en": "Every output format",
-             "es": "Todos los formatos de salida",
-             "de": "Alle Ausgabeformate",
-             "fr": "Tous les formats de sortie"},
-            #
-            # Esta bala é a única porta da página de preços para o `/link`, e ela
-            # tem de dizer o que a coisa É na mesma frase: "link para o Jira" é,
-            # a uma palavra, lido como integração — e aí o FAQ gasta uma resposta
-            # desmentindo o próprio cartão. Um cartão que precisa de nota de
-            # rodapé para não enganar está enganando.
-            {"teste": 'linkpage.mjs', "pt": "Link pré-configurado para colar no Jira, no Zephyr, no Xray ou no "
-                   "TestRail — é um endereço, não uma integração",
-             "en": "A pre-filled link to paste into Jira, Zephyr, Xray or TestRail — "
-                   "it is an address, not an integration",
-             "es": "Enlace preconfigurado para pegar en Jira, Zephyr, Xray o TestRail — "
-                   "es una dirección, no una integración",
-             "de": "Vorbereiteter Link zum Einfügen in Jira, Zephyr, Xray oder "
-                   "TestRail — eine Adresse, keine Integration",
-             "fr": "Lien prérempli à coller dans Jira, Zephyr, Xray ou TestRail — "
-                   "c’est une adresse, pas une intégration",
-             "href": "link"},
-            {"teste": 'semrede.mjs', "pt": "Sem conta para usar",
-             "en": "No account needed to use it",
-             "es": "Sin cuenta para usarlo",
-             "de": "Kein Konto nötig",
-             "fr": "Aucun compte pour l’utiliser"},
-        ],
-    },
-    {
-        "id": "personal",
-        "planoCodigo": "personal",
-        "titulo": {"pt": "Execute o seu roteiro", "en": "Run your test script",
-                   "es": "Ejecute su guion", "de": "Führen Sie Ihr Testskript aus",
-                   "fr": "Exécutez votre scénario"},
-        # A DEGUSTAÇÃO ENTRA NO SUBTÍTULO DOS DOIS CARTÕES PAGOS — 23/08.
-        #
-        # Ela existe no banco desde sempre (`plano_de`, migração 20260815142538:68):
-        # quem entra pela primeira vez ganha 14 dias com TUDO, sem cartão e sem
-        # checkout. E "14 dias" tinha ZERO ocorrências em `/`, `/precos`,
-        # `/evidencia-de-teste`, `/seguranca` e `/comparativo` — a melhor oferta do
-        # produto só aparecia depois do login, que é onde ela não serve para nada.
-        #
-        # No SUBTÍTULO, e não numa bala: a objeção de preço nasce ao lado do preço,
-        # e é ali que ela precisa de resposta. Numa bala, ela seria a sexta linha
-        # de uma lista que ninguém lê inteira.
-        "sub": {"pt": "Personal · 14 dias grátis antes, sem cartão",
-                "en": "Personal · 14 days free first, no card",
-                "es": "Personal · 14 días gratis antes, sin tarjeta",
-                "de": "Personal · 14 Tage kostenlos vorab, ohne Karte",
-                "fr": "Personal · 14 jours gratuits d’abord, sans carte"},
-        "cta": {"pt": "Assinar o Personal", "en": "Subscribe to Personal",
-                "es": "Suscribirse a Personal", "de": "Personal abonnieren",
-                "fr": "S’abonner à Personal"},
-        "destino": "conta",
-        "bullets": [
-            {"teste": 'roteiro.mjs', "pt": "Importe a planilha de casos de teste",
-             "en": "Import your spreadsheet of test cases",
-             "es": "Importe la planilla de casos de prueba",
-             "de": "Importieren Sie Ihre Tabelle mit Testfällen",
-             "fr": "Importez votre tableur de cas de test"},
-            {"teste": 'roteiro.mjs', "pt": "Abra cada caso já preenchido",
-             "en": "Open each case already filled in",
-             "es": "Abra cada caso ya rellenado",
-             "de": "Öffnen Sie jeden Fall bereits ausgefüllt",
-             "fr": "Ouvrez chaque cas déjà prérempli"},
-            {"teste": 'roteiro.mjs', "pt": "Devolva situação, data, executor e impressão digital na mesma planilha",
-             "en": "Send status, date, tester and fingerprint back in the same spreadsheet",
-             "es": "Devuelva situación, fecha, ejecutor y huella en la misma planilla",
-             "de": "Geben Sie Status, Datum, Ausführenden und Fingerabdruck in derselben Tabelle zurück",
-             "fr": "Renvoyez statut, date, exécutant et empreinte dans le même tableur"},
-            # SEM O VOCABULÁRIO, e o motivo importa.
-            #
-            # A primeira versão desta bala dizia "guarde o seu padrão, o cliente
-            # e o VOCABULÁRIO". Guardar a lista de termos é `termosGuardados` no
-            # catálogo, e ela está em `construcao`: `vocLista` mora em
-            # `sessionStorage` e morre com a aba. Aplicar os termos existe, é
-            # `termosAplicados`, e é de GRAÇA — está no Free.
-            #
-            # Quer dizer: a bala vendia no plano pago a única metade que não
-            # existe, e deixava de fora a metade que existe e é gratuita. É
-            # exatamente o defeito que este projeto já pagou duas vezes.
-            {"id": "modeloProprio",
-             "teste": 'modelos.mjs, planos.mjs', "pt": "Guarde o seu padrão de documento e o seu cliente",
-             "en": "Keep your document standard and your client",
-             "es": "Guarde su estándar de documento y su cliente",
-             "de": "Bewahren Sie Ihren Dokumentstandard und Ihren Kunden",
-             "fr": "Conservez votre standard de document et votre client"},
-            {"teste": 'marca.mjs', "pt": "A sua marca no topo de todos os formatos",
-             "en": "Your brand at the top of every format",
-             "es": "Su marca en la parte superior de todos los formatos",
-             "de": "Ihre Marke im Kopf jedes Formats",
-             "fr": "Votre marque en tête de tous les formats"},
-        ],
-    },
-    {
-        "id": "team",
-        "planoCodigo": "time",
-        "titulo": {"pt": "Coordene a rodada", "en": "Coordinate the round",
-                   "es": "Coordine la ronda", "de": "Koordinieren Sie die Runde",
-                   "fr": "Coordonnez la série"},
-        "sub": {"pt": "Team · 14 dias grátis antes, sem cartão",
-                "en": "Team · 14 days free first, no card",
-                "es": "Team · 14 días gratis antes, sin tarjeta",
-                "de": "Team · 14 Tage kostenlos vorab, ohne Karte",
-                "fr": "Team · 14 jours gratuits d’abord, sans carte"},
-        "cta": {"pt": "Assinar o Team", "en": "Subscribe to Team",
-                "es": "Suscribirse a Team", "de": "Team abonnieren",
-                "fr": "S’abonner à Team"},
-        # `conta`, e não `time`: `{{time}}` é a página que APRESENTA o Team, e o
-        # CTA de um cartão de preço tem de levar à compra. A compra começa na
-        # conta, que é onde mora o seletor de assentos e a ação de checkout.
-        "destino": "conta",
-        "bullets": [
-            {"teste": 'roteiro.mjs', "pt": "Distribua e reatribua os casos do roteiro",
-             "en": "Hand out and reassign the cases in the script",
-             "es": "Reparta y reasigne los casos del guion",
-             "de": "Verteilen Sie die Fälle des Skripts und weisen Sie sie neu zu",
-             "fr": "Répartissez et réattribuez les cas du scénario"},
-            {"teste": 'roteiro.mjs', "pt": "Acompanhe o que está pendente e quem está executando",
-             "en": "Track what is pending and who is running it",
-             "es": "Siga lo que está pendiente y quién lo está ejecutando",
-             "de": "Verfolgen Sie, was offen ist und wer gerade ausführt",
-             "fr": "Suivez ce qui est en attente et qui exécute"},
-            {"id": "padraoDoTime",
-             "teste": 'modelos.mjs', "pt": "Padrão da equipe aplicado no documento de todo mundo",
-             "en": "The team standard applied to everyone’s document",
-             "es": "El estándar del equipo aplicado al documento de todos",
-             "de": "Der Teamstandard im Dokument aller Beteiligten",
-             "fr": "Le standard de l’équipe appliqué au document de chacun"},
-            # SEM RÉGUA DESDE O BUILD 69: a ferramenta ficou grátis e perdeu a
-            # licença, os assentos e o bloqueio — `licenca.mjs` saiu com eles.
-            # A frase sai do site com a página de preços, no Build 71.
-            {"teste": '', "semTestePorque": "a ferramenta deixou de ter licença e assentos no Build 69; a frase sai do site com a página de preços no Build 71",
-             "pt": "Assentos, convite, bloqueio e prazo de revogação",
-             "en": "Seats, invitations, blocking and a revocation window",
-             "es": "Asientos, invitación, bloqueo y plazo de revocación",
-             "de": "Plätze, Einladung, Sperrung und Widerrufsfrist",
-             "fr": "Sièges, invitation, blocage et délai de révocation"},
-            {"teste": 'emissor.mjs', "pt": "Classificação e campo de emissor no documento",
-             "en": "Classification and an issuer field on the document",
-             "es": "Clasificación y campo de emisor en el documento",
-             "de": "Einstufung und Ausstellerfeld im Dokument",
-             "fr": "Classification et champ émetteur sur le document"},
-        ],
-    },
-]
-
-# ---------------------------------------------------------------------------
-# A COMPARAÇÃO CURTA — CINCO LINHAS, E SÓ CINCO.
-#
-# Ela é que decide a compra; a tabela de noventa e quatro só confirma. Uma
-# sexta linha aqui não é "mais informação": é uma linha a menos de atenção
-# sobrando para as cinco que importam.
-#
-# Célula com palavra ("individual", "compartilhado") precisa de texto por
-# idioma. Célula de sim/não usa sinal, e o sinal é igual nos cinco.
-# ---------------------------------------------------------------------------
-SIM = "sim"
-NAO = "nao"
-
-COMPARACAO = [
-    {"teste": 'evidencia.mjs',
-     "rot": {"pt": "Criar a evidência", "en": "Create the evidence",
-             "es": "Crear la evidencia", "de": "Den Nachweis erstellen",
-             "fr": "Créer la preuve"},
-     "free": SIM, "personal": SIM, "team": SIM},
-    {"teste": 'modelos.mjs',
-     "rot": {"pt": "Guardar o seu padrão e o seu cliente",
-             "en": "Keep your standard and your client",
-             "es": "Guardar su estándar y su cliente",
-             "de": "Ihren Standard und Ihren Kunden behalten",
-             "fr": "Conserver votre standard et votre client"},
-     "free": NAO, "personal": SIM, "team": SIM},
-    {"teste": 'roteiro.mjs',
-     "rot": {"pt": "Executar um roteiro de casos", "en": "Run a script of cases",
-             "es": "Ejecutar un guion de casos", "de": "Ein Fallskript ausführen",
-             "fr": "Exécuter un scénario de cas"},
-     "free": NAO,
-     "personal": {"pt": "individual", "en": "individual", "es": "individual",
-                  "de": "einzeln", "fr": "individuel"},
-     "team": {"pt": "compartilhado", "en": "shared", "es": "compartido",
-              "de": "geteilt", "fr": "partagé"}},
-    {"teste": 'roteiro.mjs',
-     "rot": {"pt": "Atribuir e acompanhar quem executa",
-             "en": "Assign and track who runs it",
-             "es": "Asignar y seguir quién ejecuta",
-             "de": "Zuweisen und verfolgen, wer ausführt",
-             "fr": "Attribuer et suivre qui exécute"},
-     "free": NAO, "personal": NAO, "team": SIM},
-    {"teste": 'modelos.mjs',
-     "rot": {"pt": "Padronizar o documento da equipe",
-             "en": "Standardise the team’s document",
-             "es": "Estandarizar el documento del equipo",
-             "de": "Das Dokument des Teams vereinheitlichen",
-             "fr": "Uniformiser le document de l’équipe"},
-     "free": NAO, "personal": NAO, "team": SIM},
-]
-
-
-# Os rótulos de moldura da página: cabeçalho da comparação, a frase do mínimo e
-# o nome dos sinais para quem usa leitor de tela. Ficam aqui, e não no
-# `i18n-site.json`, porque quem os consome é o gerador destes dois blocos — e
-# uma frase de mínimo longe do número do mínimo é como o "5 pessoas" sobreviveu
-# em cinco arquivos.
-ROTULOS_PRECOS = {
-    "pt": {"minimo": "a partir de 3 pessoas", "minimoTotal": "A partir de {0}/ano",
-           "cmpCaption": "O que muda de um plano para o outro",
-           "cmpResultado": "Resultado", "sim": "incluído", "nao": "não incluído"},
-    "en": {"minimo": "from 3 people", "minimoTotal": "From {0}/year",
-           "cmpCaption": "What changes from one plan to the next",
-           "cmpResultado": "Outcome", "sim": "included", "nao": "not included"},
-    "es": {"minimo": "desde 3 personas", "minimoTotal": "Desde {0}/año",
-           "cmpCaption": "Qué cambia de un plan a otro",
-           "cmpResultado": "Resultado", "sim": "incluido", "nao": "no incluido"},
-    "de": {"minimo": "ab 3 Personen", "minimoTotal": "Ab {0}/Jahr",
-           "cmpCaption": "Was sich von einem Plan zum anderen ändert",
-           "cmpResultado": "Ergebnis", "sim": "enthalten", "nao": "nicht enthalten"},
-    "fr": {"minimo": "à partir de 3 personnes", "minimoTotal": "À partir de {0}/an",
-           "cmpCaption": "Ce qui change d’une offre à l’autre",
-           "cmpResultado": "Résultat", "sim": "inclus", "nao": "non inclus"},
-}
-
-
-def figura_rodada() -> str:
-    """A rodada em quatro estados, desenhada.
-
-    O que o plano pago vende é difícil de contar em texto: uma planilha entra,
-    os casos se dividem entre pessoas, cada execução gera a evidência no
-    computador de quem executa, e a planilha volta com as colunas originais
-    intactas mais quatro novas. São quatro estados de UMA COISA SÓ, e um
-    parágrafo obriga quem lê a manter os quatro na cabeça ao mesmo tempo.
-
-    Aqui havia um vídeo de 47 segundos apontando para `/demo/rodada.*`. Os
-    quinze arquivos não existem no repositório — a página servia um `poster`
-    404 e um `<video>` sem fonte nos cinco idiomas. O desenho não tem esse
-    problema: nasce do código, no mesmo build.
-
-    Sem uma palavra dentro, como as outras figuras — o que aparece escrito é
-    código de caso (`CT-01`), data ISO e um pedaço de impressão digital, que
-    são iguais nos cinco idiomas. Uma figura com frase dentro seria cinco
-    figuras.
-    """
-    A, ESC, LIN, TXT, MUT = FIG_A, FIG_ESC, FIG_LIN, FIG_TXT, FIG_MUT
-    PAPEL = FIG_PAPEL
-    p = []
-    add = p.append
-    MONO = "font-family=\"ui-monospace,SFMono-Regular,Menlo,monospace\""
-
-    def painel(x, n):
-        """A moldura de um estado, com o número do passo no canto."""
-        add(f'<rect x="{x}" y="26" width="196" height="150" rx="8" fill="{PAPEL}" stroke="{LIN}"/>')
-        add(f'<circle cx="{x + 16}" cy="26" r="10" fill="{A}"/>')
-        add(f'<text x="{x + 16}" y="29.8" {MONO} font-size="11" font-weight="700" '
-            f'fill="{PAPEL}" text-anchor="middle">{n}</text>')
-
-    def seta(x):
-        add(f'<path d="M{x} 101 h22 m-6 -6 l6 6 -6 6" stroke="{TXT}" stroke-width="2" '
-            f'fill="none" stroke-linecap="round" stroke-linejoin="round"/>')
-
-    def cabecalho(x, cols):
-        """A linha de títulos da planilha: barras, não palavras."""
-        add(f'<rect x="{x + 12}" y="40" width="172" height="16" rx="3" fill="{ESC}"/>')
-        for cx, cw in cols:
-            add(f'<rect x="{x + cx}" y="46" width="{cw}" height="4" rx="2" fill="{TXT}"/>')
-
-    def codigo(x, y, i):
-        add(f'<text x="{x + 16}" y="{y + 4}" {MONO} font-size="8" fill="{MUT}">CT-0{i}</text>')
-
-    # ---- 1. a planilha como ela chega -------------------------------------
-    # Código, cenário, resultado esperado — e duas colunas de situação vazias.
-    painel(6, 1)
-    cabecalho(6, [(16, 22), (46, 46), (100, 40), (150, 14), (170, 14)])
-    for i in range(1, 5):
-        y = 68 + (i - 1) * 22
-        add(f'<line x1="18" y1="{y + 10}" x2="190" y2="{y + 10}" stroke="{LIN}"/>')
-        codigo(6, y, i)
-        add(f'<rect x="52" y="{y - 3}" width="{44 - (i % 3) * 6}" height="4" rx="2" fill="{TXT}"/>')
-        add(f'<rect x="106" y="{y - 3}" width="{34 - (i % 2) * 8}" height="4" rx="2" fill="{TXT}"/>')
-        # as duas colunas que voltarão preenchidas, aqui ainda vazias
-        add(f'<rect x="156" y="{y - 5}" width="12" height="8" rx="2" fill="none" stroke="{LIN}"/>')
-        add(f'<rect x="176" y="{y - 5}" width="12" height="8" rx="2" fill="none" stroke="{LIN}"/>')
-    seta(208)
-
-    # ---- 2. os casos distribuídos ------------------------------------------
-    # As mesmas linhas, agora com um executor em cada. Três pessoas: é o
-    # mínimo do Team, e a figura não pode contradizer o cartão ao lado.
-    painel(238, 2)
-    cabecalho(238, [(16, 22), (46, 46), (100, 40), (150, 34)])
-    CORES = [A, "#6E9BEF", "#E0A44A"]
-    for i in range(1, 5):
-        y = 68 + (i - 1) * 22
-        add(f'<line x1="250" y1="{y + 10}" x2="422" y2="{y + 10}" stroke="{LIN}"/>')
-        codigo(238, y, i)
-        add(f'<rect x="284" y="{y - 3}" width="{44 - (i % 3) * 6}" height="4" rx="2" fill="{TXT}"/>')
-        cor = CORES[(i - 1) % 3]
-        add(f'<circle cx="{344}" cy="{y - 1}" r="7" fill="{cor}" opacity=".9"/>')
-        add(f'<rect x="356" y="{y - 3}" width="52" height="4" rx="2" fill="{TXT}"/>')
-    seta(440)
-
-    # ---- 3. a evidência gerada ---------------------------------------------
-    # Uma miniatura de documento com a impressão digital visível: é o que a
-    # execução produz, e é o que o auditor vai abrir.
-    painel(470, 3)
-    add(f'<rect x="502" y="44" width="132" height="124" rx="4" fill="{ESC}" stroke="{LIN}"/>')
-    add(f'<rect x="514" y="56" width="46" height="8" rx="2" fill="{A}"/>')
-    add(f'<rect x="514" y="72" width="108" height="4" rx="2" fill="{TXT}"/>')
-    add(f'<rect x="514" y="82" width="92" height="4" rx="2" fill="{TXT}"/>')
-    # os dois quadros da tela, que são o miolo da evidência
-    add(f'<rect x="514" y="94" width="50" height="34" rx="3" fill="{PAPEL}" stroke="{LIN}"/>')
-    add(f'<rect x="572" y="94" width="50" height="34" rx="3" fill="{PAPEL}" stroke="{LIN}"/>')
-    add(f'<rect x="520" y="102" width="30" height="4" rx="2" fill="{TXT}"/>')
-    add(f'<rect x="578" y="102" width="24" height="4" rx="2" fill="{TXT}"/>')
-    add(f'<rect x="514" y="136" width="108" height="12" rx="3" fill="{A}" opacity=".12"/>')
-    add(f'<text x="519" y="145" {MONO} font-size="7.5" fill="{A}">a1f3…9c</text>')
-    add(f'<rect x="514" y="154" width="70" height="4" rx="2" fill="{TXT}"/>')
-    seta(672)
-
-    # ---- 4. a planilha de volta --------------------------------------------
-    # As colunas originais intactas; o que entra é acréscimo. É a promessa da
-    # legenda logo abaixo da figura, e ela precisa estar visível no desenho.
-    painel(702, 4)
-    cabecalho(702, [(16, 22), (46, 40), (94, 22), (122, 22), (150, 34)])
-    for i in range(1, 5):
-        y = 68 + (i - 1) * 22
-        add(f'<line x1="714" y1="{y + 10}" x2="886" y2="{y + 10}" stroke="{LIN}"/>')
-        codigo(702, y, i)
-        add(f'<rect x="748" y="{y - 3}" width="{38 - (i % 3) * 6}" height="4" rx="2" fill="{TXT}"/>')
-        # o visto verde: a coluna de situação que voltou preenchida
-        add(f'<path d="M796 {y - 1} l3 3 6 -6" stroke="{A}" stroke-width="2" fill="none" '
-            f'stroke-linecap="round" stroke-linejoin="round"/>')
-        add(f'<rect x="824" y="{y - 3}" width="22" height="4" rx="2" fill="{A}" opacity=".55"/>')
-        add(f'<rect x="852" y="{y - 3}" width="34" height="4" rx="2" fill="{A}" opacity=".55"/>')
-
-    return ('<figure class="figRodada"><svg viewBox="0 0 904 190" role="img" '
-            'aria-labelledby="figRodadaT"><title id="figRodadaT">__ALT__</title>'
-            + "".join(p) + '</svg><figcaption>__LEG__</figcaption></figure>')
-
-
-def _cel(valor, lang: str) -> str:
-    """Uma célula da comparação curta: sinal ou palavra."""
-    if valor == SIM:
-        return '<td class="sim" aria-label="__SIM__">✓</td>'
-    if valor == NAO:
-        return '<td class="nao" aria-label="__NAO__">✕</td>'
-    return f'<td>{valor[lang]}</td>'
-
-
-def blocos_de_precos(lang: str, rot: dict) -> dict:
-    """Os dois blocos gerados da página de preços, num idioma.
-
-    `rot` traz os rótulos que dependem de idioma e não cabem numa constante de
-    conteúdo: o cabeçalho da tabela, o texto do mínimo, o rótulo dos sinais.
-    """
-    m = MOEDA_DO_IDIOMA[lang]
-
-    cartoes = []
-    for c in CARTOES:
-        pid = c["id"]
-        preco = PRECO[pid][m]
-        per = PERIODO[pid][lang]
-        # O mínimo e o total mínimo andam JUNTOS do preço por pessoa. Preço por
-        # assento sem o mínimo ao lado é surpresa no checkout.
-        extra = ""
-        if pid == "team":
-            extra = (f'<p class="minimo">{rot["minimo"]}</p>'
-                     f'<p class="minimoTotal">{rot["minimoTotal"].replace("{0}", PRECO["teamMin"][m])}</p>')
-        # A ALÇA, onde o benefício corresponde a um item do catálogo.
-        #
-        # Ela não é enfeite: é o que deixa `planos.mjs` cobrar que nenhum cartão
-        # prometa uma funcionalidade que o catálogo diz que ainda não existe.
-        # Sem ela, cartão e catálogo voltam a poder discordar em silêncio — foi
-        # assim que três coisas prontas ficaram à venda como "em breve".
-        def bala(b):
-            texto = b[lang]
-            # `href` transforma a bala inteira em porta para outra página. Só o
-            # Free usa hoje, para o `/link`.
-            if b.get("href"):
-                texto = f'<a href="{{{{{b["href"]}}}}}">{texto}</a>'
-            alca = f' data-f="{b["id"]}"' if b.get("id") else ""
-            return f"<li{alca}>{texto}</li>"
-        itens = "".join(bala(b) for b in c["bullets"])
-        cartoes.append(
-            f'<div class="plan" data-plano="{pid}">'
-            f'<h3>{c["titulo"][lang]}</h3>'
-            f'<p class="planoNome">{c["sub"][lang]}</p>'
-            f'<div class="price">{preco}<span> {per}</span></div>'
-            f'{extra}'
-            f'<ul>{itens}</ul>'
-            f'<a class="btn" href="{{{{{c["destino"]}}}}}{_intencao(c)}" data-cta="{pid}">{c["cta"][lang]}</a>'
-            f'</div>')
-
-    linhas = []
-    for r in COMPARACAO:
-        linhas.append(
-            f'<tr><th scope="row">{r["rot"][lang]}</th>'
-            + _cel(r["free"], lang) + _cel(r["personal"], lang) + _cel(r["team"], lang)
-            + "</tr>")
-    # A TABELA ROLA DENTRO DA PRÓPRIA CAIXA.
-    # Quatro colunas mais um rótulo de linha por extenso não cabem em 380 px, e
-    # uma tabela que não cabe empurra o DOCUMENTO para o lado: a página inteira
-    # passa a andar na horizontal e o hero sai da tela junto. Em inglês ela
-    # cabia por sorte — as outras quatro línguas escrevem mais longo.
-    tabela = (
-        '<div class="cmpEnvolve">'
-        '<table class="cmpCurta">'
-        f'<caption class="soLeitor">{rot["cmpCaption"]}</caption>'
-        '<thead><tr>'
-        f'<th scope="col">{rot["cmpResultado"]}</th>'
-        '<th scope="col">Free</th><th scope="col">Personal</th><th scope="col">Team</th>'
-        '</tr></thead><tbody>' + "".join(linhas) + '</tbody></table></div>')
-    tabela = tabela.replace("__SIM__", rot["sim"]).replace("__NAO__", rot["nao"])
-
-    # O preço solto também sai daqui, e não escrito dentro de cada corpo: a
-    # calculadora compara o custo estimado com a mensalidade do plano, e um
-    # número de plano digitado à mão no HTML alemão é a forma mais barata de a
-    # página passar a mentir sobre o próprio preço.
-    # O NÚMERO SAI DO PREÇO, e não de uma segunda tabela.
-    #
-    # Eram duas: `PRECO` (o texto que aparece — "R$ 149") e `NUM` (o número que
-    # a calculadora usa). Hoje elas batem. Quem subir o preço vai editar `PRECO`,
-    # porque é ela que aparece na página — e a calculadora continuaria comparando
-    # com o preço velho, em silêncio, que é o jeito mais barato de uma página
-    # passar a mentir sobre o próprio preço.
-    #
-    # A separação de milhar é o motivo de `PRECO` ser texto ("R$ 1.047"), e é
-    # justamente ela que impede um `float()` ingênuo: os dígitos são extraídos e
-    # os separadores descartados.
-    def _num(txt: str) -> int:
-        digitos = re.sub(r"[^\d]", "", txt)
-        return int(digitos) if digitos else 0
-
-    NUM = {plano: {moeda: _num(txt) for moeda, txt in por_moeda.items()}
-           for plano, por_moeda in PRECO.items()}
-    return {"cartoes": f'<div class="plans tres">{"".join(cartoes)}</div>',
-            "comparacao": tabela,
-            "precoPersonal": PRECO["personal"][m],
-            "precoTeam": PRECO["team"][m],
-            "precoTeamMin": PRECO["teamMin"][m],
-            "personalNum": str(NUM["personal"][m]),
-            "teamNum": str(NUM["team"][m]),
-            "teamMinimo": str(TEAM_MINIMO),
-            "minimoFrase": rot["minimo"]}
+# A PÁGINA DE PREÇOS, EM DADOS, saiu no Build 71 — o produto ficou grátis.
+# Moravam aqui os cartões dos planos (`CARTOES`), a comparação curta, os
+# preços em três moedas, a figura da "rodada" paga e a leitura de
+# `lib/stripe.ts`. Com eles saiu o `AUDITORIA-PENDENTE.md`, que cobrava uma
+# régua para cada promessa de cartão: sem cartão, não há promessa a cobrar.
 
 
 def sobras_que_tapam_o_site(root: pathlib.Path) -> list[str]:
@@ -2364,20 +1517,19 @@ def main() -> int:
     # da tabela. O cabeçalho da ferramenta precisa dela: "Como funciona" é uma
     # âncora dentro da home, e sem esta linha o link nascia vazio.
     rotas_app["home"] = {L: ("/" if L == "pt" else "/" + L) for L in IDIOMAS}
-    rotas_app["conta"] = dict(CAMINHO_CONTA)
     src = src.replace("__ROTAS_SITE__", json.dumps(rotas_app, ensure_ascii=False))
 
     # Os rótulos do rodapé saem do dicionário do SITE, para as duas telas
     # dizerem as mesmas palavras. Só as chaves usadas — mandar o dicionário
     # inteiro seriam dezenas de KB dentro de um arquivo que já tem 900.
-    # `navHow`, `navComp` e `navPrice` entraram aqui pelo mesmo motivo que o
+    # `navHow` e `navComp` entraram aqui pelo mesmo motivo que o
     # rodapé entrou: o CABEÇALHO da ferramenta também passou a ser o do site, e
     # as palavras dele não podem ser uma segunda tradução escrita à mão dentro
     # do template. Um menu que diz "Preços" no site e "Planos" na ferramenta é
     # a mesma marca falando duas línguas.
     CHAVES_RODAPE = ["fColProduto", "fColCasos", "fColConfianca",
                      "navHow", "navComp",
-                     "navApp", "navPrice", "fAjuda", "fBlog", "fComp", "fConta",
+                     "navApp", "fAjuda", "fBlog", "fComp",
                      "casoEvT", "casoInT", "casoAtaT", "casoUxT", "casoIaT",
                      "fSec", "fVerif", "fPriv", "fTerms", "fPsr"]
     i18n_site = json.loads((ROOT / "src" / "i18n-site.json").read_text(encoding="utf-8"))
@@ -2580,7 +1732,6 @@ def main() -> int:
         print(f"ERRO: {e}", file=sys.stderr)
         return 1
 
-    escrever_auditoria(ROOT)
     return build_site(ROOT) or 0
 
 

@@ -3,7 +3,8 @@
     <h1 style="font-size:32px">Base de conhecimento</h1>
     <p class="updated">Base de conhecimento do {{marca}}, por tema. Cada bloco abre com um clique.<br>
     Se o que você procura não estiver aqui, use o botão <b>Falar com a gente</b> no canto da
-    ferramenta — problema, ideia ou elogio chegam no mesmo lugar.</p>
+    ferramenta, que abre o seu programa de e-mail, ou escreva direto para
+    <a href="mailto:suporte@walkstamp.com">suporte@walkstamp.com</a> — problema, ideia ou elogio chegam no mesmo lugar.</p>
 
     <p class="lockHint" style="margin:0 0 30px">
     <b>Antes de tudo:</b> o {{marca}} roda inteiro na aba do seu navegador. O vídeo não sobe para
@@ -46,9 +47,9 @@
       <details open>
         <summary>Preciso instalar alguma coisa? Criar cadastro?</summary>
         <p>Não e não. Abra <a href="{{app}}">a ferramenta</a> e use. Não há instalação, extensão nem
-        cadastro. Existe uma versão em <b>arquivo único</b> que você baixa e abre sem internet
-        nenhuma, para quando a rede da empresa bloqueia tudo — ela está na página de
-        <a href="{{precos}}">preços</a>.</p>
+        cadastro. Existe uma versão em <b>arquivo único</b> que abre sem internet
+        nenhuma, para quando a rede da empresa bloqueia tudo — ela é enviada por e-mail a quem pede, pelo
+        endereço que está em <a href="{{seguranca}}">Segurança da informação</a>.</p>
       </details>
       <details open>
         <summary>Qual navegador funciona</summary>
@@ -273,15 +274,16 @@
         <summary>Formato: layout e papel</summary>
         <p>O <b>layout</b> decide como as telas se distribuem — automático, uma por página com a fala
         do trecho, ou grade compacta de seis por página. O <b>papel</b> é A4 ou Carta. Os dois ficam
-        na seção <b>Formato</b>, antes dos botões que produzem o arquivo. Numa conta paga, os dois
-        podem vir configurados da conta, e a tela diz de onde vieram — trocar ali vale só para aquele
+        na seção <b>Formato</b>, antes dos botões que produzem o arquivo. Os dois também podem vir
+        de um <b>modelo</b> salvo, junto com o cenário, o sistema e o ambiente — e trocar ali vale só para aquele
         documento.</p>
       </details>
       <details open>
         <summary>Identificação: caso, sistema, chamado, resultado</summary>
         <p>São os campos que transformam um monte de telas numa evidência: de que caso de teste é, em
-        que sistema, qual o chamado, e se passou ou não. Eles são gratuitos. O que é pago é eles
-        chegarem <b>preenchidos</b> a partir da configuração da sua conta.</p>
+        que sistema, qual o chamado, e se passou ou não. Eles podem
+        chegar <b>preenchidos</b> por um <a href="{{link}}">link pré-configurado</a>, que abre a ferramenta com
+        o caso, o chamado e o sistema já no lugar.</p>
       </details>
       <details open>
         <summary>Impressão digital e numeração</summary>
@@ -323,42 +325,41 @@
     </div>
 
     <!-- ================================================================= -->
-    <h2>8 · Conta, planos e time</h2>
+    <h2>8 · Padrões, modelos e equipe</h2>
     <div class="faq">
       <details open>
-        <summary>O que é pago, afinal</summary>
-        <p>A ferramenta no navegador é gratuita e continua sendo. O que o plano paga é a <b>conta</b>:
-        a sua marca no documento, os padrões que chegam preenchidos (empresa, ambiente, rótulo,
-        layout, papel), os modelos de documento do time, o roteiro de casos e o vocabulário. A lista
-        completa e os preços estão em <a href="{{precos}}">preços</a>.</p>
+        <summary>É tudo gratuito mesmo?</summary>
+        <p>É, para todo mundo, e sem conta nem cadastro. A marca do cliente no documento, a classificação,
+        o campo <b>emitido por</b>, o resumo de telas com erro, os modelos salvos, o arquivo de padrões da
+        equipe e a lista de termos do seu sistema fazem parte da mesma ferramenta, e o que você configura
+        fica guardado no seu navegador.</p>
       </details>
       <details open>
-        <summary>Como a licença funciona sem servidor de licença</summary>
-        <p>A chave é conferida <b>dentro</b> do seu navegador. Não há consulta a servidor nenhum: ela
-        funciona sem internet, e nós não ficamos sabendo quando ou onde ela é usada. O caminho normal
-        é entrar pelo link que chega por e-mail; colar a chave à mão continua existindo para quem a
-        recebeu por outro caminho.</p>
+        <summary>Os padrões da equipe, num arquivo</summary>
+        <p>A marca do cliente (nome e logotipo), quem emite, a classificação e os modelos salvos cabem num
+        <b>arquivo de padrões</b>. Uma pessoa exporta e manda para o time pelo caminho que vocês já usam;
+        cada um importa. Importar soma os modelos aos que a pessoa já tinha, em vez de apagar os dela, e o
+        arquivo não passa por servidor nosso.</p>
       </details>
       <details open>
-        <summary>Os padrões da conta chegam, mas não mandam</summary>
-        <p>O que a empresa configura na conta chega preenchido na ferramenta — e para de valer no
-        instante em que a pessoa que está com o caso na mão troca alguma coisa. Quem sabe que
+        <summary>Os padrões chegam, mas não mandam</summary>
+        <p>O que vem de um modelo ou do arquivo de padrões chega preenchido na ferramenta — e para de valer
+        no instante em que a pessoa que está com o caso na mão troca alguma coisa. Quem sabe que
         <i>este</i> documento precisa de outro layout é quem está olhando para ele. Padrão é padrão,
         não é camisa de força.</p>
       </details>
       <details open>
-        <summary>Roteiro de casos</summary>
-        <p>Em <b>qualquer plano pago</b> — Personal ou Time — dá para subir uma planilha de casos de
-        teste e distribuir os links: cada
-        pessoa recebe um endereço que abre a ferramenta já preenchida com o caso dela, e ao terminar
-        marca como feito. A tela de controle mostra o que foi feito, por quem e quando — com o recibo
-        do documento gerado.</p>
+        <summary>Mandar um caso para outra pessoa executar</summary>
+        <p>A página do <a href="{{link}}">link pré-configurado</a> monta um endereço que abre a ferramenta
+        com o caso, o chamado e o sistema já preenchidos. Cole no caso de teste, no chamado ou numa
+        planilha: quem abrir grava, gera o documento e anexa onde vocês já anexam. O que essa pessoa
+        grava fica no navegador dela.</p>
       </details>
       <details open>
         <summary>Quanto tempo vocês guardam as coisas</summary>
-        <p>Os prazos estão escritos na <a href="{{privacidade}}">política de privacidade</a>, e há
-        código atrás deles: uma rotina diária apaga o que passou do prazo, arquivo por arquivo. As
-        faturas ficam pelo prazo de guarda fiscal — isso está dito lá, com o motivo.</p>
+        <p>O que você configura na ferramenta — marca, modelos, lista de termos — fica no seu navegador, e
+        não com a gente; limpar os dados do site no navegador apaga tudo isso. O que mais existe, e por
+        quanto tempo, está na <a href="{{privacidade}}">política de privacidade</a>.</p>
       </details>
     </div>
 
@@ -394,10 +395,11 @@
       </details>
       <details open>
         <summary>Encontrei um erro, ou queria que existisse alguma coisa</summary>
-        <p>O botão <b>Falar com a gente</b>, no canto da ferramenta, manda problema, ideia ou elogio.
-        Junto vai um relatório técnico do seu navegador — versões, recursos disponíveis, o que a
-        gravação registrou — e você <b>vê o relatório antes de mandar</b>. Nenhum vídeo, imagem ou
-        transcrição vai nele.</p>
+        <p>O botão <b>Falar com a gente</b>, no canto da ferramenta, abre o seu programa de e-mail já
+        endereçado a suporte@walkstamp.com, com o problema, a ideia ou o elogio que você escreveu. Junto pode
+        ir um relatório técnico do seu navegador — versões, recursos disponíveis, o que a gravação
+        registrou — e você <b>vê tudo antes de mandar</b>, porque quem manda é você, do seu e-mail. Nenhum
+        vídeo, imagem ou transcrição vai nele.</p>
       </details>
     </div>
 

@@ -1375,7 +1375,6 @@
          A ligação entre as duas é o LINK: a tela de controle entrega um
          endereço com caso, sistema e chamado já dentro (o `lerDaUrl()` abaixo é
          quem os recebe), e o `?rot=` avisa que há um caso esperando a volta. -->
-    <div class="recup hide" id="rotVindo"></div>
 
 
     <!-- Dois caminhos, e não uma lista de botões: gravar a tela agora é o que a
@@ -2891,7 +2890,6 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     <!-- O caminho de volta para a tela de controle do roteiro. Nasce escondido
          e só aparece depois que um documento existe: um "marcar como feito" ao
          lado de um caso não executado é um convite para mentir na planilha. -->
-    <div class="row hide" id="rotVolta" style="margin-top:10px"></div>
 
     <!-- O convite, depois de o documento sair.
          Este produto não tem cadastro, não tem anúncio e não rastreia ninguém —
@@ -3759,10 +3757,6 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       mdSalvoNao:'Não consegui salvar o modelo agora.',
       /* O que sobrou do roteiro nesta página: um aviso de que a pessoa veio de
          um caso, e o link que leva a marca de volta para a tela de controle. */
-      rotVindo:'Você veio do caso <b>{0}</b>. Grave a tela e baixe o documento — depois um botão aparece aqui para marcar o caso como feito.',
-      rotVoltaBtn:'Marcar este caso como feito',
-      rotVoltaNota:'Leva o recibo junto: a ficha do caso e a impressão dos {0} quadros. Nenhuma imagem vai — para guardar o arquivo completo, baixe o JSON e anexe lá.',
-      rotVoltaNotaSem:'Leva o nome do arquivo e a impressão do conjunto. Nenhuma imagem vai.',
       revJaAberta:'A revisão já está aberta aqui embaixo.',
       /* O que aparece onde os botões de saída estão. O primeiro é o motivo de
          eles estarem desligados — e diz onde os quadros nascem, porque botão
@@ -4401,10 +4395,6 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       mdSalvarNome:'Template name (for example: UAT evidence)',
       mdSalvo:'Template "{0}" saved.',
       mdSalvoNao:'I could not save the template right now.',
-      rotVindo:'You came from case <b>{0}</b>. Record the screen and download the document — a button then appears here to mark the case as done.',
-      rotVoltaBtn:'Mark this case as done',
-      rotVoltaNota:'It carries the receipt: the case record and the fingerprint of all {0} frames. No image goes with it — to store the complete file, download the JSON and attach it there.',
-      rotVoltaNotaSem:'It carries the file name and the fingerprint of the set. No image goes with it.',
       revJaAberta:'The review is already open just below.',
       saidaSemQuadros:'There is no frame to build from yet. Frames come out of step 2 — extract them from the video, or record the screen, which extracts as it goes.',
       saidaPronta:'{0} frames ready. Pick a format — you can download more than one.',
@@ -5039,10 +5029,6 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       mdSalvarNome:'Nombre de la plantilla (por ejemplo: Evidencia de homologación)',
       mdSalvo:'Plantilla "{0}" guardada.',
       mdSalvoNao:'No pude guardar la plantilla ahora.',
-      rotVindo:'Vienes del caso <b>{0}</b>. Graba la pantalla y descarga el documento — después aparece aquí un botón para marcar el caso como hecho.',
-      rotVoltaBtn:'Marcar este caso como hecho',
-      rotVoltaNota:'Lleva el recibo: la ficha del caso y la huella de los {0} fotogramas. Ninguna imagen va — para guardar el archivo completo, descarga el JSON y adjúntalo allí.',
-      rotVoltaNotaSem:'Lleva el nombre del archivo y la huella del conjunto. Ninguna imagen va.',
       revJaAberta:'La revisión ya está abierta aquí abajo.',
       saidaSemQuadros:'Todavía no hay ningún fotograma para generar. Los fotogramas salen en la etapa 2 — extráelos del vídeo, o graba la pantalla, que ya extrae mientras graba.',
       saidaPronta:'{0} fotogramas listos. Elige un formato — puedes descargar más de uno.',
@@ -5678,10 +5664,6 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       mdSalvoNao:'Die Vorlage konnte gerade nicht gespeichert werden.',
       /* O que sobrou do roteiro nesta página: um aviso de que a pessoa veio de
          um caso, e o link que leva a marca de volta para a tela de controle. */
-      rotVindo:'Sie kommen aus dem Fall <b>{0}</b>. Nehmen Sie den Bildschirm auf und laden Sie das Dokument herunter — danach erscheint hier eine Schaltfläche, um den Fall als erledigt zu markieren.',
-      rotVoltaBtn:'Diesen Fall als erledigt markieren',
-      rotVoltaNota:'Der Beleg geht mit: die Falldaten und die Prüfsumme der {0} Screenshots. Es geht kein Bild mit — um die vollständige Datei abzulegen, laden Sie das JSON herunter und hängen Sie es dort an.',
-      rotVoltaNotaSem:'Der Dateiname und die Prüfsumme des Satzes gehen mit. Es geht kein Bild mit.',
       revJaAberta:'Die Prüfung ist hier unten bereits geöffnet.',
       /* O que aparece onde os botões de saída estão. O primeiro é o motivo de
          eles estarem desligados — e diz onde os quadros nascem, porque botão
@@ -6321,10 +6303,6 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
       mdSalvoNao:'Impossible d’enregistrer le modèle pour le moment.',
       /* O que sobrou do roteiro nesta página: um aviso de que a pessoa veio de
          um caso, e o link que leva a marca de volta para a tela de controle. */
-      rotVindo:'Vous venez du cas <b>{0}</b>. Enregistrez l’écran et téléchargez le document — un bouton apparaîtra ensuite ici pour marquer le cas comme fait.',
-      rotVoltaBtn:'Marquer ce cas comme fait',
-      rotVoltaNota:'Le reçu part avec : la fiche du cas et l’empreinte des {0} captures. Aucune image ne part — pour conserver le fichier complet, téléchargez le JSON et joignez-le là-bas.',
-      rotVoltaNotaSem:'Le nom du fichier et l’empreinte de l’ensemble partent avec. Aucune image ne part.',
       revJaAberta:'La révision est déjà ouverte juste en dessous.',
       /* O que aparece onde os botões de saída estão. O primeiro é o motivo de
          eles estarem desligados — e diz onde os quadros nascem, porque botão
@@ -6792,9 +6770,6 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     b.title = t(autoTravado + 'Dica');
   }
 
-  /* Os três endereços da área do cliente. Traduzidos como o resto do site —
-     quem lê em espanhol não deveria ter que reconhecer a palavra "conta". */
-  /* A área do cliente fala os cinco, como o resto. */
   /* ---- o convite para contar a alguém ----
 
      Sem cadastro, sem anúncio e sem rastrear ninguém, o único canal que este
@@ -6934,20 +6909,21 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      que se escreve a mao a cada pagina nova e uma tabela que fica para tras:
      era exatamente o que estava acontecendo, com o resto do site apontando
      para o portugues em qualquer idioma. */
-  const ROTAS_SITE = {"precos": {"pt": "/precos", "en": "/en/precos", "es": "/es/precos", "de": "/de/preise", "fr": "/fr/tarifs"}, "privacidade": {"pt": "/privacidade", "en": "/en/privacidade", "es": "/es/privacidade", "de": "/de/privacidade", "fr": "/fr/privacidade"}, "termos": {"pt": "/termos", "en": "/en/termos", "es": "/es/termos", "de": "/de/termos", "fr": "/fr/termos"}, "seguranca": {"pt": "/seguranca", "en": "/en/security", "es": "/es/seguridad", "de": "/de/informationssicherheit", "fr": "/fr/securite-de-l-information"}, "verificar": {"pt": "/verificar", "en": "/en/verify", "es": "/es/verificar", "de": "/de/pruefen", "fr": "/fr/verifier"}, "comparativo": {"pt": "/comparativo", "en": "/en/compare", "es": "/es/comparativa", "de": "/de/vergleich", "fr": "/fr/comparatif"}, "link": {"pt": "/link", "en": "/en/link", "es": "/es/link", "de": "/de/link", "fr": "/fr/link"}, "ajuda": {"pt": "/ajuda", "en": "/en/help", "es": "/es/ayuda", "de": "/de/hilfe", "fr": "/fr/aide"}, "casoEv": {"pt": "/evidencia-de-teste", "en": "/en/test-evidence", "es": "/es/evidencia-de-prueba", "de": "/de/testnachweis", "fr": "/fr/preuve-de-test"}, "casoIn": {"pt": "/instrucao-de-trabalho", "en": "/en/work-instruction", "es": "/es/instruccion-de-trabajo", "de": "/de/arbeitsanweisung", "fr": "/fr/mode-operatoire"}, "casoAta": {"pt": "/ata-de-reuniao", "en": "/en/meeting-minutes", "es": "/es/acta-de-reunion", "de": "/de/besprechungsprotokoll", "fr": "/fr/compte-rendu-de-reunion"}, "casoIa": {"pt": "/contexto-para-ia", "en": "/en/context-for-ai", "es": "/es/contexto-para-ia", "de": "/de/kontext-fuer-ki", "fr": "/fr/contexte-pour-ia"}, "casoUx": {"pt": "/teste-de-usabilidade", "en": "/en/usability-test", "es": "/es/prueba-de-usabilidad", "de": "/de/usability-test", "fr": "/fr/test-d-utilisabilite"}, "steps": {"pt": "/substituto-do-steps-recorder", "en": "/en/steps-recorder-replacement", "es": "/es/alternativa-al-steps-recorder", "de": "/de/steps-recorder-ersatz", "fr": "/fr/alternative-au-steps-recorder"}, "blog": {"pt": "/blog", "en": "/en/blog", "es": "/es/blog", "de": "/de/blog", "fr": "/fr/blog"}, "home": {"pt": "/", "en": "/en", "es": "/es", "de": "/de", "fr": "/fr"}, "conta": {"pt": "/conta", "en": "/en/account", "es": "/es/cuenta", "de": "/de/konto", "fr": "/fr/compte"}};
+  const ROTAS_SITE = {"privacidade": {"pt": "/privacidade", "en": "/en/privacidade", "es": "/es/privacidade", "de": "/de/privacidade", "fr": "/fr/privacidade"}, "termos": {"pt": "/termos", "en": "/en/termos", "es": "/es/termos", "de": "/de/termos", "fr": "/fr/termos"}, "seguranca": {"pt": "/seguranca", "en": "/en/security", "es": "/es/seguridad", "de": "/de/informationssicherheit", "fr": "/fr/securite-de-l-information"}, "verificar": {"pt": "/verificar", "en": "/en/verify", "es": "/es/verificar", "de": "/de/pruefen", "fr": "/fr/verifier"}, "comparativo": {"pt": "/comparativo", "en": "/en/compare", "es": "/es/comparativa", "de": "/de/vergleich", "fr": "/fr/comparatif"}, "link": {"pt": "/link", "en": "/en/link", "es": "/es/link", "de": "/de/link", "fr": "/fr/link"}, "ajuda": {"pt": "/ajuda", "en": "/en/help", "es": "/es/ayuda", "de": "/de/hilfe", "fr": "/fr/aide"}, "casoEv": {"pt": "/evidencia-de-teste", "en": "/en/test-evidence", "es": "/es/evidencia-de-prueba", "de": "/de/testnachweis", "fr": "/fr/preuve-de-test"}, "casoIn": {"pt": "/instrucao-de-trabalho", "en": "/en/work-instruction", "es": "/es/instruccion-de-trabajo", "de": "/de/arbeitsanweisung", "fr": "/fr/mode-operatoire"}, "casoAta": {"pt": "/ata-de-reuniao", "en": "/en/meeting-minutes", "es": "/es/acta-de-reunion", "de": "/de/besprechungsprotokoll", "fr": "/fr/compte-rendu-de-reunion"}, "casoIa": {"pt": "/contexto-para-ia", "en": "/en/context-for-ai", "es": "/es/contexto-para-ia", "de": "/de/kontext-fuer-ki", "fr": "/fr/contexte-pour-ia"}, "casoUx": {"pt": "/teste-de-usabilidade", "en": "/en/usability-test", "es": "/es/prueba-de-usabilidad", "de": "/de/usability-test", "fr": "/fr/test-d-utilisabilite"}, "steps": {"pt": "/substituto-do-steps-recorder", "en": "/en/steps-recorder-replacement", "es": "/es/alternativa-al-steps-recorder", "de": "/de/steps-recorder-ersatz", "fr": "/fr/alternative-au-steps-recorder"}, "blog": {"pt": "/blog", "en": "/en/blog", "es": "/es/blog", "de": "/de/blog", "fr": "/fr/blog"}, "home": {"pt": "/", "en": "/en", "es": "/es", "de": "/de", "fr": "/fr"}};
   /* Os rotulos do rodape, tambem do `build.py`, do dicionario do SITE: as duas
      telas dizem as mesmas palavras porque leem a mesma fonte. */
-  const RODAPE_TXT = {"pt": {"fColProduto": "Produto", "fColCasos": "Casos de uso", "fColConfianca": "Confiança", "navHow": "Como funciona", "navComp": "Comparativo", "navApp": "Abrir a ferramenta", "navPrice": "Preços", "fAjuda": "Base de conhecimento", "fBlog": "Blog", "fComp": "Comparativo", "fConta": "Sua conta", "casoEvT": "Evidência de teste", "casoInT": "Instrução de trabalho", "casoAtaT": "Ata de reunião", "casoUxT": "Teste de usabilidade", "casoIaT": "Contexto para IA", "fSec": "Segurança", "fVerif": "Conferir evidência", "fPriv": "Privacidade", "fTerms": "Termos", "fPsr": "Substituto do Steps Recorder"}, "en": {"fColProduto": "Product", "fColCasos": "Use cases", "fColConfianca": "Trust", "navHow": "How it works", "navComp": "Compare", "navApp": "Open the tool", "navPrice": "Pricing", "fAjuda": "Knowledge base", "fBlog": "Blog", "fComp": "Compare", "fConta": "Your account", "casoEvT": "Test evidence", "casoInT": "Work instruction", "casoAtaT": "Meeting minutes", "casoUxT": "Usability test", "casoIaT": "Context for AI", "fSec": "Security", "fVerif": "Check evidence", "fPriv": "Privacy", "fTerms": "Terms", "fPsr": "Steps Recorder replacement"}, "es": {"fColProduto": "Producto", "fColCasos": "Casos de uso", "fColConfianca": "Confianza", "navHow": "Cómo funciona", "navComp": "Comparativa", "navApp": "Abrir la herramienta", "navPrice": "Precios", "fAjuda": "Base de conocimiento", "fBlog": "Blog", "fComp": "Comparativa", "fConta": "Tu cuenta", "casoEvT": "Evidencia de prueba", "casoInT": "Instrucción de trabajo", "casoAtaT": "Acta de reunión", "casoUxT": "Prueba de usabilidad", "casoIaT": "Contexto para IA", "fSec": "Seguridad", "fVerif": "Comprobar evidencia", "fPriv": "Privacidad", "fTerms": "Términos", "fPsr": "Alternativa al Steps Recorder"}, "de": {"fColProduto": "Produkt", "fColCasos": "Anwendungsfälle", "fColConfianca": "Vertrauen", "navHow": "So funktioniert es", "navComp": "Vergleich", "navApp": "Tool öffnen", "navPrice": "Preise", "fAjuda": "Wissensdatenbank", "fBlog": "Blog", "fComp": "Vergleich", "fConta": "Ihr Konto", "casoEvT": "Testnachweis", "casoInT": "Arbeitsanweisung", "casoAtaT": "Besprechungsprotokoll", "casoUxT": "Usability-Test", "casoIaT": "Kontext für KI", "fSec": "Sicherheit", "fVerif": "Nachweis prüfen", "fPriv": "Datenschutz", "fTerms": "Nutzungsbedingungen", "fPsr": "Ersatz für Steps Recorder"}, "fr": {"fColProduto": "Produit", "fColCasos": "Cas d’usage", "fColConfianca": "Confiance", "navHow": "Comment ça marche", "navComp": "Comparatif", "navApp": "Ouvrir l’outil", "navPrice": "Tarifs", "fAjuda": "Base de connaissances", "fBlog": "Blog", "fComp": "Comparatif", "fConta": "Votre compte", "casoEvT": "Preuve de test", "casoInT": "Mode opératoire", "casoAtaT": "Compte rendu de réunion", "casoUxT": "Test d’utilisabilité", "casoIaT": "Contexte pour l’IA", "fSec": "Sécurité", "fVerif": "Vérifier une preuve", "fPriv": "Confidentialité", "fTerms": "Conditions d’utilisation", "fPsr": "Remplaçant de Steps Recorder"}};
+  const RODAPE_TXT = {"pt": {"fColProduto": "Produto", "fColCasos": "Casos de uso", "fColConfianca": "Confiança", "navHow": "Como funciona", "navComp": "Comparativo", "navApp": "Abrir a ferramenta", "fAjuda": "Base de conhecimento", "fBlog": "Blog", "fComp": "Comparativo", "casoEvT": "Evidência de teste", "casoInT": "Instrução de trabalho", "casoAtaT": "Ata de reunião", "casoUxT": "Teste de usabilidade", "casoIaT": "Contexto para IA", "fSec": "Segurança", "fVerif": "Conferir evidência", "fPriv": "Privacidade", "fTerms": "Termos", "fPsr": "Substituto do Steps Recorder"}, "en": {"fColProduto": "Product", "fColCasos": "Use cases", "fColConfianca": "Trust", "navHow": "How it works", "navComp": "Compare", "navApp": "Open the tool", "fAjuda": "Knowledge base", "fBlog": "Blog", "fComp": "Compare", "casoEvT": "Test evidence", "casoInT": "Work instruction", "casoAtaT": "Meeting minutes", "casoUxT": "Usability test", "casoIaT": "Context for AI", "fSec": "Security", "fVerif": "Check evidence", "fPriv": "Privacy", "fTerms": "Terms", "fPsr": "Steps Recorder replacement"}, "es": {"fColProduto": "Producto", "fColCasos": "Casos de uso", "fColConfianca": "Confianza", "navHow": "Cómo funciona", "navComp": "Comparativa", "navApp": "Abrir la herramienta", "fAjuda": "Base de conocimiento", "fBlog": "Blog", "fComp": "Comparativa", "casoEvT": "Evidencia de prueba", "casoInT": "Instrucción de trabajo", "casoAtaT": "Acta de reunión", "casoUxT": "Prueba de usabilidad", "casoIaT": "Contexto para IA", "fSec": "Seguridad", "fVerif": "Comprobar evidencia", "fPriv": "Privacidad", "fTerms": "Términos", "fPsr": "Alternativa al Steps Recorder"}, "de": {"fColProduto": "Produkt", "fColCasos": "Anwendungsfälle", "fColConfianca": "Vertrauen", "navHow": "So funktioniert es", "navComp": "Vergleich", "navApp": "Tool öffnen", "fAjuda": "Wissensdatenbank", "fBlog": "Blog", "fComp": "Vergleich", "casoEvT": "Testnachweis", "casoInT": "Arbeitsanweisung", "casoAtaT": "Besprechungsprotokoll", "casoUxT": "Usability-Test", "casoIaT": "Kontext für KI", "fSec": "Sicherheit", "fVerif": "Nachweis prüfen", "fPriv": "Datenschutz", "fTerms": "Nutzungsbedingungen", "fPsr": "Ersatz für Steps Recorder"}, "fr": {"fColProduto": "Produit", "fColCasos": "Cas d’usage", "fColConfianca": "Confiance", "navHow": "Comment ça marche", "navComp": "Comparatif", "navApp": "Ouvrir l’outil", "fAjuda": "Base de connaissances", "fBlog": "Blog", "fComp": "Comparatif", "casoEvT": "Preuve de test", "casoInT": "Mode opératoire", "casoAtaT": "Compte rendu de réunion", "casoUxT": "Test d’utilisabilité", "casoIaT": "Contexte pour l’IA", "fSec": "Sécurité", "fVerif": "Vérifier une preuve", "fPriv": "Confidentialité", "fTerms": "Conditions d’utilisation", "fPsr": "Remplaçant de Steps Recorder"}};
 
 
   /* O rodape, montado a cada troca de idioma.
    *
    * As tres colunas sao as MESMAS do site, na mesma ordem e com os mesmos
-   * rotulos — os dois leem do mesmo dicionario. `app` e `conta` sao especiais:
-   * um e esta propria pagina, o outro tem endereco proprio por idioma. */
+   * rotulos — os dois leem do mesmo dicionario. `app` e especial: e esta
+   * propria pagina. "Precos" e "Sua conta" sairam no Build 71, com o que
+   * eles abriam. */
   const RODAPE_COLS = [
-    ['fColProduto',   [['app', 'navApp'], ['precos', 'navPrice'], ['ajuda', 'fAjuda'],
-                       ['blog', 'fBlog'], ['comparativo', 'fComp'], ['conta', 'fConta']]],
+    ['fColProduto',   [['app', 'navApp'], ['ajuda', 'fAjuda'],
+                       ['blog', 'fBlog'], ['comparativo', 'fComp']]],
     ['fColCasos',     [['casoEv', 'casoEvT'], ['casoIn', 'casoInT'], ['casoAta', 'casoAtaT'],
                        ['casoUx', 'casoUxT'], ['casoIa', 'casoIaT']]],
     ['fColConfianca', [['seguranca', 'fSec'], ['verificar', 'fVerif'], ['privacidade', 'fPriv'],
@@ -9393,7 +9369,7 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
      depois, e não tem como se atualizar sozinho. Sem carimbo, "estou com um
      problema no offline" é uma conversa sem chão — ninguém sabe de qual build
      se fala nem se o defeito já foi consertado. */
-  const VERSAO = '2026.11.04-19';
+  const VERSAO = '2026.11.04-20';
   window.__versao = () => VERSAO;
 
   const PIP_CSS = `
@@ -22748,144 +22724,11 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
   }
 
 
-  /* ================= a volta do roteiro de casos =======================
-
-     O roteiro mora em /conta/roteiro, no servidor, e não aqui. O que sobrou
-     nesta página é o outro lado do link: quando o endereço traz `?rot=<caso>`,
-     a pessoa veio da tela de controle para executar um caso — e, depois de
-     baixar o documento, ganha um link de volta que marca aquele caso como
-     feito, levando junto o nome do arquivo e a impressão das telas.
-
-     Repare no que NÃO viaja: nada é enviado por esta página. O link é um
-     endereço que a pessoa clica, e quem grava é a conta dela, com a sessão
-     dela, do outro lado. Esta página continua sem falar com servidor nenhum
-     para produzir documento. */
-  const casoDoRoteiro = (new URLSearchParams(location.search).get('rot') || '').replace(/\D/g, '');
-
-  /* O aviso de chegada. Ele é pintado aqui, e não dentro do `lerDaUrl()`, por
-     um motivo bobo e real: `lerDaUrl()` roda no início, antes desta linha
-     existir, e ler uma `const` antes da hora derruba a página inteira. */
-  if (casoDoRoteiro && $('rotVindo')) {
-    const nomeDoCaso = (new URLSearchParams(location.search).get('caso') || '').slice(0, 120)
-      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-    $('rotVindo').innerHTML = '<p class="status" style="margin:0">' +
-      t('rotVindo', nomeDoCaso || '—') + '</p>';
-    $('rotVindo').classList.remove('hide');
-  }
-
-  /** A impressão do documento: o SHA-256 dos hashes das imagens, em ordem.
-   *  Não é o hash do arquivo baixado — é o das telas que ele contém, que é o
-   *  que a página de conferência sabe recalcular. */
-  async function impressaoDoDocumento(){
-    const kept = frames.filter(f => f.keep);
-    await calcularHashes(kept, true);
-    const juntos = kept.map(f => f.hash || '').join('');
-    if (!juntos) return '';
-    try {
-      const d = await crypto.subtle.digest('SHA-256', bytesDe(juntos));
-      return [...new Uint8Array(d)].map(b2 => pad2(b2.toString(16))).join('').slice(0, 16);
-    } catch (e) { return ''; }
-  }
-
-  /* ---- o recibo do caso -------------------------------------------------
-   *
-   *  O que é: a ficha do que foi executado, com a impressão de CADA quadro em
-   *  ordem. O que NÃO é: o documento. Não há imagem aqui dentro, nem
-   *  transcrição, nem o texto dos passos — só os números que permitem, depois,
-   *  pegar um PDF e conferir se é aquele mesmo.
-   *
-   *  Ele viaja DENTRO do link da volta, comprimido. Poderia ser um arquivo a
-   *  mais para a pessoa baixar e anexar, e seria pior: são três gestos onde
-   *  cabe um, e o gesto que falta é sempre o que não acontece. Sessenta quadros
-   *  dão cerca de 2,5 KB de endereço, que qualquer navegador e qualquer
-   *  servidor carregam sem reclamar.
-   *
-   *  O `.json` COMPLETO da sessão — esse sim com os quadros dentro — continua
-   *  sendo um arquivo que só sai daqui se a pessoa clicar em baixar, e só chega
-   *  na conta se ela anexar de propósito, do outro lado. */
-  const TETO_RECIBO = 7000;   // caracteres de endereço; acima disso, sem hashes
-
-  /* Bytes -> base64 de endereço. O `b64url` que já existe nesta página faz o
-     caminho INVERSO (texto base64 -> bytes), para conferir licença. Dois nomes
-     iguais no mesmo escopo derrubam a página inteira antes da primeira linha
-     rodar — foi o que aconteceu, e o teste do recibo pegou. */
-  const bytesParaB64url = u8 => {
-    let b = '';
-    for (const x of u8) b += String.fromCharCode(x);
-    return btoa(b).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-  };
-
-  async function comprimir(txt){
-    /* `CompressionStream` é nativo desde 2023 nos três navegadores. Onde não
-       houver, o recibo vai sem compressão e o teto corta antes — é a diferença
-       entre um recibo menor e recibo nenhum. */
-    if (typeof CompressionStream !== 'function') return null;
-    try {
-      const fluxo = new Blob([bytesDe(txt)]).stream().pipeThrough(new CompressionStream('gzip'));
-      return new Uint8Array(await new Response(fluxo).arrayBuffer());
-    } catch (e) { return null; }
-  }
-
-  /** Monta o recibo. `semHashes` é a segunda tentativa, quando a primeira não
-   *  coube: melhor um recibo sem a lista de quadros — que ainda tem a impressão
-   *  do conjunto — do que nenhum. */
-  function montarRecibo(nomeArq, impressao, semHashes){
-    const d = evDados();
-    const kept = frames.filter(f => f.keep);
-    const r = {
-      g: 'Walkstamp', v: 1,
-      em: new Date().toISOString().slice(0, 19) + 'Z',
-      cen: ($('modelo') && $('modelo').value) || '',
-      idi: LANG,
-      caso: d.caso || '', sis: d.sistema || '', cha: d.chamado || '',
-      quem: d.quem || '', res: d.resultado || '', amb: d.ambiente || '',
-      ini: d.inicio != null ? new Date(d.inicio).toISOString().slice(0, 19) + 'Z' : '',
-      n: kept.length,
-      imp: impressao || '',
-      arq: (nomeArq || '').slice(0, 120),
-      fmt: ((nomeArq || '').match(/\.([a-z0-9]+)$/i) || ['', ''])[1].toLowerCase(),
-    };
-    for (const k of Object.keys(r)) if (r[k] === '' || r[k] == null) delete r[k];
-    if (semHashes) r.h_omitidos = kept.length;
-    else r.h = kept.map(f => f.hash || '');
-    return r;
-  }
-
-  /** O recibo pronto para viajar: comprimido e em base64 de endereço. Devolve
-   *  vazio se nem sem hashes couber — e aí o link vai sem ele, que é o que
-   *  acontecia antes deste bloco existir. */
-  async function reciboParaLink(nomeArq, impressao){
-    for (const semHashes of [false, true]) {
-      const txt = JSON.stringify(montarRecibo(nomeArq, impressao, semHashes));
-      const z = await comprimir(txt);
-      const cru = z ? bytesParaB64url(z) : '';
-      if (cru && cru.length <= TETO_RECIBO) return cru;
-    }
-    return '';
-  }
-
-  /** O link de volta para a tela de controle. Ele aparece SÓ depois que um
-   *  documento existe: antes disso não há o que marcar, e um botão de "feito"
-   *  ao lado de um caso não executado é um convite para mentir na planilha. */
-  async function oferecerVoltaDoRoteiro(nomeArq){
-    if (!casoDoRoteiro) return;
-    const caixa = $('rotVolta'); if (!caixa) return;
-    const p = new URLSearchParams();
-    p.set('marcar', casoDoRoteiro);
-    if (nomeArq) p.set('arq', nomeArq.slice(0, 120));
-    const imp = await impressaoDoDocumento();
-    if (imp) p.set('imp', imp);
-    const rec = await reciboParaLink(nomeArq, imp);
-    if (rec) p.set('rec', rec);
-    const base = (typeof CAMINHO_ROTEIRO === 'object' && CAMINHO_ROTEIRO[LANG]) || '/conta/roteiro';
-    caixa.innerHTML =
-      '<a class="btn sm" href="https://walkstamp.com' + base + '?' + p.toString() +
-      '" target="_blank" rel="noopener">' + esc(t('rotVoltaBtn')) + '</a>' +
-      '<span class="note" style="margin-left:10px">' +
-      esc(rec ? t('rotVoltaNota', frames.filter(f => f.keep).length) : t('rotVoltaNotaSem')) +
-      '</span>';
-    caixa.classList.remove('hide');
-  }
+  /* A VOLTA DO ROTEIRO DE CASOS saiu no Build 71. O roteiro morava em
+     /conta/roteiro, no servidor, e a conta saiu com o servidor: não há mais
+     tela do outro lado para marcar o caso como feito. Os campos que o link
+     preenche (caso, chamado, sistema, pré-condição, resultado esperado)
+     continuam valendo — quem monta esse link agora é a página /link. */
 
   /* ---- O QUE SAIU, GUARDADO ----
 
@@ -22920,7 +22763,6 @@ Com marcação de tempo, cada frame sai no PDF junto do que é dito naquele trec
     /* E, se a pessoa veio de um caso do roteiro, aparece o link de volta que
        marca esse caso como feito — com o nome do arquivo e a impressão das
        telas dentro. Quem grava é a conta dela, do outro lado do link. */
-    if (casoDoRoteiro) oferecerVoltaDoRoteiro(nome);
     saidaCrua = { blob, nome };
     entregar(blob, nome);
   }
@@ -25232,7 +25074,6 @@ ${relsSlide[i]}</Relationships>`) });
        fechava pelo seu próprio caminho principal, e sem erro nenhum: o
        documento saía, e o botão simplesmente não aparecia. */
     registrarSaida();
-    if (casoDoRoteiro) oferecerVoltaDoRoteiro(base + '.pdf');
     documentoSaiu('pdf');
     $('pdfStatus').innerHTML = `<span class="ok">${t('pdfDone')}</span>${t('pdfDone2', kept.length, page)}`;
     } catch (e) {

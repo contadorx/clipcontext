@@ -3,7 +3,8 @@
     <h1 style="font-size:32px">Base de conocimiento</h1>
     <p class="updated">Base de conocimiento de {{marca}}, por tema. Cada bloque se abre con un clic.<br>
     Si lo que buscas no está aquí, usa el botón <b>Hablar con nosotros</b> en la esquina de la
-    herramienta — problema, idea o elogio llegan al mismo sitio.</p>
+    herramienta, que abre tu programa de correo, o escribe directamente a
+    <a href="mailto:suporte@walkstamp.com">suporte@walkstamp.com</a> — problema, idea o elogio llegan al mismo sitio.</p>
 
     <p class="lockHint" style="margin:0 0 30px">
     <b>Antes de nada:</b> {{marca}} funciona entero en la pestaña de tu navegador. El vídeo no sube a
@@ -46,9 +47,9 @@
       <details open>
         <summary>¿Tengo que instalar algo? ¿Registrarme?</summary>
         <p>No y no. Abre <a href="{{app}}">la herramienta</a> y úsala. No hay instalación, ni extensión ni
-        registro. Existe una versión en <b>archivo único</b> que descargas y abres sin nada de internet,
-        para cuando la red de la empresa lo bloquea todo — está en la página de
-        <a href="{{precos}}">precios</a>.</p>
+        registro. Existe una versión en <b>archivo único</b> que se abre sin nada de internet,
+        para cuando la red de la empresa lo bloquea todo — se envía por correo a quien la pide, en la
+        dirección que está en <a href="{{seguranca}}">Seguridad de la información</a>.</p>
       </details>
       <details open>
         <summary>Qué navegador funciona</summary>
@@ -272,15 +273,16 @@
         <summary>Formato: diseño y papel</summary>
         <p>El <b>diseño</b> decide cómo se distribuyen las pantallas — automático, una por página con el habla
         de ese tramo, o cuadrícula compacta de seis por página. El <b>papel</b> es A4 o Carta. Los dos están
-        en la sección <b>Formato</b>, antes de los botones que producen el archivo. En una cuenta de pago, los
-        dos pueden venir configurados desde la cuenta, y la pantalla dice de dónde vinieron — cambiarlo ahí
+        en la sección <b>Formato</b>, antes de los botones que producen el archivo. Los dos también pueden
+        venir de una <b>plantilla</b> guardada, junto con el escenario, el sistema y el entorno — y cambiarlo ahí
         vale solo para ese documento.</p>
       </details>
       <details open>
         <summary>Identificación: caso, sistema, ticket, resultado</summary>
         <p>Son los campos que convierten un montón de pantallas en una evidencia: de qué caso de prueba es, en
-        qué sistema, cuál es el ticket, y si pasó o no. Son gratuitos. Lo que se paga es que lleguen
-        <b>rellenados</b> desde la configuración de tu cuenta.</p>
+        qué sistema, cuál es el ticket, y si pasó o no. Pueden llegar
+        <b>rellenados</b> con un <a href="{{link}}">enlace preconfigurado</a>, que abre la herramienta con el
+        caso, el ticket y el sistema ya en su sitio.</p>
       </details>
       <details open>
         <summary>Huella digital y numeración</summary>
@@ -322,42 +324,41 @@
     </div>
 
     <!-- ================================================================= -->
-    <h2>8 · Cuenta, planes y equipo</h2>
+    <h2>8 · Ajustes, plantillas y equipo</h2>
     <div class="faq">
       <details open>
-        <summary>Qué se paga, al final</summary>
-        <p>La herramienta en el navegador es gratuita y lo sigue siendo. Lo que paga el plan es la <b>cuenta</b>:
-        tu marca en el documento, los valores por defecto que llegan rellenados (empresa, entorno, etiqueta,
-        diseño, papel), las plantillas de documento del equipo, el guion de casos y el vocabulario. La lista
-        completa y los precios están en <a href="{{precos}}">precios</a>.</p>
+        <summary>¿De verdad es todo gratuito?</summary>
+        <p>Sí, para todos, sin cuenta y sin registro. La marca del cliente en el documento, la clasificación,
+        el campo <b>emitido por</b>, el resumen de pantallas con error, las plantillas guardadas, el archivo de
+        ajustes del equipo y la lista de términos de tu sistema forman parte de la misma herramienta, y lo que
+        configuras se guarda en tu navegador.</p>
       </details>
       <details open>
-        <summary>Cómo funciona la licencia sin servidor de licencias</summary>
-        <p>La clave se comprueba <b>dentro</b> de tu navegador. No hay consulta a ningún servidor: funciona
-        sin conexión, y nosotros no nos enteramos de cuándo ni dónde se usa. El camino normal
-        es entrar por el enlace que llega por correo; pegar la clave a mano sigue existiendo para quien la
-        recibió por otra vía.</p>
+        <summary>Los ajustes del equipo, en un archivo</summary>
+        <p>La marca del cliente (nombre y logotipo), quién emite, la clasificación y las plantillas guardadas
+        caben en un <b>archivo de ajustes</b>. Una persona lo exporta y lo manda al equipo por el camino que
+        el equipo ya usa; cada uno lo importa. Importar suma las plantillas a las que la persona ya tenía, en
+        vez de borrar las suyas, y el archivo no pasa por ningún servidor nuestro.</p>
       </details>
       <details open>
-        <summary>Los valores por defecto de la cuenta llegan, pero no mandan</summary>
-        <p>Lo que la empresa configura en la cuenta llega rellenado en la herramienta — y deja de valer en el
-        instante en que la persona que tiene el caso en la mano cambia algo. Quien sabe que
+        <summary>Los ajustes llegan, pero no mandan</summary>
+        <p>Lo que viene de una plantilla o del archivo de ajustes llega rellenado en la herramienta — y deja de
+        valer en el instante en que la persona que tiene el caso en la mano cambia algo. Quien sabe que
         <i>este</i> documento necesita otro diseño es quien lo está mirando. Un valor por defecto es un valor
         por defecto, no una camisa de fuerza.</p>
       </details>
       <details open>
-        <summary>Guion de casos</summary>
-        <p>En <b>cualquier plan de pago</b> — Personal o Equipo — se puede subir una hoja de cálculo de
-        casos de prueba y repartir los
-        enlaces: cada persona recibe una dirección que abre la herramienta ya rellenada con su caso, y al
-        terminar lo marca como hecho. La pantalla de control muestra qué se hizo, quién lo hizo y cuándo — con
-        el recibo del documento generado.</p>
+        <summary>Mandar un caso a otra persona para que lo ejecute</summary>
+        <p>La página del <a href="{{link}}">enlace preconfigurado</a> monta una dirección que abre la
+        herramienta con el caso, el ticket y el sistema ya rellenados. Pégala en el caso de prueba, en el
+        ticket o en una hoja de cálculo: quien la abra graba, genera el documento y lo adjunta donde ya se
+        adjuntan las cosas. Lo que esa persona graba se queda en su navegador.</p>
       </details>
       <details open>
         <summary>Cuánto tiempo se guardan las cosas</summary>
-        <p>Los plazos están escritos en la <a href="{{privacidade}}">política de privacidad</a>, y hay
-        código detrás de ellos: una rutina diaria borra lo que pasó del plazo, archivo por archivo. Las
-        facturas se quedan durante el plazo de conservación fiscal — eso está dicho allí, con el motivo.</p>
+        <p>Lo que configuras en la herramienta — marca, plantillas, lista de términos — se queda en tu
+        navegador, no con nosotros; borrar los datos del sitio en el navegador lo borra todo. Qué más existe, y
+        por cuánto tiempo, está en la <a href="{{privacidade}}">política de privacidad</a>.</p>
       </details>
     </div>
 
@@ -393,10 +394,11 @@
       </details>
       <details open>
         <summary>Encontré un error, o me gustaría que existiera algo</summary>
-        <p>El botón <b>Hablar con nosotros</b>, en la esquina de la herramienta, manda problema, idea o elogio.
-        Junto va un informe técnico de tu navegador — versiones, funciones disponibles, lo que registró la
-        grabación — y <b>ves el informe antes de mandarlo</b>. Ningún vídeo, imagen ni transcripción va
-        en él.</p>
+        <p>El botón <b>Hablar con nosotros</b>, en la esquina de la herramienta, abre tu programa de correo ya
+        dirigido a suporte@walkstamp.com, con el problema, la idea o el elogio que escribiste. Junto puede ir
+        un informe técnico de tu navegador — versiones, funciones disponibles, lo que registró la
+        grabación — y <b>ves todo antes de mandarlo</b>, porque quien lo manda eres tú, desde tu correo.
+        Ningún vídeo, imagen ni transcripción va en él.</p>
       </details>
     </div>
 

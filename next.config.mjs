@@ -1,8 +1,8 @@
 /* O roteamento público.
  *
  * A regra que manda em tudo: **o endereço publicado não muda**. A home
- * portuguesa é `/`, não `/pt`; a página de preços é `/precos`, não
- * `/pt/precos`. Cada um desses endereços está num canonical já indexado, num
+ * portuguesa é `/`, não `/pt`; o comparativo é `/comparativo`, não
+ * `/pt/comparativo`. Cada um desses endereços está num canonical já indexado, num
  * sitemap já enviado e em links que outras pessoas já publicaram — trocar
  * qualquer um deles é jogar fora tráfego que custou meses.
  *
@@ -32,9 +32,12 @@ const PREFIXO = Object.fromEntries(idiomas.map((L) => [L, L === 'pt' ? '' : '/' 
  *                      ferramenta busca de fora;
  *   huggingface.co     os pesos do modelo de fala, e o `cdn-lfs` que serve os
  *                      arquivos grandes;
- *   *.supabase.co      a conta: sessão, licença, chamado e a medição anônima.
- *                      A ferramenta funciona sem ele — é aditivo, nunca
- *                      requisito — mas quando existe, é para lá que ele fala;
+ *   *.hf.co            para onde o Hugging Face REDIRECIONA os pesos grandes.
+ *                      Achado nos relatos de CSP do Build 71: 28 avisos, todos
+ *                      em `.onnx` de peso e nenhum em `config.json` — o padrão
+ *                      de um redirecionamento para um host que a lista não
+ *                      tinha. Em `Report-Only` nada quebrou; travando, a
+ *                      transcrição não baixaria o modelo;
  *   accounts/apis      o Google Drive, que é recurso desligado hoje e vai
  *   /docs.google.com   ligar depois. Fora daqui, ligá-lo quebraria em produção
  *                      com um erro que ninguém liga à CSP.
@@ -70,83 +73,41 @@ const CSP = [
   "font-src 'self' data:",
   "connect-src 'self' blob: data: https://cdn.jsdelivr.net https://huggingface.co " +
     'https://*.huggingface.co https://cdn-lfs.huggingface.co https://cdn-lfs-us-1.huggingface.co ' +
-    'https://*.supabase.co https://www.googleapis.com https://accounts.google.com',
+    'https://*.hf.co https://www.googleapis.com https://accounts.google.com',
   "frame-src 'self' https://accounts.google.com https://docs.google.com",
-  /* ONDE OS AVISOS CHEGAM — e sem isto o `Report-Only` não relatava a ninguém.
-     Medido em 02/09: a política estava em `Report-Only` desde 24/08 e **sem
-     endereço de relatório**. O navegador conferia, montava o aviso e jogava
-     fora. Uma semana que devia ter virado dados virou trabalho de CPU na
-     máquina dos outros — e a segunda metade da DEC-12 dependia justamente
-     desses dados para não ser aposta.
+  /* SEM ENDEREÇO DE RELATÓRIO desde o Build 71. Os avisos iam para `/api/csp`
+     e ficavam no banco; o site deixou de ter servidor, e a rota saiu com ele.
+     Os 887 avisos guardados (02/09 a 04/11) foram lidos antes:
 
-     Os DOIS nomes, porque os navegadores não concordam: `report-uri` é o antigo
-     e é o que a maioria ainda manda; `report-to` é o novo e precisa do
-     cabeçalho `Reporting-Endpoints` ao lado. Manter só um é perder metade dos
-     relatórios, e a metade que falta é sempre a que tinha a resposta. */
-  'report-uri /api/csp',
-  'report-to csp',
+       838  script inline — a detecção de idioma da home e o trecho do Vercel
+            Analytics. São eles que precisam de hash antes de a política travar;
+        28  pesos do modelo redirecionados para `*.hf.co` — entrou acima;
+        20  capas do blog vindas do Supabase — o Build 70 as trouxe para cá;
+         1  a barra de prévia da Vercel, que não é do produto.
+
+     A política continua em `Report-Only`: o navegador ainda confere e avisa no
+     console de quem estiver olhando, e a régua `csp.mjs` continua medindo. */
 ].join('; ');
 const paginas = Object.keys(slugs);
 
-/* A área do cliente tem endereço traduzido como o resto do site: quem lê em
-   espanhol não deveria ter que reconhecer a palavra "conta" para achar a
-   própria fatura. Por dentro ela mora em `/conta/<idioma>`. */
-const CONTA = rotas.caminhoConta;
-/* AS SUB-ROTAS DO PAINEL, traduzidas como o resto.
-
-   Cada uma precisa de ponte `beforeFiles`, e não `afterFiles`: `/conta/faturas`
-   casa com a rota dinâmica `/conta/[lang]` — com `lang` valendo a palavra
-   "faturas" — e uma reescrita `afterFiles` só é consultada quando NENHUMA rota
-   casou. O resultado seria 404 numa tela que existe. O roteiro já tinha
-   aprendido isso sozinho; agora a regra vale para as quatro.
-
-   Uma tabela só. Duas tabelas para a mesma coisa é exatamente como o alemão
-   ficou sem `hreflang` e depois vendo o tour em inglês. */
-const SUB = rotas.subConta;
-/* O roteiro continua tendo nome próprio porque outros arquivos o citam. */
-const ROTEIRO = Object.fromEntries(
-  Object.keys(CONTA).map((L) => [L, `${CONTA[L]}/${SUB.roteiro[L]}`]));
-/* O site fala cinco idiomas; a área do cliente ainda fala três. Os laços da
-   conta andam por ESTA lista, e não por `idiomas` — senão cada idioma novo do
-   site pede uma rota de conta que não existe, e o build quebra com um
-   "`source` is missing" que não diz nada sobre a causa. */
-const IDIOMAS_CONTA = Object.keys(CONTA);
+/* A ÁREA DO CLIENTE SAIU NO BUILD 71 — o produto ficou grátis e sem conta.
+   Os endereços dela continuam no mundo (no e-mail de quem entrou, em
+   favoritos, em links colados num chamado), então cada um, nos cinco idiomas
+   e com tudo o que vinha embaixo dele, vai para a home do idioma com 308.
+   A lista sai do `rotas.json` (`contaAposentada`), escrita uma vez no
+   `build.py`. */
+const CONTA_APOSENTADA = rotas.contaAposentada;
 
 /** O endereço público de cada página, no idioma dela. */
 const publico = (pg, L) => (pg === 'home' ? PREFIXO[L] || '/' : PREFIXO[L] + '/' + slugs[pg][L]);
 /** E onde ela mora dentro do `app/`. */
 const interno = (pg, L) => (pg === 'home' ? `/${L}` : `/${L}/${slugs[pg][L]}`);
 
-/* ---- O TETO DA FIGURA DO BLOG, DITO ONDE O NEXT LÊ ----
-
-   O DEFEITO, relatado de produção: subir a figura de um post devolvia "This
-   page couldn't load — a server error occurred". Sem mensagem, sem pista, e
-   dependendo do arquivo: figuras pequenas subiam.
-
-   A causa são DOIS TETOS que não se falavam. O produto permite 8 MB
-   (`TETO_FIGURA`, em `lib/supabase/figura.ts`), o formulário aceita 8 MB e a
-   ação tem até a frase pronta para recusar acima disso. Só que uma Server
-   Action do Next tem teto PRÓPRIO, e o padrão dele é 1 MB — conferido na fonte
-   da versão instalada, `app-render/action-handler.js`: sem `bodySizeLimit`, o
-   valor é `1024 * 1024`, e passar dele lança um 413 ANTES de a ação rodar.
-
-   Quer dizer: toda figura entre 1 MB e 8 MB morria no framework, e a recusa
-   educada que o produto escreveu ("a figura passou de 8 MB, exporte menor")
-   nunca chegava a ser possível de ver. O erro genérico do Next era tudo o que
-   sobrava.
-
-   O número aqui é o do produto mais uma folga: o corpo multipart carrega
-   também `lang`, `chave` e `alt`, e o teto vale para o corpo inteiro, não só
-   para o arquivo.
-
-   BUILD 70: a figura do blog saiu daqui — o post virou arquivo no projeto, e o
-   editor do painel com ela (e o `testes/figura.mjs`, que comparava os dois
-   tetos). O teto continua por causa do importador de planilha do roteiro, que
-   também sobe arquivo por Server Action; ele sai com a conta, no Build 71. */
+/* O teto de 9 MB das Server Actions saiu no Build 71. Ele existia para o
+   upload de figura do blog (que virou arquivo no Build 70) e para o
+   importador de planilha da conta (que saiu com a conta). Sem Server Action
+   nenhuma no site, o padrão do Next vale. */
 const config = {
-  experimental: {
-    serverActions: { bodySizeLimit: '9mb' },
-  },
   // Os cabeçalhos vinham do vercel.json. Vieram para cá porque agora valem
   // também em desenvolvimento e nos testes — um cabeçalho que só existe em
   // produção é um cabeçalho que ninguém testa.
@@ -186,10 +147,6 @@ const config = {
            `Report-Only` e não travando. */
         { key: 'X-Frame-Options', value: 'DENY' },
         { key: 'Content-Security-Policy-Report-Only', value: CSP },
-        /* O `report-to` da CSP é só um NOME; é este cabeçalho que diz a que
-           endereço o nome corresponde. Sem ele, a diretiva não aponta para
-           lugar nenhum — e o navegador não avisa que não avisou. */
-        { key: 'Reporting-Endpoints', value: 'csp="/api/csp"' },
         { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' },
         { key: 'Permissions-Policy',
           value: 'geolocation=(), payment=(), usb=(), magnetometer=(), gyroscope=(), ' +
@@ -235,10 +192,21 @@ const config = {
         r.push({ source: `${publico(pg, L)}.html`, destination: publico(pg, L), permanent: true });
       }
     }
-    for (const L of IDIOMAS_CONTA) {
-      // e o endereço interno da conta também não é para ser visitado por fora
-      r.push({ source: `/conta/${L}`, destination: CONTA[L], permanent: true });
-      r.push({ source: `/conta/${L}/roteiro`, destination: ROTEIRO[L], permanent: true });
+    /* A conta aposentada: o endereço público de cada idioma, tudo o que vinha
+       embaixo dele, e o endereço interno `/conta/<idioma>` — todos para a home
+       do idioma. */
+    /* O interno de cada idioma vem PRIMEIRO: o público português é `/conta`, e
+       o `/conta/:resto*` dele casaria `/conta/en/...` e mandaria o inglês para
+       a home portuguesa. A primeira regra que casa é a que vale. */
+    for (const L of Object.keys(CONTA_APOSENTADA)) {
+      if (L === 'pt') continue;
+      r.push({ source: `/conta/${L}`, destination: PREFIXO[L], permanent: true });
+      r.push({ source: `/conta/${L}/:resto*`, destination: PREFIXO[L], permanent: true });
+    }
+    for (const [L, caminho] of Object.entries(CONTA_APOSENTADA)) {
+      const home = PREFIXO[L] || '/';
+      r.push({ source: caminho, destination: home, permanent: true });
+      r.push({ source: `${caminho}/:resto*`, destination: home, permanent: true });
     }
     return r;
   },
@@ -251,7 +219,6 @@ const config = {
         depois.push({ source: publico(pg, 'pt'), destination: interno(pg, 'pt') });
       }
     }
-    for (const L of IDIOMAS_CONTA) depois.push({ source: CONTA[L], destination: `/conta/${L}` });
     /* O blog. `blog` é a mesma palavra nos cinco idiomas, então ele NÃO entra
        na tabela de slugs traduzidos — mas o português continua precisando da
        ponte, porque o endereço público é `/blog` e por dentro ele mora em
@@ -269,28 +236,7 @@ const config = {
     // O `/app` sem extensão é o endereço que o site inteiro cita há meses.
     depois.push({ source: '/app', destination: '/app.html' });
 
-    /* A tela do roteiro precisa da ponte ANTES dos arquivos, e não depois.
-       `/conta/roteiro` casa com a rota dinâmica `/conta/[lang]` — com `lang`
-       valendo a palavra "roteiro" — e uma reescrita `afterFiles` só é
-       consultada quando NENHUMA rota casou. O resultado seria um 404 numa tela
-       que existe. `/conta/planilha` não precisa disto: é rota estática de
-       verdade, e estática ganha da dinâmica sem ponte nenhuma. */
     const antes = [];
-    for (const [nome, trad] of Object.entries(SUB)) {
-      for (const L of IDIOMAS_CONTA) {
-        antes.push({ source: `${CONTA[L]}/${trad[L]}`, destination: `/conta/${L}/${nome}` });
-      }
-    }
-    /* As abas do back-office são um nível mais fundo — `/conta/negocio/contas`
-       — e caem na MESMA armadilha: `/conta/negocio` já é uma reescrita, e sem
-       ponte própria a aba vira 404. A lista sai do `rotas.json`, e não escrita
-       aqui: uma aba na faixa e ausente nesta ponte é um clique que quebra. */
-    for (const aba of rotas.abasNegocio) {
-      for (const L of IDIOMAS_CONTA) {
-        antes.push({ source: `${CONTA[L]}/${SUB.negocio[L]}/${aba}`,
-                     destination: `/conta/${L}/negocio/${aba}` });
-      }
-    }
 
     return { beforeFiles: antes, afterFiles: depois };
   },

@@ -2,11 +2,5 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "nextjs",
   "buildCommand": "python3 build.py && next build",
-  "installCommand": "npm install",
-  "crons": [
-    {
-      "path": "/api/faxina",
-      "schedule": "17 4 * * *"
-    }
-  ]
+  "installCommand": "npm install"
 }

@@ -3,7 +3,8 @@
     <h1 style="font-size:32px">Base de connaissances</h1>
     <p class="updated">Base de connaissances de {{marca}}, par thème. Chaque bloc s’ouvre d’un clic.<br>
     Si ce que vous cherchez ne s’y trouve pas, utilisez le bouton <b>Nous contacter</b> dans le coin de
-    l’outil — problème, idée ou compliment arrivent au même endroit.</p>
+    l’outil, qui ouvre votre logiciel de messagerie, ou écrivez directement à
+    <a href="mailto:suporte@walkstamp.com">suporte@walkstamp.com</a> — problème, idée ou compliment arrivent au même endroit.</p>
 
     <p class="lockHint" style="margin:0 0 30px">
     <b>Avant tout :</b> {{marca}} tourne entièrement dans l’onglet de votre navigateur. La vidéo n’est
@@ -46,9 +47,9 @@
       <details open>
         <summary>Dois-je installer quelque chose ? M’inscrire ?</summary>
         <p>Non et non. Ouvrez <a href="{{app}}">l’outil</a> et utilisez-le. Il n’y a ni installation, ni extension, ni
-        inscription. Il existe une version en <b>fichier unique</b> que vous téléchargez et ouvrez sans aucune
-        connexion internet, pour quand le réseau de l’entreprise bloque tout — elle est sur la page des
-        <a href="{{precos}}">tarifs</a>.</p>
+        inscription. Il existe une version en <b>fichier unique</b> qui s’ouvre sans aucune
+        connexion internet, pour quand le réseau de l’entreprise bloque tout — nous l’envoyons par e-mail à qui
+        la demande ; l’adresse est sur la page <a href="{{seguranca}}">Sécurité de l’information</a>.</p>
       </details>
       <details open>
         <summary>Quel navigateur fonctionne</summary>
@@ -273,15 +274,16 @@
         <summary>Format : mise en page et papier</summary>
         <p>La <b>mise en page</b> décide comment les écrans se répartissent — automatique, un par page avec la parole
         du passage, ou grille compacte de six par page. Le <b>papier</b> est A4 ou Letter. Les deux se trouvent
-        dans la section <b>Format</b>, avant les boutons qui produisent le fichier. Dans un compte payant, les deux
-        peuvent arriver configurés depuis le compte, et l’écran dit d’où ils viennent — les changer là ne vaut que pour
+        dans la section <b>Format</b>, avant les boutons qui produisent le fichier. Les deux peuvent aussi
+        venir d’un <b>modèle</b> enregistré, avec le cas d’usage, le système et l’environnement — les changer là ne vaut que pour
         ce document.</p>
       </details>
       <details open>
         <summary>Identification : cas, système, ticket, résultat</summary>
         <p>Ce sont les champs qui transforment un tas d’écrans en preuve : de quel cas de test il s’agit, sur
-        quel système, quel est le ticket, et s’il est passé ou non. Ils sont gratuits. Ce qui est payant, c’est qu’ils
-        arrivent <b>renseignés</b> à partir de la configuration de votre compte.</p>
+        quel système, quel est le ticket, et s’il est passé ou non. Ils peuvent
+        arriver <b>renseignés</b> par un <a href="{{link}}">lien préconfiguré</a>, qui ouvre l’outil avec le
+        cas, le ticket et le système déjà en place.</p>
       </details>
       <details open>
         <summary>Empreinte et numérotation</summary>
@@ -323,41 +325,41 @@
     </div>
 
     <!-- ================================================================= -->
-    <h2>8 · Compte, offres et équipe</h2>
+    <h2>8 · Réglages, modèles et équipe</h2>
     <div class="faq">
       <details open>
-        <summary>Ce qui est payant, au juste</summary>
-        <p>L’outil dans le navigateur est gratuit et le reste. Ce que l’offre paie, c’est le <b>compte</b> :
-        votre marque sur le document, les valeurs par défaut qui arrivent renseignées (entreprise, environnement,
-        libellé, mise en page, papier), les modèles de document de l’équipe, la liste de cas de test et le lexique
-        métier. La liste complète et les tarifs sont sur <a href="{{precos}}">tarifs</a>.</p>
+        <summary>Tout est vraiment gratuit ?</summary>
+        <p>Oui, pour tout le monde, sans compte et sans inscription. La marque du client sur le document, la
+        classification, le champ <b>émis par</b>, le résumé des écrans en erreur, les modèles enregistrés, le
+        fichier de réglages de l’équipe et la liste des termes de votre système font partie du même outil, et ce
+        que vous configurez est conservé dans votre navigateur.</p>
       </details>
       <details open>
-        <summary>Comment la licence fonctionne sans serveur de licence</summary>
-        <p>La clé est vérifiée <b>à l’intérieur</b> de votre navigateur. Il n’y a de requête vers aucun serveur : elle
-        fonctionne sans internet, et nous n’apprenons ni quand ni où elle est utilisée. Le chemin normal
-        est d’entrer par le lien qui arrive par e-mail ; coller la clé à la main existe toujours pour qui l’a
-        reçue par un autre chemin.</p>
+        <summary>Les réglages de l’équipe, dans un fichier</summary>
+        <p>La marque du client (nom et logo), l’émetteur, la classification et les modèles enregistrés tiennent
+        dans un <b>fichier de réglages</b>. Une personne l’exporte et l’envoie à l’équipe par le chemin que vous
+        utilisez déjà ; chacun l’importe. L’import ajoute les modèles à ceux que la personne avait déjà, au lieu
+        d’effacer les siens, et le fichier ne passe par aucun serveur à nous.</p>
       </details>
       <details open>
-        <summary>Les valeurs par défaut du compte arrivent, mais ne commandent pas</summary>
-        <p>Ce que l’entreprise configure dans le compte arrive renseigné dans l’outil — et cesse de valoir à
+        <summary>Les réglages arrivent, mais ne commandent pas</summary>
+        <p>Ce qui vient d’un modèle ou du fichier de réglages arrive renseigné dans l’outil — et cesse de valoir à
         l’instant où la personne qui a le cas en main change quelque chose. Celui qui sait que
         <i>ce</i> document a besoin d’une autre mise en page, c’est celui qui l’a sous les yeux. Une valeur par défaut
         est une valeur par défaut, pas une camisole de force.</p>
       </details>
       <details open>
-        <summary>Liste de cas de test</summary>
-        <p>Dans <b>n’importe quelle offre payante</b> — Personal ou Équipe — on peut déposer un tableur
-        de cas de test et distribuer les liens : chaque
-        personne reçoit une adresse qui ouvre l’outil déjà renseigné avec son cas, et à la fin elle le marque comme fait.
-        L’écran de suivi montre ce qui a été fait, par qui et quand — avec le reçu du document généré.</p>
+        <summary>Envoyer un cas à quelqu’un d’autre pour qu’il l’exécute</summary>
+        <p>La page du <a href="{{link}}">lien préconfiguré</a> construit une adresse qui ouvre l’outil avec le
+        cas, le ticket et le système déjà renseignés. Collez-la dans le cas de test, le ticket ou un tableur :
+        qui l’ouvre enregistre, génère le document et le joint là où vous joignez déjà les choses. Ce que cette
+        personne enregistre reste dans son navigateur.</p>
       </details>
       <details open>
         <summary>Combien de temps vous gardez les choses</summary>
-        <p>Les délais sont écrits dans la <a href="{{privacidade}}">politique de confidentialité</a>, et il y a du
-        code derrière : une routine quotidienne efface ce qui a dépassé le délai, fichier par fichier. Les factures
-        restent pendant la durée de conservation fiscale — c’est dit là-bas, avec la raison.</p>
+        <p>Ce que vous configurez dans l’outil — marque, modèles, liste de termes — reste dans votre navigateur,
+        pas chez nous ; effacer les données du site dans le navigateur efface tout cela. Ce qui existe d’autre, et
+        pour combien de temps, est dans la <a href="{{privacidade}}">politique de confidentialité</a>.</p>
       </details>
     </div>
 
@@ -393,10 +395,11 @@
       </details>
       <details open>
         <summary>J’ai trouvé une erreur, ou j’aimerais que quelque chose existe</summary>
-        <p>Le bouton <b>Nous contacter</b>, dans le coin de l’outil, envoie un problème, une idée ou un compliment.
-        Avec lui part un rapport technique de votre navigateur — versions, fonctions disponibles, ce que
-        l’enregistrement a consigné — et vous <b>voyez le rapport avant de l’envoyer</b>. Aucune vidéo, image ou
-        transcription n’y figure.</p>
+        <p>Le bouton <b>Nous contacter</b>, dans le coin de l’outil, ouvre votre logiciel de messagerie déjà
+        adressé à suporte@walkstamp.com, avec le problème, l’idée ou le compliment que vous avez écrit. Un
+        rapport technique de votre navigateur peut partir avec — versions, fonctions disponibles, ce que
+        l’enregistrement a consigné — et vous <b>voyez tout avant de l’envoyer</b>, puisque c’est vous qui
+        l’envoyez, depuis votre propre adresse. Aucune vidéo, image ou transcription n’y figure.</p>
       </details>
     </div>
 

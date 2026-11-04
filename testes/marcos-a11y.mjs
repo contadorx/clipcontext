@@ -53,28 +53,24 @@ const I18N_APP = (chave, lang) => {
   const m = bloco.match(new RegExp(chave + ":'([^']*)'"));
   return m ? m[1] : '';
 };
-const I18N_CONTA = JSON.parse(fs.readFileSync(`${RAIZ_WS}/src/i18n-conta.json`, 'utf8'));
 const I18N_SITE = JSON.parse(fs.readFileSync(`${RAIZ_WS}/src/i18n-site.json`, 'utf8'));
 const IDIOMAS = ['pt', 'en', 'es', 'de', 'fr'];
 
-console.log('[1] os três dicionários dizem a MESMA frase');
+/* A conta era a terceira tela e saiu no Build 71; ficam o site e a ferramenta. */
+console.log('[1] os dois dicionários dizem a MESMA frase');
 for (const L of IDIOMAS) {
   const site = I18N_SITE[L].pular;
-  const conta = I18N_CONTA[L].pular;
   const app = I18N_APP('pular', L);
-  ok(`${L}: site, conta e ferramenta pulam com as mesmas palavras`,
-     !!site && site === conta && site === app,
-     `site="${site}" conta="${conta}" app="${app}"`);
+  ok(`${L}: site e ferramenta pulam com as mesmas palavras`,
+     !!site && site === app, `site="${site}" app="${app}"`);
 }
 
-console.log('\n[2] o HTML das três telas traz o marco e o link');
+console.log('\n[2] o HTML das duas telas traz o marco e o link');
 {
   const doc = fs.readFileSync(`${RAIZ_WS}/src/site/doc.html`, 'utf8');
-  const painel = fs.readFileSync(`${RAIZ_WS}/app/conta/[lang]/Painel.tsx`, 'utf8');
   for (const [nome, txt, alvo] of [
     ['o site', doc, /<main id="conteudo" tabindex="-1">/],
     ['a ferramenta', APP, /<main class="wrap corpo" id="conteudo" tabindex="-1">/],
-    ['a conta', painel, /id="conteudo" tabIndex=\{-1\}/],
   ]) {
     /* O detalhe só sai quando REPROVA. Impresso sempre, ele dizia "tem main,
        mas sem tabindex" ao lado de um `ok` — um rótulo contradizendo a própria
@@ -85,7 +81,6 @@ console.log('\n[2] o HTML das três telas traz o marco e o link');
   }
   ok('  o site tem o link de pular', /class="pular"/.test(doc));
   ok('  a ferramenta tem o link de pular', /class="pular"/.test(APP));
-  ok('  a conta tem o link de pular', /className="pular"/.test(painel));
 }
 
 console.log('\n[3] e ele funciona PELO TECLADO na ferramenta');

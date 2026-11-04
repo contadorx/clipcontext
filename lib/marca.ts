@@ -1,48 +1,22 @@
 /* A identidade, e só ela.
  *
- * Está num arquivo separado do resto do site por um motivo concreto: o
- * `middleware` roda no Edge, onde não existe sistema de arquivos. Se `marca`
- * viesse do mesmo módulo que lê os corpos das páginas em disco, importar o nome
- * da marca arrastaria o `fs` junto e o build quebrava.
+ * Está num arquivo separado do resto do site porque o `middleware`, que rodava
+ * no Edge (onde não existe sistema de arquivos), também a importava. O
+ * middleware saiu no Build 71, com a conta; o arquivo ficou separado porque
+ * continua sendo o lugar certo para uma coisa que não lê disco.
  *
  * `src/marca.json` é escrito pelo `build.py`, que continua sendo o dono do nome,
- * do domínio e das chaves públicas. Aqui é importação estática — o valor entra
- * no pacote na hora do build, sem ler disco em tempo de execução.
+ * do domínio e da identificação legal. Aqui é importação estática — o valor
+ * entra no pacote na hora do build, sem ler disco em tempo de execução.
+ *
+ * Saíram no Build 71: o endereço e a chave do Supabase, as duas chaves
+ * públicas da licença (que a ferramenta já não conferia desde o 69) e os
+ * prazos de retenção da conta.
  */
 import dados from '@/src/marca.json';
 
 export const marca: {
   marca: string; marcaA: string; marcaB: string; site: string; iconV: string;
   empresa: string; cnpj: string; contato: string; encarregado: string;
-  supaUrl: string; supaKey: string; analytics: string;
-  licPub: string; licPubAuto: string;
-  /* Os prazos de retenção, como texto — é assim que eles entram na frase da
-     política de privacidade. A verdade em tempo de execução é a função
-     `walkstamp.prazos()` no banco; estes existem porque a política é HTML
-     estático e não tem como perguntar. Quem impede as duas de divergirem é a
-     régua `testes/prazos.mjs`. */
-  prazoConta: string; prazoLista: string; prazoEvento: string;
+  analytics: string;
 } = dados;
-
-/* O endereço do serviço de autenticação.
- *
- * Em produção é sempre o do `marca.json`, e não há como não ser. A exceção
- * existe para os testes: eles sobem um Supabase de mentira e precisam que a
- * sessão do servidor fale com ele, e não com o projeto de verdade — sem isso, a
- * área do cliente só é testável deslogada.
- *
- * A trava é o formato do valor: **só um endereço local é aceito**. Uma variável
- * mal configurada em produção não consegue apontar para um servidor de
- * terceiro; no máximo aponta para o próprio processo, e aí quebra na hora e à
- * vista, que é o jeito certo de uma configuração errada falhar.
- *
- * Mora aqui, e não em `lib/supabase/servidor.ts`, porque o `middleware` também
- * precisa dela e roda no Edge, onde `next/headers` não existe. As duas pontas
- * lendo endereços diferentes seria pior do que não ter override nenhum: o
- * middleware derruba a sessão que a página acabou de aceitar, porque a chave do
- * cookie sai do endereço e as duas deixariam de bater.
- */
-export function enderecoDaSessao(): string {
-  const teste = process.env.WALKSTAMP_SUPA_TESTE || '';
-  return /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(teste) ? teste : marca.supaUrl;
-}

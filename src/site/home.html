@@ -17,7 +17,7 @@
      comentários antes de procurar, mas a regra continua valendo aqui: sobre a
      tag, escreva o nome dela, não a tag. -->
 
-<body data-supa-url="{{supaUrl}}" data-supa-key="{{supaKey}}">
+<body>
 
 {{jsonld}}
 <!-- O LINK DE PULAR, E POR QUE ELE É O PRIMEIRO ELEMENTO DA PÁGINA.
@@ -38,7 +38,6 @@
     <nav>
       <a href="#como" class="hide-sm">{{navHow}}</a>
       <a href="{{comparativo}}" class="hide-sm">{{navComp}}</a>
-      <a href="{{precos}}" class="hide-xs">{{navPrice}}</a>
       <!-- O BLOG ENTRA NO MENU, e antes do botão da ferramenta.
 
            Ele existia só no rodapé — o lugar onde se procura o que já se sabe
@@ -77,13 +76,13 @@
         <h1>{{h1}}</h1>
         <p class="lead">{{lead}}</p>
         <!-- DOIS CAMINHOS, E NAO UM.
-             O CTA unico otimizava ativacao gratuita: quem chega com uma
-             planilha de casos na mao — que e quem paga — nao tinha para onde
-             ir sem rolar a pagina inteira ate os precos. O primeiro continua
-             sendo o de menor atrito; o segundo leva ao trabalho que vira
-             plano. -->
+             O primeiro e o de menor atrito: testar com um video. O segundo e
+             para quem chega com uma lista de casos na mao, e leva ao link que
+             abre cada caso ja preenchido. Ele apontava para a pagina de
+             precos, que saiu no Build 71 junto com os planos: a ferramenta
+             ficou inteira gratis, e o que sobrou daquele trabalho e o link. -->
         <p class="ctas"><a class="btn" href="{{app}}">{{cta}}</a>
-        <a class="btn ghost" href="{{precos}}">{{cta2}}</a></p>
+        <a class="btn ghost" href="{{link}}">{{cta2}}</a></p>
         <p class="small muted" style="margin-top:16px">{{ctaSub}}</p>
       </div>
       {{figuraDobra}}
@@ -241,25 +240,6 @@
   </div>
 </section>
 
-<!-- OS TRES PLANOS, PELO TRABALHO.
-     A home empurrava so para o Free, e o Personal so aparecia na pagina de
-     precos — quem chega com uma planilha de casos na mao tinha que adivinhar
-     que existe um plano para isso. Aqui eles sao descritos pelo TRABALHO que
-     cada um faz, e nao por lista de recurso: a lista completa e o lugar de
-     comparar, e ele fica a um clique. -->
-<section id="planos">
-  <div class="wrap">
-    <h2>{{plH}}</h2>
-    <p class="lead">{{plP}}</p>
-    <div class="cards" style="margin-top:26px">
-      <div class="card"><h3>{{plFreeT}}</h3><p>{{plFreeD}}</p></div>
-      <div class="card"><h3>{{plPersT}}</h3><p>{{plPersD}}</p></div>
-      <div class="card"><h3>{{plTimeT}}</h3><p>{{plTimeD}}</p></div>
-    </div>
-    <p class="small muted" style="margin-top:18px"><a href="{{precos}}" style="color:var(--accent)">{{plVer}}</a></p>
-  </div>
-</section>
-
 <section>
   <div class="wrap">
     <h2>{{faqH}}</h2>
@@ -271,19 +251,13 @@
       <details><summary>{{q5}}</summary><p>{{a5}}</p></details>
       <details><summary>{{q6}}</summary><p>{{a6}}</p></details>
       <details><summary>{{q7}}</summary><p>{{a7}}</p></details>
-      <!-- AS SEIS COMERCIAIS.
-           As sete acima respondem "isto funciona?". Quem esta decidindo pagar
-           tem outras seis, e elas nao estavam em lugar nenhum do site — a
-           pessoa tinha que escrever perguntando, e a maioria nao escreve.
-           Cada resposta aqui foi conferida no codigo antes de ser escrita, e
-           uma delas mudou por causa disso: nao ha integracao com Zephyr nem
-           TestRail, so o resumo para colar no Jira. -->
-      <details><summary>{{qc1}}</summary><p>{{ac1}}</p></details>
-      <details><summary>{{qc2}}</summary><p>{{ac2}}</p></details>
+      <!-- A DO JIRA, A UNICA QUE FICOU DAS SEIS COMERCIAIS.
+           As outras cinco eram sobre a conta, a planilha do roteiro de casos,
+           o cancelamento e a cobranca, e sairam com os planos no Build 71.
+           Esta continua porque nao depende de preco nenhum, e a resposta foi
+           conferida no codigo: nao ha integracao com Zephyr nem TestRail, so
+           o resumo para colar no Jira. -->
       <details><summary>{{qc3}}</summary><p>{{ac3}}</p></details>
-      <details><summary>{{qc4}}</summary><p>{{ac4}}</p></details>
-      <details><summary>{{qc5}}</summary><p>{{ac5}}</p></details>
-      <details><summary>{{qc6}}</summary><p>{{ac6}}</p></details>
     </div>
   </div>
 </section>
@@ -308,11 +282,9 @@
       <div>
         <h3>{{fColProduto}}</h3>
         <a href="{{app}}">{{navApp}}</a>
-        <a href="{{precos}}">{{navPrice}}</a>
         <a href="{{ajuda}}">{{fAjuda}}</a>
         <a href="{{blog}}">{{fBlog}}</a>
         <a href="{{comparativo}}">{{fComp}}</a>
-        <a href="{{conta}}">{{fConta}}</a>
       </div>
       <div>
         <h3>{{fColCasos}}</h3>

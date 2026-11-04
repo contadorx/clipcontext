@@ -97,17 +97,14 @@ console.log('\n[2c] o nome antigo não aparece fora do aviso histórico');
      pessoa/ano é a página se desculpando por cobrar — quem está com o cartão
      na mão para para decidir entre comprar e doar.
      O que se cobra agora é que ele não volte por nenhuma porta. */
-  for (const rota of ['/', '/precos', '/en/precos', '/de/preise', '/comparativo']) {
+  for (const rota of ['/', '/en', '/de/vergleich', '/comparativo', '/ajuda']) {
     await pg.goto('http://localhost:8898' + rota);
     await pg.waitForTimeout(400);
     ok(`${rota} não pede apoio`, (await pg.locator('#support').count()) === 0);
   }
-  await pg.goto('http://localhost:8898/precos');
-  await pg.waitForTimeout(400);
-  const txtP = await pg.locator('body').innerText();
-  ok('e a página de preços não fala em doação nem em Pix',
-     !/\bpix\b|doa[çc][ãa]o|donate|café|coffee/i.test(txtP),
-     (txtP.match(/[^\n]*(pix|doa[çc]|donate|café|coffee)[^\n]*/i) || ['(limpo)'])[0].slice(0, 70));
+  /* A página de preços, que era onde o pedido de apoio morava, saiu no
+     Build 71. A pergunta continua valendo para o site inteiro, e o laço acima
+     já a faz. */
 }
 
 console.log('\n[2d] o cabeçalho tem a ação como botão');
@@ -134,7 +131,7 @@ console.log('\n[2e] nenhuma página começa com prosa solta antes do cabeçalho'
      telefone. Quem pegou da primeira vez foi uma régua de dobra, medindo o
      sintoma a três passos da causa.
      Aqui se cobra a causa, em quatro páginas de dois moldes diferentes. */
-  for (const rota of ['/?lang=pt', '/en', '/de/preise', '/fr/aide']) {
+  for (const rota of ['/?lang=pt', '/en', '/de/vergleich', '/fr/aide']) {
     await pg.goto('http://localhost:8898' + rota);
     const antes = await pg.evaluate(() => {
       const cab = document.querySelector('header');

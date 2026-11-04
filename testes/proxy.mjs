@@ -60,7 +60,9 @@ export function criarProxy(){
 export async function exigirNext(){
   for (let i = 0; i < 30; i++) {
     try {
-      const r = await fetch(ALVO + '/precos', { redirect: 'manual' });
+      /* Era `/precos`, que saiu no Build 71 e virou redirecionamento: um 308
+         ali diria "o Next está de pé" sem a página ter sido montada. */
+      const r = await fetch(ALVO + '/comparativo', { redirect: 'manual' });
       if (r.status < 500) return;
     } catch (e) { /* ainda subindo */ }
     await new Promise(r => setTimeout(r, 1000));

@@ -1,30 +1,49 @@
 <section style="padding-top:60px">
   <div class="wrap doc">
     <h1 style="font-size:32px">Termos de Uso</h1>
-    <p class="updated">Última atualização: 17 de agosto de 2026 (propriedade do código e versão offline).</p>
+    <p class="updated">Última atualização: 4 de novembro de 2026 (o {{marca}} passa a ser inteiramente
+    gratuito e sem conta).</p>
 
-    <p class="lockHint" style="margin:0 0 26px">
-    Até 14 de agosto de 2026 este serviço se chamava <b>ClipContext</b> e ficava em clipcontext.app.
-    Mudou o nome; a controladora, o tratamento de dados e as condições continuam os mesmos.</p>
+    <!-- `testes/legal.mjs` cobra os mesmos `id` de seção nos cinco idiomas, a
+         numeração de 1 a N sem buraco e que planos, cobrança, Stripe e
+         Supabase só apareçam dentro de elementos com `data-antigo` — o sistema
+         que deixou de existir em 04/11/2026. -->
 
-    <h2>1. Quem oferece o serviço</h2>
+    <p class="lockHint" style="margin:0 0 26px" data-antigo>
+    Em 4 de novembro de 2026 o {{marca}} passou a ser <b>inteiramente gratuito</b>: deixaram de existir
+    conta, planos pagos, licenças e cobrança, e estes termos foram reescritos para descrever o serviço como
+    ele é agora. Quem teve conta antes dessa data encontra o que mudou na seção 14.<br>
+    Até 14 de agosto de 2026 este serviço se chamava <b>ClipContext</b> e ficava em clipcontext.app.</p>
+
+    <h2 id="quem">1. Quem oferece o serviço</h2>
     <p>O {{marca}} é oferecido por <b>{{empresa}}</b>, inscrita no CNPJ sob o nº <b>{{cnpj}}</b>
-    (&ldquo;nós&rdquo;). Contato: <a href="mailto:{{contato}}" style="color:var(--accent)">{{contato}}</a>.</p>
+    (&ldquo;nós&rdquo;). Suporte:
+    <a href="mailto:suporte@walkstamp.com" style="color:var(--accent)">suporte@walkstamp.com</a>.
+    Privacidade: <a href="mailto:{{contato}}" style="color:var(--accent)">{{contato}}</a>.</p>
 
-    <h2>2. O que é o serviço</h2>
-    <p>O {{marca}} é uma ferramenta gratuita que roda no navegador e converte um arquivo de vídeo em um
-    documento — PDF, Word ou um pacote de imagens — com os quadros em que a tela muda e, opcionalmente, a
-    transcrição do áudio. <b>O processamento ocorre integralmente no dispositivo do usuário:</b> o vídeo, o
-    áudio e a transcrição não são enviados a nós, e não temos como acessá-los.</p>
+    <h2 id="servico">2. O que é o serviço</h2>
+    <p>O {{marca}} é uma ferramenta que roda no navegador e transforma uma gravação de tela ou um arquivo de
+    vídeo em um documento — PDF, Word ou um pacote de imagens — com as telas em que algo muda e,
+    opcionalmente, a transcrição do áudio. <b>O processamento ocorre integralmente no dispositivo do
+    usuário:</b> o vídeo, o áudio, as telas, a transcrição e os documentos gerados não são enviados a nós, e
+    não temos como acessá-los.</p>
+    <p>O site e a ferramenta são páginas hospedadas na Vercel, sem servidor nosso que receba o que você
+    grava.</p>
 
-    <h2>3. Aceitação</h2>
+    <h2 id="aceitacao">3. Aceitação</h2>
     <p>Ao usar o serviço, você concorda com estes termos. Se não concordar, não o utilize.</p>
 
-    <h2>4. Uso permitido</h2>
-    <p>Você pode usar o {{marca}} para fins pessoais ou comerciais, sem custo. Você é responsável por
-    garantir que possui os direitos necessários sobre os vídeos que processa.</p>
+    <h2 id="gratuito">4. Gratuito e sem conta</h2>
+    <p>O {{marca}} é <b>gratuito</b>. Não há conta, login, cadastro nem pagamento, e todas as funções estão
+    disponíveis para todos. Usar o serviço não cria obrigação de pagar nada.</p>
 
-    <h2>5. Uso proibido</h2>
+    <h2 id="permitido">5. Uso permitido, e a sua responsabilidade</h2>
+    <p>Você pode usar o {{marca}} para fins pessoais ou comerciais, sem custo.</p>
+    <p><b>Você é responsável pelo que grava e processa</b>: por ter o direito de gravar aquela tela, aquele
+    áudio e aquelas pessoas — inclusive o consentimento que a lei aplicável exigir —, por respeitar as
+    regras de sigilo da sua organização e por ter os direitos necessários sobre os vídeos que processa.</p>
+
+    <h2 id="proibido">6. Uso proibido</h2>
     <ul>
       <li>Processar conteúdo cuja posse ou distribuição seja ilegal</li>
       <li>Violar direitos autorais, de imagem ou de privacidade de terceiros</li>
@@ -33,11 +52,11 @@
     </ul>
     <p>Como não temos acesso ao que você processa, a responsabilidade por esses limites é inteiramente sua.</p>
 
-    <h2>6. Propriedade do seu conteúdo</h2>
-    <p>Seus vídeos e os PDFs gerados são seus. Não reivindicamos qualquer direito sobre eles, e nem teríamos
-    como: nada disso passa por nós.</p>
+    <h2 id="conteudo">7. Propriedade do seu conteúdo</h2>
+    <p>Suas gravações e os documentos gerados são seus. Não reivindicamos qualquer direito sobre eles, e nem
+    teríamos como: nada disso passa por nós.</p>
 
-    <h2>7. Propriedade do código</h2>
+    <h2 id="codigo">8. Propriedade do código</h2>
     <p>O código do {{marca}} é nosso e não é distribuído sob licença livre. Você pode usar a ferramenta
     à vontade, para fins pessoais ou comerciais, e o que ela produz é seu — mas copiar, redistribuir ou
     publicar o código não está autorizado, com uma exceção escrita abaixo.</p>
@@ -45,69 +64,77 @@
     publicadas sob licença MIT, com o nome ClipContext. <b>Quem obteve aquelas versões continua com os
     direitos que a MIT concedeu sobre elas</b> — uma licença já concedida não se retira. A mudança vale
     para esta versão em diante.</p>
-
     <p>A exceção, e ela é deliberada: <b>a versão offline — o arquivo único que você baixa — pode ser
     guardada, escaneada, versionada e distribuída dentro da sua organização</b>, sem pedir autorização
     a ninguém. É o que permite a uma equipe pôr o {{marca}} no meio de um procedimento sem depender de
     este site continuar existindo. O que a exceção não autoriza é publicar o arquivo fora da sua
     organização, revendê-lo, ou apresentá-lo como produto próprio.</p>
 
-    <h2>8. Ausência de garantia</h2>
-    <p>O serviço é fornecido "como está". Não garantimos que a extração de imagens, a transcrição ou o PDF
-    estejam corretos, completos ou adequados a qualquer finalidade específica. A transcrição automática é
-    gerada por um modelo estatístico e contém erros. Os quadros extraídos são amostras do vídeo, e momentos
-    entre duas capturas não aparecem no documento.</p>
+    <h2 id="garantia">9. Ausência de garantia</h2>
+    <p>O serviço é fornecido &ldquo;como está&rdquo;, sem garantia e sem acordo de nível de serviço, além do
+    que a lei exigir. Não garantimos que a extração de telas, a transcrição ou os documentos estejam
+    corretos, completos ou adequados a qualquer finalidade específica. A transcrição automática é gerada por
+    um modelo estatístico e contém erros. As telas extraídas são amostras do vídeo, e momentos entre duas
+    capturas não aparecem no documento.</p>
     <p>Decisões relevantes não devem se apoiar exclusivamente no resultado da ferramenta sem conferência
     no vídeo original.</p>
 
-    <h2>9. Limitação de responsabilidade</h2>
+    <h2 id="responsabilidade">10. Limitação de responsabilidade</h2>
     <p>Na máxima extensão permitida pela lei, não nos responsabilizamos por perdas ou danos decorrentes do uso
     ou da impossibilidade de uso do serviço, incluindo perda de dados, lucros cessantes ou interrupção de
-    atividades. Por ser um serviço gratuito e sem coleta de dados, o uso se dá por conta e risco do usuário.</p>
+    atividades. Isso inclui o que a ferramenta guarda no seu navegador — modelos, marca, vocabulário e a
+    cópia de uma gravação em curso —, que pode ser apagado por você, pelo próprio navegador ou por uma
+    limpeza dos dados do site. Por ser um serviço gratuito, que roda no seu dispositivo, o uso se dá por
+    conta e risco do usuário.</p>
+    <p>Nada nestes termos afasta direitos que a lei garanta e que não possam ser afastados por contrato,
+    inclusive os do Código de Defesa do Consumidor, quando aplicável.</p>
 
-    <h2>10. Disponibilidade</h2>
+    <h2 id="disponibilidade">11. Disponibilidade</h2>
     <p>Não garantimos funcionamento ininterrupto. O serviço pode ser alterado, suspenso ou encerrado a
     qualquer momento. O seguro contra este parágrafo é a <b>versão offline</b>: o arquivo
     único que você baixou continua funcionando na sua máquina, sem consultar servidor nenhum, mesmo
-    que este site desapareça — e a seção 7 autoriza você a guardá-lo e a distribuí-lo dentro da sua
+    que este site desapareça — e a seção 8 autoriza você a guardá-lo e a distribuí-lo dentro da sua
     organização.</p>
 
-    <h2>11. Serviços de terceiros</h2>
-    <p>A ferramenta carrega bibliotecas e modelos de terceiros pela internet. Não respondemos pela
+    <h2 id="terceiros">12. Serviços de terceiros</h2>
+    <p>A ferramenta baixa bibliotecas e modelos de terceiros pela internet, como o modelo de transcrição.
+    Funções opcionais, como abrir um vídeo do Google Drive ou enviar um documento para o Google Docs, usam
+    serviços de terceiros, que seguem os termos e as políticas deles. A lista completa está na
+    <a href="{{privacidade}}" style="color:var(--accent)">Política de Privacidade</a>. Não respondemos pela
     disponibilidade nem pelo conteúdo desses serviços.</p>
 
-    <h2>12. Alterações</h2>
-    <p>Estes termos podem ser atualizados. A data no topo indica a última revisão, e o uso continuado após
-    mudanças significa concordância com a nova versão.</p>
-
-    <h2>13. Privacidade</h2>
+    <h2 id="privacidade">13. Privacidade</h2>
     <p>O tratamento de dados pessoais está descrito na
     <a href="{{privacidade}}" style="color:var(--accent)">Política de Privacidade</a>, que integra estes
-    termos. Em resumo: seus vídeos não chegam até nós, a medição de uso é anônima, e os dados pessoais que
-    existem são o e-mail da sua conta e, para quem assina, o que a Stripe precisa para cobrar.</p>
+    termos. Em resumo: suas gravações não chegam até nós, o site não grava cookie, e os dados pessoais que
+    tratamos são os dados técnicos que toda hospedagem recebe e o e-mail que você decidir nos mandar.</p>
 
-    <h2>14. Planos pagos, renovação e cancelamento</h2>
-    <p>Os planos descritos na página de preços <b>estão à venda</b>. A cobrança é anual e feita pela Stripe;
-    o preço é o publicado na página de preços no momento da contratação, e a assinatura renova sozinha no
-    fim de cada período.</p>
-    <p>Antes de qualquer cobrança, quem entra na conta pela primeira vez recebe <b>14 dias com tudo</b>, sem
-    cartão e sem checkout. Acabados os 14 dias, nada é cobrado: a conta volta ao plano gratuito.</p>
-    <p><b>Cancelar se faz na sua conta</b>, a qualquer momento e sem falar com ninguém. O cancelamento vale
-    para a renovação seguinte: o acesso continua até o fim do período já pago, e <b>não há devolução
-    proporcional</b> do que já foi cobrado — a degustação de 14 dias existe justamente para que a decisão
-    seja tomada antes do pagamento. Isso não afasta os direitos que a legislação consumerista garantir a
-    quem contrata como pessoa física, inclusive o prazo de arrependimento do art. 49 do Código de Defesa do
-    Consumidor.</p>
-    <p>O plano gratuito descrito aqui não perde recursos por causa dos planos pagos.</p>
+    <h2 id="contaAntiga">14. Quem teve conta antes de 4 de novembro de 2026</h2>
+    <div data-antigo>
+    <p>Até 4 de novembro de 2026 o {{marca}} oferecia uma conta opcional e planos pagos, cobrados pela
+    Stripe. <b>Os planos pagos deixaram de ser oferecidos e não haverá nova cobrança.</b> As funções que
+    eram pagas passaram a ser gratuitas para todos, e as licenças emitidas antes dessa data deixaram de ser
+    necessárias para usar qualquer função.</p>
+    <p>O que acontece com os dados da conta antiga está na seção
+    <a href="{{privacidade}}#contaAntiga" style="color:var(--accent)">Quem teve conta antes de 4 de novembro
+    de 2026</a> da Política de Privacidade. Dúvidas sobre uma cobrança feita antes dessa data:
+    <a href="mailto:suporte@walkstamp.com" style="color:var(--accent)">suporte@walkstamp.com</a>. Isso não
+    afasta os direitos que a legislação de defesa do consumidor garantir a quem contratou como pessoa
+    física.</p>
+    </div>
 
-    <h2>15. Lei aplicável</h2>
+    <h2 id="alteracoes">15. Alterações</h2>
+    <p>Estes termos podem ser atualizados. A data no topo indica a última revisão, e a mudança é anunciada
+    nesta página — como não há cadastro, não temos como avisar por e-mail. O uso continuado após as mudanças
+    significa concordância com a nova versão.</p>
+
+    <h2 id="lei">16. Lei aplicável</h2>
     <p>Estes termos são regidos pela lei brasileira, eleito o foro do domicílio do usuário para dirimir
     controvérsias, quando aplicável a legislação consumerista.</p>
 
-    <h2>16. Contato</h2>
-    <p>{{empresa}} — CNPJ {{cnpj}} —
-    <a href="mailto:{{contato}}" style="color:var(--accent)">{{contato}}</a>.</p>
-
-    
+    <h2 id="contato">17. Contato</h2>
+    <p>{{empresa}} — CNPJ {{cnpj}}.<br>
+    Suporte: <a href="mailto:suporte@walkstamp.com" style="color:var(--accent)">suporte@walkstamp.com</a>.<br>
+    Privacidade: <a href="mailto:{{contato}}" style="color:var(--accent)">{{contato}}</a>.</p>
   </div>
 </section>

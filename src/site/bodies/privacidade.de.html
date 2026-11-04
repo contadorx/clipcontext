@@ -1,420 +1,424 @@
 <section style="padding-top:60px">
   <div class="wrap doc">
     <h1 style="font-size:32px">Datenschutzerklärung</h1>
-    <p class="updated">Letzte Aktualisierung: 17. August 2026.<br>
-    Diese Erklärung beschreibt die derzeitige Funktionsweise von {{marca}}: Das Werkzeug hat keinen
-    Verarbeitungsserver, und es gibt ein optionales Konto — weiter unten beschrieben — für alle, die einen bezahlten Plan abschließen.</p>
+    <p class="updated">Letzte Aktualisierung: 4. November 2026.<br>
+    Diese Erklärung beschreibt {{marca}} so, wie es ab diesem Datum funktioniert: kostenlos, ohne Konto und
+    ohne einen Server von uns, der empfängt, was Sie aufnehmen.</p>
 
-    <p class="lockHint" style="margin:0 0 26px">
-    Bis zum 14. August 2026 hieß dieser Dienst <b>ClipContext</b>. Nur der Name hat sich geändert — die
-    Verantwortliche, die Rechtsgrundlagen und die Fristen unten bleiben genau dieselben.</p>
+    <!-- `testes/legal.mjs` und `testes/terceiros.mjs` lesen diese Datei und die
+         vier anderen Sprachen: dieselben `id` von Abschnitten und Tabellen in
+         allen fünf, eine `#terceiros`-Zeile je Ziel aus `src/egressao.json`,
+         und Stripe, Supabase, Brevo, Pläne und Abrechnung NUR innerhalb von
+         Elementen mit `data-antigo` — dem System, das es seit 04/11/2026 nicht
+         mehr gibt. -->
 
-    <h2>Wer verantwortlich ist</h2>
-    <p>{{marca}} wird angeboten von <b>{{empresa}}</b>, eingetragen im CNPJ unter der Nr. <b>{{cnpj}}</b>,
-    die als <b>Verantwortliche</b> für die wenigen in dieser Erklärung beschriebenen personenbezogenen Daten
-    handelt, im Sinne des Gesetzes Nr. 13.709/2018 (LGPD).</p>
-    <p>Anfragen betroffener Personen, Fragen und Beschwerden zum Datenschutz:
-    <a href="mailto:{{contato}}" style="color:var(--accent)">{{contato}}</a>. Das ist zugleich der Kanal der
-    beauftragten Person für die Verarbeitung personenbezogener Daten (Art. 41 LGPD).</p>
+    <p class="lockHint" style="margin:0 0 26px" data-antigo>
+    Am 4. November 2026 wurde {{marca}} <b>vollständig kostenlos</b>: Konto, Anmeldung, Pläne und Abrechnung
+    gibt es nicht mehr, und alle Funktionen stehen allen zur Verfügung. Wenn Sie davor ein Konto oder einen
+    bezahlten Plan hatten, erklärt der Abschnitt
+    <a href="#contaAntiga" style="color:var(--accent)">Wer vor dem 4. November 2026 ein Konto hatte</a>,
+    was mit Ihren Daten geschieht.<br>
+    Bis zum 14. August 2026 hieß dieser Dienst <b>ClipContext</b>; an diesem Datum hat sich nur der Name
+    geändert, das verantwortliche Unternehmen ist dasselbe.</p>
 
-    <h2>Zusammenfassung</h2>
-    <p><b>Wir erhalten weder Ihre Videos noch Ihr Audio, Ihre Screenshots, Ihre Transkriptionen oder die
-    Dokumente, die Sie erzeugen.</b> Daran hat sich nichts geändert, es gilt in allen Plänen, und es ist das
-    Versprechen, das das Produkt trägt — es ist keine Einstellung, die wir später lockern könnten.</p>
-    <p>Was es gibt, ist dies, und es ist weiter unten ausführlich beschrieben: eine Zählung der Besuche ohne
-    Cookie und ohne Kennung; eine anonyme Zählung von fünfzehn Nutzungsmeilensteinen; die E-Mail-Adresse, wenn
-    Sie sie auf der Preisseite hinterlassen; und, für alle, die einen bezahlten Plan abschließen, ein
-    <b>Konto</b> — mit der E-Mail-Adresse für den Zugang, den Rechnungen, den Support-Tickets und der
-    <b>Liste der auszuführenden Fälle</b>, wenn Sie den Bildschirm der Testfallliste nutzen. Die Nutzung des
-    Werkzeugs verlangt weiterhin kein Konto: Ohne Login nimmt es auf, transkribiert und erzeugt das Dokument
-    genau gleich.</p>
-
-    <h2>Wie der Dienst funktioniert</h2>
-    <p>{{marca}} ist eine statische Seite. Wenn Sie ein Video auswählen, wird es vom Browser direkt von Ihrem
-    Gerät gelesen und bleibt dort. Die Extraktion der Bilder, das Lesen des Audios, die Transkription und der
-    Aufbau des PDF finden vollständig auf Ihrem Rechner statt, mit dessen Rechenleistung.</p>
-    <p>Es gibt keine Übertragung der Datei an uns. Es gibt keine temporäre Kopie in unseren Systemen, weil an
-    der Verarbeitung kein System von uns beteiligt ist.</p>
-
-    <h2>Daten, die wir nicht erheben</h2>
-    <ul>
-      <li>Videos, Audiodateien, extrahierte Bilder, Transkriptionen und erzeugte PDFs</li>
-      <li>Dateiname, Größe, Dauer oder irgendein Merkmal dessen, was Sie verarbeiten</li>
-      <li>Name, Telefonnummer oder persönliche Identifikation — und die E-Mail-Adresse nur, wenn Sie eine eingeben, nach Ihrer Wahl</li>
-      <li>Kennungen zur Nachverfolgung, Verhaltensprofile oder Daten für Werbung</li>
-      <li>Tracking-, Werbe- oder Mess-Cookies — <b>keine</b>. Das Konto verwendet ein
-          Sitzungs-Cookie, das Sie angemeldet hält; es ist im Abschnitt &ldquo;Bezahltes
-          Konto&rdquo; beschrieben, und das Werkzeug funktioniert ohne es</li>
-    </ul>
-
-    <h2>Was gemessen wird, und warum</h2>
-    <p>Ein Werkzeug, von dem niemand weiß, ob es genutzt wird, kann sich nicht an der richtigen Stelle
-    verbessern. Es gibt also zwei Messungen, und beide sind so entworfen, dass sie nicht wissen, wer Sie sind:</p>
-    <ul>
-      <li><strong>Seitenaufrufe</strong>, über Vercel Web Analytics. Ohne Cookie und ohne Kennung, die
-      zwischen Besuchen bestehen bleibt. Sie dienen dazu, zu wissen, wie viele Personen angekommen sind und auf welchem Weg.</li>
-      <li><strong>Fünfzehn Nutzungsmeilensteine</strong>, innerhalb des Werkzeugs: dass es geöffnet wurde, dass
-      ein Video erfolgreich geöffnet wurde und dass eine Ausgabedatei heruntergeladen wurde. Mitgesendet
-      werden die Sprache der Seite, die Herkunft des Videos (Datei, Drive, Aufnahme oder Beispiel) und das
-      heruntergeladene Format. <strong>Nichts weiter.</strong> Es gehen weder Dateiname, Größe, Dauer und
-      Inhalt noch irgendeine Sitzungskennung mit — es gibt keine Möglichkeit, zwei Meilensteine derselben
-      Person zuzuordnen oder diesen Besuch dem nächsten.</li>
-    </ul>
-    <p>Wenn Ihr Browser <em>Do Not Track</em> oder <em>Global Privacy Control</em> sendet, werden die drei
-    Meilensteine nicht übermittelt. Und die <strong>Offline-Version</strong> — die einzelne Datei, die Sie
-    herunterladen — verlässt den Build ohne jede Messadresse darin: Sie spricht mit niemandem, und Sie
-    können es prüfen, indem Sie in der Datei nach &bdquo;supabase&ldquo; suchen.</p>
-
-    <h2>Die Benachrichtigungsliste gibt es nicht mehr</h2>
-    <p>Die Preisseite hatte einmal ein optionales E-Mail-Feld, um zu benachrichtigen, sobald es den bezahlten
-    Plan gibt. Den bezahlten Plan gibt es, und das Feld ist entfernt: <b>hier wird nichts mehr erfasst von
-    jemandem, der die Seite nur besucht</b>. Adressen, die hinterlassen wurden, solange es das Feld gab,
-    bleiben bis zu {{prazoLista}} Monate nach dem Hinterlassen gespeichert und werden auf Wunsch früher
-    gelöscht, über den Kontakt am Ende dieser Seite. Sie wurden nie mit den obigen Messungen verknüpft, nie
-    verkauft oder abgetreten, und sie werden für nichts anderes verwendet.</p>
-
-    <h2>Das Konto des bezahlten Plans und die Testfallliste</h2>
-    <p>Wer einen bezahlten Plan abschließt, erhält damit ein <b>Konto</b>. Es ist der einzige Ort, an dem wir
-    nach Ihrer Wahl Daten von Ihnen speichern, und dort lebt die einzige Funktion, die Inhalte des Kunden auf
-    einem Server von uns ablegt: der <b>Bildschirm der Testfallliste</b>. Deshalb ist er hier Feld für Feld beschrieben.</p>
-    <p>Im Konto werden gespeichert:</p>
-    <ul>
-      <li>die <b>E-Mail-Adresse</b> für den Zugang, die die Identität des Kontos und das Ziel des Anmeldelinks ist;</li>
-      <li>die <b>Rechnungen</b> und der Stand des Abonnements, von Stripe;</li>
-      <li>die Support-<b>Tickets</b>, die Sie eröffnen, mit dem Text, den Sie geschrieben haben;</li>
-      <li>im Plan Team die <b>Plätze</b>: die E-Mail-Adresse jeder Person des Teams und was sie bereits erstellt hat;</li>
-      <li>die <b>Dokumentvorlagen</b> und das Erscheinungsbild, das Sie einrichten (Name des Unternehmens,
-      Adresse des Logos, Bezeichnung, Umgebung).</li>
-    </ul>
-    <p>Und wenn Sie die Testfallliste nutzen, werden <b>die Felder der Aufgabenliste</b> gespeichert, und nur
-    diese: der Code des Falls, der Titel, das System, die Nummer des Tickets, die E-Mail-Adresse der
-    verantwortlichen Person, das Datum, an dem der Fall als erledigt markiert wurde, wer ihn markiert hat, der
-    <b>Name</b> der erzeugten Datei, deren <b>Prüfsumme</b> und die Bemerkung, die Sie eingeben.</p>
-    <p>Beim Markieren eines Falls als abgeschlossen wird außerdem eine <b>Quittung</b> gespeichert: der
-    Datensatz dessen, was ausgeführt wurde (Fall, Szenario, System, Ticket, Umgebung, Ergebnis, Datum und
-    Format) und die <b>Prüfsumme jedes Screenshots</b>, der Reihe nach. Das sind Zahlen. Sie reist im
-    Rücklink selbst mit und ist das, was es erlaubt, Monate später ein Dokument zu nehmen und zu prüfen, ob es dasselbe ist.</p>
-    <p><b>Was die Quittung nie enthält:</b> Bild, Transkription oder den Text der Schritte. Die Prüfsumme
-    wird aus den Bildschirminhalten berechnet und erlaubt es <b>nicht</b>, ein Bild zu rekonstruieren. Die
-    Tabelle, die Sie zum Anlegen der Testfallliste übergeben, wird gelesen, wird zu den oben beschriebenen
-    Zeilen, und <b>die Datei wird verworfen</b>: Wir speichern die Tabelle nicht.</p>
-
-    <h2>Der Anhang der Sitzung — die einzige Ausnahme, und sie liegt bei Ihnen</h2>
-    <p>Beim Bestätigen eines Falls als abgeschlossen gibt es ein <b>optionales</b> Feld: die vollständige
-    <code>.json</code>-Datei jener Sitzung anzuhängen. Diese Datei <b>enthält die Bilder der Screenshots</b>,
-    zusammen mit dem Text der Schritte und der Transkription, falls vorhanden.</p>
-    <p>Sie anzuhängen ist das <b>Einzige</b> an diesem Produkt, das Inhalte von Ihnen auf einen Server von
-    uns legt. Deshalb, und ohne Ausnahme:</p>
-    <ul>
-      <li>sie geht <b>nie von allein</b> — das Feld ist zugeklappt voreingestellt, und die Datei muss ausgewählt werden;</li>
-      <li>was sie bedeutet, steht <b>neben dem Feld</b>, im Moment der Auswahl, und nicht nur hier;</li>
-      <li>sie liegt in einem <b>privaten</b> Speicher, ohne öffentliche Adresse: Wer sie herunterlädt, geht
-      über unseren Server, der Ihre Sitzung prüft und eine signierte Adresse zurückgibt, die <b>nach zwei Minuten abläuft</b>;</li>
-      <li>wer den Fall sieht, sieht den Anhang — in einer Testfallliste des Teams ist das das gesamte Team;</li>
-      <li>es gibt eine Schaltfläche <b>Anhang löschen</b>, und sie löscht die Datei, nicht nur den Eintrag, der auf sie verweist;</li>
-      <li>die Grenze liegt bei 32 MB pro Fall, und es werden nur <code>.json</code>-Dateien angenommen.</li>
-    </ul>
-    <p><b>Video und Audio verlassen Ihren Browser weiterhin nie</b>, mit Anhang oder ohne Anhang. Ohne
-    Anhang bleibt nur die Quittung — Zahlen, ohne Bild.</p>
-    <p>Beachten Sie, was das in der Praxis bedeutet: Eine Testfallliste ist eine <b>Arbeitsliste</b>, und ein
-    Fallcode oder eine Ticketnummer können verraten, was Ihr Unternehmen gerade testet. Schreiben Sie in diese
-    Felder, was Sie auf eine Karte an einer Aufgabentafel schreiben würden — Systemname und Ticketnummer sind
-    in Ordnung; personenbezogene Daten Dritter nicht.</p>
-    <p>Eine als <b>&bdquo;des Teams&ldquo;</b> markierte Testfallliste ist für alle Personen mit einem Platz im
-    selben Konto sichtbar; eine Testfallliste <b>&bdquo;nur meine&ldquo;</b> ist nur für die Person sichtbar, die
-    sie angelegt hat. Wer die Testfallliste angelegt hat, kann sie jederzeit löschen, und das Löschen nimmt
-    alle ihre Fälle mit — und die an sie angehängten Dateien —, sofort und ohne Kopie.</p>
-    <h3>Sie müssen nicht fragen: das Konto löscht selbst</h3>
-    <p>Im Konto gibt es eine Seite — <a href="{{contaDados}}" style="color:var(--accent)">Ihre Daten</a> —, die in klarer
-    Sprache auflistet, <b>was auf unserem Server unter Ihrem Namen existiert</b>: wie viele Testfall-Listen,
-    wie viele Fälle, wie viele angehängte Dateien, wie viele Vorlagen, wie viele Tickets. Und sie listet
-    daneben, mit demselben Gewicht, <b>was beim Löschen bleibt, und warum</b>. Auf derselben Seite gibt es
-    eine Schaltfläche, die alles Ihre sofort löscht — ohne mit jemandem zu sprechen und ohne eine Frist
-    abzuwarten. Sie verlangt vorher die Eingabe Ihrer eigenen E-Mail-Adresse, denn es gibt kein
-    Rückgängig.</p>
-    <p><b>Nach Beendigung des Abonnements wird der Inhalt des Kontos innerhalb von {{prazoConta}} Tagen gelöscht</b>,
-    durch eine Routine, die täglich läuft: Testfalllisten, Fälle, Quittungen, Anhänge, Vorlagen,
-    Konfiguration, Plätze, Verlauf der erstellten Dokumente und Tickets. Vorher auf Anfrage, über den Kontakt am Ende dieser Seite.</p>
-    <p><b>Eine Sache wird nicht gelöscht, und es ist fair zu sagen, welche:</b> die <b>Rechnung</b>. Für eine
-    Steuerrechnung gilt eine steuerliche Aufbewahrungsfrist von mehr als {{prazoConta}} Tagen, und sie einzuhalten ist
-    eine gesetzliche Pflicht — es ist weder unsere noch Ihre Wahl. Der Kundendatensatz bleibt zusammen mit
-    ihr bestehen, reduziert auf das, was den Verkauf beschreibt (Plan, Plätze, Laufzeit): <b>Name und
-    Dokumentnummer werden gelöscht</b>, und es bleiben weder E-Mail-Adresse noch Testfallliste noch Datei zurück.</p>
-    <p>Die Sitzung des Kontos verwendet ein <b>Cookie</b>, und es ist notwendig: Es ist das, was Sie angemeldet
-    hält. Es dient nicht der Messung, wird von keinem Skript Dritter gelesen und existiert nur auf den Seiten
-    des Kontos — das Werkzeug funktioniert weiterhin ganz ohne Cookie.</p>
-
-    <h2>Externe Verbindungen</h2>
-    <p>Die Seite stellt eine geringe Zahl von Verbindungen zu Diensten Dritter her, und keine davon
-    transportiert Ihre Inhalte:</p>
-    <ul>
-      <li><strong>jsDelivr</strong> — Auslieferungsnetz, das die Bibliotheken zur Erzeugung des PDF und zur
-      Transkription bereitstellt. Erhält nur die Anfrage nach der Datei der Bibliothek.</li>
-      <li><strong>Hugging Face</strong> — von dort wird das Transkriptionsmodell heruntergeladen, und nur,
-      wenn Sie die automatische Transkription auslösen. Erhält die Anfrage nach dem Modell, nie Ihr Audio.</li>
-      <li><strong>Supabase</strong> — Datenbank, die die fünfzehn Nutzungsmeilensteine erhält und, wenn Sie es
-      ausfüllen, die E-Mail-Adresse der Benachrichtigungsliste. Erhält nie Video, Audio oder Transkription.</li>
-      <li><strong>Vercel</strong> — Hosting der Seite und die Zählung der Besuche. Wie jeder Webserver protokolliert es technisch die
-      Zugriffe auf die Website.</li>
-    </ul>
-    <p>Diese Dritten haben eigene Richtlinien und können technische Daten der Verbindung protokollieren, etwa
-    die IP-Adresse, genauso wie es beim Besuch jeder beliebigen Website geschieht.</p>
-
-    
-    <p>Die folgende Tabelle ist die, nach der eine Lieferantenprüfung fragt: wer die Daten sonst noch berührt, was er erhält und unter welcher Schutzmaßnahme.</p>
-    <table class="legal" id="suboperadores">
-      <tr><th>Dritter</th><th>Funktion</th><th>Erhaltene Daten</th><th>Land</th><th>Schutzmaßnahme</th></tr>
-      <tr><td><b>Supabase</b></td>
-          <td>Datenbank und Speicher für den Sitzungsanhang</td>
-          <td>E-Mail der Benachrichtigungsliste, Nutzungsmeilensteine und der gesamte Inhalt des bezahlten Kontos. <b>Nie</b> Video, Audio oder Transkription</td>
-          <td>Brasilien (Region São Paulo)</td>
-          <td>Auftragsverarbeitungsvertrag des Anbieters; Daten ruhen in Brasilien</td></tr>
-      <tr><td><b>Vercel</b></td>
-          <td>Hosting der Website und Zählung der Besuche</td>
-          <td>Technische Zugriffsprotokolle und die Besuchszählung, ohne Cookie und ohne Kennung</td>
-          <td>Globales Netz</td>
-          <td>Standardvertragsklauseln des Anbieters (Art. 33 II LGPD)</td></tr>
-      <tr><td><b>Stripe</b></td>
-          <td>Abrechnung des Abonnements</td>
-          <td>Name, E-Mail und Zahlungsdaten der abschließenden Person. <b>Wir erhalten die Kartennummer nicht</b> — sie geht direkt an Stripe</td>
-          <td>Vereinigte Staaten und Europäische Union</td>
-          <td>Standardvertragsklauseln; PCI-DSS-Zertifizierung des Anbieters</td></tr>
-      <tr><td><b>Brevo</b></td>
-          <td>Versand des Zugangslinks zum Konto und der Einladung per E-Mail</td>
-          <td>Die E-Mail-Adresse der empfangenden Person und der Text der Nachricht</td>
-          <td>Europäische Union (Frankreich)</td>
-          <td>Standardvertragsklauseln; Land mit angemessenem Schutzniveau</td></tr>
-      <tr><td><b>jsDelivr</b></td>
-          <td>Auslieferung der Bibliotheken zur PDF-Erzeugung und zur Transkription</td>
-          <td>Nur die Anfrage nach der Datei der Bibliothek</td>
-          <td>Globales Netz</td>
-          <td>Erhält keine Kontodaten und keine Inhalte; Verbindung stets verschlüsselt</td></tr>
-      <tr><td><b>Hugging Face</b></td>
-          <td>Von dort wird das Transkriptionsmodell geladen, und nur wenn Sie die Transkription auslösen</td>
-          <td>Nur die Anfrage nach dem Modell. <b>Nie Ihr Audio</b></td>
-          <td>Vereinigte Staaten</td>
-          <td>Erhält keine Kontodaten und keine Inhalte; Verbindung stets verschlüsselt</td></tr>
-      <tr><td><b>Google<br><span class="small muted">kein Unterauftragsverarbeiter von uns</span></b></td>
-          <td>Ein Video aus Ihrem Drive öffnen und die Schaltfläche <b>An Google Docs senden</b> — <b>nur wenn Sie klicken</b></td>
-          <td>Beim Öffnen: nichts außer der Anfrage nach der von Ihnen gewählten Datei. Beim Senden an Docs: <b>das erzeugte Dokument</b>, das aus Ihrem Browser direkt in Ihr Google-Konto geht</td>
-          <td>Gemäß Ihrem Google-Konto</td>
-          <td>Minimale Berechtigung (<code>drive.file</code>), beschränkt auf die von Ihnen gewählten Dateien. Das Senden verlangt eine ausdrückliche Bestätigung</td></tr>
+    <h2 id="responsavel">Wer verantwortlich ist, und in welcher Rolle</h2>
+    <p>{{marca}} wird angeboten von <b>{{empresa}}</b>, eingetragen in Brasilien im CNPJ unter der Nr.
+    <b>{{cnpj}}</b>, nach dem Gesetz Nr. 13.709/2018 (LGPD, das brasilianische Datenschutzgesetz).</p>
+    <p>Ihre Rolle hängt von den Daten ab — und für das meiste, was durch das Werkzeug läuft, hat sie <b>gar
+    keine Rolle</b>, weil diese Inhalte sie nie erreichen:</p>
+    <table class="legal" id="papeis">
+      <tr><th>Daten</th><th>Rolle von {{empresa}}</th><th>Wer über Zweck und Mittel entscheidet</th></tr>
+      <tr><td>Aufnahmen, Audio, Transkriptionen, Bildschirme und die Dokumente, die Sie erzeugen</td>
+          <td><b>Keine</b> — wir erhalten diese Inhalte nicht</td>
+          <td>Sie, oder die Organisation, für die Sie aufnehmen</td></tr>
+      <tr><td>Einstellungen, Vorlagen und andere in Ihrem Browser gespeicherte Konfiguration</td>
+          <td><b>Keine</b> — sie bleiben in Ihrem Browser und werden nicht an uns gesendet</td>
+          <td>Sie</td></tr>
+      <tr><td>E-Mails, die Sie uns schicken</td>
+          <td><b>Verantwortliche</b> (<i>controladora</i>, Art. 5, VI LGPD)</td>
+          <td>{{empresa}}</td></tr>
+      <tr><td>Technische Zugriffsdaten und Zählung der Besuche beim Hosting der Website</td>
+          <td><b>Verantwortliche</b> (Art. 5, VI); Vercel verarbeitet diese Daten in unserem Auftrag</td>
+          <td>{{empresa}}</td></tr>
+      <tr data-antigo><td>Datensätze des früheren Kontosystems, bis sie gelöscht sind</td>
+          <td><b>Verantwortliche</b> für Konto und Abrechnung; <b>Auftragsverarbeiterin</b>
+          (<i>operadora</i>, Art. 5, VII) für die Inhalte, die das Kundenunternehmen im Konto
+          speicherte</td>
+          <td>{{empresa}}; und das Kundenunternehmen, für diese Inhalte</td></tr>
     </table>
+    <p><b>Datenschutzbeauftragter</b> (<i>encarregado</i>, Art. 41 LGPD): <b>{{encarregado}}</b>.<br>
+    Anfragen betroffener Personen, Fragen und Beschwerden zum Datenschutz, und der direkte Kanal des
+    Beauftragten: <a href="mailto:{{contato}}" style="color:var(--accent)">{{contato}}</a>.</p>
 
-    <h2>Bildschirmaufnahme und Mikrofon</h2>
-    <p>Bei der Nutzung der Aufnahme fragt der Browser Sie um Erlaubnis, den Bildschirm zu erfassen und, wenn
-    Sie die Option markieren, das Mikrofon. Das Bild und die beiden Audiokanäle werden auf Ihrem eigenen
-    Rechner verarbeitet: Die Screenshots werden extrahiert und das Audio wird ebendort transkribiert.
-    <strong>Das Video der Sitzung wird nicht gespeichert</strong> — weder auf unserer Seite, die es nicht
-    gibt, noch auf Ihrer Festplatte. Nichts aus dieser Erfassung wird an uns übertragen.</p>
+    <h2 id="resumo">Zusammenfassung</h2>
+    <p><b>Wir erhalten weder Ihre Videos noch Ihr Audio, Ihre Bildschirme, Ihre Transkriptionen oder die
+    Dokumente, die Sie erzeugen.</b> All das wird in Ihrem eigenen Browser verarbeitet, und kein Server von
+    uns empfängt diese Inhalte — die Website hat keinen Anwendungsserver: Sie besteht aus statischen Seiten
+    und dem Werkzeug, gehostet bei Vercel.</p>
+    <p>Es gibt kein Konto, keine Anmeldung, keine Registrierung und keine Zahlung. Die Website setzt keine
+    Cookies.</p>
+    <p>Was es gibt, ist Folgendes, unten im Einzelnen: die technischen Daten, die jedes Hosting bei jeder
+    Anfrage erhält; eine aggregierte Zählung der Seitenaufrufe, ohne Cookie; die Downloads von Bibliotheken
+    und Modellen, die Ihr Browser vornimmt, wenn Sie die Transkription, das PDF oder das Lesen von Text
+    nutzen; Google, nur wenn Sie es per Klick nutzen; und die E-Mails, die Sie uns schicken wollen. Und, bis
+    sie gelöscht sind, die Datensätze des früheren Kontosystems.</p>
 
-    <h2>Webcam in einer Ecke</h2>
-    <p>Ebenfalls optional, ebenfalls <strong>in allen Szenarien standardmäßig ausgeschaltet</strong>, ohne
-    Ausnahme: Ein Gesicht ist ein personenbezogenes Datum anderer Größenordnung als ein Bildschirm, und dies
-    von uns aus einzuschalten hieße, für die gefilmte Person zu entscheiden. Ist sie markiert, fragt der
-    Browser um Erlaubnis für die Kamera, und das Bild wird in eine Ecke der Screenshots und der Clips
-    gezeichnet, <strong>auf Ihrem Rechner</strong> — es verlässt ihn nicht, so wie nichts anderes ihn verlässt.
-    Wenn Sie jemanden filmen, fragen Sie diese Person um Erlaubnis: Wir können sie nicht für Sie fragen.</p>
+    <h2 id="funcionamento">Wie der Dienst funktioniert</h2>
+    <p>Wenn Sie ein Video auswählen oder den Bildschirm aufnehmen, liest der Browser die Inhalte direkt, und
+    sie bleiben auf Ihrem Gerät. Das Herauslösen der Bildschirme, das Lesen des Audios, die Transkription
+    und das Zusammenstellen von PDF, Word-Datei oder Bildpaket geschehen vollständig auf Ihrem Rechner, mit
+    dessen eigener Rechenleistung.</p>
+    <p>Die Datei wird nicht an uns hochgeladen, und es gibt keine temporäre Kopie auf einem System von uns,
+    weil kein System von uns an der Verarbeitung beteiligt ist. Sie können das mit den Entwicklerwerkzeugen
+    des Browsers (F12) im Reiter Netzwerk prüfen.</p>
+    <p>Die <b>Offline-Version</b> — die einzelne Datei, die Sie herunterladen — enthält keine der externen
+    Adressen, die in dieser Erklärung beschrieben sind.</p>
 
-    <h2>Clip der markierten Momente</h2>
-    <p>Es gibt dazu eine Ausnahme, und sie liegt bei Ihnen: die Option <em>&bdquo;einen Clip der markierten Momente speichern&ldquo;</em>.
-    Ist sie eingeschaltet, werden — und <strong>nur zu den Momenten, die Sie während der Aufnahme markieren</strong> — rund
-    fünfzehn Sekunden Video mit Ton um jede Markierung herum gespeichert. Der Rest der Sitzung wird weiterhin
-    verworfen. Die Option ist in allen Szenarien <strong>ausgeschaltet</strong> voreingestellt, außer im
-    Szenario der Sitzung einer Usability-Untersuchung, in dem der Clip das eigentliche Ergebnis der Arbeit ist — und selbst dort genügt es, sie abzuwählen.</p>
-    <p>Diese Clips liegen <strong>im Speicher dieses Tabs</strong>: Das Schließen des Tabs löscht sie. Sie
-    gelangen nur dann auf Ihre Festplatte, wenn Sie das Paket <code>.zip</code> herunterladen, und laufen
-    weiterhin über keinen Server. Es gibt zudem eine Schaltfläche <em>&bdquo;die Videos verwerfen&ldquo;</em>, die
-    alle auf einmal löscht und das Datum der Verwerfung in das Dokument schreibt — denn die Aufnahme einer
-    teilnehmenden Person ist ein personenbezogenes Datum mit Frist, und wer eine Studie prüft, muss sehen, wann sie aufgehört hat zu existieren.</p>
-
-    <h2>Google Drive</h2>
-    <p>Wenn die Schaltfläche zum Öffnen eines Videos aus Google Drive verfügbar ist und Sie sie nutzen,
-    verbindet sich der Browser mit Google, um sich zu authentifizieren und die von Ihnen gewählte Datei
-    herunterzuladen. Die Datei geht <strong>von Google direkt in Ihren Browser</strong>, ohne über einen
-    Server von uns zu laufen. Wir fordern die engste Berechtigung an, die es gibt (<code>drive.file</code>),
-    die nur Zugriff auf die Dateien gibt, die Sie im Fenster von Google auswählen — nie auf den Rest Ihres
-    Drive. Solange Sie nicht auf diese Schaltfläche klicken, wird keine Verbindung zu Google hergestellt.</p>
-    <p>Es gibt außerdem eine Schaltfläche <b>An Google Docs senden</b>. Sie ist die einzige Funktion des
-    Werkzeugs, bei der <strong>das erzeugte Dokument Ihren Rechner verlässt</strong>: Die im Browser
-    zusammengesetzte Word-Datei wird an Google gesendet, das sie in ein Dokument in Google Docs innerhalb
-    Ihres Drive umwandelt. Sie geht <strong>von hier direkt an Google</strong>, ohne über einen Server von uns
-    zu laufen — aber ab diesem Moment liegt der Inhalt bei Google, den Richtlinien von Google unterworfen und
-    nicht unseren. Deshalb verlangt die Schaltfläche vor dem Senden eine ausdrückliche Bestätigung, und
-    deshalb sagt sie, was sie tut. Wenn der Nachweis sensible Daten enthält, laden Sie die Datei herunter,
-    statt sie zu senden.</p>
-
-    <h2>Die Einladung per E-Mail</h2>
-    <p>Am Ende der Nutzung bietet das Werkzeug an, die <strong>Adresse der Website</strong> an eine
-    Kollegin oder einen Kollegen zu senden. Wenn Sie das nutzen, <strong>läuft die E-Mail-Adresse der
-    empfangenden Person über unseren Server</strong> — es ist die einzige Stelle, an der etwas Ihren
-    Rechner verlässt. Kein Video, keine Transkription, kein Dokument; das aufgenommene Material
-    verlässt Ihren Rechner weiterhin nicht.</p>
-    <p>Davon speichern wir <strong>einen Hash</strong> der Adresse und der Herkunft der Anfrage, nicht
-    die Werte selbst. Er dient allein dazu, die Zahl der Einladungen zu zählen und zu verhindern, dass
-    die Funktion zum Belästigungswerkzeug wird: fünf pro Stunde je Herkunft, zwei pro Tag an dieselbe
-    Adresse. Die Einträge werden nach <strong>sieben Tagen</strong> gelöscht. Es gibt keine Liste,
-    keine Anmeldung, und die Einladung wiederholt sich nicht.</p>
-    <p>Die Adresse zu kopieren und auf LinkedIn zu teilen läuft nicht über uns: das geschieht
-    vollständig in Ihrem Browser.</p>
-
-    <h2>Speicherung in Ihrem Browser</h2>
-    <p>Die Startseite speichert <b>eine einzige Sache</b>: das Kürzel der Sprache, die Sie im Auswahlfeld oben
-    gewählt haben (<code>pt</code>, <code>en</code>, <code>es</code>, <code>de</code> oder <code>fr</code>). Es dient dazu, Sie beim nächsten
-    Besuch nicht zur Sprache des Systems zurückzuschicken. Es sind zwei Buchstaben, sie identifizieren
-    niemanden, sie werden nirgendwohin gesendet und sie verschwinden beim Löschen der Browserdaten.</p>
-    <p>Die Liste der <b>Begriffe Ihres Systems</b> — die Codes und Eigennamen, bei denen die Spracherkennung
-    danebenliegt — liegt im <code>sessionStorage</code> zusammen mit dem Rest: Sie verschwindet beim Schließen
-    des Tabs, wird von uns nicht gelesen und verlässt Ihr Gerät nicht. Die Korrektur geschieht in Ihrem Browser, auf dem Text, der ohnehin schon hier war.</p>
-    <p>Außerdem werden einige <b>Bildschirmeinstellungen</b> gespeichert: die Größe der Lupe, die Größe der
-    Steuerleiste, die Größe des Fensters, in dem Sie während der Aufnahme auf den Bildschirm zeigen, welche
-    Blöcke geöffnet blieben und welche Dokumentvorlage Sie zuletzt verwendet haben. Das sind Maße und
-    Layout-Entscheidungen — nichts davon ist Inhalt Ihrer Arbeit, nichts verlässt diesen Computer, und alles
-    verschwindet, wenn Sie die Browserdaten löschen.</p>
-    <p>Das Werkzeug lässt sich mit Feldern öffnen, die bereits über die Adresse ausgefüllt sind — zum Beispiel
-    <code>?caso=CT-014&amp;chamado=NAT-1234</code>, in einem Link, den die Koordination des Tests an das Team schickt.
-    Ein Hinweis dazu: <b>Was in der Adresse steht, bleibt im Verlauf Ihres Browsers</b> und in den Protokollen
-    dessen, der die Seite ausliefert. Systemname und Ticketnummer sind in Ordnung; personenbezogene Daten
-    nicht — dafür tippen Sie auf dem Bildschirm.</p>
-    <p>Wer den Plan Team aktiviert, speichert außerdem den <b>Lizenzschlüssel</b> — dieselbe Zeile, die per
-    E-Mail eingegangen ist. Er wird innerhalb des Browsers gegen einen öffentlichen Schlüssel geprüft, der in
-    der Datei der Seite selbst steht: <b>Es gibt keine Abfrage an einen Lizenzserver</b>, es funktioniert
-    offline, und wir erfahren weder, dass er verwendet wurde, noch von wem. Die Schaltfläche
-    &bdquo;diese Lizenz entfernen&ldquo; löscht ihn sofort. Das Kundenlogo wird, wenn es verwendet wird, vom
-    Browser gelesen und in das Dokument gezeichnet — auch es geht nicht von hier weg.</p>
-    <p>Das Werkzeug speichert noch <b>eine</b> Sache: welche Kombination aus Bibliothek und Dateiformat
-    das Transkriptionsmodell auf diesem Rechner öffnen konnte. Das ist eine Konfiguration — Versions- und
-    Dateinamen —, kein Inhalt: Sie existiert, damit der nächste Besuch die Suche nicht wiederholt, die auf
-    manchen Rechnern Hunderte Megabyte Download kostet. Die Schaltfläche <b>das gespeicherte Modell löschen</b>, neben
-    der Diagnose, löscht diesen Vermerk zusammen mit dem Modell.</p>
-    <p>Wenn Sie das Werkzeug als Anwendung installieren (die Verknüpfung, die der Browser anbietet), speichert ein
-    <i>Service Worker</i> eine Kopie der <b>Seiten und der Stildateien</b>, damit es ohne Netz öffnet. Er
-    speichert nur das, was der Browser ohnehin von unserer Adresse herunterladen würde — <b>nie Video,
-    Audio, Transkription oder erzeugtes Dokument</b>, denn nichts davon ist eine Netzwerkanfrage: Das sind
-    Dinge, die innerhalb des Tabs entstehen und vergehen. Die Anwendung zu deinstallieren oder die
-    Browserdaten zu löschen, entfernt diese Kopie.</p>
-    <p>Wenn Sie die automatische Transkription nutzen, legt der Browser das heruntergeladene Modell im Cache
-    ab, damit es nicht erneut heruntergeladen werden muss. Diese Datei bleibt auf Ihrem Gerät, unter Ihrer
-    Kontrolle, und wird beim Löschen der Browserdaten entfernt. Wir haben keinen Zugriff darauf.</p>
-    <p>Die Felder zur Identifikation des Nachweises, die das Werkzeug anbietet — Testfall, System, wer
-    ausgeführt hat, Ticket, Ergebnis — und die Notizen je Schritt <b>werden niemals irgendwohin gesendet</b>. Sie
-    erscheinen nur in den Dokumenten, die Sie selbst erzeugen und herunterladen.</p>
-    <p>Zwei davon, <b>System</b> und <b>ausgeführt von</b>, werden im <code>sessionStorage</code> gespeichert,
-    solange der Tab offen ist, damit Sie sie nicht bei jedem Testfall neu tippen. Der
-    <code>sessionStorage</code> wird vom Browser selbst beim Schließen des Tabs gelöscht: <b>Er überdauert
-    keine Besuche</b>, er ist kein Cookie, er wird von uns nicht gelesen und verlässt Ihr Gerät nicht. Neben
-    den Feldern gibt es eine Schaltfläche &bdquo;Vergessen&ldquo;, die sie sofort löscht. Die übrigen Felder und
-    die Notizen werden nicht einmal gespeichert, solange der Tab lebt — sie verschwinden beim Neuladen der Seite.</p>
-    <p>Im selben <code>sessionStorage</code> liegt die <b>Zusammenfassung der letzten Bildschirmaufnahme</b>:
-    wie viele Screenshots gespeichert wurden und warum die anderen es nicht wurden. Das sind Zähler — kein
-    Bild, kein Text — und sie existieren, damit die Diagnose verfügbar bleibt, wenn die Seite neu geladen
-    wird, nachdem etwas schiefgegangen ist. Sie verschwindet beim Schließen des Tabs, wie der Rest.</p>
-
-    <h2>Die Bildschirme einer laufenden Aufnahme</h2>
-    <p>Das ist das Einzige, was das Werkzeug länger behält als den Tab, und es gibt einen konkreten
-    Grund dafür: <b>ein Tab kann abstürzen</b>. Bisher löschte ein Absturz nach 110 Minuten einer
-    zweistündigen Aufnahme die vollen zwei Stunden — und während einer langen Wartezeit ist genau das
-    Schließen des Tabs die Entscheidung, die jede vernünftige Person trifft.</p>
-    <p>Deshalb wird während der Aufnahme jeder erfasste Bildschirm zusätzlich in den <b>privaten
-    Speicher Ihres Browsers</b> geschrieben (das <i>Origin Private File System</i>). Der liegt <b>auf
-    Ihrem Computer</b>, in einem Bereich, den nur diese Seite lesen kann, und wird <b>nirgendwohin
-    gesendet</b> — der F12-Test gilt weiterhin: Laden Sie ein Video von mehreren Gigabyte, und die
-    gesendeten Bytes bleiben bei null.</p>
-    <p>Drei Dinge, die festgehalten gehören:</p>
+    <h2 id="naoColetamos">Daten, die wir nicht erheben</h2>
     <ul>
-      <li><b>Er löscht sich selbst, sobald ein Dokument herauskommt.</b> In dem Moment, in dem Sie das
-      PDF, die Word-Datei, die .zip oder eine andere Ausgabe erzeugen, hat die Arbeit das Werkzeug
-      verlassen und die Kopie auf der Festplatte wird gelöscht.</li>
-      <li><b>Er löscht sich nach sieben Tagen selbst</b>, auch wenn nie ein Dokument herauskam.</li>
-      <li><b>Man kann sie jederzeit wegwerfen.</b> Wenn eine Aufnahme gespeichert ist, sagt Schritt 1
-      das deutlich und bietet &bdquo;wegwerfen&ldquo; neben &bdquo;zurückholen&ldquo; an. Wegwerfen
-      löscht sofort — es hört nicht nur auf, weiter zu schreiben.</li>
+      <li>Videos, Audio, herausgelöste Bildschirme, Transkriptionen und erzeugte Dokumente</li>
+      <li>Dateiname, Größe, Dauer oder irgendein Merkmal dessen, was Sie verarbeiten — es sei denn, Sie
+          schreiben es selbst in eine E-Mail an uns</li>
+      <li>Name, Telefonnummer, Passwort oder irgendeine Registrierung: Es gibt kein Konto</li>
+      <li>Was Sie im Werkzeug tun: Wir erfassen keine Nutzungsereignisse</li>
+      <li>Tracking-Kennungen, Verhaltensprofile oder Daten für Werbung</li>
+      <li>Cookies: Die Website setzt keine — weder Sitzungs- noch Tracking-, Werbe- oder Mess-Cookies</li>
     </ul>
-    <p>Wenn eine Aufnahme gespeichert ist, sagt Schritt 1 das direkt — wie viele Bildschirme, von
-    wann, wie viel Platz — und bietet die einzigen zwei Dinge an, die man wollen kann: zurückholen
-    oder verwerfen.</p>
 
-    <h2>Cookies</h2>
-    <p>Wir verwenden weder eigene Cookies noch solche von Dritten — weder zur Nachverfolgung noch für
-    Werbung noch zur Messung. Die Zählung der Besuche und die drei oben beschriebenen Meilensteine funktionieren <b>ohne Cookie und ohne
-    Kennung, die zwischen Besuchen bestehen bleibt</b>, und genau deshalb gibt es auf dieser Seite keinen
-    Cookie-Hinweis: Es gäbe nichts, worin einzuwilligen wäre.</p>
+    <h2 id="navegador">Was in Ihrem Browser gespeichert wird</h2>
+    <p>Damit es nicht jedes Mal dasselbe fragt, speichert das Werkzeug einige Informationen <b>in Ihrem
+    eigenen Browser</b>. Sie bleiben unter Ihrer Kontrolle, <b>werden nicht an uns gesendet</b>, und wir
+    haben keinen Zugriff darauf. <b>Wenn Sie die Website-Daten im Browser löschen, ist alles gelöscht, was in
+    diesem Abschnitt beschrieben ist.</b> Aus demselben Grund heißt ein neuer Rechner oder ein anderer
+    Browser: von vorn beginnen.</p>
+    <p>Im lokalen Speicher (<code>localStorage</code>), der zwischen Besuchen erhalten bleibt:</p>
+    <ul>
+      <li><b>Einstellungen</b> für Nutzung und Anzeige — zum Beispiel Fenstergrößen, der zuletzt gewählte
+      Transkriptionsmodus und welche Bereiche offen geblieben sind;</li>
+      <li>die <b>Vorlagen</b>, die Sie speichern (Szenario, Beschriftung, Umgebung, System, Layout,
+      Rolle);</li>
+      <li>die <b>Kundenmarke</b> — Name und Logo — und das Feld <b>&bdquo;Ausgestellt von&ldquo;</b>, wenn
+      Sie sie ausfüllen;</li>
+      <li>die <b>gemerkte Vokabelliste</b>, nur wenn Sie das Kästchen zum Merken ankreuzen. Es ist nicht
+      angekreuzt, und das Abwählen löscht die Liste;</li>
+      <li>kleine <b>technische Vermerke</b>, etwa welche Kombination aus Bibliothek und Format das
+      Transkriptionsmodell auf diesem Rechner öffnen konnte.</li>
+    </ul>
+    <p>Im Speicher des Tabs (<code>sessionStorage</code>), den der Browser beim Schließen des Tabs löscht:
+    das <b>Vokabular der Sitzung</b>, die Felder <b>System</b> und <b>ausgeführt von</b>, das eingefügte
+    Schritt-Drehbuch, der Zähler der Nachweisnummerierung und eine technische Zusammenfassung der letzten
+    Aufnahme (Zähler, ohne Bild und ohne Text).</p>
+    <p>Im <b>Browser-Cache</b>: die Dateien der Seite, vom <i>Service Worker</i> gespeichert, damit das
+    Werkzeug ohne Netz öffnet, und die Dateien des Transkriptionsmodells, damit sie nicht erneut
+    heruntergeladen werden müssen. Die Schaltfläche <b>gespeichertes Modell löschen</b>, neben der Diagnose,
+    löscht das Modell und den zugehörigen technischen Vermerk.</p>
+    <p>Die <b>Vorgabendatei</b> (<code>padroes-walkstamp.json</code>), die das Werkzeug exportieren und
+    importieren lässt, ist eine Datei, die Sie herunterladen und aufbewahren, wo Sie wollen: Sie enthält
+    nur Konfiguration — Vorlagen, Marke, Aussteller und Klassifizierung —, keine Aufnahme und keinen
+    Nachweistext, und sie läuft nicht über uns.</p>
+    <p>Ein Hinweis zu Links: Das Werkzeug lässt sich mit bereits über die Adresse ausgefüllten Feldern öffnen
+    — zum Beispiel <code>?caso=CT-014&amp;chamado=NAT-1234</code>. <b>Was in der Adresse steht, bleibt im
+    Verlauf Ihres Browsers und in den Zugriffsprotokollen des Hostings.</b> Ein Systemname und eine
+    Ticketnummer sind in Ordnung; personenbezogene Daten nicht — die tippen Sie auf dem Bildschirm ein.</p>
 
-    <h2>Minderjährige</h2>
-    <p>Der Dienst richtet sich nicht an Personen unter 13 Jahren, und die Benachrichtigungsliste sollte von
-    ihnen nicht ausgefüllt werden. Wir haben keine Möglichkeit, das Alter zu prüfen — es gibt keine
-    Registrierung. Wenn Sie erfahren, dass eine minderjährige Person die E-Mail-Adresse hinterlassen hat,
-    schreiben Sie an <a href="mailto:{{contato}}" style="color:var(--accent)">{{contato}}</a>, und sie wird
-    entfernt. Darüber hinaus liegen uns keine Daten Minderjähriger vor, weil uns von niemandem Daten
-    vorliegen: Das Video verlässt das Gerät nie.</p>
+    <h2 id="espelho">Die Bildschirme einer laufenden Aufnahme</h2>
+    <p>Das ist das Einzige von Ihrer Arbeit, das das Werkzeug länger als den Tab aufbewahrt, und es hat
+    einen konkreten Grund: <b>Ein Tab kann abstürzen</b>, und ein Absturz am Ende einer langen Aufnahme
+    würde die ganze Aufnahme löschen.</p>
+    <p>Deshalb wird während der Aufnahme jeder erfasste Bildschirm auch in den <b>privaten Dateispeicher
+    Ihres Browsers</b> geschrieben (das <i>Origin Private File System</i>). Er liegt <b>auf Ihrem
+    Rechner</b>, in einem Bereich, den nur diese Seite lesen kann, und <b>wird nirgendwohin
+    gesendet</b>.</p>
+    <ul>
+      <li><b>Er löscht sich selbst, sobald ein Dokument herauskommt.</b> In dem Moment, in dem Sie das PDF,
+      die Word-Datei, die .zip oder eine andere Ausgabe erzeugen, wird die Kopie auf der Festplatte
+      gelöscht.</li>
+      <li><b>Er löscht sich nach sieben Tagen selbst</b>, auch wenn nie ein Dokument herauskam.</li>
+      <li><b>Sie können ihn jederzeit verwerfen.</b> Wenn eine Aufnahme gespeichert ist, sagt Schritt 1 das
+      und bietet &bdquo;verwerfen&ldquo; neben &bdquo;zurückholen&ldquo; an.</li>
+    </ul>
 
-    <h2>Rechtsgrundlagen, Zwecke und Fristen</h2>
-    <p>Was verarbeitet wird, warum, auf welcher Grundlage und wie lange:</p>
+    <h2 id="captura">Bildschirm-, Mikrofon- und Webcam-Aufnahme</h2>
+    <p>Wenn Sie die Aufnahme nutzen, bittet der Browser um Ihre Erlaubnis, den Bildschirm und — wenn Sie die
+    Option ankreuzen — das Mikrofon aufzunehmen. Bild und Audio werden auf Ihrem eigenen Rechner
+    verarbeitet: Die Bildschirme werden herausgelöst und das Audio wird direkt dort transkribiert. Das
+    durchgehende Video der Sitzung wird nicht aufbewahrt — die optionale Ausnahme sind die unten
+    beschriebenen Clips. Nichts von dieser Aufnahme wird an uns übertragen.</p>
+    <p><b>Webcam in einer Ecke.</b> Optional und <b>standardmäßig aus</b>. Wenn sie angekreuzt ist, bittet
+    der Browser um Erlaubnis für die Kamera, und das Bild wird in eine Ecke der Bildschirme und Clips
+    gezeichnet, auf Ihrem Rechner. Wenn Sie jemanden filmen, bitten Sie diese Person um Erlaubnis: Wir
+    haben keine Möglichkeit, das für Sie zu tun.</p>
+    <p><b>Clip der markierten Momente.</b> Mit eingeschalteter Option, und nur für die Momente, die Sie
+    während der Aufnahme markieren, werden einige Sekunden Video mit Ton um jede Markierung aufbewahrt. Diese
+    Clips bleiben <b>im Speicher dieses Tabs</b>: Das Schließen des Tabs löscht sie. Sie erreichen Ihre
+    Festplatte nur, wenn Sie das <code>.zip</code>-Paket herunterladen, und laufen über keinen Server. Die
+    Schaltfläche <b>&bdquo;Videos verwerfen&ldquo;</b> löscht alle auf einmal und vermerkt das Datum im
+    Dokument.</p>
+
+    <h2 id="terceiros">Mit wem Ihr Browser spricht</h2>
+    <p>Die Website hat keinen Anwendungsserver, daher werden alle Verbindungen unten <b>von Ihrem Browser
+    direkt</b> mit dem jeweiligen Unternehmen aufgebaut. Dies ist die vollständige Liste der externen
+    Adressen, die Seite und Werkzeug nutzen. Nur eine davon kann Inhalte von Ihnen übertragen — Google, und
+    nur, wenn Sie sie senden —, und sie ist markiert:</p>
+    <!-- Eine Zeile je Ziel aus `src/egressao.json`, mit dessen `id` in
+         `data-destino`. `testes/terceiros.mjs` vergleicht beide Listen. -->
+    <table class="legal" id="terceiros">
+      <tr><th>Dritter</th><th>Wann</th><th>Was er erhält</th><th>Was er nie erhält</th></tr>
+      <tr data-destino="hospedagem"><td><b>Vercel</b> — Hosting der Website und des Werkzeugs</td>
+          <td>Immer, beim Öffnen jeder Seite</td>
+          <td>Die Anfrage jeder Datei der Seite, mit den Daten, die jede Anfrage im Internet mitführt:
+          IP-Adresse, Browser (<i>User Agent</i>) und die angefragte Adresse. Sie liegen in den
+          Zugriffsprotokollen von Vercel</td>
+          <td>Ihre Inhalte</td></tr>
+      <tr data-destino="medicao"><td><b>Vercel Web Analytics</b> — Zählung der Besuche</td>
+          <td>Beim Öffnen einer Seite der Website oder des Werkzeugs</td>
+          <td>Den Vermerk, dass die Seite aufgerufen wurde, für eine aggregierte Zählung der Besuche, ohne
+          Cookie. Wie jede Anfrage kommt sie mit IP und Browser an</td>
+          <td>Cookie, Registrierung, was Sie im Werkzeug tun, Ihre Inhalte</td></tr>
+      <tr data-destino="pdf"><td><b>jsDelivr</b> — die Bibliothek, die das PDF erzeugt</td>
+          <td>Nur wenn Sie das PDF anfordern, und nur, wenn unsere eigene Datei fehlt: Normalerweise kommt
+          die Bibliothek von derselben Adresse, die die Seite ausgeliefert hat</td>
+          <td>Die Download-Anfrage der Bibliothek — es erfährt, dass jemand ein PDF angefordert hat, mehr
+          nicht</td>
+          <td>Ihr Ton, Ihr Bild, Ihr Text</td></tr>
+      <tr data-destino="modelo"><td><b>jsDelivr</b> und <b>Hugging Face</b> — das Transkriptionsmodell</td>
+          <td>Wenn Sie die Transkription einschalten. Der technische Bericht der Nachricht prüft ebenfalls, ob
+          diese Adressen antworten</td>
+          <td>Die Download-Anfrage: von jsDelivr das Programm, das das Modell ausführt; von Hugging Face
+          (huggingface.co und dessen Dateinetz) die Gewichte des Modells. Das Modell läuft auf Ihrem
+          Rechner</td>
+          <td>Ihr Ton — nichts wird gesendet</td></tr>
+      <tr data-destino="ocr"><td><b>jsDelivr</b> — das Lesen des Bildschirmtexts</td>
+          <td>Wenn Sie auf &bdquo;Text auf dem Bildschirm lesen&ldquo; klicken</td>
+          <td>Die Download-Anfrage des Lesers und der Sprachdaten. Der Leser läuft auf Ihrem Rechner</td>
+          <td>Ihr Bild</td></tr>
+      <tr data-destino="drive"><td><b>Google</b> — Google Drive und Google Docs, optional</td>
+          <td>Nur wenn Sie auf &bdquo;Aus Google Drive öffnen&ldquo; oder &bdquo;An Google Docs
+          senden&ldquo; klicken — Letzteres fragt vor dem Senden nach einer Bestätigung</td>
+          <td>Die Anmeldung bei Ihrem Google-Konto, im Fenster von Google selbst, mit dem engsten
+          Geltungsbereich, den es gibt (<code>drive.file</code>). Beim Öffnen aus Drive: die Anfrage der
+          Datei, die Sie wählen. Beim Senden an Docs: <b>Inhalte von Ihnen</b> — das in Ihrem Browser
+          erzeugte Dokument, Text und Bilder</td>
+          <td>Der Rest Ihres Drive; und nichts davon läuft über uns</td></tr>
+      <tr data-destino="compartilhar"><td><b>LinkedIn</b> und die anderen Teilen-Schaltflächen</td>
+          <td>Nur, wenn Sie klicken. Im Werkzeug: LinkedIn und E-Mail; im Blog: LinkedIn, WhatsApp, X und
+          E-Mail. &bdquo;Link kopieren&ldquo; verlässt Ihren Browser nicht</td>
+          <td>Die Adresse der Website oder des Artikels (im Blog auch der Titel), in einem Link, der deren
+          Website oder Ihr E-Mail-Programm öffnet</td>
+          <td>Irgendein Teil Ihres Dokuments</td></tr>
+    </table>
+    <p>Diese Dritten haben eigene Richtlinien und erhalten, wie beim Besuch jeder Website, die technischen
+    Daten der Verbindung, etwa die IP-Adresse und den Browser.</p>
+    <p><b>Zu Google.</b> Wenn Sie ein Video aus Drive öffnen, kommt die Datei von Google direkt in Ihren
+    Browser. Wenn Sie an Google Docs senden, geht das Dokument von Ihrem Browser direkt in Ihr
+    Google-Konto — und ab diesem Moment unterliegt es den Richtlinien von Google, nicht unseren. Die Fenster
+    von Google folgen den Regeln von Google, auch bei Cookies. Der Geltungsbereich <code>drive.file</code>
+    gibt nur Zugriff auf die Dateien, die Sie im Fenster von Google wählen, und auf die, die das Werkzeug
+    erstellt — nie auf den Rest Ihres Drive. Enthält der Nachweis sensible Daten, laden Sie die Datei
+    herunter, statt sie zu senden.</p>
+
+    <div class="lockHint" style="margin:22px 0">
+      <p style="margin:0 0 8px"><b>Nichts von Ihnen trainiert ein KI-Modell.</b></p>
+      <p style="margin:0">Keine Inhalte von Ihnen — Video, Audio, Transkription oder erzeugtes Dokument —
+      werden zum Training eines Modells künstlicher Intelligenz verwendet, weder eines eigenen noch eines
+      Dritten. Die Inhalte erreichen uns nicht, und das Transkriptionsmodell wird fertig heruntergeladen und
+      läuft in Ihrem Browser, ohne das Gehörte irgendwohin zu senden.</p>
+    </div>
+
+    <h2 id="operadoras">Wer in unserem Auftrag Daten verarbeitet</h2>
+    <p>Im aktuellen Betrieb verarbeiten zwei Unternehmen personenbezogene Daten <b>in unserem Auftrag</b>,
+    und keines davon erhält die Inhalte, die Sie aufnehmen:</p>
+    <table class="legal" id="operadoras">
+      <tr><th>Unternehmen</th><th>Was es für uns tut</th><th>Daten, die es erhält</th></tr>
+      <tr><td><b>Vercel</b></td>
+          <td>Hostet die Website und das Werkzeug und zählt die Besuche</td>
+          <td>Die technischen Daten jeder Anfrage (IP-Adresse, Browser, angefragte Adresse) und die
+          aggregierte Zählung der Besuche</td></tr>
+      <tr><td><b>HostGator</b></td>
+          <td>Hostet unsere Postfächer, darunter {{contato}} und suporte@walkstamp.com</td>
+          <td>Die E-Mails, die Sie uns schicken: Ihre Adresse und was Sie geschrieben haben</td></tr>
+    </table>
+    <p class="small muted" data-antigo>Bis die Datenbank des früheren Kontosystems gelöscht ist, speichert
+    auch Supabase in unserem Auftrag die Datensätze, die unter
+    <a href="#contaAntiga" style="color:var(--accent)">Wer vor dem 4. November 2026 ein Konto hatte</a>
+    beschrieben sind.</p>
+
+    <h2 id="email">Wenn Sie uns schreiben</h2>
+    <p>Die Schaltfläche <b>&bdquo;Kontakt aufnehmen&ldquo;</b> im Werkzeug sendet nichts von selbst: Sie
+    <b>öffnet Ihr eigenes E-Mail-Programm</b>, mit einer Nachricht, die bereits an
+    <a href="mailto:suporte@walkstamp.com" style="color:var(--accent)">suporte@walkstamp.com</a> adressiert
+    ist. Wenn Sie das Kästchen angekreuzt lassen — es ist angekreuzt —, geht der Anfang eines <b>technischen
+    Berichts des Browsers</b> mit: technische Daten wie die Browserversion, seine Fähigkeiten und Zahlen zur
+    letzten Aufnahme (wie viele Bildschirme, wie lange), <b>ohne Bild, Audio oder Text der Aufnahme</b>. Sie
+    sehen den Bericht vorher auf dem Bildschirm und die ganze E-Mail in Ihrem Programm, bevor Sie sie
+    senden. Wenn der Bericht nicht in die E-Mail passt, kopiert das Werkzeug ihn in die Zwischenablage,
+    damit Sie ihn einfügen können, wenn Sie möchten. Um den Bericht zu erstellen, prüft das Werkzeug, ob die
+    Adressen des Transkriptionsmodells antworten — dieselben wie in der Tabelle oben.</p>
+    <p>Wenn ein Video nicht öffnet, tut der Link <b>&bdquo;Melden Sie uns, welches Format fehlgeschlagen
+    ist&ldquo;</b> dasselbe: Er öffnet Ihr E-Mail-Programm, adressiert an {{contato}}, mit Endung und Größe
+    der Datei und dem Browser — der Dateiname geht nicht mit.</p>
+    <p>Die Schaltfläche <b>&bdquo;Per E-Mail senden&ldquo;</b>, um das Werkzeug einer Kollegin oder einem
+    Kollegen zu empfehlen, öffnet ebenfalls Ihr E-Mail-Programm, mit der Adresse der Website im Text. Wer
+    sie erhält, bestimmen Sie, und die Nachricht läuft nicht über uns.</p>
+    <p><b>Wenn Sie uns eine E-Mail senden</b>, erhalten wir Ihre E-Mail-Adresse und das, was Sie geschrieben
+    haben, einschließlich des Berichts, wenn er mitgeht, in unserem Postfach, gehostet bei HostGator. Wir
+    nutzen die Nachricht nur, um zu antworten und die Sache weiterzuverfolgen, die Sie angesprochen haben:
+    nicht für Werbung, nicht verknüpft mit anderen Daten und ohne Weitergabe an irgendwen. Wir bewahren die
+    Nachricht so lange auf, wie dafür nötig, und löschen sie früher, wenn Sie darum bitten, über
+    <a href="mailto:{{contato}}" style="color:var(--accent)">{{contato}}</a>.</p>
+
+    <h2 id="blog">Der Blog</h2>
+    <p>Der Blog besteht aus statischen Seiten: keine Kommentare, kein Formular, keine Registrierung und kein
+    Tracking über die oben beschriebene Zählung der Besuche hinaus. Die Teilen-Schaltflächen jedes Artikels
+    sind gewöhnliche Links, die LinkedIn, WhatsApp, X oder Ihr E-Mail-Programm erst öffnen, wenn Sie
+    klicken.</p>
+
+    <h2 id="cookies">Cookies</h2>
+    <p>Die Website <b>setzt keine Cookies</b> — kein Sitzungs-Cookie, weil es kein Konto gibt, und keine
+    Tracking-, Werbe- oder Mess-Cookies. Die Zählung der Besuche funktioniert ohne Cookie, und deshalb gibt
+    es auf dieser Seite keinen Cookie-Hinweis: Es gäbe nichts, worin einzuwilligen wäre. Die Fenster von
+    Google, wenn Sie Drive nutzen, gehören Google und folgen dessen Richtlinie.</p>
+
+    <h2 id="contaAntiga">Wer vor dem 4. November 2026 ein Konto hatte</h2>
+    <div data-antigo>
+    <p>Bis zum 4. November 2026 gab es ein <b>optionales Konto</b>, verbunden mit den bezahlten Plänen. Die
+    Anmeldung lief über einen per E-Mail gesendeten Link, die Daten lagen in einer Datenbank bei
+    <b>Supabase</b> (Region São Paulo, in Brasilien), die Anmelde- und Einladungs-E-Mails gingen über
+    <b>Brevo</b>, und die Abonnements wurden über <b>Stripe</b> abgerechnet. <b>Dieses System ist
+    abgeschaltet</b>: Eine Anmeldung ist nicht mehr möglich, die bezahlten Pläne werden nicht mehr angeboten,
+    und es wird keine weitere Abbuchung geben.</p>
+    <p>Was mit den Daten derer geschieht, die dieses System genutzt haben:</p>
+    <ul>
+      <li><b>Kontodaten</b> — Anmelde-E-Mail, Konfiguration, Vorlagen, Marke, Testfalllisten, Fälle,
+      Quittungen, Anhänge, Plätze und Support-Tickets — bleiben in der Datenbank, ungenutzt und mit auf uns
+      beschränktem Zugriff, bis sie gelöscht wird, und werden <b>mit der Löschung der Datenbank
+      gelöscht</b>. Die übrigen Datensätze der Datenbank, etwa die Adressen der früheren
+      Benachrichtigungsliste und die anonymen Nutzungszählungen, werden mit ihr gelöscht.</li>
+      <li>Vor der Löschung erstellen wir eine <b>Sicherungskopie</b> der Datenbank. Sie wird mit
+      beschränktem Zugriff aufbewahrt und nur genutzt, um die unten genannten gesetzlichen Pflichten zu
+      erfüllen und Anfragen betroffener Personen zu diesen Datensätzen zu beantworten.</li>
+      <li><b>Rechnungen und steuerliche Unterlagen</b> werden so lange aufbewahrt, wie das brasilianische
+      Steuer- und Buchhaltungsrecht es verlangt. Das ist eine gesetzliche Pflicht (Art. 7, II LGPD), keine
+      Wahl von uns oder von Ihnen.</li>
+      <li>Die <b>Zahlungen</b> hat Stripe verarbeitet, das seine eigenen Zahlungsunterlagen nach seiner
+      eigenen Datenschutzrichtlinie aufbewahrt. Die Kartennummer ist nie über uns gelaufen.</li>
+    </ul>
+    <p>Wenn Sie ein Konto hatten und eine Kopie Ihrer Daten möchten, oder möchten, dass sie vor der Löschung
+    der Datenbank gelöscht werden — außer den steuerlichen Unterlagen —, schreiben Sie an
+    <a href="mailto:{{contato}}" style="color:var(--accent)">{{contato}}</a>.</p>
+    </div>
+
+    <h2 id="criancas">Kinder und Jugendliche</h2>
+    <p>Der Dienst ist ein Arbeitswerkzeug und <b>richtet sich nicht an Kinder oder Jugendliche</b>. Es gibt
+    keine Registrierung, daher fragen wir nach keinem Alter und speichern keines. Wenn Sie erfahren, dass
+    ein Kind oder eine jugendliche Person uns eine E-Mail geschickt hat, schreiben Sie an
+    <a href="mailto:{{contato}}" style="color:var(--accent)">{{contato}}</a>, und die Nachricht wird
+    gelöscht.</p>
+
+    <h2 id="bases">Rechtsgrundlagen, Zwecke und Fristen</h2>
+    <p>Was wir verarbeiten, warum, auf welcher Grundlage und wie lange:</p>
     <table class="legal" id="basesLegais">
       <tr><th>Daten</th><th>Wozu</th><th>Rechtsgrundlage</th><th>Frist</th></tr>
-      <tr><td>E-Mail-Adresse der Benachrichtigungsliste</td><td>Benachrichtigen, wenn es den bezahlten Plan gibt</td>
-          <td>Einwilligung (Art. 7, I)</td><td>Bis Sie widerrufen, oder 24 Monate ohne Nutzung</td></tr>
-      <tr><td>Die fünfzehn Nutzungsmeilensteine</td><td>Erkennen, wo das Werkzeug versagt, und es verbessern</td>
-          <td>Anonymisierte Daten (Art. 12); im Zweifel berechtigtes Interesse (Art. 7, IX)</td>
-          <td>{{prazoEvento}} Monate</td></tr>
-      <tr><td>Seitenaufrufe</td><td>Wissen, wie viele Personen ankommen und über welchen Weg</td>
-          <td>Anonymisierte Daten (Art. 12); im Zweifel berechtigtes Interesse (Art. 7, IX)</td>
+      <tr><td>E-Mails, die Sie uns schicken</td>
+          <td>Antworten und die angesprochene Sache weiterverfolgen</td>
+          <td>Berechtigtes Interesse (Art. 7, IX LGPD); bei Anfragen betroffener Personen Erfüllung einer
+          gesetzlichen Pflicht (Art. 7, II)</td>
+          <td>So lange, wie zum Antworten und Weiterverfolgen nötig; früher auf Anfrage</td></tr>
+      <tr><td>Technische Zugriffsdaten (IP-Adresse, Browser, angefragte Adresse) bei Vercel</td>
+          <td>Die Seiten ausliefern und die Website schützen</td>
+          <td>Berechtigtes Interesse (Art. 7, IX); und Erfüllung einer gesetzlichen Pflicht (Art. 7, II),
+          soweit Art. 15 des brasilianischen Marco Civil da Internet (Gesetz Nr. 12.965/2014) anwendbar
+          ist</td>
+          <td>Die Aufbewahrungsfrist von Vercel, unter Beachtung dessen, was das Gesetz verlangt</td></tr>
+      <tr><td>Zählung der Seitenaufrufe</td>
+          <td>Wissen, wie viele Personen ankommen und auf welchen Seiten</td>
+          <td>Berechtigtes Interesse (Art. 7, IX)</td>
           <td>Gemäß der Richtlinie von Vercel</td></tr>
-      <tr><td>Zugriffsprotokolle des Webservers</td><td>Sicherheit und gesetzliche Pflicht</td>
-          <td>Erfüllung einer gesetzlichen Pflicht (Art. 7, II) — Marco Civil da Internet, Art. 15</td>
-          <td>6 Monate</td></tr>
-      <tr><td>Inhalt des bezahlten Kontos — Testfalllisten, Fälle, Quittungen, Anhänge, Vorlagen, Konfiguration,
-          Plätze, Tickets</td>
-          <td>Erbringung des vereinbarten Dienstes</td>
-          <td>Erfüllung eines Vertrags (Art. 7, V)</td>
-          <td>Solange das Abonnement läuft, und <b>bis zu 90 Tage</b> nach dessen Beendigung</td></tr>
-      <tr><td>Rechnung und der mit ihr verbundene Kundendatensatz</td>
+      <tr data-antigo><td>Daten des früheren Kontosystems</td>
+          <td>Kein neuer Zweck: Sie werden nur bis zur Löschung der Datenbank aufbewahrt</td>
+          <td>Erfüllung des bereits beendeten Vertrags (Art. 7, V) und berechtigtes Interesse (Art. 7, IX),
+          um die Abschaltung abzuschließen</td>
+          <td>Bis zur Löschung der Datenbank des früheren Systems</td></tr>
+      <tr data-antigo><td>Rechnungen und der mit ihnen verbundene Kundendatensatz</td>
           <td>Steuerliche und buchhalterische Pflicht</td>
           <td>Erfüllung einer gesetzlichen Pflicht (Art. 7, II)</td>
-          <td>Die anwendbare steuerliche Aufbewahrungsfrist. Name und Dokumentnummer werden zusammen mit dem
-          Rest des Kontos nach {{prazoConta}} Tagen gelöscht</td></tr>
+          <td>Die Frist, die das brasilianische Steuer- und Buchhaltungsrecht verlangt</td></tr>
     </table>
-    <p class="small muted">Die Nutzungsmeilensteine und die Besuche sind so entworfen, dass sie niemanden
-    identifizieren; sollten sie dennoch von einer Behörde als personenbezogene Daten eingestuft werden, ist
-    die Grundlage das berechtigte Interesse an Erhalt und Verbesserung des Dienstes, und Sie können über den obigen Kontakt Widerspruch einlegen.</p>
+    <p class="small muted">Für Personen im Europäischen Wirtschaftsraum gilt auch die
+    Datenschutz-Grundverordnung (DSGVO); die entsprechenden Grundlagen sind das berechtigte Interesse (Art.
+    6 Abs. 1 lit. f) und die Erfüllung einer rechtlichen Verpflichtung (Art. 6 Abs. 1 lit. c). Sie können
+    der Verarbeitung auf Grundlage des berechtigten Interesses über den obigen Kontakt widersprechen.</p>
 
-    <h2>Wo die Daten liegen</h2>
-    <p>Die E-Mail-Adresse der Liste und die Nutzungsmeilensteine liegen in einer Datenbank, die von
-    <b>Supabase in der Region São Paulo</b> gehostet wird — also <b>auf brasilianischem Staatsgebiet</b>. Das
-    Hosting der Website übernimmt <b>Vercel</b>, dessen Netz global ist: Die technischen Zugriffsprotokolle und
-    die Zählung der Besuche können außerhalb Brasiliens verarbeitet werden, was eine internationale
-    Übermittlung im Sinne von Art. 33 LGPD darstellt, gestützt auf Vertragsklauseln des Anbieters selbst.</p>
-    <p><b>Ihre Videos liegen an keinem dieser Orte</b>, weil sie Ihr Gerät nie verlassen.</p>
+    <h2 id="seguranca">Informationssicherheit</h2>
+    <p>Die wichtigste Sicherheitsmaßnahme ist die Architektur: <b>Die Inhalte, die Sie aufnehmen, verlassen
+    Ihren Rechner nicht</b>, also gibt es auf unserer Seite keine Kopie davon, die zu schützen, die zu
+    verlieren oder herauszugeben wäre. Website und Werkzeug werden über eine verschlüsselte Verbindung
+    (HTTPS) ausgeliefert, und die Website hat keinen Anwendungsserver und keine eigene Datenbank in
+    Betrieb.</p>
+    <p>Wir haben keine Zertifizierung nach SOC 2 oder ISO 27001 und werden nicht schreiben, dass wir eine
+    haben. Die Seite <a href="{{seguranca}}" style="color:var(--accent)">Informationssicherheit</a>
+    beschreibt, wie Sie prüfen, was das Werkzeug tut.</p>
 
-    <h2>Ihre Rechte</h2>
-    <p>Die LGPD (Gesetz Nr. 13.709/2018) sichert Ihnen jederzeit und unentgeltlich zu:</p>
+    <h2 id="incidentes">Sicherheitsvorfälle</h2>
+    <p>Auf unserer Seite gibt es nur die E-Mails, die wir erhalten, und, bis sie gelöscht sind, die
+    Datensätze des früheren Kontosystems. Tritt ein Sicherheitsvorfall ein, der ein relevantes Risiko oder
+    einen relevanten Schaden für betroffene Personen mit sich bringen kann, melden wir ihn der <b>ANPD</b>
+    (der brasilianischen Datenschutzbehörde) und den betroffenen Personen nach Art. 48 LGPD — und, soweit
+    anwendbar, der europäischen Aufsichtsbehörde nach der DSGVO — und sagen, was bekannt ist: welche Daten
+    betroffen sind, was bereits getan wurde und was wir empfehlen.</p>
+
+    <h2 id="autoridades">Anfragen von Behörden</h2>
+    <p>Wir geben Daten an eine Behörde nur auf eine <b>Anordnung mit gültiger Rechtsgrundlage</b> heraus,
+    und nur das Angeforderte. Wir benachrichtigen die Person, deren Daten angefordert wurden, es sei denn,
+    das Gesetz verbietet diese Benachrichtigung. Und <b>was wir nicht haben, kann nicht herausgegeben
+    werden</b>: Es liegen uns weder Video noch Audio noch Transkription vor. Eine Anfrage zum Inhalt einer
+    Aufnahme muss an die Person gerichtet werden, die aufgenommen hat.</p>
+
+    <h2 id="onde">Wo die Daten liegen</h2>
+    <p><b>Ihre Inhalte bleiben auf Ihrem Gerät.</b> Die E-Mails, die Sie uns schicken, liegen in unserem
+    Postfach bei HostGator. Die technischen Zugriffsdaten und die Zählung der Besuche liegen bei Vercel,
+    dessen Netz global ist: Sie können außerhalb Brasiliens verarbeitet werden, was eine internationale
+    Übermittlung im Sinne von Art. 33 LGPD darstellt, gestützt auf die vertraglichen Garantien des
+    Anbieters.</p>
+    <p data-antigo>Die Datensätze des früheren Kontosystems liegen bis zu ihrer Löschung in der Datenbank
+    bei Supabase, in der Region São Paulo; die Zahlungsunterlagen von Stripe liegen bei Stripe.</p>
+
+    <h2 id="direitos">Ihre Rechte</h2>
+    <p>Die LGPD (Art. 18) sichert Ihnen jederzeit und unentgeltlich zu:</p>
     <ul>
       <li>die Bestätigung, dass eine Verarbeitung stattfindet, und den Zugang zu den Daten;</li>
       <li>die Berichtigung unvollständiger, unrichtiger oder veralteter Daten;</li>
-      <li>die Anonymisierung, Sperrung oder Löschung nicht erforderlicher oder rechtswidrig verarbeiteter Daten;</li>
+      <li>die Anonymisierung, Sperrung oder Löschung nicht erforderlicher oder rechtswidrig verarbeiteter
+      Daten;</li>
       <li>die Übertragbarkeit zu einem anderen Anbieter;</li>
       <li>die Löschung der auf Grundlage Ihrer Einwilligung verarbeiteten Daten;</li>
       <li>die Auskunft darüber, mit wem wir Daten teilen;</li>
       <li>die Auskunft über die Möglichkeit, nicht einzuwilligen, und darüber, was das nach sich zieht;</li>
-      <li>den Widerruf der Einwilligung, jederzeit.</li>
+      <li>den Widerruf der Einwilligung, jederzeit;</li>
+      <li>den Widerspruch gegen eine Verarbeitung, die gegen das Gesetz verstößt.</li>
     </ul>
-    <p>In der Praxis bedeutet das hier fast immer nur eines: <b>Ihre E-Mail-Adresse von der Liste zu
-    nehmen</b>. Es genügt, an <a href="mailto:{{contato}}" style="color:var(--accent)">{{contato}}</a> zu
-    schreiben — wir antworten innerhalb von 15 Tagen, und die Löschung erfolgt sofort, wenn dies die Anfrage
-    ist. Wir verlangen für die Löschung weder ein Ausweisdokument noch eine Begründung: Die E-Mail-Adresse, die schreibt, ist selbst schon der Beweis, dass sie Ihnen gehört.</p>
-    <p>Sie können sich außerdem bei der <b>Autoridade Nacional de Proteção de Dados (ANPD)</b> beschweren,
-    wenn Sie der Auffassung sind, dass Ihre Rechte nicht gewahrt wurden.</p>
+    <p>Wenn Sie sich im Europäischen Wirtschaftsraum befinden, gewährt Ihnen die DSGVO gleichwertige Rechte:
+    Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung, Datenübertragbarkeit und Widerspruch
+    (Art. 15 bis 21).</p>
+    <p>In der Praxis sind die einzigen personenbezogenen Daten von Ihnen, die wir haben, höchstens <b>die
+    E-Mail, die Sie uns geschickt haben</b> — und, wenn Sie vor dem 4. November 2026 ein Konto hatten, dessen
+    Datensätze, bis sie gelöscht sind. Was in Ihrem Browser liegt, löschen Sie selbst, indem Sie die
+    Website-Daten löschen. Und die Inhalte Ihrer Aufnahmen liegen nicht bei uns: Für sie werden die Rechte
+    gegenüber der Person ausgeübt, die aufgenommen hat.</p>
+    <p>Um ein Recht auszuüben, schreiben Sie an
+    <a href="mailto:{{contato}}" style="color:var(--accent)">{{contato}}</a>. Wir antworten innerhalb von 15
+    Tagen. Sie können sich auch bei der <b>ANPD</b> beschweren und, wenn Sie sich im Europäischen
+    Wirtschaftsraum befinden, bei der Datenschutzaufsichtsbehörde Ihres Landes.</p>
 
-    <h2>Änderungen</h2>
-    <p>Wenn sich diese Erklärung ändert, wird das Datum oben aktualisiert. Wesentliche Änderungen — insbesondere jeder
-    Übergang dazu, Daten zu erheben — werden auf dieser Seite angekündigt, mit aktualisiertem Datum oben.</p>
+    <h2 id="alteracoes">Änderungen</h2>
+    <p>Wenn sich diese Erklärung ändert, wird das Datum oben aktualisiert und die Änderung auf dieser Seite
+    angekündigt. Da wir keine Registrierung haben, können wir niemanden per E-Mail benachrichtigen.</p>
 
-    <h2>Kontakt</h2>
+    <h2 id="contato">Kontakt</h2>
     <p>{{empresa}} — CNPJ {{cnpj}}.<br>
     Datenschutz und Anfragen betroffener Personen:
     <a href="mailto:{{contato}}" style="color:var(--accent)">{{contato}}</a>.<br>
-    Technische Angelegenheiten und Fehlermeldungen: dieselbe Adresse.</p>
-
-
+    Support, Fragen zum Werkzeug und Fehlermeldungen:
+    <a href="mailto:suporte@walkstamp.com" style="color:var(--accent)">suporte@walkstamp.com</a>.</p>
   </div>
 </section>

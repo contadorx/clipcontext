@@ -1,4 +1,4 @@
-import { LOCALE } from '@/lib/conta/textos';
+import { LOCALE } from '@/lib/site';
 /* Os textos e o endereço do blog, num lugar só.
  *
  * `blog` é a mesma palavra nos cinco idiomas — e por isso NÃO entra na tabela de

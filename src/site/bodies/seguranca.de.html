@@ -1,16 +1,15 @@
 <section style="padding-top:60px">
   <div class="wrap doc">
     <h1 style="font-size:32px">Informationssicherheit</h1>
-    <p class="updated">Letzte Aktualisierung: 15. August 2026.<br>
+    <p class="updated">Letzte Aktualisierung: 4. November 2026.<br>
     Diese Seite richtet sich an alle, die den Einsatz von {{marca}} in einem Unternehmen freigeben müssen: wie
     es funktioniert, was Ihren Rechner verlässt und was wir <b>nicht</b> haben.</p>
 
     <p class="lockHint" style="margin:0 0 26px">
     <b>In einem Satz:</b> Das Werkzeug hat keinen Verarbeitungsserver und erhält weder Ihr Video noch Ihr
-    Audio noch Ihre Screenshots. Das gilt in allen Plänen, und Sie müssen es nicht glauben — Sie können es
-    in dreißig Sekunden prüfen, mit dem Browser, den Sie ohnehin offen haben. Wer einen bezahlten Plan
-    abschließt, erhält ein <b>Konto</b>, und es gibt genau eine Sache, die es nach Ihrer Wahl speichern kann;
-    sie ist unten in aller Ausführlichkeit beschrieben.</p>
+    Audio noch Ihre Screenshots. Sie müssen es nicht glauben — Sie können es in dreißig Sekunden prüfen,
+    mit dem Browser, den Sie ohnehin offen haben. Ein Konto oder eine Registrierung gibt es ebenfalls
+    nicht: Was Sie einstellen, bleibt in Ihrem Browser, und es ist unten beschrieben.</p>
 
     <h2>Warum die Frage hier eine andere Form annimmt</h2>
     <p>Die Prüfung eines Softwareanbieters folgt meist einer Liste: wo die Daten liegen, wer Zugriff hat,
@@ -38,8 +37,9 @@
     steht er hier anstelle eines Siegels.</p>
 
     <h2>Die Offline-Version, für den Fall, dass selbst das nicht genügt</h2>
-    <p>Es gibt eine <b>einzelne HTML-Datei</b>, in der das gesamte Werkzeug steckt. Sie laden sie herunter,
-    trennen die Netzwerkverbindung, öffnen die Datei, und sie funktioniert. Nichts darin spricht mit einem Server.</p>
+    <p>Es gibt eine <b>einzelne HTML-Datei</b>, in der das gesamte Werkzeug steckt; wir schicken sie per E-Mail,
+    wenn Sie danach fragen — die Adresse steht am Ende dieser Seite. Sie speichern sie, trennen die
+    Netzwerkverbindung, öffnen die Datei, und sie funktioniert. Nichts darin spricht mit einem Server.</p>
     <p>Und das ist kein Versprechen im Text: Der Prozess, der diese Datei erzeugt, <b>bricht ab</b>, wenn darin
     noch irgendeine Messadresse übrig ist. Es ist eine Sperre im Build, keine Absicht. Sie können es prüfen,
     indem Sie in der heruntergeladenen Datei nach &bdquo;supabase&ldquo; oder &bdquo;insights&ldquo; suchen — es gibt keinen Treffer.</p>
@@ -67,32 +67,19 @@
     Spracherkennungsmodell an, das beim Zuhören übersetzt, ebenfalls auf Ihrem Rechner.
     <b>Auf keinem der beiden Wege wird der Text übertragen.</b></p>
 
-    <h2>Das bezahlte Konto und die einzige Ausnahme</h2>
-    <p>Die Nutzung des Werkzeugs verlangt kein Konto, und daran hat sich nichts geändert: Ohne Login nimmt
-    <code>/app</code> auf, transkribiert und erzeugt das Dokument genau gleich. Wer einen bezahlten Plan
-    abschließt, erhält damit ein Konto, und darin liegen die E-Mail-Adresse für den Zugang, die Rechnungen,
-    die Support-Tickets, die Plätze des Teams und — wenn Sie den Bildschirm <b>Testfallliste</b>
-    nutzen — die Liste der auszuführenden Fälle.</p>
-    <p>Auf diesem Bildschirm speichert das Markieren eines Falls als erledigt eine <b>Quittung</b>: der Code
-    des Falls, das System, das Ticket, das Datum, der Name der erzeugten Datei und die <b>Prüfsumme jedes
-    Screenshots</b>. Das sind Zahlen. Es gibt kein Bild, keine Transkription, keinen Text der Schritte. Genau
-    das erlaubt es, Monate später ein PDF zu nehmen und zu prüfen, ob es dasselbe ist — und deshalb
-    existiert sie.</p>
-    <p><b>Die Ausnahme, und sie liegt bei Ihnen:</b> Beim Bestätigen des Abschlusses gibt es ein optionales
-    Feld, um <b>die vollständige <code>.json</code>-Datei der Sitzung anzuhängen</b>. Diese Datei enthält die
-    Bilder der Screenshots. Sie anzuhängen ist das Einzige an diesem Produkt, das Inhalte von Ihnen auf einen
-    Server von uns legt; es geschieht nie von allein, das Feld ist zugeklappt voreingestellt, und der Hinweis
-    darauf, was es bedeutet, steht direkt neben dem Feld — nicht auf einer Seite mit Bedingungen. Jeder Anhang
-    hat eine Schaltfläche zum Löschen, und Löschen löscht die Datei, nicht nur die Zeile, die auf sie verweist.
-    <b>Video und Audio verlassen Ihren Browser weiterhin nie, mit Anhang oder ohne.</b></p>
-
     <h2>Was in Ihrem Browser bleibt</h2>
     <p>Nichts von Ihren Inhalten wird zwischen zwei Besuchen gespeichert. Von den Identifikationsdaten des
     Nachweises bleiben nur <b>System</b> und <b>ausgeführt von</b> im <code>sessionStorage</code> — den der
     Browser beim Schließen des Tabs löscht —, damit Sie sie nicht bei jedem Fall neu tippen; eine Schaltfläche
     löscht sie sofort. Testfall, Ticket, Ergebnis und die Notizen werden nicht einmal gespeichert, solange der
     Tab lebt. Nichts davon ist ein Cookie, nichts davon wird von uns gelesen, und nichts davon verlässt Ihr Gerät.</p>
-    <p>Neben dem Modell liegt ein Vermerk zur <b>Konfiguration</b>: welche Kombination aus Bibliothek und
+    <p>Was Sie <b>einstellen</b>, bleibt dagegen von einem Besuch zum nächsten im lokalen Speicher dieses
+    Browsers: die Kundenmarke (Name und Logo), das Feld <b>Ausgestellt von</b>, die Dokumentvorlagen, die Sie
+    gespeichert haben, und — nur wenn Sie das Kästchen anhaken — die Liste der Begriffe Ihres Systems. Das ist
+    Konfiguration, keine Aufnahme: kein Bildschirm, kein Audio, keine Transkription. Um das an eine andere
+    Person im Team weiterzugeben, gibt es die <b>Vorgabendatei</b>: Eine Person exportiert sie, die anderen
+    importieren sie, und sie reist auf dem Weg, den Sie wählen — nicht über einen Server von uns.</p>
+    <p>Neben dem Spracherkennungsmodell liegt ein Vermerk zur <b>Konfiguration</b>: welche Kombination aus Bibliothek und
     Dateiformat das Modell auf diesem Rechner öffnen kann. Versionsnamen, keine Inhalte — und
     die Schaltfläche, die das Modell löscht, löscht den Vermerk mit.</p>
     <p><b>Die Bildschirme einer laufenden Aufnahme</b> liegen im privaten Speicher des Browsers (OPFS),
@@ -134,7 +121,7 @@
     <h3>Was es stattdessen gibt</h3>
     <ul>
       <li>Der Code, der in Ihrem Browser läuft, <b>lässt sich lesen</b>: Es ist eine Seite, und <code>Strg+U</code> zeigt alles. Serverseitigen Code gibt es nicht, weil es keinen Server gibt.</li>
-      <li>Die <b>Offline-Version</b> kann von Ihrem Team heruntergeladen, geprüft, versioniert und verteilt werden.</li>
+      <li>Die <b>Offline-Version</b>, die wir auf Anfrage schicken, kann von Ihrem Team geprüft, versioniert und verteilt werden.</li>
       <li>Die Überprüfung, dass nichts hinausgeht, dauert dreißig Sekunden und hängt nicht davon ab, dass Sie uns glauben.</li>
     </ul>
 
@@ -156,38 +143,6 @@
     woran Sie das überprüfen.</p>
 
 
-    <!-- A MECÂNICA DA LICENÇA, VINDA DA `/time` — 23/08.
-         A `/time` era órfã: nenhuma página do site levava a ela, e ela estava
-         indexada. Duas páginas vendendo o mesmo plano é o defeito que mais
-         custou a este projeto, e a órfã é sempre a que ninguém lembra de
-         atualizar.
-         Ela foi redirecionada para a página de preços. Destas seções, o que
-         falava de administrar o time já existe na conta, e o que falava de
-         guardar dados e da versão offline já existe acima nesta página. O que
-         não tinha outro lugar é isto: como a chave é conferida e por que ela
-         vale pouco tempo. Numa avaliação de fornecedor é exatamente a pergunta
-         que vem depois de "o que sai da minha máquina". -->
-<h2>Wie es intern funktioniert</h2>
-    <ol class="passos">
-      <li><b>Sie fordern an.</b> Sie geben die E-Mail-Adresse hier ein. In diesem Moment wird nichts
-      entschieden: Es geht nur eine Nachricht an Ihr Postfach.</li>
-      <li><b>Sie klicken auf das, was angekommen ist.</b> Das ist der Nachweis, dass die Adresse Ihnen
-      gehört — und es ist der einzige Moment, in dem es so etwas wie eine Sitzung gibt.</li>
-      <li><b>Sie kommen mit dem fertigen Link zurück.</b> Der Schlüssel wird auf dem Server signiert, mit
-      Ihrer E-Mail-Adresse darin, und bereits in einer Adresse von {{marca}} ausgeliefert.</li>
-      <li><b>Von da an kein Netz mehr.</b> Der Schlüssel wird <b>im Browser</b> geprüft, gegen einen
-      öffentlichen Schlüssel, der im HTML des Werkzeugs selbst steht. Er funktioniert im Flugzeug, auf dem
-      Rechner des Kunden mit gesperrtem Internet und auf dem Computer, den die IT nicht mit unserem Hosting sprechen lässt.</li>
-    </ol>
-
-    <h2>Warum die Gültigkeit kurz ist</h2>
-    <p>Jeder ausgestellte Schlüssel gilt <b>21 Tage</b> im Team und <b>45</b> im Einzelplan (14 im Test),
-    und der nächste kommt per E-Mail,
-    bevor der vorherige abläuft. Die Administration kann diese Frist im Team-Portal auf 1 bis 90 Tage verkürzen. Das ist keine Bürokratie: Es ist das, was einen durchgesickerten Link
-    <b>von selbst sterben</b> lässt. Da während der Nutzung kein Server irgendetwas prüft, gibt es keine
-    Schaltfläche zum Widerrufen — die Frist ist der Widerruf. Dieser Tausch ist mit Absicht so gewählt: Uns
-    ist ein Leck, das abläuft, lieber als ein bezahltes Produkt, das aufhört zu funktionieren, wenn das Internet ausfällt.</p>
-
     <!-- A SAÍDA — 23/08. Esta página era um beco: saía só para a política de
          privacidade. Quem termina de ler aqui já resolveu a pergunta que o
          trouxe, e a próxima pergunta dele tem endereço. -->
@@ -195,7 +150,7 @@
     <p>{{segSaida}}</p>
     <p class="row" style="margin:12px 0 0">
       <a class="btn ghost" href="{{verificar}}">{{fVerif}}</a>
-      <a class="btn ghost" href="{{precos}}">{{navPrice}}</a>
+      <a class="btn ghost" href="{{comparativo}}">{{fComp}}</a>
     </p>
   </div>
 </section>

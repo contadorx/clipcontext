@@ -1,16 +1,15 @@
 <section style="padding-top:60px">
   <div class="wrap doc">
     <h1 style="font-size:32px">Information security</h1>
-    <p class="updated">Last updated: 15 August 2026.<br>
+    <p class="updated">Last updated: 4 November 2026.<br>
     This page is for whoever has to approve {{marca}} inside a company: how it works, what leaves your
     machine, and what we do <b>not</b> have.</p>
 
     <p class="lockHint" style="margin:0 0 26px">
     <b>In one line:</b> the tool has no processing server and never receives your video, your audio or
-    your frames. That holds on every plan, and you do not have to take our word for it — you can check in
-    thirty seconds, with the browser you already have open. Anyone on a paid plan gets an
-    <b>account</b>, and there is exactly one thing it can store by your choice; it is spelled out
-    below.</p>
+    your frames. You do not have to take our word for it — you can check in thirty seconds, with the
+    browser you already have open. There is no account and no sign-up either: what you set up stays in
+    your browser, and it is described below.</p>
 
     <h2>Why the question has a different shape here</h2>
     <p>Vendor assessments usually follow a checklist: where is the data held, who can access it, which
@@ -38,8 +37,9 @@
     instead of a badge.</p>
 
     <h2>The offline version, for when that is still not enough</h2>
-    <p>There is a <b>single HTML file</b> with the whole tool inside. You download it, disconnect the
-    network, open the file, and it works. Nothing in it talks to any server.</p>
+    <p>There is a <b>single HTML file</b> with the whole tool inside, which we send by e-mail to whoever
+    asks — the address is at the end of this page. You save it, disconnect the network, open the file, and
+    it works. Nothing in it talks to any server.</p>
     <p>And that is not a promise in prose: the process that produces that file <b>fails the build</b> if any
     measurement address is left inside it. It is a lock in the pipeline, not an intention. You can verify it
     by searching the downloaded file for &ldquo;supabase&rdquo; or &ldquo;insights&rdquo; — there are no
@@ -66,30 +66,19 @@
     translator does not exist, what the tool offers is the speech model translating as it listens, also on
     your computer. <b>In neither path is the text transmitted.</b></p>
 
-    <h2>The paid account, and the one exception</h2>
-    <p>Using the tool requires no account, and that has not changed: signed out, <code>/app</code>
-    records, transcribes and generates documents exactly the same. Anyone on a paid plan gets an account
-    holding the sign-in e-mail, the invoices, the support tickets, the team seats and — if you use the
-    <b>test run</b> screen — the list of cases to run.</p>
-    <p>On that screen, marking a case done stores a <b>receipt</b>: the case code, the system, the
-    ticket, the date, the name of the generated file and the <b>fingerprint of every frame</b>. Those
-    are numbers. No image, no transcript, no step text. It is what lets you take a PDF months later and
-    check that it is the same one — which is why it exists.</p>
-    <p><b>The exception, and it is yours:</b> when you confirm the case as done, there is an optional
-    field to <b>attach the complete session <code>.json</code></b>. That file has the frame images
-    inside it. Attaching it is the one thing in this product that puts content of yours on a server of
-    ours; it never goes on its own, the field starts closed, and what it means is written next to the
-    field — not in a terms page. Every attachment has a delete button, and deleting removes the file,
-    not just the row pointing at it. <b>Your video and audio still never leave your browser, attachment
-    or no attachment.</b></p>
-
     <h2>What stays in your browser</h2>
     <p>None of your content is kept between visits. Of the evidence identification fields, only
     <b>system</b> and <b>executed by</b> are held in <code>sessionStorage</code> — which the browser clears
     when the tab closes — so they are not retyped for every case; a button clears them immediately. Test
     case, ticket, result and the notes are not stored even while the tab lives. None of this is a cookie,
     none of it is read by us, and none of it leaves your device.</p>
-    <p>Alongside the model there is a <b>configuration</b> note: which combination of library and
+    <p>What you <b>set up</b> does stay from one visit to the next, in this browser's local storage: the
+    client brand (name and logo), the <b>issued by</b> field, the document templates you saved and — only if
+    you tick the box — the list of your system's terms. That is configuration, not recording: no screen,
+    audio or transcript. To take it to someone else on the team there is the <b>defaults file</b>: one
+    person exports it, the others import it, and it travels whichever way you choose — not through a
+    server of ours.</p>
+    <p>Alongside the speech model there is a <b>configuration</b> note: which combination of library and
     file format manages to open the model on this machine. Version names, no content — and the
     button that deletes the model deletes the note with it.</p>
     <p><b>The screens of a recording in progress</b> are kept in the browser's private storage (OPFS),
@@ -131,7 +120,7 @@
     <h3>What exists instead</h3>
     <ul>
       <li>The code that runs in your browser <b>can be read</b>: it is a page, and <code>Ctrl+U</code> shows all of it. There is no server-side code because there is no server.</li>
-      <li>The <b>offline version</b> can be downloaded, scanned, versioned and distributed by your own team.</li>
+      <li>The <b>offline version</b>, sent to whoever asks, can be scanned, versioned and distributed by your own team.</li>
       <li>Verifying that nothing leaves takes thirty seconds and does not depend on believing us.</li>
     </ul>
 
@@ -153,38 +142,6 @@
     check that.</p>
 
 
-    <!-- A MECÂNICA DA LICENÇA, VINDA DA `/time` — 23/08.
-         A `/time` era órfã: nenhuma página do site levava a ela, e ela estava
-         indexada. Duas páginas vendendo o mesmo plano é o defeito que mais
-         custou a este projeto, e a órfã é sempre a que ninguém lembra de
-         atualizar.
-         Ela foi redirecionada para a página de preços. Destas seções, o que
-         falava de administrar o time já existe na conta, e o que falava de
-         guardar dados e da versão offline já existe acima nesta página. O que
-         não tinha outro lugar é isto: como a chave é conferida e por que ela
-         vale pouco tempo. Numa avaliação de fornecedor é exatamente a pergunta
-         que vem depois de "o que sai da minha máquina". -->
-<h2>How it works underneath</h2>
-    <ol class="passos">
-      <li><b>You ask.</b> Type your email here. Nothing is decided at this moment: a message goes out
-      to your mailbox, that is all.</li>
-      <li><b>You click what arrived.</b> That is what proves the address is yours — and it is the only
-      moment anything resembling a session exists.</li>
-      <li><b>You come back with the link ready.</b> The key is signed on the server, with your email
-      inside it, and handed over already wrapped in a {{marca}} address.</li>
-      <li><b>From then on, no network at all.</b> The key is checked <b>inside the browser</b>, against a
-      public key that sits in the tool's own HTML. It works on a plane, on the client machine with the
-      internet locked down, and on the computer IT will not let talk to our hosting.</li>
-    </ol>
-
-    <h2>Why the validity is short</h2>
-    <p>Each key issued lasts <b>21 days</b> on a team and <b>45</b> on the individual plan (14 on the
-    trial), and the next one arrives by email
-    before the previous expires. The administrator can shorten that window, from 1 to 90 days, in the team portal. This is not bureaucracy: it is what makes a leaked link <b>die on its
-    own</b>. Since no server checks anything while you work, there is no revoke button — the deadline is
-    the revocation. It is a trade we chose on purpose: we would rather have a leak that expires than a
-    paid product that stops working when the internet drops.</p>
-
     <!-- A SAÍDA — 23/08. Esta página era um beco: saía só para a política de
          privacidade. Quem termina de ler aqui já resolveu a pergunta que o
          trouxe, e a próxima pergunta dele tem endereço. -->
@@ -192,7 +149,7 @@
     <p>{{segSaida}}</p>
     <p class="row" style="margin:12px 0 0">
       <a class="btn ghost" href="{{verificar}}">{{fVerif}}</a>
-      <a class="btn ghost" href="{{precos}}">{{navPrice}}</a>
+      <a class="btn ghost" href="{{comparativo}}">{{fComp}}</a>
     </p>
   </div>
 </section>

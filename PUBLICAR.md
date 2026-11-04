@@ -15,28 +15,17 @@ npx vercel login          # uma vez, na conta que é dona de walkstamp.com
 npx vercel --prod
 ```
 
-## As seis variáveis de ambiente
+## Variáveis de ambiente: nenhuma
 
-Elas moram nas *Project Settings → Environment Variables* da Vercel, e o
-`.env.exemplo` lista os nomes:
+Desde o Build 71 o site e a ferramenta não precisam de variável nenhuma: não há
+banco, cobrança nem envio de e-mail do lado de cá. As que ficaram na Vercel
+(`SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `STRIPE_SECRET_KEY`,
+`STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_PERSONAL`, `STRIPE_PRICE_TIME`,
+`CRON_SECRET` e as do Brevo) podem ser apagadas em *Project Settings →
+Environment Variables* depois do deploy — nenhum código as lê mais.
 
-| variável | de onde vem | o que quebra sem ela |
-|---|---|---|
-| `SUPABASE_URL` | painel do Supabase | a conta e o roteiro não abrem |
-| `SUPABASE_SERVICE_ROLE_KEY` | Supabase → Project API keys | idem |
-| `STRIPE_SECRET_KEY` | Stripe → Developers → API keys | a compra não fecha |
-| `STRIPE_WEBHOOK_SECRET` | Stripe → Webhooks → o endpoint de produção | o pagamento entra e a conta não é criada |
-| `STRIPE_PRICE_PERSONAL` | Stripe → Products | o botão do plano Personal aponta para o nada |
-| `STRIPE_PRICE_TIME` | Stripe → Products | idem, no Team |
-
-E mais uma, que não está no `.env.exemplo` porque não é do produto, é da faxina:
-
-| `CRON_SECRET` | você inventa, e cola nas duas pontas | **sem ela o `/api/faxina` responde 503 e os prazos da política de privacidade nunca rodam** |
-
-O 503 é de propósito: um endereço que apaga dado de cliente ficar público
-porque faltou uma variável é o tipo de porta que ninguém percebe estar aberta.
-Mas ele significa que, hoje, a promessa de apagar em 90 dias **não está sendo
-cumprida** — está escrita e não roda.
+Na Stripe, desligue o endpoint de webhook que apontava para
+`/api/stripe/webhook`: a rota saiu, e a Stripe ficaria tentando entregar.
 
 ## Depois de publicar, confira três coisas
 
@@ -44,8 +33,8 @@ cumprida** — está escrita e não roda.
    faixa de formatos de saída. Hoje ela traz três siglas e nenhuma faixa: a home
    em português está servindo um build velho, enquanto `/en` já está no novo.
    É a razão de publicar agora.
-2. `https://walkstamp.com/de/preise` e `/fr/tarifs` — o número grande tem que
-   estar em **€**, não em R$.
+2. `https://walkstamp.com/precos` e `/conta` — os dois têm que levar para a
+   home (308). A página de preços e a conta saíram no Build 71.
 3. `https://walkstamp.com/ajuda`, `/de/hilfe`, `/fr/aide` — a base de
    conhecimento, com nove temas.
 

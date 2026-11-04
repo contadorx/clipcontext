@@ -1,213 +1,304 @@
-/* Os documentos legais: identificação da empresa, direitos do titular e as
-   afirmações que deixaram de ser verdade quando a medição entrou. */
-import { chromium } from 'playwright';
-import http from 'http'; import fs from 'fs'; import path from 'path';
-import { criarProxy, exigirNext } from './proxy.mjs';
+/* OS DOCUMENTOS LEGAIS DEPOIS DE 04/11/2026 — política de privacidade, termos
+ * de uso e o DPA, nos cinco idiomas.
+ *
+ * O QUE MUDOU. O Walkstamp ficou grátis, sem conta e sem servidor (DEC-22,
+ * Builds 69 a 72). Os três documentos descreviam conta, planos pagos, cobrança
+ * pela Stripe, banco na Supabase e prazos de retenção que deixaram de existir.
+ * Esta régua cobrava exatamente essas frases ("estão à venda", "14 dias com
+ * tudo", "a conta apaga sozinha", o link para `/conta/dados`, a contagem de
+ * marcos de uso lida da migração do banco). Ela passou a cobrar o contrário:
+ *
+ *   [1] nenhum token aposentado (`{{prazoConta}}`, `{{contaDados}}`…) e nenhum
+ *       token fora da lista que o site e o gerador do DPA preenchem — um token
+ *       sem valor sai LITERAL na página ou no papel;
+ *   [2] as MESMAS seções (`id` de cada h2), as mesmas tabelas com o mesmo
+ *       número de linhas e os mesmos trechos `data-antigo` nos cinco idiomas;
+ *   [3] a data nova, no formato de cada idioma;
+ *   [4] Stripe, Supabase, Brevo, planos, assinatura e cobrança só aparecem
+ *       como PASSADO — dentro de elementos marcados com `data-antigo` — e a
+ *       seção sobre quem teve conta continua contando que eles existiram;
+ *   [5-7] o que cada documento tem de afirmar agora;
+ *   [8] e, com o site no ar, o que a pessoa lê na página servida.
+ *
+ * As partes [1] a [7] leem arquivos. A [8] precisa do Next na 8802:
+ *
+ *   npx next build && npx next start -p 8802      (ou rodar.sh / rapido.sh site)
+ *   node testes/legal.mjs
+ *
+ *   node testes/legal.mjs --arquivos               só [1] a [7], sem servidor
+ */
+import fs from 'fs';
+import path from 'path';
 import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
-await exigirNext();
-const ROOT=`${RAIZ_WS}/public`;
-const T={'.html':'text/html','.css':'text/css','.js':'text/javascript','.svg':'image/svg+xml','.ico':'image/x-icon','.png':'image/png'};
-/* O site virou Next.js: as páginas não existem mais como arquivo em public/.
-   O servidorzinho estático daqui virou um encaminhador para o Next — mesma
-   porta, mesmas URLs no teste, e quem responde é o produto de verdade. */
-const srv = criarProxy();
-await new Promise(r=>srv.listen(8893,r));
-const br=await chromium.launch({executablePath:CHROME_WS});
-let falhas=0; const ok=(n,c,e)=>{console.log((c?'  ok   ':'  FALHA')+'  '+n+(e?'  → '+e:''));if(!c)falhas++};
 
-const EMPRESA='Produtize Produtos e Serviços Inteligentes Ltda.';
-const CNPJ='48.417.292/0001-99';
-const MAIL='privacidade@walkstamp.com';
-const ROTAS=JSON.parse(fs.readFileSync(`${RAIZ_WS}/src/rotas.json`,'utf8'));
+const SO_ARQUIVOS = process.argv.includes('--arquivos');
+let falhas = 0;
+const ok = (n, c, e) => { console.log((c ? '  ok   ' : '  FALHA') + '  ' + n + (e ? '  → ' + e : '')); if (!c) falhas++; };
 
-/* QUANTOS MARCOS A POLÍTICA DIZ QUE EXISTEM — contra quantos o produto emite.
- *
- * A política dizia "três" nos cinco idiomas, em até cinco lugares cada. São
- * QUINZE: onze na ferramenta (`medir(...)` em `src/template.html`) e quatro na
- * conta (`lib/conta/medir.ts`). O `check` da tabela `walkstamp.evento` lista
- * exatamente esses quinze — é ele a fonte, e não uma lista escrita aqui.
- *
- * O Build 1 corrigiu a /seguranca e NÃO viu a /privacidade: mesma frase, outro
- * arquivo. E a política é justamente o documento onde um número errado sobre
- * medição custa mais. Esta régua existe para que o par não se separe de novo. */
-const NUMEROS = { 3: 'três|three|tres|drei|trois', 15: 'quinze|fifteen|quince|fünfzehn' };
-function marcosQueOProdutoEmite(){
-  const migr = fs.readdirSync(`${RAIZ_WS}/supabase/migrations`)
-    .map((f) => fs.readFileSync(`${RAIZ_WS}/supabase/migrations/${f}`, 'utf8'))
-    .filter((s) => /evento_nome_check check/.test(s)).pop() || '';
-  const bloco = /evento_nome_check check \(nome in \(([\s\S]*?)\)\)/.exec(migr);
-  return bloco ? (bloco[1].match(/'[a-z_]+'/g) || []).length : 0;
-}
+const EMPRESA = 'Produtize Produtos e Serviços Inteligentes Ltda.';
+const CNPJ = '48.417.292/0001-99';
+const MAIL = 'privacidade@walkstamp.com';
+const SUPORTE = 'suporte@walkstamp.com';
+const IDIOMAS = ['pt', 'en', 'es', 'de', 'fr'];
+const ROTAS = JSON.parse(fs.readFileSync(`${RAIZ_WS}/src/rotas.json`, 'utf8'));
+const MATRIZ = JSON.parse(fs.readFileSync(`${RAIZ_WS}/src/egressao.json`, 'utf8'));
+const DESTINOS = MATRIZ.destinos.filter((d) => (d.onde || []).includes('web'));
 
-const paginas = {
- /* A LISTA DE AVISO MORREU, E A TELA DE APAGAR NASCEU — 27/08.
-    A política descrevia um campo de e-mail na página de preços como "o único
-    dado pessoal que existe aqui". Esse campo foi removido do produto pela
-    DEC-16, e o dado pessoal que existe hoje é o e-mail da conta. Um documento
-    legal que descreve uma coleta que não acontece mais é tão errado quanto um
-    que esconde a que acontece — e este errava para os dois lados ao mesmo
-    tempo, porque a conta paga já gravava roteiro, caso e anexo.
-    O `nao` proíbe a frase antiga; o `tem` exige a nova, e exige o LINK para a
-    tela onde a pessoa apaga sozinha — que é o que separa um direito escrito de
-    um direito exercível. */
- '/privacidade.html':    {tem:['Quem é responsável','Bases legais','Onde os dados ficam','Seus direitos','ANPD','São Paulo','art. 33','Marco Civil','A lista de aviso não existe mais','a conta apaga sozinha','Seus dados'], nao:['não há informação\nsua para acessar','Como não coletamos dados, não há informação','É o único dado pessoal que existe aqui']},
- '/en/privacidade.html': {tem:['Who is responsible','Legal bases','Where the data lives','Your rights','ANPD','São Paulo','art. 33','Internet Civil Framework','The notification list no longer exists','the account deletes it itself','Your data'], nao:['there is no information of yours to access','Since we collect no data','It is the only personal data here']},
- '/es/privacidade.html': {tem:['Quién es responsable','Bases legales','Dónde están los datos','Tus derechos','ANPD','São Paulo','art. 33','Marco Civil','La lista de aviso ya no existe','la cuenta lo borra sola','Tus datos'], nao:['no hay información tuya que acceder','Como no recogemos datos','Es el único dato personal que hay aquí']},
- /* ALEMÃO E FRANCÊS ENTRARAM — 23/08.
-    Esta lista tinha três idiomas num site que fala cinco, e os dois que
-    faltavam são justamente os dois mercados que fazem avaliação de fornecedor:
-    a régua de razão social, ANPD e Marco Civil não olhava para nenhum deles.
-    `Art. 33` com maiúscula em alemão, e é assim que ele está na página. */
- '/de/privacidade.html': {tem:['Wer verantwortlich ist','Wo die Daten liegen','Ihre Rechte','ANPD','São Paulo','Art. 33','Marco Civil','Die Benachrichtigungsliste gibt es nicht mehr','das Konto löscht selbst','Ihre Daten'], nao:['gibt es keine Information von Ihnen','das einzige personenbezogene Datum, das es hier gibt']},
- '/fr/privacidade.html': {tem:['Qui est responsable','Où les données se trouvent','Vos droits','ANPD','São Paulo','art. 33','Marco Civil','La liste de notification n’existe plus','le compte efface lui-même','Vos données'], nao:['il n’y a aucune information vous concernant','la seule donnée personnelle qui existe ici']},
- /* OS TERMOS PASSARAM A VENDER — 27/08.
-    Até aqui a cláusula 14 dizia "não há nada à venda" e o único dado pessoal
-    do site era o e-mail da lista de aviso. Os dois viraram mentira no dia em
-    que a conta, a degustação de 14 dias e o cancelamento na conta entraram no
-    produto. A régua agora exige as quatro frases que sustentam a venda —
-    está à venda, degustação, cancelar na conta, sem devolução proporcional —
-    e PROÍBE as duas antigas, para que a volta atrás caia aqui e não no
-    contrato de alguém. Alemão e francês entraram junto: os termos falavam
-    cinco idiomas e esta lista olhava para três. */
- '/termos.html':         {tem:['Quem oferece o serviço','Privacidade','estão à venda','14 dias com tudo','Cancelar se faz na sua conta','não há devolução','art. 49','Lei aplicável','Contato'],
-                          nao:['lista de aviso','não há nada à venda']},
- '/en/termos.html':      {tem:['Who provides the service','Privacy','are for sale','14 days with everything','Cancelling is done in your account','no pro-rata refund','art. 49','Governing law','Contact'],
-                          nao:['notification list','nothing is for sale']},
- '/es/termos.html':      {tem:['Quién ofrece el servicio','Privacidad','están a la venta','14 días con todo','Cancelar se hace en tu cuenta','devolución proporcional','art. 49','Ley aplicable','Contacto'],
-                          nao:['lista de aviso','no hay nada a la venta']},
- '/de/termos.html':      {tem:['Wer den Dienst anbietet','Datenschutz','stehen zum Verkauf','14 Tage mit allem','Gekündigt wird im eigenen Konto','keine anteilige Erstattung','Art. 49','Anwendbares Recht','Kontakt'],
-                          nao:['Benachrichtigungsliste','steht nichts zum Verkauf']},
- '/fr/termos.html':      {tem:['Qui propose le service','Confidentialité','sont en vente','14 jours avec','La résiliation se fait dans votre compte','pas de remboursement au prorata','art. 49','Loi applicable','Contact'],
-                          nao:['liste de notification','rien n’est en vente']},
+const DOCS = {
+  privacidade: (L) => `${RAIZ_WS}/src/site/bodies/privacidade.${L}.html`,
+  termos:      (L) => `${RAIZ_WS}/src/site/bodies/termos.${L}.html`,
+  dpa:         (L) => `${RAIZ_WS}/src/site/dpa.${L}.html`,
+};
+const ler = (doc, L) => fs.readFileSync(DOCS[doc](L), 'utf8');
+
+/* ---- ferramentas de leitura ---------------------------------------------- */
+const semComentario = (s) => s.replace(/<!--[\s\S]*?-->/g, '');
+/* Os elementos marcados com `data-antigo` falam do sistema que deixou de
+   existir. Um `div` marcado não pode ter outro `div` dentro: o corte é pelo
+   primeiro fechamento da mesma etiqueta. */
+const ANTIGO = /<(div|p|tr|li|h2|span|ul)\b[^>]*\bdata-antigo\b[^>]*>[\s\S]*?<\/\1>/g;
+const semAntigo = (s) => semComentario(s).replace(ANTIGO, ' ');
+const soAntigo = (s) => (semComentario(s).match(ANTIGO) || []).join(' ');
+const texto = (s) => s.replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ').replace(/&[a-z]+;/g, ' ')
+  .replace(/\s+/g, ' ');
+const ids = (s, tag) => [...semComentario(s).matchAll(new RegExp(`<${tag}\\b[^>]*\\bid="([^"]+)"`, 'g'))].map((m) => m[1]);
+const linhasDe = (s, id) => {
+  const t = semComentario(s).match(new RegExp(`<table[^>]*\\bid="${id}"[^>]*>([\\s\\S]*?)</table>`));
+  return t ? [...t[1].matchAll(/<tr\b[^>]*>([\s\S]*?)<\/tr>/g)].map((m) => m[1]) : [];
 };
 
-for (const [rota, {tem, nao}] of Object.entries(paginas)) {
-  console.log('\n' + rota);
-  const ctx=await br.newContext(); const pg=await ctx.newPage();
-  await pg.goto('http://localhost:8893'+rota);
-  const txt=await pg.locator('body').innerText();
-  ok('razão social', txt.includes(EMPRESA));
-  ok('CNPJ', txt.includes(CNPJ));
-  ok('e-mail de contato é clicável',
-     (await pg.locator(`a[href="mailto:${MAIL}"]`).count()) > 0,
-     (await pg.locator(`a[href^="mailto:"]`).count()) + ' links mailto');
-  for (const t of tem) ok(`traz "${t}"`, txt.includes(t));
-  for (const n of nao) ok(`não afirma mais: "${n.slice(0,40)}"`, !txt.includes(n));
-  /* O LINK para a tela de apagar, e no endereço TRADUZIDO. Um `href` escrito à
-     mão na política mandaria o leitor alemão para `/de/konto/dados`, que não
-     existe — lá é `/de/konto/daten`. A régua lê o endereço do `rotas.json`, que
-     é de onde a página o tira, para não aprovar a cópia que ela deveria pegar. */
-  if (rota.includes('privacidade')) {
-    const L = rota.startsWith('/en') ? 'en' : rota.startsWith('/es') ? 'es'
-            : rota.startsWith('/de') ? 'de' : rota.startsWith('/fr') ? 'fr' : 'pt';
-    const alvoDados = ROTAS.caminhoConta[L] + '/' + ROTAS.subConta.dados[L];
-    ok('leva à tela onde a pessoa apaga sozinha',
-       (await pg.locator(`a[href="${alvoDados}"]`).count()) > 0, alvoDados);
+/* ---- o que vale em cada idioma ------------------------------------------- */
+const DATA = {
+  pt: /4 de novembro de 2026/, en: /4 November 2026/, es: /4 de noviembre de 2026/,
+  de: /4\. November 2026/, fr: /4 novembre 2026/,
+};
+/* As palavras do produto vendido. Fora de `data-antigo`, qualquer uma delas
+   é o documento voltando a descrever um sistema que não existe. */
+const VENDA = {
+  pt: /planos? pagos?|plano time|plano gratuito|assinatura|cobran[çc]a|fatura|reembolso|renova[çc][ãa]o|checkout|assentos?\b|degusta/i,
+  en: /paid plans?|team plan|free plan|subscription|subscrib|billing|invoice|refund|renewal|checkout|\bseats?\b|free trial/i,
+  es: /planes? de pago|plan team|plan gratuito|suscripci[óo]n|\bcobros?\b|factura|reembolso|renovaci[óo]n|checkout|asientos?\b/i,
+  de: /bezahlte[nr]? Plan|kostenlose[nr]? Plan|Abonnement|\bAbos?\b|Abrechnung|\bRechnung|Erstattung|Verlängerung|Checkout|Plätze|Testphase/i,
+  fr: /offres? payantes?|offre gratuite|abonnement|abonn[ée]s?\b|facturation|facture|remboursement|renouvellement|checkout|si[èe]ges?\b|\bessai\b/i,
+};
+/* O que saiu do produto no Build 69 e não pode voltar a ser prometido: os
+   marcos de uso (o `medir()` que gravava no banco) e as duas sinalizações que
+   só eles respeitavam. A contagem de visitas do Vercel não as lê. */
+const MARCOS = {
+  pt: /marcos de uso|quinze marcos/i, en: /usage milestones|fifteen milestones/i,
+  es: /hitos de uso|quince hitos/i, de: /Nutzungsmeilenstein|fünfzehn Meilensteine/i,
+  fr: /jalons d[’']usage|quinze jalons/i,
+};
+const NENHUM = { pt: /\bNenhum\b/, en: /\bNone\b/, es: /\bNinguno\b/, de: /\bKeine\b/, fr: /\bAucun\b/ };
+const SEM_COOKIE = {
+  pt: /não grava cookie nenhum/i, en: /sets no cookies/i, es: /no guarda ninguna cookie/i,
+  de: /setzt keine Cookies/i, fr: /ne dépose aucun cookie/i,
+};
+/* A cláusula de lei e foro é a que já existia. Ela não é reescrita aqui: é
+   conferida, para que uma tradução nova não mude o foro por acidente. */
+const LEI = {
+  pt: [/regidos pela lei brasileira/, /foro do domic[íi]lio do usu[áa]rio/],
+  en: [/governed by Brazilian law/, /courts of\s+the user's domicile/],
+  es: [/se rigen por la ley brasileña/, /fuero del domicilio del usuario/],
+  de: [/unterliegen brasilianischem Recht/, /Wohnsitz der nutzenden Person/],
+  fr: [/régies par la loi brésilienne/, /for du domicile de l[’']utilisateur/],
+};
+const NAO_TRATA = {
+  pt: /não trata dados pessoais por\s+conta do Cliente/, en: /does not process personal data on\s+behalf of the Customer/,
+  es: /no trata datos personales por\s+cuenta del Cliente/, de: /verarbeitet keine personenbezogenen\s+Daten im Auftrag des Kunden/,
+  fr: /ne traite pas de données personnelles\s+pour le compte du Client/,
+};
+const SEM_SUB = {
+  pt: /Não há suboperador/, en: /There is no sub-processor/, es: /No hay subencargado/,
+  de: /Es gibt keinen Unterauftragsverarbeiter/, fr: /Il n[’']y a pas de sous-traitant ultérieur/,
+};
+
+/* Os tokens que quem renderiza preenche. O site: `lib/site.ts` (`tokens()` e
+   `caminhos()`). O DPA: `testes/gerar-dpa.mjs`. */
+const TOKENS_SITE = ['marca', 'empresa', 'cnpj', 'contato', 'encarregado', 'site', 'privacidade', 'termos',
+  'seguranca', 'app', 'home', 'blog'];
+const TOKENS_DPA = [...TOKENS_SITE, 'dataDpa', 'siteDom'];
+const APOSENTADOS = ['prazoConta', 'prazoLista', 'prazoEvento', 'contaDados', 'conta', 'precos'];
+
+// ===========================================================================
+console.log('[1] tokens: nenhum aposentado, nenhum que ninguém preencha');
+for (const doc of Object.keys(DOCS)) {
+  for (const L of IDIOMAS) {
+    const s = ler(doc, L);
+    const usados = [...new Set([...s.matchAll(/\{\{(\w+)\}\}/g)].map((m) => m[1]))];
+    const mortos = usados.filter((t) => APOSENTADOS.includes(t));
+    const soltos = usados.filter((t) => !(doc === 'dpa' ? TOKENS_DPA : TOKENS_SITE).includes(t));
+    ok(`${doc}.${L}: sem token aposentado`, mortos.length === 0, mortos.join(', '));
+    ok(`${doc}.${L}: todo token tem quem o preencha`, soltos.length === 0, soltos.join(', '));
   }
-  // numeração dos termos sem buraco nem repetição
-  if (rota.includes('termos')) {
-    const ns=[...txt.matchAll(/^(\d+)\.\s/gm)].map(m=>+m[1]);
-    ok('artigos numerados de 1 a N sem falha',
-       ns.length>0 && ns.every((v,i)=>v===i+1), ns.join(','));
-  }
-  /* A tabela de bases legais tem que renderizar como tabela — e tem que falar
-     do que o cliente PAGANTE confia à gente. Ela listava só a lista de aviso,
-     os marcos, as visitas e os registros de acesso: tudo, menos a conta. Contar
-     linhas trancava um número; o que interessa é que cada linha tenha as quatro
-     colunas preenchidas e que as duas que faltavam estejam lá. */
-  if (rota.includes('privacidade')) {
-    /* CADA TABELA PELO SEU `id`.
-       Esta conferência mirava em `table.legal` — que era uma tabela só quando
-       foi escrita. Quando a política ganhou a tabela de PAPÉIS (3 colunas) e a
-       de SUBOPERADORES (5), o seletor passou a somar as três e a acusar 11
-       linhas "sem as quatro colunas" numa página correta. Uma régua que mira
-       numa classe compartilhada mede o que aparecer ali depois. */
-    const linhas = await pg.locator('table#basesLegais tr').count();
-    ok('a tabela de bases legais renderiza como tabela', linhas >= 5, linhas + ' linhas');
-    const vazias = await pg.locator('table#basesLegais tr').evaluateAll((trs) =>
-      trs.slice(1).filter((tr) => [...tr.querySelectorAll('td')].length !== 4
-        || [...tr.querySelectorAll('td')].some((td) => !td.textContent.trim())).length);
-    ok('e cada linha diz dado, finalidade, base legal e prazo', vazias === 0, String(vazias));
-
-    /* AS DUAS TABELAS NOVAS — por ora só em português.
-       A separação de papéis e a tabela de suboperadores entraram primeiro em
-       `privacidade.pt.html`, para serem revisadas antes de virarem cinco
-       traduções de um texto jurídico. Quando en/es/de/fr receberem as duas
-       seções, ESTA CONDIÇÃO SAI e a cobrança passa a valer nas três rotas.
-       Quem não deixa isso ser esquecido é `testes/terceiros.mjs`, que já falha
-       hoje, por idioma, dizendo qual tabela falta.
-
-       O que cada uma tem que afirmar:
-       A de papéis é a que decide uma avaliação de fornecedor: dizer-se
-       "controladora" dos dados que o cliente confia à conta paga é o erro que
-       reprova sozinho, porque quem decide finalidade e meios ali é o cliente. */
-    if (rota === '/privacidade.html') {
-    const papeis = (await pg.locator('table#papeis').textContent().catch(() => '')) || '';
-    ok('a política separa os dois papéis', /operadora/i.test(papeis) && /controladora/i.test(papeis),
-       papeis ? 'tem a tabela' : 'falta table#papeis');
-    ok('e a conta paga está do lado de OPERADORA',
-       /operadora[\s\S]{0,120}cliente/i.test(papeis.replace(/\s+/g, ' ')),
-       papeis.replace(/\s+/g, ' ').slice(0, 100));
-
-    const subs = await pg.locator('table#suboperadores tr').evaluateAll((trs) =>
-      trs.slice(1).filter((tr) => [...tr.querySelectorAll('td')].length !== 5
-        || [...tr.querySelectorAll('td')].some((td) => !td.textContent.trim())).length);
-    ok('e a tabela de suboperadores diz nome, função, dado, país e salvaguarda',
-       subs === 0, String(subs));
-    }
-
-    const col1 = await pg.locator('table#basesLegais tr td:first-child').allTextContents();
-    /* ISTO PULAVA POR UM MOTIVO QUE JÁ NÃO ERA VERDADE — consertado em 24/08.
-       O texto dizia que as tabelas de `de` e `fr` tinham 13 linhas contra 15 do
-       `pt`, faltando a da CONTA PAGA e a da FATURA, e que traduzi-las exigia
-       revisão jurídica antes de publicar prazo de retenção em dois mercados que
-       fazem avaliação de fornecedor.
-       Medido: as CINCO tabelas têm as mesmas sete linhas, e as duas em questão
-       estão lá em alemão ("Inhalt des bezahlten Kontos", "Rechnung") e em
-       francês ("Contenu du compte payant", "La facture"). A tradução já tinha
-       sido feita — em algum momento, sem que este arquivo ficasse sabendo.
-       O que faltava era a RÉGUA: as duas expressões regulares só conheciam
-       português, inglês e espanhol, então nem se o alemão estivesse perfeito
-       ele passaria. O pulo escondia a cobertura de dois idiomas atrás de um
-       motivo que tinha deixado de existir — e um pulo que sobrevive ao conserto
-       é lixo que esconde o próximo defeito. Agora as cinco são cobradas. */
-    ok('a conta paga está na tabela de prazos',
-       col1.some((c) => /conta paga|paid-account|cuenta de pago|bezahlten Kontos|compte payant/i
-         .test(c)), col1.join(' | ').slice(0, 140));
-    ok('e a fatura também, que é a que NÃO é apagada em 90 dias',
-       col1.some((c) => /fatura|invoice|factura|Rechnung/i.test(c)
-         || /^la facture/i.test(c.trim())), col1.join(' | ').slice(0, 140));
-  }
-  ok('sem token do build sobrando', !/\{\{|\}\}/.test(txt));
-  await ctx.close();
 }
 
-// o rodapé continua levando às duas páginas, nos três idiomas
+// ===========================================================================
+console.log('\n[2] as cinco línguas têm as mesmas seções');
+for (const doc of Object.keys(DOCS)) {
+  const pt = ler(doc, 'pt');
+  const ref = {
+    h2: ids(pt, 'h2'), tab: ids(pt, 'table'),
+    linhas: ids(pt, 'table').map((t) => linhasDe(pt, t).length),
+    antigo: (semComentario(pt).match(ANTIGO) || []).length,
+  };
+  ok(`${doc}.pt: as seções têm id`, ref.h2.length >= 5, ref.h2.join(' '));
+  for (const L of IDIOMAS.slice(1)) {
+    const s = ler(doc, L);
+    const h2 = ids(s, 'h2');
+    ok(`${doc}.${L}: mesmas seções, na mesma ordem`, h2.join(' ') === ref.h2.join(' '),
+       h2.join(' ') === ref.h2.join(' ') ? '' : h2.join(' '));
+    const tab = ids(s, 'table');
+    ok(`${doc}.${L}: mesmas tabelas`, tab.join(' ') === ref.tab.join(' '), tab.join(' '));
+    const lin = tab.map((t) => linhasDe(s, t).length);
+    ok(`${doc}.${L}: e com as mesmas linhas`, lin.join(',') === ref.linhas.join(','),
+       `${lin.join(',')} contra ${ref.linhas.join(',')}`);
+    const ant = (semComentario(s).match(ANTIGO) || []).length;
+    ok(`${doc}.${L}: os mesmos trechos sobre o sistema antigo`, ant === ref.antigo, `${ant} contra ${ref.antigo}`);
+  }
+}
+
+// ===========================================================================
+console.log('\n[3] a data nova');
+for (const doc of ['privacidade', 'termos']) {
+  for (const L of IDIOMAS) {
+    const upd = (ler(doc, L).match(/<p class="updated">([\s\S]*?)<\/p>/) || [, ''])[1];
+    ok(`${doc}.${L}: "última atualização" é 04/11/2026`, DATA[L].test(texto(upd)), texto(upd).slice(0, 60));
+  }
+}
+for (const L of IDIOMAS) {
+  const v = (ler('dpa', L).match(/<!--\s*versao:\s*([0-9-]+)\s*-->/) || [, ''])[1];
+  ok(`dpa.${L}: versão 2026-11-04`, v === '2026-11-04', v || '(sem versão)');
+}
+
+// ===========================================================================
+console.log('\n[4] o sistema vendido só aparece como passado');
+const PRECISA_ANTIGO = { privacidade: ['stripe', 'supabase', 'brevo'], termos: ['stripe'], dpa: ['stripe', 'supabase', 'brevo'] };
+for (const doc of Object.keys(DOCS)) {
+  for (const L of IDIOMAS) {
+    const s = ler(doc, L);
+    const atual = texto(semAntigo(s));
+    const marcas = atual.match(/stripe|supabase|brevo/gi) || [];
+    ok(`${doc}.${L}: Stripe, Supabase e Brevo só como passado`, marcas.length === 0, [...new Set(marcas)].join(', '));
+    const venda = atual.match(VENDA[L]);
+    ok(`${doc}.${L}: nada de plano, assinatura ou cobrança como atual`, !venda,
+       venda ? '…' + atual.slice(Math.max(0, venda.index - 40), venda.index + 40) + '…' : '');
+    ok(`${doc}.${L}: tem a seção sobre quem teve conta`, ids(s, 'h2').includes('contaAntiga'));
+    const passado = texto(soAntigo(s)).toLowerCase();
+    const calou = PRECISA_ANTIGO[doc].filter((v) => !passado.includes(v));
+    ok(`${doc}.${L}: e ela conta o que existiu`, calou.length === 0, calou.length ? 'não cita ' + calou.join(', ') : '');
+  }
+}
+
+// ===========================================================================
+console.log('\n[5] a política de privacidade');
+for (const L of IDIOMAS) {
+  const s = ler('privacidade', L);
+  const t = texto(semComentario(s));
+  ok(`${L}: canal de privacidade clicável`, s.includes('href="mailto:{{contato}}"'));
+  ok(`${L}: e o do suporte`, s.includes(`href="mailto:${SUPORTE}"`));
+  ok(`${L}: o aviso do topo leva à seção de quem teve conta`, s.includes('href="#contaAntiga"'));
+  ok(`${L}: não promete mais marco de uso`, !MARCOS[L].test(t), (t.match(MARCOS[L]) || [''])[0]);
+  ok(`${L}: nem Do Not Track / GPC, que a contagem de visitas não lê`, !/Do Not Track|Global Privacy Control/i.test(t));
+  ok(`${L}: diz que o site não grava cookie`, SEM_COOKIE[L].test(t));
+  ok(`${L}: nomeia o encarregado`, s.includes('{{encarregado}}'));
+  ok(`${L}: fala da ANPD e do RGPD/GDPR`, /ANPD/.test(t) && /RGPD|GDPR|DSGVO/.test(t));
+  const pap = linhasDe(s, 'papeis').map(texto);
+  ok(`${L}: a tabela de papéis diz que o conteúdo gravado não tem papel nosso`,
+     pap.length >= 4 && NENHUM[L].test(pap[1] || ''), (pap[1] || '(falta table#papeis)').slice(0, 80));
+  const op = texto(linhasDe(s, 'operadoras').join(' ')).toLowerCase();
+  ok(`${L}: quem trata por nossa conta: Vercel e HostGator`, op.includes('vercel') && op.includes('hostgator'));
+  const bases = linhasDe(s, 'basesLegais').slice(1);
+  const tortas = bases.filter((r) => { const tds = [...r.matchAll(/<td\b[^>]*>([\s\S]*?)<\/td>/g)].map((m) => texto(m[1]).trim()); return tds.length !== 4 || tds.some((x) => !x); });
+  ok(`${L}: bases legais — cada linha diz dado, finalidade, base e prazo`, bases.length >= 4 && tortas.length === 0,
+     `${bases.length} linhas, ${tortas.length} tortas`);
+  const terc = linhasDe(s, 'terceiros').length - 1;
+  ok(`${L}: a tabela de terceiros tem um destino por linha da matriz`, terc === DESTINOS.length,
+     `${terc} contra ${DESTINOS.length} — detalhe em testes/terceiros.mjs`);
+}
+
+// ===========================================================================
+console.log('\n[6] os termos de uso');
+for (const L of IDIOMAS) {
+  const s = ler('termos', L);
+  const t = texto(semComentario(s));
+  const ns = [...semComentario(s).matchAll(/<h2\b[^>]*>\s*(\d+)\.\s/g)].map((m) => +m[1]);
+  ok(`${L}: artigos numerados de 1 a N sem falha`, ns.length > 0 && ns.every((v, i) => v === i + 1), ns.join(','));
+  for (const r of LEI[L]) ok(`${L}: lei e foro de antes: ${String(r).slice(1, 40)}`, r.test(t));
+  ok(`${L}: canal do suporte e de privacidade clicáveis`,
+     s.includes(`href="mailto:${SUPORTE}"`) && s.includes('href="mailto:{{contato}}"'));
+  for (const id of ['gratuito', 'permitido', 'codigo', 'garantia', 'responsabilidade', 'privacidade', 'alteracoes', 'lei', 'contato'])
+    ok(`${L}: tem a seção "${id}"`, ids(s, 'h2').includes(id));
+  ok(`${L}: a ressalva da MIT e o nome antigo continuam`, /MIT/.test(t) && /ClipContext/.test(t));
+}
+
+// ===========================================================================
+console.log('\n[7] o DPA');
+for (const L of IDIOMAS) {
+  const s = ler('dpa', L);
+  const t = texto(semComentario(s));
+  ok(`${L}: diz que não trata dado por conta do Cliente`, NAO_TRATA[L].test(t));
+  ok(`${L}: e que não há suboperador`, SEM_SUB[L].test(t));
+  ok(`${L}: é um documento inteiro, para virar PDF`, /^<!doctype html>/i.test(s.trim()) && /<\/html>\s*$/.test(s));
+  ok(`${L}: usa a versão e o domínio que o gerador preenche`, s.includes('{{dataDpa}}') && s.includes('{{siteDom}}'));
+  const terc = linhasDe(s, 'terceiros').length - 1;
+  ok(`${L}: a mesma tabela de terceiros da política`, terc === DESTINOS.length, `${terc} contra ${DESTINOS.length}`);
+}
+
+if (SO_ARQUIVOS) {
+  console.log(falhas ? `\n${falhas} FALHA(S)` : '\nDocumentos legais (arquivos): tudo passou.');
+  process.exit(falhas ? 1 : 0);
+}
+
+// ===========================================================================
+console.log('\n[8] o que a pessoa lê na página servida');
+const { chromium } = await import('playwright');
+const { criarProxy, exigirNext } = await import('./proxy.mjs');
+await exigirNext();
+/* O servidorzinho daqui é um encaminhador para o Next — mesma porta, e quem
+   responde é o produto de verdade. */
+const srv = criarProxy();
+await new Promise((r) => srv.listen(8893, r));
+const br = await chromium.launch({ executablePath: CHROME_WS });
+const endereco = (pg, L) => (L === 'pt' ? '' : '/' + L) + '/' + ROTAS.slugs[pg][L];
+
+for (const L of IDIOMAS) {
+  for (const pg of ['privacidade', 'termos']) {
+    const rota = endereco(pg, L);
+    const ctx = await br.newContext(); const p = await ctx.newPage();
+    const r = await p.goto('http://localhost:8893' + rota);
+    ok(`${rota}: responde 200`, r && r.status() === 200, String(r && r.status()));
+    const txt = await p.locator('body').innerText();
+    ok(`${rota}: razão social e CNPJ`, txt.includes(EMPRESA) && txt.includes(CNPJ));
+    ok(`${rota}: e-mail de privacidade clicável`, (await p.locator(`a[href="mailto:${MAIL}"]`).count()) > 0);
+    ok(`${rota}: e-mail do suporte clicável`, (await p.locator(`a[href="mailto:${SUPORTE}"]`).count()) > 0);
+    ok(`${rota}: sem token do build sobrando`, !/\{\{|\}\}/.test(txt), (txt.match(/\{\{\w*\}\}/) || [''])[0]);
+    ok(`${rota}: a seção de quem teve conta tem âncora`, (await p.locator('#contaAntiga').count()) === 1);
+    if (pg === 'termos') {
+      const ns = [...txt.matchAll(/^(\d+)\.\s/gm)].map((m) => +m[1]);
+      ok(`${rota}: artigos numerados de 1 a N sem falha`, ns.length > 0 && ns.every((v, i) => v === i + 1), ns.join(','));
+    } else {
+      /* CADA TABELA PELO SEU `id`: mirar em `table.legal` soma as quatro. */
+      const vazias = await p.locator('table#basesLegais tr').evaluateAll((trs) =>
+        trs.slice(1).filter((tr) => [...tr.querySelectorAll('td')].length !== 4
+          || [...tr.querySelectorAll('td')].some((td) => !td.textContent.trim())).length);
+      const n = await p.locator('table#basesLegais tr').count();
+      ok(`${rota}: bases legais renderizam, com dado, finalidade, base e prazo`, n >= 5 && vazias === 0, `${n} linhas, ${vazias} tortas`);
+      const t = await p.locator('table#terceiros tr').count();
+      ok(`${rota}: a tabela de terceiros renderiza inteira`, t === DESTINOS.length + 1, String(t));
+    }
+    await ctx.close();
+  }
+}
+
 console.log('\nnavegação');
 for (const [rota, alvo] of [['/', '/privacidade'], ['/en', '/en/privacidade'], ['/es', '/es/privacidade']]) {
-  const ctx=await br.newContext(); const pg=await ctx.newPage();
-  await pg.goto('http://localhost:8893'+rota+'?lang=pt');
-  ok(`${rota}: link para a política no rodapé`,
-     (await pg.locator(`footer a[href="${alvo}"]`).count()) === 1);
+  const ctx = await br.newContext(); const p = await ctx.newPage();
+  await p.goto('http://localhost:8893' + rota + '?lang=pt');
+  ok(`${rota}: link para a política no rodapé`, (await p.locator(`footer a[href="${alvo}"]`).count()) === 1);
   await ctx.close();
-}
-
-console.log('\n[marcos] a política conta os mesmos marcos que o produto emite');
-{
-  const N = marcosQueOProdutoEmite();
-  ok('o banco declara quantos marcos existem', N > 0, String(N));
-  for (const L of ['pt', 'en', 'es', 'de', 'fr']) {
-    const html = fs.readFileSync(`${RAIZ_WS}/src/site/bodies/privacidade.${L}.html`, 'utf8');
-    /* Por PALAVRA e não por dígito: a política escreve o número por extenso,
-       que é como um documento jurídico o escreve. */
-    const errado = new RegExp(`(${NUMEROS[3]})\\s+(marcos|usage milestones|hitos|Nutzungsmeilenstein|jalons)`, 'i');
-    ok(`${L}: não diz "três marcos"`, !errado.test(html), (html.match(errado) || [''])[0]);
-    const certo = new RegExp(`(${NUMEROS[15]})\\s+(marcos|usage milestones|hitos|Nutzungsmeilenstein|jalons)`, 'i');
-    ok(`  e diz o número certo (${N})`, N !== 15 || certo.test(html),
-       (html.match(certo) || ['nenhum'])[0]);
-  }
 }
 
 await br.close(); srv.close();
-console.log(falhas?`\n${falhas} FALHA(S)`:'\nDocumentos legais: tudo passou.');
-process.exit(falhas?1:0);
+console.log(falhas ? `\n${falhas} FALHA(S)` : '\nDocumentos legais: tudo passou.');
+process.exit(falhas ? 1 : 0);

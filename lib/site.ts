@@ -11,7 +11,6 @@
  */
 import fs from 'node:fs';
 import FIGURAS from '@/src/figuras.json';
-import PRECOS from '@/src/precos.json';
 import path from 'node:path';
 
 /* Tudo o que se lê daqui mora em `src/`, e o caminho é montado com esse prefixo
@@ -33,11 +32,16 @@ const ler = (p: string) => fs.readFileSync(path.join(process.cwd(), 'src', p), '
  * `rotas.json` ganhar um sexto idioma sem que esta linha ganhe também, o build
  * quebra aqui, e não numa página em alemão que ninguém abre. */
 export type Lang = 'pt' | 'en' | 'es' | 'de' | 'fr';
+
+/** O locale de cada idioma, para datas e números (`Intl`). Morava no
+ *  `lib/conta/textos.ts`; a conta saiu no Build 71 e o blog continua usando. */
+export const LOCALE: Record<Lang, string> = {
+  pt: 'pt-BR', en: 'en-US', es: 'es-ES', de: 'de-DE', fr: 'fr-FR',
+};
 export type Dicionario = Record<string, string>;
 
-/* A identidade mora em `lib/marca.ts`, que não toca disco — ela é importada
-   pelo middleware, que roda no Edge. Reexportada aqui para quem já a pedia
-   deste módulo continuar pedindo do mesmo lugar. */
+/* A identidade mora em `lib/marca.ts`, que não toca disco. Reexportada aqui
+   para quem já a pedia deste módulo continuar pedindo do mesmo lugar. */
 export { marca } from '@/lib/marca';
 import { marca } from '@/lib/marca';
 
@@ -46,14 +50,6 @@ const rotas: {
   /* Quais idiomas têm vídeo do tour. Escrito pelo `build.py`, que olha o disco —
      ver o comentário no ponto de uso, mais abaixo. */
   demoLangs?: string[];
-  /* E quem tem o vídeo da rodada paga, que vive na página de preços. */
-  rodadaLangs?: string[];
-  caminhoConta: Record<Lang, string>;
-  /* Os pedaços traduzidos das sub-rotas da conta. O tipo é declarado aqui pelo
-     mesmo motivo de todos os outros: um `dados` que sumisse do `rotas.json`
-     reprovaria no build, em vez de virar `undefined` num `href` da política de
-     privacidade — que não quebra a página, só não leva a lugar nenhum. */
-  subConta: Record<string, Record<Lang, string>>;
   slugs: Record<string, Record<Lang, string>>;
   metas: Record<string, Record<Lang, { titulo: string; desc: string }>>;
   scripts: { detectarIdioma: string; lembrarIdioma: string };
@@ -81,7 +77,7 @@ export const IDIOMAS = rotas.idiomas;
 }
 export const SLUGS = rotas.slugs;
 export const METAS = rotas.metas;
-/** Os nomes das páginas internas — `precos`, `seguranca`, `casoEv`… */
+/** Os nomes das páginas internas — `comparativo`, `seguranca`, `casoEv`… */
 export const PAGINAS = Object.keys(rotas.slugs);
 
 /* O prefixo de cada idioma. Era uma tabela escrita à mão, e cada idioma novo
@@ -105,21 +101,6 @@ export function caminhos(lang: Lang): Dicionario {
     // Sem ele, um navegador em inglês abria o app em inglês mesmo vindo da
     // página em português — e a pessoa achava que era defeito.
     app: '/app?lang=' + lang,
-    // a área do cliente tem endereço traduzido como o resto do site: quem lê em
-    // espanhol não deveria ter que reconhecer a palavra "conta" para achar a
-    // própria fatura
-    /* Vem do `rotas.json`, e não escrito aqui.
-       
-       Escrito aqui, esta tabela tinha TRÊS idiomas num site que fala cinco — e
-       o link "Sua conta" do rodapé saía `undefined` em alemão e em francês.
-       Ninguém viu: `undefined` num `href` não quebra a página, só não leva a
-       lugar nenhum. É a mesma tabela que o `next.config.mjs` usa para montar a
-       ponte de reescrita. */
-    conta: rotas.caminhoConta[lang],
-    /* O endereço da tela "Seus dados", traduzido. Escrito à mão na política de
-       privacidade, ele mandaria o leitor alemão para `/de/konto/dados` — que
-       não existe: lá é `/de/konto/daten`. */
-    contaDados: rotas.caminhoConta[lang] + '/' + rotas.subConta.dados[lang],
     /* `blog` é a mesma palavra nos cinco idiomas, então ele não entra na tabela
        de slugs traduzidos — ela existe para os casos em que a palavra muda. */
     blog: lang === 'pt' ? '/blog' : `/${lang}/blog`,
@@ -138,19 +119,10 @@ export function tokens(lang: Lang): Dicionario {
     marcaA: marca.marcaA,
     marcaB: marca.marcaB,
     ICONV: marca.iconV,
-    supaUrl: marca.supaUrl,
-    supaKey: marca.supaKey,
     empresa: marca.empresa,
     cnpj: marca.cnpj,
     contato: marca.contato,
     encarregado: marca.encarregado,
-    /* Os prazos de retenção. Eles vêm do `marca.json`, escrito pelo `build.py`,
-       porque a política de privacidade é HTML estático e não tem como perguntar
-       ao banco. Quem impede a divergência entre este número e o do
-       `walkstamp.prazos()` é a régua `prazos.mjs`. */
-    prazoConta: marca.prazoConta,
-    prazoLista: marca.prazoLista,
-    prazoEvento: marca.prazoEvento,
     lang,
   };
 }
@@ -225,113 +197,10 @@ const features: { grupos: Grupo[] } = JSON.parse(ler('features.json'));
 const escapar = (s: string) =>
   s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
-/** O selo do plano de um item: nada quando é do Free.
- *
- *  Esta é a decisão que faz a lista caber na cabeça. Das 87 linhas, 71 estão no
- *  gratuito — a tabela antiga desenhava 213 vistos para dizer isso, e o leitor
- *  tinha que varrer três colunas de ✓ e — para descobrir as dezesseis linhas
- *  que importam. Agora o padrão é o silêncio: quem não tem selo é gratuito, e o
- *  selo aparece só onde há algo a pagar. O parágrafo acima da lista diz a regra
- *  em uma frase, e quem lê com leitor de tela ouve "só no Personal" junto.
- */
-function seloDoPlano(planos: string, t: Dicionario): string {
-  if (planos.includes('f')) return '';
-  const nome = planos.includes('p') ? 'Personal' : 'Team';
-  const classe = planos.includes('p') ? 'pl p' : 'pl t';
-  return ` <span class="${classe}"><span class="soLeitor">${escapar(t.tpSoNo)} </span>${nome}</span>`;
-}
-
-/** A lista completa do que existe, em grupos que se abrem e se fecham.
- *
- *  Ela é MONTADA e não escrita à mão porque são 87 linhas em três idiomas: à
- *  mão, seriam 261 chances de a versão em espanhol prometer uma coisa que a em
- *  português não promete. O dado mora em `src/features.json`, e a regra escrita
- *  lá no topo é a que importa — só entra o que existe.
- *
- *  Por que deixou de ser tabela: oitenta e sete linhas por quatro colunas é uma
- *  parede. Ninguém lê uma parede numa página de preço — rola até o fim e
- *  desiste no meio. Em grupos dobráveis, o que se vê primeiro são doze títulos
- *  com a contagem de cada um, e a pessoa abre o que é o problema dela. O
- *  conteúdo é o mesmo, e nada ficou escondido: os grupos nascem abertos.
- */
-/* O ESTADO DE UMA FUNCIONALIDADE — quatro, e não o liga-desliga de antes.
- *
- * O catálogo tinha `breve: true` ou nada, e "nada" queria dizer duas coisas
- * diferentes que ninguém separava: o que está pronto e o que FUNCIONA mas tem
- * uma ressalva que quem compra precisa saber. "Entrada automática por domínio
- * de e-mail" era o exemplo: a tabela existe, a licença concede por domínio — e
- * não há tela para a empresa cadastrar o domínio nem prova nenhuma de que ela
- * é dona dele. As linhas entram à mão. Vendida como pronta, ela promete um
- * self-service que não existe; escondida, some um recurso que funciona.
- *
- * `estado` ausente quer dizer `producao`. É um campo só, e não dois: `breve`
- * foi absorvido por ele, porque duas listas para a mesma verdade é como este
- * projeto já perdeu o hreflang de dois idiomas e deixou o tour em inglês numa
- * página alemã. */
-type Estado = 'producao' | 'beta' | 'construcao' | 'descoberta';
-export const estadoDe = (item: Feature): Estado =>
-  ((item.estado as Estado) || 'producao');
-
-const SELO: Record<Estado, { classe: string; chave: string } | null> = {
-  producao: null,
-  beta: { classe: 'beta', chave: 'tpBeta' },
-  construcao: { classe: 'soon', chave: 'tpBreve' },
-  descoberta: { classe: 'descoberta', chave: 'tpDescoberta' },
-};
-
-function seloDoEstado(item: Feature, t: Dicionario): string {
-  const selo = SELO[estadoDe(item)];
-  if (!selo) return '';
-  return ` <span class="${selo.classe}">${escapar(String(t[selo.chave] ?? ''))}</span>`;
-}
-
-export function tabelaDePlanos(lang: Lang, t: Dicionario): string {
-  const gratis = features.grupos.reduce(
-    (n, g) => n + g.itens.filter((i) => i.planos.includes('f')).length, 0);
-  const pagas = quantasFeatures - gratis;
-
-  const blocos = features.grupos.map((g) => {
-    const pagosNoGrupo = g.itens.filter((i) => !i.planos.includes('f')).length;
-    const itens = g.itens.map((item) => {
-      const rotulo = escapar(String(item[lang] ?? item.en ?? ''));
-      return `<li>${rotulo}${seloDoEstado(item, t)}${seloDoPlano(item.planos, t)}</li>`;
-    }).join('');
-    /* A contagem no título é o que deixa a lista fechada ainda informativa:
-       "O que sai (15)" já responde "vale a pena abrir?" antes do clique. */
-    const conta = `<span class="cont">${g.itens.length}</span>`;
-    /* Quando o grupo inteiro é do MESMO plano pago, o selo sobe para o título:
-       "Quando é uma equipe · Team" responde de fora o que a pessoa iria abrir
-       para descobrir. Ter que ser o mesmo plano não é detalhe: o grupo do
-       roteiro tem seis linhas Personal e duas Team, e um "PERSONAL" no título
-       diria que as duas de Team também são — uma promessa a menos vendida como
-       a mais, que é o jeito de errar que custa caro. */
-    const mesmoPlano = new Set(g.itens.map((i) => i.planos)).size === 1;
-    const sinal = g.itens.length > 0 && pagosNoGrupo === g.itens.length && mesmoPlano
-      ? seloDoPlano(g.itens[0].planos, t) : '';
-    /* `?? g.titulo.en`: um idioma novo do site não pode DERRUBAR a página de
-       preços enquanto a lista de funcionalidades não é traduzida. Cair no
-       inglês é visivelmente incompleto; cair num build quebrado é pior. */
-    return `<details class="grpF" open><summary><b>${escapar(g.titulo[lang] ?? g.titulo.en)}</b>${conta}${sinal}</summary>` +
-      `<ul class="fts">${itens}</ul></details>`;
-  }).join('');
-
-  return `<p class="small muted tpRegra">${preencherTexto(t.tpResumo, [quantasFeatures, gratis, pagas])}</p>` +
-    `<div class="listaF" aria-label="${escapar(t.tpListaRot)}">${blocos}</div>`;
-}
-
-/** `{0}`, `{1}`… trocados por números. Existe para o resumo acima da lista sair
- *  contado e não escrito à mão: um número redondo no texto envelhece na primeira
- *  vez que alguém mexe na lista e esquece do parágrafo. */
-function preencherTexto(molde: string, vals: Array<string | number>): string {
-  let s = escapar(molde || '');
-  vals.forEach((v, i) => { s = s.split(`{${i}}`).join(`<b>${v}</b>`); });
-  return s;
-}
-
-/** Quantas funcionalidades a lista declara. Sai no texto acima da tabela: um
- *  número contado é diferente de um número redondo escrito à mão, que envelhece
- *  na primeira vez que alguém mexe na lista e esquece do parágrafo. */
-export const quantasFeatures = features.grupos.reduce((n, g) => n + g.itens.length, 0);
+/* A LISTA COMPLETA POR PLANO saiu no Build 71, com a página de preços: o
+   produto ficou grátis, e uma lista que marcava o que era "só no Personal" e
+   "só no Team" não tem mais o que marcar. O `features.json` continua sendo a
+   fonte da tira de formatos, logo abaixo. */
 
 /* ------------------------------------------------- a tira de formatos de saída
  *
@@ -378,9 +247,6 @@ function tira(itens: Saida[], t: Dicionario): string {
     return `<span class="saida"><b>${i.selo}</b>${nota ? ' ' + escapar(nota) : ''}</span>`;
   }).join('') + '</div>';
 }
-
-/** A tira inteira — a página de preços mostra as quinze de uma vez. */
-const tiraDeSaidas = (t: Dicionario) => tira(saidasDoCatalogo(), t);
 
 /* A HOME MOSTRA QUATRO EM CIMA E O RESTO NUMA GAVETA, e isso é decisão
    editorial, não descuido: quem decide comprar quer saber se a ENTREGA dele
@@ -507,11 +373,8 @@ export function paginaHtml(pagina: string, lang: Lang): string {
   t.duoCompLinked = (t.duoComp || '')
     .replace('{0}', `<a href="${t.comparativo}" style="color:var(--accent)">`)
     .replace('{1}', '</a>');
-  // a tabela só é montada onde é usada; nas outras páginas o token vira vazio
-  t.tabelaPlanos = pagina === 'precos' ? tabelaDePlanos(lang, t) : '';
-  /* A tira vale na página de preços E na home: as duas a tinham escrita à
-     mão, e a home era a sexta cópia. */
-  t.tiraSaidas = pagina === 'precos' ? tiraDeSaidas(t) : '';
+  /* A tira da home. Ela também valia na página de preços, que saiu no
+     Build 71. */
   t.tiraDestaque = pagina === 'home' ? tiraDestaque(t) : '';
   t.tiraResto = pagina === 'home' ? tiraResto(t) : '';
   /* A MATRIZ DE EGRESSÃO. Ela é o segundo metade do caminho A da DEC-1: a frase
@@ -524,14 +387,6 @@ export function paginaHtml(pagina: string, lang: Lang): string {
      chama é `testes/egressao.mjs`. */
   t.matrizEgressao = matrizDeEgressao(lang, t);
   t.quantasSaidas = String(quantasSaidas);
-  /* O vídeo da rodada mora na página de PREÇOS, e por isso o token nasce aqui
-     e não no ramo da home — onde a primeira versão dele ficou, derrubando o
-     build com "chaves sem valor em precos.pt: rodadaLang". Onde o vídeo não
-     existe, cai no inglês, pelo mesmo motivo do tour: um `<video>` apontando
-     para um 404 é uma caixa preta, que é pior do que outro idioma. */
-  const comRodada: string[] = rotas.rodadaLangs ?? ['en'];
-  t.rodadaLang = comRodada.includes(lang) ? lang : 'en';
-  t.quantasFeatures = String(quantasFeatures);
 
   let bruto: string;
   if (pagina === 'home') {
@@ -576,41 +431,6 @@ export function paginaHtml(pagina: string, lang: Lang): string {
     t.figura = ((FIGURAS as Record<string, string>)[pagina] ?? '')
       .replace('__ALT__', String(t.figAlt ?? ''))
       .replace('__LEG__', String(t.figLegenda ?? ''));
-    /* OS DOIS BLOCOS GERADOS DA PÁGINA DE PREÇOS.
-       Cartões e comparação curta saem de constantes nomeadas no `build.py` e
-       chegam aqui como dado, pelo `precos.json` — o mesmo caminho das figuras.
-       Escritos à mão dentro dos cinco corpos, tirar uma linha da comparação
-       custaria cinco edições, e a quinta seria esquecida.
-
-       O `trocar` roda ANTES de o bloco entrar no corpo porque os CTAs trazem
-       `{{app}}` e `{{conta}}` dentro. Se ele entrasse cru, os endereços
-       dependeriam da ordem em que as chaves saem do dicionário — e a guarda de
-       chave sobrando derrubaria o build, ou pior, não derrubaria. */
-    if (pagina === 'precos') {
-      const bl = (PRECOS as Record<string, Record<string, string>>)[lang];
-      t.cartoesPlanos = trocar(bl?.cartoes ?? '', t);
-      t.comparacaoCurta = bl?.comparacao ?? '';
-      /* Preço e mínimo como token: a calculadora e o texto de cobrança
-         precisam do número na moeda do idioma, e cada cópia à mão num corpo
-         traduzido é uma chance de o alemão anunciar um preço que não existe.
-
-         UM POR LINHA, e não num laço sobre uma lista de nomes. O `build.py`
-         descobre as chaves que o Next escreve lendo `t.<nome> =` daqui — é
-         assim que ele evita manter uma segunda lista dos mesmos nomes. Um laço
-         é invisível para essa leitura, e o build volta a acusar chave sem
-         valor em cinco idiomas a cada vez, que é o aviso falso que esconde o
-         verdadeiro. */
-      t.precoPersonal = bl?.precoPersonal ?? '';
-      t.precoTeam = bl?.precoTeam ?? '';
-      t.precoTeamMin = bl?.precoTeamMin ?? '';
-      t.personalNum = bl?.personalNum ?? '';
-      t.teamNum = bl?.teamNum ?? '';
-      t.teamMinimo = bl?.teamMinimo ?? '';
-      t.minimoFrase = bl?.minimoFrase ?? '';
-      t.figuraRodada = ((FIGURAS as Record<string, string>).rodada ?? '')
-        .replace('__ALT__', String(t.rodadaAlt ?? ''))
-        .replace('__LEG__', String(t.rodadaLeg ?? ''));
-    }
     t.body = trocar(ler(`site/bodies/${pagina}.${lang}.html`), t);
     /* Antes do `dadosEstruturados`, que lê os `<details>` deste mesmo corpo —
        e o índice não toca em nenhum deles. */

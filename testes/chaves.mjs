@@ -90,16 +90,18 @@ for (const { lang, re, porque } of PROIBIDAS) {
    Ela olha `i18n-site.json`, e não o `template.html`: é o site que faz a
    promessa comercial. */
 const SITE = JSON.parse(fs.readFileSync(`${RAIZ_WS}/src/i18n-site.json`, 'utf8'));
-/* A conta ENTRA pela forma enumerada, e não pela palavra: "para usar não é
-   preciso conta" é verdade e continua valendo; "não há conta," no meio de uma
-   lista de três negações é o absoluto que ficou falso. Banco de dados e
-   rastreamento não têm forma legítima — os dois existem. */
+/* A CONTA SAIU DA LISTA NO BUILD 71: o produto ficou sem conta, e "não há
+   conta" voltou a ser verdade — proibir a frase seria proibir o fato. Banco de
+   dados e rastreamento continuam sem forma legítima solta: o banco antigo
+   existe até o Build 72, e há medição de visitas da Vercel (agregada, sem
+   cookie) — "não há rastreamento" sem dizer sobre o quê seria o absoluto de
+   novo. */
 const ABSOLUTOS = [
-  { lang: 'pt', re: /não há banco de dados|não há rastreamento|não (há|existe) conta,/i },
-  { lang: 'en', re: /no database|no tracking|there is no account,/i },
-  { lang: 'es', re: /no hay base de datos|no hay rastreo|no hay cuenta,/i },
-  { lang: 'de', re: /keine Datenbank|kein Tracking|gibt kein Konto/i },
-  { lang: 'fr', re: /pas de base de données|pas de suivi|il n’y a pas de compte/i },
+  { lang: 'pt', re: /não há banco de dados|não há rastreamento/i },
+  { lang: 'en', re: /no database|no tracking/i },
+  { lang: 'es', re: /no hay base de datos|no hay rastreo/i },
+  { lang: 'de', re: /keine Datenbank|kein Tracking/i },
+  { lang: 'fr', re: /pas de base de données|pas de suivi/i },
 ];
 for (const { lang, re } of ABSOLUTOS) {
   const achadas = Object.entries(SITE[lang] || {})

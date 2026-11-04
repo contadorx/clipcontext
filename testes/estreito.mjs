@@ -201,7 +201,7 @@ console.log('\n[2] no telefone a tabela empilha; na tela larga ela volta a ser t
 
 console.log('\n[3] main e link de pular, em toda página e nos cinco idiomas');
 {
-  const AMOSTRA = ['home', 'precos', 'privacidade', 'seguranca', 'ajuda'];
+  const AMOSTRA = ['home', 'comparativo', 'privacidade', 'seguranca', 'ajuda'];
   for (const p of AMOSTRA) {
     for (const L of R.idiomas) {
       const rota = endereco(p, L);
@@ -235,7 +235,7 @@ console.log('\n[4] escondido até o foco — e visível quando ele chega');
 {
   /* `display:none` tiraria o link da ordem de tabulação, que é o oposto do que
      ele existe para fazer. Ele sai da tela por POSIÇÃO. */
-  await pg.goto(ALVO + '/precos', { waitUntil: 'domcontentloaded' });
+  await pg.goto(ALVO + '/comparativo', { waitUntil: 'domcontentloaded' });
   await pg.waitForTimeout(120);
   const antes = await pg.evaluate(() => {
     const a = document.querySelector('a.pular');

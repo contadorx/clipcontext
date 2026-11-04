@@ -149,12 +149,12 @@ console.log('\n[M4] a lista de aviso SAIU, e não volta sem alguém decidir');
      !/walkstamp_interesse/.test(script));
 
   /* E nenhuma página do site pede e-mail para uma lista de espera. A `/precos`
-     é a que hospedava o formulário, e é onde ele voltaria. */
-  const { pg, ctx, erros } = await pagina('http://localhost:8877/precos.html?lang=pt');
-  ok('a página de preços não tem formulário de lista',
+     hospedava o formulário e saiu no Build 71; a home é onde ele voltaria. */
+  const { pg, ctx, erros } = await pagina('http://localhost:8877/?lang=pt');
+  ok('a home não tem formulário de lista',
      (await pg.locator('#listaForm').count()) === 0,
      String(await pg.locator('#listaForm').count()));
-  ok('e nenhum campo de e-mail de espera sobrou nela',
+  ok('e nenhum campo de e-mail de espera sobrou',
      (await pg.locator('#listaEmail').count()) === 0);
   ok('sem erro de JS', erros.length === 0, erros.join(' | ').slice(0, 160));
   await ctx.close();

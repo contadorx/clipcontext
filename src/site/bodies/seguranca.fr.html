@@ -1,16 +1,15 @@
 <section style="padding-top:60px">
   <div class="wrap doc">
     <h1 style="font-size:32px">Sécurité de l’information</h1>
-    <p class="updated">Dernière mise à jour : 15 août 2026.<br>
+    <p class="updated">Dernière mise à jour : 4 novembre 2026.<br>
     Cette page s’adresse à qui doit approuver l’usage de {{marca}} dans une entreprise : comment il fonctionne,
     ce qui sort de votre machine, et ce que nous n’avons <b>pas</b>.</p>
 
     <p class="lockHint" style="margin:0 0 26px">
     <b>En une ligne :</b> l’outil n’a pas de serveur de traitement et ne reçoit ni votre vidéo, ni votre
-    audio, ni vos captures. Cela vaut dans toutes les offres, et vous n’avez pas à nous croire — cela se
-    vérifie en trente secondes, avec le navigateur que vous avez déjà ouvert. Qui souscrit une offre payante
-    obtient un <b>compte</b>, et il y a une seule chose qu’il peut conserver, par votre choix ; elle est décrite
-    ci-dessous, en toutes lettres.</p>
+    audio, ni vos captures. Vous n’avez pas à nous croire — cela se vérifie en trente secondes, avec le
+    navigateur que vous avez déjà ouvert. Il n’y a pas non plus de compte ni d’inscription : ce que vous
+    configurez reste dans votre navigateur, et c’est décrit ci-dessous.</p>
 
     <h2>Pourquoi la question change de forme ici</h2>
     <p>L’évaluation d’un fournisseur de logiciel suit d’ordinaire une liste : où sont les données, qui y a
@@ -37,8 +36,9 @@
     cela qu’il est ici à la place d’un label.</p>
 
     <h2>La version hors ligne, pour quand même cela ne suffit pas</h2>
-    <p>Il existe un <b>fichier HTML unique</b> avec l’outil entier dedans. Vous le téléchargez, vous coupez le réseau,
-    vous ouvrez le fichier et il fonctionne. Rien dedans ne parle à un serveur.</p>
+    <p>Il existe un <b>fichier HTML unique</b> avec l’outil entier dedans, que nous envoyons par e-mail à qui
+    le demande — l’adresse est en bas de cette page. Vous l’enregistrez, vous coupez le réseau, vous ouvrez
+    le fichier et il fonctionne. Rien dedans ne parle à un serveur.</p>
     <p>Et ce n’est pas une promesse de texte : le processus qui produit ce fichier <b>échoue</b> s’il reste la moindre
     adresse de mesure à l’intérieur. C’est un verrou dans le build, pas une intention. Cela se vérifie en cherchant
     &laquo;&nbsp;supabase&nbsp;&raquo; ou &laquo;&nbsp;insights&nbsp;&raquo; dans le fichier téléchargé — il n’y a aucune occurrence.</p>
@@ -63,29 +63,19 @@
     traducteur n’existe pas, ce que l’outil propose, c’est le modèle de reconnaissance vocale qui traduit pendant qu’il écoute, également
     sur votre ordinateur. <b>Dans aucun des deux chemins le texte n’est transmis.</b></p>
 
-    <h2>Le compte payant, et l’unique exception</h2>
-    <p>Utiliser l’outil n’exige pas de compte, et cela n’a pas changé : sans identifiant, <code>/app</code> enregistre,
-    transcrit et génère le document exactement pareil. Qui souscrit une offre payante obtient un compte, et
-    il y reste l’e-mail d’accès, les factures, les tickets de support, les sièges de l’équipe et — si vous
-    utilisez l’écran de <b>liste de cas de test</b> — la liste des cas à exécuter.</p>
-    <p>Sur cet écran, marquer un cas comme terminé enregistre un <b>reçu</b> : le code du cas, le système, le
-    ticket, la date, le nom du fichier généré et l’<b>empreinte de chaque capture</b>. Ce sont des nombres.
-    Il n’y a pas d’image, pas de transcription, pas le texte des étapes. C’est ce qui permet de reprendre un PDF des mois
-    plus tard et de vérifier que c’est bien le même — et c’est pour cela qu’il existe.</p>
-    <p><b>L’exception, et elle est à vous :</b> au moment de confirmer le terminé, il existe un champ optionnel pour
-    <b>joindre le <code>.json</code> complet de la session</b>. Ce fichier contient les images des captures
-    à l’intérieur. Le joindre est la seule chose de ce produit qui place du contenu à vous sur un serveur à nous, il ne
-    part jamais tout seul, le champ arrive fermé, et l’avertissement de ce que cela signifie est à côté du champ — pas dans une
-    page de conditions. Chaque pièce jointe a un bouton de suppression, et supprimer supprime le fichier, pas seulement la ligne qui
-    pointe vers lui. <b>La vidéo et l’audio continuent de ne jamais sortir de votre navigateur, avec pièce jointe ou sans.</b></p>
-
     <h2>Ce qui reste dans votre navigateur</h2>
     <p>Rien de votre contenu n’est conservé entre les visites. Parmi les données d’identification de la preuve, seuls
     <b>système</b> et <b>exécuté par</b> restent dans le <code>sessionStorage</code> — que le navigateur efface à la
     fermeture de l’onglet — pour ne pas les retaper à chaque cas ; il y a un bouton qui les efface sur-le-champ. Le cas de test, le ticket,
     le résultat et les annotations ne sont pas conservés, même pas tant que l’onglet vit. Rien de tout cela n’est un cookie, rien de tout cela n’est
     lu par nous, et rien de tout cela ne sort de votre appareil.</p>
-    <p>À côté du modèle reste une note de <b>configuration</b> : quelle combinaison de bibliothèque et de
+    <p>Ce que vous <b>configurez</b>, en revanche, reste d’une visite à l’autre, dans le stockage local de ce
+    navigateur : la marque du client (nom et logo), le champ <b>émis par</b>, les modèles de document que vous
+    avez enregistrés et — seulement si vous cochez la case — la liste des termes de votre système. C’est de la
+    configuration, pas un enregistrement : aucun écran, aucun audio, aucune transcription. Pour la transmettre
+    à quelqu’un d’autre dans l’équipe, il y a le <b>fichier de réglages</b> : une personne l’exporte, les
+    autres l’importent, et il voyage par le chemin que vous choisissez — pas par un serveur à nous.</p>
+    <p>À côté du modèle de reconnaissance vocale reste une note de <b>configuration</b> : quelle combinaison de bibliothèque et de
     format de fichier arrive à ouvrir le modèle sur cette machine. Des noms de version, rien de contenu — et
     le bouton qui efface le modèle efface la note avec.</p>
     <p><b>Les écrans d’un enregistrement en cours</b> restent dans le stockage privé du navigateur
@@ -128,7 +118,7 @@
     <h3>Ce qui existe à la place</h3>
     <ul>
       <li>Le code qui tourne dans votre navigateur <b>peut être lu</b> : c’est une page, et <code>Ctrl+U</code> montre tout. Il n’y a pas de code côté serveur parce qu’il n’y a pas de serveur.</li>
-      <li>La <b>version hors ligne</b> peut être téléchargée, analysée, versionnée et distribuée par votre équipe.</li>
+      <li>La <b>version hors ligne</b>, envoyée à qui la demande, peut être analysée, versionnée et distribuée par votre équipe.</li>
       <li>La vérification que rien ne sort prend trente secondes et ne dépend pas de la confiance que vous nous accordez.</li>
     </ul>
 
@@ -149,38 +139,6 @@
     affecte ce qui est écrit ici, cette page change avec — et la date en haut est votre moyen de le vérifier.</p>
 
 
-    <!-- A MECÂNICA DA LICENÇA, VINDA DA `/time` — 23/08.
-         A `/time` era órfã: nenhuma página do site levava a ela, e ela estava
-         indexada. Duas páginas vendendo o mesmo plano é o defeito que mais
-         custou a este projeto, e a órfã é sempre a que ninguém lembra de
-         atualizar.
-         Ela foi redirecionada para a página de preços. Destas seções, o que
-         falava de administrar o time já existe na conta, e o que falava de
-         guardar dados e da versão offline já existe acima nesta página. O que
-         não tinha outro lugar é isto: como a chave é conferida e por que ela
-         vale pouco tempo. Numa avaliação de fornecedor é exatamente a pergunta
-         que vem depois de "o que sai da minha máquina". -->
-<h2>Comment cela fonctionne à l’intérieur</h2>
-    <ol class="passos">
-      <li><b>Vous demandez.</b> Vous écrivez l’e-mail ici. Rien n’est décidé à ce moment-là : il ne part qu’un message vers
-      votre boîte.</li>
-      <li><b>Vous cliquez sur ce qui est arrivé.</b> C’est cela qui prouve que l’adresse est à vous — et c’est le seul moment où
-      il existe quelque chose qui ressemble à une session.</li>
-      <li><b>Vous revenez avec le lien prêt.</b> La clé est signée sur le serveur, avec votre e-mail à l’intérieur, et
-      livrée déjà à l’intérieur d’une adresse de {{marca}}.</li>
-      <li><b>À partir de là, plus rien qui passe par le réseau.</b> La clé est vérifiée <b>à l’intérieur du navigateur</b>, contre
-      une clé publique qui se trouve dans le HTML même de l’outil. Elle fonctionne dans l’avion, sur la machine du
-      client avec internet verrouillé, et sur l’ordinateur que la DSI ne laisse pas parler avec notre hébergement.</li>
-    </ol>
-
-    <h2>Pourquoi la validité est courte</h2>
-    <p>Chaque clé émise vaut <b>21 jours</b> dans une équipe et <b>45</b> sur l’offre individuelle (14 pour
-    l’essai), et la suivante arrive par e-mail avant que la
-    précédente n’expire. L’administrateur peut raccourcir ce délai, de 1 à 90 jours, dans le portail de l’équipe. Ce n’est pas de la bureaucratie : c’est ce qui fait qu’un lien fuité <b>meurt tout seul</b>. Comme aucun
-    serveur ne vérifie quoi que ce soit pendant l’usage, il n’existe pas de bouton de révocation — la durée est la révocation. C’est
-    l’arbitrage choisi exprès : nous préférons une fuite qui expire à un produit payant qui cesse de
-    fonctionner quand internet tombe.</p>
-
     <!-- A SAÍDA — 23/08. Esta página era um beco: saía só para a política de
          privacidade. Quem termina de ler aqui já resolveu a pergunta que o
          trouxe, e a próxima pergunta dele tem endereço. -->
@@ -188,7 +146,7 @@
     <p>{{segSaida}}</p>
     <p class="row" style="margin:12px 0 0">
       <a class="btn ghost" href="{{verificar}}">{{fVerif}}</a>
-      <a class="btn ghost" href="{{precos}}">{{navPrice}}</a>
+      <a class="btn ghost" href="{{comparativo}}">{{fComp}}</a>
     </p>
   </div>
 </section>

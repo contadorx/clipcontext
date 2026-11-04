@@ -51,7 +51,7 @@ console.log('[1] a regra sai no cabeçalho, e é a que está escrita');
 const cfg = fs.readFileSync(`${RAIZ_WS}/next.config.mjs`, 'utf8');
 let cabecalho = '';
 {
-  const r = await fetch(`${ALVO}/precos`);
+  const r = await fetch(`${ALVO}/comparativo`);
   cabecalho = r.headers.get('content-security-policy-report-only') || '';
   ok('a página responde a CSP em Report-Only', cabecalho.length > 50,
      cabecalho.slice(0, 60) || '(sem cabeçalho)');
@@ -59,7 +59,7 @@ let cabecalho = '';
      medidos com rede, travar é apostar — e a aposta perdida desliga a
      transcrição, que é o que a pessoa veio fazer. */
   ok('e NÃO está travando ainda',
-     !(await fetch(`${ALVO}/precos`)).headers.get('content-security-policy'),
+     !(await fetch(`${ALVO}/comparativo`)).headers.get('content-security-policy'),
      'existe um Content-Security-Policy que trava');
 
   /* As diretivas que fazem a regra valer alguma coisa. Sem `object-src` e
@@ -154,8 +154,10 @@ const conhecido = (v) =>
 console.log('\n[2] as páginas do site, com a regra ligada');
 const novasDoSite = [];
 {
-  const PAGINAS = ['/', '/precos', '/seguranca', '/privacidade.html', '/termos.html',
-                   '/ajuda', '/en/pricing', '/de/preise', '/fr/tarifs', '/es/precios'];
+  /* As páginas de preços (`/precos`, `/de/preise`, `/fr/tarifs`) saíram no
+     Build 71; no lugar delas, o comparativo nos idiomas. */
+  const PAGINAS = ['/', '/comparativo', '/seguranca', '/privacidade.html', '/termos.html',
+                   '/ajuda', '/en/compare', '/de/vergleich', '/fr/comparatif', '/es/comparativa'];
   for (const rota of PAGINAS) {
     const v = await violacoes(BASE + rota);
     const novas = v.filter((x) => !conhecido(x));
@@ -199,14 +201,21 @@ console.log('\n[3] a ferramenta, sem tocar na rede de fora');
      resumir(foraDeScript).join(' | ').slice(0, 200));
 }
 
-/* ---- [4] a conta ---------------------------------------------------------*/
-console.log('\n[4] a área da conta, deslogada');
+/* ---- [4] a política não aponta para relatório que não existe ------------
+   Os avisos iam para `/api/csp`, e a rota saiu no Build 71 com o resto do
+   servidor (os 887 avisos guardados foram lidos antes — FILA, DEC-24). Uma
+   `report-uri` apontando para um 404 é o navegador mandando aviso para lugar
+   nenhum em toda visita. E o Hugging Face entrega os pesos do modelo a partir
+   de `*.hf.co`: sem esse host, travar a regra quebraria a transcrição. */
+console.log('\n[4] sem endereço de relatório, e com o host dos pesos do modelo');
 {
-  const v = await violacoes(`${BASE}/conta`);
-  const novas = v.filter((x) => !conhecido(x));
-  if (novas.length) console.log('       ' + resumir(novas).join('\n       '));
-  ok('a conta não traz violação nova', novas.length === 0,
-     resumir(novas).join(' | ').slice(0, 140));
+  const cab = (await fetch(`${BASE}/`)).headers.get('content-security-policy-report-only') || '';
+  ok('a política não tem report-uri nem report-to', !/report-uri|report-to/.test(cab), cab.slice(-80));
+  const rep = (await fetch(`${BASE}/`)).headers.get('reporting-endpoints');
+  ok('nem o cabeçalho Reporting-Endpoints', !rep, String(rep));
+  const conn = (cab.match(/connect-src[^;]*/) || [''])[0];
+  ok('o connect-src alcança *.hf.co', /https:\/\/\*\.hf\.co/.test(conn), conn.slice(0, 120));
+  ok('e não fala mais com o Supabase', !/supabase/.test(cab));
 }
 
 /* ---- [4b] a lista de pendências não pode ter perdão órfão ---------------- */
@@ -218,7 +227,7 @@ console.log('\n[4b] a lista do que falta é honesta');
      Medido nas páginas E na ferramenta, porque três deles só existem num dos
      dois lugares. */
   const vistos = new Set();
-  for (const rota of ['/', '/precos', '/app.html?lang=pt']) {
+  for (const rota of ['/', '/comparativo', '/app.html?lang=pt']) {
     for (const x of await violacoes(BASE + rota)) {
       for (const c of CONHECIDOS) if (x.amostra && x.amostra.includes(c.marca)) vistos.add(c.marca);
     }
@@ -251,7 +260,7 @@ console.log('\n[5] a régua sabe reprovar');
       window.__csp.push({ diretiva: e.effectiveDirective || e.violatedDirective });
     });
   });
-  await pg.goto(`${BASE}/precos`, { waitUntil: 'domcontentloaded' });
+  await pg.goto(`${BASE}/comparativo`, { waitUntil: 'domcontentloaded' });
   await pg.evaluate(() => {
     const s = document.createElement('script');
     s.textContent = 'window.__entrou = true;';

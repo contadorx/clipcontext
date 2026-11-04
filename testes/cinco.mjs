@@ -1,4 +1,4 @@
-/* Os cinco idiomas: as 16 páginas em cada um, o seletor, e as pontes.
+/* Os cinco idiomas: as páginas em cada um, o seletor, e as pontes.
  *
  * Um idioma novo num site trilíngue não é tradução: é uma tabela a mais em cada
  * lugar onde alguém escreveu ['pt','en','es'] à mão. Este arquivo procura pelos
@@ -53,8 +53,9 @@ console.log('\n[3] as páginas novas estão MESMO no idioma delas');
   /* Uma página que existe e está em português é pior do que uma que não existe:
      ela promete e não entrega, e o buscador indexa a promessa. */
   const provas = [
-    ['/de/preise', /kostenlos|Browser|Konto/],
-    ['/fr/tarifs', /gratuit|navigateur|compte/],
+    /* Eram `/de/preise` e `/fr/tarifs`; a página de preços saiu no Build 71. */
+    ['/de/vergleich', /Vergleich|Browser/],
+    ['/fr/comparatif', /comparatif|navigateur/],
     ['/de/hilfe', /Wissensdatenbank|Bildschirmaufnahme/],
     ['/fr/aide', /connaissances|enregistrement/],
     ['/de/informationssicherheit', /Informationssicherheit|Server/],
@@ -74,13 +75,13 @@ console.log('\n[3] as páginas novas estão MESMO no idioma delas');
 
 console.log('\n[4] o seletor de idioma oferece os cinco, e leva à mesma página');
 {
-  await pg.goto(SITE + '/de/preise', { waitUntil: 'domcontentloaded' });
+  await pg.goto(SITE + '/de/vergleich', { waitUntil: 'domcontentloaded' });
   const links = await pg.locator('header nav a').evaluateAll((as) =>
     as.map((a) => ({ txt: a.textContent.trim(), href: a.getAttribute('href') })));
   const siglas = links.filter((l) => /^(PT|EN|ES|DE|FR)$/i.test(l.txt));
   ok('as cinco siglas estão no cabeçalho', siglas.length === 5, siglas.map((s) => s.txt).join(' '));
   const fr = siglas.find((s) => /fr/i.test(s.txt));
-  ok('e o FR leva à MESMA página, não à home', (fr?.href || '').includes('/fr/tarifs'), fr?.href);
+  ok('e o FR leva à MESMA página, não à home', (fr?.href || '').includes('/fr/comparatif'), fr?.href);
 }
 
 console.log('\n[5] o rodapé e o hreflang não ficaram para trás');
@@ -92,88 +93,29 @@ console.log('\n[5] o rodapé e o hreflang não ficaram para trás');
   for (const L of idiomas)
     ok(`  hreflang ${L}`, alt.includes(L === 'pt' ? 'pt-BR' : L), alt.join(' '));
   const mapa = fs.readFileSync(`${RAIZ_WS}/public/sitemap-paginas.xml`, 'utf8');
-  for (const u of ['/de/hilfe', '/fr/aide', '/de/preise', '/fr/tarifs'])
+  for (const u of ['/de/hilfe', '/fr/aide', '/de/vergleich', '/fr/comparatif'])
     ok(`  o sitemap conhece ${u}`, mapa.includes(u));
+  /* E o que saiu não pode continuar sendo anunciado: um sitemap que manda o
+     buscador para um redirecionamento é um sitemap que ele aprende a ignorar. */
+  for (const u of ['/precos<', '/de/preise', '/fr/tarifs', '/conta'])
+    ok(`  o sitemap esqueceu ${u.replace('<', '')}`, !mapa.includes(u));
 }
 
-console.log('\n[6] o preço grande é na moeda de quem lê');
+console.log('\n[6] a página de preços e a conta saíram, e os endereços levam à home');
 {
-  /* Um alemão lendo "R$ 149" não sabe se é caro. A conversão existe na linha de
-     baixo desde sempre; o que estava errado era QUAL delas ficava grande — o
-     real era o número grande nos cinco idiomas, inclusive nos que não pagam em
-     real. */
-  const PRIM = { pt: 'R$', en: 'US$', es: 'US$', de: '€', fr: '€' };
-  for (const L of idiomas) {
-    await pg.goto(SITE + pre(L) + '/' + slugs.precos[L], { waitUntil: 'domcontentloaded' });
-    const grandes = await pg.locator('.plan .price').allTextContents();
-    const p = PRIM[L];
-    ok(`${L}: o número grande é em ${p}`,
-       grandes.length === 3 && grandes.every((t) => t.trim().startsWith(p + ' ')),
-       grandes.map((t) => t.trim().split(' ').slice(0, 2).join(' ')).join(' · '));
-    /* E NENHUMA OUTRA MOEDA APARECE.
-       Antes havia uma segunda linha com as outras duas, "para a conversão ser
-       possível" — e era ela que punha `R$ 349` dentro da página alemã. Ler o
-       próprio preço numa moeda que não é a sua não ajuda a converter: faz
-       perguntar qual das três é a que vai ser cobrada. Agora cada página fala
-       uma moeda só, e esta régua cobra a ausência das outras duas. */
-    const OUTRAS = { 'R$': ['US$', '€'], 'US$': ['R$', '€'], '€': ['R$', 'US$'] };
-    const cartoes = (await pg.locator('.plans.tres').innerText()).replace(/\s+/g, ' ');
-    const intrusas = OUTRAS[p].filter((m) => cartoes.includes(m));
-    ok(`  e nenhuma outra moeda aparece nos cartões`,
-       intrusas.length === 0, intrusas.join(', '));
+  /* [6] e [6b] cobravam a moeda do preço e os blocos da página de preços nos
+     cinco idiomas. A página saiu no Build 71, com a conta: o que se cobra
+     agora é que os endereços que existiam levem à home DO IDIOMA, e não a um
+     404 nem à home portuguesa. */
+  const casos = [['/precos', '/'], ['/en/precos', '/en'], ['/de/preise', '/de'], ['/fr/tarifs', '/fr'],
+                 ['/es/precos', '/es'], ['/conta', '/'], ['/en/account', '/en'], ['/de/konto/daten', '/de'],
+                 ['/conta/en/roteiro', '/en'], ['/fr/compte/factures', '/fr']];
+  for (const [de, para] of casos) {
+    const r = await fetch(SITE + de, { redirect: 'manual' });
+    const destino = r.headers.get('location') || '';
+    ok(`${de} → ${para} (308)`, r.status === 308 && (destino === para || destino.endsWith(para)),
+       `${r.status} ${destino}`);
   }
-}
-
-console.log('\n[6b] os blocos novos da página de preços existem nos cinco');
-{
-  /* A rodada anterior publicou blocos em português e deixou quatro idiomas
-     para depois. "Depois" durou meses, e a página espanhola vendia um produto
-     diferente do que a portuguesa vendia. A régua agora é por idioma. */
-  const MIN_FRASE = { pt: 'a partir de 3 pessoas', en: 'from 3 people',
-                      es: 'desde 3 personas', de: 'ab 3 Personen',
-                      fr: 'à partir de 3 personnes' };
-  const MIN_TOTAL = { pt: 'R$ 1.047', en: 'US$ 207', es: 'US$ 207',
-                      de: '€ 195', fr: '€ 195' };
-  /* Quantas perguntas cada idioma tem no FAQ de compra — comparadas depois do
-     laço. Um idioma com uma pergunta a menos é um mercado sem a resposta que os
-     outros têm, e isso não aparece em nenhuma outra régua. */
-  const faqPorIdioma = {};
-  for (const L of idiomas) {
-    await pg.goto(SITE + pre(L) + '/' + slugs.precos[L], { waitUntil: 'domcontentloaded' });
-    ok(`${L}: os três cartões, um CTA em cada`,
-       (await pg.locator('.plans.tres .plan').count()) === 3 &&
-       (await pg.locator('.plans.tres .plan a[data-cta]').count()) === 3);
-    ok(`  a comparação curta tem cinco linhas`,
-       (await pg.locator('table.cmpCurta tbody tr').count()) === 5);
-    ok(`  a figura da rodada está desenhada`,
-       (await pg.locator('.figRodada svg').count()) === 1);
-    ok(`  a lista completa está recolhida num <details>`,
-       (await pg.locator('details.listaCompleta').count()) === 1);
-    /* PISO E PARIDADE, e não um número escrito à mão.
-       Era `=== 6`. Acrescentar a sétima pergunta — a da degustação de 14 dias,
-       que é a objeção que trava a compra — reprovou nos cinco idiomas por um
-       número que ninguém tinha motivo para manter em 6. É a família do
-       `itens === 6`: contagem à mão onde o que importa é outra coisa. */
-    const nPerguntas = await pg.locator('.faqCompra dt').count();
-    const nRespostas = await pg.locator('.faqCompra dd').count();
-    ok(`  o FAQ de compra não esvaziou`, nPerguntas >= 6, String(nPerguntas));
-    ok(`  e cada pergunta tem a sua resposta`, nRespostas === nPerguntas,
-       `${nPerguntas} dt / ${nRespostas} dd`);
-    faqPorIdioma[L] = nPerguntas;
-    /* O mínimo e o total mínimo, na moeda do idioma. O número por assento sem
-       o total ao lado é a surpresa que chega no checkout. */
-    const txt = (await pg.locator('.plan[data-plano="team"]').innerText()).replace(/\s+/g, ' ');
-    ok(`  o mínimo de 3 está dito por extenso`, txt.includes(MIN_FRASE[L]), txt.slice(0, 90));
-    ok(`  e o total mínimo anual está ao lado`, txt.includes(MIN_TOTAL[L]), txt.slice(0, 90));
-  }
-  /* A PARIDADE, que é a afirmação que o `=== 6` escondia.
-     Um número igual em todos os idiomas é o que importa: um mercado com uma
-     pergunta a menos é um mercado sem a resposta que os outros têm, e nenhuma
-     outra régua olharia para isso. O `=== 6` dava essa garantia de graça, e a
-     perdia inteira no dia em que a página ganhasse uma pergunta legítima. */
-  const contagens = [...new Set(Object.values(faqPorIdioma))];
-  ok(`os cinco idiomas têm o MESMO número de perguntas no FAQ`,
-     contagens.length === 1, JSON.stringify(faqPorIdioma));
 }
 
 console.log('\n[7] o vídeo da home carrega em todo idioma');

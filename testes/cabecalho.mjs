@@ -104,12 +104,13 @@ async function medir(rota, rotulo){
 
 const site = await medir('/', 'PÁGINA PRINCIPAL');
 const app  = await medir('/app?lang=pt', 'FERRAMENTA');
-const conta = await medir('/conta', 'PAINEL DA CONTA');
+/* O PAINEL DA CONTA era a terceira casca medida aqui, e saiu no Build 71 com
+   a conta. Ficam três: o site, a ferramenta e o blog. */
 /* O BLOG É A QUARTA CASCA, e foi a última a ser achada — o menu dele não tinha
    o próprio blog. Faltar justo ali é o pior dos casos: quem está lendo um post
    não tem como voltar para a lista sem o botão de voltar do navegador. */
 const blog = await medir('/blog', 'BLOG');
-const todas = [['site', site], ['ferramenta', app], ['conta', conta], ['blog', blog]];
+const todas = [['site', site], ['ferramenta', app], ['blog', blog]];
 
 console.log('\n  o que este arquivo afirma:');
 
@@ -131,28 +132,25 @@ for (const [chave, nome] of [['logoX', 'o logo começa no mesmo x'],
 /* OS ITENS. O blog entrou, e entrou ANTES do botão de ação — o botão é o fim do
    caminho, e o que vem depois dele não é lido.
 
-   ---- BUILD 69: A FERRAMENTA PERDEU O "PREÇOS" E O BOTÃO DA CONTA ----
-   O produto ficou grátis e sem conta. O menu da ferramenta é o do site MENOS
-   o Preços, e ela não tem botão de ação — o botão das outras telas leva a ela,
-   e não há conta para onde ela levar. O site ainda tem preços e conta até o
-   Build 71; quando eles saírem, a régua continua valendo sem mudar: "o do site
-   menos o Preços" passa a ser simplesmente "o do site". */
+   ---- BUILD 71: UM MENU SÓ, DE NOVO ----
+   No Build 69 a ferramenta perdeu o "Preços" e o site ainda o tinha; no 71 a
+   página de preços saiu, e as três telas voltaram a dizer as mesmas três
+   palavras. A ferramenta continua sem botão de ação: o botão das outras telas
+   leva a ela. */
 const ehPrecos = (x) => /pre[çc]os|pricing|precios|preise|tarifs/i.test(x);
 for (const [nome, r] of todas) {
-  const n = nome === 'ferramenta' ? 3 : 4;
-  ok(`${nome}: ${n === 3 ? 'três' : 'quatro'} itens de menu`, r.itens.length === n, r.itens.join(' · '));
+  ok(`${nome}: três itens de menu`, r.itens.length === 3, r.itens.join(' · '));
   const iBlog = r.itens.findIndex(x => /blog/i.test(x));
   ok(`${nome}: o Blog está no menu`, iBlog >= 0, r.itens.join(' · '));
   ok(`${nome}: e é o último item`, iBlog === r.itens.length - 1, r.itens.join(' · '));
+  ok(`${nome}: nenhum item de preço`, !r.itens.some(ehPrecos), r.itens.join(' · '));
 }
-/* As telas dizem as mesmas palavras nos mesmos lugares — a ferramenta só não
-   diz "Preços". A comparação é com a CONTA, e não com a página principal: as
-   duas abrem em português aqui, e a raiz do site abre em inglês. */
-ok('a ferramenta tem o menu da conta, sem o Preços',
-   JSON.stringify(app.itens) === JSON.stringify(conta.itens.filter(x => !ehPrecos(x))),
-   app.itens.join(' · ') + '   ≠   ' + conta.itens.filter(x => !ehPrecos(x)).join(' · '));
-ok('e nenhum item de preço sobrou na ferramenta', !app.itens.some(ehPrecos), app.itens.join(' · '));
-ok('a ferramenta não tem botão de ação — não há conta para onde ir',
+/* A raiz do site abre em inglês e a ferramenta e o blog aqui abrem em
+   português: compara-se a ferramenta com o blog, que fala a mesma língua. */
+ok('a ferramenta e o blog têm o mesmo menu',
+   JSON.stringify(app.itens) === JSON.stringify(blog.itens),
+   app.itens.join(' · ') + '   ≠   ' + blog.itens.join(' · '));
+ok('a ferramenta não tem botão de ação — o botão das outras telas leva a ela',
    app.acao.trim() === '' && app.botao === null, app.acao);
 
 /* ---- OS ENDEREÇOS DA FERRAMENTA TROCAM DE IDIOMA ----
@@ -230,7 +228,7 @@ for (const [nome, r] of comBotao) {
 for (const chave of ['alt', 'corpo', 'peso', 'forro', 'raio', 'tinta', 'fundo']) {
   const vs = comBotao.map(([n, r]) => [n, r.botao && r.botao[chave]]);
   const um = vs[0][1];
-  ok('o botão tem o mesmo ' + chave + ' nas três telas',
+  ok('o botão tem o mesmo ' + chave + ' nas duas telas que o têm',
      vs.every(([, v]) => v === um), vs.map(([n, v]) => n + '=' + v).join('  '));
 }
 
@@ -240,7 +238,7 @@ for (const chave of ['alt', 'corpo', 'peso', 'forro', 'raio', 'tinta', 'fundo'])
    terminava 31 px à direita da borda na conta e no blog. O espanhol é o pior
    caso e é ele que decide a largura. */
 console.log('\n  o menu cabe? (o que precisa contra o que cabe)');
-for (const rota of ['/', '/es', '/fr', '/de', '/conta', '/blog', '/app?lang=pt']) {
+for (const rota of ['/', '/es', '/fr', '/de', '/blog', '/app?lang=pt']) {
   await pg.goto(BASE + rota, { waitUntil: 'domcontentloaded' });
   await pg.waitForTimeout(500);
   const s2 = await pg.evaluate(() => {
@@ -257,7 +255,7 @@ for (const rota of ['/', '/es', '/fr', '/de', '/conta', '/blog', '/app?lang=pt']
   ok('e não passa da borda em ' + rota, s2.fim <= s2.borda + 1, s2.fim + ' > ' + s2.borda);
 }
 
-ok('o rodapé tem três colunas nas três telas',
+ok('o rodapé tem três colunas em todas as telas',
    todas.every(([, r]) => r.colunas === 3), todas.map(([n, r]) => n + '=' + r.colunas).join(' '));
 ok('sem erro de página', erros.length === 0, erros[0]);
 

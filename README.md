@@ -48,20 +48,18 @@ São **dois programas** no mesmo repositório, e a separação é deliberada:
 | | o que é | por quê |
 |---|---|---|
 | `public/app.html` | a ferramenta: um arquivo, 627 KB, **zero npm em tempo de execução** | é o argumento de venda. Um arquivo que a TI escaneia, versiona e roda sem rede. Virar bundle custaria isso. |
-| o resto | site e área do cliente, em **Next.js** | é onde a sessão em cookie, o checkout e o webhook precisam de servidor |
+| o resto | o site e o blog, em **Next.js** | páginas montadas dos `{{tokens}}`, sem banco e sem sessão — a conta, o checkout e o webhook saíram no Build 71 |
 
 O Next **nunca renderiza a ferramenta**: ele a serve, intocada, por um `rewrite` de `/app` para
 `/app.html`.
 
 ```
 app/[lang]/              as 45 páginas do site — montam src/site/*.html com os {{tokens}}
-app/conta/               a área do cliente: link mágico, plano, faturas, chamados
-app/api/stripe/webhook/  a cobrança vira plano; a assinatura do corpo é a fechadura inteira
+app/[lang]/blog/         o blog, lido de conteudo/blog/ (Build 70)
 lib/site.ts              o mapa de endereços e a montagem das páginas
-lib/marca.ts             a identidade, sem tocar disco (o middleware roda no Edge)
-next.config.mjs          o roteamento público: / é a home pt, /precos é /precos
-middleware.ts            renova a sessão — só em /conta, não no site inteiro
-.env.exemplo             os quatro segredos do servidor, com onde pegar cada um
+lib/marca.ts             a identidade, sem tocar disco
+next.config.mjs          o roteamento público: / é a home pt; os endereços aposentados (preços, conta) levam à home
+conteudo/blog/           os posts do blog, um por pasta (ver BLOG.md)
 
 src/site/home.html       modelo da landing, com marcadores {{chave}}
 src/site/doc.html        modelo das páginas internas

@@ -20,7 +20,7 @@ python3 build.py
 
 Não precisa instalar nada: o script só usa a biblioteca padrão do Python. Ele lê
 `src/` e escreve `public/` e `offline/`. Toda a identidade — nome, domínio, CNPJ,
-e-mail, chaves do Supabase — está nas primeiras linhas do `build.py`, e é o único
+e-mail de contato — está nas primeiras linhas do `build.py`, e é o único
 lugar onde essas coisas existem.
 
 > **Não apague a pasta `public/` para "gerar do zero".** O `build.py` regenera as

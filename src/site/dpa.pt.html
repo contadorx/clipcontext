@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <title>Anexo de Tratamento de Dados Pessoais — {{marca}}</title>
-<!-- versao: 2026-08-19 -->
+<!-- versao: 2026-11-04 -->
 <!-- A DATA É ESCRITA AQUI, e não `hoje` no build.
 
      Um documento jurídico cuja versão muda a cada `python3 build.py` não tem
@@ -11,18 +11,18 @@
      com datas diferentes, e ninguém saberia dizer qual mudou. Esta linha muda
      quando alguém edita o documento de propósito — que é o que "versão" quer
      dizer num contrato. -->
-<!-- ESTE ARQUIVO É FONTE, e o que circula é o PDF gerado dele.
+<!-- ESTE ARQUIVO É FONTE, e o que circula é o PDF gerado dele
+     (`node testes/gerar-dpa.mjs`).
 
-     Ele existe aqui, dentro do projeto e com os mesmos marcadores de identidade
-     do resto do site, por um motivo só: um DPA em Word na pasta de alguém
-     envelhece à parte da política. Quando a política ganhar um suboperador
-     novo, este documento tem que ganhar junto — e a maneira de isso acontecer é
-     os dois lerem a mesma identidade (`src/marca.json`, emitido pelo build).
+     04/11/2026: o produto ficou grátis, sem conta e sem servidor. O anexo
+     deixou de regular "os dados da conta paga" — eles não existem mais — e
+     passou a dizer a verdade que sobra: a empresa não trata dado pessoal por
+     conta do cliente, porque o conteúdo não sai do navegador.
 
-     `testes/terceiros.mjs` cobra que a tabela de suboperadores daqui e a da
-     política digam a MESMA coisa, e que nenhuma das duas esqueça um terceiro
-     que o código conhece. Uma tabela que diverge da política publicada é pior
-     do que não ter tabela: ela vira contradição assinada. -->
+     `testes/terceiros.mjs` cobra que a tabela `#terceiros` daqui e a da
+     política tenham uma linha por destino de `src/egressao.json`, nos cinco
+     idiomas. `testes/legal.mjs` cobra os mesmos `id` de seção nos cinco, e que
+     Stripe, Supabase e Brevo só apareçam dentro de `data-antigo`. -->
 <style>
   @page { size: A4; margin: 18mm 16mm 16mm; }
   * { box-sizing: border-box }
@@ -50,164 +50,171 @@
 <body>
 
 <h1>Anexo de Tratamento de Dados Pessoais</h1>
-<p class="sub">Anexo ao contrato de assinatura do <b>{{marca}}</b> &middot; Lei nº 13.709/2018 (LGPD)
+<p class="sub">Anexo aos Termos de Uso do <b>{{marca}}</b> &middot; Lei nº 13.709/2018 (LGPD)
 &middot; versão de {{dataDpa}}</p>
 
-<p>Este Anexo integra o contrato de assinatura celebrado entre <b>{{empresa}}</b>, CNPJ
-{{cnpj}} (&ldquo;<b>Operadora</b>&rdquo;), e o cliente contratante identificado na assinatura
-(&ldquo;<b>Controlador</b>&rdquo;), e regula o tratamento de dados pessoais decorrente do uso do
-{{marca}}.</p>
+<p>Este Anexo complementa os Termos de Uso do {{marca}} e descreve, para a organização que usa a
+ferramenta (&ldquo;<b>Cliente</b>&rdquo;), como os dados pessoais são tratados nesse uso. Ele é oferecido
+por <b>{{empresa}}</b>, CNPJ {{cnpj}} (&ldquo;<b>Fornecedora</b>&rdquo;). O {{marca}} é gratuito e não
+tem conta.</p>
 
 <div class="caixa">
-  <p style="margin:0"><b>O ponto que muda o alcance deste Anexo.</b> O {{marca}} é uma ferramenta que roda
-  <b>inteiramente no navegador do usuário</b>. O vídeo, o áudio, as imagens de tela e a transcrição
-  <b>nunca são transmitidos à Operadora</b> — não existe servidor de processamento. O tratamento aqui
-  regulado alcança apenas os dados da <b>conta paga</b>, listados no item 2. Perguntas de avaliação de
-  fornecedor sobre guarda, cifra ou destruição do conteúdo audiovisual não se aplicam porque esse conteúdo
-  não chega à Operadora, e isso é verificável pelo próprio Controlador com o inspetor de rede do navegador
-  aberto na aba Rede.</p>
+  <p style="margin:0"><b>O ponto que define este Anexo.</b> A Fornecedora <b>não trata dados pessoais por
+  conta do Cliente</b>. O {{marca}} roda <b>inteiramente no navegador do usuário</b>: o vídeo, o áudio, as
+  imagens de tela, as transcrições e os documentos gerados <b>nunca são transmitidos à Fornecedora</b>. Não
+  existe servidor de processamento, conta nem banco de dados do Cliente. Perguntas de avaliação de
+  fornecedor sobre guarda, cifra ou destruição desse conteúdo não se aplicam, porque ele não chega à
+  Fornecedora — e isso é verificável pelo próprio Cliente com o inspetor de rede do navegador aberto na aba
+  Rede.</p>
 </div>
 
-<h2>1. Papéis</h2>
+<h2 id="papeis">1. Papéis</h2>
 <ol>
-  <li>O <b>Controlador</b> decide as finalidades e os meios do tratamento dos dados descritos no item 2 e
-  responde pela licitude da coleta e pela base legal aplicável.</li>
-  <li>A <b>Operadora</b> trata esses dados <b>exclusivamente</b> conforme as instruções documentadas do
-  Controlador — sendo o contrato de assinatura, este Anexo e o uso normal das funções do produto as
-  instruções documentadas iniciais.</li>
-  <li>A Operadora <b>não</b> usa esses dados para finalidade própria, <b>não</b> os cruza com outras bases,
-  <b>não</b> os cede ou comercializa e <b>não</b> os usa para treinar modelos de inteligência artificial,
-  próprios ou de terceiros.</li>
-  <li>Nos dados de contato comercial, faturamento, medição anônima de uso e registros de acesso ao site, a
-  Operadora atua como <b>controladora</b> em nome próprio, na forma da sua Política de Privacidade. Esses
-  dados estão fora do escopo deste Anexo.</li>
+  <li>O <b>Cliente</b> é o <b>controlador</b> do que grava e processa com a ferramenta: decide o que é
+  gravado, com que finalidade e com que base legal, e responde pela informação às pessoas que aparecem nas
+  gravações.</li>
+  <li>A <b>Fornecedora</b> não recebe, não acessa e não armazena esse conteúdo, e por isso <b>não atua como
+  operadora</b> dele (art. 5º, VII da LGPD). Ela fornece o software, que o Cliente executa no próprio
+  navegador.</li>
+  <li>A Fornecedora atua como <b>controladora</b>, em nome próprio, apenas dos dados descritos na sua
+  Política de Privacidade — os dados técnicos de acesso que a hospedagem do site recebe, a contagem
+  agregada de visitas e os e-mails que receber. Esses dados estão fora do escopo deste Anexo.</li>
+  <li>Nenhum conteúdo do Cliente é usado para treinar modelos de inteligência artificial, próprios ou de
+  terceiros: ele não chega à Fornecedora.</li>
 </ol>
 
-<h2>2. Objeto do tratamento</h2>
-<table>
-  <tr><th>Categorias de dados</th><th>Categorias de titulares</th><th>Natureza e finalidade</th><th>Duração</th></tr>
-  <tr>
-    <td>Lista de casos a executar (roteiro), casos de teste, chamados de suporte, modelos de documento,
-    configuração da conta, assentos do time, recibos, e <b>anexos <code>.json</code> de sessão</b> quando o
-    usuário optar por anexá-los — que podem conter imagens de tela do ambiente do Controlador</td>
-    <td>Empregados, prestadores e usuários do Controlador com assento na conta; e quaisquer titulares cujos
-    dados apareçam nas telas capturadas pelo Controlador</td>
-    <td>Armazenamento, organização e disponibilização, por meio automatizado, com a finalidade única de
-    prestar o serviço contratado</td>
-    <td>Enquanto durar a assinatura, e <b>até 90 dias</b> após o encerramento</td>
-  </tr>
+<h2 id="objeto">2. Onde o tratamento acontece</h2>
+<ol>
+  <li><b>Conteúdo das gravações</b> — telas, áudio, transcrições, anotações e documentos gerados: tratado
+  no navegador do usuário, no dispositivo do Cliente. Não sai dele, salvo pelas funções opcionais
+  descritas no item 3, acionadas pelo próprio usuário.</li>
+  <li><b>Configurações guardadas no navegador</b> — preferências, modelos, marca do cliente, o campo
+  &ldquo;Emitido por&rdquo; e, se o usuário marcar a opção, a lista de vocabulário: ficam no armazenamento
+  local do navegador, sob controle do Cliente, e são apagadas quando os dados do site são limpos no
+  navegador.</li>
+  <li><b>Cópia de uma gravação em curso</b> — as telas capturadas são espelhadas no armazenamento privado de
+  arquivos do navegador (<i>Origin Private File System</i>), para que um travamento não perca o trabalho.
+  A cópia é apagada quando um documento é gerado, após sete dias ou quando o usuário a descarta.</li>
+</ol>
+
+<h2 id="terceiros">3. Suboperadores e terceiros</h2>
+<p><b>Não há suboperador:</b> nenhum terceiro contratado pela Fornecedora recebe conteúdo do Cliente. O
+navegador do usuário se conecta diretamente aos terceiros abaixo. A relação é a mesma publicada na
+Política de Privacidade, e prevalece a versão publicada:</p>
+<table id="terceiros">
+  <tr><th>Terceiro</th><th>Quando</th><th>O que recebe</th><th>O que nunca recebe</th></tr>
+  <tr data-destino="hospedagem"><td>Vercel — hospedagem do site e da ferramenta</td>
+      <td>Sempre, ao abrir qualquer página</td>
+      <td>O pedido de cada arquivo da página, com endereço IP, navegador e endereço pedido, nos registros de
+      acesso da Vercel</td>
+      <td>Conteúdo do Cliente</td></tr>
+  <tr data-destino="medicao"><td>Vercel Web Analytics — contagem de visitas</td>
+      <td>Ao abrir uma página do site ou a ferramenta</td>
+      <td>O registro de que a página foi vista, para uma contagem agregada, sem cookie</td>
+      <td>Cookie, cadastro, uso da ferramenta, conteúdo do Cliente</td></tr>
+  <tr data-destino="pdf"><td>jsDelivr — biblioteca do PDF</td>
+      <td>Ao gerar o PDF, e só se o arquivo servido pela própria página faltar</td>
+      <td>O pedido de download da biblioteca</td>
+      <td>Áudio, imagem ou texto do Cliente</td></tr>
+  <tr data-destino="modelo"><td>jsDelivr e Hugging Face — modelo de transcrição</td>
+      <td>Quando o usuário liga a transcrição, ou monta o relatório técnico do recado</td>
+      <td>O pedido de download do programa (jsDelivr) e dos pesos do modelo (huggingface.co e a rede de
+      arquivos dela). O modelo roda no navegador</td>
+      <td>Áudio do Cliente</td></tr>
+  <tr data-destino="ocr"><td>jsDelivr — leitura de texto da tela</td>
+      <td>Quando o usuário pede a leitura de texto de uma tela</td>
+      <td>O pedido de download do leitor e dos dados do idioma. O leitor roda no navegador</td>
+      <td>Imagem do Cliente</td></tr>
+  <tr data-destino="drive"><td>Google — Google Drive e Google Docs, opcional</td>
+      <td>Só se o usuário abrir um vídeo do Drive ou enviar um documento para o Google Docs, após
+      confirmação</td>
+      <td>A autenticação na conta Google do usuário, com o escopo <code>drive.file</code>. Ao enviar para o
+      Docs: <b>conteúdo do Cliente</b> — o documento gerado, que vai do navegador direto para a conta Google
+      do usuário</td>
+      <td>O restante do Drive; nada passa pela Fornecedora</td></tr>
+  <tr data-destino="compartilhar"><td>LinkedIn e demais botões de compartilhar</td>
+      <td>Só quando o usuário clica</td>
+      <td>O endereço do site ou do artigo, num link comum</td>
+      <td>Qualquer parte de documento do Cliente</td></tr>
 </table>
-<p>A Operadora <b>não determina</b> o que aparece nas telas capturadas. Cabe ao Controlador não capturar
-dado pessoal desnecessário e usar as funções de tarja e recorte disponíveis na ferramenta antes de anexar
-uma sessão.</p>
+<p>O envio para o Google Docs é a única função em que conteúdo do Cliente sai do navegador. O destino é a
+conta Google do próprio usuário, e o tratamento a partir daí segue a relação entre o Cliente, ou o usuário,
+e o Google. Cabe ao Cliente decidir se essa função é permitida no seu ambiente.</p>
 
-<h2>3. Obrigações da Operadora</h2>
+<h2 id="cliente">4. Responsabilidades do Cliente</h2>
 <ol>
-  <li><b>Confidencialidade.</b> Restringir o acesso ao pessoal que dele necessite, sob obrigação de sigilo
-  que sobrevive ao término do vínculo.</li>
-  <li><b>Segurança.</b> Manter as medidas técnicas e administrativas do item 5, aptas a proteger os dados
-  de acessos não autorizados e de situações acidentais ou ilícitas (art. 46 da LGPD).</li>
-  <li><b>Auxílio ao Controlador.</b> Auxiliá-lo, na medida do razoável, a responder a pedidos de titulares
-  (arts. 18 e 19), a realizar relatório de impacto (art. 38) e a atender determinações da ANPD.</li>
-  <li><b>Pedidos de titular recebidos diretamente.</b> Encaminhá-los ao Controlador em até <b>5 dias
-  úteis</b>, sem respondê-los por conta própria.</li>
-  <li><b>Registro.</b> Manter registro das operações de tratamento realizadas por conta do Controlador
-  (art. 37) e disponibilizá-lo mediante pedido.</li>
-  <li><b>Devolução e eliminação.</b> Ao término, eliminar os dados no prazo do item 2, salvo obrigação
-  legal de guarda. A exportação em <code>.json</code> e <code>.csv</code> está disponível ao Controlador a
-  qualquer tempo, dentro do produto, sem depender de pedido.</li>
+  <li>Ter base legal para as gravações e informar as pessoas gravadas, na forma da lei aplicável.</li>
+  <li>Não capturar dado pessoal desnecessário, e usar as funções de tarja e recorte da ferramenta antes de
+  compartilhar um documento.</li>
+  <li>Cuidar dos dispositivos e navegadores em que a ferramenta é usada: o que ela guarda fica no
+  armazenamento daquele navegador até que os dados do site sejam limpos.</li>
+  <li>Decidir quais funções opcionais — Google Drive, Google Docs, compartilhamento — são permitidas no seu
+  ambiente.</li>
 </ol>
 
-<h2>4. Suboperadores</h2>
-<p>O Controlador autoriza, de forma geral, os suboperadores abaixo. A relação é a mesma publicada na
-Política de Privacidade e prevalece a versão publicada:</p>
-<table>
-  <tr><th>Suboperador</th><th>Função</th><th>Dado que recebe</th><th>País</th><th>Salvaguarda</th></tr>
-  <tr><td>Supabase</td><td>Banco de dados e armazenamento do anexo</td>
-      <td>Todo o conteúdo da conta paga. Nunca vídeo, áudio ou transcrição</td>
-      <td>Brasil (São Paulo)</td><td>Contrato de tratamento do fornecedor</td></tr>
-  <tr><td>Vercel</td><td>Hospedagem da aplicação</td>
-      <td>Registros técnicos de acesso</td>
-      <td>Rede global</td><td>Cláusulas contratuais padrão (art. 33, II)</td></tr>
-  <tr><td>Stripe</td><td>Cobrança da assinatura</td>
-      <td>Nome, e-mail e dados de pagamento do contratante</td>
-      <td>EUA e União Europeia</td><td>Cláusulas contratuais padrão; PCI-DSS</td></tr>
-  <tr><td>Brevo</td><td>Envio do link de acesso e do convite por e-mail</td>
-      <td>Endereço de e-mail do destinatário e texto da mensagem</td>
-      <td>União Europeia (França)</td><td>Cláusulas contratuais padrão</td></tr>
-</table>
-<p><b>Troca de suboperador.</b> A Operadora comunicará ao Controlador, por e-mail e com <b>30 dias de
-antecedência</b>, a substituição ou o acréscimo de suboperador que trate os dados do item 2. Dentro desse
-prazo o Controlador poderá se opor de forma fundamentada; não sendo possível acomodar a objeção, o
-Controlador poderá rescindir a assinatura sem ônus, com direito à exportação prévia dos dados.</p>
-
-<h2>5. Medidas técnicas e administrativas</h2>
+<h2 id="medidas">5. Medidas técnicas</h2>
 <ol>
-  <li><b>Em trânsito:</b> TLS em todo o tráfego da aplicação e das chamadas de servidor.</li>
-  <li><b>Em repouso:</b> banco de dados e armazenamento de anexo cifrados em repouso pelo provedor de
-  infraestrutura, na região de São Paulo. A cifra é do provedor; a escolha da região é da Operadora.</li>
-  <li><b>Autenticação:</b> acesso por link de uso único enviado por e-mail, com validade limitada e
-  invalidação após o primeiro uso. Não há senha armazenada.</li>
-  <li><b>Controle de acesso ao banco:</b> as tabelas residem em schema próprio, inacessível ao navegador. A
-  permissão de execução das funções expostas é revogada dos papéis públicos e concedida somente ao papel de
-  serviço, que existe apenas no servidor.</li>
-  <li><b>Anexos:</b> armazenados em repositório privado, sem leitura pública. A entrega é feita pelo
-  servidor após verificação de autorização, por endereço assinado com validade de <b>dois minutos</b>.</li>
-  <li><b>Segregação de credenciais:</b> chaves de serviço mantidas apenas em variáveis de ambiente do
-  servidor, jamais embarcadas no código entregue ao navegador.</li>
-  <li><b>Registros de acesso</b> ao servidor web mantidos por 6 meses (art. 15 do Marco Civil da Internet)
-  e então descartados.</li>
-  <li><b>Minimização por arquitetura:</b> o conteúdo audiovisual não é transmitido à Operadora em nenhum
-  momento — a medida de segurança mais forte deste Anexo é a ausência do dado.</li>
+  <li><b>Minimização por arquitetura:</b> o processamento é local, no navegador. A medida de segurança mais
+  forte deste Anexo é a ausência do dado do lado da Fornecedora.</li>
+  <li><b>Sem servidor de aplicação, conta ou banco de dados do Cliente:</b> o site e a ferramenta são
+  servidos como páginas pela hospedagem.</li>
+  <li><b>Em trânsito:</b> o site, a ferramenta e os downloads de bibliotecas e modelos usam conexão cifrada
+  (HTTPS).</li>
+  <li><b>Armazenamento local sob controle do Cliente:</b> nada do que a ferramenta guarda no navegador é
+  enviado à Fornecedora; a cópia de uma gravação em curso é apagada nas condições do item 2.</li>
+  <li><b>Versão offline:</b> o arquivo único que o Cliente baixa não contém nenhum dos endereços externos do
+  item 3, e pode ser guardado, escaneado e versionado pelo Cliente.</li>
+  <li><b>Google:</b> escopo <code>drive.file</code>, restrito aos arquivos escolhidos pelo usuário e aos
+  criados pela ferramenta, e confirmação explícita antes de qualquer envio.</li>
 </ol>
-<p>A Operadora <b>não</b> possui certificação SOC 2 ou ISO 27001 e não declara possuí-las.</p>
+<p>A Fornecedora <b>não</b> possui certificação SOC 2 ou ISO 27001 e não declara possuí-las.</p>
 
-<h2>6. Incidentes de segurança</h2>
-<ol>
-  <li>Ciente de incidente que possa acarretar risco ou dano relevante, a Operadora comunicará o Controlador
-  em até <b>48 horas</b>, pelo e-mail de contato da conta.</li>
-  <li>A comunicação indicará: dados afetados, titulares envolvidos ou sua ordem de grandeza, medidas
-  técnicas já adotadas, riscos e recomendações — sendo atualizada conforme a apuração avance, em vez de
-  aguardar estar completa.</li>
-  <li>A Operadora cooperará com o Controlador e com a ANPD na apuração, na mitigação e nas comunicações
-  exigidas pelo art. 48 da LGPD.</li>
-</ol>
+<h2 id="incidentes">6. Incidentes de segurança</h2>
+<p>Como a Fornecedora não guarda conteúdo do Cliente, um incidente do lado dela não tem como expor esse
+conteúdo. Se a Fornecedora tomar ciência de incidente que afete o site ou a ferramenta e possa acarretar
+risco ou dano relevante ao Cliente — por exemplo, uma alteração não autorizada do código servido —,
+publicará aviso no site e fará as comunicações exigidas pelo art. 48 da LGPD.</p>
 
-<h2>7. Pedidos de autoridade</h2>
-<p>A Operadora somente atenderá a requisições de autoridade pública amparadas em fundamento legal válido,
-entregando apenas o que for expressamente requisitado, e <b>notificará o Controlador</b> para que possa
-exercer sua defesa, salvo vedação legal expressa. A Operadora não dispõe de vídeo, áudio ou transcrição do
-Controlador e, portanto, não tem como entregá-los a autoridade alguma.</p>
+<h2 id="autoridades">7. Pedidos de autoridade</h2>
+<p>A Fornecedora não dispõe de vídeo, áudio, telas, transcrições ou documentos do Cliente e, portanto, não
+tem como entregá-los a autoridade alguma. Um pedido sobre esse conteúdo deve ser dirigido ao Cliente.</p>
 
-<h2>8. Auditoria</h2>
-<p>A Operadora prestará ao Controlador, mediante pedido escrito e no máximo uma vez por ano, as informações
-necessárias para demonstrar o cumprimento deste Anexo, incluindo o questionário de segurança preenchido e a
-descrição das medidas do item 5. Auditoria presencial em instalações de terceiros (provedores de
-infraestrutura) seguirá o que os contratos desses fornecedores permitirem.</p>
+<h2 id="verificacao">8. Verificação</h2>
+<p>O Cliente pode verificar o que este Anexo afirma com o inspetor de rede do navegador e com a versão
+offline. Mediante pedido escrito para {{contato}}, a Fornecedora prestará as informações razoavelmente
+necessárias para demonstrar o que este Anexo afirma.</p>
 
-<h2>9. Transferência internacional</h2>
-<p>Os dados do item 2 são armazenados <b>no Brasil</b>. Ocorrem transferências internacionais restritas aos
-suboperadores do item 4 cuja operação é global ou estrangeira, amparadas em cláusulas contratuais padrão
-(art. 33, II da LGPD).</p>
+<h2 id="transferencia">9. Transferência internacional</h2>
+<p>A Fornecedora não transfere conteúdo do Cliente, porque não o recebe. Os terceiros do item 3 com que o
+navegador se conecta podem estar fora do Brasil, e tratam os dados técnicos da conexão conforme as
+próprias políticas.</p>
 
-<h2>10. Vigência e prevalência</h2>
-<p>Este Anexo vigora enquanto durar a assinatura e, quanto às obrigações de eliminação e sigilo, até o
-cumprimento integral. Em caso de conflito entre este Anexo e o contrato de assinatura quanto a tratamento
-de dados pessoais, <b>prevalece este Anexo</b>.</p>
+<h2 id="contaAntiga">10. Quem teve conta antes de 4 de novembro de 2026</h2>
+<div data-antigo>
+<p>Versões anteriores deste Anexo regulavam os dados da conta paga, guardados na Supabase, com a Stripe
+para a cobrança e a Brevo para o envio de e-mails. Esse sistema foi desligado em 4 de novembro de 2026. Os
+dados das contas são eliminados com a exclusão do banco do sistema antigo; as faturas e os registros
+fiscais são guardados pelo prazo que a legislação brasileira exige; e as obrigações de sigilo e de
+eliminação daquelas versões continuam valendo até serem cumpridas.</p>
+</div>
+
+<h2 id="vigencia">11. Vigência e prevalência</h2>
+<p>Este Anexo vale enquanto o Cliente usar o {{marca}}. Em caso de divergência entre este Anexo e a
+Política de Privacidade publicada, prevalece a versão publicada.</p>
 
 <table class="assina">
   <tr>
-    <td><div class="linha"></div><b>{{empresa}}</b><br>CNPJ {{cnpj}} — Operadora<br>
+    <td><div class="linha"></div><b>{{empresa}}</b><br>CNPJ {{cnpj}} — Fornecedora<br>
         Nome:<br>Cargo:<br>Data:</td>
-    <td><div class="linha"></div><b>Cliente contratante</b><br>CNPJ: — Controlador<br>
+    <td><div class="linha"></div><b>Cliente</b><br>CNPJ: — Controlador<br>
         Nome:<br>Cargo:<br>Data:</td>
   </tr>
 </table>
 
 <p class="pe">{{empresa}} — CNPJ {{cnpj}} &middot; Encarregado pelo tratamento de dados pessoais:
-{{encarregado}} — {{contato}} &middot; Política de Privacidade em {{siteDom}}/privacidade &middot; Este documento é gerado a
-partir da mesma fonte da Política de Privacidade publicada; em caso de divergência, prevalece a versão
-publicada.</p>
+{{encarregado}} — {{contato}} &middot; Suporte: suporte@walkstamp.com &middot; Política de Privacidade em
+{{siteDom}}/privacidade &middot; Este documento é gerado a partir da mesma fonte da Política de Privacidade
+publicada; em caso de divergência, prevalece a versão publicada.</p>
 
 </body>
 </html>
