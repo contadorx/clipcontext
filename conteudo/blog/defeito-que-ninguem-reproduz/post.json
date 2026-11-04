@@ -1,0 +1,29 @@
+{
+  "chave": "defeito-que-ninguem-reproduz",
+  "publicado_em": "2026-08-28T12:38:49.014917+00:00",
+  "atualizado_em": "2026-08-28T12:38:49.014917+00:00",
+  "autor": null,
+  "tags": [],
+  "capa": "1787919695381.png",
+  "figuras": [
+    {
+      "arquivo": "1787919695381.png",
+      "alt": "Busca do Defeito nos Testes",
+      "md5": "6de9c320b609830b693ef97116aa5182",
+      "bytes": 2087859,
+      "origem": "https://kjlnyyblhanficgpends.supabase.co/storage/v1/object/public/blog/defeito-que-ninguem-reproduz/1787919695381.png"
+    }
+  ],
+  "idiomas": {
+    "en": {
+      "slug": "the-defect-nobody-can-reproduce",
+      "titulo": "The defect nobody can reproduce",
+      "resumo": "The report describes the outcome. Reproduction requires the input. That is why half of the tickets in user acceptance testing come back with \"could not reproduce\"."
+    },
+    "pt": {
+      "slug": "defeito-que-ninguem-reproduz",
+      "titulo": "O defeito que ninguém consegue reproduzir",
+      "resumo": "O relato descreve o resultado. A reprodução exige a entrada. É por isso que metade dos chamados de homologação volta com \"não consegui reproduzir\"."
+    }
+  }
+}

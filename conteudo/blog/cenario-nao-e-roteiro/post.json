@@ -1,0 +1,33 @@
+{
+  "chave": "cenario-nao-e-roteiro",
+  "publicado_em": "2026-08-28T11:15:37.596566+00:00",
+  "atualizado_em": "2026-08-28T11:15:37.596566+00:00",
+  "autor": null,
+  "tags": [
+    "qa",
+    "evidência",
+    "sap"
+  ],
+  "capa": "1787915721710.png",
+  "figuras": [
+    {
+      "arquivo": "1787915721710.png",
+      "alt": "Testes ERP",
+      "md5": "03a90ba10b4dd36385ca07bb0f83a4ac",
+      "bytes": 2241279,
+      "origem": "https://kjlnyyblhanficgpends.supabase.co/storage/v1/object/public/blog/cenario-nao-e-roteiro/1787915721710.png"
+    }
+  ],
+  "idiomas": {
+    "en": {
+      "slug": "scenario-is-not-a-script",
+      "titulo": "Three hours building test data, eight minutes testing",
+      "resumo": "Most ERP test cases are scripts, not scenarios. A script is an instruction; a scenario is a condition — and the condition is exactly the part nobody writes down."
+    },
+    "pt": {
+      "slug": "cenario-nao-e-roteiro",
+      "titulo": "Três horas montando massa, oito minutos testando",
+      "resumo": "A maioria dos casos de teste em projeto de ERP é roteiro, não cenário. Roteiro é instrução; cenário é condição — e a condição é justamente a parte que ninguém escreve."
+    }
+  }
+}

@@ -1,4 +1,5 @@
-/* O MAPA DO BLOG — lido do banco, e não do último deploy.
+/* O MAPA DO BLOG — lido dos posts do deploy desde o Build 70 (até o 69, do
+ * banco), e montado a cada pedido: um post agendado entra na hora marcada.
  *
  * Cada post entra uma vez POR IDIOMA em que ele existe, com os outros idiomas
  * declarados como alternativos. Anunciar uma versão alemã que não existe manda

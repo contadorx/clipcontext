@@ -23,11 +23,16 @@ import { BLOG_TXT, enderecoBlog, dataDe } from './txt';
    O que custava não era montar a página — era a CONSULTA. `force-dynamic`
    arrasta consigo `fetchCache: 'force-no-store'`, e era daí que vinha uma ida
    ao Supabase por visita de robô. Declarando `default-cache`, a leitura passa a
-   valer cinco minutos (ver `CACHE_BLOG` em `lib/blog.ts`) e a página continua
+   valer cinco minutos (era o `CACHE_BLOG`, que saiu no Build 70) e a página continua
    sendo montada a cada pedido, sempre com o que existe agora.
 
    Medido em `testes/seo.mjs`: três visitas seguidas à mesma página → ZERO
-   consultas ao banco. Era esse o número do item. */
+   consultas ao banco. Era esse o número do item.
+
+   BUILD 70: não há mais consulta nenhuma — o post é arquivo no projeto,
+   importado do `src/blog.json`. O `force-dynamic` fica porque a data de
+   publicação é conferida a cada pedido: um post agendado entra sozinho na
+   hora marcada, sem precisar de deploy. */
 export const dynamic = 'force-dynamic';
 export const fetchCache = 'default-cache';
 export const dynamicParams = false;

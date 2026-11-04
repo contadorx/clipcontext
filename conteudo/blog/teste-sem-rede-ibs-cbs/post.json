@@ -1,0 +1,33 @@
+{
+  "chave": "teste-sem-rede-ibs-cbs",
+  "publicado_em": "2026-08-20T08:47:43.708249+00:00",
+  "atualizado_em": "2026-08-20T09:32:55.893814+00:00",
+  "autor": null,
+  "tags": [
+    "evidência",
+    "qa",
+    "sap"
+  ],
+  "capa": "1787215639355.png",
+  "figuras": [
+    {
+      "arquivo": "1787215639355.png",
+      "alt": "Testes de Nota Fiscal",
+      "md5": "2fd72bfe1b3dd908958c5fd0fbc80834",
+      "bytes": 101074,
+      "origem": "https://kjlnyyblhanficgpends.supabase.co/storage/v1/object/public/blog/teste-sem-rede-ibs-cbs/1787215639355.png"
+    }
+  ],
+  "idiomas": {
+    "en": {
+      "slug": "testing-without-a-safety-net",
+      "titulo": "The filter that never arrived: testing Brazil's new VAT without a safety net",
+      "resumo": "Invoices are still authorized with the wrong tax calculation. Anyone using \"it cleared the tax authority\" as an acceptance criterion has a test that tests nothing."
+    },
+    "pt": {
+      "slug": "teste-sem-rede-ibs-cbs",
+      "titulo": "O filtro que não chegou: testar IBS e CBS sem rede",
+      "resumo": "A nota continua sendo autorizada mesmo com o cálculo errado. Quem trata \"passou na Sefaz\" como critério de aceite está com um teste que não testa nada."
+    }
+  }
+}

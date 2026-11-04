@@ -1,0 +1,33 @@
+{
+  "chave": "solman-cloud-alm-e-a-evidencia",
+  "publicado_em": "2026-08-22T10:18:06.031517+00:00",
+  "atualizado_em": "2026-08-22T10:35:31.817239+00:00",
+  "autor": null,
+  "tags": [
+    "evidência",
+    "qa",
+    "sap"
+  ],
+  "capa": "1787394923077.png",
+  "figuras": [
+    {
+      "arquivo": "1787394923077.png",
+      "alt": "Migração para o C ALM",
+      "md5": "179fc4032d147aaec8bf385ee4475002",
+      "bytes": 1853635,
+      "origem": "https://kjlnyyblhanficgpends.supabase.co/storage/v1/object/public/blog/solman-cloud-alm-e-a-evidencia/1787394923077.png"
+    }
+  ],
+  "idiomas": {
+    "en": {
+      "slug": "solman-cloud-alm-and-the-evidence",
+      "titulo": "Solution Manager until 2027, Cloud ALM after. So where does the test evidence live?",
+      "resumo": "The migration fixes orchestration, traceability and the interface. It does not fix — and does not claim to fix — who produces the proof of what was executed."
+    },
+    "pt": {
+      "slug": "solman-cloud-alm-e-a-evidencia",
+      "titulo": "SolMan até 2027, Cloud ALM depois. E a evidência do teste, fica onde?",
+      "resumo": "A migração resolve orquestração, rastreabilidade e interface. Ela não resolve — nem promete resolver — quem produz a prova do que foi executado."
+    }
+  }
+}

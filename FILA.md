@@ -141,6 +141,70 @@ campo de emissor, a contagem de erros na identificação. Marcar uma tela é
 
 ---
 
+## DEC-23 — O blog virou arquivo no projeto *(decidida 04/11, Build 70)*
+
+**O pedido:** *"tenho hostgator, dá para usar o banco deles para o blog?"*.
+Decidido com quem pediu: **arquivos no projeto**. Banco nenhum, nem o nosso
+nem o da HostGator. É o segundo dos quatro builds que tiram o Supabase.
+
+**O que mudou:**
+
+- **Os 8 posts saíram do banco para `conteudo/blog/<chave>/`.** Cada um tem
+  um `post.json` e o corpo `pt.md` e `en.md`. Saíram 16 versões ao todo.
+- **Copiados sem retranscrever.**
+  - O banco devolveu tudo numa consulta só, em base64, com MD5 e tamanho
+    calculados lá dentro. A cópia bateu nos dois.
+  - Os 16 corpos foram comparados com o banco e são iguais, com duas exceções
+    ditas: a quebra de linha (`\r\n` → `\n`) e os dois endereços de figura
+    dentro do corpo.
+  - O `paraHtml` normaliza a quebra antes de tudo, e o `blog.mjs` cobra que
+    os dois desenhem o mesmo HTML.
+- **O build junta tudo em `src/blog.json`,** e o site importa esse arquivo.
+  Nenhuma consulta por visita: o `seo.mjs` conta **zero** pedidos ao banco em
+  seis páginas do blog.
+- **As regras do banco continuam valendo**, provadas no `lib/blog.ts` de
+  verdade sobre dados de ensaio:
+  - só sai post publicado e com data passada (um post agendado entra sozinho
+    na hora);
+  - só sai idioma com título;
+  - a lista vai do mais novo para o mais velho;
+  - publicar exige português e inglês, regra que agora o build aplica.
+- **O editor saiu** (`/conta/negocio/blog`, sete ações, o módulo do balde).
+  Publicar virou commit. O passo a passo está no `BLOG.md`.
+- **As figuras passam a ser do próprio site** (`/img/blog/...`). Cada uma tem
+  no `post.json` o MD5 que tinha no balde, e o build para se faltar alguma ou
+  se o MD5 não bater.
+- **Efeito colateral bom:** a CSP do site é `img-src 'self'`, em modo
+  report-only. Toda capa vinda do Supabase gerava um relato. Com as figuras no
+  próprio site, esses relatos acabam, e é provável que boa parte dos 133
+  guardados seja isso. Conferir quando forem lidos, no Build 71.
+
+**Réguas:**
+
+- `blog.mjs` foi reescrito: arquivos, regras, escape, site no ar, editor fora.
+- `seo.mjs` passou a usar um post de ensaio por `WALKSTAMP_BLOG_TESTE`, que a
+  Vercel ignora.
+- `figura.mjs` saiu: comparava o teto do upload de figura, que não existe
+  mais.
+- Total: 170.
+
+**O que ficou para o Build 71:**
+
+- o `<body data-supa-url>` do site, que serve o `support.js`;
+- o teto de 9 MB das Server Actions, que serve o importador de planilha da
+  conta.
+
+**⚠ Pendente para fechar este build: as 9 figuras.** O host do Supabase está
+bloqueado pela política de rede desta sessão, então elas ainda não foram
+baixadas. O `conteudo/blog/baixar-figuras.py` baixa e confere o MD5 de cada
+uma. Até elas chegarem:
+
+- o `build.py` para, de propósito;
+- a esteira não roda;
+- o Build 70 não está liberado.
+
+---
+
 ## DEC-22 — A ferramenta inteira grátis, e sem servidor *(decidida 04/11, entregue no Build 69)*
 
 **O pedido:** *"vamos deixar o walkstamp inteiramente free… não quero ganhar

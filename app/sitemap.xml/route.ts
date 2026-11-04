@@ -11,7 +11,7 @@
  *
  * Então aqui é um índice, e ele aponta para dois mapas com cadências
  * diferentes: o das páginas, que nasce no build e é servido do disco, e o do
- * blog, que é lido do banco a cada rastreio. Cada um com o seu `lastmod` —
+ * blog, que até o Build 69 era lido do banco a cada rastreio. Cada um com o seu `lastmod` —
  * é por ele que o rastreador decide qual dos dois vale reabrir.
  */
 import { SITE, XML, dataISO } from '@/lib/seo';

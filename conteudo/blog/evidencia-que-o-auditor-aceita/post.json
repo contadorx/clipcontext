@@ -1,0 +1,36 @@
+{
+  "chave": "evidencia-que-o-auditor-aceita",
+  "publicado_em": "2026-08-18T11:28:30.446105+00:00",
+  "atualizado_em": "2026-08-20T09:33:40.439223+00:00",
+  "autor": null,
+  "tags": [],
+  "capa": "1787067427162.webp",
+  "figuras": [
+    {
+      "arquivo": "1787067427162.webp",
+      "alt": "Evidências de Teste",
+      "md5": "c2771e87de8f2fe7c8492f039854ab84",
+      "bytes": 20896,
+      "origem": "https://kjlnyyblhanficgpends.supabase.co/storage/v1/object/public/blog/evidencia-que-o-auditor-aceita/1787067427162.webp"
+    },
+    {
+      "arquivo": "1787069528888.jpg",
+      "alt": "Atenção ao Teste",
+      "md5": "2e194fc028403b4227a2fdf49587d584",
+      "bytes": 52747,
+      "origem": "https://kjlnyyblhanficgpends.supabase.co/storage/v1/object/public/blog/evidencia-que-o-auditor-aceita/1787069528888.jpg"
+    }
+  ],
+  "idiomas": {
+    "en": {
+      "slug": "evidence-an-auditor-accepts",
+      "titulo": "The test evidence an auditor accepts — and the kind he sends back",
+      "resumo": "Six questions that separate real proof from a pile of screenshots. And why the problem is not the team, but the moment the record is created."
+    },
+    "pt": {
+      "slug": "evidencia-que-o-auditor-aceita",
+      "titulo": "A evidência que o auditor aceita — e a que ele devolve",
+      "resumo": "Seis perguntas que separam uma prova de teste de um punhado de prints. E por que o problema não é o time, é o momento em que o registro é feito."
+    }
+  }
+}

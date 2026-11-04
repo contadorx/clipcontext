@@ -1,0 +1,29 @@
+{
+  "chave": "motor-novo-chassi-velho",
+  "publicado_em": "2026-08-21T14:32:05.390542+00:00",
+  "atualizado_em": "2026-08-21T16:35:26.541952+00:00",
+  "autor": null,
+  "tags": [],
+  "capa": "1787330110929.png",
+  "figuras": [
+    {
+      "arquivo": "1787330110929.png",
+      "alt": "Motor novo - IA",
+      "md5": "d4d6edab66fa2699df1a8801787d7004",
+      "bytes": 2035608,
+      "origem": "https://kjlnyyblhanficgpends.supabase.co/storage/v1/object/public/blog/motor-novo-chassi-velho/1787330110929.png"
+    }
+  ],
+  "idiomas": {
+    "en": {
+      "slug": "new-motor-old-chassis",
+      "titulo": "A new motor on an old chassis: why AI still doesn't show up in productivity",
+      "resumo": "Factories took forty years to profit from the electric motor. The delay was not the motor's fault — it belonged to whoever kept the old layout. It is happening again."
+    },
+    "pt": {
+      "slug": "motor-novo-chassi-velho",
+      "titulo": "O motor novo no chassi velho: por que a IA ainda não aparece na produtividade",
+      "resumo": "A fábrica levou quarenta anos para aproveitar o motor elétrico. O atraso não foi do motor: foi de quem manteve o desenho antigo. A história está se repetindo."
+    }
+  }
+}

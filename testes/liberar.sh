@@ -137,7 +137,9 @@ read -r -d '' MAPA <<'MAPA_FIM'
 # painel, e cada uma tem um dono claro quando se pergunta sobre o que ela afirma.
 # O que sobra de verdade agora é zero — e o teto do `inventario.mjs` guarda isso.
 ^app/conta/\[lang\]/chamados|^lib/conta/aviso-chamado[.]ts$ => site:chamadoconta.mjs
-^app/(blog|conta/\[lang\]/negocio)/|^lib/blog[.]ts$ => site:blog.mjs
+^app/(blog|conta/\[lang\]/negocio)/|^lib/blog[.]ts$ => site:blog.mjs site:seo.mjs
+# O BLOG VIROU ARQUIVO no Build 70: o post, o JSON gerado e as figuras.
+^conteudo/|^src/blog[.]json$|^public/img/blog/ => site:blog.mjs site:seo.mjs
 ^src/i18n-site[.]json$ => site:tabelas.mjs
 ^public/site[.]css$|^src/site/doc[.]html$ => site:paridade.mjs
 ^src/rotas[.]json$ => site:isca.mjs
@@ -148,7 +150,7 @@ read -r -d '' MAPA <<'MAPA_FIM'
 MAPA_FIM
 
 # ---- 1. os contratos: sempre, e são catorze segundos ------------------------
-CONTRATOS="auditoria.mjs folha.mjs modelopessoal.mjs numeros.mjs chaves.mjs faxina.mjs figura.mjs funil.mjs inventario.mjs middleware.mjs
+CONTRATOS="auditoria.mjs folha.mjs modelopessoal.mjs numeros.mjs chaves.mjs faxina.mjs funil.mjs inventario.mjs middleware.mjs
            planos.mjs promessa.mjs semmarca.mjs stripehook.mjs terceiros.mjs wer.mjs"
 
 # ----------------------------------------------------------------------------

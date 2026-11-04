@@ -11,8 +11,9 @@
  *   3. `Article`, `Organization`, `BreadcrumbList` no post; `FAQPage` na base;
  *      `SoftwareApplication` na home — o único investimento que muda COMO o
  *      resultado aparece, e não só onde;
- *   4. as páginas do blog são CACHEADAS, e não `force-dynamic`: todo rastreio
- *      batia no banco;
+ *   4. as páginas do blog não pedem nada a servidor nenhum — desde o Build 70
+ *      o post é arquivo no projeto, e o banco não é consultado nem na
+ *      primeira visita;
  *   5. o corpo do artigo linka a página de caso — é o que transfere autoridade
  *      do artigo para a página que vende;
  *   6. o RSS existe e é anunciado no `<head>`;
@@ -25,6 +26,7 @@
 import { chromium } from 'playwright';
 import { spawn, execSync } from 'child_process';
 import http from 'http';
+import fs from 'fs'; import path from 'path'; import os from 'os';
 
 import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
 import { garantirPortaLivre } from './_porta.mjs';
@@ -62,31 +64,23 @@ const POST = {
           corpo: 'Every team ends up writing test evidence by hand.' },
   },
 };
-let pedidosAoBanco = 0;
-const versoesCom = (p) => Object.entries(p.versoes).filter(([, v]) => (v.titulo || '').trim());
+/* O POST DE ENSAIO VAI NUM ARQUIVO, e não num banco de mentira — desde o
+   Build 70 o blog é arquivo no projeto. O `lib/blog.ts` lê este ensaio pelo
+   `WALKSTAMP_BLOG_TESTE`, que a Vercel ignora. */
+const ENSAIO = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'seo-blog-')), 'blog.json');
+fs.writeFileSync(ENSAIO, JSON.stringify({ posts: [{
+  chave: POST.chave, publicado_em: POST.publicado_em, atualizado_em: POST.atualizado_em,
+  autor: POST.autor, tags: POST.tags, capa: POST.capa, versoes: POST.versoes }] }));
 
+/* O banco continua de pé para CONTAR: qualquer pedido a ele durante uma
+   visita ao blog é um defeito, porque o blog não tem mais o que perguntar. */
+let pedidosAoBanco = 0;
 const banco = http.createServer((q, r) => {
-  const buf = [];
-  q.on('data', (d) => buf.push(d));
+  pedidosAoBanco++;
+  q.resume();
   q.on('end', () => {
-    const j = (o) => { r.writeHead(200, { 'Content-Type': 'application/json' }); r.end(JSON.stringify(o)); };
     if (q.url.startsWith('/auth/v1/user')) { r.writeHead(401); return r.end('{}'); }
-    const fn = q.url.replace('/rest/v1/rpc/', '');
-    if (fn.startsWith('walkstamp_blog_')) pedidosAoBanco++;
-    const a = JSON.parse(Buffer.concat(buf).toString('utf8') || '{}');
-    if (fn === 'walkstamp_blog_lista') {
-      const v = POST.versoes[a.p_lang];
-      return j(v ? [{ chave: POST.chave, ...v, autor: POST.autor, tags: POST.tags,
-                      capa: POST.capa, publicado_em: POST.publicado_em }] : []);
-    }
-    if (fn === 'walkstamp_blog_post') {
-      const v = POST.versoes[a.p_lang];
-      if (!v || v.slug !== a.p_slug) return j({});
-      return j({ chave: POST.chave, ...v, autor: POST.autor, tags: POST.tags, capa: POST.capa,
-                 publicado_em: POST.publicado_em, atualizado_em: POST.atualizado_em,
-                 idiomas: Object.fromEntries(versoesCom(POST).map(([L, x]) => [L, x.slug])) });
-    }
-    j({});
+    r.writeHead(200, { 'Content-Type': 'application/json' }); r.end('{}');
   });
 });
 await new Promise((r) => banco.listen(B, r));
@@ -100,7 +94,7 @@ const next = spawn('npx', ['next', 'start', '-p', String(P)], {
   cwd: RAIZ, stdio: 'ignore',
   env: { ...process.env, SUPABASE_URL: `http://localhost:${B}`,
          SUPABASE_SERVICE_ROLE_KEY: 'chave_de_mentira',
-         WALKSTAMP_SUPA_TESTE: `http://localhost:${B}` },
+         WALKSTAMP_SUPA_TESTE: `http://localhost:${B}`, WALKSTAMP_BLOG_TESTE: ENSAIO },
 });
 process.on('exit', () => { try { next.kill('SIGKILL'); } catch {} banco.close();
                            try { execSync(`fuser -k ${P}/tcp 2>/dev/null`); } catch {} });
@@ -189,32 +183,18 @@ const blocos = async (u) => {
 }
 
 // ------------------------------------------------- 4. cache
-console.log('\n[4] as páginas do blog não batem no banco a cada visita');
+console.log('\n[4] as páginas do blog não pedem nada ao banco — nem na primeira visita');
 {
-  /* A PERGUNTA CERTA É DO LADO DO BANCO, e não do cabeçalho da resposta.
-
-     `force-dynamic` fazia cada visita virar uma consulta ao Supabase — é o que
-     o item dizia, e é o que dá para medir aqui: quantos pedidos o banco recebe
-     em três visitas seguidas à MESMA página.
-
-     Medir o `Cache-Control` do HTML responderia outra coisa: no Next, uma rota
-     com segmento dinâmico e sem `generateStaticParams` é montada a cada pedido
-     mesmo com `revalidate`, e o cabeçalho diz `no-store` de qualquer forma. O
-     que passou a ser guardado é a LEITURA, e é ela que custava. */
-  /* `=== 0`, e não `< 3`. O comentário do produto garante ZERO consulta nas
-     visitas seguintes; a régua aceitava duas, e uma regressão que dobrasse o
-     custo passaria — para aparecer depois na fatura do banco.
-
-     A visita de aquecimento é EXPLÍCITA, e não herdada da seção 3. Ela estava
-     lá por acaso — este bloco media 0 porque alguém antes já tinha aberto a
-     mesma página. Uma régua que depende da ordem dos blocos é uma régua que
-     muda de resposta quando alguém reordena o arquivo. */
-  await texto(`/blog/${POST.versoes.pt.slug}`);
+  /* Até o Build 69 a pergunta era "as visitas SEGUINTES não custam nada", e a
+     primeira consultava o banco. Desde o 70 o post é arquivo: nenhuma visita
+     consulta, nem a primeira. O índice, o post, o RSS e o sitemap. */
   const antes = pedidosAoBanco;
-  for (let i = 0; i < 3; i++) await texto(`/blog/${POST.versoes.pt.slug}`);
+  for (const u of ['/blog', `/blog/${POST.versoes.pt.slug}`, `/en/blog/${POST.versoes.en.slug}`,
+                   '/blog/rss.xml', '/sitemap-blog.xml', '/blog/tag/evidencia'])
+    await texto(u);
   const gastos = pedidosAoBanco - antes;
-  console.log('     três visitas depois da primeira → ' + gastos + ' pedido(s) ao banco');
-  ok('as três visitas seguintes não custam nada', gastos === 0, gastos + ' consultas em 3 visitas');
+  console.log('     seis páginas do blog → ' + gastos + ' pedido(s) ao banco');
+  ok('nenhuma página do blog pergunta ao banco', gastos === 0, gastos + ' pedidos');
   const rr = await fetch(BASE + '/sitemap-blog.xml');
   ok('e o sitemap manda a CDN guardar',
      /s-maxage/.test(rr.headers.get('cache-control') || ''),

@@ -93,6 +93,7 @@ next-env.d.ts
 # Gerados pelo build.py para o Next ler
 src/marca.json
 src/rotas.json
+src/blog.json
 
 # ---------------------------------------------------------------------------
 # Rascunho da CLI do Supabase

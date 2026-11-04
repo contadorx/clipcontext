@@ -1,29 +1,39 @@
-/* O BLOG — leitura, gestão e o desenho do texto.
+/* O BLOG — leitura e o desenho do texto.
+ *
+ * ---- DE ONDE ELE VEM, DESDE O BUILD 70 ----
+ *
+ * Até o Build 69 os posts moravam no banco e eram escritos num editor do
+ * painel. Com o Supabase saindo, o post virou arquivo em `conteudo/blog/`, e o
+ * `build.py` junta tudo em `src/blog.json` — que é o que se importa aqui.
+ * Nenhuma consulta por visita: a página sai do que veio no deploy.
+ *
+ * As regras que as funções do banco aplicavam continuam valendo, as mesmas:
+ * só sai post com `publicado_em` preenchido e já passado (um post com data
+ * futura fica guardado e aparece sozinho na hora), só sai idioma com título,
+ * e a lista vem da publicação mais nova para a mais velha.
  *
  * ---- por que o corpo é markdown e não HTML ----
  *
- * O texto sai do banco e vira HTML numa página. Se o que estivesse guardado
- * fosse HTML, qualquer coisa escrita no editor viraria marcação executada — e o
- * editor é um formulário. Bastaria um `<script>` colado num post para ele rodar
- * na página de todo visitante, com o domínio do produto na barra.
- *
- * Então o corpo é markdown, e a conversão daqui faz UMA coisa antes de qualquer
- * outra: escapa tudo. Só depois aplica o subconjunto de marcas que a lista
- * abaixo permite. Não existe caminho pelo qual um `<` do texto original chegue
- * ao navegador como abertura de etiqueta — e é por isso que a ordem importa
- * mais que a lista.
+ * O texto vira HTML numa página. Se o que estivesse guardado fosse HTML,
+ * qualquer coisa escrita no arquivo viraria marcação executada. Então o corpo é
+ * markdown, e a conversão daqui faz UMA coisa antes de qualquer outra: escapa
+ * tudo. Só depois aplica o subconjunto de marcas que a lista abaixo permite.
+ * Não existe caminho pelo qual um `<` do texto original chegue ao navegador
+ * como abertura de etiqueta — e é por isso que a ordem importa mais que a
+ * lista.
  */
 import 'server-only';
-import { rpc } from '@/lib/supabase/servico';
+import fs from 'fs';
+import dadosBlog from '@/src/blog.json';
+import marcaJson from '@/src/marca.json';
 
 export type Lang = 'pt' | 'en' | 'es' | 'de' | 'fr';
-
-export type Figura = { caminho: string; url: string; alt: string };
 
 export type Resumo = {
   chave: string; slug: string; titulo: string; resumo: string;
   autor: string | null; tags: string[]; publicado_em: string;
-  /** a figura que vai na lista e na prévia de quem compartilha */
+  /** a figura que vai na lista e na prévia de quem compartilha — um caminho
+   *  do próprio site (`/img/blog/...`); `urlAbsoluta` a completa onde precisa */
   capa: string | null;
 };
 export type Post = Resumo & {
@@ -33,48 +43,59 @@ export type Post = Resumo & {
    *  buscador para um 404 do próprio site. */
   idiomas: Record<string, string>;
 };
-export type Versao = { slug: string; titulo: string; resumo: string; corpo: string };
-export type PostAdmin = {
-  chave: string; autor: string | null; tags: string[]; capa: string | null;
-  publicado_em: string | null; criado_em: string; atualizado_em: string;
-  versoes: Partial<Record<Lang, Versao>>;
-  figuras: Figura[];
+
+type Guardado = {
+  chave: string; publicado_em: string | null; atualizado_em: string | null;
+  autor: string | null; tags: string[]; capa: string | null;
+  versoes: Partial<Record<Lang, { slug: string; titulo: string; resumo: string; corpo: string }>>;
 };
+/* ---- O ENSAIO DAS RÉGUAS ----
 
-/* ---- AS DUAS LEITURAS PÚBLICAS DO BLOG ----
+   `WALKSTAMP_BLOG_TESTE` aponta para um JSON no formato do `src/blog.json`, e
+   as réguas que precisam de um post com autor, etiqueta e termos certos no
+   corpo (`seo.mjs`) o usam — o mesmo papel que o `WALKSTAMP_SUPA_TESTE` fazia
+   com o banco de mentira. Na Vercel (`VERCEL` definido) ele é IGNORADO: o
+   blog no ar é sempre o que veio no deploy. */
+const ENSAIO = !process.env.VERCEL ? process.env.WALKSTAMP_BLOG_TESTE : '';
+const POSTS = (ENSAIO
+  ? JSON.parse(fs.readFileSync(ENSAIO, 'utf8'))
+  : dadosBlog as { posts: Guardado[] }).posts as Guardado[];
 
-   Elas são as únicas deste projeto que podem ser guardadas em cache: o post é
-   igual para todo mundo, e um rastreador que passa cem vezes por dia não tem
-   por que abrir cem consultas ao banco. Os cinco minutos são o mesmo prazo do
-   `revalidate` das páginas — dois números diferentes aqui produziriam uma
-   página fresca sobre dados velhos, que é o pior dos dois mundos.
+/** Publicado e já no ar. A data é conferida a CADA pedido, e não no build:
+ *  um post com data futura entra sozinho na hora marcada. */
+const noAr = (p: Guardado) =>
+  Boolean(p.publicado_em) && new Date(p.publicado_em as string).getTime() <= Date.now();
 
-   Publicar pelo painel revalida os endereços explicitamente, então no caminho
-   normal ninguém espera os cinco minutos. */
-const CACHE_BLOG = 300;
+const temTitulo = (v?: { titulo: string }) => Boolean(v && v.titulo.trim());
 
-export const lista = (lang: Lang) =>
-  rpc<Resumo[]>('walkstamp_blog_lista', { p_lang: lang }, CACHE_BLOG);
-export const post = (lang: Lang, slug: string) =>
-  rpc<Post | Record<string, never>>('walkstamp_blog_post',
-    { p_lang: lang, p_slug: slug }, CACHE_BLOG);
-export const todos = () => rpc<PostAdmin[]>('walkstamp_blog_todos', {});
-export const salvar = (chave: string, autor: string, tags: string[], versoes: unknown) =>
-  rpc<{ ok?: boolean; erro?: string }>('walkstamp_blog_salvar',
-    { p_chave: chave, p_autor: autor, p_tags: tags, p_versoes: versoes });
-export const publicar = (chave: string, pub: boolean) =>
-  rpc<{ ok?: boolean; erro?: string; idiomas?: string[] }>('walkstamp_blog_publicar',
-    { p_chave: chave, p_publicar: pub });
-export const apagar = (chave: string) =>
-  rpc<{ ok?: boolean }>('walkstamp_blog_apagar', { p_chave: chave });
-export const figuraAdd = (chave: string, caminho: string, url: string, alt: string) =>
-  rpc<{ ok?: boolean; erro?: string }>('walkstamp_blog_figura_add',
-    { p_chave: chave, p_caminho: caminho, p_url: url, p_alt: alt });
-export const figuraDel = (chave: string, caminho: string) =>
-  rpc<{ ok?: boolean; erro?: string }>('walkstamp_blog_figura_del',
-    { p_chave: chave, p_caminho: caminho });
-export const definirCapa = (chave: string, url: string) =>
-  rpc<{ ok?: boolean }>('walkstamp_blog_capa', { p_chave: chave, p_url: url });
+/** Para Open Graph, JSON-LD e quem mais precisar do endereço inteiro. A página
+ *  usa o caminho do site; um robô de rede social, não. */
+export const urlAbsoluta = (u: string) =>
+  /^https?:\/\//i.test(u) ? u : `${(marcaJson as { site: string }).site}${u}`;
+
+export async function lista(lang: Lang): Promise<Resumo[]> {
+  return POSTS
+    .filter((p) => noAr(p) && temTitulo(p.versoes[lang]))
+    .map((p) => {
+      const v = p.versoes[lang]!;
+      return { chave: p.chave, slug: v.slug, titulo: v.titulo, resumo: v.resumo,
+               autor: p.autor, tags: p.tags, capa: p.capa,
+               publicado_em: p.publicado_em as string };
+    })
+    .sort((a, b) => (a.publicado_em < b.publicado_em ? 1 : a.publicado_em > b.publicado_em ? -1 : 0));
+}
+
+export async function post(lang: Lang, slug: string): Promise<Post | Record<string, never>> {
+  const p = POSTS.find((x) => noAr(x) && x.versoes[lang]?.slug === slug);
+  if (!p) return {};
+  const v = p.versoes[lang]!;
+  const idiomas: Record<string, string> = {};
+  for (const [L, w] of Object.entries(p.versoes)) if (temTitulo(w)) idiomas[L] = w!.slug;
+  return { chave: p.chave, slug: v.slug, titulo: v.titulo, resumo: v.resumo, corpo: v.corpo,
+           autor: p.autor, tags: p.tags, capa: p.capa,
+           publicado_em: p.publicado_em as string,
+           atualizado_em: (p.atualizado_em || p.publicado_em) as string, idiomas };
+}
 
 /* ------------------------------------------------------- markdown → html */
 
@@ -146,11 +167,6 @@ export function paraHtml(md: string): string {
 /** Quantos minutos de leitura. 200 palavras por minuto é a medida usual. */
 export const minutos = (md: string) =>
   Math.max(1, Math.round(String(md || '').trim().split(/\s+/).filter(Boolean).length / 200));
-
-/** Um título vira um endereço. Acento sai, espaço vira hífen, o resto cai. */
-export const paraSlug = (s: string) =>
-  String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 80);
 
 /* ---- OS LINKS CONTEXTUAIS DO CORPO DO ARTIGO ----
  *

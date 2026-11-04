@@ -1,0 +1,33 @@
+{
+  "chave": "key-user-nao-e-testador",
+  "publicado_em": "2026-08-29T14:58:25.787184+00:00",
+  "atualizado_em": "2026-08-29T14:58:25.787184+00:00",
+  "autor": null,
+  "tags": [
+    "qa",
+    "evidência",
+    "sap"
+  ],
+  "capa": "1788015492550.png",
+  "figuras": [
+    {
+      "arquivo": "1788015492550.png",
+      "alt": "Key User",
+      "md5": "9e579e26145b913763dd57d37fe0a5c8",
+      "bytes": 2108398,
+      "origem": "https://kjlnyyblhanficgpends.supabase.co/storage/v1/object/public/blog/key-user-nao-e-testador/1788015492550.png"
+    }
+  ],
+  "idiomas": {
+    "en": {
+      "slug": "key-user-is-not-a-tester",
+      "titulo": "\"It passed, but something looks off here\"",
+      "resumo": "The script asks whether it passed. The key user can answer whether it is right. Those are different questions, and the project only has a field for one of them."
+    },
+    "pt": {
+      "slug": "key-user-nao-e-testador",
+      "titulo": "\"Passou, mas tem uma coisa estranha aqui\"",
+      "resumo": "O roteiro pergunta se passou. O key user sabe responder se está certo. São perguntas diferentes, e o projeto só tem campo para uma delas."
+    }
+  }
+}

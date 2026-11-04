@@ -1,0 +1,33 @@
+{
+  "chave": "o-que-o-print-perde",
+  "publicado_em": "2026-08-19T02:44:05.367197+00:00",
+  "atualizado_em": "2026-08-20T09:32:29.936691+00:00",
+  "autor": null,
+  "tags": [
+    "evidência",
+    "qa",
+    "auditoria"
+  ],
+  "capa": "1787107437506.webp",
+  "figuras": [
+    {
+      "arquivo": "1787107437506.webp",
+      "alt": "Print SAP Fiori",
+      "md5": "00044f3ec948df889981ba485ba0b61e",
+      "bytes": 79160,
+      "origem": "https://kjlnyyblhanficgpends.supabase.co/storage/v1/object/public/blog/o-que-o-print-perde/1787107437506.webp"
+    }
+  ],
+  "idiomas": {
+    "en": {
+      "slug": "what-a-screenshot-loses",
+      "titulo": "What a screenshot loses: time, environment, sequence and integrity",
+      "resumo": "Pasting screenshots into a document is fast, and usually good enough. The problem shows up months later, when someone asks for the proof and has four questions."
+    },
+    "pt": {
+      "slug": "o-que-o-print-perde",
+      "titulo": "O que o print perde: hora, ambiente, sequência e integridade",
+      "resumo": "Colar print no documento é rápido e quase sempre suficiente. O problema aparece meses depois, quando alguém pede a prova de volta e faz quatro perguntas."
+    }
+  }
+}

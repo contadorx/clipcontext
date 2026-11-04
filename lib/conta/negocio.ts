@@ -28,7 +28,6 @@ const ROTULO: Record<string, string> = {
   cobrancas: 'Cobranças',
   chamados:  'Chamados',
   interesse: 'Interesse',
-  blog:      'Blog',
 };
 
 for (const a of rotas.abasNegocio) {

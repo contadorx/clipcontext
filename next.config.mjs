@@ -137,9 +137,12 @@ const interno = (pg, L) => (pg === 'home' ? `/${L}` : `/${L}/${slugs[pg][L]}`);
 
    O número aqui é o do produto mais uma folga: o corpo multipart carrega
    também `lang`, `chave` e `alt`, e o teto vale para o corpo inteiro, não só
-   para o arquivo. `testes/figura.mjs` compara os dois números a cada rodada —
-   dois tetos em dois arquivos voltam a divergir na primeira distração, e a
-   régua é mais barata que descobrir de novo por relato. */
+   para o arquivo.
+
+   BUILD 70: a figura do blog saiu daqui — o post virou arquivo no projeto, e o
+   editor do painel com ela (e o `testes/figura.mjs`, que comparava os dois
+   tetos). O teto continua por causa do importador de planilha do roteiro, que
+   também sobe arquivo por Server Action; ele sai com a conta, no Build 71. */
 const config = {
   experimental: {
     serverActions: { bodySizeLimit: '9mb' },

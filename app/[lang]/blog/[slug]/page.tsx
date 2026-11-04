@@ -8,7 +8,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { IDIOMAS, type Lang, endereco, marca } from '@/lib/site';
-import { post, paraHtml, minutos, ligarTermos, type Post } from '@/lib/blog';
+import { post, paraHtml, minutos, ligarTermos, urlAbsoluta, type Post } from '@/lib/blog';
 import { BLOG_TXT, enderecoBlog, dataDe, enderecoTag, enderecoAutor } from '../txt';
 import { ldJson, organizacao, trilha } from '@/lib/seo';
 import Partilhar from '../Partilhar';
@@ -26,11 +26,16 @@ import Partilhar from '../Partilhar';
    O que custava não era montar a página — era a CONSULTA. `force-dynamic`
    arrasta consigo `fetchCache: 'force-no-store'`, e era daí que vinha uma ida
    ao Supabase por visita de robô. Declarando `default-cache`, a leitura passa a
-   valer cinco minutos (ver `CACHE_BLOG` em `lib/blog.ts`) e a página continua
+   valer cinco minutos (era o `CACHE_BLOG`, que saiu no Build 70) e a página continua
    sendo montada a cada pedido, sempre com o que existe agora.
 
    Medido em `testes/seo.mjs`: três visitas seguidas à mesma página → ZERO
-   consultas ao banco. Era esse o número do item. */
+   consultas ao banco. Era esse o número do item.
+
+   BUILD 70: não há mais consulta nenhuma — o post é arquivo no projeto,
+   importado do `src/blog.json`. O `force-dynamic` fica porque a data de
+   publicação é conferida a cada pedido: um post agendado entra sozinho na
+   hora marcada, sem precisar de deploy. */
 export const dynamic = 'force-dynamic';
 export const fetchCache = 'default-cache';
 
@@ -81,11 +86,11 @@ export async function generateMetadata({ params }: PageProps<'/[lang]/blog/[slug
          compartilhar sem figura: a linha do tempo deixa de distinguir um do
          outro. */
       images: [p.capa
-        ? { url: p.capa }
+        ? { url: urlAbsoluta(p.capa) }
         : { url: `${marca.site}/og/og.${L}.png`, width: 1200, height: 630 }],
     },
     twitter: { card: 'summary_large_image', title: p.titulo, description: p.resumo,
-               images: [p.capa || `${marca.site}/og/og.${L}.png`] },
+               images: [p.capa ? urlAbsoluta(p.capa) : `${marca.site}/og/og.${L}.png`] },
   };
 }
 
@@ -116,7 +121,7 @@ export default async function Publicacao({ params }: PageProps<'/[lang]/blog/[sl
     datePublished: p.publicado_em,
     dateModified: p.atualizado_em || p.publicado_em,
     mainEntityOfPage: { '@type': 'WebPage', '@id': url },
-    ...(p.capa ? { image: [p.capa] } : {}),
+    ...(p.capa ? { image: [urlAbsoluta(p.capa)] } : {}),
     ...(p.autor ? { author: { '@type': 'Person', name: p.autor,
                               url: `${marca.site}${enderecoAutor(L, p.autor)}` } } : {}),
     publisher: organizacao(),

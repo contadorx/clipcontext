@@ -567,6 +567,134 @@ def _switcher(lang, paginas_por_idioma, pagina):
             + "".join(itens) + "</span>")
 
 
+class BlogInvalido(Exception):
+    pass
+
+
+IDIOMAS_BLOG = ("pt", "en", "es", "de", "fr")
+
+
+def escrever_blog(root: pathlib.Path, conferir_figuras: bool = True) -> None:
+    """O blog, de `conteudo/blog/` para `src/blog.json` — Build 70.
+
+    Até o Build 69 o blog morava no banco: três tabelas, nove funções e um
+    balde de figuras no Supabase, e um editor no painel do dono. Com o Supabase
+    saindo, o post virou ARQUIVO no projeto:
+
+        conteudo/blog/<chave>/post.json   datas, autor, etiquetas, capa,
+                                          figuras e, por idioma, slug,
+                                          título e resumo
+        conteudo/blog/<chave>/<lang>.md   o corpo, em markdown
+        public/img/blog/<chave>/<arquivo> as figuras
+
+    Publicar um post passou a ser um commit. Em troca, o blog não consulta
+    nada: o Next importa este JSON, e a página sai do que veio no deploy. O
+    JSON é gerado e fica fora do git, como o `marca.json` e o `rotas.json`: a
+    fonte é a pasta, e a Vercel roda este build antes do `next build`.
+
+    ---- O QUE O BANCO GARANTIA, E AGORA É GARANTIDO AQUI ----
+
+    As funções do banco só devolviam post com `publicado_em` preenchido e já
+    passado, e só idioma com título; a tabela tinha um slug por idioma. Essas
+    regras continuam valendo — a do horário no `lib/blog.ts`, que roda a cada
+    pedido; as outras aqui, que param o build:
+
+      - toda versão tem slug, título e corpo, e o slug é único no idioma;
+      - toda data é uma data;
+      - toda figura citada existe em `public/img/blog/` — e com o MD5 que tinha
+        no balde, quando o post.json o registra. Uma figura faltando sairia
+        como imagem quebrada no ar; aqui ela para o build antes.
+
+    `conferir_figuras=False` existe para gerar o JSON SEM as figuras no disco —
+    o `main()` nunca passa isso, e o `blog.mjs` cobra que não passe.
+    """
+    import datetime
+    import hashlib
+    import json
+
+    base = root / "conteudo" / "blog"
+    figuras_dir = root / "public" / "img" / "blog"
+    posts = []
+    erros = []
+    slugs = {L: {} for L in IDIOMAS_BLOG}
+    if base.is_dir():
+        for pasta in sorted(p for p in base.iterdir() if p.is_dir()):
+            arq = pasta / "post.json"
+            if not arq.exists():
+                erros.append(f"{pasta.relative_to(root)}: falta post.json")
+                continue
+            meta = json.loads(arq.read_text(encoding="utf-8"))
+            chave = meta.get("chave")
+            if chave != pasta.name:
+                erros.append(f"{arq.relative_to(root)}: chave {chave!r} ≠ pasta {pasta.name!r}")
+                continue
+            for campo in ("publicado_em", "atualizado_em"):
+                v = meta.get(campo)
+                if v is None and campo == "publicado_em":
+                    continue          # rascunho: fica no repositório e não sai no site
+                try:
+                    datetime.datetime.fromisoformat(str(v))
+                except ValueError:
+                    erros.append(f"{arq.relative_to(root)}: {campo} não é data: {v!r}")
+            figuras = meta.get("figuras") or []
+            nomes = {f.get("arquivo") for f in figuras}
+            if meta.get("capa") and meta["capa"] not in nomes:
+                erros.append(f"{arq.relative_to(root)}: a capa {meta['capa']!r} não está nas figuras")
+            for f in (figuras if conferir_figuras else []):
+                caminho = figuras_dir / chave / f["arquivo"]
+                if not caminho.exists():
+                    erros.append(f"falta {caminho.relative_to(root)} "
+                                 "(rode: python3 conteudo/blog/baixar-figuras.py)")
+                    continue
+                if f.get("md5") and hashlib.md5(caminho.read_bytes()).hexdigest() != f["md5"]:
+                    erros.append(f"{caminho.relative_to(root)}: o MD5 não é o registrado no post.json")
+            versoes = {}
+            for L, v in (meta.get("idiomas") or {}).items():
+                if L not in IDIOMAS_BLOG:
+                    erros.append(f"{arq.relative_to(root)}: idioma desconhecido {L!r}")
+                    continue
+                md = pasta / f"{L}.md"
+                corpo = md.read_text(encoding="utf-8") if md.exists() else ""
+                slug = str(v.get("slug") or "").strip()
+                titulo = str(v.get("titulo") or "").strip()
+                if not slug or not titulo or not corpo.strip():
+                    erros.append(f"{pasta.relative_to(root)} [{L}]: falta slug, título ou corpo")
+                    continue
+                if slug in slugs[L]:
+                    erros.append(f"[{L}] o slug {slug!r} está em {slugs[L][slug]} e em {chave}")
+                slugs[L][slug] = chave
+                # Endereço de figura no corpo: só o do próprio post. Um endereço
+                # do balde velho aqui seria uma imagem que some no Build 72.
+                if "supabase.co" in corpo:
+                    erros.append(f"{md.relative_to(root)}: o corpo ainda aponta para o Supabase")
+                versoes[L] = {"slug": slug, "titulo": titulo,
+                              "resumo": str(v.get("resumo") or ""), "corpo": corpo}
+            # A regra que a função `blog_publicar` do banco aplicava: publicar
+            # EXIGE português e inglês. Um rascunho (sem `publicado_em`) pode
+            # ter só um.
+            if meta.get("publicado_em") and not {"pt", "en"} <= set(versoes):
+                erros.append(f"{arq.relative_to(root)}: publicado sem português e inglês "
+                             f"(tem {', '.join(sorted(versoes)) or 'nenhum'})")
+            posts.append({
+                "chave": chave,
+                "publicado_em": meta.get("publicado_em"),
+                "atualizado_em": meta.get("atualizado_em") or meta.get("publicado_em"),
+                "autor": meta.get("autor"),
+                "tags": list(meta.get("tags") or []),
+                "capa": f"/img/blog/{chave}/{meta['capa']}" if meta.get("capa") else None,
+                "versoes": versoes,
+            })
+    if erros:
+        raise BlogInvalido("o blog não fecha:\n  " + "\n  ".join(erros))
+    arq = root / "src" / "blog.json"
+    arq.write_text(json.dumps({"_leia": "GERADO por build.py a partir de conteudo/blog/. "
+                                        "Não edite: edite os arquivos de lá e rode o build.",
+                               "posts": posts}, ensure_ascii=False, indent=1) + "\n",
+                   encoding="utf-8")
+    print(f"{arq.relative_to(root)}  ({len(posts)} posts, "
+          f"{sum(len(p['versoes']) for p in posts)} versões)")
+
+
 def escrever_marca(root: pathlib.Path) -> None:
     """Despeja a identidade num JSON para o Next.js ler.
 
@@ -639,7 +767,9 @@ def escrever_marca(root: pathlib.Path) -> None:
     # `/conta/negocio/<aba>`, e o `lib/conta/negocio.ts` precisa dela para
     # montar a faixa de abas. Escrita nos dois, é uma aba que existe no menu e
     # dá 404 no clique.
-    abas_negocio = ["contas", "cobrancas", "chamados", "interesse", "blog"]
+    # A aba "blog" saiu no Build 70: o post virou arquivo em `conteudo/blog/`,
+    # e o editor do painel não tem mais o que editar.
+    abas_negocio = ["contas", "cobrancas", "chamados", "interesse"]
     # OS ITENS DA BARRA LATERAL, na ordem em que aparecem.
     #
     # Eles moravam no `lib/conta/nav.ts`, e isso bastava enquanto a barra
@@ -2444,6 +2574,11 @@ def main() -> int:
         print(f"{path.relative_to(ROOT)}  {len(path.read_text(encoding='utf-8')) / 1024:.1f} KB")
 
     escrever_marca(ROOT)
+    try:
+        escrever_blog(ROOT)
+    except BlogInvalido as e:
+        print(f"ERRO: {e}", file=sys.stderr)
+        return 1
 
     escrever_auditoria(ROOT)
     return build_site(ROOT) or 0
