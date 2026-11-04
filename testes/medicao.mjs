@@ -69,65 +69,30 @@ async function pagina(url, opts = {}) {
   return { pg, ctx, eventos, listas, vercel, erros };
 }
 
-console.log('\n[M1] os três marcos, e só eles');
+console.log('\n[M1] a ferramenta não manda marco nenhum — nem com a porta aberta');
 {
+  /* Até o Build 68 este bloco cobrava os três marcos anônimos (abriu, carregou
+     vídeo, baixou saída) e o que ia dentro deles. No 69 a medição da
+     ferramenta saiu inteira, junto com o servidor. O que se cobra agora é o
+     silêncio — e com a porta de serviço ABERTA, que é o caso em que a versão
+     antiga mandava: uma volta da medição apareceria aqui primeiro. */
   const { pg, ctx, eventos, vercel, erros } = await pagina('http://localhost:8877/app.html?lang=pt');
-  ok('marca que a ferramenta foi aberta', eventos.some(e => e.p_nome === 'abriu_ferramenta'),
-     JSON.stringify(eventos[0]));
-  ok('e o snippet do Vercel carrega junto', vercel.length > 0, vercel[0]);
-
+  const pedidos = [];
+  pg.on('request', r => pedidos.push(r.url()));
+  ok('o snippet do Vercel continua carregando', vercel.length > 0, vercel[0]);
   await pg.setInputFiles('#file', '/tmp/amostra.webm');
   await pg.waitForFunction(() => !document.getElementById('auto').disabled, null, { timeout: 20000 });
-  await pg.waitForTimeout(400);
-  const carregou = eventos.find(e => e.p_nome === 'carregou_video');
-  ok('marca o vídeo aberto, com a origem', !!carregou && carregou.p_origem === 'arquivo',
-     JSON.stringify(carregou));
-
-  /* Uma saída baixada. Era a legenda solta, que não dependia de jsPDF nem de
-     quadros — e os três botões de legenda saíram da tela. O substituto é o
-     .json: também não precisa do jsPDF, e é a saída mais barata que sobrou.
-     Precisa de quadros, então extraímos dois antes. */
-  await pg.fill('#tr', 'WEBVTT\n\n00:00:01.000 --> 00:00:03.000\nfala de teste\n');
-  await pg.dispatchEvent('#tr', 'input');
   await pg.selectOption('#mode', 'count'); await pg.fill('#count', '2');
   await pg.locator('#extract').click();
   await pg.waitForFunction(() => document.querySelectorAll('#thumbs figure').length >= 2,
                            null, { timeout: 40000 });
   await pg.locator('#json').click();
-  await pg.waitForTimeout(600);
-  const baixou = eventos.find(e => e.p_nome === 'baixou_saida');
-  ok('marca a saída baixada, com o formato', !!baixou && baixou.p_formato === 'json',
-     JSON.stringify(baixou));
-
-  const chaves = [...new Set(eventos.flatMap(e => Object.keys(e)))].sort();
-  ok('nenhum campo além do combinado', JSON.stringify(chaves) ===
-     JSON.stringify(['p_formato','p_idioma','p_nome','p_origem']), chaves.join(','));
-  const bruto = JSON.stringify(eventos);
-  ok('nada do vídeo vai junto (nome, tamanho, duração)',
-     !/amostra|webm|\.mp4|size|dura/i.test(bruto), bruto.slice(0, 160));
+  await pg.waitForTimeout(800);
+  ok('abrir, carregar e baixar não mandam marco nenhum', eventos.length === 0,
+     eventos.length + ' enviados: ' + JSON.stringify(eventos).slice(0, 120));
+  const nossos = pedidos.filter(u => /supabase|\/api\/|rpc\//.test(u));
+  ok('e nenhum pedido a servidor nosso', nossos.length === 0, nossos.join(' | ').slice(0, 160));
   ok('sem erro de JS', erros.length === 0, erros.join(' | ').slice(0, 160));
-  await ctx.close();
-}
-
-console.log('\n[M1b] a régua não conta como gente');
-{
-  const { pg, ctx, eventos } = await pagina('http://localhost:8877/app.html?lang=pt',
-                                            { mudo: true });
-  await pg.setInputFiles('#file', '/tmp/amostra.webm');
-  await pg.waitForFunction(() => !document.getElementById('auto').disabled, null, { timeout: 20000 });
-  await pg.waitForTimeout(500);
-  ok('de localhost, sem a porta de serviço, nada é enviado', eventos.length === 0,
-     eventos.length + ' enviados: ' + JSON.stringify(eventos).slice(0, 160));
-  await ctx.close();
-}
-
-console.log('\n[M2] Do Not Track e Global Privacy Control calam a medição');
-for (const [k, rot] of [['dnt','Do Not Track'], ['gpc','Global Privacy Control']]) {
-  const { pg, ctx, eventos } = await pagina('http://localhost:8877/app.html?lang=pt', { [k]: true });
-  await pg.setInputFiles('#file', '/tmp/amostra.webm');
-  await pg.waitForFunction(() => !document.getElementById('auto').disabled, null, { timeout: 20000 });
-  await pg.waitForTimeout(500);
-  ok(`${rot}: nenhum marco enviado`, eventos.length === 0, eventos.length + ' enviados');
   await ctx.close();
 }
 

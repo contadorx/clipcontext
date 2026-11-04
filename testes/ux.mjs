@@ -122,17 +122,16 @@ ok('o estado do segundo acompanha', /1 trechos com tempo/.test(await pg.locator(
      /documento gerado/.test(await pg.locator('#sbEst4').textContent()),
      await pg.locator('#sbEst4').textContent());
 }
-console.log('\n[5] o recado sai por HTTP, com o diagnóstico anexado');
+console.log('\n[5] o recado abre o e-mail de quem escreve, com o diagnóstico junto');
 {
-  const enviados = [];
-  /* A PORTA MUDOU EM 29/08: o chamado passou a ir por `/api/chamado`, e não
-     mais direto ao Supabase — o limite morava no banco, e ali não há IP, então
-     a única chave possível era o ALVO. Quem interceptasse a porta velha veria
-     zero envios e diria que o produto quebrou. */
-  await pg.route('**/api/chamado', r => {
-    enviados.push(JSON.parse(r.request().postData() || '{}'));
-    r.fulfill({ status:200, contentType:'application/json', body:'{"numero":"WS-0042"}' });
-  });
+  /* ATÉ O BUILD 68 o recado ia por HTTP para `/api/chamado` e virava um
+     chamado numerado num banco. No 69 o produto ficou grátis e sem servidor:
+     o recado abre o programa de e-mail da pessoa, endereçado ao suporte, com o
+     texto e o relatório no corpo. A régua lê o endereço pelo espelho
+     `__ultimoEmail` — um `mailto:` não é pedido de rede. E cobra que nenhum
+     pedido HTTP tenha sobrado no caminho. */
+  const http = [];
+  pg.on('request', r => { if (/\/api\/chamado|supabase/.test(r.url())) http.push(r.url()); });
   await pg.locator('#avisar').click();
   await pg.waitForFunction(() => {
     const el = document.getElementById('fbDiagOut');
@@ -147,17 +146,30 @@ console.log('\n[5] o recado sai por HTTP, com o diagnóstico anexado');
   await pg.fill('#fbTexto','o PowerPoint sai sem a capa quando o caso está vazio');
   await pg.locator('.fbTipo[data-tipo="problema"]').click();
   await pg.locator('#fbEnviar').click(); await pg.waitForTimeout(700);
-  ok('foi por HTTP, e não abrindo o programa de e-mail', enviados.length === 1, String(enviados.length));
-  const e = enviados[0] || {};
-  ok('com o diagnóstico junto', (e.diag || '').length > 40, String((e.diag||'').length));
-  ok('e a origem marcada como app', e.origem === 'app', e.origem);
-  ok('a tela confirma', /Recebido/.test(await pg.locator('#fbMsg').textContent()),
+  const href = await pg.evaluate(() => window.__ultimoEmail || '');
+  const u = href.startsWith('mailto:') ? new URL(href) : null;
+  const corpo = u ? (u.searchParams.get('body') || '') : '';
+  ok('abriu o e-mail endereçado ao suporte', !!u && u.pathname === 'suporte@walkstamp.com', href.slice(0, 60));
+  ok('com o tipo no assunto', !!u && /Problema/.test(u.searchParams.get('subject') || ''),
+     u ? u.searchParams.get('subject') : '');
+  ok('o texto da pessoa no corpo', /PowerPoint sai sem a capa/.test(corpo), corpo.slice(0, 60));
+  /* Depois da linha que separa o recado do relatório — e o relatório começa
+     com o próprio "--- diagnóstico ---", então o corte é no PRIMEIRO "\n---\n". */
+  const anexo = corpo.includes('\n---\n') ? corpo.slice(corpo.indexOf('\n---\n') + 5) : '';
+  ok('e o diagnóstico junto', /diagn/i.test(anexo), anexo.slice(0, 60));
+  /* UM `mailto:` TEM LIMITE, e o corpo também: acima de uns dois mil
+     caracteres alguns programas de e-mail desistem. */
+  ok('o endereço inteiro cabe no limite seguro', href.length < 2100, String(href.length));
+  ok('nenhum pedido HTTP no caminho', http.length === 0, http.join(' | '));
+  ok('a tela diz o que aconteceu', /programa de e-mail/.test(await pg.locator('#fbMsg').textContent()),
      await pg.locator('#fbMsg').textContent());
   /* Desmarcar a caixa tem que realmente tirar o relatório do envio. */
   await pg.locator('#fbDiag').uncheck();
   await pg.fill('#fbTexto','segundo recado, sem relatório');
   await pg.locator('#fbEnviar').click(); await pg.waitForTimeout(700);
-  ok('desmarcada, o relatório não vai', !enviados[1].p_diag, String(enviados[1].p_diag));
+  const href2 = await pg.evaluate(() => window.__ultimoEmail || '');
+  const corpo2 = href2.startsWith('mailto:') ? (new URL(href2).searchParams.get('body') || '') : '';
+  ok('desmarcada, o relatório não vai', /segundo recado/.test(corpo2) && !/---/.test(corpo2), corpo2.slice(0, 80));
 }
 
 ok('sem erro de JS', erros.length===0, erros.join(' | ').slice(0,180));

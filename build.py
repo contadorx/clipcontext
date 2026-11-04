@@ -196,6 +196,10 @@ SW_V = "2"
 EMPRESA = "Produtize Produtos e Serviços Inteligentes Ltda."
 CNPJ    = "48.417.292/0001-99"
 CONTATO = "privacidade@walkstamp.com"
+# O SUPORTE, separado do canal de privacidade. Desde o Build 69 o recado da
+# ferramenta não passa por servidor nenhum: ele abre o e-mail de quem escreve, já
+# endereçado aqui. Esta caixa precisa existir e ser lida (fica na HostGator).
+SUPORTE = "suporte@walkstamp.com"
 
 # O encarregado pelo tratamento de dados pessoais (art. 41 da LGPD).
 #
@@ -1808,7 +1812,11 @@ CARTOES = [
              "es": "El estándar del equipo aplicado al documento de todos",
              "de": "Der Teamstandard im Dokument aller Beteiligten",
              "fr": "Le standard de l’équipe appliqué au document de chacun"},
-            {"teste": 'licenca.mjs, convite.mjs', "pt": "Assentos, convite, bloqueio e prazo de revogação",
+            # SEM RÉGUA DESDE O BUILD 69: a ferramenta ficou grátis e perdeu a
+            # licença, os assentos e o bloqueio — `licenca.mjs` saiu com eles.
+            # A frase sai do site com a página de preços, no Build 71.
+            {"teste": '', "semTestePorque": "a ferramenta deixou de ter licença e assentos no Build 69; a frase sai do site com a página de preços no Build 71",
+             "pt": "Assentos, convite, bloqueio e prazo de revogação",
              "en": "Seats, invitations, blocking and a revocation window",
              "es": "Asientos, invitación, bloqueo y plazo de revocación",
              "de": "Plätze, Einladung, Sperrung und Widerrufsfrist",
@@ -2178,6 +2186,7 @@ def main() -> int:
     src = template.read_text(encoding="utf-8")
     src = src.replace("__MARCA__", MARCA)
     src = src.replace("__CONTATO__", CONTATO)
+    src = src.replace("__SUPORTE__", SUPORTE)
     src = src.replace("__EMPRESA__", EMPRESA).replace("__CNPJ__", CNPJ)
     src = src.replace("__MARCAA__", MARCA_A).replace("__MARCAB__", MARCA_B)
     src = src.replace("__SITE__", SITE)                      # domínio público, definido no topo
@@ -2245,8 +2254,9 @@ def main() -> int:
     rodape_txt = {L: {k: i18n_site[L].get(k, k) for k in CHAVES_RODAPE} for L in IDIOMAS}
     src = src.replace("__RODAPE_TXT__", json.dumps(rodape_txt, ensure_ascii=False))
     # a chave PÚBLICA da licença vale nos dois builds: ela só confere assinatura
-    src = src.replace("__LICPUB__", LIC_PUB)
-    src = src.replace("__LICPUBAUTO__", LIC_PUB_AUTO)
+    # A ferramenta não confere licença desde o Build 69 (o produto ficou grátis):
+    # as chaves públicas deixaram de entrar nela. Elas ainda alimentam o site
+    # até ele perder a conta, no Build 71.
     if MARKER not in src:
         print(f"marcador {MARKER} não encontrado em src/template.html", file=sys.stderr)
         return 1
@@ -2256,7 +2266,13 @@ def main() -> int:
     web = src.replace(MARKER, "")
     if PLAIN_TITLE in web:
         web = web.replace(PLAIN_TITLE, META)
-    web = web.replace("__SUPAURL__", SUPA_URL).replace("__SUPAKEY__", SUPA_KEY)
+    # A ferramenta deixou de falar com o Supabase no Build 69 — sem medição,
+    # sem login, sem licença, sem recado por servidor. Se um token voltar, a
+    # trava abaixo pega antes de ele virar um endereço dentro do app.
+    for tok in ("__SUPAURL__", "__SUPAKEY__", "__LICPUB__", "__LICPUBAUTO__"):
+        if tok in src:
+            print(f"ERRO: {tok} voltou ao template — a ferramenta não fala mais com servidor nosso", file=sys.stderr)
+            return 1
     web = (web.replace("__GCLIENT__", G_CLIENT)
               .replace("__GKEY__", G_KEY)
               .replace("__GAPP__", G_APP))
@@ -2283,7 +2299,6 @@ def main() -> int:
     # Sem queda nenhuma no offline: a biblioteca já está embutida, e um
     # endereço de CDN dentro deste arquivo quebraria a promessa dele.
     offline = offline.replace("__JSPDFLOCAL__", "").replace("__JSPDFCDN__", "")
-    offline = offline.replace("__SUPAURL__", "").replace("__SUPAKEY__", "")
     for tok in ("__GCLIENT__", "__GKEY__", "__GAPP__"):
         offline = offline.replace(tok, "")
     offline = offline.replace("<!--__ANALYTICS__-->", "")

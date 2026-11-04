@@ -1,6 +1,6 @@
 # A regressão
 
-176 arquivos que afirmam coisas sobre o produto. Cada um roda sozinho com
+171 arquivos que afirmam coisas sobre o produto. Cada um roda sozinho com
 `node <arquivo>.mjs` e sai com código 1 se alguma afirmação cair.
 
 ## Primeiro uso, depois de abrir o zip
@@ -105,10 +105,10 @@ tela como ela abre, importe de `playwright`.
 
 ## O que NÃO roda a partir do zip
 
-Três testes de licença (`licenca`, `liclink`, `licauto`) e um bloco do
-`semmarca` precisam de `emitir-licenca.py` e de `PLANO-TIME.md`, que guardam as
-chaves privadas e **não podem** viajar no pacote. Eles pulam, dizendo por quê.
-Rode-os na máquina onde o emissor vive.
+Um bloco do `semmarca` precisa de `emitir-licenca.py` e de `PLANO-TIME.md`,
+que guardam as chaves privadas e **não podem** viajar no pacote. Ele pula,
+dizendo por quê. Os três testes de licença (`licenca`, `liclink`, `licauto`)
+saíram no Build 69, com a licença: a ferramenta ficou inteira grátis.
 
 ## As duas esteiras
 

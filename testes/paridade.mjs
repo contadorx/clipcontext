@@ -4,6 +4,7 @@
  * acontece o tempo todo: o site e onde se le, a ferramenta e onde se faz.
  * Estavam diferentes em duas coisas que se notam de longe -- o rodape (uma
  * linha contra tres colunas) e a barra da conta (so para quem estava logado).
+ * A barra saiu da ferramenta no Build 69, com a conta; o rodape continua igual.
  *
  * Este teste compara as duas telas em vez de conferir cada uma contra uma
  * lista escrita aqui: uma lista escrita e a proxima a ficar para tras.
@@ -119,19 +120,25 @@ console.log('\n[2] e ele acompanha o idioma, que a ferramenta troca sem recarreg
   await ctx.close();
 }
 
-console.log('\n[3] a barra da conta existe nas duas, com os mesmos itens');
+console.log('\n[3] com sessão no site, a ferramenta continua sem barra da conta');
 {
+  /* Até o Build 68 a barra existia nas duas telas, com os mesmos itens e os
+     mesmos cadeados, e era isso que este bloco comparava. No 69 a ferramenta
+     ficou grátis e sem conta: mesmo com a sessão do site aberta no navegador,
+     ela não desenha barra nenhuma — e não pergunta por ela. O site ainda tem a
+     conta até o Build 71. */
   const ctx = await ctxDe(QUEM);
   const pg = await ctx.newPage();
-  await pg.goto(`${BASE}/conta`, { waitUntil: 'networkidle' });
-  const naConta = await pg.locator('.painelMenu ul a').evaluateAll(
-    (as) => as.map((a) => a.getAttribute('href') + '|' + a.classList.contains('trancado')));
+  const perguntas = [];
+  pg.on('request', (q) => { if (/\/api\/menu|\/auth\/v1|\/rest\/v1/.test(q.url())) perguntas.push(q.url()); });
   await pg.goto(`${BASE}/app?lang=pt`, { waitUntil: 'networkidle' });
-  await pg.waitForSelector('#barraConta:not(.hide)', { timeout: 10000 });
-  const noApp = await pg.locator('#barraConta ul li a:not(.on)').evaluateAll(
-    (as) => as.map((a) => a.getAttribute('href') + '|' + a.classList.contains('trancado')));
-  ok('mesmos itens e mesmos cadeados', JSON.stringify(naConta) === JSON.stringify(noApp),
-     `\n      conta: ${naConta.join(' ')}\n      app:   ${noApp.join(' ')}`);
+  await pg.waitForTimeout(500);
+  const r = await pg.evaluate(() => ({
+    barra: !!document.getElementById('barraConta'),
+    comBarra: document.body.classList.contains('comBarra'),
+  }));
+  ok('a ferramenta não tem barra da conta', !r.barra && !r.comBarra, JSON.stringify(r));
+  ok('e não pergunta por ela, nem pela sessão', perguntas.length === 0, perguntas.join(' '));
   await ctx.close();
 }
 

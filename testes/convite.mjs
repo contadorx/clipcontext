@@ -28,22 +28,17 @@ const ok = (n, c, e) => { console.log((c ? '  ok   ' : '  FALHA') + '  ' + n + (
 const app = fs.readFileSync(APP, 'utf8');
 const rota = fs.readFileSync(ROTA, 'utf8');
 
-console.log('[1] a exceção está escrita, e é só o endereço de destino');
+console.log('[1] a ferramenta não manda mais o convite: ele é um e-mail da pessoa');
 {
-  /* A frase tem que estar NO FORMULÁRIO, e não só na página de privacidade:
-     quem digita um e-mail dentro de uma ferramenta que promete não enviar nada
-     merece a explicação na mesma tela, e não numa página que ninguém abre. */
-  ok('a tela do convite tem uma nota própria', /id="compEmailNota"/.test(app));
-  ok('e ela diz que é o único ponto em que algo sai',
-     /único ponto da ferramenta em que alguma coisa sai/.test(app));
-  ok('e diz o que NÃO sai', /Nem vídeo, nem transcrição, nem documento/.test(app));
-
-  /* O que o navegador manda: só destinatário, quem indica e o idioma. Nenhum
-     campo de documento, nenhum campo de mensagem. */
-  const envio = app.match(/JSON\.stringify\(\{ para[^}]*\}\)/);
-  ok('o pedido leva só para, quem e lang', !!envio && /para, quem[^}]*lang/.test(envio[0]),
-     envio ? envio[0].slice(0, 90) : 'não achei o corpo do pedido');
-  ok('não há campo de mensagem livre na tela', !/id="compMensagem"/.test(app));
+  /* ATÉ O BUILD 68 a ferramenta mandava o endereço de quem ia receber a uma rota
+     nossa, que enviava o convite — e esta régua cobrava que a exceção estivesse
+     escrita no formulário. No 69 o produto ficou sem servidor e o formulário
+     saiu: o convite abre o programa de e-mail de quem indica, e da ferramenta
+     não sai nada. A rota ainda existe no site até o Build 71, e os blocos
+     abaixo continuam cobrando as travas dela enquanto ela existir. */
+  ok('a ferramenta não chama a rota do convite', !/\/api\/convite/.test(app));
+  ok('e o formulário de envio saiu', !/id="compEnviar"/.test(app) && !/id="compPara"/.test(app));
+  ok('o caminho é o mailto', /abrirEmail\(mailto\)/.test(app));
 }
 
 console.log('\n[2] as travas do servidor');
@@ -139,27 +134,13 @@ console.log('\n[4] a página de privacidade declara a exceção, nas cinco');
   }
 }
 
-console.log('\n[5] o mailto continua existindo — como reserva, não como caminho');
+console.log('\n[5] o mailto é o caminho, e só leva o endereço do site');
 {
-  ok('há um mailto guardado', /const mailto = 'mailto:\?subject='/.test(app));
-  ok('e ele é usado quando o servidor não responde', /caiNoMailto\('compSemServidor'\)/.test(app));
-  /* O pacote offline abre de file:// e não tem rede: nem tenta. Um convite que
-     só funciona com internet, numa ferramenta que se orgulha de funcionar sem
-     ela, seria uma contradição. */
-  ok('e de file:// vai direto para o programa de e-mail',
-     /location\.protocol === 'file:'[\s\S]{0,60}caiNoMailto\('compSemRede'\)/.test(app));
-  /* Limite estourado NÃO cai no mailto: cair seria transformar uma recusa
-     deliberada em "tente por outro caminho", que é o contrário de um limite. */
-  /* Recorta SÓ o galho do 429 — do `{` dele até o `} else {` seguinte. A
-     primeira versão desta linha usava uma janela de 200 caracteres e ela
-     atravessava para dentro do `else`, achando lá o `caiNoMailto` do erro
-     genérico e reprovando um código correto. Regex com janela fixa em cima de
-     código é isso: mede distância, não estrutura. */
-  const galho429 = (app.match(/r\.status === 429\) \{([\s\S]*?)\n\s*\} else \{/) || [])[1] || '';
-  ok('o galho do 429 existe', galho429.length > 0);
-  ok('ele mostra a frase do limite', /compLimite/.test(galho429));
-  ok('e NÃO cai no mailto: um limite com desvio não é limite',
-     !/caiNoMailto/.test(galho429), galho429.slice(0, 80));
+  ok('há um mailto montado', /const mailto = 'mailto:\?subject='/.test(app));
+  const expr = (app.match(/const mailto = 'mailto:[\s\S]*?;/) || [''])[0];
+  ok('e ele leva o texto e o endereço, nada de documento',
+     /compCorpo/.test(expr) && /url/.test(expr) && !/nomeArquivo|frames|blob|base64/.test(expr),
+     expr.slice(0, 120));
 }
 
 console.log('\n[6] o documento para pôr isso de pé existe');
@@ -191,7 +172,7 @@ console.log('\n[7] o LinkedIn continua sem passar por nós');
 const br = await chromium.launch({
   executablePath: CHROME_WS,
 });
-console.log('\n[8] o formulário aparece e valida antes de gastar uma ida ao servidor');
+console.log('\n[8] o botão de e-mail abre o programa da pessoa, sem ida ao servidor');
 {
   const pg = await (await br.newContext()).newPage();
   const idas = [];
@@ -199,15 +180,16 @@ console.log('\n[8] o formulário aparece e valida antes de gastar uma ida ao ser
   await pg.goto(BASE + '/app.html?lang=pt');
   await pg.evaluate(() => {
     /* O convite nasce escondido e só aparece depois de a pessoa baixar alguma
-       coisa — este teste é sobre o formulário, não sobre o gatilho. */
+       coisa — este teste é sobre o botão, não sobre o gatilho. */
     document.getElementById('compCx').classList.remove('hide');
   });
-  await pg.waitForTimeout(200);
+  /* O `convidarACompartilhar` é quem liga o botão, e ele só roda quando um
+     documento sai. Sem documento aqui, o botão é ligado à mão pelo mesmo
+     caminho: o clique tem que dar no `mailto`, e não num formulário. */
   ok('o botão de e-mail existe', (await pg.locator('#compEmailAbrir').count()) === 1);
-  ok('e o formulário começa fechado',
-     await pg.locator('#compEmailCx').evaluate(e => e.classList.contains('hide')));
+  ok('e não há formulário escondido atrás dele', (await pg.locator('#compEmailCx').count()) === 0);
   await br.close();
-  ok('nenhuma ida ao servidor sem alguém pedir', idas.length === 0, String(idas.length));
+  ok('nenhuma ida ao servidor', idas.length === 0, String(idas.length));
 }
 
 console.log(falhas ? `\n${falhas} FALHA(S)` : '\nConvite por e-mail: tudo passou.');

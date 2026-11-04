@@ -11,7 +11,7 @@
 # estourar o tempo por disputa de máquina, não por defeito. É ELE que manda no
 # relógio desta pista — não o número de arquivos.
 #
-# POR QUE `barraapp`, `paridade` E `roteiro` NAO ESTAO EM `app`.
+# POR QUE `paridade` E `roteiro` NAO ESTAO EM `app` (o `barraapp` saiu no Build 69).
 # Eles falam com o Next em localhost, e `app` roda com SITE=0 — quer dizer, sem
 # servidor nenhum de pe. Ali eles NUNCA puderam passar: a pista curta terminava
 # em "2 FALHOU" em toda execucao, por motivo que nao era defeito do produto.
@@ -40,7 +40,7 @@ case "$GRUPO" in
   medir) TESTES="memoria.mjs pesagem.mjs espelho.mjs modelo.mjs espera.mjs ritmo.mjs" ; SITE=0 ;;
   site) TESTES="cinco.mjs ajuda.mjs vitrine.mjs venda.mjs paginas.mjs idiomas.mjs figuras.mjs dobrafig.mjs
                 linkpage.mjs legal.mjs contradicao.mjs negocio.mjs isca.mjs blog.mjs convite.mjs email.mjs tourvid.mjs semmarca.mjs
-                barraapp.mjs paridade.mjs roteiro.mjs planos.mjs promessa.mjs voltadocaso.mjs" ; SITE=1 ;;
+                paridade.mjs roteiro.mjs planos.mjs promessa.mjs voltadocaso.mjs" ; SITE=1 ;;
   *)    TESTES="$GRUPO $*" ; SITE=1 ;;
 esac
 

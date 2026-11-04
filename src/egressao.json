@@ -33,7 +33,11 @@
     "do menu é relativo. A primeira versão chamou esse campo de 'terceiro' e ele",
     "fazia dois trabalhos ao mesmo tempo: quem é outra empresa, e qual endereço",
     "não pode sobrar no pacote offline. São perguntas diferentes, e o campo",
-    "responde só a segunda — quem responde a primeira é o nome escrito na linha."
+    "responde só a segunda — quem responde a primeira é o nome escrito na linha.",
+    "",
+    "BUILD 69: saíram 'menu' (o /api/menu da barra da conta) e 'conta' (o",
+    "Supabase, para entrar e salvar). O Walkstamp ficou inteiramente grátis e a",
+    "ferramenta deixou de falar com servidor nosso — a matriz encolheu junto."
   ],
   "destinos": [
     {
@@ -120,48 +124,6 @@
         "nunca": "Identifiant de personne ou de session ; nom de fichier, taille, durée, contenu"
       },
       "nossoDominio": false
-    },
-    {
-      "id": "menu",
-      "hosts": [
-        "/api/menu"
-      ],
-      "quando": "sozinho",
-      "onde": [
-        "web"
-      ],
-      "conteudo": false,
-      "pt": {
-        "quem": "O menu da conta",
-        "leva": "O idioma da página, para desenhar a barra da conta. Nada mais.",
-        "gesto": "Abrir a página",
-        "nunca": "Qualquer coisa sua"
-      },
-      "en": {
-        "quem": "The account menu",
-        "leva": "The page language, to draw the account bar. Nothing else.",
-        "gesto": "Opening the page",
-        "nunca": "Anything of yours"
-      },
-      "es": {
-        "quem": "El menú de la cuenta",
-        "leva": "El idioma de la página, para dibujar la barra de la cuenta. Nada más.",
-        "gesto": "Abrir la página",
-        "nunca": "Cualquier cosa tuya"
-      },
-      "de": {
-        "quem": "Das Kontomenü",
-        "leva": "Die Sprache der Seite, um die Kontoleiste zu zeichnen. Sonst nichts.",
-        "gesto": "Die Seite öffnen",
-        "nunca": "Irgendetwas von Ihnen"
-      },
-      "fr": {
-        "quem": "Le menu du compte",
-        "leva": "La langue de la page, pour dessiner la barre du compte. Rien d’autre.",
-        "gesto": "Ouvrir la page",
-        "nunca": "Quoi que ce soit à vous"
-      },
-      "nossoDominio": true
     },
     {
       "id": "pdf",
@@ -289,48 +251,6 @@
         "leva": "Rien ne sort. Le lecteur est TÉLÉCHARGÉ et tourne sur votre ordinateur ; l’image n’est pas envoyée.",
         "gesto": "Cliquer sur « lire le texte de l’image »",
         "nunca": "Votre image"
-      },
-      "nossoDominio": false
-    },
-    {
-      "id": "conta",
-      "hosts": [
-        ".supabase.co"
-      ],
-      "quando": "gesto",
-      "onde": [
-        "web"
-      ],
-      "conteudo": true,
-      "pt": {
-        "quem": "A sua conta",
-        "leva": "<b>Conteúdo seu</b>: o e-mail da conta, e o roteiro de casos que você salvar — nomes de caso, sistema, chamado, observações e os arquivos que você anexar. Nunca vídeo, áudio nem transcrição.",
-        "gesto": "Entrar na conta e salvar um roteiro",
-        "nunca": "Vídeo, áudio e transcrição"
-      },
-      "en": {
-        "quem": "Your account",
-        "leva": "<b>Content of yours</b>: the account e-mail, and the case script you save — case names, system, ticket, notes and the files you attach. Never video, audio or transcript.",
-        "gesto": "Signing in and saving a case script",
-        "nunca": "Video, audio and transcript"
-      },
-      "es": {
-        "quem": "Tu cuenta",
-        "leva": "<b>Contenido tuyo</b>: el correo de la cuenta y el guion de casos que guardes — nombres de caso, sistema, incidencia, observaciones y los archivos que adjuntes. Nunca vídeo, audio ni transcripción.",
-        "gesto": "Entrar en la cuenta y guardar un guion",
-        "nunca": "Vídeo, audio y transcripción"
-      },
-      "de": {
-        "quem": "Ihr Konto",
-        "leva": "<b>Inhalte von Ihnen</b>: die Konto-E-Mail und die Testfall-Liste, die Sie speichern — Fallnamen, System, Ticket, Notizen und die Dateien, die Sie anhängen. Nie Video, Audio oder Transkript.",
-        "gesto": "Anmelden und eine Testfall-Liste speichern",
-        "nunca": "Video, Ton und Transkript"
-      },
-      "fr": {
-        "quem": "Votre compte",
-        "leva": "<b>Du contenu à vous</b> : l’e-mail du compte et la liste de cas que vous enregistrez — noms de cas, système, ticket, remarques et les fichiers que vous joignez. Jamais de vidéo, d’audio ni de transcription.",
-        "gesto": "Se connecter et enregistrer une liste de cas",
-        "nunca": "Vidéo, audio et transcription"
       },
       "nossoDominio": false
     },

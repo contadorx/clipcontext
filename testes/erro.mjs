@@ -19,7 +19,8 @@
  *   [1] o botão existe onde a pessoa está: na página E na janelinha;
  *   [2] marcar carimba o quadro, e a grade mostra qual é;
  *   [3] o selo chega ao PDF, ao Word e ao HTML — os três que um auditor abre;
- *   [4] o resumo "3 de 12" é de plano PAGO, e sem licença ele não sai;
+ *   [4] o resumo "3 de 12" sai para todo mundo (era de plano pago até o Build
+ *       69, quando o produto ficou grátis) — e só quando há erro marcado;
  *   [5] a marca se desfaz: um carimbo sem borracha ninguém usa.
  *
  *   node testes/erro.mjs
@@ -28,11 +29,10 @@ import { chromium } from './_navegador.mjs';
 import http from 'http'; import fs from 'fs';
 import { execSync } from 'child_process';
 import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
-import { appComChavesDeTeste, emitir } from './_licenca.mjs';
 
 const PORTA = 8984;
 const BASE = `http://localhost:${PORTA}`;
-const APP = appComChavesDeTeste();
+const APP = fs.readFileSync(`${RAIZ_WS}/public/app.html`, 'utf8');
 const jspdf = fs.readFileSync(`${RAIZ_WS}/vendor/jspdf.umd.min.js`, 'utf8');
 
 let falhas = 0;
@@ -55,8 +55,6 @@ const textoDe = (chave) => {
   const m = APP.match(new RegExp(chave + ":'([^']*)'"));
   return m ? m[1] : '';
 };
-const CLIENTE = 'Auditoria do Erro S.A.';
-const CHAVE = emitir(CLIENTE, 5, '2099-01-01');
 
 const br = await chromium.launch({ executablePath: CHROME_WS });
 
@@ -64,15 +62,14 @@ const br = await chromium.launch({ executablePath: CHROME_WS });
    LENTE, que é o mesmo dado que o botão carimba. O botão em si é cobrado no
    bloco [1]: ele só existe durante uma gravação de tela, e `getDisplayMedia`
    não existe num Chromium sem tela. Dizer isso é melhor do que fingir. */
-async function sessao(comLicenca){
+async function sessao(){
   const ctx = await br.newContext({ acceptDownloads: true, serviceWorkers: 'block',
                                     viewport: { width: 1250, height: 950 } });
   await ctx.route('**/jspdf**', (r) => r.fulfill(
     { status: 200, headers: { 'content-type': 'text/javascript' }, body: jspdf }));
   const pg = await ctx.newPage();
   const erros = []; pg.on('pageerror', (e) => erros.push(e.message));
-  const q = comLicenca ? `&lic=${encodeURIComponent(CHAVE)}` : '';
-  await pg.goto(`${BASE}/app.html?lang=pt${q}`);
+  await pg.goto(`${BASE}/app.html?lang=pt`);
   await pg.waitForTimeout(600);
   await pg.selectOption('#modelo', 'evidencia').catch(() => {});
   await pg.setInputFiles('#file', '/tmp/amostra.webm');
@@ -111,7 +108,7 @@ async function marcarPelaLente(pg, i){
 
 console.log('[1] o botão de erro existe onde a pessoa está');
 {
-  const { ctx, pg } = await sessao(false);
+  const { ctx, pg } = await sessao();
   const naPagina = await pg.evaluate(() => {
     const b = document.getElementById('recErro');
     return b ? { existe: true, classe: b.className,
@@ -142,7 +139,7 @@ console.log('[1] o botão de erro existe onde a pessoa está');
 
 console.log('\n[2] marcar carimba o quadro, e a grade diz qual é');
 {
-  const { ctx, pg } = await sessao(false);
+  const { ctx, pg } = await sessao();
   const antes = await pg.evaluate(() => ({
     etiquetas: document.querySelectorAll('#thumbs .tipoTag').length,
     contador: !document.getElementById('tagErros').classList.contains('hide'),
@@ -175,7 +172,7 @@ console.log('\n[2] marcar carimba o quadro, e a grade diz qual é');
 
 console.log('\n[3] o selo chega aos documentos que o auditor abre');
 {
-  const { ctx, pg, erros } = await sessao(true);
+  const { ctx, pg, erros } = await sessao();
   await marcarPelaLente(pg, 1);
   await pg.locator('#evBox').evaluate((e) => { e.open = true; }).catch(() => {});
   await pg.fill('#evCaso', 'CT-500 Erro').catch(() => {});
@@ -198,41 +195,36 @@ console.log('\n[3] o selo chega aos documentos que o auditor abre');
     const achou = txt.toUpperCase().includes(palavra.toUpperCase());
     ok(`  ${fmt}: traz a marca do erro`, achou, achou ? '' : `não achei "${palavra}"`);
   }
-  /* O RESUMO É DE PLANO PAGO. Com licença ele sai; sem, não — e é a mesma
-     licença que decide o emissor e a classificação. */
+  /* O RESUMO SAI PARA TODO MUNDO desde o Build 69 — era de plano pago. */
   const resumo = textoDe('docErros');
   for (const [fmt, txt] of Object.entries(texto)) {
     const achou = txt.includes(resumo);
-    ok(`  ${fmt}: e o resumo de erros, que é pago`, achou, achou ? '' : `não achei "${resumo}"`);
+    ok(`  ${fmt}: e o resumo de erros, sem plano nenhum`, achou, achou ? '' : `não achei "${resumo}"`);
   }
   ok('sem erro de JavaScript', erros.length === 0, erros.join(' | ').slice(0, 150));
   await ctx.close();
 }
 
-console.log('\n[4] SEM licença, a marca sai e o resumo NÃO');
+console.log('\n[4] sem erro marcado, nem marca nem resumo — o documento não inventa defeito');
 {
-  const { ctx, pg } = await sessao(false);
-  await marcarPelaLente(pg, 1);
-  await pg.waitForTimeout(200);
+  /* A outra metade da afirmação de cima, agora que ninguém precisa de plano:
+     o resumo existe para CONTAR erros, e sem erro marcado ele não aparece —
+     "Telas com erro: 0 de 12" seria uma linha que só diz que não há o que
+     dizer. */
+  const { ctx, pg } = await sessao();
   const d = pg.waitForEvent('download', { timeout: 90000 });
   await pg.locator('#html').click();
   await (await d).saveAs('/tmp/erro-sem.html');
   const txt = fs.readFileSync('/tmp/erro-sem.html', 'utf8');
-  const palavra = textoDe('uxT4');
-  /* MARCAR O ERRO É GRÁTIS, e tem que continuar: é o coração de uma evidência
-     de teste, e é o que faz a ferramenta valer no primeiro uso. */
-  const temMarca = txt.toUpperCase().includes(palavra.toUpperCase());
-  ok('a marca do erro sai no documento gratuito', temMarca,
-     temMarca ? '' : `não achei "${palavra}"`);
   const semConta = !txt.includes(textoDe('docErros'));
-  ok('e a CONTA não sai — ela é acabamento, e acabamento é pago', semConta,
-     semConta ? '' : 'o resumo vazou para o documento gratuito');
+  ok('sem erro marcado, o resumo não sai', semConta,
+     semConta ? '' : 'o resumo apareceu sem erro nenhum');
   await ctx.close();
 }
 
 console.log('\n[5] a marca se desfaz — um carimbo sem borracha ninguém usa');
 {
-  const { ctx, pg } = await sessao(false);
+  const { ctx, pg } = await sessao();
   await marcarPelaLente(pg, 1);
   await abrirLente(pg, 1);
   await pg.selectOption('#lenteTipo', '');

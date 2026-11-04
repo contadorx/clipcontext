@@ -188,8 +188,8 @@ const corpo = () => pg.locator('body').innerText();
  *     idiomas, cobrando o 308 e a saída do sitemap;
  *   o painel do time só existe na conta  → os blocos [2] e [3] logo abaixo,
  *     que são sobre a conta e continuam valendo;
- *   a emissão da chave                    → `licenca.mjs`, que é onde ela
- *     sempre morou de verdade.
+ *   a emissão da chave                    → `licenca.mjs`, até o Build 68.
+ *     No 69 a ferramenta ficou grátis, a licença saiu dela, e a régua junto.
  */
 
 console.log('[1] (a /time foi aposentada — ver compra.mjs [6])');

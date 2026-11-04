@@ -188,28 +188,10 @@ console.log('\n[5] o dono vê a aba de negócio; mais ninguém sabe que ela exis
   await c2.close();
 }
 
-console.log('\n[6] a barra dentro da ferramenta carrega o mesmo cadeado');
-{
-  QUEM = 'gratis@isca.example'; PLANO = null; TIME = false;
-  const ctx = await ctxDe(QUEM);
-  const pg = await ctx.newPage();
-  pg.on('pageerror', (e) => erros.push(e.message));
-  await pg.goto(`${BASE}/app?lang=pt`, { waitUntil: 'networkidle' });
-  await pg.waitForSelector('#barraConta:not(.hide)', { timeout: 10000 });
-  const naApp = await pg.locator('#barraConta ul li a:not(.on)').evaluateAll(
-    (as) => as.map((a) => ({ txt: a.innerText.replace(/\n/g, ' ').trim(),
-                             trancado: a.classList.contains('trancado') })));
-  ok('“Casos de teste” trancado também na ferramenta',
-     naApp.some((i) => /Casos de teste/.test(i.txt) && i.trancado), JSON.stringify(naApp));
-  /* O painel e a ferramenta discordarem sobre o que é pago é a pessoa
-     descobrindo a diferença no clique. */
-  await pg.goto(`${BASE}/conta`, { waitUntil: 'networkidle' });
-  const noPainel = (await menu(pg)).map((i) => `${i.txt}|${i.trancado}`);
-  ok('as duas barras concordam item a item',
-     JSON.stringify(noPainel) === JSON.stringify(naApp.map((i) => `${i.txt}|${i.trancado}`)),
-     `\n      painel: ${noPainel.join(' / ')}\n      app:    ${naApp.map((i) => `${i.txt}|${i.trancado}`).join(' / ')}`);
-  await ctx.close();
-}
+/* [6] SAIU no Build 69. Ele conferia que a barra da conta DENTRO da
+   ferramenta carregava os mesmos cadeados do painel — e a ferramenta ficou
+   grátis e sem conta: não há barra lá para concordar com o painel. O painel
+   continua até o Build 71, e os blocos acima continuam valendo para ele. */
 
 ok('nenhum erro de JavaScript', erros.length === 0, erros.join(' | '));
 await br.close();

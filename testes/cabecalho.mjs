@@ -79,8 +79,8 @@ async function medir(rota, rotulo){
       rodX: cx(q('footer .wrap')),
       colunas: document.querySelectorAll('footer .rodapeCols > div').length,
       itens,
-      /* O botão de ação muda de destino conforme a tela — na ferramenta ele
-         leva à conta, nas outras à ferramenta. É a única diferença legítima. */
+      /* O botão de ação leva à ferramenta. Na própria ferramenta ele não
+         existe desde o Build 69 — não há conta para onde ele levar. */
       acao: (q('header nav a.btnTop') || q('header nav a.btnTopo') || {}).textContent || '',
       /* O BOTÃO, medido e não olhado. Ele dizia ser cópia do do site e tinha
          quatro diferenças — forro, peso, corpo e a cor da tinta. Comparar as
@@ -129,20 +129,31 @@ for (const [chave, nome] of [['logoX', 'o logo começa no mesmo x'],
 }
 
 /* OS ITENS. O blog entrou, e entrou ANTES do botão de ação — o botão é o fim do
-   caminho, e o que vem depois dele não é lido. */
+   caminho, e o que vem depois dele não é lido.
+
+   ---- BUILD 69: A FERRAMENTA PERDEU O "PREÇOS" E O BOTÃO DA CONTA ----
+   O produto ficou grátis e sem conta. O menu da ferramenta é o do site MENOS
+   o Preços, e ela não tem botão de ação — o botão das outras telas leva a ela,
+   e não há conta para onde ela levar. O site ainda tem preços e conta até o
+   Build 71; quando eles saírem, a régua continua valendo sem mudar: "o do site
+   menos o Preços" passa a ser simplesmente "o do site". */
+const ehPrecos = (x) => /pre[çc]os|pricing|precios|preise|tarifs/i.test(x);
 for (const [nome, r] of todas) {
-  ok(`${nome}: quatro itens de menu antes da ação`, r.itens.length === 4, r.itens.join(' · '));
+  const n = nome === 'ferramenta' ? 3 : 4;
+  ok(`${nome}: ${n === 3 ? 'três' : 'quatro'} itens de menu`, r.itens.length === n, r.itens.join(' · '));
   const iBlog = r.itens.findIndex(x => /blog/i.test(x));
   ok(`${nome}: o Blog está no menu`, iBlog >= 0, r.itens.join(' · '));
-  ok(`${nome}: e é o último antes da ação`, iBlog === r.itens.length - 1, r.itens.join(' · '));
+  ok(`${nome}: e é o último item`, iBlog === r.itens.length - 1, r.itens.join(' · '));
 }
-/* As três telas dizem as mesmas palavras nos mesmos lugares — menos a ação, que
-   é o único item cujo destino depende de onde a pessoa está. */
-ok('a ferramenta e a conta têm o mesmo menu',
-   JSON.stringify(app.itens) === JSON.stringify(conta.itens),
-   app.itens.join(' · ') + '   ≠   ' + conta.itens.join(' · '));
-ok('e a ação muda de destino, como deve',
-   app.acao.trim() !== conta.acao.trim(), app.acao + ' / ' + conta.acao);
+/* As telas dizem as mesmas palavras nos mesmos lugares — a ferramenta só não
+   diz "Preços". A comparação é com a CONTA, e não com a página principal: as
+   duas abrem em português aqui, e a raiz do site abre em inglês. */
+ok('a ferramenta tem o menu da conta, sem o Preços',
+   JSON.stringify(app.itens) === JSON.stringify(conta.itens.filter(x => !ehPrecos(x))),
+   app.itens.join(' · ') + '   ≠   ' + conta.itens.filter(x => !ehPrecos(x)).join(' · '));
+ok('e nenhum item de preço sobrou na ferramenta', !app.itens.some(ehPrecos), app.itens.join(' · '));
+ok('a ferramenta não tem botão de ação — não há conta para onde ir',
+   app.acao.trim() === '' && app.botao === null, app.acao);
 
 /* ---- OS ENDEREÇOS DA FERRAMENTA TROCAM DE IDIOMA ----
 
@@ -163,69 +174,45 @@ for (const l of de) console.log('     ' + (l.rota + '        ').slice(0, 12) + l
 ok('todo item do menu tem endereço', pt.every(l => /^https?:\/\/.+\/.*/.test(l.href) || l.href.startsWith('/')),
    JSON.stringify(pt.map(l => l.href)));
 ok('e texto', pt.every(l => l.texto.length > 1), JSON.stringify(pt.map(l => l.texto)));
-/* O alemão é o caso que pega o defeito: lá `precos` vira `preise`. */
-const dePrecos = de.find(l => l.rota === 'precos');
-ok('em alemão, o endereço de preços é o alemão',
-   !!dePrecos && /\/de\//.test(dePrecos.href) && !/\/precos$/.test(dePrecos.href),
-   dePrecos && dePrecos.href);
+/* O alemão é o caso que pega o defeito: lá `comparativo` vira `vergleich`.
+   (Até o Build 68 a prova era o `precos` → `preise`; o Preços saiu da
+   ferramenta no 69, e o Comparativo é o item que também muda de endereço.) */
+const deComp = de.find(l => l.rota === 'comparativo');
+ok('em alemão, o endereço do comparativo é o alemão',
+   !!deComp && /\/de\/vergleich$/.test(deComp.href), deComp && deComp.href);
 ok('e o rótulo também mudou de idioma',
-   (pt.find(l => l.rota === 'precos') || {}).texto !== (dePrecos || {}).texto,
-   (pt.find(l => l.rota === 'precos') || {}).texto + ' / ' + (dePrecos || {}).texto);
+   (pt.find(l => l.rota === 'comparativo') || {}).texto !== (deComp || {}).texto,
+   (pt.find(l => l.rota === 'comparativo') || {}).texto + ' / ' + (deComp || {}).texto);
+ok('nenhuma rota de preços no menu da ferramenta', !pt.some(l => l.rota === 'precos'),
+   pt.map(l => l.rota).join(','));
 
-/* ---- O PLANO SAIU DO CABEÇALHO E FOI PARA A BARRA ----
+/* ---- SEM BARRA DA CONTA, E SEM PERGUNTAR POR ELA ----
 
-   A etiqueta do plano era a última peça que fazia o menu da ferramenta ser
-   diferente do das outras telas: um botão a mais, de largura variável (o nome
-   do cliente vai dentro). Uma moldura igual em três telas que ganha uma peça só
-   numa delas volta a ser três molduras.
-
-   Aqui a barra é desenhada com uma resposta de `/api/menu` fingida — ela só
-   existe com sessão, e o que se afirma é o DESENHO, não o login. */
-console.log('\n  o plano, na barra lateral:');
+   Até o Build 68 a ferramenta perguntava `/api/menu` ao abrir e, com sessão,
+   desenhava a barra da conta ao lado. No 69 a conta saiu da ferramenta: não
+   há barra, e a pergunta também não pode ter sobrado — um pedido a cada
+   abertura, para uma resposta que nunca é usada, é custo sem produto. */
+console.log('\n  sem barra da conta:');
 {
-  /* Contexto próprio, com o service worker BLOQUEADO: a ferramenta registra um
-     SW, e um SW que responde `/api/menu` do cache passa por baixo do `route` do
-     teste — o teste mediria a resposta de verdade achando que mediu a sua. */
   const ctx2 = await br.newContext({ viewport: { width: 1440, height: 900 },
                                      serviceWorkers: 'block' });
   const pg2 = await ctx2.newPage();
   const erros2 = []; pg2.on('pageerror', e => erros2.push(e.message));
-  await ctx2.route('**/api/menu*', r => r.fulfill({ status:200,
-    headers:{'content-type':'application/json'},
-    body: JSON.stringify({
-      email: 'quem@empresa.com', plano: 'Plano Team', entrar: null, raiz: '/conta',
-      itens: [{ slug:'faturas', rotulo:'Faturas', href:'/conta/faturas', icone:'M4 4h16v16H4z', bloqueado:false, selo:null }],
-      ferramenta: { rotulo:'A ferramenta', href:'/app?lang=pt' } }) }));
+  const perguntas = [];
+  pg2.on('request', q => { if (/\/api\/menu/.test(q.url())) perguntas.push(q.url()); });
   await pg2.goto(BASE + '/app?lang=pt', { waitUntil:'domcontentloaded' });
-  await pg2.waitForFunction(() => !document.getElementById('barraConta').classList.contains('hide'),
-                            null, { timeout: 20000 });
-  await pg2.waitForTimeout(300);
-  const r = await pg2.evaluate(() => {
-    const bar = document.getElementById('barraConta');
-    const quem = bar.querySelector('.quem');
-    const plano = bar.querySelector('.planoLinha');
-    /* `#licTag` saiu daqui: ele não existe mais no produto, e um seletor morto
-       numa NEGAÇÃO a enfraquece — ela passa a afirmar a ausência de algo que
-       não podia estar lá de qualquer jeito. */
-    const dentroDoCabecalho = !!document.querySelector('header .planoLinha');
-    return {
-      email: quem ? quem.textContent.trim() : null,
-      plano: plano ? plano.textContent.trim() : null,
-      /* Embaixo do e-mail, e não em qualquer lugar da barra. */
-      abaixo: !!(quem && plano) &&
-        (quem.compareDocumentPosition(plano) & Node.DOCUMENT_POSITION_FOLLOWING) !== 0,
-      dentroDoCabecalho,
-      itensCabecalho: [...document.querySelectorAll('header nav > a')].length,
-    };
-  });
-  console.log('     ' + r.email + '  →  ' + r.plano);
-  ok('o e-mail continua no topo da barra', r.email === 'quem@empresa.com', String(r.email));
-  ok('o plano aparece na barra', r.plano === 'Plano Team', String(r.plano));
-  ok('e ABAIXO do e-mail', r.abaixo === true);
-  /* A afirmação que protege a moldura: nada de plano volta para o cabeçalho. */
-  ok('e nada de plano ficou no cabeçalho', r.dentroDoCabecalho === false);
-  ok('o cabeçalho continua com os cinco itens do site', r.itensCabecalho === 5, String(r.itensCabecalho));
-  ok('sem erro de página (com barra)', erros2.length === 0, erros2[0]);
+  await pg2.waitForTimeout(1500);
+  const r = await pg2.evaluate(() => ({
+    barra: !!document.getElementById('barraConta'),
+    comBarra: document.body.classList.contains('comBarra'),
+    plano: !!document.querySelector('.planoLinha'),
+    itensCabecalho: [...document.querySelectorAll('header nav > a')].length,
+  }));
+  ok('não existe barra da conta', r.barra === false && r.comBarra === false);
+  ok('nem etiqueta de plano', r.plano === false);
+  ok('e ninguém pergunta pelo menu da conta', perguntas.length === 0, perguntas[0]);
+  ok('o cabeçalho tem os três itens do site, sem o Preços', r.itensCabecalho === 3, String(r.itensCabecalho));
+  ok('sem erro de página', erros2.length === 0, erros2[0]);
   await pg2.close(); await ctx2.close();
 }
 
@@ -234,13 +221,16 @@ console.log('\n  o plano, na barra lateral:');
    mudar junto: um botão menor e mais gordo numa das telas é a moldura
    desalinhada de novo, no único elemento que salta à vista. */
 console.log('\n  o botão de ação, medido:');
-for (const [nome, r] of todas) {
+/* A ferramenta ficou sem botão no Build 69; o botão é o mesmo nas três telas
+   que o têm. */
+const comBotao = todas.filter(([n]) => n !== 'ferramenta');
+for (const [nome, r] of comBotao) {
   console.log('     ' + nome.padEnd(11) + JSON.stringify(r.botao));
 }
 for (const chave of ['alt', 'corpo', 'peso', 'forro', 'raio', 'tinta', 'fundo']) {
-  const vs = todas.map(([n, r]) => [n, r.botao && r.botao[chave]]);
+  const vs = comBotao.map(([n, r]) => [n, r.botao && r.botao[chave]]);
   const um = vs[0][1];
-  ok('o botão tem o mesmo ' + chave + ' nas quatro telas',
+  ok('o botão tem o mesmo ' + chave + ' nas três telas',
      vs.every(([, v]) => v === um), vs.map(([n, v]) => n + '=' + v).join('  '));
 }
 

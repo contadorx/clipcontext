@@ -2,7 +2,7 @@
  *
  * São duas balas do cartão Team, e as duas estavam listadas no
  * `AUDITORIA-PENDENTE.md` como "sem teste". Medindo, a lista estava meio certa:
- * `matriz.mjs` cobre de onde o emissor VEM (`licenca.q`, e não um e-mail) e que
+ * `matriz.mjs` cobre de onde o emissor VEM (um campo, e não um e-mail) e que
  * a classificação é desenhada no rodapé; `miudos.mjs` cobre a classificação no
  * prompt. Nenhuma das duas abre o arquivo gerado.
  *
@@ -12,12 +12,11 @@
  * quatro vezes — a última foi uma régua que aprovou o produto com o caminho
  * inteiro desligado por um `if (false)`.
  *
- * O EMISSOR É DE TEAM, E SÓ DELE. Sem licença ele não sai, e isso não é
- * detalhe: é o princípio de que acabamento mora em recurso pago. A régua cobra
- * os dois lados — que aparece com licença e que NÃO aparece sem ela.
- *
- * A licença é assinada aqui mesmo, com o par gerado por `_licenca.mjs`: a
- * chave de produção não existe nesta máquina.
+ * ATÉ O BUILD 68 OS DOIS ERAM DE TEAM, e a régua cobrava que apareciam com
+ * licença e sumiam sem ela. No 69 o Walkstamp ficou inteiramente grátis: o
+ * emissor virou um campo que a pessoa escreve, e a classificação, um seletor à
+ * vista de todo mundo. Os dois lados continuam cobrados, só que a fronteira
+ * mudou de lugar — preenchido, chega ao documento; vazio, não inventa nada.
  *
  *   node testes/emissor.mjs
  */
@@ -25,9 +24,7 @@ import { chromium } from './_navegador.mjs';
 import http from 'http'; import fs from 'fs';
 import { execSync } from 'child_process';
 import { RAIZ_WS, CHROME_WS } from './_caminhos.mjs';
-import { appComChavesDeTeste, emitir } from './_licenca.mjs';
-
-const APP = appComChavesDeTeste();
+const APP = fs.readFileSync(`${RAIZ_WS}/public/app.html`, 'utf8');
 const jspdf = fs.readFileSync(`${RAIZ_WS}/vendor/jspdf.umd.min.js`, 'utf8');
 const srv = http.createServer((q, r) => {
   if (q.url.split('?')[0].startsWith('/_vercel/')) {
@@ -46,21 +43,19 @@ if (!fs.existsSync('/tmp/amostra.webm')) {
 }
 
 const CLIENTE = 'Auditoria Interna S.A.';
-const CHAVE = emitir(CLIENTE, 5, '2099-01-01');
 
 const br = await chromium.launch({ executablePath: CHROME_WS });
 
-/* Uma sessão que gera os três documentos. `comLicenca` decide se a chave entra
-   pelo endereço — é a única diferença entre os dois lados da afirmação. */
-async function gerar(comLicenca){
+/* Uma sessão que gera os três documentos. `preencher` decide se o emissor e a
+   classificação são escritos — é a única diferença entre os dois lados. */
+async function gerar(preencher){
   const ctx = await br.newContext({ acceptDownloads: true, serviceWorkers: 'block',
                                     viewport: { width: 1250, height: 950 } });
   await ctx.route('**/jspdf**', (r) => r.fulfill(
     { status: 200, headers: { 'content-type': 'text/javascript' }, body: jspdf }));
   const pg = await ctx.newPage();
   const erros = []; pg.on('pageerror', (e) => erros.push(e.message));
-  const q = comLicenca ? `&lic=${encodeURIComponent(CHAVE)}` : '';
-  await pg.goto(`http://localhost:8992/app.html?lang=pt${q}`);
+  await pg.goto('http://localhost:8992/app.html?lang=pt');
   await pg.waitForTimeout(600);
   await pg.selectOption('#modelo', 'evidencia').catch(() => {});
   await pg.setInputFiles('#file', '/tmp/amostra.webm');
@@ -78,16 +73,17 @@ async function gerar(comLicenca){
      achando que mede o produto. */
   await pg.locator('#evBox').evaluate((e) => { e.open = true; }).catch(() => {});
   await pg.fill('#evCaso', 'CT-900 Emissão').catch(() => {});
-  /* `#clsRow` NASCE ESCONDIDA e só aparece com licença de Team — está escrito
-     no produto: "uma tarja de Confidencial que qualquer um pode escrever num
-     documento gratuito não classifica nada, ela só ensina que a palavra não
-     vale". Então a visibilidade dela é parte da afirmação, e não um detalhe de
-     como chegar ao seletor. */
+  /* `#clsRow` À VISTA SEM PLANO NENHUM — desde o Build 69. A visibilidade
+     continua sendo parte da afirmação: um seletor escondido seria um recurso
+     grátis que ninguém acha. */
   const clsVisivel = await pg.locator('#clsRow').isVisible().catch(() => false);
   let cls = '';
-  if (clsVisivel) {
-    await pg.selectOption('#docClass', 'Conf').catch(() => {});
-    cls = (await pg.locator('#docClass option:checked').textContent() || '').trim();
+  if (preencher) {
+    await pg.fill('#docEmissorCampo', CLIENTE);
+    if (clsVisivel) {
+      await pg.selectOption('#docClass', 'Conf').catch(() => {});
+      cls = (await pg.locator('#docClass option:checked').textContent() || '').trim();
+    }
   }
   await pg.waitForTimeout(300);
 
@@ -96,14 +92,21 @@ async function gerar(comLicenca){
     await pg.locator(botao).click();
     await (await d).saveAs(destino);
   };
-  const suf = comLicenca ? 'com' : 'sem';
+  const suf = preencher ? 'com' : 'sem';
   await baixar('#html', `/tmp/em-${suf}.html`);
   await baixar('#docx', `/tmp/em-${suf}.docx`);
   await baixar('#go',   `/tmp/em-${suf}.pdf`);
 
-  const licMsg = (await pg.locator('#licMsg').textContent()) || '';
+  /* O EMISSOR FICA LEMBRADO NESTE NAVEGADOR: era a conta que lembrava, e a
+     conta saiu. Recarregar a página é o teste de que alguém lembra. */
+  let lembrado = '';
+  if (preencher) {
+    await pg.reload();
+    await pg.waitForTimeout(500);
+    lembrado = await pg.locator('#docEmissorCampo').inputValue().catch(() => '');
+  }
   await ctx.close();
-  return { suf, cls, clsVisivel, licMsg, erros };
+  return { suf, cls, clsVisivel, lembrado, erros };
 }
 
 const texto = {
@@ -112,13 +115,11 @@ const texto = {
   pdf:  (f) => execSync(`pdftotext ${f} - 2>/dev/null || true`, { encoding: 'utf8', maxBuffer: 1 << 28 }),
 };
 
-console.log('[1] com licença de Team, o emissor entra nos três documentos');
+console.log('[1] preenchido, o emissor entra nos três documentos — sem plano nenhum');
 const com = await gerar(true);
-console.log(`     licença: ${JSON.stringify(com.licMsg.slice(0, 56))}`);
 console.log(`     classificação escolhida: ${JSON.stringify(com.cls)}`);
-ok('o seletor de classificação aparece com licença de Team', com.clsVisivel);
-ok('a licença ativou', /Licen[çc]a v[áa]lida|Plano Time/.test(com.licMsg),
-   /Licen[çc]a v[áa]lida|Plano Time/.test(com.licMsg) ? '' : com.licMsg.slice(0, 70));
+ok('o seletor de classificação aparece sem plano', com.clsVisivel);
+ok('o emissor fica lembrado neste navegador', com.lembrado === CLIENTE, com.lembrado);
 for (const [fmt, arq] of [['html', '/tmp/em-com.html'], ['docx', '/tmp/em-com.docx'],
                           ['pdf', '/tmp/em-com.pdf']]) {
   const t = texto[fmt](arq);
@@ -138,21 +139,18 @@ if (!com.cls) {
   }
 }
 
-console.log('\n[3] SEM licença, o emissor não sai — acabamento é de plano pago');
+console.log('\n[3] VAZIO, o emissor não sai — o documento não inventa quem emitiu');
 const sem = await gerar(false);
 for (const [fmt, arq] of [['html', '/tmp/em-sem.html'], ['docx', '/tmp/em-sem.docx'],
                           ['pdf', '/tmp/em-sem.pdf']]) {
   const t = texto[fmt](arq);
   ok(`  ${fmt}: não traz emissor nenhum`, !t.includes(CLIENTE),
-     !t.includes(CLIENTE) ? '' : 'o nome do cliente vazou para o documento gratuito');
+     !t.includes(CLIENTE) ? '' : 'o nome apareceu sem ninguém ter escrito');
+  /* E SEM CLASSIFICAÇÃO ESCOLHIDA, NENHUMA TARJA: o seletor está à vista,
+     mas "nenhuma" é a escolha de partida. */
+  const T = t.toUpperCase();
+  ok(`  ${fmt}: não traz tarja de classificação`, !/CONFIDENCIAL|RESTRITO/.test(T));
 }
-/* E A CLASSIFICAÇÃO TAMBÉM É DE TEAM. Eu tinha suposto o contrário ao escrever
-   esta régua — que ela fosse gratuita — e a medição corrigiu: o `#clsRow`
-   nasce escondido e só aparece com licença. O motivo está no produto, e é bom:
-   uma tarja de "Confidencial" que qualquer um escreve não classifica nada.
-   Então o que se cobra aqui é a ausência do CONTROLE, e não do texto. */
-ok('  o seletor de classificação NÃO aparece sem licença', !sem.clsVisivel,
-   !sem.clsVisivel ? '' : 'o seletor apareceu no documento gratuito');
 
 ok('sem erro de JavaScript', com.erros.length === 0 && sem.erros.length === 0,
    [...com.erros, ...sem.erros].join(' | ').slice(0, 160));

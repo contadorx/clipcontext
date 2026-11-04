@@ -89,70 +89,16 @@ ok('as migrações declaram os seis vocabulários',
 const assinatura = (sql.match(/create or replace function public\.walkstamp_evento\(([\s\S]*?)\)\s*returns/) || [])[1] || '';
 const PARAMS = new Set([...assinatura.matchAll(/\b(p_[a-z]+)\b/g)].map((m) => m[1]));
 
-console.log('\n[1] todo evento que o produto manda cabe no vocabulário');
+console.log('\n[1] a ferramenta não manda evento nenhum');
+/* Os blocos [1] a [4] conferiam que cada `medir()` da ferramenta cabia no
+   vocabulário do banco. No Build 69 a medição da ferramenta saiu inteira — o
+   produto ficou grátis e sem servidor —, e o que se cobra agora é o
+   contrário: que nenhuma chamada tenha voltado. Uma volta silenciosa mandaria
+   eventos a um banco que vai ser apagado. */
 const html = fs.readFileSync(`${RAIZ_WS}/src/template.html`, 'utf8');
-const chamadas = [...html.matchAll(/medir\('([a-z_]+)'(?:,\s*\{([^}]*)\})?\)/g)]
-  .map((m) => ({ nome: m[1], args: m[2] || '' }));
-ok('há chamadas para conferir', chamadas.length > 10, chamadas.length + ' chamada(s)');
-
-const nomesUsados = [...new Set(chamadas.map((c) => c.nome))].sort();
-const foraDoVocab = nomesUsados.filter((n) => !NOMES.has(n));
-ok('nenhum nome de evento fora da lista do banco', foraDoVocab.length === 0,
-   foraDoVocab.join(', '));
-
-console.log('\n[2] e nenhum parâmetro que a função não tem');
-const paramsUsados = [...new Set(chamadas.flatMap(
-  (c) => [...c.args.matchAll(/\b(p_[a-z]+)\s*:/g)].map((m) => m[1])))].sort();
-const foraDaAssinatura = paramsUsados.filter((p) => !PARAMS.has(p));
-ok('todo p_* usado existe na função', foraDaAssinatura.length === 0,
-   foraDaAssinatura.join(', ') + '  (a função tem: ' + [...PARAMS].join(', ') + ')');
-
-console.log('\n[3] os valores literais também cabem');
-const CAMPOS = { p_formato: FORMATOS, p_origem: ORIGENS, p_faixa: FAIXAS, p_plano: PLANOS };
-/* Só os literais. `p_formato: ext` não dá para resolver lendo o arquivo, e
-   fingir que dá seria pior do que dizer que não dá — por isso eles entram na
-   lista de baixo, com o conjunto escrito à mão e conferido uma vez. */
-const naoLiterais = [];
-for (const c of chamadas) {
-  for (const [campo, lista] of Object.entries(CAMPOS)) {
-    const m = c.args.match(new RegExp(campo + `\\s*:\\s*(.+?)(?:,\\s*p_|$)`));
-    if (!m) continue;
-    const bruto = m[1].trim();
-    const literais = [...bruto.matchAll(/'([^']*)'/g)].map((x) => x[1]);
-    if (!literais.length) { naoLiterais.push(`${c.nome}.${campo} = ${bruto}`); continue; }
-    /* Um ternário tem dois literais, e os dois têm que caber. */
-    for (const v of literais) {
-      if (!lista.has(v)) ok(`${c.nome}: ${campo}='${v}' está no vocabulário`, false,
-                            [...lista].join(' '));
-    }
-  }
-}
-ok('todo valor literal de formato, origem, faixa e plano está no vocabulário', true);
-
-console.log('\n[4] o que não dá para ler estaticamente está declarado');
-/* Cada entrada aqui foi conferida à mão UMA vez, no código, e o conjunto está
-   escrito. Se a régua encontrar uma expressão que não está nesta lista, ela
-   reprova: um valor dinâmico novo é exatamente como `p_formato: 'drive:' + fonte`
-   entrou e ficou anos mandando algo que o banco recusava. */
-const DINAMICOS = {
-  "baixou_saida.p_formato = ext": ['html', 'md', 'csv'],
-  "baixou_saida.p_formato = ext === 'json' ? 'json' : 'vtt'": ['json', 'vtt'],
-  "carregou_video.p_origem = origem || 'arquivo'": ['arquivo', 'drive', 'gravacao', 'exemplo'],
-  "transcricao_arquivo.p_formato = fonte || 'sem_tempo'": ['vtt', 'blocos', 'linhas', 'sem_tempo'],
-  "trocou_modo.p_origem = alvo.rotulo": ['placa', 'modelo'],
-  "recado.p_origem = fbTipo": ['ideia', 'elogio', 'problema'],
-  "parou_fala.p_faixa = faixaPct(Math.round(parouNoMeio / total * 100))": ['0-24', '25-49', '50-74', '75-100'],
-  "faxina_recomendada.p_faixa = faixaConta(p.todos.length)": ['1-3', '4-10', '11-30', '31+'],
-};
-const naoDeclarados = naoLiterais.filter((d) => !(d in DINAMICOS));
-ok('nenhuma expressão dinâmica sem conjunto declarado', naoDeclarados.length === 0,
-   naoDeclarados.join(' | '));
-for (const [expr, valores] of Object.entries(DINAMICOS)) {
-  const campo = expr.split(' = ')[0].split('.')[1];
-  const fora = valores.filter((v) => !CAMPOS[campo].has(v));
-  ok(`${expr.split(' = ')[0]}: o conjunto declarado cabe no banco`, fora.length === 0,
-     fora.join(', '));
-}
+const chamadas = [...html.matchAll(/medir\('([a-z_]+)'/g)].length;
+ok('nenhuma chamada a medir() na ferramenta', chamadas === 0, chamadas + ' chamada(s)');
+ok('e nenhum endereço da função de eventos', !/walkstamp_evento/.test(html));
 
 console.log('\n[5] a area da conta mede os quatro passos do lado pago');
 /* O funil terminava em "baixou um documento". A pergunta que decide o produto

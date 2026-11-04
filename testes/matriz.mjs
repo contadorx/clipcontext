@@ -19,10 +19,9 @@
  *       fácil de vazar para o plano errado: uma tarja de "Confidencial" que
  *       qualquer um escreve num produto gratuito ensina que a palavra não vale.
  *
- * O que ESTE arquivo não consegue cobrar: o comportamento com licença Personal
- * e Team de verdade. A licença é assinada com Ed25519, e a chave privada não
- * viaja no pacote — `testes/licenca.mjs` é quem faz isso, na máquina onde o
- * emissor vive. Aqui se cobra a estrutura e o nível grátis.
+ * Desde o Build 69 não há licença: a ferramenta é inteira grátis, e o que era
+ * de plano (marca do cliente, classificação, emissor) está à vista para todos.
+ * Aqui se cobra a estrutura — e que nada mais dependa de plano.
  *
  *   node testes/matriz.mjs
  */
@@ -124,13 +123,16 @@ console.log('[A] no código: uma fonte só, e todo renderizador bebe dela');
      de privacidade que não é nossa para tomar. */
   const corpoMarca = fonte.slice(fonte.indexOf('function marcaDoDoc'),
                                  fonte.indexOf('function totalDePassosDe'));
-  ok('o emissor vem do nome da conta, não de e-mail',
-     /emissor:.*licenca && licenca\.q/.test(corpoMarca) && !/emissor:.*mail/i.test(corpoMarca),
+  /* Desde o Build 69 o emissor é um CAMPO que a pessoa escreve — era o nome
+     da conta pagante, e a conta saiu. O que continua valendo é a outra metade:
+     nunca um e-mail que a ferramenta tenha guardado sozinha. */
+  ok('o emissor vem de um campo escrito pela pessoa, não de e-mail',
+     /emissor:.*\$\('docEmissorCampo'\)/.test(corpoMarca) && !/emissor:.*mail/i.test(corpoMarca),
      (corpoMarca.match(/emissor:.*/) || [''])[0].slice(0, 70));
 }
 
 // ---------------------------------------------------------------------------
-console.log('\n[B] no navegador: sem plano, nenhum formato inventa marca de cliente');
+console.log('\n[B] no navegador: com os campos vazios, nenhum formato inventa marca de cliente');
 const srv = http.createServer((q, r) => {
   if (q.url.startsWith('/_vercel/')) {
     r.writeHead(200, { 'Content-Type': 'text/javascript' }); return r.end('');
@@ -150,10 +152,12 @@ await pg.goto('http://localhost:8850/app.html?lang=pt');
 await pg.selectOption('#modelo', 'evidencia');
 
 {
-  ok('a caixa da marca do cliente está escondida', !(await pg.locator('#marcaBox').isVisible()));
-  /* O seletor de classificação é de Team, e só dele. */
+  /* GRÁTIS DESDE O BUILD 69: a caixa da marca e a classificação estão à vista
+     de todo mundo, sem plano nenhum. O que esta régua continua cobrando é que,
+     com os campos VAZIOS, nenhum formato invente marca de cliente. */
+  ok('a caixa da marca do cliente está à vista, sem plano', await pg.locator('#marcaBox').isVisible());
   ok('e o seletor de classificação também',
-     await pg.locator('#clsRow').evaluate(e => e.classList.contains('hide')));
+     !(await pg.locator('#clsRow').evaluate(e => e.classList.contains('hide'))));
 
   const nivel = await pg.evaluate(() => {
     const s = document.getElementById('docClass');

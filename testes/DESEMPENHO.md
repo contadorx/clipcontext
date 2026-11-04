@@ -24,7 +24,8 @@ de Time colada num navegador cuja conta ainda não virou Time. Ganha o que está
 ativo aqui: dizer "Plano Free" ao lado de recursos de Time destravados seria a
 tela contradizendo a si mesma.
 
-O `testes/barraapp.mjs` tem uma lista fechada dos campos que `/api/menu` pode
+(Build 69: a barra saiu da ferramenta, e o `barraapp.mjs` com ela. O parágrafo
+abaixo fica como registro.) O `testes/barraapp.mjs` tinha uma lista fechada dos campos que `/api/menu` pode
 devolver — ela existe para que uma entrada nova seja uma decisão, e não um
 descuido. `plano` entrou por ali: é da mesma classe do `email`, o que a pessoa
 já lê no primeiro parágrafo da própria conta, e viaja como **rótulo**, sem

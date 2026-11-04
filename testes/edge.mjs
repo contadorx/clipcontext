@@ -184,16 +184,13 @@ console.log('\n[5] o walkstamp-time serve UMA ação, e é a única que alguém 
     }
   }
 
-  /* Zero chamador seria régua vazia passando: se ninguém chama, o bloco acima
-     não prova nada e a função não deveria existir. */
-  ok('o produto chama a função em algum lugar', pedidos.length > 0,
-     `${pedidos.length} chamada(s)`);
-  const fora = pedidos.filter((p) => p.acao !== 'modelo');
-  ok('  e nenhuma chamada pede ação aposentada', fora.length === 0,
-     fora.map((p) => `${p.arquivo}:${p.linha} pede ${p.acao}`).join('; '));
-  for (const p of pedidos) {
-    ok(`  ${p.arquivo}:${p.linha} pede \`${p.acao}\``, p.acao === 'modelo');
-  }
+  /* O ÚNICO CHAMADOR ERA A FERRAMENTA, salvando o modelo de documento na
+     conta. No Build 69 os modelos passaram a morar no navegador e a conta
+     saiu da ferramenta: zero chamador é o estado certo agora, e a função
+     espera ser apagada junto com o projeto, no Build 72. Um chamador que
+     voltasse falaria com uma função que vai sumir. */
+  ok('ninguém mais chama a função — ela espera ser apagada', pedidos.length === 0,
+     pedidos.map((p) => `${p.arquivo}:${p.linha} pede ${p.acao}`).join('; ') || '0 chamada(s)');
 }
 
 console.log('\n' + (falhas ? falhas + ' FALHA(S)' : 'as quatro existem e batem; o time serve só `modelo`; a divergência está dita'));

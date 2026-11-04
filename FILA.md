@@ -141,6 +141,110 @@ campo de emissor, a contagem de erros na identificação. Marcar uma tela é
 
 ---
 
+## DEC-22 — A ferramenta inteira grátis, e sem servidor *(decidida 04/11, entregue no Build 69)*
+
+**O pedido:** *"vamos deixar o walkstamp inteiramente free… não quero ganhar
+dinheiro com ele"*, e logo depois *"quero reduzir custo de supabase"*. Decidido
+com quem pediu: **tirar o Supabase inteiro**; os clientes 16 e 17 do banco são
+teste; o blog vira arquivo no projeto; o chamado vira e-mail para
+**suporte@walkstamp.com**. A sequência aprovada tem quatro builds, e este é o
+primeiro — **só a ferramenta**:
+
+| Build | O quê |
+|---|---|
+| **69** | a ferramenta grátis e sem servidor *(este)* |
+| 70 | o blog como arquivos no projeto; o editor do blog sai |
+| 71 | o site sem cobrança e sem conta: preços, `/conta`, Stripe, Brevo, rotas `/api/*`, termos/privacidade/DPA nos cinco idiomas |
+| 72 | cópia dos dados, pausa do projeto e, com confirmação, exclusão |
+
+**O que mudou na ferramenta:**
+
+- **Tudo destravado.** Marca do cliente, classificação, campo de emissor e o
+  resumo de erros estão à vista para todos. A licença saiu inteira: chave
+  pública, ativação, link de ativação, renovação e a caixa da licença.
+- **Sem conta.** A barra da conta, a sessão, o "Minha conta" e o "Preços" do
+  cabeçalho, e a ponte de venda no fim da revisão saíram.
+- **O que a conta lembrava, o navegador lembra.** Modelos (cenário, rótulo,
+  ambiente, sistema, layout, papel), a marca do cliente e quem emite ficam
+  neste navegador. O vocabulário só fica se a pessoa marcar a caixa, e
+  desmarcar apaga.
+- **O padrão do time virou arquivo.** Quem configura exporta um
+  `padroes-walkstamp.json` (modelos, marca, emissor, classificação — só
+  configuração, nada de gravação ou de texto) e o time importa. Valor
+  desconhecido num modelo importado é ignorado, e não vira campo em branco.
+- **Recado e indicação por e-mail.** Os dois abrem o programa de e-mail da
+  pessoa (`mailto:`), já endereçado.
+- **Sem evento de uso.** O `medir()` que gravava no banco saiu. Sobra a
+  medição anônima de páginas do próprio Vercel.
+
+**Os custos, ditos:**
+
+- **Máquina sem programa de e-mail** (só webmail) não abre nada ao apertar
+  Enviar. A tela diz o endereço para escrever direto, e o link de
+  compartilhar continua copiável.
+- **O corpo do e-mail leva 900 caracteres.** Acima de uns 2.000 no endereço,
+  alguns programas de e-mail desistem; com 1.600 de corpo o endereço saía com
+  2.553. O relatório inteiro vai para a área de transferência, com uma frase
+  dizendo isso.
+- **Sem número de chamado e sem lista de chamados.** A resposta volta pelo
+  e-mail de quem escreveu.
+- **Trocar de máquina, ou limpar os dados do site, perde** modelos, marca e
+  vocabulário lembrado. O arquivo de padrões é o caminho para levar para outra
+  máquina.
+
+**Achado da régua, no meio do build:** com a rede ruim, o gesto do clique já
+expirou quando o relatório fica pronto, e a cópia para a área de transferência
+**ficava pendente para sempre**. O e-mail nunca abria. A cópia ganhou prazo de
+1,5 s, e o `diagchamado.mjs` [2] é quem reprova se o prazo sumir.
+
+**Mais dois achados, da esteira do 69:**
+
+- **Os campos da marca e de quem emite não tinham nome acessível**, só o
+  texto de exemplo, que some ao digitar e que leitor de tela não trata como
+  nome. Enquanto a caixa era do plano pago ninguém via. O `foco.mjs` pegou
+  quando ela ficou à vista de todos. Agora o título é o `<label>` do campo da
+  marca (medido: mesma fonte, cor e tamanho do texto de antes), e o de quem
+  emite leva o nome "Emitido por".
+- **O `cenario1.mjs` [4] nunca tinha olhado a reabertura de documento.** Ele
+  procurava `$('modelo').value = d.cenario` no arquivo inteiro, e quem
+  respondia era a aplicação de modelo da conta. Com a conta fora, reprovou.
+  Agora lê só o `reabrirJson`: ali o cenário vem do arquivo, e a trava do
+  cenário não aparece.
+
+**Réguas:**
+
+- **Seis saíram, por não terem mais o que medir:** `barraapp`, `licenca`,
+  `licauto`, `liclink`, `renovar`, `sessao`, mais o `_licenca.mjs`.
+- **Uma entrou:** `gratis.mjs`. Ela cobra:
+  - nada trancado;
+  - nenhum pedido a servidor nosso, do abrir ao documento pronto;
+  - nenhum código de licença, conta ou evento nos dois arquivos;
+  - marca e vocabulário lembrados do jeito certo.
+- **Reescritas para o mundo sem servidor:** `formato`, `emissor`,
+  `diagchamado`, `ux` [5], `compartilhar`, `medicao`, `convite`, `matriz`,
+  `erro`, `funil`, `edge`.
+- **Ajustadas:** `cabecalho` (a ferramenta tem o menu do site sem o Preços, e
+  não tem botão de ação), `paridade` [3] e `isca` [6].
+- **Total: 171.**
+- **`auditoria.mjs`: o teto de promessas sem prova subiu de 0 para 1.**
+  - O cartão do plano Time ainda promete "assentos, convite, bloqueio e prazo
+    de revogação", e a régua que provava saiu com a licença.
+  - A frase sai com a página de preços no Build 71, e o teto tem de voltar a 0
+    lá — a própria régua reprova se não voltar.
+
+**O que este build NÃO fez, de propósito (é do 71):**
+
+- O site ainda tem preços, `/conta`, Stripe e as rotas.
+- A CSP do site (`next.config.mjs`) ainda permite `*.supabase.co`, e ela sai
+  junto com a última rota que usa o banco.
+- Os 133 relatos de CSP guardados no banco vão ser lidos antes de a rota sair.
+
+**⚠ Não publicar o 69 sozinho.** Entre o 69 e o 71 o site ainda vende planos,
+com a Stripe ativa, de uma ferramenta que já é grátis. Publicar 69, 70 e 71
+juntos. Se o 69 tiver de ir antes, desligar o checkout primeiro.
+
+---
+
 ## DEC-21 — De três janelas para duas *(decidida e entregue no Build 68)*
 
 **O pedido:** *"são três telas, vamos racionalizar — na telinha pequena coloque
@@ -523,6 +627,23 @@ do erro**, e que o salvar **ainda leve de volta**.
 900, 700, 620 e o piso de 520, lido do próprio produto) e conferida revertendo o
 desenho antigo: reprova em 620 e 520, passa nas largas. As ferramentas passaram
 a morar num contêiner que rola; o salvar fica fora dele.
+
+---
+
+## MANUTENÇÃO — `@huggingface/transformers` 4.3.2 olhada e não adotada *(04/11)*
+
+A 4.3.2 saiu no npm em **27/10/2026** e virou `latest`; `versoes.mjs` reprovou
+na esteira do Build 69 pedindo a decisão. A nota traz cinco linhas:
+
+- suporte a LFM3 e LFM3-VL (modelos que este produto não carrega);
+- um conserto de **teste** — tempo-limite do CI do Whisper, e não do Whisper;
+- `getSupportedDevices()` exposto em `env.backends.onnx`;
+- semente aleatória negativa;
+- um download de dados externos que travava o `from_pretrained`.
+
+Nada sobre WebGPU, onnxruntime ou `MatMulNBits`. **Decisão: fica a fila**
+(3.8.1 → 4.2.0 → 3.8.0), `conferido_ate` em 4.3.2. O teste que vale continua o
+mesmo: a 4.3.x num Windows/Chrome de verdade.
 
 ---
 

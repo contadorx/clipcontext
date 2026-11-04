@@ -109,20 +109,23 @@ console.log('\n[3] o selo do plano bate com o que o arquivo de dados declara');
      await pg.locator('.tpRegra').innerText());
 }
 
-console.log('\n[4] o que está no Free é o que a ferramenta faz sem licença');
+console.log('\n[4] a ferramenta não confere licença nenhuma');
 {
-  /* A tese do produto, medida: a licença destrava UMA coisa dentro do app — a
-     marca do cliente no documento. Se um dia alguém trancar mais coisa atrás do
-     plano sem mexer no site, esta conta muda e o teste avisa. */
+  /* Até o Build 68 a tese era "a licença destrava UMA coisa dentro do app — a
+     marca do cliente no documento", e este bloco contava as travas. No 69 a
+     ferramenta ficou inteira grátis: não há trava para contar. A página de
+     preços ainda lista o que era de plano até o Build 71, quando ela sai —
+     a contagem do `features.json` continua aqui até lá. */
   const pagos = feats.grupos.flatMap((g) => g.itens).filter((i) => !i.planos.includes('f'));
-  ok(`${pagos.length} funcionalidades são pagas, de ${TOTAL}`, pagos.length > 0 && pagos.length < TOTAL / 3,
-     `${pagos.length}/${TOTAL}`);
-  const travas = (app.match(/temTime\(\)/g) || []).length;
-  ok('e a ferramenta tem poucas travas de licença mesmo', travas <= 8, `${travas} usos de temTime()`);
-  /* A licença do Personal precisa ser aceita: ela existe na Stripe, e uma
-     ferramenta que só aceita 'time' faria a pessoa pagar e não destravar nada. */
-  ok('a ferramenta aceita a licença do Personal, não só a do Team',
-     /p !== 'time' && dados\.p !== 'personal'/.test(app), 'a checagem de plano mudou de forma');
+  ok(`${pagos.length} funcionalidades ainda aparecem como pagas no site, de ${TOTAL}`,
+     pagos.length < TOTAL / 3, `${pagos.length}/${TOTAL}`);
+  /* Uma definição, e não uma menção: os comentários contam a história do
+     `temTime()`, e contar a palavra contaria a história. */
+  ok('a ferramenta não define checagem de plano',
+     !/(function|const|let)\s+temTime\b|(function|const|let)\s+temPago\b/.test(app),
+     (app.match(/(function|const|let)\s+tem(Time|Pago)\b/) || [''])[0]);
+  ok('nem lê o plano de uma licença', !/dados\.p\b|\.p !== 'time'/.test(app),
+     (app.match(/dados\.p\b|\.p !== 'time'/) || [''])[0]);
 }
 
 /* ---------------------------------------------------------------- as fichas */

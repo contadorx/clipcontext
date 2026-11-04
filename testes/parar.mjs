@@ -113,15 +113,9 @@ await pg.addInitScript(() => {
   };
   if (!ligar()) document.addEventListener('DOMContentLoaded', ligar);
 });
-/* A porta de serviço da medição: sem ela o produto fica mudo em `localhost`,
-   e este arquivo usa os marcos como canal de observação. A rota é
-   interceptada logo abaixo — nada sai desta máquina. */
-await pg.addInitScript(() => { window.__medirDaqui = true; });
-const medidos = [];
-await pg.route('**/rpc/walkstamp_evento', r => {
-  try { medidos.push(JSON.parse(r.request().postData() || '{}')); } catch (e) {}
-  r.fulfill({ status: 200, headers: { 'access-control-allow-origin': '*' }, body: 'null' });
-});
+/* Este arquivo usava os marcos de medição como canal de observação — o
+   "parou_fala". A medição saiu no Build 69, com o servidor: o que prova a
+   parada agora é só o que a pessoa vê, e isso já era cobrado aqui. */
 await pg.route('**/@huggingface/transformers**', r => r.fulfill({
   status: 200, headers: { 'content-type': 'text/javascript' }, body: BIBLIOTECA_FALSA }));
 
@@ -315,9 +309,6 @@ console.log('\n[6] ela para de verdade, e o que já saiu fica');
      /cerca de .*(min|s)\b/i.test(r.st) || /não falta fala nenhuma/i.test(r.st), r.st);
   ok('o campo destravou para correção', await pg.evaluate(
      () => !document.getElementById('tr').readOnly));
-  ok('e a medição registrou a parada',
-     medidos.some(m => m.p_nome === 'parou_fala'),
-     JSON.stringify(medidos.map(m => m.p_nome)));
 }
 
 console.log('\n[7] o botão sai da tela quando não há mais o que parar');

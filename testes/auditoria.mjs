@@ -30,7 +30,12 @@ import { RAIZ_WS } from './_caminhos.mjs';
    Ele desce quando uma promessa ganha régua, e a régua manda descer: um teto
    folgado é um teto que não trava nada. Subir exige editar esta linha, que é o
    momento em que alguém tem de justificar a promessa sem prova. */
-const TETO_SEM_TRAVA = 0;
+/* BUILD 69: 0 → 1, e a justificativa é esta. A ferramenta ficou grátis e a
+   licença saiu dela; o cartão do plano Time ainda promete "assentos, convite,
+   bloqueio e prazo de revogação", e a régua que provava (`licenca.mjs`) saiu
+   com a licença. A frase sai com a página de preços inteira no Build 71 — e
+   este teto volta a 0 nesse build, ou esta linha reprova lá. */
+const TETO_SEM_TRAVA = 1;
 
 let falhas = 0;
 const ok = (n, c, e) => {

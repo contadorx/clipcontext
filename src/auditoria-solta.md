@@ -10,14 +10,14 @@ cada build. Editar o `AUDITORIA-PENDENTE.md` não adianta — ele é reescrito.
 | A frase publicada | O teste |
 |---|---|
 | Vídeo, áudio e transcrição não saem do seu computador | `semrede.mjs` — a evidência sai inteira com todo pedido externo abortado, e cada corpo que o app tentou mandar é lido, pesado e impresso; `precos.mjs` continua cobrindo a página |
-| Cobrança anual, renova sozinha, cancela na conta | `renovar.mjs` (a renovação, com o aviso pintado), `cancelar.mjs` (o caminho do cancelamento, nos cinco idiomas) — **nenhum dos dois abre o portal da Stripe**, e os dois dizem isso no cabeçalho |
+| Cobrança anual, renova sozinha, cancela na conta | `cancelar.mjs` (o caminho do cancelamento, nos cinco idiomas) — **ele não abre o portal da Stripe**, e diz isso no cabeçalho. A renovação da chave (a régua `renovar`) saiu com a licença no Build 69; a frase sai do site com a página de preços no Build 71 |
 | A partir de 3 pessoas, e o total mínimo anual | `precos.mjs`, `cinco.mjs`, `promessa.mjs` — o número sai de `lib/stripe.ts`, e desde o Build 4 o `build.py` o lê de lá em vez de repetir |
 | As suas colunas voltam como estavam | `roteiro.mjs` |
 | Nenhum número da calculadora sai do navegador | `precos.mjs` |
 | Os formatos abrem em Word, PowerPoint, navegador e LMS | `saidas.mjs`, `figuras.mjs` (a tira), `pptx.mjs`, `scorm.mjs` |
 | É um endereço, não uma integração automática | **sem teste** — mas é uma negação, e negação que se cumpre sozinha |
-| A licença é conferida no seu computador e funciona sem internet | `licenca.mjs`, `licauto.mjs` |
-| Revogar respeita o prazo de 1 a 90 dias | `licauto.mjs` |
+| A licença é conferida no seu computador e funciona sem internet | **sem teste** — a ferramenta não tem licença desde o Build 69 (`licenca` e `licauto` saíram com ela); a frase sai do site com a página de preços no Build 71 |
+| Revogar respeita o prazo de 1 a 90 dias | **sem teste** — sem licença não há o que revogar (Build 69); a frase sai com a página de preços no Build 71 |
 | A nota fiscal vem depois do pagamento, pela Stripe | **sem teste** |
 | A quantidade de assentos é ajustável | **sem teste** |
 

@@ -135,8 +135,15 @@ console.log('\n[4] enviar um vídeo também cobra o cenário');
   const fonte = fs.readFileSync(ROOT + '/app.html', 'utf8');
   ok('a função de carregar vídeo passa pela mesma trava',
      /function load\(f, origem\)\{[\s\S]{0,400}?exigirCenario\(\)/.test(fonte));
+  /* Lido no `reabrirJson`, e não no arquivo inteiro. Até o Build 68 esta
+     linha procurava `$('modelo').value = d.cenario` em qualquer lugar — e quem
+     respondia era a aplicação de MODELO da conta, não a reabertura. Quando a
+     conta saiu no Build 69 a régua reprovou, e foi assim que se descobriu que
+     ela nunca tinha olhado a reabertura. */
+  const reabrir = (fonte.match(/async function reabrirJson\(j, soQuadros\)\{[\s\S]*?\n  \}\n/) || [''])[0];
   ok('e reabrir um documento NÃO passa por ela — o cenário vem no arquivo',
-     /\$\('modelo'\)\.value = d\.cenario/.test(fonte));
+     /\$\('modelo'\)\.value = j\.cenario/.test(reabrir) && !/exigirCenario\(/.test(reabrir),
+     reabrir ? reabrir.length + ' caracteres lidos' : 'não achei o reabrirJson');
 }
 
 console.log('\n[5] a barra do modelo mora no passo 1, e não no cartão do áudio');

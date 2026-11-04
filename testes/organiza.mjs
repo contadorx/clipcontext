@@ -155,11 +155,12 @@ console.log('\n[5] baixar a transcrição solta saiu, e o plano saiu do rodapé'
 {
   ok('não há mais .vtt/.srt/.txt soltos', (await pg.locator('#expVtt').count()) === 0);
   ok('nem o botão de ativar o plano', (await pg.locator('#licBtn').count()) === 0);
-  /* Nenhum dos dois pode ter levado função junto: a legenda continua saindo
-     dentro do .zip, e a chave continua se aplicando pelo link do e-mail. */
+  /* A legenda não pode ter ido junto: ela continua saindo dentro do .zip. A
+     caixa da licença, sim, foi — no Build 69, com a licença: o produto ficou
+     grátis e não há chave para colar. */
   const fonte = fs.readFileSync(ROOT + '/app.html', 'utf8');
   ok('mas a legenda continua sendo montada para o .zip', /function montarLegenda/.test(fonte));
-  ok('e a caixa da licença continua existindo para o link', /id="licBox"/.test(fonte));
+  ok('e a caixa da licença saiu junto com a licença', !/id="licBox"/.test(fonte));
   /* A frase que explica o .vtt MUDOU DE CASA. Ela era um texto solto ao lado do
      botão, segurado por `flex:1` para não colar na borda; virou o parágrafo do
      bloco "Enviar arquivo de transcrição", que tem respiro próprio. A régua

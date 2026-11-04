@@ -70,22 +70,20 @@ console.log('\n[3] o que se compartilha é a FERRAMENTA, não o documento');
      !/data:|blob:|base64|\.pdf|\.html\b/.test(decodeURIComponent(li)),
      decodeURIComponent(li).slice(0, 70));
 
-  /* O e-mail deixou de ser um `mailto:` no `href` — ele agora é um formulário
-     que manda pelo servidor, com o `mailto:` guardado como reserva para quando
-     o servidor não responde e para o pacote offline, que não tem rede.
-
-     Então a pergunta muda de lugar mas continua sendo a mesma: o que sai daqui
-     é o ENDEREÇO DO SITE e o e-mail de quem vai receber. Nunca o documento. */
-  const oQueSai = await pg.evaluate(() => {
-    const f = (window.__ultimoEnvio || null);
-    return f;
-  });
-  const fonte = fs.readFileSync(ROOT + '/app.html', 'utf8');
-  const corpoDoPedido = (fonte.match(/JSON\.stringify\(\{ para[^}]*\}\)/) || [''])[0];
-  ok('o e-mail manda só destinatário, quem indica e idioma',
-     /para, quem[^}]*lang/.test(corpoDoPedido), corpoDoPedido.slice(0, 80));
+  /* O E-MAIL É UM `mailto:` DE NOVO, e só ele. Entre 08/2026 e o Build 68 ele
+     foi um formulário que mandava pelo servidor, com o `mailto:` de reserva; no
+     69 o produto ficou sem servidor e a reserva virou o caminho. A pergunta
+     continua a mesma: o que sai daqui é o ENDEREÇO DO SITE, nunca o documento.
+     O botão é apertado e o endereço é lido pelo espelho `__ultimoEmail`. */
+  await pg.locator('#compEmailAbrir').click();
+  await pg.waitForTimeout(200);
+  const href = await pg.evaluate(() => window.__ultimoEmail || '');
+  ok('o e-mail abre o programa da pessoa, com o endereço do site',
+     href.startsWith('mailto:') && /walkstamp\.com/.test(decodeURIComponent(href)), href.slice(0, 90));
   ok('  nada de documento no e-mail',
-     !/data:|blob:|base64|frames|imagem|doc/i.test(corpoDoPedido), corpoDoPedido.slice(0, 80));
+     !/data:|blob:|base64|\.pdf|\.html\b/.test(decodeURIComponent(href)), decodeURIComponent(href).slice(0, 80));
+  ok('  e nenhum formulário de envio pelo servidor sobrou', (await pg.locator('#compEnviar').count()) === 0);
+  const fonte = fs.readFileSync(ROOT + '/app.html', 'utf8');
   /* A STRING INTEIRA, E NÃO O COMEÇO DELA.
      A régua ancorava em `compCorpo') + '\n\n' + url` e parava ali — quer dizer,
      um `+ nomeArquivo()` acrescentado depois passava verde, e o nome do

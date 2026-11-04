@@ -95,7 +95,7 @@ read -r -d '' MAPA <<'MAPA_FIM'
 # faturas, padrões, modelos e histórico — não aparecia em linha nenhuma deste
 # mapa. Mexer no `app/conta/acoes.ts` saía verde sem ela rodar, que é o mesmo
 # defeito que a nota da `precos.mjs` acima descreve.
-^app/conta/ => site:compra.mjs site:negocio.mjs entrada2.mjs site:cancelar.mjs site:meusdados.mjs marcos-a11y.mjs site:portal.mjs site:licauto.mjs
+^app/conta/ => site:compra.mjs site:negocio.mjs entrada2.mjs site:cancelar.mjs site:meusdados.mjs marcos-a11y.mjs site:portal.mjs
 # Os três e-mails do produto saem do mesmo molde desde 28/08. Tocar o molde
 # sem rodar a régua das cartas seria mudar o que chega na caixa de um cliente
 # sem nada olhar — e em e-mail o defeito é invisível de dentro.
@@ -115,7 +115,7 @@ read -r -d '' MAPA <<'MAPA_FIM'
 ^lib/planilha[.]ts$ => bomba.mjs site:roteiro.mjs
 ^lib/(reexecucao[.]ts|conta/roteiro[.]ts)$ => site:roteiro.mjs bomba.mjs
 ^app/conta/(planilha/|roteiro-acoes[.]ts)|^app/conta/\[lang\]/roteiro/ => site:roteiro.mjs site:roteirojanela.mjs
-^lib/stripe[.]ts$ => site:precos.mjs promessa.mjs site:compra.mjs renovar.mjs site:cancelar.mjs
+^lib/stripe[.]ts$ => site:precos.mjs promessa.mjs site:compra.mjs site:cancelar.mjs
 ^app/api/convite/ => site:convite.mjs site:email.mjs
 # O chamado ganhou rota própria em 29/08, e ela tem as mesmas travas do
 # convite: origem antes de segredo, limite por quem chama. Quem toca a rota,
@@ -130,7 +130,7 @@ read -r -d '' MAPA <<'MAPA_FIM'
 # assunto de duas telas que já existiam: a sessão dentro da ferramenta e a
 # página que diz o que guardamos de alguém. Esquecer a segunda é o jeito
 # silencioso de a política de privacidade virar mentira.
-^supabase/migrations/ => modelopessoal.mjs conferir-migracoes prazos.mjs site:meusdados.mjs sessao.mjs
+^supabase/migrations/ => modelopessoal.mjs conferir-migracoes prazos.mjs site:meusdados.mjs
 # AS OITO QUE SOBRARAM — 29/08.
 # Depois de o grupo do produto virar pergunta ao disco, restaram oito réguas que
 # nenhum padrão alcançava. Elas não leem `app.html`: falam com o SITE e com o
@@ -148,7 +148,7 @@ read -r -d '' MAPA <<'MAPA_FIM'
 MAPA_FIM
 
 # ---- 1. os contratos: sempre, e são catorze segundos ------------------------
-CONTRATOS="auditoria.mjs folha.mjs modelopessoal.mjs renovar.mjs numeros.mjs chaves.mjs faxina.mjs figura.mjs funil.mjs inventario.mjs middleware.mjs
+CONTRATOS="auditoria.mjs folha.mjs modelopessoal.mjs numeros.mjs chaves.mjs faxina.mjs figura.mjs funil.mjs inventario.mjs middleware.mjs
            planos.mjs promessa.mjs semmarca.mjs stripehook.mjs terceiros.mjs wer.mjs"
 
 # ----------------------------------------------------------------------------

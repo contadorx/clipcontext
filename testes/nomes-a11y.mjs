@@ -120,7 +120,11 @@ console.log('\n[2b] os quatro que estavam sem nome continuam com nome');
      Quatro nomes escritos é uma lista — e uma lista pequena, fechada e com
      motivo é diferente de uma lista paralela: ela não duplica uma verdade que
      existe noutro lugar, ela registra o que foi medido em 28/08. */
-  const QUATRO = ['recAutoMin', 'compPara', 'compQuem', 'cmpMistura'];
+  /* Eram quatro. `compPara` e `compQuem` eram os campos do formulário de
+     convite, que saiu no Build 69 junto com o servidor: o convite virou um
+     `mailto:`. Sobram dois — e uma régua que continuasse procurando os dois
+     que saíram só ensinaria a ignorar o "não achei". */
+  const QUATRO = ['recAutoMin', 'cmpMistura'];
   for (const id of QUATRO) {
     const m = APP.match(new RegExp(`id="${id}"[^>]*`));
     const tag = m ? m[0] : '';
@@ -132,12 +136,12 @@ console.log('\n[2b] os quatro que estavam sem nome continuam com nome');
   /* E o nome tem que ser TRADUZIDO: um `aria-label` escrito à mão em português
      é um leitor de tela falando português numa tela em alemão. `data-i18n-aria`
      é repintado pelo `applyLang()`, que é por onde toda troca de idioma passa. */
-  const chaves = ['ariaRecAutoMin', 'ariaCompPara', 'ariaCompQuem', 'ariaCmpMistura'];
+  const chaves = ['ariaRecAutoMin', 'ariaCmpMistura'];
   for (const L of ['pt', 'en', 'es', 'de', 'fr']) {
     const i = APP.indexOf(`\n    ${L}: {`);
     const bloco = i < 0 ? '' : APP.slice(i, i + 95000);
     const faltando = chaves.filter((c) => !new RegExp(c + ":'[^']+'").test(bloco));
-    ok(`  ${L}: os quatro nomes existem no dicionário`, faltando.length === 0, faltando.join(' '));
+    ok(`  ${L}: os nomes existem no dicionário`, faltando.length === 0, faltando.join(' '));
   }
 }
 
