@@ -59,8 +59,9 @@ própria pessoa. Se houver plano pago no Brevo, ele pode ser cancelado.
   1. faz-se a cópia dos dados;
   2. o projeto é pausado por alguns dias;
   3. ele é apagado, só com a sua confirmação na hora, porque não tem volta.
-- **Antes disso,** as 9 figuras do blog precisam estar no projeto, em
-  `public/img/blog/` (ver `BLOG.md` e o FILA, DEC-23).
+- **As 9 figuras do blog já estão no projeto,** em `public/img/blog/`
+  (chegaram em 06/11; ver `BLOG.md` e o FILA, DEC-23). O blog não lê mais
+  nada do Supabase.
 
 ## 5. O Google Drive (opcional)
 

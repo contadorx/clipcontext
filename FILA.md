@@ -248,8 +248,10 @@ reescritos nos cinco idiomas. O que pede a sua decisão está em
 
 - a cópia dos dados;
 - a pausa e, com confirmação, a exclusão do projeto do Supabase;
-- a pasta `supabase/` (migrações e funções) sai junto;
-- **as figuras do blog têm de estar no projeto antes** (DEC-23).
+- a pasta `supabase/` (migrações e funções) sai junto.
+
+As figuras do blog, que tinham de estar no projeto antes, chegaram em 06/11
+(DEC-23).
 
 ---
 
@@ -306,14 +308,12 @@ nem o da HostGator. É o segundo dos quatro builds que tiram o Supabase.
 - o teto de 9 MB das Server Actions, que serve o importador de planilha da
   conta.
 
-**⚠ Pendente para fechar este build: as 9 figuras.** O host do Supabase está
-bloqueado pela política de rede desta sessão, então elas ainda não foram
-baixadas. O `conteudo/blog/baixar-figuras.py` baixa e confere o MD5 de cada
-uma. Até elas chegarem:
-
-- o `build.py` para, de propósito;
-- a esteira não roda;
-- o Build 70 não está liberado.
+**As 9 figuras chegaram em 06/11.** O host do Supabase estava bloqueado pela
+rede desta sessão. Foi criado um ambiente próprio do `clipcontext` que libera
+só esse host, e uma sessão curta nele rodou o `conteudo/blog/baixar-figuras.py`
+(commit `9c12970`). Aqui, as 9 foram conferidas de novo contra o tamanho e o
+MD5 de cada `post.json`. O `python3 build.py` voltou a passar sem desvio
+nenhum.
 
 ---
 
